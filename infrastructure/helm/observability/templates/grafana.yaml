@@ -1,0 +1,17 @@
+{{- if .Values.grafana.selfHosted }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.grafana.name }}
+  labels:
+    {{- include "observability.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.grafana.port }}
+      targetPort: http
+  selector:
+    {{- include "observability.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+{{- end }}

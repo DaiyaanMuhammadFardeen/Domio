@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: domio
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/component: project
+spec:
+  description: Domio application project (bounds environments and chart sources)
+  sourceRepos:
+    - https://github.com/domio/infrastructure
+    - https://github.com/domio/contracts
+    - ghcr.io/domio
+  destinations:
+    - namespace: dev
+      server: https://kubernetes.default.svc
+    - namespace: staging
+      server: https://kubernetes.default.svc
+    - namespace: prod
+      server: https://kubernetes.default.svc
+    - namespace: observability
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
+    - group: apps
+      kind: Deployment
+    - group: apps
+      kind: StatefulSet
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: networking.k8s.io
+      kind: IngressClass
+    - group: external-secrets.io
+      kind: ExternalSecret
+    - group: external-secrets.io
+      kind: ClusterSecretStore
+  signatureKeys:
+    - https://github.com/domio/infrastructure
+  orphanedResources:
+    warn: true
+  roles:
+    - name: deployer
+      policies:
+        - p, proj:domio:deployer, applications, get, domio/*, allow
+        - p, proj:domio:deployer, applications, sync, domio/*, allow
+      groups:
+        - domio:deployers
+    - name: admin
+      policies:
+        - p, proj:domio:admin, applications, *, domio/*, allow
+      groups:
+        - domio:admins

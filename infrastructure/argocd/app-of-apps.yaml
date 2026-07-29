@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: domio-app-of-apps
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: argocd
+    app.kubernetes.io/component: app-of-apps
+spec:
+  project: domio
+  source:
+    repoURL: https://github.com/domio/infrastructure
+    targetRevision: HEAD
+    path: infrastructure/argocd
+    directory:
+      recurse: false
+      include: '{applications/*.yaml,projects/*.yaml}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true

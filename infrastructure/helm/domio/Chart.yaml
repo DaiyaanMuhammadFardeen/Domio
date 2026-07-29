@@ -1,0 +1,15 @@
+apiVersion: v2
+name: domio
+description: Domio application chart (placeholder; bundles service + ingress)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/domio/infrastructure
+maintainers:
+  - name: Domio Platform Team
+    email: platform@domio.example
+keywords:
+  - domio
+  - presentation
+  - collaboration
+  - argocd

@@ -1,0 +1,8 @@
+# All values shown are dev defaults; copy to terraform.tfvars and override per cluster.
+region              = "southeastasia"
+cluster_name        = "domio-dev"
+kubernetes_version  = "1.30.4"
+gitops_repo_url     = "https://github.com/domio/infrastructure"
+vault_dev_mode      = true
+argocd_namespace    = "argocd"
+image_registry      = "ghcr.io/domio"

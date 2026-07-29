@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "observability chart values schema",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["otelCollector", "prometheus", "grafana", "tempo", "loki"],
+  "properties": {
+    "otelCollector": {
+      "type": "object",
+      "required": ["replicas", "image", "ports", "config"],
+      "properties": {
+        "replicas": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "image": {
+          "type": "object",
+          "required": ["repository", "tag", "pullPolicy"],
+          "properties": {
+            "repository": { "type": "string" },
+            "tag": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+$" },
+            "pullPolicy": {
+              "type": "string",
+              "enum": ["Always", "IfNotPresent", "Never"]
+            }
+          }
+        },
+        "ports": {
+          "type": "object",
+          "required": ["grpc", "http"],
+          "properties": {
+            "grpc": { "type": "integer", "minimum": 1, "maximum": 65535 },
+            "http": { "type": "integer", "minimum": 1, "maximum": 65535 }
+          }
+        },
+        "securityContext": {
+          "type": "object",
+          "properties": {
+            "runAsNonRoot": { "type": "boolean", "const": true },
+            "readOnlyRootFilesystem": { "type": "boolean", "const": true }
+          }
+        }
+      }
+    },
+    "prometheus": {
+      "type": "object",
+      "required": ["retentionDays", "remoteWritePort", "scrapePort"],
+      "properties": {
+        "retentionDays": { "type": "integer", "minimum": 1, "maximum": 365 },
+        "remoteWritePort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "scrapePort": { "type": "integer", "minimum": 1, "maximum": 65535 }
+      }
+    },
+    "grafana": {
+      "type": "object",
+      "required": ["port", "selfHosted"],
+      "properties": {
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "selfHosted": { "type": "boolean" },
+        "adminUser": { "type": "string", "minLength": 1 }
+      }
+    },
+    "tempo": {
+      "type": "object",
+      "required": ["otlpPort", "retentionDays"],
+      "properties": {
+        "otlpPort": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "retentionDays": { "type": "integer", "minimum": 1, "maximum": 365 }
+      }
+    },
+    "loki": {
+      "type": "object",
+      "required": ["port", "retentionDays"],
+      "properties": {
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "retentionDays": { "type": "integer", "minimum": 1, "maximum": 365 }
+      }
+    },
+    "sloAlerts": {
+      "type": "object",
+      "properties": { "enabled": { "type": "boolean" } }
+    }
+  }
+}

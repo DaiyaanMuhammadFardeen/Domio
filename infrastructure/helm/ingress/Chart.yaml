@@ -1,0 +1,11 @@
+apiVersion: v2
+name: ingress
+description: Domio ingress chart (TRAEFIK_PLACEHOLDER vendor-neutral skeleton)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - ingress
+  - traefik
+  - envoy
+  - nginx

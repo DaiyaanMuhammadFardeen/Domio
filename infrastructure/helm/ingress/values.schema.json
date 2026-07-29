@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ingress chart values schema",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["controller", "ingressClass", "securityContext"],
+  "properties": {
+    "controller": {
+      "type": "object",
+      "required": ["type", "replicas"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["traefik", "envoy", "nginx", "kong", "istio"]
+        },
+        "tag": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+$" },
+        "replicas": { "type": "integer", "minimum": 1, "maximum": 50 }
+      }
+    },
+    "ingressClass": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "isDefault": { "type": "boolean" }
+      }
+    },
+    "tls": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "certManager": { "type": "boolean" }
+      }
+    },
+    "securityContext": {
+      "type": "object",
+      "properties": {
+        "runAsNonRoot": { "type": "boolean", "const": true },
+        "readOnlyRootFilesystem": { "type": "boolean", "const": true },
+        "allowPrivilegeEscalation": { "type": "boolean", "const": false }
+      }
+    }
+  }
+}

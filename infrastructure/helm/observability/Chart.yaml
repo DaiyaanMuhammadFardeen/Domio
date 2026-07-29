@@ -1,0 +1,13 @@
+apiVersion: v2
+name: observability
+description: Domio observability stack (OTel collector, Prometheus, Grafana, Tempo, Loki)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/domio/infrastructure
+keywords:
+  - otel
+  - prometheus
+  - grafana
+  - tempo
+  - loki
