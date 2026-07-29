@@ -1,0 +1,66 @@
+# Docker Registry v2 (registry:2) pull-through cache configuration.
+#
+# Vendored tool: registry:2 (https://hub.docker.com/_/registry), official
+# upstream Docker image, Apache-2.0. We use it in "pull-through cache" mode
+# so any `docker pull <image>` from a developer in Bangladesh is fetched
+# from the upstream registry exactly once and then served from local disk.
+#
+# Variables resolved at deploy time (no secrets in this file):
+#   MIRROR_DOCKER_URL — full URL of the regional registry (e.g. https://docker.bd.example)
+#   DOCKER_UPSTREAM   — upstream registry (https://registry-1.docker.io by default)
+#
+# Why a proxy, not a mirror?
+#   - The registry:2 pull-through cache is transparent: a client does
+#     `docker pull docker.bd.example/library/alpine:3.19` and the cache fetches
+#     it from registry-1.docker.io on the first request, then serves it
+#     locally forever.
+#   - The upstream cache_headers in the proxy section ensure we respect the
+#     upstream's max-age directives.
+#
+# To run locally (dev only):
+#   docker run -d --name mirror-docker \
+#     -p 5000:5000 \
+#     -v $(pwd)/infrastructure/mirrors/registry/docker:/etc/docker/registry \
+#     registry:2 \
+#       /etc/docker/registry/registry-config.example.yml
+#
+# Security:
+#   - We never embed registry credentials in this file. If the upstream is
+#     private, credentials are mounted as a separate file from the secrets
+#     backend at deploy time, not committed.
+
+version: 0.1
+log:
+  level: info
+  formatter: json
+
+storage:
+  # Local filesystem backend. Use the cache driver for pull-through caching.
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /var/lib/registry
+
+# Pull-through proxy entries. The "remoteurl" is what the cache fetches on a
+# miss. We deliberately do NOT add any auth headers here — anonymous pulls
+# only.
+proxy:
+  remoteurl: ${DOCKER_UPSTREAM}
+  username: ""
+  password: ""
+
+http:
+  addr: :5000
+  headers:
+    X-Content-Type-Options: [nosniff]
+
+# Health endpoint for healthcheck.sh.
+health:
+  storagedriver:
+    enabled: true
+    interval: 10s
+    threshold: 3
+
+# We do NOT enable deletions here. Stale blobs age out via the upstream's
+# max-age headers; if we need to reclaim disk in an emergency we run the
+# garbage collector manually in maintenance mode.

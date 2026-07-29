@@ -1,0 +1,107 @@
+# Dependabot configuration.
+#
+# Why both Renovate AND Dependabot?
+#   - Renovate does the heavy lifting (groups, weekday scheduling, per-day
+#     caps, mirror-aware hostRules).
+#   - Dependabot is kept as a redundant security-only channel so we still
+#     get a notification even if Renovate is misconfigured. This is the
+#     "defense in depth" recommendation from Phase 01 §10 DoD.
+#
+# Schedule: weekday morning Asia/Dhaka. Mirrors are queried through the same
+# env-var-driven hostRules pattern as Renovate; tokens are NEVER committed.
+
+version: 2
+
+# Eject from GitHub default registries to the regional mirror. We do this
+# via the registries: block per ecosystem. Tokens come from
+# DEPENDABOT_NPM_TOKEN / DEPENDABOT_PYPI_TOKEN / DEPENDABOT_DOCKER_TOKEN
+# env vars; if those are unset, Dependabot falls back to the public upstream.
+
+registries:
+  npm-bd:
+    type: npm-registry
+    url: https://npm.bd.example
+    token: ${{ secrets.DEPENDABOT_NPM_TOKEN }}
+  pypi-bd:
+    type: pypi-server
+    url: https://pypi.bd.example
+    token: ${{ secrets.DEPENDABOT_PYPI_TOKEN }}
+  docker-bd:
+    type: docker-registry
+    url: https://docker.bd.example
+    username: ${{ secrets.DEPENDABOT_DOCKER_USERNAME }}
+    password: ${{ secrets.DEPENDABOT_DOCKER_TOKEN }}
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    registries: ["npm-bd"]
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Asia/Dhaka"
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - "deps"
+      - "npm"
+
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "07:00"
+      timezone: "Asia/Dhaka"
+    open-pull-requests-limit: 10
+    labels:
+      - "deps"
+      - "go"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    registries: ["pypi-bd"]
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "07:00"
+      timezone: "Asia/Dhaka"
+    open-pull-requests-limit: 10
+    labels:
+      - "deps"
+      - "python"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "07:00"
+      timezone: "Asia/Dhaka"
+    open-pull-requests-limit: 20
+    groups:
+      github-actions:
+        patterns: ["*"]
+    labels:
+      - "deps"
+      - "github-actions"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    registries: ["docker-bd"]
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "07:00"
+      timezone: "Asia/Dhaka"
+    open-pull-requests-limit: 10
+    labels:
+      - "deps"
+      - "docker"

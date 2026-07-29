@@ -1,0 +1,96 @@
+# devpi + nginx configuration for the Bangladesh PyPI mirror.
+#
+# Vendored tools:
+#   - devpi-server (https://www.devpi.net/) — PyPI proxy/cache, MIT.
+#   - nginx                                  — TLS termination + static serving.
+#
+# Both pieces are vendor-neutral and self-hostable. The devpi instance sits
+# behind nginx which terminates TLS and forwards plain HTTP to devpi on
+# loopback only. Mirror is implemented as a devpi "mirror" index that pulls
+# from the upstream on cache miss.
+#
+# Environment variables consumed (no secrets in this file):
+#   MIRROR_PYPI_URL  — full URL of the regional PyPI mirror
+#                      (e.g. https://pypi.bd.example)
+#   PYPI_UPSTREAM    — full URL of the upstream (https://pypi.org/simple)
+#
+# Why nginx and not raw devpi behind a load balancer?
+#   - We need bandwidth-saving features (gzip, brotli, http/2, long cache
+#     headers on /+simple/ listings) that nginx gives us for free.
+#   - TLS termination belongs at the edge; devpi stays inside.
+#
+# To run locally (dev only):
+#   devpi-server --serverdir /tmp/devpi-server --port 4040 &
+#   nginx -c infrastructure/mirrors/registry/pypi/devpi-nginx.conf.example \
+#        -g 'daemon off;' -p /tmp/nginx-test
+
+# Upstream devpi. Plain HTTP, loopback only.
+upstream devpi_backend {
+    server 127.0.0.1:4040 fail_timeout=0;
+    keepalive 32;
+}
+
+# Public HTTPS server — replace listen / ssl_certificate paths in production.
+server {
+    listen 443 ssl http2;
+    server_name _;
+
+    # ssl_certificate / ssl_certificate_key are NOT set here.
+    # The deploy profile injects them from the secrets backend.
+
+    # Bandwidth-saving: enable compression for all compatible types.
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        application/json
+        application/javascript
+        application/xml
+        application/xml+rss;
+
+    # Long cache on simple indexes: upstream changes the ETag if the listing
+    # changes, so this is safe.
+    location ~* ^/\+simple/ {
+        proxy_pass http://devpi_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering on;
+        expires 1h;
+        add_header Cache-Control "public, max-age=3600";
+    }
+
+    # Package downloads: short cache, validate against upstream.
+    location ~* ^/[^/]+/(?:[^/]+/)?packages/ {
+        proxy_pass http://devpi_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering on;
+        expires 10m;
+        add_header Cache-Control "public, max-age=600";
+    }
+
+    # Health endpoint consumed by healthcheck.sh.
+    location = /healthz {
+        access_log off;
+        return 200 "ok\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Everything else → devpi.
+    location / {
+        proxy_pass http://devpi_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+    }
+}

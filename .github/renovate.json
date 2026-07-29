@@ -1,0 +1,151 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":automergeMinor",
+    ":automergePatch",
+    ":rebaseStalePrs",
+    "labels:automerge",
+    "lockFileMaintenance",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "description": "Renovate config tuned for Bangladesh-aware bandwidth mirrors. Schedule is weekday-only to avoid weekend cache warmup penalty. Mirror-aware hostRules are sourced from env; commit must not contain secrets.",
+  "schedule": [
+    "before 7am on monday",
+    "before 7am on tuesday",
+    "before 7am on wednesday",
+    "before 7am on thursday",
+    "before 7am on friday"
+  ],
+  "timezone": "Asia/Dhaka",
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 4,
+  "branchConcurrentLimit": 20,
+  "updateNotScheduled": false,
+  "rangeStrategy": "bump",
+  "rebaseWhen": "behind-base-branch",
+  "commitMessagePrefix": "deps",
+  "semanticCommits": "enabled",
+  "gitTimeout": 600,
+  "enabledManagers": [
+    "npm",
+    "gomod",
+    "pip_requirements",
+    "pip_setup",
+    "github-actions",
+    "dockerfile",
+    "docker-compose",
+    "cargo",
+    "bun"
+  ],
+  "packageRules": [
+    {
+      "description": "Group all non-major dev dependency updates into a single weekly PR.",
+      "groupName": "non-major dev deps",
+      "groupSlug": "non-major-dev",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true
+    },
+    {
+      "description": "Group all non-major production (runtime) dependency updates into a weekly PR.",
+      "groupName": "non-major prod deps",
+      "groupSlug": "non-major-prod",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "automerge": true
+    },
+    {
+      "description": "Major version bumps are NOT auto-merged and are split per package so a reviewer can decide.",
+      "matchUpdateTypes": ["major"],
+      "groupName": "major version bumps",
+      "groupSlug": "major-bumps",
+      "automerge": false,
+      "labels": ["major", "needs-review"]
+    },
+    {
+      "description": "Security patches bypass the weekday schedule and are emitted immediately, but each lands in its own PR.",
+      "matchCategories": ["security"],
+      "matchUpdateTypes": ["minor", "patch", "major", "digest"],
+      "groupName": "security patches",
+      "groupSlug": "security-patches",
+      "schedule": ["at any time"],
+      "automerge": false,
+      "labels": ["security"],
+      "prPriority": 10,
+      "separateMultiplePending": true
+    },
+    {
+      "description": "GitHub Actions are pinned to a digest so renovate updates the digest in-place.",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
+    },
+    {
+      "description": "Docker images are pinned to a digest for reproducible builds.",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "pinDigests": true
+    }
+  ],
+  "hostRules": [
+    {
+      "description": "npm registry mirror. Auth tokens are injected from RENOVATE_NPM_AUTH_TOKEN at runtime; never commit tokens.",
+      "hostType": "npm",
+      "matchHost": "{{env.RENOVATE_NPM_HOST}}",
+      "token": "{{ env.RENOVATE_NPM_AUTH_TOKEN }}"
+    },
+    {
+      "description": "PyPI mirror. Auth injected from env; never commit.",
+      "hostType": "pypi",
+      "matchHost": "{{ env.RENOVATE_PYPI_HOST }}",
+      "token": "{{ env.RENOVATE_PYPI_AUTH_TOKEN }}"
+    },
+    {
+      "description": "Go module proxy.",
+      "hostType": "go",
+      "matchHost": "{{ env.RENOVATE_GO_HOST }}"
+    },
+    {
+      "description": "Docker registry mirror.",
+      "hostType": "docker",
+      "matchHost": "{{ env.RENOVATE_DOCKER_HOST }}"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"],
+    "assignees": ["@platform-foundations"],
+    "schedule": ["at any time"]
+  },
+  "osvVulnerabilityAlerts": true,
+  "customDatasources": {
+    "description": "Reserved for future use; no custom datasources are configured in this phase."
+  },
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.turbo/**",
+    "infrastructure/mirrors/registry/**"
+  ],
+  "regexManagers": [
+    {
+      "description": "Track Renovate itself so config-schema upgrades land via the same pipeline.",
+      "fileMatch": ["(^|/)renovate\\.json$"],
+      "matchStrings": ["\"renovateVersion\": \"(?<currentValue>.*?)\""],
+      "datasourceTemplate": "github:renovatebot/renovate",
+      "depNameTemplate": "renovatebot/renovate"
+    }
+  ],
+  "fileMatch": [
+    "(^|/)package\\.json$",
+    "(^|/)pnpm-lock\\.yaml$",
+    "(^|/)go\\.mod$",
+    "(^|/)go\\.sum$",
+    "(^|/)requirements\\.txt$",
+    "(^|/)pyproject\\.toml$",
+    "(^|/)Cargo\\.toml$",
+    "(^|/)\\.github/workflows/.*\\.ya?ml$",
+    "(^|/)Dockerfile$",
+    "(^|/)docker-compose\\.ya?ml$"
+  ]
+}

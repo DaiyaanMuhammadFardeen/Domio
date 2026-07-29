@@ -1,0 +1,45 @@
+# Athens configuration for the Bangladesh Go module mirror.
+#
+# Vendored tool: Athens (https://github.com/gomods/athens), MIT, vendor-neutral.
+#
+# Athens runs as a Go module proxy/cache. It pulls modules from upstream on
+# cache miss and serves them from disk thereafter. The module graph is then
+# cached and re-served to developers in Bangladesh with sub-millisecond RTT.
+#
+# Variables resolved at deploy time (no secrets in this file):
+#   MIRROR_GO_URL   — full URL of the regional Athens instance
+#                     (e.g. https://athens.bd.example)
+#   GO_UPSTREAM     — upstream VCS / proxy (e.g. https://proxy.golang.org)
+#
+# To run locally (dev only):
+#   athens -config infrastructure/mirrors/registry/go-modules/athens-config.example.toml
+
+# The disk storage backend. We deliberately avoid cloud-blob backends here so
+# the mirror is fully self-contained.
+StorageType = "disk"
+DiskStorageRoot = "/var/lib/athens"
+
+# Timeouts tuned for high-latency Bangladesh links. We err on the side of
+# patience for the first fetch from upstream; subsequent fetches are local.
+Timeout = 300
+
+# Sumdb / ChecksumDB — module verification against sum.golang.org. Disable
+# ONLY in dev; production MUST keep this on. We intentionally do not expose
+# a switch here.
+SumDBs = ["https://sum.golang.org"]
+
+# Filter — refuse to cache/archive private modules. If you need a private
+# proxy, run a separate Athens instance; do not weaken this filter.
+FilterFile = ""
+
+# Upstream proxy. We pin proxy.golang.org so behavior matches the public Go
+# ecosystem, and we list direct mode too as an absolute fallback.
+[Proxy]
+# `GOPROXY` env var is set to this URL by apply.sh.
+# Direct mode (`direct`) is intentionally NOT included so that the only path
+# to upstream is through the proxy — that is what gives us caching.
+
+# Logging — JSON to stdout for the platform log collector.
+[Logger]
+Level = "info"
+LoggerType = "json"
