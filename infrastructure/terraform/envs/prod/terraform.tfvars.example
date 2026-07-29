@@ -1,0 +1,9 @@
+region                      = "southeastasia"
+cluster_name                = "domio-prod"
+kubernetes_version          = "1.30.4"
+gitops_repo_url             = "https://github.com/domio/infrastructure"
+vault_dev_mode              = false
+vault_enabled               = false
+argocd_namespace            = "argocd"
+image_registry              = "ghcr.io/domio"
+prod_data_residency_region  = "southeastasia"

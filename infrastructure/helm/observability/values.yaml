@@ -1,0 +1,104 @@
+otelCollector:
+  name: otel-collector
+  replicas: 1
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: "0.104.0"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  ports:
+    grpc: 4317
+    http: 4318
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc: {}
+          http: {}
+    processors:
+      batch: {}
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 256
+        spike_limit_mib: 64
+    exporters:
+      prometheusremotewrite:
+        endpoint: http://{{ .Values.prometheus.name }}:{{ .Values.prometheus.remoteWritePort }}
+      otlp/tempo:
+        endpoint: {{ .Values.tempo.name }}:{{ .Values.tempo.otlpPort }}
+        tls:
+          insecure: true
+      loki:
+        endpoint: http://{{ .Values.loki.name }}:{{ .Values.loki.port }}/loki/api/v1/push
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/tempo]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheusremotewrite]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [loki]
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+
+prometheus:
+  name: prometheus
+  retentionDays: 15
+  remoteWritePort: 9201
+  scrapePort: 9090
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10002
+    runAsGroup: 10002
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+grafana:
+  name: grafana
+  port: 3000
+  adminUser: admin
+  selfHosted: true
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10003
+    runAsGroup: 10003
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+tempo:
+  name: tempo
+  otlpPort: 4317
+  retentionDays: 14
+
+loki:
+  name: loki
+  port: 3100
+  retentionDays: 14
+
+sloAlerts:
+  enabled: true

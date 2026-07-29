@@ -1,0 +1,78 @@
+# Default values for the domio chart.
+# This chart is intentionally minimal: it bundles a single Service/Deployment
+# manifest for a generic Domio workload so the GitOps pipeline has a concrete
+# target. Real workload manifests land in P02+.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: ghcr.io/domio/domio
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
+
+podAnnotations: {}
+podLabels: {}
+
+probes:
+  liveness:
+    path: /healthz
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readiness:
+    path: /readyz
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  startup:
+    path: /healthz
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    failureThreshold: 30
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+config:
+  logLevel: info
+  otlpEndpoint: http://otel-collector.observability.svc.cluster.local:4318
+
+envFromSecret: []
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+configMap:
+  data:
+    APP_ENV: placeholder

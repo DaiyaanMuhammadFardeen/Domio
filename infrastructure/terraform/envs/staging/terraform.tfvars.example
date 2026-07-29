@@ -1,0 +1,7 @@
+region              = "southeastasia"
+cluster_name        = "domio-staging"
+kubernetes_version  = "1.30.4"
+gitops_repo_url     = "https://github.com/domio/infrastructure"
+vault_dev_mode      = false
+argocd_namespace    = "argocd"
+image_registry      = "ghcr.io/domio"

@@ -1,0 +1,35 @@
+controller:
+  type: traefik
+  tag: "3.1.4"
+  replicas: 1
+
+ingressClass:
+  name: domio
+  isDefault: false
+
+dashboard:
+  enabled: false
+  host: traefik.localhost
+
+tls:
+  enabled: false
+  certManager: false
+
+annotations: {}
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65533
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
