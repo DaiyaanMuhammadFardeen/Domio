@@ -1,0 +1,125 @@
+name: contract
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'contracts/**'
+      - 'buf.yaml'
+      - 'buf.gen.yaml'
+  push:
+    branches: [master, main]
+    paths:
+      - 'contracts/**'
+      - 'buf.yaml'
+      - 'buf.gen.yaml'
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  proto-format:
+    name: buf-format
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: buf format (check)
+        uses: bufbuild/buf-action@v1.1.0
+        with:
+          setup_only: true
+      - run: buf format -d contracts/proto --exit-code
+
+  proto-lint:
+    name: buf-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: buf lint
+        uses: bufbuild/buf-action@v1.1.0
+        with:
+          setup_only: true
+      - run: buf lint contracts/proto
+
+  proto-breaking:
+    name: buf-breaking
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+      - name: buf breaking
+        uses: bufbuild/buf-action@v1.1.0
+        with:
+          setup_only: true
+        env:
+          BUF_TOKEN: ${{ secrets.BUF_TOKEN }}
+      - run: buf breaking contracts/proto --against origin/master
+        continue-on-error: false
+
+  openapi-spectral:
+    name: openapi-spectral
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - run: npm install -g @stoplight/spectral-cli@6.13.1
+      - run: spectral lint contracts/openapi/v1/*.yaml --fail-severity=error --ruleset .spectral.yaml
+      - name: Negative-failure assertion (positive rule present)
+        run: spectral lint contracts/openapi/v1/*.yaml --ruleset .spectral.yaml --display-only-failures
+
+  json-schema-ajv:
+    name: ajv-strict
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - run: npm install -g ajv-cli@5.0.0 ajv-formats@3.0.1
+      - name: Compile schemas strict
+        run: |
+          set -e
+          for f in contracts/schema/v1/*.schema.json; do
+            ajv compile --spec=draft2020 -s "$f" --strict=true --allow-non-draft-refs=false -c ajv-formats || { echo "✗ invalid schema: $f"; exit 1; }
+          done
+
+  contract-pack:
+    name: contract-pack
+    needs: [proto-format, proto-lint, proto-breaking, openapi-spectral, json-schema-ajv]
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - name: Read version
+        id: ver
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "value=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$(cat contracts/VERSION 2>/dev/null || echo 0.1.1)" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Pack
+        run: |
+          mkdir -p dist/contracts-${{ steps.ver.outputs.value }}
+          cp -R contracts/* dist/contracts-${{ steps.ver.outputs.value }}/
+          tar -C dist -czf contracts-${{ steps.ver.outputs.value }}.tar.gz contracts-${{ steps.ver.outputs.value }}
+      - uses: actions/upload-artifact@v4.4.3
+        with:
+          name: contracts-bundle
+          path: contracts-${{ steps.ver.outputs.value }}.tar.gz

@@ -1,0 +1,83 @@
+name: unit
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: install-deps
+    uses: ./.github/workflows/reusable/setup-node.yml
+    with:
+      node-version: '22.11.0'
+
+  vitest:
+    name: vitest
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+      REDIS_URL: redis://localhost:6379
+      NATS_URL: nats://localhost:4222
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4318
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      otel-collector:
+        image: otel/opentelemetry-collector-contrib:0.114.0
+        ports: ['4318:4318']
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Install Postgres extensions
+        run: |
+          PGPASSWORD=domio psql -h localhost -U domio -d domio -c "CREATE EXTENSION IF NOT EXISTS vector;"
+        env:
+          PGPASSWORD: domio
+      - name: Run vitest with coverage
+        run: pnpm test -- --coverage
+      - name: Enforce coverage gate
+        run: |
+          node tools/coverage-gate.mjs
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14

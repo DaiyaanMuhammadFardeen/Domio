@@ -1,0 +1,58 @@
+name: publish
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  determine-version:
+    name: determine-version
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      version: ${{ steps.ver.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+      - id: ver
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "value=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$(cat contracts/VERSION 2>/dev/null || echo 0.1.1)" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish-contracts:
+    name: publish-contracts
+    needs: determine-version
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          name: contracts-bundle
+      - uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push contracts bundle
+        run: |
+          VERSION="${{ needs.determine-version.outputs.version }}"
+          mkdir -p /tmp/contracts-publish
+          cp contracts-bundle.tar.gz /tmp/contracts-publish/contracts-${VERSION}.tar.gz
+          cd /tmp/contracts-publish
+          # ORAS copy supports ghcr.io; this skeleton is filled in P22
+          echo "would push contracts-${VERSION}.tar.gz to ghcr.io/domio/contracts:${VERSION}"

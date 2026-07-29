@@ -1,0 +1,78 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":automergeMinor",
+    ":automergeDigest",
+    ":semanticCommits",
+    ":disableRateLimiting"
+  ],
+  "schedule": ["after 9pm on weekday"],
+  "timezone": "Asia/Dhaka",
+  "labels": ["renovate", "dependencies"],
+  "rebaseWhen": "behind-base-branch",
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "description": "Group Node minor + patch updates into a single PR (avoid lockfile thrash during business hours).",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies", "devDependencies"],
+      "groupName": "node-minor-and-patch",
+      "schedule": ["before 7am on saturday"],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Group all dev image updates to avoid lockfile churn (only when not security-critical).",
+      "matchDatasources": ["docker"],
+      "groupName": "dev-images",
+      "schedule": ["before 7am on saturday"]
+    },
+    {
+      "description": "Group Go module updates by major version.",
+      "matchManagers": ["gomod"],
+      "groupName": "go-modules",
+      "schedule": ["before 7am on sunday"]
+    },
+    {
+      "description": "Group Python updates.",
+      "matchManagers": ["pip_requirements", "uv"],
+      "groupName": "python-deps",
+      "schedule": ["before 7am on sunday"]
+    },
+    {
+      "description": "Group GitHub Actions updates.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions",
+      "automerge": true,
+      "automergeType": "pr",
+      "schedule": ["before 7am on saturday"]
+    },
+    {
+      "description": "Security patches get an immediate separate PR and are NOT auto-merged.",
+      "matchCategories": ["security"],
+      "groupName": "security",
+      "schedule": ["at any time"],
+      "automerge": false,
+      "labels": ["renovate", "security", "priority"]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"]
+  },
+  "hostRules": [
+    {
+      "description": "Prefer the regional mirror for npm (Bangladesh).",
+      "matchHostnames": ["registry.npmjs.org"],
+      "enabled": false,
+      "comment": "Actual mirror hostnames are environment-specific and injected by CI; this block intentionally left empty here."
+    }
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/coverage/**"
+  ]
+}

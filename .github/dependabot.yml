@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "01:00"
+      timezone: "Asia/Dhaka"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions-minor:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    labels:
+      - "renovate"
+      - "dependencies"
+      - "github-actions"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "01:00"
+      timezone: "Asia/Dhaka"
+    labels:
+      - "renovate"
+      - "dependencies"
+      - "docker"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

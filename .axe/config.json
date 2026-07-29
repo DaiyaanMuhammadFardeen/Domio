@@ -1,0 +1,19 @@
+{
+  "$schema": "https://example.invalid/axe-config.schema.json",
+  "extends": ["@axe-core/preset"],
+  "rules": {
+    "wcag2a": { "enabled": true },
+    "wcag21a": { "enabled": true },
+    "wcag21aa": { "enabled": true },
+    "best-practice": { "enabled": true },
+    "color-contrast": { "enabled": true },
+    "label": { "enabled": true },
+    "image-alt": { "enabled": true },
+    "region": { "enabled": true },
+    "heading-order": { "enabled": true },
+    "landmark-one-main": { "enabled": true }
+  },
+  "tags": ["wcag2a", "wcag21a", "wcag21aa", "best-practice"],
+  "failOn": ["serious", "critical"],
+  "outputDir": "artifacts/axe"
+}

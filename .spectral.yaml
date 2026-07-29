@@ -1,0 +1,14 @@
+extends: ["spectral:oas"]
+functions: ["spectral:oas-functions"]
+rules:
+  info-contact: warn
+  info-license: warn
+  oas3-api-servers: error
+  operation-tag-defined: error
+  operation-operationId: error
+  operation-description: warn
+  path-params: error
+  operation-success-response: error
+  oas3-valid-media-example: warn
+  typed-enum: error
+  invalid_type: error

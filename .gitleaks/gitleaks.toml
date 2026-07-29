@@ -1,0 +1,61 @@
+# gitleaks configuration for Domio.
+#
+# Extends the default ruleset with project-specific patterns:
+# - .env values and bearer tokens
+# - Datadog, OpenAI, Anthropic, AWS, GCP, Stripe keys
+# - Bangladesh-specific patterns (BKash, Nagad, Rocket)
+
+title = "Domio gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow dev fixtures and test docs"
+paths = [
+  '''(?i).*\.(test|spec)\.(ts|js|tsx|jsx|json|yaml|yml|mjs)$''',
+  '''tests/fixtures/.*''',
+  '''docs/runbooks/.*\.md$''',
+  '''.env.example$''',
+  '''contracts/.*\.proto$''',
+  '''contracts/.*\.yaml$''',
+  '''infrastructure/.*/.*\.yaml$''',
+  '''infrastructure/.*/.*\.yml$''',
+  '''maps.test.ts''',
+]
+
+[[rules]]
+id = "domio-bearer-token"
+description = "Domio bearer token (any 64-hex after 'Authorization: Bearer')"
+regex = '''(?i)authorization\s*:\s*bearer\s+[a-f0-9]{64}'''
+keywords = ["authorization", "bearer"]
+
+[[rules]]
+id = "domio-aws-access-key"
+description = "AWS access key pattern"
+regex = '''AKIA[0-9A-Z]{16}'''
+keywords = ["akia"]
+
+[[rules]]
+id = "domio-bkash-key"
+description = "BKash app key pattern (BD)"
+regex = '''(?i)bkash[-_]?app[-_]?key["'\s:=]+[a-z0-9]{32}'''
+keywords = ["bkash"]
+
+[[rules]]
+id = "domio-anthropic-key"
+description = "Anthropic API key"
+regex = '''sk-ant-[A-Za-z0-9_-]{32,}'''
+keywords = ["sk-ant-"]
+
+[[rules]]
+id = "domio-openai-key"
+description = "OpenAI API key"
+regex = '''sk-[A-Za-z0-9]{32,}'''
+keywords = ["sk-"]
+
+[[rules]]
+id = "domio-stripe-key"
+description = "Stripe live or test key"
+regex = '''(?i)(sk|pk)_(test|live)_[A-Za-z0-9]{16,}'''
+keywords = ["sk_test", "pk_test", "sk_live", "pk_live"]

@@ -1,0 +1,66 @@
+name: smoke
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-smoke:
+    name: api-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - run: pnpm install --frozen-lockfile
+      - name: Install Postgres extensions
+        run: |
+          PGPASSWORD=domio psql -h localhost -U domio -d domio -c "CREATE EXTENSION IF NOT EXISTS vector;"
+      - name: Build @domio/api
+        run: pnpm --filter @domio/api build
+      - name: Start API
+        run: |
+          nohup node apps/api/dist/server.js > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/healthz > /dev/null; then break; fi
+            sleep 1
+          done
+      - name: Smoke endpoints
+        run: |
+          bash tests/smoke/api-smoke.sh
+      - name: Tear down
+        if: always()
+        run: |
+          if [ -f /tmp/api.pid ]; then kill "$(cat /tmp/api.pid)" || true; fi

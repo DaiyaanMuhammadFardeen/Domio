@@ -100,3 +100,7 @@ secrets/
 *.tfstate
 *.tfstate.backup
 helm-charts-output/
+
+# Puku CLI internal scratch
+.puku-cli/
+vitest.config.ts.timestamp-*.mjs

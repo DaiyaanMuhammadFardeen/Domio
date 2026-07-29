@@ -1,0 +1,88 @@
+name: lint
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: install-deps
+    uses: ./.github/workflows/reusable/setup-node.yml
+    with:
+      node-version: '22.11.0'
+
+  eslint:
+    name: eslint
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - name: Fail when any warnings present
+        run: |
+          if pnpm lint 2>&1 | grep -E "warning" | grep -v "warnings or errors" | grep -q .; then
+            echo "Warnings found in lint output" >&2
+            exit 1
+          fi
+
+  prettier:
+    name: prettier
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - run: npm install -g prettier@3.4.2
+      - run: prettier --check '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}' --ignore-path .gitignore
+
+  shell:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: Run shellcheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        env:
+          SHELLCHECK_OPTS: -S error
+        with:
+          scandir: ./bin
+          additionalfiles: ./scripts/**/*.sh
+
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: Download actionlint
+        id: get_actionlint
+        run: bash <(curl -sSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        shell: bash
+      - run: ${{ steps.get_actionlint.outputs.executable }} -color
