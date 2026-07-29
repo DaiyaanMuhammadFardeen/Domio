@@ -16,6 +16,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { init } from '../src/index.js';
+import { ensureRedactor } from '../src/redaction.js';
 
 interface RecordedRequest {
   method: string;
@@ -83,6 +84,10 @@ describe('OTLP HTTP integration — positive', () => {
   let endpoint: string;
 
   beforeAll(async () => {
+    // The redaction adapter resolves the workspace `@domio/redact-pii`
+    // package lazily so it never blocks log/metric emission. Tests
+    // must await the resolution once before asserting on PII markers.
+    await ensureRedactor();
     receiver = new MockOtlpReceiver();
     port = await receiver.start();
     endpoint = `http://127.0.0.1:${port}`;
@@ -177,7 +182,9 @@ describe('OTLP HTTP integration — positive', () => {
     );
     expect(errRec).toBeDefined();
     expect(errRec.body.stringValue).not.toContain('alice@example.com');
-    expect(errRec.body.stringValue).toContain('[REDACTED]');
+    // redact-pii produces structured markers like `[redacted:email]` so
+    // the redaction category is preserved for downstream dashboards.
+    expect(errRec.body.stringValue).toMatch(/\[redacted:/);
   });
 
   it('sends the request body as bytes encoded with TextEncoder', async () => {

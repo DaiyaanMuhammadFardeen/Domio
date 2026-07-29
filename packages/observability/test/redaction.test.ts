@@ -113,11 +113,12 @@ describe('init — positive coverage', () => {
       o.logger.log({ severity: 'INFO', body: 'contact alice@example.com' });
       await o.logger.flush();
       expect(o.mode).toBe('noop');
-      // The adapter is the live one (the @domio/redact-pii package is a
-      // workspace dependency) — assert PII scrubbing at the API level.
-      const { getRedactor } = await import('../src/redaction.js');
+      // Wait for the lazy adapter to resolve the workspace dep, then
+      // assert PII scrubbing at the API level.
+      const { getRedactor, ensureRedactor } = await import('../src/redaction.js');
+      await ensureRedactor();
       const redactor = getRedactor();
-      expect(redactor.redactString('alice@example.com')).toContain('[REDACTED]');
+      expect(redactor.redactString('alice@example.com')).toMatch(/\[redacted:/);
     } finally {
       if (prev !== undefined) process.env['OTEL_EXPORTER_OTLP_ENDPOINT'] = prev;
     }

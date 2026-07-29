@@ -34,6 +34,17 @@ describe('secrets helm chart', () => {
     expect(raw).toContain('secrets:');
     expect(raw).toContain('oncall:');
     expect(raw).toContain('refreshInterval:');
+    expect(raw).toContain('image:');
+    expect(raw).toContain('securityContext:');
+    expect(raw).toContain('runAsNonRoot: true');
+    expect(raw).toContain('readOnlyRootFilesystem: true');
+  });
+
+  it('values.yaml pins an image tag (not :latest)', () => {
+    const raw = readFileSync(join(SECRETS_CHART, 'values.yaml'), 'utf8');
+    const m = raw.match(/tag:\s*"?([^"\s]+)"?/);
+    expect(m, 'image tag must be present').toBeTruthy();
+    expect(m![1]).not.toMatch(/latest/i);
   });
 
   it('declares ExternalSecret for every workload component', () => {

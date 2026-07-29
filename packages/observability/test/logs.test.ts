@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { createLogger } from '../src/logs.js';
 import {
   OtlpHttpExporter,
@@ -6,6 +6,14 @@ import {
   type OtlpTransportRequest,
 } from '../src/exporters/otlp-http.js';
 import { buildResource } from '../src/resource.js';
+import { ensureRedactor } from '../src/redaction.js';
+
+beforeAll(async () => {
+  // The redaction adapter resolves the workspace `@domio/redact-pii`
+  // package lazily so it never blocks log/metric emission. Tests
+  // must await the resolution once before asserting on PII markers.
+  await ensureRedactor();
+});
 
 function makeExporter() {
   const calls: OtlpTransportRequest[] = [];
@@ -98,7 +106,9 @@ describe('createLogger — positive coverage', () => {
     const body = JSON.parse(new TextDecoder().decode(calls[0]!.body));
     const record = body.resourceLogs[0].scopeLogs[0].logRecords[0];
     expect(record.body.stringValue).not.toContain('alice@example.com');
-    expect(record.body.stringValue).toContain('[REDACTED]');
+    // redact-pii uses structured markers like `[redacted:email]` so the
+    // redaction category is preserved for downstream dashboards.
+    expect(record.body.stringValue).toMatch(/\[redacted:/);
   });
 
   it('PII in attributes is redacted before export', async () => {
@@ -113,7 +123,9 @@ describe('createLogger — positive coverage', () => {
     const body = JSON.parse(new TextDecoder().decode(calls[0]!.body));
     const attrs = body.resourceLogs[0].scopeLogs[0].logRecords[0].attributes;
     const map = Object.fromEntries(attrs.map((a: { key: string; value: { stringValue: string } }) => [a.key, a.value.stringValue]));
-    expect(map['user_email']).toBe('[REDACTED]');
+    // Emails in attribute values are redacted with a `[redacted:...]`
+    // marker; the exact category depends on the key/value matchers.
+    expect(map['user_email']).toMatch(/\[redacted:/);
     expect(map['tenant.id']).toBe('org_1');
   });
 
