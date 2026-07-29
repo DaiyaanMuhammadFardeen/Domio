@@ -1,0 +1,24 @@
+{
+  "name": "@domio/mirror-health",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Vendor-neutral mirror health and failover decision library. Used by the apply.sh/healthcheck.sh shell scripts and by tests/mirrors.",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test --import tsx ./test/*.spec.ts",
+    "typecheck": "tsc --noEmit -p ../../tsconfig.base.json"
+  },
+  "engines": {
+    "node": ">=22.11.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tsx": "4.19.2",
+    "typescript": "5.7.2",
+    "yaml": "2.6.1"
+  }
+}

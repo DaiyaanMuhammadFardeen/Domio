@@ -1,0 +1,69 @@
+# Verdaccio configuration for the Bangladesh npm mirror.
+#
+# This file is an EXAMPLE. The real config is generated at apply time from
+# environment variables (MIRROR_NPM_URL, etc.) so we never hard-code URLs.
+#
+# Vendored tool: Verdaccio (https://verdaccio.org/). Self-hostable, vendor-
+# neutral, MIT-licensed. Mirror is implemented as an "uplink" — Verdaccio
+# transparently falls through to the upstream when a package is not in cache.
+#
+# Environment variables consumed (no secrets in this file):
+#   MIRROR_NPM_URL  — full URL of the regional npm mirror (e.g. https://npm.bd.example)
+#   NPM_UPSTREAM    — full URL of the upstream registry (e.g. https://registry.npmjs.org)
+#
+# To start the mirror locally (dev only):
+#   verdaccio --config infrastructure/mirrors/registry/npm/verdaccio-config.example.yaml
+#
+# Security: do NOT add an `auth` section that embeds htpasswd credentials here.
+# Authentication is configured separately and is intentionally out of scope for
+# the public mirror config (see SECURITY.md §"Untrusted mirrors").
+
+storage: /verdaccio/storage/data
+plugins: /verdaccio/plugins
+
+# Web UI is fine in dev but disable in production via the deploy profile.
+web:
+  title: "Domio BD npm mirror"
+  enable: true
+
+# uplinks: where the proxy fetches from when a package is not in cache.
+uplinks:
+  npmjs:
+    url: "${NPM_UPSTREAM}"
+    maxage: 30m
+    timeout: 30s
+    cache: true
+    maxage_increment: 10m
+
+# packages: scope rules. We deliberately use a single wildcarded scope that
+# proxies everything. If we later need to block a specific package, we add a
+# scoped rule ABOVE this one (first match wins).
+packages:
+  "@*/*":
+    access: $all
+    publish: $anonymous
+    unpublish: $anonymous
+    proxy: npmjs
+  "**":
+    access: $all
+    publish: $anonymous
+    unpublish: $anonymous
+    proxy: npmjs
+
+# server: timeouts and keep-alive tuned for high-latency Bangladesh links.
+server:
+  keepAliveTimeout: 60
+  headersTimeout: 120
+
+# listen: only the loopback by default; production uses a reverse proxy.
+listen:
+  - 0.0.0.0:4873
+
+# logs: stdout so the platform log collector picks them up.
+logs: { type: stdout, format: pretty, level: info }
+
+# security: an empty `api` block disables the built-in token endpoint. Tokens,
+# if needed, are minted by an external auth service — never inside the mirror.
+security:
+  api:
+    legacy: true
