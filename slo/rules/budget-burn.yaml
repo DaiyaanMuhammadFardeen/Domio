@@ -1,0 +1,124 @@
+groups:
+  - name: domio-slo-budget-burn
+    interval: 30s
+    rules:
+      # ------------------------------------------------------------------
+      # api-gateway — availability
+      # SLO 99.9% over 28d ⇒ error budget = 0.1% ⇒ 1 - 0.001 = 0.999
+      # 14.4× burn ⇒ budget exhausted in 2 days
+      # ------------------------------------------------------------------
+      - alert: ApiGatewayAvailBurnFast
+        expr: |
+          (
+            sum(rate(http_requests_total{service="api-gateway",code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{service="api-gateway"}[5m]))
+          ) > (14.4 * 0.001)
+        for: 2m
+        labels:
+          severity: page
+          slo: api-gateway-availability
+          component: api-gateway
+        annotations:
+          summary: "api-gateway availability burning budget at 14.4× (5m)"
+          runbook: "runbooks/api-gateway-5xx.md"
+      - alert: ApiGatewayAvailBurnSlow
+        expr: |
+          (
+            sum(rate(http_requests_total{service="api-gateway",code=~"5.."}[30m]))
+            /
+            sum(rate(http_requests_total{service="api-gateway"}[30m]))
+          ) > (6 * 0.001)
+        for: 5m
+        labels:
+          severity: page
+          slo: api-gateway-availability
+          component: api-gateway
+        annotations:
+          summary: "api-gateway availability burning budget at 6× (30m)"
+
+      # ------------------------------------------------------------------
+      # api-gateway — latency p95 < 200ms
+      # ------------------------------------------------------------------
+      - alert: ApiGatewayLatencyBurnFast
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket{service="api-gateway"}[5m])) by (le)
+          ) > 0.2
+        for: 5m
+        labels:
+          severity: page
+          slo: api-gateway-latency-p95
+          component: api-gateway
+        annotations:
+          summary: "api-gateway p95 latency over 200ms"
+
+      # ------------------------------------------------------------------
+      # realtime-gateway — connect success
+      # SLO 99.5%
+      # ------------------------------------------------------------------
+      - alert: RealtimeConnectBurnFast
+        expr: |
+          (
+            sum(rate(rt_connection_failures_total{service="realtime-gateway"}[5m]))
+            /
+            sum(rate(rt_connection_attempts_total{service="realtime-gateway"}[5m]))
+          ) > (14.4 * 0.005)
+        for: 2m
+        labels:
+          severity: page
+          slo: realtime-connect
+          component: realtime-gateway
+        annotations:
+          summary: "realtime-gateway connect success burning budget at 14.4×"
+
+      # ------------------------------------------------------------------
+      # editor — auto-save success
+      # SLO 99.9%
+      # ------------------------------------------------------------------
+      - alert: EditorAutoSaveBurnFast
+        expr: |
+          (
+            sum(rate(editor_autosave_failures_total{service="editor"}[5m]))
+            /
+            sum(rate(editor_autosave_total{service="editor"}[5m]))
+          ) > (14.4 * 0.001)
+        for: 2m
+        labels:
+          severity: page
+          slo: editor-autosave
+          component: editor
+        annotations:
+          summary: "editor auto-save burning budget at 14.4×"
+
+      # ------------------------------------------------------------------
+      # postgres — replication lag (single-window, not burn-rate)
+      # ------------------------------------------------------------------
+      - alert: PostgresReplicationLag
+        expr: max(pg_replication_lag_seconds) > 60
+        for: 5m
+        labels:
+          severity: page
+          slo: postgres-replication
+          component: postgres
+        annotations:
+          summary: "postgres replication lag > 60s"
+
+      # ------------------------------------------------------------------
+      # postgres — write latency p99
+      # SLO 100ms
+      # ------------------------------------------------------------------
+      - alert: PostgresWriteLatencyBurnFast
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum(rate(pg_stat_statements_duration_seconds_bucket{operation="write"}[5m])) by (le)
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: page
+          slo: postgres-write-latency
+          component: postgres
+        annotations:
+          summary: "postgres write p99 latency over 100ms"

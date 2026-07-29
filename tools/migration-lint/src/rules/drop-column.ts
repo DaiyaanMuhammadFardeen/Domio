@@ -1,4 +1,4 @@
-import type { Rule } from '../types.js';
+import type { Rule, LintViolation } from '../types.js';
 import { withoutStrings } from '../sqlparse.js';
 
 const DROP_COLUMN = /\bdrop\s+column\b/i;
@@ -19,7 +19,7 @@ export const dropColumnRule: Rule = {
     'DROP COLUMN requires a preceding RENAME COLUMN within the same migration, unless BANG-ALLOWED annotation is present.',
   defaultSeverity: 'error',
   check(migration) {
-    const out: import('../types.js').LintViolation[] = [];
+    const out: LintViolation[] = [];
     const hasRename = migration.statements.some((s) => RENAME_COLUMN.test(withoutStrings(s.sql)));
     const hasBangAllowed = migration.annotations['BANG-ALLOWED']?.includes('drop-without-rename');
     for (const stmt of migration.statements) {

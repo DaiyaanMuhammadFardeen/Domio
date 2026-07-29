@@ -1,4 +1,4 @@
-import type { Rule } from '../types.js';
+import type { Rule, LintViolation } from '../types.js';
 import { withoutStrings } from '../sqlparse.js';
 
 const TRANSACTION_CONTROL = /\b(begin|commit|rollback)\b/i;
@@ -11,7 +11,7 @@ export const transactionRequiredRule: Rule = {
     'Schema migrations must be wrapped in BEGIN/COMMIT (or rely on the migration runner default). CREATE INDEX CONCURRENTLY and VACUUM are excluded.',
   defaultSeverity: 'error',
   check(migration) {
-    const out: import('../types.js').LintViolation[] = [];
+    const out: LintViolation[] = [];
     const hasBangAllowed = migration.annotations['BANG-ALLOWED']?.includes('no-transaction');
     if (hasBangAllowed) return out;
 

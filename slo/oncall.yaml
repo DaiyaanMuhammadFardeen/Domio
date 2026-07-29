@@ -1,0 +1,89 @@
+# Domio on-call rotation and escalation policy.
+#
+# Consumed by:
+#   - Alertmanager (template substitution)
+#   - PagerDuty schedule sync (via the `pagerduty_services` terraform)
+#   - runbook automation (`scripts/page.sh`)
+#
+# Values here are illustrative; the live service keys live in Vault.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: domio-oncall
+  labels:
+    app.kubernetes.io/component: oncall
+data:
+  schedule: |
+    # Follow-the-sun primary rotation. Each shift is one calendar week.
+    # Local time on the responder's machine is the source of truth.
+    #
+    # Week numbers map to ISO week-of-year modulo 5.
+    rotation:
+      - week: 1
+        primary:   "sre-primary-asia@example.com"
+        secondary: "sre-secondary-asia@example.com"
+        window: "Mon 00:00 Asia/Dhaka → Mon 00:00 Asia/Dhaka"
+      - week: 2
+        primary:   "sre-primary-eu@example.com"
+        secondary: "sre-secondary-eu@example.com"
+        window: "Mon 00:00 Europe/Berlin → Mon 00:00 Europe/Berlin"
+      - week: 3
+        primary:   "sre-primary-us@example.com"
+        secondary: "sre-secondary-us@example.com"
+        window: "Mon 00:00 America/New_York → Mon 00:00 America/New_York"
+      - week: 4
+        primary:   "sre-primary-global@example.com"
+        secondary: "sre-secondary-global@example.com"
+        window: "Mon 00:00 UTC → Mon 00:00 UTC"
+      - week: 5
+        primary:   "sre-primary-asia@example.com"
+        secondary: "sre-secondary-asia@example.com"
+        window: "Mon 00:00 Asia/Dhaka → Mon 00:00 Asia/Dhaka"
+
+  escalation: |
+    # Page escalation: every level above primary must ack within 5 minutes.
+    # Escalation is a *response* expectation, not a punishment.
+    levels:
+      - level: 1
+        target: primary
+        ack_within_minutes: 5
+      - level: 2
+        target: secondary
+        ack_within_minutes: 5
+      - level: 3
+        target: team-lead@example.com
+        ack_within_minutes: 10
+      - level: 4
+        target: engineering-manager@example.com
+        ack_within_minutes: 15
+
+  pager_routing: |
+    # label-based routing to PagerDuty services.
+    # Pages only fire for severity: page; tickets fire for severity: ticket.
+    routes:
+      - matchers: { severity: "page", component: "api-gateway" }
+        service: PAGERDUTY_SERVICE_API_GATEWAY
+        escalation_policy: PAGERDUTY_EP_API_GATEWAY
+      - matchers: { severity: "page", component: "realtime-gateway" }
+        service: PAGERDUTY_SERVICE_REALTIME_GATEWAY
+        escalation_policy: PAGERDUTY_EP_REALTIME_GATEWAY
+      - matchers: { severity: "page", component: "editor" }
+        service: PAGERDUTY_SERVICE_EDITOR
+        escalation_policy: PAGERDUTY_EP_EDITOR
+      - matchers: { severity: "page", component: "postgres" }
+        service: PAGERDUTY_SERVICE_POSTGRES
+        escalation_policy: PAGERDUTY_EP_POSTGRES
+
+  budget_freeze: |
+    # When the SLO error budget is exhausted for a component, non-emergency
+    # deploys to that component are blocked. The policy lives in code so
+    # it is auditable.
+    trigger:
+      metric: slo_budget_remaining_ratio
+      threshold: 0.0
+      window: 28d
+    action:
+      - block: deploys(component=all)
+      - allow: deploys(component=any, kind=hotfix, approved_by=engineering-manager)
+      - notify: channel("#incident")

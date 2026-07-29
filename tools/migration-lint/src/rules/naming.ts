@@ -1,4 +1,4 @@
-import type { Rule } from '../types.js';
+import type { Rule, LintViolation } from '../types.js';
 
 const NAMING_RE = /^[0-9]{4,}_[a-z0-9_]{3,}\.up\.sql$/;
 
@@ -19,7 +19,7 @@ export const namingConventionRule: Rule = {
   description: 'Migrations follow NNNN_<slug>.up.sql with a non-reserved slug.',
   defaultSeverity: 'warning',
   check(migration) {
-    const out: import('../types.js').LintViolation[] = [];
+    const out: LintViolation[] = [];
     if (!NAMING_RE.test(migration.file)) {
       out.push({
         rule: 'enforce-naming-convention',

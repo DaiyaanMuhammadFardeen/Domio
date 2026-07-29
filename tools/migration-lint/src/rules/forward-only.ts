@@ -1,4 +1,4 @@
-import type { Rule } from '../types.js';
+import type { Rule, LintViolation } from '../types.js';
 
 const UP_NAME = /^\d{4,}_[a-z0-9_]+\.up\.sql$/;
 const DOWN_NAME = /^\d{4,}_[a-z0-9_]+\.down\.sql$/;
@@ -9,7 +9,7 @@ export const forwardOnlyRule: Rule = {
     'A migration file must be named NNNN_<slug>.up.sql (denying random ordering) and have a paired NNNN_<slug>.down.sql in P01.',
   defaultSeverity: 'error',
   check(migration, all) {
-    const out: import('../types.js').LintViolation[] = [];
+    const out: LintViolation[] = [];
     if (migration.direction === 'up' && !UP_NAME.test(migration.file)) {
       out.push({
         rule: 'forward-only',

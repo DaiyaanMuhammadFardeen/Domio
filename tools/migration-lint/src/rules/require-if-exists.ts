@@ -1,4 +1,4 @@
-import type { Rule } from '../types.js';
+import type { Rule, LintViolation } from '../types.js';
 import { withoutStrings } from '../sqlparse.js';
 
 const DROP_TABLE = /\bdrop\s+table\b/i;
@@ -19,7 +19,7 @@ export const requireIfExistsRule: Rule = {
   description: 'Destructive operations against catalog objects must include IF EXISTS.',
   defaultSeverity: 'error',
   check(migration) {
-    const out: import('../types.js').LintViolation[] = [];
+    const out: LintViolation[] = [];
     for (const stmt of migration.statements) {
       const sql = withoutStrings(stmt.sql);
       const destructive =

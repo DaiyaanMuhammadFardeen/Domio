@@ -92,7 +92,10 @@ opensearchdata/
 *.pem
 *.key
 *.crt
-secrets/
+# Only ignore top-level `secrets/` (operational credential storage).
+# Subpaths like `infrastructure/helm/secrets/` are legitimate Helm
+# charts that *manage* credentials; they must be tracked.
+/secrets/
 
 # Tools
 .terraform/

@@ -1,4 +1,4 @@
-import type { Rule } from '../types.js';
+import type { Rule, LintViolation } from '../types.js';
 import { withoutStrings } from '../sqlparse.js';
 
 const RENAME_TABLE = /\b(rename|alter)\s+table\b[\s\S]*?\b(rename|to)\b/i;
@@ -8,7 +8,7 @@ export const renameTableRule: Rule = {
   description: 'Renaming tables is forbidden; instead create a new table and migrate rows.',
   defaultSeverity: 'error',
   check(migration) {
-    const out: import('../types.js').LintViolation[] = [];
+    const out: LintViolation[] = [];
     const hasBangAllowed = migration.annotations['BANG-ALLOWED']?.includes('rename-table');
     for (const stmt of migration.statements) {
       if (!RENAME_TABLE.test(withoutStrings(stmt.sql))) continue;
