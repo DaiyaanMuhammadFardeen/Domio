@@ -1,0 +1,21 @@
+{
+  "name": "@domio/canvas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "WebGL2/WebGPU renderer. Phase 0 stub; Phase 03.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

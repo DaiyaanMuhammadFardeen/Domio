@@ -1,0 +1,202 @@
+// Domio common.proto
+//
+// Common types reused across every Domio service. This file is the
+// canonical source of truth for `ResourceId`, `Timestamp`, `Money`,
+// pagination, idempotency, and error shapes.
+//
+// Lint rules (see buf.yaml):
+//   - enum prefix DOMIO_
+//   - service suffix Service
+//   - field lower_snake_case (allowed: SCREAMING_SNAKE_CASE in constants)
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Resource addressing
+// -----------------------------------------------------------------------------
+
+// ResourceId is a globally-unique identifier that is also tenant-scoped.
+// The wire form is `${kind}/${org_id}/${tenant_id}/${id}` for human
+// debuggability, but in proto we keep the structured form.
+message ResourceId {
+  // Resource kind, e.g., "deck", "slide", "theme", "brand_kit".
+  string kind = 1;
+
+  // Organization (workspace) identifier.
+  string org_id = 2;
+
+  // Tenant (workspace) identifier.
+  string tenant_id = 3;
+
+  // Local identifier within the tenant namespace. Server-assigned, opaque.
+  string id = 4;
+}
+
+// -----------------------------------------------------------------------------
+// Time and money
+// -----------------------------------------------------------------------------
+
+// Timestamp is a wall-clock instant. Wraps google.protobuf.Timestamp.
+message Timestamp {
+  google.protobuf.Timestamp value = 1;
+}
+
+// Duration is a span of time. Wraps google.protobuf.Duration.
+message Duration {
+  google.protobuf.Duration value = 1;
+}
+
+// Money is an integer count of the smallest currency unit (micros for
+// USD/EUR/BDT, yen for JPY has no minor unit). Currency is an ISO 4217
+// 3-letter code. Use Currency enum for type-safety; the wire string is
+// the source of truth.
+enum Currency {
+  CURRENCY_UNSPECIFIED = 0;
+  CURRENCY_USD = 1;
+  CURRENCY_EUR = 2;
+  CURRENCY_GBP = 3;
+  CURRENCY_BDT = 4; // Bangladeshi Taka
+  CURRENCY_INR = 5;
+  CURRENCY_JPY = 6;
+  CURRENCY_CNY = 7;
+  CURRENCY_AUD = 8;
+  CURRENCY_CAD = 9;
+}
+
+message Money {
+  Currency currency = 1;
+  int64 amount_micros = 2;
+}
+
+// -----------------------------------------------------------------------------
+// Pagination
+// -----------------------------------------------------------------------------
+
+enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0;
+  SORT_ORDER_ASC = 1;
+  SORT_ORDER_DESC = 2;
+}
+
+message PageRequest {
+  // 1-based page number. Default is 1.
+  uint32 page = 1;
+
+  // Page size. Default 50, max 200.
+  uint32 page_size = 2;
+
+  // Cursor for keyset pagination; opaque server-issued token.
+  // When present, page + page_size are ignored.
+  string page_token = 3;
+}
+
+message PageInfo {
+  uint32 page = 1;
+  uint32 page_size = 2;
+  uint64 total_items = 3;
+  uint32 total_pages = 4;
+  bool has_next = 5;
+  bool has_prev = 6;
+  // Cursor for the next page; null when on the last page.
+  string next_page_token = 7;
+  string prev_page_token = 8;
+}
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+// Error code taxonomy. Domain-specific codes live in the domain's proto.
+// Common codes cover authentication, authorization, validation,
+// idempotency, rate limits, and internal failures.
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+
+  // Generic
+  ERROR_CODE_INTERNAL = 1000;
+  ERROR_CODE_UNAVAILABLE = 1001;
+  ERROR_CODE_TIMEOUT = 1002;
+  ERROR_CODE_CANCELLED = 1003;
+  ERROR_CODE_DEPRECATED = 1004;
+
+  // Auth / authz
+  ERROR_CODE_UNAUTHENTICATED = 2000;
+  ERROR_CODE_FORBIDDEN = 2001;
+  ERROR_CODE_PERMISSION_DENIED = 2002;
+  ERROR_CODE_TENANT_ISOLATION = 2003;
+  ERROR_CODE_BRAND_LOCK_VIOLATION = 2004;
+
+  // Validation
+  ERROR_CODE_INVALID_ARGUMENT = 3000;
+  ERROR_CODE_OUT_OF_RANGE = 3001;
+  ERROR_CODE_REQUIRED = 3002;
+  ERROR_CODE_ALREADY_EXISTS = 3003;
+  ERROR_CODE_NOT_FOUND = 3004;
+  ERROR_CODE_CONFLICT = 3005;
+  ERROR_CODE_PRECONDITION_FAILED = 3006;
+
+  // Idempotency
+  ERROR_CODE_IDEMPOTENCY_KEY_REUSED = 4000;
+  ERROR_CODE_IDEMPOTENCY_KEY_CONFLICT = 4001;
+
+  // Rate limiting / quotas
+  ERROR_CODE_RATE_LIMITED = 5000;
+  ERROR_CODE_QUOTA_EXCEEDED = 5001;
+
+  // External
+  ERROR_CODE_UPSTREAM_FAILURE = 6000;
+  ERROR_CODE_VENDOR_REJECTED = 6001;
+}
+
+message Error {
+  ErrorCode code = 1;
+  string message = 2;
+
+  // Domain-specific structured details. The shape is documented per service.
+  map<string, string> details = 3;
+
+  // Trace identifier for log correlation.
+  string trace_id = 4;
+
+  // Retryable hint for clients.
+  bool retryable = 5;
+
+  // Retry-after seconds (RFC 9110). Zero means no hint.
+  uint32 retry_after_seconds = 6;
+}
+
+// -----------------------------------------------------------------------------
+// Idempotency
+// -----------------------------------------------------------------------------
+
+// IdempotencyKey is a client-generated unique key (UUID v4 or v7) for a
+// state-changing request. The same key with the same request body must
+// return the same response within 24 hours. Different bodies with the
+// same key returns ERROR_CODE_IDEMPOTENCY_KEY_CONFLICT.
+message IdempotencyKey {
+  string value = 1;
+}
+
+// -----------------------------------------------------------------------------
+// Audit
+// -----------------------------------------------------------------------------
+
+// AuditActor describes who performed an action. actor_kind values are
+// "user", "agent", "system", "cron", "admin", "service".
+message AuditActor {
+  string actor_kind = 1;
+  string actor_id = 2;
+  // Optional human-readable name for logs.
+  string display_name = 3;
+  // IP address (RFC 7239 forwarded-for, RFC 3986 source).
+  string ip_address = 4;
+  // User-Agent header verbatim.
+  string user_agent = 5;
+}

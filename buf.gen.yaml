@@ -1,0 +1,39 @@
+version: v2
+inputs:
+  - directory: contracts/proto
+
+# We pin remote plugin versions via buf.lock.yaml (created on first
+# successful `buf generate`). Remote generation requires the BSR token
+# configured at the workspace root. CI runs codegen with a read-only
+# token committed in GitHub Actions secrets.
+plugins:
+  # TypeScript — used by apps/* (editor, viewer, presenter) and services/*
+  # Uses the BSR protoc-gen-es plugin which emits ES modules and is the
+  # canonical companion to @bufbuild/protobuf. App code consumes the
+  # generated Schemas and client/service stubs directly.
+  - remote: buf.build/protocolbuffers/es
+    out: packages/api-client/src/gen
+
+  # Go — used by services/* (realtime-gateway, audience, etc.) and hot-path workers
+  - remote: buf.build/protocolbuffers/go
+    out: gen/go
+    opt:
+      - paths=source_relative
+
+  # Python — used by ai-orchestrator, ai-eval, analytics-rollup workers
+  - remote: buf.build/protocolbuffers/python
+    out: gen/python
+    opt:
+      - pyi_out=true
+
+  # Rust services use prost-build/tonic-build from build.rs rather than a
+  # BSR remote plugin. This keeps generated Rust types aligned with the
+  # crate's prost/tonic versions. See workers/*/build.rs once Rust workers
+  # receive their real implementation in Phase 04.
+
+managed:
+  enabled: true
+  override:
+    - file_option: go_package
+      path: gen/go
+      value: github.com/domio/platform/gen/go

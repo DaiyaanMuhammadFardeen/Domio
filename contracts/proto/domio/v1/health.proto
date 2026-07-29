@@ -1,0 +1,111 @@
+// Domio health.proto
+//
+// Liveness and readiness checks. Every Domio service exposes this set of
+// RPCs. The k8s liveness probe calls HealthzService.Check; the readiness
+// probe calls ReadinessService.Check.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Health
+// -----------------------------------------------------------------------------
+
+enum HealthStatus {
+  HEALTH_STATUS_UNSPECIFIED = 0;
+  HEALTH_STATUS_HEALTHY = 1;
+  HEALTH_STATUS_DEGRADED = 2;
+  HEALTH_STATUS_UNHEALTHY = 3;
+}
+
+message ComponentHealth {
+  // Component name, e.g., "postgres", "redis", "nats", "object_storage".
+  string name = 1;
+  HealthStatus status = 2;
+  string message = 3;
+  // Per-component latency in milliseconds.
+  uint64 latency_ms = 4;
+  // Per-component structured details.
+  map<string, string> details = 5;
+}
+
+message HealthzServiceCheckRequest {
+  // No fields; present for future extensibility.
+}
+
+message HealthzServiceCheckResponse {
+  HealthStatus status = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  // Service identifier (matches OTEL_SERVICE_NAME).
+  string service = 3;
+  // Build version (semver or git SHA).
+  string version = 4;
+  // Uptime in seconds.
+  uint64 uptime_seconds = 5;
+  repeated ComponentHealth components = 6;
+}
+
+message HealthzServiceWatchRequest {
+  // Stream components matching this name (empty = all).
+  string component = 1;
+}
+
+message HealthzServiceWatchResponse {
+  string component = 1;
+  HealthStatus status = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  string message = 4;
+}
+
+message ReadinessServiceCheckRequest {
+  // No fields; present for future extensibility.
+}
+
+message ReadinessServiceCheckResponse {
+  HealthStatus status = 1;
+  bool ready = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  string service = 4;
+  string version = 5;
+  repeated ComponentHealth components = 6;
+  // Reasons why the service is not ready, surfaced for debugging.
+  repeated string not_ready_reasons = 7;
+}
+
+message ReadinessServiceWatchRequest {
+  // Stream components matching this name (empty = all).
+  string component = 1;
+}
+
+message ReadinessServiceWatchResponse {
+  string component = 1;
+  HealthStatus status = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  string message = 4;
+}
+
+// -----------------------------------------------------------------------------
+// Services
+// -----------------------------------------------------------------------------
+
+// HealthzService reports process liveness. The endpoint does NOT check
+// downstream dependencies — it returns HEALTHY as long as the process is
+// alive and serving gRPC.
+service HealthzService {
+  rpc Check(HealthzServiceCheckRequest) returns (HealthzServiceCheckResponse) {}
+  rpc Watch(HealthzServiceWatchRequest) returns (stream HealthzServiceWatchResponse) {}
+}
+
+// ReadinessService reports whether the process is ready to serve
+// traffic. It DOES check downstream dependencies (postgres, redis, nats,
+// object storage). Returns HEALTHY when all critical dependencies are
+// reachable and warm.
+service ReadinessService {
+  rpc Check(ReadinessServiceCheckRequest) returns (ReadinessServiceCheckResponse) {}
+  rpc Watch(ReadinessServiceWatchRequest) returns (stream ReadinessServiceWatchResponse) {}
+}

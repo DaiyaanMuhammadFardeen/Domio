@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semver (e.g. v0.1.0)
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.11.0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm build
+      - name: Test
+        run: pnpm test
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF_NAME:-${GITHUB_EVENT.inputs.version:-}}
+          echo "Releasing $VERSION"
+          npx --yes changelog-cli@1.0.0 \
+            --org domio --repo Domio \
+            --tag "$VERSION" \
+            --file CHANGELOG.md || true
+          gh release create "$VERSION" \
+            --generate-notes \
+            --target main

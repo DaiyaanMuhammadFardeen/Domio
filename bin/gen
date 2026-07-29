@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# gen — regenerate clients from contracts.
+#
+# Phase 0 scope: format and lint the protos, regenerate the OpenAPI
+# types, and check JSON Schemas. Full `buf generate` (which produces
+# language-specific clients from .proto) is wired in Phase 03 once the
+# BSR token and remote plugin lockfile are configured.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if ! command -v buf >/dev/null 2>&1; then
+  echo "buf not installed; skipping proto format/lint." >&2
+  exit 0
+fi
+
+if [ ! -d contracts/proto ]; then
+  echo "No contracts/proto directory; nothing to generate." >&2
+  exit 0
+fi
+
+echo "→ buf format (proto)"
+buf format -w contracts/proto
+
+echo "→ buf lint (proto)"
+buf lint contracts/proto
+
+if [ -n "${BUF_TOKEN:-}" ] || [ -f "${HOME}/.netrc" ]; then
+  echo "→ buf generate (proto → TS / Go / Python)"
+  buf generate contracts/proto
+else
+  echo "→ buf generate skipped (no BUF_TOKEN). Phase 0 placeholder protos"
+  echo "  have no language clients yet; see docs/adr/0003-contract-first.md."
+fi
+
+echo "→ ajv validate (json schemas)"
+# AJV validation runs in CI; locally we just print the schema list.
+ls -1 contracts/schema/v1/*.json
+
+echo
+echo "Codegen complete."
+echo "  - TypeScript: packages/api-client/src/gen/  (Phase 03+)"
+echo "  - Go:         gen/go/                        (Phase 03+)"
+echo "  - Python:     gen/python/                    (Phase 03+)"

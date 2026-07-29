@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# clean — remove build artifacts and reset local state.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+echo "→ turbo run clean"
+pnpm clean
+
+echo "→ removing generated clients"
+rm -rf gen/ packages/api-client/src/gen/
+
+echo "→ removing dist / build artifacts"
+find . -type d \( -name dist -o -name build -o -name .next -o -name .turbo -o -name coverage \) \
+  -not -path '*/node_modules/*' -not -path '*/.git/*' -prune -exec rm -rf {} + 2>/dev/null || true
+
+echo "Clean complete."

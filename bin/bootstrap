@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# bootstrap — first-time developer setup.
+#
+# Verifies toolchain, installs JS deps, generates clients, prints next steps.
+# Idempotent; safe to re-run.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+# Color helpers.
+red() { printf "\033[31m%s\033[0m\n" "$*" >&2; }
+green() { printf "\033[32m%s\033[0m\n" "$*"; }
+yellow() { printf "\033[33m%s\033[0m\n" "$*"; }
+bold() { printf "\033[1m%s\033[0m\n" "$*"; }
+
+# -----------------------------------------------------------------------------
+# 1. Toolchain check
+# -----------------------------------------------------------------------------
+bold "→ Toolchain check"
+
+need() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    yellow "  ✗ $1 not installed. Install via 'asdf install' (see .tool-versions) or your package manager."
+    return 1
+  else
+    printf "  ✓ %-12s -> " "$1"
+    "$1" --version 2>&1 | head -1 || true
+  fi
+}
+
+ok=true
+need node      || ok=false
+need pnpm      || ok=false
+need python3   || ok=false
+need docker    || ok=false
+need buf       || ok=false
+need protoc    || ok=false
+
+# Soft checks — only required by specific phases (Phase 03+: Go, Phase 04+: Rust).
+need go        || yellow "  ! go not installed yet; required from Phase 03 onward."
+need rustc     || yellow "  ! rustc not installed yet; required from Phase 04 onward."
+
+if [ "$ok" = false ]; then
+  yellow ""
+  yellow "Core toolchain incomplete. Install the missing core tools, then re-run ./bin/bootstrap."
+  yellow "asdf install  # if you use asdf"
+  exit 1
+fi
+
+# -----------------------------------------------------------------------------
+# 2. JS deps
+# -----------------------------------------------------------------------------
+bold "→ Installing JS dependencies"
+if [ ! -f node_modules/.pnpm/lock.yaml ] && [ -f pnpm-lock.yaml ]; then
+  pnpm install --frozen-lockfile
+else
+  pnpm install
+fi
+
+# -----------------------------------------------------------------------------
+# 3. Go modules
+# -----------------------------------------------------------------------------
+if [ -f go.mod ] && command -v go >/dev/null 2>&1; then
+  bold "→ Downloading Go modules"
+  go mod download
+elif [ -f go.mod ]; then
+  yellow "  ! go.mod present but go not installed; skipping go mod download (Phase 03+)"
+fi
+
+# -----------------------------------------------------------------------------
+# 4. Generated clients
+# -----------------------------------------------------------------------------
+bold "→ Generating clients from contracts"
+if command -v buf >/dev/null 2>&1; then
+  pnpm gen || yellow "  ! codegen skipped (contracts dir empty or Buf failed)"
+else
+  yellow "  ! buf not installed; skipping proto codegen"
+fi
+
+# -----------------------------------------------------------------------------
+# 5. .env
+# -----------------------------------------------------------------------------
+if [ ! -f .env ]; then
+  bold "→ Creating .env from .env.example"
+  cp .env.example .env
+  green "  ✓ .env created"
+else
+  printf "  ✓ .env already exists\n"
+fi
+
+# -----------------------------------------------------------------------------
+# 6. Pre-commit hooks
+# -----------------------------------------------------------------------------
+bold "→ Installing pre-commit hooks"
+if command -v pre-commit >/dev/null 2>&1; then
+  pre-commit install || true
+else
+  yellow "  ! pre-commit not installed; skipping"
+fi
+
+# -----------------------------------------------------------------------------
+# 7. Next steps
+# -----------------------------------------------------------------------------
+green ""
+green "Bootstrap complete."
+green ""
+bold "Next steps:"
+printf "  1. ./bin/dev-up        # bring up Postgres, Redis, NATS, MinIO, ...\n"
+printf "  2. ./bin/db-migrate    # run migrations\n"
+printf "  3. ./bin/dev           # start editor + API in watch mode\n"
+printf "  4. Open http://localhost:3000 (editor) and http://localhost:8080/healthz (API)\n"

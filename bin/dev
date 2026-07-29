@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# dev — start the editor + API in watch mode.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+# Ensure dependencies.
+if [ ! -d node_modules ]; then
+  echo "node_modules not found. Run ./bin/bootstrap first." >&2
+  exit 1
+fi
+
+# Ensure stack is up.
+if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q domio-postgres; then
+  echo "Local stack not running. Run ./bin/dev-up first." >&2
+  exit 1
+fi
+
+# Load env.
+if [ -f .env ]; then
+  # shellcheck disable=SC1091
+  set -a; source .env; set +a
+fi
+
+# Run all services in parallel via Turbo.
+exec pnpm dev

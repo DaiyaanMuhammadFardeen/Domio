@@ -1,0 +1,60 @@
+// Domio deck.proto
+//
+// Initial deck surface for Phase 0. The deep schema lands in Phase 02;
+// this proto is a placeholder so the health + auth stubs can carry a
+// deck reference without depending on the future schema package.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// DeckStatus is the lifecycle state of a deck.
+enum DeckStatus {
+  DECK_STATUS_UNSPECIFIED = 0;
+  DECK_STATUS_DRAFT = 1;
+  DECK_STATUS_PUBLISHED = 2;
+  DECK_STATUS_ARCHIVED = 3;
+  DECK_STATUS_DELETED = 4;
+}
+
+// DeckSummary is the lightweight projection used in lists.
+message DeckSummary {
+  ResourceId id = 1;
+  string title = 2;
+  DeckStatus status = 3;
+  // Number of slides in the deck.
+  uint32 slide_count = 4;
+  // Owner user id.
+  string owner_user_id = 5;
+  // Timestamp of last successful save (milliseconds since epoch).
+  int64 last_modified_ms = 6;
+  // Semantic version of the schema this deck was authored against.
+  string schema_version = 7;
+}
+
+// GetDeckRequest is the placeholder shape for retrieving a deck.
+// The full schema-based deck representation lands in Phase 02.
+message GetDeckRequest {
+  ResourceId id = 1;
+}
+
+message GetDeckResponse {
+  DeckSummary summary = 1;
+  // Echo of the tenant for debugging; server-validated, not trusted.
+  string tenant_id = 2;
+  // Trace identifier for log correlation.
+  string trace_id = 3;
+}
+
+// DeckService exposes the minimum deck surface to verify the wire
+// formats end-to-end in Phase 0. Full deck CRUD lands in Phase 02.
+service DeckService {
+  // GetDeck returns the deck summary for a given deck id.
+  // This is intentionally minimal; the deep schema-based representation
+  // is owned by Phase 02.
+  rpc GetDeck(GetDeckRequest) returns (GetDeckResponse) {}
+}

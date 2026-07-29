@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# db-migrate — apply Postgres migrations.
+#
+# In Phase 0 there are no migrations yet; this script becomes a thin
+# wrapper around `pnpm --filter @domio/api migrate` once Phase 02 lands.
+# For now it just verifies connectivity.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [ -f .env ]; then
+  # shellcheck disable=SC1091
+  set -a; source .env; set +a
+fi
+
+if [ -z "${DATABASE_URL:-}" ]; then
+  echo "DATABASE_URL not set. Run ./bin/bootstrap to create .env." >&2
+  exit 1
+fi
+
+echo "Checking Postgres connection..."
+if command -v psql >/dev/null 2>&1; then
+  psql "$DATABASE_URL" -c "SELECT version();" || {
+    echo "Cannot connect to Postgres at $DATABASE_URL" >&2
+    exit 1
+  }
+else
+  echo "psql not installed; skipping connectivity check."
+fi
+
+echo "No migrations to apply in Phase 0 (the api workspace is a stub)."

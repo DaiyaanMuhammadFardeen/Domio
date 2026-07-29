@@ -1,0 +1,27 @@
+{
+  "name": "@domio/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Generated gRPC + REST clients for Domio. The actual generated files land in src/gen/ after `pnpm gen`. Phase 0 ships an empty stub; codegen happens in CI.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf src/gen dist .turbo coverage",
+    "gen": "../../bin/gen"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "2.2.3",
+    "@connectrpc/connect": "2.0.0",
+    "@connectrpc/connect-web": "2.0.0"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

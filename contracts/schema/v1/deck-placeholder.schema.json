@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/deck-placeholder.schema.json",
+  "title": "Domio Deck (Phase 0 placeholder)",
+  "description": "Placeholder schema for the Phase 0 deck surface. The real deck schema (Phase 02) will replace this with the full scene graph.",
+  "type": "object",
+  "required": ["id", "title", "status", "schema_version"],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/definitions/ResourceId"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "published", "archived", "deleted"]
+    },
+    "slide_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "owner_user_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "last_modified_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+$"
+    }
+  }
+}

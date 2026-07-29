@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: domio-dev
+
+scrape_configs:
+  - job_name: 'domio-api'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+        labels:
+          service: domio-api
+
+  - job_name: 'domio-self'
+    static_configs:
+      - targets: ['localhost:9090']
+
+
+# Also write OTLP metrics to Prometheus via the OTel collector.
+# (Configured in otel-collector-config.yaml.)

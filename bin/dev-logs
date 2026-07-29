@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# dev-logs — tail logs from the local docker-compose stack.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+docker compose -f infrastructure/local/docker-compose.yml logs -f "$@"

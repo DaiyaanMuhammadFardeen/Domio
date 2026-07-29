@@ -1,0 +1,97 @@
+# CODEOWNERS — auto-assigned reviewers per directory.
+#
+# When a PR modifies a file, the matching CODEOWNERS entry is requested
+# as a reviewer. The first matching line wins; later lines add to the
+# list but don't replace.
+
+# Default: no specific owner; the platform team is fallback.
+*                                               @domio/platform
+
+# Super docs and ADRs
+/docs/0[1-9]-*.md                               @domio/product @domio/architect
+/docs/adr/                                      @domio/architect
+/docs/development_phases/                       @domio/product @domio/architect
+
+# Feature-domain docs
+/docs/editor-canvas.md                          @domio/canvas
+/docs/components-templates.md                   @domio/ecosystem
+/docs/theming-branding.md                       @domio/ecosystem
+/docs/live-data-charts.md                       @domio/data-viz
+/docs/3d-motion-media.md                        @domio/media
+/docs/animation-transitions.md                  @domio/media
+/docs/prototyping-interactivity.md              @domio/prototype
+/docs/ai-copilot.md                             @domio/ai-agents
+/docs/presenter-experience.md                   @domio/presenter-audience
+/docs/audience-participation.md                 @domio/presenter-audience
+/docs/sharing-publishing.md                     @domio/presenter-audience
+/docs/analytics.md                              @domio/publishing @domio/data-viz
+/docs/collaboration-workflow.md                 @domio/collab
+/docs/enterprise-governance.md                  @domio/enterprise
+/docs/novel-frontier.md                         @domio/architect
+/docs/agentic-interfaces.md                     @domio/ai-agents
+
+# Contracts (cross-team review required)
+/contracts/                                     @domio/platform @domio/architect
+
+# Apps
+/apps/editor/                                   @domio/canvas @domio/graphics
+/apps/viewer/                                   @domio/presenter-audience
+/apps/presenter/                                @domio/presenter-audience
+/apps/landing/                                  @domio/marketing
+/apps/api/                                      @domio/platform
+
+# Control plane services
+/services/realtime-gateway/                     @domio/presenter-audience @domio/graphics
+/services/registry/                             @domio/ecosystem
+/services/theme/                                @domio/ecosystem
+/services/brand/                                @domio/ecosystem
+/services/data/                                 @domio/data-viz
+/services/ai-orchestrator/                      @domio/ai-agents
+/services/mcp-server/                           @domio/ai-agents
+/services/publish/                              @domio/presenter-audience
+/services/audience/                             @domio/presenter-audience
+/services/analytics/                            @domio/publishing @domio/data-viz
+/services/collab/                               @domio/collab
+/services/audit/                                @domio/enterprise @domio/security
+
+# Workers
+/workers/connectors/                            @domio/data-viz @domio/security
+/workers/render/                                @domio/media @domio/publishing
+/workers/brand-extract/                         @domio/ecosystem @domio/security
+/workers/theme-pair/                            @domio/ecosystem
+/workers/ai-eval/                               @domio/ai-agents @domio/security
+/workers/export/                                @domio/presenter-audience
+/workers/snapshot/                              @domio/canvas @domio/collab
+/workers/op-writer/                             @domio/canvas @domio/collab
+/workers/analytics-rollup/                      @domio/publishing
+
+# Packages (shared libraries)
+/packages/canvas/                               @domio/canvas @domio/graphics
+/packages/crdt/                                 @domio/canvas
+/packages/schema/                               @domio/platform @domio/ai-agents
+/packages/api-client/                           @domio/platform @domio/architect
+/packages/common/                               @domio/platform
+/packages/ui/                                   @domio/design-systems @domio/canvas
+/packages/tokens/                               @domio/ecosystem
+/packages/chart/                                @domio/data-viz
+/packages/media-runtime/                        @domio/media
+/packages/prototype-runtime/                    @domio/prototype
+/packages/formula-engine/                       @domio/data-viz
+/packages/ai-sdk/                               @domio/ai-agents
+/packages/agent-sdk/                            @domio/ai-agents
+/packages/analytics-sdk/                        @domio/publishing
+/packages/mcp/                                  @domio/ai-agents
+/packages/engine-sdk/                           @domio/presenter-audience
+
+# Infrastructure
+/infrastructure/                                @domio/platform @domio/sre
+
+# CI, devcontainer, pre-commit, scripts
+/.github/                                       @domio/platform
+/.devcontainer/                                 @domio/platform
+/scripts/                                       @domio/platform
+/bin/                                           @domio/platform
+
+# SECURITY and CONDUCTING changes require security review.
+/SECURITY.md                                    @domio/security
+/CODE_OF_CONDUCT.md                             @domio/product

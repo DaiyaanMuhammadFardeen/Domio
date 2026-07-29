@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# dev-down — tear down the local docker-compose stack.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+docker compose -f infrastructure/local/docker-compose.yml down "$@"
+
+echo "Done."
+echo "  - To also wipe volumes: ./bin/dev-down --volumes"
+echo "  - To bring it back up: ./bin/dev-up"

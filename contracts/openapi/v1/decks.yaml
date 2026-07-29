@@ -1,0 +1,108 @@
+openapi: 3.1.0
+info:
+  title: Domio Decks API (Phase 0 placeholder)
+  version: 1.0.0
+  description: |
+    Minimum deck surface for Phase 0 wire-format verification. The full
+    deck CRUD lands in Phase 02.
+
+    All endpoints require authentication via the bearer token (Phase 0
+    stub: `dev-stub-token`) or the session cookie. Real auth + tenant
+    isolation land in Phase 20.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: decks
+    description: Deck placeholder surface.
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+paths:
+  /v1/decks/{org_id}/{tenant_id}/{deck_id}:
+    get:
+      tags: [decks]
+      operationId: getDeck
+      summary: Get a deck (placeholder)
+      description: |
+        Returns the deck summary for a given deck id. The full
+        schema-based deck representation lands in Phase 02.
+      parameters:
+        - in: path
+          name: org_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: tenant_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deck summary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetDeckResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+components:
+  schemas:
+    DeckStatus:
+      type: string
+      enum: [draft, published, archived, deleted]
+    DeckSummary:
+      type: object
+      required: [id, title, status, slide_count, owner_user_id, schema_version]
+      properties:
+        id:
+          $ref: "common.yaml#/components/schemas/ResourceId"
+        title:
+          type: string
+          minLength: 1
+          maxLength: 256
+        status:
+          $ref: "#/components/schemas/DeckStatus"
+        slide_count:
+          type: integer
+          minimum: 0
+        owner_user_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        last_modified_ms:
+          type: integer
+          format: int64
+          minimum: 0
+        schema_version:
+          type: string
+          pattern: "^v[0-9]+\\.[0-9]+$"
+    GetDeckResponse:
+      type: object
+      required: [summary]
+      properties:
+        summary:
+          $ref: "#/components/schemas/DeckSummary"
+        tenant_id:
+          type: string
+        trace_id:
+          type: string

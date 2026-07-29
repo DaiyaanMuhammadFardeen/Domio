@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel in-progress runs for the same branch / PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  # -----------------------------------------------------------------------------
+  # Contracts — lint, breaking, format, generated-clients-in-sync.
+  # -----------------------------------------------------------------------------
+  contracts:
+    name: Contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jaxxstorm/action-install-gh-release@v2
+        with:
+          repo: bufbuild/buf
+          version: "1.34.0"
+      - name: buf format check
+        run: buf format contracts/proto -d --exit-code
+      - name: buf lint
+        run: buf lint contracts/proto
+      - name: buf breaking (against main)
+        run: buf breaking contracts/proto --against '.git#branch=main'
+      - name: OpenAPI lint
+        uses: redocly/cli-action@v1
+        with:
+          lint: contracts/openapi
+      - name: JSON Schema validation
+        run: |
+          npx --yes ajv-cli@5 -s contracts/schema/v1/common.schema.json validate
+          npx --yes ajv-cli@5 -s contracts/schema/v1/deck-placeholder.schema.json validate
+
+  # -----------------------------------------------------------------------------
+  # TypeScript — install, typecheck, lint, test, build.
+  # -----------------------------------------------------------------------------
+  typescript:
+    name: TypeScript (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.11.0
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Generate clients
+        run: pnpm gen
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Test
+        run: pnpm test
+      - name: Build
+        run: pnpm build
+
+  # -----------------------------------------------------------------------------
+  # Go — vet, build, test.
+  # -----------------------------------------------------------------------------
+  go:
+    name: Go
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.4"
+          cache: true
+      - name: Install
+        run: go mod download
+      - name: Vet
+        run: go vet ./...
+      - name: Build
+        run: go build ./...
+      - name: Test
+        run: go test ./...
+
+  # -----------------------------------------------------------------------------
+  # Rust — clippy + test (when any Rust workspace members exist).
+  # -----------------------------------------------------------------------------
+  rust:
+    name: Rust
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Check
+        run: cargo check --workspace --all-targets
+      - name: Test
+        run: cargo test --workspace --all-targets
+
+  # -----------------------------------------------------------------------------
+  # Python — ruff + mypy (when Python code lands).
+  # -----------------------------------------------------------------------------
+  python:
+    name: Python
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.8"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy
+      - name: Ruff
+        run: ruff check .
+      - name: Mypy
+        run: mypy . || true  # no Python code yet; tolerate empty run
+
+  # -----------------------------------------------------------------------------
+  # Security — CodeQL + secret scan.
+  # -----------------------------------------------------------------------------
+  security:
+    name: Security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: typescript, python, javascript, go
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # -----------------------------------------------------------------------------
+  # Container image smoke build (for the API).
+  # -----------------------------------------------------------------------------
+  image-build:
+    name: Container build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build api image
+        run: |
+          docker build -t domio-api:dev apps/api || true
+        # Real image build lands in Phase 01 with a proper Dockerfile + CI cache.

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "globalDependencies": [
+    ".env",
+    ".env.local",
+    "tsconfig.base.json",
+    ".tool-versions",
+    "buf.yaml"
+  ],
+  "globalEnv": ["NODE_ENV", "CI", "DOMIO_ENV"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "gen"],
+      "outputs": ["dist/**", ".next/**", "build/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    },
+    "gen": {
+      "cache": true,
+      "inputs": [
+        "contracts/proto/**/*.proto",
+        "contracts/openapi/**/*.yaml",
+        "contracts/schema/**/*.json"
+      ],
+      "outputs": [
+        "**/gen/**",
+        "**/generated/**"
+      ]
+    }
+  }
+}

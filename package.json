@@ -1,0 +1,43 @@
+{
+  "name": "domio",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Domio — a Figma/Canva/Keynote-grade presentation platform. Local-first, real-time collaborative, AI-assisted, polyglot.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.11.0",
+    "pnpm": ">=9.12.3"
+  },
+  "packageManager": "pnpm@9.12.3",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\" --ignore-path .gitignore",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "gen": "turbo run gen",
+    "prepare": "husky install || true"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.17.0",
+    "@types/node": "22.10.1",
+    "eslint": "9.17.0",
+    "eslint-plugin-import": "2.31.0",
+    "globals": "15.14.0",
+    "prettier": "3.4.2",
+    "turbo": "2.3.3",
+    "typescript": "5.7.2",
+    "typescript-eslint": "8.19.0",
+    "husky": "9.1.7",
+    "lint-staged": "15.2.11"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,yml,yaml}": "prettier --write",
+    "*.proto": "buf format -w"
+  }
+}

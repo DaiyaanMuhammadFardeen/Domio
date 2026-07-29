@@ -1,0 +1,252 @@
+# Domio — local development infrastructure.
+#
+# Brings up Postgres, Redis, NATS JetStream, MinIO, ClickHouse, OpenSearch,
+# MailHog, Prometheus, Grafana, Jaeger, and the OTEL collector.
+#
+# Usage:
+#   ./bin/dev-up         # bring up
+#   ./bin/dev-down       # tear down
+#   ./bin/dev-logs       # tail logs
+#
+# Data is persisted under ./data/ (gitignored). To reset, run:
+#   ./bin/dev-down --volumes
+
+name: domio
+
+x-healthcheck-defaults: &healthcheck-defaults
+  start_period: 30s
+  interval: 10s
+  timeout: 5s
+  retries: 5
+
+services:
+  # ---------------------------------------------------------------------------
+  # Postgres — control plane source of truth.
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: domio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-domio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-domio}
+      POSTGRES_DB: ${POSTGRES_DB:-domio}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-postgres.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-domio} -d ${POSTGRES_DB:-domio}"]
+
+  # ---------------------------------------------------------------------------
+  # Redis — ephemeral cache + rate-limit + idempotency.
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7.4-alpine
+    container_name: domio-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "redis-cli", "ping"]
+
+  # ---------------------------------------------------------------------------
+  # NATS JetStream — event bus + ephemeral coordination.
+  # ---------------------------------------------------------------------------
+  nats:
+    image: nats:2.10.22-alpine
+    container_name: domio-nats
+    restart: unless-stopped
+    command: ["nats-server", "-js", "-sd", "/data", "-m", "8222"]
+    ports:
+      - "4222:4222"   # client
+      - "8222:8222"   # monitoring
+      - "6222:6222"   # cluster
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+
+  # ---------------------------------------------------------------------------
+  # MinIO — S3-compatible object storage (assets, exports, snapshots).
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    container_name: domio-minio
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-domio}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-domio-dev-only}
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # console
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+
+  minio-init:
+    image: minio/mc:RELEASE.2024-10-08T09-37-26Z
+    container_name: domio-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 ${S3_ACCESS_KEY:-domio} ${S3_SECRET_KEY:-domio-dev-only} &&
+      mc mb --ignore-existing local/${S3_BUCKET:-domio-assets} &&
+      mc anonymous set download local/${S3_BUCKET:-domio-assets}/public || true
+      "
+    restart: "no"
+
+  # ---------------------------------------------------------------------------
+  # ClickHouse — analytics OLAP warehouse.
+  # ---------------------------------------------------------------------------
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: domio-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-domio_analytics}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-domio}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-domio}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "8123:8123"   # HTTP
+      - "9002:9000"   # native TCP (host 9002 → container 9000; MinIO reserves 9000/9001)
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "clickhouse-client", "--user", "domio", "--password", "domio", "--query", "SELECT 1"]
+
+  # ---------------------------------------------------------------------------
+  # OpenSearch — search + semantic queries.
+  # ---------------------------------------------------------------------------
+  opensearch:
+    image: opensearchproject/opensearch:2.18.0
+    container_name: domio-opensearch
+    restart: unless-stopped
+    environment:
+      cluster.name: domio-dev
+      node.name: domio-opensearch
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      "OPENSEARCH_JAVA_OPTS": "-Xms512m -Xmx512m"
+      "DISABLE_SECURITY_PLUGIN": "true"
+      "DISABLE_INSTALL_DEMO_CONFIG": "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -E 'green|yellow'"]
+
+  # ---------------------------------------------------------------------------
+  # MailHog — local email testing.
+  # ---------------------------------------------------------------------------
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: domio-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # web UI
+
+  # ---------------------------------------------------------------------------
+  # OpenTelemetry Collector — receives OTLP gRPC.
+  # ---------------------------------------------------------------------------
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.114.0
+    container_name: domio-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    depends_on:
+      - jaeger
+      - prometheus
+
+  # ---------------------------------------------------------------------------
+  # Prometheus — metrics scrape target.
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: domio-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+
+  # ---------------------------------------------------------------------------
+  # Grafana — dashboards.
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: domio-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+  # ---------------------------------------------------------------------------
+  # Jaeger — tracing UI.
+  # ---------------------------------------------------------------------------
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    container_name: domio-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"   # UI
+      - "14268:14268"   # Jaeger HTTP
+      - "14250:14250"   # Jaeger gRPC
+
+volumes:
+  postgres-data:
+  redis-data:
+  nats-data:
+  minio-data:
+  clickhouse-data:
+  opensearch-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  default:
+    name: domio-dev
+    driver: bridge

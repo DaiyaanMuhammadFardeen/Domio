@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# test — run all tests across the monorepo.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+echo "→ turbo run test"
+pnpm test

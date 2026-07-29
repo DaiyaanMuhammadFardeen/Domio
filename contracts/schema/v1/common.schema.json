@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/common.schema.json",
+  "title": "Domio Common",
+  "description": "Common shapes shared across every Domio document payload (decks, themes, brand kits, plugin manifests).",
+  "type": "object",
+  "definitions": {
+    "ResourceId": {
+      "type": "object",
+      "required": ["kind", "org_id", "tenant_id", "id"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "org_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "Timestamp": {
+      "type": "object",
+      "required": ["value"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Money": {
+      "type": "object",
+      "required": ["currency", "amount_micros"],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": ["USD", "EUR", "GBP", "BDT", "INR", "JPY", "CNY", "AUD", "CAD"]
+        },
+        "amount_micros": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "internal",
+            "unavailable",
+            "timeout",
+            "cancelled",
+            "deprecated",
+            "unauthenticated",
+            "forbidden",
+            "permission_denied",
+            "tenant_isolation",
+            "brand_lock_violation",
+            "invalid_argument",
+            "out_of_range",
+            "required",
+            "already_exists",
+            "not_found",
+            "conflict",
+            "precondition_failed",
+            "idempotency_key_reused",
+            "idempotency_key_conflict",
+            "rate_limited",
+            "quota_exceeded",
+            "upstream_failure",
+            "vendor_rejected"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "trace_id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "retry_after_seconds": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "AuditActor": {
+      "type": "object",
+      "required": ["actor_kind", "actor_id"],
+      "properties": {
+        "actor_kind": {
+          "type": "string",
+          "enum": ["user", "agent", "system", "cron", "admin", "service"]
+        },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "display_name": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "ip_address": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "user_agent": {
+          "type": "string",
+          "maxLength": 512
+        }
+      }
+    }
+  }
+}

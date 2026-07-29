@@ -1,0 +1,33 @@
+# Auto-detect text files, ensure consistent line endings.
+* text=auto eol=lf
+
+# Protobuf
+*.proto linguist-generated=false
+
+# Generated files
+*.pb.go linguist-generated=true
+*.pb.cc linguist-generated=true
+*.pb.h linguist-generated=true
+*_pb2.py linguist-generated=true
+*_pb2_grpc.py linguist-generated=true
+
+# Documentation
+*.md diff=markdown
+docs/development_phases/*.md merge=union
+
+# Lockfiles
+pnpm-lock.yaml -diff
+package-lock.json -diff
+yarn.lock -diff
+Cargo.lock -diff
+go.sum -diff
+
+# Avoid noisy diffs on large binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff2 binary
+*.woff binary
