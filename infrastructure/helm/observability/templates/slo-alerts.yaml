@@ -43,4 +43,33 @@ data:
             labels:
               severity: page
               slo: ingestion-freshness
+          - alert: RealtimeGatewayOpRoundTripP95Breached
+            expr: |
+              histogram_quantile(0.95, sum(rate(rtgw_sync_op_round_trip_ms_bucket[5m])) by (le)) > 250
+            for: 5m
+            labels:
+              severity: page
+              slo: realtime-op-round-trip-p95
+              phase: "04"
+            annotations:
+              summary: "Realtime gateway op round-trip p95 > 250 ms"
+              description: |
+                CRDT op round-trip latency is degraded. Investigate NATS, Redis, or
+                control-plane gRPC latency. See docs/development_phases/phase-04
+                §5-C.3 (sync_op_round_trip_ms).
+          - alert: RealtimeGatewayCrdtConvergenceP95Breached
+            expr: |
+              histogram_quantile(0.95, sum(rate(rtgw_sync_crdt_convergence_ms_bucket[5m])) by (le)) > 2000
+            for: 5m
+            labels:
+              severity: page
+              slo: realtime-crdt-convergence-p95
+              phase: "04"
+            annotations:
+              summary: "CRDT convergence p95 > 2 s"
+              description: |
+                Two replicas are taking > 2 s to converge. Likely root causes:
+                JetStream backlog, replay pressure, or a hot sub-doc with many
+                pending updates. See docs/development_phases/phase-04 §5-C.3
+                (sync_crdt_convergence_ms).
 {{- end }}

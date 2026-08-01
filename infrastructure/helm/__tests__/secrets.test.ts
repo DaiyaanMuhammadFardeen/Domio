@@ -57,7 +57,7 @@ describe('secrets helm chart', () => {
   it('values.schema.json validates well-formed values', () => {
     const schema = JSON.parse(readFileSync(join(SECRETS_CHART, 'values.schema.json'), 'utf8'));
     expect(schema.additionalProperties).toBe(false);
-    expect(schema.required).toEqual(['vault', 'secrets', 'oncall', 'refreshInterval']);
+    expect(schema.required).toEqual(['vault', 'secrets', 'oncall', 'refreshInterval', 'image']);
     expect(schema.properties.vault.required).toContain('address');
     expect(schema.properties.vault.required).toContain('authMethod');
     expect(schema.properties.vault.required).toContain('role');
