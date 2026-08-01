@@ -110,23 +110,44 @@ func ReadPump(ctx context.Context, conn *websocket.Conn, logger *zap.Logger, han
 }
 
 // unwrapMessage attempts to unmarshal the raw bytes into known message types.
-// In a real deployment this would use a proto envelope; here we try each type.
+// In a real deployment this would use a proto envelope; here we try each type
+// using multi-field checks to avoid false positives from overlapping field numbers
+// (e.g. Op.op_id at field 1 matches Hello.actor_id at field 1).
+//
+// Check order and discriminators:
+//   - Op:       op_id (field 1) + hlc (field 6) — Hello has no field 6.
+//   - Presence: actor_id (field 1) + kind (field 5) != UNSPECIFIED.
+//   - Hello:    actor_id (field 1) + deck_id (field 2).
+//   - BranchSwitch: actor_id (field 1) + to_branch_id (field 3).
 func unwrapMessage(data []byte) proto.Message {
-	// Try each known type in order of likelihood.
-	hello := &rt.Hello{}
-	if err := proto.Unmarshal(data, hello); err == nil && hello.GetActorId() != "" {
-		return hello
-	}
+	// Op is checked first because it has the unique hlc field (field 6)
+	// that no other message type has at the same number.
 	op := &rt.Op{}
-	if err := proto.Unmarshal(data, op); err == nil && op.GetOpId() != "" {
+	if err := proto.Unmarshal(data, op); err == nil &&
+		op.GetOpId() != "" && op.GetHlc() != nil {
 		return op
 	}
+
+	// Presence is checked before Hello because field 5 (kind) is an enum
+	// (varint) while Hello field 5 is repeated string — different wire types.
 	presence := &rt.Presence{}
-	if err := proto.Unmarshal(data, presence); err == nil && presence.GetActorId() != "" {
+	if err := proto.Unmarshal(data, presence); err == nil &&
+		presence.GetActorId() != "" &&
+		presence.GetKind() != rt.PresenceKind_PRESENCE_KIND_UNSPECIFIED {
 		return presence
 	}
+
+	// Hello requires both actor_id and deck_id (client always sends both).
+	hello := &rt.Hello{}
+	if err := proto.Unmarshal(data, hello); err == nil &&
+		hello.GetActorId() != "" && hello.GetDeckId() != "" {
+		return hello
+	}
+
+	// BranchSwitch requires actor_id and to_branch_id.
 	branchSwitch := &rt.BranchSwitch{}
-	if err := proto.Unmarshal(data, branchSwitch); err == nil && branchSwitch.GetActorId() != "" {
+	if err := proto.Unmarshal(data, branchSwitch); err == nil &&
+		branchSwitch.GetActorId() != "" && branchSwitch.GetToBranchId() != "" {
 		return branchSwitch
 	}
 	return nil
