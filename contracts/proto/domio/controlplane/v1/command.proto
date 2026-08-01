@@ -1,0 +1,118 @@
+// Domio controlplane command.proto
+//
+// Control-plane RPCs for realtime collaboration session management.
+// These unary RPCs are served by the API gateway and coordinate
+// session lifecycle before the client establishes a WebSocket with
+// the realtime gateway.
+//
+// Lint rules (see buf.yaml):
+//   - enum prefix DOMIO_
+//   - service suffix Service
+//   - field lower_snake_case
+
+syntax = "proto3";
+
+package domio.controlplane.v1;
+
+import "domio/realtime/v1/realtime.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/controlplane/v1;domiocontrolplanev1";
+
+// -----------------------------------------------------------------------------
+// Session Management
+// -----------------------------------------------------------------------------
+
+// StartRealtimeSessionRequest is sent by the client to obtain a
+// WebSocket connection ticket for a deck.
+message StartRealtimeSessionRequest {
+  // Actor (user) identifier — ULID.
+  string actor_id = 1;
+  // Deck to join for realtime collaboration.
+  string deck_id = 2;
+  // Branch to join; defaults to "main" if omitted.
+  string branch_id = 3;
+  // Capabilities the client intends to use.
+  repeated string capabilities = 4;
+}
+
+// StartRealtimeSessionResponse returns the ticket the client uses
+// to connect to the realtime gateway over WebSocket.
+message StartRealtimeSessionResponse {
+  // Opaque session token the client presents to the gateway.
+  string session_token = 1;
+  // WebSocket URL the client should connect to.
+  string gateway_url = 2;
+  // The HLC resume point for this session.
+  domio.realtime.v1.HLC resume_hlc = 3;
+  // Heartbeat interval the client should use (milliseconds).
+  uint32 heartbeat_interval_ms = 4;
+}
+
+// EndRealtimeSessionRequest signals the server that the client is
+// disconnecting gracefully.
+message EndRealtimeSessionRequest {
+  // Session token from StartRealtimeSessionResponse.
+  string session_token = 1;
+  // Optional reason for disconnecting.
+  string reason = 2;
+}
+
+// EndRealtimeSessionResponse confirms the session was terminated.
+message EndRealtimeSessionResponse {}
+
+// -----------------------------------------------------------------------------
+// Branch Management
+// -----------------------------------------------------------------------------
+
+// GetBranchHeadRequest fetches the current head of a branch.
+message GetBranchHeadRequest {
+  // Deck identifier.
+  string deck_id = 1;
+  // Branch identifier.
+  string branch_id = 2;
+}
+
+// GetBranchHeadResponse returns the live head for the requested branch.
+message GetBranchHeadResponse {
+  domio.realtime.v1.BranchHead head = 1;
+}
+
+// ListBranchesRequest lists available branches for a deck.
+message ListBranchesRequest {
+  // Deck identifier.
+  string deck_id = 1;
+}
+
+// BranchInfo describes a single branch.
+message BranchInfo {
+  // Branch identifier.
+  string branch_id = 1;
+  // The current head HLC for this branch.
+  domio.realtime.v1.BranchHead head = 2;
+  // Number of active sessions on this branch.
+  uint32 active_sessions = 3;
+}
+
+// ListBranchesResponse returns all branches for a deck.
+message ListBranchesResponse {
+  repeated BranchInfo branches = 1;
+}
+
+// -----------------------------------------------------------------------------
+// Service
+// -----------------------------------------------------------------------------
+
+// ControlPlaneService manages realtime collaboration sessions and branches.
+service ControlPlaneService {
+  // StartRealtimeSession obtains a WebSocket ticket for a deck session.
+  rpc StartRealtimeSession(StartRealtimeSessionRequest) returns (StartRealtimeSessionResponse) {}
+
+  // EndRealtimeSession terminates a session gracefully.
+  rpc EndRealtimeSession(EndRealtimeSessionRequest) returns (EndRealtimeSessionResponse) {}
+
+  // GetBranchHead returns the live head for a branch.
+  rpc GetBranchHead(GetBranchHeadRequest) returns (GetBranchHeadResponse) {}
+
+  // ListBranches returns all branches for a deck.
+  rpc ListBranches(ListBranchesRequest) returns (ListBranchesResponse) {}
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/presence-state.schema.json",
+  "title": "Domio Presence State",
+  "description": "Validates the transient presence state broadcast by each connected client (cursor position, selection range, viewport bounds).",
+  "type": "object",
+  "required": ["actorId", "sessionId", "kind", "hlc"],
+  "additionalProperties": false,
+  "properties": {
+    "actorId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Actor (user) identifier — ULID."
+    },
+    "sessionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Client session identifier."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["join", "leave", "update"],
+      "description": "Whether this is a join, leave, or incremental update."
+    },
+    "hlc": {
+      "$ref": "#/definitions/HLC"
+    },
+    "state": {
+      "type": "object",
+      "description": "Serialized presence state keys (cursor, selection, viewport).",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "definitions": {
+    "HLC": {
+      "type": "object",
+      "required": ["physical", "logical"],
+      "additionalProperties": false,
+      "properties": {
+        "physical": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Physical component: unix nanoseconds."
+        },
+        "logical": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Logical counter: monotonic tie-breaker."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,208 @@
+// Domio realtime.proto
+//
+// WebSocket sync protocol for Phase 04 realtime collaboration.
+// Defines the frame vocabulary for CRDT-based deck editing, presence
+// tracking, and branch management over WebSocket connections.
+//
+// All timestamps use a Hybrid Logical Clock (HLC) to provide
+// causally-ordered, globally-unique event ordering without wall-clock
+// synchronisation. An operation is accepted iff hlc > parent_hlc and
+// hlc > last-seen for the author.
+//
+// Lint rules (see buf.yaml):
+//   - enum prefix DOMIO_
+//   - service suffix Service
+//   - field lower_snake_case
+
+syntax = "proto3";
+
+package domio.realtime.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/realtime/v1;domiorealtimv1";
+
+// -----------------------------------------------------------------------------
+// Hybrid Logical Clock
+// -----------------------------------------------------------------------------
+
+// HLC is a Hybrid Logical Clock timestamp. Tuples (physical, logical)
+// are ordered lexicographically. The physical component carries
+// wall-clock nanoseconds for real-time ordering; the logical component
+// breaks ties within the same physical tick.
+message HLC {
+  // Physical component: unix nanoseconds.
+  int64 physical = 1;
+  // Logical counter: monotonic tie-breaker within the same physical tick.
+  int64 logical = 2;
+}
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// OpType distinguishes CRDT operation frame kinds.
+enum OpType {
+  OP_TYPE_UNSPECIFIED = 0;
+  OP_TYPE_YJS_UPDATE = 1;
+  OP_TYPE_CHECKPOINT = 2;
+}
+
+// PresenceKind distinguishes presence update types.
+enum PresenceKind {
+  PRESENCE_KIND_UNSPECIFIED = 0;
+  PRESENCE_KIND_JOIN = 1;
+  PRESENCE_KIND_LEAVE = 2;
+  PRESENCE_KIND_UPDATE = 3;
+}
+
+// RealtimeErrorCode enumerates realtime-specific error conditions.
+enum RealtimeErrorCode {
+  REALTIME_ERROR_CODE_UNSPECIFIED = 0;
+  REALTIME_ERROR_CODE_TENANT_MISMATCH = 1;
+  REALTIME_ERROR_CODE_DECK_NOT_FOUND = 2;
+  REALTIME_ERROR_CODE_UNAUTHORIZED = 3;
+  REALTIME_ERROR_CODE_STALE_BASE = 4;
+  REALTIME_ERROR_CODE_INVALID_OP = 5;
+  REALTIME_ERROR_CODE_PAYLOAD_TOO_LARGE = 6;
+  REALTIME_ERROR_CODE_RATE_LIMITED = 7;
+  REALTIME_ERROR_CODE_SESSION_EXPIRED = 8;
+  REALTIME_ERROR_CODE_GATEWAY_BUSY = 9;
+  REALTIME_ERROR_CODE_INTERNAL = 10;
+}
+
+// -----------------------------------------------------------------------------
+// Handshake
+// -----------------------------------------------------------------------------
+
+// Hello is the first frame sent from client to server on WebSocket connect.
+message Hello {
+  // Actor (user) identifier — ULID.
+  string actor_id = 1;
+  // Deck to sync.
+  string deck_id = 2;
+  // Branch to join; omitted defaults to "main".
+  string branch_id = 3;
+  // Client-generated session identifier.
+  string session_id = 4;
+  // Capabilities the client supports, e.g. "sync", "presence", "chat", "ping".
+  repeated string capabilities = 5;
+}
+
+// Welcome is the server's response after a successful handshake.
+message Welcome {
+  // Identifier of the gateway handling this connection.
+  string gateway_id = 1;
+  // Server's current HLC.
+  HLC server_hlc = 2;
+  // Recommended heartbeat interval in milliseconds.
+  uint32 heartbeat_interval_ms = 3;
+  // Whether the server will broadcast presence updates.
+  bool presence_broadcast = 4;
+  // Maximum payload size in bytes the client may send.
+  uint64 max_payload_bytes = 5;
+  // Optional HLC resume point — when present the server replays ops after this point.
+  HLC client_vector_hlc = 6;
+}
+
+// -----------------------------------------------------------------------------
+// CRDT Operations
+// -----------------------------------------------------------------------------
+
+// Op is a single CRDT operation frame.
+message Op {
+  // Operation identifier — ULID, unique per operation.
+  string op_id = 1;
+  // Deck this op targets.
+  string deck_id = 2;
+  // Branch this op targets.
+  string branch_id = 3;
+  // Slide this op targets within the deck.
+  string slide_id = 4;
+  // Author (actor) who created this op.
+  string author_id = 5;
+  // HLC timestamp of this operation.
+  HLC hlc = 6;
+  // Parent HLC — the op this one causally depends on.
+  HLC parent_hlc = 7;
+  // Raw Yjs update bytes.
+  bytes payload = 8;
+  // Monotonic client clock for ordering within a single client.
+  int64 client_clock = 9;
+  // Type of operation.
+  OpType op_type = 10;
+}
+
+// OpAck acknowledges receipt and optional acceptance of an Op.
+message OpAck {
+  // Echoes the op_id being acknowledged.
+  string op_id = 1;
+  // Whether the op was applied to the document.
+  bool applied = 2;
+  // Human-readable reason when applied is false.
+  string reason = 3;
+  // Server HLC after processing.
+  HLC server_hlc = 4;
+}
+
+// -----------------------------------------------------------------------------
+// Presence
+// -----------------------------------------------------------------------------
+
+// Presence describes an actor's transient state (cursor, selection, viewport).
+message Presence {
+  // Actor identifier.
+  string actor_id = 1;
+  // Session identifier.
+  string session_id = 2;
+  // Serialized state: cursor position, selection range, viewport, etc.
+  map<string, string> state = 3;
+  // HLC of this presence update.
+  HLC hlc = 4;
+  // Whether this is a join, leave, or incremental update.
+  PresenceKind kind = 5;
+}
+
+// PeerJoined is broadcast when a new actor enters the branch.
+message PeerJoined {
+  string actor_id = 1;
+  string session_id = 2;
+  string branch_id = 3;
+  HLC hlc = 4;
+}
+
+// PeerLeft is broadcast when an actor disconnects or leaves.
+message PeerLeft {
+  string actor_id = 1;
+  string session_id = 2;
+  string branch_id = 3;
+  HLC hlc = 4;
+}
+
+// -----------------------------------------------------------------------------
+// Branch Management
+// -----------------------------------------------------------------------------
+
+// BranchSwitch notifies that an actor moved to a different branch.
+message BranchSwitch {
+  string actor_id = 1;
+  string from_branch_id = 2;
+  string to_branch_id = 3;
+  HLC hlc = 4;
+}
+
+// BranchHead announces the live head for outbound fan-out.
+message BranchHead {
+  string deck_id = 1;
+  string branch_id = 2;
+  HLC hlc = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+// Error is a realtime-specific error frame sent over the WebSocket.
+message Error {
+  RealtimeErrorCode code = 1;
+  string message = 2;
+  bool retryable = 3;
+}
