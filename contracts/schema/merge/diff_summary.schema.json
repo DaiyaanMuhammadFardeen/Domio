@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/merge/diff_summary.schema.json",
+  "title": "Domio Diff Summary",
+  "description": "Structured 3-way diff output for merge requests. Consumed by both the editor UI and the agentic layer. The diff is computed at slide and element granularity between source, target, and base branches.",
+  "type": "object",
+  "required": ["slides", "elements", "conflicts"],
+  "additionalProperties": false,
+  "properties": {
+    "slides": {
+      "$ref": "#/definitions/DiffSlideChanges"
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DiffElementChange"
+      },
+      "description": "Per-element changes across all slides."
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DiffConflict"
+      },
+      "description": "Conflicting changes requiring resolution."
+    }
+  },
+  "definitions": {
+    "DiffSlideChanges": {
+      "type": "object",
+      "required": ["added", "removed", "modified"],
+      "additionalProperties": false,
+      "properties": {
+        "added": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DiffSlideRef"
+          },
+          "description": "Slides added in the source branch."
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DiffSlideRef"
+          },
+          "description": "Slides removed in the source branch."
+        },
+        "modified": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DiffSlideRef"
+          },
+          "description": "Slides modified in the source branch."
+        }
+      }
+    },
+    "DiffSlideRef": {
+      "type": "object",
+      "required": ["slideId"],
+      "additionalProperties": false,
+      "properties": {
+        "slideId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Slide identifier (e.g. 'slide:{id}')."
+        }
+      }
+    },
+    "DiffElementChange": {
+      "type": "object",
+      "required": ["slideId", "path", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "slideId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Slide containing the changed element."
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "JSON Pointer path to the changed property."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["added", "modified", "removed"],
+          "description": "Kind of change."
+        },
+        "sourceValue": {
+          "description": "Source branch value (if modified or removed)."
+        },
+        "targetValue": {
+          "description": "Target branch value (if modified or added)."
+        }
+      }
+    },
+    "DiffConflict": {
+      "type": "object",
+      "required": ["slideId", "elementId", "path", "sourceValue", "targetValue", "baseValue"],
+      "additionalProperties": false,
+      "properties": {
+        "slideId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Slide containing the conflict."
+        },
+        "elementId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Element containing the conflict."
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "JSON Pointer path to the conflicting property."
+        },
+        "sourceValue": {
+          "description": "Value from the source branch."
+        },
+        "targetValue": {
+          "description": "Value from the target branch."
+        },
+        "baseValue": {
+          "description": "Value from the common base."
+        }
+      }
+    }
+  }
+}

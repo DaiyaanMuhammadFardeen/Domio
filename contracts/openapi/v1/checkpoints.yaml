@@ -1,0 +1,354 @@
+openapi: 3.1.0
+info:
+  title: Domio Checkpoints API (Phase 05)
+  version: 1.0.0
+  description: |
+    Named checkpoints and auto-checkpoints for deck version history.
+
+    A checkpoint pins a specific revision on a branch so users can
+    restore to that state non-destructively (creates a new forward edge
+    in history rather than rewinding).
+
+    Auto-checkpoints are created by the snapshotter every 50 ops or
+    10 minutes; they expire after 30 days. Named checkpoints never
+    expire.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: checkpoints
+    description: Named checkpoints for deck version history.
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+paths:
+  /v1/decks/{deckId}/checkpoints:
+    post:
+      tags: [checkpoints]
+      operationId: createCheckpoint
+      summary: Create a named checkpoint
+      description: |
+        Creates a new named checkpoint pinning the current revision.
+        The checkpoint name must be unique per deck per branch.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCheckpointRequest"
+      responses:
+        "201":
+          description: Checkpoint created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckpointResponse"
+        "400":
+          description: Invalid request (e.g. duplicate name).
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+    get:
+      tags: [checkpoints]
+      operationId: listCheckpoints
+      summary: List checkpoints for a deck
+      description: |
+        Returns all checkpoints for a deck, optionally filtered by
+        branch and kind (named or auto).
+      parameters:
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: query
+          name: branchId
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Filter to a specific branch.
+        - in: query
+          name: kind
+          required: false
+          schema:
+            type: string
+            enum: [named, auto]
+          description: Filter by checkpoint kind.
+      responses:
+        "200":
+          description: Checkpoint list returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListCheckpointsResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/checkpoints/{checkpointId}:
+    patch:
+      tags: [checkpoints]
+      operationId: renameCheckpoint
+      summary: Rename a checkpoint
+      description: |
+        Renames an existing checkpoint. A history entry is recorded
+        for the rename operation.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: checkpointId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Checkpoint identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameCheckpointRequest"
+      responses:
+        "200":
+          description: Checkpoint renamed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckpointResponse"
+        "400":
+          description: Invalid request (e.g. duplicate name).
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or checkpoint not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/checkpoints/{checkpointId}/restore:
+    post:
+      tags: [checkpoints]
+      operationId: restoreCheckpoint
+      summary: Restore to a checkpoint
+      description: |
+        Non-destructively restores to a checkpoint. Creates a new forward
+        edge in history rather than rewinding the branch. Returns the
+        new revision created by the restore.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: checkpointId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Checkpoint identifier.
+      responses:
+        "200":
+          description: Restore successful.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestoreCheckpointResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or checkpoint not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Phase 0 stub: the bearer token is `dev-stub-token`. Phase 20
+        will replace this with full SSO + SCIM + signed capability
+        tokens.
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: domio_session
+      description: HttpOnly session cookie set by the auth endpoint.
+  schemas:
+    Checkpoint:
+      type: object
+      required: [id, deckId, branchId, name, revision, createdBy, createdAt, kind]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Unique checkpoint identifier (ULID).
+        deckId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        branchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Branch this checkpoint is on.
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Human-readable checkpoint name.
+        revision:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Revision this checkpoint pins.
+        parentId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Parent checkpoint ID (null for first checkpoint on a branch).
+        createdBy:
+          type: string
+          minLength: 1
+          maxLength: 128
+        createdAt:
+          type: string
+          format: date-time
+        kind:
+          type: string
+          enum: [named, auto]
+          description: Named (user-created) or auto (system-created).
+    CreateCheckpointRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Human-readable checkpoint name.
+        branchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          default: main
+          description: Branch to checkpoint; defaults to "main".
+        parentCheckpointId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Optional parent checkpoint ID.
+    RenameCheckpointRequest:
+      type: object
+      required: [newName]
+      properties:
+        newName:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: New name for the checkpoint.
+    CheckpointResponse:
+      type: object
+      required: [checkpoint]
+      properties:
+        checkpoint:
+          $ref: "#/components/schemas/Checkpoint"
+        traceId:
+          type: string
+    ListCheckpointsResponse:
+      type: object
+      required: [checkpoints]
+      properties:
+        checkpoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/Checkpoint"
+        traceId:
+          type: string
+    RestoreCheckpointResponse:
+      type: object
+      required: [newRevision, branchId]
+      properties:
+        newRevision:
+          type: integer
+          format: int64
+          minimum: 0
+          description: New revision created by the restore operation.
+        branchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Branch the restore was applied to.
+        traceId:
+          type: string

@@ -1,0 +1,384 @@
+openapi: 3.1.0
+info:
+  title: Domio Branches API (Phase 05)
+  version: 1.0.0
+  description: |
+    Branch management endpoints for deck versioning and branching.
+
+    A branch is a lightweight fork of a deck's CRDT history that allows
+    isolated editing before merge back to the target branch.
+
+    All endpoints require authentication via the bearer token or the
+    session cookie.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: branches
+    description: Branch management for deck versioning.
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+paths:
+  /v1/decks/{deckId}/branches:
+    post:
+      tags: [branches]
+      operationId: createBranch
+      summary: Create a new branch
+      description: |
+        Creates a new branch from a base checkpoint or the current HEAD.
+        The branch name must be unique per deck. The new branch inherits
+        the parent's history and diverges from the creation point.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBranchRequest"
+      responses:
+        "201":
+          description: Branch created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BranchResponse"
+        "400":
+          description: Invalid request (e.g. duplicate name).
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+    get:
+      tags: [branches]
+      operationId: listBranches
+      summary: List branches for a deck
+      description: |
+        Returns all branches for a deck, including lineage information,
+        head revision, and status fields.
+      parameters:
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [active, archived]
+          description: Filter by branch status.
+      responses:
+        "200":
+          description: Branch list returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListBranchesResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/branches/{branchId}/checkout:
+    post:
+      tags: [branches]
+      operationId: checkoutBranch
+      summary: Switch editor to a branch
+      description: |
+        Switches the editor's active branch. Returns a WebSocket endpoint
+        and the branch's HLC vector for resume. Cursor and selection state
+        are preserved.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: branchId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Branch identifier.
+      responses:
+        "200":
+          description: Branch checkout successful.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or branch not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/branches/{branchId}/archive:
+    post:
+      tags: [branches]
+      operationId: archiveBranch
+      summary: Archive a branch
+      description: |
+        Soft-archives a branch. Archived branches are hidden from the
+        default branch list but can be restored. The "main" branch
+        cannot be archived.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: branchId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Branch identifier.
+      responses:
+        "200":
+          description: Branch archived.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BranchResponse"
+        "400":
+          description: Cannot archive the main branch.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or branch not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/branches/{branchId}/lineage:
+    get:
+      tags: [branches]
+      operationId: getBranchLineage
+      summary: Get branch ancestry
+      description: |
+        Returns the full ancestry chain from the specified branch to the
+        root branch ("main"). Useful for rendering branch graphs and
+        computing merge bases.
+      parameters:
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: branchId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Branch identifier.
+      responses:
+        "200":
+          description: Branch lineage returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BranchLineageResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or branch not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Phase 0 stub: the bearer token is `dev-stub-token`. Phase 20
+        will replace this with full SSO + SCIM + signed capability
+        tokens.
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: domio_session
+      description: HttpOnly session cookie set by the auth endpoint.
+  schemas:
+    Branch:
+      type: object
+      required: [id, deckId, name, parentBranchId, headRevision, status, createdBy, createdAt]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Unique branch identifier (ULID).
+        deckId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Human-readable branch name (unique per deck).
+        parentBranchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Parent branch this was forked from.
+        headRevision:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Current head revision on this branch.
+        status:
+          type: string
+          enum: [active, archived]
+        createdBy:
+          type: string
+          minLength: 1
+          maxLength: 128
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateBranchRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Human-readable branch name (unique per deck).
+        baseCheckpointId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Base checkpoint ID to branch from; omit for current HEAD.
+    BranchResponse:
+      type: object
+      required: [branch]
+      properties:
+        branch:
+          $ref: "#/components/schemas/Branch"
+        traceId:
+          type: string
+    ListBranchesResponse:
+      type: object
+      required: [branches]
+      properties:
+        branches:
+          type: array
+          items:
+            $ref: "#/components/schemas/Branch"
+        traceId:
+          type: string
+    CheckoutResponse:
+      type: object
+      required: [branch, resumeHlc]
+      properties:
+        branch:
+          $ref: "#/components/schemas/Branch"
+        resumeHlc:
+          description: HLC vector the client should use for resume.
+          allOf:
+            - $ref: "realtime.yaml#/components/schemas/HLC"
+        traceId:
+          type: string
+    BranchLineage:
+      type: object
+      required: [branchId, ancestors]
+      properties:
+        branchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        ancestors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Branch"
+          description: Ancestor chain from branch to root, ordered child-to-root.
+    BranchLineageResponse:
+      type: object
+      required: [lineage]
+      properties:
+        lineage:
+          $ref: "#/components/schemas/BranchLineage"
+        traceId:
+          type: string

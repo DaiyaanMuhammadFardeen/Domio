@@ -1,0 +1,253 @@
+openapi: 3.1.0
+info:
+  title: Domio Diff API (Phase 05)
+  version: 1.0.0
+  description: |
+    Structural diff computation for deck branching and merging.
+
+    The diff service computes a 3-way diff at slide and element
+    granularity between source, target, and base branches. The output
+    is a structured diff_summary JSON consumed by both the editor UI
+    and the agentic layer.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: diff
+    description: Structural diff computation for deck branching.
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+paths:
+  /v1/decks/{deckId}/diff:
+    post:
+      tags: [diff]
+      operationId: computeDiff
+      summary: Compute a 3-way diff
+      description: |
+        Computes a structured 3-way diff between source and target
+        branches. Returns a diff_summary with slide-level and
+        element-level granularity. If the target has not advanced
+        since the base, returns a fast-forward indicator.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComputeDiffRequest"
+      responses:
+        "200":
+          description: Diff computed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComputeDiffResponse"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or branch not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/diff/{mrId}:
+    get:
+      tags: [diff]
+      operationId: getDiff
+      summary: Get a previously computed diff
+      description: |
+        Returns the stored diff_summary for a merge request.
+      parameters:
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: mrId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Merge request identifier.
+      responses:
+        "200":
+          description: Diff summary returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetDiffResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck, MR, or diff not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Phase 0 stub: the bearer token is `dev-stub-token`. Phase 20
+        will replace this with full SSO + SCIM + signed capability
+        tokens.
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: domio_session
+      description: HttpOnly session cookie set by the auth endpoint.
+  schemas:
+    DiffSummary:
+      type: object
+      required: [slides, elements, conflicts]
+      properties:
+        slides:
+          $ref: "#/components/schemas/DiffSlideChanges"
+        elements:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffElementChange"
+          description: Per-element changes across all slides.
+        conflicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffConflict"
+          description: Conflicting changes requiring resolution.
+    DiffSlideChanges:
+      type: object
+      required: [added, removed, modified]
+      properties:
+        added:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffSlideRef"
+        removed:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffSlideRef"
+        modified:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffSlideRef"
+    DiffSlideRef:
+      type: object
+      required: [slideId]
+      properties:
+        slideId:
+          type: string
+          description: Slide identifier (e.g. "slide:{id}").
+    DiffElementChange:
+      type: object
+      required: [slideId, path, kind]
+      properties:
+        slideId:
+          type: string
+          description: Slide containing the changed element.
+        path:
+          type: string
+          description: JSON Pointer path to the changed property.
+        kind:
+          type: string
+          enum: [added, modified, removed]
+          description: Kind of change.
+        sourceValue:
+          description: Source branch value (if modified or removed).
+        targetValue:
+          description: Target branch value (if modified or added).
+    DiffConflict:
+      type: object
+      required: [slideId, elementId, path, sourceValue, targetValue, baseValue]
+      properties:
+        slideId:
+          type: string
+          description: Slide containing the conflict.
+        elementId:
+          type: string
+          description: Element containing the conflict.
+        path:
+          type: string
+          description: JSON Pointer path to the conflicting property.
+        sourceValue:
+          description: Value from the source branch.
+        targetValue:
+          description: Value from the target branch.
+        baseValue:
+          description: Value from the common base.
+    ComputeDiffRequest:
+      type: object
+      required: [sourceBranchId, targetBranchId]
+      properties:
+        sourceBranchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Source branch ID.
+        targetBranchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Target branch ID.
+        baseRevision:
+          type: integer
+          format: int64
+          minimum: 0
+          default: 0
+          description: >
+            Base revision for the 3-way diff; if 0, computed from
+            common ancestor.
+    ComputeDiffResponse:
+      type: object
+      required: [diffSummary, isFastForward]
+      properties:
+        diffSummary:
+          $ref: "#/components/schemas/DiffSummary"
+        isFastForward:
+          type: boolean
+          description: Whether this was a fast-forward (no diff needed).
+        traceId:
+          type: string
+    GetDiffResponse:
+      type: object
+      required: [diffSummary]
+      properties:
+        diffSummary:
+          $ref: "#/components/schemas/DiffSummary"
+        traceId:
+          type: string

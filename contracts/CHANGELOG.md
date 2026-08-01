@@ -48,6 +48,67 @@ suite, with individual proto packages versioned independently.
   - TypeScript client types for `domio.controlplane.v1` RPCs.
   - Re-exports session management and branch management types.
 
+## [1.1.0] - 2026-08-01
+
+### Added
+
+- **branch.proto v1.0.0** (`contracts/proto/domio/branch/v1/branch.proto`)
+  - Branch CRUD: `CreateBranch`, `GetBranch`, `ListBranches`, `ArchiveBranch`.
+  - Branch switch: `Checkout` returns branch head and HLC resume vector.
+  - Lineage: `GetLineage` computes ancestry chain from branch to main.
+  - Enums: `BranchStatus`, `BranchErrorCode`.
+  - Service: `BranchService`.
+
+- **checkpoint.proto v1.0.0** (`contracts/proto/domio/checkpoint/v1/checkpoint.proto`)
+  - Checkpoint CRUD: `CreateCheckpoint`, `GetCheckpoint`, `ListCheckpoints`, `RenameCheckpoint`.
+  - Restore: `RestoreCheckpoint` creates a new forward edge in history.
+  - Enums: `CheckpointKind` (named/auto), `CheckpointErrorCode`.
+  - Service: `CheckpointService`.
+
+- **merge.proto v1.0.0** (`contracts/proto/domio/merge/v1/merge.proto`)
+  - MR lifecycle: `CreateMergeRequest`, `GetMergeRequest`, `ListMergeRequests`.
+  - Resolution: `ResolveMergeRequest` (theirs/ours/manual strategies).
+  - Commit: `CommitMergeRequest` produces a new branch head.
+  - Close: `CloseMergeRequest` closes without merging.
+  - Embedded `DiffSummary`, `DiffSlideChanges`, `DiffElementChange`, `DiffConflict` messages.
+  - Enums: `MergeRequestStatus`, `ResolutionStrategy`, `MergeErrorCode`.
+  - Service: `MergeService`.
+
+- **diff.proto v1.0.0** (`contracts/proto/domio/diff/v1/diff.proto`)
+  - Diff computation: `ComputeDiff` returns structured 3-way diff.
+  - Diff retrieval: `GetDiff` fetches stored diff by MR ID.
+  - Embedded `DiffSummary`, `DiffSlideChanges`, `DiffElementChange`, `DiffConflict` messages.
+  - Enums: `DiffErrorCode`.
+  - Service: `DiffService`.
+
+- **Branches OpenAPI** (`contracts/openapi/v1/branches.yaml`)
+  - `POST /v1/decks/{deckId}/branches` — create branch.
+  - `GET /v1/decks/{deckId}/branches` — list branches with status filter.
+  - `POST /v1/decks/{deckId}/branches/{branchId}/checkout` — switch editor to branch.
+  - `POST /v1/decks/{deckId}/branches/{branchId}/archive` — soft-archive branch.
+  - `GET /v1/decks/{deckId}/branches/{branchId}/lineage` — branch ancestry.
+
+- **Checkpoints OpenAPI** (`contracts/openapi/v1/checkpoints.yaml`)
+  - `POST /v1/decks/{deckId}/checkpoints` — create named checkpoint.
+  - `GET /v1/decks/{deckId}/checkpoints` — list with branch/kind filters.
+  - `PATCH /v1/decks/{deckId}/checkpoints/{checkpointId}` — rename checkpoint.
+  - `POST /v1/decks/{deckId}/checkpoints/{checkpointId}/restore` — non-destructive restore.
+
+- **Merge Requests OpenAPI** (`contracts/openapi/v1/merge_requests.yaml`)
+  - `POST /v1/decks/{deckId}/merge_requests` — create MR with initial diff.
+  - `GET /v1/decks/{deckId}/merge_requests` — list with status filter.
+  - `GET /v1/decks/{deckId}/merge_requests/{mrId}` — fetch MR + diff.
+  - `POST /v1/decks/{deckId}/merge_requests/{mrId}/resolve` — resolve conflicts.
+  - `POST /v1/decks/{deckId}/merge_requests/{mrId}/merge` — commit merge.
+
+- **Diff OpenAPI** (`contracts/openapi/v1/diff.yaml`)
+  - `POST /v1/decks/{deckId}/diff` — compute 3-way diff.
+  - `GET /v1/decks/{deckId}/diff/{mrId}` — get stored diff.
+
+- **Diff Summary JSON Schema** (`contracts/schema/merge/diff_summary.schema.json`)
+  - Structured 3-way diff shape shared by editor UI and agentic layer.
+  - Covers slide-level changes, per-element changes, and conflicts.
+
 ## [0.1.1] - Unreleased
 
 ### Changed

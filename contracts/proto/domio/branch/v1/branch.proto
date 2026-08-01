@@ -1,0 +1,200 @@
+// Domio branch.proto
+//
+// Branch CRUD, switch/checkout, and lineage for Phase 05 persistence,
+// versioning, and branching. A branch is a lightweight fork of a deck's
+// CRDT history that allows isolated editing before merge.
+//
+// All timestamps use a Hybrid Logical Clock (HLC) inherited from the
+// realtime package.
+//
+// Lint rules (see buf.yaml):
+//   - enum prefix DOMIO_
+//   - service suffix Service
+//   - field lower_snake_case
+
+syntax = "proto3";
+
+package domio.branch.v1;
+
+import "domio/realtime/v1/realtime.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/branch/v1;domiobranchv1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// BranchStatus represents the lifecycle state of a branch.
+enum BranchStatus {
+  BRANCH_STATUS_UNSPECIFIED = 0;
+  BRANCH_STATUS_ACTIVE = 1;
+  BRANCH_STATUS_ARCHIVED = 2;
+}
+
+// BranchErrorCode enumerates branch-specific error conditions.
+enum BranchErrorCode {
+  BRANCH_ERROR_CODE_UNSPECIFIED = 0;
+  BRANCH_ERROR_CODE_DECK_NOT_FOUND = 1;
+  BRANCH_ERROR_CODE_BRANCH_NOT_FOUND = 2;
+  BRANCH_ERROR_CODE_DUPLICATE_NAME = 3;
+  BRANCH_ERROR_CODE_CANNOT_ARCHIVE_MAIN = 4;
+  BRANCH_ERROR_CODE_BRANCH_ARCHIVED = 5;
+  BRANCH_ERROR_CODE_UNAUTHORIZED = 6;
+  BRANCH_ERROR_CODE_INTERNAL = 7;
+}
+
+// -----------------------------------------------------------------------------
+// Branch CRUD
+// -----------------------------------------------------------------------------
+
+// Branch describes a versioned fork of a deck's CRDT history.
+message Branch {
+  // Unique branch identifier — ULID.
+  string id = 1;
+  // Deck this branch belongs to.
+  string deck_id = 2;
+  // Human-readable branch name (unique per deck).
+  string name = 3;
+  // Parent branch this was forked from; "main" for the root branch.
+  string parent_branch_id = 4;
+  // Current head revision on this branch.
+  int64 head_revision = 5;
+  // Lifecycle status.
+  BranchStatus status = 6;
+  // Actor who created this branch.
+  string created_by = 7;
+  // Timestamp when the branch was created.
+  string created_at = 8;
+  // Timestamp when the branch was last updated.
+  string updated_at = 9;
+}
+
+// CreateBranchRequest creates a new branch from a base checkpoint.
+message CreateBranchRequest {
+  // Deck to branch from.
+  string deck_id = 1;
+  // Human-readable name for the branch (unique per deck).
+  string name = 2;
+  // Base checkpoint ID to branch from; if empty, branches from the current HEAD.
+  string base_checkpoint_id = 3;
+  // Actor creating the branch.
+  string actor_id = 4;
+}
+
+// CreateBranchResponse returns the newly created branch.
+message CreateBranchResponse {
+  Branch branch = 1;
+}
+
+// GetBranchRequest fetches a single branch by ID.
+message GetBranchRequest {
+  string deck_id = 1;
+  string branch_id = 2;
+}
+
+// GetBranchResponse returns the requested branch.
+message GetBranchResponse {
+  Branch branch = 1;
+}
+
+// ListBranchesRequest lists all branches for a deck.
+message ListBranchesRequest {
+  // Deck identifier.
+  string deck_id = 1;
+  // Optional filter by status.
+  BranchStatus status_filter = 2;
+}
+
+// ListBranchesResponse returns all branches for a deck.
+message ListBranchesResponse {
+  repeated Branch branches = 1;
+}
+
+// ArchiveBranchRequest soft-archives a branch.
+message ArchiveBranchRequest {
+  string deck_id = 1;
+  string branch_id = 2;
+  string actor_id = 3;
+}
+
+// ArchiveBranchResponse confirms the archive.
+message ArchiveBranchResponse {
+  Branch branch = 1;
+}
+
+// -----------------------------------------------------------------------------
+// Checkout / Switch
+// -----------------------------------------------------------------------------
+
+// CheckoutRequest switches the editor to a different branch.
+message CheckoutRequest {
+  string deck_id = 1;
+  string branch_id = 2;
+  string actor_id = 3;
+}
+
+// CheckoutResponse returns the branch head and the HLC vector
+// the client should use for resume.
+message CheckoutResponse {
+  Branch branch = 1;
+  domio.realtime.v1.HLC resume_hlc = 2;
+}
+
+// -----------------------------------------------------------------------------
+// Lineage
+// -----------------------------------------------------------------------------
+
+// BranchLineage represents the ancestry chain from a branch to main.
+message BranchLineage {
+  // The branch whose lineage is being reported.
+  string branch_id = 1;
+  // Ancestor chain from the branch to main, ordered child-to-root.
+  repeated Branch ancestors = 2;
+}
+
+// GetLineageRequest computes the ancestry of a branch.
+message GetLineageRequest {
+  string deck_id = 1;
+  string branch_id = 2;
+}
+
+// GetLineageResponse returns the full lineage.
+message GetLineageResponse {
+  BranchLineage lineage = 1;
+}
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+// Error is a branch-specific error frame.
+message Error {
+  BranchErrorCode code = 1;
+  string message = 2;
+  bool retryable = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Service
+// -----------------------------------------------------------------------------
+
+// BranchService manages deck branches — CRUD, switch, and lineage.
+service BranchService {
+  // CreateBranch creates a new branch from a base checkpoint.
+  rpc CreateBranch(CreateBranchRequest) returns (CreateBranchResponse) {}
+
+  // GetBranch fetches a single branch by ID.
+  rpc GetBranch(GetBranchRequest) returns (GetBranchResponse) {}
+
+  // ListBranches returns all branches for a deck.
+  rpc ListBranches(ListBranchesRequest) returns (ListBranchesResponse) {}
+
+  // ArchiveBranch soft-archives a branch.
+  rpc ArchiveBranch(ArchiveBranchRequest) returns (ArchiveBranchResponse) {}
+
+  // Checkout switches the editor to a different branch.
+  rpc Checkout(CheckoutRequest) returns (CheckoutResponse) {}
+
+  // GetLineage returns the ancestry chain from a branch to main.
+  rpc GetLineage(GetLineageRequest) returns (GetLineageResponse) {}
+}

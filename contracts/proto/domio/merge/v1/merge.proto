@@ -1,0 +1,261 @@
+// Domio merge.proto
+//
+// Merge request lifecycle for Phase 05 branching and merging.
+// A merge request (MR) captures a 3-way diff between a source branch,
+// a target branch, and their common base, and provides resolution
+// and commit operations.
+//
+// Lint rules (see buf.yaml):
+//   - enum prefix DOMIO_
+//   - service suffix Service
+//   - field lower_snake_case
+
+syntax = "proto3";
+
+package domio.merge.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/merge/v1;domiomergev1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// MergeRequestStatus represents the lifecycle state of a merge request.
+enum MergeRequestStatus {
+  MERGE_REQUEST_STATUS_UNSPECIFIED = 0;
+  MERGE_REQUEST_STATUS_OPEN = 1;
+  MERGE_REQUEST_STATUS_RESOLVED = 2;
+  MERGE_REQUEST_STATUS_MERGED = 3;
+  MERGE_REQUEST_STATUS_CLOSED = 4;
+}
+
+// ResolutionStrategy specifies how conflicts are resolved.
+enum ResolutionStrategy {
+  RESOLUTION_STRATEGY_UNSPECIFIED = 0;
+  RESOLUTION_STRATEGY_THEIRS = 1;
+  RESOLUTION_STRATEGY_OURS = 2;
+  RESOLUTION_STRATEGY_MANUAL = 3;
+}
+
+// MergeErrorCode enumerates merge-specific error conditions.
+enum MergeErrorCode {
+  MERGE_ERROR_CODE_UNSPECIFIED = 0;
+  MERGE_ERROR_CODE_DECK_NOT_FOUND = 1;
+  MERGE_ERROR_CODE_MR_NOT_FOUND = 2;
+  MERGE_ERROR_CODE_SOURCE_BRANCH_NOT_FOUND = 3;
+  MERGE_ERROR_CODE_TARGET_BRANCH_NOT_FOUND = 4;
+  MERGE_ERROR_CODE_NO_CHANGES = 5;
+  MERGE_ERROR_CODE_CONFLICTS_UNRESOLVED = 6;
+  MERGE_ERROR_CODE_TARGET_BRANCH_ARCHIVED = 7;
+  MERGE_ERROR_CODE_UNAUTHORIZED = 8;
+  MERGE_ERROR_CODE_INTERNAL = 9;
+}
+
+// -----------------------------------------------------------------------------
+// Diff Summary (embedded)
+// -----------------------------------------------------------------------------
+
+// DiffSlideChange describes the change status of a single slide.
+message DiffSlideChange {
+  // Slide identifier (e.g. "slide:{id}").
+  string slide_id = 1;
+}
+
+// DiffElementChange describes a per-element change path.
+message DiffElementChange {
+  // Slide containing the changed element.
+  string slide_id = 1;
+  // JSON Pointer path to the changed property.
+  string path = 2;
+  // Kind of change: added, modified, removed.
+  string kind = 3;
+  // Source branch value (if modified or removed).
+  string source_value = 4;
+  // Target branch value (if modified or added).
+  string target_value = 5;
+}
+
+// DiffConflict describes a conflicting change between source and target.
+message DiffConflict {
+  // Slide containing the conflict.
+  string slide_id = 1;
+  // Element containing the conflict.
+  string element_id = 2;
+  // JSON Pointer path to the conflicting property.
+  string path = 3;
+  // Value from the source branch.
+  string source_value = 4;
+  // Value from the target branch.
+  string target_value = 5;
+  // Value from the common base.
+  string base_value = 6;
+}
+
+// DiffSummary is the structured 3-way diff output consumed by the
+// editor UI and the agentic layer.
+message DiffSummary {
+  // Slides that were added, removed, or modified.
+  DiffSlideChanges slides = 1;
+  // Per-element changes across all slides.
+  repeated DiffElementChange elements = 2;
+  // Conflicting changes requiring resolution.
+  repeated DiffConflict conflicts = 3;
+}
+
+// DiffSlideChanges groups slide-level additions, removals, and modifications.
+message DiffSlideChanges {
+  repeated DiffSlideChange added = 1;
+  repeated DiffSlideChange removed = 2;
+  repeated DiffSlideChange modified = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Merge Request
+// -----------------------------------------------------------------------------
+
+// MergeRequest captures a pending merge from source to target branch.
+message MergeRequest {
+  // Unique MR identifier — ULID.
+  string id = 1;
+  // Deck this MR belongs to.
+  string deck_id = 2;
+  // Source branch (the branch being merged in).
+  string source_branch_id = 3;
+  // Target branch (the branch receiving the merge).
+  string target_branch_id = 4;
+  // Current status.
+  MergeRequestStatus status = 5;
+  // 3-way diff summary.
+  DiffSummary diff_summary = 6;
+  // Resolution strategy applied (if resolved).
+  ResolutionStrategy resolution_strategy = 7;
+  // Actor who resolved the conflicts.
+  string resolved_by = 8;
+  // Timestamp when conflicts were resolved.
+  string resolved_at = 9;
+  // Actor who created the MR.
+  string created_by = 10;
+  // Timestamp when the MR was created.
+  string created_at = 11;
+}
+
+// CreateMergeRequestRequest initiates a new merge request.
+message CreateMergeRequestRequest {
+  // Deck identifier.
+  string deck_id = 1;
+  // Source branch ID (being merged).
+  string source_branch_id = 2;
+  // Target branch ID (receiving the merge).
+  string target_branch_id = 3;
+  // Actor creating the MR.
+  string actor_id = 4;
+}
+
+// CreateMergeRequestResponse returns the MR with initial diff.
+message CreateMergeRequestResponse {
+  MergeRequest merge_request = 1;
+}
+
+// GetMergeRequestRequest fetches an MR by ID.
+message GetMergeRequestRequest {
+  string deck_id = 1;
+  string mr_id = 2;
+}
+
+// GetMergeRequestResponse returns the requested MR.
+message GetMergeRequestResponse {
+  MergeRequest merge_request = 1;
+}
+
+// ListMergeRequestsRequest lists MRs for a deck.
+message ListMergeRequestsRequest {
+  string deck_id = 1;
+  // Optional filter by status.
+  MergeRequestStatus status_filter = 2;
+}
+
+// ListMergeRequestsResponse returns all matching MRs.
+message ListMergeRequestsResponse {
+  repeated MergeRequest merge_requests = 1;
+}
+
+// ResolveMergeRequestRequest resolves conflicts in an MR.
+message ResolveMergeRequestRequest {
+  string deck_id = 1;
+  string mr_id = 2;
+  // Strategy for resolving conflicts.
+  ResolutionStrategy strategy = 3;
+  // Manual resolutions: path → chosen value (only for MANUAL strategy).
+  map<string, string> resolutions = 4;
+  // Actor resolving the conflicts.
+  string actor_id = 5;
+}
+
+// ResolveMergeRequestResponse returns the updated MR.
+message ResolveMergeRequestResponse {
+  MergeRequest merge_request = 1;
+}
+
+// CommitMergeRequestRequest finalises the merge, producing a new
+// branch head on the target.
+message CommitMergeRequestRequest {
+  string deck_id = 1;
+  string mr_id = 2;
+  string actor_id = 3;
+}
+
+// CommitMergeRequestResponse returns the merge result.
+message CommitMergeRequestResponse {
+  // The merge request after commit.
+  MergeRequest merge_request = 1;
+  // New revision on the target branch.
+  int64 new_revision = 2;
+}
+
+// CloseMergeRequestRequest closes an MR without merging.
+message CloseMergeRequestRequest {
+  string deck_id = 1;
+  string mr_id = 2;
+  string actor_id = 3;
+}
+
+// CloseMergeRequestResponse confirms the closure.
+message CloseMergeRequestResponse {
+  MergeRequest merge_request = 1;
+}
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+// Error is a merge-specific error frame.
+message Error {
+  MergeErrorCode code = 1;
+  string message = 2;
+  bool retryable = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Service
+// -----------------------------------------------------------------------------
+
+// MergeService manages the merge request lifecycle.
+service MergeService {
+  // CreateMergeRequest initiates a new merge request with a 3-way diff.
+  rpc CreateMergeRequest(CreateMergeRequestRequest) returns (CreateMergeRequestResponse) {}
+
+  // GetMergeRequest fetches an MR by ID.
+  rpc GetMergeRequest(GetMergeRequestRequest) returns (GetMergeRequestResponse) {}
+
+  // ListMergeRequests returns all MRs for a deck.
+  rpc ListMergeRequests(ListMergeRequestsRequest) returns (ListMergeRequestsResponse) {}
+
+  // ResolveMergeRequest resolves conflicts using the specified strategy.
+  rpc ResolveMergeRequest(ResolveMergeRequestRequest) returns (ResolveMergeRequestResponse) {}
+
+  // CommitMergeRequest finalises the merge, producing a new branch head.
+  rpc CommitMergeRequest(CommitMergeRequestRequest) returns (CommitMergeRequestResponse) {}
+
+  // CloseMergeRequest closes an MR without merging.
+  rpc CloseMergeRequest(CloseMergeRequestRequest) returns (CloseMergeRequestResponse) {}
+}

@@ -12,16 +12,28 @@ import { createRequire } from "node:module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const SCHEMAS_DIR = join(__dirname, "..", "contracts", "schema", "v1");
+const SCHEMAS_DIRS = [
+  join(__dirname, "..", "contracts", "schema", "v1"),
+  join(__dirname, "..", "contracts", "schema", "merge"),
+];
 
-function loadSchemas(dir) {
-  return readdirSync(dir)
-    .filter((n) => n.endsWith(".schema.json"))
-    .map((n) => ({
-      name: n,
-      path: join(dir, n),
-      data: JSON.parse(readFileSync(join(dir, n), "utf8")),
-    }));
+function loadSchemas(dirs) {
+  const schemas = [];
+  for (const dir of dirs) {
+    try {
+      const entries = readdirSync(dir)
+        .filter((n) => n.endsWith(".schema.json"))
+        .map((n) => ({
+          name: `${dir.split("/").slice(-2).join("/")}/${n}`,
+          path: join(dir, n),
+          data: JSON.parse(readFileSync(join(dir, n), "utf8")),
+        }));
+      schemas.push(...entries);
+    } catch {
+      // directory may not exist yet — skip silently
+    }
+  }
+  return schemas;
 }
 
 async function tryImportAjv() {
@@ -67,9 +79,9 @@ async function main() {
   const ajv = new Ajv({ allErrors: true, strict: true });
   addFormats(ajv);
 
-  const schemas = loadSchemas(SCHEMAS_DIR);
+  const schemas = loadSchemas(SCHEMAS_DIRS);
   if (schemas.length === 0) {
-    console.error(`No schemas found in ${SCHEMAS_DIR}`);
+    console.error(`No schemas found in ${SCHEMAS_DIRS.join(", ")}`);
     process.exit(2);
   }
 

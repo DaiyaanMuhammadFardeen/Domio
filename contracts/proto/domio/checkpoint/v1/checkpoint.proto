@@ -1,0 +1,174 @@
+// Domio checkpoint.proto
+//
+// Named checkpoints and auto-checkpoints for Phase 05 version history.
+// A checkpoint pins a specific revision on a branch so users can
+// restore to that state non-destructively (creates a new forward edge).
+//
+// Lint rules (see buf.yaml):
+//   - enum prefix DOMIO_
+//   - service suffix Service
+//   - field lower_snake_case
+
+syntax = "proto3";
+
+package domio.checkpoint.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/checkpoint/v1;domiocheckpointv1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// CheckpointKind distinguishes named (user-created) from auto checkpoints.
+enum CheckpointKind {
+  CHECKPOINT_KIND_UNSPECIFIED = 0;
+  CHECKPOINT_KIND_NAMED = 1;
+  CHECKPOINT_KIND_AUTO = 2;
+}
+
+// CheckpointErrorCode enumerates checkpoint-specific error conditions.
+enum CheckpointErrorCode {
+  CHECKPOINT_ERROR_CODE_UNSPECIFIED = 0;
+  CHECKPOINT_ERROR_CODE_DECK_NOT_FOUND = 1;
+  CHECKPOINT_ERROR_CODE_CHECKPOINT_NOT_FOUND = 2;
+  CHECKPOINT_ERROR_CODE_DUPLICATE_NAME = 3;
+  CHECKPOINT_ERROR_CODE_UNAUTHORIZED = 4;
+  CHECKPOINT_ERROR_CODE_INTERNAL = 5;
+}
+
+// -----------------------------------------------------------------------------
+// Checkpoint CRUD
+// -----------------------------------------------------------------------------
+
+// Checkpoint represents a pinned revision in a deck's history.
+message Checkpoint {
+  // Unique checkpoint identifier — ULID.
+  string id = 1;
+  // Deck this checkpoint belongs to.
+  string deck_id = 2;
+  // Branch this checkpoint is on.
+  string branch_id = 3;
+  // Human-readable name.
+  string name = 4;
+  // Revision this checkpoint pins.
+  int64 revision = 5;
+  // Parent checkpoint ID; null for the first checkpoint on a branch.
+  string parent_id = 6;
+  // Actor who created this checkpoint.
+  string created_by = 7;
+  // Timestamp when the checkpoint was created.
+  string created_at = 8;
+  // Kind: named (user) or auto (system).
+  CheckpointKind kind = 9;
+}
+
+// CreateCheckpointRequest creates a new named checkpoint.
+message CreateCheckpointRequest {
+  // Deck identifier.
+  string deck_id = 1;
+  // Branch to checkpoint; defaults to "main".
+  string branch_id = 2;
+  // Human-readable name for the checkpoint.
+  string name = 3;
+  // Optional parent checkpoint ID.
+  string parent_checkpoint_id = 4;
+  // Actor creating the checkpoint.
+  string actor_id = 5;
+}
+
+// CreateCheckpointResponse returns the newly created checkpoint.
+message CreateCheckpointResponse {
+  Checkpoint checkpoint = 1;
+}
+
+// GetCheckpointRequest fetches a single checkpoint by ID.
+message GetCheckpointRequest {
+  string deck_id = 1;
+  string checkpoint_id = 2;
+}
+
+// GetCheckpointResponse returns the requested checkpoint.
+message GetCheckpointResponse {
+  Checkpoint checkpoint = 1;
+}
+
+// ListCheckpointsRequest lists checkpoints for a deck/branch.
+message ListCheckpointsRequest {
+  // Deck identifier.
+  string deck_id = 1;
+  // Optional branch filter; if empty, returns checkpoints across all branches.
+  string branch_id = 2;
+  // Optional kind filter.
+  CheckpointKind kind_filter = 3;
+}
+
+// ListCheckpointsResponse returns all matching checkpoints.
+message ListCheckpointsResponse {
+  repeated Checkpoint checkpoints = 1;
+}
+
+// RenameCheckpointRequest renames an existing checkpoint.
+message RenameCheckpointRequest {
+  string deck_id = 1;
+  string checkpoint_id = 2;
+  string new_name = 3;
+  string actor_id = 4;
+}
+
+// RenameCheckpointResponse returns the updated checkpoint.
+message RenameCheckpointResponse {
+  Checkpoint checkpoint = 1;
+}
+
+// -----------------------------------------------------------------------------
+// Restore
+// -----------------------------------------------------------------------------
+
+// RestoreCheckpointRequest non-destructively restores to a checkpoint.
+// Creates a new forward edge in history rather than rewinding.
+message RestoreCheckpointRequest {
+  string deck_id = 1;
+  string checkpoint_id = 2;
+  string actor_id = 3;
+}
+
+// RestoreCheckpointResponse returns the new revision after restore.
+message RestoreCheckpointResponse {
+  // The new revision created by the restore operation.
+  int64 new_revision = 1;
+  // The branch the restore was applied to.
+  string branch_id = 2;
+}
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+// Error is a checkpoint-specific error frame.
+message Error {
+  CheckpointErrorCode code = 1;
+  string message = 2;
+  bool retryable = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Service
+// -----------------------------------------------------------------------------
+
+// CheckpointService manages named and auto checkpoints for deck history.
+service CheckpointService {
+  // CreateCheckpoint pins the current revision as a named checkpoint.
+  rpc CreateCheckpoint(CreateCheckpointRequest) returns (CreateCheckpointResponse) {}
+
+  // GetCheckpoint fetches a single checkpoint by ID.
+  rpc GetCheckpoint(GetCheckpointRequest) returns (GetCheckpointResponse) {}
+
+  // ListCheckpoints returns all checkpoints for a deck/branch.
+  rpc ListCheckpoints(ListCheckpointsRequest) returns (ListCheckpointsResponse) {}
+
+  // RenameCheckpoint renames an existing checkpoint.
+  rpc RenameCheckpoint(RenameCheckpointRequest) returns (RenameCheckpointResponse) {}
+
+  // RestoreCheckpoint non-destructively restores to a checkpoint.
+  rpc RestoreCheckpoint(RestoreCheckpointRequest) returns (RestoreCheckpointResponse) {}
+}

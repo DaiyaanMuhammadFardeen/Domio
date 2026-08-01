@@ -1,0 +1,150 @@
+// Domio diff.proto
+//
+// Diff request/response for Phase 05 structural diff computation.
+// The diff service computes a 3-way diff at slide and element
+// granularity between source, target, and base branches.
+//
+// The DiffSummary JSON shape is also defined in
+// contracts/schema/merge/diff_summary.schema.json so the agentic
+// layer and the UI share the same contract.
+//
+// Lint rules (see buf.yaml):
+//   - enum prefix DOMIO_
+//   - service suffix Service
+//   - field lower_snake_case
+
+syntax = "proto3";
+
+package domio.diff.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/diff/v1;domiodiffv1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// DiffErrorCode enumerates diff-specific error conditions.
+enum DiffErrorCode {
+  DIFF_ERROR_CODE_UNSPECIFIED = 0;
+  DIFF_ERROR_CODE_DECK_NOT_FOUND = 1;
+  DIFF_ERROR_CODE_SOURCE_BRANCH_NOT_FOUND = 2;
+  DIFF_ERROR_CODE_TARGET_BRANCH_NOT_FOUND = 3;
+  DIFF_ERROR_CODE_BASE_REVISION_NOT_FOUND = 4;
+  DIFF_ERROR_CODE_UNAUTHORIZED = 5;
+  DIFF_ERROR_CODE_INTERNAL = 6;
+}
+
+// -----------------------------------------------------------------------------
+// Diff Shapes
+// -----------------------------------------------------------------------------
+
+// DiffSlideChange describes the change status of a single slide.
+message DiffSlideChange {
+  // Slide identifier (e.g. "slide:{id}").
+  string slide_id = 1;
+}
+
+// DiffSlideChanges groups slide-level additions, removals, and modifications.
+message DiffSlideChanges {
+  repeated DiffSlideChange added = 1;
+  repeated DiffSlideChange removed = 2;
+  repeated DiffSlideChange modified = 3;
+}
+
+// DiffElementChange describes a per-element property change.
+message DiffElementChange {
+  // Slide containing the changed element.
+  string slide_id = 1;
+  // JSON Pointer path to the changed property.
+  string path = 2;
+  // Kind of change: added, modified, removed.
+  string kind = 3;
+  // Source branch value (if modified or removed).
+  string source_value = 4;
+  // Target branch value (if modified or added).
+  string target_value = 5;
+}
+
+// DiffConflict describes a conflicting change between source and target.
+message DiffConflict {
+  // Slide containing the conflict.
+  string slide_id = 1;
+  // Element containing the conflict.
+  string element_id = 2;
+  // JSON Pointer path to the conflicting property.
+  string path = 3;
+  // Value from the source branch.
+  string source_value = 4;
+  // Value from the target branch.
+  string target_value = 5;
+  // Value from the common base.
+  string base_value = 6;
+}
+
+// DiffSummary is the structured 3-way diff output.
+message DiffSummary {
+  // Slides that were added, removed, or modified.
+  DiffSlideChanges slides = 1;
+  // Per-element changes across all slides.
+  repeated DiffElementChange elements = 2;
+  // Conflicting changes requiring resolution.
+  repeated DiffConflict conflicts = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Diff Request / Response
+// -----------------------------------------------------------------------------
+
+// ComputeDiffRequest requests a 3-way diff computation.
+message ComputeDiffRequest {
+  // Deck identifier.
+  string deck_id = 1;
+  // Source branch ID.
+  string source_branch_id = 2;
+  // Target branch ID.
+  string target_branch_id = 3;
+  // Base revision for the 3-way diff; if 0, computed from common ancestor.
+  int64 base_revision = 4;
+}
+
+// ComputeDiffResponse returns the computed diff summary.
+message ComputeDiffResponse {
+  DiffSummary diff_summary = 1;
+  // Whether this was a fast-forward (no diff needed).
+  bool is_fast_forward = 2;
+}
+
+// GetDiffRequest fetches a previously computed diff by MR ID.
+message GetDiffRequest {
+  string deck_id = 1;
+  string mr_id = 2;
+}
+
+// GetDiffResponse returns the stored diff summary.
+message GetDiffResponse {
+  DiffSummary diff_summary = 1;
+}
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+// Error is a diff-specific error frame.
+message Error {
+  DiffErrorCode code = 1;
+  string message = 2;
+  bool retryable = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Service
+// -----------------------------------------------------------------------------
+
+// DiffService computes and retrieves 3-way structural diffs.
+service DiffService {
+  // ComputeDiff computes a 3-way diff between source and target branches.
+  rpc ComputeDiff(ComputeDiffRequest) returns (ComputeDiffResponse) {}
+
+  // GetDiff fetches a previously computed diff by MR ID.
+  rpc GetDiff(GetDiffRequest) returns (GetDiffResponse) {}
+}

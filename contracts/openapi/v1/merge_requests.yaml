@@ -1,0 +1,473 @@
+openapi: 3.1.0
+info:
+  title: Domio Merge Requests API (Phase 05)
+  version: 1.0.0
+  description: |
+    Merge request lifecycle for deck branching and merging.
+
+    A merge request (MR) captures a 3-way diff between a source branch,
+    a target branch, and their common base. It supports conflict
+    resolution (theirs, ours, manual) and produces a structured
+    diff_summary for both UI and agentic consumption.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: merge_requests
+    description: Merge request lifecycle for deck branching.
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+paths:
+  /v1/decks/{deckId}/merge_requests:
+    post:
+      tags: [merge_requests]
+      operationId: createMergeRequest
+      summary: Create a merge request
+      description: |
+        Initiates a new merge request from source to target branch.
+        Returns the MR with the initial diff_summary. If the target
+        branch has not advanced since the base, the merge is a
+        fast-forward and skips the diff UI.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMergeRequestRequest"
+      responses:
+        "201":
+          description: Merge request created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MergeRequestResponse"
+        "400":
+          description: Invalid request (e.g. no changes to merge).
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or branch not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+    get:
+      tags: [merge_requests]
+      operationId: listMergeRequests
+      summary: List merge requests for a deck
+      description: |
+        Returns all merge requests for a deck, optionally filtered by
+        status.
+      parameters:
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [open, resolved, merged, closed]
+          description: Filter by MR status.
+      responses:
+        "200":
+          description: Merge request list returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListMergeRequestsResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/merge_requests/{mrId}:
+    get:
+      tags: [merge_requests]
+      operationId: getMergeRequest
+      summary: Get a merge request
+      description: |
+        Returns a single merge request including its diff_summary.
+      parameters:
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: mrId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Merge request identifier.
+      responses:
+        "200":
+          description: Merge request returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MergeRequestResponse"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or MR not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/merge_requests/{mrId}/resolve:
+    post:
+      tags: [merge_requests]
+      operationId: resolveMergeRequest
+      summary: Resolve merge request conflicts
+      description: |
+        Resolves conflicts in a merge request using the specified strategy.
+        "theirs" accepts all source changes, "ours" keeps target values,
+        and "manual" applies per-path resolutions from the request body.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: mrId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Merge request identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResolveMergeRequestRequest"
+      responses:
+        "200":
+          description: Conflicts resolved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MergeRequestResponse"
+        "400":
+          description: Invalid resolution (e.g. missing manual resolutions).
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or MR not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/decks/{deckId}/merge_requests/{mrId}/merge:
+    post:
+      tags: [merge_requests]
+      operationId: commitMergeRequest
+      summary: Commit a merge request
+      description: |
+        Finalises the merge, producing a new branch head on the target.
+        All conflicts must be resolved before merging. The merge is
+        idempotent — re-merging after a partial resolve produces the
+        same head.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: path
+          name: deckId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Deck identifier (ULID).
+        - in: path
+          name: mrId
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+          description: Merge request identifier.
+      responses:
+        "200":
+          description: Merge committed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommitMergeResponse"
+        "400":
+          description: Conflicts not yet resolved.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck or MR not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Phase 0 stub: the bearer token is `dev-stub-token`. Phase 20
+        will replace this with full SSO + SCIM + signed capability
+        tokens.
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: domio_session
+      description: HttpOnly session cookie set by the auth endpoint.
+  schemas:
+    DiffSummary:
+      type: object
+      required: [slides, elements, conflicts]
+      properties:
+        slides:
+          $ref: "#/components/schemas/DiffSlideChanges"
+        elements:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffElementChange"
+          description: Per-element changes across all slides.
+        conflicts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffConflict"
+          description: Conflicting changes requiring resolution.
+    DiffSlideChanges:
+      type: object
+      required: [added, removed, modified]
+      properties:
+        added:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffSlideRef"
+        removed:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffSlideRef"
+        modified:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiffSlideRef"
+    DiffSlideRef:
+      type: object
+      required: [slideId]
+      properties:
+        slideId:
+          type: string
+          description: Slide identifier (e.g. "slide:{id}").
+    DiffElementChange:
+      type: object
+      required: [slideId, path, kind]
+      properties:
+        slideId:
+          type: string
+          description: Slide containing the changed element.
+        path:
+          type: string
+          description: JSON Pointer path to the changed property.
+        kind:
+          type: string
+          enum: [added, modified, removed]
+          description: Kind of change.
+        sourceValue:
+          description: Source branch value (if modified or removed).
+        targetValue:
+          description: Target branch value (if modified or added).
+    DiffConflict:
+      type: object
+      required: [slideId, elementId, path, sourceValue, targetValue, baseValue]
+      properties:
+        slideId:
+          type: string
+          description: Slide containing the conflict.
+        elementId:
+          type: string
+          description: Element containing the conflict.
+        path:
+          type: string
+          description: JSON Pointer path to the conflicting property.
+        sourceValue:
+          description: Value from the source branch.
+        targetValue:
+          description: Value from the target branch.
+        baseValue:
+          description: Value from the common base.
+    MergeRequest:
+      type: object
+      required: [id, deckId, sourceBranchId, targetBranchId, status, createdBy, createdAt]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Unique MR identifier (ULID).
+        deckId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        sourceBranchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Source branch (the branch being merged in).
+        targetBranchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Target branch (the branch receiving the merge).
+        status:
+          type: string
+          enum: [open, resolved, merged, closed]
+        diffSummary:
+          $ref: "#/components/schemas/DiffSummary"
+        resolutionStrategy:
+          type: string
+          enum: [theirs, ours, manual]
+          description: Resolution strategy applied (if resolved).
+        resolvedBy:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Actor who resolved the conflicts.
+        resolvedAt:
+          type: string
+          format: date-time
+          description: Timestamp when conflicts were resolved.
+        createdBy:
+          type: string
+          minLength: 1
+          maxLength: 128
+        createdAt:
+          type: string
+          format: date-time
+    CreateMergeRequestRequest:
+      type: object
+      required: [sourceBranchId, targetBranchId]
+      properties:
+        sourceBranchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Source branch ID (being merged).
+        targetBranchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Target branch ID (receiving the merge).
+    ResolveMergeRequestRequest:
+      type: object
+      required: [strategy]
+      properties:
+        strategy:
+          type: string
+          enum: [theirs, ours, manual]
+          description: Strategy for resolving conflicts.
+        resolutions:
+          type: object
+          additionalProperties:
+            type: string
+          description: >
+            Manual resolutions: JSON Pointer path to chosen value
+            (only for "manual" strategy).
+    MergeRequestResponse:
+      type: object
+      required: [mergeRequest]
+      properties:
+        mergeRequest:
+          $ref: "#/components/schemas/MergeRequest"
+        traceId:
+          type: string
+    ListMergeRequestsResponse:
+      type: object
+      required: [mergeRequests]
+      properties:
+        mergeRequests:
+          type: array
+          items:
+            $ref: "#/components/schemas/MergeRequest"
+        traceId:
+          type: string
+    CommitMergeResponse:
+      type: object
+      required: [mergeRequest, newRevision]
+      properties:
+        mergeRequest:
+          $ref: "#/components/schemas/MergeRequest"
+        newRevision:
+          type: integer
+          format: int64
+          minimum: 0
+          description: New revision on the target branch.
+        traceId:
+          type: string
