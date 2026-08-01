@@ -97,7 +97,10 @@ function generateJWT(deckId, actorId) {
   var headerB64 = base64urlEncode(header);
   var payloadB64 = base64urlEncode(payload);
   var signingInput = headerB64 + '.' + payloadB64;
-  var signature = crypto.hmac('sha256', JWT_SECRET, signingInput, 'base64url');
+  // Use binary then encode with rawurl to produce unpadded base64url,
+  // matching Go's base64.RawURLEncoding used in handshake.go verifyHMAC.
+  var sigBytes = crypto.hmac('sha256', JWT_SECRET, signingInput, 'binary');
+  var signature = base64urlEncode(String.fromCharCode.apply(null, sigBytes));
 
   return signingInput + '.' + signature;
 }

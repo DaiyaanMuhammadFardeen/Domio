@@ -21,25 +21,127 @@ bash tests/e2e/realtime-e2e.sh
 
 This runs the complete suite: build → boot → Go test → k6 load → chaos → teardown.
 
+## JWT Claims Format
+
+All clients minting tokens for the realtime gateway must produce HMAC-SHA256 (HS256) JWTs with the following structure:
+
+### Header
+
+```json
+{"alg": "HS256", "typ": "JWT"}
+```
+
+The gateway **pins algorithm to HS256** — tokens with `alg: none`, `alg: RS256`, or any other algorithm are rejected.
+
+### Payload (Claims)
+
+```json
+{
+  "sub":          "<actor_ulid>",
+  "actor_id":     "<actor_ulid>",
+  "deck_id":      "<deck_ulid>",
+  "session_kind": "interactive" | "service",
+  "exp":          <unix_epoch_seconds>,
+  "iat":          <unix_epoch_seconds>
+}
+```
+
+| Claim | Type | Required | Description |
+|-------|------|----------|-------------|
+| `sub` | string | yes | Subject — typically the actor's ULID |
+| `actor_id` | string | yes | Actor identifier (ULID). Must match `sub`. |
+| `deck_id` | string | yes | Deck identifier (ULID). Must match the URL path deck ID. |
+| `session_kind` | string | yes | `"interactive"` (browser) or `"service"` (backend). |
+| `exp` | int64 | yes | Expiration time (Unix epoch seconds). |
+| `iat` | int64 | yes | Issued-at time (Unix epoch seconds). |
+
+### Signature
+
+- **Algorithm**: HMAC-SHA256 over `<header_b64>.<payload_b64>`
+- **Encoding**: Unpadded base64url (`base64.RawURLEncoding` in Go)
+- **Secret**: Shared `JWT_SECRET` configured on the gateway
+
+### Example (Go)
+
+```go
+headerJSON, _ := json.Marshal(map[string]string{"alg": "HS256", "typ": "JWT"})
+headerB64 := base64.RawURLEncoding.EncodeToString(headerJSON)
+
+payloadJSON, _ := json.Marshal(map[string]any{
+    "sub":          actorID,
+    "actor_id":     actorID,
+    "deck_id":      deckID,
+    "session_kind": "interactive",
+    "exp":          time.Now().Add(time.Hour).Unix(),
+    "iat":          time.Now().Unix(),
+})
+payloadB64 := base64.RawURLEncoding.EncodeToString(payloadJSON)
+
+mac := hmac.New(sha256.New, []byte(jwtSecret))
+mac.Write([]byte(headerB64 + "." + payloadB64))
+sig := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+
+token := headerB64 + "." + payloadB64 + "." + sig
+```
+
+### Example (JavaScript/k6)
+
+```javascript
+function generateJWT(deckId, actorId, secret) {
+  var header = JSON.stringify({ alg: 'HS256', typ: 'JWT' });
+  var now = Math.floor(Date.now() / 1000);
+  var payload = JSON.stringify({
+    sub: actorId, actor_id: actorId, deck_id: deckId,
+    session_kind: 'interactive', exp: now + 3600, iat: now,
+  });
+  var headerB64 = encoding.b64encode(header, 'rawurl');
+  var payloadB64 = encoding.b64encode(payload, 'rawurl');
+  var signingInput = headerB64 + '.' + payloadB64;
+  // IMPORTANT: use binary then rawurl to avoid padding
+  var sigBytes = crypto.hmac('sha256', secret, signingInput, 'binary');
+  var signature = encoding.b64encode(String.fromCharCode.apply(null, sigBytes), 'rawurl');
+  return signingInput + '.' + signature;
+}
+```
+
+### WebSocket Authentication
+
+The JWT is passed as a `?token=` query parameter on the WebSocket upgrade request:
+
+```
+ws://localhost:8080/v1/sync/{deckId}?token={jwt}
+```
+
+## Wire Protocol
+
+WebSocket binary frames with 4-byte big-endian length prefix followed by raw protobuf bytes:
+
+```
+[4-byte BE length][protobuf payload]
+```
+
+**No type tag** — message type is discriminated by field presence on the decoded protobuf (see `unwrapMessage` in `transport/ws.go` and `realtime.go`).
+
 ## What Gets Tested
 
 ### Go E2E Test (`e2e_test.go`)
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 00_Setup | Create test tenant + workspace + deck in Postgres (FK compliance) | ✅ PASS |
-| 01_SyncHandshake | Connect WS → send Hello → receive Welcome (gateway_id, HLC, heartbeat) | ✅ PASS |
-| 02_SendOps | Send 50 Ops → receive OpAck for each (applied=true) | ⚠️ Known bug BUG-001 |
-| 03_DuplicateOp | Send same op_id twice → assert idempotent handling | ⏭️ Skipped (blocked by BUG-001) |
-| 04_PostgresPersistence | Verify ops landed in crdt_logs table | ⏭️ Skipped (blocked by BUG-001) |
-| 05_SecondClient | Open second WS client for same deck → assert Welcome received | ✅ PASS |
-| 06_Presence | Two actors connect presence → assert cursor update fan-out | ✅ PASS |
-| 99_Summary | Print results table with known bugs | ✅ PASS |
+| Phase | Description | Client | Status |
+|-------|-------------|--------|--------|
+| 00_Setup | Create test tenant + workspace + deck in Postgres (FK compliance) | — | ✅ PASS |
+| 01_SyncHandshake_SDK | Connect via SDK → send Hello → receive Welcome | Go SDK | ✅ PASS |
+| 02_SendOps_SDK | Send 50 Ops via SDK → receive OpAck for each | Go SDK | ⚠️ Known bug BUG-001 |
+| 03_DuplicateOp_SDK | Send same op_id twice → assert idempotent handling | Go SDK | ⏭️ Skipped (blocked by BUG-001) |
+| 04_PostgresPersistence | Verify ops landed in crdt_logs table | — | ⏭️ Skipped (blocked by BUG-001) |
+| 05_SecondClient_SDK | Open second SDK client for same deck → assert Welcome received | Go SDK | ✅ PASS |
+| 06_Presence | Two actors connect presence → assert cursor update fan-out | Raw WS | ✅ PASS |
+| 99_Summary | Print results table with known bugs | — | ✅ PASS |
 
 ### k6 Load Test
 
 - 4 VUs, 15s duration, constant VUs scenario
 - Connects to live gateway WS endpoint
+- JWT generation uses unpadded base64url (matches Go's `base64.RawURLEncoding`)
 - Measures connection throughput and latency
 
 ### Chaos Scenario
@@ -68,22 +170,6 @@ This causes ALL Op inserts to fail, returning `REALTIME_ERROR_CODE_INVALID_OP` t
 
 **Fix**: Change `int32(op.GetOpType())` to `op.GetOpType().String()` in the INSERT statement.
 
-### BUG-002: k6 JWT encoding (affects k6 script only)
-
-**Location**: `tests/load/k6-realtime.js` — `generateJWT()`
-
-**Problem**: k6's `crypto.hmac('sha256', ..., 'base64url')` may include padding `=` characters in the signature, while Go's `base64.RawURLEncoding` (used by the gateway's handshake verifier) produces unpadded output. This causes JWT verification to fail with 401.
-
-**Fix**: Use binary encoding + manual base64url in the k6 JWT generation, as done in the e2e k6 test script.
-
-### Wire Format Mismatch (affects Go SDK client)
-
-**Location**: `packages/sdk-go/realtime/realtime.go` — `MarshalFrame()`
-
-**Problem**: The Go SDK's `MarshalFrame` adds a 1-byte type tag between the 4-byte length prefix and protobuf payload: `[4-byte len][1-byte tag][protobuf]`. The server's `transport/ws.go` reads/writes `[4-byte len][protobuf]` with no type tag. This means the Go SDK client cannot communicate with the gateway server.
-
-**Note**: The e2e test uses raw gorilla/websocket with the server's wire format to bypass this mismatch.
-
 ## Architecture
 
 ```
@@ -99,7 +185,7 @@ realtime-e2e.sh
     ├── STEP 1: Build binaries (gateway + sync worker)
     ├── STEP 2: Start gateway (unique JWT_SECRET, port 18080)
     ├── STEP 3: Start sync worker (port 19090)
-    ├── STEP 4: Run Go E2E test (E2E=1)
+    ├── STEP 4: Run Go E2E test (E2E=1) — SDK client path
     ├── STEP 5: Run k6 load test (15s CI scenario)
     ├── STEP 6: Chaos scenario (NATS SIGSTOP/SIGCONT)
     └── Summary: PASS/FAIL with timings

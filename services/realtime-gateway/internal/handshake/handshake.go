@@ -26,13 +26,28 @@ var (
 )
 
 // Claims represents the JWT claims relevant to the realtime gateway.
+//
+// Required claims format for clients minting tokens:
+//
+//	{
+//	  "sub":          "<actor_ulid>",
+//	  "actor_id":     "<actor_ulid>",
+//	  "deck_id":      "<deck_ulid>",
+//	  "session_kind": "interactive" | "service",
+//	  "exp":          <unix_epoch_seconds>,
+//	  "iat":          <unix_epoch_seconds>
+//	}
+//
+// Header must contain {"alg":"HS256","typ":"JWT"}.
+// Signature must be HMAC-SHA256 over "header_b64.payload_b64" using the
+// shared JWT_SECRET, encoded as unpadded base64url (base64.RawURLEncoding).
 type Claims struct {
-	Subject   string `json:"sub"`
-	ActorID   string `json:"actor_id"`
-	DeckID    string `json:"deck_id"`
+	Subject     string `json:"sub"`
+	ActorID     string `json:"actor_id"`
+	DeckID      string `json:"deck_id"`
 	SessionKind string `json:"session_kind"`
-	ExpiresAt int64  `json:"exp"`
-	IssuedAt  int64  `json:"iat"`
+	ExpiresAt   int64  `json:"exp"`
+	IssuedAt    int64  `json:"iat"`
 }
 
 // AllowedSessionKinds is the set of session_kind values accepted by the gateway.
@@ -86,6 +101,21 @@ func (v *Verifier) Verify(ctx context.Context, token string) (*Claims, error) {
 
 func (v *Verifier) verifyHMAC(parts []string) (*Claims, error) {
 	headerB64, payloadB64, sigB64 := parts[0], parts[1], parts[2]
+
+	// Pin algorithm to HS256 — prevents "alg:none" and algorithm confusion attacks.
+	headerJSON, err := base64.RawURLEncoding.DecodeString(headerB64)
+	if err != nil {
+		return nil, fmt.Errorf("handshake: base64 decode header: %w", err)
+	}
+	var header struct {
+		Alg string `json:"alg"`
+	}
+	if err := json.Unmarshal(headerJSON, &header); err != nil {
+		return nil, fmt.Errorf("handshake: json unmarshal header: %w", err)
+	}
+	if header.Alg != "HS256" {
+		return nil, fmt.Errorf("handshake: unsupported algorithm %q (only HS256 allowed)", header.Alg)
+	}
 
 	// Compute expected signature.
 	mac := hmac.New(sha256.New, v.secret)
