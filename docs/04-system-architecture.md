@@ -247,6 +247,8 @@ The module dependency graph is acyclic by policy. Cross-module writes go through
 
 ### 4.5.2 Canvas render pipeline
 
+> **Phase 04 cross-reference:** The realtime gateway (`/services/realtime-gateway`) and the Yjs CRDT sync substrate (`/packages/yjs-shared`) are now live and implement features #17 (realtime collaboration), #19 (branching infrastructure), and #21 (offline-first sync) as specified in `phase-04-realtime-collab-crdt.md`. The `Canvas/Sync (presence fan-out)` module in §4.4 and the `deck document state (Yjs sub-documents)` layer in §4.5.1 are now operational.
+
 ```mermaid
 flowchart LR
     Input[Pointer/keyboard]
