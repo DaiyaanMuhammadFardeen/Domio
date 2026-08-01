@@ -1,0 +1,408 @@
+{
+  "uid": "rtgw-realtime-gateway",
+  "title": "Realtime Gateway",
+  "tags": ["domio", "realtime", "phase-04"],
+  "timezone": "utc",
+  "editable": false,
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "text": "Prometheus", "value": "Prometheus" },
+        "hide": 0
+      },
+      {
+        "name": "instance",
+        "type": "query",
+        "datasource": { "uid": "${datasource}" },
+        "query": "label_values(rtgw_sync_active_connections, instance)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Active WebSocket Connections",
+      "description": "Current number of active sync WebSocket connections to the realtime gateway.",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 500 },
+              { "color": "red", "value": 1000 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "rtgw_sync_active_connections{instance=~\"$instance\"}",
+          "legendFormat": "connections",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Active Presence Sessions",
+      "description": "Current number of active presence sessions across all decks.",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 200 },
+              { "color": "red", "value": 500 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "rtgw_presence_active_sessions{instance=~\"$instance\"}",
+          "legendFormat": "sessions",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Op Round-Trip Time (p95)",
+      "description": "95th-percentile round-trip time for sync operations. DoD threshold: > 250 ms triggers alert.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 150 },
+              { "color": "red", "value": 250 }
+            ]
+          },
+          "unit": "ms",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(rtgw_sync_op_round_trip_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le, deck_id))",
+          "legendFormat": "p95 deck={{deck_id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(rtgw_sync_op_round_trip_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le, deck_id))",
+          "legendFormat": "p99 deck={{deck_id}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "CRDT Convergence Time (p95)",
+      "description": "95th-percentile time for CRDT state convergence after op apply. DoD threshold: > 2000 ms triggers alert.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1000 },
+              { "color": "red", "value": 2000 }
+            ]
+          },
+          "unit": "ms",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(rtgw_sync_crdt_convergence_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le, deck_id))",
+          "legendFormat": "p95 deck={{deck_id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(rtgw_sync_crdt_convergence_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le, deck_id))",
+          "legendFormat": "p99 deck={{deck_id}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Op Apply Duration (p95)",
+      "description": "95th-percentile time to apply a single sync operation to the CRDT state.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ms",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(rtgw_sync_op_apply_duration_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(rtgw_sync_op_apply_duration_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le))",
+          "legendFormat": "p50",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Presence Cursor Latency (p95)",
+      "description": "95th-percentile latency for presence cursor updates to reach all peers.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 80 }
+            ]
+          },
+          "unit": "ms",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(rtgw_presence_cursor_latency_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le))",
+          "legendFormat": "p95",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(rtgw_presence_cursor_latency_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le))",
+          "legendFormat": "p99",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Op Round-Trip p95 — Alert Threshold",
+      "description": "Red line at 250 ms DoD threshold. Fires rtgw-op-roundtrip-p95-high alert.",
+      "type": "timeseries",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 22 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "pointSize": 0,
+            "showPoints": "never",
+            "thresholdsStyle": { "mode": "line+area" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "red", "value": 250 }
+            ]
+          },
+          "unit": "ms",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "DoD Threshold (250 ms)" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } },
+              { "id": "custom.fillOpacity", "value": 10 }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(rtgw_sync_op_round_trip_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le))",
+          "legendFormat": "p95 (all decks)",
+          "refId": "A"
+        },
+        {
+          "expr": "250",
+          "legendFormat": "DoD Threshold (250 ms)",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "CRDT Convergence p95 — Alert Threshold",
+      "description": "Red line at 2000 ms DoD threshold. Fires rtgw-crdt-convergence-p95-high alert.",
+      "type": "timeseries",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 26 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "pointSize": 0,
+            "showPoints": "never",
+            "thresholdsStyle": { "mode": "line+area" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "red", "value": 2000 }
+            ]
+          },
+          "unit": "ms",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "DoD Threshold (2000 ms)" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } },
+              { "id": "custom.fillOpacity", "value": 10 }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(rtgw_sync_crdt_convergence_ms_bucket{instance=~\"$instance\"}[$__rate_interval])) by (le))",
+          "legendFormat": "p95 (all decks)",
+          "refId": "A"
+        },
+        {
+          "expr": "2000",
+          "legendFormat": "DoD Threshold (2000 ms)",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "name": "Alerts",
+        "datasource": { "uid": "${datasource}" },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "type": "dashboard"
+      }
+    ]
+  }
+}

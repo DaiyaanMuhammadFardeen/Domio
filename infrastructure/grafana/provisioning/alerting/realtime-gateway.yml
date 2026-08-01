@@ -1,0 +1,124 @@
+# Grafana unified alerting rules provisioned for the realtime gateway.
+# These rules are loaded by Grafana on startup when alerting provisioning
+# is enabled (default for self-hosted Grafana in this repo).
+#
+# DoD: alerts on op_round_trip_ms p95 > 250 ms and crdt_convergence_ms p95 > 2000 ms are wired.
+
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: realtime-gateway
+    folder: domio
+    interval: 30s
+    rules:
+      # ── Alert 1: Op round-trip p95 exceeded 250 ms ──────────────────
+      - uid: rtgw-op-roundtrip-p95-high
+        title: "rtgw op_round_trip_ms p95 > 250 ms"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: >-
+                histogram_quantile(0.95,
+                  sum(rate(rtgw_sync_op_round_trip_ms_bucket[$__rate_interval])) by (le)
+                )
+              instant: false
+              range: true
+              intervalMs: 15000
+              maxDataPoints: 4320
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [250]
+                  operator:
+                    type: and
+                  reducer:
+                    type: last
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+        for: 5m
+        labels:
+          service: realtime-gateway
+          severity: warning
+          phase: "04"
+        annotations:
+          summary: "Realtime gateway op round-trip p95 exceeds 250 ms"
+          description: >-
+            The 95th-percentile round-trip time for sync operations has exceeded
+            250 ms for 5 minutes. Current value: {{ $values.C }} ms.
+            DoD threshold: op_round_trip_ms p95 > 250 ms.
+          runbook_url: "https://github.com/domio/domio/blob/main/docs/runbooks/realtime-gateway-high-latency.md"
+
+      # ── Alert 2: CRDT convergence p95 exceeded 2000 ms ──────────────
+      - uid: rtgw-crdt-convergence-p95-high
+        title: "rtgw crdt_convergence_ms p95 > 2000 ms"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: >-
+                histogram_quantile(0.95,
+                  sum(rate(rtgw_sync_crdt_convergence_ms_bucket[$__rate_interval])) by (le)
+                )
+              instant: false
+              range: true
+              intervalMs: 15000
+              maxDataPoints: 4320
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [2000]
+                  operator:
+                    type: and
+                  reducer:
+                    type: last
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+        for: 5m
+        labels:
+          service: realtime-gateway
+          severity: warning
+          phase: "04"
+        annotations:
+          summary: "Realtime gateway CRDT convergence p95 exceeds 2000 ms"
+          description: >-
+            The 95th-percentile CRDT convergence time has exceeded 2000 ms for
+            5 minutes. Current value: {{ $values.C }} ms.
+            DoD threshold: crdt_convergence_ms p95 > 2000 ms.
+          runbook_url: "https://github.com/domio/domio/blob/main/docs/runbooks/realtime-gateway-slow-convergence.md"
