@@ -73,6 +73,15 @@ async function main() {
     process.exit(2);
   }
 
+  // Register every schema under its $id FIRST so cross-file $refs resolve
+  // (e.g. deck.schema.json -> scene-graph.schema.json#/definitions/...).
+  for (const { data } of schemas) {
+    const id = data.$id || data.id;
+    if (typeof id === "string" && id.length > 0) {
+      ajv.addSchema(data, id);
+    }
+  }
+
   let hadFailure = false;
 
   for (const { name, data } of schemas) {
