@@ -1,0 +1,58 @@
+# toxiproxy-realtime.yaml — Chaos testing infrastructure for the realtime gateway.
+#
+# Uses Toxiproxy to inject network faults between the gateway and its
+# dependencies (NATS, Redis). The gateway is configured to connect to
+# Toxiproxy proxy ports instead of directly to the real services.
+#
+# Architecture:
+#   k6 → gateway → Toxiproxy → NATS (real, localhost:4222)
+#                           → Redis (real, localhost:6379)
+#
+# Run:
+#   docker compose -f tests/chaos/toxiproxy-realtime.yaml up -d
+#   tests/chaos/run.sh
+
+version: "3.8"
+
+services:
+  toxiproxy:
+    image: shopify/toxiproxy:latest
+    container_name: domio-toxiproxy
+    ports:
+      - "8474:8474"   # Toxiproxy API
+      - "14222:14222" # NATS proxy
+      - "16379:16379" # Redis proxy
+    networks:
+      - chaos-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8474/version"]
+      interval: 2s
+      timeout: 3s
+      retries: 5
+
+  # The gateway, configured to use toxiproxy addresses.
+  gateway-chaos:
+    build:
+      context: ../../
+      dockerfile: services/realtime-gateway/Dockerfile
+      # If no Dockerfile exists, use a binary mount approach instead (see run.sh)
+    image: domio-rtgw-chaos:latest
+    container_name: domio-rtgw-chaos
+    depends_on:
+      toxiproxy:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      NATS_URL: "nats://toxiproxy:14222"
+      REDIS_ADDR: "toxiproxy:16379"
+      POSTGRES_URL: ""
+      JWT_SECRET: "chaos-test-secret"
+      JWT_JWKS_URL: ""
+    ports:
+      - "8081:8080"
+    networks:
+      - chaos-net
+
+networks:
+  chaos-net:
+    driver: bridge
