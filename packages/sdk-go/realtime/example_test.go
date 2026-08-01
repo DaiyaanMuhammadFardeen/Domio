@@ -9,7 +9,8 @@ import (
 )
 
 // This example demonstrates the frame codec round-trip: marshal a
-// Hello frame, then unmarshal it back.
+// Hello frame, then unmarshal it back. Wire format is
+// [4-byte BE length][protobuf bytes] — matching the server gateway.
 func Example_frameCodec() {
 	// Build a Hello message
 	hello := &rtproto.Hello{
@@ -42,7 +43,7 @@ func Example_frameCodec() {
 	fmt.Printf("actor: %s, deck: %s\n", helloFrame.Hello.ActorId, helloFrame.Hello.DeckId)
 
 	// Output:
-	// wire frame: 78 bytes
+	// wire frame: 77 bytes
 	// frame type: 1
 	// actor: 01H0ABCDEF0123456789ABCDEF, deck: deck-123
 }

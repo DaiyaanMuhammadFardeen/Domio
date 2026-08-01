@@ -45,6 +45,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"net/url"
 	"sync"
 	"time"
 
@@ -75,19 +76,10 @@ const (
 	FrameError                  // Server -> Client
 )
 
-// Wire type tags for the frame codec.
-const (
-	wireTypeHello       byte = 0x01
-	wireTypeWelcome     byte = 0x02
-	wireTypeOp          byte = 0x03
-	wireTypeOpAck       byte = 0x04
-	wireTypePresence    byte = 0x05
-	wireTypePeerJoined  byte = 0x06
-	wireTypePeerLeft    byte = 0x07
-	wireTypeBranchSwitch byte = 0x08
-	wireTypeBranchHead  byte = 0x09
-	wireTypeError       byte = 0x0A
-)
+// NOTE: The server gateway (transport/ws.go) does NOT use a wire type tag.
+// Wire format is [4-byte big-endian length][protobuf bytes]. Message type
+// discrimination is done by field presence on the decoded protobuf,
+// mirroring unwrapMessage in the gateway.
 
 // Frame is the top-level decoded frame read from the WebSocket.
 type Frame interface {
@@ -222,90 +214,33 @@ type ErrorFrame struct {
 func (f ErrorFrame) GetType() FrameType { return FrameError }
 
 // ---------------------------------------------------------------------------
-// Frame codec — length-prefix + protobuf
+// Frame codec — length-prefix + protobuf (matches server wire format)
 // ---------------------------------------------------------------------------
 
-// Wire format: [4-byte big-endian payload length][1-byte type tag][protobuf payload bytes]
+// Wire format: [4-byte big-endian payload length][protobuf payload bytes]
 //
-// The type tag identifies which protobuf message follows. The payload
-// length does NOT include the 5-byte header (4 length + 1 tag).
+// This matches the server gateway (transport/ws.go). There is NO type tag;
+// message type is discriminated by field presence on the decoded protobuf
+// bytes, mirroring the server's unwrapMessage function.
 
-// wireTypeForProto returns the wire type tag for a protobuf message.
-func wireTypeForProto(msg proto.Message) (byte, error) {
-	switch msg.(type) {
-	case *rtproto.Hello:
-		return wireTypeHello, nil
-	case *rtproto.Welcome:
-		return wireTypeWelcome, nil
-	case *rtproto.Op:
-		return wireTypeOp, nil
-	case *rtproto.OpAck:
-		return wireTypeOpAck, nil
-	case *rtproto.Presence:
-		return wireTypePresence, nil
-	case *rtproto.PeerJoined:
-		return wireTypePeerJoined, nil
-	case *rtproto.PeerLeft:
-		return wireTypePeerLeft, nil
-	case *rtproto.BranchSwitch:
-		return wireTypeBranchSwitch, nil
-	case *rtproto.BranchHead:
-		return wireTypeBranchHead, nil
-	case *rtproto.Error:
-		return wireTypeError, nil
-	default:
-		return 0, fmt.Errorf("unknown protobuf message type: %T", msg)
-	}
-}
-
-// protoForWireType returns a new protobuf message for a wire type tag.
-func protoForWireType(tag byte) (proto.Message, error) {
-	switch tag {
-	case wireTypeHello:
-		return &rtproto.Hello{}, nil
-	case wireTypeWelcome:
-		return &rtproto.Welcome{}, nil
-	case wireTypeOp:
-		return &rtproto.Op{}, nil
-	case wireTypeOpAck:
-		return &rtproto.OpAck{}, nil
-	case wireTypePresence:
-		return &rtproto.Presence{}, nil
-	case wireTypePeerJoined:
-		return &rtproto.PeerJoined{}, nil
-	case wireTypePeerLeft:
-		return &rtproto.PeerLeft{}, nil
-	case wireTypeBranchSwitch:
-		return &rtproto.BranchSwitch{}, nil
-	case wireTypeBranchHead:
-		return &rtproto.BranchHead{}, nil
-	case wireTypeError:
-		return &rtproto.Error{}, nil
-	default:
-		return nil, fmt.Errorf("unknown wire type tag: 0x%02X", tag)
-	}
-}
-
-// MarshalFrame serializes a protobuf message into the length-prefix wire format.
+// MarshalFrame serializes a protobuf message into the length-prefix wire format:
+// [4-byte big-endian payload length][protobuf payload bytes].
+//
+// This matches the server's framing in transport/ws.go (no type tag).
 func MarshalFrame(msg proto.Message) ([]byte, error) {
-	tag, err := wireTypeForProto(msg)
-	if err != nil {
-		return nil, err
-	}
 	payload, err := proto.Marshal(msg)
 	if err != nil {
 		return nil, fmt.Errorf("proto.Marshal: %w", err)
 	}
-	// 4 bytes length + 1 byte tag + payload
-	frame := make([]byte, 5+len(payload))
+	frame := make([]byte, 4+len(payload))
 	binary.BigEndian.PutUint32(frame[:4], uint32(len(payload)))
-	frame[4] = tag
-	copy(frame[5:], payload)
+	copy(frame[4:], payload)
 	return frame, nil
 }
 
 // UnmarshalFrame reads one length-prefixed frame from r and returns the
-// decoded protobuf message.
+// decoded protobuf message. It discriminates message type by field presence,
+// mirroring unwrapMessage in the gateway's transport/ws.go.
 func UnmarshalFrame(r io.Reader) (Frame, error) {
 	// Read 4-byte length prefix
 	var length uint32
@@ -316,29 +251,115 @@ func UnmarshalFrame(r io.Reader) (Frame, error) {
 		return nil, fmt.Errorf("frame too large: %d bytes", length)
 	}
 
-	// Read 1-byte type tag
-	var tagByte [1]byte
-	if _, err := io.ReadFull(r, tagByte[:]); err != nil {
-		return nil, fmt.Errorf("read type tag: %w", err)
-	}
-
-	// Read payload
+	// Read payload (no type tag — matches server wire format)
 	payload := make([]byte, length)
 	if _, err := io.ReadFull(r, payload); err != nil {
 		return nil, fmt.Errorf("read payload: %w", err)
 	}
 
-	// Decode protobuf
-	msg, err := protoForWireType(tagByte[0])
-	if err != nil {
-		return nil, err
-	}
-	if err := proto.Unmarshal(payload, msg); err != nil {
-		return nil, fmt.Errorf("proto.Unmarshal: %w", err)
+	return unwrapMessage(payload)
+}
+
+// unwrapMessage attempts to unmarshal raw protobuf bytes into a known message
+// type by field presence — exactly mirroring the server's unwrapMessage in
+// transport/ws.go, extended for all message types the client receives.
+//
+// Check order and discriminators:
+//   - Op:          op_id (field 1) + hlc (field 6) — unique to Op.
+//   - Presence:    actor_id (field 1) + kind (field 5) != UNSPECIFIED.
+//   - Hello:       actor_id (field 1) + deck_id (field 2).
+//   - BranchSwitch: actor_id (field 1) + to_branch_id (field 3).
+//   - Welcome:     gateway_id (field 1) + heartbeat_interval_ms (field 3) > 0.
+//   - OpAck:       op_id (field 1) — checked after Welcome to avoid false match.
+//   - PeerJoined:  actor_id (field 1) + session_id (field 2) + branch_id (field 3) + hlc (field 4).
+//   - PeerLeft:    actor_id (field 1) + session_id (field 2) + branch_id (field 3) + hlc (field 4).
+//   - BranchHead:  deck_id (field 1) + branch_id (field 2) + hlc (field 3).
+//   - Error:       code (field 1) != UNSPECIFIED.
+func unwrapMessage(data []byte) (Frame, error) {
+	// Op is checked first — has the unique hlc field (field 6).
+	op := &rtproto.Op{}
+	if err := proto.Unmarshal(data, op); err == nil &&
+		op.GetOpId() != "" && op.GetHlc() != nil {
+		return OpFrame(OpFromProto(op)), nil
 	}
 
-	// Wrap in typed frame
-	return wrapProtoFrame(msg)
+	// Presence is checked before Hello — field 5 (kind) is an enum (varint)
+	// while Hello field 5 is repeated string — different wire types.
+	presence := &rtproto.Presence{}
+	if err := proto.Unmarshal(data, presence); err == nil &&
+		presence.GetActorId() != "" &&
+		presence.GetKind() != rtproto.PresenceKind_PRESENCE_KIND_UNSPECIFIED {
+		return PresenceFrame{Presence: presence}, nil
+	}
+
+	// Hello requires both actor_id and deck_id.
+	hello := &rtproto.Hello{}
+	if err := proto.Unmarshal(data, hello); err == nil &&
+		hello.GetActorId() != "" && hello.GetDeckId() != "" {
+		return HelloFrame{Hello: hello}, nil
+	}
+
+	// BranchSwitch requires actor_id and to_branch_id.
+	branchSwitch := &rtproto.BranchSwitch{}
+	if err := proto.Unmarshal(data, branchSwitch); err == nil &&
+		branchSwitch.GetActorId() != "" && branchSwitch.GetToBranchId() != "" {
+		return BranchSwitchFrame{BranchSwitch: branchSwitch}, nil
+	}
+
+	// Welcome requires gateway_id and heartbeat_interval_ms > 0.
+	// Checked before OpAck because both have a string at field 1 (gateway_id
+	// vs op_id) and would otherwise false-match on field presence alone.
+	welcome := &rtproto.Welcome{}
+	if err := proto.Unmarshal(data, welcome); err == nil &&
+		welcome.GetGatewayId() != "" && welcome.GetHeartbeatIntervalMs() > 0 {
+		return WelcomeFrame{Welcome: welcome}, nil
+	}
+
+	// OpAck requires op_id (field 1). Checked after Welcome to avoid
+	// false-matching a Welcome frame whose gateway_id lands in op_id.
+	opAck := &rtproto.OpAck{}
+	if err := proto.Unmarshal(data, opAck); err == nil &&
+		opAck.GetOpId() != "" {
+		return OpAckFrame{OpAck: opAck}, nil
+	}
+
+	// PeerJoined requires actor_id, session_id, branch_id, and hlc.
+	peerJoined := &rtproto.PeerJoined{}
+	if err := proto.Unmarshal(data, peerJoined); err == nil &&
+		peerJoined.GetActorId() != "" &&
+		peerJoined.GetSessionId() != "" &&
+		peerJoined.GetBranchId() != "" &&
+		peerJoined.GetHlc() != nil {
+		return PeerJoinedFrame{PeerJoined: peerJoined}, nil
+	}
+
+	// PeerLeft requires actor_id, session_id, branch_id, and hlc.
+	peerLeft := &rtproto.PeerLeft{}
+	if err := proto.Unmarshal(data, peerLeft); err == nil &&
+		peerLeft.GetActorId() != "" &&
+		peerLeft.GetSessionId() != "" &&
+		peerLeft.GetBranchId() != "" &&
+		peerLeft.GetHlc() != nil {
+		return PeerLeftFrame{PeerLeft: peerLeft}, nil
+	}
+
+	// BranchHead requires deck_id, branch_id, and hlc.
+	branchHead := &rtproto.BranchHead{}
+	if err := proto.Unmarshal(data, branchHead); err == nil &&
+		branchHead.GetDeckId() != "" &&
+		branchHead.GetBranchId() != "" &&
+		branchHead.GetHlc() != nil {
+		return BranchHeadFrame{BranchHead: branchHead}, nil
+	}
+
+	// Error requires code != UNSPECIFIED.
+	errMsg := &rtproto.Error{}
+	if err := proto.Unmarshal(data, errMsg); err == nil &&
+		errMsg.GetCode() != rtproto.RealtimeErrorCode_REALTIME_ERROR_CODE_UNSPECIFIED {
+		return ErrorFrame{Error: errMsg}, nil
+	}
+
+	return nil, fmt.Errorf("unable to unwrap message from %d bytes", len(data))
 }
 
 // wrapProtoFrame wraps a decoded protobuf message into the appropriate Frame type.
@@ -392,17 +413,27 @@ type Client struct {
 
 // Connect establishes a WebSocket connection to the realtime gateway,
 // performs the Hello/Welcome handshake, and returns a ready Client.
-func Connect(ctx context.Context, url string, cfg Config) (*Client, error) {
+//
+// The gateway authenticates via a ?token= query parameter on the WS upgrade
+// request. The Config.Token field is appended to the URL automatically.
+func Connect(ctx context.Context, rawURL string, cfg Config) (*Client, error) {
 	dialer := websocket.Dialer{
 		HandshakeTimeout: 10 * time.Second,
 	}
 
-	header := make(map[string][]string)
+	// Append token as query parameter (gateway reads ?token= on upgrade).
 	if cfg.Token != "" {
-		header["Authorization"] = []string{"Bearer " + cfg.Token}
+		u, err := url.Parse(rawURL)
+		if err != nil {
+			return nil, fmt.Errorf("parse url: %w", err)
+		}
+		q := u.Query()
+		q.Set("token", cfg.Token)
+		u.RawQuery = q.Encode()
+		rawURL = u.String()
 	}
 
-	conn, _, err := dialer.DialContext(ctx, url, header)
+	conn, _, err := dialer.DialContext(ctx, rawURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("websocket dial: %w", err)
 	}
@@ -468,28 +499,18 @@ func (c *Client) ReadFrame() (Frame, error) {
 
 // UnmarshalFrameBytes is like UnmarshalFrame but reads from a byte slice.
 func UnmarshalFrameBytes(data []byte) (Frame, error) {
-	if len(data) < 5 {
+	if len(data) < 4 {
 		return nil, fmt.Errorf("frame too short: %d bytes", len(data))
 	}
 
 	length := binary.BigEndian.Uint32(data[:4])
-	tagByte := data[4]
 
-	if int(length)+5 > len(data) {
-		return nil, fmt.Errorf("frame truncated: expected %d bytes, got %d", int(length)+5, len(data))
+	if int(length)+4 > len(data) {
+		return nil, fmt.Errorf("frame truncated: expected %d bytes, got %d", int(length)+4, len(data))
 	}
 
-	payload := data[5 : 5+length]
-
-	msg, err := protoForWireType(tagByte)
-	if err != nil {
-		return nil, err
-	}
-	if err := proto.Unmarshal(payload, msg); err != nil {
-		return nil, fmt.Errorf("proto.Unmarshal: %w", err)
-	}
-
-	return wrapProtoFrame(msg)
+	payload := data[4 : 4+length]
+	return unwrapMessage(payload)
 }
 
 // Close gracefully closes the WebSocket connection.

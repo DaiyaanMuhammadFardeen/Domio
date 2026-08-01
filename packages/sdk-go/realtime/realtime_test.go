@@ -26,25 +26,25 @@ func TestMarshalUnmarshalFrame_RoundTrip(t *testing.T) {
 		{
 			name: "Welcome",
 			msg: &rtproto.Welcome{
-				GatewayId:            "gw-1",
-				HeartbeatIntervalMs:  5000,
-				PresenceBroadcast:    true,
-				MaxPayloadBytes:      1048576,
+				GatewayId:           "gw-1",
+				HeartbeatIntervalMs: 5000,
+				PresenceBroadcast:   true,
+				MaxPayloadBytes:     1048576,
 			},
 		},
 		{
 			name: "Op",
 			msg: &rtproto.Op{
-				OpId:        "01H0ABCDEF0123456789ABCDEF",
-				DeckId:      "deck-123",
-				BranchId:    "main",
-				SlideId:     "slide-intro",
-				AuthorId:    "01H0ABCDEF0123456789ABCDEF",
-				Hlc:         &rtproto.HLC{Physical: 1700000000000000000, Logical: 1},
-				ParentHlc:   &rtproto.HLC{Physical: 1700000000000000000, Logical: 0},
-				Payload:     []byte{0x01, 0x02, 0x03},
+				OpId:     "01H0ABCDEF0123456789ABCDEF",
+				DeckId:   "deck-123",
+				BranchId: "main",
+				SlideId:  "slide-intro",
+				AuthorId: "01H0ABCDEF0123456789ABCDEF",
+				Hlc:      &rtproto.HLC{Physical: 1700000000000000000, Logical: 1},
+				ParentHlc: &rtproto.HLC{Physical: 1700000000000000000, Logical: 0},
+				Payload:   []byte{0x01, 0x02, 0x03},
 				ClientClock: 42,
-				OpType:      rtproto.OpType_OP_TYPE_YJS_UPDATE,
+				OpType:   rtproto.OpType_OP_TYPE_YJS_UPDATE,
 			},
 		},
 		{
@@ -87,7 +87,7 @@ func TestMarshalUnmarshalFrame_RoundTrip(t *testing.T) {
 		{
 			name: "BranchSwitch",
 			msg: &rtproto.BranchSwitch{
-				ActorId:     "01H0ABCDEF0123456789ABCDEF",
+				ActorId:      "01H0ABCDEF0123456789ABCDEF",
 				FromBranchId: "main",
 				ToBranchId:   "experiment",
 				Hlc:          &rtproto.HLC{Physical: 1700000000000000020, Logical: 0},
@@ -119,8 +119,8 @@ func TestMarshalUnmarshalFrame_RoundTrip(t *testing.T) {
 				t.Fatalf("MarshalFrame: %v", err)
 			}
 
-			// Verify wire format: at least 5 bytes header
-			if len(data) < 5 {
+			// Wire format: at least 4 bytes header (no type tag)
+			if len(data) < 4 {
 				t.Fatalf("frame too short: %d bytes", len(data))
 			}
 
@@ -150,16 +150,16 @@ func TestMarshalUnmarshalFrame_RoundTrip(t *testing.T) {
 
 func TestMarshalFrame_OpRoundTrip_PreservesAllFields(t *testing.T) {
 	original := &rtproto.Op{
-		OpId:        "01H0ABCDEF0123456789ABCDEF",
-		DeckId:      "deck-456",
-		BranchId:    "experiment",
-		SlideId:     "slide-chart",
-		AuthorId:    "01H0XYZXYZ0123456789ABCDEF",
-		Hlc:         &rtproto.HLC{Physical: 1700000000000000000, Logical: 42},
-		ParentHlc:   &rtproto.HLC{Physical: 1699999999000000000, Logical: 99},
-		Payload:     []byte{0xDE, 0xAD, 0xBE, 0xEF},
+		OpId:     "01H0ABCDEF0123456789ABCDEF",
+		DeckId:   "deck-456",
+		BranchId: "experiment",
+		SlideId:  "slide-chart",
+		AuthorId: "01H0XYZXYZ0123456789ABCDEF",
+		Hlc:      &rtproto.HLC{Physical: 1700000000000000000, Logical: 42},
+		ParentHlc: &rtproto.HLC{Physical: 1699999999000000000, Logical: 99},
+		Payload:   []byte{0xDE, 0xAD, 0xBE, 0xEF},
 		ClientClock: 7,
-		OpType:      rtproto.OpType_OP_TYPE_YJS_UPDATE,
+		OpType:   rtproto.OpType_OP_TYPE_YJS_UPDATE,
 	}
 
 	data, err := MarshalFrame(original)
@@ -247,32 +247,46 @@ func TestUnmarshalFrame_FrameTooShort(t *testing.T) {
 	}
 }
 
-func TestUnmarshalFrame_InvalidWireType(t *testing.T) {
-	// Build a frame with an unknown type tag
-	data := make([]byte, 5)
-	data[0] = 0x00 // length = 0
-	data[1] = 0x00
-	data[2] = 0x00
-	data[3] = 0x00
-	data[4] = 0xFF // invalid type tag
-
-	_, err := UnmarshalFrameBytes(data)
-	if err == nil {
-		t.Fatal("expected error for invalid wire type")
-	}
-}
-
 func TestUnmarshalFrame_TruncatedPayload(t *testing.T) {
-	// Claim length=100 but only provide 5 bytes total
-	data := make([]byte, 5)
+	// Claim length=100 but only provide 4 bytes total
+	data := make([]byte, 4)
 	data[0] = 0x00
 	data[1] = 0x00
 	data[2] = 0x00
 	data[3] = 100
-	data[4] = wireTypeOp
 
 	_, err := UnmarshalFrameBytes(data)
 	if err == nil {
 		t.Fatal("expected error for truncated frame")
+	}
+}
+
+func TestUnmarshalFrame_ServerCompatibleWireFormat(t *testing.T) {
+	// Verify that MarshalFrame output matches the server wire format:
+	// [4-byte BE length][protobuf bytes] — no type tag.
+	hello := &rtproto.Hello{
+		ActorId: "actor-test",
+		DeckId:  "deck-test",
+	}
+
+	data, err := MarshalFrame(hello)
+	if err != nil {
+		t.Fatalf("MarshalFrame: %v", err)
+	}
+
+	// Header is exactly 4 bytes (length prefix only, no type tag)
+	length := uint32(data[0])<<24 | uint32(data[1])<<16 | uint32(data[2])<<8 | uint32(data[3])
+	if int(length)+4 != len(data) {
+		t.Fatalf("wire format mismatch: length prefix says %d bytes payload but total frame is %d", length, len(data))
+	}
+
+	// The payload after the 4-byte prefix should be valid protobuf
+	payload := data[4:]
+	decoded := &rtproto.Hello{}
+	if err := proto.Unmarshal(payload, decoded); err != nil {
+		t.Fatalf("proto.Unmarshal on payload: %v", err)
+	}
+	if decoded.GetActorId() != "actor-test" {
+		t.Errorf("actor_id = %q, want %q", decoded.GetActorId(), "actor-test")
 	}
 }
