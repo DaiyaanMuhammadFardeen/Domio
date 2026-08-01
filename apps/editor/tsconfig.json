@@ -14,11 +14,6 @@
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
     "allowJs": true
   },
   "include": [

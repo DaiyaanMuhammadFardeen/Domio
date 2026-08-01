@@ -1,0 +1,107 @@
+name: schema-validate
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'contracts/schema/**'
+      - 'fixtures/**'
+      - 'packages/schema/**'
+      - 'packages/sdk-ts/**'
+      - 'services/control-plane/**'
+      - '.github/workflows/schema-validate.yml'
+  push:
+    branches: [master, main]
+    paths:
+      - 'contracts/schema/**'
+      - 'fixtures/**'
+      - 'packages/schema/**'
+      - 'packages/sdk-ts/**'
+      - 'services/control-plane/**'
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: schema-validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ajv:
+    name: ajv-fixtures
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - run: npm install -g ajv-cli@5.0.0 ajv-formats@3.0.1
+      - name: Compile contracts/schema/v1/*.schema.json strict
+        run: |
+          set -e
+          for f in contracts/schema/v1/*.schema.json; do
+            ajv compile --spec=draft2020 -s "$f" --strict=true -c ajv-formats \
+              $([ "$f" != "contracts/schema/v1/common.schema.json" ] && echo "-r contracts/schema/v1/common.schema.json") \
+              $([ "$f" = "contracts/schema/v1/deck.schema.json" ] && echo "-r contracts/schema/v1/scene-graph.schema.json") \
+              || { echo "✗ invalid schema: $f"; exit 1; }
+          done
+      - name: Validate fixtures against deck schema
+        run: |
+          ajv validate --spec=draft2020 \
+            -s contracts/schema/v1/deck.schema.json \
+            -r contracts/schema/v1/common.schema.json \
+            -r contracts/schema/v1/scene-graph.schema.json \
+            -c ajv-formats \
+            -d "fixtures/*.json"
+
+  schema-package:
+    name: schema-package-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @domio/schema typecheck
+      - run: pnpm --filter @domio/schema test
+      - run: pnpm --filter @domio/sdk typecheck
+      - run: pnpm --filter @domio/sdk test
+      - run: pnpm --filter @domio/control-plane typecheck
+      - run: pnpm --filter @domio/control-plane test
+
+  fixture-workspace:
+    name: fixture-workspace-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - run: pnpm install --frozen-lockfile
+      - run: VITEST_WORKSPACE=1 pnpm exec vitest run fixtures/__tests__ --config vitest.config.ts
+
+  contract-pack-needs-schema-validate:
+    name: contract-pack-gate
+    needs: [ajv, schema-package, fixture-workspace]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Block on failure
+        run: |
+          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "true" ]; then
+            echo "Phase 02 schema validation failed"
+            exit 1
+          fi
+          echo "Phase 02 schema validation passed"

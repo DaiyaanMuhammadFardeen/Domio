@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/deck.schema.json",
+  "title": "Domio Deck Document",
+  "description": "Canonical, versioned, persisted representation of a Domio deck. The single source of truth for the editor, viewer, MCP gateway, and renderer.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "tenantId", "workspaceId", "title", "revision", "slides", "settings"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver of the deck document shape. Major bump on breaking changes."
+    },
+    "id": { "$ref": "common.schema.json#/definitions/ULID" },
+    "tenantId": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "workspaceId": { "$ref": "common.schema.json#/definitions/ULID" },
+    "projectId": { "$ref": "common.schema.json#/definitions/ULID" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "revision": { "type": "integer", "minimum": 0 },
+    "branch": { "type": "string", "default": "main" },
+    "brandKitId": { "$ref": "common.schema.json#/definitions/ULID" },
+    "themeId": { "$ref": "common.schema.json#/definitions/ULID" },
+    "settings": { "$ref": "#/definitions/DeckSettings" },
+    "variables": {
+      "type": "array",
+      "items": { "$ref": "scene-graph.schema.json#/definitions/PrototypeVariable" }
+    },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/Slide" }
+    },
+    "extensions": {
+      "type": "object",
+      "description": "Reserved for downstream phases (e.g. CRDT extensions). Anything not modeled above can be parked here.",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "DeckSettings": {
+      "type": "object",
+      "required": ["defaultSlideRatio"],
+      "additionalProperties": false,
+      "properties": {
+        "defaultSlideRatio": {
+          "type": "object",
+          "required": ["ratioW", "ratioH"],
+          "properties": {
+            "ratioW": { "type": "number", "exclusiveMinimum": 0 },
+            "ratioH": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        "grid": {
+          "type": "object",
+          "properties": {
+            "size": { "type": "integer", "minimum": 1 },
+            "color": { "$ref": "common.schema.json#/definitions/Color" }
+          }
+        },
+        "snapToGrid": { "type": "boolean", "default": true },
+        "showRulers": { "type": "boolean", "default": true }
+      }
+    },
+    "Slide": {
+      "type": "object",
+      "required": ["id", "semanticId", "position", "aspect", "elements"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "position": { "type": "integer", "minimum": 0 },
+        "title": { "type": "string", "maxLength": 256 },
+        "aspect": {
+          "type": "object",
+          "required": ["ratioW", "ratioH"],
+          "properties": {
+            "ratioW": { "type": "number", "exclusiveMinimum": 0 },
+            "ratioH": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        "background": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fill": { "$ref": "scene-graph.schema.json#/definitions/StyleFill" }
+          }
+        },
+        "elements": {
+          "type": "array",
+          "items": { "$ref": "scene-graph.schema.json#/definitions/Element" }
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

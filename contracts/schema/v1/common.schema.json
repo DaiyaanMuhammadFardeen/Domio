@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://domio.example/schemas/v1/common.schema.json",
   "title": "Domio Common",
-  "description": "Common shapes shared across every Domio document payload (decks, themes, brand kits, plugin manifests).",
+  "description": "Common shapes shared across every Domio document payload (decks, themes, brand kits, plugin manifests). The Phase 02 additions below add ULID, SemanticAddress, Color, Length, and Duration primitives used by the scene-graph schema.",
   "type": "object",
   "definitions": {
     "ResourceId": {
@@ -137,6 +137,44 @@
           "type": "string",
           "maxLength": 512
         }
+      }
+    },
+    "ULID": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "Crockford-base32 ULID used as the canonical primary key for domain objects."
+    },
+    "SemanticAddress": {
+      "type": "string",
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(\\[[a-zA-Z0-9_-]+\\])*$",
+      "description": "Exact semantic path such as slide[3].chart[revenue_by_region]. The regex is single-pass parseable."
+    },
+    "Length": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string", "enum": ["px", "%", "vw", "vh", "auto"] }
+      }
+    },
+    "Duration": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit": { "type": "string", "enum": ["ms", "s"] }
+      }
+    },
+    "Color": {
+      "type": "object",
+      "required": ["colorSpace", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "colorSpace": { "type": "string", "enum": ["srgb", "display-p3"] },
+        "value": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$" },
+        "alpha": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     }
   }

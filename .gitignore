@@ -57,7 +57,10 @@ desktop.ini
 
 # Generated
 **/gen/
-**/generated/
+# `packages/schema/src/generated/` is intentionally NOT ignored: those files
+# are the hand-written source of truth for the v1 deck scene graph types
+# consumed by every other package. The JSON-Schema → TypeScript generator is
+# a P02 follow-up; until it lands these files are committed.
 **/*.pb.go
 **/*.pb.cc
 **/*.pb.h

@@ -1,0 +1,31 @@
+{
+  "name": "@domio/control-plane",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Domio control-plane service. Owns the Deck & Schema module per Phase 02.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./deck/loader": "./src/deck/loader.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/common": "workspace:*",
+    "@domio/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "eslint": "9.17.0",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

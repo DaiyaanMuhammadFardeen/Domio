@@ -14,7 +14,12 @@
     "test:watch": "vitest",
     "clean": "rm -rf dist .turbo coverage"
   },
+  "dependencies": {
+    "@domio/schema": "workspace:*",
+    "@domio/common": "workspace:*"
+  },
   "devDependencies": {
+    "@types/node": "22.10.1",
     "typescript": "5.7.2",
     "vitest": "2.1.8"
   }

@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/scene-graph.schema.json",
+  "title": "Domio Scene Graph",
+  "description": "Versioned scene-graph primitives used inside a DeckDocument. Pulled out of deck.schema.json so that JSON-Schema $ref graphs stay small and the runtime can reuse these types for live editing operations.",
+  "type": "object",
+  "definitions": {
+    "Transform2D": {
+      "type": "object",
+      "required": ["x", "y", "w", "h", "rotation"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "w": { "type": "number", "minimum": 0 },
+        "h": { "type": "number", "minimum": 0 },
+        "rotation": { "type": "number", "description": "Degrees, counter-clockwise." },
+        "scale": { "type": "number", "minimum": 0, "default": 1 }
+      }
+    },
+    "LayerConstraints": {
+      "type": "object",
+      "description": "Constraints applied by the Phase 03 constraint solver.",
+      "additionalProperties": false,
+      "properties": {
+        "horizontal": { "type": "string", "enum": ["min", "center", "max", "stretch", "scale"] },
+        "vertical": { "type": "string", "enum": ["min", "center", "max", "stretch", "scale"] },
+        "pinToCorners": { "type": "boolean", "default": false }
+      }
+    },
+    "AutoLayoutSpec": {
+      "type": "object",
+      "required": ["direction"],
+      "additionalProperties": false,
+      "properties": {
+        "direction": { "type": "string", "enum": ["horizontal", "vertical", "grid"] },
+        "primaryAlign": { "type": "string", "enum": ["min", "center", "max", "space-between"] },
+        "counterAlign": { "type": "string", "enum": ["min", "center", "max", "stretch"] },
+        "padding": { "$ref": "common.schema.json#/definitions/Length" },
+        "itemSpacing": { "type": "number", "minimum": 0 },
+        "wrap": { "type": "string", "enum": ["no-wrap", "wrap"] }
+      }
+    },
+    "StyleFill": {
+      "type": "object",
+      "required": ["color"],
+      "additionalProperties": false,
+      "properties": {
+        "color": { "$ref": "common.schema.json#/definitions/Color" }
+      }
+    },
+    "DataBinding": {
+      "type": "object",
+      "required": ["source"],
+      "additionalProperties": false,
+      "properties": {
+        "source": { "type": "string", "description": "ResourceId.kind/deck_id or external ref." },
+        "path": { "type": "string" },
+        "format": { "type": "string" },
+        "refresh": { "type": "string", "enum": ["manual", "onLoad", "onChange"] },
+        "fallback": { "type": "string" }
+      }
+    },
+    "Animation": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["fade", "slide", "scale", "rotate", "custom"] },
+        "trigger": { "type": "string", "enum": ["onLoad", "onClick", "onHover", "onTime"] },
+        "delay": { "$ref": "common.schema.json#/definitions/Duration" },
+        "duration": { "$ref": "common.schema.json#/definitions/Duration" },
+        "easing": {
+          "type": "string",
+          "enum": ["linear", "ease", "ease-in", "ease-out", "ease-in-out", "spring"]
+        },
+        "keyTimes": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "PrototypeVariable": {
+      "type": "object",
+      "required": ["name", "type", "default"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$" },
+        "type": { "type": "string", "enum": ["string", "number", "boolean", "color"] },
+        "default": {}
+      }
+    },
+    "ComponentInstance": {
+      "type": "object",
+      "required": ["componentId", "overrides"],
+      "additionalProperties": false,
+      "properties": {
+        "componentId": { "$ref": "common.schema.json#/definitions/ULID" },
+        "overrides": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "FrameLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "aspect"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "type": { "const": "frame" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "aspect": {
+          "type": "object",
+          "required": ["ratioW", "ratioH"],
+          "additionalProperties": false,
+          "properties": {
+            "ratioW": { "type": "number", "exclusiveMinimum": 0 },
+            "ratioH": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        "clipContent": { "type": "boolean", "default": true }
+      }
+    },
+    "GroupLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "type": { "const": "group" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" }
+      }
+    },
+    "AutoLayoutLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "autoLayout"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "type": { "const": "autoLayout" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "autoLayout": { "$ref": "#/definitions/AutoLayoutSpec" }
+      }
+    },
+    "TextLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "text"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "type": { "const": "text" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "text": {
+          "type": "object",
+          "required": ["content"],
+          "additionalProperties": false,
+          "properties": {
+            "content": { "type": "string" },
+            "runs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["start", "end", "style"],
+                "additionalProperties": false,
+                "properties": {
+                  "start": { "type": "integer", "minimum": 0 },
+                  "end": { "type": "integer", "minimum": 0 },
+                  "style": { "type": "object", "additionalProperties": true }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ImageLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "assetId"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "type": { "const": "image" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "assetId": { "type": "string" },
+        "fit": { "type": "string", "enum": ["cover", "contain", "fill"] },
+        "alt": { "type": "string" }
+      }
+    },
+    "VectorLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "paths"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "type": { "const": "vector" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "fill": { "$ref": "#/definitions/StyleFill" },
+        "stroke": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "color": { "$ref": "common.schema.json#/definitions/Color" },
+            "width": { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "BooleanShapeLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "operation", "operands"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "type": { "const": "boolean" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "operation": {
+          "type": "string",
+          "enum": ["union", "subtract", "intersect", "exclude"]
+        },
+        "operands": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "common.schema.json#/definitions/ULID" }
+        }
+      }
+    },
+    "Element": {
+      "description": "Discriminated union of every layer kind. The `type` field is exclusive per kind.",
+      "oneOf": [
+        { "$ref": "#/definitions/FrameLayer" },
+        { "$ref": "#/definitions/GroupLayer" },
+        { "$ref": "#/definitions/AutoLayoutLayer" },
+        { "$ref": "#/definitions/TextLayer" },
+        { "$ref": "#/definitions/ImageLayer" },
+        { "$ref": "#/definitions/VectorLayer" },
+        { "$ref": "#/definitions/BooleanShapeLayer" }
+      ]
+    }
+  }
+}

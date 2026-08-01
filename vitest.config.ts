@@ -1,4 +1,6 @@
 import { defineConfig } from 'vitest/config';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 
 /**
  * Workspace-level test runner.
@@ -9,8 +11,18 @@ import { defineConfig } from 'vitest/config';
  * `test:workspace` script in the root package.json sets the var.
  */
 const enabled = process.env.VITEST_WORKSPACE === '1';
+const here = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  resolve: enabled
+    ? {
+        alias: {
+          '@domio/common': resolve(here, 'packages/common/src/index.ts'),
+          '@domio/schema': resolve(here, 'packages/schema/src/index.ts'),
+          '@domio/sdk': resolve(here, 'packages/sdk-ts/src/index.ts'),
+        },
+      }
+    : undefined,
   test: enabled
     ? {
         name: 'workspace',
@@ -20,6 +32,7 @@ export default defineConfig({
           'infrastructure/**/__tests__/**/*.{test,spec}.{ts,mjs}',
           'threat-model/__tests__/**/*.{test,spec}.{ts,mjs}',
           'slo/__tests__/**/*.{test,spec}.{ts,mjs}',
+          'fixtures/__tests__/**/*.{test,spec}.{ts,mjs}',
         ],
         exclude: [
           'node_modules',
