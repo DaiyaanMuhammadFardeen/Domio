@@ -86,7 +86,7 @@ export class Canvas2DRenderer implements Renderer {
           this.drawCommand(ctx, child, camera, viewport);
         }
         return;
-      case 'clip':
+      case 'clip': {
         ctx.save();
         ctx.beginPath();
         const c1 = worldToScreen(camera, { x: cmd.x, y: cmd.y }, viewport);
@@ -95,6 +95,7 @@ export class Canvas2DRenderer implements Renderer {
         ctx.clip();
         ctx.restore();
         return;
+      }
       case 'transform':
         ctx.save();
         if (cmd.translate) {

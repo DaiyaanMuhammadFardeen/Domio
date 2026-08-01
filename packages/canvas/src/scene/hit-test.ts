@@ -6,7 +6,7 @@
  */
 
 import type { Element, ULID } from '@domio/schema';
-import { SpatialIndex } from './spatial-index.js';
+import type { SpatialIndex } from './spatial-index.js';
 import type { SceneGraph } from './scene-graph.js';
 
 export interface HitTestOptions {

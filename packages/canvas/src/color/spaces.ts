@@ -11,7 +11,7 @@ export interface Rgb {
   b: number;
 }
 
-export interface DisplayP3 extends Rgb {}
+export type DisplayP3 = Rgb;
 
 export function hexToRgb(hex: string): Rgb | null {
   const m = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(hex);
