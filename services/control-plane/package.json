@@ -8,7 +8,8 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./deck/loader": "./src/deck/loader.ts"
+    "./deck/loader": "./src/deck/loader.ts",
+    "./gen/controlplane/v1": "./gen/controlplane/v1/client.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

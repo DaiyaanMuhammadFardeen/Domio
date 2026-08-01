@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/crdt/slide.schema.json",
+  "title": "Domio CRDT Slide Sub-Document",
+  "description": "Documents the Yjs sub-document shape for a single slide within a deck. Each slide lives in its own Y.Doc so concurrent edits to different slides don't create merge conflicts. The shape mirrors the structure in packages/yjs-shared/src/subdocs.ts.",
+  "type": "object",
+  "required": ["meta", "aspect", "zOrder", "elementProps"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Y.Map('meta') — slide metadata envelope.",
+      "required": ["id", "semanticId", "position"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 26,
+          "maxLength": 26,
+          "description": "ULID — globally unique slide identifier."
+        },
+        "semanticId": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$",
+          "description": "Stable semantic key for the slide (e.g. 'intro', 'chart-revenue')."
+        },
+        "position": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Zero-based position in the deck's slide order."
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Optional human-readable title for the slide."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional speaker notes for the slide."
+        }
+      }
+    },
+    "aspect": {
+      "type": "object",
+      "description": "Y.Map('aspect') — slide aspect ratio.",
+      "required": ["ratioW", "ratioH"],
+      "additionalProperties": false,
+      "properties": {
+        "ratioW": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Width component of the aspect ratio."
+        },
+        "ratioH": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Height component of the aspect ratio."
+        }
+      }
+    },
+    "zOrder": {
+      "type": "array",
+      "description": "Y.Array('zOrder') — element IDs in render order (RGA). Determines the visual stacking/z-order of layers.",
+      "items": {
+        "type": "string",
+        "minLength": 26,
+        "maxLength": 26
+      }
+    },
+    "elements": {
+      "type": "array",
+      "description": "Y.Array('elements') — all element IDs present in this slide (append-only RGA).",
+      "items": {
+        "type": "string",
+        "minLength": 26,
+        "maxLength": 26
+      }
+    },
+    "elementProps": {
+      "type": "object",
+      "description": "Y.Map('elementProps') — keyed by element ID, each value is a Y.Map of element properties.",
+      "additionalProperties": {
+        "$ref": "#/definitions/ElementProps"
+      }
+    },
+    "text": {
+      "type": "object",
+      "description": "Y.Text instances stored as 'text:{elementId}' — live collaborative text content for text-type elements.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "definitions": {
+    "ElementProps": {
+      "type": "object",
+      "description": "Y.Map per-element property bag. Stores the element's static properties that are not collaborative text.",
+      "required": ["id", "semanticId", "name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 26,
+          "maxLength": 26,
+          "description": "ULID — element identifier."
+        },
+        "semanticId": {
+          "type": "string",
+          "description": "Stable semantic key for the element."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "Human-readable display name."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["frame", "group", "autoLayout", "text", "image", "vector", "boolean"],
+          "description": "Layer type discriminator."
+        },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "minLength": 26, "maxLength": 26 }
+          ],
+          "description": "Parent element ID or null for root-level elements."
+        },
+        "transform": {
+          "$ref": "#/definitions/Transform2D"
+        },
+        "z": {
+          "type": "integer",
+          "description": "Numeric z-order value (derived from zOrder array position)."
+        },
+        "locked": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the element is locked from editing."
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the element is hidden from view."
+        }
+      }
+    },
+    "Transform2D": {
+      "type": "object",
+      "required": ["x", "y", "w", "h"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "w": { "type": "number", "minimum": 0 },
+        "h": { "type": "number", "minimum": 0 },
+        "rotation": { "type": "number", "description": "Degrees, counter-clockwise." },
+        "scale": { "type": "number", "minimum": 0, "default": 1 }
+      }
+    }
+  }
+}

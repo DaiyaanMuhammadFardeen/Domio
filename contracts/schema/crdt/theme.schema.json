@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/crdt/theme.schema.json",
+  "title": "Domio CRDT Theme Sub-Document",
+  "description": "Documents the Yjs sub-document shape for a deck theme. Themes store color palette tokens and typography tokens as Y.Map values. The theme sub-doc lives alongside slide sub-docs in the deck root's SubDocRegistry.",
+  "type": "object",
+  "required": ["meta", "colors", "fonts"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Y.Map('meta') — theme metadata envelope.",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 26,
+          "maxLength": 26,
+          "description": "ULID — globally unique theme identifier."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Human-readable theme name (e.g. 'Corporate Blue', 'Dark Mode')."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1024,
+          "description": "Optional description of the theme."
+        }
+      }
+    },
+    "colors": {
+      "type": "object",
+      "description": "Y.Map('colors') — color palette tokens. Each key is a semantic color name; each value is a hex color string.",
+      "additionalProperties": {
+        "$ref": "#/definitions/ColorToken"
+      },
+      "properties": {
+        "primary": { "$ref": "#/definitions/ColorToken" },
+        "secondary": { "$ref": "#/definitions/ColorToken" },
+        "background": { "$ref": "#/definitions/ColorToken" },
+        "surface": { "$ref": "#/definitions/ColorToken" },
+        "text": { "$ref": "#/definitions/ColorToken" },
+        "textInverse": { "$ref": "#/definitions/ColorToken" },
+        "accent": { "$ref": "#/definitions/ColorToken" },
+        "success": { "$ref": "#/definitions/ColorToken" },
+        "warning": { "$ref": "#/definitions/ColorToken" },
+        "error": { "$ref": "#/definitions/ColorToken" }
+      }
+    },
+    "fonts": {
+      "type": "object",
+      "description": "Y.Map('fonts') — typography tokens. Each key is a semantic font role; each value describes a font family and weight.",
+      "additionalProperties": {
+        "$ref": "#/definitions/FontToken"
+      },
+      "properties": {
+        "heading": { "$ref": "#/definitions/FontToken" },
+        "body": { "$ref": "#/definitions/FontToken" },
+        "code": { "$ref": "#/definitions/FontToken" },
+        "caption": { "$ref": "#/definitions/FontToken" }
+      }
+    }
+  },
+  "definitions": {
+    "ColorToken": {
+      "type": "object",
+      "required": ["value"],
+      "additionalProperties": false,
+      "description": "A single color token value. Stored as a Y.Map entry in the colors sub-doc.",
+      "properties": {
+        "value": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$",
+          "description": "Hex color value (6 or 8 digits)."
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1,
+          "description": "Optional alpha transparency."
+        }
+      }
+    },
+    "FontToken": {
+      "type": "object",
+      "required": ["family"],
+      "additionalProperties": false,
+      "description": "A typography token. Stored as a Y.Map entry in the fonts sub-doc.",
+      "properties": {
+        "family": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Font family name (e.g. 'Inter', 'JetBrains Mono')."
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 900,
+          "multipleOf": 100,
+          "default": 400,
+          "description": "Font weight (100–900, CSS standard)."
+        },
+        "style": {
+          "type": "string",
+          "enum": ["normal", "italic", "oblique"],
+          "default": "normal",
+          "description": "Font style."
+        },
+        "fallback": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "description": "Fallback font stack."
+        }
+      }
+    }
+  }
+}

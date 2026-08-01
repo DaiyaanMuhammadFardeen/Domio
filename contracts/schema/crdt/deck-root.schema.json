@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/crdt/deck-root.schema.json",
+  "title": "Domio CRDT Deck Root Sub-Document",
+  "description": "Documents the Yjs deck root document shape. The deck root is the parent Y.Doc that owns the SubDocRegistry — a Y.Map of all sub-documents (slides, themes, deck root metadata). It carries the slide RGA order, per-slide sub-doc GUID refs, and the active branch.",
+  "type": "object",
+  "required": ["meta", "subdocs", "slideOrder", "branch"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Y.Map('meta') — deck-level metadata.",
+      "required": ["id", "title"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 26,
+          "maxLength": 26,
+          "description": "ULID — globally unique deck identifier."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Human-readable deck title."
+        },
+        "tenantId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "Tenant identifier for multi-tenant isolation."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp of deck creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp of last modification."
+        }
+      }
+    },
+    "subdocs": {
+      "type": "object",
+      "description": "Y.Map('subdocs') — SubDocRegistry mapping semantic keys to sub-document metadata. Each entry stores the Y.Doc GUID and kind (slide, deckRoot, theme).",
+      "additionalProperties": {
+        "$ref": "#/definitions/SubDocMeta"
+      }
+    },
+    "slideOrder": {
+      "type": "array",
+      "description": "Y.Array('slideOrder') — ordered list of slide semantic IDs (RGA). This is the canonical slide rail that determines presentation order. Concurrent reorders converge via Yjs RGA semantics.",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128
+      }
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "default": "main",
+      "description": "Active branch identifier. The deck root doc is branch-aware; each branch may have its own slide order and sub-doc mapping."
+    }
+  },
+  "definitions": {
+    "SubDocMeta": {
+      "type": "object",
+      "required": ["docId", "kind"],
+      "additionalProperties": false,
+      "description": "Metadata envelope stored alongside each sub-doc in the parent's SubDocRegistry Y.Map.",
+      "properties": {
+        "docId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Y.Doc GUID — the unique identifier for the sub-document."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["slide", "deckRoot", "theme"],
+          "description": "Sub-document kind discriminator."
+        }
+      }
+    }
+  }
+}

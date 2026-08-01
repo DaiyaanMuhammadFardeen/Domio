@@ -1,0 +1,152 @@
+openapi: 3.1.0
+info:
+  title: Domio Internal API (Phase 04)
+  version: 1.0.0
+  description: |
+    Admin-only internal endpoints. These are not exposed to end users
+    and are secured with an API key (not a user bearer token).
+
+    The ops replay endpoint allows an administrator to replay CRDT
+    operations from a given HLC checkpoint for debugging and recovery
+    purposes.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: internal
+    description: Admin-only internal operations.
+security: []
+paths:
+  /v1/internal/replay:
+    post:
+      tags: [internal]
+      operationId: replayOps
+      summary: Replay CRDT operations from a checkpoint
+      description: |
+        Triggers an admin-only replay of CRDT operations for a deck
+        starting from the given HLC checkpoint. The replay streams ops
+        to all connected clients on the specified branch.
+
+        Requires the `X-Api-Key` security scheme. This endpoint is
+        rate-limited to 10 requests per minute per API key.
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReplayRequest"
+      responses:
+        "202":
+          description: Replay accepted and in progress.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReplayResponse"
+        "400":
+          description: Invalid request (missing fields, bad HLC).
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "404":
+          description: Deck not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "429":
+          description: Rate limited.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: |
+        Admin API key. Distributed to operations staff only. Different
+        from user bearer tokens — this key bypasses user-level ACL and
+        operates at the system level.
+  schemas:
+    HLC:
+      type: object
+      required: [physical, logical]
+      additionalProperties: false
+      description: Hybrid Logical Clock timestamp.
+      properties:
+        physical:
+          type: integer
+          minimum: 0
+          description: "Physical component: unix nanoseconds."
+        logical:
+          type: integer
+          minimum: 0
+          description: "Logical counter: monotonic tie-breaker."
+    ReplayRequest:
+      type: object
+      required: [deckId, branchId, fromHlc]
+      additionalProperties: false
+      properties:
+        deckId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Deck identifier (ULID) to replay ops for.
+        branchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          default: main
+          description: Branch to replay on; defaults to "main".
+        fromHlc:
+          $ref: "#/components/schemas/HLC"
+          description: Start replay from this HLC (exclusive). All ops with hlc > fromHlc are replayed.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          default: 1000
+          description: Maximum number of ops to replay.
+    ReplayResponse:
+      type: object
+      required: [status, deckId, branchId, fromHlc, opsReplayed]
+      properties:
+        status:
+          type: string
+          enum: [accepted, completed, failed]
+          description: Current status of the replay.
+        deckId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        branchId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        fromHlc:
+          $ref: "#/components/schemas/HLC"
+        opsReplayed:
+          type: integer
+          minimum: 0
+          description: Number of ops replayed so far.
+        replayId:
+          type: string
+          description: Unique identifier for this replay operation (for tracking).
+        traceId:
+          type: string
