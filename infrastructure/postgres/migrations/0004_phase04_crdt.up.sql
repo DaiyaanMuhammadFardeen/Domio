@@ -8,17 +8,19 @@ BEGIN;
 -- crdt_logs — append-only event store for CRDT operations.
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS crdt_logs (
-    id              text PRIMARY KEY,
-    deck_id         text NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
-    branch_id       text NOT NULL DEFAULT 'main',
-    slide_id        text,
-    author_id       text NOT NULL,
-    hlc_physical    bigint NOT NULL,
-    hlc_logical     bigint NOT NULL,
-    operation_type  text NOT NULL,
-    yjs_update      bytea,
-    metadata        jsonb NOT NULL DEFAULT '{}'::jsonb,
-    created_at      timestamptz NOT NULL DEFAULT now()
+    op_id                text PRIMARY KEY,
+    deck_id              text NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+    branch_id            text NOT NULL DEFAULT 'main',
+    slide_id             text,
+    author_id            text NOT NULL,
+    hlc_physical         bigint NOT NULL,
+    hlc_logical          bigint NOT NULL,
+    parent_hlc_physical  bigint,
+    parent_hlc_logical   bigint,
+    op_type              text NOT NULL,
+    payload              bytea NOT NULL,
+    metadata             jsonb NOT NULL DEFAULT '{}'::jsonb,
+    applied_at           timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS crdt_logs_deck_branch_idx
