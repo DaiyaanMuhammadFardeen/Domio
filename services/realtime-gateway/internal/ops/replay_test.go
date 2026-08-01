@@ -7,6 +7,7 @@ import (
 	rt "github.com/domio/platform/gen/go/domio/realtime/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 )
 
 // generateULID generates a valid 26-char Crockford Base32 ULID string for testing.
@@ -295,34 +296,38 @@ func TestReplayRejectsMalformedOps(t *testing.T) {
 	// Valid op should pass
 	require.NoError(t, Validate(validOp, deckID))
 
+	// clone returns a deep copy so mutations never copy the protobuf's
+	// internal lock (MessageState) by value.
+	clone := func() *rt.Op { return proto.Clone(validOp).(*rt.Op) }
+
 	// Malformed op_id
-	badIDOp := *validOp
+	badIDOp := clone()
 	badIDOp.OpId = "BAD_ID"
-	assert.ErrorIs(t, Validate(&badIDOp, deckID), ErrMalformedOpID)
+	assert.ErrorIs(t, Validate(badIDOp, deckID), ErrMalformedOpID)
 
 	// Empty author
-	badAuthorOp := *validOp
+	badAuthorOp := clone()
 	badAuthorOp.AuthorId = ""
-	assert.ErrorIs(t, Validate(&badAuthorOp, deckID), ErrEmptyAuthorID)
+	assert.ErrorIs(t, Validate(badAuthorOp, deckID), ErrEmptyAuthorID)
 
 	// Missing HLC
-	badHLCOOp := *validOp
+	badHLCOOp := clone()
 	badHLCOOp.Hlc = nil
-	assert.ErrorIs(t, Validate(&badHLCOOp, deckID), ErrMissingHLC)
+	assert.ErrorIs(t, Validate(badHLCOOp, deckID), ErrMissingHLC)
 
 	// HLC regression
-	badRegressOp := *validOp
+	badRegressOp := clone()
 	badRegressOp.Hlc = &rt.HLC{Physical: 100, Logical: 0}
 	badRegressOp.ParentHlc = &rt.HLC{Physical: 1_700_000_000_000_000_000, Logical: 0}
-	assert.ErrorIs(t, Validate(&badRegressOp, deckID), ErrHLCCausal)
+	assert.ErrorIs(t, Validate(badRegressOp, deckID), ErrHLCCausal)
 
 	// Payload too large
-	badPayloadOp := *validOp
+	badPayloadOp := clone()
 	badPayloadOp.Payload = make([]byte, MaxPayloadSize+1)
-	assert.ErrorIs(t, Validate(&badPayloadOp, deckID), ErrPayloadTooLarge)
+	assert.ErrorIs(t, Validate(badPayloadOp, deckID), ErrPayloadTooLarge)
 
 	// Deck mismatch
-	badDeckOp := *validOp
+	badDeckOp := clone()
 	badDeckOp.DeckId = "WRONG_DECK_ID_VALUE_0000"
-	assert.ErrorIs(t, Validate(&badDeckOp, deckID), ErrDeckMismatch)
+	assert.ErrorIs(t, Validate(badDeckOp, deckID), ErrDeckMismatch)
 }
