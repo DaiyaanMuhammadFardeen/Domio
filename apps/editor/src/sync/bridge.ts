@@ -22,20 +22,8 @@ import type { SyncProvider } from './provider.js';
 import type { LocalQueue } from './local-queue.js';
 import type { DeckSubDocs } from './subdocs.js';
 import { syncSlideOrder } from './subdocs.js';
-
-// ----- Remote op applied entry -----
-
-export interface RemoteOpApplied {
-  kind: 'RemoteOpApplied';
-  /** The author who created the remote op. */
-  remoteAuthorId: string;
-  /** The op ID. */
-  opId: string;
-  /** The slide the op targeted. */
-  slideId: string;
-  /** Timestamp. */
-  timestamp: number;
-}
+import { applyRemoteOp } from '../history/remote-op-applier.js';
+export type { RemoteOpApplied } from '../history/remote-op-applier.js';
 
 // ----- Bridge -----
 
@@ -153,29 +141,25 @@ export class SyncBridge {
   // ----- Internals -----
 
   private handleRemoteOp(op: import('@domio/api-client/gen/domio/realtime/v1/realtime_pb').Op): void {
-    // Find the slide sub-doc
-    const slideId = op.slideId;
-    const slideDoc = this.subdocs.slideDocs.get(slideId);
-    if (!slideDoc) return;
-
-    // Apply the Yjs update to the sub-doc
-    if (op.payload && op.payload.length > 0) {
-      Y.applyUpdate(slideDoc, op.payload);
-    }
-
-    // Record in history engine as a remote op (not undoable locally)
+    // Delegate to the canonical remote-op-applier.
     this._lastRemoteAuthorId = op.authorId;
     this.suppressingRemote = true;
 
-    // We don't push to past — remote ops don't undo locally.
-    // Instead, we rebuild the DeckDocument from CRDT state and notify.
+    const entry = applyRemoteOp(op, {
+      deck: this.deck,
+      subdocs: this.subdocs,
+      onRemoteDeckChange: (newDeck) => {
+        this.deck = newDeck;
+        this.onRemoteDeckChange(newDeck);
+      },
+    });
+
     this.suppressingRemote = false;
     this._lastRemoteAuthorId = null;
 
-    // Rebuild the deck document from all sub-docs
-    const newDeck = this.rebuildDeckFromDocs();
-    this.deck = newDeck;
-    this.onRemoteDeckChange(newDeck);
+    // Entry is non-null when the op was successfully applied.
+    // It can be used for observability / structured logging downstream.
+    void entry;
   }
 
   private pushLocalUpdates(doc: DeckDocument): void {
@@ -206,24 +190,5 @@ export class SyncBridge {
     for (const op of ops) {
       this.provider.sendOp(op);
     }
-  }
-
-  private rebuildDeckFromDocs(): DeckDocument {
-    // Rebuild slides from CRDT sub-docs
-    const slides = this.deck.slides.map((slideSchema) => {
-      const slideDoc = this.subdocs.slideDocs.get(slideSchema.semanticId);
-      if (!slideDoc) return slideSchema;
-
-      // For now, return the schema version; CRDT → schema serialization
-      // is handled by yjs-shared's serializeSlide
-      const meta = slideDoc.getMap('meta');
-      if (meta.size === 0) return slideSchema;
-
-      // Return the existing schema (the CRDT is the source of truth for
-      // text/position, but for the bridge we keep the schema current)
-      return slideSchema;
-    });
-
-    return { ...this.deck, slides };
   }
 }
