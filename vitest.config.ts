@@ -20,6 +20,8 @@ export default defineConfig({
           '@domio/common': resolve(here, 'packages/common/src/index.ts'),
           '@domio/schema': resolve(here, 'packages/schema/src/index.ts'),
           '@domio/sdk': resolve(here, 'packages/sdk-ts/src/index.ts'),
+          '@domio/yjs-shared': resolve(here, 'packages/yjs-shared/src/index.ts'),
+          '@domio/canvas': resolve(here, 'packages/canvas/src/index.ts'),
         },
       }
     : undefined,
