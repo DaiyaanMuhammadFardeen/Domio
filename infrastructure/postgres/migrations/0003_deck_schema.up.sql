@@ -201,7 +201,7 @@ ALTER TABLE brand_kits          ENABLE ROW LEVEL SECURITY;
 DO $$
 BEGIN
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'decks_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'decks_tenant_isolation'
     ) THEN
         CREATE POLICY decks_tenant_isolation ON decks
             USING (
@@ -215,7 +215,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'slides_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'slides_tenant_isolation'
     ) THEN
         CREATE POLICY slides_tenant_isolation ON slides
             USING (
@@ -237,7 +237,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'elements_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'elements_tenant_isolation'
     ) THEN
         CREATE POLICY elements_tenant_isolation ON elements
             USING (
@@ -259,7 +259,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'element_overrides_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'element_overrides_tenant_isolation'
     ) THEN
         CREATE POLICY element_overrides_tenant_isolation ON element_overrides
             USING (
@@ -283,7 +283,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'deck_schemas_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'deck_schemas_tenant_isolation'
     ) THEN
         CREATE POLICY deck_schemas_tenant_isolation ON deck_schemas
             USING (
@@ -305,7 +305,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'component_instances_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'component_instances_tenant_isolation'
     ) THEN
         CREATE POLICY component_instances_tenant_isolation ON component_instances
             USING (
@@ -327,7 +327,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'token_sets_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'token_sets_tenant_isolation'
     ) THEN
         CREATE POLICY token_sets_tenant_isolation ON token_sets
             USING (
@@ -349,7 +349,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'themes_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'themes_tenant_isolation'
     ) THEN
         CREATE POLICY themes_tenant_isolation ON themes
             USING (
@@ -371,7 +371,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'brand_kits_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'brand_kits_tenant_isolation'
     ) THEN
         CREATE POLICY brand_kits_tenant_isolation ON brand_kits
             USING (
@@ -393,7 +393,7 @@ BEGIN
     END IF;
 
     IF NOT EXISTS (
-        SELECT 1 FROM pg_policies WHERE polname = 'deck_versions_tenant_isolation'
+        SELECT 1 FROM pg_policies WHERE policyname = 'deck_versions_tenant_isolation'
     ) THEN
         CREATE POLICY deck_versions_tenant_isolation ON deck_versions
             USING (
