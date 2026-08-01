@@ -9,6 +9,10 @@
   "exports": {
     ".": "./src/index.ts",
     "./deck/loader": "./src/deck/loader.ts",
+    "./deck/revisions": "./src/deck/revisions.ts",
+    "./branch": "./src/branch/index.ts",
+    "./checkpoint": "./src/checkpoint/index.ts",
+    "./diff": "./src/diff/index.ts",
     "./gen/controlplane/v1": "./gen/controlplane/v1/client.ts"
   },
   "scripts": {

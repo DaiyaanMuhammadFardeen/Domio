@@ -10,3 +10,4 @@
  */
 
 export * from './deck/loader.js';
+export * from './deck/revisions.js';

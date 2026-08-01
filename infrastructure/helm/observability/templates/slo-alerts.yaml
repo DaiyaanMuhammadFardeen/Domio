@@ -13,26 +13,19 @@ data:
         interval: 30s
         rules:
           - alert: SLORequestAvailabilityBreached
-            expr: |
-              sum(rate(http_requests_total{code=~"5.."}[5m]))
-                /
-              sum(rate(http_requests_total[5m])) > 0.01
+            expr: sum(rate(http_requests_total{code=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.01
             for: 5m
             labels:
               severity: page
               slo: request-availability
           - alert: SLOP95LatencyBreached
-            expr: |
-              histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
             for: 5m
             labels:
               severity: page
               slo: p95-latency
           - alert: SLOErrorRateBreached
-            expr: |
-              sum(rate(http_requests_total{code=~"5.."}[5m]))
-                /
-              sum(rate(http_requests_total[5m])) > 0.05
+            expr: sum(rate(http_requests_total{code=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
             for: 5m
             labels:
               severity: page
@@ -44,32 +37,37 @@ data:
               severity: page
               slo: ingestion-freshness
           - alert: RealtimeGatewayOpRoundTripP95Breached
-            expr: |
-              histogram_quantile(0.95, sum(rate(rtgw_sync_op_round_trip_ms_bucket[5m])) by (le)) > 250
+            expr: histogram_quantile(0.95, sum(rate(rtgw_sync_op_round_trip_ms_bucket[5m])) by (le)) > 250
             for: 5m
             labels:
               severity: page
               slo: realtime-op-round-trip-p95
               phase: "04"
-            annotations:
-              summary: "Realtime gateway op round-trip p95 > 250 ms"
-              description: |
-                CRDT op round-trip latency is degraded. Investigate NATS, Redis, or
-                control-plane gRPC latency. See docs/development_phases/phase-04
-                §5-C.3 (sync_op_round_trip_ms).
           - alert: RealtimeGatewayCrdtConvergenceP95Breached
-            expr: |
-              histogram_quantile(0.95, sum(rate(rtgw_sync_crdt_convergence_ms_bucket[5m])) by (le)) > 2000
+            expr: histogram_quantile(0.95, sum(rate(rtgw_sync_crdt_convergence_ms_bucket[5m])) by (le)) > 2000
             for: 5m
             labels:
               severity: page
               slo: realtime-crdt-convergence-p95
               phase: "04"
+          - alert: BranchDiffDurationP95Breached
+            expr: histogram_quantile(0.95, sum(rate(branch_diff_duration_ms_bucket[5m])) by (le)) > 2000
+            for: 5m
+            labels:
+              severity: page
+              slo: branch-diff-duration-p95
+              phase: "05"
             annotations:
-              summary: "CRDT convergence p95 > 2 s"
-              description: |
-                Two replicas are taking > 2 s to converge. Likely root causes:
-                JetStream backlog, replay pressure, or a hot sub-doc with many
-                pending updates. See docs/development_phases/phase-04 §5-C.3
-                (sync_crdt_convergence_ms).
+              summary: "Branch diff duration p95 > 2 s"
+              description: "3-way branch diff computation exceeds the Phase 05 latency budget."
+          - alert: SnapshotDurationMsBreached
+            expr: histogram_quantile(0.95, sum(rate(snapshot_duration_ms_bucket[5m])) by (le)) > 5000
+            for: 5m
+            labels:
+              severity: page
+              slo: snapshot-duration-p95
+              phase: "05"
+            annotations:
+              summary: "Snapshot materialization duration p95 > 5 s"
+              description: "Snapshot materialization exceeds the Phase 05 latency budget."
 {{- end }}

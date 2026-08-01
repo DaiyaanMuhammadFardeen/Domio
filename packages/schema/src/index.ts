@@ -9,8 +9,9 @@ export * from './version.js';
 export * from './generated/scene-graph.js';
 export * from './validate.js';
 export * from './migrate.js';
-export * from './address.js';
 export * from './registry.js';
+export * from './versioning.js';
+export * from './address.js';
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
