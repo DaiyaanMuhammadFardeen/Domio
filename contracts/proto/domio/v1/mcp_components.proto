@@ -1,0 +1,39 @@
+// Domio mcp_components.proto
+//
+// MCP tool request/response envelopes (feature 222). The MCP layer maps
+// tool calls to these envelopes; error codes surface as
+// ERR_BRAND_LOCK | ERR_LICENSE_MISSING | ERR_PIN_UNAVAILABLE.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+enum McpErrorCode {
+  MCP_ERROR_CODE_UNSPECIFIED = 0;
+  MCP_ERROR_CODE_BRAND_LOCK = 1;
+  MCP_ERROR_CODE_LICENSE_MISSING = 2;
+  MCP_ERROR_CODE_PIN_UNAVAILABLE = 3;
+  MCP_ERROR_CODE_NOT_FOUND = 4;
+}
+
+message McpToolRequest {
+  string tool = 1; // list_components | describe_component | install_component | ...
+  map<string, string> args = 2;
+  bool dry_run = 3;
+  string agent_id = 4;
+}
+
+message McpToolResponse {
+  string result = 1; // JSON-encoded structured result
+  McpErrorCode error_code = 2;
+  string error_message = 3;
+  bool applied = 4; // false for dry-run or rejected writes
+}
+
+service McpComponentsService {
+  rpc RunTool(McpToolRequest) returns (McpToolResponse);
+}

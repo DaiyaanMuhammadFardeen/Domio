@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/font-asset-v1.schema.json",
+  "title": "Domio Font Asset V1",
+  "description": "Font asset metadata for Phase 07 theming. Tracks font files, licensing, glyph coverage, and OpenType axis support.",
+  "type": "object",
+  "required": ["schemaVersion", "fontId", "kitId", "fileUrl", "format", "weight", "subsets", "glyphCoverage", "sha256", "licenseStatus", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver of the font asset schema."
+    },
+    "fontId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "kitId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "fileUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "format": {
+      "type": "string",
+      "enum": ["woff2", "woff", "otf", "ttf", "ttc"]
+    },
+    "weight": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 900
+    },
+    "subsets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Character set subsets included (e.g., 'latin', 'cyrillic', 'emoji')."
+    },
+    "glyphCoverage": {
+      "type": "object",
+      "description": "Coverage percentage keyed by Unicode block name.",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100
+      }
+    },
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "weight": {
+          "type": "object",
+          "required": ["min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          }
+        },
+        "width": {
+          "type": "object",
+          "required": ["min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          }
+        },
+        "slant": {
+          "type": "object",
+          "required": ["min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          }
+        }
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 hex digest of the font file."
+    },
+    "licenseStatus": {
+      "type": "string",
+      "enum": ["permissive", "restricted", "unknown"]
+    },
+    "licenseUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "licenseExpiresAt": {
+      "oneOf": [
+        { "type": "string", "format": "date-time" },
+        { "type": "null" }
+      ]
+    },
+    "antiPiracyScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Risk score for font piracy (0 = safe, 1 = likely pirated)."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

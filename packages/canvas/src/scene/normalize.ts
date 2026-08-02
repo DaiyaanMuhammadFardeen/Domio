@@ -16,6 +16,7 @@ import type {
   RenderCommandList,
 } from '../renderer/commands.js';
 import type { SceneGraph } from './scene-graph.js';
+import { expandComponent } from '@domio/components';
 
 export interface NormalizeOptions {
   /** Excludes hidden layers from the emitted command list. */
@@ -82,6 +83,16 @@ export function elementToCommand(element: Element): RenderCommand | null {
       return pathFor(element);
     case 'boolean':
       return null;
+    case 'component': {
+      // Component layers expand (deterministically) into their scene-graph
+      // children via the shared @domio/components pack, then normalize each.
+      const children = expandComponent(element).map(elementToCommand).filter((c): c is RenderCommand => c !== null);
+      return {
+        kind: 'drawGroup',
+        id: element.id,
+        children,
+      };
+    }
   }
 }
 
@@ -99,11 +110,20 @@ function rectFor(
     w: t.w,
     h: t.h,
   };
-  if (opts.fillColor) {
+  // Component builders paint fills/strokes on frame layers directly.
+  if (element.type === 'frame' && element.fill?.color) {
+    cmd.fill = rgbaToColor(element.fill.color);
+  } else if (opts.fillColor) {
     cmd.fill = { colorSpace: 'srgb', value: opts.fillColor };
   }
-  if (opts.strokeWidth) {
-    cmd.stroke = { color: { colorSpace: 'srgb', value: '#60A5FA' }, width: opts.strokeWidth };
+  const strokeWidth =
+    element.type === 'frame' && element.stroke?.width != null ? element.stroke.width : opts.strokeWidth;
+  if (strokeWidth) {
+    const strokeColor =
+      element.type === 'frame' && element.stroke?.color
+        ? rgbaToColor(element.stroke.color)
+        : { colorSpace: 'srgb' as const, value: '#60A5FA' };
+    cmd.stroke = { color: strokeColor, width: strokeWidth };
   }
   return cmd;
 }

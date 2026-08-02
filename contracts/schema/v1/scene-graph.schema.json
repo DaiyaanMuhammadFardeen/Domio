@@ -99,6 +99,29 @@
         "overrides": { "type": "object", "additionalProperties": true }
       }
     },
+    "ComponentRef": {
+      "type": "object",
+      "description": "Reference to a component-package instance. `props` are validated against the component's JSON-Schema props schema (contracts/schema/component-package-v1.schema.json).",
+      "required": ["catalogId", "version", "props"],
+      "additionalProperties": false,
+      "properties": {
+        "catalogId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$",
+          "description": "Namespaced catalog id, e.g. domio.stat-card."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Semver of the component package."
+        },
+        "variant": {
+          "type": "string",
+          "description": "Active variant id (e.g. light | dark | sm | md | lg)."
+        },
+        "props": { "type": "object", "additionalProperties": true }
+      }
+    },
     "FrameLayer": {
       "type": "object",
       "required": ["id", "semanticId", "type", "name", "aspect"],
@@ -339,6 +362,33 @@
         }
       }
     },
+    "ComponentLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "component"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "type": { "const": "component" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "component": { "$ref": "#/definitions/ComponentRef" }
+      }
+    },
     "Element": {
       "description": "Discriminated union of every layer kind. The `type` field is exclusive per kind.",
       "oneOf": [
@@ -348,7 +398,8 @@
         { "$ref": "#/definitions/TextLayer" },
         { "$ref": "#/definitions/ImageLayer" },
         { "$ref": "#/definitions/VectorLayer" },
-        { "$ref": "#/definitions/BooleanShapeLayer" }
+        { "$ref": "#/definitions/BooleanShapeLayer" },
+        { "$ref": "#/definitions/ComponentLayer" }
       ]
     }
   }

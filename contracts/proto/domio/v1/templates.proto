@@ -1,0 +1,55 @@
+// Domio templates.proto
+//
+// Full-deck and section template installation, plus guided fill-in.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+message Placeholder {
+  string id = 1;
+  string element_id = 2;
+  string label = 3;
+  string kind = 4; // text | image | data_binding | component_prop
+  string default_value = 5;
+  int64 narrative_order = 6;
+}
+
+message TemplateManifest {
+  ResourceId id = 1;
+  string name = 2;
+  string kind = 3; // full_deck | section
+  string deck_json = 4; // canonical deck.json payload
+  repeated Placeholder placeholders = 5;
+}
+
+message InstallTemplateRequest {
+  ResourceId template_id = 1;
+  ResourceId target_deck = 2;
+  map<string, string> placeholder_values = 3;
+  IdempotencyKey idempotency_key = 4;
+}
+
+message InstallTemplateResponse {
+  string deck_id = 1;
+  int64 slides_added = 2;
+  repeated string unresolved_placeholders = 3;
+  repeated string missing_components = 4;
+}
+
+message GuidedFillRequest {
+  ResourceId template_id = 1;
+}
+
+message GuidedFillResponse {
+  repeated Placeholder placeholders = 1; // ordered by narrative_order
+}
+
+service TemplatesService {
+  rpc Install(InstallTemplateRequest) returns (InstallTemplateResponse);
+  rpc GuidedFill(GuidedFillRequest) returns (GuidedFillResponse);
+}

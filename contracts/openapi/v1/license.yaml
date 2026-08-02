@@ -1,0 +1,93 @@
+openapi: 3.1.0
+info:
+  title: Domio License API (Phase 06)
+  version: 1.0.0
+  description: |
+    License grant issuance, verification, revocation, and seat enforcement for
+    paid marketplace components. Grants are HS256 compact JWTs with a 30-day
+    offline grace window past expiry.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: license
+    description: License lifecycle.
+security:
+  - bearerAuth: []
+paths:
+  /v1/license/verify:
+    post:
+      tags: [license]
+      summary: Verify a license token
+      description: |
+        Verifies JWS signature, catalog/version claim match, revocation, and
+        expiry (honoring the 30-day offline grace). Optionally enforces seats.
+      operationId: verifyLicense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string }
+                catalogId: { type: string }
+                version: { type: string }
+                workspaceId: { type: string }
+                enforceSeats: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Valid license
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean, const: true }
+                  grant: { type: object }
+        '403':
+          description: Invalid / revoked / expired / seat limit
+
+  /v1/license/grants/{licenseId}:
+    delete:
+      tags: [license]
+      summary: Revoke a license grant
+      operationId: revokeLicense
+      parameters:
+        - name: licenseId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Revoked
+        '404':
+          description: Unknown license
+
+  /v1/license/grants/{licenseId}/seats:
+    get:
+      tags: [license]
+      summary: Seat usage for a license
+      operationId: seatUsage
+      parameters:
+        - name: licenseId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Seat usage
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  seats: { type: integer }
+                  used: { type: integer }
+                  available: { type: integer }

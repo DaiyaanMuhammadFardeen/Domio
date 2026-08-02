@@ -13,11 +13,10 @@
  */
 
 import * as Y from 'yjs';
-import type { DeckDocument } from '@domio/schema';
-import {
-  HistoryEngine,
-  type HistoryOp,
-} from '@domio/canvas';
+import type { Op } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
+import type { DeckDocument } from '@domio/schema/generated/scene-graph';
+import type { HistoryEngine } from '@domio/canvas';
+import type { HistoryOp } from '@domio/canvas';
 import type { SyncProvider } from './provider.js';
 import type { LocalQueue } from './local-queue.js';
 import type { DeckSubDocs } from './subdocs.js';
@@ -140,7 +139,7 @@ export class SyncBridge {
 
   // ----- Internals -----
 
-  private handleRemoteOp(op: import('@domio/api-client/gen/domio/realtime/v1/realtime_pb').Op): void {
+  private handleRemoteOp(op: Op): void {
     // Delegate to the canonical remote-op-applier.
     this._lastRemoteAuthorId = op.authorId;
     this.suppressingRemote = true;

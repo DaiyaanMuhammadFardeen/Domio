@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "@domio/schema": "workspace:*",
-    "@domio/common": "workspace:*"
+    "@domio/common": "workspace:*",
+    "@domio/components": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.10.1",

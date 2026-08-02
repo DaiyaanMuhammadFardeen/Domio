@@ -1,0 +1,116 @@
+// Domio theme.proto
+//
+// Theme resolution, apply, and override surface for Phase 07.
+// Design tokens are resolved through a layered precedence chain:
+//   override → theme → brand → org → platform-fallback → system-alias
+
+syntax = "proto3";
+
+package domio.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// TokenGroup is the eight token categories defined by the design system.
+enum TokenGroup {
+  TOKEN_GROUP_UNSPECIFIED = 0;
+  TOKEN_GROUP_COLOR = 1;
+  TOKEN_GROUP_TYPOGRAPHY = 2;
+  TOKEN_GROUP_SPACING = 3;
+  TOKEN_GROUP_RADIUS = 4;
+  TOKEN_GROUP_SHADOW = 5;
+  TOKEN_GROUP_MOTION = 6;
+  TOKEN_GROUP_CONTENT = 7;
+  TOKEN_GROUP_BORDER = 8;
+}
+
+// TokenSource identifies the precedence layer a resolved token came from.
+enum TokenSource {
+  TOKEN_SOURCE_UNSPECIFIED = 0;
+  TOKEN_SOURCE_OVERRIDE = 1;
+  TOKEN_SOURCE_THEME = 2;
+  TOKEN_SOURCE_BRAND = 3;
+  TOKEN_SOURCE_ORG = 4;
+  TOKEN_SOURCE_PLATFORM_FALLBACK = 5;
+  TOKEN_SOURCE_SYSTEM_ALIAS = 6;
+}
+
+// -----------------------------------------------------------------------------
+// Messages
+// -----------------------------------------------------------------------------
+
+// ThemeServiceResolveTokensRequest asks the token resolver to resolve a set
+// of token references against the current scope and deck state.
+message ThemeServiceResolveTokensRequest {
+  // Token references to resolve (e.g., "color.brand.primary").
+  repeated string token_refs = 1;
+
+  // Resolution scope (org, workspace, deck).
+  string scope = 2;
+
+  // Optional deck state reference for per-deck overrides.
+  string deck_state_ref = 3;
+}
+
+// ThemeServiceResolveTokensResponse contains the resolved token values.
+message ThemeServiceResolveTokensResponse {
+  // Resolved token reference → JSON-encoded value.
+  map<string, string> resolved = 1;
+
+  // Source layer each token was resolved from.
+  map<string, TokenSource> sources = 2;
+
+  // Non-fatal warnings (e.g., alias cycles, deprecated tokens).
+  repeated string warnings = 3;
+}
+
+// ThemeServiceApplyThemeRequest applies a theme to a deck.
+message ThemeServiceApplyThemeRequest {
+  // Theme identifier.
+  string theme_id = 1;
+
+  // Target deck identifier.
+  string deck_id = 2;
+
+  // Actor performing the apply.
+  string actor_id = 3;
+}
+
+// ThemeServiceApplyThemeResponse reports the outcome of a theme application.
+message ThemeServiceApplyThemeResponse {
+  // Number of tokens that were changed.
+  uint32 tokens_changed_count = 1;
+
+  // Reference to the operation batch for tracking.
+  string op_batch_ref = 2;
+
+  // Latency of the apply operation in milliseconds.
+  int64 latency_ms = 3;
+}
+
+// ThemeOverrideSpec defines per-scope token overrides with optional conditions.
+message ThemeOverrideSpec {
+  // Override scope (e.g., "slide", "element").
+  string scope = 1;
+
+  // Scope identifier (e.g., slide ID or element ID).
+  string scope_id = 2;
+
+  // Partial token map (token reference → JSON-encoded value).
+  map<string, string> tokens_partial = 3;
+
+  // Optional condition expression for conditional overrides.
+  string condition_expr = 4;
+}
+
+// ThemeService exposes theme resolution and application via gRPC.
+service ThemeService {
+  // ResolveTokens resolves token references to concrete values.
+  rpc ResolveTokens(ThemeServiceResolveTokensRequest) returns (ThemeServiceResolveTokensResponse) {}
+
+  // ApplyTheme applies a theme to a deck.
+  rpc ApplyTheme(ThemeServiceApplyThemeRequest) returns (ThemeServiceApplyThemeResponse) {}
+}

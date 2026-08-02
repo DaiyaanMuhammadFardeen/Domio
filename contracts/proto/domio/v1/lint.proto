@@ -1,0 +1,97 @@
+// Domio lint.proto
+//
+// Style linting surface for Phase 07. Flags off-brand colors, fonts, and
+// other token violations across a deck with one-click fix proposals.
+
+syntax = "proto3";
+
+package domio.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// LintSeverity is the severity of a lint finding.
+enum LintSeverity {
+  LINT_SEVERITY_UNSPECIFIED = 0;
+  LINT_SEVERITY_BLOCK = 1;
+  LINT_SEVERITY_WARN = 2;
+  LINT_SEVERITY_INFO = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Messages
+// -----------------------------------------------------------------------------
+
+// LintFinding is a single lint violation detected in a deck.
+message LintFinding {
+  // Unique finding identifier.
+  string finding_id = 1;
+
+  // Rule that produced this finding (e.g., "off-brand-color").
+  string rule_id = 2;
+
+  // Severity of the finding.
+  LintSeverity severity = 3;
+
+  // Token reference that was expected (if applicable).
+  string token_ref = 4;
+
+  // Element reference where the violation was found.
+  string element_ref = 5;
+
+  // Human-readable description of the violation.
+  string message = 6;
+
+  // Optional fix proposal.
+  LintFixProposal fix_proposal = 7;
+}
+
+// LintFixProposal describes a one-click fix for a lint finding.
+message LintFixProposal {
+  // The replacement token reference.
+  string replacement_token = 1;
+
+  // Delta-E color distance between old and new values (for color fixes).
+  float delta_e = 2;
+
+  // Old value (JSON-encoded).
+  string old_value = 3;
+
+  // New value (JSON-encoded).
+  string new_value = 4;
+}
+
+// LintServiceRunLintRequest initiates a lint check on a deck.
+message LintServiceRunLintRequest {
+  // Deck identifier to lint.
+  string deck_id = 1;
+
+  // Optional brand kit ID to lint against.
+  string brand_kit_id = 2;
+
+  // Optional rule filter (empty = all rules).
+  repeated string rule_ids = 3;
+}
+
+// LintServiceRunLintResponse contains the lint findings.
+message LintServiceRunLintResponse {
+  // All findings.
+  repeated LintFinding findings = 1;
+
+  // Summary counts by severity.
+  uint32 block_count = 2;
+  uint32 warn_count = 3;
+  uint32 info_count = 4;
+
+  // Total elements scanned.
+  uint32 elements_scanned = 5;
+}
+
+// LintService exposes style linting via gRPC.
+service LintService {
+  // RunLint performs a lint check on a deck.
+  rpc RunLint(LintServiceRunLintRequest) returns (LintServiceRunLintResponse) {}
+}

@@ -1,0 +1,6 @@
+BEGIN;
+
+DROP TABLE IF EXISTS token_alias;
+DROP TABLE IF EXISTS design_token;
+
+COMMIT;

@@ -8,7 +8,7 @@
  * control plane.
  */
 
-import type { DeckDocument } from '@domio/schema';
+import type { DeckDocument } from '@domio/schema/generated/scene-graph';
 import exampleDeck from '../../../../fixtures/example-deck.json' with { type: 'json' };
 
 export interface DocumentLoader {

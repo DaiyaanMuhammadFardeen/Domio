@@ -1,0 +1,252 @@
+openapi: 3.1.0
+info:
+  title: Domio Marketplace API (Phase 06)
+  version: 1.0.0
+  description: |
+    Marketplace listings, reviews with moderation, revenue-share ledger, and
+    search across published components.
+
+    All endpoints require authentication via the bearer token or the session
+    cookie.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: marketplace
+    description: Marketplace listings, reviews, revenue, and search.
+security:
+  - bearerAuth: []
+paths:
+  /v1/marketplace/listings:
+    get:
+      tags: [marketplace]
+      summary: Search marketplace listings
+      description: |
+        Read-side search over published listings. Supports text query,
+        category (tag) filter, price range, and sort (relevance, newest,
+        price, rating). Removed listings are never returned.
+      operationId: searchListings
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: minPrice
+          in: query
+          schema: { type: integer }
+        - name: maxPrice
+          in: query
+          schema: { type: integer }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [relevance, newest, price-asc, price-desc, rating] }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, default: 24, maximum: 100 }
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/Listing' } }
+                  total: { type: integer }
+                  page: { type: integer }
+                  pageSize: { type: integer }
+    post:
+      tags: [marketplace]
+      summary: Create a draft listing
+      operationId: createListing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [catalogId, sellerId, title, description, priceCents]
+              properties:
+                catalogId: { type: string }
+                sellerId: { type: string }
+                title: { type: string }
+                description: { type: string }
+                tags: { type: array, items: { type: string } }
+                priceCents: { type: integer, minimum: 0 }
+                currency: { type: string, default: USD }
+                isFree: { type: boolean }
+                preview: { type: object }
+      responses:
+        '201':
+          description: Draft created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Listing' }
+        '409':
+          description: Listing already exists for this catalog
+
+  /v1/marketplace/listings/{listingId}/status:
+    post:
+      tags: [marketplace]
+      summary: Transition listing status (draft → in_review → published → deprecated → removed)
+      operationId: transitionListing
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [draft, in_review, published, deprecated, removed] }
+                reason: { type: string }
+      responses:
+        '200':
+          description: Transitioned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Listing' }
+        '409':
+          description: Invalid transition
+
+  /v1/marketplace/listings/{listingId}/reviews:
+    post:
+      tags: [marketplace]
+      summary: Submit a review
+      description: |
+        Reviews pass heuristic moderation (profanity, link density, caps ratio,
+        repetition, trust score). Auto-flagged reviews return 202 and are
+        processed by the moderator worker.
+      operationId: submitReview
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reviewerId, rating, body]
+              properties:
+                reviewerId: { type: string }
+                rating: { type: integer, minimum: 1, maximum: 5 }
+                body: { type: string, minLength: 1, maxLength: 2000 }
+                verifiedBuyer: { type: boolean, default: false }
+      responses:
+        '201':
+          description: Review accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '202':
+          description: Queued for moderation (ERR_MODERATION_QUEUED)
+        '400':
+          description: Invalid rating
+
+  /v1/marketplace/sellers/{sellerId}/revenue:
+    get:
+      tags: [marketplace]
+      summary: Revenue-share ledger balance
+      operationId: getRevenue
+      parameters:
+        - name: sellerId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: periodMonth
+          in: query
+          schema: { type: string, pattern: '^\d{4}-\d{2}$' }
+      responses:
+        '200':
+          description: Ledger summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balanceCents: { type: integer }
+                  payoutEligible: { type: boolean }
+                  events: { type: array, items: { $ref: '#/components/schemas/RevenueEvent' } }
+
+  /v1/marketplace/sellers/{sellerId}/revenue/payout:
+    post:
+      tags: [marketplace]
+      summary: Request a payout (writer worker marks eligible)
+      operationId: requestPayout
+      parameters:
+        - name: sellerId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: periodMonth
+          in: query
+          schema: { type: string, pattern: '^\d{4}-\d{2}$' }
+      responses:
+        '200':
+          description: Payout queued
+        '409':
+          description: Below minimum payout threshold
+
+components:
+  schemas:
+    Listing:
+      type: object
+      properties:
+        id: { type: string }
+        catalogId: { type: string }
+        sellerId: { type: string }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [draft, in_review, published, deprecated, removed] }
+        isFree: { type: boolean }
+        priceCents: { type: integer }
+        currency: { type: string }
+        tags: { type: array, items: { type: string } }
+        publishedAt: { type: integer }
+        deprecatedAt: { type: integer }
+        createdAt: { type: integer }
+        updatedAt: { type: integer }
+
+    Review:
+      type: object
+      properties:
+        id: { type: string }
+        listingId: { type: string }
+        reviewerId: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        body: { type: string }
+        status: { type: string, enum: [queued, accepted, auto_flagged, removed] }
+        verifiedBuyer: { type: boolean }
+        createdAt: { type: integer }
+
+    RevenueEvent:
+      type: object
+      properties:
+        id: { type: string }
+        listingId: { type: string }
+        sellerId: { type: string }
+        currency: { type: string }
+        grossCents: { type: integer }
+        feeCents: { type: integer }
+        netCents: { type: integer }
+        eventType: { type: string }
+        periodMonth: { type: string }
+        createdAt: { type: integer }

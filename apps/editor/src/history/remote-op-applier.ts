@@ -12,7 +12,7 @@
  */
 
 import * as Y from 'yjs';
-import type { DeckDocument } from '@domio/schema';
+import type { DeckDocument } from '@domio/schema/generated/scene-graph';
 import type { DeckSubDocs } from '../sync/subdocs.js';
 import type { Op } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
 

@@ -111,6 +111,42 @@ describe('validate', () => {
     expect(result.valid).toBe(false);
   });
 
+  it('accepts a component element with a valid ComponentRef', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H00000000000000000000097'),
+      semanticId: 'stat_card',
+      type: 'component',
+      name: 'Stat card',
+      parentId: null,
+      transform: { x: 100, y: 100, w: 320, h: 160, rotation: 0 },
+      component: {
+        catalogId: 'domio.stat-card',
+        version: '1.0.0',
+        variant: 'light',
+        props: { value: 42, label: 'Revenue' },
+      },
+    });
+    const result = validate(doc);
+    expect(result.valid).toBe(true);
+  });
+
+  it('rejects a component element with a missing or malformed ComponentRef', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H00000000000000000000096'),
+      semanticId: 'broken_stat',
+      type: 'component',
+      name: 'Broken stat',
+      parentId: null,
+      component: { catalogId: '', version: 'not-a-version', props: [] as unknown as Record<string, unknown> },
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.component.version'))).toBe(true);
+    expect(result.errors.some((e) => e.path.endsWith('.component.props'))).toBe(true);
+  });
+
   it('enforces the schemaVersion on the structural validator by default', () => {
     const doc = { ...baseDeck(), schemaVersion: '0.9.0' };
     const result = validate(doc);

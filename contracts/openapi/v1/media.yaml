@@ -1,0 +1,244 @@
+openapi: 3.1.0
+info:
+  title: Domio Media API (Phase 06)
+  version: 1.0.0
+  description: |
+    Icon catalog, stock photo providers (Unsplash/Pexels), Lottie/GIF
+    validation and transcoding, and sticker packs.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: media
+    description: Icons, stock media, animations, and stickers.
+security:
+  - bearerAuth: []
+paths:
+  /v1/media/icons/search:
+    get:
+      tags: [media]
+      summary: Search the icon catalog
+      description: |
+        Name/synonym text search with style filtering. Perceptual-hash
+        similarity is available via the `similarTo` parameter.
+      operationId: searchIcons
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+        - name: styles
+          in: query
+          schema:
+            type: array
+            items: { type: string }
+            style: form
+            explode: false
+        - name: similarTo
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 40 }
+      responses:
+        '200':
+          description: Icons
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/Icon' } }
+                  total: { type: integer }
+
+  /v1/media/icons:
+    post:
+      tags: [media]
+      summary: Ingest an icon
+      description: |
+        Stores an icon with its SVG path data, computes the perceptual hash,
+        and makes it searchable.
+      operationId: ingestIcon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, pathData, vendor, licenseId]
+              properties:
+                name: { type: string }
+                synonyms: { type: array, items: { type: string } }
+                styles: { type: array, items: { type: string } }
+                pathData: { type: string }
+                viewBox: { type: string, default: '0 0 24 24' }
+                vendor: { type: string }
+                licenseId: { type: string }
+      responses:
+        '201':
+          description: Ingested
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Icon' }
+        '400':
+          description: Missing name or path data
+
+  /v1/media/stock/search:
+    get:
+      tags: [media]
+      summary: Search a stock photo provider
+      description: |
+        Proxies Unsplash or Pexels. API key must be configured on the provider;
+        results carry attribution.
+      operationId: searchStock
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema: { type: string, enum: [unsplash, pexels] }
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+        - name: perPage
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          description: Results with attribution
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  provider: { type: string }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        thumbUrl: { type: string }
+                        width: { type: integer }
+                        height: { type: integer }
+                        author: { type: string }
+                        attributionHtml: { type: string }
+        '400':
+          description: Missing provider API key
+
+  /v1/media/animations/validate:
+    post:
+      tags: [media]
+      summary: Validate a Lottie animation
+      description: |
+        Rejects script-like `expression` features, prototype-pollution keys,
+        oversized layer counts, and frame rates above 120.
+      operationId: validateLottie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lottie]
+              properties:
+                lottie: { type: object }
+                maxLayers: { type: integer, default: 500 }
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+                  errors: { type: array, items: { type: string } }
+
+  /v1/media/sticker-packs:
+    get:
+      tags: [media]
+      summary: List sticker packs
+      operationId: listStickerPacks
+      parameters:
+        - name: theme
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Packs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    name: { type: string }
+                    theme: { type: string }
+                    informalOnly: { type: boolean }
+                    stickerComponentIds: { type: array, items: { type: string } }
+
+  /v1/media/sticker-packs/{packId}/install:
+    post:
+      tags: [media]
+      summary: Install a sticker pack
+      operationId: installStickerPack
+      parameters:
+        - name: packId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [workspaceId, userId]
+              properties:
+                workspaceId: { type: string }
+                userId: { type: string }
+      responses:
+        '200':
+          description: Installed stickers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stickers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        catalogId: { type: string }
+                        informalOnly: { type: boolean }
+                        installed: { type: boolean, const: true }
+        '404':
+          description: Unknown pack
+
+components:
+  schemas:
+    Icon:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        synonyms: { type: array, items: { type: string } }
+        styles: { type: array, items: { type: string } }
+        pathData: { type: string }
+        viewBox: { type: string }
+        vendor: { type: string }
+        licenseId: { type: string }
+        perceptualHash: { type: string }
+        createdAt: { type: integer }

@@ -170,6 +170,21 @@ export interface ComponentInstance {
   overrides?: Record<string, unknown>;
 }
 
+/**
+ * Reference to a component-package instance on the canvas. `props` are
+ * validated against the component's JSON-Schema props schema.
+ */
+export interface ComponentRef {
+  /** Namespaced catalog id, e.g. `domio.stat-card`. */
+  catalogId: string;
+  /** Semver of the component package. */
+  version: string;
+  /** Active variant id (e.g. `light` | `dark` | `sm` | `md` | `lg`). */
+  variant?: string;
+  /** Resolved prop values validated against the props schema. */
+  props: Record<string, unknown>;
+}
+
 // ----- Layer base & discriminated union -----
 
 /**
@@ -267,6 +282,11 @@ export interface BooleanShapeLayer extends ElementBase {
   operation: 'union' | 'subtract' | 'intersect' | 'exclude';
 }
 
+export interface ComponentLayer extends ElementBase {
+  type: 'component';
+  component: ComponentRef;
+}
+
 export type LayerType =
   | 'frame'
   | 'group'
@@ -274,7 +294,8 @@ export type LayerType =
   | 'text'
   | 'image'
   | 'vector'
-  | 'boolean';
+  | 'boolean'
+  | 'component';
 
 export type Element =
   | FrameLayer
@@ -283,7 +304,8 @@ export type Element =
   | TextLayer
   | ImageLayer
   | VectorLayer
-  | BooleanShapeLayer;
+  | BooleanShapeLayer
+  | ComponentLayer;
 
 // ----- Slide & deck document -----
 

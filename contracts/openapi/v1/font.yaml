@@ -1,0 +1,191 @@
+openapi: 3.1.0
+info:
+  title: Domio Font API
+  version: 1.0.0
+  description: |
+    Font asset management for Phase 07. Upload, retrieve, and list font files
+    with licensing and glyph coverage metadata.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: fonts
+    description: Font asset operations.
+security:
+  - bearerAuth: []
+paths:
+  /v1/fonts/{font_id}:
+    get:
+      tags: [fonts]
+      operationId: getFontAsset
+      summary: Get a font asset
+      parameters:
+        - in: path
+          name: font_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Font asset details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FontAsset"
+        "404":
+          description: Font asset not found.
+  /v1/fonts:
+    get:
+      tags: [fonts]
+      operationId: listFontAssets
+      summary: List font assets for a brand kit
+      parameters:
+        - in: query
+          name: kit_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: List of font assets.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListFontAssetsResponse"
+    post:
+      tags: [fonts]
+      operationId: uploadFont
+      summary: Upload a font asset
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, kitId, weight]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                kitId:
+                  type: string
+                weight:
+                  type: integer
+                  minimum: 100
+                  maximum: 900
+                subsets:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Font asset uploaded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FontAsset"
+        "400":
+          description: Invalid font file or parameters.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    FontAsset:
+      type: object
+      required: [fontId, kitId, fileUrl, format, weight, subsets, licenseStatus, createdAt]
+      properties:
+        fontId:
+          type: string
+        kitId:
+          type: string
+        fileUrl:
+          type: string
+          format: uri
+        format:
+          type: string
+          enum: [woff2, woff, otf, ttf, ttc]
+        weight:
+          type: integer
+        subsets:
+          type: array
+          items:
+            type: string
+        glyphCoverage:
+          type: object
+          additionalProperties:
+            type: number
+        axes:
+          type: object
+          properties:
+            weight:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+            width:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+            slant:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+        sha256:
+          type: string
+        licenseStatus:
+          type: string
+          enum: [permissive, restricted, unknown]
+        licenseUrl:
+          type: string
+          format: uri
+        licenseExpiresAt:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+        antiPiracyScore:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    ListFontAssetsResponse:
+      type: object
+      properties:
+        fontAssets:
+          type: array
+          items:
+            $ref: "#/components/schemas/FontAsset"
+        pageInfo:
+          type: object
+          properties:
+            page:
+              type: integer
+            pageSize:
+              type: integer
+            totalItems:
+              type: integer
+            hasNext:
+              type: boolean

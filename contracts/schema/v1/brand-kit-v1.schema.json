@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/brand-kit-v1.schema.json",
+  "title": "Domio Brand Kit V1",
+  "description": "Brand kit definition for Phase 07 theming. Encapsulates logos, palettes, imagery rules, sub-brands, governance, and extraction attestation for an organization's visual identity.",
+  "type": "object",
+  "required": ["schemaVersion", "name", "ownerOrgId", "scope", "status", "logos", "palettes"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver of the brand kit schema."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "ownerOrgId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["org", "workspace", "team"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "published", "archived"]
+    },
+    "logos": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/LogoAsset" }
+    },
+    "palettes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/Palette" }
+    },
+    "imageryRules": { "$ref": "#/definitions/ImageryRules" },
+    "subBrands": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/SubBrand" }
+    },
+    "governance": { "$ref": "#/definitions/Governance" },
+    "extractionAttestation": {
+      "oneOf": [
+        { "$ref": "#/definitions/ExtractionAttestation" },
+        { "type": "null" }
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "LogoAsset": {
+      "type": "object",
+      "required": ["variant", "size", "format", "assetUrl", "contentHash"],
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "type": "string",
+          "enum": ["light", "dark", "mono"]
+        },
+        "size": {
+          "type": "string",
+          "enum": ["small", "medium", "large", "full"]
+        },
+        "format": {
+          "type": "string",
+          "enum": ["svg", "png", "webp"]
+        },
+        "assetUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "contentHash": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "clearSpacePx": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "Palette": {
+      "type": "object",
+      "required": ["tokenIds"],
+      "additionalProperties": false,
+      "properties": {
+        "tokenIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]+(?:\\.[a-z0-9]+)*$"
+          }
+        },
+        "cvSafe": {
+          "type": "boolean",
+          "description": "Whether this palette is colorblind-safe."
+        },
+        "hueSpacingDeg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "Hue spacing in degrees between palette entries."
+        }
+      }
+    },
+    "ImageryRules": {
+      "type": "object",
+      "required": ["minResolution", "allowedSources"],
+      "additionalProperties": false,
+      "properties": {
+        "doRules": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dontRules": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "minResolution": {
+          "type": "object",
+          "required": ["width", "height"],
+          "additionalProperties": false,
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "subjectSafeZonePolygon": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["x", "y"],
+            "additionalProperties": false,
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" }
+            }
+          },
+          "description": "Polygon vertices defining the safe zone for subject placement."
+        },
+        "allowedSources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
+    "SubBrand": {
+      "type": "object",
+      "required": ["name", "parentBrandKitId"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "parentBrandKitId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "overrides": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "Governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "approvalRequired": {
+          "type": "boolean",
+          "default": false
+        },
+        "approvers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "lockAfterPublish": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "ExtractionAttestation": {
+      "type": "object",
+      "required": ["confirmedBy", "confirmedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "confirmedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confirmedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

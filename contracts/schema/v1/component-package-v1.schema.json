@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/component-package-v1.schema.json",
+  "title": "Domio Component Package Manifest",
+  "description": "Manifest for a versioned, content-addressed component package. The package kind is one of component | icon | sticker | animation. Every file referenced in `files` is content-addressed by its sha256; `package_hash` is the hash of the canonical manifest (files sorted by key, serialized as stable JSON). Tampered files or manifests are rejected at install.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_version",
+    "kind",
+    "catalog_id",
+    "version",
+    "name",
+    "description",
+    "props_schema",
+    "files",
+    "package_hash",
+    "license_id",
+    "signing_key_id",
+    "signature"
+  ],
+  "properties": {
+    "manifest_version": { "const": 1 },
+    "kind": { "enum": ["component", "icon", "sticker", "animation"] },
+    "catalog_id": { "type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "description": { "type": "string", "maxLength": 500 },
+    "category": { "type": "string", "maxLength": 60 },
+    "author": { "type": "string", "maxLength": 120 },
+    "license_id": { "type": "string", "maxLength": 80 },
+    "deps": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "props_schema": { "type": "object" },
+    "variants": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/variant" }
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/fileEntry" }
+    },
+    "package_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "signing_key_id": { "type": "string", "minLength": 8 },
+    "signature": { "type": "string", "minLength": 64 },
+    "size_budget_bytes": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalog_id", "version_range"],
+      "properties": {
+        "catalog_id": { "type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$" },
+        "version_range": { "type": "string", "pattern": "^[~^]?\\d+\\.\\d+\\.\\d+$" }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "label": { "type": "string", "maxLength": 60 },
+        "tokens": { "type": "object" }
+      }
+    },
+    "fileEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "size_bytes"],
+      "properties": {
+        "path": { "type": "string", "maxLength": 500 },
+        "sha256": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "size_bytes": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

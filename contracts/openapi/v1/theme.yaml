@@ -1,0 +1,132 @@
+openapi: 3.1.0
+info:
+  title: Domio Theme API
+  version: 1.0.0
+  description: |
+    Theme resolution, apply, and override surface for Phase 07.
+    Exposes the REST endpoints implied by the theme proto service.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: themes
+    description: Theme resolution and application.
+security:
+  - bearerAuth: []
+paths:
+  /v1/themes/{theme_id}/resolve:
+    post:
+      tags: [themes]
+      operationId: resolveThemeTokens
+      summary: Resolve design tokens for a theme
+      description: |
+        Resolves token references against a theme and returns concrete values
+        with source attribution.
+      parameters:
+        - in: path
+          name: theme_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenResolveRequest"
+      responses:
+        "200":
+          description: Token resolution results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResolveResponse"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Theme not found.
+  /v1/themes/{theme_id}/apply:
+    post:
+      tags: [themes]
+      operationId: applyTheme
+      summary: Apply a theme to a deck
+      description: |
+        Applies a theme to a deck, restyling all elements according to the
+        theme's design tokens.
+      parameters:
+        - in: path
+          name: theme_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThemeApplyRequest"
+      responses:
+        "200":
+          description: Theme applied successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeApplyResponse"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Theme or deck not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    TokenResolveRequest:
+      type: object
+      required: [tokenRefs, scope]
+      properties:
+        tokenRefs:
+          type: array
+          items:
+            type: string
+        scope:
+          type: string
+        deckStateRef:
+          type: string
+    TokenResolveResponse:
+      type: object
+      properties:
+        resolved:
+          type: object
+          additionalProperties:
+            type: string
+        sources:
+          type: object
+          additionalProperties:
+            type: string
+            enum: [OVERRIDE, THEME, BRAND, ORG, PLATFORM_FALLBACK, SYSTEM_ALIAS]
+        warnings:
+          type: array
+          items:
+            type: string
+    ThemeApplyRequest:
+      type: object
+      required: [deckId, actorId]
+      properties:
+        deckId:
+          type: string
+        actorId:
+          type: string
+    ThemeApplyResponse:
+      type: object
+      properties:
+        tokensChangedCount:
+          type: integer
+        opBatchRef:
+          type: string
+        latencyMs:
+          type: integer

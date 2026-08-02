@@ -1,5 +1,6 @@
 import type {
   BooleanShapeLayer,
+  ComponentLayer,
   Element,
   FrameLayer,
   GroupLayer,
@@ -25,6 +26,7 @@ const LAYER_TYPES = [
   'image',
   'vector',
   'boolean',
+  'component',
 ] as const;
 export type StructuralLayerType = (typeof LAYER_TYPES)[number];
 
@@ -206,6 +208,9 @@ export class StructuralValidator implements DeckSchemaValidator {
       case 'boolean':
         this.validateBoolean(element, basePath, errors);
         return;
+      case 'component':
+        this.validateComponent(element, basePath, errors);
+        return;
       default:
         return;
     }
@@ -282,7 +287,51 @@ export class StructuralValidator implements DeckSchemaValidator {
       });
     }
   }
+
+  private validateComponent(
+    layer: ComponentLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    const component = layer.component;
+    if (!component || typeof component !== 'object') {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.component`,
+        message: 'ComponentLayer.component is required.',
+      });
+      return;
+    }
+    if (typeof component.catalogId !== 'string' || component.catalogId.length === 0) {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.component.catalogId`,
+        message: 'ComponentRef.catalogId must be a non-empty string.',
+      });
+    }
+    if (typeof component.version !== 'string' || !SEMVER_PATTERN.test(component.version)) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.component.version`,
+        message: 'ComponentRef.version must be a semver string (X.Y.Z).',
+      });
+    }
+    if (
+      component.props !== undefined &&
+      (typeof component.props !== 'object' ||
+        component.props === null ||
+        Array.isArray(component.props))
+    ) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.component.props`,
+        message: 'ComponentRef.props must be an object.',
+      });
+    }
+  }
 }
+
+const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/;
 
 export function validate(document: unknown, options?: ValidatorOptions): SchemaValidateResult {
   return new StructuralValidator(options ?? {}).validate(document as DeckDocument);

@@ -1,0 +1,52 @@
+// Domio locks.proto
+//
+// Brand-locked regions: CRUD and enforcement. Lock scopes are
+// slide | element | region; strictness is strict | color-only | text-only.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+message BrandLockRegion {
+  ResourceId id = 1;
+  string deck_id = 2;
+  string scope = 3; // slide | element | region
+  string strictness = 4; // strict | color-only | text-only
+  repeated string allowed_overrides = 5;
+  string owner_user_id = 6;
+  string scene_graph_selector = 7; // JSONPath-style selector of the locked subtree
+}
+
+message CreateLockRequest {
+  string deck_id = 1;
+  string scope = 2;
+  string strictness = 3;
+  repeated string allowed_overrides = 4;
+  string scene_graph_selector = 5;
+}
+
+message CreateLockResponse {
+  BrandLockRegion lock = 1;
+}
+
+message CheckWriteRequest {
+  string deck_id = 1;
+  string scene_graph_selector = 2;
+  string actor_token = 3; // present => agent; brand_lock_bypass claim checked
+}
+
+message CheckWriteResponse {
+  bool allowed = 1;
+  string error_code = 2; // "" | ERR_BRAND_LOCK
+  string admin_bypass_actor = 3;
+  string audit_row_id = 4;
+}
+
+service LocksService {
+  rpc Create(CreateLockRequest) returns (CreateLockResponse);
+  rpc CheckWrite(CheckWriteRequest) returns (CheckWriteResponse);
+}

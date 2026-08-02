@@ -11,7 +11,7 @@
 
 import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
-import type { Element, Slide, ULID } from '@domio/schema';
+import type { Element, Slide, ULID } from '@domio/schema/generated/scene-graph';
 
 export interface LayersPanelProps {
   slide: Slide;

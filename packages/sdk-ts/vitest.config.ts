@@ -6,10 +6,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   resolve: {
-    alias: {
-      '@domio/common': resolve(here, '../common/src/index.ts'),
-      '@domio/schema': resolve(here, '../schema/src/index.ts'),
-    },
+    alias: [
+      { find: '@domio/common', replacement: resolve(here, '../common/src/index.ts') },
+      { find: /^@domio\/schema$/, replacement: resolve(here, '../schema/src/index.ts') },
+      { find: /^@domio\/schema\/generated\/scene-graph$/, replacement: resolve(here, '../schema/src/generated/scene-graph.ts') },
+      { find: /^@domio\/schema\/contracts$/, replacement: resolve(here, '../schema/src/contracts-loader.ts') },
+    ],
   },
   test: {
     include: ['src/**/*.test.ts'],

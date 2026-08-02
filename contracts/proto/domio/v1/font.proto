@@ -1,0 +1,129 @@
+// Domio font.proto
+//
+// Font asset management for Phase 07. Tracks uploaded font files,
+// licensing status, glyph coverage, and OpenType axis support.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// FontLicenseStatus indicates the licensing status of a font.
+enum FontLicenseStatus {
+  FONT_LICENSE_STATUS_UNSPECIFIED = 0;
+  FONT_LICENSE_STATUS_PERMISSIVE = 1;
+  FONT_LICENSE_STATUS_RESTRICTED = 2;
+  FONT_LICENSE_STATUS_UNKNOWN = 3;
+}
+
+// FontFormat is the file format of the font.
+enum FontFormat {
+  FONT_FORMAT_UNSPECIFIED = 0;
+  FONT_FORMAT_WOFF2 = 1;
+  FONT_FORMAT_WOFF = 2;
+  FONT_FORMAT_OTF = 3;
+  FONT_FORMAT_TTF = 4;
+  FONT_FORMAT_TTC = 5;
+}
+
+// -----------------------------------------------------------------------------
+// Messages
+// -----------------------------------------------------------------------------
+
+// FontAsset is the canonical representation of a font file.
+message FontAsset {
+  ResourceId id = 1;
+  string font_id = 2;
+  string kit_id = 3;
+  string file_url = 4;
+  FontFormat format = 5;
+  uint32 weight = 6;
+
+  // Character set subsets (e.g., "latin", "cyrillic").
+  repeated string subsets = 7;
+
+  // Glyph coverage keyed by Unicode block name.
+  repeated GlyphCoverage glyph_coverage = 8;
+
+  // OpenType variable axes.
+  FontAxes axes = 9;
+
+  // SHA-256 hex digest.
+  string sha256 = 10;
+
+  // License status.
+  FontLicenseStatus license_status = 11;
+
+  // License URL.
+  string license_url = 12;
+
+  // License expiration (nullable — null means no expiration).
+  google.protobuf.Timestamp license_expires_at = 13;
+
+  // Anti-piracy risk score (0.0 = safe, 1.0 = likely pirated).
+  float anti_piracy_score = 14;
+
+  // Creation timestamp.
+  google.protobuf.Timestamp created_at = 15;
+}
+
+// GlyphCoverage represents coverage for a single Unicode block.
+message GlyphCoverage {
+  // Unicode block name (e.g., "Basic Latin", "Cyrillic").
+  string block = 1;
+
+  // Percentage of glyphs covered (0.0 - 100.0).
+  float percent_covered = 2;
+}
+
+// FontAxes describes the OpenType variable axes of a font.
+message FontAxes {
+  AxisRange weight = 1;
+  AxisRange width = 2;
+  AxisRange slant = 3;
+}
+
+// AxisRange is a min/max range for a single OpenType axis.
+message AxisRange {
+  float min = 1;
+  float max = 2;
+}
+
+// FontServiceGetFontAssetRequest is the request for getting a font asset.
+message FontServiceGetFontAssetRequest {
+  ResourceId id = 1;
+}
+
+// FontServiceGetFontAssetResponse is the response for getting a font asset.
+message FontServiceGetFontAssetResponse {
+  FontAsset font_asset = 1;
+}
+
+// FontServiceListFontAssetsRequest is the request for listing font assets.
+message FontServiceListFontAssetsRequest {
+  string kit_id = 1;
+  PageRequest page = 2;
+}
+
+// FontServiceListFontAssetsResponse is the response for listing font assets.
+message FontServiceListFontAssetsResponse {
+  repeated FontAsset font_assets = 1;
+  PageInfo page_info = 2;
+}
+
+// FontService exposes font asset management via gRPC.
+service FontService {
+  // GetFontAsset returns a font asset by ID.
+  rpc GetFontAsset(FontServiceGetFontAssetRequest) returns (FontServiceGetFontAssetResponse) {}
+
+  // ListFontAssets returns font assets for a brand kit.
+  rpc ListFontAssets(FontServiceListFontAssetsRequest) returns (FontServiceListFontAssetsResponse) {}
+}

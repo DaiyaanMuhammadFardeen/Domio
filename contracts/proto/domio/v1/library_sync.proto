@@ -1,0 +1,51 @@
+// Domio library_sync.proto
+//
+// Per-namespace library sync protocol. Events are append-only; replay is
+// idempotent on (library_id, seq).
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+message LibraryEvent {
+  string id = 1;
+  string library_id = 2;
+  int64 seq = 3;
+  string kind = 4; // component_published | component_updated | component_removed | policy_changed
+  string component_id = 5;
+  string version = 6;
+  string payload_ref = 7; // content-addressed ref of the payload
+  string actor_id = 8;
+  int64 created_at_ms = 9;
+}
+
+message FetchEventsRequest {
+  string library_id = 1;
+  int64 after_seq = 2;
+}
+
+message FetchEventsResponse {
+  repeated LibraryEvent events = 1;
+  int64 next_seq = 2;
+}
+
+message ApplyEventsRequest {
+  string library_id = 1;
+  repeated LibraryEvent events = 2;
+  IdempotencyKey idempotency_key = 3;
+}
+
+message ApplyEventsResponse {
+  int64 applied_seq = 1;
+  bool conflicted = 2;
+  string resolution = 3; // none | workspace_policy_wins
+}
+
+service LibrarySyncService {
+  rpc FetchEvents(FetchEventsRequest) returns (FetchEventsResponse);
+  rpc ApplyEvents(ApplyEventsRequest) returns (ApplyEventsResponse);
+}

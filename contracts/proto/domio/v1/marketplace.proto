@@ -1,0 +1,104 @@
+// Domio marketplace.proto
+//
+// Marketplace listing lifecycle, reviews, and purchase. Payout execution
+// is deferred to P19: this surface ends at the revenue-share ledger row.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// Listing lifecycle: draft -> in_review -> published -> deprecated -> removed.
+enum ListingStatus {
+  LISTING_STATUS_UNSPECIFIED = 0;
+  LISTING_STATUS_DRAFT = 1;
+  LISTING_STATUS_IN_REVIEW = 2;
+  LISTING_STATUS_PUBLISHED = 3;
+  LISTING_STATUS_DEPRECATED = 4;
+  LISTING_STATUS_REMOVED = 5;
+}
+
+message MarketplaceListing {
+  ResourceId id = 1;
+  string catalog_id = 2;
+  string seller_id = 3;
+  string title = 4;
+  string description = 5;
+  ListingStatus status = 6;
+  bool is_free = 7;
+  Money price = 8; // integer cents; null for free listings
+  string currency = 9;
+  repeated string tags = 10;
+  int64 published_at_ms = 11;
+}
+
+message ListListingRequest {
+  ListingStatus status = 1;
+  string catalog_id = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message ListListingResponse {
+  repeated MarketplaceListing listings = 1;
+  int64 total = 2;
+}
+
+message SubmitListingRequest {
+  string catalog_id = 1;
+  string title = 2;
+  string description = 3;
+  Money price = 4;
+  string currency = 5;
+  repeated string tags = 6;
+}
+
+message SubmitListingResponse {
+  MarketplaceListing listing = 1;
+  IdempotencyKey idempotency_key = 2;
+}
+
+message ReviewRequest {
+  ResourceId listing_id = 1;
+  int32 rating = 2; // 1..5
+  string body = 3;
+  bool verified_buyer = 4;
+}
+
+message ReviewResponse {
+  string review_id = 1;
+  string status = 2; // accepted | queued_for_review
+}
+
+message PurchaseRequest {
+  ResourceId listing_id = 1;
+  ResourceId workspace = 2;
+  string currency = 3;
+  Money gross = 4;
+}
+
+message PurchaseResponse {
+  LicenseGrant grant = 1;
+  RevenueShareLedgerRow ledger_row = 2;
+}
+
+message RevenueShareLedgerRow {
+  string id = 1;
+  string listing_id = 2;
+  string seller_id = 3;
+  string currency = 4;
+  int64 gross_cents = 5;
+  int64 fee_cents = 6;
+  int64 net_cents = 7;
+  string payout_status = 8; // pending | eligible | refunded
+}
+
+service MarketplaceService {
+  rpc List(ListListingRequest) returns (ListListingResponse);
+  rpc Submit(SubmitListingRequest) returns (SubmitListingResponse);
+  rpc Review(ReviewRequest) returns (ReviewResponse);
+  rpc Purchase(PurchaseRequest) returns (PurchaseResponse);
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/marketplace-listing-v1.schema.json",
+  "title": "Domio Marketplace Listing",
+  "description": "Marketplace listing document. Lifecycle: draft -> in_review -> published -> deprecated -> removed. Payout execution is P19; this schema ends at the revenue-share ledger row.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_version", "catalog_id", "seller_id", "title", "status", "is_free"],
+  "properties": {
+    "manifest_version": { "const": 1 },
+    "listing_id": { "type": "string", "minLength": 1 },
+    "catalog_id": { "type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$" },
+    "seller_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "description": { "type": "string", "maxLength": 2000 },
+    "status": {
+      "enum": ["draft", "in_review", "published", "deprecated", "removed"]
+    },
+    "is_free": { "type": "boolean" },
+    "price_cents": { "type": "integer", "minimum": 0 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "tags": {
+      "type": "array",
+      "default": [],
+      "items": { "type": "string", "maxLength": 40 }
+    },
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "poster_ref": { "type": "string" },
+        "loop_ref": { "type": "string" }
+      }
+    },
+    "published_at_ms": { "type": "integer", "minimum": 0 },
+    "deprecated_at_ms": { "type": "integer", "minimum": 0 }
+  }
+}

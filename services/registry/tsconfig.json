@@ -1,10 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
+    "noEmit": true,
     "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@domio/schema-prop": ["../../packages/schema-prop/src/index.ts"],
+      "@domio/schema": ["../../packages/schema/src/index.ts"],
+      "@domio/components": ["../../packages/components/src/index.ts"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]

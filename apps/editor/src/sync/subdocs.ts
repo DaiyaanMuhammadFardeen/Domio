@@ -9,7 +9,7 @@
  */
 
 import * as Y from 'yjs';
-import type { DeckDocument, Slide } from '@domio/schema';
+import type { DeckDocument, Slide } from '@domio/schema/generated/scene-graph';
 import {
   SubDocRegistry,
   createDeckDocs,

@@ -11,6 +11,21 @@
 
 **Intent.** Turn the canvas into a Canva-scale authoring surface by delivering the component registry, smart components with JSON-Schema-driven editable props, variants, the promote-to-component flow, user/team component libraries with publish/subscribe semantics, the full-deck and section template engines, the icon/media/animation/sticker libraries, and brand-locked templates. The phase lands the structural machinery that every later "deepening" and "surface" phase builds on: #25's prop schema becomes the canonical contract for the AI copilot (P12) and the MCP tool surface (P13); #27's library sync model is reused for theme libraries in P07; #28's marketplace plumbing provides the foundation for P19's billing/payout layer. Marketplace billing and payout specifically land in P19; this phase delivers listings, install, license grants, and the revenue-share event ledger but stops short of payout execution.
 
+> **Phase 06 status (shipped).** All seven workstreams delivered.
+> Sub-phase 1: `component` scene-graph kind + validation; `@domio/schema-prop` prop engine
+> (Fast-Check tested); `@domio/components` curated catalog (25 components with props
+> schemas, light/dark variants, SVG builders); `PropEditOp`/`VariantChangeOp` CRDT ops;
+> `ElementSvg` renderer upgrade; Magic UI chrome (Tailwind + `motion`, adapted `MagicCard`
+> + `Marquee`); Insert → Components panel and schema-driven PropsPanel wired into the
+> editor. Sub-phase 2: `services/registry` (Hono) with content-addressed bundle store
+> (SHA-256 verified), signed URLs, catalog + pins + variants, install round-trip, license
+> module (JWS + offline grace + seats), team libraries (event log + replay + policies +
+> webhooks), marketplace (listings lifecycle, reviews + moderation, revenue ledger, search),
+> templates (engine + sections + brand locks + SVG poster renderer), media (icons + stock +
+> Lottie/GIF + stickers), 7 workers, HTTP transport (7 route groups), MCP tool surface
+> (13 tools + agent audit). Migrations 0011–0016, 7 protos, 2 JSON schemas, ADRs 0005–0008,
+> i18n (7 locales), axe a11y, Playwright E2E smoke. 542 registry tests at 84% line coverage.
+
 ---
 
 ## 1. Goals

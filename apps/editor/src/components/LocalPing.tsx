@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import { LocalPingAdapter, type LocalPing } from '@domio/canvas';
+import type { LocalPingAdapter, LocalPing } from '@domio/canvas';
 
 export interface LocalPingProps {
   /** Adapter instance (allows sharing across panels). */

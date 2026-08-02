@@ -3,9 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "MCP server. Phase 0 stub; Phase 13.",
+  "description": "MCP server — Phase 13 wiring + Phase 07 brand-aware tool stubs.",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./brand-tools": "./src/brand-tools.ts"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint src --max-warnings 0",

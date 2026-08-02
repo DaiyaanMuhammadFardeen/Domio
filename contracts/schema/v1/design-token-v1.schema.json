@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/design-token-v1.schema.json",
+  "title": "Domio Design Token V1",
+  "description": "Canonical design token definition for Phase 07 theming. Defines colors, typography, spacing, radii, shadows, motion, content, and border tokens with aliasing support.",
+  "type": "object",
+  "required": ["schemaVersion", "tokens"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver of the token schema. Major bump on breaking changes."
+    },
+    "tokens": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          { "$ref": "#/definitions/TokenDefinition" },
+          { "$ref": "#/definitions/TokenAlias" }
+        ]
+      },
+      "description": "Array of token definitions and aliases."
+    }
+  },
+  "definitions": {
+    "TokenId": {
+      "type": "string",
+      "pattern": "^[a-z]+(?:\\.[a-z0-9]+)*$",
+      "description": "Stable dot-separated token identifier, e.g., 'color.brand.primary'."
+    },
+    "TokenGroup": {
+      "type": "string",
+      "enum": ["color", "typography", "spacing", "radius", "shadow", "motion", "content", "border"]
+    },
+    "TokenType": {
+      "type": "string",
+      "enum": ["color", "dimension", "typography", "shadow", "motion", "content"]
+    },
+    "TokenRole": {
+      "type": "string",
+      "enum": ["interactive", "brand", "content", "decorative"]
+    },
+    "TokenDeprecated": {
+      "type": "object",
+      "required": ["replacedBy", "sinceVersion"],
+      "additionalProperties": false,
+      "properties": {
+        "replacedBy": { "$ref": "#/definitions/TokenId" },
+        "sinceVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      }
+    },
+    "TokenColor": {
+      "type": "object",
+      "required": ["space", "channels", "alpha"],
+      "additionalProperties": false,
+      "properties": {
+        "space": { "type": "string", "enum": ["srgb", "p3"] },
+        "channels": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0, "maximum": 1 },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "alpha": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "TokenDimension": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string", "enum": ["px", "rem", "em", "%"] }
+      }
+    },
+    "TokenTypography": {
+      "type": "object",
+      "required": ["fontFamily", "fontSize", "fontWeight", "lineHeight", "letterSpacing", "fallbackChain"],
+      "additionalProperties": false,
+      "properties": {
+        "fontFamily": { "type": "string", "minLength": 1 },
+        "fontSize": { "$ref": "#/definitions/TokenDimension" },
+        "fontWeight": { "type": "number", "minimum": 100, "maximum": 900 },
+        "lineHeight": { "type": "number", "minimum": 0 },
+        "letterSpacing": { "$ref": "#/definitions/TokenDimension" },
+        "fallbackChain": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
+    "TokenShadow": {
+      "type": "object",
+      "required": ["offsetX", "offsetY", "blur", "spread", "color"],
+      "additionalProperties": false,
+      "properties": {
+        "offsetX": { "$ref": "#/definitions/TokenDimension" },
+        "offsetY": { "$ref": "#/definitions/TokenDimension" },
+        "blur": { "$ref": "#/definitions/TokenDimension" },
+        "spread": { "$ref": "#/definitions/TokenDimension" },
+        "color": { "$ref": "#/definitions/TokenColor" }
+      }
+    },
+    "TokenMotion": {
+      "type": "object",
+      "required": ["duration", "easing", "delay"],
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "type": "object",
+          "required": ["value", "unit"],
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "number", "minimum": 0 },
+            "unit": { "type": "string", "enum": ["ms", "s"] }
+          }
+        },
+        "easing": {
+          "type": "string",
+          "enum": ["linear", "ease-in", "ease-out", "ease-in-out", "spring"]
+        },
+        "delay": {
+          "type": "object",
+          "required": ["value", "unit"],
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "number", "minimum": 0 },
+            "unit": { "type": "string", "enum": ["ms", "s"] }
+          }
+        }
+      }
+    },
+    "TokenContent": {
+      "type": "object",
+      "required": ["contentType", "data"],
+      "additionalProperties": false,
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "enum": ["text", "icon", "image", "svg", "lottie"]
+        },
+        "data": {
+          "type": "string",
+          "description": "Inline content data or URI."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "TokenValue": {
+      "description": "Discriminated union of all token value types.",
+      "oneOf": [
+        { "$ref": "#/definitions/TokenColor" },
+        { "$ref": "#/definitions/TokenDimension" },
+        { "$ref": "#/definitions/TokenTypography" },
+        { "$ref": "#/definitions/TokenShadow" },
+        { "$ref": "#/definitions/TokenMotion" },
+        { "$ref": "#/definitions/TokenContent" }
+      ]
+    },
+    "TokenDefinition": {
+      "type": "object",
+      "required": ["tokenId", "group", "type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "tokenId": { "$ref": "#/definitions/TokenId" },
+        "group": { "$ref": "#/definitions/TokenGroup" },
+        "type": { "$ref": "#/definitions/TokenType" },
+        "value": { "$ref": "#/definitions/TokenValue" },
+        "description": {
+          "type": "string",
+          "maxLength": 1024
+        },
+        "roles": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/TokenRole" },
+          "uniqueItems": true
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "deprecated": { "$ref": "#/definitions/TokenDeprecated" }
+      }
+    },
+    "TokenAlias": {
+      "type": "object",
+      "required": ["tokenId", "alias"],
+      "additionalProperties": false,
+      "properties": {
+        "tokenId": { "$ref": "#/definitions/TokenId" },
+        "alias": { "$ref": "#/definitions/TokenId" },
+        "description": {
+          "type": "string",
+          "maxLength": 1024
+        }
+      }
+    }
+  }
+}

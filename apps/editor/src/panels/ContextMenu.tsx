@@ -81,7 +81,10 @@ export function ContextMenu(props: ContextMenuProps): ReactElement | null {
  * Build the default context menu for a given selection kind. Used by
  * the editor's right-click handler.
  */
-export function contextMenuFor(kind: 'frame' | 'text' | 'image' | 'vector' | 'group' | 'selection'): ContextMenuItem[] {
+export function contextMenuFor(
+  kind: 'frame' | 'text' | 'image' | 'vector' | 'group' | 'selection',
+  options?: { hasSelection?: boolean; isComponent?: boolean },
+): ContextMenuItem[] {
   const base: ContextMenuItem[] = [
     { id: 'cut', label: 'Cut', shortcut: 'Cmd+X' },
     { id: 'copy', label: 'Copy', shortcut: 'Cmd+C' },
@@ -93,6 +96,12 @@ export function contextMenuFor(kind: 'frame' | 'text' | 'image' | 'vector' | 'gr
   }
   if (kind === 'text') {
     base.push({ id: 'edit-text', label: 'Edit text' });
+  }
+  if (options?.hasSelection && !options?.isComponent) {
+    base.push({ id: 'promote', label: 'Promote to component' });
+  }
+  if (options?.isComponent) {
+    base.push({ id: 'detach', label: 'Detach from component' });
   }
   base.push({ id: 'bring-forward', label: 'Bring forward' });
   base.push({ id: 'send-backward', label: 'Send backward' });

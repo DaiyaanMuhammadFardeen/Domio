@@ -1,0 +1,106 @@
+openapi: 3.1.0
+info:
+  title: Domio Lint API
+  version: 1.0.0
+  description: |
+    Style linting surface for Phase 07. Flags off-brand colors, fonts, and
+    other token violations across a deck with one-click fix proposals.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: lint
+    description: Style linting operations.
+security:
+  - bearerAuth: []
+paths:
+  /v1/lint/run:
+    post:
+      tags: [lint]
+      operationId: runLint
+      summary: Run style lint on a deck
+      description: |
+        Scans all elements in a deck against the specified brand kit and
+        returns findings grouped by severity with fix proposals.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LintRunRequest"
+      responses:
+        "200":
+          description: Lint results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LintRunResponse"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Deck or brand kit not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    LintRunRequest:
+      type: object
+      required: [deckId]
+      properties:
+        deckId:
+          type: string
+        brandKitId:
+          type: string
+        ruleIds:
+          type: array
+          items:
+            type: string
+    LintRunResponse:
+      type: object
+      properties:
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/LintFinding"
+        blockCount:
+          type: integer
+        warnCount:
+          type: integer
+        infoCount:
+          type: integer
+        elementsScanned:
+          type: integer
+    LintFinding:
+      type: object
+      properties:
+        findingId:
+          type: string
+        ruleId:
+          type: string
+        severity:
+          type: string
+          enum: [BLOCK, WARN, INFO]
+        tokenRef:
+          type: string
+        elementRef:
+          type: string
+        message:
+          type: string
+        fixProposal:
+          $ref: "#/components/schemas/LintFixProposal"
+    LintFixProposal:
+      type: object
+      properties:
+        replacementToken:
+          type: string
+        deltaE:
+          type: number
+        oldValue:
+          type: string
+        newValue:
+          type: string

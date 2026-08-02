@@ -1,0 +1,243 @@
+openapi: 3.1.0
+info:
+  title: Domio Component Registry API (Phase 06)
+  version: 1.0.0
+  description: |
+    Component catalog, package installation, and content-addressed bundle
+    downloads for the Domio component ecosystem.
+
+    All endpoints require authentication via the bearer token or the session
+    cookie.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: registry
+    description: Component package catalog and installation.
+security:
+  - bearerAuth: []
+paths:
+  /v1/registry/components:
+    get:
+      tags: [registry]
+      summary: List or search component packages
+      description: |
+        Returns published component packages. Supports free-text search across
+        catalogId, name, and description, plus kind/category/limit filters.
+      operationId: listComponents
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: kind
+          in: query
+          schema: { type: string, enum: [component, icon, sticker, animation] }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50, maximum: 200 }
+      responses:
+        '200':
+          description: Matching packages
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ComponentPackage' }
+    post:
+      tags: [registry]
+      summary: Publish a component package
+      description: |
+        Publishes a new version. The manifest is validated against
+        component-package-v1.schema.json; every blob referenced in `files` must
+        already be present in the content-addressed store. `packageHash` is the
+        SHA-256 of the canonical manifest body and is verified at install.
+      operationId: publishComponent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ComponentPackage' }
+      responses:
+        '201':
+          description: Package published
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ComponentPackage' }
+        '400':
+          description: Manifest failed validation
+        '409':
+          description: Duplicate (catalogId, version) or tampered blob
+
+  /v1/registry/components/{catalogId}/versions/{version}:
+    get:
+      tags: [registry]
+      summary: Fetch a specific package version
+      operationId: getComponent
+      parameters:
+        - name: catalogId
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[a-z0-9]+(?:[.-][a-z0-9]+)*$' }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string, pattern: '^\d+\.\d+\.\d+$' }
+      responses:
+        '200':
+          description: Package
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ComponentPackage' }
+        '404':
+          description: Not found
+
+  /v1/registry/install:
+    post:
+      tags: [registry]
+      summary: Install (or update) a component in a workspace library
+      description: |
+        Resolves the target version from the pin mode, re-verifies every bundle
+        blob hash, issues a license grant for paid listings, upserts the library
+        item, and returns bundle URLs (signed, 5-minute TTL for paid; immutable
+        for free).
+      operationId: installComponent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InstallRequest' }
+      responses:
+        '200':
+          description: Installed or updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InstallResult' }
+        '403':
+          description: License required / seat limit
+        '409':
+          description: Tampered package or pin unavailable
+
+  /v1/registry/bundles/{sha256}:
+    get:
+      tags: [registry]
+      summary: Download a content-addressed bundle blob
+      description: |
+        Blobs are addressed by SHA-256. Private/paid blobs require a valid
+        short-lived signed query (X-Expires + X-Signature); free blobs are
+        immutable and public.
+      operationId: getBundle
+      parameters:
+        - name: sha256
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[a-f0-9]{64}$' }
+        - name: X-Expires
+          in: query
+          schema: { type: integer }
+        - name: X-Signature
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Blob bytes
+          content:
+            application/octet-stream: { schema: { type: string, format: binary } }
+        '403':
+          description: Invalid or expired signature
+        '404':
+          description: Unknown blob
+
+  /v1/registry/components/{catalogId}/versions/{version}/deprecate:
+    post:
+      tags: [registry]
+      summary: Deprecate a package version
+      operationId: deprecateComponent
+      parameters:
+        - name: catalogId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: version
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+                replaceWith: { type: string }
+      responses:
+        '200':
+          description: Deprecated
+        '404':
+          description: Not found
+
+components:
+  schemas:
+    ComponentPackage:
+      type: object
+      additionalProperties: false
+      required: [schemaVersion, kind, catalogId, name, version, variants, propsSchema, files]
+      properties:
+        schemaVersion: { type: string, const: '1.0.0' }
+        kind: { type: string, enum: [component, icon, sticker, animation] }
+        catalogId: { type: string, pattern: '^[a-z0-9]+(?:[.-][a-z0-9]+)*$' }
+        name: { type: string }
+        description: { type: string }
+        version: { type: string, pattern: '^\d+\.\d+\.\d+$' }
+        variants:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              label: { type: string }
+              tokens: { type: object, additionalProperties: { type: string } }
+        defaultVariant: { type: string }
+        propsSchema: { type: object }
+        files:
+          type: object
+          additionalProperties: { type: string, pattern: '^[a-f0-9]{64}$' }
+        packageHash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        smartProps: { type: array, items: { type: object } }
+        createdAt: { type: integer }
+
+    InstallRequest:
+      type: object
+      required: [catalogId]
+      properties:
+        catalogId: { type: string }
+        version: { type: string }
+        pinMode: { type: string, enum: [track-latest, pin-version, pin-range] }
+        pinValue: { type: string }
+        seats: { type: integer, minimum: 1, default: 1 }
+
+    InstallResult:
+      type: object
+      required: [item, version, bundleUrls, updated]
+      properties:
+        item: { type: object }
+        version: { type: string }
+        bundleUrls:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              sha256: { type: string }
+              url: { type: string }
+              signed: { type: boolean }
+              expiresAt: { type: integer }
+        licenseGrant: { type: object }
+        updated: { type: boolean }

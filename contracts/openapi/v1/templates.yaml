@@ -1,0 +1,227 @@
+openapi: 3.1.0
+info:
+  title: Domio Template API (Phase 06)
+  version: 1.0.0
+  description: |
+    Template engine (full-deck + section), guided placeholder fill-in, and
+    brand-lock region enforcement.
+
+    All endpoints require authentication via the bearer token or the session
+    cookie.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: templates
+    description: Template install, sections, and brand locks.
+security:
+  - bearerAuth: []
+paths:
+  /v1/templates/{templateId}/install:
+    post:
+      tags: [templates]
+      summary: Install a template into a deck
+      description: |
+        Deep-copies the template deck and replaces every placeholder with the
+        provided values (or defaults), following each placeholder's binding
+        path. Returns the instantiated deck and a manifest of replacements.
+      operationId: installTemplate
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Instantiated deck
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deck: { type: object }
+                  manifest:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key: { type: string }
+                        value: { type: [string, number, boolean, object] }
+        '400':
+          description: Missing required placeholder / unresolved binding
+
+  /v1/templates/{templateId}/placeholders:
+    get:
+      tags: [templates]
+      summary: Guided fill-in order for placeholders
+      operationId: guidedOrder
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Placeholders in fill order (required first)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    key: { type: string }
+                    label: { type: string }
+                    kind: { type: string, enum: [text, number, asset, component, table, boolean] }
+                    required: { type: boolean }
+                    default: { type: [string, number, boolean, object] }
+
+  /v1/sections/{sectionId}/insert:
+    post:
+      tags: [templates]
+      summary: Insert a section template into a deck
+      description: |
+        Clones the section's slides, substitutes placeholders, and inserts at
+        the requested index. Spreadable sections may be inserted multiple times.
+        Returns warnings for missing component catalogIds.
+      operationId: insertSection
+      parameters:
+        - name: sectionId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deck, atSlideIndex]
+              properties:
+                deck: { type: object }
+                atSlideIndex: { type: integer, minimum: 0 }
+                values: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Updated deck + warnings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deck: { type: object }
+                  warnings: { type: array, items: { type: string } }
+
+  /v1/decks/{deckId}/brand-locks:
+    get:
+      tags: [templates]
+      summary: List brand locks for a deck
+      operationId: listBrandLocks
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Brand locks
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/BrandLockRegion' }
+    post:
+      tags: [templates]
+      summary: Create a brand lock (owner-only)
+      operationId: createBrandLock
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scope, strictness, sceneGraphSelector, ownerUserId]
+              properties:
+                scope: { type: string, enum: [slide, element, region] }
+                strictness: { type: string, enum: [strict, color-only, text-only] }
+                sceneGraphSelector: { type: string }
+                ownerUserId: { type: string }
+                allowedOverrides: { type: array, items: { type: string } }
+      responses:
+        '201':
+          description: Lock created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BrandLockRegion' }
+
+  /v1/decks/{deckId}/brand-locks/{lockId}:
+    delete:
+      tags: [templates]
+      summary: Delete a brand lock (owner-only)
+      operationId: deleteBrandLock
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: lockId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Not the lock owner (ERR_BRAND_LOCK / ERR_UNAUTHORIZED)
+
+  /v1/templates/{templateId}/preview:
+    get:
+      tags: [templates]
+      summary: Template poster preview
+      description: |
+        Server-side SVG poster rendered from the template deck. Component
+        elements are expanded via the component catalog.
+      operationId: renderTemplatePoster
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: SVG poster
+          content:
+            image/svg+xml: { schema: { type: string } }
+
+components:
+  schemas:
+    BrandLockRegion:
+      type: object
+      properties:
+        id: { type: string }
+        deckId: { type: string }
+        scope: { type: string, enum: [slide, element, region] }
+        strictness: { type: string, enum: [strict, color-only, text-only] }
+        allowedOverrides: { type: array, items: { type: string } }
+        ownerUserId: { type: string }
+        sceneGraphSelector: { type: string }
+        createdAt: { type: integer }
+        updatedAt: { type: integer }

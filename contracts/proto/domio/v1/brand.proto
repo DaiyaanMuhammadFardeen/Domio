@@ -1,0 +1,224 @@
+// Domio brand.proto
+//
+// Brand kit management for Phase 07. Covers brand kit CRUD, brand context,
+// extraction jobs, and extraction attestation.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// BrandKitStatus is the lifecycle state of a brand kit.
+enum BrandKitStatus {
+  BRAND_KIT_STATUS_UNSPECIFIED = 0;
+  BRAND_KIT_STATUS_DRAFT = 1;
+  BRAND_KIT_STATUS_PUBLISHED = 2;
+  BRAND_KIT_STATUS_ARCHIVED = 3;
+}
+
+// BrandKitScope defines the visibility boundary of a brand kit.
+enum BrandKitScope {
+  BRAND_KIT_SCOPE_UNSPECIFIED = 0;
+  BRAND_KIT_SCOPE_ORG = 1;
+  BRAND_KIT_SCOPE_WORKSPACE = 2;
+  BRAND_KIT_SCOPE_TEAM = 3;
+}
+
+// BrandExtractionStatus tracks the lifecycle of an extraction job.
+enum BrandExtractionStatus {
+  BRAND_EXTRACTION_STATUS_UNSPECIFIED = 0;
+  BRAND_EXTRACTION_STATUS_PENDING = 1;
+  BRAND_EXTRACTION_STATUS_RUNNING = 2;
+  BRAND_EXTRACTION_STATUS_COMPLETED = 3;
+  BRAND_EXTRACTION_STATUS_FAILED = 4;
+}
+
+// -----------------------------------------------------------------------------
+// Messages
+// -----------------------------------------------------------------------------
+
+// BrandKit is the canonical representation of an organization's brand kit.
+message BrandKit {
+  ResourceId id = 1;
+  string name = 2;
+  string owner_org_id = 3;
+  BrandKitScope scope = 4;
+  BrandKitStatus status = 5;
+
+  // Logo assets (light/dark/mono variants).
+  repeated LogoAsset logos = 6;
+
+  // Color palettes referencing design tokens.
+  repeated Palette palettes = 7;
+
+  // Imagery usage rules.
+  ImageryRules imagery_rules = 8;
+
+  // Sub-brand definitions.
+  repeated SubBrand sub_brands = 9;
+
+  // Governance settings.
+  Governance governance = 10;
+
+  // Extraction attestation (nullable).
+  BrandExtractionAttestation extraction_attestation = 11;
+
+  // Arbitrary metadata.
+  map<string, string> metadata = 12;
+
+  // Schema version.
+  string schema_version = 13;
+}
+
+// LogoAsset represents a single logo variant.
+message LogoAsset {
+  string variant = 1; // light, dark, mono
+  string size = 2; // small, medium, large, full
+  string format = 3; // svg, png, webp
+  string asset_url = 4;
+  string content_hash = 5;
+  uint32 clear_space_px = 6;
+}
+
+// Palette is a set of token references forming a color palette.
+message Palette {
+  repeated string token_ids = 1;
+  bool cv_safe = 2;
+  float hue_spacing_deg = 3;
+}
+
+// ImageryRules defines allowed and disallowed imagery usage patterns.
+message ImageryRules {
+  repeated string do_rules = 1;
+  repeated string dont_rules = 2;
+  uint32 min_resolution_width = 3;
+  uint32 min_resolution_height = 4;
+  repeated PointF subject_safe_zone_polygon = 5;
+  repeated string allowed_sources = 6;
+}
+
+// PointF is a 2D point for polygon vertices.
+message PointF {
+  float x = 1;
+  float y = 2;
+}
+
+// SubBrand is a child brand inheriting from a parent brand kit.
+message SubBrand {
+  string name = 1;
+  string parent_brand_kit_id = 2;
+  map<string, string> overrides = 3;
+}
+
+// Governance controls for brand kit modification.
+message Governance {
+  bool approval_required = 1;
+  repeated string approvers = 2;
+  bool lock_after_publish = 3;
+}
+
+// BrandContext is the active brand context for a session or workspace.
+message BrandContext {
+  string context_id = 1;
+  string org_id = 2;
+  string name = 3;
+  string active_kit_id = 4;
+  google.protobuf.Timestamp archived_at = 5;
+}
+
+// BrandExtractionJob tracks an AI-driven brand extraction from a URL.
+message BrandExtractionJob {
+  string job_id = 1;
+  string org_id = 2;
+  string url = 3;
+  BrandExtractionStatus status = 4;
+
+  // Extraction stages (e.g., "fetch", "parse", "colors", "fonts", "logo").
+  repeated string stages = 5;
+
+  // Attribution information (source website details).
+  map<string, string> attribution = 6;
+
+  // Confidence scores per extraction category (0.0 - 1.0).
+  map<string, float> confidence_scores = 7;
+
+  // Resulting brand kit (set on completion).
+  BrandKit result = 8;
+
+  // Error code on failure.
+  string error_code = 9;
+
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp completed_at = 11;
+}
+
+// BrandExtractionAttestation confirms a human reviewed extracted brand data.
+message BrandExtractionAttestation {
+  string confirmed_by = 1;
+  google.protobuf.Timestamp confirmed_at = 2;
+}
+
+// BrandServiceGetBrandKitRequest is the request for getting a brand kit.
+message BrandServiceGetBrandKitRequest {
+  ResourceId id = 1;
+}
+
+// BrandServiceGetBrandKitResponse is the response for getting a brand kit.
+message BrandServiceGetBrandKitResponse {
+  BrandKit brand_kit = 1;
+}
+
+// BrandServiceListBrandKitsRequest is the request for listing brand kits.
+message BrandServiceListBrandKitsRequest {
+  string org_id = 1;
+  PageRequest page = 2;
+}
+
+// BrandServiceListBrandKitsResponse is the response for listing brand kits.
+message BrandServiceListBrandKitsResponse {
+  repeated BrandKit brand_kits = 1;
+  PageInfo page_info = 2;
+}
+
+// BrandServiceCreateBrandKitRequest is the request for creating a brand kit.
+message BrandServiceCreateBrandKitRequest {
+  BrandKit brand_kit = 1;
+}
+
+// BrandServiceCreateBrandKitResponse is the response for creating a brand kit.
+message BrandServiceCreateBrandKitResponse {
+  BrandKit brand_kit = 1;
+}
+
+// BrandServiceUpdateBrandKitRequest is the request for updating a brand kit.
+message BrandServiceUpdateBrandKitRequest {
+  BrandKit brand_kit = 1;
+}
+
+// BrandServiceUpdateBrandKitResponse is the response for updating a brand kit.
+message BrandServiceUpdateBrandKitResponse {
+  BrandKit brand_kit = 1;
+}
+
+// BrandService exposes brand kit management via gRPC.
+service BrandService {
+  // GetBrandKit returns a brand kit by ID.
+  rpc GetBrandKit(BrandServiceGetBrandKitRequest) returns (BrandServiceGetBrandKitResponse) {}
+
+  // ListBrandKits returns brand kits for an organization.
+  rpc ListBrandKits(BrandServiceListBrandKitsRequest) returns (BrandServiceListBrandKitsResponse) {}
+
+  // CreateBrandKit creates a new brand kit.
+  rpc CreateBrandKit(BrandServiceCreateBrandKitRequest) returns (BrandServiceCreateBrandKitResponse) {}
+
+  // UpdateBrandKit updates an existing brand kit.
+  rpc UpdateBrandKit(BrandServiceUpdateBrandKitRequest) returns (BrandServiceUpdateBrandKitResponse) {}
+}

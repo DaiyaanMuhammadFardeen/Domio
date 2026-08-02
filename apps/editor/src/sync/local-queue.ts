@@ -11,10 +11,10 @@
 import { newToken } from '@domio/common';
 import {
   Op,
-  OpAck,
   OpType,
   HLC,
 } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
+import type { OpAck } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
 
 // ----- Pending op entry -----
 

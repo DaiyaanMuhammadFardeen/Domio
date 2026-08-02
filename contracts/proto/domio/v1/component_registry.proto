@@ -1,0 +1,142 @@
+// Domio component_registry.proto
+//
+// Registry-surface RPCs for component packages: install/uninstall,
+// search, describe, and version pinning. The MCP tool surface wraps
+// these same operations (see mcp_components.proto).
+//
+// Lint rules (see buf.yaml): field lower_snake_case, service suffix Service.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+message ComponentRef {
+  string catalog_id = 1;
+  string version = 2;
+
+  // Pin mode for instance resolution: track_latest | pin_version | pin_range | workspace_managed.
+  string pin = 3;
+}
+
+message ComponentManifest {
+  ResourceId id = 1;
+  string kind = 2; // component | icon | sticker | animation
+  string catalog_id = 3;
+  string version = 4;
+  string name = 5;
+  string description = 6;
+  string license_id = 7;
+  repeated Dependency deps = 8;
+  string package_hash = 9;
+  string signing_key_id = 10;
+  string signature = 11;
+  map<string, FileEntry> files = 12;
+  string props_schema = 13; // JSON-encoded JSON Schema fragment
+  repeated Variant variants = 14;
+  int64 size_budget_bytes = 15;
+}
+
+message Dependency {
+  string catalog_id = 1;
+  string version_range = 2;
+}
+
+message FileEntry {
+  string path = 1;
+  string sha256 = 2;
+  int64 size_bytes = 3;
+}
+
+message Variant {
+  string id = 1;
+  string label = 2;
+  map<string, string> tokens = 3;
+}
+
+message InstallRequest {
+  ComponentRef component = 1;
+  ResourceId workspace = 2;
+  IdempotencyKey idempotency_key = 3;
+}
+
+message InstallResponse {
+  LicenseGrant grant = 1;
+  ComponentManifest manifest = 2;
+  repeated string installed_deps = 3;
+}
+
+message LicenseGrant {
+  string token = 1; // signed JWT
+  string listing_id = 2;
+  string license_id = 3;
+  int32 seats = 4;
+  int64 issued_at_ms = 5;
+  int64 expires_at_ms = 6;
+}
+
+message UninstallRequest {
+  ComponentRef component = 1;
+  ResourceId workspace = 2;
+}
+
+message UninstallResponse {
+  bool uninstalled = 1;
+  int64 license_grants_revoked = 2;
+}
+
+message SearchRequest {
+  string query = 1;
+  string category = 2;
+  string kind = 3;
+  string variant_id = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+message SearchResponse {
+  repeated ComponentHit hits = 1;
+  int64 total = 2;
+}
+
+message ComponentHit {
+  string catalog_id = 1;
+  string name = 2;
+  string description = 3;
+  string kind = 4;
+  string latest_version = 5;
+  string variant_id = 6;
+  int64 install_count = 7;
+}
+
+message DescribeRequest {
+  string catalog_id = 1;
+  string version = 2; // optional; defaults to latest
+}
+
+message DescribeResponse {
+  ComponentManifest manifest = 1;
+  repeated string available_versions = 2;
+}
+
+message PinRequest {
+  string catalog_id = 1;
+  string pin = 2; // track_latest | pin-version:<v> | pin-range:<range>
+  string version = 3;
+}
+
+message PinResponse {
+  ComponentRef resolved = 1;
+  bool update_available = 2;
+}
+
+service ComponentRegistryService {
+  rpc Install(InstallRequest) returns (InstallResponse);
+  rpc Uninstall(UninstallRequest) returns (UninstallResponse);
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc Describe(DescribeRequest) returns (DescribeResponse);
+  rpc PinVersion(PinRequest) returns (PinResponse);
+}

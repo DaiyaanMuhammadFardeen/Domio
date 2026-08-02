@@ -1,0 +1,32 @@
+{
+  "name": "@domio/font-service",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Font asset management (Phase 07).",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./dal": "./src/dal.ts",
+    "./service": "./src/service.ts",
+    "./handlers": "./src/handlers.ts",
+    "./metrics": "./src/metrics.ts",
+    "./audit": "./src/audit.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

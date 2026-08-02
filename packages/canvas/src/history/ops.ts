@@ -25,6 +25,8 @@ export type HistoryOpName =
   | 'RemoveElementOp'
   | 'StyleOp'
   | 'TextEditOp'
+  | 'PropEditOp'
+  | 'VariantChangeOp'
   | 'CheckpointOp';
 
 export interface HistoryOp<T = unknown> {
@@ -162,6 +164,54 @@ export function styleOp(
   };
 }
 
+/**
+ * Smart-component prop edit — mutates `element.component.props[key]`.
+ * One op per keystroke/commit; inverse restores the previous value.
+ */
+export interface PropEditForward {
+  changes: Array<{ id: ULID; key: string; from: unknown; to: unknown }>;
+}
+
+export function propEditOp(
+  changes: PropEditForward['changes'],
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<PropEditForward> {
+  return {
+    id: newOpId(),
+    name: 'PropEditOp',
+    timestamp,
+    forward: { changes },
+    inverse: {
+      changes: changes.map((c) => ({ id: c.id, key: c.key, from: c.to, to: c.from })),
+    },
+    authorId,
+  };
+}
+
+/**
+ * Variant switch — emits a single CRDT op (`component.variant_changed`)
+ * that sets `element.component.variant`; no new CRDT type (per P06 §4.2.2).
+ */
+export interface VariantChangeForward {
+  changes: Array<{ id: ULID; from: string; to: string }>;
+}
+
+export function variantChangeOp(
+  changes: VariantChangeForward['changes'],
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<VariantChangeForward> {
+  return {
+    id: newOpId(),
+    name: 'VariantChangeOp',
+    timestamp,
+    forward: { changes },
+    inverse: { changes: changes.map((c) => ({ id: c.id, from: c.to, to: c.from })) },
+    authorId,
+  };
+}
+
 export interface AddRemoveForward {
   added: Element[];
   removed: Element[];
@@ -206,6 +256,10 @@ export function applyOp(doc: DeckDocument, op: HistoryOp): DeckDocument {
       return applyTextEdit(doc, op.forward as TextEditForward);
     case 'StyleOp':
       return applyStyle(doc, op.forward as StyleOpForward);
+    case 'PropEditOp':
+      return applyPropEdit(doc, op.forward as PropEditForward);
+    case 'VariantChangeOp':
+      return applyVariantChange(doc, op.forward as VariantChangeForward);
     case 'AddElementOp':
     case 'RemoveElementOp':
       return applyAddRemove(doc, op.forward as AddRemoveForward);
@@ -255,6 +309,26 @@ function applyStyle(doc: DeckDocument, payload: StyleOpForward): DeckDocument {
     const change = payload.changes.find((c) => c.id === element.id);
     if (!change) return element;
     return { ...element, style: { ...(element.style ?? {}), ...(change.to as Record<string, unknown>) } };
+  });
+}
+
+function applyPropEdit(doc: DeckDocument, payload: PropEditForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.type !== 'component') return element;
+    const change = payload.changes.find((c) => c.id === element.id);
+    if (!change) return element;
+    const props = { ...(element.component.props ?? {}) };
+    props[change.key] = change.to;
+    return { ...element, component: { ...element.component, props } };
+  });
+}
+
+function applyVariantChange(doc: DeckDocument, payload: VariantChangeForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.type !== 'component') return element;
+    const change = payload.changes.find((c) => c.id === element.id);
+    if (!change) return element;
+    return { ...element, component: { ...element.component, variant: change.to } };
   });
 }
 

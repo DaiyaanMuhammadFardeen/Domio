@@ -7,10 +7,12 @@
  */
 
 import {
+  PresenceKind,
+} from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
+import type {
   Presence as PresenceMsg,
   PeerJoined,
   PeerLeft,
-  PresenceKind,
 } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
 import {
   createAwareness,
