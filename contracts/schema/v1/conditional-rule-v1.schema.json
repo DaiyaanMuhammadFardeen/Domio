@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/conditional-rule-v1.schema.json",
+  "title": "Prototype conditional rule",
+  "description": "A prioritized predicate that, when true, dispatches an action. Phase 10 M2.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "name", "priority",
+    "condition", "condition_source", "scope_slide_id",
+    "action", "enabled", "version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "priority": { "type": "integer", "minimum": -10000, "maximum": 10000 },
+    "condition": {
+      "type": "object",
+      "description": "Compiled AST produced by compileExpression(). Source of truth at runtime."
+    },
+    "condition_source": {
+      "type": "string",
+      "maxLength": 4096,
+      "description": "Source text used by the editor for editing/display."
+    },
+    "scope_slide_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "null means deck-wide."
+    },
+    "action": { "$ref": "#/$defs/action" },
+    "enabled": { "type": "boolean", "default": true },
+    "version": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "updated_at": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "action": {
+      "type": "object",
+      "required": ["kind", "params"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "show", "hide", "enable", "disable",
+            "set_variable", "navigate_to", "play_animation",
+            "submit_form", "open_overlay", "close_overlay"
+          ]
+        },
+        "params": { "type": "object" }
+      }
+    }
+  }
+}

@@ -46,7 +46,17 @@
       "@domio/api-client": ["./packages/api-client/src/index.ts"],
       "@domio/api-client/*": ["./packages/api-client/src/*"],
       "@domio/canvas": ["./packages/canvas/src/index.ts"],
-      "@domio/canvas/*": ["./packages/canvas/src/*"]
+      "@domio/canvas/*": ["./packages/canvas/src/*"],
+      "@domio/deep-link": ["./packages/deep-link/src/index.ts"],
+      "@domio/deep-link/*": ["./packages/deep-link/src/*"],
+      "@domio/prototype-runtime": ["./packages/prototype-runtime/src/index.ts"],
+      "@domio/prototype-runtime/*": ["./packages/prototype-runtime/src/*"],
+      "@domio/formula-engine": ["./packages/formula-engine/src/index.ts"],
+      "@domio/formula-engine/*": ["./packages/formula-engine/src/*"],
+      "@domio/animation-runtime": ["./packages/animation-runtime/src/index.ts"],
+      "@domio/animation-runtime/*": ["./packages/animation-runtime/src/*"],
+      "@domio/agent-schema": ["./packages/agent-schema/src/index.ts"],
+      "@domio/agent-schema/*": ["./packages/agent-schema/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", ".next", ".turbo", "**/gen/**", "**/generated/**"]

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/xapi-statement-v1.schema.json",
+  "title": "xAPI 1.0.3 statement",
+  "description": "An xAPI 1.0.3 statement emitted by the quiz runtime. Phase 10 M6.1. Replayable by Yet Analytics SCORM Cloud.",
+  "type": "object",
+  "required": ["id", "actor", "verb", "object"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "UUID v4 set by the runtime."
+    },
+    "actor": {
+      "type": "object",
+      "required": ["objectType", "account"],
+      "additionalProperties": false,
+      "properties": {
+        "objectType": { "enum": ["Agent"] },
+        "account": {
+          "type": "object",
+          "required": ["homePage", "name"],
+          "additionalProperties": false,
+          "properties": {
+            "homePage": { "type": "string", "format": "uri" },
+            "name": { "type": "string" }
+          }
+        }
+      }
+    },
+    "verb": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "format": "uri" },
+        "display": { "type": "object", "additionalProperties": false, "properties": { "en-US": { "type": "string" } } }
+      }
+    },
+    "object": {
+      "type": "object",
+      "required": ["objectType", "id"],
+      "additionalProperties": false,
+      "properties": {
+        "objectType": {
+          "description": "Activity for the quiz object.",
+          "enum": ["Activity"]
+        },
+        "id": { "type": "string", "format": "uri" },
+        "definition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": { "type": "string", "format": "uri" },
+            "name": { "type": "object", "additionalProperties": false, "properties": { "en-US": { "type": "string" } } },
+            "description": { "type": "object", "additionalProperties": false, "properties": { "en-US": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "score": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "scaled": { "type": "number", "minimum": 0, "maximum": 1 },
+            "raw": { "type": "number", "minimum": 0 },
+            "min": { "type": "number", "minimum": 0 },
+            "max": { "type": "number", "minimum": 0 }
+          }
+        },
+        "success": { "type": "boolean" },
+        "completion": { "type": "boolean" },
+        "response": { "type": "string" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "registration": { "type": "string" },
+        "contextActivities": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parent": { "type": "array", "items": { "type": "object" } },
+            "grouping": { "type": "array", "items": { "type": "object" } }
+          }
+        }
+      }
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "stored": { "type": "string", "format": "date-time" },
+    "authority": { "type": "object" }
+  }
+}

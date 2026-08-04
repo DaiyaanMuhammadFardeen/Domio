@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/deep-link-v1.schema.json",
+  "title": "Deep link record",
+  "description": "A short-link record returned by the deep-link service. Phase 10 M7.1.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "kid", "click_count",
+    "expires_at", "viewer_scope", "created_at", "payload"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{9}$",
+      "description": "Short id used in the public URL `/d/:id`."
+    },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "kid": {
+      "type": "string",
+      "description": "HMAC key id; supports the 7-day rotation overlap."
+    },
+    "click_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many times the short id has been resolved."
+    },
+    "expires_at": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Absolute expiry (ms since epoch)."
+    },
+    "viewer_scope": { "enum": ["public", "tenant", "private"] },
+    "single_use": {
+      "type": "boolean",
+      "default": false,
+      "description": "True iff the link enforces single-use replay protection."
+    },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "created_by": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "payload": { "$ref": "./deep-link-payload-v1.schema.json" }
+  }
+}

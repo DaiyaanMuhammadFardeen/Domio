@@ -1,0 +1,381 @@
+openapi: 3.1.0
+info:
+  title: Domio Prototype Recorder API
+  version: 1.0.0
+  description: Phase 10 M5 user-testing telemetry recorder. Append-only event ledger with chained HMAC, DSR endpoints, and PDPA retention cron.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: sessions
+  - name: ingest
+  - name: dsr
+  - name: keys
+paths:
+  /v1/tenants/{tenantId}/decks/{deckId}/telemetry/sessions:
+    post:
+      tags: [sessions]
+      operationId: startSession
+      summary: Start a new test session (or rejoin an existing one)
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - $ref: "#/components/parameters/DeckIdPath"
+        - $ref: "#/components/parameters/SubjectIdQuery"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StartSessionRequest" }
+      responses:
+        "201":
+          description: Session created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PrototypeSession" }
+        "400": { description: Bad request. }
+        "409": { description: Region pin mismatch. }
+    get:
+      tags: [sessions]
+      operationId: listSessions
+      summary: List sessions for a deck
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - $ref: "#/components/parameters/DeckIdPath"
+        - in: query
+          name: region
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Sessions list.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/PrototypeSession" }
+  /v1/tenants/{tenantId}/telemetry/sessions/{sessionId}:
+    get:
+      tags: [sessions]
+      operationId: getSessionEvents
+      summary: Fetch session + events (replay endpoint)
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Session details and ordered events.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [session, events]
+                properties:
+                  session: { $ref: "#/components/schemas/PrototypeSession" }
+                  events:
+                    type: array
+                    items: { $ref: "#/components/schemas/PrototypeEvent" }
+        "404": { description: Session not found. }
+  /v1/tenants/{tenantId}/telemetry/prototype/batch:
+    post:
+      tags: [ingest]
+      operationId: ingestBatch
+      summary: Bulk-ingest a batch of telemetry events
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IngestBatchRequest" }
+      responses:
+        "200":
+          description: Events accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accepted, events]
+                properties:
+                  accepted: { type: integer }
+                  events:
+                    type: array
+                    items: { $ref: "#/components/schemas/PrototypeEvent" }
+        "400": { description: Bad request. }
+        "409": { description: HMAC failed / chain reordered. }
+  /v1/me/telemetry_sessions:
+    get:
+      tags: [dsr]
+      operationId: listMySessions
+      summary: DSR — list the caller's own sessions
+      parameters:
+        - in: query
+          name: tenant_id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Caller's sessions (no key material exposed).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/PrototypeSession" }
+    delete:
+      tags: [dsr]
+      operationId: deleteMySessionsBefore
+      summary: DSR — bulk delete my sessions older than a cutoff
+      parameters:
+        - in: query
+          name: tenant_id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: before
+          required: true
+          schema: { type: integer, description: "epoch ms" }
+      responses:
+        "200":
+          description: Sessions deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted, deletedEvents, before]
+                properties:
+                  deleted: { type: integer }
+                  deletedEvents: { type: integer }
+                  before: { type: integer }
+  /v1/me/telemetry_sessions/{sessionId}:
+    delete:
+      tags: [dsr]
+      operationId: deleteMySession
+      summary: DSR — hard-delete a session + cascade events
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: tenant_id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Deletion result.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted, deletedEvents]
+                properties:
+                  deleted: { type: boolean }
+                  deletedEvents: { type: integer }
+        "404": { description: Session does not belong to caller (privacy). }
+  /v1/tenants/{tenantId}/telemetry/keys/rotate:
+    post:
+      tags: [keys]
+      operationId: rotateKey
+      summary: Operator-only key rotation
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RotateKeyRequest" }
+      responses:
+        "201":
+          description: New key rotated.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IntegrityKey" }
+        "403": { description: Operator only. }
+  /v1/tenants/{tenantId}/telemetry/keys:
+    get:
+      tags: [keys]
+      operationId: listKeys
+      summary: Operator-only key listing (no key material)
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - in: query
+          name: deck_id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Keys registered for the deck.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/IntegrityKey" }
+        "403": { description: Operator only. }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  parameters:
+    TenantIdPath:
+      in: path
+      name: tenantId
+      required: true
+      schema: { type: string }
+    DeckIdPath:
+      in: path
+      name: deckId
+      required: true
+      schema: { type: string }
+    SubjectIdQuery:
+      in: query
+      name: subject_id
+      required: false
+      schema: { type: string }
+    TenantId:
+      in: query
+      name: tenant_id
+      required: true
+      schema: { type: string }
+  schemas:
+    PrototypeSession:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, sessionToken, consent, region, regionPinned, samplingRate, kid, startedAt, lastEventAt, expiresAt, lastSeq]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        subjectId: { type: ["string", "null"] }
+        sessionToken: { type: string }
+        consent: { enum: [opt_in, opt_out, anonymous] }
+        region: { enum: [us-east, us-west, eu-central, ap-south, ap-east] }
+        regionPinned: { type: boolean }
+        abVariant: { type: ["string", "null"] }
+        samplingRate: { type: number, minimum: 0, maximum: 1 }
+        kid: { type: string }
+        startedAt: { type: integer }
+        lastEventAt: { type: integer }
+        expiresAt: { type: integer }
+        lastSeq: { type: integer }
+    PrototypeEvent:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, sessionId, seq, eventType, payload, prevHash, eventHash, kid, clientFingerprint, region, createdAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        sessionId: { type: string }
+        seq: { type: integer, minimum: 1 }
+        eventType:
+          enum:
+            - session_start
+            - session_end
+            - slide_enter
+            - slide_exit
+            - click
+            - hover
+            - form_submit
+            - calculator_change
+            - rage_click
+            - error
+            - device_frame_change
+            - consent_change
+        payload: { type: object }
+        prevHash: { type: string, pattern: "^[0-9a-f]{64}$" }
+        eventHash: { type: string, pattern: "^[0-9a-f]{64}$" }
+        kid: { type: string }
+        clientFingerprint: { type: string }
+        region: { enum: [us-east, us-west, eu-central, ap-south, ap-east] }
+        createdAt: { type: integer }
+    IntegrityKey:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, kid, rotatedAt, expiresAt, overlapUntil]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        kid: { type: string }
+        rotatedAt: { type: integer }
+        expiresAt: { type: integer }
+        overlapUntil: { type: integer }
+    StartSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [consent, region]
+      properties:
+        consent: { enum: [opt_in, opt_out, anonymous] }
+        region: { enum: [us-east, us-west, eu-central, ap-south, ap-east] }
+        regionPinned: { type: boolean }
+        abVariant: { type: ["string", "null"] }
+        samplingRate: { type: number, minimum: 0, maximum: 1 }
+        ttlMs: { type: integer, minimum: 60000, maximum: 31536000000 }
+        rejoinSessionToken: { type: string }
+    IngestBatchRequest:
+      type: object
+      additionalProperties: false
+      required: [sessionId, events]
+      properties:
+        sessionId: { type: string }
+        events:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/IngestEvent" }
+    IngestEvent:
+      type: object
+      additionalProperties: false
+      required: [eventType, payload, clientFingerprint]
+      properties:
+        eventType:
+          enum:
+            - session_start
+            - session_end
+            - slide_enter
+            - slide_exit
+            - click
+            - hover
+            - form_submit
+            - calculator_change
+            - rage_click
+            - error
+            - device_frame_change
+            - consent_change
+        payload: { type: object }
+        clientFingerprint: { type: string, minLength: 1, maxLength: 256 }
+        createdAt: { type: integer }
+        signedEvent: { $ref: "#/components/schemas/SignedEvent" }
+    SignedEvent:
+      type: object
+      additionalProperties: false
+      required: [id, seq, prevHash, eventHash, kid, clientFingerprint, region, createdAt, payload]
+      properties:
+        id: { type: string }
+        seq: { type: integer, minimum: 1 }
+        prevHash: { type: string, pattern: "^[0-9a-f]{64}$" }
+        eventHash: { type: string, pattern: "^[0-9a-f]{64}$" }
+        kid: { type: string }
+        clientFingerprint: { type: string }
+        region: { enum: [us-east, us-west, eu-central, ap-south, ap-east] }
+        createdAt: { type: integer }
+        payload: { type: object }
+    RotateKeyRequest:
+      type: object
+      additionalProperties: false
+      required: [deckId]
+      properties:
+        deckId: { type: string }

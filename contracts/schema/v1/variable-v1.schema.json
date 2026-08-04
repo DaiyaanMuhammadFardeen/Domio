@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/variable-v1.schema.json",
+  "title": "Prototype variable",
+  "description": "A typed variable scoped to one of the five prototype-runtime scope ladders. Phase 10 M2.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "name", "scope", "type",
+    "default_value", "visibility", "read_only", "version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+      "description": "Logical name (no leading `$` — that prefix is reserved for references)."
+    },
+    "scope": { "enum": ["deck", "slide", "component_instance", "session", "viewer"] },
+    "type": { "enum": ["string", "number", "boolean", "enum", "json", "array"] },
+    "enum_values": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true
+    },
+    "min": { "type": "number" },
+    "max": { "type": "number" },
+    "default_value": {},
+    "visibility": { "enum": ["deck_public", "private", "server_only"] },
+    "read_only": { "type": "boolean", "default": false },
+    "version": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "updated_at": { "type": "integer", "minimum": 0 }
+  }
+}

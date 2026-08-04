@@ -17,7 +17,11 @@
     "allowJs": true,
     "paths": {
       "@domio/chart": ["../../packages/chart/src/index.ts"],
-      "@domio/mock-data": ["../../packages/mock-data/src/index.ts"]
+      "@domio/deep-link": ["../../packages/deep-link/src/index.ts"],
+      "@domio/deep-link/*": ["../../packages/deep-link/src/*"],
+      "@domio/mock-data": ["../../packages/mock-data/src/index.ts"],
+      "@domio/prototype-runtime": ["../../packages/prototype-runtime/src/index.ts"],
+      "@domio/prototype-runtime/*": ["../../packages/prototype-runtime/src/*"]
     }
   },
   "include": [

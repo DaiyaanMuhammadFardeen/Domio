@@ -19,6 +19,8 @@
     "@domio/canvas": "workspace:*",
     "@domio/common": "workspace:*",
     "@domio/components": "workspace:*",
+    "@domio/deep-link": "workspace:*",
+    "@domio/prototype-runtime": "workspace:*",
     "@domio/schema": "workspace:*",
     "@domio/schema-prop": "workspace:*",
     "@domio/sdk": "workspace:*",

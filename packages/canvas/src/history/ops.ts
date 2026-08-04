@@ -36,7 +36,14 @@ export type HistoryOpName =
   | 'TransitionOp'
   | 'MagicMoveOp'
   | 'ReducedMotionOp'
-  | 'ExportOp';
+  | 'ExportOp'
+  // P10 prototyping ops
+  | 'HotspotOp'
+  | 'OverlayOp'
+  | 'BranchingEdgeOp'
+  | 'VariableOp'
+  | 'ConditionalRuleOp'
+  | 'VariableBindingOp';
 
 // ---- P08 live-data types ----
 
@@ -496,6 +503,154 @@ export function removeElementOp(removed: Element[], slideId: ULID, timestamp: nu
   };
 }
 
+// ── P10 prototype ops ───────────────────────────────────────────────────
+
+/** Stored at `slide['x-domio:hotspots']` (array, by-id). */
+export interface HotspotForward {
+  slideId: string;
+  hotspot: unknown; // Hotspot from @domio/prototype-runtime — kept as `unknown` to avoid a circular dep
+  previous: unknown | null;
+}
+
+export function hotspotOp(
+  slideId: string,
+  hotspot: unknown,
+  previous: unknown | null,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<HotspotForward> {
+  return {
+    id: newOpId(),
+    name: 'HotspotOp',
+    timestamp,
+    forward: { slideId, hotspot: deepClone(hotspot), previous: previous ? deepClone(previous) : null },
+    inverse: { slideId, hotspot: previous ? deepClone(previous) : null, previous: deepClone(hotspot) },
+    authorId,
+  };
+}
+
+/** Stored at `slide['x-domio:overlays']`. */
+export interface OverlayForward {
+  slideId: string;
+  overlay: unknown;
+  previous: unknown | null;
+}
+
+export function overlayOp(
+  slideId: string,
+  overlay: unknown,
+  previous: unknown | null,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<OverlayForward> {
+  return {
+    id: newOpId(),
+    name: 'OverlayOp',
+    timestamp,
+    forward: { slideId, overlay: deepClone(overlay), previous: previous ? deepClone(previous) : null },
+    inverse: { slideId, overlay: previous ? deepClone(previous) : null, previous: deepClone(overlay) },
+    authorId,
+  };
+}
+
+/** Stored at `slide['x-domio:branching-edges']`. */
+export interface BranchingEdgeForward {
+  slideId: string;
+  edge: unknown;
+  previous: unknown | null;
+}
+
+export function branchingEdgeOp(
+  slideId: string,
+  edge: unknown,
+  previous: unknown | null,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<BranchingEdgeForward> {
+  return {
+    id: newOpId(),
+    name: 'BranchingEdgeOp',
+    timestamp,
+    forward: { slideId, edge: deepClone(edge), previous: previous ? deepClone(previous) : null },
+    inverse: { slideId, edge: previous ? deepClone(previous) : null, previous: deepClone(edge) },
+    authorId,
+  };
+}
+
+/** Stored at `slide['x-domio:variables']`. */
+export interface VariableForward {
+  slideId: string;
+  variable: unknown;
+  previous: unknown | null;
+}
+
+export function variableOp(
+  slideId: string,
+  variable: unknown,
+  previous: unknown | null,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<VariableForward> {
+  return {
+    id: newOpId(),
+    name: 'VariableOp',
+    timestamp,
+    forward: { slideId, variable: deepClone(variable), previous: previous ? deepClone(previous) : null },
+    inverse: { slideId, variable: previous ? deepClone(previous) : null, previous: deepClone(variable) },
+    authorId,
+  };
+}
+
+/** Stored at `props['x-domio:conditional-rule']`. */
+export interface ConditionalRuleForward {
+  layerId: string;
+  rule: unknown;
+  previous: unknown | null;
+}
+
+export function conditionalRuleOp(
+  layerId: string,
+  rule: unknown,
+  previous: unknown | null,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<ConditionalRuleForward> {
+  return {
+    id: newOpId(),
+    name: 'ConditionalRuleOp',
+    timestamp,
+    forward: { layerId, rule: deepClone(rule), previous: previous ? deepClone(previous) : null },
+    inverse: { layerId, rule: previous ? deepClone(previous) : null, previous: deepClone(rule) },
+    authorId,
+  };
+}
+
+/** Stored at `props['x-domio:variable-binding']`. */
+export interface VariableBindingForward {
+  layerId: string;
+  binding: unknown;
+  previous: unknown | null;
+}
+
+export function variableBindingOp(
+  layerId: string,
+  binding: unknown,
+  previous: unknown | null,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<VariableBindingForward> {
+  return {
+    id: newOpId(),
+    name: 'VariableBindingOp',
+    timestamp,
+    forward: { layerId, binding: deepClone(binding), previous: previous ? deepClone(previous) : null },
+    inverse: { layerId, binding: previous ? deepClone(previous) : null, previous: deepClone(binding) },
+    authorId,
+  };
+}
+
+// ── applyOp dispatch ───────────────────────────────────────────────────
+
 /**
  * Apply an op to a deck document. Pure function; no mutation of the input.
  */
@@ -535,6 +690,18 @@ export function applyOp(doc: DeckDocument, op: HistoryOp): DeckDocument {
     case 'AddElementOp':
     case 'RemoveElementOp':
       return applyAddRemove(doc, op.forward as AddRemoveForward);
+    case 'HotspotOp':
+      return applyHotspot(doc, op.forward as HotspotForward);
+    case 'OverlayOp':
+      return applyOverlay(doc, op.forward as OverlayForward);
+    case 'BranchingEdgeOp':
+      return applyBranchingEdge(doc, op.forward as BranchingEdgeForward);
+    case 'VariableOp':
+      return applyVariable(doc, op.forward as VariableForward);
+    case 'ConditionalRuleOp':
+      return applyConditionalRule(doc, op.forward as ConditionalRuleForward);
+    case 'VariableBindingOp':
+      return applyVariableBinding(doc, op.forward as VariableBindingForward);
     case 'GroupOp':
     case 'UngroupOp':
     case 'CheckpointOp':
@@ -702,6 +869,100 @@ function applyAddRemove(doc: DeckDocument, payload: AddRemoveForward): DeckDocum
       };
     }),
   };
+}
+
+// ── P10 apply functions ─────────────────────────────────────────────────
+
+function applyHotspot(doc: DeckDocument, payload: HotspotForward): DeckDocument {
+  return {
+    ...doc,
+    slides: doc.slides.map((slide) => {
+      if (slide.id !== payload.slideId) return slide;
+      const prev = deepClone(slide) as unknown as Record<string, unknown>;
+      if (payload.hotspot === null) {
+        delete prev['x-domio:hotspots'];
+      } else {
+        prev['x-domio:hotspots'] = deepClone(payload.hotspot);
+      }
+      return prev as unknown as Slide;
+    }),
+  };
+}
+
+function applyOverlay(doc: DeckDocument, payload: OverlayForward): DeckDocument {
+  return {
+    ...doc,
+    slides: doc.slides.map((slide) => {
+      if (slide.id !== payload.slideId) return slide;
+      const prev = deepClone(slide) as unknown as Record<string, unknown>;
+      if (payload.overlay === null) {
+        delete prev['x-domio:overlays'];
+      } else {
+        prev['x-domio:overlays'] = deepClone(payload.overlay);
+      }
+      return prev as unknown as Slide;
+    }),
+  };
+}
+
+function applyBranchingEdge(doc: DeckDocument, payload: BranchingEdgeForward): DeckDocument {
+  return {
+    ...doc,
+    slides: doc.slides.map((slide) => {
+      if (slide.id !== payload.slideId) return slide;
+      const prev = deepClone(slide) as unknown as Record<string, unknown>;
+      if (payload.edge === null) {
+        delete prev['x-domio:branching-edges'];
+      } else {
+        prev['x-domio:branching-edges'] = deepClone(payload.edge);
+      }
+      return prev as unknown as Slide;
+    }),
+  };
+}
+
+function applyVariable(doc: DeckDocument, payload: VariableForward): DeckDocument {
+  return {
+    ...doc,
+    slides: doc.slides.map((slide) => {
+      if (slide.id !== payload.slideId) return slide;
+      const prev = deepClone(slide) as unknown as Record<string, unknown>;
+      if (payload.variable === null) {
+        delete prev['x-domio:variables'];
+      } else {
+        prev['x-domio:variables'] = deepClone(payload.variable);
+      }
+      return prev as unknown as Slide;
+    }),
+  };
+}
+
+function applyConditionalRule(doc: DeckDocument, payload: ConditionalRuleForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.type !== 'component') return element;
+    if (element.id !== payload.layerId) return element;
+    const props = { ...(element.component.props ?? {}) };
+    if (payload.rule === null) {
+      delete props['x-domio:conditional-rule'];
+    } else {
+      props['x-domio:conditional-rule'] = deepClone(payload.rule);
+    }
+    return { ...element, component: { ...element.component, props } };
+  });
+}
+
+function applyVariableBinding(doc: DeckDocument, payload: VariableBindingForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.type !== 'component') return element;
+    if (element.id !== payload.layerId) return element;
+    const props = { ...(element.component.props ?? {}) };
+    if (payload.binding === null) {
+      delete props['x-domio:variable-binding'];
+    } else {
+      props['x-domio:variable-binding'] = deepClone(payload.binding);
+    }
+    return { ...element, component: { ...element.component, props } };
+  });
 }
 
 function mapElements(doc: DeckDocument, mapper: (element: Element) => Element): DeckDocument {

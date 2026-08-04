@@ -1,0 +1,247 @@
+openapi: 3.1.0
+info:
+  title: Domio Prototype State Machines API
+  version: 1.0.0
+  description: |
+    Phase 10 M3 — Component state machines. Exposes CRUD for
+    `interaction_state` records plus a transition endpoint that applies
+    a single event (`focus|press|click|hover|default`) to the
+    underlying state machine and returns the next state. The runtime
+    `StateMachine` resolves ambiguous same-tick events via the
+    precedence ladder `focus > press > click > hover > default`.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: state-machines
+paths:
+  /v1/tenants/{tenantId}/decks/{deckId}/interaction-states:
+    get:
+      tags: [state-machines]
+      operationId: listInteractionStates
+      summary: List interaction states for a deck
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Interaction states in deterministic creation order.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/InteractionState" }
+    post:
+      tags: [state-machines]
+      operationId: createInteractionState
+      summary: Create an interaction state
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateInteractionStateRequest" }
+      responses:
+        "201":
+          description: Interaction state created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InteractionState" }
+        "422": { description: Validation failed. }
+  /v1/tenants/{tenantId}/decks/{deckId}/interaction-states/{id}:
+    get:
+      tags: [state-machines]
+      operationId: getInteractionState
+      summary: Get an interaction state
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Interaction state.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InteractionState" }
+        "404": { description: Interaction state not found. }
+    patch:
+      tags: [state-machines]
+      operationId: patchInteractionState
+      summary: Update an interaction state
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatchInteractionStateRequest" }
+      responses:
+        "200":
+          description: Updated interaction state.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InteractionState" }
+        "404": { description: Interaction state not found. }
+        "422": { description: Validation failed. }
+    delete:
+      tags: [state-machines]
+      operationId: deleteInteractionState
+      summary: Delete an interaction state
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "204": { description: Interaction state deleted. }
+        "404": { description: Interaction state not found. }
+  /v1/tenants/{tenantId}/decks/{deckId}/interaction-states/{id}/transition:
+    post:
+      tags: [state-machines]
+      operationId: transitionInteractionState
+      summary: Apply a transition event to a state machine
+      description: |
+        Applies a single interaction event to the stored state machine.
+        If multiple events fire on the same tick, the runtime resolves
+        the winner via the precedence ladder
+        `focus > press > click > hover > default`.
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TransitionRequest" }
+      responses:
+        "200":
+          description: Updated interaction state + transition metadata.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [record, transition]
+                properties:
+                  record: { $ref: "#/components/schemas/InteractionState" }
+                  transition: { $ref: "#/components/schemas/TransitionResult" }
+        "400": { description: Invalid event. }
+        "404": { description: Interaction state not found. }
+        "422": { description: Validation failed. }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  parameters:
+    TenantId:
+      in: query
+      name: tenant_id
+      required: true
+      schema: { type: string }
+    DeckId:
+      in: path
+      name: deck_id
+      required: true
+      schema: { type: string }
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: string }
+  schemas:
+    StateMachineSpec:
+      type: object
+      additionalProperties: false
+      required: [states, transitions, initial]
+      properties:
+        states:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/StateNode" }
+          minProperties: 1
+          maxProperties: 64
+        initial:
+          type: string
+          minLength: 1
+          maxLength: 64
+        transitions:
+          type: array
+          items: { $ref: "#/components/schemas/StateTransition" }
+          maxItems: 256
+    StateNode:
+      type: object
+      additionalProperties: false
+      properties:
+        label: { type: string, maxLength: 128 }
+        meta:
+          type: object
+          additionalProperties: true
+    StateTransition:
+      type: object
+      additionalProperties: false
+      required: [from, to, event]
+      properties:
+        from: { type: string, minLength: 1, maxLength: 64 }
+        to: { type: string, minLength: 1, maxLength: 64 }
+        event: { type: string, minLength: 1, maxLength: 64 }
+        guard: { type: string, maxLength: 4096 }
+    InteractionState:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, instanceId, stateMachine, currentState, scope, persistInstanceState, updatedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        instanceId: { type: string }
+        stateMachine: { $ref: "#/components/schemas/StateMachineSpec" }
+        currentState: { type: string }
+        scope: { enum: [session, slide, deck, persistent_session] }
+        persistInstanceState: { type: boolean }
+        updatedAt: { type: integer }
+    CreateInteractionStateRequest:
+      type: object
+      additionalProperties: false
+      required: [instanceId, stateMachine, currentState, scope]
+      properties:
+        instanceId: { type: string, minLength: 1, maxLength: 128 }
+        stateMachine: { $ref: "#/components/schemas/StateMachineSpec" }
+        currentState: { type: string, minLength: 1 }
+        scope: { enum: [session, slide, deck, persistent_session] }
+        persistInstanceState: { type: boolean, default: false }
+    PatchInteractionStateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        currentState: { type: string, minLength: 1 }
+        scope: { enum: [session, slide, deck, persistent_session] }
+        persistInstanceState: { type: boolean }
+        stateMachine: { $ref: "#/components/schemas/StateMachineSpec" }
+    TransitionRequest:
+      type: object
+      additionalProperties: false
+      required: [event]
+      properties:
+        event: { enum: [focus, press, click, hover, default] }
+        currentState:
+          type: string
+          minLength: 1
+          description: Optional override for the source state (used to bypass the persisted current).
+    TransitionResult:
+      type: object
+      additionalProperties: false
+      required: [previous, current, event, changed, at, precedence]
+      properties:
+        previous: { type: string }
+        current: { type: string }
+        event: { enum: [focus, press, click, hover, default] }
+        changed: { type: boolean }
+        at: { type: integer }
+        precedence: { type: integer }

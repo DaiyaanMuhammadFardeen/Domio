@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/prototype-session-v1.schema.json",
+  "title": "Prototype session",
+  "description": "A user-testing session for a prototype. Phase 10 M5. Resolves PDPA consent, region pin, and the integrity chain kid.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "session_token", "consent", "region",
+    "region_pinned", "sampling_rate", "kid", "started_at", "last_event_at",
+    "expires_at", "last_seq"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "tenant_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "deck_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "subject_id": { "type": ["string", "null"], "maxLength": 64 },
+    "session_token": { "type": "string", "minLength": 8, "maxLength": 64 },
+    "consent": { "enum": ["opt_in", "opt_out", "anonymous"] },
+    "region": { "enum": ["us-east", "us-west", "eu-central", "ap-south", "ap-east"] },
+    "region_pinned": { "type": "boolean" },
+    "ab_variant": { "type": ["string", "null"], "maxLength": 64 },
+    "sampling_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "kid": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "started_at": { "type": "integer", "minimum": 0 },
+    "last_event_at": { "type": "integer", "minimum": 0 },
+    "expires_at": { "type": "integer", "minimum": 0 },
+    "last_seq": { "type": "integer", "minimum": 0 }
+  }
+}

@@ -1,0 +1,289 @@
+openapi: 3.1.0
+info:
+  title: Domio Prototype Hotspots and Branching API
+  version: 1.0.0
+  description: Hotspot, branching-edge, and interaction-state CRUD for Phase 10 M1.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: hotspots
+  - name: branching-edges
+paths:
+  /v1/decks/{deck_id}/hotspots:
+    get:
+      tags: [hotspots]
+      operationId: listHotspots
+      summary: List hotspots for a deck
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+        - in: query
+          name: slide_id
+          schema: { type: string }
+      responses:
+        "200":
+          description: Hotspots in deterministic creation order.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Hotspot" }
+    post:
+      tags: [hotspots]
+      operationId: createHotspot
+      summary: Create a hotspot
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateHotspotRequest" }
+      responses:
+        "201":
+          description: Hotspot created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Hotspot" }
+        "422": { description: Geometry or target validation failed. }
+  /v1/hotspots/{id}:
+    get:
+      tags: [hotspots]
+      operationId: getHotspot
+      summary: Get a hotspot
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Hotspot details.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Hotspot" }
+        "404": { description: Hotspot not found. }
+    patch:
+      tags: [hotspots]
+      operationId: patchHotspot
+      summary: Update a hotspot using optimistic locking
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatchHotspotRequest" }
+      responses:
+        "200":
+          description: Hotspot updated.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Hotspot" }
+        "404": { description: Hotspot not found. }
+        "409": { description: Version conflict. }
+        "422": { description: Geometry or target validation failed. }
+    delete:
+      tags: [hotspots]
+      operationId: deleteHotspot
+      summary: Delete a hotspot
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "204": { description: Hotspot deleted. }
+        "404": { description: Hotspot not found. }
+  /v1/decks/{deck_id}/branching-edges:
+    get:
+      tags: [branching-edges]
+      operationId: listBranchingEdges
+      summary: List branching edges for a deck
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Branching edges.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/BranchingEdge" }
+    post:
+      tags: [branching-edges]
+      operationId: createBranchingEdge
+      summary: Create a directed slide edge
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateBranchingEdgeRequest" }
+      responses:
+        "201":
+          description: Edge created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BranchingEdge" }
+        "409": { description: Duplicate edge. }
+        "422": { description: Self-loop or invalid slide reference. }
+  /v1/branching-edges/{id}:
+    get:
+      tags: [branching-edges]
+      operationId: getBranchingEdge
+      summary: Get a branching edge
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Edge details.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BranchingEdge" }
+        "404": { description: Edge not found. }
+    patch:
+      tags: [branching-edges]
+      operationId: patchBranchingEdge
+      summary: Update a branching edge
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatchBranchingEdgeRequest" }
+      responses:
+        "200":
+          description: Edge updated.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BranchingEdge" }
+        "404": { description: Edge not found. }
+        "422": { description: Self-loop or invalid slide reference. }
+    delete:
+      tags: [branching-edges]
+      operationId: deleteBranchingEdge
+      summary: Delete a branching edge
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "204": { description: Edge deleted. }
+        "404": { description: Edge not found. }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  parameters:
+    TenantId:
+      in: query
+      name: tenant_id
+      required: true
+      schema: { type: string }
+    DeckId:
+      in: path
+      name: deck_id
+      required: true
+      schema: { type: string }
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: string }
+  schemas:
+    Hotspot:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, slideId, name, geometry, gestureMask, zIndex, targetType, targetRef, status, version, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        slideId: { type: string }
+        name: { type: string }
+        geometry: { type: object }
+        gestureMask:
+          type: array
+          items: { enum: [click, double_click, long_press, hover, focus] }
+        zIndex: { type: integer }
+        targetType: { enum: [slide, url, overlay, action] }
+        targetRef: { type: object }
+        status: { enum: [ok, dangling] }
+        version: { type: integer, minimum: 0 }
+        createdAt: { type: integer }
+        updatedAt: { type: integer }
+    CreateHotspotRequest:
+      type: object
+      additionalProperties: false
+      required: [slideId, name, geometry, targetType, targetRef]
+      properties:
+        slideId: { type: string }
+        name: { type: string, minLength: 1 }
+        geometry: { type: object }
+        gestureMask:
+          type: array
+          items: { enum: [click, double_click, long_press, hover, focus] }
+          default: [click]
+        zIndex: { type: integer, default: 0 }
+        targetType: { enum: [slide, url, overlay, action] }
+        targetRef: { type: object }
+    PatchHotspotRequest:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: integer, minimum: 0 }
+        name: { type: string, minLength: 1 }
+        geometry: { type: object }
+        gestureMask:
+          type: array
+          items: { enum: [click, double_click, long_press, hover, focus] }
+        zIndex: { type: integer }
+        targetType: { enum: [slide, url, overlay, action] }
+        targetRef: { type: object }
+        status: { enum: [ok, dangling] }
+    BranchingEdge:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, fromSlideId, toSlideId, name, ruleId, priority, createdAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        fromSlideId: { type: string }
+        toSlideId: { type: string }
+        name: { type: string }
+        ruleId: { type: [string, "null"] }
+        priority: { type: integer }
+        createdAt: { type: integer }
+    CreateBranchingEdgeRequest:
+      type: object
+      additionalProperties: false
+      required: [fromSlideId, toSlideId, name]
+      properties:
+        fromSlideId: { type: string }
+        toSlideId: { type: string }
+        name: { type: string, minLength: 1 }
+        ruleId: { type: [string, "null"] }
+        priority: { type: integer, default: 0 }
+    PatchBranchingEdgeRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        toSlideId: { type: string }
+        name: { type: string, minLength: 1 }
+        ruleId: { type: [string, "null"] }
+        priority: { type: integer }

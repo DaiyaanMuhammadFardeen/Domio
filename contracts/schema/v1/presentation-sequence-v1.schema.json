@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/presentation-sequence-v1.schema.json",
+  "title": "Presentation sequence",
+  "description": "An auto-advance timeline of slides with pause/resume, interruption policies, visibility-aware clock handling, and reduced-motion default-off. Phase 10 M6.2.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "name", "slides", "interval_ms",
+    "pause_on_event", "loop", "count", "interruption_policy",
+    "reduced_motion_default_off", "pause_warn_at_ms",
+    "version", "created_at", "updated_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "interval_ms": {
+      "type": "integer",
+      "minimum": 50, "maximum": 86400000,
+      "description": "Default 1000ms."
+    },
+    "pause_on_event": {
+      "type": "boolean",
+      "description": "Pause the timeline when a click/tap event is intercepted on the active slide."
+    },
+    "loop": {
+      "type": "boolean",
+      "description": "Loop the slide list when finished. Bounded by `count`."
+    },
+    "count": {
+      "type": "integer", "minimum": 1, "maximum": 1024, "default": 1,
+      "description": "Number of complete plays before stopping."
+    },
+    "interruption_policy": {
+      "enum": ["ignore", "queue", "abort"],
+      "default": "queue"
+    },
+    "reduced_motion_default_off": {
+      "type": "boolean", "default": true,
+      "description": "When prefers-reduced-motion:reduce is set, default to NOT starting the sequence."
+    },
+    "pause_warn_at_ms": {
+      "type": "integer",
+      "minimum": 1000, "maximum": 7200000, "default": 1800000,
+      "description": "Millis of continuous pause before firing a warning callback. Default 30 min."
+    },
+    "version": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "updated_at": { "type": "integer", "minimum": 0 }
+  }
+}

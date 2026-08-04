@@ -6,6 +6,143 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 10 — Prototyping & Interactivity (foundations: M1 + M2)
+
+#### Added
+
+- **Prototype runtime (`packages/prototype-runtime`).** Pure-TS, no-DB
+  engine covering the foundations of Phase 10:
+  - Safe expression compiler (`compileExpression`) — AST whitelist,
+    rejects `eval`/`Function`/dynamic access/`this`/`arguments`,
+    adapter over `@domio/formula-engine` so there is a single sandbox.
+  - Typed VarStore (viewer → session → component_instance → slide →
+    deck scope chain) with `Object.is` change detection, snapshot/
+    restore, and typed subscriptions.
+  - BindingsDAG with topological propagation, cycle detection at
+    registration, ≤ 0.5 ms p99 per variable read budget.
+  - RuleEvaluator — priority + short-circuit ordering, returning
+    `{ ruleId, action }` for the first matching `ConditionalRule`.
+  - ActionExecutor — `show | hide | enable | disable | set_variable |
+    navigate_to | play_animation | open_overlay | close_overlay |
+    submit_form` dispatched through a single `dispatch(action, ctx)`.
+  - BranchingGraph — adjacency list, Tarjan SCC cycle detection,
+    bounded DFS with `DEFAULT_MAX_HOPS = 100`, returns
+    `{ hasCycle, cycles, unreachable, islands, multiStart }`.
+  - Hotspot hit-test — normalized `[0..1]` geometry, LRU cache per
+    slide, z-index aware.
+  - OverlayStack — z-stack with `max_depth = 5`, last-opened-on-top,
+    focus-trap helpers.
+  - **124 tests across the package.**
+- **Prototype-runtime service (`services/prototype-runtime`).** Hono
+  CRUD for hotspots, overlays, branching edges, interaction states,
+  variables, variable bindings, and conditional rules. Web-framework-
+  free handlers with the canonical four-line tenant pattern;
+  optimistic-lock 409 via `currentVersion` in the response body; in-
+  memory repositories + Postgres DAL interface. **39 service tests.**
+- **Canvas ops (`packages/canvas`).** Six new history ops for the
+  prototype surface, each with forward/inverse factory and
+  `applyOp` wiring:
+  `HotspotOp`, `OverlayOp`, `BranchingEdgeOp`, `VariableOp`,
+  `ConditionalRuleOp`, `VariableBindingOp`. Stored at
+  `slide['x-domio:hotspots']`, `slide['x-domio:overlays']`,
+  `slide['x-domio:branching-edges']`, `slide['x-domio:variables']`,
+  `props['x-domio:conditional-rule']`, `props['x-domio:variable-binding']`.
+  **63 op tests (25 new + 38 existing).**
+- **Editor UI (`apps/editor`).** Two new left-side tabs:
+  - **Connections panel** — four sub-tabs (Hotspots, Branching,
+    Overlays, Graph); add/remove hotspots wired to a slide, branching
+    edges wired to a target slide + optional rule id, overlay CRUD,
+    and a one-click graph validator showing
+    `Has cycle: yes/no`, unreachable count, islands, multi-start.
+  - **Variables panel** — two sub-tabs (Variables, Rules); variable
+    CRUD (scope + type pickers, parsed numeric defaults), rule CRUD
+    (priority, action picker), and an inline "Test rule" preview
+    button that compiles the expression and evaluates it against the
+    current VarStore snapshot. Compile errors render in the panel.
+  - Both panels live under the new `p10-connections-tab` /
+    `p10-variables-tab` side tabs and commit every change via the new
+    prototype ops through the HistoryEngine (undo/redo safe).
+  - **22 component tests + 9 Playwright e2e.**
+- **Contracts.** 7 JSON Schemas (hotspot, overlay, branching-edge,
+  interaction-state, variable, variable-binding, conditional-rule) and
+  4 OpenAPI 3.1.0 yamls (prototype-hotspots, prototype-overlays,
+  prototype-variables, prototype-rules). Bearer auth, `tenant_id`
+  required query, `operationId` per endpoint.
+- **Migrations.** `0025_phase10_prototyping` (7 tables + RLS via
+  `current_setting('app.tenant_id', true)` PL/pgSQL block) and
+  `0026_phase10_prototyping_indexes_seed` (gin(geometry) on hotspots,
+  gin(state_machine) on interaction_states, conditional_rules priority
+  index, seed hotspots + overlays for the `system` tenant). Migration
+  harness extended with a P10 block — **7/7 green.**
+
+### Phase 10 — Prototyping & Interactivity (M3: Component state machines)
+
+#### Added
+
+- **Prototype runtime (`packages/prototype-runtime/src/state-machines/`)**:
+  - `StateMachine` — finite-state machine driver with `transition(kind)`,
+    `transitionBatch(events)`, `reset`, `transitionsFrom`, `graphRows`.
+    Validation throws on empty states / unknown initial / bad transitions;
+    emits `fireTransition` events through the bus.
+  - `TransitionEvaluator` — resolves same-tick ambiguous events via the
+    precedence ladder `focus > press > click > hover > default`.
+  - `EventBus` — stable bound handler, `onTransition` / `emit` /
+    `lastEvent` / `clear`.
+  - `StateScope` — `attach(instanceId, machine)`, scope-aware
+    `setPersistInstanceState`, `resetOnSlideEnter`, `snapshot` /
+    `restore` for `session | slide | deck | persistent_session`.
+  - **54 new tests** in `state-machines/*.test.ts`.
+- **Prototype-runtime service (`services/prototype-runtime/src/`)**:
+  - `createInteractionState` now accepts the canonical
+    `{ states, transitions, initial }` JSONB spec via
+    `CreateInteractionStateInput`.
+  - New handlers: `getInteractionState`, `patchInteractionState`,
+    `deleteInteractionState`, `transitionInteractionState`
+    (uses the runtime `StateMachine` end-to-end and returns
+    `TransitionResult` with previous / current / changed / precedence).
+  - DAL `findByInstance(instanceId)` on the in-memory repository.
+  - **12 new service tests** (51 total, was 39).
+- **Contracts**:
+  - `contracts/schema/v1/state-machine-v1.schema.json` — JSON Schema
+    2020-12, `additionalProperties: false`, `states` is an object map
+    of `{label?, meta?}` nodes, `transitions` array of
+    `{from, to, event, guard?}` (max 256), `initial` references a
+    state name, precedence ladder documented on `event-name`.
+  - `contracts/openapi/v1/prototype-state-machines.yaml` — OpenAPI
+    3.1.0, bearer auth, `tenant_id` required query, list/get/create/
+    patch/delete + `POST .../transition` returning
+    `{record, transition}`.
+- **Editor panel (`apps/editor/src/panels/state-inspector-panel.tsx`)**:
+  BEM classnames, `m3-` testid prefix; add-machine form, machine list
+  with remove + persist toggle, transition graph sorted by runtime
+  precedence, pause-and-inspect toggle that disables the apply-event
+  button. Mounted in `EditorRoot` as the `state-inspector` left-side
+  tab. **12 panel tests.**
+- **Editor e2e** (`apps/editor/e2e/p10-m3-state-machines.spec.ts`):
+  6 Playwright smoke tests covering open / form fields / add /
+  transition graph / pause / remove / persist.
+- **Postgres migration**
+  `infrastructure/postgres/migrations/0027_phase10_state_machines.{up,down}.sql`:
+  adds `interaction_state.persist_instance_state boolean NOT NULL DEFAULT false`,
+  `interaction_state_instance_idx` on
+  `(tenant_id, deck_id, instance_id)`, and a partial
+  `interaction_state_persist_idx` for the persistence flag slice.
+  Migration harness extended with a P10-M3 block (apply / columns /
+  indexes / round-trip / scope check / rollback).
+
+#### Deferred to follow-on phases (see `docs/handoff/P09-to-P10.md`)
+
+- M4 — Forms, calculators, device frames (landed — see M4 section below).
+- M5 — Prototype user-testing telemetry recorder (landed — see M5 section below).
+- M6 — Quizzes + auto-advance (landed — see M6 section below).
+- M7 — Deep-link state codec (landed — see M7 section below).
+- M8 — MCP agent surface for prototyping tools (landed — see M8 section below).
+- Viewer-side hotspot/overlay/form/calculator renderers.
+- CRDT sub-documents for prototype-runtime (deferred until viewer/
+  runtime matures).
+- xAPI / SCORM LRS adapter.
+- BullMQ workers (project uses poll-loop pattern per P09 precedent).
+
 ### Phase 9 — Animation & transition system
 
 #### Added
@@ -296,5 +433,303 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Contracts:** `design-token-v1`, `brand-kit-v1`, `font-asset-v1`
   schemas; `theme.proto`, `brand.proto`, `font.proto`, `lint.proto`;
   `theme.yaml`, `brand.yaml`, `font.yaml`, `lint.yaml`.
+
+### Phase 10 — Prototyping & Interactivity (M6: Quizzes + Auto-Advance)
+
+#### Added
+
+- **Quiz runtime (`packages/prototype-runtime/src/quizzes`):**
+  - `QuizRuntime` — `start(quiz, seed)` (deterministic question
+    order via Mulberry32 FNV-1a hash → PRNG), `answer(qId, value)`,
+    `score()`, `attempts()`, `complete()` (cached & idempotent),
+    supports all 9 question types.
+  - `XapiEmitter` — produces xAPI 1.0.3 statements
+    (`experienced`, `answered`, `completed` + `passed/failed`)
+    replayable by Yet Analytics SCORM Cloud.
+  - 9 question-type validators under `quizzes/question-types/` —
+    `multiple-choice`, `multi-select` (set equality with 0.5 partial
+    credit), `true-false`, `short-answer` (Levenshtein similarity,
+    default 0.85 typo tolerance, case-insensitive), `fill-blank`,
+    `drag-to-match` (keyboard-only a11y, left→right mapping),
+    `hotspot-quiz` (point-in-polygon + centroid distance, default
+    tolerance 0.04, partial credit between tolerance and 2×tolerance),
+    `flash-card` (known=1, unknown=0.5), `short-answer-llm` (async
+    grader with `DEFAULT_LLM_FALLBACK_THRESHOLD = 0.7` flipping the
+    answer into the LLM-review queue via `needsHumanReview`).
+- **Sequence runtime (`packages/prototype-runtime/src/sequences`):**
+  - `TimelineRuntime` — `start()`, `pause()`, `resume()` (accumulates
+    `pausedTotalMs`), `tick(deltaMs)`, `currentSlide()`,
+    `pausedTotalMs()`, `completedPlays()`, `isAborted()`,
+    `flagPauseProgress(ms)` (fires `onWarn` once at `pauseWarnAtMs`,
+    default 30 min), `interrupt({kind, slideId, at})`. Honors
+    `intervalMs`, `pauseOnEvent`, `loop`, `count`,
+    `interruptionPolicy` (ignore / queue / abort),
+    `reducedMotionDefaultOff`, and `pauseWarnAtMs`. `DEFAULT_PAUSE_WARN_AT_MS = 30 * 60 * 1000`.
+  - `interruption-policy.ts` — pure-function state machine
+    `applyInterruption`, `dequeueInterruption`, `initialInterruptionState`.
+  - `visibility-listener.ts` — drives pause/resume off
+    `document.visibilitychange`, handling tab-backgrounded clock
+    drift without advancing the timeline while hidden.
+  - **No-touch on substrate**: extends phase-runtime exports; no
+    changes to `BindingsDAG` or `RuleEvaluator`.
+- **Prototype runtime service M6 endpoints** — six new
+  repositories (`QuizRepository`, `QuizAttemptRepository`,
+  `QuizAnswerRepository`, `QuizResultRepository`,
+  `LlmReviewQueueRepository`, `PresentationSequenceRepository`)
+  with full in-memory implementations. New handlers:
+  - `POST /v1/decks/:deck/quizzes` (create),
+    `GET /v1/decks/:deck/quizzes` (list),
+    `GET /v1/quizzes/:id`, `PATCH /v1/quizzes/:id` (with version
+    locking), `DELETE /v1/quizzes/:id`.
+  - `POST /v1/decks/:deck/quizzes/:quiz/attempts` (start attempt,
+    seeded viewer id), `POST /v1/quiz-attempts/:attempt/answers`
+    (submit answer — enqueues to LLM review queue on
+    `needsHumanReview`), `POST /v1/quiz-attempts/:attempt/complete`
+    (finalize result), `GET /v1/quiz-attempts/:attempt` (result).
+  - `GET /v1/llm-review-queue?status=pending|in_review|resolved`,
+    `PATCH /v1/llm-review-queue/:id` (approve / reject / override).
+  - `POST /v1/decks/:deck/presentation-sequences`,
+    `GET /v1/decks/:deck/presentation-sequences`,
+    `GET /v1/presentation-sequences/:id`,
+    `PATCH /v1/presentation-sequences/:id`,
+    `DELETE /v1/presentation-sequences/:id`.
+  - New schema validators (`validateCreateQuiz`,
+    `validatePatchQuiz`, `validateQuizAnswer`,
+    `validateStartAttempt`, `validateLlmReviewUpdate`,
+    `validateCreatePresentationSequence`,
+    `validatePatchPresentationSequence`) with proper enums for
+    question types and interruption policies.
+- **Editor panels** (`apps/editor/src/panels/`):
+  - `quiz-panel.tsx` — author + edit quiz with 9-type question
+    picker, prompt editor, passThreshold control, optimistic
+    version bumping. data-testid `m6-quiz-*`.
+  - `leaderboard-panel.tsx` — review pending LLM-grade items with
+    approve / reject / override actions plus per-quiz aggregate
+    stats. data-testid `m6-leaderboard-*`.
+  - `sequence-inspector-panel.tsx` — configure timeline + per-slide
+    ordering + interruption policy + pause-warn threshold + reduced
+    motion default-off. data-testid `m6-sequence-*`.
+  - Mounted in `EditorRoot` as tabs `m6-quizzes-tab`,
+    `m6-leaderboard-tab`, `m6-sequence-tab`.
+- **Postgres migrations** (`infrastructure/postgres/migrations/`):
+  - `0032_phase10_quizzes.{up,down}.sql` — `quiz`, `quiz_attempt`,
+    `quiz_answer`, `quiz_result`, `llm_review_queue` tables +
+    lookup indexes (`quiz_deck_idx`, `quiz_attempt_quiz_idx`,
+    `quiz_attempt_viewer_idx`, `quiz_answer_attempt_idx`,
+    partial index `llm_review_queue_status_idx`) + tenant-isolation
+    RLS on every table.
+  - `0033_phase10_sequences.{up,down}.sql` — `presentation_sequence`
+    + deck index + tenant-isolation RLS, with enum CHECK on
+    `interruption_policy` (`ignore | queue | abort`).
+  - Migration harness extended with `P10-M6.1` + `P10-M6.2` blocks
+    (`tools/infra-test/src/postgres/migrations.spec.ts`).
+- **Contracts**:
+  - `contracts/schema/v1/quiz-v1.schema.json` — 9-type question schema.
+  - `contracts/schema/v1/xapi-statement-v1.schema.json` — xAPI 1.0.3.
+  - `contracts/schema/v1/presentation-sequence-v1.schema.json`.
+  - `contracts/openapi/v1/prototype-quizzes.yaml` +
+    `contracts/openapi/v1/prototype-sequences.yaml`.
+- **Tests** — 308 prototype-runtime package tests (M6.1 quiz: 56,
+  M6.2 sequence: 19, plus earlier M1-M3 + M7 work); 69 prototype-runtime-
+  service tests covering quiz + sequence CRUD + attempt lifecycle;
+  25 new panel tests (quiz + leaderboard + sequence); 9 e2e
+  tests (`p10-m6-quizzes.spec.ts`, `p10-m6-sequences.spec.ts`).
+- **Handoff doc** — `docs/handoff/P09-to-P10.md` updated to remove
+  M6 from the deferred list and document the landed deliverables.
+- **TypeScript strict + `exactOptionalPropertyTypes: true`** held
+  throughout — no `any`, no `as unknown`.
+
+### Phase 10 — Prototyping & Interactivity (M7: Deep-Link State Codec)
+
+#### Added
+
+- **Codec package (`packages/deep-link`).** Pure-TS deep-link
+  state codec with HMAC-SHA256 signing over canonical JSON:
+  - `state-encoder.ts` — `encodePayload`, `decodePayload`,
+    `canonicalJson`, `generateKey`, and `StateEncoder`/`StateDecoder`
+    classes. `decodePayload` uses `timingSafeEqual` and strictly
+    enforces required fields, wire version (`DEEP_LINK_VERSION = 1`),
+    audience match, and expiry. **≤ 5 ms decode p99 across 200
+    samples verified by test.**
+  - `shortener.ts` — 9-char Crockford short-id, replay-safe
+    `Shortener.resolve()` enforces single-use via the
+    `click_count > 1 && before.click_count >= 1` predicate.
+  - `key-rotation.ts` — `KeyRotator` with `KEY_TTL_MS = 30d`,
+    `OVERLAP_MS = 7d`, `RETIRE_AFTER_MS = 37d`. Active key signs
+    new tokens; previous key stays valid for resolution during the
+    overlap window and is swept after retirement.
+  - `scope-filter.ts` — strips `server_only` entries before signing,
+    strips `private` unless authoring === requesting, strips
+    `session`/`viewer` scope for public links or mismatched
+    viewers.
+  - **41 tests across the package** (state-encoder 18, shortener 8,
+    key-rotation 7, scope-filter 8).
+- **Deep-link service (`services/deep-link-svc`).** Hono CRUD
+  with web-framework-free handlers:
+  - `POST /v1/tenants/:tenant/decks/:deck/deep-links/shorten`
+  - `POST /v1/tenants/:tenant/deep-links/resolve`
+  - `DELETE /v1/tenants/:tenant/deep-links/:id`
+  - `GET /v1/tenants/:tenant/deep-links/:id/stats`
+  - `GET /v1/tenants/:tenant/decks/:deck/deep-links`
+  - `POST /v1/tenants/:tenant/decks/:deck/deep-links/rotate-key`
+  - `DeepLinkService` facade composes `Shortener` + `KeyRotator`
+    and enforces tenant scoping on every operation.
+  - **17 service tests** covering shorten, resolve, audience
+    mismatch, expiry, single-use, scope filter, key rotation
+    overlap, and the four HTTP error paths.
+- **Postgres:** `0034_phase10_deep_links.{up,down}.sql` adds the
+  `deep_links` table (`id`, `tenant_id`, `deck_id`, `kid`,
+  `payload` jsonb, `click_count`, `expires_at`, `viewer_scope`
+  CHECK, `single_use`, `created_at`, `created_by`), the
+  `deep_links_deck_idx` and `deep_links_tenant_expiry_idx`
+  indexes, and the `deep_links_tenant_isolation` RLS policy via
+  PL/pgSQL mirroring 0025/0021/0023. A `system`-tenant demo row
+  is seeded for harness verification.
+- **Migration harness:** `tools/infra-test/src/postgres/migrations.spec.ts`
+  P10-M7 block — 7 tests covering apply, columns/types, indexes,
+  CHECK constraint, RLS policy, round-trip insert, and rollback.
+  **All 51 migration harness tests green.**
+- **Contracts:**
+  - `contracts/schema/v1/deep-link-payload-v1.schema.json` (wire
+    payload with const `v: 1`, ULID patterns, `additionalProperties:
+    false`).
+  - `contracts/schema/v1/deep-link-v1.schema.json` (full record
+    incl. `click_count`, `viewer_scope` enum, `single_use`).
+  - `contracts/openapi/v1/deep-links.yaml` — 6 paths, 9 schemas,
+    `bearerAuth` security scheme.
+- **Editor UI (`apps/editor`).**
+  - `ShareStateButton.tsx` (toolbar, BEM classnames,
+    `m7-share-` testid prefix) — encodes current runtime state via
+    `StateEncoder`, copies the URL to clipboard, optional QR via
+    `renderQr` prop, session-storage `kid`/`key` cache, clipboard
+    fallback when the API is unavailable.
+  - `deep-links-panel.tsx` (left-side panel, BEM classnames,
+    `m7-deep-link-` testid prefix) — lists deep links sorted by
+    `created_at` desc with copy/resolve/delete actions.
+  - Both mounted in `EditorRoot` as `m7-deep-links-tab`.
+  - **14 new editor tests** (ShareStateButton 6, deep-links-panel 8).
+- **Renderer toast (`packages/prototype-runtime/src/deep-links/restore-toast.ts`):**
+  Pure-TS helpers `resumeToast()`, `expiredToast()`, and
+  `partialToast()` with `RESUME_AUTO_DISMISS_MS = 1500`. **5 tests.**
+- **E2E:** `apps/editor/e2e/p10-m7-deep-links.spec.ts` — 5 smoke
+  tests covering share button render, panel render, sample-resolve,
+  restore banner appearance, and copy-URL.
+
+### Phase 10 — Prototyping & Interactivity (M8: MCP Agent Surface)
+
+#### Added
+
+- **Agent schema package (`packages/agent-schema`).** Pure-TS,
+  zero-dep address parser for paths like `slide[3].hotspot[cta_pricing]`
+  plus shared `Capability | AuditEntry | McpTool | McpContext` types
+  used by every M8 tool. **12 tests.**
+- **MCP tool surface (`services/mcp-server/src/tools/prototyping/`).**
+  48 tools across 12 families (`hotspots`, `overlays`,
+  `state-machines`, `variables`, `rules`, `bindings`, `forms`,
+  `calculators`, `device-frames`, `quizzes`, `sequences`,
+  `deep-links`) plus the M8 meta-tools `nl_patch`, `simulate_sweep`,
+  and `deck_diff`. Each tool:
+  - Hand-rolled input/output validator returning
+    `{ ok, value } | { ok: false, code: 'INVALID_INPUT', issues }`.
+  - Capability-claim gated via the in-memory
+    `claimCapability(agentId, capability)` router; denied callers
+    receive `MCPError('PERMISSION_DENIED')`.
+  - Audit-trail appended through the shared `globalAuditTrail`.
+  - Routes through `services/prototype-runtime` over HTTP using
+    `PROTOTYPE_RUNTIME_URL`.
+  **52 service tests** (plus 6 router tests); service suite
+  **67/67 passing**.
+- **NL Patch API.** `nlPatch(ctx, deckId, prompt)` decomposes
+  natural-language prompts into ordered tool calls and exposes
+  `apply()` / `rollback()` snapshots; rollback restores inverse
+  inputs and surfaces `MCPError('ROLLBACK_FAILED')` on undo failure.
+- **Simulator sweep + deck diff.** `simulate_sweep` linear-interpolates
+  up to 1024 samples and invokes `compute_calculator` per step
+  (≤ 5 ms/sample budget for ≤ 100-node DAGs); `deck_diff` returns
+  `{ added, removed, changed }` entries across hotspots, rules,
+  variables, calculators, and overlays.
+- **Editor surfaces (`apps/editor`).**
+  - `m8-audit-tab` — `AuditTrail` component listing entries with
+    `{ human | agent }` badge, expandable input/output, and a
+    diff-view button. **5 tests.**
+  - `m8-nl-patch-tab` — `NlPatchPanel` with textarea, Patch button,
+    inline diff preview, and Apply/Rollback controls. **6 tests.**
+  - `m8-deck-diff-tab` — `DeckDiffPanel` with two deck inputs and a
+    three-list diff view. **5 tests.**
+  Editor suite remains **253/253 green** after M8 wiring.
+- **Contracts.**
+  - `contracts/openapi/v1/mcp-prototyping.yaml` — OpenAPI 3.1.0
+    covering all 48 tools + the 3 meta-tools, with Bearer auth.
+  - `contracts/mcp/prototyping.tools.json` — `{ tools: [...] }`
+    manifest consumed by the MCP host UI.
+- **Handoff doc.** `docs/handoff/P09-to-P10.md` updated to mark M8
+  as landed (no longer deferred).
+
+### Phase 10 — Prototyping & Interactivity (M4: Forms, Calculators, Device Frames)
+
+- **Forms runtime** (`packages/prototype-runtime/src/forms/`):
+  - `FormRegistry` — register/resolve/unregister form defs by id.
+  - `input-validator.ts` — coercion (`coerce`), default-value lookup,
+    `runValidator`/`effectiveValidators` async-debounced check,
+    `DEFAULT_ASYNC_DEBOUNCE_MS`.
+  - `autosave-policy.ts` — `AutosavePolicy` debounce/throttle, draft
+    callback interface, `DEFAULT_AUTOSAVE_DEBOUNCE_MS`.
+  - 34 tests in `form-registry.test.ts`.
+- **Calculator runtime** (`packages/prototype-runtime/src/calculators/`):
+  - `CalculatorDef` (`form` + `graph` modes), `validateCalculatorDef`.
+  - `recompute-engine.ts` — topological propagation through form/graph
+    DAGs, cycle detection, sandboxed builtins (`sum`, `average`, `min`,
+    `max`, `if`, `coalesce`, `clamp`, `round`, `formatCurrency`, `irr`,
+    `npv`), array-literal `[1, 2, 3]` support, formula mini-language
+    with operator precedence + parens.
+  - Newton-Raphson IRR + bisection fallback for negative-IRR paths.
+  - `@domio/decimal128` — 38-digit precision arithmetic
+    (`add`, `sub`, `mul`, `div`, `round`, `formatCurrency`,
+    `formatNumber`), banker's/half-up/half-down rounding modes.
+  - 29 tests in `recompute-engine.test.ts` (form/graph modes,
+    topologic order, IRR positive + negative paths, NPV,
+    `formatCurrency`, builtin coverage).
+- **Device-frame runtime** (`packages/prototype-runtime/src/device-frames/`):
+  - `DeviceFrameRegistry`, `DEFAULT_DEVICE_FRAMES` (iPhone 15 / Pro Max,
+    iPad 11", Desktop 1280 / 1920), `findDefaultFrame`.
+  - 8 tests covering register/resolve/unregister + fallback.
+- **Calculator fix post-merge.** `recompute-engine.ts` had six
+  `Number(decAdd(...))` / `Number(decDiv(...))` call sites where
+  `DecResult.value` should have been used (DecResult is an envelope
+  object — `Number({value: '6'}) === NaN`). `formatCurrency` builtin
+  was case-sensitive (BUILTINS key was `formatCurrency` but parser
+  did `tk.toLowerCase()`) — renamed to lowercase. `evaluateOutput`
+  re-ordered so format-specific handling runs *before* precision
+  rounding. New `[ ]` tokenizer + parser support for `npv` array
+  literals. `round` builtin switched to `half-down` mode so
+  `round(1.55, 1) === 1.5`.
+- **Migration test fix.** `tools/infra-test/.../migrations.spec.ts` —
+  pg's default array parser returns `text[]` as a JS array (not a
+  `{s1,s2,s3}` literal), so the M6.2 round-trip test was updated to
+  assert `slides.length === 3` directly.
+- **Viewer test infra fix.** jsdom 25 disables `localStorage` on the
+  default opaque origin; the viewer vitest config now sets
+  `environmentOptions.jsdom.url` to `http://localhost/` and a setup
+  file polyfills `localStorage` if the upstream config didn't take.
+  ConsentBanner's `waitFor` assertion now uses a 2-second timeout for
+  React 19 concurrent-mode effect scheduling.
+
+### Phase 10 — Prototyping & Interactivity (M5: User-Testing Telemetry)
+
+- **Recorder + Aggregator** under `apps/viewer/src/components/`:
+  - `ConsentBanner` — three-tier consent UI (opt-in / opt-out /
+    anonymous), persisted under `domio.viewer.consent`. 6 tests.
+  - Telemetry session + heatmap data models under
+    `apps/editor/src/panels/`:
+    - `test-sessions-panel.tsx` — list + filter test sessions. 9 tests.
+    - `heatmap-panel.tsx` — click / scroll heatmap visualization.
+      5 tests.
+    - `study-config-panel.tsx` — study-level configuration (tasks,
+      success criteria). 13 tests.
+- **Migration.** `0031_phase10_telemetry.{up,down}.sql` — telemetry
+  tables added (recorded in infra-test).
+- **Tests.** 33 telemetry panel/component tests, all green; the
+  viewer package now reports **93/93 green** including the
+  ConsentBanner suite.
 
 [Unreleased]: https://github.com/DaiyaanMuhammadFardeen/Domio/compare/main...HEAD

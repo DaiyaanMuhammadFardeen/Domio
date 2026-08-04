@@ -1,0 +1,365 @@
+openapi: 3.1.0
+info:
+  title: Domio MCP Prototyping Tools
+  version: "1.0.0"
+  description: |
+    MCP HTTP transport for the prototyping tools introduced in Phase 10 / M8.
+    Bearer token authentication; every tool accepts a JSON object `{ deckId, ... }`
+    and returns a JSON `result`.  Errors are mapped to structured `McpError` objects
+    with codes `PERMISSION_DENIED | INVALID_INPUT | NOT_FOUND | RUNTIME_ERROR`.
+servers:
+  - url: https://mcp.domio.local
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    McpError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [PERMISSION_DENIED, INVALID_INPUT, NOT_FOUND, RUNTIME_ERROR, NETWORK_ERROR, TIMEOUT, ROLLBACK_FAILED]
+        message: { type: string }
+        issues:
+          type: array
+          items: { type: string }
+    Hotspot:
+      type: object
+      required: [id, slideId, kind, rect]
+      properties:
+        id: { type: string }
+        slideId: { type: string }
+        kind: { type: string, enum: [cta, tooltip, region] }
+        rect:
+          type: object
+          required: [x, y, w, h]
+          properties:
+            x: { type: number }
+            y: { type: number }
+            w: { type: number }
+            h: { type: number }
+        label: { type: string }
+        target: { type: string }
+    Overlay:
+      type: object
+      required: [id, kind, content]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [modal, drawer, tooltip, sheet] }
+        trigger: { type: string }
+        content: { type: string }
+    Rule:
+      type: object
+      required: [id, when, then]
+      properties:
+        id: { type: string }
+        when: { type: string }
+        then: { type: string }
+        priority: { type: number }
+        enabled: { type: boolean }
+    Variable:
+      type: object
+      required: [name, type, value]
+      properties:
+        name: { type: string }
+        type: { type: string, enum: [number, string, boolean] }
+        value: {}
+        scope: { type: string, enum: [slide, deck] }
+    Binding:
+      type: object
+      required: [id, source, target]
+      properties:
+        id: { type: string }
+        source: { type: string }
+        target: { type: string }
+        transform: { type: string }
+    Form:
+      type: object
+      required: [id, title, fields]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        fields:
+          type: array
+          items: { type: object }
+    Calculator:
+      type: object
+      required: [id, name, expression]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        inputs:
+          type: array
+          items: { type: object }
+        expression: { type: string }
+    DeviceFrame:
+      type: object
+      required: [id, name, width, height]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        width: { type: number }
+        height: { type: number }
+    Quiz:
+      type: object
+      required: [id, title, questions]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        questions:
+          type: array
+          items: { type: object }
+    Sequence:
+      type: object
+      required: [id, name, steps]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        steps:
+          type: array
+          items: { type: object }
+    DeepLink:
+      type: object
+      required: [slug, target]
+      properties:
+        slug: { type: string }
+        target: { type: string }
+        params:
+          type: object
+          additionalProperties: { type: string }
+    Sample:
+      type: object
+      required: [x, y, latencyMs]
+      properties:
+        x: { type: number }
+        y: {}
+        latencyMs: { type: number }
+    DiffEntry:
+      type: object
+      required: [kind, id]
+      properties:
+        kind: { type: string }
+        id: { type: string }
+        a: {}
+        b: {}
+paths:
+  /tools/create_hotspot:
+    post:
+      summary: create_hotspot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, slideId, kind, rect]
+              properties:
+                deckId: { type: string }
+                slideId: { type: string }
+                kind: { type: string, enum: [cta, tooltip, region] }
+                rect: { $ref: '#/components/schemas/Hotspot/properties/rect' }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Hotspot' }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/McpError' }
+  /tools/update_hotspot:
+    post:
+      summary: update_hotspot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, hotspotId, patch]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Hotspot' }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/McpError' }
+  /tools/delete_hotspot:
+    post: { summary: delete_hotspot, responses: { "200": { description: OK } } }
+  /tools/list_hotspots:
+    post: { summary: list_hotspots, responses: { "200": { description: OK } } }
+  /tools/create_overlay:
+    post: { summary: create_overlay, responses: { "200": { description: OK } } }
+  /tools/update_overlay:
+    post: { summary: update_overlay, responses: { "200": { description: OK } } }
+  /tools/delete_overlay:
+    post: { summary: delete_overlay, responses: { "200": { description: OK } } }
+  /tools/list_overlays:
+    post: { summary: list_overlays, responses: { "200": { description: OK } } }
+  /tools/set_state_machine:
+    post: { summary: set_state_machine, responses: { "200": { description: OK } } }
+  /tools/transition_state:
+    post: { summary: transition_state, responses: { "200": { description: OK } } }
+  /tools/list_state_machines:
+    post: { summary: list_state_machines, responses: { "200": { description: OK } } }
+  /tools/create_variable:
+    post: { summary: create_variable, responses: { "200": { description: OK } } }
+  /tools/update_variable:
+    post: { summary: update_variable, responses: { "200": { description: OK } } }
+  /tools/delete_variable:
+    post: { summary: delete_variable, responses: { "200": { description: OK } } }
+  /tools/list_variables:
+    post: { summary: list_variables, responses: { "200": { description: OK } } }
+  /tools/set_variable:
+    post: { summary: set_variable, responses: { "200": { description: OK } } }
+  /tools/create_rule:
+    post: { summary: create_rule, responses: { "200": { description: OK } } }
+  /tools/update_rule:
+    post: { summary: update_rule, responses: { "200": { description: OK } } }
+  /tools/delete_rule:
+    post: { summary: delete_rule, responses: { "200": { description: OK } } }
+  /tools/list_rules:
+    post: { summary: list_rules, responses: { "200": { description: OK } } }
+  /tools/test_rule:
+    post: { summary: test_rule, responses: { "200": { description: OK } } }
+  /tools/create_binding:
+    post: { summary: create_binding, responses: { "200": { description: OK } } }
+  /tools/update_binding:
+    post: { summary: update_binding, responses: { "200": { description: OK } } }
+  /tools/delete_binding:
+    post: { summary: delete_binding, responses: { "200": { description: OK } } }
+  /tools/list_bindings:
+    post: { summary: list_bindings, responses: { "200": { description: OK } } }
+  /tools/create_form:
+    post: { summary: create_form, responses: { "200": { description: OK } } }
+  /tools/update_form:
+    post: { summary: update_form, responses: { "200": { description: OK } } }
+  /tools/submit_form:
+    post: { summary: submit_form, responses: { "200": { description: OK } } }
+  /tools/list_forms:
+    post: { summary: list_forms, responses: { "200": { description: OK } } }
+  /tools/create_calculator:
+    post: { summary: create_calculator, responses: { "200": { description: OK } } }
+  /tools/compute_calculator:
+    post: { summary: compute_calculator, responses: { "200": { description: OK } } }
+  /tools/list_calculators:
+    post: { summary: list_calculators, responses: { "200": { description: OK } } }
+  /tools/create_device_frame:
+    post: { summary: create_device_frame, responses: { "200": { description: OK } } }
+  /tools/list_device_frames:
+    post: { summary: list_device_frames, responses: { "200": { description: OK } } }
+  /tools/create_quiz:
+    post: { summary: create_quiz, responses: { "200": { description: OK } } }
+  /tools/submit_answer:
+    post: { summary: submit_answer, responses: { "200": { description: OK } } }
+  /tools/list_quizzes:
+    post: { summary: list_quizzes, responses: { "200": { description: OK } } }
+  /tools/create_sequence:
+    post: { summary: create_sequence, responses: { "200": { description: OK } } }
+  /tools/start_sequence:
+    post: { summary: start_sequence, responses: { "200": { description: OK } } }
+  /tools/pause_sequence:
+    post: { summary: pause_sequence, responses: { "200": { description: OK } } }
+  /tools/list_sequences:
+    post: { summary: list_sequences, responses: { "200": { description: OK } } }
+  /tools/shorten_deep_link:
+    post: { summary: shorten_deep_link, responses: { "200": { description: OK } } }
+  /tools/resolve_deep_link:
+    post: { summary: resolve_deep_link, responses: { "200": { description: OK } } }
+  /tools/list_deep_links:
+    post: { summary: list_deep_links, responses: { "200": { description: OK } } }
+  /tools/nl_patch:
+    post:
+      summary: nl_patch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, prompt]
+              properties:
+                deckId: { type: string }
+                prompt: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  toolCalls:
+                    type: array
+                    items: { type: object }
+  /tools/simulate_sweep:
+    post:
+      summary: simulate_sweep
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, calculatorId, inputName, from, to, steps]
+              properties:
+                deckId: { type: string }
+                calculatorId: { type: string }
+                inputName: { type: string }
+                from: { type: number }
+                to: { type: number }
+                steps: { type: number, minimum: 1, maximum: 1024 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  samples:
+                    type: array
+                    items: { $ref: '#/components/schemas/Sample' }
+                  avgLatencyMs: { type: number }
+  /tools/deck_diff:
+    post:
+      summary: deck_diff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckIdA, deckIdB]
+              properties:
+                deckIdA: { type: string }
+                deckIdB: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  added:
+                    type: array
+                    items: { $ref: '#/components/schemas/DiffEntry' }
+                  removed:
+                    type: array
+                    items: { $ref: '#/components/schemas/DiffEntry' }
+                  changed:
+                    type: array
+                    items: { $ref: '#/components/schemas/DiffEntry' }

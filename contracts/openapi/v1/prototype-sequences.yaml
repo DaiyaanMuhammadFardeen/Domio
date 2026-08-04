@@ -1,0 +1,175 @@
+openapi: 3.1.0
+info:
+  title: Domio Prototype Sequences API
+  version: 1.0.0
+  description: Presentation sequence CRUD for Phase 10 M6.2.
+    Sequences drive auto-advance timelines with pause/resume,
+    interruption policies (ignore | queue | abort), visibility-aware
+    clock handling, and reduced-motion default-off.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: sequences
+paths:
+  /v1/decks/{deck_id}/presentation-sequences:
+    get:
+      tags: [sequences]
+      operationId: listPresentationSequences
+      summary: List presentation sequences for a deck
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Sequences.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/PresentationSequence" }
+    post:
+      tags: [sequences]
+      operationId: createPresentationSequence
+      summary: Create a presentation sequence
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreatePresentationSequenceRequest" }
+      responses:
+        "201":
+          description: Sequence created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PresentationSequence" }
+        "422": { description: Validation error. }
+  /v1/presentation-sequences/{id}:
+    get:
+      tags: [sequences]
+      operationId: getPresentationSequence
+      summary: Get a sequence
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Sequence details.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PresentationSequence" }
+        "404": { description: Sequence not found. }
+    patch:
+      tags: [sequences]
+      operationId: patchPresentationSequence
+      summary: Update a sequence
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatchPresentationSequenceRequest" }
+      responses:
+        "200":
+          description: Sequence updated.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PresentationSequence" }
+        "404": { description: Sequence not found. }
+        "409": { description: Version conflict. }
+    delete:
+      tags: [sequences]
+      operationId: deletePresentationSequence
+      summary: Delete a sequence
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "204": { description: Sequence deleted. }
+        "404": { description: Sequence not found. }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  parameters:
+    TenantId:
+      in: query
+      name: tenant_id
+      required: true
+      schema: { type: string }
+    DeckId:
+      in: path
+      name: deck_id
+      required: true
+      schema: { type: string }
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: string }
+  schemas:
+    PresentationSequence:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, name, slides, intervalMs, pauseOnEvent, loop, count, interruptionPolicy, reducedMotionDefaultOff, pauseWarnAtMs, version, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        name: { type: string }
+        slides:
+          type: array
+          items: { type: string }
+        intervalMs: { type: integer, minimum: 50, maximum: 86400000 }
+        pauseOnEvent: { type: boolean }
+        loop: { type: boolean }
+        count: { type: integer, minimum: 1, maximum: 1024 }
+        interruptionPolicy: { enum: [ignore, queue, abort] }
+        reducedMotionDefaultOff: { type: boolean }
+        pauseWarnAtMs: { type: integer, minimum: 1000, maximum: 7200000 }
+        version: { type: integer }
+        createdAt: { type: integer }
+        updatedAt: { type: integer }
+    CreatePresentationSequenceRequest:
+      type: object
+      additionalProperties: false
+      required: [name, slides, intervalMs]
+      properties:
+        name: { type: string, minLength: 1 }
+        slides:
+          type: array
+          minItems: 1
+          items: { type: string }
+        intervalMs: { type: integer, minimum: 50, maximum: 86400000 }
+        pauseOnEvent: { type: boolean, default: false }
+        loop: { type: boolean, default: false }
+        count: { type: integer, minimum: 1, maximum: 1024, default: 1 }
+        interruptionPolicy: { enum: [ignore, queue, abort], default: queue }
+        reducedMotionDefaultOff: { type: boolean, default: true }
+        pauseWarnAtMs: { type: integer, minimum: 1000, maximum: 7200000, default: 1800000 }
+    PatchPresentationSequenceRequest:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: integer }
+        name: { type: string }
+        slides:
+          type: array
+          items: { type: string }
+        intervalMs: { type: integer }
+        pauseOnEvent: { type: boolean }
+        loop: { type: boolean }
+        count: { type: integer }
+        interruptionPolicy: { enum: [ignore, queue, abort] }
+        reducedMotionDefaultOff: { type: boolean }
+        pauseWarnAtMs: { type: integer }

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/overlay-v1.schema.json",
+  "title": "Prototype overlay",
+  "description": "A modal, tooltip, drawer, popover, or sheet rendered above a prototype slide. Phase 10 M1.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "slide_id", "name", "type",
+    "size_strategy", "anchor", "open_trigger", "close_trigger",
+    "persistent", "schema", "version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "slide_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "type": { "enum": ["modal", "tooltip", "drawer", "popover", "sheet"] },
+    "size_strategy": { "enum": ["small", "medium", "large", "fullscreen", "auto"] },
+    "anchor": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["x", "y"],
+          "additionalProperties": false,
+          "properties": {
+            "x": { "type": "number", "minimum": 0, "maximum": 1 },
+            "y": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      ]
+    },
+    "open_trigger": { "$ref": "#/$defs/trigger_or_null" },
+    "close_trigger": { "$ref": "#/$defs/trigger_or_null" },
+    "persistent": { "type": "boolean", "default": false },
+    "schema": { "type": "object" },
+    "version": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "updated_at": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "trigger_or_null": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["kind"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "type": "string", "minLength": 1, "maxLength": 64 },
+            "params": { "type": "object" }
+          }
+        }
+      ]
+    }
+  }
+}

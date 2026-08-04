@@ -1,0 +1,364 @@
+openapi: 3.1.0
+info:
+  title: Domio Prototype Quizzes API
+  version: 1.0.0
+  description: Quiz CRUD + attempt lifecycle + xAPI emission for Phase 10 M6.1.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: quizzes
+  - name: attempts
+  - name: xapi
+  - name: llm-review
+paths:
+  /v1/decks/{deck_id}/quizzes:
+    get:
+      tags: [quizzes]
+      operationId: listQuizzes
+      summary: List quizzes for a deck
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Quizzes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Quiz" }
+    post:
+      tags: [quizzes]
+      operationId: createQuiz
+      summary: Create a quiz
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateQuizRequest" }
+      responses:
+        "201":
+          description: Quiz created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quiz" }
+        "422": { description: Validation error. }
+  /v1/quizzes/{id}:
+    get:
+      tags: [quizzes]
+      operationId: getQuiz
+      summary: Get a quiz
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Quiz details.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quiz" }
+        "404": { description: Quiz not found. }
+    patch:
+      tags: [quizzes]
+      operationId: patchQuiz
+      summary: Update a quiz
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatchQuizRequest" }
+      responses:
+        "200":
+          description: Quiz updated.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quiz" }
+        "404": { description: Quiz not found. }
+        "409": { description: Version conflict. }
+    delete:
+      tags: [quizzes]
+      operationId: deleteQuiz
+      summary: Delete a quiz
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "204": { description: Quiz deleted. }
+        "404": { description: Quiz not found. }
+  /v1/decks/{deck_id}/quizzes/{quiz_id}/attempts:
+    post:
+      tags: [attempts]
+      operationId: startAttempt
+      summary: Start a viewer attempt at a quiz
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/QuizId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StartAttemptRequest" }
+      responses:
+        "201":
+          description: Attempt created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizAttempt" }
+        "400": { description: Missing viewerId. }
+  /v1/quiz-attempts/{attempt_id}/answers:
+    post:
+      tags: [attempts]
+      operationId: submitAnswer
+      summary: Submit an answer for one question of an attempt
+      parameters:
+        - $ref: "#/components/parameters/AttemptId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuizAnswer" }
+      responses:
+        "200":
+          description: Answer recorded.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizAnswer" }
+        "400": { description: Validation error. }
+        "404": { description: Attempt not found. }
+  /v1/quiz-attempts/{attempt_id}/complete:
+    post:
+      tags: [attempts]
+      operationId: completeAttempt
+      summary: Finalize an attempt and produce a result
+      parameters:
+        - $ref: "#/components/parameters/AttemptId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizResult" }
+        "404": { description: Attempt not found. }
+  /v1/quiz-attempts/{attempt_id}:
+    get:
+      tags: [attempts]
+      operationId: getAttemptResult
+      summary: Get the result of a completed attempt
+      parameters:
+        - $ref: "#/components/parameters/AttemptId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuizResult" }
+        "404": { description: Result not found. }
+  /v1/llm-review-queue:
+    get:
+      tags: [llm-review]
+      operationId: listLlmReviewQueue
+      summary: List LLM review queue items
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - in: query
+          name: status
+          required: false
+          schema: { enum: [pending, approved, rejected, overridden] }
+      responses:
+        "200":
+          description: Queue items.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/LlmReviewQueueItem" }
+  /v1/llm-review-queue/{id}:
+    patch:
+      tags: [llm-review]
+      operationId: updateLlmReviewItem
+      summary: Update a review queue item (override / approve / reject)
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatchLlmReviewRequest" }
+      responses:
+        "200":
+          description: Item updated.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LlmReviewQueueItem" }
+        "404": { description: Item not found. }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  parameters:
+    TenantId:
+      in: query
+      name: tenant_id
+      required: true
+      schema: { type: string }
+    DeckId:
+      in: path
+      name: deck_id
+      required: true
+      schema: { type: string }
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: string }
+    QuizId:
+      in: path
+      name: quiz_id
+      required: true
+      schema: { type: string }
+    AttemptId:
+      in: path
+      name: attempt_id
+      required: true
+      schema: { type: string }
+  schemas:
+    Quiz:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, name, questions, version, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        name: { type: string }
+        questions:
+          type: array
+          items: { type: object }
+        passThreshold: { type: [number, "null"] }
+        version: { type: integer }
+        createdAt: { type: integer }
+        updatedAt: { type: integer }
+    CreateQuizRequest:
+      type: object
+      additionalProperties: false
+      required: [name, questions]
+      properties:
+        name: { type: string, minLength: 1 }
+        questions:
+          type: array
+          minItems: 1
+          items: { type: object }
+        passThreshold: { type: number, minimum: 0, maximum: 1 }
+    PatchQuizRequest:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: integer }
+        name: { type: string }
+        questions:
+          type: array
+          items: { type: object }
+        passThreshold: { type: number, minimum: 0, maximum: 1 }
+    QuizAttempt:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, quizId, seed, viewerId, startedAt, completedAt, status, currentQuestionId, score, passed]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        quizId: { type: string }
+        seed: { type: string }
+        viewerId: { type: string }
+        startedAt: { type: integer }
+        completedAt: { type: ["integer", "null"] }
+        status: { enum: [in_progress, completed, abandoned] }
+        currentQuestionId: { type: ["string", "null"] }
+        score: { type: number }
+        passed: { type: ["boolean", "null"] }
+    StartAttemptRequest:
+      type: object
+      additionalProperties: false
+      required: [viewerId]
+      properties:
+        viewerId: { type: string, minLength: 1 }
+        seed: { type: string, maxLength: 256 }
+    QuizAnswer:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, attemptId, questionId, value, correct, score, needsHumanReview, submittedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        attemptId: { type: string }
+        questionId: { type: string }
+        value: {}
+        correct: { type: boolean }
+        score: { type: number, minimum: 0, maximum: 1 }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        needsHumanReview: { type: boolean }
+        submittedAt: { type: integer }
+    QuizResult:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, attemptId, quizId, totalScore, maxScore, percentage, passed, answers, completedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        attemptId: { type: string }
+        quizId: { type: string }
+        totalScore: { type: number }
+        maxScore: { type: number }
+        percentage: { type: number }
+        passed: { type: boolean }
+        answers:
+          type: array
+          items: { $ref: "#/components/schemas/QuizAnswer" }
+        completedAt: { type: integer }
+    LlmReviewQueueItem:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, quizId, attemptId, questionId, submittedAnswer, llmConfidence, llmReason, status, reviewerId, overrideScore, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        quizId: { type: string }
+        attemptId: { type: string }
+        questionId: { type: string }
+        submittedAnswer: { type: string }
+        llmConfidence: { type: number }
+        llmReason: { type: string }
+        status: { enum: [pending, approved, rejected, overridden] }
+        reviewerId: { type: ["string", "null"] }
+        overrideScore: { type: ["number", "null"] }
+        createdAt: { type: integer }
+        updatedAt: { type: integer }
+    PatchLlmReviewRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        status: { enum: [pending, approved, rejected, overridden] }
+        reviewerId: { type: ["string", "null"] }
+        overrideScore: { type: ["number", "null"] }

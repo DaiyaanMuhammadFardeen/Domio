@@ -111,5 +111,11 @@ helm-charts-output/
 .puku-cli/
 vitest.config.ts.timestamp-*.mjs
 
+# Playwright test artifacts
+test-results/
+test-results/.last-run.json
+playwright-report/
+playwright/.cache/
+
 # Local agent/harness scratch
 .hive/

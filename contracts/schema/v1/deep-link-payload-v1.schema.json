@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/deep-link-payload-v1.schema.json",
+  "title": "Deep link payload",
+  "description": "The signed payload carried by a Domio deep link. Phase 10 M7. HMAC-SHA256 over the canonical JSON of every field except `sig`.",
+  "type": "object",
+  "required": [
+    "v", "exp", "deck_id", "slide_id", "path_stack", "overlay_stack",
+    "var_snapshot", "device_frame_state", "scenario", "form_drafts",
+    "aud", "sig"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "v": { "const": 1 },
+    "exp": { "type": "integer", "minimum": 0, "description": "Absolute expiry (ms since epoch)." },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "slide_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "path_stack": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+      "maxItems": 64
+    },
+    "overlay_stack": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+      "maxItems": 16
+    },
+    "var_snapshot": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/var_entry" },
+      "maxItems": 512
+    },
+    "device_frame_state": { "type": "object" },
+    "scenario": { "type": "string", "maxLength": 128 },
+    "form_drafts": { "type": "object" },
+    "aud": { "enum": ["viewer", "editor", "embed", "presenter"] },
+    "tenant_id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "Required when viewer_scope is tenant or private."
+    },
+    "sig": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{40,64}$",
+      "description": "Base64url HMAC-SHA256 over the canonical JSON of every other field."
+    }
+  },
+  "$defs": {
+    "var_entry": {
+      "type": "object",
+      "required": ["name", "value", "visibility", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$" },
+        "value": {},
+        "visibility": { "enum": ["deck_public", "private", "server_only"] },
+        "scope": { "enum": ["deck", "slide", "component_instance", "session", "viewer"] }
+      }
+    }
+  }
+}

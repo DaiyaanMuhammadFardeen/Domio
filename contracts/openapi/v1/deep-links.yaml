@@ -1,0 +1,239 @@
+openapi: 3.1.0
+info:
+  title: Domio Deep Links API
+  version: 1.0.0
+  description: |
+    Phase 10 M7 deep-link service — shortener, resolver, stats, and
+    key-rotation endpoints. Tokens are base64url-encoded JSON
+    payloads signed with HMAC-SHA256. Per-deck keys rotate every
+    30 days with a 7-day overlap window.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: deep-links
+paths:
+  /v1/tenants/{tenantId}/decks/{deckId}/deep-links/shorten:
+    post:
+      tags: [deep-links]
+      operationId: shortenDeepLink
+      summary: Mint a short deep link for the current runtime state
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - $ref: "#/components/parameters/DeckIdPath"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ShortenDeepLinkRequest" }
+      responses:
+        "201":
+          description: Short link created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ShortenDeepLinkResponse" }
+        "400": { description: Missing or invalid field. }
+        "401": { description: Unauthorized. }
+        "422": { description: Validation failed. }
+  /v1/tenants/{tenantId}/deep-links/resolve:
+    post:
+      tags: [deep-links]
+      operationId: resolveDeepLink
+      summary: Resolve a short id into its signed payload
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ResolveDeepLinkRequest" }
+      responses:
+        "200":
+          description: Resolved payload.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ResolveDeepLinkResponse" }
+        "401": { description: Unauthorized. }
+        "404": { description: Link not found. }
+        "409":
+          description: Link expired or replay-rejected.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422": { description: Signature or audience mismatch. }
+  /v1/tenants/{tenantId}/decks/{deckId}/deep-links:
+    get:
+      tags: [deep-links]
+      operationId: listDeepLinks
+      summary: List short deep links for a deck
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - $ref: "#/components/parameters/DeckIdPath"
+      responses:
+        "200":
+          description: Short links in reverse creation order.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/DeepLink" }
+  /v1/tenants/{tenantId}/deep-links/{id}:
+    delete:
+      tags: [deep-links]
+      operationId: deleteDeepLink
+      summary: Delete a short deep link
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - $ref: "#/components/parameters/DeepLinkId"
+      responses:
+        "204": { description: Link deleted. }
+        "404": { description: Link not found. }
+  /v1/tenants/{tenantId}/deep-links/{id}/stats:
+    get:
+      tags: [deep-links]
+      operationId: getDeepLinkStats
+      summary: Get click count, expiry, and scope for a short deep link
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - $ref: "#/components/parameters/DeepLinkId"
+      responses:
+        "200":
+          description: Stats returned.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DeepLinkStats" }
+        "404": { description: Link not found. }
+  /v1/tenants/{tenantId}/decks/{deckId}/deep-links/rotate-key:
+    post:
+      tags: [deep-links]
+      operationId: rotateDeepLinkKey
+      summary: Issue a new HMAC key for the (tenant, deck) pair
+      parameters:
+        - $ref: "#/components/parameters/TenantIdPath"
+        - $ref: "#/components/parameters/DeckIdPath"
+      responses:
+        "200":
+          description: New key id + expiry returned.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RotateKeyResponse" }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  parameters:
+    TenantIdPath:
+      in: path
+      name: tenantId
+      required: true
+      schema: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{26}$" }
+    DeckIdPath:
+      in: path
+      name: deckId
+      required: true
+      schema: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{26}$" }
+    DeepLinkId:
+      in: path
+      name: id
+      required: true
+      schema: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{9}$" }
+    TenantId:
+      in: query
+      name: tenant_id
+      required: false
+      schema: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{26}$" }
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error, code]
+      additionalProperties: true
+      properties:
+        error: { type: string }
+        code: { type: string }
+    ShortenDeepLinkRequest:
+      type: object
+      required: [slide_id]
+      additionalProperties: false
+      properties:
+        slide_id: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{26}$" }
+        path_stack:
+          type: array
+          items: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{26}$" }
+          maxItems: 64
+        overlay_stack:
+          type: array
+          items: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{26}$" }
+          maxItems: 16
+        var_snapshot:
+          type: array
+          items: { $ref: "#/components/schemas/VarEntry" }
+          maxItems: 512
+        device_frame_state: { type: object }
+        scenario: { type: string, maxLength: 128 }
+        form_drafts: { type: object }
+        audience: { enum: [viewer, editor, embed, presenter] }
+        viewer_scope: { enum: [public, tenant, private] }
+        single_use: { type: boolean, default: false }
+        ttl_seconds: { type: integer, minimum: 1, default: 2592000 }
+        authoring_viewer_id: { type: string }
+    ShortenDeepLinkResponse:
+      type: object
+      required: [id, token, kid, expires_at, viewer_scope]
+      additionalProperties: false
+      properties:
+        id: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{9}$" }
+        token: { type: string }
+        kid: { type: string }
+        expires_at: { type: integer, minimum: 0 }
+        viewer_scope: { enum: [public, tenant, private] }
+    ResolveDeepLinkRequest:
+      type: object
+      required: [id, audience]
+      additionalProperties: false
+      properties:
+        id: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{9}$" }
+        audience: { enum: [viewer, editor, embed, presenter] }
+        requesting_viewer_id: { type: string }
+    ResolveDeepLinkResponse:
+      type: object
+      required: [payload, id, kid, click_count]
+      additionalProperties: false
+      properties:
+        id: { type: string, pattern: "^[0-9A-HJKMNP-TV-Z]{9}$" }
+        kid: { type: string }
+        click_count: { type: integer, minimum: 0 }
+        payload: { $ref: "./deep-link-payload-v1.schema.json" }
+    DeepLink:
+      $ref: "./deep-link-v1.schema.json"
+    DeepLinkStats:
+      type: object
+      required: [id, click_count, expires_at, viewer_scope, single_use, created_at]
+      additionalProperties: false
+      properties:
+        id: { type: string }
+        click_count: { type: integer, minimum: 0 }
+        expires_at: { type: integer, minimum: 0 }
+        viewer_scope: { enum: [public, tenant, private] }
+        single_use: { type: boolean }
+        created_at: { type: integer, minimum: 0 }
+    RotateKeyResponse:
+      type: object
+      required: [kid, not_after]
+      additionalProperties: false
+      properties:
+        kid: { type: string }
+        not_after: { type: integer, minimum: 0 }
+    VarEntry:
+      type: object
+      required: [name, value, visibility, scope]
+      additionalProperties: false
+      properties:
+        name: { type: string }
+        value: {}
+        visibility: { enum: [deck_public, private, server_only] }
+        scope: { enum: [deck, slide, component_instance, session, viewer] }

@@ -1,0 +1,262 @@
+openapi: 3.1.0
+info:
+  title: Domio Prototype Variables API
+  version: 1.0.0
+  description: Variable and binding CRUD for Phase 10 M2.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: variables
+  - name: variable-bindings
+paths:
+  /v1/decks/{deck_id}/variables:
+    get:
+      tags: [variables]
+      operationId: listVariables
+      summary: List variables for a deck
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Variables in deterministic creation order.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Variable" }
+    post:
+      tags: [variables]
+      operationId: createVariable
+      summary: Create a variable
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateVariableRequest" }
+      responses:
+        "201":
+          description: Variable created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Variable" }
+        "409": { description: Variable name already exists. }
+        "422": { description: Validation failed. }
+  /v1/variables/{id}:
+    get:
+      tags: [variables]
+      operationId: getVariable
+      summary: Get a variable
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Variable details.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Variable" }
+        "404": { description: Variable not found. }
+    patch:
+      tags: [variables]
+      operationId: patchVariable
+      summary: Update a variable
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PatchVariableRequest" }
+      responses:
+        "200":
+          description: Variable updated.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Variable" }
+        "404": { description: Variable not found. }
+        "409": { description: Version conflict. }
+        "422": { description: Validation failed. }
+    delete:
+      tags: [variables]
+      operationId: deleteVariable
+      summary: Delete a variable
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "204": { description: Variable deleted. }
+        "404": { description: Variable not found. }
+  /v1/decks/{deck_id}/variable-bindings:
+    get:
+      tags: [variable-bindings]
+      operationId: listVariableBindings
+      summary: List variable bindings for a deck
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Bindings.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/VariableBinding" }
+    post:
+      tags: [variable-bindings]
+      operationId: createVariableBinding
+      summary: Create a binding
+      parameters:
+        - $ref: "#/components/parameters/DeckId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateVariableBindingRequest" }
+      responses:
+        "201":
+          description: Binding created.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VariableBinding" }
+        "422": { description: Cycle or transform validation failed. }
+  /v1/variable-bindings/{id}:
+    get:
+      tags: [variable-bindings]
+      operationId: getVariableBinding
+      summary: Get a binding
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Binding details.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VariableBinding" }
+        "404": { description: Binding not found. }
+    delete:
+      tags: [variable-bindings]
+      operationId: deleteVariableBinding
+      summary: Delete a binding
+      parameters:
+        - $ref: "#/components/parameters/Id"
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "204": { description: Binding deleted. }
+        "404": { description: Binding not found. }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+  parameters:
+    TenantId:
+      in: query
+      name: tenant_id
+      required: true
+      schema: { type: string }
+    DeckId:
+      in: path
+      name: deck_id
+      required: true
+      schema: { type: string }
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: string }
+  schemas:
+    Variable:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, name, scope, type, defaultValue, visibility, readOnly, version, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        name: { type: string }
+        scope: { enum: [deck, slide, component_instance, session, viewer] }
+        type: { enum: [string, number, boolean, enum, json, array] }
+        enumValues:
+          type: array
+          items: { type: string }
+        min: { type: number }
+        max: { type: number }
+        defaultValue: {}
+        visibility: { enum: [deck_public, private, server_only] }
+        readOnly: { type: boolean }
+        version: { type: integer }
+        createdAt: { type: integer }
+        updatedAt: { type: integer }
+    CreateVariableRequest:
+      type: object
+      additionalProperties: false
+      required: [name, scope, type, defaultValue, visibility]
+      properties:
+        name: { type: string, pattern: "^[A-Za-z_][A-Za-z0-9_]{0,63}$" }
+        scope: { enum: [deck, slide, component_instance, session, viewer] }
+        type: { enum: [string, number, boolean, enum, json, array] }
+        enumValues:
+          type: array
+          items: { type: string }
+        min: { type: number }
+        max: { type: number }
+        defaultValue: {}
+        visibility: { enum: [deck_public, private, server_only], default: deck_public }
+        readOnly: { type: boolean, default: false }
+    PatchVariableRequest:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version: { type: integer }
+        scope: { enum: [deck, slide, component_instance, session, viewer] }
+        defaultValue: {}
+        enumValues:
+          type: array
+          items: { type: string }
+        min: { type: number }
+        max: { type: number }
+        visibility: { enum: [deck_public, private, server_only] }
+        readOnly: { type: boolean }
+    VariableBinding:
+      type: object
+      additionalProperties: false
+      required: [id, tenantId, deckId, variableId, targetKind, targetId, targetProp, version, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        tenantId: { type: string }
+        deckId: { type: string }
+        variableId: { type: string }
+        targetKind: { enum: [element_prop, slide_prop, deck_prop, overlay_open, hotspot_target] }
+        targetId: { type: string }
+        targetProp: { type: string }
+        transform: { type: string }
+        version: { type: integer }
+        createdAt: { type: integer }
+        updatedAt: { type: integer }
+    CreateVariableBindingRequest:
+      type: object
+      additionalProperties: false
+      required: [variableId, targetKind, targetId, targetProp]
+      properties:
+        variableId: { type: string }
+        targetKind: { enum: [element_prop, slide_prop, deck_prop, overlay_open, hotspot_target] }
+        targetId: { type: string }
+        targetProp: { type: string }
+        transform: { type: string, maxLength: 4096 }

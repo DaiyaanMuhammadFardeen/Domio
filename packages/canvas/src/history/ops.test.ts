@@ -7,6 +7,12 @@ import {
   transitionOp,
   magicMoveOp,
   reducedMotionOp,
+  hotspotOp,
+  overlayOp,
+  branchingEdgeOp,
+  variableOp,
+  conditionalRuleOp,
+  variableBindingOp,
   applyOp,
   type LiveDataBinding,
   type ThresholdRule,
@@ -558,5 +564,221 @@ describe('P09 ops compose independently on the same layer', () => {
     expect(el4.component.props).not.toHaveProperty('x-domio:timeline');
     expect(el4.component.props['x-domio:binding']).toEqual(SAMPLE_BINDING);
     expect(el4.component.props['x-domio:thresholds']).toEqual(SAMPLE_RULES);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────
+// P10 prototype ops
+// ────────────────────────────────────────────────────────────────────────
+
+const SAMPLE_HOTSPOT = {
+  id: 'h1',
+  slideId: SLIDE_ID,
+  name: 'CTA',
+  geometry: { kind: 'rect', x: 0.1, y: 0.1, w: 0.5, h: 0.2 },
+  gestureMask: ['click'],
+  zIndex: 1,
+  targetType: 'slide',
+  targetRef: { slideId: SLIDE_ID_2 },
+  status: 'ok',
+};
+
+const SAMPLE_OVERLAY = {
+  id: 'o1',
+  slideId: SLIDE_ID,
+  type: 'modal',
+  sizeStrategy: 'medium',
+};
+
+const SAMPLE_EDGE = {
+  id: 'e1',
+  fromSlideId: SLIDE_ID,
+  toSlideId: SLIDE_ID_2,
+  name: 'next',
+};
+
+const SAMPLE_VARIABLE = {
+  id: 'v1',
+  deckId: DECK_ID,
+  name: 'TIER',
+  scope: 'deck',
+  type: 'string',
+  defaultValue: 'monthly',
+};
+
+const SAMPLE_RULE = {
+  id: 'r1',
+  deckId: DECK_ID,
+  name: 'annual tier badge',
+  priority: 10,
+  conditionSource: '$TIER == "annual"',
+};
+
+const SAMPLE_VAR_BINDING = {
+  id: 'b1',
+  variableId: 'v1',
+  targetKind: 'element_prop',
+  targetId: COMP_A,
+  targetProp: 'text',
+};
+
+function slideLevel(doc: DeckDocument, slideId: string): Record<string, unknown> {
+  const slide = doc.slides.find((s) => s.id === slideId);
+  return slide as unknown as Record<string, unknown>;
+}
+
+describe('HotspotOp', () => {
+  it('stores hotspot on slide[x-domio:hotspots]', () => {
+    const doc = buildDoc();
+    const next = applyOp(doc, hotspotOp(SLIDE_ID, SAMPLE_HOTSPOT, null, 0));
+    expect(slideLevel(next, SLIDE_ID)['x-domio:hotspots']).toEqual(SAMPLE_HOTSPOT);
+  });
+
+  it('round-trip forward + inverse restores previous state', () => {
+    const doc = buildDoc();
+    const op = hotspotOp(SLIDE_ID, SAMPLE_HOTSPOT, null, 0);
+    const withHotspot = applyOp(doc, op);
+    const reverted = applyOp(withHotspot, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    expect(slideLevel(reverted, SLIDE_ID)).not.toHaveProperty('x-domio:hotspots');
+  });
+
+  it('null hotspot removes the field', () => {
+    const doc = buildDoc();
+    const step1 = applyOp(doc, hotspotOp(SLIDE_ID, SAMPLE_HOTSPOT, null, 0));
+    const step2 = applyOp(step1, hotspotOp(SLIDE_ID, null, SAMPLE_HOTSPOT, 1));
+    expect(slideLevel(step2, SLIDE_ID)).not.toHaveProperty('x-domio:hotspots');
+  });
+
+  it('does not touch other slides', () => {
+    const doc = buildDoc();
+    const next = applyOp(doc, hotspotOp(SLIDE_ID, SAMPLE_HOTSPOT, null, 0));
+    expect(slideLevel(next, SLIDE_ID_2)).not.toHaveProperty('x-domio:hotspots');
+  });
+
+  it('op factory names the HistoryOp correctly', () => {
+    expect(hotspotOp(SLIDE_ID, SAMPLE_HOTSPOT, null, 0).name).toBe('HotspotOp');
+  });
+});
+
+describe('OverlayOp', () => {
+  it('stores overlay on slide[x-domio:overlays]', () => {
+    const next = applyOp(buildDoc(), overlayOp(SLIDE_ID, SAMPLE_OVERLAY, null, 0));
+    expect(slideLevel(next, SLIDE_ID)['x-domio:overlays']).toEqual(SAMPLE_OVERLAY);
+  });
+
+  it('round-trip restores previous state', () => {
+    const doc = buildDoc();
+    const op = overlayOp(SLIDE_ID, SAMPLE_OVERLAY, null, 0);
+    const withOverlay = applyOp(doc, op);
+    const reverted = applyOp(withOverlay, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    expect(slideLevel(reverted, SLIDE_ID)).not.toHaveProperty('x-domio:overlays');
+  });
+
+  it('op factory names correctly', () => {
+    expect(overlayOp(SLIDE_ID, SAMPLE_OVERLAY, null, 0).name).toBe('OverlayOp');
+  });
+});
+
+describe('BranchingEdgeOp', () => {
+  it('stores edge on slide[x-domio:branching-edges]', () => {
+    const next = applyOp(buildDoc(), branchingEdgeOp(SLIDE_ID, SAMPLE_EDGE, null, 0));
+    expect(slideLevel(next, SLIDE_ID)['x-domio:branching-edges']).toEqual(SAMPLE_EDGE);
+  });
+
+  it('round-trip restores previous', () => {
+    const doc = buildDoc();
+    const op = branchingEdgeOp(SLIDE_ID, SAMPLE_EDGE, null, 0);
+    const withEdge = applyOp(doc, op);
+    const reverted = applyOp(withEdge, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    expect(slideLevel(reverted, SLIDE_ID)).not.toHaveProperty('x-domio:branching-edges');
+  });
+
+  it('op factory names correctly', () => {
+    expect(branchingEdgeOp(SLIDE_ID, SAMPLE_EDGE, null, 0).name).toBe('BranchingEdgeOp');
+  });
+});
+
+describe('VariableOp', () => {
+  it('stores variable on slide[x-domio:variables]', () => {
+    const next = applyOp(buildDoc(), variableOp(SLIDE_ID, SAMPLE_VARIABLE, null, 0));
+    expect(slideLevel(next, SLIDE_ID)['x-domio:variables']).toEqual(SAMPLE_VARIABLE);
+  });
+
+  it('round-trip restores previous', () => {
+    const doc = buildDoc();
+    const op = variableOp(SLIDE_ID, SAMPLE_VARIABLE, null, 0);
+    const withVar = applyOp(doc, op);
+    const reverted = applyOp(withVar, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    expect(slideLevel(reverted, SLIDE_ID)).not.toHaveProperty('x-domio:variables');
+  });
+
+  it('op factory names correctly', () => {
+    expect(variableOp(SLIDE_ID, SAMPLE_VARIABLE, null, 0).name).toBe('VariableOp');
+  });
+});
+
+describe('ConditionalRuleOp', () => {
+  it('stores rule on component.props[x-domio:conditional-rule]', () => {
+    const next = applyOp(buildDoc(), conditionalRuleOp(COMP_A, SAMPLE_RULE, null, 0));
+    const el = comp(next, COMP_A);
+    expect(el.component.props?.['x-domio:conditional-rule']).toEqual(SAMPLE_RULE);
+  });
+
+  it('round-trip restores previous', () => {
+    const doc = buildDoc();
+    const op = conditionalRuleOp(COMP_A, SAMPLE_RULE, null, 0);
+    const withRule = applyOp(doc, op);
+    const reverted = applyOp(withRule, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    expect(comp(reverted, COMP_A).component.props).not.toHaveProperty('x-domio:conditional-rule');
+  });
+
+  it('null removes the rule', () => {
+    const doc = buildDoc();
+    const step1 = applyOp(doc, conditionalRuleOp(COMP_A, SAMPLE_RULE, null, 0));
+    const step2 = applyOp(step1, conditionalRuleOp(COMP_A, null, SAMPLE_RULE, 1));
+    expect(comp(step2, COMP_A).component.props).not.toHaveProperty('x-domio:conditional-rule');
+  });
+
+  it('op factory names correctly', () => {
+    expect(conditionalRuleOp(COMP_A, SAMPLE_RULE, null, 0).name).toBe('ConditionalRuleOp');
+  });
+});
+
+describe('VariableBindingOp', () => {
+  it('stores binding on component.props[x-domio:variable-binding]', () => {
+    const next = applyOp(buildDoc(), variableBindingOp(COMP_A, SAMPLE_VAR_BINDING, null, 0));
+    const el = comp(next, COMP_A);
+    expect(el.component.props?.['x-domio:variable-binding']).toEqual(SAMPLE_VAR_BINDING);
+  });
+
+  it('round-trip restores previous', () => {
+    const doc = buildDoc();
+    const op = variableBindingOp(COMP_A, SAMPLE_VAR_BINDING, null, 0);
+    const withBinding = applyOp(doc, op);
+    const reverted = applyOp(withBinding, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    expect(comp(reverted, COMP_A).component.props).not.toHaveProperty('x-domio:variable-binding');
+  });
+
+  it('null removes the binding', () => {
+    const doc = buildDoc();
+    const step1 = applyOp(doc, variableBindingOp(COMP_A, SAMPLE_VAR_BINDING, null, 0));
+    const step2 = applyOp(step1, variableBindingOp(COMP_A, null, SAMPLE_VAR_BINDING, 1));
+    expect(comp(step2, COMP_A).component.props).not.toHaveProperty('x-domio:variable-binding');
+  });
+
+  it('op factory names correctly', () => {
+    expect(variableBindingOp(COMP_A, SAMPLE_VAR_BINDING, null, 0).name).toBe('VariableBindingOp');
+  });
+
+  it('P10 ops do not collide with existing props', () => {
+    const doc = buildDoc();
+    const next = applyOp(
+      doc,
+      conditionalRuleOp(COMP_A, SAMPLE_RULE, null, 0),
+    );
+    // existing props (color, size) preserved
+    const el = comp(next, COMP_A);
+    expect(el.component.props?.color).toBe('blue');
+    expect(el.component.props?.size).toBe(42);
   });
 });

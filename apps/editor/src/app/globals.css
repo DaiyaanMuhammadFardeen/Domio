@@ -2260,3 +2260,221 @@ code {
 .scenario-dialog__btn--create:hover {
   filter: brightness(1.1);
 }
+
+/* ---- P10: Connections + Variables panels ---- */
+.connections-panel,
+.variables-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.connections-panel__header,
+.variables-panel__header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.connections-panel__header h2,
+.variables-panel__header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.connections-panel__tabs,
+.variables-panel__tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.connections-panel__tab,
+.variables-panel__tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.connections-panel__tab:hover,
+.variables-panel__tab:hover {
+  color: var(--text);
+}
+
+.connections-panel__tab.is-active,
+.variables-panel__tab.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.connections-panel__body,
+.variables-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px;
+  overflow-y: auto;
+}
+
+.connections-panel__controls,
+.variables-panel__form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.connections-panel__controls label,
+.variables-panel__form label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.connections-panel__controls input,
+.connections-panel__controls select,
+.variables-panel__form input,
+.variables-panel__form select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.connections-panel__controls button,
+.variables-panel__form button,
+.variables-panel__actions button {
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.connections-panel__controls button:hover,
+.variables-panel__form button:hover,
+.variables-panel__actions button:hover {
+  filter: brightness(1.1);
+}
+
+.connections-panel__items,
+.variables-panel__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.connections-panel__item,
+.variables-panel__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.connections-panel__item span,
+.variables-panel__item span {
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.connections-panel__item small,
+.variables-panel__item small {
+  color: var(--muted);
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+}
+
+.connections-panel__item button,
+.variables-panel__item button {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.connections-panel__item button:hover,
+.variables-panel__item button:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.connections-panel__empty,
+.variables-panel__empty {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 16px 0;
+  font-style: italic;
+}
+
+.connections-panel__hint,
+.variables-panel__hint {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 0 0 8px;
+}
+
+.connections-panel__report,
+.variables-panel__preview {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+}
+
+.connections-panel__report p,
+.variables-panel__preview {
+  margin: 4px 0;
+}
+
+.connections-panel__error,
+.variables-panel__error {
+  color: #ff7b72;
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+  margin: 0;
+}
+
+.variables-panel__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.variables-panel__actions button + button {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}

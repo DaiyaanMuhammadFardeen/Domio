@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/state-machine-v1.schema.json",
+  "title": "Prototype state-machine spec",
+  "description": "The { states, transitions, initial } shape consumed by `StateMachine` and persisted by the runtime service. Phase 10 M3.",
+  "type": "object",
+  "required": ["states", "transitions", "initial"],
+  "additionalProperties": false,
+  "properties": {
+    "states": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/state-node" },
+      "minProperties": 1,
+      "maxProperties": 64
+    },
+    "initial": {
+      "$ref": "#/$defs/state-name",
+      "description": "Must be a key in `states`."
+    },
+    "transitions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/transition" },
+      "maxItems": 256
+    }
+  },
+  "$defs": {
+    "state-node": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "maxLength": 128 },
+        "meta": {
+          "type": "object",
+          "additionalProperties": true,
+          "maxProperties": 32
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "required": ["from", "to", "event"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "$ref": "#/$defs/state-name" },
+        "to": { "$ref": "#/$defs/state-name" },
+        "event": { "$ref": "#/$defs/event-name" },
+        "guard": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      }
+    },
+    "state-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z_][A-Za-z0-9_.\\-:]*$"
+    },
+    "event-name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Interactive input event. M3.1 precedence ladder: focus > press > click > hover > default.",
+      "anyOf": [
+        { "const": "focus" },
+        { "const": "press" },
+        { "const": "click" },
+        { "const": "hover" },
+        { "const": "default" },
+        { "pattern": "^[A-Za-z_][A-Za-z0-9_:.\\-]{0,63}$" }
+      ]
+    }
+  }
+}

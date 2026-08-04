@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/interaction-state-v1.schema.json",
+  "title": "Prototype interaction state",
+  "description": "A small finite-state machine attached to a component instance. Phase 10 M1 (state-machine editor surfaces in M3).",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "instance_id",
+    "state_machine", "current_state", "scope"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "instance_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "state_machine": {
+      "type": "object",
+      "required": ["states", "initial", "transitions"],
+      "additionalProperties": false,
+      "properties": {
+        "states": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "initial": { "type": "string", "minLength": 1 },
+        "transitions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/transition" },
+          "maxItems": 256
+        }
+      }
+    },
+    "current_state": { "type": "string", "minLength": 1 },
+    "scope": { "enum": ["session", "slide", "deck", "persistent_session"] },
+    "updated_at": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "transition": {
+      "type": "object",
+      "required": ["from", "to", "event"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "event": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "guard": { "type": "string", "maxLength": 4096 }
+      }
+    }
+  }
+}

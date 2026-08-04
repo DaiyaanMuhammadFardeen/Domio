@@ -48,8 +48,31 @@ import { DataSourcePanel } from '../panels/data-source-panel';
 import { FiltersPanel } from '../panels/filters-panel';
 import { ScenarioSwitcher } from '../panels/scenario-switcher';
 import { AnimationsPanel } from '../panels/animations-panel';
+import { ConnectionsPanel, type ConnectionsPanelEdge, type ConnectionsPanelHotspot, type ConnectionsPanelOverlay } from '../panels/connections-panel';
+import { VariablesPanel, type VariablesPanelVariable, type VariablesPanelRule } from '../panels/variables-panel';
+import {
+  StateInspectorPanel,
+  type StateInspectorMachine,
+  type StateMachineEventKind,
+} from '../panels/state-inspector-panel';
+import { DeepLinksPanel, type DeepLinkRecord } from '../panels/deep-links-panel';
+import { QuizPanel, type QuizRecord } from '../panels/quiz-panel';
+import {
+  LeaderboardPanel,
+  type LeaderboardEntry,
+  type LeaderboardAggregate,
+} from '../panels/leaderboard-panel';
+import {
+  SequenceInspectorPanel,
+  type PresentationSequenceRecord,
+} from '../panels/sequence-inspector-panel';
+import { ShareStateButton, type ShareStateButtonCurrentState } from '../components/prototyping/ShareStateButton';
+import { AuditTrail, type AuditEntryView } from './prototyping/agent/AuditTrail';
+import { NlPatchPanel, type NlToolCallSummary } from '../panels/nl-patch-panel';
+import { DeckDiffPanel, type DeckDiffEntry } from '../panels/deck-diff-panel';
 import type { LayerTimeline, SlideTransition, ReducedMotionPolicy } from '@domio/canvas';
 import { timelineOp, transitionOp, magicMoveOp, reducedMotionOp } from '@domio/canvas';
+import { hotspotOp, overlayOp, branchingEdgeOp, variableOp } from '@domio/canvas';
 import type { A11yAuditFinding } from '../lib/theme-audit';
 import { addToLibrary } from '../lib/library';
 
@@ -99,7 +122,25 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     doc.slides[0]?.id ?? ('' as ULID),
   );
   const [leftTab, setLeftTab] = useState<
-    'layers' | 'insert' | 'library' | 'stickers' | 'icons' | 'theme-brand' | 'data-sources' | 'filters' | 'animations'
+    | 'layers'
+    | 'insert'
+    | 'library'
+    | 'stickers'
+    | 'icons'
+    | 'theme-brand'
+    | 'data-sources'
+    | 'filters'
+    | 'animations'
+    | 'connections'
+    | 'variables'
+    | 'deep-links'
+    | 'm6-quizzes'
+    | 'm6-leaderboard'
+    | 'm6-sequence'
+    | 'm8-audit'
+    | 'm8-nl-patch'
+    | 'm8-deck-diff'
+    | 'state-inspector'
   >('layers');
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | null>(null);
   const [promoteOpen, setPromoteOpen] = useState(false);
@@ -580,6 +621,351 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     autosave.enqueue(`paste-timeline-${selectedComponent.id}`, op);
   }, [selectedComponent, copiedAnimation, engine, autosave]);
 
+  // P10: Prototyping state — hotspots, overlays, branching edges, variables, rules
+  const [hotspots, setHotspots] = useState<ConnectionsPanelHotspot[]>([]);
+  const [overlays, setOverlays] = useState<ConnectionsPanelOverlay[]>([]);
+  // P10 M7: Deep-link records for the active deck.
+  const [deepLinks, setDeepLinks] = useState<DeepLinkRecord[]>([]);
+  const [branchingEdges, setBranchingEdges] = useState<ConnectionsPanelEdge[]>([]);
+  const [variables, setVariables] = useState<VariablesPanelVariable[]>([]);
+  const [rules, setRules] = useState<VariablesPanelRule[]>([]);
+  const [stateMachines, setStateMachines] = useState<StateInspectorMachine[]>([]);
+  // P10 M6: Quiz + leaderboard + presentation-sequence state for the active deck.
+  const [activeQuiz, setActiveQuiz] = useState<QuizRecord>(() => ({
+    id: 'demo-quiz',
+    tenantId: 'demo',
+    deckId: 'demo-deck',
+    name: 'Untitled Quiz',
+    questions: [],
+    passThreshold: 0.7,
+    version: 0,
+  }));
+  const [leaderboardItems, setLeaderboardItems] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardAggregates] = useState<LeaderboardAggregate[]>([]);
+  const [activeSequence, setActiveSequence] = useState<PresentationSequenceRecord>(() => ({
+    id: 'demo-sequence',
+    tenantId: 'demo',
+    deckId: 'demo-deck',
+    name: 'Untitled Sequence',
+    slides: ['s1', 's2', 's3'],
+    intervalMs: 1000,
+    pauseOnEvent: false,
+    loop: false,
+    count: 1,
+    interruptionPolicy: 'queue',
+    reducedMotionDefaultOff: true,
+    pauseWarnAtMs: 1_800_000,
+    version: 0,
+  }));
+
+  const handleQuizPatch = useCallback(
+    (patch: { name?: string; questions?: QuizRecord['questions']; passThreshold?: number; version: number }) => {
+      setActiveQuiz((current) => ({
+        ...current,
+        ...(patch.name !== undefined ? { name: patch.name } : {}),
+        ...(patch.questions !== undefined ? { questions: patch.questions } : {}),
+        ...(patch.passThreshold !== undefined ? { passThreshold: patch.passThreshold } : {}),
+        version: patch.version + 1,
+      }));
+    },
+    [],
+  );
+
+  const handleQuizDelete = useCallback(() => {
+    setActiveQuiz((current) => ({
+      ...current,
+      questions: [],
+      version: current.version + 1,
+    }));
+  }, []);
+
+  const handleLeaderboardUpdate = useCallback(
+    (id: string, update: { status?: LeaderboardEntry['status']; reviewerId?: string | null; overrideScore?: number | null }) => {
+      setLeaderboardItems((current) =>
+        current.map((i) => (i.id === id ? { ...i, ...update } : i)),
+      );
+    },
+    [],
+  );
+
+  const handleSequencePatch = useCallback(
+    (patch: Partial<PresentationSequenceRecord> & { version: number }) => {
+      setActiveSequence((current) => ({
+        ...current,
+        ...patch,
+        version: patch.version + 1,
+      }));
+    },
+    [],
+  );
+
+  const handleSequenceDelete = useCallback(() => {
+    setActiveSequence((current) => ({
+      ...current,
+      slides: [],
+      version: current.version + 1,
+    }));
+  }, []);
+
+  const handleAddHotspot = useCallback(
+    (slideId: string, hotspot: Omit<ConnectionsPanelHotspot, 'id'>) => {
+      const id = `hs-${Date.now()}`;
+      const next: ConnectionsPanelHotspot = { id, ...hotspot };
+      setHotspots((current) => [...current, next]);
+      const op = hotspotOp(slideId, next, null, Date.now());
+      setDeck(engine.apply(op));
+      autosave.enqueue(`hotspot-${id}`, op);
+    },
+    [engine, autosave],
+  );
+
+  const handleRemoveHotspot = useCallback(
+    (id: string) => {
+      setHotspots((current) => current.filter((h) => h.id !== id));
+    },
+    [],
+  );
+
+  const handleAddOverlay = useCallback(
+    (slideId: string, overlay: Omit<ConnectionsPanelOverlay, 'id'>) => {
+      const id = `ov-${Date.now()}`;
+      const next: ConnectionsPanelOverlay = { id, ...overlay };
+      setOverlays((current) => [...current, next]);
+      const op = overlayOp(slideId, next, null, Date.now());
+      setDeck(engine.apply(op));
+      autosave.enqueue(`overlay-${id}`, op);
+    },
+    [engine, autosave],
+  );
+
+  const handleRemoveOverlay = useCallback((id: string) => {
+    setOverlays((current) => current.filter((o) => o.id !== id));
+  }, []);
+
+  const handleAddEdge = useCallback(
+    (edge: Omit<ConnectionsPanelEdge, 'id'>) => {
+      const id = `edge-${Date.now()}`;
+      const next: ConnectionsPanelEdge = { id, ...edge };
+      setBranchingEdges((current) => [...current, next]);
+      const op = branchingEdgeOp(edge.fromSlideId, next, null, Date.now());
+      setDeck(engine.apply(op));
+      autosave.enqueue(`edge-${id}`, op);
+    },
+    [engine, autosave],
+  );
+
+  const handleRemoveEdge = useCallback((id: string) => {
+    setBranchingEdges((current) => current.filter((e) => e.id !== id));
+  }, []);
+
+  const handleAddVariable = useCallback(
+    (variable: Omit<VariablesPanelVariable, 'id'>) => {
+      const id = `var-${Date.now()}`;
+      const next: VariablesPanelVariable = { id, ...variable };
+      setVariables((current) => [...current, next]);
+      const op = variableOp(activeSlideId, next, null, Date.now());
+      setDeck(engine.apply(op));
+      autosave.enqueue(`var-${id}`, op);
+    },
+    [engine, autosave, activeSlideId],
+  );
+
+  const handleRemoveVariable = useCallback((id: string) => {
+    setVariables((current) => current.filter((v) => v.id !== id));
+  }, []);
+
+  const handleAddRule = useCallback(
+    (rule: Omit<VariablesPanelRule, 'id'>) => {
+      const id = `rule-${Date.now()}`;
+      const next: VariablesPanelRule = { id, ...rule };
+      setRules((current) => [...current, next]);
+    },
+    [],
+  );
+
+  const handleRemoveRule = useCallback((id: string) => {
+    setRules((current) => current.filter((r) => r.id !== id));
+  }, []);
+
+  // M3 — state-machine handlers. Local-only: the editor ships a
+  // prototype-runtime client in a follow-up, so the panel mounts with
+  // an in-memory list wired through these callbacks. The contract
+  // shape mirrors `StateInspectorPanel` exactly so swapping the
+  // backend in is a one-line change.
+  const handleAddStateMachine = useCallback(
+    (
+      instanceId: string,
+      initialState: string,
+      scope: StateInspectorMachine['scope'],
+    ) => {
+      const id = `sm-${Date.now()}`;
+      const machine: StateInspectorMachine = {
+        id,
+        instanceId,
+        stateMachine: {
+          states: {
+            [initialState]: { label: initialState },
+            active: { label: 'active' },
+            idle: { label: 'idle' },
+          },
+          initial: initialState,
+          transitions: [
+            { from: initialState, to: 'active', event: 'click' },
+            { from: 'active', to: initialState, event: 'default' },
+          ],
+        },
+        currentState: initialState,
+        scope,
+        persistInstanceState: false,
+      };
+      setStateMachines((current) => [...current, machine]);
+    },
+    [],
+  );
+
+  const handleRemoveStateMachine = useCallback((id: string) => {
+    setStateMachines((current) => current.filter((m) => m.id !== id));
+  }, []);
+
+  const handleAdvanceStateMachine = useCallback(
+    (id: string, event: StateMachineEventKind) => {
+      setStateMachines((current) =>
+        current.map((m) => {
+          if (m.id !== id) return m;
+          const match = m.stateMachine.transitions.find(
+            (t) => t.from === m.currentState && t.event === event,
+          );
+          if (!match) return m;
+          return { ...m, currentState: match.to };
+        }),
+      );
+    },
+    [],
+  );
+
+  const handleTogglePersistInstanceState = useCallback(
+    (id: string, value: boolean) => {
+      setStateMachines((current) =>
+        current.map((m) => (m.id === id ? { ...m, persistInstanceState: value } : m)),
+      );
+    },
+    [],
+  );
+
+  // M7 — deep-link handlers. These are local-only handlers so the
+  // panel can mount without a backend round-trip; the real wiring
+  // lands when the editor ships a deep-link-svc client.
+  const handleCreateDeepLinkSample = useCallback(
+    async (input: { deck_id: string; slide_id: string; scenario: string }) => {
+      const id = `dl${Date.now().toString(36).toUpperCase().padStart(9, '0').slice(-9)}`;
+      const token = `local.${id}`;
+      const expires_at = Date.now() + 30 * 24 * 60 * 60 * 1000;
+      setDeepLinks((current) => [
+        ...current,
+        {
+          id,
+          click_count: 0,
+          expires_at,
+          viewer_scope: 'public',
+          single_use: false,
+          created_at: Date.now(),
+        },
+      ]);
+      void input; void token;
+      return { id, token };
+    },
+    [],
+  );
+  const handleResolveDeepLink = useCallback(
+    async (id: string) => {
+      const r = deepLinks.find((d) => d.id === id);
+      if (!r) return null;
+      return {
+        slide_id: activeSlideId,
+        scenario: 'bear',
+        exp: r.expires_at,
+      };
+    },
+    [deepLinks, activeSlideId],
+  );
+  const handleDeleteDeepLink = useCallback(async (id: string) => {
+    setDeepLinks((current) => current.filter((d) => d.id !== id));
+    return true;
+  }, []);
+  const getShareState = useCallback(
+    (): ShareStateButtonCurrentState => ({
+      deck_id: deck.id,
+      slide_id: activeSlideId,
+      var_snapshot: [
+        { name: 'TIER', value: 'bear', visibility: 'deck_public', scope: 'deck' },
+      ],
+      device_frame_state: { kind: 'iphone', orientation: 'portrait' },
+      scenario: 'bear',
+      form_drafts: {},
+    }),
+    [deck.id, activeSlideId],
+  );
+
+  // M8 — agent surface (audit, NL patch, deck diff)
+  const [auditEntries, setAuditEntries] = useState<readonly AuditEntryView[]>([]);
+  const handleAuditDiff = useCallback((_entry: AuditEntryView) => {
+    /* no-op for now — render-only diff preview; reserved for future use */
+  }, []);
+  const M8AuditPanel = useCallback(
+    ({ entries, onDiff }: { entries: readonly AuditEntryView[]; onDiff: (entry: AuditEntryView) => void }) =>
+      AuditTrail({ entries, onDiff }),
+    [],
+  );
+  const handleNlParse = useCallback(
+    async (prompt: string): Promise<readonly NlToolCallSummary[]> => {
+      // Stub — wire to real MCP client in #227 follow-up.
+      return [{ toolName: 'create_hotspot', input: { deckId: deck.id, prompt } }];
+    },
+    [deck.id],
+  );
+  const handleNlApply = useCallback(
+    async (_calls: readonly NlToolCallSummary[]) => {
+      setAuditEntries((current) => [
+        {
+          id: `apply-${Date.now()}`,
+          agentId: 'agent-1',
+          source: 'agent',
+          toolName: 'nl_patch',
+          timestamp: new Date().toISOString(),
+          input: '<<nl-prompt>>',
+          output: { ok: true },
+        },
+        ...current,
+      ]);
+    },
+    [],
+  );
+  const handleNlRollback = useCallback(async (_calls: readonly NlToolCallSummary[]) => {
+    setAuditEntries((current) => [
+      {
+        id: `rollback-${Date.now()}`,
+        agentId: 'agent-1',
+        source: 'agent',
+        toolName: 'nl_rollback',
+        timestamp: new Date().toISOString(),
+        input: '<<nl-prompt>>',
+        output: { rolledBack: true },
+      },
+      ...current,
+    ]);
+  }, []);
+  const handleDeckDiffCompare = useCallback(
+    async (_a: string, _b: string) => {
+      const stub: { added: readonly DeckDiffEntry[]; removed: readonly DeckDiffEntry[]; changed: readonly DeckDiffEntry[] } = {
+        added: [{ kind: 'hotspot', id: 'hs1' }],
+        removed: [],
+        changed: [],
+      };
+      return stub;
+    },
+    [],
+  );
+
   return (
     <div className="editor-root">
       <header className="editor-toolbar" onContextMenu={onContextMenu}>
@@ -614,6 +1000,7 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
             + Insert
           </button>
           <ScenarioSwitcher />
+          <ShareStateButton getState={getShareState} audience="viewer" />
           <SyncIndicator facade={autosave} />
         </div>
       </header>
@@ -704,6 +1091,106 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
             >
               Animations
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'connections'}
+              className={`side-tab${leftTab === 'connections' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('connections')}
+              data-testid="p10-connections-tab"
+            >
+              Connections
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'variables'}
+              className={`side-tab${leftTab === 'variables' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('variables')}
+              data-testid="p10-variables-tab"
+            >
+              Variables
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'deep-links'}
+              className={`side-tab${leftTab === 'deep-links' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('deep-links')}
+              data-testid="m7-deep-links-tab"
+            >
+              Deep Links
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm6-quizzes'}
+              className={`side-tab${leftTab === 'm6-quizzes' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m6-quizzes')}
+              data-testid="m6-quizzes-tab"
+            >
+              Quizzes
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm6-leaderboard'}
+              className={`side-tab${leftTab === 'm6-leaderboard' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m6-leaderboard')}
+              data-testid="m6-leaderboard-tab"
+            >
+              Leaderboard
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm6-sequence'}
+              className={`side-tab${leftTab === 'm6-sequence' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m6-sequence')}
+              data-testid="m6-sequence-tab"
+            >
+              Sequence
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm8-audit'}
+              className={`side-tab${leftTab === 'm8-audit' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m8-audit')}
+              data-testid="m8-audit-tab"
+            >
+              Audit
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm8-nl-patch'}
+              className={`side-tab${leftTab === 'm8-nl-patch' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m8-nl-patch')}
+              data-testid="m8-nl-patch-tab"
+            >
+              NL Patch
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm8-deck-diff'}
+              className={`side-tab${leftTab === 'm8-deck-diff' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m8-deck-diff')}
+              data-testid="m8-deck-diff-tab"
+            >
+              Deck Diff
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'state-inspector'}
+              className={`side-tab${leftTab === 'state-inspector' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('state-inspector')}
+              data-testid="m3-state-inspector-tab"
+            >
+              State inspector
+            </button>
           </div>
           {leftTab === 'layers'
             ? activeSlide
@@ -768,7 +1255,98 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
                               onPaste={handlePasteAnimation}
                             />
                           )
-                        : (
+                        : leftTab === 'connections'
+                          ? (
+                              <ConnectionsPanel
+                                slides={deck.slides}
+                                activeSlideId={activeSlideId}
+                                hotspots={hotspots}
+                                overlays={overlays}
+                                edges={branchingEdges}
+                                onAddHotspot={handleAddHotspot}
+                                onRemoveHotspot={handleRemoveHotspot}
+                                onAddEdge={handleAddEdge}
+                                onRemoveEdge={handleRemoveEdge}
+                                onAddOverlay={handleAddOverlay}
+                                onRemoveOverlay={handleRemoveOverlay}
+                              />
+                            )
+                          : leftTab === 'variables'
+                            ? (
+                                <VariablesPanel
+                                  variables={variables}
+                                  rules={rules}
+                                  onAddVariable={handleAddVariable}
+                                  onRemoveVariable={handleRemoveVariable}
+                                  onAddRule={handleAddRule}
+                                  onRemoveRule={handleRemoveRule}
+                                />
+                              )
+                            : leftTab === 'deep-links'
+                              ? (
+                                  <DeepLinksPanel
+                                    deckId={deck.id}
+                                    activeSlideId={activeSlideId}
+                                    links={deepLinks}
+                                    onCreateSample={handleCreateDeepLinkSample}
+                                    onResolve={handleResolveDeepLink}
+                                    onDelete={handleDeleteDeepLink}
+                                  />
+                                )
+                              : leftTab === 'm6-quizzes'
+                                ? (
+                                    <QuizPanel
+                                      quiz={activeQuiz}
+                                      onPatch={handleQuizPatch}
+                                      onDelete={handleQuizDelete}
+                                    />
+                                  )
+                                : leftTab === 'm6-leaderboard'
+                                  ? (
+                                      <LeaderboardPanel
+                                        items={leaderboardItems}
+                                        aggregates={leaderboardAggregates}
+                                        onUpdate={handleLeaderboardUpdate}
+                                      />
+                                    )
+                                  : leftTab === 'm6-sequence'
+                                    ? (
+                                        <SequenceInspectorPanel
+                                          sequence={activeSequence}
+                                          onPatch={handleSequencePatch}
+                                          onDelete={handleSequenceDelete}
+                                        />
+                                      )
+                                    : leftTab === 'm8-audit'
+                              ? <M8AuditPanel entries={auditEntries} onDiff={handleAuditDiff} />
+                              : leftTab === 'm8-nl-patch'
+                                ? (
+                                    <NlPatchPanel
+                                      deckId={deck.id}
+                                      onParse={handleNlParse}
+                                      onApply={handleNlApply}
+                                      onRollback={handleNlRollback}
+                                    />
+                                  )
+                                : leftTab === 'm8-deck-diff'
+                                  ? (
+                                      <DeckDiffPanel
+                                        defaultDeckId={deck.id}
+                                        onCompare={handleDeckDiffCompare}
+                                      />
+                                    )
+                                  : leftTab === 'state-inspector'
+                                    ? (
+                                        <StateInspectorPanel
+                                          machines={stateMachines}
+                                          activeSlideId={activeSlideId}
+                                          onAddMachine={handleAddStateMachine}
+                                          onRemoveMachine={handleRemoveStateMachine}
+                                          onAdvance={handleAdvanceStateMachine}
+                                          onTogglePersistInstanceState={handleTogglePersistInstanceState}
+                                        />
+                                      )
+                                    : (
                         <ThemeBrandPanel
                           themes={PHASE_07_THEMES}
                           activeThemeId={activeThemeId}

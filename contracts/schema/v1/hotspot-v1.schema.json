@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/hotspot-v1.schema.json",
+  "title": "Prototype hotspot",
+  "description": "A clickable region on a slide that dispatches navigation/overlay/action at runtime. Phase 10 M1.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "slide_id", "name",
+    "geometry", "gesture_mask", "z_index", "target_type",
+    "target_ref", "status", "version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "slide_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "geometry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "x", "y", "w", "h"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "rect" },
+            "x": { "type": "number", "minimum": 0, "maximum": 1 },
+            "y": { "type": "number", "minimum": 0, "maximum": 1 },
+            "w": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+            "h": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "points"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "polygon" },
+            "points": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 64,
+              "items": {
+                "type": "object",
+                "required": ["x", "y"],
+                "additionalProperties": false,
+                "properties": {
+                  "x": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "y": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "gesture_mask": {
+      "type": "array",
+      "items": { "enum": ["click", "double_click", "long_press", "hover", "focus"] },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 5
+    },
+    "z_index": { "type": "integer", "minimum": 0, "maximum": 1000, "default": 0 },
+    "target_type": { "enum": ["slide", "url", "overlay", "action"] },
+    "target_ref": { "type": "object" },
+    "status": { "enum": ["ok", "dangling"], "default": "ok" },
+    "version": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "updated_at": { "type": "integer", "minimum": 0 }
+  }
+}

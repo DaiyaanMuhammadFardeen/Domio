@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/quiz-v1.schema.json",
+  "title": "Prototype quiz",
+  "description": "A deck-level assessment with one or more questions of any supported type. Phase 10 M6.1.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "name", "questions",
+    "version", "created_at", "updated_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/question" }
+    },
+    "pass_threshold": {
+      "type": "number", "minimum": 0, "maximum": 1,
+      "description": "Default 0.7. Percent score required to pass."
+    },
+    "version": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "updated_at": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "required": ["id", "type", "prompt"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "type": {
+          "enum": [
+            "multiple_choice", "multi_select", "true_false", "short_answer",
+            "fill_blank", "drag_to_match", "hotspot_quiz", "flash_card",
+            "short_answer_llm"
+          ]
+        },
+        "prompt": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "points": { "type": "integer", "minimum": 0, "maximum": 100, "default": 1 },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "minLength": 1, "maxLength": 64 },
+              "label": { "type": "string", "minLength": 1, "maxLength": 256 }
+            }
+          }
+        },
+        "correct_choice_id": { "type": "string" },
+        "correct_choice_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "correct": { "type": "boolean" },
+        "accepted_answers": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 256 }
+        },
+        "typo_tolerance": {
+          "type": "number", "minimum": 0, "maximum": 1, "default": 0.85
+        },
+        "blanks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "accepted_answers"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "accepted_answers": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "pairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["left", "right"],
+            "additionalProperties": false,
+            "properties": {
+              "left": { "type": "string" },
+              "right": { "type": "string" }
+            }
+          }
+        },
+        "geometry": {
+          "type": "object",
+          "description": "Rect | polygon — normalized [0..1] coordinates.",
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "enum": ["rect", "polygon"] },
+            "x": { "type": "number", "minimum": 0, "maximum": 1 },
+            "y": { "type": "number", "minimum": 0, "maximum": 1 },
+            "w": { "type": "number", "minimum": 0, "maximum": 1 },
+            "h": { "type": "number", "minimum": 0, "maximum": 1 },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["x", "y"],
+                "additionalProperties": false,
+                "properties": {
+                  "x": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "y": { "type": "number", "minimum": 0, "maximum": 1 }
+                }
+              }
+            }
+          }
+        },
+        "tolerance": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.04 },
+        "front": { "type": "string" },
+        "back": { "type": "string" },
+        "reference_answer": { "type": "string" },
+        "fallback_threshold": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.7 }
+      }
+    }
+  }
+}

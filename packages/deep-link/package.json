@@ -1,0 +1,22 @@
+{
+  "name": "@domio/deep-link",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deep-link state codec — encode/decode the runtime VarStore snapshot into an HMAC-signed base64url token. Phase 10 M7.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

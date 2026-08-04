@@ -1,0 +1,25 @@
+{
+  "name": "@domio/prototype-recorder-service",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 10 M5 prototype user-testing telemetry recorder. Append-only event ledger with chained HMAC, DSR endpoints, and PDPA retention cron.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

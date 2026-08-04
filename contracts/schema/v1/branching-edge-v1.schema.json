@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/branching-edge-v1.schema.json",
+  "title": "Prototype branching edge",
+  "description": "A directed transition between two prototype slides. Phase 10 M1.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "from_slide_id", "to_slide_id",
+    "name", "rule_id", "priority"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "from_slide_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "to_slide_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "rule_id": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "priority": { "type": "integer", "minimum": -10000, "maximum": 10000, "default": 0 },
+    "created_at": { "type": "integer", "minimum": 0 }
+  }
+}

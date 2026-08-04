@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/variable-binding-v1.schema.json",
+  "title": "Prototype variable binding",
+  "description": "A reactive binding from a variable to a target element/slide/deck/overlay prop. Phase 10 M2.",
+  "type": "object",
+  "required": [
+    "id", "tenant_id", "deck_id", "variable_id",
+    "target_kind", "target_id", "target_prop", "version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "tenant_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "variable_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "target_kind": {
+      "enum": ["element_prop", "slide_prop", "deck_prop", "overlay_open", "hotspot_target"]
+    },
+    "target_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "target_prop": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "transform": {
+      "type": "string",
+      "maxLength": 4096,
+      "description": "Optional safe expression. Source text, compiled on the server."
+    },
+    "version": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "integer", "minimum": 0 },
+    "updated_at": { "type": "integer", "minimum": 0 }
+  }
+}
