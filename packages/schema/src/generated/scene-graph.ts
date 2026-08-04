@@ -204,6 +204,9 @@ export interface Transform2D {
 export interface ElementBase {
   id: ULID;
   semanticId: string;
+  /** Magic-move matching key (Phase 09). Optional role shared across slides
+   *  so the diff engine can tween matched elements. */
+  element_role?: string;
   name: string;
   type: LayerType;
   parentId: ULID | null;

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/query-v1.schema.json",
+  "title": "Domio Query V1",
+  "description": "Declarative chart-spec -> dataset query bound to a data source, with a per-binding freshness policy. Consumed by the query gateway and refresh scheduler (Phase 08).",
+  "type": "object",
+  "required": ["id", "data_source_id", "name", "query_spec", "freshness_policy"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "data_source_id": { "type": "string", "format": "uuid" },
+    "tenant_id": { "type": "string" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "query_spec": {
+      "type": "object",
+      "description": "Connector-specific spec (SQL text, sheet range, REST url + rows_path, GraphQL query, etc.).",
+      "additionalProperties": true
+    },
+    "freshness_policy": {
+      "$ref": "chart-binding-v1.schema.json#/definitions/FreshnessPolicy"
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

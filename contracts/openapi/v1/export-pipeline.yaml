@@ -1,0 +1,212 @@
+openapi: 3.1.0
+info:
+  title: Domio Export Pipeline API
+  version: 1.0.0
+  description: |
+    Animation export pipeline for Phase 09.
+    Manages export jobs: create, query, list, cancel.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: exports
+    description: Export job management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/export/jobs:
+    post:
+      tags: [exports]
+      operationId: createExportJob
+      summary: Create an export job
+      description: |
+        Creates a new export job in 'queued' status. The job will be
+        picked up by a render worker for processing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExportJobRequest"
+      responses:
+        "201":
+          description: Export job created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportJob"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthenticated.
+    get:
+      tags: [exports]
+      operationId: listExportJobs
+      summary: List export jobs for a tenant
+      description: Returns all export jobs for the specified tenant.
+      parameters:
+        - in: query
+          name: tenantId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of export jobs.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportJobList"
+        "400":
+          description: Missing tenantId.
+        "401":
+          description: Unauthenticated.
+  /v1/export/jobs/{id}:
+    get:
+      tags: [exports]
+      operationId: getExportJob
+      summary: Get an export job by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Export job details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportJob"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Job not found.
+    delete:
+      tags: [exports]
+      operationId: cancelExportJob
+      summary: Cancel an export job
+      description: |
+        Cancels a queued or rendering job. Fails if the job is already
+        in 'ready' or 'failed' status.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Job cancelled.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Job not found.
+        "409":
+          description: Cannot cancel job in current status.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    CreateExportJobRequest:
+      type: object
+      required: [tenantId, deckId, format, range, scale, fps]
+      properties:
+        tenantId:
+          type: string
+        deckId:
+          type: string
+        format:
+          type: string
+          enum: [gif, mp4, webm]
+        range:
+          $ref: "#/components/schemas/ExportRange"
+        scale:
+          type: number
+          minimum: 0.1
+          maximum: 10
+        fps:
+          type: number
+          minimum: 1
+          maximum: 120
+        sourceUrl:
+          type: string
+          format: uri
+    ExportRange:
+      type: object
+      required: [start, end]
+      properties:
+        start:
+          type: integer
+          minimum: 0
+        end:
+          type: integer
+          minimum: 0
+    ExportJob:
+      type: object
+      required: [id, tenantId, deckId, format, range, scale, fps, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        deckId:
+          type: string
+        format:
+          type: string
+          enum: [gif, mp4, webm]
+        range:
+          $ref: "#/components/schemas/ExportRange"
+        scale:
+          type: number
+        fps:
+          type: number
+        sourceUrl:
+          type: string
+        status:
+          type: string
+          enum: [queued, rendering, encoding, ready, failed]
+        artifactUri:
+          type: string
+        error:
+          $ref: "#/components/schemas/ExportJobError"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ExportJobError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    ExportJobList:
+      type: object
+      required: [jobs]
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExportJob"
+    ErrorResponse:
+      type: object
+      required: [error, code]
+      properties:
+        error:
+          type: string
+        code:
+          type: string

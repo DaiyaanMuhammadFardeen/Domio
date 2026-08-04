@@ -1,0 +1,168 @@
+openapi: 3.1.0
+info:
+  title: Domio Localization API
+  version: 1.0.0
+  description: |
+    Locale-aware formatting, exchange-rate management for Phase 08.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: localization
+    description: Formatting and exchange-rate operations.
+security:
+  - bearerAuth: []
+paths:
+  /v1/localization/format:
+    post:
+      tags: [localization]
+      operationId: formatNumber
+      summary: Format a number using locale-aware rules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormatRequest"
+      responses:
+        "200":
+          description: Formatted result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FormatResponse"
+        "400":
+          description: Invalid locale or currency.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/localization/rates:
+    post:
+      tags: [localization]
+      operationId: ingestRates
+      summary: Ingest exchange rate snapshots
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RatesRequest"
+      responses:
+        "200":
+          description: Rates ingested.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RatesResponse"
+        "401":
+          description: Unauthenticated.
+  /v1/localization/convert:
+    post:
+      tags: [localization]
+      operationId: convert
+      summary: Convert an amount between currencies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConvertRequest"
+      responses:
+        "200":
+          description: Conversion result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConvertResponse"
+        "404":
+          description: Exchange rate not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    FormatRequest:
+      type: object
+      required: [value, locale]
+      properties:
+        value:
+          type: number
+        locale:
+          type: string
+        style:
+          type: string
+          enum: [decimal, currency, percent]
+        currency:
+          type: string
+        decimals:
+          type: integer
+    FormatResponse:
+      type: object
+      properties:
+        formatted:
+          type: string
+    RatesRequest:
+      type: object
+      required: [pairs]
+      properties:
+        pairs:
+          type: array
+          items:
+            $ref: "#/components/schemas/RateSnapshot"
+    RatesResponse:
+      type: object
+      properties:
+        ingested:
+          type: integer
+    RateSnapshot:
+      type: object
+      required: [pair, rate, asOf]
+      properties:
+        pair:
+          type: string
+        rate:
+          type: number
+        asOf:
+          type: string
+          format: date-time
+    ConvertRequest:
+      type: object
+      required: [amount, from, to]
+      properties:
+        amount:
+          type: number
+        from:
+          type: string
+        to:
+          type: string
+        asOf:
+          type: string
+          format: date-time
+    ConvertResponse:
+      type: object
+      properties:
+        amount:
+          type: number
+        from:
+          type: string
+        to:
+          type: string
+        convertedAmount:
+          type: number
+        rate:
+          type: number
+        rateAsOf:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string

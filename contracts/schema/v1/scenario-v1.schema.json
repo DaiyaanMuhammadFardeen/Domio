@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/scenario-v1.schema.json",
+  "title": "Domio Scenario V1",
+  "description": "Named scenario overlay for a deck. Scenarios form a DAG via parent_id; each scenario owns immutable dataset snapshots plus overrides for formula constants, slider values, and annotations. Consumed by the scenario manager (Phase 08) and later by MCP tools (Phase 13).",
+  "type": "object",
+  "required": ["id", "deck_id", "name", "overlays"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "format": "uuid", "description": "Stable scenario id; survives connector renames." },
+    "deck_id": { "type": "string", "format": "uuid" },
+    "parent_id": { "type": ["string", "null"], "format": "uuid", "description": "Scenario DAG parent; null for the default/Base scenario." },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128, "description": "'Base', 'Bull', 'Bear', ..." },
+    "description": { "type": "string", "default": "" },
+    "overlays": {
+      "type": "object",
+      "description": "Snapshot + override refs that differentiate this scenario from its parent.",
+      "additionalProperties": false,
+      "properties": {
+        "dataset_snapshot_refs": {
+          "type": "object",
+          "description": "binding_id -> dataset_snapshot_id (immutable snapshot pointer).",
+          "additionalProperties": { "type": "string", "format": "uuid" }
+        },
+        "formula_constant_overrides": {
+          "type": "object",
+          "description": "formula_field_id -> constant value.",
+          "additionalProperties": {}
+        },
+        "slider_value_overrides": {
+          "type": "object",
+          "description": "slider_id -> numeric value.",
+          "additionalProperties": { "type": "number" }
+        },
+        "annotation_overrides": {
+          "type": "object",
+          "description": "annotation_id -> visible (boolean).",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

@@ -57,7 +57,7 @@ function asDeck(elements: Element[]): DeckDocument {
 describe('catalog registry', () => {
   it('registers every curated component', () => {
     expect(CATALOG.length).toBeGreaterThanOrEqual(20);
-    expect(CATALOG.length).toBe(25);
+    expect(CATALOG.length).toBe(39);
   });
 
   it('has unique catalog ids and semver versions', () => {

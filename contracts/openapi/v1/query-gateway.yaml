@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: Domio Query Gateway API
+  version: 1.0.0
+  description: |
+    Live-data query gateway for Phase 08 charts.
+    Exposes execute, webhook, invalidate, viewer-token, and status endpoints.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: queries
+    description: Query execution and lifecycle.
+  - name: viewer-tokens
+    description: Viewer token issuance and validation.
+security:
+  - bearerAuth: []
+paths:
+  /v1/queries/execute:
+    post:
+      tags: [queries]
+      operationId: executeQuery
+      summary: Execute a live-data query
+      description: |
+        Executes a query against the configured connector, returning
+        a dataset snapshot with freshness metadata.  Subject to
+        rate limiting (429) and ACL checks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecuteQueryRequest"
+      responses:
+        "200":
+          description: Query executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecuteQueryResponse"
+        "401":
+          description: Unauthenticated or ACL denied.
+        "404":
+          description: Query not found.
+        "429":
+          description: Rate limit exceeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RateLimitResponse"
+  /v1/queries/webhook:
+    post:
+      tags: [queries]
+      operationId: processWebhook
+      summary: Receive a webhook callback
+      description: |
+        Receives a webhook callback with dataset updates.  Verifies
+        the HMAC signature, deduplicates by idempotency key, and
+        writes a new snapshot + freshness record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookRequest"
+      responses:
+        "200":
+          description: Webhook processed (or deduplicated).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookResponse"
+        "400":
+          description: Invalid HMAC signature.
+        "401":
+          description: Unauthenticated or ACL denied.
+  /v1/queries/invalidate:
+    post:
+      tags: [queries]
+      operationId: invalidateQuery
+      summary: Invalidate cached query results
+      description: |
+        Invalidates the in-memory cache for a query and writes a
+        freshness record with status 'stale'.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvalidateRequest"
+      responses:
+        "204":
+          description: Cache invalidated successfully.
+        "401":
+          description: Unauthenticated or ACL denied.
+        "404":
+          description: Query not found.
+  /v1/queries/{queryId}:
+    get:
+      tags: [queries]
+      operationId: getQuery
+      summary: Get query status and latest snapshot
+      description: |
+        Returns the query definition, latest dataset snapshot, and
+        latest freshness record.
+      parameters:
+        - in: path
+          name: queryId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: actorId
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Query details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryStatusResponse"
+        "401":
+          description: Unauthenticated or ACL denied.
+        "404":
+          description: Query not found.
+  /v1/viewer-tokens:
+    post:
+      tags: [viewer-tokens]
+      operationId: issueViewerToken
+      summary: Issue a viewer token
+      description: |
+        Issues a scoped, time-limited viewer token for accessing
+        query data without full authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ViewerTokenRequest"
+      responses:
+        "201":
+          description: Viewer token issued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ViewerTokenResponse"
+        "401":
+          description: Unauthenticated or ACL denied.
+        "404":
+          description: Query not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    ExecuteQueryRequest:
+      type: object
+      required: [queryId]
+      properties:
+        queryId:
+          type: string
+        forceRefresh:
+          type: boolean
+    ExecuteQueryResponse:
+      type: object
+      properties:
+        snapshot:
+          $ref: "#/components/schemas/DatasetSnapshot"
+        freshness:
+          $ref: "#/components/schemas/FreshnessRecord"
+        fromCache:
+          type: boolean
+        cacheTier:
+          type: string
+          enum: [hit, miss]
+    WebhookRequest:
+      type: object
+      required: [payload, signature, idempotencyKey, queryId]
+      properties:
+        payload:
+          type: string
+          description: JSON-encoded webhook payload.
+        signature:
+          type: string
+          description: HMAC-SHA256 hex signature of the payload.
+        idempotencyKey:
+          type: string
+        queryId:
+          type: string
+    WebhookResponse:
+      type: object
+      properties:
+        snapshot:
+          $ref: "#/components/schemas/DatasetSnapshot"
+        deduped:
+          type: boolean
+    InvalidateRequest:
+      type: object
+      required: [queryId]
+      properties:
+        queryId:
+          type: string
+    ViewerTokenRequest:
+      type: object
+      required: [queryId]
+      properties:
+        queryId:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        ttlMs:
+          type: integer
+          description: Token time-to-live in milliseconds.  Default 3600000 (1h).
+    ViewerTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        queryId:
+          type: string
+        orgId:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        expiresAt:
+          type: string
+          format: date-time
+        used:
+          type: boolean
+    RateLimitResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        retryAfterMs:
+          type: integer
+    DatasetSnapshot:
+      type: object
+      properties:
+        snapshotId:
+          type: string
+        queryId:
+          type: string
+        orgId:
+          type: string
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: array
+        rowCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    FreshnessRecord:
+      type: object
+      properties:
+        recordId:
+          type: string
+        queryId:
+          type: string
+        orgId:
+          type: string
+        snapshotId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [ok, error, stale]
+        source:
+          type: string
+          enum: [poll, webhook, manual]
+        errorMessage:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    QueryStatusResponse:
+      type: object
+      properties:
+        query:
+          $ref: "#/components/schemas/QueryDefinition"
+        latestSnapshot:
+          $ref: "#/components/schemas/DatasetSnapshot"
+        latestFreshness:
+          $ref: "#/components/schemas/FreshnessRecord"
+    QueryDefinition:
+      type: object
+      properties:
+        queryId:
+          type: string
+        orgId:
+          type: string
+        sql:
+          type: string
+        connectorId:
+          type: string
+        params:
+          type: array
+        freshnessPolicy:
+          $ref: "#/components/schemas/FreshnessPolicy"
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    FreshnessPolicy:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [eager, on_interval, on_demand]
+        intervalMs:
+          type: integer

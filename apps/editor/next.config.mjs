@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@domio/canvas', '@domio/schema', '@domio/components', '@domio/schema-prop'],
+  transpilePackages: ['@domio/canvas', '@domio/schema', '@domio/components', '@domio/schema-prop', '@domio/api-client'],
   experimental: {
     typedRoutes: true,
   },

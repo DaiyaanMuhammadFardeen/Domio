@@ -31,6 +31,9 @@ export {
   controlDescriptors,
   type PropControlDescriptor,
   type PropControlKind,
+  type DataBindingControlDescriptor,
+  type ThresholdControlDescriptor,
+  type TypedControlDescriptor,
 } from './controls.js';
 
 export {

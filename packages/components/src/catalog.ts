@@ -11,6 +11,11 @@ import { SECTION_HEADER, AGENDA, BULLET_LIST, NUMBERED_STEPS, CALLOUT, QUOTE_BLO
 import { TEAM_GRID, PROFILE_CARD } from './components/people.js';
 import { BENTO_GRID, KANBAN_BOARD, ORG_CHART } from './components/layout.js';
 import { ICON } from './components/icons.js';
+import {
+  LIVE_BAR, LIVE_LINE, LIVE_AREA, LIVE_PIE, LIVE_SCATTER,
+  LIVE_FUNNEL, LIVE_SANKEY, LIVE_TREEMAP, LIVE_HEATMAP, LIVE_WATERFALL,
+  LIVE_GAUGE, LIVE_RADAR, LIVE_CANDLESTICK, LIVE_BULLET,
+} from './components/live-charts.js';
 
 export const CATALOG: readonly DomioComponentDef[] = [
   STAT_CARD,
@@ -38,6 +43,20 @@ export const CATALOG: readonly DomioComponentDef[] = [
   KANBAN_BOARD,
   ORG_CHART,
   ICON,
+  LIVE_BAR,
+  LIVE_LINE,
+  LIVE_AREA,
+  LIVE_PIE,
+  LIVE_SCATTER,
+  LIVE_FUNNEL,
+  LIVE_SANKEY,
+  LIVE_TREEMAP,
+  LIVE_HEATMAP,
+  LIVE_WATERFALL,
+  LIVE_GAUGE,
+  LIVE_RADAR,
+  LIVE_CANDLESTICK,
+  LIVE_BULLET,
 ];
 
 const byCatalogId = new Map(CATALOG.map((def) => [def.catalogId, def]));

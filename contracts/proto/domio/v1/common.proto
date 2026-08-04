@@ -185,6 +185,32 @@ message IdempotencyKey {
 }
 
 // -----------------------------------------------------------------------------
+// Licensing
+// -----------------------------------------------------------------------------
+
+// LicenseGrant is a JWT-signed entitlement issued by the license service.
+// It grants access to a catalog listing within a workspace scope.
+message LicenseGrant {
+  // Signed JWT token. Clients may cache and present this for verification.
+  string token = 1;
+
+  // Marketplace listing this grant covers.
+  string listing_id = 2;
+
+  // License identifier.
+  string license_id = 3;
+
+  // Seat limit for this grant. Zero means unlimited.
+  int32 seats = 4;
+
+  // Issued-at (epoch milliseconds).
+  int64 issued_at_ms = 5;
+
+  // Expiration (epoch milliseconds). Zero means no expiry.
+  int64 expires_at_ms = 6;
+}
+
+// -----------------------------------------------------------------------------
 // Audit
 // -----------------------------------------------------------------------------
 

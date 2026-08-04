@@ -8,8 +8,6 @@ syntax = "proto3";
 
 package domio.v1;
 
-import "domio/v1/common.proto";
-
 option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
 
 enum McpErrorCode {

@@ -69,15 +69,6 @@ message InstallResponse {
   repeated string installed_deps = 3;
 }
 
-message LicenseGrant {
-  string token = 1; // signed JWT
-  string listing_id = 2;
-  string license_id = 3;
-  int32 seats = 4;
-  int64 issued_at_ms = 5;
-  int64 expires_at_ms = 6;
-}
-
 message UninstallRequest {
   ComponentRef component = 1;
   ResourceId workspace = 2;

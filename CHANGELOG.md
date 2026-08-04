@@ -6,6 +6,145 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 9 — Animation & transition system
+
+#### Added
+
+- **Easing library (`packages/easing`).** Pure-TS, fully deterministic
+  easing evaluators (linear, step, cubic-Bézier via Newton-Raphson with
+  degenerate fallbacks, spring via fixed 120 Hz sub-step solver with
+  `wobbly`/`snappy`/`gentle` presets, physics gravity/throw/bounce);
+  `validateBezier` rejecting degenerate/non-monotonic/out-of-range handles;
+  256-entry LUT builder (<5 ms) + 1024-entry LRU cache. **47 tests.**
+- **Animation runtime (`packages/animation-runtime`).** Client timeline
+  engine (tracks, keyframes, interpolation of numbers/colors/strings,
+  loop/playCount/startOffset, debounced writes, worker-offload hook,
+  headless `tickManually`); trigger resolver (`on_click`/`on_enter`/
+  `on_hover`/`on_data_change`/`on_timer` with 250 ms debounce + 16-trigger
+  cap, negative timer offset rejected); stagger (forward/reverse/
+  center-out/random, offsets only); reduced-motion guard (`follow_os`/
+  `always_reduced`/`always_full`, duration clamp, particle/scroll collapse);
+  scroll-linked bindings (32 cap, dependency rejection). **77 tests incl.
+  a 64-track @ 60 fps perf smoke.**
+- **Timeline API (`services/timeline-api`).** Hono service: timeline/track/
+  keyframe/trigger CRUD with optimistic-lock (etag → 409), easing-curve
+  CRUD with business-rule validation (non-monotonic Bézier, spring bounds),
+  animation-preset CRUD with `applyPreset` (required-property check +
+  last-slide `on_enter`→`on_click` conversion), transition CRUD, reduced-
+  motion get/put (default `follow_os`). **33 tests.**
+- **Magic-move (`services/magic-move` + `workers/magic-move`).** Job CRUD
+  + worker-facing claim/complete/fail; compute worker with poll loop and
+  graceful shutdown. **19 tests.**
+- **Export pipeline (`services/export-pipeline` + `workers/export-render`).**
+  Job lifecycle (queued→rendering→encoding→ready) with budget enforcement
+  (GIF ≤ 12 s, video ≤ 30 s); GIF encoder via gifenc with a minimal
+  GIF89a LZW fallback; ffmpeg shell-out for MP4/WebM (graceful
+  `{ unsupported: true }` when absent); SSRF guard (loopback, RFC1918,
+  link-local, cloud metadata, non-HTTPS); render worker with graceful
+  shutdown. **54 tests.**
+- **Viewer animation runtime (`apps/viewer/src/animation`).** Scroll-linked
+  resolver (easing, bucket cache, cap, dependency chain), reduced-motion
+  guard factory, playback engine over `TimelineEngine`, 8-kind transition
+  resolver (fade/slide/wipe/zoom/flip/bubble/cube/shutter) with motion-heavy
+  classification; interactive demo page wiring all four modules. **87 tests.**
+- **Canvas ops (`packages/canvas`).** `TimelineOp`, `TransitionOp`,
+  `MagicMoveOp`, `ReducedMotionOp` (deep-clone + inverse-swap factories,
+  apply/revert, `applyOp` wiring) storing to
+  `props['x-domio:timeline']` / `slide['x-domio:transition']` /
+  `element.element_role` / `deck['x-domio:reduced-motion']`. **188 tests.**
+- **Editor UI (`apps/editor`).** Animations left tab with timeline panel
+  (add/configure timelines, tracks, keyframes, play/scrub), easing picker +
+  custom Bézier editor, trigger picker, per-slide transition inspector,
+  magic-move role inspector, copy/paste animations, reduced-motion policy
+  panel, export dialog; all committed via the new ops through the
+  HistoryEngine (undo/redo safe). **189 tests + 9-test Playwright e2e.**
+- **Scene-graph `element_role`.** Optional `element_role` field added to all
+  layer types (contract-first: schema → generated types → validator test).
+- **Contracts + migrations.** 7 JSON schemas (timeline, easing-curve,
+  animation-preset, reduced-motion, magic-move, transition, animation-export)
+  + 5 OpenAPI yamls (animation, magic-move, export-pipeline); migrations
+  `0023_phase09_animation` (10 tables + RLS) and
+  `0024_phase09_animation_indexes_seed` (indexes + easing curves + 24
+  presets), verified against live Postgres via the docker-gated harness
+  (7/7).
+
+### Phase 8 — Live data & interactive charts
+
+#### Added
+
+- **Formula engine (`packages/formula-engine`).** Recursive-descent parser
+  (lexer → AST) for spreadsheet-style formulas; ~50 built-in functions
+  (aggregation, logical, text, date, lookup, math) with typed error codes
+  (`#DIV/0!`, `#REF!`, `#CYCLE!`, `#NAME?`, …); dependency DAG with
+  cycle detection reporting the reachable path; incremental recompute
+  (slider drags re-evaluate only dependents); constant folding + CSE;
+  sandboxed evaluator with host-access rejection (`eval`, `Function`,
+  `globalThis`, `process`, `fetch`, …) and step/recursion/runtime caps —
+  no `eval`, no I/O. **288 tests.**
+- **Chart engine (`packages/chart`).** 14 chart types (bar, line, area,
+  pie, scatter, funnel, sankey, treemap, heatmap, waterfall, gauge,
+  radar, candlestick, bullet) rendered as SVG with a tri-stack renderer
+  interface and hybrid escalation thresholds (1k / 10k points);
+  per-type binding schemas + `validateBinding`; interaction layer
+  (hit-test, drill, legend toggle, brush zoom); data-table ops
+  (sort, paginate >10k with cursor, locale-aware format,
+  conditional format, sparkline). **84 tests.**
+- **Mock data generator (`packages/mock-data`).** Seeded deterministic
+  generator (uniform/normal/lognormal/poisson/categorical/date/currency)
+  with correlated region/quarter demos. **26 tests.**
+- **Connector framework (`services/connector-framework`).** Versioned
+  adapter registry (pin/deprecation); canonical column/row normalization
+  with semantic roles; PII shape detection (email/phone/SSN) reusing
+  `@domio/redact-pii`; exponential backoff + jitter + circuit breaker;
+  auth flow handlers for Google/Microsoft/Airtable/Notion (state + scope,
+  CSRF); credential validation for Postgres/MySQL/BigQuery/Snowflake +
+  REST/GraphQL (bearer/API-key/anonymous); `create-readonly-role` SQL for
+  Postgres 14+ and MySQL 8; 10 adapters (sheets, excel, airtable, notion,
+  postgres, mysql, bigquery, snowflake, rest, graphql) on an injectable
+  transport with recorded-provider fixtures (real Postgres adapter is
+  docker-gated). **126 tests.**
+- **Query gateway (`services/query-gateway`).** Token-bucket rate limiter
+  (burst + refill), 3-tier cache with single-flight stampede prevention,
+  ACL (deny-by-default), HMAC webhook ingestion with idempotent dedup,
+  single-use viewer tokens with TTL + scope, append-only tamper-evident
+  audit log. **33 tests.**
+- **Refresh scheduler (`workers/refresh-scheduler`).** Drift-tracked
+  `on_interval` ticking (≤1s) + `eager` triggers; writes
+  `dataset_snapshot` + `freshness_record` (ok/error). **14 tests.**
+- **Scenario manager (`services/scenario-manager`).** Scenario DAG
+  (parent chains, cycle detection with reachable path, depth cap 8),
+  overlay merge (parent-first, child-wins) + diff, CRUD + REST. **28 tests.**
+- **Localization (`services/localization`).** Intl number/currency/percent/
+  date formatting + collation (en/de/bn), fixed-point Decimal arithmetic
+  (no float drift), FX rate ingestion + as-of conversion. **32 tests.**
+- **Embed proxy (`services/embed-proxy`).** SSRF guard (loopback, RFC1918,
+  link-local, cloud metadata, DNS re-check), single-use TTL embed tokens,
+  authenticated forwarding. **61 tests.**
+- **Freshness tracker (`workers/freshness-tracker`).** Append-only
+  freshness records (ok/stale/error/never), staleness math with grace
+  period, graceful shutdown. **25 tests.**
+- **Contracts.** JSON Schemas `chart-binding-v1`, `scenario-v1`,
+  `annotation-v1`, `query-v1`, `threshold-rule-v1`, `mock-data-v1`;
+  OpenAPI `connector-framework.yaml`, `query-gateway.yaml`, `scenario.yaml`,
+  `localization.yaml`, `embed-proxy.yaml`, `freshness-tracker.yaml`.
+- **Migrations.** `0021_phase08_data_plane` (12 tables + RLS via
+  `current_setting('app.tenant_id')`) and `0022_phase08_live_data_indexes_seed`
+  (indexes + 4 freshness policies + 24 threshold-rule templates).
+- **Canvas ops (`packages/canvas`).** `DataBindingOp` / `ThresholdOp` —
+  bindings and threshold rules persist on the layer via
+  `props['x-domio:binding']` / `props['x-domio:thresholds']` with
+  deep-cloned inverse for undo. **10 tests.**
+- **Prop engine (`packages/schema-prop`).** Real `data-binding` and
+  `thresholds` control kinds (previously a placeholder). **8 tests.**
+- **Editor live-data UI (`apps/editor`).** Data Sources tab (demo
+  datasets + add/refresh/remove), live-chart inserts (14 types via
+  `domio.live-*` catalog), bind-to-data inspector with field mapping and
+  validation, threshold rules panel, scenario switcher dropdown,
+  freshness status, stage-view toggle. **153 tests (26 files)** +
+  e2e smoke `e2e/p08-live-charts.spec.ts` (insert → bind → threshold →
+  scenario). **242 tests** in `@domio/components`.
+- **Handoff doc:** `docs/handoff/P07-to-P08.md`.
+
 ### Phase 0 — Repository, contracts, dev environment
 
 #### Added

@@ -22,7 +22,8 @@ export type PropControlKind =
   | 'data-binding'
   | 'repeatable'
   | 'nested-object'
-  | 'union';
+  | 'union'
+  | 'thresholds';
 
 export interface PropControlDescriptor {
   kind: PropControlKind;
@@ -42,6 +43,30 @@ export interface PropControlDescriptor {
   branches?: Array<{ label: string; schema: PropSchemaFragment }> | undefined;
 }
 
+/** Control descriptor for live-data binding panels (P08). */
+export interface DataBindingControlDescriptor extends PropControlDescriptor {
+  kind: 'data-binding';
+  /** Human-readable label shown in the props panel. */
+  label: string;
+  /** Optional hint/description below the control. */
+  hint?: string | undefined;
+}
+
+/** Control descriptor for threshold rule editors (P08). */
+export interface ThresholdControlDescriptor extends PropControlDescriptor {
+  kind: 'thresholds';
+  /** Human-readable label shown in the props panel. */
+  label: string;
+  /** Maximum number of rules the component supports (feature #60 cap). */
+  maxRules?: number | undefined;
+}
+
+/** Discriminated union of all typed control descriptors. */
+export type TypedControlDescriptor =
+  | PropControlDescriptor
+  | DataBindingControlDescriptor
+  | ThresholdControlDescriptor;
+
 const OPTION_LABEL_PATTERN = /[A-Za-z0-9 _-]+/;
 
 function friendlyOptionLabel(value: unknown): string {
@@ -57,7 +82,7 @@ export function inferControl(
   key: string,
   fragment: PropSchemaFragment,
   opts: { category?: DomioPropExtension['category'] } = {},
-): PropControlDescriptor {
+): TypedControlDescriptor {
   const ext = fragment['x-domio-prop'];
   const category = ext?.category ?? opts.category;
   const base = { keys: [key], category, livePreview: ext?.livePreview ?? true };
@@ -97,9 +122,11 @@ export function inferControl(
       case 'asset':
         return { ...base, kind: 'asset' };
       case 'data-binding':
-        return { ...base, kind: 'data-binding' };
+        return { ...base, kind: 'data-binding', label: 'Bind to data (P08)' };
       case 'repeatable':
         return { ...base, kind: 'repeatable' };
+      case 'thresholds':
+        return { ...base, kind: 'thresholds', label: 'Threshold rules', maxRules: 64 };
     }
   }
 
@@ -127,7 +154,7 @@ export function inferControl(
     case 'asset-ref':
       return { ...base, kind: 'asset' };
     case 'data-binding':
-      return { ...base, kind: 'data-binding' };
+      return { ...base, kind: 'data-binding', label: 'Bind to data (P08)' };
   }
 
   // Enum → segmented (≤ 4) or select.
@@ -172,8 +199,8 @@ function firstEnum(fragment: PropSchemaFragment): unknown {
 /** Ordered, category-grouped control descriptors for the whole schema. */
 export function controlDescriptors(
   schema: DomioPropsSchema,
-): Array<{ category: NonNullable<DomioPropExtension['category']>; controls: PropControlDescriptor[] }> {
-  const groups = new Map<NonNullable<DomioPropExtension['category']>, PropControlDescriptor[]>();
+): Array<{ category: NonNullable<DomioPropExtension['category']>; controls: TypedControlDescriptor[] }> {
+  const groups = new Map<NonNullable<DomioPropExtension['category']>, TypedControlDescriptor[]>();
   for (const [key, fragment] of Object.entries(schema.properties ?? {})) {
     const descriptor = inferControl(key, fragment);
     const category = descriptor.category ?? 'Content';

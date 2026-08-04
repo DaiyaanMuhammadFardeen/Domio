@@ -129,6 +129,7 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
         "type": { "const": "frame" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
@@ -165,6 +166,7 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
         "type": { "const": "group" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
@@ -191,6 +193,7 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
         "type": { "const": "autoLayout" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
@@ -218,6 +221,7 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
         "type": { "const": "text" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
@@ -265,6 +269,7 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
         "type": { "const": "image" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
@@ -294,6 +299,7 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
         "type": { "const": "vector" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
@@ -334,6 +340,7 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
         "type": { "const": "boolean" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
@@ -369,6 +376,7 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
         "type": { "const": "component" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {

@@ -131,6 +131,22 @@ describe('validate', () => {
     expect(result.valid).toBe(true);
   });
 
+  it('accepts an element carrying the optional element_role magic-move key', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H00000000000000000000098'),
+      semanticId: 'hero_title',
+      element_role: 'deck-title',
+      type: 'frame',
+      name: 'Hero title',
+      parentId: null,
+      aspect: { ratioW: 16, ratioH: 9 },
+      transform: { x: 100, y: 100, w: 320, h: 160, rotation: 0 },
+    });
+    const result = validate(doc);
+    expect(result.valid).toBe(true);
+  });
+
   it('rejects a component element with a missing or malformed ComponentRef', () => {
     const doc = baseDeck();
     doc.slides[0]!.elements.push({

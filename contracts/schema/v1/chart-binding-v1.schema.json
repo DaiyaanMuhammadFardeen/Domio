@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/chart-binding-v1.schema.json",
+  "title": "Domio Chart Binding V1",
+  "description": "Glue contract between a chart widget and a query: which dataset columns map to which chart axes, which filters the chart listens to, and the drill hierarchy. Extends Appendix C of live-data-charts.md. Consumed by the chart engine (Phase 08) and later by MCP tools (Phase 13).",
+  "type": "object",
+  "required": ["query_id", "field_map"],
+  "additionalProperties": false,
+  "properties": {
+    "query_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Stable id of the query this chart is bound to."
+    },
+    "field_map": {
+      "type": "object",
+      "description": "Chart axis/role -> dataset column name.",
+      "required": [],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "string", "description": "Category / x dimension column." },
+        "y": { "type": "string", "description": "Measure / y value column." },
+        "series": { "type": "string", "description": "Series-grouping column (multi-series charts)." },
+        "size": { "type": "string", "description": "Bubble size column (scatter)." },
+        "color": { "type": "string", "description": "Color-coded category column." },
+        "source": { "type": "string", "description": "Sankey source node column." },
+        "target": { "type": "string", "description": "Sankey target node column." },
+        "value": { "type": "string", "description": "Sankey / treemap / funnel / waterfall value column." },
+        "open": { "type": "string", "description": "Candlestick open column." },
+        "high": { "type": "string", "description": "Candlestick high column." },
+        "low": { "type": "string", "description": "Candlestick low column." },
+        "close": { "type": "string", "description": "Candlestick close column." },
+        "volume": { "type": "string", "description": "Candlestick volume column." },
+        "label": { "type": "string", "description": "Dimension column rendered as a label (pie/treemap/gauge/radar)." },
+        "measure": { "type": "string", "description": "Bullet chart actual-value column." },
+        "target_value": { "type": "string", "description": "Bullet chart target column." }
+      }
+    },
+    "listen_to_filters": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Filter keys this chart subscribes to on the slide-scoped pub/sub bus."
+    },
+    "drill": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Dimension columns available for drill-down."
+    },
+    "scenario_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Scenario this binding snapshot belongs to (null = default/Base)."
+    }
+  },
+  "definitions": {
+    "ChartType": {
+      "type": "string",
+      "enum": [
+        "bar", "line", "area", "pie", "scatter", "funnel", "sankey",
+        "treemap", "heatmap", "waterfall", "gauge", "radar", "candlestick", "bullet"
+      ]
+    },
+    "FreshnessPolicy": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["eager", "lazy", "manual", "on_interval"]
+        },
+        "interval_seconds": {
+          "type": "integer",
+          "minimum": 5,
+          "description": "Required when type = on_interval."
+        }
+      }
+    }
+  }
+}

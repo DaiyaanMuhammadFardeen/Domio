@@ -8,6 +8,7 @@ import { newToken } from '@domio/common';
 import type {
   DeckDocument,
   Element,
+  Slide,
   Transform2D,
   ULID,
 } from '@domio/schema';
@@ -27,7 +28,34 @@ export type HistoryOpName =
   | 'TextEditOp'
   | 'PropEditOp'
   | 'VariantChangeOp'
-  | 'CheckpointOp';
+  | 'CheckpointOp'
+  | 'DataBindingOp'
+  | 'ThresholdOp'
+  | 'FilterOp'
+  | 'TimelineOp'
+  | 'TransitionOp'
+  | 'MagicMoveOp'
+  | 'ReducedMotionOp'
+  | 'ExportOp';
+
+// ---- P08 live-data types ----
+
+/** Serializable binding descriptor stored in `component.props['x-domio:binding']`. */
+export interface LiveDataBinding {
+  queryId: string | null;
+  fieldMap: Record<string, string>;
+  listenToFilters: string[];
+}
+
+/** A single threshold rule stored in `component.props['x-domio:thresholds']`. */
+export interface ThresholdRule {
+  id: string;
+  measure: string;
+  comparator: 'lt' | 'lte' | 'gt' | 'gte' | 'eq' | 'between' | 'outside';
+  values: number[];
+  severity: 'info' | 'warn' | 'critical';
+  styleOverride: Record<string, unknown>;
+}
 
 export interface HistoryOp<T = unknown> {
   readonly id: string;
@@ -212,6 +240,236 @@ export function variantChangeOp(
   };
 }
 
+/**
+ * DataBindingOp — binds/rebinds/clears a live-data binding on a ComponentLayer.
+ * Stores the previous binding for precise revert.
+ */
+export interface DataBindingForward {
+  layerId: string;
+  /** The new binding to apply. `null` unbinds (deletes the prop key). */
+  binding: LiveDataBinding | null;
+  /** Snapshot of the previous value for revert (deep-cloned at op creation). */
+  previousBinding: unknown;
+}
+
+/**
+ * ThresholdOp — sets threshold rules on a ComponentLayer.
+ */
+export interface ThresholdForward {
+  layerId: string;
+  /** The new rules to apply. */
+  rules: ThresholdRule[];
+  /** Snapshot of the previous value for revert (deep-cloned at op creation). */
+  previousRules: unknown;
+}
+
+/**
+ * FilterOp — stores cross-chart global filters on a ComponentLayer.
+ * Each filter = { id, dimension, value } where dimension is a column name.
+ */
+export interface CrossFilter {
+  id: string;
+  dimension: string;
+  value: string;
+}
+
+export interface FilterForward {
+  layerId: string;
+  /** The new filters to apply. */
+  filters: CrossFilter[];
+  /** Snapshot of the previous value for revert (deep-cloned at op creation). */
+  previousFilters: unknown;
+}
+
+/**
+ * Deep-clone a JSON-serialisable value (or return `null`/`undefined` as-is).
+ */
+function deepClone<T>(value: T): T {
+  if (value === null || value === undefined) return value;
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+export function dataBindingOp(
+  layerId: string,
+  binding: LiveDataBinding | null,
+  previousBinding: unknown,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<DataBindingForward> {
+  return {
+    id: newOpId(),
+    name: 'DataBindingOp',
+    timestamp,
+    forward: { layerId, binding: deepClone(binding), previousBinding: deepClone(previousBinding) },
+    inverse: { layerId, binding: previousBinding as LiveDataBinding | null, previousBinding: binding },
+    authorId,
+  };
+}
+
+export function thresholdOp(
+  layerId: string,
+  rules: ThresholdRule[],
+  previousRules: unknown,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<ThresholdForward> {
+  return {
+    id: newOpId(),
+    name: 'ThresholdOp',
+    timestamp,
+    forward: { layerId, rules: deepClone(rules), previousRules: deepClone(previousRules) },
+    inverse: { layerId, rules: previousRules as ThresholdRule[], previousRules: rules },
+    authorId,
+  };
+}
+
+export function filterOp(
+  layerId: string,
+  filters: CrossFilter[],
+  previousFilters: unknown,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<FilterForward> {
+  return {
+    id: newOpId(),
+    name: 'FilterOp',
+    timestamp,
+    forward: { layerId, filters: deepClone(filters), previousFilters: deepClone(previousFilters) },
+    inverse: { layerId, filters: previousFilters as CrossFilter[], previousFilters: filters },
+    authorId,
+  };
+}
+
+// ---- P09 animation & transition types ----
+
+export interface Keyframe {
+  timeMs: number;
+  value: unknown;
+  easing?: string;
+}
+
+export interface TimelineTrack {
+  property: string;
+  keyframes: Keyframe[];
+}
+
+export interface TriggerConfig {
+  kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer';
+  sourceId?: string;
+  fieldPath?: string;
+  seconds?: number;
+  debounceMs?: number;
+}
+
+export interface LayerTimeline {
+  id: string;
+  durationMs: number;
+  loop: boolean;
+  playCount: number | null;
+  startOffsetMs: number;
+  trigger?: TriggerConfig;
+  tracks: TimelineTrack[];
+}
+
+export interface SlideTransition {
+  kind: 'fade' | 'slide' | 'wipe' | 'zoom' | 'flip' | 'bubble' | 'cube' | 'shutter';
+  durationMs: number;
+  easing?: string;
+  direction?: string;
+}
+
+export type ReducedMotionPolicy = 'follow_os' | 'always_reduced' | 'always_full';
+
+export interface TimelineForward {
+  layerId: string;
+  timeline: LayerTimeline | null;
+  previousTimeline: unknown;
+}
+
+export interface TransitionForward {
+  slideId: string;
+  transition: SlideTransition | null;
+  previousTransition: unknown;
+}
+
+export interface MagicMoveForward {
+  layerId: string;
+  role: string | null;
+  previousRole: unknown;
+}
+
+export interface ReducedMotionForward {
+  policy: ReducedMotionPolicy | null;
+  previousPolicy: unknown;
+}
+
+export function timelineOp(
+  layerId: string,
+  timeline: LayerTimeline | null,
+  previousTimeline: unknown,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<TimelineForward> {
+  return {
+    id: newOpId(),
+    name: 'TimelineOp',
+    timestamp,
+    forward: { layerId, timeline: deepClone(timeline), previousTimeline: deepClone(previousTimeline) },
+    inverse: { layerId, timeline: previousTimeline as LayerTimeline | null, previousTimeline: timeline },
+    authorId,
+  };
+}
+
+export function transitionOp(
+  slideId: string,
+  transition: SlideTransition | null,
+  previousTransition: unknown,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<TransitionForward> {
+  return {
+    id: newOpId(),
+    name: 'TransitionOp',
+    timestamp,
+    forward: { slideId, transition: deepClone(transition), previousTransition: deepClone(previousTransition) },
+    inverse: { slideId, transition: previousTransition as SlideTransition | null, previousTransition: transition },
+    authorId,
+  };
+}
+
+export function magicMoveOp(
+  layerId: string,
+  role: string | null,
+  previousRole: unknown,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<MagicMoveForward> {
+  return {
+    id: newOpId(),
+    name: 'MagicMoveOp',
+    timestamp,
+    forward: { layerId, role, previousRole: deepClone(previousRole) },
+    inverse: { layerId, role: previousRole as string | null, previousRole: role },
+    authorId,
+  };
+}
+
+export function reducedMotionOp(
+  policy: ReducedMotionPolicy | null,
+  previousPolicy: unknown,
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<ReducedMotionForward> {
+  return {
+    id: newOpId(),
+    name: 'ReducedMotionOp',
+    timestamp,
+    forward: { policy, previousPolicy: deepClone(previousPolicy) },
+    inverse: { policy: previousPolicy as ReducedMotionPolicy | null, previousPolicy: policy },
+    authorId,
+  };
+}
+
 export interface AddRemoveForward {
   added: Element[];
   removed: Element[];
@@ -260,12 +518,28 @@ export function applyOp(doc: DeckDocument, op: HistoryOp): DeckDocument {
       return applyPropEdit(doc, op.forward as PropEditForward);
     case 'VariantChangeOp':
       return applyVariantChange(doc, op.forward as VariantChangeForward);
+    case 'DataBindingOp':
+      return applyDataBinding(doc, op.forward as DataBindingForward);
+    case 'ThresholdOp':
+      return applyThreshold(doc, op.forward as ThresholdForward);
+    case 'FilterOp':
+      return applyFilter(doc, op.forward as FilterForward);
+    case 'TimelineOp':
+      return applyTimeline(doc, op.forward as TimelineForward);
+    case 'TransitionOp':
+      return applyTransition(doc, op.forward as TransitionForward);
+    case 'MagicMoveOp':
+      return applyMagicMove(doc, op.forward as MagicMoveForward);
+    case 'ReducedMotionOp':
+      return applyReducedMotion(doc, op.forward as ReducedMotionForward);
     case 'AddElementOp':
     case 'RemoveElementOp':
       return applyAddRemove(doc, op.forward as AddRemoveForward);
     case 'GroupOp':
     case 'UngroupOp':
     case 'CheckpointOp':
+      return doc;
+    default:
       return doc;
   }
 }
@@ -330,6 +604,90 @@ function applyVariantChange(doc: DeckDocument, payload: VariantChangeForward): D
     if (!change) return element;
     return { ...element, component: { ...element.component, variant: change.to } };
   });
+}
+
+function applyDataBinding(doc: DeckDocument, payload: DataBindingForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.type !== 'component') return element;
+    if (element.id !== payload.layerId) return element;
+    const props = { ...(element.component.props ?? {}) };
+    if (payload.binding === null) {
+      delete props['x-domio:binding'];
+    } else {
+      props['x-domio:binding'] = deepClone(payload.binding);
+    }
+    return { ...element, component: { ...element.component, props } };
+  });
+}
+
+function applyThreshold(doc: DeckDocument, payload: ThresholdForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.type !== 'component') return element;
+    if (element.id !== payload.layerId) return element;
+    const props = { ...(element.component.props ?? {}) };
+    props['x-domio:thresholds'] = deepClone(payload.rules);
+    return { ...element, component: { ...element.component, props } };
+  });
+}
+
+function applyFilter(doc: DeckDocument, payload: FilterForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.type !== 'component') return element;
+    if (element.id !== payload.layerId) return element;
+    const props = { ...(element.component.props ?? {}) };
+    props['x-domio:filters'] = deepClone(payload.filters);
+    return { ...element, component: { ...element.component, props } };
+  });
+}
+
+function applyTimeline(doc: DeckDocument, payload: TimelineForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.type !== 'component') return element;
+    if (element.id !== payload.layerId) return element;
+    const props = { ...(element.component.props ?? {}) };
+    if (payload.timeline === null) {
+      delete props['x-domio:timeline'];
+    } else {
+      props['x-domio:timeline'] = deepClone(payload.timeline);
+    }
+    return { ...element, component: { ...element.component, props } };
+  });
+}
+
+function applyTransition(doc: DeckDocument, payload: TransitionForward): DeckDocument {
+  return {
+    ...doc,
+    slides: doc.slides.map((slide) => {
+      if (slide.id !== payload.slideId) return slide;
+      if (payload.transition === null) {
+        const prev = deepClone(slide) as unknown as Record<string, unknown>;
+        delete prev['x-domio:transition'];
+        return prev as unknown as Slide;
+      }
+      return { ...slide, 'x-domio:transition': deepClone(payload.transition) } as Slide;
+    }),
+  };
+}
+
+function applyMagicMove(doc: DeckDocument, payload: MagicMoveForward): DeckDocument {
+  return mapElements(doc, (element) => {
+    if (element.id !== payload.layerId) return element;
+    if (payload.role === null) {
+      const prev = deepClone(element) as unknown as Record<string, unknown>;
+      delete prev['element_role'];
+      return prev as unknown as Element;
+    }
+    return { ...element, element_role: payload.role } as Element;
+  });
+}
+
+function applyReducedMotion(doc: DeckDocument, payload: ReducedMotionForward): DeckDocument {
+  if (payload.policy === null) {
+    const prev = deepClone(doc) as unknown as Record<string, unknown>;
+    delete prev['x-domio:reduced-motion'];
+    return prev as unknown as DeckDocument;
+  }
+  return { ...doc, 'x-domio:reduced-motion': payload.policy } as unknown as DeckDocument;
 }
 
 function applyAddRemove(doc: DeckDocument, payload: AddRemoveForward): DeckDocument {

@@ -1,0 +1,529 @@
+openapi: 3.1.0
+info:
+  title: Domio Connector Framework API
+  version: 1.0.0
+  description: |
+    Connector framework — adapter interface, registry, auth flows,
+    canonical normalization, PII detection, and retry/circuit-breaker.
+    Phase 08.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: connectors
+    description: Connector auth, ping, discover, query, subscribe, and invalidate operations.
+security:
+  - bearerAuth: []
+paths:
+  /v1/connectors/{connector_id}/auth/start:
+    post:
+      tags: [connectors]
+      operationId: authStart
+      summary: Start an OAuth / credential auth flow
+      description: |
+        Initiates an auth flow for the given connector.
+        Returns a redirect URL for OAuth connectors, or an empty URL
+        for credential-based connectors.
+      parameters:
+        - in: path
+          name: connector_id
+          required: true
+          schema:
+            type: string
+            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectorAuthStartRequest"
+      responses:
+        "200":
+          description: Auth start succeeded. Returns redirect URL and CSRF state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectorAuthStartResponse"
+        "409":
+          description: Adapter version mismatch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/connectors/{connector_id}/auth/callback:
+    get:
+      tags: [connectors]
+      operationId: authCallback
+      summary: Handle OAuth callback
+      description: |
+        Exchanges an authorization code for a credential.
+        The state parameter is verified against the state stored
+        during auth_start.
+      parameters:
+        - in: path
+          name: connector_id
+          required: true
+          schema:
+            type: string
+            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+        - in: query
+          name: code
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: state
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: version
+          required: false
+          schema:
+            type: string
+            default: "1.0.0"
+      responses:
+        "200":
+          description: Callback succeeded. Returns credential reference.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectorAuthCallbackResponse"
+        "400":
+          description: Auth state mismatch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/connectors/{connector_id}/ping:
+    post:
+      tags: [connectors]
+      operationId: pingConnector
+      summary: Ping a connector to verify connectivity
+      description: |
+        Sends a lightweight ping to the underlying connector service
+        and returns success status and latency.
+      parameters:
+        - in: path
+          name: connector_id
+          required: true
+          schema:
+            type: string
+            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectorPingRequest"
+      responses:
+        "200":
+          description: Ping succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectorPingResponse"
+        "404":
+          description: Connection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Adapter version mismatch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/connectors/{connector_id}/discover:
+    post:
+      tags: [connectors]
+      operationId: discoverConnector
+      summary: Discover datasets/tables for a connection
+      description: |
+        Returns the list of available tables and their canonical
+        column schemas for the given connection.
+      parameters:
+        - in: path
+          name: connector_id
+          required: true
+          schema:
+            type: string
+            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectorDiscoverRequest"
+      responses:
+        "200":
+          description: Discover succeeded. Returns available tables.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectorDiscoverResponse"
+        "404":
+          description: Connection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Adapter version mismatch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/connectors/{connector_id}/query:
+    post:
+      tags: [connectors]
+      operationId: queryConnector
+      summary: Execute a query against a connector
+      description: |
+        Runs a query (SQL, API query, etc.) against the connector and
+        returns canonical rows with typed columns.
+      parameters:
+        - in: path
+          name: connector_id
+          required: true
+          schema:
+            type: string
+            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectorQueryRequest"
+      responses:
+        "200":
+          description: Query succeeded. Returns canonical rows and column metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectorQueryResponse"
+        "404":
+          description: Connection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Adapter version mismatch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/connectors/{connector_id}/subscribe:
+    post:
+      tags: [connectors]
+      operationId: subscribeConnector
+      summary: Subscribe to change notifications
+      description: |
+        Creates a subscription for a table to receive change notifications.
+        Returns not_implemented for connectors that do not support subscriptions.
+      parameters:
+        - in: path
+          name: connector_id
+          required: true
+          schema:
+            type: string
+            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectorSubscribeRequest"
+      responses:
+        "200":
+          description: Subscribe succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectorSubscribeResponse"
+        "404":
+          description: Connection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/connectors/{connector_id}/invalidate:
+    post:
+      tags: [connectors]
+      operationId: invalidateConnector
+      summary: Invalidate (disconnect) a connection
+      description: |
+        Invalidates the stored credentials and connection state for
+        the given connection.
+      parameters:
+        - in: path
+          name: connector_id
+          required: true
+          schema:
+            type: string
+            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectorInvalidateRequest"
+      responses:
+        "200":
+          description: Invalidation succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectorInvalidateResponse"
+        "404":
+          description: Connection not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/connectors:
+    get:
+      tags: [connectors]
+      operationId: listConnectors
+      summary: List all registered connectors
+      description: Returns the list of all registered connector adapters and their version info.
+      responses:
+        "200":
+          description: List of registered connectors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connectors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AdapterVersionInfo"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    ConnectorAuthStartRequest:
+      type: object
+      required: [version, tenant_id]
+      properties:
+        version:
+          type: string
+          description: Adapter version to use (e.g. "1.0.0" or "^1.0.0")
+        tenant_id:
+          type: string
+        redirect_uri:
+          type: string
+          description: Custom redirect URI for OAuth callback.
+        scope:
+          type: array
+          items:
+            type: string
+          description: Custom OAuth scopes. Defaults depend on connector.
+    ConnectorAuthStartResponse:
+      type: object
+      properties:
+        redirect_url:
+          type: string
+          description: URL to redirect the user to for OAuth authorization.
+        state:
+          type: string
+          description: CSRF nonce for callback verification.
+        scope:
+          type: string
+          description: Granted/requested scope string.
+    ConnectorAuthCallbackResponse:
+      type: object
+      properties:
+        credential_ref:
+          $ref: "#/components/schemas/CredentialRef"
+    ConnectorPingRequest:
+      type: object
+      required: [version, connection_id, tenant_id]
+      properties:
+        version:
+          type: string
+        connection_id:
+          type: string
+        tenant_id:
+          type: string
+    ConnectorPingResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        latency_ms:
+          type: integer
+    ConnectorDiscoverRequest:
+      type: object
+      required: [version, connection_id, tenant_id]
+      properties:
+        version:
+          type: string
+        connection_id:
+          type: string
+        tenant_id:
+          type: string
+        tables:
+          type: array
+          items:
+            type: string
+          description: Optional filter for specific table names.
+    ConnectorDiscoverResponse:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            $ref: "#/components/schemas/DiscoveredTable"
+    ConnectorQueryRequest:
+      type: object
+      required: [version, connection_id, tenant_id, sql]
+      properties:
+        version:
+          type: string
+        connection_id:
+          type: string
+        tenant_id:
+          type: string
+        sql:
+          type: string
+          description: Query string (SQL for databases, range for sheets, etc.)
+        params:
+          type: array
+          items: {}
+          description: Optional query parameters.
+        max_rows:
+          type: integer
+        cursor:
+          type: string
+    ConnectorQueryResponse:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            type: array
+            items: {}
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/CanonicalColumn"
+        cursor:
+          type: string
+        stats:
+          $ref: "#/components/schemas/QueryStats"
+    ConnectorSubscribeRequest:
+      type: object
+      required: [version, connection_id, tenant_id, table]
+      properties:
+        version:
+          type: string
+        connection_id:
+          type: string
+        tenant_id:
+          type: string
+        table:
+          type: string
+        cursor:
+          type: string
+    ConnectorSubscribeResponse:
+      type: object
+      properties:
+        subscription_id:
+          type: string
+        status:
+          type: string
+          enum: [active, not_implemented]
+    ConnectorInvalidateRequest:
+      type: object
+      required: [version, connection_id, tenant_id]
+      properties:
+        version:
+          type: string
+        connection_id:
+          type: string
+        tenant_id:
+          type: string
+    ConnectorInvalidateResponse:
+      type: object
+      properties:
+        invalidated:
+          type: boolean
+        connector_id:
+          type: string
+    CredentialRef:
+      type: object
+      properties:
+        vault:
+          type: string
+        path:
+          type: string
+    CanonicalColumn:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [string, number, boolean, date, currency, percent]
+        semantic_role:
+          type: string
+          enum: [dimension, measure, date, currency, percent, id]
+        pii_detected:
+          type: string
+          enum: [none, low, medium, high, restricted]
+    DiscoveredTable:
+      type: object
+      properties:
+        name:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/CanonicalColumn"
+        row_count_estimate:
+          type: integer
+    QueryStats:
+      type: object
+      properties:
+        duration_ms:
+          type: integer
+        row_count:
+          type: integer
+        source:
+          type: string
+          enum: [live, cache]
+    AdapterVersionInfo:
+      type: object
+      properties:
+        connector_id:
+          type: string
+        version:
+          type: string
+        auth_kind:
+          type: string
+          enum: [oauth, credentials, token, anonymous]
+        deprecated:
+          type: boolean
+        deprecated_since:
+          type: string
+        replaced_by:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string

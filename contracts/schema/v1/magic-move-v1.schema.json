@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/magic-move-v1.schema.json",
+  "title": "Magic-move config",
+  "description": "Element diff config for automatic cross-slide tweens (Phase 09).",
+  "type": "object",
+  "required": ["from_slide_id", "to_slide_id", "element_role", "duration_ms", "easing"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "from_slide_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "to_slide_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "element_role": { "type": "string", "minLength": 1 },
+    "duration_ms": { "type": "integer", "minimum": 50, "maximum": 10000 },
+    "easing": { "type": "string", "minLength": 1 },
+    "properties": {
+      "type": "array",
+      "items": { "enum": ["transform", "opacity", "props", "all"] },
+      "uniqueItems": true
+    }
+  }
+}

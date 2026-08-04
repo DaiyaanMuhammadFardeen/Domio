@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/reduced-motion-v1.schema.json",
+  "title": "Reduced-motion settings",
+  "description": "Deck-level reduced-motion policy (Phase 09).",
+  "type": "object",
+  "required": ["deck_id", "policy", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "policy": { "enum": ["follow_os", "always_reduced", "always_full"] },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

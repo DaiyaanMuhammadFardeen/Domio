@@ -19,6 +19,8 @@ export default defineConfig({
       '@domio/schema/generated/scene-graph': resolve(here, '../../packages/schema/src/generated/scene-graph.ts'),
       '@domio/schema/contracts': resolve(here, '../../packages/schema/src/contracts-loader.ts'),
       '@domio/schema-prop': resolve(here, '../../packages/schema-prop/src/index.ts'),
+      '@domio/chart': resolve(here, '../../packages/chart/src/index.ts'),
+      '@domio/mock-data': resolve(here, '../../packages/mock-data/src/index.ts'),
       '@domio/sdk': resolve(here, '../../packages/sdk-ts/src/index.ts'),
       '@domio/yjs-shared': resolve(here, '../../packages/yjs-shared/src/index.ts'),
       '@bufbuild/protobuf': resolve(here, '../../node_modules/.pnpm/@bufbuild+protobuf@1.10.1/node_modules/@bufbuild/protobuf'),

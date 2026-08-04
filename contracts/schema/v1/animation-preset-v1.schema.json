@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/animation-preset-v1.schema.json",
+  "title": "Animation preset",
+  "description": "A reusable entrance/exit/emphasis animation preset (Phase 09).",
+  "type": "object",
+  "required": ["id", "name", "category", "kind", "requires", "keyframes"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "name": { "type": "string", "minLength": 1 },
+    "category": { "enum": ["entrance", "exit", "emphasis"] },
+    "tags": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "kind": { "type": "string", "minLength": 1 },
+    "requires": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "durationMs": { "type": "integer", "minimum": 0, "maximum": 60000 },
+    "keyframes": { "type": "array", "items": { "type": "object" }, "maxItems": 512 }
+  }
+}

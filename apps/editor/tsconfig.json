@@ -14,7 +14,11 @@
         "name": "next"
       }
     ],
-    "allowJs": true
+    "allowJs": true,
+    "paths": {
+      "@domio/chart": ["../../packages/chart/src/index.ts"],
+      "@domio/mock-data": ["../../packages/mock-data/src/index.ts"]
+    }
   },
   "include": [
     "next-env.d.ts",

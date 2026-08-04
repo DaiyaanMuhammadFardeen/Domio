@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/timeline-v1.schema.json",
+  "title": "Animation timeline",
+  "description": "A keyframe timeline attached to a deck or a single element. Track/keyframe/trigger collections live on the timeline (Phase 09).",
+  "type": "object",
+  "required": ["id", "deck_id", "element_id", "duration_ms", "tracks", "version"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "element_id": { "type": ["string", "null"], "description": "null means the slide-level (transition) timeline." },
+    "duration_ms": { "type": "integer", "minimum": 1, "maximum": 60000 },
+    "loop": { "type": "boolean", "default": false },
+    "play_count": { "type": ["integer", "null"], "minimum": 1, "maximum": 100, "default": null },
+    "start_offset_ms": { "type": "integer", "minimum": 0, "default": 0 },
+    "tracks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/track" },
+      "maxItems": 64
+    },
+    "version": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "track": {
+      "type": "object",
+      "required": ["id", "property", "keyframes"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        "property": { "type": "string", "minLength": 1 },
+        "keyframes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/keyframe" },
+          "maxItems": 512
+        }
+      }
+    },
+    "keyframe": {
+      "type": "object",
+      "required": ["id", "time_ms", "value", "easing"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        "time_ms": { "type": "integer", "minimum": 0 },
+        "value": {},
+        "easing": { "$ref": "#/$defs/easing_ref" }
+      }
+    },
+    "easing_ref": {
+      "oneOf": [
+        { "type": "string", "enum": ["linear", "ease", "ease-in", "ease-out", "ease-in-out"] },
+        { "$ref": "easing-curve-v1.schema.json" }
+      ]
+    }
+  }
+}

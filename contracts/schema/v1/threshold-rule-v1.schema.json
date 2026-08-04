@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/threshold-rule-v1.schema.json",
+  "title": "Domio Threshold Rule V1",
+  "description": "Threshold alert rule: auto-restyle a chart/callout on measure breach, with a provenance chip. Declared per chart binding, capped at 64 rules per binding (R-08-6).",
+  "type": "object",
+  "required": ["measure", "comparator", "values", "severity", "style_override"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "chart_widget_id": { "type": "string", "format": "uuid" },
+    "scenario_id": { "type": ["string", "null"], "format": "uuid" },
+    "measure": { "type": "string", "description": "'revenue', 'churn', ... the evaluated measure name." },
+    "comparator": {
+      "type": "string",
+      "enum": ["lt", "lte", "gt", "gte", "eq", "between", "outside"]
+    },
+    "values": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": { "type": "number" },
+      "description": "Single value for lt/lte/gt/gte/eq; [low, high] for between/outside."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "warn", "critical"]
+    },
+    "style_override": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Restyle applied on breach (fill, textColor, etc.)."
+    },
+    "floating_point_tolerance": {
+      "type": "number",
+      "minimum": 0,
+      "default": 1e-9,
+      "description": "Equality tolerance honored on comparisons (AC-60.4)."
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

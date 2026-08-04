@@ -392,3 +392,375 @@ describe.skipIf(!hasDocker())('P07 migrations apply + rollback', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// P08 migrations — live data plane.
+// ---------------------------------------------------------------------------
+const P08_MIGRATIONS = [
+  '0021_phase08_data_plane',
+  '0022_phase08_live_data_indexes_seed',
+];
+const P08_TABLES = [
+  'data_connection', 'data_source', 'query', 'dataset_snapshot',
+  'scenario', 'formula_field', 'chart_widget', 'chart_binding',
+  'annotation', 'threshold_rule', 'embed_config', 'freshness_record',
+];
+
+describe.skipIf(!hasDocker())('P08 migrations apply + rollback', () => {
+  let containerName = '';
+  let client = new pg.Client({ user: 'postgres', password: 'test', database: 'domio' });
+  let host = '127.0.0.1';
+  let port = 0;
+
+  beforeAll(async () => {
+    const name = `domio-p08-mig-${process.pid}-${Date.now()}`;
+    containerName = name;
+    spawn(
+      'docker',
+      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      { stdio: 'ignore' },
+    );
+    let attempts = 90;
+    while (attempts-- > 0) {
+      try {
+        const out = execSync(`docker port ${name} 5432/tcp`, { encoding: 'utf8' }).trim();
+        const line = out.split('\n')[0];
+        const [h, p] = line ? line.split(':') : ['', ''];
+        if (h && p) {
+          host = h === '0.0.0.0' || h === '::' ? '127.0.0.1' : h;
+          port = Number(p);
+          if (port) break;
+        }
+      } catch {
+        /* container not ready yet */
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    if (!port) throw new Error('Could not determine container port');
+    await waitForPg({ host, port, user: 'postgres', password: 'test', database: 'domio' });
+    client = new pg.Client({ host, port, user: 'postgres', password: 'test', database: 'domio' });
+    await client.connect();
+  }, 180000);
+
+  afterAll(async () => {
+    try {
+      await client.end();
+    } catch {
+      /* already closed */
+    }
+    try {
+      execSync(`docker rm -f ${containerName} >/dev/null 2>&1`, { stdio: 'ignore' });
+    } catch {
+      /* nothing to clean */
+    }
+  }, 30000);
+
+  it('applies 0021–0022 cleanly', async () => {
+    for (const m of P08_MIGRATIONS) {
+      await client.query(readSql(m, 'up'));
+    }
+    const { rows } = await client.query<{ table_name: string }>(
+      `SELECT table_name FROM information_schema.tables
+       WHERE table_schema = 'public'
+       ORDER BY table_name`,
+    );
+    const tables = rows.map((r) => r.table_name);
+    const expected = [...P08_TABLES, 'freshness_policy', 'threshold_rule_template'];
+    for (const t of expected) {
+      expect(tables).toContain(t);
+    }
+  });
+
+  it('creates the key P08 columns and indexes', async () => {
+    const { rows: cols } = await client.query<{ column_name: string; table_name: string }>(
+      `SELECT table_name, column_name FROM information_schema.columns
+       WHERE table_schema = 'public' AND (
+         (table_name = 'data_connection' AND column_name IN ('tenant_id', 'owner_id', 'connector_id', 'connector_ver', 'credential_ref'))
+         OR (table_name = 'data_source' AND column_name IN ('connection_id', 'query_spec', 'schema_json', 'pii_class'))
+         OR (table_name = 'query' AND column_name IN ('data_source_id', 'freshness_policy'))
+         OR (table_name = 'dataset_snapshot' AND column_name IN ('query_id', 'hash', 'row_count', 'obj_key', 'expires_at'))
+         OR (table_name = 'scenario' AND column_name IN ('deck_id', 'parent_id'))
+         OR (table_name = 'formula_field' AND column_name IN ('expression', 'ast_json', 'version'))
+         OR (table_name = 'chart_widget' AND column_name IN ('component_id', 'binding_id', 'props_json'))
+         OR (table_name = 'chart_binding' AND column_name IN ('chart_widget_id', 'query_id', 'field_map', 'listen_to_filters'))
+         OR (table_name = 'annotation' AND column_name IN ('chart_widget_id', 'scenario_id', 'bindable_point'))
+         OR (table_name = 'threshold_rule' AND column_name IN ('measure', 'comparator', 'values', 'severity', 'style_override'))
+         OR (table_name = 'embed_config' AND column_name IN ('provider', 'url', 'sizing', 'auth_passthrough'))
+         OR (table_name = 'freshness_record' AND column_name IN ('binding_id', 'status', 'source', 'recorded_at'))
+       )`,
+    );
+    expect(cols.length).toBeGreaterThanOrEqual(40);
+    const { rows: idx } = await client.query<{ indexname: string }>(
+      `SELECT indexname FROM pg_indexes WHERE schemaname = 'public'
+       AND indexname IN (
+         'dataset_snapshot_scenario_idx', 'freshness_record_tenant_status_idx',
+         'scenario_parent_idx', 'threshold_rule_widget_measure_idx'
+       )`,
+    );
+    expect(idx.length).toBe(4);
+  });
+
+  it('seeds 4 freshness policies and 24 threshold-rule templates', async () => {
+    const { rows: policies } = await client.query<{ policy_id: string }>(
+      `SELECT policy_id FROM freshness_policy ORDER BY policy_id`,
+    );
+    expect(policies.map((r) => r.policy_id)).toEqual(['eager', 'lazy', 'manual', 'on_interval']);
+    const { rows: templates } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM threshold_rule_template`,
+    );
+    expect(Number(templates[0]?.count ?? '0')).toBe(24);
+  });
+
+  it('enforces RLS policies exist for all P08 tables', async () => {
+    const { rows } = await client.query<{ tablename: string; policyname: string }>(
+      `SELECT tablename, policyname FROM pg_policies
+       WHERE schemaname = 'public' AND tablename = ANY($1)
+       ORDER BY tablename, policyname`,
+      [P08_TABLES],
+    );
+    const perTable = new Map<string, string[]>();
+    for (const r of rows) {
+      perTable.set(r.tablename, [...(perTable.get(r.tablename) ?? []), r.policyname]);
+    }
+    for (const t of P08_TABLES) {
+      const policies = perTable.get(t) ?? [];
+      expect(policies).toContain(`${t}_tenant_isolation`);
+    }
+  });
+
+  it('enforces an insert chain across the data plane', async () => {
+    // data_connection → data_source → query → chart_widget → chart_binding → threshold_rule / freshness_record
+    await client.query(
+      `INSERT INTO data_connection (id, tenant_id, owner_id, connector_id, connector_ver, label, credential_ref)
+       VALUES ('00000000-0000-4000-8000-000000000001', 'org-test', 'user-test', 'google-sheets', '1.0.0', 'Test Sheet', 'vault:key-1')`,
+    );
+    await client.query(
+      `INSERT INTO data_source (id, tenant_id, connection_id, name, kind, query_spec, schema_json, pii_class)
+       VALUES ('00000000-0000-4000-8000-000000000002', 'org-test', '00000000-0000-4000-8000-000000000001',
+               'Revenue', 'sheet', '{"range":"A1:D24"}'::jsonb, '{"columns":[]}'::jsonb, 'medium')`,
+    );
+    await client.query(
+      `INSERT INTO query (id, data_source_id, tenant_id, name, query_spec, freshness_policy)
+       VALUES ('00000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000002',
+               'org-test', 'revenue-monthly', '{}'::jsonb, '{"type":"eager"}'::jsonb)`,
+    );
+    await client.query(
+      `INSERT INTO chart_widget (id, tenant_id, deck_id, slide_id, component_id, type, props_json, binding_id)
+       VALUES ('00000000-0000-4000-8000-000000000004', 'org-test', '00000000-0000-4000-8000-00000000000a',
+               '00000000-0000-4000-8000-00000000000b', '00000000-0000-4000-8000-00000000000c',
+               'chart', '{}'::jsonb, '00000000-0000-4000-8000-000000000005')`,
+    );
+    await client.query(
+      `INSERT INTO chart_binding (id, tenant_id, chart_widget_id, query_id, field_map, listen_to_filters)
+       VALUES ('00000000-0000-4000-8000-000000000005', 'org-test', '00000000-0000-4000-8000-000000000004',
+               '00000000-0000-4000-8000-000000000003', '{"x":"month","y":"revenue"}'::jsonb, '{region}')`,
+    );
+    await client.query(
+      `INSERT INTO threshold_rule (id, tenant_id, chart_widget_id, measure, comparator, values, severity, style_override)
+       VALUES ('00000000-0000-4000-8000-000000000006', 'org-test', '00000000-0000-4000-8000-000000000004',
+               'revenue', 'lt', '[1000000]'::jsonb, 'critical', '{"fill":"#EF4444"}'::jsonb)`,
+    );
+    await client.query(
+      `INSERT INTO freshness_record (id, tenant_id, binding_id, status, source)
+       VALUES ('00000000-0000-4000-8000-000000000007', 'org-test', '00000000-0000-4000-8000-000000000005',
+               'ok', 'poll')`,
+    );
+    const { rows } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM chart_binding WHERE tenant_id = 'org-test'`,
+    );
+    expect(Number(rows[0]?.count ?? '0')).toBe(1);
+  });
+
+  it('rolls back 0022 → 0021 cleanly', async () => {
+    for (const m of [...P08_MIGRATIONS].reverse()) {
+      await client.query(readSql(m, 'down'));
+    }
+    const { rows } = await client.query<{ table_name: string }>(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`,
+    );
+    const tables = rows.map((r) => r.table_name);
+    for (const t of [...P08_TABLES, 'freshness_policy', 'threshold_rule_template']) {
+      expect(tables).not.toContain(t);
+    }
+  });
+});
+
+const P09_MIGRATIONS = [
+  '0023_phase09_animation',
+  '0024_phase09_animation_indexes_seed',
+];
+const P09_TABLES = [
+  'timeline', 'timeline_track', 'timeline_keyframe', 'timeline_trigger',
+  'easing_curve', 'animation_preset', 'transition', 'reduced_motion_settings',
+  'magic_move_config', 'animation_export_job',
+];
+
+describe.skipIf(!hasDocker())('P09 migrations apply + rollback', () => {
+  let containerName = '';
+  let client = new pg.Client({ user: 'postgres', password: 'test', database: 'domio' });
+  let host = '127.0.0.1';
+  let port = 0;
+
+  beforeAll(async () => {
+    const name = `domio-p09-mig-${process.pid}-${Date.now()}`;
+    containerName = name;
+    spawn(
+      'docker',
+      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      { stdio: 'ignore' },
+    );
+    let attempts = 90;
+    while (attempts-- > 0) {
+      try {
+        const out = execSync(`docker port ${name} 5432/tcp`, { encoding: 'utf8' }).trim();
+        const line = out.split('\n')[0];
+        const [h, p] = line ? line.split(':') : ['', ''];
+        if (h && p) {
+          host = h === '0.0.0.0' || h === '::' ? '127.0.0.1' : h;
+          port = Number(p);
+          if (port) break;
+        }
+      } catch {
+        /* container not ready yet */
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    if (!port) throw new Error('Could not determine container port');
+    await waitForPg({ host, port, user: 'postgres', password: 'test', database: 'domio' });
+    client = new pg.Client({ host, port, user: 'postgres', password: 'test', database: 'domio' });
+    await client.connect();
+  }, 180000);
+
+  afterAll(async () => {
+    try { await client.end(); } catch { /* ignore */ }
+    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+  });
+
+  it('applies 0023 + 0024 cleanly', async () => {
+    for (const m of P09_MIGRATIONS) {
+      await client.query(readSql(m, 'up'));
+    }
+    const { rows } = await client.query<{ table_name: string }>(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`,
+    );
+    const tables = rows.map((r) => r.table_name);
+    for (const t of P09_TABLES) {
+      expect(tables).toContain(t);
+    }
+  });
+
+  it('creates the P09 columns and indexes', async () => {
+    const { rows } = await client.query<{ table_name: string; column_name: string }>(
+      `SELECT table_name, column_name FROM information_schema.columns
+       WHERE table_schema = 'public' AND (column_name = 'tenant_id' OR column_name = 'timeline_id' OR column_name = 'track_id')`,
+    );
+    const cols = rows.map((r) => `${r.table_name}.${r.column_name}`);
+    expect(cols).toContain('timeline.tenant_id');
+    expect(cols).toContain('timeline_track.tenant_id');
+    expect(cols).toContain('timeline_keyframe.tenant_id');
+    expect(cols).toContain('timeline_trigger.tenant_id');
+    expect(cols).toContain('timeline_track.timeline_id');
+    expect(cols).toContain('timeline_keyframe.track_id');
+    expect(cols).toContain('timeline_trigger.timeline_id');
+    const { rows: idx } = await client.query<{ indexname: string }>(
+      `SELECT indexname FROM pg_indexes WHERE schemaname = 'public'`,
+    );
+    const indexes = idx.map((r) => r.indexname);
+    for (const i of ['timeline_tenant_deck_idx', 'timeline_track_timeline_idx', 'timeline_keyframe_track_idx', 'transition_tenant_deck_idx']) {
+      expect(indexes).toContain(i);
+    }
+  });
+
+  it('enforces RLS policies on all P09 tables', async () => {
+    const { rows } = await client.query<{ tablename: string; policyname: string }>(
+      `SELECT tablename, policyname FROM pg_policies WHERE schemaname = 'public'`,
+    );
+    const policies = new Set(rows.map((r) => r.policyname));
+    for (const t of P09_TABLES) {
+      expect(policies.has(`${t}_tenant_isolation`)).toBe(true);
+    }
+  });
+
+  it('seeds easing curves and 24 animation presets', async () => {
+    const { rows: curves } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM easing_curve WHERE tenant_id = 'system'`,
+    );
+    expect(Number(curves[0]?.count ?? '0')).toBe(10);
+    const { rows: presets } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM animation_preset`,
+    );
+    expect(Number(presets[0]?.count ?? '0')).toBe(24);
+  });
+
+  it('enforces the P09 insert chain (timeline → track → keyframe → trigger)', async () => {
+    const tl = await client.query<{ id: string }>(
+      `INSERT INTO timeline (id, tenant_id, deck_id, element_id, duration_ms) VALUES
+         ('01H0000000000000000000000E1', 'org-test', 'deck-1', NULL, 800) RETURNING id`,
+    );
+    const timelineId = tl.rows[0]!.id;
+    const tr = await client.query<{ id: string }>(
+      `INSERT INTO timeline_track (id, tenant_id, timeline_id, property) VALUES
+         ('01H0000000000000000000000E2', 'org-test', $1, 'opacity') RETURNING id`,
+      [timelineId],
+    );
+    const trackId = tr.rows[0]!.id;
+    await client.query(
+      `INSERT INTO timeline_keyframe (id, tenant_id, track_id, time_ms, value) VALUES
+         ('01H0000000000000000000000E3', 'org-test', $1, 0, '{"opacity":0}'::jsonb)`,
+      [trackId],
+    );
+    await client.query(
+      `INSERT INTO timeline_trigger (id, tenant_id, timeline_id, kind) VALUES
+         ('01H0000000000000000000000E4', 'org-test', $1, 'on_enter')`,
+      [timelineId],
+    );
+    await client.query(
+      `INSERT INTO transition (id, tenant_id, deck_id, from_slide_id, to_slide_id, kind, duration_ms, easing) VALUES
+         ('01H0000000000000000000000E5', 'org-test', 'deck-1', 's1', 's2', 'fade', 300, 'linear')`,
+    );
+    await client.query(
+      `INSERT INTO reduced_motion_settings (deck_id, tenant_id, policy) VALUES
+         ('deck-1', 'org-test', 'follow_os')`,
+    );
+    await client.query(
+      `INSERT INTO magic_move_config (id, tenant_id, deck_id, from_slide_id, to_slide_id, element_role, duration_ms, easing) VALUES
+         ('01H0000000000000000000000E6', 'org-test', 'deck-1', 's1', 's2', 'hero', 500, 'linear')`,
+    );
+    await client.query(
+      `INSERT INTO animation_export_job (id, tenant_id, deck_id, format, range) VALUES
+         ('01H0000000000000000000000E7', 'org-test', 'deck-1', 'gif', '{"from":0,"to":2}'::jsonb)`,
+    );
+    const { rows } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM timeline_keyframe WHERE tenant_id = 'org-test'`,
+    );
+    expect(Number(rows[0]?.count ?? '0')).toBe(1);
+  });
+
+  it('rejects a bad transition kind and a bad trigger kind', async () => {
+    await expect(
+      client.query(
+        `INSERT INTO transition (id, tenant_id, deck_id, from_slide_id, to_slide_id, kind, duration_ms, easing) VALUES
+           ('01H0000000000000000000000F1', 'org-test', 'deck-1', 's1', 's2', 'warp', 300, 'linear')`,
+      ),
+    ).rejects.toThrow();
+    await expect(
+      client.query(
+        `INSERT INTO timeline_trigger (id, tenant_id, timeline_id, kind) VALUES
+           ('01H0000000000000000000000F2', 'org-test', '01H0000000000000000000000E1', 'on_scroll')`,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it('rolls back 0024 → 0023 cleanly', async () => {
+    for (const m of [...P09_MIGRATIONS].reverse()) {
+      await client.query(readSql(m, 'down'));
+    }
+    const { rows } = await client.query<{ table_name: string }>(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`,
+    );
+    const tables = rows.map((r) => r.table_name);
+    for (const t of P09_TABLES) {
+      expect(tables).not.toContain(t);
+    }
+  });
+});

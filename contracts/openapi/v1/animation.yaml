@@ -1,0 +1,1014 @@
+openapi: 3.1.0
+info:
+  title: Domio Timeline API
+  version: 1.0.0
+  description: |
+    Timeline data-plane API for Phase 09 animation & transitions.
+    Exposes REST endpoints for timeline, track, keyframe, trigger CRUD,
+    easing-curve CRUD, animation-preset CRUD, transitions, and
+    reduced-motion settings.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: timelines
+    description: Timeline, track, keyframe, and trigger management.
+  - name: easing-curves
+    description: Named easing-curve definitions.
+  - name: animation-presets
+    description: Reusable animation presets.
+  - name: transitions
+    description: Slide-to-slide transitions.
+  - name: reduced-motion
+    description: Per-deck accessibility settings.
+security:
+  - bearerAuth: []
+paths:
+  /v1/decks/{deck_id}/timelines:
+    get:
+      tags: [timelines]
+      operationId: listTimelines
+      summary: List timelines for a deck
+      parameters:
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tenant_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of timelines.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineListResponse"
+        "401":
+          description: Unauthenticated.
+    post:
+      tags: [timelines]
+      operationId: createTimeline
+      summary: Create a new timeline
+      parameters:
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tenant_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTimelineRequest"
+      responses:
+        "201":
+          description: Timeline created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Timeline"
+        "400":
+          description: Validation error.
+        "401":
+          description: Unauthenticated.
+  /v1/timelines/{id}:
+    get:
+      tags: [timelines]
+      operationId: getTimeline
+      summary: Get a timeline by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tenant_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Timeline details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Timeline"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Timeline not found.
+    patch:
+      tags: [timelines]
+      operationId: patchTimeline
+      summary: Update a timeline (optimistic lock)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tenant_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchTimelineRequest"
+      responses:
+        "200":
+          description: Timeline updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Timeline"
+        "400":
+          description: Validation error.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Timeline not found.
+        "409":
+          description: Version conflict (stale etag).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionConflictResponse"
+    delete:
+      tags: [timelines]
+      operationId: deleteTimeline
+      summary: Delete a timeline
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tenant_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Timeline deleted.
+        "401":
+          description: Unauthenticated.
+  /v1/timelines/{id}/tracks:
+    post:
+      tags: [timelines]
+      operationId: createTrack
+      summary: Add a track to a timeline
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tenant_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTrackRequest"
+      responses:
+        "201":
+          description: Track created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Track"
+        "400":
+          description: Validation error.
+        "404":
+          description: Timeline not found.
+  /v1/tracks/{id}/keyframes:
+    post:
+      tags: [timelines]
+      operationId: createKeyframe
+      summary: Add a keyframe to a track
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateKeyframeRequest"
+      responses:
+        "201":
+          description: Keyframe created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Keyframe"
+        "400":
+          description: Validation error.
+        "404":
+          description: Track not found.
+  /v1/timelines/{id}/triggers:
+    post:
+      tags: [timelines]
+      operationId: createTrigger
+      summary: Add a trigger to a timeline
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tenant_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTriggerRequest"
+      responses:
+        "201":
+          description: Trigger created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trigger"
+        "400":
+          description: Validation error.
+        "404":
+          description: Timeline not found.
+  /v1/workspaces/{workspace_id}/easing-curves:
+    get:
+      tags: [easing-curves]
+      operationId: listEasingCurves
+      summary: List easing curves for a workspace
+      parameters:
+        - in: path
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of easing curves.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EasingCurveListResponse"
+    post:
+      tags: [easing-curves]
+      operationId: createEasingCurve
+      summary: Create an easing curve
+      parameters:
+        - in: path
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEasingCurveRequest"
+      responses:
+        "201":
+          description: Easing curve created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EasingCurve"
+        "400":
+          description: Validation error.
+        "422":
+          description: Business rule validation failed (non-monotonic Bezier, out-of-bounds spring).
+  /v1/easing-curves/{id}:
+    get:
+      tags: [easing-curves]
+      operationId: getEasingCurve
+      summary: Get an easing curve by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Easing curve details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EasingCurve"
+        "404":
+          description: Easing curve not found.
+    patch:
+      tags: [easing-curves]
+      operationId: patchEasingCurve
+      summary: Update an easing curve
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchEasingCurveRequest"
+      responses:
+        "200":
+          description: Easing curve updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EasingCurve"
+        "404":
+          description: Easing curve not found.
+        "422":
+          description: Business rule validation failed.
+    delete:
+      tags: [easing-curves]
+      operationId: deleteEasingCurve
+      summary: Delete an easing curve
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Easing curve deleted.
+  /v1/workspaces/{workspace_id}/animation-presets:
+    get:
+      tags: [animation-presets]
+      operationId: listAnimationPresets
+      summary: List animation presets (filterable by category/tag)
+      parameters:
+        - in: path
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [entrance, exit, emphasis]
+        - in: query
+          name: tag
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of animation presets.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimationPresetListResponse"
+    post:
+      tags: [animation-presets]
+      operationId: createAnimationPreset
+      summary: Create an animation preset
+      parameters:
+        - in: path
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAnimationPresetRequest"
+      responses:
+        "201":
+          description: Animation preset created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimationPreset"
+        "400":
+          description: Validation error.
+  /v1/animation-presets/{id}:
+    get:
+      tags: [animation-presets]
+      operationId: getAnimationPreset
+      summary: Get an animation preset by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Animation preset details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimationPreset"
+        "404":
+          description: Animation preset not found.
+  /v1/decks/{deck_id}/transitions:
+    get:
+      tags: [transitions]
+      operationId: listTransitions
+      summary: List transitions for a deck
+      parameters:
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of transitions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransitionListResponse"
+    post:
+      tags: [transitions]
+      operationId: createTransition
+      summary: Create a transition
+      parameters:
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransitionRequest"
+      responses:
+        "201":
+          description: Transition created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transition"
+        "400":
+          description: Validation error.
+  /v1/decks/{deck_id}/reduced-motion:
+    get:
+      tags: [reduced-motion]
+      operationId: getReducedMotion
+      summary: Get reduced-motion settings for a deck
+      parameters:
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reduced-motion settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReducedMotionSettings"
+    put:
+      tags: [reduced-motion]
+      operationId: putReducedMotion
+      summary: Update reduced-motion settings
+      parameters:
+        - in: path
+          name: deck_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutReducedMotionRequest"
+      responses:
+        "200":
+          description: Reduced-motion settings updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReducedMotionSettings"
+        "400":
+          description: Validation error.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Timeline:
+      type: object
+      required: [id, tenantId, deckId, slideId, elementId, durationMs, loop, playCount, startOffsetMs, tracks, triggers, version, updatedAt]
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        deckId:
+          type: string
+        slideId:
+          type: string
+        elementId:
+          type: string
+        durationMs:
+          type: number
+        loop:
+          type: boolean
+        playCount:
+          type: integer
+        startOffsetMs:
+          type: number
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Track"
+        triggers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trigger"
+        version:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+    Track:
+      type: object
+      required: [id, timelineId, property, keyframes, startOffsetMs, easing]
+      properties:
+        id:
+          type: string
+        timelineId:
+          type: string
+        property:
+          type: string
+        keyframes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Keyframe"
+        startOffsetMs:
+          type: number
+        easing:
+          type: string
+    Keyframe:
+      type: object
+      required: [id, trackId, timeMs, value]
+      properties:
+        id:
+          type: string
+        trackId:
+          type: string
+        timeMs:
+          type: number
+        value:
+          description: Arbitrary value (type varies by property)
+        easing:
+          type: string
+    Trigger:
+      type: object
+      required: [id, timelineId, kind]
+      properties:
+        id:
+          type: string
+        timelineId:
+          type: string
+        kind:
+          type: string
+          enum: [on_click, on_enter, on_hover, on_data_change, on_timer]
+        sourceId:
+          type: string
+        fieldPath:
+          type: string
+        offsetMs:
+          type: number
+        debounceMs:
+          type: number
+    EasingCurve:
+      type: object
+      required: [id, workspaceId, name, type, params, lutVersion, builtIn]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [linear, cubic_bezier, spring, physics, step]
+        params:
+          $ref: "#/components/schemas/EasingCurveParams"
+        lutVersion:
+          type: integer
+        builtIn:
+          type: boolean
+    EasingCurveParams:
+      type: object
+      properties:
+        bezier:
+          type: array
+          items:
+            type: number
+          minItems: 4
+          maxItems: 4
+        spring:
+          type: object
+          properties:
+            mass:
+              type: number
+              minimum: 0.1
+              maximum: 10
+            stiffness:
+              type: number
+              minimum: 10
+              maximum: 1000
+            damping:
+              type: number
+              minimum: 1
+              maximum: 200
+        physics:
+          type: object
+          properties:
+            friction:
+              type: number
+            strength:
+              type: number
+        steps:
+          type: integer
+          minimum: 1
+    AnimationPreset:
+      type: object
+      required: [id, workspaceId, name, category, tags, definition, builtIn]
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+          enum: [entrance, exit, emphasis]
+        tags:
+          type: array
+          items:
+            type: string
+        definition:
+          $ref: "#/components/schemas/AnimationPresetDefinition"
+        builtIn:
+          type: boolean
+    AnimationPresetDefinition:
+      type: object
+      required: [durationMs, tracks]
+      properties:
+        durationMs:
+          type: number
+        tracks:
+          type: array
+          items:
+            type: object
+            properties:
+              property:
+                type: string
+              keyframes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timeMs:
+                      type: number
+                    value:
+                      description: Arbitrary value
+                    easing:
+                      type: string
+              easing:
+                type: string
+        triggers:
+          type: array
+          items:
+            type: object
+            properties:
+              kind:
+                type: string
+                enum: [on_click, on_enter, on_hover, on_data_change, on_timer]
+              offsetMs:
+                type: number
+        requiredProperties:
+          type: array
+          items:
+            type: string
+    Transition:
+      type: object
+      required: [id, deckId, fromSlideId, toSlideId, type, magicMoveEnabled, options]
+      properties:
+        id:
+          type: string
+        deckId:
+          type: string
+        fromSlideId:
+          type: string
+        toSlideId:
+          type: string
+        type:
+          type: string
+          enum: [fade, slide, zoom, dissolve, push, wipe, morph]
+        magicMoveEnabled:
+          type: boolean
+        options:
+          $ref: "#/components/schemas/TransitionOptions"
+    TransitionOptions:
+      type: object
+      properties:
+        durationMs:
+          type: number
+        easing:
+          type: string
+        direction:
+          type: string
+          enum: [left, right, up, down]
+    ReducedMotionSettings:
+      type: object
+      required: [deckId, mode, maxTransitionMs, disableParticles, collapseScrollLinked, instantTickers]
+      properties:
+        deckId:
+          type: string
+        mode:
+          type: string
+          enum: [follow_os, always_reduced, always_full]
+        maxTransitionMs:
+          type: number
+        disableParticles:
+          type: boolean
+        collapseScrollLinked:
+          type: boolean
+        instantTickers:
+          type: boolean
+    CreateTimelineRequest:
+      type: object
+      required: [slideId, elementId, durationMs]
+      properties:
+        slideId:
+          type: string
+        elementId:
+          type: string
+        durationMs:
+          type: number
+          minimum: 0
+        loop:
+          type: boolean
+        playCount:
+          type: integer
+          minimum: 0
+        startOffsetMs:
+          type: number
+          minimum: 0
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateTrackRequest"
+        triggers:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateTriggerRequest"
+    PatchTimelineRequest:
+      type: object
+      required: [version]
+      properties:
+        durationMs:
+          type: number
+          minimum: 0
+        loop:
+          type: boolean
+        playCount:
+          type: integer
+          minimum: 0
+        startOffsetMs:
+          type: number
+          minimum: 0
+        version:
+          type: integer
+          minimum: 1
+        tracks:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateTrackRequest"
+        triggers:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateTriggerRequest"
+    CreateTrackRequest:
+      type: object
+      required: [property, keyframes, easing]
+      properties:
+        property:
+          type: string
+        keyframes:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [timeMs, value]
+            properties:
+              timeMs:
+                type: number
+                minimum: 0
+              value:
+                description: Arbitrary value
+              easing:
+                type: string
+        startOffsetMs:
+          type: number
+          minimum: 0
+        easing:
+          type: string
+    CreateKeyframeRequest:
+      type: object
+      required: [timeMs, value]
+      properties:
+        timeMs:
+          type: number
+          minimum: 0
+        value:
+          description: Arbitrary value
+        easing:
+          type: string
+    CreateTriggerRequest:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [on_click, on_enter, on_hover, on_data_change, on_timer]
+        sourceId:
+          type: string
+        fieldPath:
+          type: string
+        offsetMs:
+          type: number
+        debounceMs:
+          type: number
+          minimum: 0
+    CreateEasingCurveRequest:
+      type: object
+      required: [name, type, params]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [linear, cubic_bezier, spring, physics, step]
+        params:
+          $ref: "#/components/schemas/EasingCurveParams"
+    PatchEasingCurveRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [linear, cubic_bezier, spring, physics, step]
+        params:
+          $ref: "#/components/schemas/EasingCurveParams"
+    CreateAnimationPresetRequest:
+      type: object
+      required: [name, category, definition]
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+          enum: [entrance, exit, emphasis]
+        tags:
+          type: array
+          items:
+            type: string
+        definition:
+          $ref: "#/components/schemas/AnimationPresetDefinition"
+    CreateTransitionRequest:
+      type: object
+      required: [fromSlideId, toSlideId, type]
+      properties:
+        fromSlideId:
+          type: string
+        toSlideId:
+          type: string
+        type:
+          type: string
+          enum: [fade, slide, zoom, dissolve, push, wipe, morph]
+        magicMoveEnabled:
+          type: boolean
+        options:
+          $ref: "#/components/schemas/TransitionOptions"
+    PutReducedMotionRequest:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          type: string
+          enum: [follow_os, always_reduced, always_full]
+        maxTransitionMs:
+          type: number
+          minimum: 0
+        disableParticles:
+          type: boolean
+        collapseScrollLinked:
+          type: boolean
+        instantTickers:
+          type: boolean
+    TimelineListResponse:
+      type: object
+      properties:
+        timelines:
+          type: array
+          items:
+            $ref: "#/components/schemas/Timeline"
+    EasingCurveListResponse:
+      type: object
+      properties:
+        easingCurves:
+          type: array
+          items:
+            $ref: "#/components/schemas/EasingCurve"
+    AnimationPresetListResponse:
+      type: object
+      properties:
+        animationPresets:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnimationPreset"
+    TransitionListResponse:
+      type: object
+      properties:
+        transitions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transition"
+    VersionConflictResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+          enum: [VERSION_CONFLICT]
+        etag:
+          type: string
+        currentVersion:
+          type: integer

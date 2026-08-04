@@ -24,8 +24,9 @@ import {
   removeElementOp,
   propEditOp,
   variantChangeOp,
+  filterOp,
 } from '@domio/canvas';
-import type { HistoryEntry } from '@domio/canvas';
+import type { HistoryEntry, CrossFilter } from '@domio/canvas';
 import { getComponent, expandComponent, type DomioComponentDef } from '@domio/components';
 import { LayersPanel } from '../panels/LayersPanel';
 import { HistoryPanel } from '../panels/HistoryPanel';
@@ -43,6 +44,12 @@ import { LibraryPanel } from '../panels/library-panel';
 import { StickersPanel } from '../panels/stickers-panel';
 import { IconPicker } from '../panels/icon-picker';
 import { ThemeBrandPanel, type PaletteOverride, type ColorScheme } from '../panels/theme-brand-panel';
+import { DataSourcePanel } from '../panels/data-source-panel';
+import { FiltersPanel } from '../panels/filters-panel';
+import { ScenarioSwitcher } from '../panels/scenario-switcher';
+import { AnimationsPanel } from '../panels/animations-panel';
+import type { LayerTimeline, SlideTransition, ReducedMotionPolicy } from '@domio/canvas';
+import { timelineOp, transitionOp, magicMoveOp, reducedMotionOp } from '@domio/canvas';
 import type { A11yAuditFinding } from '../lib/theme-audit';
 import { addToLibrary } from '../lib/library';
 
@@ -92,8 +99,9 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     doc.slides[0]?.id ?? ('' as ULID),
   );
   const [leftTab, setLeftTab] = useState<
-    'layers' | 'insert' | 'library' | 'stickers' | 'icons' | 'theme-brand'
+    'layers' | 'insert' | 'library' | 'stickers' | 'icons' | 'theme-brand' | 'data-sources' | 'filters' | 'animations'
   >('layers');
+  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | null>(null);
   const [promoteOpen, setPromoteOpen] = useState(false);
   const [activeThemeId, setActiveThemeId] = useState<string>('theme-acme-light');
   const [activeBrandKitId, setActiveBrandKitId] = useState<string>('brand-acme');
@@ -101,6 +109,11 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
   const [overrides, setOverrides] = useState<Record<string, PaletteOverride>>({});
   const [a11yFindings, setA11yFindings] = useState<readonly A11yAuditFinding[]>([]);
   const [isAuditing, setIsAuditing] = useState(false);
+  const [crossFilters, setCrossFilters] = useState<CrossFilter[]>([]);
+
+  // P09 animation state
+  const [copiedAnimation, setCopiedAnimation] = useState<LayerTimeline | null>(null);
+  const [deckReducedMotion, setDeckReducedMotion] = useState<ReducedMotionPolicy | null>(null);
 
   const pingRef = useRef<HTMLDivElement>(null);
   const pingAdapter = useMemo(() => new LocalPingAdapter(), []);
@@ -483,6 +496,90 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     });
   }, []);
 
+  const handleFilterChange = useCallback(
+    (newFilters: CrossFilter[]) => {
+      const prev = crossFilters;
+      setCrossFilters(newFilters);
+      // Commit via FilterOp on all components that listen to filters
+      const slide = deck.slides.find((s) => s.id === activeSlideId);
+      if (!slide) return;
+      for (const el of slide.elements) {
+        if (el.type !== 'component') continue;
+        const binding = (el.component.props ?? {})['x-domio:binding'] as { listenToFilters?: string[] } | undefined;
+        if (!binding?.listenToFilters?.length) continue;
+        const op = filterOp(el.id, newFilters, prev, Date.now());
+        setDeck(engine.apply(op));
+      }
+    },
+    [crossFilters, deck, activeSlideId, engine],
+  );
+
+  // P09: Timeline change handler
+  const handleTimelineChange = useCallback(
+    (timeline: LayerTimeline | null) => {
+      if (!selectedComponent) return;
+      const prevTimeline = (selectedComponent.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null | undefined;
+      const op = timelineOp(selectedComponent.id, timeline, prevTimeline ?? null, Date.now());
+      setDeck(engine.apply(op));
+      autosave.enqueue(`timeline-${selectedComponent.id}`, op);
+    },
+    [selectedComponent, engine, autosave],
+  );
+
+  // P09: Transition change handler
+  const handleTransitionChange = useCallback(
+    (transition: SlideTransition | null) => {
+      const slide = deck.slides.find((s) => s.id === activeSlideId);
+      if (!slide) return;
+      const prevTransition = (slide as unknown as Record<string, unknown>)['x-domio:transition'] as SlideTransition | null | undefined;
+      const op = transitionOp(activeSlideId, transition, prevTransition ?? null, Date.now());
+      setDeck(engine.apply(op));
+      autosave.enqueue(`transition-${activeSlideId}`, op);
+    },
+    [deck, activeSlideId, engine, autosave],
+  );
+
+  // P09: Magic move role change handler
+  const handleMagicRoleChange = useCallback(
+    (role: string | null) => {
+      if (!selectedComponent) return;
+      const prevRole = (selectedComponent as unknown as Record<string, unknown>)['element_role'] as string | null | undefined;
+      const op = magicMoveOp(selectedComponent.id, role, prevRole ?? null, Date.now());
+      setDeck(engine.apply(op));
+      autosave.enqueue(`magic-${selectedComponent.id}`, op);
+    },
+    [selectedComponent, engine, autosave],
+  );
+
+  // P09: Reduced motion handler
+  const handleReducedMotionChange = useCallback(
+    (policy: ReducedMotionPolicy | null) => {
+      const prevPolicy = (deck as unknown as Record<string, unknown>)['x-domio:reduced-motion'] as ReducedMotionPolicy | null | undefined;
+      const op = reducedMotionOp(policy, prevPolicy ?? null, Date.now());
+      setDeck(engine.apply(op));
+      setDeckReducedMotion(policy);
+      autosave.enqueue(`reduced-motion`, op);
+    },
+    [deck, engine, autosave],
+  );
+
+  // P09: Copy animation
+  const handleCopyAnimation = useCallback(() => {
+    if (!selectedComponent) return;
+    const timeline = (selectedComponent.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null;
+    setCopiedAnimation(timeline ? { ...timeline } : null);
+  }, [selectedComponent]);
+
+  // P09: Paste animation
+  const handlePasteAnimation = useCallback(() => {
+    if (!selectedComponent || !copiedAnimation) return;
+    const prevTimeline = (selectedComponent.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null | undefined;
+    const pasted = { ...copiedAnimation, id: `tl-${Date.now()}` };
+    const op = timelineOp(selectedComponent.id, pasted, prevTimeline ?? null, Date.now());
+    setDeck(engine.apply(op));
+    autosave.enqueue(`paste-timeline-${selectedComponent.id}`, op);
+  }, [selectedComponent, copiedAnimation, engine, autosave]);
+
   return (
     <div className="editor-root">
       <header className="editor-toolbar" onContextMenu={onContextMenu}>
@@ -516,6 +613,7 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
           >
             + Insert
           </button>
+          <ScenarioSwitcher />
           <SyncIndicator facade={autosave} />
         </div>
       </header>
@@ -576,6 +674,36 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
             >
               Theme
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'data-sources'}
+              className={`side-tab${leftTab === 'data-sources' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('data-sources')}
+              data-testid="p08-data-tab"
+            >
+              Data
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'filters'}
+              className={`side-tab${leftTab === 'filters' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('filters')}
+              data-testid="p08-filters-tab"
+            >
+              Filters
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'animations'}
+              className={`side-tab${leftTab === 'animations' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('animations')}
+              data-testid="p09-animations-tab"
+            >
+              Animations
+            </button>
           </div>
           {leftTab === 'layers'
             ? activeSlide
@@ -597,7 +725,50 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
                   ? <StickersPanel onInsert={handleInsertComponent} />
                   : leftTab === 'icons'
                     ? <IconPicker onInsert={handleInsertIcon} />
-                    : (
+                    : leftTab === 'data-sources'
+                      ? (
+                          <DataSourcePanel
+                            selectedSourceId={selectedDataSourceId}
+                            onSelectSource={setSelectedDataSourceId}
+                          />
+                        )
+                      : leftTab === 'filters'
+                      ? (
+                          <FiltersPanel
+                            filters={crossFilters}
+                            onChange={handleFilterChange}
+                          />
+                        )
+                      : leftTab === 'animations'
+                        ? (
+                            <AnimationsPanel
+                              timeline={
+                                selectedComponent
+                                  ? ((selectedComponent.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null) ?? null
+                                  : null
+                              }
+                              onTimelineChange={handleTimelineChange}
+                              transition={
+                                activeSlide
+                                  ? ((activeSlide as unknown as Record<string, unknown>)['x-domio:transition'] as SlideTransition | null) ?? null
+                                  : null
+                              }
+                              onTransitionChange={handleTransitionChange}
+                              magicRole={
+                                selectedComponent
+                                  ? ((selectedComponent as unknown as Record<string, unknown>)['element_role'] as string | null) ?? null
+                                  : null
+                              }
+                              onMagicRoleChange={handleMagicRoleChange}
+                              hasMatchingRole={false}
+                              reducedMotion={deckReducedMotion}
+                              onReducedMotionChange={handleReducedMotionChange}
+                              copiedAnimation={copiedAnimation}
+                              onCopy={handleCopyAnimation}
+                              onPaste={handlePasteAnimation}
+                            />
+                          )
+                        : (
                         <ThemeBrandPanel
                           themes={PHASE_07_THEMES}
                           activeThemeId={activeThemeId}

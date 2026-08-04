@@ -1,0 +1,163 @@
+openapi: 3.1.0
+info:
+  title: Domio Freshness Tracker API
+  version: 1.0.0
+  description: |
+    Freshness tracker service — monitors binding data freshness and
+    writes staleness records for Phase 08 M5.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: freshness
+    description: Freshness tracking and staleness records.
+paths:
+  /v1/freshness/bindings:
+    get:
+      tags: [freshness]
+      operationId: listBindings
+      summary: List tracked bindings
+      responses:
+        "200":
+          description: List of bindings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bindings:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FreshnessBinding"
+
+  /v1/freshness/status:
+    get:
+      tags: [freshness]
+      operationId: scanAllStatus
+      summary: Scan all bindings for current freshness status
+      responses:
+        "200":
+          description: Freshness status per binding
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FreshnessStatusResult"
+
+  /v1/freshness/records/{bindingId}:
+    get:
+      tags: [freshness]
+      operationId: getRecords
+      summary: Get freshness records for a binding
+      parameters:
+        - in: path
+          name: bindingId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Freshness records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FreshnessRecord"
+
+  /v1/freshness/signal/stale:
+    post:
+      tags: [freshness]
+      operationId: signalStale
+      summary: Signal a binding's data is stale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bindingId]
+              properties:
+                bindingId:
+                  type: string
+      responses:
+        "200":
+          description: Stale signal recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FreshnessRecord"
+
+  /v1/freshness/signal/error:
+    post:
+      tags: [freshness]
+      operationId: signalError
+      summary: Signal a binding's fetch failed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bindingId, error]
+              properties:
+                bindingId:
+                  type: string
+                error:
+                  type: string
+      responses:
+        "200":
+          description: Error signal recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FreshnessRecord"
+
+components:
+  schemas:
+    FreshnessBinding:
+      type: object
+      properties:
+        bindingId:
+          type: string
+        freshnessTtlMs:
+          type: integer
+        staleGraceMs:
+          type: integer
+
+    FreshnessStatusResult:
+      type: object
+      properties:
+        bindingId:
+          type: string
+        status:
+          type: string
+          enum: [ok, stale, error, never]
+
+    FreshnessRecord:
+      type: object
+      properties:
+        bindingId:
+          type: string
+        status:
+          type: string
+          enum: [ok, stale, error, never]
+        recordedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        error:
+          type: string

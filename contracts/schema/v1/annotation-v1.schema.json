@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/annotation-v1.schema.json",
+  "title": "Domio Chart Annotation V1",
+  "description": "Pinned text annotation on a chart data point, scenario-scoped. {point, text, author, ts, color} per feature #59.",
+  "type": "object",
+  "required": ["point", "text", "author_id", "ts", "color"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "chart_widget_id": { "type": "string", "format": "uuid" },
+    "scenario_id": { "type": ["string", "null"], "format": "uuid", "description": "Null = visible in all scenarios (default)." },
+    "point": {
+      "type": "object",
+      "description": "Bound data point the annotation pins to.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["series", "x", "y"],
+          "additionalProperties": false,
+          "properties": {
+            "series": { "type": "string" },
+            "x": { "type": ["number", "string"] },
+            "y": { "type": "number" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["row_index"],
+          "additionalProperties": false,
+          "properties": { "row_index": { "type": "integer", "minimum": 0 } }
+        }
+      ]
+    },
+    "text": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "author_id": { "type": "string", "format": "uuid" },
+    "author_name": { "type": "string", "default": "" },
+    "ts": { "type": "string", "format": "date-time" },
+    "color": { "type": "string", "format": "color", "default": "#F59E0B" }
+  }
+}

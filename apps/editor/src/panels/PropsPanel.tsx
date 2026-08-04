@@ -10,12 +10,10 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ComponentLayer } from '@domio/schema';
 import { getComponent } from '@domio/components';
-import {
-  inferControl,
-  resolveSchemaDefaults,
-  type PropControlDescriptor,
-  type PropSchemaFragment,
-} from '@domio/schema-prop';
+import { inferControl, resolveSchemaDefaults, type PropControlDescriptor, type PropSchemaFragment } from '@domio/schema-prop';
+import { BindInspector, catalogIdToChartType } from './bind-inspector';
+import { ThresholdPanel } from './threshold-panel';
+import type { LiveDataBinding, ThresholdRule } from '../lib/live-data-store';
 
 const FONTS = ['Inter', 'Georgia', 'Menlo', 'Arial', 'Courier New'];
 
@@ -39,10 +37,17 @@ export function PropsPanel({ element, onPropEdit, onVariantChange }: PropsPanelP
   }
 
   const schema = def.propsSchema;
+  const isLiveChart = element.component.catalogId.startsWith('domio.live-');
+  const chartType = isLiveChart ? catalogIdToChartType(element.component.catalogId) : undefined;
+  const currentBinding = (props['x-domio:binding'] ?? { queryId: null, fieldMap: {}, listenToFilters: [] }) as LiveDataBinding;
+  const currentThresholds = (props['x-domio:thresholds'] ?? []) as ThresholdRule[];
+
   const descriptors = useMemo(() => {
     const out: Array<{ key: string; fragment: PropSchemaFragment; descriptor: PropControlDescriptor; required: boolean }> = [];
     const required = new Set(schema.required ?? []);
+    // Skip x-domio:binding and x-domio:thresholds from standard descriptors — rendered separately
     for (const [key, fragment] of Object.entries(schema.properties ?? {})) {
+      if (key === 'x-domio:binding' || key === 'x-domio:thresholds') continue;
       out.push({
         key,
         fragment,
@@ -99,6 +104,25 @@ export function PropsPanel({ element, onPropEdit, onVariantChange }: PropsPanelP
           </div>
         </div>
       ) : null}
+
+      {isLiveChart && chartType && (
+        <div className="props-panel__section">
+          <BindInspector
+            binding={currentBinding}
+            onChange={(b) => onPropEdit('x-domio:binding', currentBinding, b)}
+            chartType={chartType}
+          />
+        </div>
+      )}
+
+      {isLiveChart && (
+        <div className="props-panel__section">
+          <ThresholdPanel
+            rules={currentThresholds}
+            onChange={(r) => onPropEdit('x-domio:thresholds', currentThresholds, r)}
+          />
+        </div>
+      )}
 
       {groups.map(([category, items]) => (
         <div key={category} className="props-panel__section">
@@ -296,10 +320,15 @@ function FragmentEditorInner({ id, label, fragment, descriptor, value, onChange 
         </select>
       );
     case 'asset':
+      return (
+        <div className="prop-control prop-control--readonly">
+          Asset picker (P08)
+        </div>
+      );
     case 'data-binding':
       return (
         <div className="prop-control prop-control--readonly">
-          {descriptor.kind === 'asset' ? 'Asset picker (P08)' : 'Bind to data (P08)'}
+          Bind to data (see inspector below)
         </div>
       );
     case 'repeatable':

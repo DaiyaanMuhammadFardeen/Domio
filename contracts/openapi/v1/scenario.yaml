@@ -1,0 +1,315 @@
+openapi: 3.1.0
+info:
+  title: Domio Scenario Manager API
+  version: 1.0.0
+  description: |
+    Scenario DAG, overlays, and diff for Phase 08 live data & interactive charts.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: scenarios
+    description: Scenario CRUD, DAG management, overlays, and diff.
+security:
+  - bearerAuth: []
+paths:
+  /v1/scenarios:
+    post:
+      tags: [scenarios]
+      operationId: createScenario
+      summary: Create a new scenario
+      description: |
+        Creates a scenario with optional parent. Rejects with 400 if the
+        parent would create a cycle or exceed the max depth (8 levels).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateScenarioRequest"
+      responses:
+        "201":
+          description: Scenario created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scenario"
+        "400":
+          description: Cycle or depth violation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthenticated.
+    get:
+      tags: [scenarios]
+      operationId: listScenarios
+      summary: List scenarios by deck
+      parameters:
+        - in: query
+          name: deck_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Scenario list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioListResponse"
+        "401":
+          description: Unauthenticated.
+  /v1/scenarios/{id}:
+    get:
+      tags: [scenarios]
+      operationId: getScenario
+      summary: Get a scenario by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Scenario details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scenario"
+        "404":
+          description: Scenario not found.
+    patch:
+      tags: [scenarios]
+      operationId: updateScenario
+      summary: Update a scenario
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateScenarioRequest"
+      responses:
+        "200":
+          description: Scenario updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scenario"
+        "400":
+          description: Cycle or depth violation.
+        "404":
+          description: Scenario not found.
+    delete:
+      tags: [scenarios]
+      operationId: deleteScenario
+      summary: Delete a scenario
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Scenario deleted.
+        "404":
+          description: Scenario not found.
+  /v1/scenarios/{id}/overlays:
+    post:
+      tags: [scenarios]
+      operationId: upsertOverlay
+      summary: Upsert overlay for a scenario
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertOverlayRequest"
+      responses:
+        "200":
+          description: Overlay upserted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Overlay"
+        "404":
+          description: Scenario not found.
+  /v1/scenarios/{id}/diff:
+    get:
+      tags: [scenarios]
+      operationId: diffScenarios
+      summary: Compute overlay diff between two scenarios
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: base
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Diff result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiffResponse"
+        "404":
+          description: Scenario not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Scenario:
+      type: object
+      required: [id, tenantId, deckId, parentId, name, description, createdAt]
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        deckId:
+          type: string
+        parentId:
+          type: string
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CreateScenarioRequest:
+      type: object
+      required: [deckId, parentId, name, description]
+      properties:
+        deckId:
+          type: string
+        parentId:
+          type: string
+          nullable: true
+        name:
+          type: string
+        description:
+          type: string
+    UpdateScenarioRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        parentId:
+          type: string
+          nullable: true
+    ScenarioListResponse:
+      type: object
+      properties:
+        scenarios:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scenario"
+    Overlay:
+      type: object
+      required: [id, scenarioId, tenantId]
+      properties:
+        id:
+          type: string
+        scenarioId:
+          type: string
+        tenantId:
+          type: string
+        datasetSnapshotRefs:
+          type: array
+          items:
+            type: string
+        formulaConstantOverrides:
+          type: object
+          additionalProperties:
+            type: number
+        sliderValueOverrides:
+          type: object
+          additionalProperties:
+            type: number
+        annotationOverrides:
+          type: object
+          additionalProperties:
+            type: string
+    UpsertOverlayRequest:
+      type: object
+      properties:
+        datasetSnapshotRefs:
+          type: array
+          items:
+            type: string
+        formulaConstantOverrides:
+          type: object
+          additionalProperties:
+            type: number
+        sliderValueOverrides:
+          type: object
+          additionalProperties:
+            type: number
+        annotationOverrides:
+          type: object
+          additionalProperties:
+            type: string
+    DiffResponse:
+      type: object
+      properties:
+        base:
+          $ref: "#/components/schemas/OverlayState"
+        target:
+          $ref: "#/components/schemas/OverlayState"
+        diff:
+          type: object
+    OverlayState:
+      type: object
+      properties:
+        datasetSnapshotRefs:
+          type: array
+          items:
+            type: string
+        formulaConstantOverrides:
+          type: object
+          additionalProperties:
+            type: number
+        sliderValueOverrides:
+          type: object
+          additionalProperties:
+            type: number
+        annotationOverrides:
+          type: object
+          additionalProperties:
+            type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string

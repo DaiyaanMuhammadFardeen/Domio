@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/mock-data-v1.schema.json",
+  "title": "Domio Mock Data V1",
+  "description": "Seeded mock dataset spec: deterministic generator with distributions and correlations (feature #56). Same seed always yields the same rows; mock bindings are clearly badged in editor + presenter.",
+  "type": "object",
+  "required": ["fields", "seed", "n"],
+  "additionalProperties": false,
+  "properties": {
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": { "$ref": "#/definitions/MockField" }
+    },
+    "seed": {
+      "type": "integer",
+      "description": "Determinism seed; same seed => same rows."
+    },
+    "n": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000,
+      "description": "Row count."
+    }
+  },
+  "definitions": {
+    "MockField": {
+      "type": "object",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$" },
+        "type": {
+          "type": "string",
+          "enum": ["number", "integer", "currency", "percent", "string", "category", "boolean", "date", "datetime"]
+        },
+        "distribution": {
+          "type": "string",
+          "enum": ["uniform", "normal", "lognormal", "poisson", "categorical", "linear", "constant"]
+        },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "mean": { "type": "number" },
+        "stddev": { "type": "number", "minimum": 0 },
+        "lambda": { "type": "number", "minimum": 0 },
+        "categories": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "format": { "type": "string", "description": "Currency code (USD/BDT/EUR) or percent scale." },
+        "start": { "type": "string", "format": "date", "description": "Date/datetime lower bound." },
+        "end": { "type": "string", "format": "date", "description": "Date/datetime upper bound." },
+        "step": { "type": "number", "description": "Linear/date step." }
+      }
+    }
+  }
+}

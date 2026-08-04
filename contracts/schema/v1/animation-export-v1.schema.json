@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/schema/v1/animation-export-v1.schema.json",
+  "title": "Animation export job",
+  "description": "Server-side GIF/MP4/WebM export job for a deck (Phase 09).",
+  "type": "object",
+  "required": ["deck_id", "format", "range", "scale", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+    "format": { "enum": ["gif", "mp4", "webm"] },
+    "range": {
+      "oneOf": [
+        { "enum": ["current_slide", "all"] },
+        {
+          "type": "object",
+          "required": ["from", "to"],
+          "additionalProperties": false,
+          "properties": {
+            "from": { "type": "integer", "minimum": 0 },
+            "to": { "type": "integer", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "scale": { "type": "number", "minimum": 0.25, "maximum": 2, "default": 1 },
+    "fps": { "type": "integer", "minimum": 1, "maximum": 60, "default": 30 },
+    "status": { "enum": ["queued", "rendering", "encoding", "done", "failed"] },
+    "error": { "type": ["string", "null"] },
+    "artifact": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["gif", "mp4", "webm"] },
+        "byte_size": { "type": "integer", "minimum": 0 },
+        "duration_s": { "type": "number", "minimum": 0 },
+        "storage_key": { "type": "string" }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": ["string", "null"], "format": "date-time" }
+  }
+}

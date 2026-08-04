@@ -1,0 +1,160 @@
+openapi: 3.1.0
+info:
+  title: Domio Embed Proxy API
+  version: 1.0.0
+  description: |
+    Embed proxy service — SSRF guard, embed token management,
+    and authenticated proxy forwarding for Phase 08.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: embed
+    description: Embed proxy and token management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/embed/tokens:
+    post:
+      tags: [embed]
+      operationId: createEmbedToken
+      summary: Create an embed token
+      description: |
+        Creates a short-lived, single-use token that authorises a
+        proxy fetch to the target URL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmbedTokenRequest"
+      responses:
+        "200":
+          description: Token created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmbedTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /v1/embed/tokens/{token}:
+    get:
+      tags: [embed]
+      operationId: validateEmbedToken
+      summary: Validate an embed token
+      description: |
+        Checks whether an embed token is valid (not expired, not used).
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmbedTokenValidationResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/embed/{bindingId}/proxy:
+    post:
+      tags: [embed]
+      operationId: proxyEmbedRequest
+      summary: Proxy an embed request
+      description: |
+        Creates a short-lived token and proxies the request to the
+        binding's target URL with auth_passthrough.
+      parameters:
+        - in: path
+          name: bindingId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Proxied response
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          $ref: "#/components/responses/SsrfBlocked"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    CreateEmbedTokenRequest:
+      type: object
+      required: [bindingId, url]
+      properties:
+        bindingId:
+          type: string
+        url:
+          type: string
+          format: uri
+
+    EmbedTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    EmbedTokenValidationResponse:
+      type: object
+      properties:
+        bindingId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    SsrfBlocked:
+      description: SSRF blocked
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string

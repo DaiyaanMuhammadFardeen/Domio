@@ -22,7 +22,8 @@ export interface DomioPropExtension {
     | 'font'
     | 'asset'
     | 'data-binding'
-    | 'repeatable';
+    | 'repeatable'
+    | 'thresholds';
   /** Whether the canvas should re-render on every keystroke. */
   livePreview?: boolean;
   /** Step for stepper/slider controls. */
