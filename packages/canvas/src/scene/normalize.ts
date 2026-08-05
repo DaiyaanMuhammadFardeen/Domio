@@ -93,6 +93,18 @@ export function elementToCommand(element: Element): RenderCommand | null {
         children,
       };
     }
+    // Phase 11 rich-media kinds render through their own viewports/players
+    // (WebGL viewport, video/audio element, iframe, code block, KaTeX,
+    // map canvas), not the 2D normalizer — no render command here.
+    case 'model3d':
+    case 'video':
+    case 'audio':
+    case 'lottie':
+    case 'embed':
+    case 'codeBlock':
+    case 'latex':
+    case 'map':
+      return null;
   }
 }
 

@@ -290,6 +290,86 @@ export interface ComponentLayer extends ElementBase {
   component: ComponentRef;
 }
 
+export interface Model3DLayer extends ElementBase {
+  type: 'model3d';
+  modelAssetId: string;
+  sceneId?: string;
+  upAxis?: 'y-up' | 'z-up';
+  autoRotate?: boolean;
+  paused?: boolean;
+  physicsEnabled?: boolean;
+}
+
+export interface VideoLayer extends ElementBase {
+  type: 'video';
+  assetId: string;
+  trimInMs?: number;
+  trimOutMs?: number;
+  speed?: number;
+  muted?: boolean;
+  loop?: boolean;
+  autoplay?: boolean;
+  captionsOn?: boolean;
+  posterFrameMs?: number;
+  chapters?: Array<{
+    timeMs: number;
+    label: string;
+  }>;
+}
+
+export interface AudioLayer extends ElementBase {
+  type: 'audio';
+  assetId: string;
+  volume?: number;
+  pan?: number;
+  fadeInMs?: number;
+  fadeOutMs?: number;
+  loop?: boolean;
+  startAtMs?: number;
+}
+
+export interface LottieLayer extends ElementBase {
+  type: 'lottie';
+  assetId: string;
+  autoplay?: boolean;
+  loop?: boolean;
+  speed?: number;
+  variableBindings?: Record<string, string>;
+}
+
+export interface EmbedLayer extends ElementBase {
+  type: 'embed';
+  url: string;
+  policyId?: string;
+  sandboxFlags?: string;
+  title?: string;
+}
+
+export interface CodeBlockLayer extends ElementBase {
+  type: 'codeBlock';
+  code: string;
+  language?: string;
+  runnable?: boolean;
+  policyId?: string;
+  showLineNumbers?: boolean;
+  stepReveal?: boolean;
+}
+
+export interface LatexLayer extends ElementBase {
+  type: 'latex';
+  source: string;
+  displayMode?: 'inline' | 'block';
+  themeHash?: string;
+}
+
+export interface MapLayer extends ElementBase {
+  type: 'map';
+  styleId: string;
+  zoom?: number;
+  center?: { lng: number; lat: number };
+  choropleth?: boolean;
+}
+
 export type LayerType =
   | 'frame'
   | 'group'
@@ -298,7 +378,15 @@ export type LayerType =
   | 'image'
   | 'vector'
   | 'boolean'
-  | 'component';
+  | 'component'
+  | 'model3d'
+  | 'video'
+  | 'audio'
+  | 'lottie'
+  | 'embed'
+  | 'codeBlock'
+  | 'latex'
+  | 'map';
 
 export type Element =
   | FrameLayer
@@ -308,7 +396,15 @@ export type Element =
   | ImageLayer
   | VectorLayer
   | BooleanShapeLayer
-  | ComponentLayer;
+  | ComponentLayer
+  | Model3DLayer
+  | VideoLayer
+  | AudioLayer
+  | LottieLayer
+  | EmbedLayer
+  | CodeBlockLayer
+  | LatexLayer
+  | MapLayer;
 
 // ----- Slide & deck document -----
 

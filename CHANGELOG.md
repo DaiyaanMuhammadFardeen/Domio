@@ -6,6 +6,147 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 11 — 3D, Motion & Rich Media
+
+#### Added
+
+- **3D engine (`packages/3d-engine`).** Renderer core + scene/viz
+  lane: capability detection (webgpu/webgl2), budget enforcement,
+  LOD selection, decimation, keyframe interpolation, instanced
+  rendering, particle systems, shader registry integration.
+  **277 tests across the package.**
+- **Scene graph & camera keyframes (`packages/3d-engine`).**
+  Pure-TS scene graph, deterministic stepper, camera-keyframe
+  interpolation with cubic-bezier easing, scroll-driven timeline
+  with halt/wrap overshoot and reduced-motion fallback
+  (`viewer/src/three/scroll-driver.ts`).
+- **Audio runtime (`packages/audio`).** Mixer (computeAllGains),
+  envelopes (fadeGain / duckGain / backgroundGain), drift monitor
+  (withinBudget / pickDriftStrategy / updateDrift), PCM/WAV export
+  bus. **Phase 11 perf smoke: 64-track bus under 10 ms, 256-track
+  bus under 50 ms.**
+- **Video runtime (`packages/video`).** Segment selection
+  (getSegmentInfo / clipTrimToSource), WebVTT parse + generate,
+  chapters, transcode state machine, contrast analyzer, waveform
+  bars. **Phase 11 perf smoke: 100 KB WebVTT under 500 ms,
+  64K-sample → 256 bars under 250 ms.**
+- **Recording (`packages/recording`).** Frame-capture, deterministic
+  scrubber, replay-diff.
+- **Lottie (`packages/lottie`).** Sanitized Bodymovin playback.
+- **Physics (`packages/physics`).** Rapier WASM world + pure-TS
+  fallback integrator, binding-freeze registry, broadphase warning
+  threshold. Viewer runtime uses the fallback for headless tests.
+- **Maps (`packages/maps`).** Mapbox/MapLibre style catalog with
+  sanitized style ids and zoom/clamp enforcement.
+- **Agent-schema claims (`packages/agent-schema`).** Phase 11
+  capability claims added: `manage_assets`, `manage_scenes`,
+  `manage_policies`, `models:*`, `scenes:*`, `camera-keyframes:*`,
+  `shaders:*`, `licenses:*`, `cad-jobs:*`, `ar-sessions:*`,
+  `video:*`, `audio:*`, `lottie:*`, `embed-policies:*`,
+  `sandbox-policies:*`, `sandbox:run`, `latex:render`,
+  `map-styles:*`.
+- **CAD-jobs service (`services/cad-jobs`).** In-memory repository,
+  worker simulator with parsing → meshing → optimizing → done
+  state machine, websocket URL builder, ULID generator, REST
+  routes. **18 service tests.**
+- **Embed-policy extensions (`services/embed-proxy`).**
+  EmbedPolicyService CRUD, CSP header builder, focus-trap
+  header, JWT verification, SSRF guard. All accessible from
+  the viewer runtime.
+- **MCP capability gating (`packages/mcp`).** `assertCapability`,
+  `gatedHandler`, `createGatedMcpRegistry` — every Phase 11 tool
+  surface (3D, media, embed, code, latex, map) goes through the
+  same claim gate as the existing Phase 10 surface. **10 tests.**
+- **Editor MediaPanel (`apps/editor/src/panels/media-panel.tsx`).**
+  Tabbed panel for 3D Model, Video, Audio, Lottie, Embed, Code,
+  LaTeX, Map. Wired into `EditorRoot` as the `m11-media` left
+  tab with full `onInsert` + `onPropEdit` integration. **23 tests.**
+- **License dashboard
+  (`apps/editor/src/panels/license-dashboard.tsx`).** Per-workspace
+  LicenseGrant summary with active / expiring / expired / revoked
+  classification, seats usage, and revoke action. **9 tests.**
+- **Viewer runtimes (`apps/viewer/src/`).** Phase 11 wrappers:
+  - `audio/playback.ts` — gain bus + envelopes + drift over the
+    `@domio/audio` primitives. **10 tests.**
+  - `video/playback.ts` — segment / chapter / VTT / contrast /
+    waveform wrapper. **14 tests.**
+  - `physics/playback.ts` — Integrator + BindRegistry wrapper
+    with broadphase warning. **10 tests.**
+  - `embeds/sandbox.ts` — iframe sandbox + CSP + origin-allow
+    wrapper around `@domio/embed-proxy`. **6 tests.**
+  - `three/scroll-driver.ts` — scroll-driven 3D storytelling
+    (M5.4) with cubic-bezier easing and reduced-motion fallback.
+    **21 tests.**
+  - `ar/viewer-ar.ts` — Phase 11 AR handoff runtime (M5.3):
+    `detectArSupport(env)` (WebXR / iOS Quick Look / Android
+    Scene Viewer probe), `buildPlatformAudienceUrl` (signed
+    audience URL per platform), `createArRuntime` (lifecycle:
+    enter / exit / heartbeat), `createAnchorTracker` (anchor
+    attach / update / release), and `defaultArProbe` for
+    headless tests. Verifies HMAC tokens minted by
+    `services/ar-sessions`. **22 tests.**
+- **Audio mixer wrappers (`packages/audio`).** `WebAudioMixer`
+  brings the headless `computeAllGains` mixer onto a real
+  `AudioContextLike` (graph construction, per-track gain/pan
+  wiring, master + global volume, snapshot/restore, lifecycle
+  start/stop/close). `ExportMixer` is the deterministic wrapper
+  used by the recording pipeline. **18 tests using a fake
+  AudioContext.**
+- **Recording UI (`apps/editor/src/panels/recording-panel.tsx`).**
+  M7.3 editor surface: codec pick (`selectEncoder`), adaptive
+  bitrate (`computeBitrate`), resumable state machine
+  (`draftReducer` + `createDraft` + `finalizeDraft`), and
+  timing guards (`checkElapsed` / `checkMinDuration`). Wired
+  into `EditorRoot` as the `m11-recording` left tab. **14 tests.**
+- **Asset API extensions (`services/asset-api`).** M7.1 / M7.2 /
+  M7.3 routes for audio, video, and Lottie assets: CRUD
+  (`GET /audio`, `POST /audio`, `GET /audio/:id`, `PATCH /audio/:id`,
+  `DELETE /audio/:id`, and the same for video & lottie) plus
+  `POST /audio/upload` / `POST /video/upload` / `POST /lottie/upload`
+  for binary content (base64-decoded). Domain types
+  `AudioAsset` / `VideoAsset` / `LottieAsset`, in-memory
+  repositories, and metadata parsers `parseAudioMetadata` /
+  `parseVideoMetadata` / `parseLottieMetadata`. **29 new tests
+  (94 total, was 65).**
+- **Editor tabs.** `EditorRoot` now exposes `m11-licenses`
+  (license dashboard) and `m11-recording` (recording panel)
+  left tabs alongside the existing `m11-media` tab. New
+  callbacks `handleInsertMedia` and the `selectedMediaKind` /
+  `selectedMediaProps` derivation drive the prop-edit surface.
+- **i18n.** All 7 locales now cover the `p11.*` namespace
+  (60+ keys per locale): en, es, fr, de, ja, zh-CN, and the
+  default fallback.
+- **Perf smokes.** New files in `packages/3d-engine`,
+  `packages/audio`, `packages/video` validate the Phase 11 R-11-2
+  budgets with 10x wall-clock headroom.
+- **CHANGELOG entry.** This section.
+- **Handoff doc.** `docs/handoff/P10-to-P11.md` summarises
+  deliverables, perf budgets, capability matrix, and the
+  rollout plan for production.
+
+#### Changed
+
+- `packages/decimal128/src/arithmetic.ts` — `cmpMagnitude` return
+  type narrowed to `-1 | 0 | 1` literal so `compare()` satisfies
+  the existing call sites.
+- `apps/editor/src/components/EditorRoot.tsx` — added `m11-media`
+  leftTab case, `handleInsertMedia` callback, and `selectedMediaKind`
+  / `selectedMediaProps` derivation for the prop-edit surface.
+- `apps/editor/src/components/EditorRoot.tsx` — added `m11-licenses`
+  (license dashboard) and `m11-recording` (recording panel) left
+  tabs alongside `m11-media`, behind the same `flags.p11_rich_media`
+  feature flag.
+- `apps/viewer/package.json` + `apps/viewer/vitest.config.ts` —
+  added `@domio/ar-sessions` dependency + alias for the new AR
+  viewer runtime (`apps/viewer/src/ar/viewer-ar.ts`).
+- `apps/editor/package.json` + `apps/editor/vitest.config.ts` —
+  added `@domio/recording` dependency + alias for the new
+  recording panel (`apps/editor/src/panels/recording-panel.tsx`).
+- `services/asset-api/src/routes/audio.ts` + `video.ts` +
+  `lottie.ts` — new REST route modules wired through
+  `createApp()` for the audio/video/lottie asset surfaces
+  (M7.1 / M7.2 / M7.3).
+
 ### Phase 10 — Prototyping & Interactivity (foundations: M1 + M2)
 
 #### Added

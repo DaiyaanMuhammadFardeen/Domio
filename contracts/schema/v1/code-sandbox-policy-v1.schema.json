@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/code-sandbox-policy-v1.schema.json",
+  "title": "Domio Code Sandbox Policy V1",
+  "description": "Code sandbox policy for Phase 11 runnable JS snippets. Defines CPU/memory limits, capability flags (network, DOM, console, import), and module allowlists.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "workspaceId", "name", "maxCpuMs", "maxMemoryMb", "allowNetwork", "allowDom", "allowConsole", "allowImport", "moduleAllowlist", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "maxCpuMs": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 30000,
+      "default": 8000,
+      "description": "Hard wall-clock timeout in milliseconds."
+    },
+    "maxMemoryMb": {
+      "type": "integer",
+      "minimum": 8,
+      "maximum": 512,
+      "default": 64,
+      "description": "Memory cap in megabytes."
+    },
+    "allowNetwork": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow fetch / XMLHttpRequest inside the sandbox."
+    },
+    "allowDom": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow access to window / document (insecure)."
+    },
+    "allowConsole": {
+      "type": "boolean",
+      "default": true,
+      "description": "Allow console.log interception."
+    },
+    "allowImport": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow dynamic import() statements."
+    },
+    "moduleAllowlist": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "default": [],
+      "description": "Allowed module specifiers when allowImport=true."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

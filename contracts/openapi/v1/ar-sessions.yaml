@@ -1,0 +1,147 @@
+openapi: 3.1.0
+info:
+  title: Domio AR Sessions API
+  version: 1.0.0
+  description: |
+    AR session API for Phase 11 (#74). Creates time-limited AR viewer sessions
+    with QR code payloads. Sessions issue a short-lived token (30 min total,
+    5 min inactivity) and an audience URL for WebXR (Android) or AR Quick Look (iOS).
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: ar-sessions
+    description: AR session management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/ar_sessions:
+    post:
+      tags: [ar-sessions]
+      operationId: createArSession
+      summary: Create an AR session
+      description: |
+        Creates a time-limited AR viewer session. Returns a token, audience URL,
+        and expiry. The audience URL can be encoded as a QR code for audience
+        handoff during live presentations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateArSessionRequest"
+      responses:
+        "201":
+          description: Session created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArSession"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+  /v1/ar_sessions/{id}:
+    get:
+      tags: [ar-sessions]
+      operationId: getArSession
+      summary: Get AR session status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArSession"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Session not found.
+    delete:
+      tags: [ar-sessions]
+      operationId: invalidateArSession
+      summary: Invalidate an AR session
+      description: |
+        Immediately invalidates a session token. The audience URL will no longer
+        be accessible.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Session invalidated.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Session not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ArSession:
+      type: object
+      required: [id, slideId, modelAssetId, token, audienceUrl, expiresAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slideId:
+          type: string
+          format: uuid
+        modelAssetId:
+          type: string
+          format: uuid
+        token:
+          type: string
+          description: Short-lived session token
+        audienceUrl:
+          type: string
+          format: uri
+          description: "Viewer URL, e.g. https://ar.domio.app/s/{session_id}"
+        expiresAt:
+          type: string
+          format: date-time
+          description: 30-minute expiry from creation
+        qrPayload:
+          type: string
+          description: Base64-encoded QR code payload for the audience URL
+        createdAt:
+          type: string
+          format: date-time
+    CreateArSessionRequest:
+      type: object
+      required: [slideId, modelAssetId]
+      properties:
+        slideId:
+          type: string
+          format: uuid
+        modelAssetId:
+          type: string
+          format: uuid
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

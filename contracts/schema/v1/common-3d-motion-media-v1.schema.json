@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/common-3d-motion-media-v1.schema.json",
+  "title": "Domio 3D Motion & Rich Media Common Definitions V1",
+  "description": "Shared type definitions for the Phase 11 (3D, Motion & Rich Media) data model. Provides Vec3, Vec2, BezierEasing, and other reusable primitives referenced by the table schemas in this directory.",
+  "type": "object",
+  "definitions": {
+    "Vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "description": "3D vector used for camera positions, light positions, and model transforms.",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+    "Vec2": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "description": "2D vector for screen-space coordinates.",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "BezierEasing": {
+      "type": "object",
+      "required": ["p1x", "p1y", "p2x", "p2y"],
+      "additionalProperties": false,
+      "description": "Cubic-bezier easing curve with four control points. Default ease-in-out: {p1x:0.42, p1y:0, p2x:0.58, p2y:1}.",
+      "properties": {
+        "p1x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "p1y": { "type": "number" },
+        "p2x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "p2y": { "type": "number" }
+      }
+    },
+    "PBRMaterial": {
+      "type": "object",
+      "description": "Physically-based rendering material properties for 3D meshes.",
+      "additionalProperties": false,
+      "properties": {
+        "baseColor": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$",
+          "description": "Base albedo color (sRGB hex)."
+        },
+        "roughness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5
+        },
+        "metallic": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0
+        },
+        "normalMapUrl": {
+          "oneOf": [
+            { "type": "string", "format": "uri" },
+            { "type": "null" }
+          ]
+        },
+        "emissiveColor": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+        },
+        "emissiveIntensity": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        },
+        "occlusionStrength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        }
+      }
+    },
+    "Light": {
+      "type": "object",
+      "required": ["kind", "color", "intensity"],
+      "additionalProperties": false,
+      "description": "Scene light definition.",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["directional", "point", "spot"]
+        },
+        "position": { "$ref": "#/definitions/Vec3" },
+        "target": { "$ref": "#/definitions/Vec3" },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "intensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "castShadow": {
+          "type": "boolean",
+          "default": false
+        },
+        "spotAngle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180
+        }
+      }
+    },
+    "CameraPreset": {
+      "type": "object",
+      "required": ["name", "position", "target", "fov"],
+      "additionalProperties": false,
+      "description": "Named camera preset within a scene.",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "position": { "$ref": "#/definitions/Vec3" },
+        "target": { "$ref": "#/definitions/Vec3" },
+        "fov": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 179
+        },
+        "roll": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "EnvironmentMap": {
+      "type": "object",
+      "description": "Environment-map configuration for image-based lighting.",
+      "additionalProperties": false,
+      "properties": {
+        "envMapUrls": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "maxItems": 4
+        },
+        "exposure": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 1
+        },
+        "rotationY": {
+          "type": "number"
+        }
+      }
+    },
+    "Transform3D": {
+      "type": "object",
+      "required": ["position", "rotation", "scale"],
+      "additionalProperties": false,
+      "description": "3D transform with position, Euler rotation (degrees), and uniform scale.",
+      "properties": {
+        "position": { "$ref": "#/definitions/Vec3" },
+        "rotation": { "$ref": "#/definitions/Vec3" },
+        "scale": { "$ref": "#/definitions/Vec3" }
+      }
+    }
+  }
+}

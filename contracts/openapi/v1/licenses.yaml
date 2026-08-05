@@ -1,0 +1,231 @@
+openapi: 3.1.0
+info:
+  title: Domio Licenses API
+  version: 1.0.0
+  description: |
+    License CRUD for Phase 11 asset governance (#85). Tracks license metadata
+    (source, terms URL, expiry, seat limits) for 3D models, videos, audio tracks,
+    and other media assets. Expired licenses block publishing.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: licenses
+    description: License lifecycle management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/licenses:
+    get:
+      tags: [licenses]
+      operationId: listLicenses
+      summary: List licenses for a workspace
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of licenses.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LicenseList"
+        "401":
+          description: Unauthenticated.
+    post:
+      tags: [licenses]
+      operationId: createLicense
+      summary: Create a license
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLicenseRequest"
+      responses:
+        "201":
+          description: License created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/License"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+  /v1/licenses/{id}:
+    get:
+      tags: [licenses]
+      operationId: getLicense
+      summary: Get a license by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: License details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/License"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: License not found.
+    patch:
+      tags: [licenses]
+      operationId: patchLicense
+      summary: Update a license
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchLicenseRequest"
+      responses:
+        "200":
+          description: License updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/License"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: License not found.
+    delete:
+      tags: [licenses]
+      operationId: deleteLicense
+      summary: Delete a license
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: License deleted.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: License not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    License:
+      type: object
+      required: [id, workspaceId, name, source]
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        source:
+          type: string
+          description: "License source, e.g. 'unsplash', 'pexels', 'user-upload'"
+        termsUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+        seats:
+          type: integer
+          minimum: 1
+          description: Seat limit (null = unlimited)
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+    LicenseList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/License"
+    CreateLicenseRequest:
+      type: object
+      required: [workspaceId, name, source]
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        source:
+          type: string
+        termsUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+        seats:
+          type: integer
+          minimum: 1
+        metadata:
+          type: object
+          additionalProperties: true
+    PatchLicenseRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        termsUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+        seats:
+          type: integer
+          minimum: 1
+        metadata:
+          type: object
+          additionalProperties: true
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

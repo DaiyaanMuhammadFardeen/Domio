@@ -21,6 +21,7 @@
     "@domio/components": "workspace:*",
     "@domio/deep-link": "workspace:*",
     "@domio/prototype-runtime": "workspace:*",
+    "@domio/recording": "workspace:*",
     "@domio/schema": "workspace:*",
     "@domio/schema-prop": "workspace:*",
     "@domio/sdk": "workspace:*",

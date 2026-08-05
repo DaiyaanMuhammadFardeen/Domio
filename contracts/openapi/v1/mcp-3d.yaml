@@ -1,0 +1,525 @@
+openapi: 3.1.0
+info:
+  title: Domio MCP 3D Tools
+  version: "1.0.0"
+  description: |
+    MCP HTTP transport for 3D tools introduced in Phase 11.
+    Bearer token authentication; every tool accepts a JSON object `{ deckId, ... }`
+    and returns a JSON `result`. Errors are mapped to structured `McpError` objects.
+
+    Capability-claim gating: agents must hold the `manage_assets` capability to
+    call model/shader tools, and `manage_scenes` for scene/camera-keyframe tools.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name: Domio Engineering
+    url: https://github.com/DaiyaanMuhammadFardeen/Domio
+servers:
+  - url: https://mcp.domio.local
+tags:
+  - name: models
+    description: 3D model asset tools.
+  - name: scenes
+    description: 3D scene tools.
+  - name: camera-keyframes
+    description: Camera keyframe tools.
+  - name: shaders
+    description: Shader registry tools.
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    McpError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [PERMISSION_DENIED, INVALID_INPUT, NOT_FOUND, RUNTIME_ERROR, NETWORK_ERROR, TIMEOUT]
+        message: { type: string }
+        issues:
+          type: array
+          items: { type: string }
+paths:
+  /tools/list_models:
+    post:
+      operationId: mcp_list_models
+      tags: [models]
+      summary: list_models
+      description: List 3D model assets in the workspace. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId]
+              properties:
+                deckId: { type: string }
+                page: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/get_model:
+    post:
+      operationId: mcp_get_model
+      tags: [models]
+      summary: get_model
+      description: Get a 3D model asset by ID. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, modelId]
+              properties:
+                deckId: { type: string }
+                modelId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/upload_model:
+    post:
+      operationId: mcp_upload_model
+      tags: [models]
+      summary: upload_model
+      description: Upload a 3D model asset. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, file, name]
+              properties:
+                deckId: { type: string }
+                file: { type: string, description: "Base64-encoded file data" }
+                name: { type: string }
+                format: { type: string, enum: [glb, gltf, usdz, step, stp, iges, igs, fbx, obj] }
+                licenseId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_model:
+    post:
+      operationId: mcp_delete_model
+      tags: [models]
+      summary: delete_model
+      description: Delete a 3D model asset. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, modelId]
+              properties:
+                deckId: { type: string }
+                modelId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/create_scene:
+    post:
+      operationId: mcp_create_scene
+      tags: [scenes]
+      summary: create_scene
+      description: Create a 3D scene. Requires `manage_scenes`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, modelAssetId]
+              properties:
+                deckId: { type: string }
+                modelAssetId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/update_scene:
+    post:
+      operationId: mcp_update_scene
+      tags: [scenes]
+      summary: update_scene
+      description: Update a 3D scene. Requires `manage_scenes`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, sceneId]
+              properties:
+                deckId: { type: string }
+                sceneId: { type: string }
+                patch: { type: object }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_scene:
+    post:
+      operationId: mcp_delete_scene
+      tags: [scenes]
+      summary: delete_scene
+      description: Delete a 3D scene. Requires `manage_scenes`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, sceneId]
+              properties:
+                deckId: { type: string }
+                sceneId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/list_scenes:
+    post:
+      operationId: mcp_list_scenes
+      tags: [scenes]
+      summary: list_scenes
+      description: List 3D scenes in the workspace. Requires `manage_scenes`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId]
+              properties:
+                deckId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/create_camera_keyframe:
+    post:
+      operationId: mcp_create_camera_keyframe
+      tags: [camera-keyframes]
+      summary: create_camera_keyframe
+      description: Create a camera keyframe. Requires `manage_scenes`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, slideId, position, target, fov]
+              properties:
+                deckId: { type: string }
+                slideId: { type: string }
+                sceneId: { type: string }
+                position: { type: object, properties: { x: { type: number }, y: { type: number }, z: { type: number } } }
+                target: { type: object, properties: { x: { type: number }, y: { type: number }, z: { type: number } } }
+                fov: { type: number }
+                roll: { type: number }
+                easing: { type: object }
+                durationMs: { type: integer }
+                trigger: { type: string, enum: [auto, click, scroll, data] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/update_camera_keyframe:
+    post:
+      operationId: mcp_update_camera_keyframe
+      tags: [camera-keyframes]
+      summary: update_camera_keyframe
+      description: Update a camera keyframe. Requires `manage_scenes`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, keyframeId]
+              properties:
+                deckId: { type: string }
+                keyframeId: { type: string }
+                patch: { type: object }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_camera_keyframe:
+    post:
+      operationId: mcp_delete_camera_keyframe
+      tags: [camera-keyframes]
+      summary: delete_camera_keyframe
+      description: Delete a camera keyframe. Requires `manage_scenes`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, keyframeId]
+              properties:
+                deckId: { type: string }
+                keyframeId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/list_camera_keyframes:
+    post:
+      operationId: mcp_list_camera_keyframes
+      tags: [camera-keyframes]
+      summary: list_camera_keyframes
+      description: List camera keyframes for a slide. Requires `manage_scenes`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, slideId]
+              properties:
+                deckId: { type: string }
+                slideId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/create_shader:
+    post:
+      operationId: mcp_create_shader
+      tags: [shaders]
+      summary: create_shader
+      description: Create a shader. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, name, kind, sourceWgsl, sourceGlsl]
+              properties:
+                deckId: { type: string }
+                name: { type: string }
+                kind: { type: string, enum: [background, particle, material, post] }
+                sourceWgsl: { type: string }
+                sourceGlsl: { type: string }
+                inputs: { type: object }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/update_shader:
+    post:
+      operationId: mcp_update_shader
+      tags: [shaders]
+      summary: update_shader
+      description: Update a shader. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, shaderId]
+              properties:
+                deckId: { type: string }
+                shaderId: { type: string }
+                patch: { type: object }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_shader:
+    post:
+      operationId: mcp_delete_shader
+      tags: [shaders]
+      summary: delete_shader
+      description: Delete a shader. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, shaderId]
+              properties:
+                deckId: { type: string }
+                shaderId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/list_shaders:
+    post:
+      operationId: mcp_list_shaders
+      tags: [shaders]
+      summary: list_shaders
+      description: List shaders in the workspace. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId]
+              properties:
+                deckId: { type: string }
+                kind: { type: string, enum: [background, particle, material, post] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/publish_shader:
+    post:
+      operationId: mcp_publish_shader
+      tags: [shaders]
+      summary: publish_shader
+      description: Publish a shader. Requires `manage_assets`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, shaderId]
+              properties:
+                deckId: { type: string }
+                shaderId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }

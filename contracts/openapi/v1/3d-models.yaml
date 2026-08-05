@@ -1,0 +1,288 @@
+openapi: 3.1.0
+info:
+  title: Domio 3D Models API
+  version: 1.0.0
+  description: |
+    3D model asset CRUD and upload pipeline for Phase 11.
+    Supports .glb, .gltf, .usdz, .step, .stp, .iges, .igs, .fbx, .obj uploads
+    with multipart form-data. CAD files are routed to a conversion job; native
+    glTF files are processed inline. All assets are CDN-served and license-tagged.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: models
+    description: 3D model asset management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/models/upload:
+    post:
+      tags: [models]
+      operationId: uploadModel
+      summary: Upload a 3D model asset
+      description: |
+        Accepts multipart/form-data with a 3D model file. Native glTF/GLB/USDZ
+        files are processed inline; CAD formats (STEP/IGES/FBX/OBJ) are routed
+        to a conversion job that tessellates and decimates to glTF binary.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, workspaceId]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: "Model file (.glb, .gltf, .usdz, .step, .stp, .iges, .igs, .fbx, .obj)"
+                workspaceId:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                licenseId:
+                  type: string
+                  format: uuid
+                decimationTargetPolyCount:
+                  type: integer
+                  minimum: 1000
+                  maximum: 10000000
+                  description: Target polygon count for auto-decimation (default 250000)
+      responses:
+        "202":
+          description: Upload accepted; processing asynchronously.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelUploadAccepted"
+        "400":
+          description: Invalid file format or missing fields.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "413":
+          description: File exceeds size limit.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/models:
+    get:
+      tags: [models]
+      operationId: listModels
+      summary: List 3D model assets
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        "200":
+          description: List of model assets.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelAssetList"
+        "401":
+          description: Unauthenticated.
+  /v1/models/{id}:
+    get:
+      tags: [models]
+      operationId: getModel
+      summary: Get a 3D model asset by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Model asset details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelAsset"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Model not found.
+    patch:
+      tags: [models]
+      operationId: patchModel
+      summary: Update a 3D model asset
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchModelRequest"
+      responses:
+        "200":
+          description: Model asset updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelAsset"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Model not found.
+    delete:
+      tags: [models]
+      operationId: deleteModel
+      summary: Delete a 3D model asset
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Model deleted.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Model not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ModelAsset:
+      type: object
+      required: [id, workspaceId, uploaderId, name, format, sourceUrl, derivedUrl, polyCount, textureCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        uploaderId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        format:
+          type: string
+          enum: [glb, gltf, usdz, step, stp, iges, igs, fbx, obj]
+        sourceUrl:
+          type: string
+          format: uri
+          description: CDN URL of the original file
+        derivedUrl:
+          type: string
+          format: uri
+          description: CDN URL of the GLB rendition
+        thumbnailUrl:
+          type: string
+          format: uri
+        polyCount:
+          type: integer
+        textureCount:
+          type: integer
+        hasAnimations:
+          type: boolean
+          default: false
+        cadSourceUrl:
+          type: string
+          format: uri
+          description: CDN URL of the CAD source (for CAD-derived assets)
+        licenseId:
+          type: string
+          format: uuid
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ModelAssetList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModelAsset"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    ModelUploadAccepted:
+      type: object
+      required: [modelAssetId, statusUrl, formatDetected]
+      properties:
+        modelAssetId:
+          type: string
+          format: uuid
+        statusUrl:
+          type: string
+          description: Poll this URL for processing status
+        formatDetected:
+          type: string
+        estimatedSeconds:
+          type: integer
+          description: Estimated processing time in seconds
+    PatchModelRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        licenseId:
+          type: string
+          format: uuid
+        metadata:
+          type: object
+          additionalProperties: true
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

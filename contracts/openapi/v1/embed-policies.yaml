@@ -1,0 +1,237 @@
+openapi: 3.1.0
+info:
+  title: Domio Embed Policies API
+  version: 1.0.0
+  description: |
+    Embed policy CRUD for Phase 11 (#81). Controls iframe sandbox behavior
+    for live-app embeds: allowed origins, sandbox flags, JWT requirements,
+    and focus trapping for kiosk mode. Policies are per-workspace with
+    optional per-deck overrides (org-admin required).
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: embed-policies
+    description: Embed policy management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/embed_policies:
+    get:
+      tags: [embed-policies]
+      operationId: listEmbedPolicies
+      summary: List embed policies
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of embed policies.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmbedPolicyList"
+        "401":
+          description: Unauthenticated.
+    post:
+      tags: [embed-policies]
+      operationId: createEmbedPolicy
+      summary: Create an embed policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmbedPolicyRequest"
+      responses:
+        "201":
+          description: Policy created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmbedPolicy"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+  /v1/embed_policies/{id}:
+    get:
+      tags: [embed-policies]
+      operationId: getEmbedPolicy
+      summary: Get an embed policy by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Policy details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmbedPolicy"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Policy not found.
+    put:
+      tags: [embed-policies]
+      operationId: updateEmbedPolicy
+      summary: Update an embed policy
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmbedPolicyRequest"
+      responses:
+        "200":
+          description: Policy updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmbedPolicy"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Policy not found.
+    delete:
+      tags: [embed-policies]
+      operationId: deleteEmbedPolicy
+      summary: Delete an embed policy
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Policy deleted.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Policy not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    EmbedPolicy:
+      type: object
+      required: [id, workspaceId, name, allowedOrigins, sandboxFlags, jwtRequired, trapFocus]
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        allowedOrigins:
+          type: array
+          description: "List of allowed origin patterns, e.g. ['https://*.example.com']"
+          items:
+            type: string
+        sandboxFlags:
+          type: string
+          default: "allow-scripts allow-same-origin allow-forms"
+          description: "Space-separated iframe sandbox flags"
+        jwtRequired:
+          type: boolean
+          default: true
+        jwtAudience:
+          type: string
+          description: Expected JWT audience claim
+        trapFocus:
+          type: boolean
+          default: false
+          description: Enable focus trapping for kiosk use
+        createdAt:
+          type: string
+          format: date-time
+    EmbedPolicyList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EmbedPolicy"
+    CreateEmbedPolicyRequest:
+      type: object
+      required: [workspaceId, name]
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        allowedOrigins:
+          type: array
+          items:
+            type: string
+          default: []
+        sandboxFlags:
+          type: string
+          default: "allow-scripts allow-same-origin allow-forms"
+        jwtRequired:
+          type: boolean
+          default: true
+        jwtAudience:
+          type: string
+        trapFocus:
+          type: boolean
+          default: false
+    UpdateEmbedPolicyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        allowedOrigins:
+          type: array
+          items:
+            type: string
+        sandboxFlags:
+          type: string
+        jwtRequired:
+          type: boolean
+        jwtAudience:
+          type: string
+        trapFocus:
+          type: boolean
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

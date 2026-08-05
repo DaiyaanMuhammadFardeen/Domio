@@ -32,7 +32,42 @@ export type Capability =
   | 'deep-links:write'
   | 'simulate'
   | 'deck-diff'
-  | 'nl-patch';
+  | 'nl-patch'
+  // Phase 11 — 3D, motion & rich media (claim-level gates per mcp-3d.yaml / mcp-embed.yaml)
+  | 'manage_assets'
+  | 'manage_scenes'
+  | 'manage_policies'
+  // Phase 11 — 3D tool surface
+  | 'models:read'
+  | 'models:write'
+  | 'scenes:read'
+  | 'scenes:write'
+  | 'camera-keyframes:read'
+  | 'camera-keyframes:write'
+  | 'shaders:read'
+  | 'shaders:write'
+  | 'licenses:read'
+  | 'licenses:write'
+  | 'cad-jobs:read'
+  | 'cad-jobs:write'
+  | 'ar-sessions:read'
+  | 'ar-sessions:write'
+  // Phase 11 — media tool surface
+  | 'video:read'
+  | 'video:write'
+  | 'audio:read'
+  | 'audio:write'
+  | 'lottie:read'
+  | 'lottie:write'
+  // Phase 11 — embed tool surface
+  | 'embed-policies:read'
+  | 'embed-policies:write'
+  | 'sandbox-policies:read'
+  | 'sandbox-policies:write'
+  | 'sandbox:run'
+  | 'latex:render'
+  | 'map-styles:read'
+  | 'map-styles:write';
 
 /**
  * Source of an audit entry: either a human user or an agent.

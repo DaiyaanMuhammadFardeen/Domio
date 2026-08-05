@@ -175,3 +175,230 @@ describe('validate', () => {
     expect(result.valid).toBe(true);
   });
 });
+
+describe('validate — Phase 11 rich-media layer kinds', () => {
+  it('accepts a model3d element with a modelAssetId', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000A0'),
+      semanticId: 'product_model',
+      type: 'model3d',
+      name: 'Product model',
+      parentId: null,
+      modelAssetId: 'model_asset_01',
+      upAxis: 'z-up',
+      autoRotate: true,
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(true);
+  });
+
+  it('rejects a model3d element missing modelAssetId', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000A1'),
+      semanticId: 'broken_model',
+      type: 'model3d',
+      name: 'Broken model',
+      parentId: null,
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.modelAssetId'))).toBe(true);
+  });
+
+  it('rejects a model3d element with an invalid upAxis', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000A2'),
+      semanticId: 'bad_axis_model',
+      type: 'model3d',
+      name: 'Bad axis',
+      parentId: null,
+      modelAssetId: 'model_asset_01',
+      upAxis: 'x-up' as unknown as 'y-up' | 'z-up',
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.upAxis'))).toBe(true);
+  });
+
+  it('accepts a video element with trim metadata and chapters', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000A3'),
+      semanticId: 'promo_video',
+      type: 'video',
+      name: 'Promo video',
+      parentId: null,
+      assetId: 'video_asset_01',
+      trimInMs: 0,
+      trimOutMs: 30000,
+      speed: 1.5,
+      chapters: [
+        { timeMs: 5000, label: 'Intro' },
+        { timeMs: 20000, label: 'Outro' },
+      ],
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(true);
+  });
+
+  it('rejects a video element with trimOutMs before trimInMs', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000A4'),
+      semanticId: 'bad_trim',
+      type: 'video',
+      name: 'Bad trim',
+      parentId: null,
+      assetId: 'video_asset_01',
+      trimInMs: 30000,
+      trimOutMs: 5000,
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.trimOutMs'))).toBe(true);
+  });
+
+  it('rejects a video element with out-of-range speed', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000A5'),
+      semanticId: 'fast_video',
+      type: 'video',
+      name: 'Too fast',
+      parentId: null,
+      assetId: 'video_asset_01',
+      speed: 8,
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.speed'))).toBe(true);
+  });
+
+  it('accepts audio / lottie / embed / codeBlock / latex / map elements', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push(
+      {
+        id: asULID('01H000000000000000000000A6'),
+        semanticId: 'voiceover',
+        type: 'audio',
+        name: 'Voiceover',
+        parentId: null,
+        assetId: 'audio_track_01',
+        volume: 0.8,
+        pan: -0.3,
+        fadeInMs: 200,
+      } as Element,
+      {
+        id: asULID('01H000000000000000000000A7'),
+        semanticId: 'loading_anim',
+        type: 'lottie',
+        name: 'Loading animation',
+        parentId: null,
+        assetId: 'lottie_asset_01',
+        autoplay: true,
+        variableBindings: { $progress: 'viewer.session.progress' },
+      } as Element,
+      {
+        id: asULID('01H000000000000000000000A8'),
+        semanticId: 'live_app',
+        type: 'embed',
+        name: 'Live app',
+        parentId: null,
+        url: 'https://app.example.com/dashboard',
+        policyId: 'embed_policy_01',
+      } as Element,
+      {
+        id: asULID('01H000000000000000000000A9'),
+        semanticId: 'code_demo',
+        type: 'codeBlock',
+        name: 'Code demo',
+        parentId: null,
+        code: 'console.log(1 + 1)',
+        language: 'javascript',
+        runnable: true,
+      } as Element,
+      {
+        id: asULID('01H000000000000000000000AA'),
+        semanticId: 'maxwell_eq',
+        type: 'latex',
+        name: 'Maxwell equation',
+        parentId: null,
+        source: '$$\\nabla \\cdot E = \\rho / \\epsilon_0$$',
+        displayMode: 'block',
+      } as Element,
+      {
+        id: asULID('01H000000000000000000000AB'),
+        semanticId: 'customer_map',
+        type: 'map',
+        name: 'Customer map',
+        parentId: null,
+        styleId: 'map_style_01',
+        zoom: 4,
+        center: { lng: -74, lat: 40.7 },
+        choropleth: true,
+      } as Element,
+    );
+    const result = validate(doc);
+    expect(result.valid).toBe(true);
+  });
+
+  it('rejects an embed element missing url', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000AC'),
+      semanticId: 'broken_embed',
+      type: 'embed',
+      name: 'Broken embed',
+      parentId: null,
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.url'))).toBe(true);
+  });
+
+  it('rejects a codeBlock element missing code', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000AD'),
+      semanticId: 'empty_code',
+      type: 'codeBlock',
+      name: 'Empty code',
+      parentId: null,
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.code'))).toBe(true);
+  });
+
+  it('rejects a latex element with empty source', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000AE'),
+      semanticId: 'empty_latex',
+      type: 'latex',
+      name: 'Empty latex',
+      parentId: null,
+      source: '',
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.source'))).toBe(true);
+  });
+
+  it('rejects a map element missing styleId', () => {
+    const doc = baseDeck();
+    doc.slides[0]!.elements.push({
+      id: asULID('01H000000000000000000000AF'),
+      semanticId: 'broken_map',
+      type: 'map',
+      name: 'Broken map',
+      parentId: null,
+    } as Element);
+    const result = validate(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.endsWith('.styleId'))).toBe(true);
+  });
+});

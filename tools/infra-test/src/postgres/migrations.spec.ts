@@ -1643,3 +1643,266 @@ describe.skipIf(!hasDocker())('P10-M6.2 migrations apply + rollback', () => {
     expect(tables.has('presentation_sequence')).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// P11 migrations — 3D, Motion & Rich Media.
+// ---------------------------------------------------------------------------
+const P11_MIGRATIONS = [
+  '0035_phase11_3d_assets',
+  '0036_phase11_media_assets',
+  '0037_phase11_embed_maps_jobs',
+  '0038_phase11_3d_indexes_seed',
+];
+const P11_TABLES = [
+  'license', 'model_asset', 'scene', 'camera_keyframe', 'shader',
+  'video_asset', 'audio_track', 'lottie_asset', 'ar_session',
+  'code_sandbox_policy', 'embed_policy', 'latex_doc', 'map_style',
+  'cad_jobs', 'video_jobs',
+];
+
+describe.skipIf(!hasDocker())('P11 migrations apply + rollback', () => {
+  let containerName = '';
+  let client = new pg.Client({ user: 'postgres', password: 'test', database: 'domio' });
+  let host = '127.0.0.1';
+  let port = 0;
+
+  beforeAll(async () => {
+    const name = `domio-p11-mig-${process.pid}-${Date.now()}`;
+    containerName = name;
+    spawn(
+      'docker',
+      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      { stdio: 'ignore' },
+    );
+    let attempts = 90;
+    while (attempts-- > 0) {
+      try {
+        const out = execSync(`docker port ${name} 5432/tcp`, { encoding: 'utf8' }).trim();
+        const line = out.split('\n')[0];
+        const [h, p] = line ? line.split(':') : ['', ''];
+        if (h && p) {
+          host = h === '0.0.0.0' || h === '::' ? '127.0.0.1' : h;
+          port = Number(p);
+          if (port) break;
+        }
+      } catch {
+        /* container not ready yet */
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    if (!port) throw new Error('Could not determine container port');
+    await waitForPg({ host, port, user: 'postgres', password: 'test', database: 'domio' });
+    client = new pg.Client({ host, port, user: 'postgres', password: 'test', database: 'domio' });
+    await client.connect();
+  }, 180000);
+
+  afterAll(async () => {
+    try { await client.end(); } catch { /* ignore */ }
+    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+  });
+
+  it('applies 0035–0038 cleanly', async () => {
+    for (const m of P11_MIGRATIONS) {
+      await client.query(readSql(m, 'up'));
+    }
+    const { rows } = await client.query<{ table_name: string }>(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`,
+    );
+    const tables = rows.map((r) => r.table_name);
+    for (const t of P11_TABLES) {
+      expect(tables).toContain(t);
+    }
+  });
+
+  it('creates the P11 columns and indexes', async () => {
+    const { rows: cols } = await client.query<{ table_name: string; column_name: string }>(
+      `SELECT table_name, column_name FROM information_schema.columns
+       WHERE table_schema = 'public' AND (
+         (table_name = 'model_asset' AND column_name IN ('tenant_id', 'format', 'source_url', 'derived_url', 'poly_count', 'license_id'))
+         OR (table_name = 'scene' AND column_name IN ('tenant_id', 'model_asset_id', 'environment'))
+         OR (table_name = 'camera_keyframe' AND column_name IN ('tenant_id', 'slide_id', 'scene_id', 'order_index', 'fov'))
+         OR (table_name = 'shader' AND column_name IN ('tenant_id', 'kind', 'source_wgsl', 'source_glsl'))
+         OR (table_name = 'license' AND column_name IN ('tenant_id', 'name', 'source', 'terms_url'))
+         OR (table_name = 'video_asset' AND column_name IN ('tenant_id', 'transcode_state', 'hls_url', 'duration_ms'))
+         OR (table_name = 'audio_track' AND column_name IN ('tenant_id', 'slide_id', 'kind', 'volume'))
+         OR (table_name = 'lottie_asset' AND column_name IN ('tenant_id', 'format', 'state_machine'))
+         OR (table_name = 'ar_session' AND column_name IN ('tenant_id', 'slide_id', 'model_asset_id', 'token', 'expires_at'))
+         OR (table_name = 'code_sandbox_policy' AND column_name IN ('tenant_id', 'max_cpu_ms', 'max_memory_mb'))
+         OR (table_name = 'embed_policy' AND column_name IN ('tenant_id', 'sandbox_flags', 'jwt_required'))
+         OR (table_name = 'latex_doc' AND column_name IN ('tenant_id', 'cache_key', 'rendered_html'))
+         OR (table_name = 'map_style' AND column_name IN ('tenant_id', 'provider', 'style_url'))
+         OR (table_name = 'cad_jobs' AND column_name IN ('tenant_id', 'model_asset_id', 'progress'))
+         OR (table_name = 'video_jobs' AND column_name IN ('tenant_id', 'video_asset_id', 'status'))
+       )`,
+    );
+    const colSet = new Set(cols.map((r) => `${r.table_name}.${r.column_name}`));
+    // Spot-check key columns across all 15 tables
+    for (const c of [
+      'model_asset.tenant_id', 'model_asset.format', 'scene.model_asset_id',
+      'camera_keyframe.slide_id', 'camera_keyframe.order_index',
+      'shader.tenant_id', 'shader.kind', 'license.source',
+      'video_asset.tenant_id', 'video_asset.transcode_state',
+      'audio_track.slide_id', 'lottie_asset.format',
+      'ar_session.token', 'ar_session.expires_at',
+      'code_sandbox_policy.tenant_id', 'embed_policy.sandbox_flags',
+      'latex_doc.cache_key', 'map_style.provider',
+      'cad_jobs.progress', 'video_jobs.status',
+    ]) {
+      expect(colSet.has(c)).toBe(true);
+    }
+
+    const { rows: idx } = await client.query<{ indexname: string }>(
+      `SELECT indexname FROM pg_indexes WHERE schemaname = 'public'`,
+    );
+    const indexes = idx.map((r) => r.indexname);
+    for (const i of [
+      'model_asset_tenant_idx', 'model_asset_format_idx',
+      'scene_model_asset_idx', 'camera_keyframe_slide_order_idx',
+      'shader_tenant_kind_idx',
+      'video_asset_tenant_idx', 'video_asset_transcode_idx',
+      'audio_track_slide_idx', 'lottie_asset_tenant_format_idx',
+      'ar_session_expires_idx',
+      'code_sandbox_policy_tenant_idx', 'latex_doc_cache_key_idx',
+      'map_style_tenant_idx',
+    ]) {
+      expect(indexes).toContain(i);
+    }
+  });
+
+  it('enforces RLS policies on all P11 tables', async () => {
+    const { rows } = await client.query<{ policyname: string }>(
+      `SELECT policyname FROM pg_policies WHERE schemaname = 'public'`,
+    );
+    const policies = new Set(rows.map((r) => r.policyname));
+    for (const t of P11_TABLES) {
+      expect(policies.has(`${t}_tenant_isolation`)).toBe(true);
+    }
+  });
+
+  it('seeds 3 default licenses and 3 shader presets', async () => {
+    const { rows: licenses } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM license WHERE tenant_id = 'system'`,
+    );
+    expect(Number(licenses[0]?.count ?? '0')).toBe(3);
+    const { rows: shaders } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM shader WHERE tenant_id = 'system'`,
+    );
+    expect(Number(shaders[0]?.count ?? '0')).toBe(3);
+  });
+
+  it('enforces the P11 insert chain across all 15 tables', async () => {
+    // license (already seeded, but insert a tenant-scoped one)
+    await client.query(
+      `INSERT INTO license (id, tenant_id, name, source) VALUES
+         ('p11lic00000000000000001', 'tenant-p11', 'Test License', 'user-upload')`,
+    );
+    // model_asset
+    await client.query(
+      `INSERT INTO model_asset (id, tenant_id, uploader_id, name, format, source_url, derived_url, poly_count, texture_count, license_id) VALUES
+         ('p11mod00000000000000001', 'tenant-p11', 'user-1', 'Test Model', 'glb', 'https://cdn.example.com/m.glb', 'https://cdn.example.com/m-derived.glb', 15000, 3, 'p11lic00000000000000001')`,
+    );
+    // scene
+    await client.query(
+      `INSERT INTO scene (id, tenant_id, model_asset_id) VALUES
+         ('p11sce00000000000000001', 'tenant-p11', 'p11mod00000000000000001')`,
+    );
+    // camera_keyframe
+    await client.query(
+      `INSERT INTO camera_keyframe (id, tenant_id, slide_id, scene_id, order_index, position, target, fov, easing, duration_ms) VALUES
+         ('p11cam00000000000000001', 'tenant-p11', 'slide-1', 'p11sce00000000000000001', 1,
+          '{"x":0,"y":1.5,"z":5}'::jsonb, '{"x":0,"y":0,"z":0}'::jsonb, 50.0,
+          '{"type":"cubic-bezier","x1":0.42,"y1":0,"x2":0.58,"y2":1}'::jsonb, 800)`,
+    );
+    // shader
+    await client.query(
+      `INSERT INTO shader (id, tenant_id, workspace_id, author_id, name, kind, source_wgsl, source_glsl) VALUES
+         ('p11sha00000000000000001', 'tenant-p11', 'ws-1', 'user-1', 'Test Shader', 'background', '@fragment fn f() -> vec4f { return vec4f(1.0); }', 'void main() {}')`,
+    );
+    // video_asset
+    await client.query(
+      `INSERT INTO video_asset (id, tenant_id, uploader_id, name, source_url, duration_ms, width, height, has_audio, license_id) VALUES
+         ('p11vid00000000000000001', 'tenant-p11', 'user-1', 'Test Video', 'https://cdn.example.com/v.mp4', 30000, 1920, 1080, true, 'p11lic00000000000000001')`,
+    );
+    // audio_track
+    await client.query(
+      `INSERT INTO audio_track (id, tenant_id, slide_id, workspace_id, uploader_id, kind, source_url, duration_ms) VALUES
+         ('p11aud00000000000000001', 'tenant-p11', 'slide-1', 'ws-1', 'user-1', 'voiceover', 'https://cdn.example.com/a.mp3', 15000)`,
+    );
+    // lottie_asset
+    await client.query(
+      `INSERT INTO lottie_asset (id, tenant_id, workspace_id, uploader_id, name, format, source_url, width, height) VALUES
+         ('p11lot00000000000000001', 'tenant-p11', 'ws-1', 'user-1', 'Test Lottie', 'lottie', 'https://cdn.example.com/l.json', 200, 200)`,
+    );
+    // ar_session
+    await client.query(
+      `INSERT INTO ar_session (id, tenant_id, slide_id, model_asset_id, token, expires_at) VALUES
+         ('p11ars00000000000000001', 'tenant-p11', 'slide-1', 'p11mod00000000000000001',
+          'ar-token-abc123', now() + interval '30 minutes')`,
+    );
+    // code_sandbox_policy
+    await client.query(
+      `INSERT INTO code_sandbox_policy (id, tenant_id, workspace_id, name) VALUES
+         ('p11csp00000000000000001', 'tenant-p11', 'ws-1', 'Default Sandbox')`,
+    );
+    // embed_policy
+    await client.query(
+      `INSERT INTO embed_policy (id, tenant_id, workspace_id, name) VALUES
+         ('p11emb00000000000000001', 'tenant-p11', 'ws-1', 'Default Embed')`,
+    );
+    // latex_doc
+    await client.query(
+      `INSERT INTO latex_doc (id, tenant_id, workspace_id, source, rendered_html, theme_hash, cache_key) VALUES
+         ('p11tex00000000000000001', 'tenant-p11', 'ws-1', E'\\\\frac{1}{2}', '<span>1/2</span>', 'h1', 'cache-abc-123')`,
+    );
+    // map_style
+    await client.query(
+      `INSERT INTO map_style (id, tenant_id, workspace_id, name, provider, style_url) VALUES
+         ('p11map00000000000000001', 'tenant-p11', 'ws-1', 'Test Map', 'mapbox', 'https://api.mapbox.com/styles/v1/test')`,
+    );
+    // cad_jobs
+    await client.query(
+      `INSERT INTO cad_jobs (id, tenant_id, model_asset_id, progress) VALUES
+         ('p11cad00000000000000001', 'tenant-p11', 'p11mod00000000000000001', 'parsing')`,
+    );
+    // video_jobs
+    await client.query(
+      `INSERT INTO video_jobs (id, tenant_id, video_asset_id, status) VALUES
+         ('p11vjb00000000000000001', 'tenant-p11', 'p11vid00000000000000001', 'queued')`,
+    );
+    // Verify all rows inserted
+    const { rows } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM model_asset WHERE tenant_id = 'tenant-p11'`,
+    );
+    expect(Number(rows[0]?.count ?? '0')).toBe(1);
+    const { rows: r2 } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM ar_session WHERE tenant_id = 'tenant-p11'`,
+    );
+    expect(Number(r2[0]?.count ?? '0')).toBe(1);
+    const { rows: r3 } = await client.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM video_jobs WHERE tenant_id = 'tenant-p11'`,
+    );
+    expect(Number(r3[0]?.count ?? '0')).toBe(1);
+  });
+
+  it('rejects an invalid model_asset format', async () => {
+    await expect(
+      client.query(
+        `INSERT INTO model_asset (id, tenant_id, uploader_id, name, format, source_url, derived_url, poly_count, texture_count) VALUES
+           ('p11bad00000000000000001', 'tenant-p11', 'user-1', 'Bad', 'bmp', 'http://x', 'http://x', 0, 0)`,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it('rolls back 0038 → 0035 cleanly', async () => {
+    for (const m of [...P11_MIGRATIONS].reverse()) {
+      await client.query(readSql(m, 'down'));
+    }
+    const { rows } = await client.query<{ table_name: string }>(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`,
+    );
+    const tables = rows.map((r) => r.table_name);
+    for (const t of P11_TABLES) {
+      expect(tables).not.toContain(t);
+    }
+  });
+});

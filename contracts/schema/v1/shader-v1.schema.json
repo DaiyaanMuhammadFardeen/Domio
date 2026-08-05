@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/shader-v1.schema.json",
+  "title": "Domio Shader V1",
+  "description": "User-authored GPU shader for Phase 11 particle systems and shader backgrounds. Stores WGSL (WebGPU) and GLSL (WebGL fallback) source, input bindings, and publish state.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "workspaceId", "authorId", "name", "kind", "sourceWgsl", "sourceGlsl", "inputs", "published", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "authorId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["background", "particle", "material", "post"],
+      "description": "Shader category: background, particle emitter, PBR material override, or post-processing pass."
+    },
+    "sourceWgsl": {
+      "type": "string",
+      "minLength": 1,
+      "description": "WGSL source for WebGPU rendering."
+    },
+    "sourceGlsl": {
+      "type": "string",
+      "minLength": 1,
+      "description": "GLSL source for WebGL 2 fallback."
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Uniform/texture input declarations keyed by binding name.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["type"],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["float", "vec2", "vec3", "vec4", "mat4", "texture2d", "sampler"]
+          },
+          "default": {},
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "published": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this shader is published to the org shared library."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

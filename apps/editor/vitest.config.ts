@@ -23,6 +23,7 @@ export default defineConfig({
       '@domio/chart': resolve(here, '../../packages/chart/src/index.ts'),
       '@domio/mock-data': resolve(here, '../../packages/mock-data/src/index.ts'),
       '@domio/prototype-runtime': resolve(here, '../../packages/prototype-runtime/src/index.ts'),
+      '@domio/recording': resolve(here, '../../packages/recording/src/index.ts'),
       '@domio/sdk': resolve(here, '../../packages/sdk-ts/src/index.ts'),
       '@domio/yjs-shared': resolve(here, '../../packages/yjs-shared/src/index.ts'),
       '@bufbuild/protobuf': resolve(here, '../../node_modules/.pnpm/@bufbuild+protobuf@1.10.1/node_modules/@bufbuild/protobuf'),

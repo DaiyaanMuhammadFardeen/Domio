@@ -70,7 +70,7 @@ export function compare(a: string, b: string): -1 | 0 | 1 {
   if (isNaN(x) || isNaN(y)) return NaN as unknown as -1;
   const ax = toParts(x), ay = toParts(y);
   if (ax.sign !== ay.sign) return ax.sign === '+' ? 1 : -1;
-  return (cmpMagnitude(ax, ay) as -1 | 0 | 1) * (ax.sign === '+' ? 1 : -1);
+  return (cmpMagnitude(ax, ay) * (ax.sign === '+' ? 1 : -1)) as -1 | 0 | 1;
 }
 
 interface Parts {
@@ -114,7 +114,7 @@ function stripTrailingZeros(s: string): string {
   return s.slice(0, i);
 }
 
-function cmpMagnitude(a: Parts, b: Parts): number {
+function cmpMagnitude(a: Parts, b: Parts): -1 | 0 | 1 {
   // Compute adjusted exponent of the most-significant digit.
   const aExp = a.exp + a.intDigits.length - 1;
   const bExp = b.exp + b.intDigits.length - 1;

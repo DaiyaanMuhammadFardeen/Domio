@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info:
+  title: Domio Sandbox Runs API
+  version: 1.0.0
+  description: |
+    Code sandbox run API for Phase 11 (#82). Executes user-provided JavaScript
+    in a QuickJS sandbox with resource limits defined by a sandbox policy.
+    Returns stdout, stderr, exit code, duration, and whether the run was killed.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: sandbox-runs
+    description: Sandbox code execution.
+security:
+  - bearerAuth: []
+paths:
+  /v1/sandbox/run:
+    post:
+      tags: [sandbox-runs]
+      operationId: runSandboxCode
+      summary: Execute code in a sandboxed environment
+      description: |
+        Executes the provided code in a QuickJS worker with resource limits
+        from the referenced policy. stdout is capped at 1 MB per run.
+        Runs are rate-limited per workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SandboxRunRequest"
+      responses:
+        "200":
+          description: Execution completed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxRunResult"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "429":
+          description: Rate limited.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SandboxRunRequest:
+      type: object
+      required: [policyId, code]
+      properties:
+        policyId:
+          type: string
+          format: uuid
+          description: Reference to a sandbox policy that defines resource limits
+        code:
+          type: string
+          description: JavaScript code to execute
+          maxLength: 65536
+        language:
+          type: string
+          enum: [js]
+          default: js
+    SandboxRunResult:
+      type: object
+      required: [stdout, stderr, exitCode, durationMs]
+      properties:
+        stdout:
+          type: string
+          description: Standard output (capped at 1 MB)
+        stderr:
+          type: string
+          description: Standard error
+        exitCode:
+          type: integer
+          description: Process exit code (0 = success)
+        durationMs:
+          type: integer
+          description: Execution duration in milliseconds
+        killed:
+          type: boolean
+          default: false
+          description: Whether the process was killed by resource limits
+        memoryUsedMb:
+          type: number
+          description: Peak memory usage in megabytes
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

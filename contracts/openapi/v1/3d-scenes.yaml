@@ -1,0 +1,284 @@
+openapi: 3.1.0
+info:
+  title: Domio 3D Scenes API
+  version: 1.0.0
+  description: |
+    3D scene CRUD for Phase 11 — lights, cameras, materials, and environment maps.
+    Scenes are the runtime container for a 3D model's visual configuration
+    within a deck. Each scene references exactly one model asset.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: scenes
+    description: 3D scene management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/scenes:
+    get:
+      tags: [scenes]
+      operationId: listScenes
+      summary: List scenes for a workspace
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: model_asset_id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of scenes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SceneList"
+        "401":
+          description: Unauthenticated.
+    post:
+      tags: [scenes]
+      operationId: createScene
+      summary: Create a new scene
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSceneRequest"
+      responses:
+        "201":
+          description: Scene created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scene"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+  /v1/scenes/{id}:
+    get:
+      tags: [scenes]
+      operationId: getScene
+      summary: Get a scene by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Scene details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scene"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Scene not found.
+    patch:
+      tags: [scenes]
+      operationId: patchScene
+      summary: Update a scene
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchSceneRequest"
+      responses:
+        "200":
+          description: Scene updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Scene"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Scene not found.
+    delete:
+      tags: [scenes]
+      operationId: deleteScene
+      summary: Delete a scene
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Scene deleted.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Scene not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Scene:
+      type: object
+      required: [id, modelAssetId, environment, lights, cameras, materials]
+      properties:
+        id:
+          type: string
+          format: uuid
+        modelAssetId:
+          type: string
+          format: uuid
+        environment:
+          type: object
+          description: "Environment map config: {hdr, background_blur, background_intensity, exposure}"
+          additionalProperties: true
+        lights:
+          type: array
+          description: Array of light objects (directional, point, spot, ambient)
+          items:
+            type: object
+            required: [type]
+            properties:
+              type:
+                type: string
+                enum: [directional, point, spot, ambient]
+              color:
+                type: string
+              intensity:
+                type: number
+              position:
+                type: object
+                properties:
+                  x: { type: number }
+                  y: { type: number }
+                  z: { type: number }
+              castShadow:
+                type: boolean
+        cameras:
+          type: array
+          description: Array of named camera presets
+          items:
+            type: object
+            required: [name]
+            properties:
+              name:
+                type: string
+              position:
+                type: object
+                properties:
+                  x: { type: number }
+                  y: { type: number }
+                  z: { type: number }
+              target:
+                type: object
+                properties:
+                  x: { type: number }
+                  y: { type: number }
+                  z: { type: number }
+              fov:
+                type: number
+              roll:
+                type: number
+        materials:
+          type: object
+          description: Map of material slot overrides
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SceneList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scene"
+        total:
+          type: integer
+    CreateSceneRequest:
+      type: object
+      required: [modelAssetId]
+      properties:
+        modelAssetId:
+          type: string
+          format: uuid
+        environment:
+          type: object
+          additionalProperties: true
+        lights:
+          type: array
+          items:
+            type: object
+        cameras:
+          type: array
+          items:
+            type: object
+        materials:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+    PatchSceneRequest:
+      type: object
+      properties:
+        environment:
+          type: object
+          additionalProperties: true
+        lights:
+          type: array
+          items:
+            type: object
+        cameras:
+          type: array
+          items:
+            type: object
+        materials:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

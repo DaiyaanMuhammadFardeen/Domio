@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/ar-session-v1.schema.json",
+  "title": "Domio AR Session V1",
+  "description": "AR handoff session for Phase 11. Represents a single-use, time-limited WebXR/Quick Look session created when a presenter sends a 3D model to audience phones via QR code.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "slideId", "modelAssetId", "token", "expiresAt", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "slideId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "modelAssetId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "3D model to display in AR."
+    },
+    "token": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Short-lived signed JWT encoded into the QR URL."
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Session expiry (30 minutes total or 5 minutes of inactivity)."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

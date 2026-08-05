@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/lottie-asset-v1.schema.json",
+  "title": "Domio Lottie Asset V1",
+  "description": "Lottie/Rive vector animation asset for Phase 11. Tracks source files, dimensions, Rive state-machine descriptors, and licensing.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "workspaceId", "uploaderId", "name", "format", "sourceUrl", "width", "height", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "uploaderId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "format": {
+      "type": "string",
+      "enum": ["lottie", "rive"],
+      "description": "Animation runtime format."
+    },
+    "sourceUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "CDN URL of the Lottie JSON or Rive .riv binary."
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "stateMachine": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Rive state-machine descriptor with inputs and transitions.",
+          "properties": {
+            "inputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "type"],
+                "additionalProperties": false,
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "type": { "type": "string", "enum": ["trigger", "boolean", "number"] }
+                }
+              }
+            },
+            "states": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        { "type": "null" }
+      ],
+      "description": "Rive state-machine definition (null for Lottie files)."
+    },
+    "licenseId": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/video-asset-v1.schema.json",
+  "title": "Domio Video Asset V1",
+  "description": "Video asset metadata for Phase 11. Tracks source uploads, HLS/DASH streaming renditions, captions, waveform data, and transcode pipeline state.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "workspaceId", "uploaderId", "name", "sourceUrl", "durationMs", "width", "height", "hasAudio", "transcodeState", "metadata", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "uploaderId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "sourceUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "CDN URL of the original uploaded video file."
+    },
+    "hlsUrl": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "null" }
+      ],
+      "description": "HLS manifest URL for adaptive streaming."
+    },
+    "dashUrl": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "null" }
+      ],
+      "description": "DASH manifest URL for adaptive streaming."
+    },
+    "durationMs": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "hasAudio": {
+      "type": "boolean"
+    },
+    "captionsUrl": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "null" }
+      ],
+      "description": "WebVTT captions file URL."
+    },
+    "thumbnailUrl": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "null" }
+      ],
+      "description": "Poster/thumbnail image URL."
+    },
+    "waveformUrl": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "null" }
+      ],
+      "description": "Waveform visualization JSON URL."
+    },
+    "licenseId": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ]
+    },
+    "transcodeState": {
+      "type": "string",
+      "enum": ["pending", "processing", "ready", "failed"],
+      "default": "pending",
+      "description": "Current state of the server-side transcode pipeline."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

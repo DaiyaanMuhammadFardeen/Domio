@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/latex-doc-v1.schema.json",
+  "title": "Domio LaTeX Doc V1",
+  "description": "LaTeX expression cache entry for Phase 11 scientific decks. Stores source, rendered HTML/SVG, theme fingerprint, and CDN cache key.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "workspaceId", "source", "renderedHtml", "themeHash", "cacheKey", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Raw LaTeX source string (e.g., '\\nabla \\cdot E = \\rho / \\epsilon_0')."
+    },
+    "renderedHtml": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Server-rendered HTML output from MathJax/KaTeX."
+    },
+    "renderedSvg": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "null" }
+      ],
+      "description": "Server-rendered SVG output (preferred for export)."
+    },
+    "themeHash": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Hash of the deck theme tokens used during rendering."
+    },
+    "cacheKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Unique cache key derived from source + themeHash."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

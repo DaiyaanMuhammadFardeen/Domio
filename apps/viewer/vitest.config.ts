@@ -10,7 +10,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@domio/animation-runtime': resolve(here, '../../packages/animation-runtime/src/index.ts'),
+      '@domio/ar-sessions': resolve(here, '../../services/ar-sessions/src/index.ts'),
       '@domio/easing': resolve(here, '../../packages/easing/src/index.ts'),
+      '@domio/audio': resolve(here, '../../packages/audio/src/index.ts'),
+      '@domio/video': resolve(here, '../../packages/video/src/index.ts'),
+      '@domio/physics': resolve(here, '../../packages/physics/src/index.ts'),
+      '@domio/lottie': resolve(here, '../../packages/lottie/src/index.ts'),
+      '@domio/maps': resolve(here, '../../packages/maps/src/index.ts'),
+      '@domio/embed-proxy': resolve(here, '../../services/embed-proxy/src/index.ts'),
     },
   },
   test: {

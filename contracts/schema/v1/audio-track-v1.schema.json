@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/audio-track-v1.schema.json",
+  "title": "Domio Audio Track V1",
+  "description": "Audio track metadata for Phase 11. Represents voiceover, music, ambient, or SFX tracks attached to slides, with per-track mixing parameters.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "workspaceId", "uploaderId", "kind", "sourceUrl", "durationMs", "volume", "fadeInMs", "fadeOutMs", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "slideId": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ],
+      "description": "Slide this track is attached to (null for deck-level music)."
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "uploaderId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["voiceover", "music", "ambient", "sfx"]
+    },
+    "sourceUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "CDN URL of the audio file (AAC/MP3/OGG)."
+    },
+    "durationMs": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "volume": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 2,
+      "default": 1.0,
+      "description": "Playback volume (0.0–2.0)."
+    },
+    "fadeInMs": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Fade-in duration in milliseconds."
+    },
+    "fadeOutMs": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Fade-out duration in milliseconds."
+    },
+    "licenseId": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

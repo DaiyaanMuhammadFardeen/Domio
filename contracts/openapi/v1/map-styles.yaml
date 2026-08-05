@@ -1,0 +1,248 @@
+openapi: 3.1.0
+info:
+  title: Domio Map Styles API
+  version: 1.0.0
+  description: |
+    Map style CRUD for Phase 11 (#84). Manages map provider configurations
+    (Mapbox, Google, MapLibre, custom) with style URLs, API key references,
+    and default viewport settings (zoom, longitude, latitude).
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: map-styles
+    description: Map style management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/map_styles:
+    get:
+      tags: [map-styles]
+      operationId: listMapStyles
+      summary: List map styles
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of map styles.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MapStyleList"
+        "401":
+          description: Unauthenticated.
+    post:
+      tags: [map-styles]
+      operationId: createMapStyle
+      summary: Create a map style
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMapStyleRequest"
+      responses:
+        "201":
+          description: Map style created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MapStyle"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+  /v1/map_styles/{id}:
+    get:
+      tags: [map-styles]
+      operationId: getMapStyle
+      summary: Get a map style by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Map style details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MapStyle"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Map style not found.
+    put:
+      tags: [map-styles]
+      operationId: updateMapStyle
+      summary: Update a map style
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMapStyleRequest"
+      responses:
+        "200":
+          description: Map style updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MapStyle"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Map style not found.
+    delete:
+      tags: [map-styles]
+      operationId: deleteMapStyle
+      summary: Delete a map style
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Map style deleted.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Map style not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    MapStyle:
+      type: object
+      required: [id, workspaceId, name, provider, styleUrl, defaultZoom, defaultLng, defaultLat]
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        provider:
+          type: string
+          enum: [mapbox, google, maplibre, custom]
+        styleUrl:
+          type: string
+          format: uri
+          description: URL of the map style JSON
+        apiKeyId:
+          type: string
+          format: uuid
+          description: Reference to a stored API key
+        defaultZoom:
+          type: number
+          minimum: 0
+          maximum: 22
+          default: 2
+        defaultLng:
+          type: number
+          minimum: -180
+          maximum: 180
+          default: 0
+        defaultLat:
+          type: number
+          minimum: -85.105
+          maximum: 85.105
+          default: 0
+        createdAt:
+          type: string
+          format: date-time
+    MapStyleList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MapStyle"
+    CreateMapStyleRequest:
+      type: object
+      required: [workspaceId, name, provider, styleUrl]
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        provider:
+          type: string
+          enum: [mapbox, google, maplibre, custom]
+        styleUrl:
+          type: string
+          format: uri
+        apiKeyId:
+          type: string
+          format: uuid
+        defaultZoom:
+          type: number
+          default: 2
+        defaultLng:
+          type: number
+          default: 0
+        defaultLat:
+          type: number
+          default: 0
+    UpdateMapStyleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        provider:
+          type: string
+          enum: [mapbox, google, maplibre, custom]
+        styleUrl:
+          type: string
+          format: uri
+        apiKeyId:
+          type: string
+          format: uuid
+        defaultZoom:
+          type: number
+        defaultLng:
+          type: number
+        defaultLat:
+          type: number
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

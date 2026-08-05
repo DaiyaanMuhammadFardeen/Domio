@@ -1,0 +1,21 @@
+{
+  "name": "@domio/recording",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Screen-recording capture via getDisplayMedia. Encoder selection, bitrate auto-scale, resumable drafts. Phase 11 (M7.3).",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

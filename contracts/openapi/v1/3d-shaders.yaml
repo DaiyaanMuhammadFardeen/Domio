@@ -1,0 +1,250 @@
+openapi: 3.1.0
+info:
+  title: Domio 3D Shaders API
+  version: 1.0.0
+  description: |
+    Shader registry CRUD for Phase 11 (#72). Stores custom WGSL and GLSL
+    shader source for backgrounds, particles, materials, and post-processing
+    effects. Shaders must be published before they can be referenced by scenes.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: shaders
+    description: Shader registry management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/shaders:
+    get:
+      tags: [shaders]
+      operationId: listShaders
+      summary: List shaders
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: kind
+          schema:
+            type: string
+            enum: [background, particle, material, post]
+      responses:
+        "200":
+          description: List of shaders.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShaderList"
+        "401":
+          description: Unauthenticated.
+    post:
+      tags: [shaders]
+      operationId: createShader
+      summary: Create a shader
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateShaderRequest"
+      responses:
+        "201":
+          description: Shader created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shader"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+  /v1/shaders/{id}:
+    get:
+      tags: [shaders]
+      operationId: getShader
+      summary: Get a shader by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Shader details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shader"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Shader not found.
+    put:
+      tags: [shaders]
+      operationId: updateShader
+      summary: Update a shader
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateShaderRequest"
+      responses:
+        "200":
+          description: Shader updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shader"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Shader not found.
+    delete:
+      tags: [shaders]
+      operationId: deleteShader
+      summary: Delete a shader
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Shader deleted.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Shader not found.
+  /v1/shaders/{id}/publish:
+    post:
+      tags: [shaders]
+      operationId: publishShader
+      summary: Publish a shader
+      description: Marks a shader as published and available for scene references.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Shader published.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shader"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Shader not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Shader:
+      type: object
+      required: [id, workspaceId, authorId, name, kind, sourceWgsl, sourceGlsl, inputs, published]
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        kind:
+          type: string
+          enum: [background, particle, material, post]
+        sourceWgsl:
+          type: string
+          description: WebGPU Shading Language source
+        sourceGlsl:
+          type: string
+          description: GLSL source (WebGL2 fallback)
+        inputs:
+          type: object
+          description: Input uniforms/parameters with their types and defaults
+          additionalProperties: true
+        published:
+          type: boolean
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+    ShaderList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Shader"
+    CreateShaderRequest:
+      type: object
+      required: [name, kind, sourceWgsl, sourceGlsl]
+      properties:
+        name:
+          type: string
+        kind:
+          type: string
+          enum: [background, particle, material, post]
+        sourceWgsl:
+          type: string
+        sourceGlsl:
+          type: string
+        inputs:
+          type: object
+          additionalProperties: true
+    UpdateShaderRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        sourceWgsl:
+          type: string
+        sourceGlsl:
+          type: string
+        inputs:
+          type: object
+          additionalProperties: true
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

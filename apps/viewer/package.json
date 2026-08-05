@@ -15,7 +15,14 @@
   },
   "dependencies": {
     "@domio/animation-runtime": "workspace:*",
+    "@domio/ar-sessions": "workspace:*",
+    "@domio/audio": "workspace:*",
     "@domio/easing": "workspace:*",
+    "@domio/embed-proxy": "workspace:*",
+    "@domio/lottie": "workspace:*",
+    "@domio/maps": "workspace:*",
+    "@domio/physics": "workspace:*",
+    "@domio/video": "workspace:*",
     "next": "15.1.3",
     "react": "19.0.0",
     "react-dom": "19.0.0"

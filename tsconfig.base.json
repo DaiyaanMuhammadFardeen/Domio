@@ -56,7 +56,23 @@
       "@domio/animation-runtime": ["./packages/animation-runtime/src/index.ts"],
       "@domio/animation-runtime/*": ["./packages/animation-runtime/src/*"],
       "@domio/agent-schema": ["./packages/agent-schema/src/index.ts"],
-      "@domio/agent-schema/*": ["./packages/agent-schema/src/*"]
+      "@domio/agent-schema/*": ["./packages/agent-schema/src/*"],
+      "@domio/lottie": ["./packages/lottie/src/index.ts"],
+      "@domio/lottie/*": ["./packages/lottie/src/*"],
+      "@domio/3d-engine": ["./packages/3d-engine/src/index.ts"],
+      "@domio/3d-engine/*": ["./packages/3d-engine/src/*"],
+      "@domio/audio": ["./packages/audio/src/index.ts"],
+      "@domio/audio/*": ["./packages/audio/src/*"],
+      "@domio/easing": ["./packages/easing/src/index.ts"],
+      "@domio/easing/*": ["./packages/easing/src/*"],
+      "@domio/maps": ["./packages/maps/src/index.ts"],
+      "@domio/maps/*": ["./packages/maps/src/*"],
+      "@domio/physics": ["./packages/physics/src/index.ts"],
+      "@domio/physics/*": ["./packages/physics/src/*"],
+      "@domio/recording": ["./packages/recording/src/index.ts"],
+      "@domio/recording/*": ["./packages/recording/src/*"],
+      "@domio/video": ["./packages/video/src/index.ts"],
+      "@domio/video/*": ["./packages/video/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", ".next", ".turbo", "**/gen/**", "**/generated/**"]

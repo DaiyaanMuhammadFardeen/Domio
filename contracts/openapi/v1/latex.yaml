@@ -1,0 +1,90 @@
+openapi: 3.1.0
+info:
+  title: Domio LaTeX Render API
+  version: 1.0.0
+  description: |
+    LaTeX rendering API for Phase 11 (#83). Accepts LaTeX source and returns
+    rendered HTML, SVG, or PNG output via edge-rendered KaTeX. Results are
+    CDN-cached for 30 days keyed by source + theme hash.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: latex
+    description: LaTeX rendering.
+security:
+  - bearerAuth: []
+paths:
+  /v1/latex/render:
+    post:
+      tags: [latex]
+      operationId: renderLatex
+      summary: Render LaTeX source
+      description: |
+        Renders LaTeX source to HTML, SVG, or PNG using KaTeX. Input is
+        restricted to a safe math subset (no \input, no \href{}). Results
+        are cached by source + theme_hash for 30 days.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LatexRenderRequest"
+      responses:
+        "200":
+          description: Rendered output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LatexRenderResponse"
+        "400":
+          description: Invalid LaTeX source.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LatexRenderRequest:
+      type: object
+      required: [source, format]
+      properties:
+        source:
+          type: string
+          description: LaTeX source (restricted to safe math subset)
+          maxLength: 8192
+        format:
+          type: string
+          enum: [html, svg, png]
+          default: html
+        themeHash:
+          type: string
+          description: Theme identifier for cache key and styling
+    LatexRenderResponse:
+      type: object
+      required: [rendered, cacheKey]
+      properties:
+        rendered:
+          type: string
+          description: Rendered output (HTML string, SVG string, or base64 PNG)
+        cacheKey:
+          type: string
+          description: Cache key for CDN (source + theme hash)
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

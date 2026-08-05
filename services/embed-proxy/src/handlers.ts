@@ -1,17 +1,30 @@
 /**
- * Embed proxy — embed page + handler types (Phase 08).
+ * Embed proxy — embed page + handler types (Phase 08/11).
  *
  * The embed handler serves the `/v1/embed/:bindingId` page and
  * manages token creation + proxy forwarding.
  *
+ * Phase 11 additions: embed policy CRUD handlers.
+ *
  * Public surface:
  *  - {@link embedHandlers} — handler-function signatures.
+ *  - {@link policyHandlers} — policy CRUD handler signatures.
  *  - {@link EmbedHandlerContext} — deps bag.
+ *  - {@link PolicyHandlerContext} — deps bag for policy handlers.
  */
 
 import type { EmbedTokenService } from './tokens.js';
 import { proxyHandler, type ProxyHandlerContext } from './proxy.js';
 import type { HttpRequest, HttpResponse } from './types.js';
+import {
+  PolicyNotFoundError,
+  PolicyValidationError,
+} from './policies.js';
+import type {
+  EmbedPolicyService,
+  CreatePolicyInput,
+  UpdatePolicyInput,
+} from './policies.js';
 
 // ---------------------------------------------------------------------------
 // Context
@@ -25,12 +38,22 @@ export interface EmbedHandlerContext {
   readonly resolveBinding: (bindingId: string) => Promise<{ url: string } | null>;
 }
 
+export interface PolicyHandlerContext {
+  readonly policyService: EmbedPolicyService;
+}
+
 // ---------------------------------------------------------------------------
 // Response helpers
 // ---------------------------------------------------------------------------
 
 function ok<T>(body: T): HttpResponse {
   return { status: 200, body };
+}
+function created<T>(body: T): HttpResponse {
+  return { status: 201, body };
+}
+function noContent(): HttpResponse {
+  return { status: 204, body: undefined };
 }
 function badRequest(message: string, code: string): HttpResponse {
   return { status: 400, body: { error: message, code } };
@@ -109,6 +132,96 @@ export async function validateEmbedTokenHandler(
 }
 
 // ---------------------------------------------------------------------------
+// Policy CRUD handlers (Phase 11)
+// ---------------------------------------------------------------------------
+
+/**
+ * GET /v1/embed_policies?workspace_id=...
+ *
+ * List embed policies for a workspace.
+ */
+export async function listPoliciesHandler(
+  req: HttpRequest<undefined, undefined, Record<string, string | undefined>>,
+  ctx: PolicyHandlerContext,
+): Promise<HttpResponse> {
+  const workspaceId = req.query.workspace_id;
+  if (!workspaceId) return badRequest('workspace_id is required', 'MISSING_WORKSPACE_ID');
+  const policies = ctx.policyService.listByWorkspace(workspaceId);
+  return ok({ items: policies });
+}
+
+/**
+ * POST /v1/embed_policies
+ *
+ * Create a new embed policy.
+ */
+export async function createPolicyHandler(
+  req: HttpRequest<undefined, CreatePolicyInput>,
+  ctx: PolicyHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const policy = ctx.policyService.create(req.body);
+    return created(policy);
+  } catch (e) {
+    if (e instanceof PolicyValidationError) {
+      return badRequest(e.message, 'POLICY_VALIDATION_ERROR');
+    }
+    throw e;
+  }
+}
+
+/**
+ * GET /v1/embed_policies/:id
+ *
+ * Get an embed policy by ID.
+ */
+export async function getPolicyHandler(
+  req: HttpRequest<{ id: string }>,
+  ctx: PolicyHandlerContext,
+): Promise<HttpResponse> {
+  const policy = ctx.policyService.getById(req.params.id);
+  if (!policy) return notFound(`Policy not found: ${req.params.id}`);
+  return ok(policy);
+}
+
+/**
+ * PUT /v1/embed_policies/:id
+ *
+ * Update an embed policy.
+ */
+export async function updatePolicyHandler(
+  req: HttpRequest<{ id: string }, UpdatePolicyInput>,
+  ctx: PolicyHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const policy = ctx.policyService.update(req.params.id, req.body);
+    return ok(policy);
+  } catch (e) {
+    if (e instanceof PolicyNotFoundError) {
+      return notFound(`Policy not found: ${req.params.id}`);
+    }
+    if (e instanceof PolicyValidationError) {
+      return badRequest(e.message, 'POLICY_VALIDATION_ERROR');
+    }
+    throw e;
+  }
+}
+
+/**
+ * DELETE /v1/embed_policies/:id
+ *
+ * Delete an embed policy.
+ */
+export async function deletePolicyHandler(
+  req: HttpRequest<{ id: string }>,
+  ctx: PolicyHandlerContext,
+): Promise<HttpResponse> {
+  const deleted = ctx.policyService.delete(req.params.id);
+  if (!deleted) return notFound(`Policy not found: ${req.params.id}`);
+  return noContent();
+}
+
+// ---------------------------------------------------------------------------
 // Named handlers + grouped export
 // ---------------------------------------------------------------------------
 
@@ -116,4 +229,12 @@ export const embedHandlers = {
   proxy: embedProxyHandler,
   createToken: createEmbedTokenHandler,
   validateToken: validateEmbedTokenHandler,
+} as const;
+
+export const policyHandlers = {
+  list: listPoliciesHandler,
+  create: createPolicyHandler,
+  get: getPolicyHandler,
+  update: updatePolicyHandler,
+  delete: deletePolicyHandler,
 } as const;

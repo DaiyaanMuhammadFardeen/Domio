@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/model-asset-v1.schema.json",
+  "title": "Domio Model Asset V1",
+  "description": "3D model asset metadata for Phase 11. Tracks uploaded models (glTF/GLB/USDZ/CAD), derived renditions, polygon budgets, and license provenance.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "workspaceId", "uploaderId", "name", "format", "sourceUrl", "derivedUrl", "polyCount", "textureCount", "hasAnimations", "metadata", "createdAt", "updatedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver of the model asset schema."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID primary key."
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "uploaderId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "format": {
+      "type": "string",
+      "enum": ["glb", "gltf", "usdz", "step", "stp", "iges", "igs", "fbx", "obj"],
+      "description": "Original file format of the uploaded model."
+    },
+    "sourceUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "CDN URL of the original uploaded file."
+    },
+    "derivedUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "CDN URL of the optimized glTF 2.0 binary (GLB) rendition."
+    },
+    "thumbnailUrl": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "null" }
+      ],
+      "description": "CDN URL of a preview thumbnail."
+    },
+    "polyCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Triangle count of the derived model."
+    },
+    "textureCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of textures in the derived model."
+    },
+    "hasAnimations": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the model contains skeletal or morph-target animations."
+    },
+    "cadSourceUrl": {
+      "oneOf": [
+        { "type": "string", "format": "uri" },
+        { "type": "null" }
+      ],
+      "description": "CDN URL of the original CAD file (STEP/FBX), kept for traceability."
+    },
+    "licenseId": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ],
+      "description": "Reference to the license governing this asset."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary key-value metadata (LOD levels, up_axis, polygon budget tier, etc.).",
+      "additionalProperties": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

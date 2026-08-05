@@ -1,0 +1,304 @@
+openapi: 3.1.0
+info:
+  title: Domio 3D Camera Keyframes API
+  version: 1.0.0
+  description: |
+    Camera keyframe CRUD for Phase 11 scroll/click-driven 3D storytelling.
+    Each keyframe defines a 7-DOF camera pose (position, target, fov, roll)
+    with cubic bezier easing, duration, and trigger type. Keyframes are
+    ordered per slide and interpolated by the runtime.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: camera-keyframes
+    description: 3D camera keyframe management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/slides/{slideId}/camera_keyframes:
+    get:
+      tags: [camera-keyframes]
+      operationId: listCameraKeyframes
+      summary: List camera keyframes for a slide
+      parameters:
+        - in: path
+          name: slideId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: scene_id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ordered list of camera keyframes.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CameraKeyframeList"
+        "401":
+          description: Unauthenticated.
+    post:
+      tags: [camera-keyframes]
+      operationId: createCameraKeyframe
+      summary: Create a camera keyframe
+      parameters:
+        - in: path
+          name: slideId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCameraKeyframeRequest"
+      responses:
+        "201":
+          description: Keyframe created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CameraKeyframe"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+  /v1/camera_keyframes/{id}:
+    get:
+      tags: [camera-keyframes]
+      operationId: getCameraKeyframe
+      summary: Get a camera keyframe by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Camera keyframe details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CameraKeyframe"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Keyframe not found.
+    patch:
+      tags: [camera-keyframes]
+      operationId: patchCameraKeyframe
+      summary: Update a camera keyframe
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchCameraKeyframeRequest"
+      responses:
+        "200":
+          description: Keyframe updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CameraKeyframe"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Keyframe not found.
+    delete:
+      tags: [camera-keyframes]
+      operationId: deleteCameraKeyframe
+      summary: Delete a camera keyframe
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Keyframe deleted.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Keyframe not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CameraKeyframe:
+      type: object
+      required: [id, slideId, orderIndex, position, target, fov, roll, easing, durationMs, trigger]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slideId:
+          type: string
+          format: uuid
+        sceneId:
+          type: string
+          format: uuid
+        orderIndex:
+          type: integer
+          minimum: 0
+        position:
+          type: object
+          required: [x, y, z]
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        target:
+          type: object
+          required: [x, y, z]
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        fov:
+          type: number
+          description: Field of view in degrees
+        roll:
+          type: number
+          default: 0
+          description: Camera roll in degrees
+        easing:
+          type: object
+          description: "Cubic bezier control points: {p1x, p1y, p2x, p2y}"
+          required: [p1x, p1y, p2x, p2y]
+          properties:
+            p1x: { type: number }
+            p1y: { type: number }
+            p2x: { type: number }
+            p2y: { type: number }
+        durationMs:
+          type: integer
+          minimum: 0
+        trigger:
+          type: string
+          enum: [auto, click, scroll, data]
+        createdAt:
+          type: string
+          format: date-time
+    CameraKeyframeList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CameraKeyframe"
+    CreateCameraKeyframeRequest:
+      type: object
+      required: [position, target, fov]
+      properties:
+        sceneId:
+          type: string
+          format: uuid
+        orderIndex:
+          type: integer
+          minimum: 0
+        position:
+          type: object
+          required: [x, y, z]
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        target:
+          type: object
+          required: [x, y, z]
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        fov:
+          type: number
+        roll:
+          type: number
+          default: 0
+        easing:
+          type: object
+          properties:
+            p1x: { type: number }
+            p1y: { type: number }
+            p2x: { type: number }
+            p2y: { type: number }
+        durationMs:
+          type: integer
+          minimum: 0
+        trigger:
+          type: string
+          enum: [auto, click, scroll, data]
+          default: auto
+    PatchCameraKeyframeRequest:
+      type: object
+      properties:
+        position:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        target:
+          type: object
+          properties:
+            x: { type: number }
+            y: { type: number }
+            z: { type: number }
+        fov:
+          type: number
+        roll:
+          type: number
+        easing:
+          type: object
+          properties:
+            p1x: { type: number }
+            p1y: { type: number }
+            p2x: { type: number }
+            p2y: { type: number }
+        durationMs:
+          type: integer
+          minimum: 0
+        trigger:
+          type: string
+          enum: [auto, click, scroll, data]
+        orderIndex:
+          type: integer
+          minimum: 0
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

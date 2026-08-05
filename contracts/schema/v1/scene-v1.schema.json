@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/scene-v1.schema.json",
+  "title": "Domio Scene V1",
+  "description": "3D scene descriptor for Phase 11. Stores lighting rig, camera rig, material bindings, and environment-map slots for a model_asset on a slide.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "modelAssetId", "environment", "lights", "cameras", "materials", "metadata", "createdAt", "updatedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "modelAssetId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "Reference to the model_asset this scene renders."
+    },
+    "environment": {
+      "type": "object",
+      "description": "Environment-map slots (1–4 HDR cubemaps) and ambient settings.",
+      "properties": {
+        "envMapUrls": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" },
+          "maxItems": 4,
+          "description": "CDN URLs of environment-map cubemap faces or equirectangular HDRIs."
+        },
+        "exposure": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 1
+        },
+        "rotationY": {
+          "type": "number",
+          "description": "Horizontal rotation of the environment map in degrees."
+        }
+      },
+      "additionalProperties": false
+    },
+    "lights": {
+      "type": "array",
+      "description": "Array of scene lights (directional, point, spot). Max 8 recommended.",
+      "items": { "$ref": "#/definitions/Light" }
+    },
+    "cameras": {
+      "type": "array",
+      "description": "Named camera presets for the scene.",
+      "items": { "$ref": "#/definitions/CameraPreset" }
+    },
+    "materials": {
+      "type": "object",
+      "description": "Per-mesh or per-mesh-group PBR material overrides keyed by mesh name.",
+      "additionalProperties": { "$ref": "#/definitions/PBRMaterial" }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "definitions": {
+    "Vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+    "Light": {
+      "type": "object",
+      "required": ["kind", "color", "intensity"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["directional", "point", "spot"]
+        },
+        "position": { "$ref": "#/definitions/Vec3" },
+        "target": { "$ref": "#/definitions/Vec3" },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "sRGB hex color of the light."
+        },
+        "intensity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "castShadow": {
+          "type": "boolean",
+          "default": false
+        },
+        "spotAngle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180,
+          "description": "Spotlight cone angle in degrees. Only applies when kind=spot."
+        }
+      }
+    },
+    "CameraPreset": {
+      "type": "object",
+      "required": ["name", "position", "target", "fov"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "position": { "$ref": "#/definitions/Vec3" },
+        "target": { "$ref": "#/definitions/Vec3" },
+        "fov": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 179,
+          "description": "Vertical field of view in degrees."
+        },
+        "roll": {
+          "type": "number",
+          "default": 0,
+          "description": "Camera roll in degrees."
+        }
+      }
+    },
+    "PBRMaterial": {
+      "type": "object",
+      "description": "Physically-based rendering material properties.",
+      "additionalProperties": false,
+      "properties": {
+        "baseColor": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$",
+          "description": "Base albedo color (sRGB hex)."
+        },
+        "roughness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5
+        },
+        "metallic": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0
+        },
+        "normalMapUrl": {
+          "oneOf": [
+            { "type": "string", "format": "uri" },
+            { "type": "null" }
+          ]
+        },
+        "emissiveColor": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+        },
+        "emissiveIntensity": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        },
+        "occlusionStrength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        }
+      }
+    }
+  }
+}

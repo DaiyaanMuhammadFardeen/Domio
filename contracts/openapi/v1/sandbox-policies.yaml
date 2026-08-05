@@ -1,0 +1,268 @@
+openapi: 3.1.0
+info:
+  title: Domio Sandbox Policies API
+  version: 1.0.0
+  description: |
+    Code sandbox policy CRUD for Phase 11 (#82). Defines resource limits and
+    capability gates for runnable code blocks: CPU time, memory, network access,
+    DOM access, console access, module imports, and per-policy module allowlists.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: sandbox-policies
+    description: Code sandbox policy management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/sandbox_policies:
+    get:
+      tags: [sandbox-policies]
+      operationId: listSandboxPolicies
+      summary: List sandbox policies
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of sandbox policies.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxPolicyList"
+        "401":
+          description: Unauthenticated.
+    post:
+      tags: [sandbox-policies]
+      operationId: createSandboxPolicy
+      summary: Create a sandbox policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSandboxPolicyRequest"
+      responses:
+        "201":
+          description: Policy created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxPolicy"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+  /v1/sandbox_policies/{id}:
+    get:
+      tags: [sandbox-policies]
+      operationId: getSandboxPolicy
+      summary: Get a sandbox policy by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Policy details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxPolicy"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Policy not found.
+    put:
+      tags: [sandbox-policies]
+      operationId: updateSandboxPolicy
+      summary: Update a sandbox policy
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSandboxPolicyRequest"
+      responses:
+        "200":
+          description: Policy updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxPolicy"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Policy not found.
+    delete:
+      tags: [sandbox-policies]
+      operationId: deleteSandboxPolicy
+      summary: Delete a sandbox policy
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Policy deleted.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Policy not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SandboxPolicy:
+      type: object
+      required: [id, workspaceId, name, maxCpuMs, maxMemoryMb, allowNetwork, allowDom, allowConsole, allowImport]
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        maxCpuMs:
+          type: integer
+          minimum: 1000
+          maximum: 50000
+          default: 8000
+          description: Max CPU time in milliseconds
+        maxMemoryMb:
+          type: integer
+          minimum: 8
+          maximum: 512
+          default: 64
+          description: Max memory in megabytes
+        allowNetwork:
+          type: boolean
+          default: false
+          description: Allow fetch/XMLHttpRequest
+        allowDom:
+          type: boolean
+          default: false
+          description: Allow DOM access
+        allowConsole:
+          type: boolean
+          default: true
+          description: Allow console.log
+        allowImport:
+          type: boolean
+          default: false
+          description: Allow dynamic import
+        moduleAllowlist:
+          type: array
+          description: Allowed module specifiers (empty = no imports allowed)
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+    SandboxPolicyList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SandboxPolicy"
+    CreateSandboxPolicyRequest:
+      type: object
+      required: [workspaceId, name]
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        maxCpuMs:
+          type: integer
+          minimum: 1000
+          maximum: 50000
+          default: 8000
+        maxMemoryMb:
+          type: integer
+          minimum: 8
+          maximum: 512
+          default: 64
+        allowNetwork:
+          type: boolean
+          default: false
+        allowDom:
+          type: boolean
+          default: false
+        allowConsole:
+          type: boolean
+          default: true
+        allowImport:
+          type: boolean
+          default: false
+        moduleAllowlist:
+          type: array
+          items:
+            type: string
+    UpdateSandboxPolicyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        maxCpuMs:
+          type: integer
+          minimum: 1000
+          maximum: 50000
+        maxMemoryMb:
+          type: integer
+          minimum: 8
+          maximum: 512
+        allowNetwork:
+          type: boolean
+        allowDom:
+          type: boolean
+        allowConsole:
+          type: boolean
+        allowImport:
+          type: boolean
+        moduleAllowlist:
+          type: array
+          items:
+            type: string
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

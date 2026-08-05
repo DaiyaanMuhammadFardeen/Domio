@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/camera-keyframe-v1.schema.json",
+  "title": "Domio Camera Keyframe V1",
+  "description": "Camera keyframe for Phase 11 3D storytelling. Each keyframe defines a camera pose (7-DOF: position + target + FOV) with cubic-bezier easing and a trigger mode.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "slideId", "orderIndex", "position", "target", "fov", "roll", "easing", "durationMs", "trigger", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "slideId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "sceneId": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ],
+      "description": "Optional scene reference for 3D continuity."
+    },
+    "orderIndex": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Sequence position on the slide timeline."
+    },
+    "position": {
+      "$ref": "#/definitions/Vec3",
+      "description": "Camera world-space position."
+    },
+    "target": {
+      "$ref": "#/definitions/Vec3",
+      "description": "Camera look-at target."
+    },
+    "fov": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 179,
+      "description": "Vertical field of view in degrees."
+    },
+    "roll": {
+      "type": "number",
+      "default": 0,
+      "description": "Camera roll in degrees."
+    },
+    "easing": {
+      "$ref": "#/definitions/BezierEasing",
+      "description": "Cubic-bezier control points for interpolation."
+    },
+    "durationMs": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Transition duration in milliseconds."
+    },
+    "trigger": {
+      "type": "string",
+      "enum": ["auto", "click", "scroll", "data"],
+      "default": "auto",
+      "description": "What initiates this keyframe transition."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "definitions": {
+    "Vec3": {
+      "type": "object",
+      "required": ["x", "y", "z"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
+    "BezierEasing": {
+      "type": "object",
+      "required": ["p1x", "p1y", "p2x", "p2y"],
+      "additionalProperties": false,
+      "description": "Cubic-bezier easing curve. Default ease-in-out: {p1x:0.42, p1y:0, p2x:0.58, p2y:1}.",
+      "properties": {
+        "p1x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "p1y": { "type": "number" },
+        "p2x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "p2y": { "type": "number" }
+      }
+    }
+  }
+}

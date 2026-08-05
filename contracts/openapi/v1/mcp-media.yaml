@@ -1,0 +1,439 @@
+openapi: 3.1.0
+info:
+  title: Domio MCP Media Tools
+  version: "1.0.0"
+  description: |
+    MCP HTTP transport for media tools introduced in Phase 11.
+    Bearer token authentication; every tool accepts a JSON object `{ deckId, ... }`
+    and returns a JSON `result`. Errors are mapped to structured `McpError` objects.
+
+    Covers video, audio, and Lottie/Rive asset management.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name: Domio Engineering
+    url: https://github.com/DaiyaanMuhammadFardeen/Domio
+servers:
+  - url: https://mcp.domio.local
+tags:
+  - name: video
+    description: Video asset tools.
+  - name: audio
+    description: Audio track tools.
+  - name: lottie
+    description: Lottie/Rive asset tools.
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    McpError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [PERMISSION_DENIED, INVALID_INPUT, NOT_FOUND, RUNTIME_ERROR, NETWORK_ERROR, TIMEOUT]
+        message: { type: string }
+        issues:
+          type: array
+          items: { type: string }
+paths:
+  /tools/list_video_assets:
+    post:
+      operationId: mcp_list_video_assets
+      tags: [video]
+      summary: list_video_assets
+      description: List video assets in the workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId]
+              properties:
+                deckId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/upload_video_asset:
+    post:
+      operationId: mcp_upload_video_asset
+      tags: [video]
+      summary: upload_video_asset
+      description: Upload a video asset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, file, name]
+              properties:
+                deckId: { type: string }
+                file: { type: string, description: "Base64-encoded file data" }
+                name: { type: string }
+                licenseId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/get_video_asset:
+    post:
+      operationId: mcp_get_video_asset
+      tags: [video]
+      summary: get_video_asset
+      description: Get a video asset by ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, videoAssetId]
+              properties:
+                deckId: { type: string }
+                videoAssetId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_video_asset:
+    post:
+      operationId: mcp_delete_video_asset
+      tags: [video]
+      summary: delete_video_asset
+      description: Delete a video asset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, videoAssetId]
+              properties:
+                deckId: { type: string }
+                videoAssetId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/create_video_job:
+    post:
+      operationId: mcp_create_video_job
+      tags: [video]
+      summary: create_video_job
+      description: Create a video transcode job.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, videoAssetId, renditions]
+              properties:
+                deckId: { type: string }
+                videoAssetId: { type: string }
+                renditions: { type: array, items: { type: string } }
+                extractCaptions: { type: boolean }
+                extractWaveform: { type: boolean }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/get_video_job:
+    post:
+      operationId: mcp_get_video_job
+      tags: [video]
+      summary: get_video_job
+      description: Get a video job by ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, jobId]
+              properties:
+                deckId: { type: string }
+                jobId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/list_audio_tracks:
+    post:
+      operationId: mcp_list_audio_tracks
+      tags: [audio]
+      summary: list_audio_tracks
+      description: List audio tracks for a slide.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, slideId]
+              properties:
+                deckId: { type: string }
+                slideId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/upload_audio_track:
+    post:
+      operationId: mcp_upload_audio_track
+      tags: [audio]
+      summary: upload_audio_track
+      description: Upload an audio track.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, slideId, file, kind]
+              properties:
+                deckId: { type: string }
+                slideId: { type: string }
+                file: { type: string, description: "Base64-encoded file data" }
+                kind: { type: string, enum: [voiceover, music, ambient, sfx] }
+                volume: { type: number }
+                fadeInMs: { type: integer }
+                fadeOutMs: { type: integer }
+                licenseId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/update_audio_track:
+    post:
+      operationId: mcp_update_audio_track
+      tags: [audio]
+      summary: update_audio_track
+      description: Update an audio track.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, trackId]
+              properties:
+                deckId: { type: string }
+                trackId: { type: string }
+                volume: { type: number }
+                fadeInMs: { type: integer }
+                fadeOutMs: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_audio_track:
+    post:
+      operationId: mcp_delete_audio_track
+      tags: [audio]
+      summary: delete_audio_track
+      description: Delete an audio track.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, trackId]
+              properties:
+                deckId: { type: string }
+                trackId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/list_lottie_assets:
+    post:
+      operationId: mcp_list_lottie_assets
+      tags: [lottie]
+      summary: list_lottie_assets
+      description: List Lottie/Rive assets in the workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId]
+              properties:
+                deckId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/upload_lottie_asset:
+    post:
+      operationId: mcp_upload_lottie_asset
+      tags: [lottie]
+      summary: upload_lottie_asset
+      description: Upload a Lottie/Rive asset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, file, name, format]
+              properties:
+                deckId: { type: string }
+                file: { type: string, description: "Base64-encoded file data" }
+                name: { type: string }
+                format: { type: string, enum: [lottie, rive] }
+                licenseId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/get_lottie_asset:
+    post:
+      operationId: mcp_get_lottie_asset
+      tags: [lottie]
+      summary: get_lottie_asset
+      description: Get a Lottie/Rive asset by ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, lottieAssetId]
+              properties:
+                deckId: { type: string }
+                lottieAssetId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_lottie_asset:
+    post:
+      operationId: mcp_delete_lottie_asset
+      tags: [lottie]
+      summary: delete_lottie_asset
+      description: Delete a Lottie/Rive asset.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, lottieAssetId]
+              properties:
+                deckId: { type: string }
+                lottieAssetId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }

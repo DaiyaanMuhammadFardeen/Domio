@@ -1,0 +1,197 @@
+openapi: 3.1.0
+info:
+  title: Domio CAD Jobs API
+  version: 1.0.0
+  description: |
+    CAD conversion job API for Phase 11 (#70). Accepts a model asset ID
+    and tessellation/decimation parameters, dispatches a worker job, and
+    streams progress via WebSocket. CAD formats (STEP/IGES) are converted
+    to glTF 2.0 binary with configurable polygon budgets.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: cad-jobs
+    description: CAD conversion job management.
+security:
+  - bearerAuth: []
+paths:
+  /v1/cad_jobs:
+    post:
+      tags: [cad-jobs]
+      operationId: createCadJob
+      summary: Create a CAD conversion job
+      description: |
+        Dispatches a tessellation/decimation job. Progress is streamed via
+        WebSocket at the returned `websocket_url`. Job progress states:
+        parsing → meshing → optimizing → done | failed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCadJobRequest"
+      responses:
+        "201":
+          description: Job created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CadJob"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+    get:
+      tags: [cad-jobs]
+      operationId: listCadJobs
+      summary: List CAD jobs for a workspace
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of CAD jobs.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CadJobList"
+        "401":
+          description: Unauthenticated.
+  /v1/cad_jobs/{id}:
+    get:
+      tags: [cad-jobs]
+      operationId: getCadJob
+      summary: Get a CAD job by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CadJob"
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Job not found.
+    delete:
+      tags: [cad-jobs]
+      operationId: cancelCadJob
+      summary: Cancel a CAD job
+      description: |
+        Cancels a queued or in-progress job. Fails if the job is already
+        in 'done' or 'failed' status.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Job cancelled.
+        "401":
+          description: Unauthenticated.
+        "404":
+          description: Job not found.
+        "409":
+          description: Cannot cancel job in current status.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CadJob:
+      type: object
+      required: [id, modelAssetId, progress, format]
+      properties:
+        id:
+          type: string
+          format: uuid
+        modelAssetId:
+          type: string
+          format: uuid
+        tessellationChordMm:
+          type: number
+          description: Tessellation chord tolerance in mm
+        tessellationAngleDeg:
+          type: number
+          description: Tessellation angle in degrees
+        targetPolyCount:
+          type: integer
+          description: Target polygon count for decimation
+        format:
+          type: string
+          enum: [glb, gltf]
+          default: glb
+        progress:
+          type: string
+          enum: [parsing, meshing, optimizing, done, failed]
+        websocketUrl:
+          type: string
+          description: WebSocket URL for real-time progress streaming
+        resultUrl:
+          type: string
+          format: uri
+          description: CDN URL of the converted GLB (when done)
+        errorMessage:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CadJobList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CadJob"
+    CreateCadJobRequest:
+      type: object
+      required: [modelAssetId]
+      properties:
+        modelAssetId:
+          type: string
+          format: uuid
+        tessellationChordMm:
+          type: number
+          default: 0.1
+        tessellationAngleDeg:
+          type: number
+          default: 15
+        targetPolyCount:
+          type: integer
+          default: 250000
+          minimum: 1000
+          maximum: 10000000
+        format:
+          type: string
+          enum: [glb, gltf]
+          default: glb
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

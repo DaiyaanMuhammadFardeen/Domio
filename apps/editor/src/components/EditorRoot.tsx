@@ -57,6 +57,9 @@ import {
 } from '../panels/state-inspector-panel';
 import { DeepLinksPanel, type DeepLinkRecord } from '../panels/deep-links-panel';
 import { QuizPanel, type QuizRecord } from '../panels/quiz-panel';
+import { MediaPanel } from '../panels/media-panel';
+import { LicenseDashboard } from '../panels/license-dashboard';
+import { RecordingPanel } from '../panels/recording-panel';
 import {
   LeaderboardPanel,
   type LeaderboardEntry,
@@ -141,6 +144,9 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     | 'm8-nl-patch'
     | 'm8-deck-diff'
     | 'state-inspector'
+    | 'm11-media'
+    | 'm11-licenses'
+    | 'm11-recording'
   >('layers');
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | null>(null);
   const [promoteOpen, setPromoteOpen] = useState(false);
@@ -391,6 +397,46 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     },
     [deck, activeSlideId, engine, autosave],
   );
+
+  const handleInsertMedia = useCallback(
+    (kind: string, props: Record<string, unknown>) => {
+      const slide = deck.slides.find((s) => s.id === activeSlideId);
+      // Map media kinds to their component catalog id.
+      const catalogMap: Record<string, string> = {
+        model3d: 'domio.model3d',
+        video: 'domio.video',
+        audio: 'domio.audio',
+        lottie: 'domio.lottie',
+        embed: 'domio.embed',
+        codeBlock: 'domio.codeBlock',
+        latex: 'domio.latex',
+        map: 'domio.map',
+      };
+      const catalogId = catalogMap[kind] ?? `domio.${kind}`;
+      const def = getComponent(catalogId);
+      if (!slide || !def) return;
+      const layer = makeComponentLayer(def);
+      layer.component.props = { ...props };
+      const op = addElementOp([layer], slide.id, Date.now());
+      setDeck(engine.apply(op));
+      setSelectedIds(new Set([layer.id]));
+      autosave.enqueue(`insert-media-${layer.id}`, op);
+    },
+    [deck, activeSlideId, engine, autosave],
+  );
+
+  // P11 — selected media kind + props for the MediaPanel prop-edit surface.
+  const selectedMediaKind = useMemo(() => {
+    if (!selectedComponent) return null;
+    const props = selectedComponent.component.props ?? {};
+    const kind = (props as { kind?: unknown }).kind;
+    return typeof kind === 'string' ? kind : null;
+  }, [selectedComponent]);
+
+  const selectedMediaProps = useMemo(() => {
+    if (!selectedComponent) return null;
+    return (selectedComponent.component.props ?? {}) as Record<string, unknown>;
+  }, [selectedComponent]);
 
   const handlePropEdit = useCallback(
     (key: string, from: unknown, to: unknown) => {
@@ -1191,6 +1237,36 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
             >
               State inspector
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm11-media'}
+              className={`side-tab${leftTab === 'm11-media' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m11-media')}
+              data-testid="m11-media-tab"
+            >
+              Media
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm11-licenses'}
+              className={`side-tab${leftTab === 'm11-licenses' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m11-licenses')}
+              data-testid="m11-licenses-tab"
+            >
+              Licenses
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'm11-recording'}
+              className={`side-tab${leftTab === 'm11-recording' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('m11-recording')}
+              data-testid="m11-recording-tab"
+            >
+              Recording
+            </button>
           </div>
           {leftTab === 'layers'
             ? activeSlide
@@ -1346,7 +1422,68 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
                                           onTogglePersistInstanceState={handleTogglePersistInstanceState}
                                         />
                                       )
-                                    : (
+                                      : leftTab === 'm11-media'
+                                        ? (
+                                            <MediaPanel
+                                              selectedKind={selectedMediaKind}
+                                              selectedProps={selectedMediaProps}
+                                              onPropEdit={handlePropEdit}
+                                              onInsert={handleInsertMedia}
+                                            />
+                                          )
+                                        : leftTab === 'm11-licenses'
+                                          ? (
+                                              <LicenseDashboard
+                                                workspaceId="default-workspace"
+                                                fetchGrants={async () => [
+                                                  {
+                                                    id: 'grant-1',
+                                                    catalogId: 'model-cadpack-pro',
+                                                    version: '1.0.0',
+                                                    seats: 25,
+                                                    seatsUsed: 18,
+                                                    expiresAt: Date.now() + 30 * 86_400_000,
+                                                    revokedAt: null,
+                                                    status: 'active',
+                                                  },
+                                                  {
+                                                    id: 'grant-2',
+                                                    catalogId: 'audio-stock-loop-bundle',
+                                                    version: '2.3.1',
+                                                    seats: 10,
+                                                    seatsUsed: 7,
+                                                    expiresAt: Date.now() + 7 * 86_400_000,
+                                                    revokedAt: null,
+                                                    status: 'expiring',
+                                                  },
+                                                  {
+                                                    id: 'grant-3',
+                                                    catalogId: 'shader-particle-pack',
+                                                    version: '0.9.0-beta',
+                                                    seats: 5,
+                                                    seatsUsed: 0,
+                                                    expiresAt: Date.now() - 86_400_000,
+                                                    revokedAt: null,
+                                                    status: 'expired',
+                                                  },
+                                                ]}
+                                                onRevoke={(grantId) => {
+                                                  console.info('[m11-licenses] revoke requested', grantId);
+                                                }}
+                                              />
+                                            )
+                                          : leftTab === 'm11-recording'
+                                            ? (
+                                                <RecordingPanel
+                                                  viewportWidth={1920}
+                                                  viewportHeight={1080}
+                                                  fps={30}
+                                                  onFinalize={(draft) => {
+                                                    console.info('[m11-recording] finalized', draft.chunks.length);
+                                                  }}
+                                                />
+                                              )
+                                            : (
                         <ThemeBrandPanel
                           themes={PHASE_07_THEMES}
                           activeThemeId={activeThemeId}

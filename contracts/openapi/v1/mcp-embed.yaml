@@ -1,0 +1,451 @@
+openapi: 3.1.0
+info:
+  title: Domio MCP Embed Tools
+  version: "1.0.0"
+  description: |
+    MCP HTTP transport for embed tools introduced in Phase 11.
+    Bearer token authentication; every tool accepts a JSON object `{ deckId, ... }`
+    and returns a JSON `result`. Errors are mapped to structured `McpError` objects.
+
+    Covers live-app embedding, sandbox execution, LaTeX rendering, and maps.
+
+    Capability-claim gating: agents must hold the `manage_policies` capability to
+    call policy-mutating tools (create/update/delete embed_policy, sandbox_policy).
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name: Domio Engineering
+    url: https://github.com/DaiyaanMuhammadFardeen/Domio
+servers:
+  - url: https://mcp.domio.local
+tags:
+  - name: embed
+    description: Live-app embed policy tools.
+  - name: sandbox
+    description: Code sandbox tools.
+  - name: latex
+    description: LaTeX rendering tools.
+  - name: maps
+    description: Map style tools.
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    McpError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [PERMISSION_DENIED, INVALID_INPUT, NOT_FOUND, RUNTIME_ERROR, NETWORK_ERROR, TIMEOUT]
+        message: { type: string }
+        issues:
+          type: array
+          items: { type: string }
+paths:
+  /tools/create_embed_policy:
+    post:
+      operationId: mcp_create_embed_policy
+      tags: [embed]
+      summary: create_embed_policy
+      description: Create an embed policy. Requires `manage_policies`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, name]
+              properties:
+                deckId: { type: string }
+                name: { type: string }
+                allowedOrigins: { type: array, items: { type: string } }
+                sandboxFlags: { type: string }
+                jwtRequired: { type: boolean }
+                jwtAudience: { type: string }
+                trapFocus: { type: boolean }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/update_embed_policy:
+    post:
+      operationId: mcp_update_embed_policy
+      tags: [embed]
+      summary: update_embed_policy
+      description: Update an embed policy. Requires `manage_policies`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, policyId]
+              properties:
+                deckId: { type: string }
+                policyId: { type: string }
+                patch: { type: object }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_embed_policy:
+    post:
+      operationId: mcp_delete_embed_policy
+      tags: [embed]
+      summary: delete_embed_policy
+      description: Delete an embed policy. Requires `manage_policies`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, policyId]
+              properties:
+                deckId: { type: string }
+                policyId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/list_embed_policies:
+    post:
+      operationId: mcp_list_embed_policies
+      tags: [embed]
+      summary: list_embed_policies
+      description: List embed policies in the workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId]
+              properties:
+                deckId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/create_sandbox_policy:
+    post:
+      operationId: mcp_create_sandbox_policy
+      tags: [sandbox]
+      summary: create_sandbox_policy
+      description: Create a code sandbox policy. Requires `manage_policies`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, name]
+              properties:
+                deckId: { type: string }
+                name: { type: string }
+                maxCpuMs: { type: integer }
+                maxMemoryMb: { type: integer }
+                allowNetwork: { type: boolean }
+                allowDom: { type: boolean }
+                allowConsole: { type: boolean }
+                allowImport: { type: boolean }
+                moduleAllowlist: { type: array, items: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/update_sandbox_policy:
+    post:
+      operationId: mcp_update_sandbox_policy
+      tags: [sandbox]
+      summary: update_sandbox_policy
+      description: Update a code sandbox policy. Requires `manage_policies`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, policyId]
+              properties:
+                deckId: { type: string }
+                policyId: { type: string }
+                patch: { type: object }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_sandbox_policy:
+    post:
+      operationId: mcp_delete_sandbox_policy
+      tags: [sandbox]
+      summary: delete_sandbox_policy
+      description: Delete a code sandbox policy. Requires `manage_policies`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, policyId]
+              properties:
+                deckId: { type: string }
+                policyId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/list_sandbox_policies:
+    post:
+      operationId: mcp_list_sandbox_policies
+      tags: [sandbox]
+      summary: list_sandbox_policies
+      description: List sandbox policies in the workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId]
+              properties:
+                deckId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/run_sandbox_code:
+    post:
+      operationId: mcp_run_sandbox_code
+      tags: [sandbox]
+      summary: run_sandbox_code
+      description: Execute code in a sandboxed environment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, policyId, code]
+              properties:
+                deckId: { type: string }
+                policyId: { type: string }
+                code: { type: string }
+                language: { type: string, enum: [js] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/render_latex:
+    post:
+      operationId: mcp_render_latex
+      tags: [latex]
+      summary: render_latex
+      description: Render LaTeX source to HTML/SVG/PNG.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, source, format]
+              properties:
+                deckId: { type: string }
+                source: { type: string }
+                format: { type: string, enum: [html, svg, png] }
+                themeHash: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/list_map_styles:
+    post:
+      operationId: mcp_list_map_styles
+      tags: [maps]
+      summary: list_map_styles
+      description: List map styles in the workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId]
+              properties:
+                deckId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { type: object } }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/create_map_style:
+    post:
+      operationId: mcp_create_map_style
+      tags: [maps]
+      summary: create_map_style
+      description: Create a map style.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, name, provider, styleUrl]
+              properties:
+                deckId: { type: string }
+                name: { type: string }
+                provider: { type: string, enum: [mapbox, google, maplibre, custom] }
+                styleUrl: { type: string }
+                apiKeyId: { type: string }
+                defaultZoom: { type: number }
+                defaultLng: { type: number }
+                defaultLat: { type: number }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/update_map_style:
+    post:
+      operationId: mcp_update_map_style
+      tags: [maps]
+      summary: update_map_style
+      description: Update a map style.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, styleId]
+              properties:
+                deckId: { type: string }
+                styleId: { type: string }
+                patch: { type: object }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { type: object }
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }
+  /tools/delete_map_style:
+    post:
+      operationId: mcp_delete_map_style
+      tags: [maps]
+      summary: delete_map_style
+      description: Delete a map style.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deckId, styleId]
+              properties:
+                deckId: { type: string }
+                styleId: { type: string }
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid input
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/McpError" }

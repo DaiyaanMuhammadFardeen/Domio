@@ -8,6 +8,14 @@ import type {
   TextLayer,
   ImageLayer,
   VectorLayer,
+  Model3DLayer,
+  VideoLayer,
+  AudioLayer,
+  LottieLayer,
+  EmbedLayer,
+  CodeBlockLayer,
+  LatexLayer,
+  MapLayer,
   DeckDocument,
   ULID,
 } from './generated/scene-graph.js';
@@ -27,6 +35,14 @@ const LAYER_TYPES = [
   'vector',
   'boolean',
   'component',
+  'model3d',
+  'video',
+  'audio',
+  'lottie',
+  'embed',
+  'codeBlock',
+  'latex',
+  'map',
 ] as const;
 export type StructuralLayerType = (typeof LAYER_TYPES)[number];
 
@@ -211,6 +227,30 @@ export class StructuralValidator implements DeckSchemaValidator {
       case 'component':
         this.validateComponent(element, basePath, errors);
         return;
+      case 'model3d':
+        this.validateModel3D(element, basePath, errors);
+        return;
+      case 'video':
+        this.validateVideo(element, basePath, errors);
+        return;
+      case 'audio':
+        this.validateAudio(element, basePath, errors);
+        return;
+      case 'lottie':
+        this.validateLottie(element, basePath, errors);
+        return;
+      case 'embed':
+        this.validateEmbed(element, basePath, errors);
+        return;
+      case 'codeBlock':
+        this.validateCodeBlock(element, basePath, errors);
+        return;
+      case 'latex':
+        this.validateLatex(element, basePath, errors);
+        return;
+      case 'map':
+        this.validateMap(element, basePath, errors);
+        return;
       default:
         return;
     }
@@ -326,6 +366,199 @@ export class StructuralValidator implements DeckSchemaValidator {
         code: 'invalid_argument',
         path: `${basePath}.component.props`,
         message: 'ComponentRef.props must be an object.',
+      });
+    }
+  }
+
+  private validateModel3D(
+    layer: Model3DLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    if (!layer.modelAssetId || typeof layer.modelAssetId !== 'string') {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.modelAssetId`,
+        message: 'Model3DLayer.modelAssetId is required.',
+      });
+    }
+    if (
+      layer.upAxis !== undefined &&
+      layer.upAxis !== 'y-up' &&
+      layer.upAxis !== 'z-up'
+    ) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.upAxis`,
+        message: 'Model3DLayer.upAxis must be one of y-up, z-up.',
+      });
+    }
+  }
+
+  private validateVideo(
+    layer: VideoLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    if (!layer.assetId || typeof layer.assetId !== 'string') {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.assetId`,
+        message: 'VideoLayer.assetId is required.',
+      });
+    }
+    if (
+      layer.trimInMs !== undefined &&
+      (typeof layer.trimInMs !== 'number' || layer.trimInMs < 0)
+    ) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.trimInMs`,
+        message: 'VideoLayer.trimInMs must be a non-negative number.',
+      });
+    }
+    if (
+      layer.trimOutMs !== undefined &&
+      layer.trimInMs !== undefined &&
+      layer.trimOutMs < layer.trimInMs
+    ) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.trimOutMs`,
+        message: 'VideoLayer.trimOutMs must be >= trimInMs.',
+      });
+    }
+    if (
+      layer.speed !== undefined &&
+      (layer.speed < 0.25 || layer.speed > 4)
+    ) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.speed`,
+        message: 'VideoLayer.speed must be within 0.25x and 4x.',
+      });
+    }
+  }
+
+  private validateAudio(
+    layer: AudioLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    if (!layer.assetId || typeof layer.assetId !== 'string') {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.assetId`,
+        message: 'AudioLayer.assetId is required.',
+      });
+    }
+    if (
+      layer.volume !== undefined &&
+      (layer.volume < 0 || layer.volume > 1)
+    ) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.volume`,
+        message: 'AudioLayer.volume must be within 0 and 1.',
+      });
+    }
+    if (layer.pan !== undefined && (layer.pan < -1 || layer.pan > 1)) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.pan`,
+        message: 'AudioLayer.pan must be within -1 and 1.',
+      });
+    }
+  }
+
+  private validateLottie(
+    layer: LottieLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    if (!layer.assetId || typeof layer.assetId !== 'string') {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.assetId`,
+        message: 'LottieLayer.assetId is required.',
+      });
+    }
+  }
+
+  private validateEmbed(
+    layer: EmbedLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    if (!layer.url || typeof layer.url !== 'string') {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.url`,
+        message: 'EmbedLayer.url is required.',
+      });
+    }
+  }
+
+  private validateCodeBlock(
+    layer: CodeBlockLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    if (typeof layer.code !== 'string') {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.code`,
+        message: 'CodeBlockLayer.code must be a string.',
+      });
+    }
+  }
+
+  private validateLatex(
+    layer: LatexLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    if (typeof layer.source !== 'string' || layer.source.length === 0) {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.source`,
+        message: 'LatexLayer.source must be a non-empty string.',
+      });
+    }
+    if (
+      layer.displayMode !== undefined &&
+      layer.displayMode !== 'inline' &&
+      layer.displayMode !== 'block'
+    ) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.displayMode`,
+        message: 'LatexLayer.displayMode must be one of inline, block.',
+      });
+    }
+  }
+
+  private validateMap(
+    layer: MapLayer,
+    basePath: string,
+    errors: ValidationWarning[],
+  ): void {
+    if (!layer.styleId || typeof layer.styleId !== 'string') {
+      errors.push({
+        code: 'required',
+        path: `${basePath}.styleId`,
+        message: 'MapLayer.styleId is required.',
+      });
+    }
+    if (
+      layer.center !== undefined &&
+      (typeof layer.center.lng !== 'number' ||
+        typeof layer.center.lat !== 'number')
+    ) {
+      errors.push({
+        code: 'invalid_argument',
+        path: `${basePath}.center`,
+        message: 'MapLayer.center must have numeric lng and lat.',
       });
     }
   }

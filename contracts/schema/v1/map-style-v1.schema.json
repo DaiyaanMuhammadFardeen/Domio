@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/map-style-v1.schema.json",
+  "title": "Domio Map Style V1",
+  "description": "Map provider style configuration for Phase 11 interactive maps. Stores provider choice, style URL, API key reference, and default viewport.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "workspaceId", "name", "provider", "styleUrl", "defaultZoom", "defaultLng", "defaultLat", "createdAt"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "workspaceId": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "provider": {
+      "type": "string",
+      "enum": ["mapbox", "google", "maplibre", "custom"],
+      "description": "Map tile provider."
+    },
+    "styleUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the map style specification (Mapbox style JSON, Google Maps style, etc.)."
+    },
+    "apiKeyId": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
+        { "type": "null" }
+      ],
+      "description": "Reference to a map_api_key record for provider authentication."
+    },
+    "defaultZoom": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 24,
+      "default": 2,
+      "description": "Default zoom level for newly placed maps."
+    },
+    "defaultLng": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180,
+      "default": 0,
+      "description": "Default longitude center."
+    },
+    "defaultLat": {
+      "type": "number",
+      "minimum": -85.051129,
+      "maximum": 85.051129,
+      "default": 0,
+      "description": "Default latitude center."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

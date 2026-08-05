@@ -397,6 +397,290 @@
         "component": { "$ref": "#/definitions/ComponentRef" }
       }
     },
+    "Model3DLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "modelAssetId"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "type": { "const": "model3d" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "modelAssetId": { "type": "string", "description": "Reference to a model_asset (GLB/GLTF/USDZ rendition, Phase 11)." },
+        "sceneId": { "type": "string", "description": "Optional reference to a 3D scene (lights/cameras/materials/environment)." },
+        "upAxis": { "type": "string", "enum": ["y-up", "z-up"], "default": "y-up", "description": "Coordinate-system hint; z-up assets auto-rotate to y-up unless overridden." },
+        "autoRotate": { "type": "boolean", "default": false },
+        "paused": { "type": "boolean", "default": false },
+        "physicsEnabled": { "type": "boolean", "default": false, "description": "Rigid-body physics (Phase 11 M4.2)." }
+      }
+    },
+    "VideoLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "assetId"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "type": { "const": "video" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "assetId": { "type": "string", "description": "Reference to a video_asset (Phase 11)." },
+        "trimInMs": { "type": "integer", "minimum": 0, "default": 0, "description": "Metadata-only trim in point; no re-encoding." },
+        "trimOutMs": { "type": "integer", "minimum": 0, "description": "Metadata-only trim out point; no re-encoding." },
+        "speed": { "type": "number", "minimum": 0.25, "maximum": 4, "default": 1 },
+        "muted": { "type": "boolean", "default": false },
+        "loop": { "type": "boolean", "default": false },
+        "autoplay": { "type": "boolean", "default": false },
+        "captionsOn": { "type": "boolean", "default": true },
+        "posterFrameMs": { "type": "integer", "minimum": 0 },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["timeMs", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "timeMs": { "type": "integer", "minimum": 0 },
+              "label": { "type": "string", "maxLength": 128 }
+            }
+          }
+        }
+      }
+    },
+    "AudioLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "assetId"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "type": { "const": "audio" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "assetId": { "type": "string", "description": "Reference to an audio_track (Phase 11)." },
+        "volume": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 },
+        "pan": { "type": "number", "minimum": -1, "maximum": 1, "default": 0 },
+        "fadeInMs": { "type": "integer", "minimum": 0, "default": 0 },
+        "fadeOutMs": { "type": "integer", "minimum": 0, "default": 0 },
+        "loop": { "type": "boolean", "default": false },
+        "startAtMs": { "type": "integer", "minimum": 0, "default": 0 }
+      }
+    },
+    "LottieLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "assetId"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "type": { "const": "lottie" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "assetId": { "type": "string", "description": "Reference to a lottie_asset (Lottie or Rive, Phase 11)." },
+        "autoplay": { "type": "boolean", "default": true },
+        "loop": { "type": "boolean", "default": true },
+        "speed": { "type": "number", "minimum": 0, "default": 1 },
+        "variableBindings": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Maps Lottie/Rive variable names to variable paths for scrub (e.g. { \"$progress\": \"viewer.session.progress\" })."
+        }
+      }
+    },
+    "EmbedLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "url"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "type": { "const": "embed" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "url": { "type": "string", "format": "uri", "description": "Live-app URL served through the embed proxy (Phase 11 M8.1)." },
+        "policyId": { "type": "string", "description": "Reference to an embed_policy governing origins/sandbox/JWT." },
+        "sandboxFlags": { "type": "string", "description": "Per-deck sandbox override (org-admin required)." },
+        "title": { "type": "string", "maxLength": 256 }
+      }
+    },
+    "CodeBlockLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "code"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "type": { "const": "codeBlock" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "code": { "type": "string", "description": "Source text of the code block." },
+        "language": { "type": "string", "default": "javascript", "description": "Language id for syntax highlighting (Shiki)." },
+        "runnable": { "type": "boolean", "default": false, "description": "When true, code executes in the QuickJS sandbox (Phase 11 M8.2)." },
+        "policyId": { "type": "string", "description": "Reference to a code_sandbox_policy." },
+        "showLineNumbers": { "type": "boolean", "default": true },
+        "stepReveal": { "type": "boolean", "default": false, "description": "Line-step reveal animates on click." }
+      }
+    },
+    "LatexLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "source"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "type": { "const": "latex" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "source": { "type": "string", "description": "LaTeX source ($...$ inline or $$...$$ block), edge-rendered via KaTeX (Phase 11 M8.3)." },
+        "displayMode": { "type": "string", "enum": ["inline", "block"], "default": "inline" },
+        "themeHash": { "type": "string", "description": "Cache key suffix; re-render on theme change." }
+      }
+    },
+    "MapLayer": {
+      "type": "object",
+      "required": ["id", "semanticId", "type", "name", "styleId"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "common.schema.json#/definitions/ULID" },
+        "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
+        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "type": { "const": "map" },
+        "name": { "type": "string", "maxLength": 256 },
+        "parentId": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "common.schema.json#/definitions/ULID" }
+          ]
+        },
+        "locked": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "z": { "type": "integer", "default": 0 },
+        "transform": { "$ref": "#/definitions/Transform2D" },
+        "style": { "type": "object", "additionalProperties": true },
+        "constraints": { "$ref": "#/definitions/LayerConstraints" },
+        "animation": { "$ref": "#/definitions/Animation" },
+        "binding": { "$ref": "#/definitions/DataBinding" },
+        "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
+        "styleId": { "type": "string", "description": "Reference to a map_style (provider, style_url, defaults, Phase 11 M8.4)." },
+        "zoom": { "type": "number", "description": "Per-element zoom override; pan/zoom remembered per slide." },
+        "center": {
+          "type": "object",
+          "required": ["lng", "lat"],
+          "additionalProperties": false,
+          "properties": {
+            "lng": { "type": "number" },
+            "lat": { "type": "number" }
+          }
+        },
+        "choropleth": { "type": "boolean", "default": false, "description": "Join GeoJSON/TopoJSON regions to the bound data source." }
+      }
+    },
     "Element": {
       "description": "Discriminated union of every layer kind. The `type` field is exclusive per kind.",
       "oneOf": [
@@ -407,7 +691,15 @@
         { "$ref": "#/definitions/ImageLayer" },
         { "$ref": "#/definitions/VectorLayer" },
         { "$ref": "#/definitions/BooleanShapeLayer" },
-        { "$ref": "#/definitions/ComponentLayer" }
+        { "$ref": "#/definitions/ComponentLayer" },
+        { "$ref": "#/definitions/Model3DLayer" },
+        { "$ref": "#/definitions/VideoLayer" },
+        { "$ref": "#/definitions/AudioLayer" },
+        { "$ref": "#/definitions/LottieLayer" },
+        { "$ref": "#/definitions/EmbedLayer" },
+        { "$ref": "#/definitions/CodeBlockLayer" },
+        { "$ref": "#/definitions/LatexLayer" },
+        { "$ref": "#/definitions/MapLayer" }
       ]
     }
   }
