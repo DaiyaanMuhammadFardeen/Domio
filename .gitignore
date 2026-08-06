@@ -74,6 +74,8 @@ desktop.ini
 **/.mypy_cache/
 **/.pytest_cache/
 **/.ruff_cache/
+**/*.egg-info/
+**/.venv/
 
 # Docker
 .docker/
@@ -119,3 +121,4 @@ playwright/.cache/
 
 # Local agent/harness scratch
 .hive/
+.slim/deepwork/

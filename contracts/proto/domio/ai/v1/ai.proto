@@ -1,0 +1,793 @@
+// Domio ai.proto
+//
+// AI Copilot contracts for Phase 12. Defines messages for the 12 AI
+// copilot tables (ai_job, ai_run, citation, slide_citation, source,
+// image_generation_request, rehearsal_session, qa_pair, summary,
+// audience_variant, freshness_record, semantic_index_entry), the
+// AiCopilotService gRPC surface, and the AdapterService (model-adapter
+// layer that talks to external LLM/embedding/ASR/image-gen providers).
+//
+// Lint rules (see buf.yaml):
+//   - enum prefix DOMIO_
+//   - service suffix Service
+//   - field lower_snake_case
+
+syntax = "proto3";
+
+package domio.ai.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/ai/v1;domioaiv1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// JobStatus represents the lifecycle state of an AI generation job.
+enum JobStatus {
+  JOB_STATUS_UNSPECIFIED = 0;
+  JOB_STATUS_QUEUED = 1;
+  JOB_STATUS_RUNNING = 2;
+  JOB_STATUS_SUCCEEDED = 3;
+  JOB_STATUS_FAILED = 4;
+  JOB_STATUS_CANCELLED = 5;
+  JOB_STATUS_PARTIAL = 6;
+}
+
+// RunStatus represents the lifecycle state of a single AI run step.
+enum RunStatus {
+  RUN_STATUS_UNSPECIFIED = 0;
+  RUN_STATUS_RUNNING = 1;
+  RUN_STATUS_SUCCEEDED = 2;
+  RUN_STATUS_FAILED = 3;
+  RUN_STATUS_CANCELLED = 4;
+}
+
+// CitationRole describes the relationship between a slide claim and a citation.
+enum CitationRole {
+  CITATION_ROLE_UNSPECIFIED = 0;
+  CITATION_ROLE_PRIMARY = 1;
+  CITATION_ROLE_SUPPORTING = 2;
+  CITATION_ROLE_BACKGROUND = 3;
+}
+
+// SourceKind identifies the type of ingested source document.
+enum SourceKind {
+  SOURCE_KIND_UNSPECIFIED = 0;
+  SOURCE_KIND_PDF = 1;
+  SOURCE_KIND_DOCX = 2;
+  SOURCE_KIND_NOTION = 3;
+  SOURCE_KIND_MARKDOWN = 4;
+  SOURCE_KIND_URL = 5;
+  SOURCE_KIND_SHEET = 6;
+  SOURCE_KIND_CUSTOM = 7;
+}
+
+// QaDifficulty indicates the expected difficulty of a Q&A pair.
+enum QaDifficulty {
+  QA_DIFFICULTY_UNSPECIFIED = 0;
+  QA_DIFFICULTY_EASY = 1;
+  QA_DIFFICULTY_MEDIUM = 2;
+  QA_DIFFICULTY_HARD = 3;
+}
+
+// QaUserStatus tracks user engagement with a Q&A pair.
+enum QaUserStatus {
+  QA_USER_STATUS_UNSPECIFIED = 0;
+  QA_USER_STATUS_EXPECTED = 1;
+  QA_USER_STATUS_SURPRISE = 2;
+  QA_USER_STATUS_SKIP = 3;
+}
+
+// SummaryVariant indicates the type of summary generated.
+enum SummaryVariant {
+  SUMMARY_VARIANT_UNSPECIFIED = 0;
+  SUMMARY_VARIANT_EXECUTIVE = 1;
+  SUMMARY_VARIANT_TLDR = 2;
+  SUMMARY_VARIANT_ONE_PAGER = 3;
+}
+
+// AudienceVariantType identifies the target audience for a derived deck.
+enum AudienceVariantType {
+  AUDIENCE_VARIANT_TYPE_UNSPECIFIED = 0;
+  AUDIENCE_VARIANT_TYPE_FIVE_MIN = 1;
+  AUDIENCE_VARIANT_TYPE_TECHNICAL = 2;
+  AUDIENCE_VARIANT_TYPE_EXECUTIVE = 3;
+  AUDIENCE_VARIANT_TYPE_SALES = 4;
+  AUDIENCE_VARIANT_TYPE_CUSTOMER = 5;
+}
+
+// FreshnessVerifiedVia describes how a freshness check was performed.
+enum FreshnessVerifiedVia {
+  FRESHNESS_VERIFIED_VIA_UNSPECIFIED = 0;
+  FRESHNESS_VERIFIED_VIA_AUTO = 1;
+  FRESHNESS_VERIFIED_VIA_MANUAL = 2;
+  FRESHNESS_VERIFIED_VIA_FETCH_RETRY = 3;
+}
+
+// ImageGenerationStatus tracks the lifecycle of an image generation request.
+enum ImageGenerationStatus {
+  IMAGE_GENERATION_STATUS_UNSPECIFIED = 0;
+  IMAGE_GENERATION_STATUS_QUEUED = 1;
+  IMAGE_GENERATION_STATUS_PROCESSING = 2;
+  IMAGE_GENERATION_STATUS_COMPLETED = 3;
+  IMAGE_GENERATION_STATUS_FAILED = 4;
+}
+
+// AiErrorCode enumerates AI-specific error conditions.
+enum AiErrorCode {
+  AI_ERROR_CODE_UNSPECIFIED = 0;
+  AI_ERROR_CODE_PROVIDER_UNAVAILABLE = 1;
+  AI_ERROR_CODE_CONTENT_MODERATED = 2;
+  AI_ERROR_CODE_COST_EXCEEDED = 3;
+  AI_ERROR_CODE_RATE_LIMITED = 4;
+  AI_ERROR_CODE_MODEL_ERROR = 5;
+  AI_ERROR_CODE_INVALID_PROMPT = 6;
+  AI_ERROR_CODE_INGESTION_FAILED = 7;
+}
+
+// MessageRole identifies the role of a chat message.
+enum MessageRole {
+  MESSAGE_ROLE_UNSPECIFIED = 0;
+  MESSAGE_ROLE_SYSTEM = 1;
+  MESSAGE_ROLE_USER = 2;
+  MESSAGE_ROLE_ASSISTANT = 3;
+}
+
+// FinishReason indicates why the model stopped generating.
+enum FinishReason {
+  FINISH_REASON_UNSPECIFIED = 0;
+  FINISH_REASON_STOP = 1;
+  FINISH_REASON_LENGTH = 2;
+  FINISH_REASON_CONTENT_FILTER = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Common types
+// -----------------------------------------------------------------------------
+
+// IdempotencyKey is a client-generated unique key for state-changing requests.
+message IdempotencyKey {
+  string value = 1;
+}
+
+// AuditFields are universal audit columns present on every AI copilot table.
+message AuditFields {
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp updated_at = 2;
+  string created_by = 3;
+  string updated_by = 4;
+  // ai_run_id links a row to the AI run that generated it.
+  string ai_run_id = 5;
+  // agent_session_id links a row to an agent-initiated session.
+  string agent_session_id = 6;
+}
+
+// -----------------------------------------------------------------------------
+// ai_job
+// -----------------------------------------------------------------------------
+
+// AiJob represents a queued generation request.
+message AiJob {
+  string id = 1;
+  string workspace_id = 2;
+  string requested_by = 3;
+  string idempotency_key = 4;
+  string job_type = 5;
+  JobStatus status = 6;
+  google.protobuf.Struct payload = 7;
+  google.protobuf.Struct constraints = 8;
+  google.protobuf.Struct result = 9;
+  google.protobuf.Struct error = 10;
+  int32 cost_cents = 11;
+  AuditFields audit = 12;
+  google.protobuf.Timestamp started_at = 13;
+  google.protobuf.Timestamp completed_at = 14;
+}
+
+// CreateAiJobRequest submits a new AI generation job.
+message CreateAiJobRequest {
+  string workspace_id = 1;
+  string requested_by = 2;
+  string job_type = 3;
+  google.protobuf.Struct payload = 4;
+  google.protobuf.Struct constraints = 5;
+  IdempotencyKey idempotency_key = 6;
+}
+
+// CreateAiJobResponse returns the accepted job.
+message CreateAiJobResponse {
+  AiJob job = 1;
+  string stream_url = 2;
+}
+
+// GetAiJobRequest fetches a single job by ID.
+message GetAiJobRequest {
+  string job_id = 1;
+}
+
+// GetAiJobResponse returns the requested job.
+message GetAiJobResponse {
+  AiJob job = 1;
+}
+
+// ListAiJobsRequest lists jobs for a workspace.
+message ListAiJobsRequest {
+  string workspace_id = 1;
+  JobStatus status_filter = 2;
+  uint32 page = 3;
+  uint32 page_size = 4;
+}
+
+// ListAiJobsResponse returns the job list.
+message ListAiJobsResponse {
+  repeated AiJob jobs = 1;
+  uint32 total_count = 2;
+}
+
+// CancelAiJobRequest cancels a running or queued job.
+message CancelAiJobRequest {
+  string job_id = 1;
+  string actor_id = 2;
+}
+
+// CancelAiJobResponse confirms the cancellation.
+message CancelAiJobResponse {
+  AiJob job = 1;
+}
+
+// -----------------------------------------------------------------------------
+// ai_run
+// -----------------------------------------------------------------------------
+
+// AiRun represents a single attempt of an ai_job (one for retries, plus
+// one per step in the plan).
+message AiRun {
+  string id = 1;
+  string job_id = 2;
+  string parent_run_id = 3;
+  string step_name = 4;
+  string model_class = 5;
+  string model_id = 6;
+  string prompt_hash = 7;
+  string prompt_ref = 8;
+  int32 input_tokens = 9;
+  int32 output_tokens = 10;
+  int32 cost_cents = 11;
+  RunStatus status = 12;
+  google.protobuf.Struct error = 13;
+  AuditFields audit = 14;
+  google.protobuf.Timestamp started_at = 15;
+  google.protobuf.Timestamp completed_at = 16;
+}
+
+// ListAiRunsRequest lists runs for a job.
+message ListAiRunsRequest {
+  string job_id = 1;
+}
+
+// ListAiRunsResponse returns the run list.
+message ListAiRunsResponse {
+  repeated AiRun runs = 1;
+}
+
+// -----------------------------------------------------------------------------
+// source
+// -----------------------------------------------------------------------------
+
+// Source represents an ingested document or data source.
+message Source {
+  string id = 1;
+  string workspace_id = 2;
+  SourceKind kind = 3;
+  string title = 4;
+  google.protobuf.Struct ref = 5;
+  AuditFields audit = 6;
+}
+
+// CreateSourceRequest registers a new source.
+message CreateSourceRequest {
+  string workspace_id = 1;
+  SourceKind kind = 2;
+  string title = 3;
+  google.protobuf.Struct ref = 4;
+  string created_by = 5;
+}
+
+// CreateSourceResponse returns the created source.
+message CreateSourceResponse {
+  Source source = 1;
+}
+
+// GetSourceRequest fetches a single source by ID.
+message GetSourceRequest {
+  string source_id = 1;
+}
+
+// GetSourceResponse returns the requested source.
+message GetSourceResponse {
+  Source source = 1;
+}
+
+// IngestSourceRequest triggers the doc ingestion pipeline.
+message IngestSourceRequest {
+  string source_id = 1;
+  google.protobuf.Struct options = 2;
+}
+
+// IngestSourceResponse returns the ingestion job.
+message IngestSourceResponse {
+  string job_id = 1;
+}
+
+// -----------------------------------------------------------------------------
+// citation
+// -----------------------------------------------------------------------------
+
+// Citation is a first-class citation record.
+message Citation {
+  string id = 1;
+  string workspace_id = 2;
+  string source_id = 3;
+  google.protobuf.Struct location = 4;
+  string snippet = 5;
+  string quote_hash = 6;
+  float confidence = 7;
+  string verified_by = 8;
+  google.protobuf.Timestamp verified_at = 9;
+  bool disputed = 10;
+  AuditFields audit = 11;
+}
+
+// GetCitationRequest fetches a single citation.
+message GetCitationRequest {
+  string citation_id = 1;
+}
+
+// GetCitationResponse returns the requested citation.
+message GetCitationResponse {
+  Citation citation = 1;
+}
+
+// UpdateCitationRequest verifies or disputes a citation.
+message UpdateCitationRequest {
+  string citation_id = 1;
+  string verified_by = 2;
+  bool disputed = 3;
+}
+
+// UpdateCitationResponse returns the updated citation.
+message UpdateCitationResponse {
+  Citation citation = 1;
+}
+
+// SlideCitation maps a slide claim to a citation with a role.
+message SlideCitation {
+  string slide_id = 1;
+  string citation_id = 2;
+  string claim_id = 3;
+  CitationRole role = 4;
+}
+
+// ListSlideCitationsRequest lists citations for a slide.
+message ListSlideCitationsRequest {
+  string slide_id = 1;
+}
+
+// ListSlideCitationsResponse returns the citation list.
+message ListSlideCitationsResponse {
+  repeated SlideCitation citations = 1;
+}
+
+// -----------------------------------------------------------------------------
+// image_generation_request
+// -----------------------------------------------------------------------------
+
+// ImageGenerationRequest records an AI image generation request.
+message ImageGenerationRequest {
+  string id = 1;
+  string workspace_id = 2;
+  string requested_by = 3;
+  string prompt = 4;
+  string style_ref_image_id = 5;
+  string brand_kit_id = 6;
+  string model_class = 7;
+  string model_id = 8;
+  int64 seed = 9;
+  string output_asset_id = 10;
+  google.protobuf.Struct moderation_verdict = 11;
+  ImageGenerationStatus status = 12;
+  int32 cost_cents = 13;
+  AuditFields audit = 14;
+  google.protobuf.Timestamp completed_at = 15;
+}
+
+// -----------------------------------------------------------------------------
+// rehearsal_session
+// -----------------------------------------------------------------------------
+
+// RehearsalSession stores per-session coaching data.
+message RehearsalSession {
+  string id = 1;
+  string workspace_id = 2;
+  string user_id = 3;
+  string deck_id = 4;
+  google.protobuf.Timestamp started_at = 5;
+  google.protobuf.Timestamp ended_at = 6;
+  google.protobuf.Struct consent_flags = 7;
+  string raw_video_ref = 8;
+  string raw_audio_ref = 9;
+  google.protobuf.Struct metrics = 10;
+  bool flagged = 11;
+  google.protobuf.Timestamp retention_until = 12;
+  AuditFields audit = 13;
+}
+
+// CreateRehearsalSessionRequest starts a new rehearsal.
+message CreateRehearsalSessionRequest {
+  string workspace_id = 1;
+  string user_id = 2;
+  string deck_id = 3;
+  google.protobuf.Struct consent_flags = 4;
+}
+
+// CreateRehearsalSessionResponse returns the created session.
+message CreateRehearsalSessionResponse {
+  RehearsalSession session = 1;
+}
+
+// UpdateRehearsalSessionRequest updates session end time or flag.
+message UpdateRehearsalSessionRequest {
+  string session_id = 1;
+  google.protobuf.Timestamp ended_at = 2;
+  bool flagged = 3;
+}
+
+// UpdateRehearsalSessionResponse returns the updated session.
+message UpdateRehearsalSessionResponse {
+  RehearsalSession session = 1;
+}
+
+// DeleteRehearsalSessionRequest removes a session and all derived data.
+message DeleteRehearsalSessionRequest {
+  string session_id = 1;
+}
+
+// DeleteRehearsalSessionResponse confirms deletion.
+message DeleteRehearsalSessionResponse {}
+
+// SubmitRehearsalMetricsRequest uploads derived metrics.
+message SubmitRehearsalMetricsRequest {
+  string session_id = 1;
+  google.protobuf.Struct per_slide = 2;
+  google.protobuf.Struct aggregate = 3;
+}
+
+// SubmitRehearsalMetricsResponse confirms receipt.
+message SubmitRehearsalMetricsResponse {}
+
+// -----------------------------------------------------------------------------
+// qa_pair
+// -----------------------------------------------------------------------------
+
+// QaPair is a per-slide anticipated Q&A record.
+message QaPair {
+  string id = 1;
+  string deck_id = 2;
+  string slide_id = 3;
+  string question = 4;
+  string rationale = 5;
+  string suggested_answer = 6;
+  QaDifficulty difficulty = 7;
+  string audience_profile = 8;
+  QaUserStatus user_status = 9;
+  AuditFields audit = 10;
+}
+
+// GenerateQaRequest generates Q&A for a deck.
+message GenerateQaRequest {
+  string deck_id = 1;
+  string audience_profile = 2;
+}
+
+// GenerateQaResponse returns the job.
+message GenerateQaResponse {
+  string job_id = 1;
+}
+
+// -----------------------------------------------------------------------------
+// summary
+// -----------------------------------------------------------------------------
+
+// Summary is an executive summary or TL;DR.
+message Summary {
+  string id = 1;
+  string deck_id = 2;
+  SummaryVariant variant = 3;
+  google.protobuf.Struct content = 4;
+  string source_deck_version_id = 5;
+  string language = 6;
+  AuditFields audit = 7;
+}
+
+// GenerateSummaryRequest generates a summary.
+message GenerateSummaryRequest {
+  string deck_id = 1;
+  SummaryVariant variant = 2;
+}
+
+// GenerateSummaryResponse returns the job.
+message GenerateSummaryResponse {
+  string job_id = 1;
+}
+
+// -----------------------------------------------------------------------------
+// audience_variant
+// -----------------------------------------------------------------------------
+
+// AudienceVariant is a derived deck adapted for a specific audience.
+message AudienceVariant {
+  string id = 1;
+  string source_deck_id = 2;
+  AudienceVariantType variant_type = 3;
+  string derived_deck_id = 4;
+  google.protobuf.Struct diff_summary = 5;
+  AuditFields audit = 6;
+}
+
+// GenerateAudienceVariantRequest generates an audience variant.
+message GenerateAudienceVariantRequest {
+  string deck_id = 1;
+  AudienceVariantType variant_type = 2;
+}
+
+// GenerateAudienceVariantResponse returns the job.
+message GenerateAudienceVariantResponse {
+  string job_id = 1;
+}
+
+// -----------------------------------------------------------------------------
+// freshness_record
+// -----------------------------------------------------------------------------
+
+// FreshnessRecord tracks the freshness of a citation or source.
+message FreshnessRecord {
+  string id = 1;
+  string workspace_id = 2;
+  string source_id = 3;
+  string citation_id = 4;
+  string claim_id = 5;
+  google.protobuf.Timestamp last_verified_at = 6;
+  int32 threshold_days = 7;
+  float freshness_score = 8;
+  FreshnessVerifiedVia verified_via = 9;
+  AuditFields audit = 10;
+}
+
+// CheckFreshnessRequest checks freshness for a deck.
+message CheckFreshnessRequest {
+  string deck_id = 1;
+}
+
+// CheckFreshnessResponse returns the job.
+message CheckFreshnessResponse {
+  string job_id = 1;
+}
+
+// -----------------------------------------------------------------------------
+// semantic_index_entry
+// -----------------------------------------------------------------------------
+
+// SemanticIndexEntry is a vector-indexed chunk for semantic search.
+message SemanticIndexEntry {
+  string id = 1;
+  string workspace_id = 2;
+  string slide_id = 3;
+  string chunk_id = 4;
+  bytes embedding = 5;
+  string text = 6;
+  string language = 7;
+  google.protobuf.Struct metadata = 8;
+  AuditFields audit = 9;
+}
+
+// SearchRequest performs a semantic search across a workspace.
+message SearchRequest {
+  string query = 1;
+  string workspace_id = 2;
+  string deck_id = 3;
+  uint32 limit = 4;
+}
+
+// SearchResult is a single search hit.
+message SearchResult {
+  string slide_id = 1;
+  string deck_id = 2;
+  string snippet = 3;
+  float confidence = 4;
+}
+
+// SearchResponse returns ranked search results.
+message SearchResponse {
+  repeated SearchResult results = 1;
+}
+
+// -----------------------------------------------------------------------------
+// AdapterService messages
+// -----------------------------------------------------------------------------
+
+// ChatMessage is a single message in a conversation (role + content).
+message ChatMessage {
+  MessageRole role = 1;
+  string content = 2;
+}
+
+// GenerateTextRequest is the request for text generation (server-streaming).
+message GenerateTextRequest {
+  string model = 1;
+  repeated ChatMessage messages = 2;
+  int32 max_tokens = 3;
+  float temperature = 4;
+  bool json_mode = 5;
+}
+
+// GenerateTextDelta is a single streaming delta from text generation.
+message GenerateTextDelta {
+  string text = 1;
+  FinishReason finish_reason = 2;
+  int32 input_tokens = 3;
+  int32 output_tokens = 4;
+}
+
+// GenerateImageRequest is the request for image generation.
+message GenerateImageRequest {
+  string model = 1;
+  string prompt = 2;
+  int32 n = 3;
+  string size = 4;
+}
+
+// GenerateImageResponse is the response from image generation.
+message GenerateImageResponse {
+  string url = 1;
+  string provider = 2;
+  string model = 3;
+  string prompt = 4;
+  google.protobuf.Struct moderation_verdict = 5;
+}
+
+// TranscribeRequest is the request for audio transcription (server-streaming).
+message TranscribeRequest {
+  string model = 1;
+  bytes audio = 2;
+}
+
+// TranscribeDelta is a single streaming delta from transcription.
+message TranscribeDelta {
+  string text = 1;
+  bool is_final = 2;
+}
+
+// EmbedRequest is the request for embedding generation.
+message EmbedRequest {
+  string model = 1;
+  string input = 2;
+}
+
+// EmbedResponse is the response from embedding generation.
+message EmbedResponse {
+  repeated float embedding = 1;
+}
+
+// GetCapabilitiesRequest queries the capabilities of a model.
+message GetCapabilitiesRequest {
+  string model = 1;
+}
+
+// GetCapabilitiesResponse returns the model class and its capabilities.
+message GetCapabilitiesResponse {
+  string model_class = 1;
+  repeated string capabilities = 2;
+}
+
+// GetPromptRequest fetches a prompt template by ID and optional version.
+message GetPromptRequest {
+  string template_id = 1;
+  int32 version = 2;
+}
+
+// GetPromptResponse returns the prompt template contents.
+message GetPromptResponse {
+  string id = 1;
+  int32 version = 2;
+  string model_class_hint = 3;
+  string input_schema_json = 4;
+  string output_schema_json = 5;
+  string system_prompt = 6;
+  string user_prompt_template = 7;
+  string eval_set_id = 8;
+}
+
+// -----------------------------------------------------------------------------
+// Errors
+// -----------------------------------------------------------------------------
+
+// Error is an AI-specific error frame.
+message Error {
+  AiErrorCode code = 1;
+  string message = 2;
+  bool retryable = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Service
+// -----------------------------------------------------------------------------
+
+// AiCopilotService manages AI generation jobs, sources, citations, and
+// all AI copilot operations.
+service AiCopilotService {
+  // Job management
+  rpc CreateAiJob(CreateAiJobRequest) returns (CreateAiJobResponse) {}
+  rpc GetAiJob(GetAiJobRequest) returns (GetAiJobResponse) {}
+  rpc ListAiJobs(ListAiJobsRequest) returns (ListAiJobsResponse) {}
+  rpc CancelAiJob(CancelAiJobRequest) returns (CancelAiJobResponse) {}
+
+  // Run management
+  rpc ListAiRuns(ListAiRunsRequest) returns (ListAiRunsResponse) {}
+
+  // Source management
+  rpc CreateSource(CreateSourceRequest) returns (CreateSourceResponse) {}
+  rpc GetSource(GetSourceRequest) returns (GetSourceResponse) {}
+  rpc IngestSource(IngestSourceRequest) returns (IngestSourceResponse) {}
+
+  // Citation management
+  rpc GetCitation(GetCitationRequest) returns (GetCitationResponse) {}
+  rpc UpdateCitation(UpdateCitationRequest) returns (UpdateCitationResponse) {}
+  rpc ListSlideCitations(ListSlideCitationsRequest) returns (ListSlideCitationsResponse) {}
+
+  // Rehearsal
+  rpc CreateRehearsalSession(CreateRehearsalSessionRequest) returns (CreateRehearsalSessionResponse) {}
+  rpc UpdateRehearsalSession(UpdateRehearsalSessionRequest) returns (UpdateRehearsalSessionResponse) {}
+  rpc DeleteRehearsalSession(DeleteRehearsalSessionRequest) returns (DeleteRehearsalSessionResponse) {}
+  rpc SubmitRehearsalMetrics(SubmitRehearsalMetricsRequest) returns (SubmitRehearsalMetricsResponse) {}
+
+  // Q&A
+  rpc GenerateQa(GenerateQaRequest) returns (GenerateQaResponse) {}
+
+  // Summary
+  rpc GenerateSummary(GenerateSummaryRequest) returns (GenerateSummaryResponse) {}
+
+  // Audience variants
+  rpc GenerateAudienceVariant(GenerateAudienceVariantRequest) returns (GenerateAudienceVariantResponse) {}
+
+  // Freshness
+  rpc CheckFreshness(CheckFreshnessRequest) returns (CheckFreshnessResponse) {}
+
+  // Semantic search
+  rpc Search(SearchRequest) returns (SearchResponse) {}
+}
+
+// AdapterService is the model-adapter layer — the only component that talks
+// to external LLM / embedding / ASR / image-gen providers. Each RPC maps to
+// a single provider call routed through the orchestrator's ModelAdapter.
+service AdapterService {
+  // GenerateText streams text completion deltas from a chat prompt.
+  rpc GenerateText(GenerateTextRequest) returns (stream GenerateTextDelta) {}
+
+  // GenerateImage produces one or more images from a text prompt.
+  rpc GenerateImage(GenerateImageRequest) returns (GenerateImageResponse) {}
+
+  // Transcribe streams transcription deltas from an audio chunk.
+  rpc Transcribe(TranscribeRequest) returns (stream TranscribeDelta) {}
+
+  // Embed produces a vector embedding for a text input.
+  rpc Embed(EmbedRequest) returns (EmbedResponse) {}
+
+  // GetCapabilities returns the class and supported capabilities of a model.
+  rpc GetCapabilities(GetCapabilitiesRequest) returns (GetCapabilitiesResponse) {}
+
+  // GetPrompt fetches a versioned prompt template from the registry.
+  rpc GetPrompt(GetPromptRequest) returns (GetPromptResponse) {}
+}

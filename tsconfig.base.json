@@ -72,7 +72,11 @@
       "@domio/recording": ["./packages/recording/src/index.ts"],
       "@domio/recording/*": ["./packages/recording/src/*"],
       "@domio/video": ["./packages/video/src/index.ts"],
-      "@domio/video/*": ["./packages/video/src/*"]
+      "@domio/video/*": ["./packages/video/src/*"],
+      "@domio/model-adapter": ["./packages/model-adapter/src/index.ts"],
+      "@domio/model-adapter/*": ["./packages/model-adapter/src/*"],
+      "@domio/prompt-registry": ["./packages/prompt-registry/src/index.ts"],
+      "@domio/prompt-registry/*": ["./packages/prompt-registry/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", ".next", ".turbo", "**/gen/**", "**/generated/**"]

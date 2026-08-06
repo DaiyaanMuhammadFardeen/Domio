@@ -288,6 +288,26 @@ const en: I18nDict = {
   'p11.map.lng': 'Longitude',
   'p11.map.choropleth': 'Choropleth (data-driven regions)',
   'p11.map.insert': 'Insert Map',
+
+  // Phase 12 — AI Copilot
+  'p12.copilot.tab': 'Copilot',
+  'p12.copilot.title': 'AI Copilot',
+  'p12.copilot.promptPlaceholder': 'Describe your presentation...',
+  'p12.copilot.promptLabel': 'Presentation prompt',
+  'p12.copilot.generateBtn': 'Generate outline',
+  'p12.copilot.approveBtn': 'Approve & Generate',
+  'p12.copilot.slideCount': '{count} slides',
+  'p12.copilot.status.queued': 'Queued...',
+  'p12.copilot.status.running': 'Generating...',
+  'p12.copilot.status.succeeded': 'Complete',
+  'p12.copilot.emptyTitle': 'Create a presentation outline',
+  'p12.copilot.emptyHint': 'Describe what you want to present and I will generate a structured outline for you.',
+  'p12.copilot.slideTitleEdit': 'Edit slide title',
+  'p12.copilot.moveUp': 'Move slide up',
+  'p12.copilot.moveDown': 'Move slide down',
+  'p12.copilot.deleteSlide': 'Delete slide',
+  'p12.copilot.chartType': 'Chart type',
+  'p12.copilot.newOutline': 'Start new outline',
 };
 
 const bn: I18nDict = {
@@ -538,6 +558,26 @@ const bn: I18nDict = {
   'p11.map.lng': 'দ্রাঘিমাংশ',
   'p11.map.choropleth': 'কোরোপ্লেথ (ডেটা-চালিত অঞ্চল)',
   'p11.map.insert': 'মানচিত্র ঢোকান',
+
+  // Phase 12 — AI Copilot
+  'p12.copilot.tab': 'কো-পাইলট',
+  'p12.copilot.title': 'AI কো-পাইলট',
+  'p12.copilot.promptPlaceholder': 'আপনার উপস্থাপন বর্ণনা করুন...',
+  'p12.copilot.promptLabel': 'উপস্থাপন প্রম্পট',
+  'p12.copilot.generateBtn': 'রূপরেখা তৈরি করুন',
+  'p12.copilot.approveBtn': 'অনুমোদন ও জেনারেট',
+  'p12.copilot.slideCount': '{count}টি স্লাইড',
+  'p12.copilot.status.queued': 'সারিতে অপেক্ষমান...',
+  'p12.copilot.status.running': 'তৈরি হচ্ছে...',
+  'p12.copilot.status.succeeded': 'সম্পূর্ণ',
+  'p12.copilot.emptyTitle': 'একটি উপস্থাপন রূপরেখা তৈরি করুন',
+  'p12.copilot.emptyHint': 'আপনি কী উপস্থাপন করতে চান তা বর্ণনা করুন এবং আমি আপনার জন্য একটি কাঠামোগত রূপরেখা তৈরি করব।',
+  'p12.copilot.slideTitleEdit': 'স্লাইড শিরোনাম সম্পাদনা',
+  'p12.copilot.moveUp': 'স্লাইড উপরে সরান',
+  'p12.copilot.moveDown': 'স্লাইড নিচে সরান',
+  'p12.copilot.deleteSlide': 'স্লাইড মুছুন',
+  'p12.copilot.chartType': 'চার্ট ধরন',
+  'p12.copilot.newOutline': 'নতুন রূপরেখা শুরু করুন',
 };
 
 const es: I18nDict = {
@@ -788,6 +828,26 @@ const es: I18nDict = {
   'p11.map.lng': 'Longitud',
   'p11.map.choropleth': 'Coroplético (regiones basadas en datos)',
   'p11.map.insert': 'Insertar mapa',
+
+  // Phase 12 — AI Copilot
+  'p12.copilot.tab': 'Copiloto',
+  'p12.copilot.title': 'Copiloto IA',
+  'p12.copilot.promptPlaceholder': 'Describe tu presentación...',
+  'p12.copilot.promptLabel': 'Indicación de presentación',
+  'p12.copilot.generateBtn': 'Generar esquema',
+  'p12.copilot.approveBtn': 'Aprobar y generar',
+  'p12.copilot.slideCount': '{count} diapositivas',
+  'p12.copilot.status.queued': 'En cola...',
+  'p12.copilot.status.running': 'Generando...',
+  'p12.copilot.status.succeeded': 'Completado',
+  'p12.copilot.emptyTitle': 'Crea un esquema de presentación',
+  'p12.copilot.emptyHint': 'Describe lo que quieres presentar y generaré un esquema estructurado para ti.',
+  'p12.copilot.slideTitleEdit': 'Editar título de diapositiva',
+  'p12.copilot.moveUp': 'Mover diapositiva arriba',
+  'p12.copilot.moveDown': 'Mover diapositiva abajo',
+  'p12.copilot.deleteSlide': 'Eliminar diapositiva',
+  'p12.copilot.chartType': 'Tipo de gráfico',
+  'p12.copilot.newOutline': 'Nuevo esquema',
 };
 
 const fr: I18nDict = {
@@ -1038,6 +1098,26 @@ const fr: I18nDict = {
   'p11.map.lng': 'Longitude',
   'p11.map.choropleth': 'Choroplèthe (régions basées sur les données)',
   'p11.map.insert': 'Insérer une carte',
+
+  // Phase 12 — AI Copilot
+  'p12.copilot.tab': 'Copilote',
+  'p12.copilot.title': 'Copilote IA',
+  'p12.copilot.promptPlaceholder': 'Décrivez votre présentation...',
+  'p12.copilot.promptLabel': 'Invite de présentation',
+  'p12.copilot.generateBtn': 'Générer le plan',
+  'p12.copilot.approveBtn': 'Approuver et générer',
+  'p12.copilot.slideCount': '{count} diapositives',
+  'p12.copilot.status.queued': 'En attente...',
+  'p12.copilot.status.running': 'Génération...',
+  'p12.copilot.status.succeeded': 'Terminé',
+  'p12.copilot.emptyTitle': 'Créez un plan de présentation',
+  'p12.copilot.emptyHint': 'Décrivez ce que vous souhaitez présenter et je générerai un plan structuré pour vous.',
+  'p12.copilot.slideTitleEdit': 'Modifier le titre de la diapositive',
+  'p12.copilot.moveUp': 'Déplacer la diapositive vers le haut',
+  'p12.copilot.moveDown': 'Déplacer la diapositive vers le bas',
+  'p12.copilot.deleteSlide': 'Supprimer la diapositive',
+  'p12.copilot.chartType': 'Type de graphique',
+  'p12.copilot.newOutline': 'Nouveau plan',
 };
 
 const de: I18nDict = {
@@ -1288,6 +1368,26 @@ const de: I18nDict = {
   'p11.map.lng': 'Längengrad',
   'p11.map.choropleth': 'Choropleth (datengesteuerte Regionen)',
   'p11.map.insert': 'Karte einfügen',
+
+  // Phase 12 — AI Copilot
+  'p12.copilot.tab': 'Copilot',
+  'p12.copilot.title': 'KI-Copilot',
+  'p12.copilot.promptPlaceholder': 'Beschreiben Sie Ihre Präsentation...',
+  'p12.copilot.promptLabel': 'Präsentationsaufforderung',
+  'p12.copilot.generateBtn': 'Gliederung erstellen',
+  'p12.copilot.approveBtn': 'Freigeben und generieren',
+  'p12.copilot.slideCount': '{count} Folien',
+  'p12.copilot.status.queued': 'In Warteschlange...',
+  'p12.copilot.status.running': 'Wird generiert...',
+  'p12.copilot.status.succeeded': 'Abgeschlossen',
+  'p12.copilot.emptyTitle': 'Erstellen Sie eine Präsentationsgliederung',
+  'p12.copilot.emptyHint': 'Beschreiben Sie, was Sie präsentieren möchten, und ich erstelle eine strukturierte Gliederung für Sie.',
+  'p12.copilot.slideTitleEdit': 'Folientitel bearbeiten',
+  'p12.copilot.moveUp': 'Folie nach oben verschieben',
+  'p12.copilot.moveDown': 'Folie nach unten verschieben',
+  'p12.copilot.deleteSlide': 'Folie löschen',
+  'p12.copilot.chartType': 'Diagrammtyp',
+  'p12.copilot.newOutline': 'Neue Gliederung',
 };
 
 const ja: I18nDict = {
@@ -1538,6 +1638,26 @@ const ja: I18nDict = {
   'p11.map.lng': '経度',
   'p11.map.choropleth': 'コロプレス（データ駆動地域）',
   'p11.map.insert': '地図を挿入',
+
+  // Phase 12 — AI Copilot
+  'p12.copilot.tab': 'コパイロット',
+  'p12.copilot.title': 'AI コパイロット',
+  'p12.copilot.promptPlaceholder': 'プレゼンテーションを説明してください...',
+  'p12.copilot.promptLabel': 'プレゼンテーションプロンプト',
+  'p12.copilot.generateBtn': 'アウトラインを作成',
+  'p12.copilot.approveBtn': '承認して生成',
+  'p12.copilot.slideCount': '{count} スライド',
+  'p12.copilot.status.queued': 'キュー待ち...',
+  'p12.copilot.status.running': '生成中...',
+  'p12.copilot.status.succeeded': '完了',
+  'p12.copilot.emptyTitle': 'プレゼンテーションのアウトラインを作成',
+  'p12.copilot.emptyHint': 'プレゼンテーションの内容を説明すると、構造化されたアウトラインを生成します。',
+  'p12.copilot.slideTitleEdit': 'スライドタイトルを編集',
+  'p12.copilot.moveUp': 'スライドを上に移動',
+  'p12.copilot.moveDown': 'スライドを下に移動',
+  'p12.copilot.deleteSlide': 'スライドを削除',
+  'p12.copilot.chartType': 'チャートタイプ',
+  'p12.copilot.newOutline': '新しいアウトライン',
 };
 
 const zhCN: I18nDict = {
@@ -1788,6 +1908,26 @@ const zhCN: I18nDict = {
   'p11.map.lng': '经度',
   'p11.map.choropleth': '等值线图（数据驱动区域）',
   'p11.map.insert': '插入地图',
+
+  // Phase 12 — AI Copilot
+  'p12.copilot.tab': '助手',
+  'p12.copilot.title': 'AI 助手',
+  'p12.copilot.promptPlaceholder': '描述你的演示文稿...',
+  'p12.copilot.promptLabel': '演示文稿提示',
+  'p12.copilot.generateBtn': '生成大纲',
+  'p12.copilot.approveBtn': '批准并生成',
+  'p12.copilot.slideCount': '{count} 张幻灯片',
+  'p12.copilot.status.queued': '排队中...',
+  'p12.copilot.status.running': '生成中...',
+  'p12.copilot.status.succeeded': '完成',
+  'p12.copilot.emptyTitle': '创建演示文稿大纲',
+  'p12.copilot.emptyHint': '描述你想演示的内容，我会为你生成结构化的大纲。',
+  'p12.copilot.slideTitleEdit': '编辑幻灯片标题',
+  'p12.copilot.moveUp': '向上移动幻灯片',
+  'p12.copilot.moveDown': '向下移动幻灯片',
+  'p12.copilot.deleteSlide': '删除幻灯片',
+  'p12.copilot.chartType': '图表类型',
+  'p12.copilot.newOutline': '新建大纲',
 };
 
 const DICTS: Record<Locale, I18nDict> = { en, bn, es, fr, de, ja, 'zh-CN': zhCN };

@@ -1,0 +1,1156 @@
+openapi: 3.1.0
+info:
+  title: Domio AI Copilot API
+  version: 1.0.0
+  description: |
+    AI Copilot layer for Phase 12. Async job submission for deck generation,
+    slide rendering, image generation, voice-to-deck, and all generative
+    features. Includes source ingestion, citations, Q&A, summarization,
+    audience variants, rehearsal coaching, layout repair, accessibility,
+    chart selection, semantic search, and freshness checking.
+
+    Internal service-to-service traffic uses gRPC and Protobuf (see
+    `contracts/proto/domio/ai/v1/`). External clients use REST + this
+    OpenAPI spec.
+
+    All non-idempotent endpoints require the `Idempotency-Key` header.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: jobs
+    description: Async AI generation job submission and status.
+  - name: sources
+    description: Source document ingestion and management.
+  - name: citations
+    description: Citation retrieval and management.
+  - name: image
+    description: AI image generation and background removal.
+  - name: voice
+    description: Voice-to-deck via ASR.
+  - name: notes
+    description: Speaker notes generation.
+  - name: qa
+    description: Anticipated Q&A generation.
+  - name: summary
+    description: Smart summarization (executive, TL;DR, one-pager).
+  - name: variants
+    description: Audience-adaptive deck variants.
+  - name: rehearsal
+    description: Rehearsal coaching sessions.
+  - name: lint
+    description: Layout repair detection.
+  - name: accessibility
+    description: Accessibility AI (alt text, captions, contrast).
+  - name: chart
+    description: AI chart selection recommender.
+  - name: search
+    description: Semantic deck search.
+  - name: freshness
+    description: Content freshness checking.
+  - name: prompts
+    description: Prompt template retrieval.
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+paths:
+  # ── Jobs ──────────────────────────────────────────────────────────────
+  /v1/ai/jobs:
+    post:
+      tags: [jobs]
+      operationId: createAiJob
+      summary: Submit an async AI generation job
+      description: |
+        Submits a generation request to the AI orchestrator. Returns a
+        job_id and a stream_url for SSE events. The same idempotency_key
+        with the same request body returns the cached response within 24h.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAiJobRequest"
+      responses:
+        "202":
+          description: Job accepted and queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "401":
+          description: Unauthenticated.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "409":
+          description: Idempotency key conflict (different body).
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/ai/jobs/{job_id}:
+    get:
+      tags: [jobs]
+      operationId: getAiJob
+      summary: Get job status and result
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+      responses:
+        "200":
+          description: Job details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobResponse"
+        "404":
+          description: Job not found.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+  /v1/ai/jobs/{job_id}/stream:
+    get:
+      tags: [jobs]
+      operationId: streamAiJob
+      summary: Stream job events via SSE
+      description: |
+        Server-Sent Events stream for a running job. Events include
+        status updates, text deltas, artifact previews, citations, and
+        completion/error signals.
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+        - in: header
+          name: Last-Event-ID
+          required: false
+          schema:
+            type: string
+          description: Resume from this event ID after reconnect.
+      responses:
+        "200":
+          description: SSE event stream.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "404":
+          description: Job not found.
+  # ── Sources ───────────────────────────────────────────────────────────
+  /v1/sources:
+    post:
+      tags: [sources]
+      operationId: createSource
+      summary: Register a new source document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSourceRequest"
+      responses:
+        "201":
+          description: Source created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Source"
+    get:
+      tags: [sources]
+      operationId: listSources
+      summary: List sources for a workspace
+      parameters:
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Source list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListSourcesResponse"
+  /v1/sources/{source_id}:
+    get:
+      tags: [sources]
+      operationId: getSource
+      summary: Get a source by ID
+      parameters:
+        - in: path
+          name: source_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Source details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Source"
+        "404":
+          description: Source not found.
+  /v1/sources/{source_id}/ingest:
+    post:
+      tags: [sources]
+      operationId: ingestSource
+      summary: Start ingestion pipeline for a source
+      description: |
+        Triggers the doc ingestion pipeline (extract, chunk, embed).
+        Returns a job_id for tracking progress via SSE.
+      parameters:
+        - in: path
+          name: source_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IngestSourceRequest"
+      responses:
+        "202":
+          description: Ingestion job started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+  # ── Citations ─────────────────────────────────────────────────────────
+  /v1/citations/{citation_id}:
+    get:
+      tags: [citations]
+      operationId: getCitation
+      summary: Get a citation by ID
+      parameters:
+        - in: path
+          name: citation_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Citation details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Citation"
+        "404":
+          description: Citation not found.
+    patch:
+      tags: [citations]
+      operationId: updateCitation
+      summary: Verify or dispute a citation
+      parameters:
+        - in: path
+          name: citation_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCitationRequest"
+      responses:
+        "200":
+          description: Citation updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Citation"
+  /v1/slides/{slide_id}/citations:
+    get:
+      tags: [citations]
+      operationId: listSlideCitations
+      summary: List citations for a slide
+      parameters:
+        - in: path
+          name: slide_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Citation list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListSlideCitationsResponse"
+  # ── Image Generation ──────────────────────────────────────────────────
+  /v1/ai/image:
+    post:
+      tags: [image]
+      operationId: generateImage
+      summary: Generate an AI image
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateImageRequest"
+      responses:
+        "202":
+          description: Image generation started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageGenerationResponse"
+  /v1/ai/image/{request_id}/remove-background:
+    post:
+      tags: [image]
+      operationId: removeBackground
+      summary: Remove background from an image
+      parameters:
+        - in: path
+          name: request_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Background removal started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageGenerationResponse"
+  # ── Voice ─────────────────────────────────────────────────────────────
+  /v1/ai/voice/transcribe:
+    post:
+      tags: [voice]
+      operationId: transcribeAudio
+      summary: Transcribe audio for voice-to-deck
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Audio file (browser-supported codec).
+                language:
+                  type: string
+                  description: Optional language hint (e.g. "en").
+      responses:
+        "202":
+          description: Transcription started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranscriptionAccepted"
+  # ── Speaker Notes ─────────────────────────────────────────────────────
+  /v1/ai/notes:
+    post:
+      tags: [notes]
+      operationId: generateNotes
+      summary: Generate speaker notes for a slide
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateNotesRequest"
+      responses:
+        "202":
+          description: Notes generation started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+  # ── Q&A ───────────────────────────────────────────────────────────────
+  /v1/ai/qa:
+    post:
+      tags: [qa]
+      operationId: generateQa
+      summary: Generate anticipated Q&A for a deck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateQaRequest"
+      responses:
+        "202":
+          description: Q&A generation started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+  # ── Summary ───────────────────────────────────────────────────────────
+  /v1/ai/summary:
+    post:
+      tags: [summary]
+      operationId: generateSummary
+      summary: Generate executive summary or TL;DR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateSummaryRequest"
+      responses:
+        "202":
+          description: Summary generation started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+  # ── Audience Variants ─────────────────────────────────────────────────
+  /v1/ai/variants:
+    post:
+      tags: [variants]
+      operationId: generateAudienceVariant
+      summary: Generate an audience-adaptive deck variant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateVariantRequest"
+      responses:
+        "202":
+          description: Variant generation started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+  # ── Rehearsal ─────────────────────────────────────────────────────────
+  /v1/ai/rehearsal/sessions:
+    post:
+      tags: [rehearsal]
+      operationId: createRehearsalSession
+      summary: Start a rehearsal coaching session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRehearsalSessionRequest"
+      responses:
+        "201":
+          description: Session created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RehearsalSession"
+  /v1/ai/rehearsal/sessions/{session_id}:
+    get:
+      tags: [rehearsal]
+      operationId: getRehearsalSession
+      summary: Get rehearsal session details
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RehearsalSession"
+        "404":
+          description: Session not found.
+    patch:
+      tags: [rehearsal]
+      operationId: updateRehearsalSession
+      summary: Update rehearsal session (end, annotate)
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRehearsalSessionRequest"
+      responses:
+        "200":
+          description: Session updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RehearsalSession"
+    delete:
+      tags: [rehearsal]
+      operationId: deleteRehearsalSession
+      summary: Delete a rehearsal session and all derived data
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Session deleted.
+  /v1/ai/rehearsal/sessions/{session_id}/metrics:
+    post:
+      tags: [rehearsal]
+      operationId: submitRehearsalMetrics
+      summary: Submit derived metrics for a rehearsal session
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RehearsalMetrics"
+      responses:
+        "200":
+          description: Metrics saved.
+  # ── Layout Repair ─────────────────────────────────────────────────────
+  /v1/ai/lint/layout:
+    post:
+      tags: [lint]
+      operationId: lintDeckLayout
+      summary: Run layout repair detection on a deck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LintLayoutRequest"
+      responses:
+        "202":
+          description: Layout lint started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+  # ── Accessibility ─────────────────────────────────────────────────────
+  /v1/ai/accessibility/audit:
+    post:
+      tags: [accessibility]
+      operationId: accessibilityAudit
+      summary: Run accessibility audit on a deck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessibilityAuditRequest"
+      responses:
+        "202":
+          description: Audit started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+  # ── Chart Selection ───────────────────────────────────────────────────
+  /v1/ai/chart/recommend:
+    post:
+      tags: [chart]
+      operationId: recommendChart
+      summary: Get a chart recommendation for a dataset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChartRecommendRequest"
+      responses:
+        "200":
+          description: Chart recommendation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChartRecommendation"
+  # ── Semantic Search ───────────────────────────────────────────────────
+  /v1/ai/search:
+    get:
+      tags: [search]
+      operationId: semanticSearch
+      summary: Semantic deck search
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+          description: Natural-language search query.
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: deck_id
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        "200":
+          description: Search results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+  # ── Freshness ─────────────────────────────────────────────────────────
+  /v1/ai/freshness/check:
+    post:
+      tags: [freshness]
+      operationId: checkFreshness
+      summary: Check content freshness for a deck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FreshnessCheckRequest"
+      responses:
+        "202":
+          description: Freshness check started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiJobAccepted"
+  # ── Prompts ───────────────────────────────────────────────────────────
+  /v1/prompts/{template_id}:
+    get:
+      tags: [prompts]
+      operationId: getPromptTemplate
+      summary: Get a prompt template by ID
+      parameters:
+        - in: path
+          name: template_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Prompt template.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptTemplate"
+        "404":
+          description: Template not found.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Phase 0 stub: the bearer token is `dev-stub-token`. Phase 20
+        will replace this with full SSO + SCIM + signed capability tokens.
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: domio_session
+      description: HttpOnly session cookie set by the auth endpoint.
+  schemas:
+    # ── Job schemas ───────────────────────────────────────────────────
+    CreateAiJobRequest:
+      type: object
+      required: [type, payload]
+      properties:
+        type:
+          type: string
+          description: |
+            Job type identifier, e.g. "deck.generate", "slide.render",
+            "image.generate", "rehearsal.coach", "qa.generate",
+            "summary.generate", "translation", "freshness.check",
+            "lint.layout".
+        payload:
+          type: object
+          additionalProperties: true
+          description: Input parameters per job_type.
+        constraints:
+          type: object
+          additionalProperties: true
+          description: |
+            Optional constraints: max_cost_cents, auto_approve_outline,
+            brand lock overrides, audience profile.
+        workspace_id:
+          type: string
+          description: Target workspace.
+    AiJobAccepted:
+      type: object
+      required: [job_id, status, stream_url]
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+          enum: [queued]
+        stream_url:
+          type: string
+          description: SSE stream URL for job events.
+        trace_id:
+          type: string
+    AiJob:
+      type: object
+      required: [id, workspace_id, type, status, created_at]
+      properties:
+        id:
+          type: string
+        workspace_id:
+          type: string
+        requested_by:
+          type: string
+        idempotency_key:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, succeeded, failed, cancelled, partial]
+        payload:
+          type: object
+          additionalProperties: true
+        constraints:
+          type: object
+          additionalProperties: true
+        result:
+          type: object
+          additionalProperties: true
+        error:
+          type: object
+          additionalProperties: true
+        cost_cents:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+    AiJobResponse:
+      type: object
+      required: [job]
+      properties:
+        job:
+          $ref: "#/components/schemas/AiJob"
+        trace_id:
+          type: string
+    # ── Source schemas ────────────────────────────────────────────────
+    Source:
+      type: object
+      required: [id, workspace_id, kind, title]
+      properties:
+        id:
+          type: string
+        workspace_id:
+          type: string
+        kind:
+          type: string
+          enum: [pdf, docx, notion, markdown, url, sheet, custom]
+        title:
+          type: string
+        ref:
+          type: object
+          additionalProperties: true
+          description: Reference data (URL, object key, etc.).
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    CreateSourceRequest:
+      type: object
+      required: [workspace_id, kind, title]
+      properties:
+        workspace_id:
+          type: string
+        kind:
+          type: string
+          enum: [pdf, docx, notion, markdown, url, sheet, custom]
+        title:
+          type: string
+        ref:
+          type: object
+          additionalProperties: true
+    IngestSourceRequest:
+      type: object
+      properties:
+        options:
+          type: object
+          additionalProperties: true
+          description: Ingestion options (OCR, chunk size, etc.).
+    ListSourcesResponse:
+      type: object
+      required: [sources]
+      properties:
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/Source"
+        trace_id:
+          type: string
+    # ── Citation schemas ──────────────────────────────────────────────
+    Citation:
+      type: object
+      required: [id, workspace_id, source_id, location, snippet, quote_hash, confidence]
+      properties:
+        id:
+          type: string
+        workspace_id:
+          type: string
+        source_id:
+          type: string
+        location:
+          type: object
+          additionalProperties: true
+          description: "Chunk index, page, section, row_range."
+        snippet:
+          type: string
+          maxLength: 280
+        quote_hash:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        verified_by:
+          type: string
+        verified_at:
+          type: string
+          format: date-time
+        disputed:
+          type: boolean
+          default: false
+        created_at:
+          type: string
+          format: date-time
+    UpdateCitationRequest:
+      type: object
+      properties:
+        verified_by:
+          type: string
+          description: User ID if manually verified; null to un-verify.
+        disputed:
+          type: boolean
+          description: Mark citation as disputed.
+    ListSlideCitationsResponse:
+      type: object
+      required: [citations]
+      properties:
+        citations:
+          type: array
+          items:
+            $ref: "#/components/schemas/SlideCitationEntry"
+        trace_id:
+          type: string
+    SlideCitationEntry:
+      type: object
+      required: [citation_id, claim_id, role]
+      properties:
+        citation_id:
+          type: string
+        claim_id:
+          type: string
+        role:
+          type: string
+          enum: [primary, supporting, background]
+        citation:
+          $ref: "#/components/schemas/Citation"
+    # ── Image Generation schemas ──────────────────────────────────────
+    GenerateImageRequest:
+      type: object
+      required: [prompt, workspace_id]
+      properties:
+        prompt:
+          type: string
+        workspace_id:
+          type: string
+        style_ref_image_id:
+          type: string
+          description: Optional reference image for style transfer.
+        brand_kit_id:
+          type: string
+          description: Optional brand kit for style locking.
+    ImageGenerationResponse:
+      type: object
+      required: [request_id, status]
+      properties:
+        request_id:
+          type: string
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+        job_id:
+          type: string
+          description: Associated AI job ID for streaming.
+        trace_id:
+          type: string
+    # ── Voice schemas ─────────────────────────────────────────────────
+    TranscriptionAccepted:
+      type: object
+      required: [transcript_id, stream_url]
+      properties:
+        transcript_id:
+          type: string
+        stream_url:
+          type: string
+          description: SSE stream for partial transcription results.
+        trace_id:
+          type: string
+    # ── Notes schemas ─────────────────────────────────────────────────
+    GenerateNotesRequest:
+      type: object
+      required: [slide_id, variant]
+      properties:
+        slide_id:
+          type: string
+        variant:
+          type: string
+          enum: [terse, detailed, executive]
+    # ── Q&A schemas ───────────────────────────────────────────────────
+    GenerateQaRequest:
+      type: object
+      required: [deck_id]
+      properties:
+        deck_id:
+          type: string
+        audience_profile:
+          type: string
+          enum: [board, technical, customer, general]
+          default: general
+    # ── Summary schemas ───────────────────────────────────────────────
+    GenerateSummaryRequest:
+      type: object
+      required: [deck_id, variant]
+      properties:
+        deck_id:
+          type: string
+        variant:
+          type: string
+          enum: [executive, tldr, one_pager]
+    # ── Variant schemas ───────────────────────────────────────────────
+    GenerateVariantRequest:
+      type: object
+      required: [deck_id, variant_type]
+      properties:
+        deck_id:
+          type: string
+        variant_type:
+          type: string
+          enum: [five_min, technical, executive, sales, customer]
+    # ── Rehearsal schemas ─────────────────────────────────────────────
+    CreateRehearsalSessionRequest:
+      type: object
+      required: [workspace_id, user_id, deck_id, consent_flags]
+      properties:
+        workspace_id:
+          type: string
+        user_id:
+          type: string
+        deck_id:
+          type: string
+        consent_flags:
+          type: object
+          required: [camera, mic, retention_days, on_device]
+          properties:
+            camera:
+              type: boolean
+            mic:
+              type: boolean
+            retention_days:
+              type: integer
+              minimum: 0
+            on_device:
+              type: boolean
+    RehearsalSession:
+      type: object
+      required: [id, workspace_id, user_id, deck_id, consent_flags, created_at]
+      properties:
+        id:
+          type: string
+        workspace_id:
+          type: string
+        user_id:
+          type: string
+        deck_id:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+        consent_flags:
+          type: object
+          additionalProperties: true
+        raw_video_ref:
+          type: string
+        raw_audio_ref:
+          type: string
+        metrics:
+          type: object
+          additionalProperties: true
+        flagged:
+          type: boolean
+          default: false
+        retention_until:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+    UpdateRehearsalSessionRequest:
+      type: object
+      properties:
+        ended_at:
+          type: string
+          format: date-time
+        flagged:
+          type: boolean
+    RehearsalMetrics:
+      type: object
+      required: [per_slide]
+      properties:
+        per_slide:
+          type: array
+          items:
+            type: object
+            properties:
+              slide_id:
+                type: string
+              pace_wpm:
+                type: number
+              filler_count:
+                type: integer
+              eye_contact_pct:
+                type: number
+              duration_ms:
+                type: integer
+              stumbles:
+                type: array
+                items:
+                  type: object
+        aggregate:
+          type: object
+          additionalProperties: true
+    # ── Lint schemas ──────────────────────────────────────────────────
+    LintLayoutRequest:
+      type: object
+      required: [deck_id]
+      properties:
+        deck_id:
+          type: string
+    # ── Accessibility schemas ─────────────────────────────────────────
+    AccessibilityAuditRequest:
+      type: object
+      required: [deck_id]
+      properties:
+        deck_id:
+          type: string
+    # ── Chart schemas ─────────────────────────────────────────────────
+    ChartRecommendRequest:
+      type: object
+      required: [dataset_id, intent]
+      properties:
+        dataset_id:
+          type: string
+        intent:
+          type: string
+          description: "e.g. \"show change over time\""
+    ChartRecommendation:
+      type: object
+      required: [chart_type, rationale]
+      properties:
+        chart_type:
+          type: string
+        rationale:
+          type: string
+        example_layout:
+          type: object
+          additionalProperties: true
+    # ── Search schemas ────────────────────────────────────────────────
+    SearchResults:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              slide_id:
+                type: string
+              deck_id:
+                type: string
+              snippet:
+                type: string
+              confidence:
+                type: number
+        trace_id:
+          type: string
+    # ── Freshness schemas ─────────────────────────────────────────────
+    FreshnessCheckRequest:
+      type: object
+      required: [deck_id]
+      properties:
+        deck_id:
+          type: string
+    # ── Prompt schemas ────────────────────────────────────────────────
+    PromptTemplate:
+      type: object
+      required: [id, version, model_class_hint]
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+        model_class_hint:
+          type: string
+        input_schema:
+          type: object
+          additionalProperties: true
+        output_schema:
+          type: object
+          additionalProperties: true

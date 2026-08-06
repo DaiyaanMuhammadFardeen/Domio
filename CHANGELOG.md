@@ -6,6 +6,67 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 12 — AI Copilot Foundation
+
+#### Added
+
+- **AI orchestrator (`services/ai-orchestrator`, Go).** Job lifecycle
+  (`POST /v1/ai/jobs` with `Idempotency-Key` conflict handling, `GET
+  /v1/ai/jobs/{id}`, SSE job stream, `GET /v1/prompts/{template_id}`),
+  pgx-backed `ai_job`/`ai_run` persistence, policy router (per-job cost
+  cap, per-workspace cap, circuit breaker, moderation gate), generic
+  planner with outline builder, executor with retries and provider
+  fallback chains, and a `Broker` secrets interface (env-backed in dev
+  with a Vault seam). **Planner 26 tests, renderer 22, router, executor,
+  store and secretbroker suites.**
+- **Model adapter layer (`packages/model-adapter`).** `ModelAdapter`
+  interface (text/vision/json-mode/tools capabilities) with provider
+  adapters for OpenAI, Anthropic, Google and self-hosted vLLM, dispatched
+  by model-class prefix. **21 tests.**
+- **Prompt registry (`packages/prompt-registry`).** Versioned, schema'd
+  prompt templates seeded for all 14 Phase 12 templates (outline,
+  slide design, notes, QA, summaries, translate, accessibility,
+  freshness, lint). **18 tests.**
+- **AI adapters service (`services/ai-adapters`).** TypeScript gRPC
+  server exposing the adapter surface — GenerateText (server-stream),
+  GenerateImage, Transcribe (server-stream), Embed, GetCapabilities,
+  GetPrompt — as the orchestrator↔provider seam. **12 tests.**
+- **AI tasks worker (`workers/ai-tasks`, Go).** NATS JetStream consumer
+  for `ai.jobs.*` with AckExplicit/MaxDeliver, pgx `ai_job` transitions,
+  health/ready/metrics endpoints. **13 tests.**
+- **AI eval harness (`workers/ai-eval`, Python).** Golden-set runner with
+  LLM-as-judge gate and seeded eval fixtures for outline and alt-text
+  generation. **15 tests.**
+- **Doc ingest worker (`workers/ingest-docs`, Python).** PDF (pymupdf
+  with OCR hook), DOCX, Notion and Markdown extraction into `source`
+  rows with chunked `ref` payloads.
+- **Data-analysis worker (`workers/data-analysis`, Python).** Pearson
+  correlation, Mann-Kendall trend detection, IQR/z-score outlier
+  detection producing structured Findings. **38 Python tests across the
+  three workers.**
+- **AI contracts (`contracts/openapi/v1/ai.yaml`,
+  `contracts/proto/domio/ai/v1/ai.proto`).** REST job/SSE/prompts API
+  plus the gRPC seam (`AiCopilotService` + `AdapterService`), lint-clean
+  against buf.
+- **Migration 0039 (`infrastructure/postgres/migrations/`).** All 12 AI
+  tables (source, ai_job, ai_run, citation, slide_citation,
+  image_generation_request, rehearsal_session, qa_pair, summary,
+  audience_variant, ai_freshness_record, semantic_index_entry) with RLS
+  tenant isolation. Deferrals documented: pgvector embedding column
+  (BYTEA for now, ivfflat index with the M5 follow-up), foreign keys to
+  not-yet-existing phase tables, and UUIDv4 default ids vs UUIDv7.
+- **Editor Copilot UI (`apps/editor/src/components/copilot/OutlineApproval.tsx`).**
+  Outline approval with drag-reorder, per-slide confidence badges,
+  chart-type selection and an Approve & Generate state machine; the
+  `p12-store` module singleton; a Copilot sidebar tab wired into
+  EditorRoot; 126 `p12.*` i18n keys across all 7 locales. **35 editor
+  tests; full editor suite 386 tests.**
+- **Orchestrator internals (`services/ai-orchestrator/internal/`).**
+  Outline builder (template-assisted with heuristic fallback), deck
+  renderer writing `deck_versions` rows with version increments and
+  citation-coverage math, image moderation gate and fallback, RTL
+  content transformation.
+
 ### Phase 11 — 3D, Motion & Rich Media
 
 #### Added

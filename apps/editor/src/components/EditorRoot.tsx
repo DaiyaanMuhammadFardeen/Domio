@@ -60,6 +60,7 @@ import { QuizPanel, type QuizRecord } from '../panels/quiz-panel';
 import { MediaPanel } from '../panels/media-panel';
 import { LicenseDashboard } from '../panels/license-dashboard';
 import { RecordingPanel } from '../panels/recording-panel';
+import { OutlineApproval } from './copilot/OutlineApproval';
 import {
   LeaderboardPanel,
   type LeaderboardEntry,
@@ -147,6 +148,7 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     | 'm11-media'
     | 'm11-licenses'
     | 'm11-recording'
+    | 'p12-copilot'
   >('layers');
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | null>(null);
   const [promoteOpen, setPromoteOpen] = useState(false);
@@ -1267,6 +1269,16 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
             >
               Recording
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'p12-copilot'}
+              className={`side-tab${leftTab === 'p12-copilot' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('p12-copilot')}
+              data-testid="p12-copilot-tab"
+            >
+              Copilot
+            </button>
           </div>
           {leftTab === 'layers'
             ? activeSlide
@@ -1483,7 +1495,11 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
                                                   }}
                                                 />
                                               )
-                                            : (
+                                            : leftTab === 'p12-copilot'
+                                              ? (
+                                                  <OutlineApproval />
+                                                )
+                                              : (
                         <ThemeBrandPanel
                           themes={PHASE_07_THEMES}
                           activeThemeId={activeThemeId}

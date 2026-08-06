@@ -15,6 +15,13 @@
 | #19 | Branching & merging (infra) | Branch creation, switch, lineage, op-log isolation — infrastructure only; merge resolution UI lands in Phase 05 | 04 / 05 | Done (infra) | `phase-04-realtime-collab-crdt.md`, `phase-05-persistence-versioning-branches.md` |
 | #20 | Named checkpoints & visual diffs | Checkpoint creation, timeline scrub, visual diff between checkpoints | 05 | Pending | `editor-canvas.md` §1.20 |
 | #21 | Offline-first sync (CRDT) | Offline editing with conflict-free sync on reconnect (CRDT-based); deterministic convergence | 04 | Done | `editor-canvas.md` §1.21, `phase-04-realtime-collab-crdt.md` |
+| #108 | Full deck generation from a prompt, doc, or meeting transcript | Outline-first generation: outline approval gate, then designed slides | 12 | Done (M1+M2 core) | `ai-copilot.md` §1.108, `phase-12-ai-copilot-foundation.md` |
+| #109 | Doc-to-deck with citations | PDF/DOCX/Notion/Markdown ingest, chunked sources, citation mapping with coverage | 12 | Done (M1+M2 core) | `ai-copilot.md` §1.109, `phase-12-ai-copilot-foundation.md` |
+| #110 | Data-to-story narrative generation | Statistical findings (correlation, trend, outliers) feeding live-bound chart narrative | 12 | Done (M1+M2 core) | `ai-copilot.md` §1.110, `phase-12-ai-copilot-foundation.md` |
+| #111 | AI slide designer | Four distinct layout options per slide with diversity check | 12 | Pending | `ai-copilot.md` §1.111, `phase-12-ai-copilot-foundation.md` |
+| #112 | AI slide redesign | Light vs full redesign modes, content-preserving, brand-aware | 12 | Pending | `ai-copilot.md` §1.112, `phase-12-ai-copilot-foundation.md` |
+| #113 | Copy assistant | Shorten / punch-up / tone / translate (100+ languages) with layout preservation | 12 | Pending | `ai-copilot.md` §1.113, `phase-12-ai-copilot-foundation.md` |
+| #114 | AI image generation & background removal | Style-locked generation with two-layer moderation and provenance | 12 | Partial (moderation + fallback; provider dispatch pending) | `ai-copilot.md` §1.114, `phase-12-ai-copilot-foundation.md` |
 
 ---
 
@@ -23,7 +30,8 @@
 | Phase | Features | Key deliverables |
 |-------|----------|------------------|
 | 04 — Real-time collaboration & CRDT sync | #17, #19 (infra), #21 | Realtime gateway, Yjs CRDT substrate, presence channel, offline convergence, convergence test suite |
+| 12 — AI Copilot Foundation (M1 Foundations + M2 Generation core) | #108, #109, #110 (core); #111–#114 pending/partial | Go AI orchestrator, model-adapter layer, prompt registry, ai-adapters gRPC seam, ai-tasks worker, ai-eval harness, ingest-docs + data-analysis workers, editor OutlineApproval UI, migration 0039 |
 
 ---
 
-_Last updated: Phase 04 completion._
+_Last updated: Phase 12 (M1 Foundations + M2 Generation core) completion._

@@ -1377,6 +1377,21 @@ The AI Copilot is the substrate for the agentic layer. The full cross-section ti
 
 ---
 
+## 13. Implementation Notes & Divergences (Phase 12, M1 Foundations + M2 Generation core)
+
+Recorded at Phase 12 M1+M2 completion. Updates where implementation diverges from this document, per phase DoD. Deferred M3–M5 content (voice, rehearsal, maintenance, semantic index) is unchanged and tracked in the phase doc.
+
+1. **Cross-language seam.** The orchestrator is Go (`services/ai-orchestrator`); provider access flows Go orchestrator → gRPC → TypeScript adapter service (`services/ai-adapters`, hosting `packages/model-adapter` + `packages/prompt-registry`). The seam is `AdapterService` in `contracts/proto/domio/ai/v1/ai.proto` (GenerateText server-stream, GenerateImage, Transcribe server-stream, Embed, GetCapabilities, GetPrompt). The ModelAdapter interface follows §4.3 exactly.
+2. **Prompt registry is code-data, not a DB table.** The 14 seeded templates live in `packages/prompt-registry` (version, model-class hint, input/output schemas, eval-set id). There is no `prompt_template` table; `GET /v1/prompts/{template_id}` is served by the orchestrator proxying to the adapter service's `GetPrompt`.
+3. **Migration 0039 deferrals.** All 12 tables ship in one forward-only migration (`0039_phase12_ai_copilot`). Documented deferrals: (a) `semantic_index_entry.embedding` is `BYTEA` — pgvector type + ivfflat index deferred to the M5 follow-up migration (extension is available in the runtime image); (b) foreign keys to tables owned by other phases (workspace, deck, slide, deck_version, brand_kit, asset) are omitted; columns are `uuid NOT NULL` without `REFERENCES`; (c) ids use `gen_random_uuid()` (v4) rather than UUIDv7 — ids are opaque to clients, non-breaking.
+4. **Codegen is CI-only.** `buf generate` requires `BUF_TOKEN` (BSR remote plugins), available only in CI (`contracts.yml`). No `buf.lock.yaml` is committed yet; local `pnpm gen` validates the OpenAPI/ajv portion and skips buf. Generated stubs (Go `domioaiv1`, TS `api-client`, Python) land on the next CI run.
+5. **Adapter service proto wiring pending.** `services/ai-adapters` currently serves the AdapterService surface via a built-in JSON service definition; migration to real proto-generated stubs is pending CI codegen (see item 4).
+6. **Deck persistence in renderer is in-memory.** `internal/renderer` writes `deck_versions` through a `DeckStore` interface with only `MemDeckStore` today; a pgx-backed store and the editor's `HttpClientDocumentLoader`/checkpoint (Phase 05) write path are not yet wired.
+7. **M2 feature coverage.** #108 (outline + approval + render), #109 (ingest + citations), #110 (data-analysis + bindings) implemented at core level. #111 (slide designer), #112 (redesign), #113 (copy assistant), and #114 (image provider dispatch; moderation + fallback only today) are logged follow-up backlog items for a later M2 pass.
+8. **RLS tenant isolation.** `0039` adds `tenant_isolation` policies on all 12 tables keyed on `current_setting('app.current_workspace_id')`, per §5 conventions.
+
+---
+
 **End of document.**
 
 Coverage report:
