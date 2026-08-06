@@ -201,6 +201,24 @@ export const IdempotencyKey = /*@__PURE__*/ proto3.makeMessageType(
 );
 
 /**
+ * LicenseGrant is a JWT-signed entitlement issued by the license service.
+ * It grants access to a catalog listing within a workspace scope.
+ *
+ * @generated from message domio.v1.LicenseGrant
+ */
+export const LicenseGrant = /*@__PURE__*/ proto3.makeMessageType(
+  "domio.v1.LicenseGrant",
+  () => [
+    { no: 1, name: "token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "listing_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "license_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "seats", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 5, name: "issued_at_ms", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 6, name: "expires_at_ms", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+  ],
+);
+
+/**
  * AuditActor describes who performed an action. actor_kind values are
  * "user", "agent", "system", "cron", "admin", "service".
  *

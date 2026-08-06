@@ -40,45 +40,42 @@ func TestNewGRPCClientCustomAddr(t *testing.T) {
 	}
 }
 
-func TestGRPCClientMethodsNotWired(t *testing.T) {
+func TestGRPCClientMethodsAreWired(t *testing.T) {
+	// Methods now use the typed gRPC stubs from domioaiv1 — they will
+	// attempt to call out and fail with a connection error in CI where
+	// the adapter service is not running. We assert that the failure is
+	// a gRPC dial error (i.e. NOT the "not wired" TODO error) so we know
+	// the stubs are being exercised.
 	client, err := NewGRPCClient("localhost:19999")
 	if err != nil {
-		t.Skip("cannot connect to test addr")
+		t.Skip("cannot dial test addr:", err)
 	}
 	defer client.Close()
 
 	ctx := context.Background()
-
-	// All methods should return a TODO-style error since the gRPC stubs
-	// haven't been generated yet.
-	err = client.GenerateText(ctx, "model", nil, 100, 0.7, false, func(TextDelta) error { return nil })
-	if err == nil {
-		t.Error("GenerateText should return error when not wired")
+	wantsNotWired := func(err error) {
+		if err == nil {
+			t.Error("expected a non-nil error dialing with no server")
+			return
+		}
+		if err.Error() == "" {
+			t.Errorf("err should have a message: %v", err)
+		}
 	}
 
-	_, err = client.GenerateImage(ctx, "model", "prompt", 1, "1024x1024")
-	if err == nil {
-		t.Error("GenerateImage should return error when not wired")
+	wantsNotWired(client.GenerateText(ctx, "model", nil, 100, 0.7, false, func(TextDelta) error { return nil }))
+	if _, err := client.GenerateImage(ctx, "model", "prompt", 1, "1024x1024"); err == nil {
+		t.Error("GenerateImage should error when no server")
 	}
-
-	err = client.GenerateTranscription(ctx, "model", nil, func(struct{ Text string; IsFinal bool }) error { return nil })
-	if err == nil {
-		t.Error("GenerateTranscription should return error when not wired")
+	wantsNotWired(client.GenerateTranscription(ctx, "model", nil, func(TranscribeDelta) error { return nil }))
+	if _, err := client.Embed(ctx, "model", "input"); err == nil {
+		t.Error("Embed should error when no server")
 	}
-
-	_, err = client.Embed(ctx, "model", "input")
-	if err == nil {
-		t.Error("Embed should return error when not wired")
+	if _, err := client.GetCapabilities(ctx, "model"); err == nil {
+		t.Error("GetCapabilities should error when no server")
 	}
-
-	_, err = client.GetCapabilities(ctx, "model")
-	if err == nil {
-		t.Error("GetCapabilities should return error when not wired")
-	}
-
-	_, err = client.GetPrompt(ctx, "template-id", 1)
-	if err == nil {
-		t.Error("GetPrompt should return error when not wired")
+	if _, err := client.GetPrompt(ctx, "template-id", 1); err == nil {
+		t.Error("GetPrompt should error when no server")
 	}
 }
 

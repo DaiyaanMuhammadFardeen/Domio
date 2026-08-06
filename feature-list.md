@@ -131,10 +131,10 @@
 108. **Full deck generation from a prompt, doc, or meeting transcript** — outline first, approve, then designed slides
 109. Doc-to-deck: paste a Word/Notion/PDF report, get a structured presentation with sources cited per slide
 110. **Data-to-story**: connect a spreadsheet, AI finds the narrative ("revenue up 40% driven by APAC") and builds the slides with the right charts
-111. AI slide designer — describe a slide ("comparison of our 3 pricing tiers, playful"), get 4 layout options
-112. AI redesign — select an ugly slide, get on-brand redesigns preserving content
-113. Copy assistant: shorten to bullet, punch up headlines, fix tone, translate (100+ languages) while preserving layout
-114. AI image generation and background removal built into the canvas
+111. AI slide designer — describe a slide ("comparison of our 3 pricing tiers, playful"), get 4 layout options *(M2 — implemented in `services/ai-orchestrator/internal/designer`; HTTP `POST /v1/ai/designer`)*
+112. AI redesign — select an ugly slide, get on-brand redesigns preserving content *(M2 — implemented in `services/ai-orchestrator/internal/redesign`; light / full modes with brand-lock + content preservation; HTTP `POST /v1/ai/redesign`)*
+113. Copy assistant: shorten to bullet, punch up headlines, fix tone, translate (100+ languages) while preserving layout *(M2 — implemented in `services/ai-orchestrator/internal/copy`; glossary + RTL flip; HTTP `POST /v1/ai/copy`)*
+114. AI image generation and background removal built into the canvas *(M2 — implemented in `services/ai-orchestrator/internal/image`; provider chain + 2-layer moderation + provenance; HTTP `POST /v1/ai/image`, `POST /v1/ai/image/{id}/remove-background`)*
 115. **Voice-to-deck** — talk through your idea for 3 minutes, AI drafts the deck structure
 116. AI speaker notes generation from slide content ("what should I say here?")
 117. **AI rehearsal coach** — practice with your camera/mic; get feedback on pace, filler words, eye contact, time per slide, and which slides you stumble on

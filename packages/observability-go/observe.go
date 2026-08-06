@@ -239,13 +239,29 @@ const (
 	signalLogs
 )
 
+func (s signal) String() string {
+	switch s {
+	case signalTraces:
+		return "traces"
+	case signalMetrics:
+		return "metrics"
+	case signalLogs:
+		return "logs"
+	default:
+		return "unknown"
+	}
+}
+
 // Tracer accumulates spans and flushes them to OTLP/HTTP on demand.
 type Tracer struct {
 	resource Resource
 	exporter *exporter // nil in noop mode
 	mu       sync.Mutex
-	buf      []span
-	closed   bool
+	// buf holds pointers to *Span so that mutations on the public Span
+	// (e.g. RecordException appending events) propagate to the exporter
+	// at Flush time without us needing to copy fields back and forth.
+	buf    []*Span
+	closed bool
 }
 
 // Meter accumulates counters/histograms and flushes them to OTLP/HTTP.
@@ -280,7 +296,10 @@ type Observability struct {
 func (o *Observability) IsExporting() bool { return o.Mode == ModeOTLP }
 
 // Shutdown flushes all signals and closes the underlying exporter.
-// Idempotent.
+// Idempotent. The exporter is shared across the three signals
+// (Tracer/Meter/Logger), so we close it exactly once at the very end —
+// otherwise the second signal's flush would race against the first
+// signal's exporter shutdown.
 func (o *Observability) Shutdown(ctx context.Context) error {
 	var errs []error
 	if err := o.Tracer.shutdown(ctx); err != nil {
@@ -291,6 +310,10 @@ func (o *Observability) Shutdown(ctx context.Context) error {
 	}
 	if err := o.Logger.shutdown(ctx); err != nil {
 		errs = append(errs, err)
+	}
+	// Close the shared exporter last, exactly once.
+	if o.Tracer != nil && o.Tracer.exporter != nil {
+		o.Tracer.exporter.shutdown()
 	}
 	if len(errs) == 0 {
 		return nil
@@ -500,49 +523,48 @@ type span struct {
 	events     []spanEvent
 }
 
+// Note: the internal `span` struct above is kept for backwards
+// compatibility with any external code that may have referenced it
+// during the type alias period. The Tracer now buffers *Span directly.
+
 // StartSpan creates and registers a new span with the tracer. The span
-// is held in an internal buffer until Flush is called.
+// is held in an internal buffer until Flush is called. The returned
+// *Span is the same pointer that lives in the buffer, so mutating
+// fields on the Span (via SetAttribute / RecordException / SetStatus /
+// End) propagates to the next Flush.
 func (t *Tracer) StartSpan(name string, opts ...SpanOptions) *Span {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	traceID := randomHex(32)
 	spanID := randomHex(16)
 	now := time.Now().UnixMilli()
-	s := span{
-		traceID: traceID,
-		spanID:  spanID,
-		name:    name,
-		kind:    "internal",
-		startMs: now,
-		attrs:   map[string]any{},
+	s := &Span{
+		TraceID:    traceID,
+		SpanID:     spanID,
+		Name:       name,
+		Kind:       "internal",
+		StartTime:  time.UnixMilli(now),
+		Attributes: map[string]any{},
 	}
 	o := SpanOptions{}
 	if len(opts) > 0 {
 		o = opts[0]
-		s.parentID = o.ParentSpanID
+		s.ParentID = o.ParentSpanID
 		if o.TraceID != "" {
-			s.traceID = o.TraceID
+			s.TraceID = o.TraceID
 		}
 		if o.Kind != "" {
-			s.kind = o.Kind
+			s.Kind = o.Kind
 		}
 		if !o.StartTime.IsZero() {
-			s.startMs = o.StartTime.UnixMilli()
+			s.StartTime = o.StartTime
 		}
 		for k, v := range o.Attributes {
-			s.attrs[k] = v
+			s.Attributes[k] = v
 		}
 	}
 	t.buf = append(t.buf, s)
-	return &Span{
-		TraceID:    s.traceID,
-		SpanID:     s.spanID,
-		Name:       s.name,
-		Kind:       s.kind,
-		StartTime:  time.UnixMilli(s.startMs),
-		Attributes: s.attrs,
-		ParentID:   s.parentID,
-	}
+	return s
 }
 
 // SpanOptions is the optional argument to StartSpan.
@@ -571,27 +593,27 @@ func (t *Tracer) Flush(ctx context.Context) error {
 
 	otlpSpans := make([]map[string]any, 0, len(batch))
 	for _, s := range batch {
-		ev := make([]map[string]any, 0, len(s.events))
-		for _, e := range s.events {
+		ev := make([]map[string]any, 0, len(s.Events))
+		for _, e := range s.Events {
 			ev = append(ev, map[string]any{
-				"timeUnixNano":   fmt.Sprintf("%d", e.Time.UnixNano()),
-				"name":           e.Name,
-				"attributes":     toOtlpAttrs(e.Attributes),
+				"timeUnixNano": fmt.Sprintf("%d", e.Time.UnixNano()),
+				"name":         e.Name,
+				"attributes":   toOtlpAttrs(e.Attributes),
 			})
 		}
 		spanObj := map[string]any{
-			"traceId":           s.traceID,
-			"spanId":            s.spanID,
-			"name":              s.name,
-			"kind":              kindToOtlp(s.kind),
-			"startTimeUnixNano": fmt.Sprintf("%d", s.startMs*1_000_000),
-			"endTimeUnixNano":   fmt.Sprintf("%d", s.endMs*1_000_000),
-			"attributes":        toOtlpAttrs(s.attrs),
+			"traceId":           s.TraceID,
+			"spanId":            s.SpanID,
+			"name":              s.Name,
+			"kind":              kindToOtlp(s.Kind),
+			"startTimeUnixNano": fmt.Sprintf("%d", s.StartTime.UnixNano()),
+			"endTimeUnixNano":   fmt.Sprintf("%d", s.EndTime.UnixNano()),
+			"attributes":        toOtlpAttrs(s.Attributes),
 			"events":            ev,
-			"status":            statusToOtlp(s.status),
+			"status":            statusToOtlp(s.Status),
 		}
-		if s.parentID != "" {
-			spanObj["parentSpanId"] = s.parentID
+		if s.ParentID != "" {
+			spanObj["parentSpanId"] = s.ParentID
 		}
 		otlpSpans = append(otlpSpans, spanObj)
 	}
@@ -619,20 +641,16 @@ func (t *Tracer) shutdown(ctx context.Context) error {
 	}
 	t.closed = true
 	t.mu.Unlock()
-	if err := t.Flush(ctx); err != nil {
-		return err
-	}
-	if t.exporter != nil {
-		t.exporter.shutdown()
-	}
-	return nil
+	// Exporter is closed once by Observability.Shutdown — see that doc.
+	return t.Flush(ctx)
 }
 
 // DefaultBucketsMs is the default histogram bucket layout.
 var DefaultBucketsMs = []float64{1, 2, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 30000}
 
 type counterState struct {
-	byAttrs map[string]float64
+	byAttrs   map[string]float64
+	monotonic bool // true for Counter (default), false for UpDownCounter
 }
 
 type histogramState struct {
@@ -725,7 +743,10 @@ func (m *Meter) addCounter(name string, value float64, attrs map[string]string, 
 	}
 	state, ok := m.counters[name]
 	if !ok {
-		state = &counterState{byAttrs: map[string]float64{}}
+		state = &counterState{
+			byAttrs:   map[string]float64{},
+			monotonic: !allowNegative,
+		}
 		m.counters[name] = state
 	}
 	k := metricAttrKey(attrs)
@@ -841,7 +862,7 @@ func (m *Meter) Flush(ctx context.Context) error {
 				name:      name,
 				sum:       &val,
 				attrs:     parseAttrKey(k),
-				monotonic: true,
+				monotonic: st.monotonic,
 			})
 		}
 	}
@@ -933,13 +954,8 @@ func (m *Meter) shutdown(ctx context.Context) error {
 	}
 	m.closed = true
 	m.mu.Unlock()
-	if err := m.Flush(ctx); err != nil {
-		return err
-	}
-	if m.exporter != nil {
-		m.exporter.shutdown()
-	}
-	return nil
+	// Exporter is closed once by Observability.Shutdown — see that doc.
+	return m.Flush(ctx)
 }
 
 // Severity is the OTLP log severity.
@@ -1066,13 +1082,8 @@ func (l *Logger) shutdown(ctx context.Context) error {
 	}
 	l.closed = true
 	l.mu.Unlock()
-	if err := l.Flush(ctx); err != nil {
-		return err
-	}
-	if l.exporter != nil {
-		l.exporter.shutdown()
-	}
-	return nil
+	// Exporter is closed once by Observability.Shutdown — see that doc.
+	return l.Flush(ctx)
 }
 
 // toOtlpAttrs converts a map of string->any into OTLP key/value pairs.

@@ -17,11 +17,17 @@
     "allowJs": true,
     "paths": {
       "@domio/chart": ["../../packages/chart/src/index.ts"],
+      "@domio/chart/*": ["../../packages/chart/src/*"],
       "@domio/deep-link": ["../../packages/deep-link/src/index.ts"],
       "@domio/deep-link/*": ["../../packages/deep-link/src/*"],
       "@domio/mock-data": ["../../packages/mock-data/src/index.ts"],
+      "@domio/mock-data/*": ["../../packages/mock-data/src/*"],
       "@domio/prototype-runtime": ["../../packages/prototype-runtime/src/index.ts"],
-      "@domio/prototype-runtime/*": ["../../packages/prototype-runtime/src/*"]
+      "@domio/prototype-runtime/*": ["../../packages/prototype-runtime/src/*"],
+      "@domio/api-client": ["../../packages/api-client/src/index.ts"],
+      "@domio/api-client/*": ["../../packages/api-client/src/*"],
+      "@domio/common": ["../../packages/common/src/index.ts"],
+      "@domio/common/*": ["../../packages/common/src/*"]
     }
   },
   "include": [

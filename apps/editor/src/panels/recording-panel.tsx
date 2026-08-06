@@ -101,9 +101,16 @@ export function RecordingPanel({
 
   // Initialize the draft state machine.
   const initialMachine = useMemo(() => createDraft(), []);
-  const [machine, dispatch] = useReducer(draftReducer, initialMachine);
+  // The pure draftReducer takes (machine, action, now) — wrap it so React's
+  // useReducer only sees (state, action) and we pass `Date.now()` as the
+  // wall-clock source for `startedAt`.
+  const reducer = useMemo(
+    () => (state: DraftMachine, action: import('@domio/recording').DraftAction): DraftMachine =>
+      draftReducer(state, action, Date.now()),
+    [],
+  );
+  const [machine, dispatch] = useReducer(reducer, initialMachine);
   const [now, setNow] = useState<number>(() => Date.now());
-  const [startedAt, setStartedAt] = useState<number | null>(initialMachine.startedAt);
 
   // Tick clock so elapsed counter updates at ~1Hz.
   useEffect(() => {
@@ -125,12 +132,18 @@ export function RecordingPanel({
       : machine.state === 'paused' && machine.startedAt !== null
         ? Math.floor(now / 2 - machine.startedAt / 2) // demo: simulate
         : 0;
-  const elapsedCheck = checkElapsed({ elapsedMs: elapsed, config: timingConfig });
-  const minCheck = checkMinDuration({ elapsedMs: elapsed, config: timingConfig });
+  // checkElapsed(startMs, nowMs, config?) returns TimingCheck { stopped, elapsedMs }.
+  // We use stopped (true when elapsed >= maxDurationMs) instead of `exceeded`.
+  const elapsedCheck = checkElapsed(
+    machine.startedAt ?? now,
+    now,
+    timingConfig,
+  );
+  // checkMinDuration(durationMs) returns MinGuardResult { discarded, warning }.
+  const minCheck = checkMinDuration(elapsed);
 
   const handleStart = (): void => {
     dispatch({ type: 'start' });
-    setStartedAt(now);
   };
 
   const handlePause = (): void => {
@@ -147,7 +160,6 @@ export function RecordingPanel({
     const draft: DraftMachine = { ...machine };
     const result = finalizeDraft(draft, now);
     dispatch({ type: 'finalize' });
-    setStartedAt(null);
     if (onFinalize) {
       onFinalize(result);
     }
@@ -239,13 +251,13 @@ export function RecordingPanel({
         </div>
       ) : null}
 
-      {elapsedCheck.exceeded ? (
+      {elapsedCheck.stopped ? (
         <p data-testid="recording-panel-warning-max" role="alert" className="recording-panel__warning">
           Recording exceeded max duration ({DEFAULT_MAX_DURATION_MS / 1000}s). Auto-stop recommended.
         </p>
       ) : null}
 
-      {minCheck.belowMinimum && machine.state === 'finalized' ? (
+      {minCheck.discarded && machine.state === 'finalized' ? (
         <p data-testid="recording-panel-warning-min" role="alert" className="recording-panel__warning">
           Recording shorter than the minimum ({MIN_DURATION_MS / 1000}s) and cannot be saved.
         </p>

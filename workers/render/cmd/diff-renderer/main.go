@@ -155,12 +155,12 @@ type Service struct {
 	logger   *zap.Logger
 	renderer ThumbnailRenderer
 	publish  Publisher
-	ulid     domiouid.Generator
+	ulid     *domiouid.Generator
 }
 
 // NewService returns a service wired with the placeholder renderer
 // and the given publisher.
-func NewService(logger *zap.Logger, renderer ThumbnailRenderer, publish Publisher, ulid domiouid.Generator) *Service {
+func NewService(logger *zap.Logger, renderer ThumbnailRenderer, publish Publisher, ulid *domiouid.Generator) *Service {
 	if renderer == nil {
 		renderer = PlaceholderRenderer{}
 	}

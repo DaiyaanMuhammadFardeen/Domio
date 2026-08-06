@@ -16,9 +16,14 @@ import (
 
 	"github.com/domio/platform/services/ai-orchestrator/internal/adapterclient"
 	"github.com/domio/platform/services/ai-orchestrator/internal/config"
+	"github.com/domio/platform/services/ai-orchestrator/internal/copy"
+	"github.com/domio/platform/services/ai-orchestrator/internal/designer"
 	"github.com/domio/platform/services/ai-orchestrator/internal/executor"
+	"github.com/domio/platform/services/ai-orchestrator/internal/image"
 	"github.com/domio/platform/services/ai-orchestrator/internal/observability"
 	"github.com/domio/platform/services/ai-orchestrator/internal/planner"
+	"github.com/domio/platform/services/ai-orchestrator/internal/redesign"
+	"github.com/domio/platform/services/ai-orchestrator/internal/renderer"
 	"github.com/domio/platform/services/ai-orchestrator/internal/router"
 	"github.com/domio/platform/services/ai-orchestrator/internal/secretbroker"
 	"github.com/domio/platform/services/ai-orchestrator/internal/store"
@@ -63,23 +68,51 @@ func main() {
 
 	// ─── Database store ───────────────────────────────────────────────
 	var jobStore store.Store
+	var pool *pgxpool.Pool
 	databaseURL := cfg.DatabaseURL
 
 	if databaseURL != "" {
-		pool, poolErr := pgxpool.New(ctx, databaseURL)
+		p, poolErr := pgxpool.New(ctx, databaseURL)
 		if poolErr != nil {
 			logger.Fatal("pgxpool connect failed", zap.Error(poolErr))
 		}
-		if pingErr := pool.Ping(ctx); pingErr != nil {
+		if pingErr := p.Ping(ctx); pingErr != nil {
 			logger.Fatal("pgxpool ping failed", zap.Error(pingErr))
 		}
-		defer pool.Close()
+		defer p.Close()
+		pool = p
 		jobStore = store.NewPGXStore(pool)
 		logger.Info("database connected", zap.String("dsn", maskDSN(databaseURL)))
 	} else {
 		logger.Warn("no DATABASE_URL — using in-memory store (dev/test only)")
 		jobStore = store.NewMemStore()
 	}
+
+	// ─── Deck renderer (deck_versions / slides persistence) ──────────
+	//
+	// When DATABASE_URL is configured we persist deck_versions and slides
+	// to Postgres; otherwise we fall back to the in-memory store. This
+	// closes gap #2 from the Phase 12 status report (renderer was
+	// previously write-only-in-memory).
+	var deckStore renderer.DeckStore
+	if pool != nil {
+		deckStore = renderer.NewPGXDeckStore(pool)
+	} else {
+		deckStore = renderer.NewMemDeckStore()
+	}
+	deckRenderer := renderer.NewDeckRenderer(deckStore, nil)
+
+	// ─── M2 features (#111–#114) ──────────────────────────────────────
+	// Heuristic-only generators are used when no adapter is wired.
+	// Production deployments replace these with the adapter gRPC
+	// implementations (see internal/adapterclient).
+	designerInstance := designer.New(heuristicGenerator{})
+	redesignerInstance := redesign.New(&redesign.SpacingMutator{NormalizeColumns: true})
+	copyAssistant := copy.New(nil)
+	imageService := image.NewImageService(image.Config{
+		Providers:       []image.Provider{},
+		ReadyInFallback: "3 min",
+	})
 
 	// ─── Planner ──────────────────────────────────────────────────────
 	p := planner.New(cfg.MaxDecompositionDepth)
@@ -96,6 +129,12 @@ func main() {
 		Executor:       exec,
 		Planner:        p,
 		Store:          jobStore,
+		Renderer:       deckRenderer,
+		AdapterClient:  adapterClient,
+		Designer:       designerInstance,
+		Redesigner:     redesignerInstance,
+		CopyAssistant:  copyAssistant,
+		ImageService:   imageService,
 		ModerationGate: cfg.ModerationEnabled,
 		MaxCostPerReq:  cfg.MaxCostPerReq,
 	})
@@ -186,4 +225,59 @@ func (p *placeholderProvider) Complete(_ context.Context, prompt string) (string
 	}
 	cost := float64(tokens) * 0.00002
 	return "Placeholder response for: " + prompt, tokens, cost, nil
+}
+
+// ─── Heuristic designer generator ───────────────────────────────────
+//
+// heuristicGenerator satisfies designer.OptionGenerator using
+// deterministic templates. Production wiring replaces this with a
+// generator backed by the adapter gRPC service.
+type heuristicGenerator struct{}
+
+func (heuristicGenerator) GenerateOptions(_ context.Context, prompt designer.SlidePrompt, target int) ([]designer.LayoutOption, error) {
+	options := make([]designer.LayoutOption, 0, target)
+	templates := []struct {
+		id, hint, title string
+		blocks           []string
+		conf             float64
+	}{
+		{"tpl-title", "title-center", prompt.Intent, []string{prompt.Intent, "subtitle"}, 0.7},
+		{"tpl-bullets", "bullets", prompt.Intent, []string{"key point 1", "key point 2", "key point 3"}, 0.7},
+		{"tpl-2col", "2-col", prompt.Intent, []string{"left column", "right column"}, 0.6},
+		{"tpl-3col", "3-col", prompt.Intent, []string{"col 1", "col 2", "col 3"}, 0.6},
+		{"tpl-data-viz", "data-viz", prompt.Intent, []string{"chart"}, 0.5},
+		{"tpl-image", "image", prompt.Intent, []string{"hero image"}, 0.5},
+		{"tpl-table", "table", prompt.Intent, []string{"data table"}, 0.5},
+		{"tpl-quote", "quote", prompt.Intent, []string{"pull quote"}, 0.5},
+	}
+	for i, tmpl := range templates {
+		if i >= target {
+			break
+		}
+		options = append(options, designer.LayoutOption{
+			Index:         i + 1,
+			TemplateID:    tmpl.id,
+			Title:         tmpl.title,
+			LayoutHint:    tmpl.hint,
+			ContentBlocks: tmpl.blocks,
+			Confidence:    tmpl.conf,
+		})
+	}
+	return options, nil
+}
+
+func (heuristicGenerator) GenerateVariants(_ context.Context, seed designer.LayoutOption, _ designer.SlidePrompt, target int) ([]designer.LayoutOption, error) {
+	options := make([]designer.LayoutOption, 0, target)
+	hints := []string{"2-col", "3-col", "bullets", "content"}
+	for i := 0; i < target; i++ {
+		options = append(options, designer.LayoutOption{
+			Index:         i + 1,
+			TemplateID:    seed.TemplateID + "-v" + fmt.Sprintf("%d", i+1),
+			Title:         seed.Title,
+			LayoutHint:    hints[i%len(hints)],
+			ContentBlocks: seed.ContentBlocks,
+			Confidence:    0.6,
+		})
+	}
+	return options, nil
 }

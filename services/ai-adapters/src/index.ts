@@ -226,9 +226,9 @@ export function startServer(opts?: {
 
 function findProtoPath(): string | null {
   const candidates = [
-    path.resolve(process.cwd(), 'contracts/proto/domio/v1/ai.proto'),
-    path.resolve(__dirname, '../../../contracts/proto/domio/v1/ai.proto'),
-    path.resolve(__dirname, '../../contracts/proto/domio/v1/ai.proto'),
+    path.resolve(process.cwd(), 'contracts/proto/domio/ai/v1/ai.proto'),
+    path.resolve(__dirname, '../../../contracts/proto/domio/ai/v1/ai.proto'),
+    path.resolve(__dirname, '../../contracts/proto/domio/ai/v1/ai.proto'),
   ];
 
   for (const candidate of candidates) {
@@ -253,8 +253,10 @@ function loadProtoAndBind(
   });
 
   const proto = grpc.loadPackageDefinition(packageDef) as unknown as Record<string, unknown>;
-  const domioV1 = proto['domio.v1'] as Record<string, unknown> | undefined;
-  const AdapterService = domioV1?.['AdapterService'] as { service: grpc.ServiceDefinition<grpc.UntypedHandleCall> } | undefined;
+  // The ai.proto package is `domio.ai.v1`. proto-loader represents
+  // dots as nested objects.
+  const domioAi = proto['domio']?.['ai']?.['v1'] as Record<string, unknown> | undefined;
+  const AdapterService = domioAi?.['AdapterService'] as { service: grpc.ServiceDefinition<grpc.UntypedHandleCall> } | undefined;
 
   if (!AdapterService) {
     log.info('AdapterService not found in proto — using built-in definition');

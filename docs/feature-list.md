@@ -18,10 +18,10 @@
 | #108 | Full deck generation from a prompt, doc, or meeting transcript | Outline-first generation: outline approval gate, then designed slides | 12 | Done (M1+M2 core) | `ai-copilot.md` §1.108, `phase-12-ai-copilot-foundation.md` |
 | #109 | Doc-to-deck with citations | PDF/DOCX/Notion/Markdown ingest, chunked sources, citation mapping with coverage | 12 | Done (M1+M2 core) | `ai-copilot.md` §1.109, `phase-12-ai-copilot-foundation.md` |
 | #110 | Data-to-story narrative generation | Statistical findings (correlation, trend, outliers) feeding live-bound chart narrative | 12 | Done (M1+M2 core) | `ai-copilot.md` §1.110, `phase-12-ai-copilot-foundation.md` |
-| #111 | AI slide designer | Four distinct layout options per slide with diversity check | 12 | Pending | `ai-copilot.md` §1.111, `phase-12-ai-copilot-foundation.md` |
-| #112 | AI slide redesign | Light vs full redesign modes, content-preserving, brand-aware | 12 | Pending | `ai-copilot.md` §1.112, `phase-12-ai-copilot-foundation.md` |
-| #113 | Copy assistant | Shorten / punch-up / tone / translate (100+ languages) with layout preservation | 12 | Pending | `ai-copilot.md` §1.113, `phase-12-ai-copilot-foundation.md` |
-| #114 | AI image generation & background removal | Style-locked generation with two-layer moderation and provenance | 12 | Partial (moderation + fallback; provider dispatch pending) | `ai-copilot.md` §1.114, `phase-12-ai-copilot-foundation.md` |
+| #111 | AI slide designer | Four distinct layout options per slide with diversity check | 12 | Done (M2 follow-up) | `ai-copilot.md` §1.111, `phase-12-ai-copilot-foundation.md` |
+| #112 | AI slide redesign | Light vs full redesign modes, content-preserving, brand-aware | 12 | Done (M2 follow-up) | `ai-copilot.md` §1.112, `phase-12-ai-copilot-foundation.md` |
+| #113 | Copy assistant | Shorten / punch-up / tone / translate (100+ languages) with layout preservation | 12 | Done (M2 follow-up) | `ai-copilot.md` §1.113, `phase-12-ai-copilot-foundation.md` |
+| #114 | AI image generation & background removal | Style-locked generation with two-layer moderation and provenance | 12 | Done (M2 follow-up) | `ai-copilot.md` §1.114, `phase-12-ai-copilot-foundation.md` |
 
 ---
 

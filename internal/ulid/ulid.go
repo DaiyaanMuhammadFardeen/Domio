@@ -25,7 +25,9 @@ import (
 const alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
 // Generator produces ULIDs from a monotonic clock.
-type Generator struct {
+type Generator = generator
+
+type generator struct {
 	mu      sync.Mutex
 	lastMS  int64
 	counter uint64
@@ -41,10 +43,10 @@ func WithWorker(worker string) Option {
 }
 
 // New creates a Generator pinned to the current process clock.
-func New(opts ...Option) Generator {
-	g := Generator{}
+func New(opts ...Option) *Generator {
+	g := &Generator{}
 	for _, opt := range opts {
-		opt(&g)
+		opt(g)
 	}
 	return g
 }

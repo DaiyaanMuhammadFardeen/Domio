@@ -1035,7 +1035,19 @@ data: {"code": "rate_limit", "retry_after": 30}
 
 ### 6.3 Tool-Use Endpoints (MCP surface)
 
-The orchestrator exposes a typed tool surface consumable via MCP (feature 221):
+The orchestrator exposes a typed tool surface consumable via MCP (feature 221). Phase 12 M2 surfaces — implemented in `services/ai-orchestrator/internal/{designer,redesign,copy,image}` and exposed at:
+
+```http
+POST /v1/ai/designer             # feature #111 — 4 distinct options
+POST /v1/ai/designer/more-like   # feature #111 — variants biased to a chosen option
+POST /v1/ai/redesign             # feature #112 — light or full, content-preserving
+POST /v1/ai/copy                 # feature #113 — shorten / punch_up / tone / translate
+POST /v1/ai/image                # feature #114 — generate (style-locked + 2-layer moderation)
+POST /v1/ai/image/{id}/remove-background   # feature #114 — bg removal
+POST /v1/ai/jobs                 # `type = "deck_render"` — sync outline → render → persist
+```
+
+The full MCP surface:
 
 - `generate_deck(brief, data_sources, constraints) → job_id`
 - `outline_deck(brief) → outline_blueprint`
@@ -1384,10 +1396,10 @@ Recorded at Phase 12 M1+M2 completion. Updates where implementation diverges fro
 1. **Cross-language seam.** The orchestrator is Go (`services/ai-orchestrator`); provider access flows Go orchestrator → gRPC → TypeScript adapter service (`services/ai-adapters`, hosting `packages/model-adapter` + `packages/prompt-registry`). The seam is `AdapterService` in `contracts/proto/domio/ai/v1/ai.proto` (GenerateText server-stream, GenerateImage, Transcribe server-stream, Embed, GetCapabilities, GetPrompt). The ModelAdapter interface follows §4.3 exactly.
 2. **Prompt registry is code-data, not a DB table.** The 14 seeded templates live in `packages/prompt-registry` (version, model-class hint, input/output schemas, eval-set id). There is no `prompt_template` table; `GET /v1/prompts/{template_id}` is served by the orchestrator proxying to the adapter service's `GetPrompt`.
 3. **Migration 0039 deferrals.** All 12 tables ship in one forward-only migration (`0039_phase12_ai_copilot`). Documented deferrals: (a) `semantic_index_entry.embedding` is `BYTEA` — pgvector type + ivfflat index deferred to the M5 follow-up migration (extension is available in the runtime image); (b) foreign keys to tables owned by other phases (workspace, deck, slide, deck_version, brand_kit, asset) are omitted; columns are `uuid NOT NULL` without `REFERENCES`; (c) ids use `gen_random_uuid()` (v4) rather than UUIDv7 — ids are opaque to clients, non-breaking.
-4. **Codegen is CI-only.** `buf generate` requires `BUF_TOKEN` (BSR remote plugins), available only in CI (`contracts.yml`). No `buf.lock.yaml` is committed yet; local `pnpm gen` validates the OpenAPI/ajv portion and skips buf. Generated stubs (Go `domioaiv1`, TS `api-client`, Python) land on the next CI run.
+4. **Codegen — CI canonical, local fallback available.** `buf generate` runs in CI (`contracts.yml`) using BSR remote plugins (requires `BUF_TOKEN`). For local development without a BUF_TOKEN, `buf.gen.local.yaml` uses pinned local plugins (`protoc-gen-es 1.10.1` from `node_modules`, `protoc-gen-go v1.36.x`, `protoc-gen-go-grpc v1.6.x` from `$GOBIN`). `bin/gen` falls back to the local template automatically. Generated stubs (Go `domioaiv1`, TS `api-client`, Python) live under `gen/` and `packages/api-client/src/gen/`.
 5. **Adapter service proto wiring pending.** `services/ai-adapters` currently serves the AdapterService surface via a built-in JSON service definition; migration to real proto-generated stubs is pending CI codegen (see item 4).
-6. **Deck persistence in renderer is in-memory.** `internal/renderer` writes `deck_versions` through a `DeckStore` interface with only `MemDeckStore` today; a pgx-backed store and the editor's `HttpClientDocumentLoader`/checkpoint (Phase 05) write path are not yet wired.
-7. **M2 feature coverage.** #108 (outline + approval + render), #109 (ingest + citations), #110 (data-analysis + bindings) implemented at core level. #111 (slide designer), #112 (redesign), #113 (copy assistant), and #114 (image provider dispatch; moderation + fallback only today) are logged follow-up backlog items for a later M2 pass.
+6. **Deck persistence — pgx-backed DeckStore.** `internal/renderer` writes `deck_versions` and `slides` through a `DeckStore` interface. The pgx-backed `NewPGXDeckStore(pool)` is now wired in `cmd/ai-orchestrator/main.go` whenever `DATABASE_URL` is set; an in-memory fallback remains for dev/test. Schema references migrations `0003_deck_schema` (decks / deck_versions / slides).
+7. **M2 feature coverage (#111–#114) shipped.** #108 (outline + approval + render), #109 (ingest + citations), #110 (data-analysis + bindings) implemented at core level. #111 (slide designer, 4 distinct options + more-like), #112 (redesign, light / full with content-preservation + brand-lock), #113 (copy assistant, shorten / punch_up / tone / translate with glossary + RTL flip), and #114 (image generation + bg removal, provider chain with fallback + 2-layer moderation + provenance) are implemented in `services/ai-orchestrator/internal/{designer,redesign,copy,image}` and exposed at `POST /v1/ai/{designer,redesign,copy,image}`. Per-feature tests run in the orchestrator suite.
 8. **RLS tenant isolation.** `0039` adds `tenant_isolation` policies on all 12 tables keyed on `current_setting('app.current_workspace_id')`, per §5 conventions.
 
 ---

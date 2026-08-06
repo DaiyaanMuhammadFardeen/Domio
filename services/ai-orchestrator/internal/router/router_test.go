@@ -13,6 +13,7 @@ import (
 
 	"github.com/domio/platform/services/ai-orchestrator/internal/executor"
 	"github.com/domio/platform/services/ai-orchestrator/internal/planner"
+	"github.com/domio/platform/services/ai-orchestrator/internal/renderer"
 	"github.com/domio/platform/services/ai-orchestrator/internal/store"
 )
 
@@ -57,11 +58,13 @@ func newTestRouter(t *testing.T) (chi.Router, *executor.Executor) {
 	}
 	exec := executor.New(providers, 3, 100.0, 5)
 
+	deckStore := renderer.NewMemDeckStore()
 	cfg := Config{
 		Logger:         logger,
 		Executor:       exec,
 		Planner:        p,
 		Store:          store.NewMemStore(),
+		Renderer:       renderer.NewDeckRenderer(deckStore, nil),
 		ModerationGate: true,
 		MaxCostPerReq:  100.0,
 	}
@@ -366,6 +369,109 @@ func TestStreamJobNotFound(t *testing.T) {
 
 	if resp.StatusCode != http.StatusNotFound {
 		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusNotFound)
+	}
+}
+
+func TestCreateDeckRenderJobSucceeds(t *testing.T) {
+	r, _ := newTestRouter(t)
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	body, _ := json.Marshal(createJobRequest{
+		Type: DeckRenderJobType,
+		Payload: json.RawMessage(`{
+			"deck_id": "deck-test",
+			"author_id": "user-test",
+			"branch_id": "main",
+			"goal": "create a deck about quantum computing"
+		}`),
+	})
+
+	req, _ := http.NewRequest("POST", ts.URL+"/v1/ai/jobs", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Idempotency-Key", "deck-render-test-001")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("POST /v1/ai/jobs: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusAccepted {
+		t.Errorf("status = %d, want %d", resp.StatusCode, http.StatusAccepted)
+	}
+
+	var accepted aiJobAccepted
+	if err := json.NewDecoder(resp.Body).Decode(&accepted); err != nil {
+		t.Fatalf("decode accepted: %v", err)
+	}
+
+	// Job should be 'succeeded' (deck render is synchronous).
+	getResp, err := http.Get(ts.URL + "/v1/ai/jobs/" + accepted.JobID)
+	if err != nil {
+		t.Fatalf("GET /v1/ai/jobs/{id}: %v", err)
+	}
+	defer getResp.Body.Close()
+
+	var jobResp aiJobResponse
+	if err := json.NewDecoder(getResp.Body).Decode(&jobResp); err != nil {
+		t.Fatalf("decode job: %v", err)
+	}
+
+	if jobResp.Job.Status != "succeeded" {
+		t.Errorf("Status = %q, want succeeded", jobResp.Job.Status)
+	}
+	if len(jobResp.Job.Result) == 0 {
+		t.Error("Result should be populated with rendered deck info")
+	}
+}
+
+func TestCreateDeckRenderJobMissingDeckID(t *testing.T) {
+	r, _ := newTestRouter(t)
+	ts := httptest.NewServer(r)
+	defer ts.Close()
+
+	body, _ := json.Marshal(createJobRequest{
+		Type: DeckRenderJobType,
+		Payload: json.RawMessage(`{
+			"author_id": "user-test",
+			"goal": "no deck id specified"
+		}`),
+	})
+
+	req, _ := http.NewRequest("POST", ts.URL+"/v1/ai/jobs", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Idempotency-Key", "deck-render-test-002")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("POST /v1/ai/jobs: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusAccepted {
+		t.Errorf("status = %d, want %d (job is created and marked failed internally)", resp.StatusCode, http.StatusAccepted)
+	}
+
+	var accepted aiJobAccepted
+	if err := json.NewDecoder(resp.Body).Decode(&accepted); err != nil {
+		t.Fatalf("decode accepted: %v", err)
+	}
+
+	// Job should be 'failed' due to missing deck_id.
+	getResp, err := http.Get(ts.URL + "/v1/ai/jobs/" + accepted.JobID)
+	if err != nil {
+		t.Fatalf("GET /v1/ai/jobs/{id}: %v", err)
+	}
+	defer getResp.Body.Close()
+
+	var jobResp aiJobResponse
+	if err := json.NewDecoder(getResp.Body).Decode(&jobResp); err != nil {
+		t.Fatalf("decode job: %v", err)
+	}
+
+	if jobResp.Job.Status != "failed" {
+		t.Errorf("Status = %q, want failed", jobResp.Job.Status)
 	}
 }
 

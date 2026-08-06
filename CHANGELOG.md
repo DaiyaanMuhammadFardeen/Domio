@@ -67,6 +67,51 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   citation-coverage math, image moderation gate and fallback, RTL
   content transformation.
 
+### Phase 12 completion follow-ups (closes prior M2 backlog gaps)
+
+#### Added
+
+- **PGX-backed DeckStore (`services/ai-orchestrator/internal/renderer/pgx_store.go`).**
+  Production wiring for `deck_versions` / `slides` / `decks.current_revision`.
+  Used automatically when `DATABASE_URL` is set; falls back to the
+  in-memory store for dev/test. Closes phase-12 gap #2 (renderer was
+  previously write-only-in-memory).
+- **Slide designer (feature #111,
+  `services/ai-orchestrator/internal/designer/`).** Generates 4
+  distinct layout options per slide prompt with a structural
+  fingerprint diversity check, fallbacks when the generator
+  under-supplies, and a `MoreLike` path that produces variants
+  biased toward a chosen option. HTTP: `POST /v1/ai/designer`,
+  `POST /v1/ai/designer/more-like`.
+- **Slide redesign (feature #112,
+  `services/ai-orchestrator/internal/redesign/`).** `light` (spacing /
+  alignment only) and `full` (column-grid snap) modes; brand-locked
+  elements are refused at the framework boundary; content-preservation
+  diff blocks any output that drifts on text / data bindings /
+  citation refs. HTTP: `POST /v1/ai/redesign`.
+- **Copy assistant (feature #113,
+  `services/ai-orchestrator/internal/copy/`).** `shorten`, `punch_up`,
+  `tone`, `translate`. Glossary lock is enforced (audit-only here;
+  the transformer is expected to honor it); 100+ languages are
+  represented via code-based target selection; RTL targets
+  (`ar`, `he`, `ur`, `fa`, `yi`) trigger a layout-flip warning on
+  output; translated runs are tagged with `translated_into` so
+  re-translation is traceable. HTTP: `POST /v1/ai/copy`.
+- **Image generation + bg removal (feature #114,
+  `services/ai-orchestrator/internal/image/`).** Provider chain with
+  deterministic fallback (`ErrAllProvidersUnavailable` with a
+  client-facing `ready in N min` hint), two-layer moderation
+  (orchestrator-side blocklist + provider verdict) with `Layer1Hit` /
+  `Layer2Hit` flags, brand-aware style-lock prompting, and full
+  provenance (sha256 hash of `provider|model|prompt` plus timestamp).
+  HTTP: `POST /v1/ai/image`, `POST /v1/ai/image/{id}/remove-background`.
+- **Deck render job type (HTTP).** New `type = "deck_render"` job
+  accepted at `POST /v1/ai/jobs`. The router expands the payload into
+  a planner outline (template-aware when the adapter is wired,
+  heuristic otherwise) and persists a new deck version + slide rows
+  via the pgx DeckStore. Idempotency, moderation, and circuit-breaker
+  gates are inherited from the existing job flow.
+
 ### Phase 11 — 3D, Motion & Rich Media
 
 #### Added

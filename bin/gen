@@ -27,11 +27,18 @@ echo "→ buf lint (proto)"
 buf lint contracts/proto
 
 if [ -n "${BUF_TOKEN:-}" ] || [ -f "${HOME}/.netrc" ]; then
-  echo "→ buf generate (proto → TS / Go / Python)"
+  echo "→ buf generate (BSR remote → TS / Go / Python)"
   buf generate contracts/proto
+elif [ -f buf.gen.local.yaml ]; then
+  echo "→ buf generate (local plugins — no BUF_TOKEN)"
+  echo "  Using buf.gen.local.yaml + PATH=node_modules/.bin:$HOME/go/bin:\$PATH"
+  # Prepend local bins so the local protoc-gen-go and protoc-gen-es
+  # win over any system-wide installs. This is what we do today in
+  # development; CI uses the BSR remote plugins via buf.gen.yaml.
+  export PATH="$PWD/node_modules/.bin:$HOME/go/bin:$PATH"
+  buf generate --template buf.gen.local.yaml contracts/proto
 else
-  echo "→ buf generate skipped (no BUF_TOKEN). Phase 0 placeholder protos"
-  echo "  have no language clients yet; see docs/adr/0003-contract-first.md."
+  echo "→ buf generate skipped (no BUF_TOKEN, no local fallback)."
 fi
 
 echo "→ ajv validate (json schemas)"

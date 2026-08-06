@@ -12,6 +12,7 @@
 package router
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -22,8 +23,14 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 
+	"github.com/domio/platform/services/ai-orchestrator/internal/adapterclient"
+	"github.com/domio/platform/services/ai-orchestrator/internal/copy"
+	"github.com/domio/platform/services/ai-orchestrator/internal/designer"
 	"github.com/domio/platform/services/ai-orchestrator/internal/executor"
+	"github.com/domio/platform/services/ai-orchestrator/internal/image"
 	"github.com/domio/platform/services/ai-orchestrator/internal/planner"
+	"github.com/domio/platform/services/ai-orchestrator/internal/redesign"
+	"github.com/domio/platform/services/ai-orchestrator/internal/renderer"
 	"github.com/domio/platform/services/ai-orchestrator/internal/store"
 )
 
@@ -33,8 +40,29 @@ type Config struct {
 	Executor       *executor.Executor
 	Planner        *planner.Planner
 	Store          store.Store // job persistence
+	Renderer       *renderer.DeckRenderer
+	AdapterClient  adapterclient.Client
+	Designer       *designer.Designer
+	Redesigner     *redesign.Redesigner
+	CopyAssistant  *copy.CopyAssistant
+	ImageService   *image.ImageService
 	ModerationGate bool
 	MaxCostPerReq  float64
+}
+
+// Deck render job type identifier. When POST /v1/ai/jobs is submitted with
+// `type = "deck_render"`, the router expands the payload into a full
+// outline via the planner + adapter's prompt registry, then delegates to
+// the renderer to persist a new deck version + slides.
+const DeckRenderJobType = "deck_render"
+
+// renderJobPayload is the JSON body for `type = "deck_render"` jobs.
+type renderJobPayload struct {
+	DeckID     string `json:"deck_id"`
+	AuthorID   string `json:"author_id"`
+	BranchID   string `json:"branch_id,omitempty"`
+	Goal       string `json:"goal"`
+	TemplateID string `json:"template_id,omitempty"`
 }
 
 // ---------------------------------------------------------------------------
@@ -174,6 +202,14 @@ func New(cfg Config) chi.Router {
 
 		// Circuit status (retained for ops visibility)
 		r.Get("/circuit", handleCircuitStatus(cfg))
+
+		// M2 features
+		r.Post("/ai/designer", handleDesigner(cfg))
+		r.Post("/ai/designer/more-like", handleDesignerMoreLike(cfg))
+		r.Post("/ai/redesign", handleRedesign(cfg))
+		r.Post("/ai/copy", handleCopy(cfg))
+		r.Post("/ai/image", handleImageGenerate(cfg))
+		r.Post("/ai/image/{id}/remove-background", handleImageRemoveBackground(cfg))
 	})
 
 	return r
@@ -307,12 +343,115 @@ func handleCreateJob(cfg Config) http.HandlerFunc {
 			zap.String("type", req.Type),
 			zap.String("workspace", workspaceID))
 
+		// If the job is a deck render, kick off the planner + renderer
+		// synchronously. Other job types are async-only and rely on the
+		// external worker pool.
+		if req.Type == DeckRenderJobType {
+			if err := runDeckRender(r.Context(), cfg, job); err != nil {
+				cfg.Logger.Error("deck render failed",
+					zap.String("job_id", jobID), zap.Error(err))
+				// We don't fail the HTTP response — the job is in store
+				// and operators can inspect it. The job status will be
+				// 'failed' and the error is captured in job.Error.
+			}
+		}
+
 		writeJSON(w, http.StatusAccepted, aiJobAccepted{
 			JobID:     jobID,
 			Status:    "queued",
 			StreamURL: fmt.Sprintf("/v1/ai/jobs/%s/stream", jobID),
 		})
 	}
+}
+
+// runDeckRender executes the planner → outline → renderer pipeline for a
+// "deck_render" job. The job's status is updated in place; on success
+// the rendered deck revision and slide IDs are returned in the result.
+func runDeckRender(ctx context.Context, cfg Config, job *store.Job) error {
+	var p renderJobPayload
+	if err := json.Unmarshal(job.Payload, &p); err != nil {
+		jobErr := json.RawMessage(fmt.Sprintf(`{"code":"invalid_argument","message":"%s"}`, err.Error()))
+		_ = cfg.Store.MarkJobFailed(ctx, job.ID, jobErr)
+		return fmt.Errorf("runDeckRender: parse payload: %w", err)
+	}
+	if p.DeckID == "" || p.AuthorID == "" {
+		jobErr := json.RawMessage(`{"code":"required","message":"deck_id and author_id are required"}`)
+		_ = cfg.Store.MarkJobFailed(ctx, job.ID, jobErr)
+		return fmt.Errorf("runDeckRender: deck_id and author_id required")
+	}
+	if cfg.Renderer == nil {
+		jobErr := json.RawMessage(`{"code":"unavailable","message":"renderer not wired"}`)
+		_ = cfg.Store.MarkJobFailed(ctx, job.ID, jobErr)
+		return fmt.Errorf("runDeckRender: renderer not wired")
+	}
+
+	// Transition to running.
+	if err := cfg.Store.MarkJobRunning(ctx, job.ID); err != nil {
+		return fmt.Errorf("runDeckRender: mark running: %w", err)
+	}
+
+	// Plan + outline.
+	plan, err := cfg.Planner.Decompose(ctx, p.Goal, 0)
+	if err != nil {
+		jobErr := json.RawMessage(fmt.Sprintf(`{"code":"planner_error","message":"%s"}`, err.Error()))
+		_ = cfg.Store.MarkJobFailed(ctx, job.ID, jobErr)
+		return fmt.Errorf("runDeckRender: plan: %w", err)
+	}
+
+	var fetcher planner.PromptFetcher
+	if cfg.AdapterClient != nil {
+		fetcher = promptFetcherAdapter{client: cfg.AdapterClient}
+	}
+	outline, err := planner.BuildOutline(ctx, fetcher, p.TemplateID, plan)
+	if err != nil || outline == nil {
+		// Fallback: build a minimal outline from the plan.
+		outline = &planner.Outline{}
+		for _, st := range plan.Subtasks {
+			outline.Slides = append(outline.Slides, planner.OutlineSlide{
+				Intent:        st.Title,
+				LayoutHint:    "content",
+				ContentBlocks: []string{st.Description},
+			})
+		}
+	}
+
+	// Render.
+	renderResult, err := cfg.Renderer.Render(ctx, renderer.RenderRequest{
+		DeckID:     p.DeckID,
+		AuthorID:   p.AuthorID,
+		BranchID:   p.BranchID,
+		Outline:    outline,
+		ChangeDesc: fmt.Sprintf("auto-render from goal: %s", p.Goal),
+	})
+	if err != nil {
+		jobErr := json.RawMessage(fmt.Sprintf(`{"code":"render_error","message":"%s"}`, err.Error()))
+		_ = cfg.Store.MarkJobFailed(ctx, job.ID, jobErr)
+		return fmt.Errorf("runDeckRender: render: %w", err)
+	}
+
+	// Persist the result.
+	resultJSON, err := json.Marshal(map[string]interface{}{
+		"deck_id":  renderResult.DeckID,
+		"revision": renderResult.Revision,
+		"slide_ids": renderResult.SlideIDs,
+	})
+	if err != nil {
+		return fmt.Errorf("runDeckRender: marshal result: %w", err)
+	}
+	if err := cfg.Store.MarkJobSucceeded(ctx, job.ID, resultJSON); err != nil {
+		return fmt.Errorf("runDeckRender: mark succeeded: %w", err)
+	}
+	return nil
+}
+
+// promptFetcherAdapter adapts adapterclient.Client to the planner.PromptFetcher
+// interface so the outline builder can pull prompt templates.
+type promptFetcherAdapter struct {
+	client adapterclient.Client
+}
+
+func (p promptFetcherAdapter) GetPrompt(ctx context.Context, templateID string, version int32) (*adapterclient.PromptTemplate, error) {
+	return p.client.GetPrompt(ctx, templateID, version)
 }
 
 func handleGetJob(cfg Config) http.HandlerFunc {
@@ -459,6 +598,207 @@ func handleCircuitStatus(cfg Config) http.HandlerFunc {
 			"circuit":    stateStr,
 			"total_cost": cfg.Executor.TotalCost(),
 		})
+	}
+}
+
+// ---------------------------------------------------------------------------
+// M2 feature handlers (#111–#114)
+// ---------------------------------------------------------------------------
+
+// handleDesigner implements POST /v1/ai/designer (feature #111).
+//
+// Body: designer.SlidePrompt. Returns 4 distinct layout options.
+func handleDesigner(cfg Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if cfg.Designer == nil {
+			writeJSON(w, http.StatusNotImplemented, map[string]interface{}{
+				"code":    "unavailable",
+				"message": "designer not wired",
+			})
+			return
+		}
+		var req designer.SlidePrompt
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"code":    "invalid_argument",
+				"message": "invalid request body",
+			})
+			return
+		}
+		res, err := cfg.Designer.Design(r.Context(), req)
+		if err != nil {
+			cfg.Logger.Error("designer", zap.Error(err))
+			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"code":    "designer_error",
+				"message": err.Error(),
+			})
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	}
+}
+
+// handleDesignerMoreLike implements POST /v1/ai/designer/more-like.
+// Body: { "seed": designer.LayoutOption, "prompt": designer.SlidePrompt }.
+func handleDesignerMoreLike(cfg Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if cfg.Designer == nil {
+			writeJSON(w, http.StatusNotImplemented, map[string]interface{}{
+				"code":    "unavailable",
+				"message": "designer not wired",
+			})
+			return
+		}
+		var body struct {
+			Seed   designer.LayoutOption  `json:"seed"`
+			Prompt designer.SlidePrompt   `json:"prompt"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"code":    "invalid_argument",
+				"message": "invalid request body",
+			})
+			return
+		}
+		res, err := cfg.Designer.MoreLike(r.Context(), body.Seed, body.Prompt)
+		if err != nil {
+			cfg.Logger.Error("designer more-like", zap.Error(err))
+			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"code":    "designer_error",
+				"message": err.Error(),
+			})
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	}
+}
+
+// handleRedesign implements POST /v1/ai/redesign (feature #112).
+// Body: { "slide": redesign.SlideInput, "mode": "light"|"full" }.
+func handleRedesign(cfg Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if cfg.Redesigner == nil {
+			writeJSON(w, http.StatusNotImplemented, map[string]interface{}{
+				"code":    "unavailable",
+				"message": "redesigner not wired",
+			})
+			return
+		}
+		var body struct {
+			Slide redesign.SlideInput `json:"slide"`
+			Mode  redesign.Mode       `json:"mode"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"code":    "invalid_argument",
+				"message": "invalid request body",
+			})
+			return
+		}
+		opt, err := cfg.Redesigner.Redesign(r.Context(), body.Slide, body.Mode)
+		if err != nil {
+			cfg.Logger.Error("redesign", zap.Error(err))
+			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"code":    "redesign_error",
+				"message": err.Error(),
+			})
+			return
+		}
+		writeJSON(w, http.StatusOK, opt)
+	}
+}
+
+// handleCopy implements POST /v1/ai/copy (feature #113).
+// Body: copy.CopyRequest.
+func handleCopy(cfg Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if cfg.CopyAssistant == nil {
+			writeJSON(w, http.StatusNotImplemented, map[string]interface{}{
+				"code":    "unavailable",
+				"message": "copy assistant not wired",
+			})
+			return
+		}
+		var req copy.CopyRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"code":    "invalid_argument",
+				"message": "invalid request body",
+			})
+			return
+		}
+		res, err := cfg.CopyAssistant.Apply(r.Context(), req)
+		if err != nil {
+			cfg.Logger.Error("copy", zap.Error(err))
+			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"code":    "copy_error",
+				"message": err.Error(),
+			})
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	}
+}
+
+// handleImageGenerate implements POST /v1/ai/image (feature #114 generate).
+func handleImageGenerate(cfg Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if cfg.ImageService == nil {
+			writeJSON(w, http.StatusNotImplemented, map[string]interface{}{
+				"code":    "unavailable",
+				"message": "image service not wired",
+			})
+			return
+		}
+		var req image.GenerateRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"code":    "invalid_argument",
+				"message": "invalid request body",
+			})
+			return
+		}
+		res, err := cfg.ImageService.Generate(r.Context(), req)
+		if err != nil {
+			cfg.Logger.Error("image generate", zap.Error(err))
+			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"code":    "image_error",
+				"message": err.Error(),
+			})
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	}
+}
+
+// handleImageRemoveBackground implements POST /v1/ai/image/{id}/remove-background.
+func handleImageRemoveBackground(cfg Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if cfg.ImageService == nil {
+			writeJSON(w, http.StatusNotImplemented, map[string]interface{}{
+				"code":    "unavailable",
+				"message": "image service not wired",
+			})
+			return
+		}
+		var req image.RemoveBackgroundRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			writeJSON(w, http.StatusBadRequest, map[string]interface{}{
+				"code":    "invalid_argument",
+				"message": "invalid request body",
+			})
+			return
+		}
+		res, err := cfg.ImageService.RemoveBackground(r.Context(), req)
+		if err != nil {
+			cfg.Logger.Error("image remove-background", zap.Error(err))
+			writeJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"code":    "image_error",
+				"message": err.Error(),
+			})
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
 	}
 }
 

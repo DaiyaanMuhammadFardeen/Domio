@@ -2,10 +2,9 @@
 // AdapterService (services/ai-adapters, gRPC :50051).
 //
 // The Client interface mirrors the RPCs defined in contracts/proto/domio/ai/v1/ai.proto.
-// The gRPC implementation references the generated domioaiv1 package; since buf
-// generate cannot run locally (no BUF_TOKEN), the generated package import is
-// clearly marked with a TODO. The typed interface is fully defined so P2-L1
-// can drop in the generated client.
+// The gRPC implementation now uses the generated domioaiv1 package (produced
+// by `buf generate` with protoc-gen-go and protoc-gen-go-grpc). See
+// buf.gen.local.yaml for the local fallback used when no BUF_TOKEN is set.
 package adapterclient
 
 import (
@@ -15,9 +14,13 @@ import (
 	"io"
 	"os"
 
+	domioaiv1 "github.com/domio/platform/gen/go/domio/ai/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+// ErrStreamDone is returned by stream Recv when the peer closes the stream.
+var ErrStreamDone = io.EOF
 
 // ErrNotConfigured is returned when the adapter address is not set.
 var ErrNotConfigured = errors.New("adapterclient: ADAPTER_ADDR not configured")
@@ -34,10 +37,10 @@ type ChatMessage struct {
 
 // TextDelta represents a single streaming delta from text generation.
 type TextDelta struct {
-	Text          string
-	FinishReason  string
-	InputTokens   int32
-	OutputTokens  int32
+	Text         string
+	FinishReason string
+	InputTokens  int32
+	OutputTokens int32
 }
 
 // ImageResult represents the response from image generation.
@@ -49,6 +52,12 @@ type ImageResult struct {
 	ModerationVerdict map[string]interface{}
 }
 
+// TranscribeDelta represents a streaming delta from transcription.
+type TranscribeDelta struct {
+	Text    string
+	IsFinal bool
+}
+
 // EmbedResult represents the response from embedding generation.
 type EmbedResult struct {
 	Embedding []float32
@@ -56,7 +65,7 @@ type EmbedResult struct {
 
 // Capabilities represents model capability information.
 type Capabilities struct {
-	ModelClass  string
+	ModelClass   string
 	Capabilities []string
 }
 
@@ -76,6 +85,9 @@ type PromptTemplate struct {
 // error to abort the stream.
 type TextStreamHandler func(delta TextDelta) error
 
+// TranscribeStreamHandler is called for each transcription delta.
+type TranscribeStreamHandler func(delta TranscribeDelta) error
+
 // Client defines the typed interface for communicating with the adapter
 // service. Implementations must be safe for concurrent use.
 type Client interface {
@@ -86,7 +98,7 @@ type Client interface {
 	GenerateImage(ctx context.Context, model, prompt string, n int32, size string) (*ImageResult, error)
 
 	// GenerateTranscription streams transcription deltas from audio.
-	GenerateTranscription(ctx context.Context, model string, audio []byte, handler func(delta struct{ Text string; IsFinal bool }) error) error
+	GenerateTranscription(ctx context.Context, model string, audio []byte, handler TranscribeStreamHandler) error
 
 	// Embed produces a vector embedding for a text input.
 	Embed(ctx context.Context, model, input string) (*EmbedResult, error)
@@ -102,10 +114,12 @@ type Client interface {
 // gRPC implementation — wraps a gRPC connection to the adapter service.
 // ---------------------------------------------------------------------------
 
-// grpcClient implements Client over a gRPC connection.
+// grpcClient implements Client over a gRPC connection using the typed
+// stubs from contracts/proto/domio/ai/v1/ai.proto.
 type grpcClient struct {
-	addr string
-	conn *grpc.ClientConn
+	addr   string
+	conn   *grpc.ClientConn
+	ai     domioaiv1.AdapterServiceClient
 }
 
 // NewGRPCClient creates a new gRPC-backed adapter client.
@@ -125,7 +139,11 @@ func NewGRPCClient(addr string) (*grpcClient, error) {
 		return nil, fmt.Errorf("adapterclient: dial %s: %w", addr, err)
 	}
 
-	return &grpcClient{addr: addr, conn: conn}, nil
+	return &grpcClient{
+		addr: addr,
+		conn: conn,
+		ai:   domioaiv1.NewAdapterServiceClient(conn),
+	}, nil
 }
 
 // Close closes the underlying gRPC connection.
@@ -137,84 +155,193 @@ func (c *grpcClient) Close() error {
 }
 
 // ---------------------------------------------------------------------------
-// RPC call sites — each method references the generated domioaiv1 package.
-// When buf generate runs in CI, these will compile against the generated stubs.
+// RPC call sites — typed against domioaiv1 (contracts/proto/domio/ai/v1).
 // ---------------------------------------------------------------------------
 
-// TODO(domioaiv1): When buf generate runs in CI, import:
-//   domioaiv1 "github.com/domio/platform/gen/go/domio/ai/v1"
-// and replace the manual gRPC calls below with typed RPC invocations.
-//
-// For now, the methods use the generic gRPC client API so that the code
-// compiles locally without the generated package. P2-L1 will swap these
-// for direct domioaiv1 calls.
+func toProtoMessage(m ChatMessage) *domioaiv1.ChatMessage {
+	var role domioaiv1.MessageRole
+	switch m.Role {
+	case "system":
+		role = domioaiv1.MessageRole_MESSAGE_ROLE_SYSTEM
+	case "assistant":
+		role = domioaiv1.MessageRole_MESSAGE_ROLE_ASSISTANT
+	default:
+		role = domioaiv1.MessageRole_MESSAGE_ROLE_USER
+	}
+	return &domioaiv1.ChatMessage{
+		Role:    role,
+		Content: m.Content,
+	}
+}
+
+func fromProtoFinishReason(r domioaiv1.FinishReason) string {
+	return r.String()
+}
+
+func fromProtoModeration(s interface{}) map[string]interface{} {
+	// domioaiv1.GenerateImageResponse.ModerationVerdict is a *structpb.Struct.
+	// We map it back to a plain map for downstream consumers.
+	type structUnwrap interface {
+		AsMap() map[string]interface{}
+	}
+	if s == nil {
+		return nil
+	}
+	if u, ok := s.(structUnwrap); ok {
+		return u.AsMap()
+	}
+	return nil
+}
 
 func (c *grpcClient) GenerateText(ctx context.Context, model string, messages []ChatMessage, maxTokens int32, temperature float32, jsonMode bool, handler TextStreamHandler) error {
-	// TODO(domioaiv1): Replace with:
-	//   client := domioaiv1.NewAdapterServiceClient(c.conn)
-	//   stream, err := client.GenerateText(ctx, &domioaiv1.GenerateTextRequest{...})
-	//   for { delta, err := stream.Recv(); ... handler(toTextDelta(delta)) }
 	if c.conn == nil {
 		return ErrNotConfigured
 	}
-
-	// Placeholder: call via generic gRPC invoke.
-	// The real implementation will unmarshal domioaiv1.GenerateTextDelta messages.
-	return fmt.Errorf("adapterclient.GenerateText: not yet wired (TODO domioaiv1)")
+	protoMessages := make([]*domioaiv1.ChatMessage, len(messages))
+	for i, m := range messages {
+		protoMessages[i] = toProtoMessage(m)
+	}
+	stream, err := c.ai.GenerateText(ctx, &domioaiv1.GenerateTextRequest{
+		Model:       model,
+		Messages:    protoMessages,
+		MaxTokens:   maxTokens,
+		Temperature: temperature,
+		JsonMode:    jsonMode,
+	})
+	if err != nil {
+		return fmt.Errorf("adapterclient.GenerateText: %w", err)
+	}
+	for {
+		delta, err := stream.Recv()
+		if err != nil {
+			if errors.Is(err, ErrStreamDone) {
+				return nil
+			}
+			return fmt.Errorf("adapterclient.GenerateText: stream recv: %w", err)
+		}
+		if delta == nil {
+			return nil
+		}
+		if handler != nil {
+			if err := handler(TextDelta{
+				Text:         delta.GetText(),
+				FinishReason: fromProtoFinishReason(delta.GetFinishReason()),
+				InputTokens:  delta.GetInputTokens(),
+				OutputTokens: delta.GetOutputTokens(),
+			}); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 func (c *grpcClient) GenerateImage(ctx context.Context, model, prompt string, n int32, size string) (*ImageResult, error) {
-	// TODO(domioaiv1): Replace with:
-	//   client := domioaiv1.NewAdapterServiceClient(c.conn)
-	//   resp, err := client.GenerateImage(ctx, &domioaiv1.GenerateImageRequest{...})
 	if c.conn == nil {
 		return nil, ErrNotConfigured
 	}
-	return nil, fmt.Errorf("adapterclient.GenerateImage: not yet wired (TODO domioaiv1)")
+	resp, err := c.ai.GenerateImage(ctx, &domioaiv1.GenerateImageRequest{
+		Model:  model,
+		Prompt: prompt,
+		N:      n,
+		Size:   size,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("adapterclient.GenerateImage: %w", err)
+	}
+	return &ImageResult{
+		URL:               resp.GetUrl(),
+		Provider:          resp.GetProvider(),
+		Model:             resp.GetModel(),
+		Prompt:            resp.GetPrompt(),
+		ModerationVerdict: fromProtoModeration(resp.GetModerationVerdict()),
+	}, nil
 }
 
-func (c *grpcClient) GenerateTranscription(ctx context.Context, model string, audio []byte, handler func(delta struct{ Text string; IsFinal bool }) error) error {
-	// TODO(domioaiv1): Replace with:
-	//   client := domioaiv1.NewAdapterServiceClient(c.conn)
-	//   stream, err := client.Transcribe(ctx, &domioaiv1.TranscribeRequest{...})
+func (c *grpcClient) GenerateTranscription(ctx context.Context, model string, audio []byte, handler TranscribeStreamHandler) error {
 	if c.conn == nil {
 		return ErrNotConfigured
 	}
-	return fmt.Errorf("adapterclient.GenerateTranscription: not yet wired (TODO domioaiv1)")
+	stream, err := c.ai.Transcribe(ctx, &domioaiv1.TranscribeRequest{
+		Model: model,
+		Audio: audio,
+	})
+	if err != nil {
+		return fmt.Errorf("adapterclient.GenerateTranscription: %w", err)
+	}
+	for {
+		delta, err := stream.Recv()
+		if err != nil {
+			if errors.Is(err, ErrStreamDone) {
+				return nil
+			}
+			return fmt.Errorf("adapterclient.GenerateTranscription: stream recv: %w", err)
+		}
+		if delta == nil {
+			return nil
+		}
+		if handler != nil {
+			if err := handler(TranscribeDelta{
+				Text:    delta.GetText(),
+				IsFinal: delta.GetIsFinal(),
+			}); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 func (c *grpcClient) Embed(ctx context.Context, model, input string) (*EmbedResult, error) {
-	// TODO(domioaiv1): Replace with:
-	//   client := domioaiv1.NewAdapterServiceClient(c.conn)
-	//   resp, err := client.Embed(ctx, &domioaiv1.EmbedRequest{...})
 	if c.conn == nil {
 		return nil, ErrNotConfigured
 	}
-	return nil, fmt.Errorf("adapterclient.Embed: not yet wired (TODO domioaiv1)")
+	resp, err := c.ai.Embed(ctx, &domioaiv1.EmbedRequest{
+		Model: model,
+		Input: input,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("adapterclient.Embed: %w", err)
+	}
+	return &EmbedResult{Embedding: resp.GetEmbedding()}, nil
 }
 
 func (c *grpcClient) GetCapabilities(ctx context.Context, model string) (*Capabilities, error) {
-	// TODO(domioaiv1): Replace with:
-	//   client := domioaiv1.NewAdapterServiceClient(c.conn)
-	//   resp, err := client.GetCapabilities(ctx, &domioaiv1.GetCapabilitiesRequest{...})
 	if c.conn == nil {
 		return nil, ErrNotConfigured
 	}
-	return nil, fmt.Errorf("adapterclient.GetCapabilities: not yet wired (TODO domioaiv1)")
+	resp, err := c.ai.GetCapabilities(ctx, &domioaiv1.GetCapabilitiesRequest{
+		Model: model,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("adapterclient.GetCapabilities: %w", err)
+	}
+	return &Capabilities{
+		ModelClass:   resp.GetModelClass(),
+		Capabilities: resp.GetCapabilities(),
+	}, nil
 }
 
 func (c *grpcClient) GetPrompt(ctx context.Context, templateID string, version int32) (*PromptTemplate, error) {
-	// TODO(domioaiv1): Replace with:
-	//   client := domioaiv1.NewAdapterServiceClient(c.conn)
-	//   resp, err := client.GetPrompt(ctx, &domioaiv1.GetPromptRequest{...})
 	if c.conn == nil {
 		return nil, ErrNotConfigured
 	}
-	return nil, fmt.Errorf("adapterclient.GetPrompt: not yet wired (TODO domioaiv1)")
+	resp, err := c.ai.GetPrompt(ctx, &domioaiv1.GetPromptRequest{
+		TemplateId: templateID,
+		Version:    version,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("adapterclient.GetPrompt: %w", err)
+	}
+	return &PromptTemplate{
+		ID:                 resp.GetId(),
+		Version:            resp.GetVersion(),
+		ModelClassHint:     resp.GetModelClassHint(),
+		InputSchemaJSON:    resp.GetInputSchemaJson(),
+		OutputSchemaJSON:   resp.GetOutputSchemaJson(),
+		SystemPrompt:       resp.GetSystemPrompt(),
+		UserPromptTemplate: resp.GetUserPromptTemplate(),
+		EvalSetID:          resp.GetEvalSetId(),
+	}, nil
 }
 
 // Ensure grpcClient implements Client at compile time.
 var _ Client = (*grpcClient)(nil)
-
-// Ensure the unused import is consumed if io is needed for streaming later.
-var _ = io.EOF

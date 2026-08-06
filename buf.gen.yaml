@@ -20,6 +20,12 @@ plugins:
     opt:
       - paths=source_relative
 
+  # Go gRPC — server + client stubs. Companion to the protoc-gen-go above.
+  - remote: buf.build/protocolbuffers/go-grpc
+    out: gen/go
+    opt:
+      - paths=source_relative
+
   # Python — used by ai-orchestrator, ai-eval, analytics-rollup workers
   - remote: buf.build/protocolbuffers/python
     out: gen/python

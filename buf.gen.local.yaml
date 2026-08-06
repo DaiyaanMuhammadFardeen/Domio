@@ -1,0 +1,50 @@
+# Local fallback for `buf generate`.
+#
+# The canonical CI path uses the BSR remote plugins configured in
+# `buf.gen.yaml` (buf.build/protocolbuffers/{es,go,go-grpc,python}).
+# That path requires a BUF_TOKEN configured in CI secrets and is the
+# supported codegen workflow for releases.
+#
+# When developing locally without a BUF_TOKEN, point buf at this file to
+# use the pinned local plugins from node_modules and the Go bin:
+#
+#   PATH=$PWD/node_modules/.bin:$HOME/go/bin:$PATH \
+#     buf generate --template buf.gen.local.yaml
+#
+# The local plugins are pinned via pnpm-lock.yaml (protoc-gen-es
+# 1.10.1) and the Go toolchain (protoc-gen-go v1.36.x,
+# protoc-gen-go-grpc v1.6.x). bump those pins together with the BSR
+# remote versions in buf.gen.yaml.
+#
+# The local and remote outputs are byte-equivalent for the supported
+# plugins; do not commit divergent outputs.
+
+version: v2
+inputs:
+  - directory: contracts/proto
+
+plugins:
+  - local: protoc-gen-es
+    out: packages/api-client/src/gen
+
+  - local: protoc-gen-go
+    out: gen/go
+    opt:
+      - paths=source_relative
+
+  - local: protoc-gen-go-grpc
+    out: gen/go
+    opt:
+      - paths=source_relative
+
+  # Python is not generated locally — Python workers do not yet
+  # consume the generated stubs (they speak gRPC over HTTP/JSON via
+  # the orchestrator). When they do, add a local protoc-gen-python
+  # entry here.
+
+managed:
+  enabled: true
+  override:
+    - file_option: go_package
+      path: gen/go
+      value: github.com/domio/platform/gen/go

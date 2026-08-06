@@ -305,9 +305,8 @@ func TestTracer_EndIdempotent(t *testing.T) {
 
 func TestTracer_ParentSpan(t *testing.T) {
 	srv, rec := newTestServer(t)
-	o, _ := New(InitOptions{Resource: ResourceOptions{ServiceName: "svc", Environment: "dev", GitSha: "abc1234"}, Endpoint: srv.URL})
-	// Use correct field name: GitSHA
-	o, _ = New(InitOptions{Resource: ResourceOptions{ServiceName: "svc", Environment: "dev", GitSHA: "abc1234"}, Endpoint: srv.URL})
+	// Use correct field name: GitSHA (not GitSha — GitSha was added in error).
+	o, _ := New(InitOptions{Resource: ResourceOptions{ServiceName: "svc", Environment: "dev", GitSHA: "abc1234"}, Endpoint: srv.URL})
 	parent := o.Tracer.StartSpan("parent")
 	parent.End()
 	child := o.Tracer.StartSpan("child", SpanOptions{TraceID: parent.TraceID, ParentSpanID: parent.SpanID})
@@ -396,9 +395,9 @@ func TestMeter_Histogram(t *testing.T) {
 	srv, rec := newTestServer(t)
 	o, _ := New(InitOptions{Resource: ResourceOptions{ServiceName: "svc", Environment: "dev", GitSHA: "abc1234"}, Endpoint: srv.URL})
 	h := o.Meter.CreateHistogram("duration_ms", MetricOptions{Unit: "ms"})
-	h.Record(5)
-	h.Record(50)
-	h.Record(50000)
+	h.Record(5, nil)
+	h.Record(50, nil)
+	h.Record(50000, nil)
 	if err := o.Meter.Flush(context.Background()); err != nil {
 		t.Fatalf("flush: %v", err)
 	}
@@ -432,8 +431,8 @@ func TestMeter_UpDownCounterAdd(t *testing.T) {
 	srv, rec := newTestServer(t)
 	o, _ := New(InitOptions{Resource: ResourceOptions{ServiceName: "svc", Environment: "dev", GitSHA: "abc1234"}, Endpoint: srv.URL})
 	c := o.Meter.CreateUpDownCounter("in_flight")
-	c.Add(5)
-	c.Add(-2)
+	c.Add(5, nil)
+	c.Add(-2, nil)
 	if err := o.Meter.Flush(context.Background()); err != nil {
 		t.Fatalf("flush: %v", err)
 	}
@@ -530,7 +529,7 @@ func TestShutdown_FlushesAllSignals(t *testing.T) {
 	srv, rec := newTestServer(t)
 	o, _ := New(InitOptions{Resource: ResourceOptions{ServiceName: "svc", Environment: "dev", GitSHA: "abc1234"}, Endpoint: srv.URL})
 	o.Tracer.StartSpan("op").End()
-	o.Meter.CreateCounter("c").Add(1)
+	o.Meter.CreateCounter("c").Add(1, nil)
 	o.Logger.Log(LogRecord{Severity: SeverityInfo, Body: "hi"})
 	if err := o.Shutdown(context.Background()); err != nil {
 		t.Fatalf("shutdown: %v", err)
@@ -595,7 +594,7 @@ func TestPII_BasicRedaction(t *testing.T) {
 func TestOtlpWireShape(t *testing.T) {
 	srv, rec := newTestServer(t)
 	o, _ := New(InitOptions{Resource: ResourceOptions{ServiceName: "svc", Environment: "dev", GitSHA: "abc1234"}, Endpoint: srv.URL})
-	o.Meter.CreateCounter("c").Add(1)
+	o.Meter.CreateCounter("c").Add(1, nil)
 	if err := o.Meter.Flush(context.Background()); err != nil {
 		t.Fatalf("flush: %v", err)
 	}
