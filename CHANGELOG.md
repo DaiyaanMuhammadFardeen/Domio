@@ -6,6 +6,59 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Phase 14 — W1: Share-link data plane
+
+#### Added
+
+- **Migration `0041_phase14_sharing.{up,down}.sql`.** Six new tables
+  (`share_link`, `link_policy`, `link_visibility_rule`,
+  `watermark_profile`, `embed_config`, `seo_metadata`) with RLS keyed
+  to `workspace_id`, `UNIQUE (workspace_id, short_id)`, `UNIQUE
+  (workspace_id, slug)`, and indexes on `token_hash`. The
+  watermark/embed/SEO tables are created now but unused at the W1
+  API surface — W3/W4/W9 will read them.
+- **`packages/signed-link-token`.** TypeScript package exporting:
+  - `mintShortId()` — 8-char Crockford base32 with mod-31 checksum;
+  - `mintLinkToken({claims, expiresAt}, key)` — HMAC-SHA256 over
+    `<payload>.<expires_at_sec>.<nonce>`;
+  - `verifyLinkToken(token, key, {nonceStore})` — constant-time
+    HMAC compare, expiry check, and nonce-replay rejection;
+  - `NonceStore` interface with `InMemoryNonceStore` (TTL-aware,
+    Map-backed) and `NullNonceStore` (dev convenience).
+  **29 tests.**
+- **`packages/audit-ts`.** TypeScript port of the P13 hash-chained
+  audit log: `Chain` class with `loadKey`, `rotateKey`, `build`,
+  `commit`, `verifyChain`, 7-day rotation overlap and 90-day key
+  hard expiry. Wire format is compatible with the Go P13 chain.
+  **14 tests.**
+- **`services/share-api`.** TypeScript REST service exposing:
+  - `POST   /v1/shares` — create (201 with snapshot + token);
+  - `GET    /v1/shares/{link_id}` — read (200/404);
+  - `PATCH  /v1/shares/{link_id}` — update with `If-Match: <seq>`
+    ETag (200/400/404/409);
+  - `DELETE /v1/shares/{link_id}` — soft-revoke (200/404/409);
+  - `POST   /v1/shares/{link_id}/rotate-token` — mint a fresh token
+    (200/404/409);
+  - `POST   /v1/shares/{link_id}/extend-expiry` — push expiry forward
+    (200/400/404/409);
+  - `GET    /v1/shares/{link_id}/policy` (200/404);
+  - `PUT    /v1/shares/{link_id}/policy` (200/400/404/409);
+  - `POST   /mcp/share-introspect` — verify a signed token without
+    a session (the token *is* the credential).
+  Every privileged action emits a hash-chained audit event via
+  `@domio/audit-ts` (`share.created` / `share.updated` /
+  `share.policy_changed` / `share.token_rotated` /
+  `share.expiry_extended` / `share.deleted`). The pgx-backed
+  `PgShareStore` ships with nil-guards; full DML lands in M2 once
+  the migration is applied against a live Postgres. **36 tests**
+  (lifecycle, concurrency, handlers, store).
+- **`contracts/openapi/v1/shares.yaml`.** OpenAPI 3.1 contract for
+  all 9 endpoints with request/response schemas, problem-detail
+  error bodies, and capability-scope expectations.
+- **Audit emission on revoke.** `share.deleted` is emitted by the
+  revoke handler (the prior plan used `share.revoked`; the wire
+  format kept the more standard `share.deleted`).
+
 ### Phase 12 — AI Copilot Foundation
 
 #### Added
@@ -111,6 +164,61 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   heuristic otherwise) and persists a new deck version + slide rows
   via the pgx DeckStore. Idempotency, moderation, and circuit-breaker
   gates are inherited from the existing job flow.
+
+### Phase 13 — M1: MCP server + read-only tools
+
+#### Added
+
+- **Standalone MCP service (`services/mcp-server/`, Go).** New service
+  hosting the JSON-RPC 2.0 gateway for the Domio MCP tool surface.
+  Listens on `:8086` by default. The gateway is the single entry point
+  for all MCP traffic; the existing Node/TS `services/mcp-server/` stub
+  is retained for backward compatibility but is no longer the source of
+  truth.
+- **JSON-RPC 2.0 gateway (`services/mcp-server/internal/gateway/`).**
+  Bearer-token authentication, capability-gated dispatch via the M1
+  scopes (`read:deck`, `lint:deck`, `search:deck`, `audit:read`,
+  `claim:read`, `a11y:run`), RFC-7807-style problem-detail errors,
+  and SSE streaming transport (reuses the pattern at
+  `services/ai-orchestrator/internal/router/router.go:497-573`).
+  Notifications (id=null) are accepted but never replied to.
+- **Hash-chained audit log (`services/mcp-server/internal/audit/`).**
+  HMAC-SHA256 per (workspace, agent_session) chain, with `prev_hash`
+  linkage. `kid`-tagged keys with 7-day rotation overlap and 90-day
+  hard expiry. `Build` is concurrency-safe (atomic seq assignment).
+  `VerifyChain` detects tampering and reordering. Algorithms are
+  byte-equivalent to `services/prototype-recorder/src/integrity.ts`
+  (Phase 10 M5) so cross-service verification works.
+- **Six read-only tools (features #223–#228,
+  `services/mcp-server/internal/tools/`).**
+  `lint_deck`, `get_provenance`, `semantic_search`,
+  `get_claim_confidence`, `accessibility_audit`, `check_freshness`.
+  Each tool is a pure function over JSON params with a deterministic
+  stub result so the wire format is testable without a database. M2
+  will back the stubs with P12 table queries.
+- **PGX store (`services/mcp-server/internal/store/`).** Persists
+  `mcp_session`, `mcp_tool_call`, `tool_call_idempotency`, and
+  `agent_audit_event` rows. Falls back to an in-memory store when
+  `DATABASE_URL` is unset. Nil-receiver and nil-pool guards on every
+  method so dev-mode is safe.
+- **JSON Schema contracts (`contracts/mcp/tools/*.schema.json`,
+  12 files).** Every tool has an input and output schema (JSON Schema
+  2020-12). All results include a `tool_version` field (`p13-m1-v1`)
+  for client-side compatibility checks.
+- **Migration `0040_phase13_mcp` (`infrastructure/postgres/migrations/`).**
+  Creates 6 tables (`mcp_session`, `mcp_tool_call`,
+  `tool_call_idempotency`, `mcp_capability_scope`,
+  `mcp_tool_capability`, `agent_audit_event`) with RLS policies
+  matching the P12 pattern. Seeds the 6 M1 capability scopes and
+  their tool-to-scope mappings.
+- **Tool registry (`services/mcp-server/internal/registry/`).**
+  Goroutine-safe lookup table from method name to `Spec` (handler +
+  required scopes + schema paths). `MustRegister` is used at startup
+  for fail-fast configuration errors.
+- **Tests.** 5 packages × ≥ 6 tests = ~50 unit + integration tests
+  covering seam tests, capability gating, audit-chain integrity
+  (tamper + reorder detection), id/replay safety, and an end-to-end
+  JSON-RPC round-trip through the gateway.
 
 ### Phase 11 — 3D, Motion & Rich Media
 

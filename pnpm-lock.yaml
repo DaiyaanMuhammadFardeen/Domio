@@ -411,6 +411,18 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  packages/audit-ts:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   packages/canvas:
     dependencies:
       '@domio/common':
@@ -795,6 +807,18 @@ importers:
       eslint:
         specifier: 9.17.0
         version: 9.17.0(jiti@1.21.7)
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  packages/signed-link-token:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1389,6 +1413,31 @@ importers:
       '@types/node':
         specifier: 22.10.1
         version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/share-api:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+      '@domio/signed-link-token':
+        specifier: workspace:*
+        version: link:../../packages/signed-link-token
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
       typescript:
         specifier: 5.7.2
         version: 5.7.2

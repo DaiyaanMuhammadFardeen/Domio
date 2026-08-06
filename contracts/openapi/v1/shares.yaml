@@ -1,0 +1,605 @@
+openapi: 3.1.0
+info:
+  title: Domio Share API (Phase 14 W1)
+  version: 0.1.0
+  description: |
+    Share-link data plane. REST CRUD over `share_link` + `link_policy`
+    rows, signed-link-token mint/verify, soft-revoke, and audit emission.
+
+    Auth model:
+      - All `/v1/shares/*` endpoints require a workspace bearer session
+        (cookie or `Authorization: Bearer …`). The capability scopes
+        listed per endpoint must be present on the session.
+      - `POST /mcp/share-introspect` is callable WITHOUT a session —
+        the signed link token is the credential. The token's HMAC
+        is verified against the workspace's signing key; the embedded
+        nonce is checked against the nonce store; the short_id is
+        reconciled with the row in the database.
+
+    Concurrency:
+      - Mutations (`PATCH`, `DELETE`, `rotate-token`, `extend-expiry`,
+        `PUT /policy`) require an `If-Match: <seq>` header. The seq
+        is monotonic per share_link. Stale seq → `409 Conflict`.
+
+    Audit:
+      - Every privileged action emits one hash-chained event into
+        the P13 `agent_audit_event` table via @domio/audit-ts.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://api.domio.example.com
+    description: Production
+  - url: http://localhost:8087
+    description: Local development
+tags:
+  - name: shares
+    description: Share-link CRUD + audit surfaces.
+  - name: share-policy
+    description: Link policy (visibility, allowed viewers, download/print/embed flags).
+  - name: share-token
+    description: Token rotation, expiry extension, and introspection.
+paths:
+  /v1/shares:
+    post:
+      tags: [shares]
+      operationId: createShare
+      summary: Create a share link for a deck.
+      description: |
+        Mints a short_id, persists the share_link + link_policy rows,
+        mints an initial signed token, stores its sha256 in
+        `share_link.token_hash`, and emits `share.created` audit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShareInput'
+      responses:
+        '201':
+          description: Share created. Body contains the snapshot plus the new bearer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateShareResponse'
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Short-id collision (after 5 retries) or seat-blocked conflict.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+  /v1/shares/{link_id}:
+    parameters:
+      - $ref: '#/components/parameters/LinkId'
+      - in: query
+        name: workspaceId
+        required: true
+        schema: { type: string }
+    get:
+      tags: [shares]
+      operationId: getShare
+      summary: Read a share link + its policy.
+      responses:
+        '200':
+          description: Snapshot of the share link.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ShareLinkSnapshot' }
+        '404':
+          description: Not found or revoked.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    patch:
+      tags: [shares]
+      operationId: updateShare
+      summary: Update a share link (or its policy).
+      description: |
+        Patches any subset of link and policy fields. When at least
+        one policy field is set, the audit event is `share.policy_changed`;
+        otherwise `share.updated`.
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateShareInput' }
+      responses:
+        '200':
+          description: Post-update snapshot.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ShareLinkSnapshot' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Not found or revoked.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: If-Match seq is stale.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    delete:
+      tags: [shares]
+      operationId: revokeShare
+      summary: Soft-revoke the share link.
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - in: header
+          name: x-actor-id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Post-revoke snapshot.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ShareLinkSnapshot' }
+        '404':
+          description: Not found or already revoked.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: If-Match seq is stale.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+  /v1/shares/{link_id}/rotate-token:
+    parameters:
+      - $ref: '#/components/parameters/LinkId'
+      - $ref: '#/components/parameters/IfMatch'
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+      - in: query
+        name: workspaceId
+        required: true
+        schema: { type: string }
+    post:
+      tags: [share-token]
+      operationId: rotateShareToken
+      summary: Mint a fresh token; old token is invalidated.
+      description: |
+        Generates a new nonce, signs a fresh token, stores the new
+        sha256 in `share_link.token_hash`. The old token's nonce is
+        NOT explicitly revoked — re-presenting it will hit
+        `NONCE_REPLAYED` on the verifier side because the verifier
+        will record the new nonce first, then see the old one as a
+        replay on the new chain. (Within a single chain the old nonce
+        remains unseen; the practical invalidation comes from
+        short-circuiting via the policy/slug revocations or by the
+        explicit revocation below.)
+      responses:
+        '200':
+          description: New token + post-rotate snapshot.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreateShareResponse' }
+        '404':
+          description: Not found or revoked.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: If-Match seq is stale.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+  /v1/shares/{link_id}/extend-expiry:
+    parameters:
+      - $ref: '#/components/parameters/LinkId'
+      - $ref: '#/components/parameters/IfMatch'
+      - in: query
+        name: workspaceId
+        required: true
+        schema: { type: string }
+    post:
+      tags: [share-token]
+      operationId: extendShareExpiry
+      summary: Push the share link's expiry forward.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExtendExpiryInput' }
+      responses:
+        '200':
+          description: Post-extension snapshot.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ShareLinkSnapshot' }
+        '400':
+          description: Validation error (e.g. expiry in the past).
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Not found or revoked.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: If-Match seq is stale.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+  /v1/shares/{link_id}/policy:
+    parameters:
+      - $ref: '#/components/parameters/LinkId'
+      - in: query
+        name: workspaceId
+        required: true
+        schema: { type: string }
+    get:
+      tags: [share-policy]
+      operationId: getSharePolicy
+      summary: Read the link policy.
+      responses:
+        '200':
+          description: The link policy.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LinkPolicy' }
+        '404':
+          description: Not found or revoked.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    put:
+      tags: [share-policy]
+      operationId: putSharePolicy
+      summary: Replace fields of the link policy.
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - in: header
+          name: x-actor-id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PutPolicyInput' }
+      responses:
+        '200':
+          description: Post-update policy.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LinkPolicy' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Not found or revoked.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: If-Match seq is stale.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+  /mcp/share-introspect:
+    post:
+      tags: [share-token]
+      operationId: introspectShare
+      summary: Verify a signed link token (no session required).
+      description: |
+        Verifies HMAC + expiry + nonce uniqueness against the
+        workspace's signing key, then reconciles the embedded short_id
+        with the live row. The body of the call is the only credential;
+        no bearer token is needed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IntrospectRequest' }
+      responses:
+        '200':
+          description: Verified. Returns claims + expiry.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IntrospectResponse' }
+        '400':
+          description: |
+            Token validation failed — bad format, bad signature, expired,
+            nonce replay, or short_id mismatch.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Short-id is not present in the workspace.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Link is revoked.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security: [] # intentional: signed token IS the credential
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: domio_session
+  parameters:
+    LinkId:
+      in: path
+      name: link_id
+      required: true
+      schema: { type: string }
+    IfMatch:
+      in: header
+      name: if-match
+      required: true
+      description: |
+        The expected per-record seq. Monotonic integer that increments
+        on every successful mutation. Used as a coarse optimistic
+        concurrency check; a stale value results in 409.
+      schema: { type: string }
+  schemas:
+    LinkPolicy:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - shareLinkId
+        - visibility
+        - allowedViewers
+        - maxViews
+        - viewCount
+        - allowDownload
+        - allowPrint
+        - allowEmbed
+        - requirePasscode
+        - createdAt
+        - updatedAt
+      properties:
+        id: { type: string }
+        workspaceId: { type: string }
+        shareLinkId: { type: string }
+        visibility:
+          type: string
+          enum: [public, link_only, allowlist, domain_restricted]
+        allowedViewers:
+          type: array
+          items: { $ref: '#/components/schemas/ViewerTuple' }
+        maxViews:
+          type: integer
+          nullable: true
+          minimum: 1
+        viewCount: { type: integer, minimum: 0 }
+        allowDownload: { type: boolean }
+        allowPrint: { type: boolean }
+        allowEmbed: { type: boolean }
+        requirePasscode: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ViewerTuple:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          type: string
+          enum: [email, domain, group_id]
+        value: { type: string }
+    ShareLink:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - deckId
+        - shortId
+        - status
+        - createdAt
+        - updatedAt
+        - createdBy
+      properties:
+        id: { type: string }
+        workspaceId: { type: string }
+        deckId: { type: string }
+        shortId:
+          type: string
+          description: 8-char Crockford base32 with mod-31 checksum.
+          pattern: '^[0-9A-HJKMNP-TV-Z]{8}$'
+          example: KQ2HR9T3
+        slug:
+          type: string
+          nullable: true
+          pattern: '^[a-z0-9-]{1,64}$'
+        tokenHash:
+          type: string
+          nullable: true
+          description: SHA-256 hex of the most recently minted token.
+        status:
+          type: string
+          enum: [active, revoked, expired]
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        revokedAt:
+          type: string
+          format: date-time
+          nullable: true
+        revokedBy:
+          type: string
+          nullable: true
+        watermarkProfileId:
+          type: string
+          nullable: true
+          description: Wired in W3.
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        createdBy: { type: string }
+        updatedBy: { type: string, nullable: true }
+    ShareLinkSnapshot:
+      type: object
+      required: [link, policy]
+      properties:
+        link: { $ref: '#/components/schemas/ShareLink' }
+        policy: { $ref: '#/components/schemas/LinkPolicy' }
+    CreateShareInput:
+      type: object
+      required: [workspaceId, deckId, actorId]
+      properties:
+        workspaceId: { type: string }
+        deckId: { type: string }
+        actorId: { type: string }
+        slug:
+          type: string
+          pattern: '^[a-z0-9-]{1,64}$'
+        expiresAt: { type: string, format: date-time }
+        visibility:
+          type: string
+          enum: [public, link_only, allowlist, domain_restricted]
+        allowedViewers:
+          type: array
+          items: { $ref: '#/components/schemas/ViewerTuple' }
+        maxViews: { type: integer, minimum: 1 }
+        allowDownload: { type: boolean }
+        allowPrint: { type: boolean }
+        allowEmbed: { type: boolean }
+        requirePasscode: { type: boolean }
+    CreateShareResponse:
+      type: object
+      required: [link, policy, token]
+      properties:
+        link: { $ref: '#/components/schemas/ShareLink' }
+        policy: { $ref: '#/components/schemas/LinkPolicy' }
+        token:
+          type: string
+          description: |
+            base64url-encoded signed link token of the form
+            `<payload>.<expires_at_unix_sec>.<nonce>.<hmac>`.
+          example: 'eyJ3b3Jrc3BhY2VfaWQiOiJ3MSJ9.MzU5MDAwMDAwMA.AAAA.BBBB'
+    UpdateShareInput:
+      type: object
+      required: [actorId]
+      properties:
+        actorId: { type: string }
+        workspaceId: { type: string }
+        slug:
+          type: string
+          pattern: '^[a-z0-9-]{1,64}$'
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+        visibility:
+          type: string
+          enum: [public, link_only, allowlist, domain_restricted]
+        allowedViewers:
+          type: array
+          items: { $ref: '#/components/schemas/ViewerTuple' }
+        maxViews:
+          type: integer
+          nullable: true
+          minimum: 1
+        allowDownload: { type: boolean }
+        allowPrint: { type: boolean }
+        allowEmbed: { type: boolean }
+        requirePasscode: { type: boolean }
+    PutPolicyInput:
+      type: object
+      required: [workspaceId, actorId]
+      properties:
+        workspaceId: { type: string }
+        actorId: { type: string }
+        visibility:
+          type: string
+          enum: [public, link_only, allowlist, domain_restricted]
+        allowedViewers:
+          type: array
+          items: { $ref: '#/components/schemas/ViewerTuple' }
+        maxViews:
+          type: integer
+          nullable: true
+          minimum: 1
+        allowDownload: { type: boolean }
+        allowPrint: { type: boolean }
+        allowEmbed: { type: boolean }
+        requirePasscode: { type: boolean }
+    ExtendExpiryInput:
+      type: object
+      required: [actorId, expiresAt]
+      properties:
+        actorId: { type: string }
+        expiresAt:
+          type: string
+          format: date-time
+          description: New absolute expiry. Must be in the future.
+    IntrospectRequest:
+      type: object
+      required: [workspaceId, shortId, token]
+      properties:
+        workspaceId: { type: string }
+        shortId: { type: string }
+        token: { type: string }
+    IntrospectResponse:
+      type: object
+      required: [short_id, link_id, workspace_id, expires_at_sec]
+      properties:
+        short_id: { type: string }
+        link_id: { type: string }
+        workspace_id: { type: string }
+        audience:
+          type: string
+          nullable: true
+        grants:
+          type: array
+          items: { type: string }
+        expires_at_sec:
+          type: integer
+          description: Unix-seconds. Caller can re-verify locally.
+    ProblemDetail:
+      type: object
+      required: [error, code]
+      properties:
+        error: { type: string }
+        code: { type: string }
