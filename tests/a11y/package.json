@@ -1,0 +1,20 @@
+{
+  "name": "@domio/test-a11y",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 17 — axe-core a11y suite for the dashboard. Boots apps/dashboard, exercises all 7 routes, and asserts 0 serious/critical violations per route.",
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.1",
+    "@playwright/test": "1.49.1",
+    "typescript": "5.7.2"
+  },
+  "peerDependencies": {
+    "@domio/dashboard": "workspace:*"
+  }
+}
