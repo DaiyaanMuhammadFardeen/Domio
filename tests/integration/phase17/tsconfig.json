@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@domio/analytics-warehouse": ["../../../services/analytics-warehouse/src/index.ts"],
+      "@domio/analytics-warehouse/*": ["../../../services/analytics-warehouse/src/*"],
+      "@domio/event-ingest": ["../../../services/event-ingest/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

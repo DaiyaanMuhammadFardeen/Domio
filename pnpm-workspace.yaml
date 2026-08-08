@@ -4,3 +4,4 @@ packages:
   - "workers/*"
   - "packages/*"
   - "tools/*"
+  - "tests/*"
