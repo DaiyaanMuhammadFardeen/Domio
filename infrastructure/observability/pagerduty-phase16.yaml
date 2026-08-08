@@ -1,0 +1,82 @@
+# Phase 16 — PagerDuty alert routing rules.
+#
+# Severity mapping:
+#   critical → page on-call
+#   warning  → open ticket, no page
+#   info     → log only
+#
+# Routes are namespace-scoped to the audience services. Add new alerts
+# below using the existing metric names from
+# `services/participant-ws-gateway/internal/observability/metrics.go`
+# and the per-engine `observability/metrics.ts`.
+
+routes:
+  - name: phase-16-audience
+    description: Audience participation stack
+    services:
+      - participant-ws-gateway
+      - participant-session
+      - session-coordinator
+      - poll-engine
+      - word-cloud-engine
+      - qa-engine
+      - quiz-engine
+      - reaction-broadcaster
+      - nav-vote-collector
+      - sentiment-collector
+      - raise-hand-queue
+      - attendance-logger
+      - translation-pipeline
+    rules:
+      - name: WS open latency critical
+        severity: critical
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(audience_ws_open_ms_bucket[5m]))
+          ) > 2500
+        runbook: runbooks/audience-ws-latency.md
+
+      - name: Fan-out latency critical
+        severity: critical
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(audience_fanout_duration_ms_bucket[5m]))
+          ) > 500
+        runbook: runbooks/audience-fanout.md
+
+      - name: Aggregation latency warning
+        severity: warning
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(audience_aggregation_latency_ms_bucket[5m]))
+          ) > 750
+        runbook: runbooks/audience-aggregation.md
+
+      - name: Attendance chain integrity breach
+        severity: critical
+        window: 10m
+        condition: |
+          (sum(rate(attendance_chain_intact_total[10m]))
+            / clamp_min(sum(rate(attendance_chain_verified_total[10m])), 1)
+          ) < 0.999
+        runbook: runbooks/attendance-chain.md
+
+      - name: Translation latency warning
+        severity: warning
+        window: 10m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le, provider) (rate(audience_translation_latency_ms_bucket[10m]))
+          ) > 4000
+        runbook: runbooks/audience-translation.md
+
+      - name: Send errors warning
+        severity: warning
+        window: 5m
+        condition: |
+          sum(rate(audience_send_errors[5m]))
+            / clamp_min(sum(rate(audience_messages_total[5m])), 1) > 0.005
+        runbook: runbooks/audience-send-errors.md

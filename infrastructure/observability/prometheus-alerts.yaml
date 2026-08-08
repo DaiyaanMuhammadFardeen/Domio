@@ -1,0 +1,82 @@
+# Phase 15 — Presencer SLO alerts.
+#
+# Bound to the dashboard at
+#   infrastructure/grafana/provisioning/dashboards/phase-15-presenter.json
+# and routed to PagerDuty via
+#   infrastructure/observability/pagerduty.yaml
+
+groups:
+  - name: presenter-slo
+    interval: 30s
+    rules:
+      - alert: presenter_ws_p95_open_high
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, session_id) (rate(presenter_ws_open_ms_bucket[5m]))
+          ) > 800
+        for: 5m
+        labels:
+          severity: critical
+          service: presenter
+          slo: ws_open
+        annotations:
+          summary: "Presenter WS handshake p95 above 800 ms (session {{ $labels.session_id }})"
+          description: |
+            p95 = {{ $value }} ms over the last 5 minutes. Threshold: 800 ms.
+            See https://runbooks.domio.internal/presenter/ws-p95
+          dashboard: https://grafana.domio.internal/d/p15-presenter
+
+      - alert: presenter_annotation_p95_replay_high
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, kind) (rate(presenter_annotation_replay_ms_bucket[5m]))
+          ) > 200
+        for: 5m
+        labels:
+          severity: warning
+          service: presenter
+          slo: annotation_replay
+        annotations:
+          summary: "Annotation replay p95 above 200 ms (kind {{ $labels.kind }})"
+          description: |
+            p95 = {{ $value }} ms over the last 5 minutes. Threshold: 200 ms.
+            See https://runbooks.domio.internal/presenter/annotation-replay
+          dashboard: https://grafana.domio.internal/d/p15-presenter
+
+      - alert: presenter_handoff_p95_high
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, session_id) (rate(presenter_handoff_ms_bucket[5m]))
+          ) > 1500
+        for: 5m
+        labels:
+          severity: critical
+          service: presenter
+          slo: handoff
+        annotations:
+          summary: "Handover p95 above 1500 ms (session {{ $labels.session_id }})"
+          description: |
+            p95 = {{ $value }} ms over the last 5 minutes. Threshold: 1500 ms.
+            See https://runbooks.domio.internal/presenter/handoff
+          dashboard: https://grafana.domio.internal/d/p15-presenter
+
+      - alert: presenter_recap_p95_high
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, phase) (rate(presenter_recap_ms_bucket[5m]))
+          ) > 2000
+        for: 5m
+        labels:
+          severity: warning
+          service: presenter
+          slo: recap
+        annotations:
+          summary: "Recap p95 above 2000 ms (phase {{ $labels.phase }})"
+          description: |
+            p95 = {{ $value }} ms over the last 5 minutes. Threshold: 2000 ms.
+            See https://runbooks.domio.internal/presenter/recap
+          dashboard: https://grafana.domio.internal/d/p15-presenter

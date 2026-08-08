@@ -1,0 +1,101 @@
+# PagerDuty routing rules for the Phase 15 Presenter SLOs.
+#
+# Pinned SLOs (see dashboard phase-15-presenter.json):
+#   - presenter_ws_open_ms            (p95) — 800 ms
+#   - presenter_annotation_replay_ms  (p95) — 200 ms
+#   - presenter_handoff_ms            (p95) — 1500 ms
+#   - presenter_recap_ms              (p95) — 2000 ms
+#
+# The PromQL alerts are declared in
+#   infrastructure/observability/prometheus-alerts.yaml
+# Each alert is bound to a service and an urgency below.
+
+version: 1
+defaults:
+  escalation_policy: presenter-oncall
+  acknowledgement_timeout_minutes: 5
+  auto_resolve_timeout_minutes: 30
+
+# Severity → notification channel map.
+severity_policies:
+  critical:
+    notification_channels:
+      - pd-service:presenter
+      - pd-team:domio-platform
+      - slack:#presenter-oncall
+  warning:
+    notification_channels:
+      - pd-team:domio-platform
+      - slack:#presenter-oncall
+  info:
+    notification_channels:
+      - slack:#presenter-oncall
+
+# Per-rule routing. The rule name matches the alert label.
+rules:
+  - name: presenter-ws-p95-open-high
+    alert: alertmanager
+    severity: critical
+    description: |
+      WS handshake p95 latency exceeded 800 ms for 5 minutes.
+      Likely causes: realtime-gateway CPU saturation, Postgres slow
+      pool checkout, or DNS resolution regression.
+    runbook_url: https://runbooks.domio.internal/presenter/ws-p95
+    suspected_services:
+      - realtime-gateway
+      - domio-api
+    auto_page: true
+
+  - name: presenter-annotation-p95-replay-high
+    alert: alertmanager
+    severity: warning
+    description: |
+      Annotation replay p95 latency exceeded 200 ms for 5 minutes.
+      Likely cause: Yjs CRDT snapshot reconstruction regression or
+      oversized payload fanout.
+    runbook_url: https://runbooks.domio.internal/presenter/annotation-replay
+    suspected_services:
+      - realtime-gateway
+    auto_page: false
+
+  - name: presenter-handoff-p95-high
+    alert: alertmanager
+    severity: critical
+    description: |
+      Handover p95 latency exceeded 1500 ms for 5 minutes.
+      Likely cause: KMS key propagation delay or audit-emitter
+      backpressure.
+    runbook_url: https://runbooks.domio.internal/presenter/handoff
+    suspected_services:
+      - domio-api
+      - audit-ts
+    auto_page: true
+
+  - name: presenter-recap-p95-high
+    alert: alertmanager
+    severity: warning
+    description: |
+      Recap aggregation p95 latency exceeded 2000 ms for 5 minutes.
+      Likely cause: workers/recap pool starvation or cold cache.
+    runbook_url: https://runbooks.domio.internal/presenter/recap
+    suspected_services:
+      - workers
+      - domio-api
+    auto_page: false
+
+# Schedule swap windows — handover rule is suppressed during
+# scheduled maintenance windows declared in this repo.
+suppressions:
+  - name: presenter-handoff-p95-high
+    match:
+      label: maintenance
+    during:
+      crontab: "0 2 * * 0"  # Sundays 2 UTC
+    duration_minutes: 60
+    reason: "weekly handshake key rotation"
+
+# Pager test cadence — fire a synthetic alert every Friday at 16 UTC.
+test_pager:
+  schedule: "0 16 * * 5"
+  target: presenter-oncall
+  message: "Synthetic P15 alert — verify pager end-to-end."
