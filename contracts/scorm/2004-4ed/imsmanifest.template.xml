@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SCORM 2004 4th Edition imsmanifest.xml template.
+
+  This file is the canonical schema reference for packages emitted by
+  @domio/scorm-packager. The packager substitutes the placeholders
+  below at runtime.
+
+  Required substitutions (in order):
+    {{ORGANIZATION_ID}} — workspace + session identifier
+    {{ITEM_ID}}         — top-level item identifier
+    {{TITLE}}           — human-readable session title
+    {{LAUNCH_URL}}      — deep-link URL into the handout app
+    {{SCORM_AT4_ID}}    — ADL SCORM 4th Ed identifier
+-->
+<manifest identifier="{{ORGANIZATION_ID}}" version="1.0"
+          xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+          xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+          xmlns:imsss="http://www.imsglobal.org/xsd/imsss_v1p0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 imscp_v1p1.xsd http://www.imsglobal.org/xsd/imsss_v1p0 imsss_v1p0.xsd http://www.adlnet.org/xsd/adlcp_v1p3 adlcp_v1p3.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>2004 4th Edition</schemaversion>
+    <lom xmlns="http://ltsc.ieee.org/xsd/LOM">
+      <general><title><string language="en">{{TITLE}}</string></title></general>
+      <technical><format>text/html</format></technical>
+    </lom>
+  </metadata>
+  <organizations default="{{ORGANIZATION_ID}}">
+    <organization identifier="{{ORGANIZATION_ID}}" structure="hierarchical">
+      <item identifier="{{ITEM_ID}}" identifierref="{{RESOURCE_ID}}" isvisible="true">
+        <title>{{TITLE}}</title>
+        <adlcp:completionStatus>completed</adlcp:completionStatus>
+        <imsss:tracking><imsss:tracked>true</imsss:tracked></imsss:tracking>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="{{RESOURCE_ID}}" type="webcontent" adlcp:scormType="sco" href="{{LAUNCH_URL}}">
+      <file href="{{LAUNCH_URL}}"/>
+      <metadata><adlcp:location>{{SCORM_AT4_ID}}</adlcp:location></metadata>
+    </resource>
+  </resources>
+</manifest>

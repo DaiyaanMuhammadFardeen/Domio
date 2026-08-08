@@ -1,0 +1,24 @@
+{
+  "name": "@domio/translation-pipeline",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 16 W9 — STT → MT → TTS pipeline. Pluggable providers.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@domio/mt-provider": "workspace:*",
+    "@domio/stt-provider": "workspace:*",
+    "@domio/tts-provider": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

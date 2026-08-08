@@ -1,0 +1,20 @@
+{
+  "name": "@domio/scorm-packager",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 16 W9 — SCORM 2004 4th Ed packager. Emits imsmanifest.xml + content.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}
