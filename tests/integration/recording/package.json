@@ -1,0 +1,23 @@
+{
+  "name": "@domio/test-integration-recording",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 21 W1.9 — integration tests for the recording pipeline. Exercises start → multi-track capture → chunks → stop → finalize through the orchestrator and the in-memory object-store adapter.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --max-warnings 0"
+  },
+  "dependencies": {
+    "@domio/object-store": "workspace:*",
+    "@domio/recording-orchestrator": "workspace:*",
+    "@domio/recording-extensions": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

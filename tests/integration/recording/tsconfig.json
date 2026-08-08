@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@domio/audit-ts": ["../../../packages/audit-ts/src/index.ts"],
+      "@domio/object-store": ["../../../packages/object-store/src/index.ts"],
+      "@domio/recording-orchestrator": ["../../../services/recording-orchestrator/src/index.ts"],
+      "@domio/recording-extensions": ["../../../packages/recording-extensions/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
