@@ -229,3 +229,30 @@ GROUP BY workspace_id, bucket;
 -- team-analytics service (W9) which has access to the deck→template mapping
 -- from Postgres. The MV above populates the workspace/day rollup which the
 -- service joins on for the composite scoring.
+
+-- ---------------------------------------------------------------------------
+-- team_metric_materialized_view — W9 rollup target.
+--
+-- Created by services/team-analytics (rollup.ts). Stores per-day aggregates
+-- keyed by (workspace_id, template_id, component_id, brand_kit_id, bucket).
+-- The night rollup daemon (W9 commit 2) inserts one row per dimension
+-- combination; queries read via /v1/team/templates/top, /components/top,
+-- and /brands/health.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS domio_analytics.team_metric_materialized_view
+(
+    workspace_id       LowCardinality(String),
+    template_id        LowCardinality(String) DEFAULT '',
+    component_id       LowCardinality(String) DEFAULT '',
+    brand_kit_id       LowCardinality(String) DEFAULT '',
+    bucket             Date('UTC'),
+    deck_count         UInt32 CODEC(ZSTD(1)),
+    total_views        UInt64 CODEC(ZSTD(1)),
+    total_completions  UInt64 CODEC(ZSTD(1)),
+    distinct_viewers   AggregateFunction(uniq, String),
+    composite_score    Float64 CODEC(ZSTD(1))
+)
+ENGINE = SummingMergeTree
+PARTITION BY toYYYYMM(bucket)
+ORDER BY (workspace_id, template_id, component_id, brand_kit_id, bucket)
+TTL toDateTime(bucket) + INTERVAL 13 MONTH DELETE;
