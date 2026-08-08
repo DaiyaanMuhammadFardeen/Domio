@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/ingest/live_session_event.json",
+  "title": "AnalyticsLiveSessionEvent",
+  "description": "Phase 17 W1+W10 — Re-emitted by services/realtime-gateway and services/participant-ws-gateway to Kafka events.ingest.raw when CRDT state transitions or audience participation events (P16) reach an analytics-relevant threshold. Mirrors the rtgw NATS subject analytics.ingest.live.{sessionID} → Kafka for columnar ingestion.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_name",
+    "schema_version",
+    "ts_ms",
+    "workspace_id",
+    "deck_id",
+    "session_id",
+    "live_event_kind",
+    "source_app",
+    "ingest_topic"
+  ],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_name": { "const": "live_session_event" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "ts_ms": { "type": "integer", "format": "int64" },
+    "workspace_id": { "type": "string" },
+    "deck_id": { "type": "string" },
+    "slide_id": { "type": "string" },
+    "scene_node_id": { "type": "string" },
+    "session_id": {
+      "type": "string",
+      "description": "Live session id from P15 presenter-session table."
+    },
+    "viewer_id_key": {
+      "type": "string",
+      "description": "Set when the event has an associated viewer."
+    },
+    "presenter_user_id": {
+      "type": "string"
+    },
+    "live_event_kind": {
+      "type": "string",
+      "enum": [
+        "crdt_state_apply",
+        "crdt_branch_create",
+        "crdt_remote_update",
+        "attendance_join",
+        "attendance_leave",
+        "attendance_hybrid_mark",
+        "poll_open",
+        "poll_close",
+        "poll_vote",
+        "qa_submit",
+        "qa_upvote",
+        "quiz_open",
+        "quiz_close",
+        "quiz_attempt",
+        "reaction_burst",
+        "reaction_storm",
+        "nav_vote_open",
+        "nav_vote_cast",
+        "nav_vote_close",
+        "sentiment_sample",
+        "raise_hand",
+        "raise_hand_drop",
+        "feedback_open",
+        "feedback_response"
+      ]
+    },
+    "live_event_data": {
+      "type": "string",
+      "description": "JSON-encoded payload. Mirrors the source event shape from P15/P16; columnar loader joins on live_event_kind + session_id."
+    },
+    "payload_size_bytes": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Original payload size (before Kafka envelope) — used for ingest backpressure accounting."
+    },
+    "latency_ms": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Original event arrival → ingest emit; used to monitor rtgw/pwg fan-out lag."
+    },
+    "country_iso": { "type": "string", "minLength": 2, "maxLength": 2 },
+    "region_pinned": { "type": "string", "enum": ["global", "bd"] },
+    "source_app": {
+      "type": "string",
+      "enum": ["rtgw", "pwg", "presenter", "viewer", "join-web"]
+    },
+    "ingest_topic": {
+      "type": "string",
+      "const": "events.ingest.raw"
+    },
+    "forward_compat": { "type": "boolean" }
+  }
+}

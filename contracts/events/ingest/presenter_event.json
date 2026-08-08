@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/ingest/presenter_event.json",
+  "title": "AnalyticsPresenterEvent",
+  "description": "Phase 17 W1+W10 — Emitted by apps/presenter for presenter-mode actions: slide advance, presenter mode change (build vs run), HUD interaction, private note. Drives W10 live analytics + W15 live_session_summary. Some subkinds are mirrored to NATS analytics.ingest.live.{sessionID} for fan-out (rtgw re-emits CRDT state transitions here).",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_name",
+    "schema_version",
+    "ts_ms",
+    "workspace_id",
+    "deck_id",
+    "slide_id",
+    "presenter_user_id",
+    "session_id",
+    "action",
+    "source_app",
+    "ingest_topic"
+  ],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_name": { "const": "presenter_event" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "ts_ms": { "type": "integer", "format": "int64" },
+    "workspace_id": { "type": "string" },
+    "deck_id": { "type": "string" },
+    "slide_id": { "type": "string" },
+    "scene_node_id": { "type": "string" },
+    "presenter_user_id": {
+      "type": "string",
+      "description": "Identifier of the presenter user (not the viewer)."
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Live session id from P15 presenter-session table."
+    },
+    "viewer_id_key": {
+      "type": "string",
+      "description": "Set when the event has an associated viewer (e.g. spotlight); empty for pure presenter actions."
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "slide_advance",
+        "slide_regress",
+        "slide_jump",
+        "mode_change",
+        "hud_open",
+        "hud_close",
+        "private_note",
+        "spotlight_on",
+        "spotlight_off",
+        "whiteboard_clear",
+        "annotation_create",
+        "annotation_delete",
+        "session_start",
+        "session_pause",
+        "session_resume",
+        "session_end",
+        "co_presenter_invite",
+        "co_presenter_kick"
+      ]
+    },
+    "action_data": {
+      "type": "string",
+      "description": "JSON-encoded payload. Per-action schemas live in contracts/events/ingest/presenter_actions/ (W1 follow-up)."
+    },
+    "co_presenter_user_id": {
+      "type": "string",
+      "description": "Set on co_presenter_invite / kick."
+    },
+    "annotation_id": {
+      "type": "string"
+    },
+    "country_iso": { "type": "string", "minLength": 2, "maxLength": 2 },
+    "region_pinned": { "type": "string", "enum": ["global", "bd"] },
+    "source_app": {
+      "type": "string",
+      "enum": ["presenter"]
+    },
+    "ingest_topic": {
+      "type": "string",
+      "const": "events.ingest.raw"
+    },
+    "forward_compat": { "type": "boolean" }
+  }
+}
