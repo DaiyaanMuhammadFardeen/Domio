@@ -10,6 +10,21 @@ export {
   resolveRecipient,
 } from './rules/evaluate.js';
 
+export {
+  Router,
+  SlackSender,
+  TeamsSender,
+  EmailSender,
+  InAppSender,
+  WebhookSender,
+} from './channels/router.js';
+export type {
+  ChannelSender,
+  EmailTransport,
+  NatsPublisher,
+  SendResult,
+} from './channels/router.js';
+
 export type {
   AuditEntry,
   ChannelKind,
