@@ -256,3 +256,38 @@ ENGINE = SummingMergeTree
 PARTITION BY toYYYYMM(bucket)
 ORDER BY (workspace_id, template_id, component_id, brand_kit_id, bucket)
 TTL toDateTime(bucket) + INTERVAL 13 MONTH DELETE;
+
+-- ---------------------------------------------------------------------------
+-- live_session_summary — W10 post-session rollup table.
+--
+-- One row per live session, written by services/live-analytics
+-- (summary/sink.ts) when the presenter ends a session or the idle
+-- flusher evicts a stale one. Aggregates the ring-buffer event
+-- stream into a single summary row (peak concurrent, total
+-- reactions, average dwell_ms) so the warehouse can answer
+-- "how did the Friday standup go" cheaply without re-replaying the
+-- events table.
+--
+-- Reads: services/analytics-warehouse → /v1/live/summaries
+--        apps/dashboard → /live/[session_id] (Wave 6)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS domio_analytics.live_session_summary
+(
+    workspace_id              LowCardinality(String),
+    session_id                String,
+    deck_id                   LowCardinality(String),
+    started_at_ms             DateTime64(3, 'UTC'),
+    ended_at_ms               DateTime64(3, 'UTC'),
+    duration_ms               Int64 CODEC(ZSTD(1)),
+    peak_concurrent_viewers   UInt32 CODEC(ZSTD(1)),
+    total_events              UInt32 CODEC(ZSTD(1)),
+    total_reactions           UInt32 CODEC(ZSTD(1)),
+    total_poll_votes          UInt32 CODEC(ZSTD(1)),
+    total_annotations         UInt32 CODEC(ZSTD(1)),
+    unique_viewers            UInt32 CODEC(ZSTD(1)),
+    average_dwell_ms          Int32 CODEC(ZSTD(1))
+)
+ENGINE = ReplacingMergeTree(ended_at_ms)
+PARTITION BY toYYYYMM(started_at_ms)
+ORDER BY (workspace_id, session_id)
+TTL toDateTime(ended_at_ms) + INTERVAL 13 MONTH DELETE;
