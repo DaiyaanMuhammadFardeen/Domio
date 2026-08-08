@@ -1,0 +1,132 @@
+// Domio audience.proto
+//
+// Phase 16 W1. Wire format for the audience envelope exchanged over
+// the WebSocket gateway. The TS bindings in
+// `packages/protocol/src/audience-envelope.ts` mirror this proto 1:1.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// AudienceEnvelopeKind discriminates the payload below.
+enum AudienceEnvelopeKind {
+  AUDIENCE_ENVELOPE_KIND_UNSPECIFIED = 0;
+  AUDIENCE_ENVELOPE_KIND_HELLO = 1;
+  AUDIENCE_ENVELOPE_KIND_WELCOME = 2;
+  AUDIENCE_ENVELOPE_KIND_HEARTBEAT = 3;
+  AUDIENCE_ENVELOPE_KIND_PRESENCE_JOIN = 4;
+  AUDIENCE_ENVELOPE_KIND_PRESENCE_LEAVE = 5;
+  AUDIENCE_ENVELOPE_KIND_POLL_VOTE = 6;
+  AUDIENCE_ENVELOPE_KIND_POLL_CLOSE = 7;
+  AUDIENCE_ENVELOPE_KIND_WORD_CLOUD_SUBMIT = 8;
+  AUDIENCE_ENVELOPE_KIND_QA_SUBMIT = 9;
+  AUDIENCE_ENVELOPE_KIND_QA_UPVOTE = 10;
+  AUDIENCE_ENVELOPE_KIND_QUIZ_ANSWER = 11;
+  AUDIENCE_ENVELOPE_KIND_REACTION = 12;
+  AUDIENCE_ENVELOPE_KIND_NAV_VOTE = 13;
+  AUDIENCE_ENVELOPE_KIND_SENTIMENT_VOTE = 14;
+  AUDIENCE_ENVELOPE_KIND_RAISE_HAND = 15;
+  AUDIENCE_ENVELOPE_KIND_ERROR = 99;
+}
+
+// AudienceEnvelope is the single frame exchanged over the audience WS
+// gateway. Higher-level frames reuse the same envelope; only the
+// `payload` shape varies by `kind`.
+message AudienceEnvelope {
+  AudienceEnvelopeKind kind = 1;
+  int64 ts_ms = 2;
+  string participant_id = 3;
+  string idempotency_key = 4;
+  string session_code = 5;
+  // One of the per-kind payloads below.
+  oneof payload {
+    HelloPayload hello = 10;
+    WelcomePayload welcome = 11;
+    PollVotePayload poll_vote = 12;
+    PollClosePayload poll_close = 13;
+    WordCloudSubmitPayload word_cloud_submit = 14;
+    QaSubmitPayload qa_submit = 15;
+    QaUpvotePayload qa_upvote = 16;
+    QuizAnswerPayload quiz_answer = 17;
+    ReactionPayload reaction = 18;
+    NavVotePayload nav_vote = 19;
+    SentimentVotePayload sentiment_vote = 20;
+    RaiseHandPayload raise_hand = 21;
+    ErrorPayload error = 99;
+  }
+}
+
+message HelloPayload {
+  string display_name = 1;
+  string locale = 2;
+}
+
+message WelcomePayload {
+  int64 server_ts_ms = 1;
+  AudienceSessionMetadata session_metadata = 2;
+}
+
+message PollVotePayload {
+  string poll_id = 1;
+  string option_id = 2;
+}
+
+message PollClosePayload {
+  string poll_id = 1;
+}
+
+message WordCloudSubmitPayload {
+  string text = 1;
+}
+
+message QaSubmitPayload {
+  string question = 1;
+}
+
+message QaUpvotePayload {
+  string question_id = 1;
+}
+
+message QuizAnswerPayload {
+  string question_id = 1;
+  string option_id = 2;
+  int64 answer_latency_ms = 3;
+}
+
+message ReactionPayload {
+  string emoji = 1;
+}
+
+message NavVotePayload {
+  string target_slide_id = 1;
+}
+
+message SentimentVotePayload {
+  // -1 / 0 / 1.
+  int32 value = 1;
+}
+
+message RaiseHandPayload {
+  // 'up' or 'down'.
+  string hand = 1;
+}
+
+message ErrorPayload {
+  string code = 1;
+  string message = 2;
+  string idempotency_key = 3;
+}
+
+message AudienceSessionMetadata {
+  string session_id = 1;
+  string workspace_id = 2;
+  string title = 3;
+  string started_at = 4;
+  string presenter_display_name = 5;
+  string locale = 6;
+  bool reduced_motion = 7;
+}

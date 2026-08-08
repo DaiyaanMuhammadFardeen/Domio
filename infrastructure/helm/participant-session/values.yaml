@@ -1,0 +1,103 @@
+# Default values for participant-session.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/domio/platform/participant-session
+  pullPolicy: IfNotPresent
+  tag: "0.1.0"
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/path: "/metrics"
+  prometheus.io/port: "8091"
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8091
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: participant.domio.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+env:
+  NODE_ENV: production
+  PARTICIPANT_PORT: "8091"
+  PRESENTER_LOOKUP_URL: "http://presenter-session.domio.svc:8080"
+
+envFromSecret: ""
+
+probes:
+  liveness:
+    path: /healthz
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  readiness:
+    path: /healthz
+    initialDelaySeconds: 3
+    periodSeconds: 5
+  startup:
+    path: /healthz
+    initialDelaySeconds: 1
+    periodSeconds: 2
+    failureThreshold: 60
+
+# ── Feature flags ──────────────────────────────────────────────
+# audience.join must be "true" for the WS gateway to accept joins.
+featureFlags:
+  audienceJoin: "true"
+  audienceFanout: "true"
+  audienceHeartbeat: "true"
+
+# ── Idempotency window ─────────────────────────────────────────
+idempotency:
+  ttlMs: 86400000   # 24h
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

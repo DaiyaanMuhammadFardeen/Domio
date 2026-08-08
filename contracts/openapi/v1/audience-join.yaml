@@ -1,0 +1,250 @@
+openapi: 3.1.0
+info:
+  title: Domio Audience Join API (Phase 16 W1)
+  version: 0.2.0
+  description: |
+    Audience participation — session join bundle.
+
+    The audience PWA at `/j/<code>` calls `POST /v1/audience/join` to
+    mint a participant session and receive the widget bundle for the
+    currently-active deck. All endpoints under this OpenAPI document
+    are unauthenticated by design — pair-resolved security is wired
+    via the `workspace_id` parameter and the signed `reconnect_token`
+    returned in the bundle.
+
+    Coordinated session-channel routing is owned by the WS gateway
+    (Phase 16 W1, `services/participant-ws-gateway`).
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.domio.example
+    description: Production (placeholder)
+tags:
+  - name: audience
+    description: Audience participation — join, status, widget bundle.
+paths:
+  /v1/audience/join:
+    post:
+      tags: [audience]
+      operationId: joinAudienceSession
+      summary: Join a presenter session as an audience member.
+      description: |
+        Resolves the session code to a presenter session, mints a
+        participant session, and returns the widget bundle.
+      parameters:
+        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - in: query
+          name: workspace_id
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+          description: Workspace identifier (ULID).
+        - in: query
+          name: fingerprint
+          required: false
+          schema:
+            type: string
+            maxLength: 128
+          description: |
+            Browser fingerprint for participants joining anonymously.
+            Hashed server-side; never stored in plaintext.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AudienceJoinRequest"
+      responses:
+        "200":
+          description: Bundle returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AudienceJoinBundle"
+        "400":
+          $ref: "common.yaml#/components/responses/BadRequest"
+        "404":
+          $ref: "common.yaml#/components/responses/NotFound"
+        "410":
+          description: Session has ended.
+          content:
+            application/json:
+              schema:
+                $ref: "common.yaml#/components/schemas/Error"
+        "429":
+          description: Rate-limited.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RateLimitedError"
+
+  /v1/audience/sessions/{audienceSessionId}/status:
+    get:
+      tags: [audience]
+      operationId: getAudienceSessionStatus
+      summary: Get the current session status for an audience member.
+      parameters:
+        - in: path
+          name: audienceSessionId
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: x-reconnect-token
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AudienceSessionStatus"
+        "401":
+          $ref: "common.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "common.yaml#/components/responses/NotFound"
+
+  /v1/audience/sessions/{audienceSessionId}/leave:
+    post:
+      tags: [audience]
+      operationId: leaveAudienceSession
+      summary: Mark the participant as having left.
+      parameters:
+        - in: path
+          name: audienceSessionId
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: x-reconnect-token
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Left.
+        "401":
+          $ref: "common.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "common.yaml#/components/responses/NotFound"
+
+components:
+  schemas:
+    AudienceJoinRequest:
+      type: object
+      required: [session_code, display_name, locale]
+      properties:
+        session_code:
+          type: string
+          minLength: 5
+          maxLength: 16
+          description: |
+            Crockford-base32 session code from the QR. Format:
+            `<4>-<4>` with a 4-bit checksum nibble.
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 64
+        locale:
+          type: string
+          minLength: 2
+          maxLength: 16
+          description: BCP-47 locale tag.
+
+    AudienceJoinBundle:
+      type: object
+      required: [audience_session_id, participant_id, session_metadata, widgets, server_ts_ms, reconnect_token]
+      properties:
+        audience_session_id:
+          type: string
+        participant_id:
+          type: string
+        session_metadata:
+          $ref: "#/components/schemas/AudienceSessionMetadata"
+        widgets:
+          type: array
+          items:
+            $ref: "#/components/schemas/AudienceWidgetDescriptor"
+        server_ts_ms:
+          type: integer
+          format: int64
+        reconnect_token:
+          type: string
+          description: |
+            HMAC-signed token bound to the audience_session_id; the
+            audience PWA persists it in IndexedDB for reconnect.
+
+    AudienceSessionStatus:
+      type: object
+      required: [session_id, ended_at, current_slide_id, participants_connected]
+      properties:
+        session_id:
+          type: string
+        ended_at:
+          type: string
+          nullable: true
+          format: date-time
+        current_slide_id:
+          type: string
+        participants_connected:
+          type: integer
+          minimum: 0
+
+    AudienceSessionMetadata:
+      type: object
+      required: [session_id, workspace_id, title, started_at, presenter_display_name, locale, reduced_motion]
+      properties:
+        session_id:
+          type: string
+        workspace_id:
+          type: string
+        title:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        presenter_display_name:
+          type: string
+        locale:
+          type: string
+        reduced_motion:
+          type: boolean
+
+    AudienceWidgetDescriptor:
+      type: object
+      required: [widget_id, type, position, payload, updated_at_ms]
+      properties:
+        widget_id:
+          type: string
+        type:
+          type: string
+          enum: [poll, word_cloud, qa, quiz, reaction, nav_vote, sentiment, raise_hand]
+        position:
+          type: integer
+          minimum: 0
+        payload:
+          type: object
+          additionalProperties: true
+        updated_at_ms:
+          type: integer
+          format: int64
+
+    RateLimitedError:
+      type: object
+      required: [error, message, retry_after_ms]
+      properties:
+        error:
+          type: string
+          enum: [RATE_LIMITED]
+        message:
+          type: string
+        retry_after_ms:
+          type: integer
+          format: int64

@@ -1,0 +1,159 @@
+# Phase 16 — Audience Participation feature flags.
+#
+# These flags are consumed by apps/api + the audience services. They
+# follow the convention `FEATURE_<GROUP>_<NAME>` and are exposed via
+# the `featureFlags` Helm value block.
+#
+# Defaults shown below are for local dev / dev-up all. Production
+# overrides are in the platform Helm umbrella chart.
+
+flags:
+  # W1 — Join foundation
+  audience.join:
+    default: true
+    description: Allow new join requests. Disable to lock the audience out.
+    owner: audience-team
+    srm: low
+  audience.fanout:
+    default: true
+    description: Enable fan-out from the WS gateway to audience PWA clients.
+    owner: audience-team
+    srm: low
+  audience.heartbeat:
+    default: true
+    description: Accept participant heartbeats. Disable for static-audience mode.
+    owner: audience-team
+    srm: low
+  audience.handed_out_link:
+    default: true
+    description: Allow /h/[token] signed handout links.
+    owner: audience-team
+    srm: medium
+  audience.feedback:
+    default: true
+    description: Enable the post-session feedback form.
+    owner: audience-team
+    srm: low
+
+  # W2 — Lifecycle
+  audience.lifecycle_idle_warning:
+    default: true
+    description: Push session.idle_warning before TTL reaping.
+    owner: audience-team
+    srm: low
+  audience.lifecycle_ended:
+    default: true
+    description: Push session.ended and flush in-memory aggregates.
+    owner: audience-team
+    srm: low
+
+  # W3 — Widget palette
+  audience.widget_palette_participation:
+    default: true
+    description: Show the "Participation" category in the editor palette.
+    owner: editor-team
+    srm: low
+
+  # W4 — Poll
+  audience.poll:
+    default: true
+    description: Enable poll widget end-to-end.
+    owner: audience-team
+    srm: low
+  audience.poll_rank:
+    default: true
+    description: Enable rank-choice polls.
+    owner: audience-team
+    srm: low
+
+  # W5 — Word cloud + moderation
+  audience.word_cloud:
+    default: true
+    description: Enable word-cloud widget.
+    owner: audience-team
+    srm: low
+  audience.moderation_blocklist:
+    default: true
+    description: Run submissions through the blocklist.
+    owner: moderation-team
+    srm: medium
+  audience.moderation_ml:
+    default: false
+    description: Run submissions through the ML scorer.
+    owner: moderation-team
+    srm: medium
+
+  # W6 — Q&A
+  audience.qa:
+    default: true
+    description: Enable Q&A widget.
+    owner: audience-team
+    srm: low
+  audience.qa_promote_to_parking_lot:
+    default: true
+    description: Allow moderator-promoted Q&A → parking-lot (P15 W9).
+    owner: presenter-team
+    srm: low
+
+  # W7 — Quiz
+  audience.quiz:
+    default: true
+    description: Enable quiz widget.
+    owner: audience-team
+    srm: low
+
+  # W8 — Reaction / nav / sentiment / hand
+  audience.reaction:
+    default: true
+    description: Enable reaction emoji widget.
+    owner: audience-team
+    srm: low
+  audience.nav_vote:
+    default: true
+    description: Enable audience nav-vote widget.
+    owner: audience-team
+    srm: low
+  audience.sentiment:
+    default: true
+    description: Enable sentiment widget.
+    owner: audience-team
+    srm: low
+  audience.raise_hand:
+    default: true
+    description: Enable raise-hand widget.
+    owner: audience-team
+    srm: low
+
+  # W9 — Closeout
+  audience.attendance:
+    default: true
+    description: Append attendance rows + hash-chain.
+    owner: audience-team
+    srm: medium
+  audience.handout_pdf:
+    default: true
+    description: Generate PDF handout artifact.
+    owner: audience-team
+    srm: low
+  audience.scorm_packager:
+    default: false
+    description: Run SCORM 2004 4th Ed packager (off by default for cost).
+    owner: audience-team
+    srm: low
+  audience.translation:
+    default: true
+    description: Enable STT/MT/TTS translation pipeline.
+    owner: audience-team
+    srm: medium
+
+  # Compliance
+  audience.pdpa_anonymous_toggle:
+    default: true
+    description: Allow anonymous-identified toggle per workspace.
+    owner: privacy-team
+    srm: high
+  audience.turnstile_captcha:
+    default: false
+    description: Require Turnstile challenge on join.
+    owner: privacy-team
+    srm: medium
