@@ -186,3 +186,28 @@ ENGINE = ReplacingMergeTree(updated_at)
 PARTITION BY toYYYYMM(last_seen_at)
 ORDER BY (workspace_id, viewer_id_key)
 TTL toDateTime(last_seen_at) + INTERVAL 13 MONTH DELETE;
+
+-- Sessions long table (mirrored from Postgres session table for
+-- fast session aggregation in the warehouse).
+CREATE TABLE IF NOT EXISTS domio_analytics.sessions_long
+(
+    session_id      String,
+    workspace_id    LowCardinality(String),
+    viewer_id_key   String,
+    deck_id         String,
+    source_app      LowCardinality(String),
+    privacy_mode    LowCardinality(String),
+    device_class    LowCardinality(String),
+    region_pinned   LowCardinality(String) DEFAULT '',
+    country_iso     LowCardinality(String) DEFAULT '',
+    started_at_ms   DateTime64(3, 'UTC'),
+    last_event_at_ms DateTime64(3, 'UTC'),
+    ended_at_ms     Nullable(DateTime64(3, 'UTC')),
+    event_count     UInt32,
+    state           LowCardinality(String) DEFAULT 'open',
+    updated_at      DateTime64(3, 'UTC') DEFAULT now64(3)
+)
+ENGINE = ReplacingMergeTree(updated_at)
+PARTITION BY toYYYYMM(started_at_ms)
+ORDER BY (workspace_id, viewer_id_key, started_at_ms)
+TTL toDateTime(started_at_ms) + INTERVAL 13 MONTH DELETE;
