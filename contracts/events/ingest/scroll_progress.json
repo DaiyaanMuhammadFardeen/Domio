@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/ingest/scroll_progress.json",
+  "title": "AnalyticsScrollProgress",
+  "description": "Phase 17 W1+W5 — Emitted by apps/viewer (scroll-mode decks, P14) at most every 250ms while the viewer scrolls. Tile coordinates are emitted so services/heatmap-generator can aggregate per-tile attention (#171). Privacy floor (<5 impressions) is enforced in the rollup.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_name",
+    "schema_version",
+    "ts_ms",
+    "workspace_id",
+    "deck_id",
+    "slide_id",
+    "viewer_id_key",
+    "session_id",
+    "dwell_ms",
+    "scroll_depth",
+    "tile_x",
+    "tile_y",
+    "viewport_height_px",
+    "source_app",
+    "ingest_topic"
+  ],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_name": { "const": "scroll_progress" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "ts_ms": { "type": "integer", "format": "int64" },
+    "workspace_id": { "type": "string" },
+    "deck_id": { "type": "string" },
+    "slide_id": { "type": "string" },
+    "scene_node_id": { "type": "string" },
+    "viewer_id_key": { "type": "string" },
+    "session_id": { "type": "string" },
+    "privacy_mode": {
+      "type": "string",
+      "enum": ["identified", "pseudonymous", "anon_consent", "anon_no_track"]
+    },
+    "dwell_ms": {
+      "type": "integer",
+      "format": "int32",
+      "description": "Time spent in this scroll position since the previous scroll_progress event.",
+      "minimum": 0,
+      "maximum": 60000
+    },
+    "scroll_depth": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "0 = top of scroll container; 1 = bottom."
+    },
+    "tile_x": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 63,
+      "description": "Tile column (32x18 default; 64xN for decks >50 slides)."
+    },
+    "tile_y": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31,
+      "description": "Tile row."
+    },
+    "viewport_height_px": {
+      "type": "integer",
+      "minimum": 100,
+      "description": "Client viewport height in pixels at emission time; used for viewport normalization in W5."
+    },
+    "scroll_velocity_px_per_s": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Median velocity over the last second; sessions >5000 px/s are excluded from the rollup."
+    },
+    "country_iso": { "type": "string", "minLength": 2, "maxLength": 2 },
+    "region_pinned": { "type": "string", "enum": ["global", "bd"] },
+    "source_app": {
+      "type": "string",
+      "enum": ["viewer"]
+    },
+    "ingest_topic": {
+      "type": "string",
+      "const": "events.ingest.raw"
+    },
+    "forward_compat": { "type": "boolean" }
+  }
+}

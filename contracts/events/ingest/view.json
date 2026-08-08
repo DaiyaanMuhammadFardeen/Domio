@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/ingest/view.json",
+  "title": "AnalyticsView",
+  "description": "Phase 17 W1 — Emitted by apps/viewer (and forwarded by apps/presenter / apps/join-web) when a viewer lands on a slide. Partition key in Kafka is workspace_id:viewer_id_key (joined at ingest). This is the foundational event for per-viewer, per-slide analytics (#169).",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_name",
+    "schema_version",
+    "ts_ms",
+    "workspace_id",
+    "deck_id",
+    "slide_id",
+    "viewer_id_key",
+    "session_id",
+    "privacy_mode",
+    "device_class",
+    "ua_family",
+    "os_family",
+    "country_iso",
+    "source_app",
+    "ingest_topic"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "ULID assigned by the analytics-sdk at emission time."
+    },
+    "event_name": {
+      "const": "view"
+    },
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Client-side timestamp (Date.now()). Server drift-corrected via session.heartbeat (W4)."
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "slide_id": {
+      "type": "string",
+      "description": "Stable scene-graph node ID from P02; survives reorder."
+    },
+    "scene_node_id": {
+      "type": "string",
+      "description": "Optional finer-grained node within the slide."
+    },
+    "viewer_id_key": {
+      "type": "string",
+      "description": "Privacy-mode aware salted hash; never the raw viewer_id. Partition key."
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Assigned by services/sessionization in W4; empty until assigned."
+    },
+    "experiment_id": {
+      "type": "string",
+      "description": "Optional — non-empty only when the viewer is in an active A/B test."
+    },
+    "variant_id": {
+      "type": "string"
+    },
+    "privacy_mode": {
+      "type": "string",
+      "enum": ["identified", "pseudonymous", "anon_consent", "anon_no_track"]
+    },
+    "device_class": {
+      "type": "string",
+      "enum": ["mobile", "tablet", "desktop", "bot"]
+    },
+    "ua_family": {
+      "type": "string",
+      "description": "e.g. 'Chrome', 'Firefox', 'Safari', 'Edge'. Empty for bot traffic."
+    },
+    "os_family": {
+      "type": "string",
+      "description": "e.g. 'macOS', 'Windows', 'iOS', 'Android', 'Linux'."
+    },
+    "referer_host": {
+      "type": "string",
+      "description": "Bare host, never full URL. Empty for direct nav."
+    },
+    "country_iso": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "description": "ISO-3166 alpha-2 country code from MaxMind GeoIP."
+    },
+    "region_pinned": {
+      "type": "string",
+      "enum": ["global", "bd"],
+      "description": "Bangladesh residency flag; 'bd' routes to the BD-only ClickHouse shard."
+    },
+    "share_link_id": {
+      "type": "string",
+      "description": "The P14 share-link token; used for per-link privacy-mode overrides."
+    },
+    "experiment_concluded_at_ms": {
+      "type": "integer",
+      "format": "int64",
+      "description": "Optional — server-stamped once the event joins a concluded A/B test."
+    },
+    "source_app": {
+      "type": "string",
+      "enum": ["viewer", "presenter", "join-web"]
+    },
+    "ingest_topic": {
+      "type": "string",
+      "const": "events.ingest.raw"
+    },
+    "forward_compat": {
+      "type": "boolean",
+      "description": "True when an unknown payload field was accepted by the schema validator."
+    }
+  }
+}

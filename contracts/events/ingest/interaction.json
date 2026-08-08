@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/ingest/interaction.json",
+  "title": "AnalyticsInteraction",
+  "description": "Phase 17 W1 — Emitted when a viewer interacts with an interactive element on a slide: poll vote, ROI calculator input, hotspot click, branching choice, form field, scenario toggle. Drives feature #170 (interactive element analytics) and feeds #177 (funnel step computation).",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_name",
+    "schema_version",
+    "ts_ms",
+    "workspace_id",
+    "deck_id",
+    "slide_id",
+    "viewer_id_key",
+    "session_id",
+    "interaction_kind",
+    "interaction_data",
+    "source_app",
+    "ingest_topic"
+  ],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_name": { "const": "interaction" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "ts_ms": { "type": "integer", "format": "int64" },
+    "workspace_id": { "type": "string" },
+    "deck_id": { "type": "string" },
+    "slide_id": { "type": "string" },
+    "scene_node_id": { "type": "string" },
+    "viewer_id_key": { "type": "string" },
+    "session_id": { "type": "string" },
+    "experiment_id": { "type": "string" },
+    "variant_id": { "type": "string" },
+    "privacy_mode": {
+      "type": "string",
+      "enum": ["identified", "pseudonymous", "anon_consent", "anon_no_track"]
+    },
+    "interaction_kind": {
+      "type": "string",
+      "enum": [
+        "poll_vote",
+        "roi_calc_input",
+        "hotspot_click",
+        "branching_choice",
+        "form_field",
+        "scenario_toggle",
+        "qa_item",
+        "quiz_attempt",
+        "reaction",
+        "nav_vote",
+        "sentiment_input",
+        "raise_hand",
+        "feedback_response",
+        "cta_click",
+        "share",
+        "download"
+      ],
+      "description": "Controlled vocabulary (P22 polish adds custom taxonomies)."
+    },
+    "interaction_data": {
+      "type": "string",
+      "description": "JSON-encoded payload. Schema per kind lives in contracts/events/ingest/interactions/<kind>.json (W1 follow-up)."
+    },
+    "value_numeric": {
+      "type": "number",
+      "description": "Optional — set when the interaction has a numeric outcome (ROI calc, sentiment slider)."
+    },
+    "value_text": {
+      "type": "string",
+      "description": "Optional — set when the interaction has a textual outcome (Q&A, word cloud)."
+    },
+    "share_link_id": { "type": "string" },
+    "country_iso": { "type": "string", "minLength": 2, "maxLength": 2 },
+    "region_pinned": { "type": "string", "enum": ["global", "bd"] },
+    "source_app": {
+      "type": "string",
+      "enum": ["viewer", "presenter", "join-web"]
+    },
+    "ingest_topic": {
+      "type": "string",
+      "const": "events.ingest.raw"
+    },
+    "forward_compat": { "type": "boolean" }
+  }
+}

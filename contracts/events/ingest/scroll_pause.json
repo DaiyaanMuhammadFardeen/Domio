@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/ingest/scroll_pause.json",
+  "title": "AnalyticsScrollPause",
+  "description": "Phase 17 W1+W5 — Emitted by apps/viewer when the viewer stops scrolling on a tile for >=750ms. Heavy dwell on a tile during a scroll-mode session is the strongest signal of attention in the heatmap.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_name",
+    "schema_version",
+    "ts_ms",
+    "workspace_id",
+    "deck_id",
+    "slide_id",
+    "viewer_id_key",
+    "session_id",
+    "dwell_ms",
+    "tile_x",
+    "tile_y",
+    "source_app",
+    "ingest_topic"
+  ],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_name": { "const": "scroll_pause" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "ts_ms": { "type": "integer", "format": "int64" },
+    "workspace_id": { "type": "string" },
+    "deck_id": { "type": "string" },
+    "slide_id": { "type": "string" },
+    "scene_node_id": { "type": "string" },
+    "viewer_id_key": { "type": "string" },
+    "session_id": { "type": "string" },
+    "privacy_mode": {
+      "type": "string",
+      "enum": ["identified", "pseudonymous", "anon_consent", "anon_no_track"]
+    },
+    "dwell_ms": {
+      "type": "integer",
+      "format": "int32",
+      "minimum": 750,
+      "description": "Pause duration; minimum 750ms to avoid jitter."
+    },
+    "tile_x": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 63
+    },
+    "tile_y": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 31
+    },
+    "viewport_height_px": {
+      "type": "integer",
+      "minimum": 100
+    },
+    "scroll_depth": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "country_iso": { "type": "string", "minLength": 2, "maxLength": 2 },
+    "region_pinned": { "type": "string", "enum": ["global", "bd"] },
+    "source_app": {
+      "type": "string",
+      "enum": ["viewer"]
+    },
+    "ingest_topic": {
+      "type": "string",
+      "const": "events.ingest.raw"
+    },
+    "forward_compat": { "type": "boolean" }
+  }
+}
