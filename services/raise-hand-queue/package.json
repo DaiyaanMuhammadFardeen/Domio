@@ -1,0 +1,22 @@
+{
+  "name": "@domio/raise-hand-queue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 16 W8 — raise-hand queue with FIFO ordering and presenter call/dismiss actions.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@domio/edge-pubsub": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}
