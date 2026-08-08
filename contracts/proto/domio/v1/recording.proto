@@ -1,0 +1,144 @@
+// Domio recording.proto
+//
+// Phase 21 W1. Wire format for the recording-orchestrator gRPC service.
+//
+// Mirrors services/recording-orchestrator/src/types.ts. The orchestrator
+// drives the capture pipeline (screen / camera / mic / system_audio +
+// slide_diff + widget_events + annotations) through a typed state
+// machine (pending → recording → paused → stopping → finalizing →
+// ready / failed / expired / revoked). Chunks are committed under
+// optimistic concurrency + lease.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+service RecordingService {
+  // Lifecycle.
+  rpc Start (StartRecordingRequest)    returns (RecordingSession);
+  rpc Get   (GetRecordingRequest)      returns (RecordingSession);
+  rpc Pause (TransitionRequest)        returns (RecordingSession);
+  rpc Resume(TransitionRequest)        returns (RecordingSession);
+  rpc Stop  (TransitionRequest)        returns (RecordingSession);
+  rpc Finalize (TransitionRequest)     returns (RecordingSession);
+  rpc Fail  (FailRequest)              returns (RecordingSession);
+
+  // Chunks.
+  rpc CommitChunk(CommitChunkRequest)  returns (CommitChunkResponse);
+  rpc ListChunks (ListChunksRequest)   returns (ChunkList);
+}
+
+enum RecordingStatus {
+  RECORDING_STATUS_UNSPECIFIED = 0;
+  RECORDING_STATUS_PENDING     = 1;
+  RECORDING_STATUS_RECORDING   = 2;
+  RECORDING_STATUS_PAUSED      = 3;
+  RECORDING_STATUS_STOPPING    = 4;
+  RECORDING_STATUS_FINALIZING  = 5;
+  RECORDING_STATUS_READY       = 6;
+  RECORDING_STATUS_FAILED      = 7;
+  RECORDING_STATUS_EXPIRED     = 8;
+  RECORDING_STATUS_REVOKED     = 9;
+}
+
+enum TrackKind {
+  TRACK_KIND_UNSPECIFIED = 0;
+  TRACK_KIND_SCREEN      = 1;
+  TRACK_KIND_CAMERA      = 2;
+  TRACK_KIND_MIC         = 3;
+  TRACK_KIND_SYSTEM_AUDIO= 4;
+  TRACK_KIND_SLIDE_DIFF  = 5;
+  TRACK_KIND_WIDGET_EVENTS = 6;
+  TRACK_KIND_ANNOTATIONS = 7;
+}
+
+message RecordingSession {
+  string                id                  = 1;
+  string                workspace_id        = 2;
+  string                session_id          = 3;
+  string                presenter_user_id   = 4;
+  RecordingStatus       status              = 5;
+  string                started_at          = 6;
+  string                paused_at           = 7;
+  string                stopped_at          = 8;
+  string                finalized_at        = 9;
+  string                expires_at          = 10;
+  string                storage_prefix      = 11;
+  string                title               = 12;
+  string                description         = 13;
+  string                language            = 14;
+  string                error               = 15;
+  int64                 version             = 16;
+}
+
+message StartRecordingRequest {
+  string                workspace_id        = 1;
+  string                session_id          = 2;
+  string                presenter_user_id   = 3;
+  string                storage_prefix      = 4;
+  string                title               = 5;
+  string                description         = 6;
+  string                language            = 7;
+  string                expires_at          = 8;
+  string                idempotency_key     = 9;
+}
+
+message GetRecordingRequest {
+  string                workspace_id        = 1;
+  string                recording_session_id = 2;
+}
+
+message TransitionRequest {
+  string                workspace_id        = 1;
+  string                recording_session_id = 2;
+  int64                 expected_version    = 3;
+  string                idempotency_key     = 4;
+}
+
+message FailRequest {
+  string                workspace_id        = 1;
+  string                recording_session_id = 2;
+  int64                 expected_version    = 3;
+  string                reason              = 4;
+  string                idempotency_key     = 5;
+}
+
+message CommitChunkRequest {
+  string                workspace_id        = 1;
+  string                recording_session_id = 2;
+  TrackKind             track_kind          = 3;
+  int64                 sequence            = 4;
+  int64                 byte_size           = 5;
+  int64                 duration_ms         = 6;
+  string                sha256              = 7;
+  string                storage_key         = 8;
+  string                lease_id            = 9;
+  string                lease_expires_at    = 10;
+  string                idempotency_key     = 11;
+}
+
+message CommitChunkResponse {
+  string                workspace_id        = 1;
+  string                recording_session_id = 2;
+  TrackKind             track_kind          = 3;
+  int64                 sequence            = 4;
+}
+
+message ListChunksRequest {
+  string                workspace_id        = 1;
+  string                recording_session_id = 2;
+}
+
+message ChunkSummary {
+  TrackKind             track_kind          = 1;
+  int64                 sequence            = 2;
+  int64                 byte_size           = 3;
+}
+
+message ChunkList {
+  repeated ChunkSummary items              = 1;
+}

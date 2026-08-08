@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/recording/recording-ready.json",
+  "title": "RecordingReady",
+  "description": "Emitted by the recording-orchestrator when a recording transitions to ready (finalization complete). Subscribers include the SCORM packager (build the LMS package), the search service (index the transcript + clips), and the engagement-graph (close the replay window).",
+  "type": "object",
+  "required": ["event_id", "ts_ms", "workspace_id", "recording_session_id", "finalized_at", "total_chunks", "total_bytes"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "ts_ms": { "type": "integer", "format": "int64" },
+    "workspace_id": { "type": "string" },
+    "recording_session_id": { "type": "string" },
+    "session_id": { "type": "string" },
+    "finalized_at": { "type": "string", "format": "date-time" },
+    "total_chunks": { "type": "integer", "minimum": 0 },
+    "total_bytes": { "type": "integer", "format": "int64", "minimum": 0 },
+    "track_count": { "type": "integer", "minimum": 0 },
+    "language": { "type": "string" },
+    "storage_prefix": { "type": "string" },
+    "hash": { "type": "string" },
+    "prev_hash": { "type": "string" }
+  }
+}

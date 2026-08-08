@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/recording/recording-failed.json",
+  "title": "RecordingFailed",
+  "description": "Emitted by the recording-orchestrator when a recording is marked as failed. The `reason` is a short, human-readable description of the failure (e.g. 'presenter lost connection', 'chunk lease expired'); full diagnostics are in the audit log.",
+  "type": "object",
+  "required": ["event_id", "ts_ms", "workspace_id", "recording_session_id", "reason", "from_status"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "ts_ms": { "type": "integer", "format": "int64" },
+    "workspace_id": { "type": "string" },
+    "recording_session_id": { "type": "string" },
+    "reason": { "type": "string", "minLength": 1, "maxLength": 1024 },
+    "from_status": {
+      "type": "string",
+      "enum": ["recording", "paused", "finalizing", "pending"]
+    },
+    "expected_version": { "type": "integer", "format": "int64" },
+    "hash": { "type": "string" },
+    "prev_hash": { "type": "string" }
+  }
+}

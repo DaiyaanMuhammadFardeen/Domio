@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/recording/recording-chunk-committed.json",
+  "title": "RecordingChunkCommitted",
+  "description": "Emitted by the recording-orchestrator when a chunk is committed under lease. The capture pipeline uploads the chunk bytes to @domio/object-store first, then commits via the orchestrator; this event is the durable record of the (track_kind, sequence) entry.",
+  "type": "object",
+  "required": ["event_id", "ts_ms", "workspace_id", "recording_session_id", "track_kind", "sequence", "byte_size", "duration_ms", "sha256", "storage_key", "committed_at"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "ts_ms": { "type": "integer", "format": "int64" },
+    "workspace_id": { "type": "string" },
+    "recording_session_id": { "type": "string" },
+    "track_kind": {
+      "type": "string",
+      "enum": ["screen", "camera", "mic", "system_audio", "slide_diff", "widget_events", "annotations"]
+    },
+    "sequence": { "type": "integer", "format": "int64", "minimum": 0 },
+    "byte_size": { "type": "integer", "format": "int64", "minimum": 0 },
+    "duration_ms": { "type": "integer", "format": "int64", "minimum": 0 },
+    "sha256": { "type": "string" },
+    "storage_key": { "type": "string" },
+    "lease_id": { "type": "string", "nullable": true },
+    "lease_expires_at": { "type": "string", "format": "date-time", "nullable": true },
+    "committed_at": { "type": "string", "format": "date-time" },
+    "hash": { "type": "string" },
+    "prev_hash": { "type": "string" }
+  }
+}
