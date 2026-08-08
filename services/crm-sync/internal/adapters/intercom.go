@@ -44,6 +44,11 @@ func NewIntercom(logger *zap.Logger) *Intercom {
 	}
 }
 
+// SetTransportForTest swaps the underlying http.RoundTripper for tests.
+func (i *Intercom) SetTransportForTest(rt http.RoundTripper) {
+	i.httpClient = &http.Client{Timeout: i.httpClient.Timeout, Transport: rt}
+}
+
 // Name returns the provider name.
 func (i *Intercom) Name() string { return "intercom" }
 

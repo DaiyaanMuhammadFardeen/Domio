@@ -45,6 +45,11 @@ func NewOutreach(logger *zap.Logger) *Outreach {
 	}
 }
 
+// SetTransportForTest swaps the underlying http.RoundTripper for tests.
+func (o *Outreach) SetTransportForTest(rt http.RoundTripper) {
+	o.httpClient = &http.Client{Timeout: o.httpClient.Timeout, Transport: rt}
+}
+
 // Name returns the provider name.
 func (o *Outreach) Name() string { return "outreach" }
 

@@ -64,6 +64,11 @@ func NewSalesforce(logger *zap.Logger) *Salesforce {
 	}
 }
 
+// SetTransportForTest swaps the underlying http.RoundTripper for tests.
+func (s *Salesforce) SetTransportForTest(rt http.RoundTripper) {
+	s.httpClient = &http.Client{Timeout: s.httpClient.Timeout, Transport: rt}
+}
+
 // Name returns the provider name.
 func (s *Salesforce) Name() string { return "salesforce" }
 

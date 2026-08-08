@@ -47,6 +47,13 @@ func NewHubSpot(logger *zap.Logger) *HubSpot {
 	}
 }
 
+// SetTransportForTest swaps the underlying http.RoundTripper. It
+// exists so tests can route requests through httptest servers while
+// keeping the production client (timeouts, etc.) intact.
+func (h *HubSpot) SetTransportForTest(rt http.RoundTripper) {
+	h.httpClient = &http.Client{Timeout: h.httpClient.Timeout, Transport: rt}
+}
+
 // Name returns the provider name.
 func (h *HubSpot) Name() string { return "hubspot" }
 
