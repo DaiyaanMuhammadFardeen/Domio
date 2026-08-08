@@ -1,0 +1,31 @@
+{
+  "name": "@domio/recording-orchestrator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 21 W1 — recording orchestration service. Drives the capture pipeline (screen/camera/mic/system_audio + slide-deck diff + widget events + annotations), commits chunks under lease, finalizes the recording on session_ended. Mirrors @domio/presenter-session skeleton (types, service, store, audit, idempotency, observability).",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/audit-ts": "workspace:*",
+    "@domio/object-store": "workspace:*",
+    "@domio/observability": "workspace:^",
+    "@domio/signed-link-token": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}
