@@ -1,0 +1,29 @@
+{
+  "name": "@domio/recording-extensions",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 21 W1 — multi-track recorder (screen + cam + mic + system audio) with chunked uploads to @domio/object-store. Browser-only; depends on MediaRecorder + getDisplayMedia + getUserMedia.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/object-store": "workspace:*",
+    "@domio/recording": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}
