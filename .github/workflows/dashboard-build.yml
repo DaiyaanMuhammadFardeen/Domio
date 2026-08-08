@@ -1,0 +1,166 @@
+name: dashboard-build
+
+# Phase 17 — Apps/dashboard build + axe-core suite
+#
+# On PR and push to master: typecheck + build apps/dashboard, run the
+# axe-core a11y suite against a built-and-served dashboard, and upload
+# screenshots as artifacts. Fails on serious or critical a11y violations.
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'apps/dashboard/**'
+      - '.axe/**'
+      - 'tests/axe/**'
+  push:
+    branches: [master, main]
+    paths:
+      - 'apps/dashboard/**'
+      - '.axe/**'
+      - 'tests/axe/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dashboard-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: install-deps
+    uses: ./.github/workflows/reusable/setup-node.yml
+    with:
+      node-version: '22.11.0'
+
+  build:
+    name: typecheck + build
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck dashboard
+        run: pnpm --filter @domio/dashboard typecheck
+      - name: Build dashboard
+        run: pnpm --filter @domio/dashboard build
+
+  axe:
+    name: axe-core a11y
+    needs: [setup, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+      REDIS_URL: redis://localhost:6379
+      NATS_URL: nats://localhost:4222
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      nats:
+        image: nats:2.10-alpine
+        ports: ['4222:4222']
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Build dashboard for scan
+        run: pnpm --filter @domio/dashboard build
+      - name: Serve dashboard
+        run: |
+          pnpm --filter @domio/dashboard start &
+          SERVE_PID=$!
+          echo "SERVE_PID=$SERVE_PID" >> $GITHUB_ENV
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            if curl -fsS http://localhost:3010 > /dev/null; then break; fi
+            sleep 2
+          done
+      - name: Install Playwright
+        run: |
+          pnpm --filter @domio/dashboard exec playwright install --with-deps chromium
+      - name: Run axe-core across all dashboard routes
+        run: |
+          node tests/axe/run-axe.mjs http://localhost:3010 \
+            --config .axe/config.json \
+            --fail-on serious critical \
+            --routes /overview,/deck/deck-1,/heatmap,/ab,/crm,/team,/live,/benchmarks,/exports \
+            --screenshot-dir artifacts/screenshots
+      - name: Upload screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: dashboard-axe-screenshots
+          path: artifacts/screenshots
+          retention-days: 30
+      - name: Tear down
+        if: ${{ always() }}
+        run: pkill -f "next start" || true
+
+  test:
+    name: vitest + playwright
+    needs: [setup, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Run vitest
+        run: pnpm --filter @domio/dashboard test -- --coverage
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: dashboard-coverage-report
+          path: apps/dashboard/coverage/
+          retention-days: 14

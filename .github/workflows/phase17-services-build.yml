@@ -1,0 +1,180 @@
+name: phase17-services-build
+
+# Phase 17 — Per-service build matrix
+#
+# Catches regressions in any single one of the 12 new Phase 17 services
+# (8 TS + 4 Go) even when the rest of the suite is green. Runs in
+# parallel with the rest of CI; each matrix leg is a fast fail-fast
+# checkout + build + test cycle.
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'services/event-ingest/**'
+      - 'services/analytics-warehouse/**'
+      - 'services/viewer-identity/**'
+      - 'services/sessionization/**'
+      - 'services/heatmap-generator/**'
+      - 'services/team-analytics/**'
+      - 'services/live-analytics/**'
+      - 'services/notification-dispatcher/**'
+      - 'services/ab-assignment/**'
+      - 'services/ab-measurement/**'
+      - 'services/ab-statistics/**'
+      - 'services/crm-sync/**'
+      - 'packages/analytics-sdk/**'
+      - 'packages/analytics-types/**'
+      - 'contracts/events/ingest/**'
+      - 'contracts/openapi/v1/analytics.yaml'
+      - 'contracts/graphql/v1/analytics.graphql'
+      - 'contracts/proto/domio/v1/analytics.proto'
+      - 'contracts/proto/domio/v1/ab.proto'
+  push:
+    branches: [master, main]
+    paths:
+      - 'services/event-ingest/**'
+      - 'services/analytics-warehouse/**'
+      - 'services/viewer-identity/**'
+      - 'services/sessionization/**'
+      - 'services/heatmap-generator/**'
+      - 'services/team-analytics/**'
+      - 'services/live-analytics/**'
+      - 'services/notification-dispatcher/**'
+      - 'services/ab-assignment/**'
+      - 'services/ab-measurement/**'
+      - 'services/ab-statistics/**'
+      - 'services/crm-sync/**'
+      - 'packages/analytics-sdk/**'
+      - 'packages/analytics-types/**'
+      - 'contracts/events/ingest/**'
+      - 'contracts/openapi/v1/analytics.yaml'
+      - 'contracts/graphql/v1/analytics.graphql'
+      - 'contracts/proto/domio/v1/analytics.proto'
+      - 'contracts/proto/domio/v1/ab.proto'
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase17-services-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ts:
+    name: ts-${{ matrix.service }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - event-ingest
+          - analytics-warehouse
+          - viewer-identity
+          - sessionization
+          - heatmap-generator
+          - team-analytics
+          - live-analytics
+          - notification-dispatcher
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+      REDIS_URL: redis://localhost:6379
+      NATS_URL: nats://localhost:4222
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4318
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      nats:
+        image: nats:2.10-alpine
+        ports: ['4222:4222']
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Install Postgres extensions
+        run: |
+          PGPASSWORD=domio psql -h localhost -U domio -d domio -c "CREATE EXTENSION IF NOT EXISTS vector;"
+        env:
+          PGPASSWORD: domio
+      - name: Typecheck ${{ matrix.service }}
+        run: pnpm --filter @domio/${{ matrix.service }} typecheck
+      - name: Lint ${{ matrix.service }}
+        run: pnpm --filter @domio/${{ matrix.service }} lint
+      - name: Build ${{ matrix.service }}
+        run: pnpm --filter @domio/${{ matrix.service }} build
+      - name: Test ${{ matrix.service }}
+        run: pnpm --filter @domio/${{ matrix.service }} test
+
+  go:
+    name: go-${{ matrix.service }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - ab-assignment
+          - ab-measurement
+          - ab-statistics
+          - crm-sync
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+      CLICKHOUSE_URL: http://localhost:8123
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      clickhouse:
+        image: clickhouse/clickhouse-server:24.3
+        ports: ['8123:8123', '9000:9000']
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-go@v5.2.0
+        with:
+          go-version: '1.23.4'
+          cache: true
+      - name: Verify go.mod
+        run: go mod download && go mod verify
+      - name: Vet ${{ matrix.service }}
+        run: go vet ./services/${{ matrix.service }}/...
+      - name: Build ${{ matrix.service }}
+        run: go build ./services/${{ matrix.service }}/...
+      - name: Test ${{ matrix.service }}
+        run: go test -count=1 ./services/${{ matrix.service }}/...
