@@ -1,0 +1,8 @@
+-- 0060_analytics_ab.down.sql
+BEGIN;
+
+DROP TABLE IF EXISTS ab_exposure CASCADE;
+DROP TABLE IF EXISTS ab_assignment CASCADE;
+DROP TABLE IF EXISTS ab_test CASCADE;
+
+COMMIT;
