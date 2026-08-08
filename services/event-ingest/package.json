@@ -1,0 +1,34 @@
+{
+  "name": "@domio/event-ingest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 17 W1 — Analytics event ingest edge. Receives HMAC-signed events from viewers/presenters/join-web and the rtgw/pwg NATS bridge, validates, strips PII, and forwards to Kafka topic events.ingest.raw. Falls back to disk spool under Kafka backpressure.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/observability": "workspace:^",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "hono": "4.6.13",
+    "ioredis": "^5.4.1",
+    "kafkajs": "^2.2.4",
+    "nats": "^2.29.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}
