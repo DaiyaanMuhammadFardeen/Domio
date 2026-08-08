@@ -1,0 +1,33 @@
+{
+  "name": "@domio/viewer-identity",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 17 W3 — Viewer identity graph + 4 privacy modes + GDPR endpoints. Stores salted viewer_id_key hashes in Postgres; merges cross-device identities via last-seen IP/UA + opt-in email hash; serves DELETE/export/object endpoints for GDPR right-to-erasure / right-to-access / right-to-object.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/observability": "workspace:^",
+    "@domio/event-ingest": "workspace:*",
+    "hono": "4.6.13",
+    "ioredis": "^5.4.1",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "@types/pg": "^8.11.10",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

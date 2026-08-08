@@ -2082,6 +2082,37 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/viewer-identity:
+    dependencies:
+      '@domio/event-ingest':
+        specifier: workspace:*
+        version: link:../event-ingest
+      '@domio/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
+      hono:
+        specifier: 4.6.13
+        version: 4.6.13
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.11.1
+      pg:
+        specifier: ^8.13.1
+        version: 8.22.0
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.11.10
+        version: 8.20.3
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/word-cloud-engine:
     dependencies:
       '@domio/audit-ts':
@@ -2091,6 +2122,53 @@ importers:
         specifier: workspace:*
         version: link:../edge-pubsub
     devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  tests/integration/phase17:
+    dependencies:
+      '@domio/analytics-warehouse':
+        specifier: workspace:*
+        version: link:../../../services/analytics-warehouse
+      '@domio/event-ingest':
+        specifier: workspace:*
+        version: link:../../../services/event-ingest
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../../packages/observability
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      graphql:
+        specifier: ^16.9.0
+        version: 16.14.2
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  tests/integration/recording:
+    dependencies:
+      '@domio/object-store':
+        specifier: workspace:*
+        version: link:../../../packages/object-store
+      '@domio/recording-extensions':
+        specifier: workspace:*
+        version: link:../../../packages/recording-extensions
+      '@domio/recording-orchestrator':
+        specifier: workspace:*
+        version: link:../../../services/recording-orchestrator
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
       typescript:
         specifier: 5.7.2
         version: 5.7.2
