@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/audience/session-left.json",
+  "title": "AudienceSessionLeft",
+  "description": "Emitted when an audience member leaves (graceful close or socket timeout).",
+  "type": "object",
+  "required": ["event_id", "ts_ms", "workspace_id", "audience_session_id", "session_id", "reason"],
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "audience_session_id": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "enum": ["user_action", "socket_timeout", "session_ended", "moderator_kick", "rate_limit"]
+    }
+  }
+}

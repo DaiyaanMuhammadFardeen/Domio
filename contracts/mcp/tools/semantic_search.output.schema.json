@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/semantic_search.output.schema.json",
+  "title": "SemanticSearchOutput",
+  "description": "Output of the semantic_search MCP tool.",
+  "type": "object",
+  "required": ["query", "hits", "scanned", "tool_version"],
+  "additionalProperties": false,
+  "properties": {
+    "query":   { "type": "string" },
+    "deck_id": { "type": "string" },
+    "hits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["slide_id", "score"],
+        "additionalProperties": false,
+        "properties": {
+          "slide_id": { "type": "string" },
+          "title":    { "type": "string" },
+          "score":    { "type": "number", "minimum": 0, "maximum": 1 },
+          "snippet":  { "type": "string" }
+        }
+      }
+    },
+    "scanned":     { "type": "integer", "minimum": 0 },
+    "tool_version": { "type": "string" }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/accessibility_audit.input.schema.json",
+  "title": "AccessibilityAuditInput",
+  "description": "Input to the accessibility_audit MCP tool.",
+  "type": "object",
+  "required": ["deck_id"],
+  "additionalProperties": false,
+  "properties": {
+    "deck_id":   { "type": "string", "format": "uuid" },
+    "deck_json": { "description": "Optional deck content as JSON." }
+  }
+}

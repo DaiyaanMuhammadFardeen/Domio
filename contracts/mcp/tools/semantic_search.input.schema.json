@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/semantic_search.input.schema.json",
+  "title": "SemanticSearchInput",
+  "description": "Input to the semantic_search MCP tool.",
+  "type": "object",
+  "required": ["query"],
+  "additionalProperties": false,
+  "properties": {
+    "query":   { "type": "string", "minLength": 1 },
+    "deck_id": { "type": "string", "format": "uuid" },
+    "k":       { "type": "integer", "minimum": 1, "maximum": 50, "default": 5 },
+    "slides": {
+      "description": "Optional corpus. Each entry: { id, title, content }.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id":      { "type": "string" },
+          "title":   { "type": "string" },
+          "content": { "type": "string" }
+        }
+      }
+    }
+  }
+}

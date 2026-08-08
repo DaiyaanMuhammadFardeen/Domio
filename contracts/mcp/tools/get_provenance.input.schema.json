@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/get_provenance.input.schema.json",
+  "title": "GetProvenanceInput",
+  "description": "Input to the get_provenance MCP tool.",
+  "type": "object",
+  "required": ["deck_id"],
+  "additionalProperties": false,
+  "properties": {
+    "deck_id":  { "type": "string", "format": "uuid" },
+    "slide_id": { "type": "string", "format": "uuid" }
+  }
+}

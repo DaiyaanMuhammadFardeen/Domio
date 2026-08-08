@@ -115,3 +115,37 @@ suite, with individual proto packages versioned independently.
 
 - Initial contract suite scaffold (Phase 00).
 - Common schemas, deck placeholder, health protos.
+
+## [0.2.0] - 2026-08-08
+
+### Phase 16 pre-flight scaffolding
+
+- **session-code generator** (`packages/session-code/src/session-code.ts`)
+  - Crockford base32 + 4-bit XOR checksum nibble.
+  - Configurable body length and shard-bit allocation.
+  - Round-trip-safe parse with case-insensitive normalisation.
+
+- **text-normalize** (`packages/text-normalize/`)
+  - NFKC normalization + zero-width / bidi-control stripping.
+  - Locale-aware stopword lists: en, bn, es (`packages/text-normalize/src/stopwords/`).
+  - `normalize`, `tokenize`, `bucketKey` primitives used by word-cloud and qa engines.
+
+- **moderation** (`packages/moderation/`)
+  - Blocklist matcher (`checkBlocklist`) operating on normalised input.
+  - Pluggable `MlScorer` interface for hosted ML classifiers (Detoxify / custom BERT).
+  - Null scorer default for tests + boot.
+
+- **protocol** (`packages/protocol/src/audience-envelope.ts`)
+  - Discriminated `AudienceEnvelope` covering hello, welcome, poll, quiz,
+    qa, word-cloud, reactions, nav, sentiment, raise-hand, error.
+  - Type-safe `narrowEnvelope<K>(...)` discriminator helper.
+
+- **audience-service** (`services/audience/src/`)
+  - Cross-shard types (`ShardCoordinate`, `AudienceJoinBundle`, `AudienceWidgetDescriptor`).
+  - Error hierarchy: `AudienceSessionNotFoundError`, `AudienceRateLimitedError`,
+    `AudienceModerationError`, `AudienceConflictError`.
+
+- **contracts** (`contracts/`)
+  - `openapi/v1/audience-join.yaml` — `/v1/audience/join`, status, leave.
+  - `proto/domio/v1/audience.proto` — `AudienceEnvelope` + 11 payload messages.
+  - `events/audience/session-joined.json` and `session-left.json` — JSON-schema events.

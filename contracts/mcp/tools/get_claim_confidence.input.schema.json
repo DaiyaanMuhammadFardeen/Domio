@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/get_claim_confidence.input.schema.json",
+  "title": "GetClaimConfidenceInput",
+  "description": "Input to the get_claim_confidence MCP tool.",
+  "type": "object",
+  "required": ["claim_id"],
+  "additionalProperties": false,
+  "properties": {
+    "claim_id": { "type": "string", "minLength": 1 },
+    "deck_id":  { "type": "string", "format": "uuid" }
+  }
+}

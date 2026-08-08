@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/events/session-lifecycle/session-ended.json",
+  "title": "AudienceSessionEnded",
+  "description": "Phase 16 W2 — Emitted when the broadcaster reaps a session after hard_ttl_ms. session-archiver flushes aggregates.",
+  "type": "object",
+  "required": ["workspace_id", "session_id", "phase", "ts_ms", "active_count", "idle_count"],
+  "properties": {
+    "workspace_id": { "type": "string", "format": "uuid" },
+    "session_id": { "type": "string", "format": "uuid" },
+    "phase": { "const": "ended" },
+    "ts_ms": { "type": "integer", "minimum": 0 },
+    "active_count": { "type": "integer", "minimum": 0 },
+    "idle_count": { "type": "integer", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

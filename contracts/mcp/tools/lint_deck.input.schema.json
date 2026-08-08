@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/lint_deck.input.schema.json",
+  "title": "LintDeckInput",
+  "description": "Input to the lint_deck MCP tool.",
+  "type": "object",
+  "required": ["deck_id"],
+  "additionalProperties": false,
+  "properties": {
+    "deck_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identifier of the deck to lint."
+    },
+    "deck_json": {
+      "description": "Optional deck content as JSON. If absent, the tool returns a single 'deck_not_loaded' info violation."
+    },
+    "rules": {
+      "type": "array",
+      "description": "Subset of rules to run. Empty = run all. Known rules: overflow, missing_alt_text, low_contrast, title_too_long, empty_slide, too_many_bullets.",
+      "items": {
+        "type": "string",
+        "enum": ["overflow", "missing_alt_text", "low_contrast", "title_too_long", "empty_slide", "too_many_bullets"]
+      }
+    }
+  }
+}

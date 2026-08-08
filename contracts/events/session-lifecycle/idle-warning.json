@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/events/session-lifecycle/idle-warning.json",
+  "title": "AudienceSessionIdleWarning",
+  "description": "Phase 16 W2 — Emitted when no participant has heartbeated within soft_ttl_ms. The audience PWA surfaces a 'are you still there?' prompt.",
+  "type": "object",
+  "required": ["workspace_id", "session_id", "phase", "ts_ms", "active_count", "idle_count"],
+  "properties": {
+    "workspace_id": { "type": "string", "format": "uuid" },
+    "session_id": { "type": "string", "format": "uuid" },
+    "phase": { "const": "idle_warning" },
+    "ts_ms": { "type": "integer", "minimum": 0 },
+    "active_count": { "type": "integer", "minimum": 0 },
+    "idle_count": { "type": "integer", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

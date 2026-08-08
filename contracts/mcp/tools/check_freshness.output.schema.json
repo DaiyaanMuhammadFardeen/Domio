@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/check_freshness.output.schema.json",
+  "title": "CheckFreshnessOutput",
+  "description": "Output of the check_freshness MCP tool.",
+  "type": "object",
+  "required": ["deck_id", "threshold_days", "stale", "tool_version"],
+  "additionalProperties": false,
+  "properties": {
+    "deck_id":        { "type": "string" },
+    "data_binding":   { "type": "string" },
+    "threshold_days": { "type": "integer", "minimum": 1 },
+    "last_synced_at": { "type": "string", "format": "date-time" },
+    "age_days":       { "type": "integer", "minimum": 0 },
+    "stale":          { "type": "boolean" },
+    "reason":         { "type": "string" },
+    "tool_version":   { "type": "string" }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/get_provenance.output.schema.json",
+  "title": "GetProvenanceOutput",
+  "description": "Output of the get_provenance MCP tool — the universal audit quartet.",
+  "type": "object",
+  "required": ["deck_id", "created_by", "updated_by", "ai_run_id", "agent_session_id", "created_at", "updated_at", "tool_version"],
+  "additionalProperties": false,
+  "properties": {
+    "deck_id":          { "type": "string" },
+    "slide_id":         { "type": "string" },
+    "created_by":       { "type": "string" },
+    "updated_by":       { "type": "string" },
+    "ai_run_id":        { "type": "string" },
+    "agent_session_id": { "type": "string" },
+    "created_at":       { "type": "string", "format": "date-time" },
+    "updated_at":       { "type": "string", "format": "date-time" },
+    "source":           { "type": "string" },
+    "tool_version":     { "type": "string" }
+  }
+}

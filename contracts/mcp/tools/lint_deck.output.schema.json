@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/lint_deck.output.schema.json",
+  "title": "LintDeckOutput",
+  "description": "Output of the lint_deck MCP tool.",
+  "type": "object",
+  "required": ["deck_id", "violations", "counts", "tool_version"],
+  "additionalProperties": false,
+  "properties": {
+    "deck_id": { "type": "string" },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "severity", "slide", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "code":     { "type": "string" },
+          "severity": { "type": "string", "enum": ["info", "warning", "error"] },
+          "slide":    { "type": "integer", "minimum": 0 },
+          "message":  { "type": "string" }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "required": ["info", "warning", "error", "total"],
+      "additionalProperties": false,
+      "properties": {
+        "info":    { "type": "integer", "minimum": 0 },
+        "warning": { "type": "integer", "minimum": 0 },
+        "error":   { "type": "integer", "minimum": 0 },
+        "total":   { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tool_version": { "type": "string" }
+  }
+}

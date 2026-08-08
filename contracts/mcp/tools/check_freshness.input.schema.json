@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.dev/contracts/mcp/tools/check_freshness.input.schema.json",
+  "title": "CheckFreshnessInput",
+  "description": "Input to the check_freshness MCP tool.",
+  "type": "object",
+  "required": ["deck_id"],
+  "additionalProperties": false,
+  "properties": {
+    "deck_id":        { "type": "string", "format": "uuid" },
+    "data_binding":   { "type": "string" },
+    "threshold_days": { "type": "integer", "minimum": 1, "maximum": 3650, "default": 30 },
+    "last_synced_at": { "type": "string", "format": "date-time" }
+  }
+}
