@@ -101,15 +101,38 @@ var (
 	SyncCRDTConvergence   = NewHistogram("sync_crdt_convergence_ms", []float64{1, 5, 10, 25, 50, 100, 250, 500})
 	PresenceActiveSessions = &Gauge{name: "presence_active_sessions"}
 	PresenceCursorLatency  = NewHistogram("presence_cursor_latency_ms", []float64{1, 2, 5, 10, 25, 50, 100, 250})
+
+	// Phase 15 presenter metrics — surfaced through the gateway because
+	// annotation + handover traffic flows across this hot-path. The
+	// service-level histograms (presenter_annotation_replay_ms,
+	// presenter_handoff_ms) live in `@domio/presenter-session` and are
+	// scraped from apps/api. The gauges here track aggregate session
+	// fan-out health.
+	PresenterActiveSessions = &Gauge{name: "presenter_active_sessions"}
+	PresenterFailoverRole   = &Gauge{name: "presenter_failover_role"} // 0=disabled, 1=standby, 2=primary
+	AnnotationFanoutLatency = NewHistogram("presenter_annotation_fanout_ms", []float64{1, 5, 10, 25, 50, 100, 250, 500, 1000})
 )
+
+// SetFailoverRole normalises the gateway role to the gauge value used
+// by the dashboard ("primary"/"standby"/"disabled").
+func SetFailoverRole(role string) {
+	switch role {
+	case "primary":
+		PresenterFailoverRole.Set(2)
+	case "standby":
+		PresenterFailoverRole.Set(1)
+	default:
+		PresenterFailoverRole.Set(0)
+	}
+}
 
 // MetricsHandler returns an HTTP handler that serves metrics in a
 // Prometheus-compatible text format.
 func MetricsHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-		allGauges := []*Gauge{SyncActiveConns, PresenceActiveSessions}
-		allHists := []*Histogram{SyncOpApplyDuration, SyncOpRoundTrip, SyncCRDTConvergence, PresenceCursorLatency}
+		allGauges := []*Gauge{SyncActiveConns, PresenceActiveSessions, PresenterActiveSessions, PresenterFailoverRole}
+		allHists := []*Histogram{SyncOpApplyDuration, SyncOpRoundTrip, SyncCRDTConvergence, PresenceCursorLatency, AnnotationFanoutLatency}
 
 		for _, g := range allGauges {
 			fmt.Fprintf(w, "# HELP rtgw_%s Current value\n# TYPE rtgw_%s gauge\nrtgw_%s %v\n",
@@ -209,6 +232,15 @@ const (
 	SpanPresenceFO    = "realtime.presence.fanout"
 	SpanPingRelay     = "realtime.ping.relay"
 	SpanChatBroadcast = "realtime.chat.broadcast"
+
+	// Phase 15 — presenter-specific spans. These names mirror the
+	// service-level ones in @domio/presenter-session so traces can be
+	// joined across the WS hop.
+	SpanAnnotationApply    = "realtime.annotation.apply"
+	SpanAnnotationFanout   = "realtime.annotation.fanout"
+	SpanPresenterHandover  = "presenter.handover"
+	SpanPresenterFailover  = "presenter.failover"
+	SpanRecapAggregate     = "presenter.recap.aggregate"
 )
 
 // StartSpan starts a new tracing span from the global provider.

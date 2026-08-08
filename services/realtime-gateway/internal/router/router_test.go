@@ -480,3 +480,50 @@ func TestSessionCleanup(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	assert.Equal(t, 0, cfg.Sessions.Count())
 }
+
+// ─── Failover role advertisement ────────────────────────────────────
+
+func TestFailoverRoleDefault(t *testing.T) {
+	_, server := newTestRouter(t)
+	defer server.Close()
+
+	resp, err := http.Get(server.URL + "/v1/failover")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, 200, resp.StatusCode)
+
+	body, _ := io.ReadAll(resp.Body)
+	var out map[string]any
+	require.NoError(t, json.Unmarshal(body, &out))
+	assert.Equal(t, "test-gw", out["gateway_id"])
+	assert.Equal(t, "primary", out["role"])
+}
+
+func TestFailoverRoleStandby(t *testing.T) {
+	_, server := newTestRouter(t)
+	defer server.Close()
+
+	resp, err := http.Get(server.URL + "/v1/failover?mode=standby")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	var out map[string]any
+	require.NoError(t, json.Unmarshal(body, &out))
+	assert.Equal(t, "standby", out["role"])
+}
+
+func TestFailoverRoleInvalidDefaultsToPrimary(t *testing.T) {
+	_, server := newTestRouter(t)
+	defer server.Close()
+
+	resp, err := http.Get(server.URL + "/v1/failover?mode=banana")
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	var out map[string]any
+	require.NoError(t, json.Unmarshal(body, &out))
+	// Unknown roles currently fall back to primary; future: 400.
+	assert.Equal(t, "primary", out["role"])
+}

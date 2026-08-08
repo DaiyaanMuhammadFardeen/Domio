@@ -64,6 +64,26 @@ func New(cfg Config) chi.Router {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
+	// Failover role advertisement. Query parameters:
+	//   ?mode=primary   — accepts writes; rejects stale-epoch.
+	//   ?mode=standby   — buffers writes for replay on promotion.
+	//   ?mode=disabled  — read-only / draining.
+	r.Get("/v1/failover", func(w http.ResponseWriter, r *http.Request) {
+		mode := r.URL.Query().Get("mode")
+		switch mode {
+		case "primary", "standby", "disabled":
+			// accepted
+		default:
+			mode = "primary"
+		}
+		observability.SetFailoverRole(mode)
+		w.Header().Set("content-type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"gateway_id": cfg.GatewayID,
+			"role":       mode,
+		})
+	})
+
 	// Metrics endpoint.
 	r.Handle("/metrics", observability.MetricsHandler())
 
