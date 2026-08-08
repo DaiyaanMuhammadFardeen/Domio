@@ -1,0 +1,49 @@
+name: setup-pnpm
+
+# Reusable workflow that installs pnpm + the pnpm store cache. Pair
+# with the canonical `setup-node.yml` when the workflow needs Node as
+# well; this workflow only handles pnpm-specific setup so that
+# dashboard-build.yml / phase17-services-build.yml can opt into a
+# pnpm-only pre-flight without re-installing Node.
+
+on:
+  workflow_call:
+    inputs:
+      pnpm-version:
+        description: pnpm version (must match .tool-versions).
+        type: string
+        default: '9.12.3'
+      cache:
+        description: Enable pnpm store caching.
+        type: boolean
+        default: true
+      os:
+        description: Runner OS slug.
+        type: string
+        default: ubuntu-latest
+
+jobs:
+  main:
+    name: setup-pnpm
+    runs-on: ${{ inputs.os }}
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4.1.0
+        with:
+          version: ${{ inputs.pnpm-version }}
+          run_install: false
+
+      - name: Cache pnpm store
+        if: ${{ inputs.cache }}
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ inputs.pnpm-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-${{ inputs.pnpm-version }}-

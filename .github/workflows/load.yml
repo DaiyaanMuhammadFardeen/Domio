@@ -1,0 +1,195 @@
+name: load
+
+# Phase 17 — Analytics & Engagement Intelligence
+#
+# Nightly k6 load test against the analytics plane. Runs the three
+# reference scenarios defined in tests/load/k6/ and asserts the SLO
+# thresholds from slo/phase-17.md. Fails the build if any threshold is
+# breached so we catch regressions before the user does.
+
+on:
+  schedule:
+    # 02:00 UTC daily; lowest expected traffic for most regions.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      skip_ingest:
+        description: Skip ingest-200k.js (longest scenario)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: load-${{ github.ref }}
+  cancel-in-progress: false  # never cancel a nightly load run
+
+jobs:
+  setup:
+    name: install-deps
+    uses: ./.github/workflows/reusable/setup-node.yml
+    with:
+      node-version: '22.11.0'
+
+  ingest-200k:
+    name: ingest-200k (sustained)
+    needs: setup
+    if: ${{ !inputs.skip_ingest }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      kafka:
+        image: bitnami/kafka:3.7
+        env:
+          KAFKA_CFG_NODE_ID: 1
+          KAFKA_CFG_PROCESS_ROLES: broker,controller
+          KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+          KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+          KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+          KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          ALLOW_PLAINTEXT_LISTENER: 'yes'
+        ports: ['9092:9092']
+      clickhouse:
+        image: clickhouse/clickhouse-server:24.3
+        ports: ['8123:8123', '9000:9000']
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
+      REDIS_URL: redis://localhost:6379
+      KAFKA_BROKERS: localhost:9092
+      CLICKHOUSE_URL: http://localhost:8123
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: tests/load/k6/ingest-200k.js
+        env:
+          INGEST_URL: http://localhost:8081
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-ingest-200k
+          path: |
+            summary.json
+            artifacts/
+          retention-days: 30
+
+  dashboard-10k:
+    name: dashboard-10k (concurrent)
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      clickhouse:
+        image: clickhouse/clickhouse-server:24.3
+        ports: ['8123:8123', '9000:9000']
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
+      CLICKHOUSE_URL: http://localhost:8123
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: tests/load/k6/dashboard-10k.js
+        env:
+          DASHBOARD_URL: http://localhost:3010/api/graphql
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-dashboard-10k
+          path: |
+            summary.json
+            artifacts/
+          retention-days: 30
+
+  crm-burst:
+    name: crm-burst (rate-limit)
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: tests/load/k6/crm-burst.js
+        env:
+          CRM_URL: http://localhost:8082
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-crm-burst
+          path: |
+            summary.json
+            artifacts/
+          retention-days: 30
+
+  summary:
+    name: load-summary
+    needs: [ingest-200k, dashboard-10k, crm-burst]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: Aggregate k6 summaries
+        run: |
+          for f in k6-summary-*; do
+            echo "## $f"
+            jq '{metrics: (.metrics | to_entries | map({key, value: .value}))}' \
+              "$f/summary.json" 2>/dev/null || echo "no summary for $f"
+          done
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-all
+          path: artifacts/
+          retention-days: 30
