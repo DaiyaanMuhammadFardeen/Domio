@@ -1,0 +1,49 @@
+{
+  "name": "@domio/dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Domio analytics dashboard — Next.js 15 + Tailwind + graphql-yoga gateway. Phase 17 final app.",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev -p 3000",
+    "start": "next start -p 3000",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf .next dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/chart": "workspace:*",
+    "@domio/observability": "workspace:^",
+    "@graphql-tools/schema": "10.0.16",
+    "graphql": "16.10.0",
+    "graphql-yoga": "5.10.4",
+    "lucide-react": "^0.469.0",
+    "motion": "^12.43.0",
+    "next": "15.1.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "tailwind-merge": "^3.6.0",
+    "graphql-ws": "5.16.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "22.10.1",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.2",
+    "@vitejs/plugin-react": "4.3.4",
+    "autoprefixer": "^10.5.4",
+    "clsx": "^2.1.1",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.5.25",
+    "tailwindcss": "^3.4.17",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  },
+  "engines": {
+    "node": ">=22.11.0"
+  }
+}

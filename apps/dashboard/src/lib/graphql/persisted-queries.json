@@ -1,0 +1,34 @@
+{
+  "OverviewKPI": {
+    "hash": "1bf12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e70",
+    "query": "query OverviewKPI($workspaceId: String!, $fromMs: Float!, $toMs: Float!) {\n  deckSummary(workspaceId: $workspaceId, fromMs: $fromMs, toMs: $toMs) {\n    workspaceId\n    deckId\n    sessionCount\n    viewerCount\n    avgSessionMs\n    completionRate\n  }\n}"
+  },
+  "DeckSummary": {
+    "hash": "2cf12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e71",
+    "query": "query DeckSummary($workspaceId: String!, $deckId: String!, $fromMs: Float!, $toMs: Float!) {\n  deckSummary(workspaceId: $workspaceId, deckId: $deckId, fromMs: $fromMs, toMs: $toMs) {\n    workspaceId\n    deckId\n    sessionCount\n    viewerCount\n    totalEvents\n    avgSessionMs\n    completionRate\n  }\n}"
+  },
+  "SlideBreakdown": {
+    "hash": "3df12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e72",
+    "query": "query SlideBreakdown($workspaceId: String!, $deckId: String!, $fromMs: Float!, $toMs: Float!) {\n  slideBreakdown(workspaceId: $workspaceId, deckId: $deckId, fromMs: $fromMs, toMs: $toMs) {\n    slideId\n    views\n    uniqueViewers\n    avgDwellMs\n    bounceRate\n  }\n}"
+  },
+  "FunnelChart": {
+    "hash": "4ef12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e73",
+    "query": "query FunnelChart($workspaceId: String!, $deckId: String!, $steps: [String!]!, $fromMs: Float!, $toMs: Float!) {\n  funnel(workspaceId: $workspaceId, deckId: $deckId, steps: $steps, fromMs: $fromMs, toMs: $toMs) {\n    stepName\n    entered\n    completed\n    completionRate\n  }\n}"
+  },
+  "HeatmapTile": {
+    "hash": "5ff12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e74",
+    "query": "query HeatmapTile($workspaceId: String!, $deckId: String!, $slideId: String!, $fromMs: Float!, $toMs: Float!) {\n  heatmap(workspaceId: $workspaceId, deckId: $deckId, slideId: $slideId, fromMs: $fromMs, toMs: $toMs) {\n    workspaceId\n    deckId\n    slideId\n    gridCols\n    gridRows\n    cells {\n      x\n      y\n      intensity\n    }\n  }\n}"
+  },
+  "AbTestResults": {
+    "hash": "60f12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e75",
+    "query": "query AbTestResults($workspaceId: String!, $experimentId: String!) {\n  abTestResults(workspaceId: $workspaceId, experimentId: $experimentId) {\n    experimentId\n    status\n    variants {\n      variantKey\n      exposures\n      conversions\n      rate\n    }\n    lift\n    pValue\n    ciLow\n    ciHigh\n  }\n}"
+  },
+  "TeamRollup": {
+    "hash": "71f12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e76",
+    "query": "query TeamRollup($workspaceId: String!) {\n  liveSession(sessionId: $workspaceId) {\n    sessionId\n    concurrentViewers\n  }\n}"
+  },
+  "LivePulse": {
+    "hash": "82f12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e77",
+    "query": "query LivePulse($sessionId: String!) {\n  liveSession(sessionId: $sessionId) {\n    sessionId\n    concurrentViewers\n    currentSlide\n    recentReactions\n    lastEventMs\n  }\n}"
+  }
+}
