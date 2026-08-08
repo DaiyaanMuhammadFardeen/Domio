@@ -1459,6 +1459,31 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/heatmap-generator:
+    dependencies:
+      '@domio/analytics-warehouse':
+        specifier: workspace:*
+        version: link:../analytics-warehouse
+      '@domio/event-ingest':
+        specifier: workspace:*
+        version: link:../event-ingest
+      '@domio/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
+      hono:
+        specifier: 4.6.13
+        version: 4.6.13
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/keyframes-svc:
     dependencies:
       hono:
@@ -1611,6 +1636,28 @@ importers:
         specifier: workspace:*
         version: link:../edge-pubsub
     devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/notification-dispatcher:
+    dependencies:
+      '@domio/event-ingest':
+        specifier: workspace:*
+        version: link:../event-ingest
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.11.1
+      nats:
+        specifier: ^2.29.0
+        version: 2.29.3
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1926,6 +1973,25 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/sessionization:
+    dependencies:
+      '@domio/event-ingest':
+        specifier: workspace:*
+        version: link:../event-ingest
+      '@domio/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/shader-registry:
     dependencies:
       ajv:
@@ -1975,6 +2041,25 @@ importers:
 
   services/stt-provider:
     devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/team-analytics:
+    dependencies:
+      '@domio/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
+      hono:
+        specifier: 4.6.13
+        version: 4.6.13
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
       typescript:
         specifier: 5.7.2
         version: 5.7.2

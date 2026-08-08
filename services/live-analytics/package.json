@@ -1,0 +1,33 @@
+{
+  "name": "@domio/live-analytics",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 17 W10 — Live session delivery analytics. Subscribes to NATS JetStream subject analytics.ingest.live.*, maintains an in-memory ring buffer per session, derives real-time KPIs (concurrent viewers, current slide, reaction counts), broadcasts the live pulse over graphql-ws, and writes a single summary row to ClickHouse after the session ends.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/observability": "workspace:^",
+    "graphql-ws": "5.16.0",
+    "hono": "4.6.13",
+    "nats": "^2.29.0",
+    "ws": "8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "@types/ws": "8.5.13",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}
