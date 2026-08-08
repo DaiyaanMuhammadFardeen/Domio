@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/creator-profile-v1.schema.json",
+  "title": "Domio Creator Profile V1",
+  "description": "Creator profile, payout method, and KYC session shapes for the marketplace creator economy. These tables are user-scoped (not workspace-scoped). Phase 19.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "CreatorProfile": {
+      "type": "object",
+      "description": "Creator identity, KYC state, and running balance. Keyed by user_id.",
+      "required": ["id", "user_id", "display_name", "slug", "bio", "payout_method", "payout_ready", "kyc_status", "balance_cents", "currency"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "user_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Platform user who owns this profile (immutable at creation)."
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "slug": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "URL-safe unique slug for the creator's public page."
+        },
+        "bio": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code."
+        },
+        "payout_method": {
+          "type": "string",
+          "enum": ["stripe_connect", "bkash", "nagad", "bank"]
+        },
+        "payout_ready": {
+          "type": "boolean",
+          "description": "True when KYC is approved and payout method is verified."
+        },
+        "kyc_status": {
+          "type": "string",
+          "enum": ["pending", "approved", "rejected", "expired"]
+        },
+        "balance_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Accumulated unpaid balance in integer cents."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 preferred payout currency."
+        },
+        "created_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "updated_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "CreatorPayoutMethod": {
+      "type": "object",
+      "description": "Payout instrument bound to a creator profile.",
+      "required": ["id", "creator_id", "kind", "verified"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "creator_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "FK to creator_profile.id."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["stripe_connect", "bkash", "nagad", "bank"]
+        },
+        "external_account_id": {
+          "type": "string",
+          "description": "Provider-side account identifier (Stripe account ID, bKash mobile, etc.)."
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "True after the provider confirms the account."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Provider-specific details.",
+          "additionalProperties": true
+        },
+        "created_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "updated_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "KycSession": {
+      "type": "object",
+      "description": "KYC verification session with a vendor (Persona, Sumsub, etc.).",
+      "required": ["id", "creator_id", "vendor", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "creator_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "FK to creator_profile.id."
+        },
+        "vendor": {
+          "type": "string",
+          "minLength": 1,
+          "description": "KYC provider name."
+        },
+        "vendor_session_id": {
+          "type": "string",
+          "description": "Provider-side session identifier."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["started", "pending", "approved", "rejected", "expired"]
+        },
+        "last_polled_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Last time the worker polled the vendor for status updates."
+        },
+        "raw": {
+          "type": "object",
+          "description": "Full vendor response for audit/debug.",
+          "additionalProperties": true
+        },
+        "created_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

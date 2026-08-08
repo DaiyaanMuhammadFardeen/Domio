@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Domio Marketplace Webhook Event Catalog (Phase 19)",
+  "description": "Webhook event catalog for the marketplace creator economy. All events follow a canonical envelope with event_id (ULID), event_type, ts_ms, workspace_id, actor_id, actor_type, and a typed payload. Phase 19 W1.",
+  "type": "object",
+  "events": [
+    {
+      "event_type": "listing.published",
+      "description": "Emitted when a marketplace listing transitions to published status.",
+      "payload": {
+        "type": "object",
+        "required": ["listing_id", "catalog_id", "seller_id", "version", "published_at_ms"],
+        "properties": {
+          "listing_id": { "type": "string", "description": "Marketplace listing identifier." },
+          "catalog_id": { "type": "string", "description": "Catalog entry identifier." },
+          "seller_id": { "type": "string", "description": "Creator who published the listing." },
+          "version": { "type": "string", "description": "Semver version published." },
+          "published_at_ms": { "type": "integer", "description": "Epoch milliseconds when the listing was published." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "listing.updated",
+      "description": "Emitted when a published marketplace listing is updated (metadata, tags, preview, etc.).",
+      "payload": {
+        "type": "object",
+        "required": ["listing_id", "catalog_id", "seller_id", "version", "changed_fields"],
+        "properties": {
+          "listing_id": { "type": "string", "description": "Marketplace listing identifier." },
+          "catalog_id": { "type": "string", "description": "Catalog entry identifier." },
+          "seller_id": { "type": "string", "description": "Creator who owns the listing." },
+          "version": { "type": "string", "description": "Current version after update." },
+          "changed_fields": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of fields that changed in this update."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "order.created",
+      "description": "Emitted when a buyer completes a purchase of a marketplace listing.",
+      "payload": {
+        "type": "object",
+        "required": ["purchase_id", "listing_id", "buyer_id", "gross_cents", "fee_cents", "net_cents", "currency", "license_grant_id"],
+        "properties": {
+          "purchase_id": { "type": "string", "description": "Application-level purchase identifier." },
+          "listing_id": { "type": "string", "description": "Purchased marketplace listing." },
+          "buyer_id": { "type": "string", "description": "User who made the purchase." },
+          "gross_cents": { "type": "integer", "description": "Gross purchase amount in integer cents." },
+          "fee_cents": { "type": "integer", "description": "Platform fee in integer cents." },
+          "net_cents": { "type": "integer", "description": "Net amount to creator in integer cents." },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code." },
+          "license_grant_id": { "type": "string", "description": "License grant issued to the buyer." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "order.refunded",
+      "description": "Emitted when a purchase is refunded (auto-approved or admin-approved).",
+      "payload": {
+        "type": "object",
+        "required": ["purchase_id", "listing_id", "buyer_id", "refund_cents", "currency"],
+        "properties": {
+          "purchase_id": { "type": "string", "description": "Original purchase identifier." },
+          "listing_id": { "type": "string", "description": "Refunded marketplace listing." },
+          "buyer_id": { "type": "string", "description": "User who received the refund." },
+          "refund_cents": { "type": "integer", "description": "Refund amount in integer cents." },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "payout.eligible",
+      "description": "Emitted when a seller's accrued balance meets the minimum payout threshold for a given period.",
+      "payload": {
+        "type": "object",
+        "required": ["seller_id", "period_month", "net_cents", "currency"],
+        "properties": {
+          "seller_id": { "type": "string", "description": "Creator eligible for payout." },
+          "period_month": { "type": "string", "pattern": "^\\d{4}-\\d{2}$", "description": "Period key in 'YYYY-MM' format." },
+          "net_cents": { "type": "integer", "description": "Net payout amount eligible in integer cents." },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "payout.paid",
+      "description": "Emitted when a payout is successfully executed via the payment provider.",
+      "payload": {
+        "type": "object",
+        "required": ["seller_id", "period_month", "payout_ledger_entry_id", "provider", "provider_transfer_id"],
+        "properties": {
+          "seller_id": { "type": "string", "description": "Creator who was paid." },
+          "period_month": { "type": "string", "pattern": "^\\d{4}-\\d{2}$", "description": "Period key in 'YYYY-MM' format." },
+          "payout_ledger_entry_id": { "type": "string", "description": "Payout ledger entry identifier." },
+          "provider": { "type": "string", "enum": ["stripe", "bkash", "nagad"], "description": "Payment provider used." },
+          "provider_transfer_id": { "type": "string", "description": "Provider-side transfer identifier." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "payout.held",
+      "description": "Emitted when a payout is held (below threshold, first-payout hold, takedown freeze, etc.).",
+      "payload": {
+        "type": "object",
+        "required": ["seller_id", "period_month", "reason"],
+        "properties": {
+          "seller_id": { "type": "string", "description": "Creator whose payout is held." },
+          "period_month": { "type": "string", "pattern": "^\\d{4}-\\d{2}$", "description": "Period key in 'YYYY-MM' format." },
+          "reason": { "type": "string", "description": "Human-readable reason for the hold (e.g., 'below_threshold', 'first_payout_hold', 'takedown_freeze')." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "takedown.filed",
+      "description": "Emitted when a DMCA, trademark, or policy takedown request is filed against a listing.",
+      "payload": {
+        "type": "object",
+        "required": ["takedown_request_id", "listing_id", "kind"],
+        "properties": {
+          "takedown_request_id": { "type": "string", "description": "Takedown request identifier." },
+          "listing_id": { "type": "string", "description": "Targeted marketplace listing." },
+          "kind": { "type": "string", "enum": ["dmca", "trademark", "policy"], "description": "Type of takedown complaint." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "takedown.resolved",
+      "description": "Emitted when a takedown request reaches a terminal resolution (confirmed, dismissed, or resolved after counter-notice).",
+      "payload": {
+        "type": "object",
+        "required": ["takedown_request_id", "listing_id", "resolution"],
+        "properties": {
+          "takedown_request_id": { "type": "string", "description": "Takedown request identifier." },
+          "listing_id": { "type": "string", "description": "Targeted marketplace listing." },
+          "resolution": { "type": "string", "enum": ["confirmed", "dismissed", "resolved"], "description": "Final resolution of the takedown." }
+        },
+        "additionalProperties": false
+      }
+    }
+  ]
+}

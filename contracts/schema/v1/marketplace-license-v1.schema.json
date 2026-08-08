@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/marketplace-license-v1.schema.json",
+  "title": "Domio Marketplace License Grant V1",
+  "description": "License grant document for a marketplace purchase. Tracks the grant lifecycle including issuance, expiry, revocation, and offline grace period. Phase 19.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "workspace_id", "user_id", "catalog_id", "version", "listing_id", "license_id", "seats", "signed_token", "issued_at_ms"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Globally-unique license grant identifier."
+    },
+    "workspace_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Workspace that owns this grant."
+    },
+    "user_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "User who received the grant."
+    },
+    "catalog_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Catalog entry identifier."
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Semver version of the licensed listing."
+    },
+    "listing_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Marketplace listing this grant covers."
+    },
+    "license_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "License identifier."
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["single_seat", "team_n_seats", "enterprise_pool"],
+      "description": "License scope controlling usage rights."
+    },
+    "seats": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Seat limit for this grant. Null means unlimited."
+    },
+    "signed_token": {
+      "type": "string",
+      "minLength": 1,
+      "description": "JWT-signed entitlement token. Clients may cache and present this for verification."
+    },
+    "issued_at_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Issued-at timestamp in epoch milliseconds."
+    },
+    "expires_at_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Expiration timestamp in epoch milliseconds. 0 means no expiry."
+    },
+    "revoked_at_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Revocation timestamp in epoch milliseconds. 0 means not revoked."
+    },
+    "offline_grace_until_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Offline grace period end in epoch milliseconds. 0 means no offline grace."
+    }
+  }
+}

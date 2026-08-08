@@ -1,0 +1,625 @@
+openapi: 3.1.0
+info:
+  title: Domio Marketplace Service API (Phase 19 W1)
+  version: 0.1.0
+  description: |
+    Marketplace listing lifecycle, pricing, reviews, and curated brand-locked
+    listings for the Phase 19 creator economy.
+
+    All endpoints require authentication via the bearer token or the session
+    cookie.
+
+    The operationIds in this file MUST match the handler names in the
+    parallel services/marketplace service.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://api.domio.example.com
+    description: Production (placeholder)
+  - url: http://localhost:8080
+    description: Local development
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+tags:
+  - name: marketplace-listings
+    description: Marketplace listing CRUD and lifecycle transitions.
+  - name: marketplace-pricing
+    description: Price calculation and payout policy.
+  - name: marketplace-reviews
+    description: Listing reviews, replies, and reporting.
+  - name: marketplace-curated
+    description: Brand-locked curated marketplace listings.
+paths:
+  /v1/marketplace/listings:
+    post:
+      tags: [marketplace-listings]
+      summary: Create a marketplace listing (draft)
+      operationId: createMarketplaceListing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MarketplaceListingInput' }
+      responses:
+        '201':
+          description: Draft listing created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarketplaceListing' }
+        '400':
+          description: Validation error
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Listing already exists for this catalog
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+    get:
+      tags: [marketplace-listings]
+      summary: List marketplace listings
+      operationId: listMarketplaceListings
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [draft, in_review, published, deprecated, removed] }
+        - name: seller_id
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Listing results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/MarketplaceListing' } }
+                  total: { type: integer }
+        '400':
+          description: Validation error
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/listings/{listing_id}:
+    get:
+      tags: [marketplace-listings]
+      summary: Get a marketplace listing by ID
+      operationId: getMarketplaceListing
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      responses:
+        '200':
+          description: Listing details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarketplaceListing' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+    patch:
+      tags: [marketplace-listings]
+      summary: Update a marketplace listing
+      operationId: updateMarketplaceListing
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MarketplaceListingInput' }
+      responses:
+        '200':
+          description: Listing updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarketplaceListing' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/listings/{listing_id}/submit:
+    post:
+      tags: [marketplace-listings]
+      summary: Submit a draft listing for review (draft → in_review)
+      operationId: submitMarketplaceListing
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      responses:
+        '202':
+          description: Listing submitted for review
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarketplaceListing' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Invalid status transition
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/listings/{listing_id}/publish:
+    post:
+      tags: [marketplace-listings]
+      summary: Publish a reviewed listing (in_review → published)
+      operationId: publishMarketplaceListing
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      responses:
+        '200':
+          description: Listing published
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarketplaceListing' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Invalid status transition
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/listings/{listing_id}/deprecate:
+    post:
+      tags: [marketplace-listings]
+      summary: Deprecate a published listing (published → deprecated)
+      operationId: deprecateMarketplaceListing
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      responses:
+        '200':
+          description: Listing deprecated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarketplaceListing' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Invalid status transition
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/listings/{listing_id}/versions:
+    post:
+      tags: [marketplace-listings]
+      summary: Add a new version to a marketplace listing
+      operationId: addMarketplaceListingVersion
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [version, changelog]
+              properties:
+                version: { type: string, minLength: 1, description: "Semver version (e.g. '1.1.0')." }
+                changelog: { type: string, maxLength: 4096, description: "Human-readable changelog for this version." }
+      responses:
+        '201':
+          description: Version added
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ListingVersion' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/listings/{listing_id}/changelog:
+    get:
+      tags: [marketplace-listings]
+      summary: Get the changelog for a marketplace listing
+      operationId: getMarketplaceListingChangelog
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      responses:
+        '200':
+          description: Changelog entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ChangelogEntry' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/pricing/calculate:
+    post:
+      tags: [marketplace-pricing]
+      summary: Calculate marketplace price for a given pricing model
+      operationId: calculateMarketplacePrice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PriceCalculationInput' }
+      responses:
+        '200':
+          description: Price calculation result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PriceCalculationResult' }
+        '400':
+          description: Validation error
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/payout-policy:
+    get:
+      tags: [marketplace-pricing]
+      summary: Get the current payout policy
+      operationId: getPayoutPolicy
+      responses:
+        '200':
+          description: Payout policy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PayoutPolicy' }
+
+  /v1/marketplace/listings/{listing_id}/reviews:
+    post:
+      tags: [marketplace-reviews]
+      summary: Submit a review for a marketplace listing
+      description: |
+        Reviews pass heuristic moderation (profanity, link density, caps ratio,
+        repetition, trust score). Only verified buyers may submit reviews.
+        Auto-flagged reviews return 202 and are processed by the moderator worker.
+      operationId: submitMarketplaceReview
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewInput' }
+      responses:
+        '201':
+          description: Review accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+        '202':
+          description: Queued for moderation (ERR_MODERATION_QUEUED)
+        '400':
+          description: Invalid rating or body too long
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Not a verified buyer (ERR_NOT_VERIFIED_BUYER)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+    get:
+      tags: [marketplace-reviews]
+      summary: List reviews for a marketplace listing
+      operationId: listMarketplaceReviews
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      responses:
+        '200':
+          description: Review results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/Review' } }
+                  total: { type: integer }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/reviews/{review_id}/reply:
+    post:
+      tags: [marketplace-reviews]
+      summary: Reply to a marketplace review (one reply per review, creator only)
+      operationId: replyToMarketplaceReview
+      parameters:
+        - name: review_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, minLength: 1, maxLength: 4096 }
+      responses:
+        '201':
+          description: Reply created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReviewReply' }
+        '409':
+          description: Already replied (ERR_ALREADY_REPLIED)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/reviews/{review_id}/report:
+    post:
+      tags: [marketplace-reviews]
+      summary: Report a marketplace review as abusive
+      operationId: reportMarketplaceReview
+      parameters:
+        - name: review_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, minLength: 1, maxLength: 4096 }
+      responses:
+        '202':
+          description: Report queued for moderation
+        '404':
+          description: Review not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/curated:
+    get:
+      tags: [marketplace-curated]
+      summary: Get brand-locked curated marketplace listings
+      operationId: getCuratedMarketplaceListings
+      parameters:
+        - name: brand_kit_id
+          in: query
+          required: true
+          schema: { type: string }
+          description: Brand-kit identifier to filter curated listings for.
+      responses:
+        '200':
+          description: Curated listing results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: '#/components/schemas/CuratedListing' } }
+                  total: { type: integer }
+        '400':
+          description: Missing required brand_kit_id query parameter
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+# ════════════════════════════════════════════════════════════════════════════
+# Components
+# ════════════════════════════════════════════════════════════════════════════
+components:
+  parameters:
+    ListingId:
+      name: listing_id
+      in: path
+      required: true
+      schema: { type: string }
+      description: Marketplace listing identifier.
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+
+  schemas:
+    # ── RFC-7807 ──────────────────────────────────────────────────────────
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference identifying the problem type.
+          example: "https://domio.example/problems/not-found"
+        title:
+          type: string
+          description: Short human-readable summary.
+          example: "Resource not found"
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          example: "Listing with id 'lst-abc' does not exist."
+        instance:
+          type: string
+          format: uri
+          description: URI reference identifying the specific occurrence.
+          example: "https://api.domio.example.com/v1/marketplace/listings/lst-abc"
+
+    # ── Marketplace Listing ────────────────────────────────────────────────
+    MarketplaceListingInput:
+      type: object
+      required: [catalog_id, seller_id, title, kind, license_id, price]
+      properties:
+        catalog_id: { type: string, minLength: 1, description: "Catalog entry identifier." }
+        seller_id: { type: string, minLength: 1, description: "Creator selling this listing." }
+        title: { type: string, minLength: 1, maxLength: 120 }
+        kind: { type: string, enum: [component, template, theme, sticker_pack, icon_pack] }
+        license_id: { type: string, minLength: 1, description: "License identifier for this listing." }
+        description: { type: string, maxLength: 4096 }
+        tags: { type: array, items: { type: string, maxLength: 40 }, default: [] }
+        price:
+          type: object
+          required: [model, price_cents, currency]
+          properties:
+            model: { type: string, enum: [free, one_time, subscription, team_seats, enterprise_quote] }
+            price_cents: { type: integer, minimum: 0 }
+            currency: { type: string, pattern: '^[A-Z]{3}$' }
+
+    MarketplaceListing:
+      type: object
+      properties:
+        id: { type: string }
+        catalog_id: { type: string }
+        seller_id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [draft, in_review, published, deprecated, removed] }
+        is_free: { type: boolean }
+        price_cents: { type: integer }
+        currency: { type: string }
+        tags: { type: array, items: { type: string } }
+        preview:
+          type: object
+          properties:
+            poster_ref: { type: string }
+            loop_ref: { type: string }
+        published_at_ms: { type: integer }
+        deprecated_at_ms: { type: integer }
+        version: { type: string }
+        created_at: { type: integer }
+        updated_at: { type: integer }
+
+    ListingVersion:
+      type: object
+      properties:
+        version: { type: string }
+        changelog: { type: string }
+        created_at: { type: integer }
+        created_by: { type: string }
+
+    ChangelogEntry:
+      type: object
+      properties:
+        version: { type: string }
+        changelog: { type: string }
+        created_at: { type: integer }
+
+    # ── Pricing ────────────────────────────────────────────────────────────
+    PriceCalculationInput:
+      type: object
+      required: [model, price_cents, currency]
+      properties:
+        model: { type: string, enum: [free, one_time, subscription, team_seats, enterprise_quote] }
+        price_cents: { type: integer, minimum: 0 }
+        currency: { type: string, pattern: '^[A-Z]{3}$' }
+        license_scope: { type: string, enum: [single_seat, team_n_seats, enterprise_pool] }
+        team_seats: { type: integer, minimum: 1 }
+
+    PriceCalculationResult:
+      type: object
+      required: [gross_cents, fee_cents, net_cents, currency, fx_rate, fx_timestamp]
+      properties:
+        model: { type: string, enum: [free, one_time, subscription, team_seats, enterprise_quote] }
+        gross_cents: { type: integer, description: "Gross amount in integer cents." }
+        fee_cents: { type: integer, description: "Platform fee in integer cents." }
+        net_cents: { type: integer, description: "Net amount to creator in integer cents." }
+        currency: { type: string, pattern: '^[A-Z]{3}$' }
+        fx_rate: { type: number, description: "FX rate locked at invoice time." }
+        fx_timestamp: { type: integer, description: "Epoch milliseconds of FX rate snapshot." }
+        license_scope: { type: string, enum: [single_seat, team_n_seats, enterprise_pool] }
+
+    # ── Payout Policy ──────────────────────────────────────────────────────
+    PayoutPolicy:
+      type: object
+      properties:
+        split_creator_bps: { type: integer, description: "Basis points for creator share (7000 = 70%)." }
+        split_platform_bps: { type: integer, description: "Basis points for platform share (3000 = 30%)." }
+        min_payout_cents: { type: integer, description: "Minimum payout threshold in integer cents." }
+        first_payout_hold_days: { type: integer, description: "Hold period for first-ever payout." }
+        updated_at: { type: integer }
+
+    # ── Reviews ────────────────────────────────────────────────────────────
+    ReviewInput:
+      type: object
+      required: [rating, body]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        body: { type: string, minLength: 1, maxLength: 4096 }
+
+    Review:
+      type: object
+      properties:
+        id: { type: string }
+        listing_id: { type: string }
+        reviewer_id: { type: string }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        body: { type: string }
+        status: { type: string, enum: [queued, accepted, auto_flagged, removed] }
+        verified_buyer: { type: boolean }
+        created_at: { type: integer }
+
+    ReviewReply:
+      type: object
+      properties:
+        id: { type: string }
+        review_id: { type: string }
+        replier_id: { type: string }
+        body: { type: string }
+        created_at: { type: integer }
+
+    # ── Curated Listing ────────────────────────────────────────────────────
+    CuratedListing:
+      type: object
+      properties:
+        id: { type: string }
+        catalog_id: { type: string }
+        seller_id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [draft, in_review, published, deprecated, removed] }
+        is_free: { type: boolean }
+        price_cents: { type: integer }
+        currency: { type: string }
+        tags: { type: array, items: { type: string } }
+        preview:
+          type: object
+          properties:
+            poster_ref: { type: string }
+            loop_ref: { type: string }
+        published_at_ms: { type: integer }
+        deprecated_at_ms: { type: integer }
+        version: { type: string }
+        created_at: { type: integer }
+        updated_at: { type: integer }
+        state: { type: string, enum: [allow, deny, override], description: "Brand-lock curation state." }
+        override_price_cents: { type: integer, description: "Per-brand price override in integer cents." }

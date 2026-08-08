@@ -1,0 +1,83 @@
+// Domio marketplace_creator.proto
+//
+// Creator profile, payout method, and KYC session for the marketplace
+// creator economy. Phase 19 — message-only (no RPCs in Wave 1; the
+// marketplace-service REST handlers own the surface).
+
+syntax = "proto3";
+
+package domio.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// CreatorPayoutMethodKind identifies the payout instrument type.
+enum CreatorPayoutMethodKind {
+  CREATOR_PAYOUT_METHOD_KIND_UNSPECIFIED = 0;
+  CREATOR_PAYOUT_METHOD_KIND_STRIPE_CONNECT = 1;
+  CREATOR_PAYOUT_METHOD_KIND_BKASH = 2;
+  CREATOR_PAYOUT_METHOD_KIND_NAGAD = 3;
+  CREATOR_PAYOUT_METHOD_KIND_BANK = 4;
+}
+
+// KycStatus tracks the lifecycle of KYC verification.
+enum KycStatus {
+  KYC_STATUS_UNSPECIFIED = 0;
+  KYC_STATUS_PENDING = 1;
+  KYC_STATUS_APPROVED = 2;
+  KYC_STATUS_REJECTED = 3;
+  KYC_STATUS_EXPIRED = 4;
+}
+
+// -----------------------------------------------------------------------------
+// Messages
+// -----------------------------------------------------------------------------
+
+// CreatorProfile represents a creator's identity, KYC state, and running
+// balance. Keyed by user_id (a user may sell across workspaces).
+message CreatorProfile {
+  string id = 1;
+  string user_id = 2;
+  string display_name = 3;
+  string slug = 4;
+  string bio = 5;
+  string country_code = 6; // ISO 3166-1 alpha-2, char(2)
+  CreatorPayoutMethodKind payout_method = 7;
+  bool payout_ready = 8;
+  KycStatus kyc_status = 9;
+  int64 balance_cents = 10; // accumulated unpaid balance in integer cents
+  string currency = 11;     // ISO 4217 char(3)
+  int64 created_at_ms = 12;
+  int64 updated_at_ms = 13;
+}
+
+// CreatorPayoutMethod represents a payout instrument bound to a creator.
+// kind: stripe_connect | bkash | nagad | bank.
+// verified: set to true after the provider confirms the account.
+// metadata: provider-specific details (Stripe account ID, bKash mobile, etc.)
+message CreatorPayoutMethod {
+  string id = 1;
+  string creator_id = 2;
+  CreatorPayoutMethodKind kind = 3;
+  string external_account_id = 4;
+  bool verified = 5;
+  string metadata_json = 6; // JSON-encoded provider-specific metadata
+  int64 created_at_ms = 7;
+  int64 updated_at_ms = 8;
+}
+
+// KycSession represents a KYC verification session with a vendor
+// (Persona, Sumsub, etc.). Vendor-agnostic interface.
+message KycSession {
+  string id = 1;
+  string creator_id = 2;
+  string vendor = 3; // KYC provider name
+  string vendor_session_id = 4;
+  KycStatus status = 5;
+  int64 last_polled_at_ms = 6;
+  string raw_json = 7; // Full vendor response for audit/debug
+  int64 created_at_ms = 8;
+}

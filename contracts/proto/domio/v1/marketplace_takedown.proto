@@ -1,0 +1,69 @@
+// Domio marketplace_takedown.proto
+//
+// Takedown (DMCA / trademark / policy) request and trust scoring for the
+// marketplace. Phase 19 — message-only (no RPCs in Wave 1; the
+// marketplace-service REST handlers own the surface).
+
+syntax = "proto3";
+
+package domio.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// TakedownKind identifies the type of takedown complaint.
+enum TakedownKind {
+  TAKEDOWN_KIND_UNSPECIFIED = 0;
+  TAKEDOWN_KIND_DMCA = 1;
+  TAKEDOWN_KIND_TRADEMARK = 2;
+  TAKEDOWN_KIND_POLICY = 3;
+}
+
+// TakedownStatus tracks the lifecycle of a takedown request.
+enum TakedownStatus {
+  TAKEDOWN_STATUS_UNSPECIFIED = 0;
+  TAKEDOWN_STATUS_RECEIVED = 1;
+  TAKEDOWN_STATUS_IN_REVIEW = 2;
+  TAKEDOWN_STATUS_CONFIRMED = 3;
+  TAKEDOWN_STATUS_DISMISSED = 4;
+  TAKEDOWN_STATUS_COUNTER_NOTICE = 5;
+  TAKEDOWN_STATUS_RESOLVED = 6;
+}
+
+// -----------------------------------------------------------------------------
+// Messages
+// -----------------------------------------------------------------------------
+
+// TakedownRequest represents a DMCA, trademark, or policy violation filing.
+// listing_id is the targeted marketplace listing. claimant_id is the user
+// who filed the takedown.
+message TakedownRequest {
+  string id = 1;
+  string workspace_id = 2;
+  string listing_id = 3;
+  string claimant_id = 4;
+  TakedownKind kind = 5;
+  string evidence_url = 6;
+  string statement = 7;          // good-faith statement (DMCA §512(c) elements)
+  TakedownStatus status = 8;
+  string resolution_notes = 9;
+  int64 submitted_at_ms = 10;
+  int64 resolved_at_ms = 11;
+  int64 created_at_ms = 12;
+  int64 updated_at_ms = 13;
+}
+
+// TrustScore represents a computed trust score for a marketplace listing.
+// Global table (trust scores are per-listing, not tenant-scoped).
+// score is on a 0.0–1.0 scale. signals is a JSON blob of individual
+// trust signals (malware scan, pricing anomaly, review sentiment, etc.).
+message TrustScore {
+  string id = 1;
+  string listing_id = 2;
+  double score = 3;           // 0.0–1.0 trust score
+  string signals_json = 4;    // JSON-encoded trust signal details
+  int64 computed_at_ms = 5;
+}

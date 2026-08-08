@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/schemas/v1/marketplace-payout-v1.schema.json",
+  "title": "Domio Marketplace Payout V1",
+  "description": "Payout ledger entry, payout run, and payout policy shapes for the marketplace creator economy. All monetary amounts are integer cents; currency is ISO 4217 char(3). Phase 19.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "PayoutLedgerEntry": {
+      "type": "object",
+      "description": "Per-event payout line item. One row per revenue_share_event that has been paid/held/failed.",
+      "required": ["id", "workspace_id", "creator_id", "period_month", "event_id", "gross_cents", "fee_cents", "net_cents", "currency", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "creator_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period_month": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}$",
+          "description": "Period key in 'YYYY-MM' format."
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "FK to revenue_share_event.id."
+        },
+        "gross_cents": {
+          "type": "integer",
+          "description": "Gross revenue in integer cents."
+        },
+        "fee_cents": {
+          "type": "integer",
+          "description": "Platform fee in integer cents."
+        },
+        "net_cents": {
+          "type": "integer",
+          "description": "Net payout amount in integer cents."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 currency code."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "paid", "held", "failed", "refunded"]
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["stripe", "bkash", "nagad"],
+          "description": "Payment provider used for this payout."
+        },
+        "provider_transfer_id": {
+          "type": "string",
+          "description": "Provider-side transfer identifier."
+        },
+        "executor_run_id": {
+          "type": "string",
+          "description": "FK to payout_run.id for the batch that paid this."
+        },
+        "created_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "updated_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "PayoutRun": {
+      "type": "object",
+      "description": "One batch execution of the monthly payout executor.",
+      "required": ["id", "workspace_id", "period_month", "executed_at_ms", "total_creators", "total_payout_cents", "currency", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period_month": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}$"
+        },
+        "executed_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_creators": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of creators paid in this run."
+        },
+        "total_payout_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of all net_cents paid in this run."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["running", "completed", "partial_failure"]
+        },
+        "created_at_ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "PayoutPolicy": {
+      "type": "object",
+      "description": "Singleton platform-wide payout configuration.",
+      "required": ["split_creator_bps", "split_platform_bps", "min_payout_cents", "first_payout_hold_days"],
+      "properties": {
+        "split_creator_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Basis points for creator share (7000 = 70%)."
+        },
+        "split_platform_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Basis points for platform share (3000 = 30%)."
+        },
+        "min_payout_cents": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum payout threshold in integer cents (5000 = $50)."
+        },
+        "first_payout_hold_days": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Hold period in days for a creator's first-ever payout."
+        },
+        "updated_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Last time the policy was modified."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

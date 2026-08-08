@@ -1,0 +1,94 @@
+# Phase 19 — Marketplace & Creator Economy feature flags.
+#
+# These flags are consumed by:
+#   - services/marketplace-* (storefront, creator, reviews, pricing, payout)
+#   - apps/{marketplace-web,creator-console}
+#   - workers/{payout-executor,takedown-processor,refund-processor}
+#   - tools/mcp-marketplace (purchase_listing, request_refund, etc.)
+#
+# Follow the convention `marketplace.<feature>` and mirror the structure of
+# phase-18.yaml. Defaults shown are for local dev / dev-up all. Production
+# overrides live in the platform Helm umbrella.
+
+flags:
+  # Core marketplace
+  marketplace.storefront:
+    default: false
+    description: Public marketplace storefront (marketplace-web) + read API.
+    owner: marketplace-team
+    srm: low
+  marketplace.creator:
+    default: false
+    description: 'Creator console: listing creation, versions, pricing, submit.'
+    owner: marketplace-team
+    srm: low
+  marketplace.reviews:
+    default: false
+    description: Verified-buyer reviews, ratings, moderation, replies.
+    owner: marketplace-team
+    srm: medium
+  marketplace.pricing:
+    default: false
+    description: 'Pricing model: free / one_time / subscription / team_seats / enterprise_quote; license policy calculator.'
+    owner: marketplace-team
+    srm: medium
+  marketplace.subscription:
+    default: false
+    description: 'Subscription lifecycle: renewal, cancel, pause; recurring billing.'
+    owner: marketplace-team
+    srm: medium
+  marketplace.refund:
+    default: false
+    description: 'Refund window (14-day, usage < 5 inserts), auto-approve vs admin review.'
+    owner: marketplace-team
+    srm: medium
+  marketplace.chargeback:
+    default: false
+    description: Chargeback detection, freeze, resolution.
+    owner: marketplace-team
+    srm: high
+  marketplace.curated:
+    default: false
+    description: 'Brand-locked marketplace: admin-curated per brand-kit, server-side filter.'
+    owner: marketplace-team
+    srm: medium
+  marketplace.kyc:
+    default: false
+    description: Creator KYC onboarding + verification gate for paid listings.
+    owner: marketplace-team
+    srm: high
+  marketplace.payout:
+    default: false
+    description: 'Payout executor: revenue share, threshold, holds, Stripe Connect / bKash / Nagad.'
+    owner: marketplace-team
+    srm: high
+  marketplace.analytics:
+    default: false
+    description: Creator analytics dashboard (downloads, revenue, geo, MRR).
+    owner: marketplace-team
+    srm: low
+  marketplace.takedown:
+    default: false
+    description: DMCA / trademark / policy takedown workflow + counter-notice.
+    owner: marketplace-team
+    srm: high
+  marketplace.partner_api:
+    default: false
+    description: Partner marketplace API (OAuth consumer scopes, rate limits).
+    owner: marketplace-team
+    srm: medium
+  marketplace.mcp:
+    default: false
+    description: MCP marketplace tools (purchase_listing, request_refund, get_payout_status, file_takedown, lint_marketplace_listing); purchase_marketplace capability off by default.
+    owner: marketplace-team
+    srm: high
+  marketplace.webhooks:
+    default: false
+    description: 'Seller/partner webhooks: listing.published, order.*, payout.*, takedown.* (HMAC-signed).'
+    owner: marketplace-team
+    srm: low
+  marketplace.audit:
+    default: false
+    description: 'Marketplace audit coverage: purchases, refunds, payouts, takedowns, KYC, brand-lock curation.'
+    owner: marketplace-team
+    srm: medium

@@ -1,0 +1,151 @@
+// Domio marketplace_billing.proto
+//
+// Payment intent, subscription, payout ledger, payout run, and payout policy
+// for the marketplace creator economy. Phase 19 — message-only (no RPCs in
+// Wave 1; the marketplace-service REST handlers own the surface).
+
+syntax = "proto3";
+
+package domio.v1;
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+// PaymentProvider identifies the payment rail used for a purchase or payout.
+enum PaymentProvider {
+  PAYMENT_PROVIDER_UNSPECIFIED = 0;
+  PAYMENT_PROVIDER_STRIPE = 1;
+  PAYMENT_PROVIDER_BKASH = 2;
+  PAYMENT_PROVIDER_NAGAD = 3;
+}
+
+// PaymentIntentStatus tracks the lifecycle of a single purchase transaction.
+enum PaymentIntentStatus {
+  PAYMENT_INTENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_INTENT_STATUS_PENDING = 1;
+  PAYMENT_INTENT_STATUS_SUCCEEDED = 2;
+  PAYMENT_INTENT_STATUS_FAILED = 3;
+  PAYMENT_INTENT_STATUS_REFUNDED = 4;
+  PAYMENT_INTENT_STATUS_DISPUTED = 5;
+}
+
+// SubscriptionStatus tracks the lifecycle of a recurring subscription.
+enum SubscriptionStatus {
+  SUBSCRIPTION_STATUS_UNSPECIFIED = 0;
+  SUBSCRIPTION_STATUS_ACTIVE = 1;
+  SUBSCRIPTION_STATUS_PAST_DUE = 2;
+  SUBSCRIPTION_STATUS_CANCELED = 3;
+  SUBSCRIPTION_STATUS_INCOMPLETE = 4;
+}
+
+// PayoutStatus tracks the lifecycle of a payout ledger entry.
+enum PayoutStatus {
+  PAYOUT_STATUS_UNSPECIFIED = 0;
+  PAYOUT_STATUS_PENDING = 1;
+  PAYOUT_STATUS_PAID = 2;
+  PAYOUT_STATUS_HELD = 3;
+  PAYOUT_STATUS_FAILED = 4;
+  PAYOUT_STATUS_REFUNDED = 5;
+}
+
+// PayoutRunStatus tracks the status of a monthly payout batch execution.
+enum PayoutRunStatus {
+  PAYOUT_RUN_STATUS_UNSPECIFIED = 0;
+  PAYOUT_RUN_STATUS_RUNNING = 1;
+  PAYOUT_RUN_STATUS_COMPLETED = 2;
+  PAYOUT_RUN_STATUS_PARTIAL_FAILURE = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Messages
+// -----------------------------------------------------------------------------
+
+// PaymentIntent is an immutable record of a purchase transaction.
+// All monetary amounts are integer cents (no floats). Currency is ISO 4217.
+// fx_rate / fx_timestamp are locked at invoice time for cross-border compliance.
+message PaymentIntent {
+  string id = 1;
+  string workspace_id = 2;
+  string buyer_id = 3;
+  string listing_id = 4;
+  string purchase_id = 5;
+  PaymentProvider provider = 6;
+  string provider_intent_id = 7;
+  string currency = 8; // ISO 4217 char(3)
+  int64 gross_cents = 9;
+  int64 tax_cents = 10;
+  int64 fee_cents = 11;
+  int64 net_cents = 12;
+  double fx_rate = 13;
+  int64 fx_timestamp_ms = 14;
+  PaymentIntentStatus status = 15;
+  string idempotency_key = 16;
+  int64 created_at_ms = 17;
+  int64 updated_at_ms = 18;
+}
+
+// Subscription represents a recurring subscription to a marketplace listing.
+// provider_subscription_id is the Stripe subscription ID or equivalent.
+message Subscription {
+  string id = 1;
+  string workspace_id = 2;
+  string listing_id = 3;
+  string buyer_id = 4;
+  string provider_subscription_id = 5;
+  SubscriptionStatus status = 6;
+  int64 current_period_end_ms = 7;
+  bool cancel_at_period_end = 8;
+  int64 created_at_ms = 9;
+  int64 updated_at_ms = 10;
+}
+
+// PayoutLedgerEntry is a per-event payout line item. One row per
+// revenue_share_event that has been paid/held/failed. The UNIQUE constraint
+// on (executor_run_id, event_id) prevents double-payout.
+message PayoutLedgerEntry {
+  string id = 1;
+  string workspace_id = 2;
+  string creator_id = 3;
+  string period_month = 4; // 'YYYY-MM'
+  string event_id = 5;
+  int64 gross_cents = 6;
+  int64 fee_cents = 7;
+  int64 net_cents = 8;
+  string currency = 9; // ISO 4217 char(3)
+  PayoutStatus status = 10;
+  PaymentProvider provider = 11;
+  string provider_transfer_id = 12;
+  string executor_run_id = 13;
+  int64 created_at_ms = 14;
+  int64 updated_at_ms = 15;
+}
+
+// PayoutRun represents one batch execution of the monthly payout executor.
+// total_creators is the count of creators paid; total_payout_cents is the
+// sum of all net_cents paid in this run.
+message PayoutRun {
+  string id = 1;
+  string workspace_id = 2;
+  string period_month = 3; // 'YYYY-MM'
+  int64 executed_at_ms = 4;
+  int32 total_creators = 5;
+  int64 total_payout_cents = 6;
+  string currency = 7; // ISO 4217 char(3)
+  PayoutRunStatus status = 8;
+  int64 created_at_ms = 9;
+}
+
+// PayoutPolicy is the singleton platform-wide payout configuration.
+// Seeded with: 70/30 creator/platform split, $50 minimum payout,
+// 30-day first-payout hold.
+message PayoutPolicy {
+  string id = 1;
+  int32 split_creator_bps = 2;  // basis points (7000 = 70%)
+  int32 split_platform_bps = 3; // basis points (3000 = 30%)
+  int64 min_payout_cents = 4;   // minimum payout threshold in integer cents
+  int32 first_payout_hold_days = 5; // hold period for first-ever payout
+  int64 updated_at_ms = 6;
+}
