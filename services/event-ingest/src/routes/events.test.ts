@@ -43,6 +43,7 @@ function buildDeps(overrides: Partial<IngestDeps> = {}): IngestDeps {
     spool: buildInMemorySpool(),
     nats: buildInMemoryNatsBridge(),
     dlq: buildInMemoryDlq(),
+    dlqPublisher: null,
     metrics: buildInMemoryMetrics(),
     nextSeq: (() => {
       let n = 0;
@@ -200,6 +201,40 @@ describe('POST /v1/events', () => {
       headers: signedHeaders(big, ts, nonce),
     });
     expect(res.status).toBe(413);
+  });
+
+  it('publishes DLQ records to Kafka DLQ topic when configured', async () => {
+    const dlqPub = buildInMemoryKafkaPublisher();
+    const depsWithDlq = buildDeps({ dlqPublisher: dlqPub });
+    const appWithDlq = buildApp(depsWithDlq);
+    await depsWithDlq.nats.start(async () => {
+      /* no-op */
+    });
+    const body = JSON.stringify({
+      event_id: 'e-bad-1',
+      event_name: 'view',
+      schema_version: 1,
+      ts_ms: Date.now(),
+      workspace_id: 'ws-1',
+      deck_id: 'deck-1',
+      viewer_id_key: 'v-1',
+      privacy_mode: 'anon_no_track', // rejected by consent gate
+      device_class: 'desktop',
+      source_app: 'viewer',
+      ingest_topic: 'events.ingest.raw',
+    });
+    const ts = Date.now();
+    const nonce = 'dlqpub1234';
+    const res = await appWithDlq.request('/v1/events', {
+      method: 'POST',
+      body,
+      headers: signedHeaders(body, ts, nonce),
+    });
+    expect(res.status).toBe(200);
+    expect(dlqPub.publishRawCalls.length).toBe(1);
+    expect(dlqPub.publishRawCalls[0]?.topic).toBe('events.ingest.dlq');
+    const decoded = JSON.parse(new TextDecoder().decode(dlqPub.publishRawCalls[0]?.payload));
+    expect(decoded.reason).toBe('consent');
   });
 });
 

@@ -24,6 +24,13 @@ export interface IngestDeps {
   hmac: HmacVerifier;
   nonces: NonceCache;
   publisher: KafkaPublisher;
+  /**
+   * Optional Kafka publisher for the DLQ topic. When set, DLQ writes are
+   * also published to `events.ingest.dlq` so downstream consumers
+   * (replay tool, alerts) see them in real time. When null (tests), DLQ
+   * is disk-only.
+   */
+  dlqPublisher: KafkaPublisher | null;
   spool: Spool;
   nats: NatsBridge;
   dlq: DlqWriter;

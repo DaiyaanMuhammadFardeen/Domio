@@ -58,6 +58,11 @@ export async function defaultDeps(cfg: IngestConfig): Promise<IngestDeps> {
     return seq;
   };
 
+  // The DLQ publisher reuses the main Kafka producer but routes to the
+  // dedicated DLQ topic. If Kafka is down at boot, we still keep the
+  // always-failing publisher so DLQ publishes go to disk only.
+  const dlqPublisher = publisher;
+
   // Wire the NATS handler into the same ingest pipeline the HTTP
   // route uses. The bridge calls handleNatsEvent, which validates,
   // strips, and publishes — with the same metrics counters.
@@ -67,11 +72,12 @@ export async function defaultDeps(cfg: IngestConfig): Promise<IngestDeps> {
       validator,
       pii,
       publisher,
+      dlqPublisher,
       spool,
       dlq,
       metrics,
     });
   });
 
-  return { cfg, validator, pii, hmac, nonces, publisher, spool, nats, dlq, metrics, nextSeq };
+  return { cfg, validator, pii, hmac, nonces, publisher, dlqPublisher, spool, nats, dlq, metrics, nextSeq };
 }

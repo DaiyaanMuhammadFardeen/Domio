@@ -14,8 +14,31 @@
 import { Hono } from 'hono';
 import { toIngestError } from '../errors.js';
 import { HMAC_HEADER_NAME, TIMESTAMP_HEADER_NAME, NONCE_HEADER_NAME } from '../hmac.js';
+import { KAFKA_TOPIC_DLQ } from '../types.js';
+import type { DlqRecord } from '../dlq.js';
 import type { IngestDeps } from '../deps.js';
 import type { AnalyticsEvent, IngestAck } from '../types.js';
+
+/**
+ * Publish a DLQ record to the DLQ Kafka topic. Best-effort: if the
+ * publisher is missing or Kafka is unavailable we log but do not fail
+ * the request — the disk DLQ is the source of truth.
+ */
+async function publishDlq(deps: IngestDeps, record: DlqRecord): Promise<void> {
+  if (!deps.dlqPublisher) return;
+  try {
+    const key = typeof record.raw === 'object' && record.raw !== null
+      ? String((record.raw as { event_id?: unknown }).event_id ?? 'unknown')
+      : 'unknown';
+    await deps.dlqPublisher.publishRaw(
+      KAFKA_TOPIC_DLQ,
+      key,
+      new TextEncoder().encode(JSON.stringify(record)),
+    );
+  } catch {
+    // Swallowed intentionally; disk DLQ is authoritative.
+  }
+}
 
 export function eventsRoutes(deps: IngestDeps): Hono {
   const app = new Hono();
@@ -89,12 +112,14 @@ export function eventsRoutes(deps: IngestDeps): Hono {
         const err = deps.validator.tryValidate(rawEvent);
         if (err !== null) {
           rejected += 1;
-          await deps.dlq.write({
+          const dlqRec = {
             recorded_at_ms: Date.now(),
-            reason: 'schema',
+            reason: 'schema' as const,
             message: err,
             raw: rawEvent,
-          });
+          };
+          await deps.dlq.write(dlqRec);
+          await publishDlq(deps, dlqRec);
           deps.metrics.recordEvent(
             typeof (rawEvent as { event_name?: unknown })?.event_name === 'string'
               ? ((rawEvent as { event_name: string }).event_name)
@@ -109,12 +134,14 @@ export function eventsRoutes(deps: IngestDeps): Hono {
         const event = rawEvent as AnalyticsEvent;
         if (!deps.cfg.acceptPrivacyModes.includes(event.privacy_mode)) {
           rejected += 1;
-          await deps.dlq.write({
+          const dlqRec = {
             recorded_at_ms: Date.now(),
-            reason: 'consent',
+            reason: 'consent' as const,
             message: `privacy_mode ${event.privacy_mode} not accepted`,
             raw: event,
-          });
+          };
+          await deps.dlq.write(dlqRec);
+          await publishDlq(deps, dlqRec);
           deps.metrics.recordEvent(event.event_name, event.privacy_mode, event.source_app, 'rejected');
           deps.metrics.recordDlq('consent');
           continue;
