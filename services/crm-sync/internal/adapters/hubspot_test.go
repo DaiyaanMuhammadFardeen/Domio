@@ -49,12 +49,7 @@ func TestHubSpotPushSuccess(t *testing.T) {
 	defer srv.Close()
 
 	a := NewHubSpot(zap.NewNop())
-	// Override the hardcoded HubSpot URL by setting the httpClient to a
-	// custom transport that redirects to the test server. Simpler:
-	// patch the bucket to be huge and validate request plumbing via
-	// the test server (URL swap is below).
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
-
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 	conn := newConn()
 	rec := newRec()
 	require.NoError(t, a.Push(context.Background(), conn, rec))
@@ -71,8 +66,7 @@ func TestHubSpotPushRateLimit(t *testing.T) {
 	defer srv.Close()
 
 	a := NewHubSpot(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
-
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 	conn := newConn()
 	err := a.Push(context.Background(), conn, newRec())
 	require.Error(t, err)
@@ -90,8 +84,7 @@ func TestHubSpotPushServerError(t *testing.T) {
 	defer srv.Close()
 
 	a := NewHubSpot(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
-
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 	conn := newConn()
 	err := a.Push(context.Background(), conn, newRec())
 	require.Error(t, err)
@@ -119,33 +112,4 @@ func TestParseRetryAfterMs(t *testing.T) {
 	got := parseRetryAfterMs(future)
 	require.Greater(t, got, int64(0))
 	require.LessOrEqual(t, got, int64(70000))
-}
-
-// redirectTransport rewrites every request to point at baseURL so a
-// hardcoded "https://api.hubapi.com/…" endpoint can be exercised
-// against an httptest server.
-type rt struct{ base string }
-
-func (r *rt) RoundTrip(req *http.Request) (*http.Response, error) {
-	// Rewrite the URL.
-	u := *req.URL
-	u.Scheme = "http"
-	u.Host = r.baseURLHost()
-	req2 := req.Clone(req.Context())
-	req2.URL = &u
-	return http.DefaultTransport.RoundTrip(req2)
-}
-
-func (r *rt) baseURLHost() string {
-	// base looks like "http://127.0.0.1:43257"
-	for i := 7; i < len(r.base); i++ {
-		if r.base[i] == ':' {
-			return r.base[7:] // strip "http://"
-		}
-	}
-	return r.base[7:]
-}
-
-func redirectTransport(base string) http.RoundTripper {
-	return &rt{base: base}
 }

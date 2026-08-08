@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -45,6 +44,9 @@ type sfServer struct {
 func newSFMock(t *testing.T) (*httptest.Server, *sfServer) {
 	t.Helper()
 	st := &sfServer{}
+	// Bind the mock first so we can include its real URL in the
+	// token response (the Salesforce adapter uses the instance_url
+	// from the token response verbatim for subsequent API calls).
 	mux := http.NewServeMux()
 	mux.HandleFunc("/services/oauth2/token", func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&st.tokenCalls, 1)
@@ -54,12 +56,12 @@ func newSFMock(t *testing.T) (*httptest.Server, *sfServer) {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"access_token":"AT-1","instance_url":"http://` + t.Name() + `","issued_at":"0"}`))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"access_token":"AT-1","instance_url":"http://` + r.Host + `","issued_at":"0"}`))
 	})
 	mux.HandleFunc("/services/data/v59.0/sobjects/Contact/Email/", func(w http.ResponseWriter, r *http.Request) {
 		atomic.AddInt32(&st.contactHits, 1)
 		st.lastAuth = r.Header.Get("Authorization")
-		// Path is "/services/data/v59.0/sobjects/Contact/Email/alice@example.com"
 		idx := strings.LastIndex(r.URL.Path, "/")
 		st.lastEmail = r.URL.Path[idx+1:]
 		buf := make([]byte, 1024)
@@ -83,7 +85,7 @@ func TestSalesforcePushSuccess(t *testing.T) {
 	defer srv.Close()
 
 	a := NewSalesforce(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	conn := newSFConn()
 	rec := newRec()
@@ -102,7 +104,7 @@ func TestSalesforcePushRateLimited(t *testing.T) {
 	st.retryAfter = "2"
 
 	a := NewSalesforce(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	err := a.Push(context.Background(), newSFConn(), newRec())
 	require.Error(t, err)
@@ -116,12 +118,11 @@ func TestSalesforcePushRefreshesToken(t *testing.T) {
 	defer srv.Close()
 
 	a := NewSalesforce(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	conn := newSFConn()
 	require.NoError(t, a.Push(context.Background(), conn, newRec()))
 	require.NoError(t, a.Push(context.Background(), conn, newRec()))
-	// Both Pushes should reuse the cached bearer (no second refresh).
 	require.Equal(t, int32(1), atomic.LoadInt32(&st.tokenCalls))
 	require.Equal(t, int32(2), atomic.LoadInt32(&st.contactHits))
 }
@@ -132,7 +133,7 @@ func TestSalesforcePushTokenFail(t *testing.T) {
 	st.failToken = true
 
 	a := NewSalesforce(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	err := a.Push(context.Background(), newSFConn(), newRec())
 	require.Error(t, err)

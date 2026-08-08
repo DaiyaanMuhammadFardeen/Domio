@@ -8,7 +8,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -41,7 +40,7 @@ func TestOutreachPushMailbox(t *testing.T) {
 	defer srv.Close()
 
 	a := NewOutreach(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	rec := newRec()
 	rec.EventName = "view"
@@ -66,7 +65,7 @@ func TestOutreachPushSequence(t *testing.T) {
 	defer srv.Close()
 
 	a := NewOutreach(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	rec := newRec()
 	rec.EventName = "interaction"
@@ -84,7 +83,7 @@ func TestOutreachPushRateLimit(t *testing.T) {
 	defer srv.Close()
 
 	a := NewOutreach(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	err := a.Push(context.Background(), newORConn(), newRec())
 	require.Error(t, err)
@@ -101,7 +100,7 @@ func TestOutreachPushServerError(t *testing.T) {
 	defer srv.Close()
 
 	a := NewOutreach(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	err := a.Push(context.Background(), newORConn(), newRec())
 	require.Error(t, err)

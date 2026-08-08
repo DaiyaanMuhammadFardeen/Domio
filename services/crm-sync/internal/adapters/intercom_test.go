@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -42,7 +41,7 @@ func TestIntercomPushSuccess(t *testing.T) {
 	defer srv.Close()
 
 	a := NewIntercom(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	conn := newICConn()
 	rec := newRec()
@@ -69,7 +68,7 @@ func TestIntercomPushRateLimit(t *testing.T) {
 	defer srv.Close()
 
 	a := NewIntercom(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	err := a.Push(context.Background(), newICConn(), newRec())
 	require.Error(t, err)
@@ -86,7 +85,7 @@ func TestIntercomPushServerError(t *testing.T) {
 	defer srv.Close()
 
 	a := NewIntercom(zap.NewNop())
-	a.httpClient = &http.Client{Timeout: 5 * time.Second, Transport: redirectTransport(srv.URL)}
+	a.SetTransportForTest(NewRedirectTransport(srv.URL))
 
 	err := a.Push(context.Background(), newICConn(), newRec())
 	require.Error(t, err)
