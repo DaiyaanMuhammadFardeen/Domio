@@ -27,7 +27,13 @@
       "@domio/api-client": ["../../packages/api-client/src/index.ts"],
       "@domio/api-client/*": ["../../packages/api-client/src/*"],
       "@domio/common": ["../../packages/common/src/index.ts"],
-      "@domio/common/*": ["../../packages/common/src/*"]
+      "@domio/common/*": ["../../packages/common/src/*"],
+      "@domio/recording": ["../../packages/recording/src/index.ts"],
+      "@domio/recording/*": ["../../packages/recording/src/*"],
+      "@domio/recording-extensions": ["../../packages/recording-extensions/src/index.ts"],
+      "@domio/recording-extensions/*": ["../../packages/recording-extensions/src/*"],
+      "@domio/object-store": ["../../packages/object-store/src/index.ts"],
+      "@domio/object-store/*": ["../../packages/object-store/src/*"]
     }
   },
   "include": [
