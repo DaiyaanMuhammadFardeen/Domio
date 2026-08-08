@@ -9,7 +9,8 @@
     "paths": {
       "@domio/analytics-warehouse": ["../../../services/analytics-warehouse/src/index.ts"],
       "@domio/analytics-warehouse/*": ["../../../services/analytics-warehouse/src/*"],
-      "@domio/event-ingest": ["../../../services/event-ingest/src/index.ts"]
+      "@domio/event-ingest": ["../../../services/event-ingest/src/index.ts"],
+      "@domio/event-ingest/*": ["../../../services/event-ingest/src/*"]
     }
   },
   "include": ["src/**/*.ts"]
