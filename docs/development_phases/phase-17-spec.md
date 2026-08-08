@@ -1,10 +1,19 @@
+---
+phase: 17
+owner_stream: F (Insights & Workflow)
+critical_path: false
+status: complete
+completion_date: 2026-08-08
+---
+
 # Phase 17 — Analytics & Engagement Intelligence
 
 **Phase:** 17
 **Name:** Analytics & engagement intelligence
-**Owner:** Stream F — Insights & Workflow lead; sub-owners per workstream (Ingestion, Identity, Engagement, Heatmaps, A/B, Sales Notifications, CRM Sync, Team Analytics, Live Delivery, Benchmarks, Dashboard)
+**Owner:** Stream F — Insights & Workflow lead; sub-owners per workstream (W0 Foundations, W1 Ingestion, W2 Warehouse, W3 Identity, W4 Sessionization, W5 Heatmaps, W6 A/B, W7 CRM Sync, W8 Notifications, W9 Team Analytics, W10 Live Delivery, W11 Benchmarks + Dashboard — the closing workstream)
 **Critical-path:** No (surface phase, parallelizable)
 **Parallel stream tag:** Stream F — Insights & Workflow (sibling to P18 collaboration & workflow)
+**Status:** Complete as of 2026-08-08 (see `phase-17-dod.md` and `phase-17-verification.md`)
 
 **Intent:** Turn every view, click, hover, scenario toggle, ROI calculator interaction, scroll-pause, and live-session action into actionable, owner-visible intelligence — while honoring per-viewer privacy modes (identified / pseudonymous / anonymous-consent / anonymous-no-track) and global compliance regimes (GDPR, CCPA, PDPA 2026). The phase delivers the ingestion plane, columnar analytics warehouse, dashboard GraphQL surface, sales-mode notifications, A/B testing framework, CRM sync adapters, scroll-mode heatmaps, team-level template analytics, live-session delivery analytics, and anonymized benchmark cohorts — all wired to the events emitted by the viewer runtimes (P14), presenter mode (P15), and audience participation (P16).
 

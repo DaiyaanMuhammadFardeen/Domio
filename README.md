@@ -10,9 +10,12 @@ This repository contains the source code, planning docs, and infrastructure for 
 
 ## Status
 
-**Phase 0 — Repository, contracts, dev environment.** This phase bootstraps the monorepo, locks the wire-format contracts, and brings every developer's machine and CI runner to a state where `git clone && ./bin/dev-up && ./bin/dev` brings up a working editor + API + page that says "Domio — phase 0 boot" with `/healthz` green.
-
-The complete platform plan is in [`docs/development_phases/`](docs/development_phases/). The architecture is in [`docs/`](docs/) and the ADRs are in [`docs/adr/`](docs/adr/).
+**Phase 17 — Analytics & Engagement Intelligence ✅ complete** (2026-08-08).
+Stream F now has the analytics plane (ingestion, warehouse, identity, A/B,
+CRM sync, sales notifications, team analytics, live delivery, benchmarks,
+dashboard). Next phase is **Phase 18 — Collaboration & Workflow** (Stream F
+sibling). The complete platform plan is in [`docs/development_phases/`](docs/development_phases/).
+The architecture is in [`docs/`](docs/) and the ADRs are in [`docs/adr/`](docs/adr/).
 
 ---
 
@@ -119,3 +122,27 @@ See [`SECURITY.md`](SECURITY.md) for how to report vulnerabilities. Treat all pl
 ## Acknowledgements
 
 This is a from-scratch build. No prior code is reused. All architecture decisions are documented in [`docs/adr/`](docs/adr/).
+
+---
+
+## Phase 17 — Analytics & Engagement Intelligence ✅
+
+**Phase 17 (Analytics & Engagement Intelligence) is complete: 60+ commits, 12 services, 258 TS tests + 121 Go tests passing.**
+
+Phase 17 turns every view, click, scroll, and live-session action into
+owner-visible intelligence while honoring privacy modes and global
+compliance (GDPR, CCPA, PDPA 2026). The phase ships the analytics
+plane — ingestion, warehouse, identity, sessionization, heatmaps,
+A/B, CRM sync, sales notifications, team analytics, live delivery,
+benchmarks, and the dashboard.
+
+| Artifact | Link |
+|---|---|
+| Phase 17 spec | [`docs/development_phases/phase-17-spec.md`](docs/development_phases/phase-17-spec.md) |
+| Architecture data-flow | [`docs/architecture/phase-17-data-flow.md`](docs/architecture/phase-17-data-flow.md) |
+| Analytics runbook | [`docs/analytics-runbook.md`](docs/analytics-runbook.md) |
+| Phase 17 SLOs | [`slo/phase-17.md`](slo/phase-17.md) |
+| Dashboard app README | [`apps/dashboard/README.md`](apps/dashboard/README.md) |
+| Phase 17 DoD | [`docs/development_phases/phase-17-dod.md`](docs/development_phases/phase-17-dod.md) |
+| Phase 17 verification log | [`docs/development_phases/phase-17-verification.md`](docs/development_phases/phase-17-verification.md) |
+| Phase 17 commit log | [`docs/development_phases/phase-17-commit-log.md`](docs/development_phases/phase-17-commit-log.md) |
