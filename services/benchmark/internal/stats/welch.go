@@ -28,16 +28,16 @@ var ErrZeroVariance = errors.New("stats: zero variance in both samples")
 // WelchResult is the output of WelchT. Field names mirror the model
 // fields exposed in the public BenchmarkRun response.
 type WelchResult struct {
-	TStatistic      float64 `json:"t_statistic"`
+	TStatistic       float64 `json:"t_statistic"`
 	DegreesOfFreedom float64 `json:"degrees_of_freedom"`
-	PValue          float64 `json:"p_value"`
-	MeanA           float64 `json:"mean_a"`
-	MeanB           float64 `json:"mean_b"`
-	VarA            float64 `json:"var_a"`
-	VarB            float64 `var_b"`
-	NA              int     `json:"n_a"`
-	NB              int     `json:"n_b"`
-	EffectSigned    float64 `json:"effect_signed"`
+	PValue           float64 `json:"p_value"`
+	MeanA            float64 `json:"mean_a"`
+	MeanB            float64 `json:"mean_b"`
+	VarA             float64 `json:"var_a"`
+	VarB             float64 `json:"var_b"`
+	NA               int     `json:"n_a"`
+	NB               int     `json:"n_b"`
+	EffectSigned     float64 `json:"effect_signed"`
 }
 
 // WelchT performs Welch's two-sample t-test on a and b.
