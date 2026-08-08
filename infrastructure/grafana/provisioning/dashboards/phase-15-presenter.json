@@ -1,0 +1,380 @@
+{
+  "uid": "p15-presenter",
+  "title": "Phase 15 — Presenter",
+  "tags": ["domio", "presenter", "phase-15"],
+  "timezone": "utc",
+  "editable": false,
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "text": "Prometheus", "value": "Prometheus" },
+        "hide": 0
+      },
+      {
+        "name": "instance",
+        "type": "query",
+        "datasource": { "uid": "${datasource}" },
+        "query": "label_values(presenter_ws_open_ms_count, instance)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "hide": 0
+      },
+      {
+        "name": "session_id",
+        "type": "query",
+        "datasource": { "uid": "${datasource}" },
+        "query": "label_values(presenter_ws_open_ms_count, session_id)",
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "WS Open p95 — SLO 800 ms",
+      "description": "95th-percentile presenter WS handshake latency. DoD threshold: 800 ms triggers presenter-ws-p95-open-high alert.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 500 },
+              { "color": "red", "value": 800 }
+            ]
+          },
+          "unit": "ms",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(presenter_ws_open_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le, session_id))",
+          "legendFormat": "p95 session={{session_id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(presenter_ws_open_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le, session_id))",
+          "legendFormat": "p99 session={{session_id}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Annotation Replay p95 — SLO 200 ms",
+      "description": "95th-percentile annotation overlay replay latency. DoD threshold: 200 ms triggers presenter-annotation-p95-replay-high alert.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 200 }
+            ]
+          },
+          "unit": "ms",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(presenter_annotation_replay_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le, kind))",
+          "legendFormat": "p95 kind={{kind}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Handoff p95 — SLO 1500 ms",
+      "description": "95th-percentile round-trip for handover (token mint + verify + apply). DoD threshold: 1500 ms triggers presenter-handoff-p95-high alert.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 800 },
+              { "color": "red", "value": 1500 }
+            ]
+          },
+          "unit": "ms",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(presenter_handoff_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le, session_id))",
+          "legendFormat": "p95 session={{session_id}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Recap p95 — SLO 2000 ms",
+      "description": "95th-percentile recap aggregation latency. DoD threshold: 2000 ms triggers presenter-recap-p95-high alert.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "gradientMode": "scheme",
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1000 },
+              { "color": "red", "value": 2000 }
+            ]
+          },
+          "unit": "ms",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(presenter_recap_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le, phase))",
+          "legendFormat": "p95 phase={{phase}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Advance Throughput",
+      "description": "Slide-advance events per second per session — drives the cadence-rate panel.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "scheme",
+            "pointSize": 4,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "sum", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(presenter_advance_count_count{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (session_id)",
+          "legendFormat": "session={{session_id}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Optimistic-Concurrency Conflicts",
+      "description": "Conflict count per capability. Useful for spotting contention on hot sessions.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "scheme",
+            "pointSize": 4,
+            "showPoints": "auto"
+          },
+          "unit": "ops",
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "sum", "lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(presenter_conflict_count_count{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (capability)",
+          "legendFormat": "{{capability}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "All SLOs — Threshold Lines",
+      "description": "Side-by-side thresholds for the four pinned SLOs. Each fires its own alert when breached for 5 minutes.",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "datasource": { "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "pointSize": 0,
+            "showPoints": "never"
+          },
+          "unit": "ms",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "WS Open (800 ms)" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Annotation Replay (200 ms)" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [5, 5] } },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Handoff (1500 ms)" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "purple" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Recap (2000 ms)" },
+            "properties": [
+              { "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } },
+              { "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "table", "placement": "bottom" }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(presenter_ws_open_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le))",
+          "legendFormat": "WS Open p95",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(presenter_annotation_replay_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le))",
+          "legendFormat": "Annotation Replay p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(presenter_handoff_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le))",
+          "legendFormat": "Handoff p95",
+          "refId": "C"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(presenter_recap_ms_bucket{instance=~\"$instance\",session_id=~\"$session_id\"}[$__rate_interval])) by (le))",
+          "legendFormat": "Recap p95",
+          "refId": "D"
+        },
+        { "expr": "800", "legendFormat": "WS Open (800 ms)", "refId": "E" },
+        { "expr": "200", "legendFormat": "Annotation Replay (200 ms)", "refId": "F" },
+        { "expr": "1500", "legendFormat": "Handoff (1500 ms)", "refId": "G" },
+        { "expr": "2000", "legendFormat": "Recap (2000 ms)", "refId": "H" }
+      ]
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "name": "Alerts",
+        "datasource": { "uid": "${datasource}" },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "type": "dashboard"
+      }
+    ]
+  }
+}
