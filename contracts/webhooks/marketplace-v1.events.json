@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Domio Marketplace Webhook Event Catalog (Phase 19)",
-  "description": "Webhook event catalog for the marketplace creator economy. All events follow a canonical envelope with event_id (ULID), event_type, ts_ms, workspace_id, actor_id, actor_type, and a typed payload. Phase 19 W1.",
+    "description": "Webhook event catalog for the marketplace creator economy. All events follow a canonical envelope with event_id (ULID), event_type, ts_ms, workspace_id, actor_id, actor_type, and a typed payload. Phase 19 W1–W2.",
   "type": "object",
   "events": [
     {
@@ -144,6 +144,39 @@
           "takedown_request_id": { "type": "string", "description": "Takedown request identifier." },
           "listing_id": { "type": "string", "description": "Targeted marketplace listing." },
           "resolution": { "type": "string", "enum": ["confirmed", "dismissed", "resolved"], "description": "Final resolution of the takedown." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "order.paid",
+      "description": "Emitted when a purchase payment is confirmed by the payment provider (Stripe checkout.session.completed, bKash Nagad success callback).",
+      "payload": {
+        "type": "object",
+        "required": ["purchase_id", "listing_id", "buyer_id", "provider", "gross_cents", "currency", "license_grant_id"],
+        "properties": {
+          "purchase_id": { "type": "string", "description": "Application-level purchase identifier." },
+          "listing_id": { "type": "string", "description": "Purchased marketplace listing." },
+          "buyer_id": { "type": "string", "description": "User who completed the purchase." },
+          "provider": { "type": "string", "enum": ["stripe", "bkash", "nagad"], "description": "Payment provider that confirmed payment." },
+          "gross_cents": { "type": "integer", "description": "Gross payment amount in integer cents." },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code." },
+          "license_grant_id": { "type": "string", "description": "License grant issued to the buyer." }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "event_type": "order.chargeback_opened",
+      "description": "Emitted when a payment provider opens a dispute (chargeback) against a purchase. The listing is frozen pending resolution.",
+      "payload": {
+        "type": "object",
+        "required": ["purchase_id", "listing_id", "dispute_status", "frozen"],
+        "properties": {
+          "purchase_id": { "type": "string", "description": "Original purchase identifier." },
+          "listing_id": { "type": "string", "description": "Marketplace listing under dispute." },
+          "dispute_status": { "type": "string", "const": "opened", "description": "Dispute status (always 'opened' for this event)." },
+          "frozen": { "type": "boolean", "const": true, "description": "Always true — listing is frozen for the duration of the dispute." }
         },
         "additionalProperties": false
       }

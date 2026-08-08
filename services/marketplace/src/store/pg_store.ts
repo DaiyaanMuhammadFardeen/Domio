@@ -22,6 +22,10 @@ import type {
   PayoutPolicy,
   ListingVersion,
   AuditEvent,
+  PaymentIntent,
+  LicenseGrant,
+  RevenueShareEvent,
+  PayoutLedgerEntry,
 } from '../types.js';
 import { ListingNotFoundError, ReviewNotFoundError } from '../types.js';
 import type { MarketplaceStore } from './store.js';
@@ -437,6 +441,265 @@ export class PgMarketplaceStore implements MarketplaceStore {
     );
     return rows.length > 0 ? (rows[0]!.hash as string) : '';
   }
+
+  // -------------------------------------------------------------------------
+  // Payment Intents (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async insertPaymentIntent(intent: PaymentIntent): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('insertPaymentIntent');
+    await this.pool.query(
+      `INSERT INTO payment_intent (
+        id, workspace_id, buyer_id, listing_id, purchase_id,
+        provider, provider_intent_id, currency,
+        gross_cents, tax_cents, fee_cents, net_cents,
+        fx_rate, fx_timestamp, status, idempotency_key,
+        dispute_status, refund_status, refunded_at, refund_reason,
+        created_at, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7, $8,
+        $9, $10, $11, $12,
+        $13, $14, $15, $16,
+        $17, $18, $19, $20,
+        $21, $22
+      )`,
+      [
+        intent.id,
+        intent.workspaceId,
+        intent.buyerId,
+        intent.listingId,
+        intent.purchaseId,
+        intent.provider,
+        intent.providerIntentId,
+        intent.currency,
+        intent.grossCents,
+        intent.taxCents,
+        intent.feeCents,
+        intent.netCents,
+        intent.fxRate,
+        intent.fxTimestamp,
+        intent.status,
+        intent.idempotencyKey,
+        intent.disputeStatus,
+        intent.refundStatus,
+        intent.refundedAt,
+        intent.refundReason,
+        intent.createdAt,
+        intent.updatedAt,
+      ],
+    );
+  }
+
+  async getPaymentIntentByPurchaseId(purchaseId: string): Promise<PaymentIntent | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getPaymentIntentByPurchaseId');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM payment_intent WHERE purchase_id = $1',
+      [purchaseId],
+    );
+    if (rows.length === 0) return null;
+    return paymentIntentRowToDomain(rows[0]!);
+  }
+
+  async getPaymentIntentByProviderIntentId(providerIntentId: string): Promise<PaymentIntent | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getPaymentIntentByProviderIntentId');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM payment_intent WHERE provider_intent_id = $1',
+      [providerIntentId],
+    );
+    if (rows.length === 0) return null;
+    return paymentIntentRowToDomain(rows[0]!);
+  }
+
+  async getPaymentIntentByIdempotencyKey(workspaceId: string, idempotencyKey: string): Promise<PaymentIntent | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getPaymentIntentByIdempotencyKey');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM payment_intent WHERE workspace_id = $1 AND idempotency_key = $2',
+      [workspaceId, idempotencyKey],
+    );
+    if (rows.length === 0) return null;
+    return paymentIntentRowToDomain(rows[0]!);
+  }
+
+  async updatePaymentIntentStatus(
+    purchaseId: string,
+    status: PaymentIntent['status'],
+    patch?: Partial<Pick<PaymentIntent, 'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'>>,
+  ): Promise<PaymentIntent> {
+    if (!this.pool) throw new StoreNotConfiguredError('updatePaymentIntentStatus');
+
+    const setClauses: string[] = ['status = $1'];
+    const params: unknown[] = [status];
+    let idx = 2;
+
+    if (patch?.providerIntentId !== undefined) {
+      setClauses.push(`provider_intent_id = $${idx++}`);
+      params.push(patch.providerIntentId);
+    }
+    if (patch?.disputeStatus !== undefined) {
+      setClauses.push(`dispute_status = $${idx++}`);
+      params.push(patch.disputeStatus);
+    }
+    if (patch?.refundStatus !== undefined) {
+      setClauses.push(`refund_status = $${idx++}`);
+      params.push(patch.refundStatus);
+    }
+    if (patch?.refundedAt !== undefined) {
+      setClauses.push(`refunded_at = $${idx++}`);
+      params.push(patch.refundedAt);
+    }
+    if (patch?.refundReason !== undefined) {
+      setClauses.push(`refund_reason = $${idx++}`);
+      params.push(patch.refundReason);
+    }
+
+    setClauses.push(`updated_at = $${idx++}`);
+    params.push(new Date());
+
+    params.push(purchaseId);
+    const sql = `UPDATE payment_intent SET ${setClauses.join(', ')} WHERE purchase_id = $${idx} RETURNING *`;
+    const { rows } = await this.pool.query(sql, params);
+    if (rows.length === 0) throw new ListingNotFoundError(purchaseId);
+    return paymentIntentRowToDomain(rows[0]!);
+  }
+
+  // -------------------------------------------------------------------------
+  // License Grants (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async insertLicenseGrant(grant: LicenseGrant): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('insertLicenseGrant');
+    await this.pool.query(
+      `INSERT INTO license_grant (
+        id, listing_id, buyer_id, version, scopes,
+        seats, signed_token, created_at
+      ) VALUES (
+        $1, $2, $3, $4, $5::jsonb,
+        $6, $7, $8
+      )`,
+      [
+        grant.id,
+        grant.listingId,
+        grant.buyerId,
+        grant.version,
+        JSON.stringify(grant.scopes),
+        grant.seats,
+        grant.signedToken,
+        grant.createdAt,
+      ],
+    );
+  }
+
+  async getLicenseGrantByListingAndBuyer(listingId: string, buyerId: string): Promise<LicenseGrant | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getLicenseGrantByListingAndBuyer');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM license_grant WHERE listing_id = $1 AND buyer_id = $2 LIMIT 1',
+      [listingId, buyerId],
+    );
+    if (rows.length === 0) return null;
+    return licenseGrantRowToDomain(rows[0]!);
+  }
+
+  // -------------------------------------------------------------------------
+  // Revenue Share Events (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async insertRevenueShareEvent(event: RevenueShareEvent): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('insertRevenueShareEvent');
+    await this.pool.query(
+      `INSERT INTO revenue_share_event (
+        id, listing_id, seller_id, workspace_id, currency,
+        gross_cents, fee_cents, net_cents, period_month,
+        event_type, payout_status, created_at
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7, $8, $9,
+        $10, $11, $12
+      )`,
+      [
+        event.id,
+        event.listingId,
+        event.sellerId,
+        event.workspaceId,
+        event.currency,
+        event.grossCents,
+        event.feeCents,
+        event.netCents,
+        event.periodMonth,
+        event.eventType,
+        event.payoutStatus,
+        event.createdAt,
+      ],
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Listing Freeze (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async markListingFrozen(listingId: string, frozenFor: string, frozenAt: Date): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('markListingFrozen');
+    await this.pool.query(
+      'UPDATE marketplace_listing SET frozen_for = $1, frozen_at = $2 WHERE id = $3',
+      [frozenFor, frozenAt, listingId],
+    );
+  }
+
+  async clearListingFrozen(listingId: string): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('clearListingFrozen');
+    await this.pool.query(
+      'UPDATE marketplace_listing SET frozen_for = NULL, frozen_at = NULL WHERE id = $1',
+      [listingId],
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Payout Ledger Entries (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async insertPayoutLedgerEntry(entry: PayoutLedgerEntry): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('insertPayoutLedgerEntry');
+    await this.pool.query(
+      `INSERT INTO payout_ledger_entry (
+        id, workspace_id, creator_id, period_month, event_id,
+        gross_cents, fee_cents, net_cents, currency,
+        status, provider, provider_transfer_id, executor_run_id,
+        created_at, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7, $8, $9,
+        $10, $11, $12, $13,
+        $14, $15
+      )`,
+      [
+        entry.id,
+        entry.workspaceId,
+        entry.creatorId,
+        entry.periodMonth,
+        entry.eventId,
+        entry.grossCents,
+        entry.feeCents,
+        entry.netCents,
+        entry.currency,
+        entry.status,
+        entry.provider,
+        entry.providerTransferId,
+        entry.executorRunId,
+        entry.createdAt,
+        entry.updatedAt,
+      ],
+    );
+  }
+
+  async listEligiblePayoutEvents(periodMonth: string): Promise<RevenueShareEvent[]> {
+    if (!this.pool) throw new StoreNotConfiguredError('listEligiblePayoutEvents');
+    const { rows } = await this.pool.query(
+      `SELECT * FROM revenue_share_event
+       WHERE period_month = $1 AND payout_status = 'eligible'`,
+      [periodMonth],
+    );
+    return rows.map(revenueShareEventRowToDomain);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -477,6 +740,63 @@ function reviewRowToDomain(
     verifiedBuyer: row.verified_buyer as boolean,
     replyBody: reply?.replyBody ?? null,
     repliedAt: reply?.repliedAt ?? null,
+    createdAt: toDate(row.created_at),
+  };
+}
+
+function paymentIntentRowToDomain(row: Record<string, unknown>): PaymentIntent {
+  return {
+    id: row.id as string,
+    workspaceId: row.workspace_id as string,
+    buyerId: row.buyer_id as string,
+    listingId: row.listing_id as string,
+    purchaseId: row.purchase_id as string,
+    provider: row.provider as PaymentIntent['provider'],
+    providerIntentId: row.provider_intent_id as string | null,
+    currency: row.currency as string,
+    grossCents: Number(row.gross_cents),
+    taxCents: Number(row.tax_cents),
+    feeCents: Number(row.fee_cents),
+    netCents: Number(row.net_cents),
+    fxRate: row.fx_rate != null ? Number(row.fx_rate) : null,
+    fxTimestamp: row.fx_timestamp != null ? toDate(row.fx_timestamp) : null,
+    status: row.status as PaymentIntent['status'],
+    idempotencyKey: row.idempotency_key as string,
+    disputeStatus: row.dispute_status as PaymentIntent['disputeStatus'],
+    refundStatus: row.refund_status as PaymentIntent['refundStatus'],
+    refundedAt: row.refunded_at != null ? toDate(row.refunded_at) : null,
+    refundReason: row.refund_reason as string | null,
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
+  };
+}
+
+function licenseGrantRowToDomain(row: Record<string, unknown>): LicenseGrant {
+  return {
+    id: row.id as string,
+    listingId: row.listing_id as string,
+    buyerId: row.buyer_id as string,
+    version: row.version as string,
+    scopes: row.scopes != null ? parseJsonb(row.scopes) as readonly string[] : [],
+    seats: row.seats as number,
+    signedToken: row.signed_token as string,
+    createdAt: toDate(row.created_at),
+  };
+}
+
+function revenueShareEventRowToDomain(row: Record<string, unknown>): RevenueShareEvent {
+  return {
+    id: row.id as string,
+    listingId: row.listing_id as string,
+    sellerId: row.seller_id as string,
+    workspaceId: row.workspace_id as string,
+    currency: row.currency as string,
+    grossCents: Number(row.gross_cents),
+    feeCents: Number(row.fee_cents),
+    netCents: Number(row.net_cents),
+    periodMonth: row.period_month as string,
+    eventType: row.event_type as string,
+    payoutStatus: row.payout_status as RevenueShareEvent['payoutStatus'],
     createdAt: toDate(row.created_at),
   };
 }

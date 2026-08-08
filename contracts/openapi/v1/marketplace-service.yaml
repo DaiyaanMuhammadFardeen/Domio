@@ -31,6 +31,8 @@ tags:
     description: Listing reviews, replies, and reporting.
   - name: marketplace-curated
     description: Brand-locked curated marketplace listings.
+  - name: marketplace-checkout
+    description: Purchase, refund, and payment webhook handling.
 paths:
   /v1/marketplace/listings:
     post:
@@ -424,6 +426,175 @@ paths:
             application/problem+json:
               schema: { $ref: '#/components/schemas/ProblemDetail' }
 
+  # ── Marketplace Checkout (Phase 19 W2) ──────────────────────────────────
+
+  /v1/marketplace/listings/{listing_id}/purchase:
+    post:
+      tags: [marketplace-checkout]
+      summary: Initiate a purchase of a marketplace listing
+      operationId: createPurchase
+      parameters:
+        - $ref: '#/components/parameters/ListingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PurchaseInput' }
+      responses:
+        '201':
+          description: Purchase initiated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseInitiation' }
+        '400':
+          description: Validation error
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Not authorized to purchase
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Duplicate idempotency key (ERR_IDEMPOTENCY_KEY_REUSED)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Payment provider unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/purchases/{purchase_id}/refund:
+    post:
+      tags: [marketplace-checkout]
+      summary: Request a refund for a completed purchase
+      operationId: requestRefund
+      parameters:
+        - name: purchase_id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Purchase identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, minLength: 1, maxLength: 4096, description: "Reason for the refund request." }
+      responses:
+        '202':
+          description: Refund request accepted for processing
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RefundRequest' }
+        '404':
+          description: Purchase not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Refund already exists or outside refund window (ERR_REFUND_INVALID)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Payment provider unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/webhooks/stripe:
+    post:
+      tags: [marketplace-checkout]
+      summary: Receive a Stripe webhook event
+      operationId: receiveStripeWebhook
+      description: |
+        Inbound webhook receiver for Stripe. Signature is verified at the API
+        gateway layer via `X-Stripe-Signature` header.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Raw Stripe event payload.
+      responses:
+        '200':
+          description: Webhook acknowledged.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookReceipt' }
+        '401':
+          description: Signature verification failed.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/webhooks/bkash:
+    post:
+      tags: [marketplace-checkout]
+      summary: Receive a bKash webhook event
+      operationId: receiveBkashWebhook
+      description: |
+        Inbound webhook receiver for bKash payment notifications. Signature is
+        verified at the API gateway layer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Raw bKash notification payload.
+      responses:
+        '200':
+          description: Webhook acknowledged.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookReceipt' }
+        '401':
+          description: Signature verification failed.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/marketplace/webhooks/nagad:
+    post:
+      tags: [marketplace-checkout]
+      summary: Receive a Nagad webhook event
+      operationId: receiveNagadWebhook
+      description: |
+        Inbound webhook receiver for Nagad payment notifications. Signature is
+        verified at the API gateway layer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Raw Nagad notification payload.
+      responses:
+        '200':
+          description: Webhook acknowledged.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WebhookReceipt' }
+        '401':
+          description: Signature verification failed.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
 # ════════════════════════════════════════════════════════════════════════════
 # Components
 # ════════════════════════════════════════════════════════════════════════════
@@ -623,3 +794,42 @@ components:
         updated_at: { type: integer }
         state: { type: string, enum: [allow, deny, override], description: "Brand-lock curation state." }
         override_price_cents: { type: integer, description: "Per-brand price override in integer cents." }
+
+    # ── Checkout (Phase 19 W2) ──────────────────────────────────────────
+    PurchaseInput:
+      type: object
+      required: [listing_id, provider, currency, idempotency_key]
+      properties:
+        listing_id: { type: string, minLength: 1, description: "Marketplace listing to purchase." }
+        provider: { type: string, enum: [stripe, bkash, nagad], description: "Payment provider." }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+        idempotency_key: { type: string, minLength: 1, description: "Client-generated idempotency key (UUID v4/v7). Prevents duplicate charges." }
+        quantity: { type: integer, minimum: 1, default: 1, description: "Number of seats/licenses to purchase." }
+        success_url: { type: string, format: uri, description: "Redirect URL after successful payment." }
+        cancel_url: { type: string, format: uri, description: "Redirect URL if the buyer cancels." }
+
+    PurchaseInitiation:
+      type: object
+      required: [purchase_id, provider, status, expires_at]
+      properties:
+        purchase_id: { type: string, description: "Application-level purchase identifier." }
+        provider: { type: string, enum: [stripe, bkash, nagad], description: "Payment provider used." }
+        provider_intent_id: { type: string, description: "Provider-side payment intent identifier." }
+        checkout_url: { type: string, format: uri, nullable: true, description: "Provider checkout URL. Null for redirect-less flows (e.g., bKash token collection)." }
+        status: { type: string, enum: [pending, processing, succeeded, failed, expired], description: "Current purchase status." }
+        expires_at: { type: integer, description: "Epoch milliseconds when this purchase intent expires." }
+
+    RefundRequest:
+      type: object
+      required: [purchase_id, refund_status, auto_approved, review_required]
+      properties:
+        purchase_id: { type: string, description: "Original purchase identifier." }
+        refund_status: { type: string, enum: [pending, approved, rejected, processing, completed], description: "Current refund status." }
+        auto_approved: { type: boolean, description: "True if refund was auto-approved (within 14-day window and usage < 5 inserts)." }
+        review_required: { type: boolean, description: "True if the refund requires admin review." }
+
+    WebhookReceipt:
+      type: object
+      required: [received]
+      properties:
+        received: { type: boolean, description: "Always true when the webhook is acknowledged." }

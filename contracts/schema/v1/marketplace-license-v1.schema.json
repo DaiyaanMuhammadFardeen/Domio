@@ -77,5 +77,54 @@
       "minimum": 0,
       "description": "Offline grace period end in epoch milliseconds. 0 means no offline grace."
     }
+  },
+  "definitions": {
+    "PurchaseLicenseGrant": {
+      "type": "object",
+      "description": "License grant issued at purchase time. Mirrors the LicenseGrant shape but scoped to the purchase transaction.",
+      "required": ["license_grant_id", "listing_id", "buyer_id", "version", "scopes", "issued_at_ms", "signed_token"],
+      "properties": {
+        "license_grant_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Globally-unique license grant identifier."
+        },
+        "listing_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Marketplace listing this grant covers."
+        },
+        "buyer_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "User who received the grant."
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Semver version of the licensed listing at time of purchase."
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["single_seat", "team_n_seats", "enterprise_pool"]
+          },
+          "minItems": 1,
+          "description": "License scopes granted with this purchase."
+        },
+        "issued_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Issued-at timestamp in epoch milliseconds."
+        },
+        "signed_token": {
+          "type": "string",
+          "minLength": 1,
+          "description": "JWT-signed entitlement token."
+        }
+      },
+      "additionalProperties": false
+    }
   }
 }

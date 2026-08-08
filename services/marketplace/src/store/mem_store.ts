@@ -11,6 +11,10 @@ import type {
   PayoutPolicy,
   ListingVersion,
   AuditEvent,
+  PaymentIntent,
+  LicenseGrant,
+  RevenueShareEvent,
+  PayoutLedgerEntry,
 } from '../types.js';
 import {
   ListingNotFoundError,
@@ -23,6 +27,10 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   private readonly reviews = new Map<string, MarketplaceReview>();
   private readonly versions: ListingVersion[] = [];
   private readonly auditEvents: AuditEvent[] = [];
+  private readonly paymentIntents = new Map<string, PaymentIntent>();
+  private readonly licenseGrants: LicenseGrant[] = [];
+  private readonly revenueShareEvents: RevenueShareEvent[] = [];
+  private readonly payoutLedgerEntries: PayoutLedgerEntry[] = [];
   private payoutPolicy: PayoutPolicy = {
     id: 'default',
     splitCreatorBps: 7000,
@@ -179,6 +187,104 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   }
 
   // -------------------------------------------------------------------------
+  // Payment Intents (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async insertPaymentIntent(intent: PaymentIntent): Promise<void> {
+    this.paymentIntents.set(intent.purchaseId, intent);
+  }
+
+  async getPaymentIntentByPurchaseId(purchaseId: string): Promise<PaymentIntent | null> {
+    return this.paymentIntents.get(purchaseId) ?? null;
+  }
+
+  async getPaymentIntentByProviderIntentId(providerIntentId: string): Promise<PaymentIntent | null> {
+    for (const intent of this.paymentIntents.values()) {
+      if (intent.providerIntentId === providerIntentId) return intent;
+    }
+    return null;
+  }
+
+  async getPaymentIntentByIdempotencyKey(workspaceId: string, idempotencyKey: string): Promise<PaymentIntent | null> {
+    for (const intent of this.paymentIntents.values()) {
+      if (intent.workspaceId === workspaceId && intent.idempotencyKey === idempotencyKey) {
+        return intent;
+      }
+    }
+    return null;
+  }
+
+  async updatePaymentIntentStatus(
+    purchaseId: string,
+    status: PaymentIntent['status'],
+    patch?: Partial<Pick<PaymentIntent, 'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'>>,
+  ): Promise<PaymentIntent> {
+    const existing = this.paymentIntents.get(purchaseId);
+    if (!existing) throw new ListingNotFoundError(purchaseId);
+    const updated: PaymentIntent = {
+      ...existing,
+      status,
+      ...patch,
+      updatedAt: new Date(),
+    } as PaymentIntent;
+    this.paymentIntents.set(purchaseId, updated);
+    return updated;
+  }
+
+  // -------------------------------------------------------------------------
+  // License Grants (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async insertLicenseGrant(grant: LicenseGrant): Promise<void> {
+    this.licenseGrants.push(grant);
+  }
+
+  async getLicenseGrantByListingAndBuyer(listingId: string, buyerId: string): Promise<LicenseGrant | null> {
+    for (const grant of this.licenseGrants) {
+      if (grant.listingId === listingId && grant.buyerId === buyerId) return grant;
+    }
+    return null;
+  }
+
+  // -------------------------------------------------------------------------
+  // Revenue Share Events (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async insertRevenueShareEvent(event: RevenueShareEvent): Promise<void> {
+    this.revenueShareEvents.push(event);
+  }
+
+  // -------------------------------------------------------------------------
+  // Listing Freeze (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async markListingFrozen(listingId: string, frozenFor: string, frozenAt: Date): Promise<void> {
+    const existing = this.listings.get(listingId);
+    if (!existing) throw new ListingNotFoundError(listingId);
+    const updated = { ...existing, frozenFor, frozenAt } as unknown as MarketplaceListing;
+    this.listings.set(listingId, updated);
+  }
+
+  async clearListingFrozen(listingId: string): Promise<void> {
+    const existing = this.listings.get(listingId);
+    if (!existing) throw new ListingNotFoundError(listingId);
+    const updated = { ...existing, frozenFor: null, frozenAt: null } as unknown as MarketplaceListing;
+    this.listings.set(listingId, updated);
+  }
+
+  // -------------------------------------------------------------------------
+  // Payout Ledger Entries (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async insertPayoutLedgerEntry(entry: PayoutLedgerEntry): Promise<void> {
+    this.payoutLedgerEntries.push(entry);
+  }
+
+  async listEligiblePayoutEvents(periodMonth: string): Promise<RevenueShareEvent[]> {
+    return this.revenueShareEvents.filter(e => e.periodMonth === periodMonth && e.payoutStatus === 'eligible');
+  }
+
+  // -------------------------------------------------------------------------
   // Test helpers
   // -------------------------------------------------------------------------
 
@@ -187,5 +293,9 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
     this.reviews.clear();
     this.versions.length = 0;
     this.auditEvents.length = 0;
+    this.paymentIntents.clear();
+    this.licenseGrants.length = 0;
+    this.revenueShareEvents.length = 0;
+    this.payoutLedgerEntries.length = 0;
   }
 }

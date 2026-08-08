@@ -262,4 +262,224 @@ describe('InMemoryMarketplaceStore', () => {
       expect(await store.getReview('review-1')).toBeNull();
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Payment Intents (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  describe('payment intents', () => {
+    it('inserts and retrieves a payment intent', async () => {
+      const intent = {
+        id: 'pi-1',
+        workspaceId: 'ws1',
+        buyerId: 'b1',
+        listingId: 'l1',
+        purchaseId: 'p1',
+        provider: 'stripe' as const,
+        providerIntentId: 'pi_xxx',
+        currency: 'USD',
+        grossCents: 1000,
+        taxCents: 0,
+        feeCents: 300,
+        netCents: 700,
+        fxRate: 1,
+        fxTimestamp: new Date(),
+        status: 'pending' as const,
+        idempotencyKey: 'idem-1',
+        disputeStatus: 'none' as const,
+        refundStatus: 'none' as const,
+        refundedAt: null,
+        refundReason: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.insertPaymentIntent(intent);
+      const found = await store.getPaymentIntentByPurchaseId('p1');
+      expect(found?.id).toBe('pi-1');
+    });
+
+    it('getPaymentIntentByProviderIntentId finds by provider_intent_id', async () => {
+      const intent = {
+        id: 'pi-1',
+        workspaceId: 'ws1',
+        buyerId: 'b1',
+        listingId: 'l1',
+        purchaseId: 'p1',
+        provider: 'stripe' as const,
+        providerIntentId: 'pi_xxx',
+        currency: 'USD',
+        grossCents: 1000,
+        taxCents: 0,
+        feeCents: 300,
+        netCents: 700,
+        fxRate: 1,
+        fxTimestamp: new Date(),
+        status: 'pending' as const,
+        idempotencyKey: 'idem-1',
+        disputeStatus: 'none' as const,
+        refundStatus: 'none' as const,
+        refundedAt: null,
+        refundReason: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.insertPaymentIntent(intent);
+      const found = await store.getPaymentIntentByProviderIntentId('pi_xxx');
+      expect(found?.id).toBe('pi-1');
+    });
+
+    it('getPaymentIntentByIdempotencyKey finds by workspace + key', async () => {
+      const intent = {
+        id: 'pi-1',
+        workspaceId: 'ws1',
+        buyerId: 'b1',
+        listingId: 'l1',
+        purchaseId: 'p1',
+        provider: 'stripe' as const,
+        providerIntentId: 'pi_xxx',
+        currency: 'USD',
+        grossCents: 1000,
+        taxCents: 0,
+        feeCents: 300,
+        netCents: 700,
+        fxRate: 1,
+        fxTimestamp: new Date(),
+        status: 'pending' as const,
+        idempotencyKey: 'idem-1',
+        disputeStatus: 'none' as const,
+        refundStatus: 'none' as const,
+        refundedAt: null,
+        refundReason: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.insertPaymentIntent(intent);
+      const found = await store.getPaymentIntentByIdempotencyKey('ws1', 'idem-1');
+      expect(found?.id).toBe('pi-1');
+    });
+
+    it('updatePaymentIntentStatus updates status', async () => {
+      const intent = {
+        id: 'pi-1',
+        workspaceId: 'ws1',
+        buyerId: 'b1',
+        listingId: 'l1',
+        purchaseId: 'p1',
+        provider: 'stripe' as const,
+        providerIntentId: 'pi_xxx',
+        currency: 'USD',
+        grossCents: 1000,
+        taxCents: 0,
+        feeCents: 300,
+        netCents: 700,
+        fxRate: 1,
+        fxTimestamp: new Date(),
+        status: 'pending' as const,
+        idempotencyKey: 'idem-1',
+        disputeStatus: 'none' as const,
+        refundStatus: 'none' as const,
+        refundedAt: null,
+        refundReason: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.insertPaymentIntent(intent);
+      const updated = await store.updatePaymentIntentStatus('p1', 'succeeded');
+      expect(updated.status).toBe('succeeded');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // License Grants (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  describe('license grants', () => {
+    it('inserts and retrieves a license grant', async () => {
+      const grant = {
+        id: 'lg-1',
+        listingId: 'l1',
+        buyerId: 'b1',
+        version: '1.0',
+        scopes: ['use'],
+        seats: 1,
+        signedToken: 'token.xxx',
+        createdAt: new Date(),
+      };
+      await store.insertLicenseGrant(grant);
+      const found = await store.getLicenseGrantByListingAndBuyer('l1', 'b1');
+      expect(found?.id).toBe('lg-1');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Revenue Share Events (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  describe('revenue share events', () => {
+    it('inserts a revenue share event', async () => {
+      const event = {
+        id: 'rse-1',
+        listingId: 'l1',
+        sellerId: 's1',
+        workspaceId: 'ws1',
+        currency: 'USD',
+        grossCents: 1000,
+        feeCents: 300,
+        netCents: 700,
+        periodMonth: '2024-01',
+        eventType: 'purchase',
+        payoutStatus: 'eligible' as const,
+        createdAt: new Date(),
+      };
+      await store.insertRevenueShareEvent(event);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Payout Ledger Entries (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  describe('payout ledger entries', () => {
+    it('inserts a payout ledger entry', async () => {
+      const entry = {
+        id: 'ple-1',
+        workspaceId: 'ws1',
+        creatorId: 'c1',
+        periodMonth: '2024-01',
+        eventId: 'rse-1',
+        grossCents: 1000,
+        feeCents: 300,
+        netCents: 700,
+        currency: 'USD',
+        status: 'pending' as const,
+        provider: null,
+        providerTransferId: null,
+        executorRunId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.insertPayoutLedgerEntry(entry);
+    });
+
+    it('listEligiblePayoutEvents returns eligible events', async () => {
+      const event = {
+        id: 'rse-1',
+        listingId: 'l1',
+        sellerId: 's1',
+        workspaceId: 'ws1',
+        currency: 'USD',
+        grossCents: 1000,
+        feeCents: 300,
+        netCents: 700,
+        periodMonth: '2024-01',
+        eventType: 'purchase',
+        payoutStatus: 'eligible' as const,
+        createdAt: new Date(),
+      };
+      await store.insertRevenueShareEvent(event);
+      const events = await store.listEligiblePayoutEvents('2024-01');
+      expect(events).toHaveLength(1);
+      expect(events[0]!.id).toBe('rse-1');
+    });
+  });
 });

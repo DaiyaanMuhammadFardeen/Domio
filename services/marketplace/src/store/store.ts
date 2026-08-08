@@ -14,6 +14,10 @@ import type {
   PayoutPolicy,
   ListingVersion,
   AuditEvent,
+  PaymentIntent,
+  LicenseGrant,
+  RevenueShareEvent,
+  PayoutLedgerEntry,
 } from '../types.js';
 
 // ---------------------------------------------------------------------------
@@ -70,6 +74,43 @@ export interface MarketplaceStore {
   insertAuditEvent(event: AuditEvent): Promise<void>;
   getNextAuditSeq(workspaceId: string, eventKind: string): Promise<number>;
   getLastAuditHash(workspaceId: string, eventKind: string): Promise<string>;
+
+  // -------------------------------------------------------------------------
+  // Payment Intents (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  insertPaymentIntent(intent: PaymentIntent): Promise<void>;
+  getPaymentIntentByPurchaseId(purchaseId: string): Promise<PaymentIntent | null>;
+  getPaymentIntentByProviderIntentId(providerIntentId: string): Promise<PaymentIntent | null>;
+  getPaymentIntentByIdempotencyKey(workspaceId: string, idempotencyKey: string): Promise<PaymentIntent | null>;
+  updatePaymentIntentStatus(purchaseId: string, status: PaymentIntent['status'], patch?: Partial<Pick<PaymentIntent, 'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'>>): Promise<PaymentIntent>;
+
+  // -------------------------------------------------------------------------
+  // License Grants (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  insertLicenseGrant(grant: LicenseGrant): Promise<void>;
+  getLicenseGrantByListingAndBuyer(listingId: string, buyerId: string): Promise<LicenseGrant | null>;
+
+  // -------------------------------------------------------------------------
+  // Revenue Share Events (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  insertRevenueShareEvent(event: RevenueShareEvent): Promise<void>;
+
+  // -------------------------------------------------------------------------
+  // Listing Freeze (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  markListingFrozen(listingId: string, frozenFor: string, frozenAt: Date): Promise<void>;
+  clearListingFrozen(listingId: string): Promise<void>;
+
+  // -------------------------------------------------------------------------
+  // Payout Ledger Entries (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  insertPayoutLedgerEntry(entry: PayoutLedgerEntry): Promise<void>;
+  listEligiblePayoutEvents(periodMonth: string): Promise<RevenueShareEvent[]>;
 
   // -------------------------------------------------------------------------
   // Transaction support

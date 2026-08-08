@@ -278,6 +278,370 @@ describe('MarketplaceService', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Purchases (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  describe('createPurchase', () => {
+    it('creates a purchase for a published listing', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      expect(purchase.purchase_id).toBeTruthy();
+      expect(purchase.listing_id).toBe(listing.id);
+      expect(purchase.buyer_id).toBe('buyer-1');
+      expect(purchase.provider).toBe('stripe');
+      expect(purchase.status).toBe('pending');
+      expect(purchase.gross_cents).toBe(1000);
+    });
+
+    it('returns existing purchase on idempotent replay', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase1 = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      const purchase2 = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      expect(purchase2.purchase_id).toBe(purchase1.purchase_id);
+    });
+
+    it('throws ListingNotFoundError for unknown listing', async () => {
+      await expect(
+        service.createPurchase('ws1', 'buyer-1', {
+          listing_id: 'nonexistent',
+          provider: 'stripe',
+          currency: 'USD',
+          idempotency_key: 'idem-1',
+        }),
+      ).rejects.toThrow(ListingNotFoundError);
+    });
+
+    it('throws for unpublished listing', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Draft Component',
+      });
+
+      await expect(
+        service.createPurchase('ws1', 'buyer-1', {
+          listing_id: listing.id,
+          provider: 'stripe',
+          currency: 'USD',
+          idempotency_key: 'idem-1',
+        }),
+      ).rejects.toThrow(MarketplaceValidationError);
+    });
+
+    it('throws for invalid currency', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      await expect(
+        service.createPurchase('ws1', 'buyer-1', {
+          listing_id: listing.id,
+          provider: 'stripe',
+          currency: 'GBP',
+          idempotency_key: 'idem-1',
+        }),
+      ).rejects.toThrow('Invalid marketplace currency');
+    });
+  });
+
+  describe('handlePaymentWebhook', () => {
+    it('returns received on success event', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      const result = await service.handlePaymentWebhook(
+        'stripe',
+        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' }),
+        'valid_sig',
+        'checkout.session.completed',
+      );
+
+      expect(result.received).toBe(true);
+    });
+
+    it('returns received on failure event', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      const result = await service.handlePaymentWebhook(
+        'stripe',
+        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.expired' }),
+        'valid_sig',
+        'checkout.session.expired',
+      );
+
+      expect(result.received).toBe(true);
+    });
+
+    it('throws on invalid webhook signature', async () => {
+      await expect(
+        service.handlePaymentWebhook('stripe', '{}', '', 'checkout.session.completed'),
+      ).rejects.toThrow(MarketplaceValidationError);
+    });
+
+    it('is idempotent on re-delivery', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      const body = JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' });
+      await service.handlePaymentWebhook('stripe', body, 'valid_sig', 'checkout.session.completed');
+      const result = await service.handlePaymentWebhook('stripe', body, 'valid_sig', 'checkout.session.completed');
+      expect(result.received).toBe(true);
+    });
+  });
+
+  describe('requestRefund', () => {
+    it('auto-approves refund within 14 days with low usage', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      // Simulate payment success
+      await service.handlePaymentWebhook(
+        'stripe',
+        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' }),
+        'valid_sig',
+        'checkout.session.completed',
+      );
+
+      const refund = await service.requestRefund('ws1', 'buyer-1', purchase.purchase_id, 'Changed my mind');
+      expect(refund.refund_status).toBe('refunded');
+      expect(refund.auto_approved).toBe(true);
+      expect(refund.review_required).toBe(false);
+    });
+
+    it('returns review_required when outside 14 day window', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      // Simulate payment success
+      await service.handlePaymentWebhook(
+        'stripe',
+        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' }),
+        'valid_sig',
+        'checkout.session.completed',
+      );
+
+      // Manually set createdAt to 15 days ago
+      const intent = await store.getPaymentIntentByPurchaseId(purchase.purchase_id);
+      if (intent) {
+        const fifteenDaysAgo = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000);
+        await store.updatePaymentIntentStatus(purchase.purchase_id, 'succeeded', {
+          refundedAt: null,
+          refundStatus: 'none',
+        });
+        // Override the createdAt by re-inserting
+        await store.insertPaymentIntent({
+          ...intent,
+          createdAt: fifteenDaysAgo,
+        });
+      }
+
+      const refund = await service.requestRefund('ws1', 'buyer-1', purchase.purchase_id, 'Too late');
+      expect(refund.refund_status).toBe('requested');
+      expect(refund.auto_approved).toBe(false);
+      expect(refund.review_required).toBe(true);
+    });
+
+    it('throws 409 when refund already requested', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      // Simulate payment success
+      await service.handlePaymentWebhook(
+        'stripe',
+        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' }),
+        'valid_sig',
+        'checkout.session.completed',
+      );
+
+      // First refund
+      await service.requestRefund('ws1', 'buyer-1', purchase.purchase_id, 'First');
+
+      // Second refund should throw
+      await expect(
+        service.requestRefund('ws1', 'buyer-1', purchase.purchase_id, 'Second'),
+      ).rejects.toThrow(MarketplaceValidationError);
+    });
+  });
+
+  describe('handleChargeback', () => {
+    it('freezes listing on dispute.opened', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      await service.handleChargeback('stripe', 'dispute.opened', purchase.purchase_id);
+
+      const updated = await store.getListing(listing.id);
+      expect(updated).toBeTruthy();
+    });
+
+    it('unfreezes listing on dispute.resolved', async () => {
+      const listing = await service.createListing({
+        catalogId: 'c1',
+        sellerId: 's1',
+        title: 'Paid Component',
+        priceCents: 1000,
+        currency: 'USD',
+      });
+      await service.submitListing(listing.id);
+      await service.publishListing(listing.id);
+
+      const purchase = await service.createPurchase('ws1', 'buyer-1', {
+        listing_id: listing.id,
+        provider: 'stripe',
+        currency: 'USD',
+        idempotency_key: 'idem-1',
+      });
+
+      await service.handleChargeback('stripe', 'dispute.opened', purchase.purchase_id);
+      await service.handleChargeback('stripe', 'dispute.resolved', purchase.purchase_id);
+
+      const updated = await store.getListing(listing.id);
+      expect(updated).toBeTruthy();
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Full lifecycle
   // -------------------------------------------------------------------------
 

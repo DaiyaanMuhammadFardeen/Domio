@@ -1,6 +1,6 @@
 # Domio Marketplace Runbook (Phase 19)
 
-Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain (flags, migrations, contracts, marketplace service).
+Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 complete (2026-08-09)** — Money-moving (checkout, refund, chargeback). Remaining: Waves 3, 4, 5.
 
 ## What Wave 1 shipped
 
@@ -29,18 +29,33 @@ Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain (flags, mi
 - `services/marketplace` (`@domio/marketplace-service`) — **138 tests**, typecheck clean. Listing CRUD + lifecycle transitions (draft→in_review→published→deprecated/removed matching P06 registry), listing versions + changelog, pricing calculator (integer cents, 70/30 split floor rounding, free/enterprise_quote, USD|BDT|EUR), reviews (verified-buyer gate, rating 1-5, body ≤4KB, reply-once, report), payout policy read, curated stub. Full pg DML + withTransaction. 16 handlers matching the 16 operationIds exactly. Self-contained HMAC-SHA256 audit recorder (prev_hash chain, kid='mk1').
 
 ### Follow-ups (deferred to later waves)
-1. P06 `payout_executor_enabled` flag is doc-only (never wired in code) — wire alongside Wave 2/3 payout machinery.
-2. Verified-buyer review gate uses in-memory license check — real `license_grant` lookup in Wave 2.
+1. P06 `payout_executor_enabled` flag is doc-only (never wired in code) — wire alongside Wave 3 payout machinery.
+2. Verified-buyer review gate uses in-memory license check — real `license_grant` lookup in Wave 3 (post-checkout grants now exist in the store, just not queried by the review gate).
 3. `getCuratedMarketplaceListings` returns `[]` stub — real brand-locked curated logic in Wave 4 (WS-MKT-5).
-4. Listing versions throw `StoreNotImplementedError` in pg_store (no listing_version table) — add migration in Wave 2.
-5. Review replies tracked in in-memory Map in pg_store (no reply column in P06 `marketplace_review`) — migration needed.
-6. Audit recorder not yet wired into service methods — wired in Waves 2-4 when purchase/refund/payout/kyc/takedown events land (event_kind enum fits those, not listing lifecycle).
-7. Real vendor adapters (Stripe/bKash/Nagad/KYC/FX) are external — narrow interfaces + sandbox/in-memory impls + full tests now, real providers later (P18 vendor-adapter pattern).
-8. Migrations 0079–0086 not yet applied to a live DB (no local Postgres in authoring environment) — run `make migrate-up` before exercising services.
+4. Real vendor adapters (Stripe/bKash/Nagad/KYC/FX) are external — sandbox providers + narrow interfaces now, real providers later (P18 vendor-adapter pattern).
+5. Migrations 0079–0089 not yet applied to a live DB (no local Postgres in authoring environment) — run `make migrate-up` before exercising services.
+
+## What Wave 2 shipped (Money-moving, WS-MKT-4)
+
+### Migrations (0087–0089, ALTER/CREATE per P19 conventions)
+- `0087_phase19_listing_versions` — `listing_version` (listing_id FK→marketplace_listing CASCADE, version_num, changelog text, manifest jsonb, created_by, created_at; UNIQUE(listing_id,version_num)). Workspace RLS.
+- `0088_phase19_review_reply` — `marketplace_review` +reply/replied_by/replied_at (creator reply support); `payment_intent` +dispute_status CHECK(none,opened,won,lost,resolved), +refund_status CHECK(none,requested,approved,refunded), +refunded_at, +refund_reason.
+- `0089_phase19_chargeback` — `marketplace_listing` +frozen_for CHECK(dispute,takedown), +frozen_at; `subscription` +canceled_at, +grace_ends_at, +revoked_at (7-day grace lifecycle).
+
+### Contracts (append-only, old 16 operationIds untouched)
+- `marketplace-service.yaml` → **21 operationIds** (+5, tag marketplace-checkout): `createPurchase`, `requestRefund`, `receiveStripeWebhook`, `receiveBkashWebhook`, `receiveNagadWebhook`; +4 schemas (PurchaseInput, PurchaseInitiation, RefundRequest, WebhookReceipt).
+- Webhook catalog → **11 events** (+order.paid, +order.chargeback_opened).
+- `marketplace-license-v1.schema.json` + `PurchaseLicenseGrant` definition.
+
+### Services
+- `services/marketplace` (`@domio/marketplace-service`) — **182 tests** (138 + 44 new), typecheck clean. New: `src/payments/{types,providers}.ts` (PaymentProvider interface + StripeSandboxProvider/BkashSandboxProvider/NagadSandboxProvider, verifyWebhook by provider signature header, sandbox env `MARKETPLACE_PAYMENTS_SANDBOX` default true), `src/license.ts` (LicenseSigner + SandboxLicenseSigner JWS-HS256 JWT-shaped token, 365-day exp, env `MARKETPLACE_LICENSE_SECRET`). Store +10 methods (payment_intent/license_grant/revenue_share_event/payout_ledger_entry/listing freeze + full pg DML vs 0081/0082/0087-0089). Service methods: `createPurchase` (idempotency via idempotency_key replay → no double-write, published-listing check, price calc, provider checkout), `handlePaymentWebhook` (verify sig → 401; success → paid + license_grant + revenue_share_event eligible + audit 'purchase'; re-delivery no-op; failed → no grant), `requestRefund` (14-day window + <5 inserts via injected UsageProvider default 0 → auto-approve else admin review; refund_status lifecycle; audit 'refund'), `handleChargeback` (FEATURE_MARKETPLACE_CHARGEBACK-gated: dispute → listing frozen_for='dispute' + audit; resolution → unfreeze). 6 handlers incl. the 5 contract operationIds + handleChargeback (200). Audit recorder now wired to money events (closes Wave-1 follow-up 6).
+
+### Workers
+- `workers/subscription-billing` (`@domio/subscription-billing-worker`) — **9 tests**. SubscriptionBillingWorker (setInterval tick, WORKER_TICK_MS 60000, start/stop/runOnce → {scanned,canceled,revoked}); injected SubscriptionProvider (InMemorySubscriptionProvider default): listDueForCancellation (cancel_at_period_end ≤ now), listGraceExpired (grace_ends_at ≤ now, not yet revoked); cancel → canceled_at, revoke → revoked_at after 7-day grace. Idempotent (skips already-canceled/revoked).
+- `workers/refund-processor` (`@domio/refund-processor-worker`) — **8 tests**. RefundProcessorWorker (same tick pattern, runOnce → {scanned,auto_approved,review_required}); injected RefundProvider (InMemoryRefundProvider default): listRefundRequests('requested'), approveRefund (→ refund_status 'refunded'), flagForReview (admin queue). Auto-approve if within 14 days + usage <5 inserts, else admin.
 
 ## Waves remaining
 
-- **Wave 2 — Money-moving (WS-MKT-4)**: checkout purchase flow (Stripe Checkout + bKash/Nagad token adapters + sandbox, idempotency-key, webhook re-delivery no double-write, failed payment no license_grant, signed JWT ≤1.5s p95), license-signer extension, `subscription-billing` worker (daily cron, payout.eligible monthly, cancel → license revoked after 7-day grace), `refund-processor` (14-day window + <5 inserts, auto-approve else admin), chargeback (dispute → listing frozen_for, payout held, creator notified, resolution unfreezes/voids).
 - **Wave 3 — Creator economy (WS-MKT-6/7)**: onboarding/KYC state machine (pending→profile_complete→kyc_required→kyc_submitted→kyc_approved→payout_ready→active; free listings at profile_complete, paid requires payout_ready), KYC vendor-agnostic interface + kyc-webhook poll worker, payout setup (Stripe Connect Express OAuth / bKash-Nagad + bank fallback), `payout-executor` (monthly, groups by seller, idempotent on (executor_run_id,event_id), partial-failure no batch rollback, $50 min + 30-day hold), `fx-rate-cacher` (daily mid-rate) + VAT tax records, creator analytics (downloads/installs/MRR/conversion/refund rate/top geos) + PDF statements + 1099-K.
 - **Wave 4 — Trust/curation/integrations (WS-MKT-5/8/9)**: brand-locked curated filter + 403 guard on direct API bypass, takedown intake/workflow/counter-notice + trust-scanner, partner API (OAuth 2.1 scopes, rate limits 600/min Pro / 6000/min Enterprise, `marketplace-partner.yaml`), MCP tools (`purchase_marketplace` capability OFF by default), webhook-dispatcher (HMAC idempotent), audit coverage.
 - **Wave 5 — Frontend + finalize (WS-MKT-1 + cross-cutting)**: `apps/marketplace-web` storefront (SSR facets, LCP ≤2s, Lighthouse ≥90), editor Insert→Marketplace panel re-skin (brand-locked overlay), `apps/creator-console` studio (drag-upload, manifest, price, license) + analytics + statements, `apps/admin-console` brand-lock UI, i18n 7 locales (en, bn, es, fr, de, ja, zh-CN; bn first-class ৳ numerals), contracts tag `phase-19-contracts-v1.0.0`, runbook, full cross-service verify.

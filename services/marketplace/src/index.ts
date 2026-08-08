@@ -1,10 +1,11 @@
 /**
- * Domio marketplace-service (Phase 19 Wave 1).
+ * Domio marketplace-service (Phase 19 Wave 1+2).
  *
  * Marketplace & Creator Economy service.
  *
  * Exports:
- *  - Service, handlers, store, types, feature flags, pricing, audit.
+ *  - Service, handlers, store, types, feature flags, pricing, audit,
+ *    payments, license.
  */
 
 export { MarketplaceService } from './service.js';
@@ -19,6 +20,14 @@ export type { FeatureFlag } from './feature_flags.js';
 export { calculatePrice, normalizeCurrency } from './pricing.js';
 export { InMemoryAuditRecorder, computeHash, verifyHash, AUDIT_KID, GENESIS_HASH } from './audit.js';
 export type { AuditRecorder, AuditStore } from './audit.js';
+
+// Payment providers (Phase 19 Wave 2)
+export { StripeSandboxProvider, BkashSandboxProvider, NagadSandboxProvider } from './payments/providers.js';
+export type { PaymentProvider, CreateCheckoutInput, CreateCheckoutResult } from './payments/types.js';
+
+// License signer (Phase 19 Wave 2)
+export { SandboxLicenseSigner, verifyLicenseToken } from './license.js';
+export type { LicenseSigner } from './license.js';
 
 // Types
 export type {
@@ -36,6 +45,20 @@ export type {
   AuditEventKind,
   MarketplaceEvent,
   MarketplaceEventEmitter,
+  PaymentIntent,
+  PaymentProviderType,
+  PaymentStatus,
+  RefundStatus,
+  DisputeStatus,
+  PurchaseInitiation,
+  RefundRequest,
+  LicenseGrant,
+  RevenueShareEvent,
+  RevenuePayoutStatus,
+  PayoutLedgerEntry,
+  PayoutEntryStatus,
+  ChargebackEventType,
+  UsageProvider,
 } from './types.js';
 export {
   LISTING_TRANSITIONS,
@@ -48,4 +71,5 @@ export {
   NotVerifiedBuyerError,
   AlreadyRepliedError,
   MarketplaceValidationError,
+  defaultUsageProvider,
 } from './types.js';

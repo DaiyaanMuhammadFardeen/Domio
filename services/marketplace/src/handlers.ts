@@ -38,6 +38,7 @@ import {
   StoreNotConfiguredError,
   StoreNotImplementedError,
 } from './store/pg_store.js';
+import type { ChargebackEventType } from './types.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -429,7 +430,7 @@ export async function reportMarketplaceReviewHandler(
 }
 
 // ---------------------------------------------------------------------------
-// GET /v1/marketplace/listings/curated
+// POST /v1/marketplace/listings/curated
 // ---------------------------------------------------------------------------
 
 export async function getCuratedMarketplaceListingsHandler(
@@ -439,6 +440,159 @@ export async function getCuratedMarketplaceListingsHandler(
   try {
     const listings = await ctx.service.getCuratedListings(req.query.brand_kit_id);
     return ok({ listings });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/purchases  (201)
+// ---------------------------------------------------------------------------
+
+export async function createPurchaseHandler(
+  req: HttpRequest<Record<string, never>, {
+    listing_id: string;
+    provider: string;
+    currency: string;
+    idempotency_key: string;
+    quantity?: number;
+    success_url?: string;
+    cancel_url?: string;
+  }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const actorId = getActorId(req);
+    const workspaceId = (req.headers['x-workspace-id'] as string) ?? '';
+    const input: {
+      listing_id: string;
+      provider: string;
+      currency: string;
+      idempotency_key: string;
+      quantity?: number;
+      success_url?: string;
+      cancel_url?: string;
+    } = {
+      listing_id: req.body.listing_id,
+      provider: req.body.provider,
+      currency: req.body.currency,
+      idempotency_key: req.body.idempotency_key,
+    };
+    if (req.body.quantity !== undefined) input.quantity = req.body.quantity;
+    if (req.body.success_url !== undefined) input.success_url = req.body.success_url;
+    if (req.body.cancel_url !== undefined) input.cancel_url = req.body.cancel_url;
+    const purchase = await ctx.service.createPurchase(workspaceId, actorId, input);
+    return created({ purchase });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/refunds  (202)
+// ---------------------------------------------------------------------------
+
+export async function requestRefundHandler(
+  req: HttpRequest<Record<string, never>, {
+    purchase_id: string;
+    reason: string;
+  }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const actorId = getActorId(req);
+    const workspaceId = (req.headers['x-workspace-id'] as string) ?? '';
+    const refund = await ctx.service.requestRefund(
+      workspaceId,
+      actorId,
+      req.body.purchase_id,
+      req.body.reason,
+    );
+    return accepted({ refund });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/webhooks/stripe  (200)
+// ---------------------------------------------------------------------------
+
+export async function receiveStripeWebhookHandler(
+  req: HttpRequest<Record<string, never>, Buffer | string>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const signature = req.headers['stripe-signature'] ?? '';
+    const body = typeof req.body === 'string' ? req.body : req.body.toString();
+    const payload = JSON.parse(body) as Record<string, unknown>;
+    const eventType = (payload.type as string) ?? '';
+    const result = await ctx.service.handlePaymentWebhook('stripe', req.body, signature, eventType);
+    return ok(result);
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/webhooks/bkash  (200)
+// ---------------------------------------------------------------------------
+
+export async function receiveBkashWebhookHandler(
+  req: HttpRequest<Record<string, never>, Buffer | string>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const signature = req.headers['x-bkash-signature'] ?? '';
+    const body = typeof req.body === 'string' ? req.body : req.body.toString();
+    const payload = JSON.parse(body) as Record<string, unknown>;
+    const eventType = (payload.type as string) ?? '';
+    const result = await ctx.service.handlePaymentWebhook('bkash', req.body, signature, eventType);
+    return ok(result);
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/webhooks/nagad  (200)
+// ---------------------------------------------------------------------------
+
+export async function receiveNagadWebhookHandler(
+  req: HttpRequest<Record<string, never>, Buffer | string>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const signature = req.headers['x-nagad-signature'] ?? '';
+    const body = typeof req.body === 'string' ? req.body : req.body.toString();
+    const payload = JSON.parse(body) as Record<string, unknown>;
+    const eventType = (payload.type as string) ?? '';
+    const result = await ctx.service.handlePaymentWebhook('nagad', req.body, signature, eventType);
+    return ok(result);
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/chargebacks  (200)
+// ---------------------------------------------------------------------------
+
+export async function handleChargebackHandler(
+  req: HttpRequest<Record<string, never>, {
+    provider: string;
+    event_type: ChargebackEventType;
+    purchase_id: string;
+  }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    await ctx.service.handleChargeback(
+      req.body.provider,
+      req.body.event_type,
+      req.body.purchase_id,
+    );
+    return ok({ received: true });
   } catch (e) {
     return mapError(e);
   }
@@ -465,4 +619,10 @@ export const handlers = {
   replyToMarketplaceReview: replyToMarketplaceReviewHandler,
   reportMarketplaceReview: reportMarketplaceReviewHandler,
   getCuratedMarketplaceListings: getCuratedMarketplaceListingsHandler,
+  createPurchase: createPurchaseHandler,
+  requestRefund: requestRefundHandler,
+  receiveStripeWebhook: receiveStripeWebhookHandler,
+  receiveBkashWebhook: receiveBkashWebhookHandler,
+  receiveNagadWebhook: receiveNagadWebhookHandler,
+  handleChargeback: handleChargebackHandler,
 } as const;

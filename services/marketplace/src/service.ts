@@ -17,6 +17,12 @@ import {
   type ListingVersion,
   type PricingModel,
   type MarketplaceEventEmitter,
+  type PaymentIntent,
+  type PurchaseInitiation,
+  type RefundRequest,
+  type UsageProvider,
+  defaultUsageProvider,
+  type ChargebackEventType,
 } from './types.js';
 import {
   ListingNotFoundError,
@@ -29,8 +35,13 @@ import {
 } from './types.js';
 import { noopEmitter } from './types.js';
 import { checkFeature, FEATURE_FLAGS } from './feature_flags.js';
-import { calculatePrice } from './pricing.js';
+import { calculatePrice, normalizeCurrency } from './pricing.js';
+import { InMemoryAuditRecorder, type AuditRecorder } from './audit.js';
 import type { MarketplaceStore } from './store/store.js';
+import type { PaymentProvider, CreateCheckoutInput } from './payments/types.js';
+import { StripeSandboxProvider, BkashSandboxProvider, NagadSandboxProvider } from './payments/providers.js';
+import type { LicenseSigner } from './license.js';
+import { SandboxLicenseSigner } from './license.js';
 
 // ---------------------------------------------------------------------------
 // Service options
@@ -41,6 +52,14 @@ export interface MarketplaceServiceOptions {
   readonly eventEmitter?: MarketplaceEventEmitter;
   /** Clock. Default Date.now. */
   readonly now?: () => Date;
+  /** Payment providers. Default: sandbox providers. */
+  readonly paymentProviders?: Record<string, PaymentProvider>;
+  /** License signer. Default: SandboxLicenseSigner. */
+  readonly licenseSigner?: LicenseSigner;
+  /** Usage provider. Default: returns 0 (Wave-2 stub). */
+  readonly usageProvider?: UsageProvider;
+  /** Audit recorder. Default: InMemoryAuditRecorder. */
+  readonly auditRecorder?: AuditRecorder;
 }
 
 // ---------------------------------------------------------------------------
@@ -51,12 +70,24 @@ export class MarketplaceService {
   private readonly store: MarketplaceStore;
   private readonly emitter: MarketplaceEventEmitter;
   private readonly clock: () => Date;
+  private readonly paymentProviders: Record<string, PaymentProvider>;
+  private readonly licenseSigner: LicenseSigner;
+  private readonly usageProvider: UsageProvider;
+  private readonly auditRecorder: AuditRecorder;
 
   constructor(opts: MarketplaceServiceOptions) {
     if (!opts.store) throw new Error('MarketplaceService: store is required');
     this.store = opts.store;
     this.emitter = opts.eventEmitter ?? noopEmitter;
     this.clock = opts.now ?? (() => new Date());
+    this.paymentProviders = opts.paymentProviders ?? {
+      stripe: new StripeSandboxProvider(),
+      bkash: new BkashSandboxProvider(),
+      nagad: new NagadSandboxProvider(),
+    };
+    this.licenseSigner = opts.licenseSigner ?? new SandboxLicenseSigner();
+    this.usageProvider = opts.usageProvider ?? defaultUsageProvider;
+    this.auditRecorder = opts.auditRecorder ?? new InMemoryAuditRecorder(opts.store);
   }
 
   private idGen(): string {
@@ -358,5 +389,415 @@ export class MarketplaceService {
     // Wave-1 stub: returns []. Real curated logic is Wave 4.
     void brandKitId; // passthrough param
     return [];
+  }
+
+  // -------------------------------------------------------------------------
+  // Purchases (Phase 19 Wave 2)
+  // -------------------------------------------------------------------------
+
+  async createPurchase(
+    workspaceId: string,
+    actorId: string,
+    input: {
+      listing_id: string;
+      provider: string;
+      currency: string;
+      idempotency_key: string;
+      quantity?: number;
+      success_url?: string;
+      cancel_url?: string;
+    },
+  ): Promise<PurchaseInitiation> {
+    checkFeature(FEATURE_FLAGS.pricing);
+
+    // Idempotency check
+    const existing = await this.store.getPaymentIntentByIdempotencyKey(workspaceId, input.idempotency_key);
+    if (existing) {
+      return {
+        purchase_id: existing.purchaseId,
+        listing_id: existing.listingId,
+        buyer_id: existing.buyerId,
+        provider: existing.provider,
+        provider_intent_id: existing.providerIntentId,
+        checkout_url: undefined,
+        status: existing.status,
+        gross_cents: existing.grossCents,
+        currency: existing.currency,
+      };
+    }
+
+    // Validate listing exists and is published
+    const listing = await this.store.getListing(input.listing_id);
+    if (!listing) throw new ListingNotFoundError(input.listing_id);
+    if (listing.status !== 'published') {
+      throw new MarketplaceValidationError('Listing must be published to purchase', 'LISTING_NOT_PUBLISHED');
+    }
+
+    // Check listing is not frozen
+    if ((listing as unknown as Record<string, unknown>).frozenFor) {
+      throw new MarketplaceValidationError('Listing is frozen', 'LISTING_FROZEN');
+    }
+
+    // Validate currency
+    const currency = normalizeCurrency(input.currency);
+
+    // Calculate price
+    const quantity = input.quantity ?? 1;
+    const priceCents = (listing.priceCents ?? 0) * quantity;
+    const policy = await this.store.getPayoutPolicy();
+    const breakdown = calculatePrice(priceCents, currency, listing.isFree ? 'free' : 'one_time', policy);
+
+    // Get payment provider
+    const provider = this.paymentProviders[input.provider];
+    if (!provider) {
+      throw new MarketplaceValidationError(`Unknown payment provider: ${input.provider}`, 'UNKNOWN_PROVIDER');
+    }
+
+    // Create checkout
+    const purchaseId = this.idGen();
+    const checkoutInput: CreateCheckoutInput = {
+      listing_id: input.listing_id,
+      buyer_id: actorId,
+      gross_cents: breakdown.priceCents,
+      currency: breakdown.currency,
+      idempotency_key: input.idempotency_key,
+      success_url: input.success_url,
+      cancel_url: input.cancel_url,
+    };
+    const checkoutResult = await provider.createCheckout(checkoutInput);
+
+    // Create payment intent
+    const now = this.now();
+    const intent: PaymentIntent = {
+      id: this.idGen(),
+      workspaceId,
+      buyerId: actorId,
+      listingId: input.listing_id,
+      purchaseId,
+      provider: input.provider as PaymentIntent['provider'],
+      providerIntentId: checkoutResult.provider_intent_id,
+      currency: breakdown.currency,
+      grossCents: breakdown.priceCents,
+      taxCents: 0,
+      feeCents: breakdown.platformFeeCents,
+      netCents: breakdown.creatorShareCents,
+      fxRate: 1,
+      fxTimestamp: now,
+      status: checkoutResult.status === 'pending' ? 'pending' : checkoutResult.status === 'succeeded' ? 'succeeded' : 'failed',
+      idempotencyKey: input.idempotency_key,
+      disputeStatus: 'none',
+      refundStatus: 'none',
+      refundedAt: null,
+      refundReason: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await this.store.insertPaymentIntent(intent);
+
+    return {
+      purchase_id: purchaseId,
+      listing_id: input.listing_id,
+      buyer_id: actorId,
+      provider: input.provider as PaymentIntent['provider'],
+      provider_intent_id: checkoutResult.provider_intent_id,
+      checkout_url: checkoutResult.checkout_url,
+      status: intent.status,
+      gross_cents: breakdown.priceCents,
+      currency: breakdown.currency,
+    };
+  }
+
+  async handlePaymentWebhook(
+    _provider: string,
+    rawBody: Buffer | string,
+    signature: string,
+    eventType: string,
+  ): Promise<{ received: true }> {
+    checkFeature(FEATURE_FLAGS.pricing);
+
+    // Verify webhook signature
+    const paymentProvider = this.paymentProviders[_provider];
+    if (!paymentProvider) {
+      throw new MarketplaceValidationError(`Unknown payment provider: ${_provider}`, 'UNKNOWN_PROVIDER');
+    }
+
+    const isValid = paymentProvider.verifyWebhook(rawBody, signature);
+    if (!isValid) {
+      throw new MarketplaceValidationError('Invalid webhook signature', 'INVALID_WEBHOOK_SIGNATURE');
+    }
+
+    // Determine success/failure based on event type
+    const isSuccess = this.isPaymentSuccessEvent(_provider, eventType);
+    const isFailure = this.isPaymentFailureEvent(_provider, eventType);
+
+    if (!isSuccess && !isFailure) {
+      // Unknown event type, just acknowledge
+      return { received: true };
+    }
+
+    // Find payment intent by provider_intent_id from webhook payload
+    let payload: Record<string, unknown>;
+    try {
+      payload = typeof rawBody === 'string' ? JSON.parse(rawBody) : JSON.parse(rawBody.toString());
+    } catch {
+      throw new MarketplaceValidationError('Invalid webhook payload', 'INVALID_WEBHOOK_PAYLOAD');
+    }
+
+    const providerIntentId = this.extractProviderIntentId(_provider, payload);
+    if (!providerIntentId) {
+      throw new MarketplaceValidationError('Missing provider_intent_id in webhook', 'MISSING_PROVIDER_INTENT_ID');
+    }
+
+    const intent = await this.store.getPaymentIntentByProviderIntentId(providerIntentId);
+    if (!intent) {
+      throw new ListingNotFoundError(`Payment intent for provider_intent_id: ${providerIntentId}`);
+    }
+
+    // Idempotent: if already in terminal state, no-op
+    if (intent.status === 'succeeded' || intent.status === 'failed') {
+      return { received: true };
+    }
+
+    if (isSuccess) {
+      // Success: update status, issue license, create revenue event, audit
+      await this.store.withTransaction(async () => {
+        await this.store.updatePaymentIntentStatus(intent.purchaseId, 'succeeded');
+
+        // Issue license grant
+        const token = await this.licenseSigner.issueLicenseGrant({
+          listing_id: intent.listingId,
+          buyer_id: intent.buyerId,
+          version: '1.0',
+          scopes: ['use'],
+          seats: 1,
+        });
+
+        const grantId = this.idGen();
+        await this.store.insertLicenseGrant({
+          id: grantId,
+          listingId: intent.listingId,
+          buyerId: intent.buyerId,
+          version: '1.0',
+          scopes: ['use'],
+          seats: 1,
+          signedToken: token,
+          createdAt: this.now(),
+        });
+
+        // Create revenue share event
+        const periodMonth = this.now().toISOString().slice(0, 7);
+        await this.store.insertRevenueShareEvent({
+          id: this.idGen(),
+          listingId: intent.listingId,
+          sellerId: (await this.store.getListing(intent.listingId))?.sellerId ?? '',
+          workspaceId: intent.workspaceId,
+          currency: intent.currency,
+          grossCents: intent.grossCents,
+          feeCents: intent.feeCents,
+          netCents: intent.netCents,
+          periodMonth,
+          eventType: 'purchase',
+          payoutStatus: 'eligible',
+          createdAt: this.now(),
+        });
+      });
+
+      // Audit event (after transaction)
+      await this.auditRecorder.record({
+        workspaceId: intent.workspaceId,
+        actorId: intent.buyerId,
+        actorType: 'user',
+        actorKind: 'human',
+        eventKind: 'purchase',
+        eventType: 'purchase',
+        payload: {
+          purchase_id: intent.purchaseId,
+          listing_id: intent.listingId,
+          gross_cents: intent.grossCents,
+          currency: intent.currency,
+        },
+      });
+    } else {
+      // Failure: just update status
+      await this.store.updatePaymentIntentStatus(intent.purchaseId, 'failed');
+    }
+
+    return { received: true };
+  }
+
+  async requestRefund(
+    _workspaceId: string,
+    actorId: string,
+    purchaseId: string,
+    reason: string,
+  ): Promise<RefundRequest> {
+    checkFeature(FEATURE_FLAGS.refund);
+
+    const intent = await this.store.getPaymentIntentByPurchaseId(purchaseId);
+    if (!intent) throw new ListingNotFoundError(purchaseId);
+
+    // Must be paid and not already refunded
+    if (intent.status !== 'succeeded') {
+      throw new MarketplaceValidationError('Payment must be succeeded to request refund', 'PAYMENT_NOT_SUCCEEDED');
+    }
+    if (intent.refundStatus !== 'none') {
+      throw new MarketplaceValidationError('Refund already requested or processed', 'REFUND_ALREADY_REQUESTED');
+    }
+
+    // Check eligibility: purchased within 14 days AND usage < 5 inserts
+    const daysSincePurchase = (this.now().getTime() - intent.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    const insertCount = await this.usageProvider.countInserts(intent.listingId, intent.buyerId);
+    const isEligible = daysSincePurchase <= 14 && insertCount < 5;
+
+    if (isEligible) {
+      // Auto-approve refund
+      await this.store.withTransaction(async () => {
+        await this.store.updatePaymentIntentStatus(purchaseId, 'refunded', {
+          refundStatus: 'refunded',
+          refundedAt: this.now(),
+          refundReason: reason,
+        });
+
+        // Create refunded revenue share event
+        const periodMonth = this.now().toISOString().slice(0, 7);
+        await this.store.insertRevenueShareEvent({
+          id: this.idGen(),
+          listingId: intent.listingId,
+          sellerId: (await this.store.getListing(intent.listingId))?.sellerId ?? '',
+          workspaceId: intent.workspaceId,
+          currency: intent.currency,
+          grossCents: -intent.grossCents,
+          feeCents: -intent.feeCents,
+          netCents: -intent.netCents,
+          periodMonth,
+          eventType: 'refund',
+          payoutStatus: 'refunded',
+          createdAt: this.now(),
+        });
+      });
+
+      // Audit event
+      await this.auditRecorder.record({
+        workspaceId: intent.workspaceId,
+        actorId,
+        actorType: 'user',
+        actorKind: 'human',
+        eventKind: 'refund',
+        eventType: 'refund',
+        payload: {
+          purchase_id: purchaseId,
+          listing_id: intent.listingId,
+          reason,
+          auto_approved: true,
+        },
+      });
+
+      return {
+        purchase_id: purchaseId,
+        refund_status: 'refunded',
+        auto_approved: true,
+        review_required: false,
+      };
+    } else {
+      // Request admin review
+      await this.store.updatePaymentIntentStatus(purchaseId, 'succeeded', {
+        refundStatus: 'requested',
+      });
+
+      return {
+        purchase_id: purchaseId,
+        refund_status: 'requested',
+        auto_approved: false,
+        review_required: true,
+      };
+    }
+  }
+
+  async handleChargeback(
+    _provider: string,
+    eventType: ChargebackEventType,
+    purchaseId: string,
+  ): Promise<void> {
+    checkFeature(FEATURE_FLAGS.chargeback);
+
+    const intent = await this.store.getPaymentIntentByPurchaseId(purchaseId);
+    if (!intent) throw new ListingNotFoundError(purchaseId);
+
+    if (eventType === 'dispute.opened') {
+      // Freeze listing
+      await this.store.markListingFrozen(intent.listingId, 'dispute', this.now());
+      await this.store.updatePaymentIntentStatus(purchaseId, 'disputed', {
+        disputeStatus: 'opened',
+      });
+
+      // Audit
+      await this.auditRecorder.record({
+        workspaceId: intent.workspaceId,
+        actorId: intent.buyerId,
+        actorType: 'user',
+        actorKind: 'human',
+        eventKind: 'payout',
+        eventType: 'dispute.opened',
+        payload: {
+          purchase_id: purchaseId,
+          listing_id: intent.listingId,
+          note: 'Listing frozen due to dispute',
+        },
+      });
+    } else if (eventType === 'dispute.won' || eventType === 'dispute.lost' || eventType === 'dispute.resolved') {
+      // Unfreeze listing
+      await this.store.clearListingFrozen(intent.listingId);
+      const disputeStatus = eventType === 'dispute.won' ? 'won' : eventType === 'dispute.lost' ? 'lost' : 'resolved';
+      await this.store.updatePaymentIntentStatus(purchaseId, 'disputed', {
+        disputeStatus,
+      });
+
+      // Audit
+      await this.auditRecorder.record({
+        workspaceId: intent.workspaceId,
+        actorId: intent.buyerId,
+        actorType: 'user',
+        actorKind: 'human',
+        eventKind: 'payout',
+        eventType,
+        payload: {
+          purchase_id: purchaseId,
+          listing_id: intent.listingId,
+          dispute_status: disputeStatus,
+        },
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Private helpers for webhooks
+  // -------------------------------------------------------------------------
+
+  private isPaymentSuccessEvent(provider: string, eventType: string): boolean {
+    if (provider === 'stripe') return eventType === 'checkout.session.completed';
+    if (provider === 'bkash') return eventType === 'payment.completed';
+    if (provider === 'nagad') return eventType === 'payment.completed';
+    return false;
+  }
+
+  private isPaymentFailureEvent(provider: string, eventType: string): boolean {
+    if (provider === 'stripe') return eventType === 'checkout.session.expired';
+    if (provider === 'bkash') return eventType === 'payment.failed';
+    if (provider === 'nagad') return eventType === 'payment.failed';
+    return false;
+  }
+
+  private extractProviderIntentId(provider: string, payload: Record<string, unknown>): string | null {
+    if (provider === 'stripe') {
+      return (payload.session_id as string) ?? (payload.provider_intent_id as string) ?? null;
+    }
+    if (provider === 'bkash') {
+      return (payload.payment_id as string) ?? (payload.provider_intent_id as string) ?? null;
+    }
+    if (provider === 'nagad') {
+      return (payload.payment_token as string) ?? (payload.provider_intent_id as string) ?? null;
+    }
+    return null;
   }
 }

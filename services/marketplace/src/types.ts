@@ -226,3 +226,145 @@ export class MarketplaceValidationError extends Error {
     this.code = code;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Payment Intent (Phase 19 Wave 2)
+// ---------------------------------------------------------------------------
+
+export type PaymentProviderType = 'stripe' | 'bkash' | 'nagad';
+export type PaymentStatus = 'pending' | 'succeeded' | 'failed' | 'refunded' | 'disputed';
+export type RefundStatus = 'none' | 'requested' | 'approved' | 'refunded';
+export type DisputeStatus = 'none' | 'opened' | 'won' | 'lost' | 'resolved';
+
+export interface PaymentIntent {
+  readonly id: string;
+  readonly workspaceId: string;
+  readonly buyerId: string;
+  readonly listingId: string;
+  readonly purchaseId: string;
+  readonly provider: PaymentProviderType;
+  readonly providerIntentId: string | null;
+  readonly currency: string;
+  readonly grossCents: number;
+  readonly taxCents: number;
+  readonly feeCents: number;
+  readonly netCents: number;
+  readonly fxRate: number | null;
+  readonly fxTimestamp: Date | null;
+  readonly status: PaymentStatus;
+  readonly idempotencyKey: string;
+  readonly disputeStatus: DisputeStatus;
+  readonly refundStatus: RefundStatus;
+  readonly refundedAt: Date | null;
+  readonly refundReason: string | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+// ---------------------------------------------------------------------------
+// Purchase Initiation (returned by createPurchase)
+// ---------------------------------------------------------------------------
+
+export interface PurchaseInitiation {
+  readonly purchase_id: string;
+  readonly listing_id: string;
+  readonly buyer_id: string;
+  readonly provider: PaymentProviderType;
+  readonly provider_intent_id: string | null;
+  readonly checkout_url: string | undefined;
+  readonly status: PaymentStatus;
+  readonly gross_cents: number;
+  readonly currency: string;
+}
+
+// ---------------------------------------------------------------------------
+// Refund Request (returned by requestRefund)
+// ---------------------------------------------------------------------------
+
+export interface RefundRequest {
+  readonly purchase_id: string;
+  readonly refund_status: RefundStatus;
+  readonly auto_approved: boolean;
+  readonly review_required: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// License Grant (Phase 19 Wave 2)
+// ---------------------------------------------------------------------------
+
+export interface LicenseGrant {
+  readonly id: string;
+  readonly listingId: string;
+  readonly buyerId: string;
+  readonly version: string;
+  readonly scopes: readonly string[];
+  readonly seats: number;
+  readonly signedToken: string;
+  readonly createdAt: Date;
+}
+
+// ---------------------------------------------------------------------------
+// Revenue Share Event (Phase 19 Wave 2)
+// ---------------------------------------------------------------------------
+
+export type RevenuePayoutStatus = 'eligible' | 'refunded' | 'held';
+
+export interface RevenueShareEvent {
+  readonly id: string;
+  readonly listingId: string;
+  readonly sellerId: string;
+  readonly workspaceId: string;
+  readonly currency: string;
+  readonly grossCents: number;
+  readonly feeCents: number;
+  readonly netCents: number;
+  readonly periodMonth: string;
+  readonly eventType: string;
+  readonly payoutStatus: RevenuePayoutStatus;
+  readonly createdAt: Date;
+}
+
+// ---------------------------------------------------------------------------
+// Payout Ledger Entry (Phase 19 Wave 2)
+// ---------------------------------------------------------------------------
+
+export type PayoutEntryStatus = 'pending' | 'paid' | 'held' | 'failed' | 'refunded';
+
+export interface PayoutLedgerEntry {
+  readonly id: string;
+  readonly workspaceId: string;
+  readonly creatorId: string;
+  readonly periodMonth: string;
+  readonly eventId: string;
+  readonly grossCents: number;
+  readonly feeCents: number;
+  readonly netCents: number;
+  readonly currency: string;
+  readonly status: PayoutEntryStatus;
+  readonly provider: string | null;
+  readonly providerTransferId: string | null;
+  readonly executorRunId: string | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+// ---------------------------------------------------------------------------
+// Chargeback Event Types
+// ---------------------------------------------------------------------------
+
+export type ChargebackEventType = 'dispute.opened' | 'dispute.won' | 'dispute.lost' | 'dispute.resolved';
+
+// ---------------------------------------------------------------------------
+// Usage Provider Interface (Wave 2 stub)
+// ---------------------------------------------------------------------------
+
+export interface UsageProvider {
+  countInserts(listingId: string, buyerId: string): Promise<number>;
+}
+
+export const defaultUsageProvider: UsageProvider = {
+  async countInserts(_listingId: string, _buyerId: string): Promise<number> {
+    // Wave-2 stub: returns 0. Real usage lookup is a later wave.
+    return 0;
+  },
+};
