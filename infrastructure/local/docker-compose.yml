@@ -348,6 +348,70 @@ services:
       - "3002:3002"
     profiles: ["phase15", "all"]
 
+  # ---------------------------------------------------------------------------
+  # Phase 17 — ClickHouse loader (W2). Kafka consumer that ships
+  # raw analytics events into the events table.
+  # ---------------------------------------------------------------------------
+  clickhouse-loader:
+    build:
+      context: ../..
+      dockerfile: services/clickhouse-loader/Dockerfile
+    image: domio/clickhouse-loader:dev
+    container_name: domio-clickhouse-loader
+    restart: unless-stopped
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPIC: events.ingest.raw
+      KAFKA_GROUP_ID: clickhouse-loader
+      KAFKA_DLQ_TOPIC: events.ingest.dlq
+      CLICKHOUSE_ADDR: clickhouse:9000
+      CLICKHOUSE_DB: domio_analytics
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      LOG_LEVEL: info
+      HEALTH_PORT: 8080
+    depends_on:
+      kafka:
+        condition: service_started
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "3040:8080"
+    profiles: ["phase17", "all"]
+
+  # ---------------------------------------------------------------------------
+  # Phase 17 — Event ingest edge (W1). Hono + ajv validation + HMAC
+  # signed batches + Kafka producer + disk spool fallback.
+  # ---------------------------------------------------------------------------
+  event-ingest:
+    build:
+      context: ../..
+      dockerfile: services/event-ingest/Dockerfile
+    image: domio/event-ingest:dev
+    container_name: domio-event-ingest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3020
+      INGEST_KAFKA_BROKERS: kafka:9092
+      INGEST_KAFKA_TOPIC: events.ingest.raw
+      INGEST_KAFKA_DLQ_TOPIC: events.ingest.dlq
+      INGEST_REDIS_URL: redis://redis:6379
+      INGEST_NATS_URL: nats://nats:4222
+      INGEST_SPOOL_DIR: /var/lib/domio/spool
+      INGEST_HMAC_KEY_HEX: ${INGEST_HMAC_KEY_HEX:-00112233445566778899aabbccddeeff}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      kafka:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    ports:
+      - "3020:3020"
+    profiles: ["phase17", "all"]
+
 volumes:
   postgres-data:
   redis-data:
