@@ -1,0 +1,251 @@
+# Phase 17 — Analytics & Engagement Intelligence PagerDuty alert routing rules.
+#
+# Severity mapping:
+#   critical → page on-call
+#   warning  → open ticket, no page
+#   info     → log only
+#
+# Routes are namespace-scoped to the analytics + ingest + warehouse + CRM +
+# notification + team-analytics stacks. Add new alerts below using the
+# canonical metric names from:
+#   - services/event-ingest/src/observability/metrics.ts
+#   - services/analytics-warehouse/src/observability/metrics.ts
+#   - services/viewer-identity/src/observability/metrics.ts
+#   - services/sessionization/src/observability/metrics.ts
+#   - services/heatmap-generator/src/observability/metrics.ts
+#   - services/team-analytics/src/observability/metrics.ts
+#   - services/live-analytics/src/observability/metrics.ts
+#   - services/notification-dispatcher/src/observability/metrics.ts
+#   - workers/columnar-loader/internal/observability/metrics.go
+#   - services/ab-{assignment,measurement,statistics}/.../metrics.go
+#   - services/crm-sync/internal/observability/metrics.go
+#   - services/benchmark/internal/observability/metrics.go
+
+routes:
+  - name: phase-17-analytics
+    description: Analytics & engagement intelligence stack
+    services:
+      - event-ingest
+      - analytics-warehouse
+      - viewer-identity
+      - sessionization
+      - heatmap-generator
+      - team-analytics
+      - live-analytics
+      - notification-dispatcher
+      - columnar-loader
+      - ab-assignment
+      - ab-measurement
+      - ab-statistics
+      - crm-sync
+      - benchmark
+      - dashboard
+    rules:
+      # ---- W1 ingestion ----
+      - name: Ingest p95 > 5s
+        severity: critical
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(event_ingest_request_seconds_bucket[5m]))
+          ) > 5
+        runbook: runbooks/event-ingest-latency.md
+
+      - name: Ingest 5xx rate > 1%
+        severity: critical
+        window: 5m
+        condition: |
+          (
+            sum(rate(event_ingest_requests_total{status_class="5xx"}[5m]))
+            / clamp_min(sum(rate(event_ingest_requests_total[5m])), 1)
+          ) > 0.01
+        runbook: runbooks/event-ingest-5xx.md
+
+      - name: Kafka producer lag
+        severity: warning
+        window: 5m
+        condition: |
+          sum(event_ingest_kafka_produce_lag_seconds) > 10
+        runbook: runbooks/kafka-producer-lag.md
+
+      - name: Backpressure spool > 5 GB
+        severity: warning
+        window: 5m
+        condition: |
+          sum(event_ingest_disk_spool_bytes) > 5368709120
+        runbook: runbooks/ingest-backpressure.md
+
+      # ---- W2 warehouse ----
+      - name: ClickHouse replication lag > 5 min
+        severity: warning
+        window: 5m
+        condition: |
+          max(clickhouse_replication_lag_seconds) > 300
+        runbook: runbooks/clickhouse-replication-lag.md
+
+      - name: ClickHouse disk > 80%
+        severity: warning
+        window: 5m
+        condition: |
+          (
+            sum(clickhouse_disk_used_bytes) by (instance)
+            / sum(clickhouse_disk_total_bytes) by (instance)
+          ) > 0.8
+        runbook: runbooks/clickhouse-disk.md
+
+      - name: ClickHouse query p95 > 2s
+        severity: warning
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(clickhouse_query_duration_seconds_bucket[5m]))
+          ) > 2
+        runbook: runbooks/clickhouse-query-latency.md
+
+      - name: Columnar loader lag > 60s
+        severity: critical
+        window: 5m
+        condition: |
+          (
+            now() - max(columnar_loader_last_processed_timestamp_seconds)
+          ) > 60
+        runbook: runbooks/columnar-loader-stuck.md
+
+      # ---- W3 identity ----
+      - name: GDPR erasure lag > 24h
+        severity: critical
+        window: 1h
+        condition: |
+          (
+            now() - max(viewer_identity_last_erasure_processed_timestamp_seconds)
+          ) > 86400
+        runbook: runbooks/gdpr-erasure-lag.md
+
+      - name: Identity merge collision rate
+        severity: warning
+        window: 5m
+        condition: |
+          (
+            sum(rate(viewer_identity_merge_collisions_total[5m]))
+            / clamp_min(sum(rate(viewer_identity_merge_attempts_total[5m])), 1)
+          ) > 0.005
+        runbook: runbooks/identity-merge-collisions.md
+
+      # ---- W4 sessionization ----
+      - name: Sessionization consumer lag
+        severity: warning
+        window: 5m
+        condition: |
+          sum(sessionization_kafka_consumer_lag) > 50000
+        runbook: runbooks/sessionization-lag.md
+
+      - name: Bot tag false positive > 0.5%
+        severity: warning
+        window: 1h
+        condition: |
+          (
+            sum(rate(sessionization_bot_tagged_total{human_verified="true"}[1h]))
+            / clamp_min(sum(rate(sessionization_bot_tagged_total[1h])), 1)
+          ) > 0.005
+        runbook: runbooks/bot-tag-false-positive.md
+
+      # ---- W5 heatmap ----
+      - name: Heatmap refresh SLO breached
+        severity: warning
+        window: 5m
+        condition: |
+          (
+            now() - max(heatmap_last_refreshed_timestamp_seconds)
+          ) > 60
+        runbook: runbooks/heatmap-refresh-slo.md
+
+      # ---- W6 A/B ----
+      - name: A/B assignment p95 > 5ms
+        severity: warning
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(ab_assignment_request_seconds_bucket[5m]))
+          ) > 0.005
+        runbook: runbooks/ab-assignment-latency.md
+
+      - name: A/B cross-workspace contamination
+        severity: critical
+        window: 1m
+        condition: |
+          sum(ab_assignment_cross_workspace_total) > 0
+        runbook: runbooks/ab-cross-workspace-leak.md
+
+      # ---- W7 CRM ----
+      - name: CRM sync failure rate > 1%
+        severity: warning
+        window: 5m
+        condition: |
+          (
+            sum(rate(crm_sync_failure_total[5m]))
+            / clamp_min(sum(rate(crm_sync_total[5m])), 1)
+          ) > 0.01
+        runbook: runbooks/crm-sync-failures.md
+
+      - name: CRM DLQ depth > 1000
+        severity: warning
+        window: 5m
+        condition: |
+          sum(crm_sync_dlq_depth) > 1000
+        runbook: runbooks/crm-dlq.md
+
+      # ---- W8 notifications ----
+      - name: Notification trigger p95 > 10s
+        severity: warning
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(notification_dispatcher_trigger_seconds_bucket[5m]))
+          ) > 10
+        runbook: runbooks/notification-trigger-latency.md
+
+      - name: Notification rate-limit bypass
+        severity: critical
+        window: 5m
+        condition: |
+          sum(increase(notification_dispatcher_rate_limit_violations_total[5m])) > 0
+        runbook: runbooks/notification-rate-limit.md
+
+      # ---- W9 team ----
+      - name: Team rollup job missed
+        severity: warning
+        window: 25h
+        condition: |
+          (
+            now() - max(team_analytics_last_rollup_timestamp_seconds)
+          ) > 86400
+        runbook: runbooks/team-rollup-missed.md
+
+      # ---- W10 live ----
+      - name: Live HUD p95 > 1s
+        severity: warning
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(live_analytics_hud_seconds_bucket[5m]))
+          ) > 1
+        runbook: runbooks/live-hud-latency.md
+
+      # ---- W11 dashboard ----
+      - name: Dashboard query p95 > 800ms
+        severity: warning
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(analytics_warehouse_query_seconds_bucket[5m]))
+          ) > 0.8
+        runbook: runbooks/dashboard-query-latency.md
+
+      - name: Benchmark nightly job missed
+        severity: warning
+        window: 25h
+        condition: |
+          (
+            now() - max(benchmark_last_snapshot_timestamp_seconds)
+          ) > 86400
+        runbook: runbooks/benchmark-rollup-missed.md

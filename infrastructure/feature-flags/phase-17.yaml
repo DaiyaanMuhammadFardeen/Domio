@@ -1,0 +1,339 @@
+# Phase 17 — Analytics & Engagement Intelligence feature flags.
+#
+# These flags are consumed by:
+#   - apps/{viewer,presenter,join-web} for client-side emitters + consent banner
+#   - services/{event-ingest,viewer-identity,sessionization,heatmap-generator,
+#               team-analytics,live-analytics,notification-dispatcher,
+#               analytics-warehouse}
+#   - services/{ab-assignment,ab-measurement,crm-sync,benchmark} (Go)
+#   - workers/{columnar-loader,session-archiver,team-analytics-rollup,
+#              benchmark-rollup,crm-reconciler}
+#
+# Follow the convention `FEATURE_<GROUP>_<NAME>` and the structure of
+# phase-21.yaml. Defaults shown are for local dev / dev-up all. Production
+# overrides live in the platform Helm umbrella.
+
+flags:
+  # W0 — Foundations
+  analytics.runtime_emitters:
+    default: true
+    description: Wire client-side event emitters in viewer/presenter/join-web.
+    owner: analytics-team
+    srm: low
+  analytics.sdk:
+    default: true
+    description: Use the @domio/analytics-sdk for client events (vs. legacy prototype-recorder).
+    owner: analytics-team
+    srm: low
+  analytics.consent_banner:
+    default: true
+    description: Show the consent capture banner for EU/UK viewers; opt-in elsewhere.
+    owner: privacy-team
+    srm: high
+  analytics.dnt_honor:
+    default: true
+    description: Honor Do-Not-Track and Sec-CH-Prefers-Reduced-Tracking headers.
+    owner: privacy-team
+    srm: high
+
+  # W1 — Ingestion
+  ingest.kafka_producer:
+    default: true
+    description: Forward validated events to Kafka events.ingest.raw via KafkaJS.
+    owner: ingestion-team
+    srm: medium
+  ingest.hmac_verify:
+    default: true
+    description: Enforce HMAC-SHA256 signature validation on /v1/events.
+    owner: ingestion-team
+    srm: high
+  ingest.pii_stripper:
+    default: true
+    description: Strip PII fields (email/phone/IP/name) before forwarding.
+    owner: privacy-team
+    srm: high
+  ingest.backpressure_spool:
+    default: true
+    description: Spool to local disk when Kafka is unreachable; 10 GB / POP.
+    owner: ingestion-team
+    srm: medium
+  ingest.dlq:
+    default: true
+    description: Forward schema-violating events to events.ingest.dlq.
+    owner: ingestion-team
+    srm: low
+
+  # W2 — Warehouse
+  warehouse.columnar_loader:
+    default: true
+    description: Run workers/columnar-loader to write Kafka events into ClickHouse.
+    owner: warehouse-team
+    srm: medium
+  warehouse.materialized_views:
+    default: true
+    description: Maintain session_agg_mv / deck_metric_5m / slide_metric_5m / funnel_step_hourly / team_metric_mv.
+    owner: warehouse-team
+    srm: medium
+  warehouse.cold_parquet:
+    default: true
+    description: Archive events older than 13 months to Parquet in object-store.
+    owner: warehouse-team
+    srm: low
+  warehouse.clickhouse_mirror:
+    default: true
+    description: Mirror deck_metric / slide_metric to Postgres for low-latency OLTP reads.
+    owner: warehouse-team
+    srm: low
+
+  # W3 — Identity
+  identity.graph:
+    default: true
+    description: Maintain the viewer identity graph (email / CRM ID / share-link / SSO).
+    owner: identity-team
+    srm: medium
+  identity.privacy_strict:
+    default: false
+    description: Force every workspace to start in strict privacy mode (no analytics without explicit consent).
+    owner: privacy-team
+    srm: high
+  identity.gdpr_erase:
+    default: true
+    description: Honor GDPR right-to-erasure via ClickHouse LIGHTWEIGHT DELETE + tombstone.
+    owner: privacy-team
+    srm: high
+  identity.merge_rules:
+    default: true
+    description: Apply workspace-configured merge rules (default: email normalization match).
+    owner: identity-team
+    srm: medium
+
+  # W4 — Sessionization
+  sessionization.engine:
+    default: true
+    description: Run the 30-min inactivity sessionization consumer.
+    owner: sessionization-team
+    srm: medium
+  sessionization.heartbeat:
+    default: true
+    description: Reconcile client dwell vs. server heartbeat every 30 s.
+    owner: sessionization-team
+    srm: low
+  sessionization.bot_filter:
+    default: true
+    description: Tag bot sessions by UA matching; exclude from human metrics.
+    owner: sessionization-team
+    srm: low
+  sessionization.concurrent_tab:
+    default: true
+    description: Surface the "another tab" badge in the dashboard when two sessions share a viewer.
+    owner: sessionization-team
+    srm: low
+
+  # W5 — Heatmap
+  heatmap.generator:
+    default: true
+    description: Run services/heatmap-generator on a 5-min batch + on session end.
+    owner: heatmap-team
+    srm: low
+  heatmap.privacy_floor:
+    default: true
+    description: Suppress tiles with <5 impressions; default behavior.
+    owner: privacy-team
+    srm: high
+  heatmap.fast_scroller_exclude:
+    default: true
+    description: Drop sessions with median scroll velocity >5000 px/s.
+    owner: heatmap-team
+    srm: low
+  heatmap.png_export:
+    default: true
+    description: Cache PNG/SVG exports in object-store for dashboard reads.
+    owner: heatmap-team
+    srm: low
+
+  # W6 — A/B testing
+  ab.assignment:
+    default: true
+    description: Run services/ab-assignment for deterministic variant hashing.
+    owner: ab-team
+    srm: medium
+  ab.measurement:
+    default: true
+    description: Run services/ab-measurement (Kafka consumer; per-variant aggregation).
+    owner: ab-team
+    srm: medium
+  ab.sequential_test:
+    default: true
+    description: Allow mSPRT sequential test + early stopping on the A/B dashboard.
+    owner: ab-team
+    srm: medium
+  ab.multi_variant:
+    default: false
+    description: A/B/n beyond two variants (code supports it; UI ships two-variant first).
+    owner: ab-team
+    srm: low
+  ab.exploratory_peek:
+    default: true
+    description: Mid-test peeking is allowed but flagged "exploratory" until horizon.
+    owner: ab-team
+    srm: medium
+
+  # W7 — CRM sync
+  crm.sync:
+    default: true
+    description: Run services/crm-sync consumer for Salesforce / HubSpot / Pipedrive / Dynamics.
+    owner: crm-team
+    srm: medium
+  crm.hubspot:
+    default: true
+    description: Enable HubSpot adapter (token bucket 100/10s).
+    owner: crm-team
+    srm: medium
+  crm.salesforce:
+    default: true
+    description: Enable Salesforce adapter (OAuth refresh + 429 backoff).
+    owner: crm-team
+    srm: medium
+  crm.pipedrive:
+    default: false
+    description: Enable Pipedrive adapter (deferred to P22 polish; sandboxed adapter).
+    owner: crm-team
+    srm: low
+  crm.dynamics:
+    default: false
+    description: Enable Dynamics adapter (deferred to P22 polish; Azure AD + Web API).
+    owner: crm-team
+    srm: low
+  crm.immediate_high_signal:
+    default: true
+    description: Flush pricing_slide_revisit / completed / cta_click events immediately.
+    owner: crm-team
+    srm: medium
+  crm.idempotency_keys:
+    default: true
+    description: Compute idempotency keys as SHA-256(workspaceID:viewerID:eventType:eventID).
+    owner: crm-team
+    srm: high
+
+  # W8 — Notifications
+  notifications.dispatcher:
+    default: true
+    description: Run services/notification-dispatcher with the CEP rules engine.
+    owner: notifications-team
+    srm: medium
+  notifications.email:
+    default: true
+    description: Enable email channel (SMTP/SES stub).
+    owner: notifications-team
+    srm: medium
+  notifications.slack:
+    default: true
+    description: Enable Slack incoming webhook channel.
+    owner: notifications-team
+    srm: medium
+  notifications.teams:
+    default: true
+    description: Enable Teams incoming webhook channel.
+    owner: notifications-team
+    srm: medium
+  notifications.mobile_push:
+    default: false
+    description: Enable mobile push (FCM/APNs); deferred to P22.
+    owner: notifications-team
+    srm: medium
+  notifications.quiet_hours:
+    default: true
+    description: Enforce per-recipient DND / quiet-hours before sending.
+    owner: notifications-team
+    srm: medium
+  notifications.anonymous_redaction:
+    default: true
+    description: Strip identity fields from notifications for anon_no_track viewers.
+    owner: privacy-team
+    srm: high
+
+  # W9 — Team analytics
+  team_analytics.nightly_rollup:
+    default: true
+    description: Run the team-analytics nightly rollup worker.
+    owner: team-analytics-team
+    srm: low
+  team_analytics.trending_badge:
+    default: true
+    description: Award "trending" badge when growth >2× workspace median over 30 d.
+    owner: team-analytics-team
+    srm: low
+  team_analytics.library_health:
+    default: true
+    description: Surface "underused-but-high-engagement" and "overused-but-low-engagement" templates.
+    owner: team-analytics-team
+    srm: low
+  team_analytics.bd_residency:
+    default: true
+    description: Route bd=true tagged events to the Bangladesh-only ClickHouse shard.
+    owner: residency-team
+    srm: high
+
+  # W10 — Live analytics
+  live_analytics.hud:
+    default: true
+    description: Run the WebSocket fan-out to presenter HUD (<1 s p95).
+    owner: live-analytics-team
+    srm: medium
+  live_analytics.summary:
+    default: true
+    description: Generate live_session_summary within 5 min of session end.
+    owner: live-analytics-team
+    srm: low
+  live_analytics.hybrid_attendance:
+    default: true
+    description: Merge in-room + remote attendance via QR check-in or presenter mark.
+    owner: live-analytics-team
+    srm: low
+  live_analytics.dedup:
+    default: true
+    description: Deduplicate viewers present in both live + replay modes.
+    owner: live-analytics-team
+    srm: low
+
+  # W11 — Benchmarks + dashboard
+  benchmark.service:
+    default: true
+    description: Run services/benchmark (Go, t-digest + HDR histograms).
+    owner: benchmark-team
+    srm: low
+  benchmark.cohort_eligibility:
+    default: true
+    description: Deck must have ≥10 sessions / 30 d; cohort only published if n≥30.
+    owner: benchmark-team
+    srm: medium
+  benchmark.outlier_exclusion:
+    default: true
+    description: Drop decks >3× cohort p99 from percentile calc.
+    owner: benchmark-team
+    srm: medium
+  dashboard.graphql_gateway:
+    default: true
+    description: Serve GraphQL Yoga gateway at /api/graphql in apps/dashboard.
+    owner: dashboard-team
+    srm: medium
+  dashboard.persisted_queries:
+    default: true
+    description: Persist + cache GraphQL queries at the gateway.
+    owner: dashboard-team
+    srm: medium
+  dashboard.csv_export:
+    default: true
+    description: Stream CSV exports of per-viewer analytics via /v1/exports.
+    owner: dashboard-team
+    srm: medium
+  dashboard.parquet_export:
+    default: true
+    description: Stream Parquet exports of per-viewer analytics via /v1/exports.
+    owner: dashboard-team
+    srm: medium
+  dashboard.export_audit:
+    default: true
+    description: Record every export in analytics_export_audit with the requester + filter.
+    owner: privacy-team
+    srm: high
