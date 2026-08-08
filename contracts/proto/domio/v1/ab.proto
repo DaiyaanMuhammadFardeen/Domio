@@ -1,0 +1,119 @@
+// Domio ab.proto
+//
+// Phase 17 — A/B testing framework contract (#173).
+//
+// services/ab-assignment is the synchronous hot path (sub-ms p95);
+// services/ab-measurement is the Kafka consumer that aggregates per
+// variant; services/ab-statistics performs the Bayesian / frequentist
+// inference. Both call sites sit behind this contract.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// AbTestStatus mirrors the GraphQL enum.
+enum AbTestStatus {
+  AB_TEST_STATUS_UNSPECIFIED = 0;
+  AB_TEST_STATUS_DRAFT = 1;
+  AB_TEST_STATUS_RUNNING = 2;
+  AB_TEST_STATUS_CONCLUDED = 3;
+  AB_TEST_STATUS_ABORTED = 4;
+}
+
+// StatisticalMethod captures which inference is requested.
+enum StatisticalMethod {
+  STATISTICAL_METHOD_UNSPECIFIED = 0;
+  STATISTICAL_METHOD_BAYESIAN_BETA_BINOMIAL = 1;
+  STATISTICAL_METHOD_FREQUENTIST_Z_TEST = 2;
+  STATISTICAL_METHOD_FREQUENTIST_T_TEST = 3;
+  STATISTICAL_METHOD_SEQUENTIAL_MSPRT = 4;
+}
+
+// AbVariant is a single arm of an experiment.
+message AbVariant {
+  string id = 1;
+  string name = 2;
+  uint64 exposures = 3;
+  uint64 conversions = 4;
+  float conversion_rate = 5;
+  // Beta-Binomial 95% HDI (posterior).
+  repeated float credible_interval = 6; // [low, high]
+  // Lift vs. control (control = first variant).
+  float lift_vs_control = 7;
+  repeated float lift_credible_interval = 8; // [low, high]
+}
+
+// AbTest is the full experiment record.
+message AbTest {
+  ResourceId id = 1;
+  ResourceId workspace_id = 2;
+  string name = 3;
+  AbTestStatus status = 4;
+  google.protobuf.Timestamp started_at = 5;
+  google.protobuf.Timestamp concluded_at = 6;
+  string winner_variant_id = 7;
+  float confidence = 8;
+  StatisticalMethod method = 9;
+  repeated AbVariant variants = 10;
+}
+
+// AbAssignment is the result of GET /v1/ab/assign.
+message AbAssignment {
+  ResourceId experiment_id = 1;
+  string viewer_key = 2;
+  string variant_id = 3;
+  google.protobuf.Timestamp assigned_at = 4;
+}
+
+// AbAssignRequest / AbAssignResponse — synchronous hot path.
+message AbAssignRequest {
+  ResourceId experiment_id = 1;
+  string viewer_key = 2;
+  ResourceId workspace_id = 3;
+}
+
+message AbAssignResponse {
+  AbAssignment assignment = 1;
+}
+
+// AbConcludeRequest / AbConcludeResponse — declare a winner.
+message AbConcludeRequest {
+  ResourceId experiment_id = 1;
+  string winner_variant_id = 2;
+  string reason = 3;
+}
+
+message AbConcludeResponse {
+  AbTest test = 1;
+}
+
+// AbMeasureRequest — Kafka consumer shape for services/ab-measurement.
+// The `experiment_id` is denormalized from the event payload so we can
+// aggregate without re-reading the test record on every event.
+message AbMeasureRequest {
+  ResourceId experiment_id = 1;
+  string variant_id = 2;
+  string event_name = 3; // 'view' | 'interaction' | 'session_complete' | ...
+  uint32 weight = 4;     // 1 for binary conversion; numeric for dwell/conversion
+  google.protobuf.Timestamp ts = 5;
+}
+
+message AbMeasureResponse {
+  AbTest test_snapshot = 1;
+}
+
+// AbAssignmentService — synchronous variant resolution (Go).
+service AbAssignmentService {
+  rpc Assign(AbAssignRequest) returns (AbAssignResponse);
+  rpc Conclude(AbConcludeRequest) returns (AbConcludeResponse);
+}
+
+// AbMeasurementService — Kafka consumer that updates per-variant counters.
+service AbMeasurementService {
+  rpc Measure(AbMeasureRequest) returns (AbMeasureResponse);
+}

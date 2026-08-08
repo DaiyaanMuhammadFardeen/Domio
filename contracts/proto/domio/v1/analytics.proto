@@ -1,0 +1,195 @@
+// Domio analytics.proto
+//
+// Phase 17 — Analytics & Engagement Intelligence OLAP query dispatch.
+//
+// services/analytics-warehouse is the only implementation of this service.
+// It fans out to ClickHouse (long-running aggregates) and to Postgres (low-
+// latency control-plane mirrors) based on the query shape.
+
+syntax = "proto3";
+
+package domio.v1;
+
+import "domio/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/domio/platform/gen/go/domio/v1;domiov1";
+
+// PrivacyMode mirrors contracts/graphql/v1/analytics.graphql#PrivacyMode.
+enum PrivacyMode {
+  PRIVACY_MODE_UNSPECIFIED = 0;
+  PRIVACY_MODE_IDENTIFIED = 1;
+  PRIVACY_MODE_PSEUDONYMOUS = 2;
+  PRIVACY_MODE_ANON_CONSENT = 3;
+  PRIVACY_MODE_ANON_NO_TRACK = 4;
+}
+
+// FunnelStage mirrors the GraphQL enum.
+enum FunnelStage {
+  FUNNEL_STAGE_UNSPECIFIED = 0;
+  FUNNEL_STAGE_SENT = 1;
+  FUNNEL_STAGE_OPENED = 2;
+  FUNNEL_STAGE_COMPLETED = 3;
+  FUNNEL_STAGE_REPLIED = 4;
+}
+
+// DeviceClass mirrors the GraphQL enum.
+enum DeviceClass {
+  DEVICE_CLASS_UNSPECIFIED = 0;
+  DEVICE_CLASS_MOBILE = 1;
+  DEVICE_CLASS_TABLET = 2;
+  DEVICE_CLASS_DESKTOP = 3;
+  DEVICE_CLASS_BOT = 4;
+}
+
+// DeckAnalytics is the lightweight projection of /deck/[id].
+message DeckAnalytics {
+  ResourceId deck_id = 1;
+  uint64 views = 2;
+  uint64 distinct_viewers = 3;
+  uint64 unique_sessions = 4;
+  uint64 avg_dwell_ms = 5;
+  float completion_pct = 6;
+  uint64 cta_clicks = 7;
+  repeated DeckBucket sparkline = 8;
+  repeated SlideBreakdown slide_breakdown = 9;
+  FunnelReport funnel = 10;
+}
+
+message DeckBucket {
+  google.protobuf.Timestamp bucket = 1;
+  uint64 views = 2;
+  uint64 distinct_viewers = 3;
+  uint64 interactions = 4;
+}
+
+message SlideBreakdown {
+  string slide_id = 1;
+  uint64 views = 2;
+  uint64 distinct_viewers = 3;
+  uint64 total_dwell_ms = 4;
+  uint32 max_dwell_ms = 5;
+  float drop_rate = 6;
+  repeated SlideBucket sparkline = 7;
+}
+
+message SlideBucket {
+  google.protobuf.Timestamp bucket = 1;
+  uint64 views = 2;
+  uint64 dwell_ms = 3;
+}
+
+message FunnelReport {
+  ResourceId deck_id = 1;
+  repeated FunnelStageCount stages = 2;
+}
+
+message FunnelStageCount {
+  FunnelStage stage = 1;
+  uint64 n = 2;
+  float conversion_pct = 3;
+  uint32 median_time_to_stage_ms = 4;
+}
+
+// ViewerEngagement is the per-viewer detail (W3 + W11).
+message ViewerEngagement {
+  string viewer_id_key = 1;
+  ResourceId workspace_id = 2;
+  uint32 total_sessions = 3;
+  uint64 total_dwell_ms = 4;
+  uint32 total_slides_viewed = 5;
+  float completion_pct = 6;
+  uint64 interactions = 7;
+  google.protobuf.Timestamp last_session_at = 8;
+  FunnelStage funnel_stage_reached = 9;
+  repeated string experiments_participated = 10;
+}
+
+// HeatmapTile / HeatmapReport for W5.
+message HeatmapReport {
+  ResourceId deck_id = 1;
+  uint32 width = 2;
+  uint32 height = 3;
+  google.protobuf.Timestamp generated_at = 4;
+  repeated HeatmapTile tiles = 5;
+  string png_url = 6;
+  string svg_url = 7;
+}
+
+message HeatmapTile {
+  uint32 x = 1;
+  uint32 y = 2;
+  uint64 impressions = 3;
+  uint64 pause_total_ms = 4;
+  uint64 scroll_through_ms = 5;
+}
+
+// Benchmark for W11.
+message Benchmark {
+  ResourceId workspace_id = 1;
+  string cohort_key = 2;
+  string metric = 3;
+  uint32 n = 4;
+  float p25 = 5;
+  float p50 = 6;
+  float p75 = 7;
+  float p95 = 8;
+  float p99 = 9;
+  google.protobuf.Timestamp bucket_date = 10;
+  uint32 your_rank = 11;
+  bool cold_start = 12;
+}
+
+// ----- Query envelope -----
+
+// AnalyticsQueryRequest is the single entry point used by apps/dashboard's
+// GraphQL gateway. The `kind` discriminator selects the shape.
+message AnalyticsQueryRequest {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_DECK_ANALYTICS = 1;
+    KIND_VIEWER_ENGAGEMENT = 2;
+    KIND_HEATMAP = 3;
+    KIND_FUNNEL = 4;
+    KIND_BENCHMARKS = 5;
+  }
+  Kind kind = 1;
+  ResourceId workspace_id = 2;
+  ResourceId deck_id = 3;
+  string viewer_id_key = 4;
+  string cohort_key = 5;
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+  string window = 8;
+  string segmentation = 9;
+}
+
+message AnalyticsQueryResponse {
+  oneof result {
+    DeckAnalytics deck_analytics = 1;
+    ViewerEngagement viewer_engagement = 2;
+    HeatmapReport heatmap = 3;
+    FunnelReport funnel = 4;
+    Benchmark benchmark = 5;
+  }
+}
+
+// AnalyticsWarehouseService is the single gRPC server that exposes
+// services/analytics-warehouse. All queries go through here so the
+// warehouse can swap the storage backend without breaking callers.
+service AnalyticsWarehouseService {
+  rpc Query(AnalyticsQueryRequest) returns (AnalyticsQueryResponse);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+// HealthRequest / HealthResponse mirror contracts/proto/domio/v1/health.proto.
+message HealthRequest {
+  string service_name = 1;
+}
+
+message HealthResponse {
+  string service_name = 1;
+  string status = 2;
+  google.protobuf.Timestamp checked_at = 3;
+  map<string, string> component_status = 4;
+}
