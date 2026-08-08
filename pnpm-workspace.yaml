@@ -7,3 +7,5 @@ packages:
   - "tests/integration/*"
   - "tests/a11y"
   - "tests/e2e"
+  - "tests/security"
+  - "tests/load/replay-corpora"
