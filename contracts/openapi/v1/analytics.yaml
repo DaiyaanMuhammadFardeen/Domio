@@ -1,0 +1,659 @@
+openapi: 3.1.0
+info:
+  title: Domio Analytics API
+  version: 1.0.0
+  description: |
+    Phase 17 — Analytics & Engagement Intelligence REST surface.
+
+    This API is the public-facing contract for:
+      * apps/dashboard (the dashboard GraphQL gateway; REST + GraphQL co-exist
+        because some downstream consumers are easier to wire against REST).
+      * Third-party BI tools that want to pull per-viewer export, deck summary,
+        funnel stage counts, and heatmap exports without going through GraphQL.
+      * Internal scripts that need a synchronous export trigger.
+
+    All endpoints sit behind the standard Domio tenant middleware
+    (`X-Domio-Workspace-Id` + signed auth). Every request that returns
+    per-viewer data honors the four privacy modes; `anon_no_track` viewers
+    surface only as aggregate buckets in the deck/funnel/heatmap endpoints
+    and never appear in the per-viewer export.
+
+    The Read API surface in this file is intentionally narrower than the
+    GraphQL schema in `contracts/graphql/v1/analytics.graphql`. Anything
+    that's only useful inside the dashboard (per-slide scatter, A/B
+    decision table) lives in GraphQL only.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name: Domio Engineering
+    url: https://github.com/DaiyaanMuhammadFardeen/Domio
+
+servers:
+  - url: http://localhost:8080/v1
+    description: Local development (gateway)
+  - url: https://api.domio.example/v1
+    description: Production
+
+tags:
+  - name: ingest
+    description: |
+      Event ingestion. Hot path — the SDK in @domio/analytics-sdk POSTs
+      signed batches here. Returns 200 on accept, 207 if any event in the
+      batch was quarantined to DLQ, 401 on signature failure.
+  - name: viewers
+    description: |
+      Viewer identity + GDPR endpoints (#169 + PII stripper).
+  - name: decks
+    description: |
+      Per-deck analytics aggregates (drives /deck/[id]).
+  - name: funnel
+    description: |
+      Sales funnel view (#177): sent → opened → completed → replied.
+  - name: heatmap
+    description: |
+      Scroll-mode attention heatmap (#171).
+  - name: ab
+    description: |
+      A/B testing (#173): assignment + conclude.
+  - name: crm
+    description: |
+      CRM sync health + webhook receivers (#176).
+  - name: exports
+    description: |
+      Long-running export jobs (per-viewer NDJSON, CSV, Parquet). All
+      exports are themselves audited.
+  - name: live
+    description: |
+      Live session delivery metrics (#175). WebSocket endpoints are
+      documented in `analytics.graphql` (subscription transport).
+
+paths:
+  /events:
+    post:
+      tags: [ingest]
+      operationId: ingestEvents
+      summary: Submit a batch of analytics events
+      description: |
+        Accepts a single event or a batch of 1–100 events. Every event is
+        HMAC-SHA256 signed with the workspace's `X-Domio-Signature` (hex).
+        The validator checks each event against the JSON Schemas in
+        `contracts/events/ingest/`; unknown event types are accepted with
+        `forward_compat=true` rather than rejected.
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/Signature'
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/TsMs'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/IngestEvent'
+                - $ref: '#/components/schemas/IngestEventBatch'
+      responses:
+        '200':
+          description: All events accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+        '207':
+          description: Mixed result — some events accepted, some quarantined.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /viewers/{viewer_id_key}/export:
+    post:
+      tags: [viewers]
+      operationId: exportViewer
+      summary: GDPR data subject access — stream all data for a viewer
+      description: |
+        Streams NDJSON. Each line is one event or one row from `viewer`,
+        `identity_link`, `consent_event`, `session`. Stops on connection
+        close. Audit row written to `analytics_export_audit`.
+      parameters:
+        - name: viewer_id_key
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/WorkspaceId'
+      responses:
+        '200':
+          description: NDJSON stream begins.
+          content:
+            application/x-ndjson:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /viewers/{viewer_id_key}/erase:
+    post:
+      tags: [viewers]
+      operationId: eraseViewer
+      summary: GDPR right-to-erasure
+      description: |
+        Tombstones the viewer; ClickHouse `LIGHTWEIGHT DELETE` removes the
+        viewer's rows from `events`, `session_agg`, `consent_events` within
+        60 seconds. The tombstone table ensures late-arriving events are
+        dropped at ingest.
+      parameters:
+        - name: viewer_id_key
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/WorkspaceId'
+      responses:
+        '202':
+          description: Erasure queued; will complete within 24h.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErasureJob'
+
+  /viewers/{viewer_id_key}/object:
+    post:
+      tags: [viewers]
+      operationId: objectToViewerProcessing
+      summary: GDPR right-to-object
+      description: |
+        Flips the viewer's privacy_mode to `anon_no_track` and stops any
+        further per-viewer processing. Future events are aggregated only.
+      parameters:
+        - name: viewer_id_key
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/WorkspaceId'
+      responses:
+        '200':
+          description: Objection recorded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Viewer'
+
+  /decks/{deck_id}/summary:
+    get:
+      tags: [decks]
+      operationId: getDeckSummary
+      summary: Per-deck analytics summary (drives /deck/[id])
+      parameters:
+        - name: deck_id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/WorkspaceId'
+        - in: query
+          name: window
+          schema:
+            type: string
+            enum: ['24h', '7d', '30d', '90d']
+            default: '7d'
+      responses:
+        '200':
+          description: Deck summary payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckSummary'
+
+  /decks/{deck_id}/funnel:
+    get:
+      tags: [funnel]
+      operationId: getDeckFunnel
+      summary: Per-stage funnel for sales decks (#177)
+      parameters:
+        - name: deck_id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/WorkspaceId'
+        - in: query
+          name: segmentation
+          schema: { type: string }
+      responses:
+        '200':
+          description: Funnel payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FunnelReport'
+
+  /decks/{deck_id}/heatmap:
+    get:
+      tags: [heatmap]
+      operationId: getDeckHeatmap
+      summary: Scroll-mode attention heatmap (#171)
+      parameters:
+        - name: deck_id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/WorkspaceId'
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [png, svg, json]
+            default: png
+      responses:
+        '200':
+          description: Heatmap image or JSON.
+          content:
+            image/png:
+              schema: { type: string, format: binary }
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeatmapData'
+
+  /ab/assign:
+    get:
+      tags: [ab]
+      operationId: abAssign
+      summary: Public A/B variant assignment (#173)
+      parameters:
+        - in: query
+          name: experiment_id
+          required: true
+          schema: { type: string }
+        - in: query
+          name: viewer_key
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Variant assignment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AbAssignment'
+
+  /ab/conclude:
+    post:
+      tags: [ab]
+      operationId: abConclude
+      summary: Declare an A/B test winner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AbConcludeRequest'
+      responses:
+        '200':
+          description: Test concluded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AbTest'
+
+  /crm/health:
+    get:
+      tags: [crm]
+      operationId: getCrmHealth
+      summary: CRM sync health dashboard
+      responses:
+        '200':
+          description: Health summary per provider.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrmHealth'
+
+  /webhooks/crm/{provider}:
+    post:
+      tags: [crm]
+      operationId: receiveCrmWebhook
+      summary: Inbound webhook from a CRM provider
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [hubspot, salesforce, pipedrive, dynamics]
+      responses:
+        '202':
+          description: Webhook accepted.
+
+  /exports/run:
+    post:
+      tags: [exports]
+      operationId: runExport
+      summary: Start a long-running export job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportRunRequest'
+      responses:
+        '202':
+          description: Export job queued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportRun'
+
+  /exports/runs/{run_id}:
+    get:
+      tags: [exports]
+      operationId: getExportRun
+      summary: Poll export job status + signed URL
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Export run state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportRun'
+
+  /live/sessions/{session_id}/summary:
+    get:
+      tags: [live]
+      operationId: getLiveSessionSummary
+      summary: Live session delivery summary (#175)
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: '#/components/parameters/WorkspaceId'
+      responses:
+        '200':
+          description: Live session summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveSessionSummary'
+
+components:
+  parameters:
+    WorkspaceId:
+      name: X-Domio-Workspace-Id
+      in: header
+      required: true
+      schema: { type: string }
+    Signature:
+      name: X-Domio-Signature
+      in: header
+      required: true
+      schema: { type: string }
+      description: Hex-encoded HMAC-SHA256 of the request body.
+    DeckId:
+      name: X-Domio-Deck-Id
+      in: header
+      schema: { type: string }
+    SessionId:
+      name: X-Domio-Session-Id
+      in: header
+      schema: { type: string }
+    TsMs:
+      name: X-Domio-Ts-Ms
+      in: header
+      required: true
+      schema: { type: integer, format: int64 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      schema: { type: string }
+
+  responses:
+    BadRequest:
+      description: Malformed request.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: HMAC signature invalid or workspace mismatch.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Rate limit exceeded; retry after the time in Retry-After.
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource not found or cross-tenant 404.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    IngestEvent:
+      oneOf:
+        - $ref: 'https://domio.example/contracts/events/ingest/view.json'
+        - $ref: 'https://domio.example/contracts/events/ingest/interaction.json'
+        - $ref: 'https://domio.example/contracts/events/ingest/scroll_progress.json'
+        - $ref: 'https://domio.example/contracts/events/ingest/scroll_pause.json'
+        - $ref: 'https://domio.example/contracts/events/ingest/presenter_event.json'
+        - $ref: 'https://domio.example/contracts/events/ingest/live_session_event.json'
+      discriminator:
+        propertyName: event_name
+        mapping:
+          view: 'https://domio.example/contracts/events/ingest/view.json'
+          interaction: 'https://domio.example/contracts/events/ingest/interaction.json'
+          scroll_progress: 'https://domio.example/contracts/events/ingest/scroll_progress.json'
+          scroll_pause: 'https://domio.example/contracts/events/ingest/scroll_pause.json'
+          presenter_event: 'https://domio.example/contracts/events/ingest/presenter_event.json'
+          live_session_event: 'https://domio.example/contracts/events/ingest/live_session_event.json'
+
+    IngestEventBatch:
+      type: object
+      required: [events]
+      properties:
+        events:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/IngestEvent'
+
+    IngestResponse:
+      type: object
+      required: [accepted, quarantined, ingest_lag_ms]
+      properties:
+        accepted:
+          type: integer
+          description: Count of events written to Kafka.
+        quarantined:
+          type: integer
+          description: Count of events forwarded to DLQ.
+        ingest_lag_ms:
+          type: integer
+          description: Median client-to-server ingest latency for this batch.
+
+    Viewer:
+      type: object
+      required: [viewer_id_key, workspace_id, privacy_mode, created_at]
+      properties:
+        viewer_id_key: { type: string }
+        workspace_id: { type: string }
+        privacy_mode:
+          type: string
+          enum: [identified, pseudonymous, anon_consent, anon_no_track]
+        email_hash: { type: string }
+        display_name: { type: string }
+        company: { type: string }
+        created_at: { type: string, format: date-time }
+
+    ErasureJob:
+      type: object
+      required: [viewer_id_key, queued_at, will_complete_by]
+      properties:
+        viewer_id_key: { type: string }
+        queued_at: { type: string, format: date-time }
+        will_complete_by: { type: string, format: date-time }
+
+    DeckSummary:
+      type: object
+      properties:
+        deck_id: { type: string }
+        views: { type: integer }
+        distinct_viewers: { type: integer }
+        unique_sessions: { type: integer }
+        avg_dwell_ms: { type: integer }
+        completion_pct: { type: number }
+        sparkline:
+          type: array
+          items:
+            type: object
+            properties:
+              bucket: { type: string, format: date-time }
+              views: { type: integer }
+              distinct_viewers: { type: integer }
+
+    FunnelReport:
+      type: object
+      properties:
+        deck_id: { type: string }
+        stages:
+          type: array
+          items:
+            type: object
+            properties:
+              stage:
+                type: string
+                enum: [sent, opened, completed, replied]
+              n: { type: integer }
+              conversion_pct: { type: number }
+              median_time_to_stage_ms: { type: integer }
+
+    HeatmapData:
+      type: object
+      properties:
+        deck_id: { type: string }
+        tile_grid:
+          type: object
+          properties:
+            width: { type: integer }
+            height: { type: integer }
+            tiles:
+              type: array
+              items:
+                type: object
+                properties:
+                  x: { type: integer }
+                  y: { type: integer }
+                  impressions: { type: integer }
+                  pause_total_ms: { type: integer }
+
+    AbAssignment:
+      type: object
+      required: [experiment_id, viewer_key, variant_id]
+      properties:
+        experiment_id: { type: string }
+        viewer_key: { type: string }
+        variant_id: { type: string }
+        assigned_at: { type: string, format: date-time }
+
+    AbTest:
+      type: object
+      properties:
+        id: { type: string }
+        status:
+          type: string
+          enum: [draft, running, concluded, aborted]
+        winner_variant_id: { type: string }
+        confidence: { type: number }
+
+    AbConcludeRequest:
+      type: object
+      required: [experiment_id, winner_variant_id, reason]
+      properties:
+        experiment_id: { type: string }
+        winner_variant_id: { type: string }
+        reason: { type: string }
+
+    CrmHealth:
+      type: object
+      properties:
+        providers:
+          type: array
+          items:
+            type: object
+            properties:
+              provider:
+                type: string
+                enum: [hubspot, salesforce, pipedrive, dynamics]
+              enabled: { type: boolean }
+              last_sync_at: { type: string, format: date-time }
+              failure_rate_1h: { type: number }
+              queue_depth: { type: integer }
+
+    ExportRunRequest:
+      type: object
+      required: [workspace_id, kind, filter]
+      properties:
+        workspace_id: { type: string }
+        kind:
+          type: string
+          enum: [per_viewer_ndjson, per_deck_csv, per_deck_parquet, funnel_csv]
+        filter:
+          type: object
+          description: Free-form filter; documented per-kind in services/analytics-warehouse.
+
+    ExportRun:
+      type: object
+      properties:
+        id: { type: string }
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        signed_url: { type: string, format: uri }
+        byte_size: { type: integer }
+        audit_id: { type: string }
+
+    LiveSessionSummary:
+      type: object
+      properties:
+        session_id: { type: string }
+        peak_attendance: { type: integer }
+        total_attendance: { type: integer }
+        poll_participation:
+          type: array
+          items:
+            type: object
+            properties:
+              poll_id: { type: string }
+              participants: { type: integer }
+              response_rate: { type: number }
+              time_to_first_vote_ms: { type: integer }
+        qa_volume:
+          type: object
+          properties:
+            distinct_askers: { type: integer }
+            upvotes: { type: integer }
+            unanswered: { type: integer }
+        reactions_total: { type: integer }
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        request_id: { type: string }

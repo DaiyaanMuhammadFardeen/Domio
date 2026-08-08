@@ -1,0 +1,410 @@
+"""
+Phase 17 — Analytics & Engagement Intelligence GraphQL schema.
+
+This is the read API consumed by apps/dashboard. It fans out to:
+
+  * Postgres control plane (services/analytics-warehouse + services/viewer-identity)
+  * ClickHouse analytics warehouse (services/analytics-warehouse + services/benchmark)
+  * Live WebSocket fan-out for live metrics (services/live-analytics)
+
+Persisted-query support: every field on this schema is statically known so the
+dashboard can register a persisted query + Apollo client hash map. The schema
+deliberately mirrors the OpenAPI surface in contracts/openapi/v1/analytics.yaml
+where overlap exists; OpenAPI remains the contract for non-dashboard consumers.
+
+Spec version: 1
+Schema version: 1
+"""
+
+scalar DateTime
+scalar JSON
+scalar UUID
+
+enum PrivacyMode {
+  identified
+  pseudonymous
+  anon_consent
+  anon_no_track
+}
+
+enum DeviceClass {
+  mobile
+  tablet
+  desktop
+  bot
+}
+
+enum EventName {
+  view
+  interaction
+  scroll_progress
+  scroll_pause
+  presenter_event
+  live_session_event
+  session_complete
+  send
+  reply
+}
+
+enum FunnelStage {
+  sent
+  opened
+  completed
+  replied
+}
+
+enum AbTestStatus {
+  draft
+  running
+  concluded
+  aborted
+}
+
+enum ExportKind {
+  per_viewer_ndjson
+  per_deck_csv
+  per_deck_parquet
+  funnel_csv
+}
+
+enum ExportStatus {
+  queued
+  running
+  completed
+  failed
+}
+
+# ----- Inputs -----
+
+input DeckFilter {
+  workspaceId: UUID!
+  startTime: DateTime
+  endTime: DateTime
+  audienceTier: String
+  campaignId: String
+  experimentId: String
+  variantId: String
+}
+
+input ViewerFilter {
+  workspaceId: UUID!
+  viewerIdKey: String
+  emailHash: String
+  privacyMode: PrivacyMode
+  startTime: DateTime
+  endTime: DateTime
+}
+
+input AbAssignmentInput {
+  experimentId: UUID!
+  viewerKey: String!
+}
+
+input AbConcludeInput {
+  experimentId: UUID!
+  winnerVariantId: String!
+  reason: String!
+}
+
+input ExportInput {
+  workspaceId: UUID!
+  kind: ExportKind!
+  filter: JSON
+}
+
+# ----- Types -----
+
+type Viewer {
+  viewerIdKey: String!
+  workspaceId: UUID!
+  privacyMode: PrivacyMode!
+  emailHash: String
+  displayName: String
+  company: String
+  consentAt: DateTime
+  createdAt: DateTime!
+}
+
+type ErasureJob {
+  viewerIdKey: String!
+  queuedAt: DateTime!
+  willCompleteBy: DateTime!
+}
+
+type ViewerEngagement {
+  viewerIdKey: String!
+  totalSessions: Int!
+  totalDwellMs: Int!
+  totalSlidesViewed: Int!
+  completionPct: Float!
+  interactions: Int!
+  lastSessionAt: DateTime
+  funnelStageReached: FunnelStage
+  experimentsParticipated: [String!]!
+}
+
+type SlideBreakdown {
+  slideId: String!
+  views: Int!
+  distinctViewers: Int!
+  totalDwellMs: Int!
+  maxDwellMs: Int!
+  dropRate: Float!
+  sparkline: [SlideBucket!]!
+}
+
+type SlideBucket {
+  bucket: DateTime!
+  views: Int!
+  dwellMs: Int!
+}
+
+type DeckAnalytics {
+  deckId: UUID!
+  views: Int!
+  distinctViewers: Int!
+  uniqueSessions: Int!
+  avgDwellMs: Int!
+  completionPct: Float!
+  ctaClicks: Int!
+  sparkline: [DeckBucket!]!
+  slideBreakdown: [SlideBreakdown!]!
+  funnel: FunnelReport
+}
+
+type DeckBucket {
+  bucket: DateTime!
+  views: Int!
+  distinctViewers: Int!
+  interactions: Int!
+}
+
+type FunnelReport {
+  deckId: UUID!
+  stages: [FunnelStageCount!]!
+}
+
+type FunnelStageCount {
+  stage: FunnelStage!
+  n: Int!
+  conversionPct: Float!
+  medianTimeToStageMs: Int!
+}
+
+type Heatmap {
+  deckId: UUID!
+  width: Int!
+  height: Int!
+  generatedAt: DateTime!
+  tiles: [HeatmapTile!]!
+  pngUrl: String
+  svgUrl: String
+}
+
+type HeatmapTile {
+  x: Int!
+  y: Int!
+  impressions: Int!
+  pauseTotalMs: Int!
+  scrollThroughMs: Int!
+}
+
+type AbAssignment {
+  experimentId: UUID!
+  viewerKey: String!
+  variantId: String!
+  assignedAt: DateTime!
+}
+
+type AbTest {
+  id: UUID!
+  workspaceId: UUID!
+  name: String!
+  status: AbTestStatus!
+  startedAt: DateTime
+  concludedAt: DateTime
+  winnerVariantId: String
+  confidence: Float
+  variants: [AbVariant!]!
+}
+
+type AbVariant {
+  id: String!
+  name: String!
+  exposures: Int!
+  conversions: Int!
+  conversionRate: Float!
+  credibleInterval: [Float!]!   # Beta-Binomial 95% HDI
+  liftVsControl: Float
+  liftCredibleInterval: [Float!]!
+}
+
+type Benchmark {
+  workspaceId: UUID!
+  cohortKey: String!
+  metric: String!
+  n: Int!
+  p25: Float!
+  p50: Float!
+  p75: Float!
+  p95: Float!
+  p99: Float!
+  bucketDate: DateTime!
+  yourRank: Int
+  coldStart: Boolean!
+}
+
+type TeamAnalytics {
+  workspaceId: UUID!
+  bucket: DateTime!
+  templates: [TemplateEngagement!]!
+  components: [ComponentEngagement!]!
+  brandKits: [BrandKitEngagement!]!
+}
+
+type TemplateEngagement {
+  templateId: String!
+  deckCount: Int!
+  totalViews: Int!
+  totalCompletions: Int!
+  compositeScore: Float!
+  trending: Boolean!
+  libraryHealth: TemplateLibraryHealth!
+}
+
+enum TemplateLibraryHealth {
+  promote
+  retire
+  neutral
+  incubating
+}
+
+type ComponentEngagement {
+  componentId: String!
+  totalUses: Int!
+  totalViews: Int!
+  compositeScore: Float!
+}
+
+type BrandKitEngagement {
+  brandKitId: String!
+  totalDecks: Int!
+  totalViews: Int!
+  compositeScore: Float!
+}
+
+type LiveSession {
+  sessionId: UUID!
+  workspaceId: UUID!
+  startedAt: DateTime!
+  endedAt: DateTime
+  peakAttendance: Int!
+  currentAttendance: Int!
+  attendanceSeries: [AttendanceBucket!]!
+  pollParticipation: [PollParticipation!]!
+  qaVolume: QaVolume!
+  reactionBursts: Int!
+}
+
+type AttendanceBucket {
+  bucket: DateTime!
+  attendance: Int!
+}
+
+type PollParticipation {
+  pollId: String!
+  openedAt: DateTime
+  closedAt: DateTime
+  participants: Int!
+  responseRate: Float!
+  timeToFirstVoteMs: Int!
+}
+
+type QaVolume {
+  distinctAskers: Int!
+  upvotes: Int!
+  unanswered: Int!
+}
+
+type ExportRun {
+  id: UUID!
+  workspaceId: UUID!
+  kind: ExportKind!
+  status: ExportStatus!
+  requestedAt: DateTime!
+  completedAt: DateTime
+  byteSize: Int
+  signedUrl: String
+  auditId: UUID!
+}
+
+# ----- Subscriptions -----
+
+type LiveAttendanceUpdate {
+  sessionId: UUID!
+  bucket: DateTime!
+  attendance: Int!
+  reactionsLast10s: Int!
+}
+
+# ----- Root -----
+
+type Query {
+  # W3 — Identity
+  viewer(input: ViewerFilter!): Viewer
+  viewerEngagement(input: ViewerFilter!): ViewerEngagement
+
+  # W2 + W11 — Per-deck analytics
+  deckAnalytics(deckId: UUID!, window: String = "7d"): DeckAnalytics!
+
+  # W5 — Heatmap
+  heatmap(deckId: UUID!, segmentation: String): Heatmap!
+
+  # W6 — A/B
+  abAssign(input: AbAssignmentInput!): AbAssignment!
+  abTest(id: UUID!): AbTest!
+  abTests(workspaceId: UUID!): [AbTest!]!
+
+  # W9 — Team analytics
+  teamAnalytics(workspaceId: UUID!, bucket: DateTime): TeamAnalytics!
+
+  # W10 — Live
+  liveSession(sessionId: UUID!): LiveSession!
+
+  # W11 — Benchmarks
+  benchmarks(
+    workspaceId: UUID!
+    cohortKey: String!
+    metric: String
+  ): [Benchmark!]!
+
+  # W11 — Exports
+  exportRun(id: UUID!): ExportRun
+}
+
+type Mutation {
+  # W3 — GDPR
+  eraseViewer(viewerIdKey: String!, workspaceId: UUID!): ErasureJob!
+  objectToViewerProcessing(viewerIdKey: String!, workspaceId: UUID!): Viewer!
+
+  # W6 — A/B conclude
+  abConclude(input: AbConcludeInput!): AbTest!
+
+  # W11 — Exports
+  runExport(input: ExportInput!): ExportRun!
+
+  # W3 — Consent
+  recordConsent(
+    viewerIdKey: String!
+    workspaceId: UUID!
+    privacyMode: PrivacyMode!
+  ): Viewer!
+}
+
+type Subscription {
+  # W10 — Live HUD
+  liveAttendance(sessionId: UUID!): LiveAttendanceUpdate!
+}
+
+# Schema directive for persisted-query support.
+directive @cacheControl(maxAge: Int!, scope: String) on FIELD_DEFINITION | OBJECT
