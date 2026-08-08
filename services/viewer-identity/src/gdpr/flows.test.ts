@@ -242,11 +242,10 @@ describe('GDPR integration — verify (object → anon_no_track)', () => {
 });
 
 describe('GDPR integration — full lifecycle', () => {
-  let store: IdentityStore;
   let app: Hono;
 
   beforeEach(() => {
-    ({ app, store } = buildApp());
+    ({ app } = buildApp());
   });
 
   it('upsert → consent → export → erase → 404 chain', async () => {
