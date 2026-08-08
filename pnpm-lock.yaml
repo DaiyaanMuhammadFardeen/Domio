@@ -235,6 +235,9 @@ importers:
 
   apps/join-web:
     dependencies:
+      '@domio/analytics-sdk':
+        specifier: workspace:*
+        version: link:../../packages/analytics-sdk
       '@domio/audience-service':
         specifier: workspace:^
         version: link:../../services/audience
@@ -306,6 +309,9 @@ importers:
 
   apps/presenter:
     dependencies:
+      '@domio/analytics-sdk':
+        specifier: workspace:*
+        version: link:../../packages/analytics-sdk
       '@domio/annotation-engine':
         specifier: workspace:*
         version: link:../../services/annotation-engine
@@ -337,6 +343,9 @@ importers:
 
   apps/viewer:
     dependencies:
+      '@domio/analytics-sdk':
+        specifier: workspace:*
+        version: link:../../packages/analytics-sdk
       '@domio/animation-runtime':
         specifier: workspace:*
         version: link:../../packages/animation-runtime
@@ -427,7 +436,14 @@ importers:
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
   packages/analytics-sdk:
+    dependencies:
+      '@domio/prototype-recorder':
+        specifier: workspace:*
+        version: link:../prototype-recorder
     devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
       typescript:
         specifier: 5.7.2
         version: 5.7.2

@@ -8,8 +8,11 @@ package router
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -315,6 +318,20 @@ func syncOpHandler(ctx context.Context, msg *rt.Op, sess *session.Session, cfg C
 			if perr := cfg.Bus.PublishCRDT(ctx, msg.GetDeckId(), data); perr != nil {
 				cfg.Logger.Warn("nats: publish CRDT failed", zap.Error(perr))
 			}
+			// Phase 17 W0 — re-emit CRDT state apply as a live_session_event
+			// to the analytics fan-out subject so the columnar loader can
+			// ingest it. Best-effort; never block the realtime path. Only
+			// fans out when the CRDT session is bound to a Phase 16
+			// live session (i.e. the deck is being presented live).
+			if sess.LiveSessionID != "" {
+				if env, eerr := buildLiveSessionEvent("crdt_state_apply", sess.LiveSessionID, msg.GetDeckId(), sess.ActorID, data); eerr == nil {
+					if perr := cfg.Bus.PublishAnalyticsLive(ctx, sess.LiveSessionID, env); perr != nil {
+						cfg.Logger.Warn("nats: publish analytics-live failed", zap.Error(perr))
+					}
+				} else {
+					cfg.Logger.Warn("rtgw: build live_session_event failed", zap.Error(eerr))
+				}
+			}
 		}
 	}
 
@@ -375,4 +392,37 @@ func syncBranchSwitchHandler(ctx context.Context, msg *rt.BranchSwitch, sess *se
 
 func generateSessionID() string {
 	return uuid.New().String()
+}
+
+// buildLiveSessionEvent wraps a CRDT op (or any other realtime artifact)
+// as a Phase 17 live_session_event JSON envelope. The envelope shape
+// mirrors contracts/events/ingest/live_session_event.json. The original
+// payload is base64-encoded into live_event_data so the columnar loader
+// can decode the source bytes after Kafka → ClickHouse hand-off.
+//
+// Required fields for the schema:
+//   live_event_kind, session_id, source_app="rtgw", ingest_topic="events.ingest.raw"
+// Optional fields default to safe values (region_pinned="global", forward_compat=true).
+func buildLiveSessionEvent(kind, sessionID, deckID, actorID string, payload []byte) ([]byte, error) {
+	if sessionID == "" {
+		return nil, fmt.Errorf("buildLiveSessionEvent: empty sessionID")
+	}
+	if kind == "" {
+		return nil, fmt.Errorf("buildLiveSessionEvent: empty kind")
+	}
+	env := map[string]any{
+		"live_event_kind":    kind,
+		"session_id":         sessionID,
+		"deck_id":            deckID,
+		"viewer_id_key":      actorID,
+		"live_event_data":    base64.StdEncoding.EncodeToString(payload),
+		"payload_size_bytes": len(payload),
+		"latency_ms":         0,
+		"region_pinned":      "global",
+		"source_app":         "rtgw",
+		"ingest_topic":       "events.ingest.raw",
+		"forward_compat":     true,
+		"ts_ms":              time.Now().UnixMilli(),
+	}
+	return json.Marshal(env)
 }

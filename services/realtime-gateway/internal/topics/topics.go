@@ -53,6 +53,14 @@ func Peer(deckID string) string {
 	return Presence(deckID)
 }
 
+// AnalyticsLive returns the NATS subject for analytics fan-out from rtgw
+// to services/event-ingest. The session ID is the live session ID from
+// P15; consumers (event-ingest Kafka bridge + session-archiver) filter
+// by `analytics.ingest.live.*`.
+func AnalyticsLive(sessionID string) string {
+	return fmt.Sprintf("analytics.ingest.live.%s", sessionID)
+}
+
 // StreamName is the NATS JetStream stream name for the realtime domain.
 const StreamName = "realtime"
 
@@ -62,6 +70,7 @@ func StreamSubjects() []string {
 		"realtime.deck.*.crdt",
 		"realtime.deck.*.presence",
 		"realtime.deck.*.meta",
+		"analytics.ingest.live.*",
 	}
 }
 

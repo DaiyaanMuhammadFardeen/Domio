@@ -14,6 +14,7 @@
     "clean": "rm -rf .next dist .turbo coverage"
   },
   "dependencies": {
+    "@domio/analytics-sdk": "workspace:*",
     "@domio/animation-runtime": "workspace:*",
     "@domio/ar-sessions": "workspace:*",
     "@domio/audio": "workspace:*",

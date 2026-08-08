@@ -16,6 +16,7 @@ import (
 	"github.com/domio/platform/services/participant-ws-gateway/internal/hlc"
 	"github.com/domio/platform/services/participant-ws-gateway/internal/metrics"
 	"github.com/domio/platform/services/participant-ws-gateway/internal/session"
+	"github.com/domio/platform/services/participant-ws-gateway/internal/topics"
 )
 
 // Envelope mirrors services/protocol/src/audience-envelope.ts.
@@ -139,6 +140,9 @@ func (c *Conn) dispatch(env Envelope) {
 			"participant_id": env.ParticipantID,
 			"hlc": c.cfg.HLC.Now(),
 		}))
+		// Phase 17 W0 — fan out the attendance_join to the analytics
+		// ingest plane so the live session summary worker sees it.
+		c.fanoutToAnalyticsLive("attendance_join", env.ParticipantID, nil)
 	case "heartbeat":
 		if err := c.cfg.Registry.Touch(c.cfg.SessionCode, env.ParticipantID, time.UnixMilli(c.cfg.Now())); err != nil {
 			c.sendError("unknown_participant", err.Error())
@@ -151,6 +155,9 @@ func (c *Conn) dispatch(env Envelope) {
 			"event": "left",
 			"participant_id": env.ParticipantID,
 		}))
+		// Phase 17 W0 — fan out attendance_leave to the analytics ingest
+		// plane so the live session summary worker can close the row.
+		c.fanoutToAnalyticsLive("attendance_leave", env.ParticipantID, nil)
 		c.shutdown()
 	default:
 		// Generic fan-out: enqueue to the per-participant topic.
@@ -164,7 +171,86 @@ func (c *Conn) dispatch(env Envelope) {
 			"payload": payload,
 		}))
 		c.cfg.Metrics.IncPublish()
+		// Phase 17 W0 — map the audience event types to the canonical
+		// live_session_event kinds defined in contracts/events/ingest/
+		// live_session_event.json and re-emit to the analytics ingest
+		// plane. The mapping is intentionally narrow: any envelopes the
+		// analytics fan-out does not recognize are skipped silently so
+		// we never invent a kind that the columnar loader expects.
+		if kind := audienceLiveEventKind(env.Type); kind != "" {
+			c.fanoutToAnalyticsLive(kind, env.ParticipantID, payload)
+		}
 	}
+}
+
+// audienceLiveEventKind maps a pwg envelope type to the canonical
+// live_session_event_kind defined in contracts/events/ingest/live_session_event.json.
+// Returns "" if the envelope type is not a recognized audience engagement event.
+func audienceLiveEventKind(envType string) string {
+	switch envType {
+	case "poll_vote":
+		return "poll_vote"
+	case "poll_open":
+		return "poll_open"
+	case "poll_close":
+		return "poll_close"
+	case "qa_item":
+		return "qa_submit"
+	case "qa_upvote":
+		return "qa_upvote"
+	case "quiz_attempt":
+		return "quiz_attempt"
+	case "quiz_open":
+		return "quiz_open"
+	case "quiz_close":
+		return "quiz_close"
+	case "reaction":
+		return "reaction_burst"
+	case "nav_vote":
+		return "nav_vote_cast"
+	case "sentiment_input":
+		return "sentiment_sample"
+	case "raise_hand":
+		return "raise_hand"
+	case "feedback_response":
+		return "feedback_response"
+	default:
+		return ""
+	}
+}
+
+// fanoutToAnalyticsLive publishes a live_session_event envelope to the
+// Phase 17 analytics ingest plane (NATS subject
+// analytics.ingest.live.{sessionID}). The Kafka bridge in
+// services/event-ingest consumes this subject and forwards the event to
+// Kafka events.ingest.raw so the columnar loader can ingest it.
+//
+// The fan-out is best-effort: failure is swallowed because the realtime
+// participant path must never block on analytics. The envelope shape
+// mirrors contracts/events/ingest/live_session_event.json so the
+// columnar loader sees a single canonical schema across rtgw + pwg.
+func (c *Conn) fanoutToAnalyticsLive(kind, participantID string, payload json.RawMessage) {
+	if c.cfg.SessionID == "" {
+		// No live session binding; this is a pre-session or test envelope.
+		return
+	}
+	if len(payload) == 0 {
+		payload = json.RawMessage(`{}`)
+	}
+	env := map[string]any{
+		"live_event_kind":    kind,
+		"session_id":         c.cfg.SessionID,
+		"viewer_id_key":      participantID,
+		"live_event_data":    json.RawMessage(payload),
+		"payload_size_bytes": len(payload),
+		"region_pinned":      "global",
+		"source_app":         "pwg",
+		"ingest_topic":       "events.ingest.raw",
+		"forward_compat":     true,
+		"ts_ms":              c.cfg.Now(),
+	}
+	c.cfg.Bus.Publish(topics.AnalyticsLive(c.cfg.SessionID), mustJSON(env))
+	c.cfg.Metrics.IncPublish()
 }
 
 func (c *Conn) writeLoop() {

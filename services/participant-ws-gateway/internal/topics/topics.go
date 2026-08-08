@@ -22,6 +22,14 @@ const (
 	Whisper     = "whisper"
 )
 
+// AnalyticsLive returns the NATS subject for analytics fan-out from
+// pwg to services/event-ingest. Mirrors services/realtime-gateway/
+// internal/topics/topics.go#AnalyticsLive so the Kafka bridge has a
+// single subject prefix to consume.
+func AnalyticsLive(sessionID string) string {
+	return fmt.Sprintf("analytics.ingest.live.%s", sessionID)
+}
+
 // For builds a subject for a given session + topic + (optional) shard.
 // Examples:
 //

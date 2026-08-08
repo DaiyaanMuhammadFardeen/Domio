@@ -148,6 +148,18 @@ func (b *Bus) PublishMeta(ctx context.Context, deckID string, data []byte) error
 	return b.Publish(ctx, topics.Meta(deckID), data)
 }
 
+// PublishAnalyticsLive re-emits a CRDT or participation event as a
+// Phase 17 live_session_event to the analytics fan-out subject. The
+// Kafka bridge in services/event-ingest consumes this subject and
+// forwards the event to Kafka events.ingest.raw so the columnar
+// loader can ingest it.
+func (b *Bus) PublishAnalyticsLive(ctx context.Context, sessionID string, data []byte) error {
+	if sessionID == "" {
+		return fmt.Errorf("publishAnalyticsLive: empty session id")
+	}
+	return b.Publish(ctx, topics.AnalyticsLive(sessionID), data)
+}
+
 // Close shuts down the NATS connection.
 func (b *Bus) Close() {
 	if b.nc != nil {

@@ -107,6 +107,13 @@ type Session struct {
 	DeckID   string
 	BranchID string
 
+	// LiveSessionID is the Phase 16 live-session ID this CRDT session
+	// is bound to (set when the deck is being presented live). Empty
+	// for offline editing sessions. When set, the gateway re-emits CRDT
+	// state applies to NATS subject analytics.ingest.live.{LiveSessionID}
+	// so the Phase 17 columnar loader can ingest them.
+	LiveSessionID string
+
 	HLC    *rt.HLC // current HLC snapshot (pointer to shared proto)
 	OutCh  chan []byte
 	Closed chan struct{}
@@ -140,6 +147,12 @@ func (s *Session) UpdateHLC(h *rt.HLC) {
 	if h != nil {
 		s.HLC = h
 	}
+}
+
+// BindLiveSessionID pins this CRDT session to a Phase 16 live-session
+// for analytics fan-out. Passing an empty string clears the binding.
+func (s *Session) BindLiveSessionID(id string) {
+	s.LiveSessionID = id
 }
 
 // Send enqueues a protobuf-encoded frame for the write pump.
