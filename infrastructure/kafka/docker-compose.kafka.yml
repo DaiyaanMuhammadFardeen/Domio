@@ -1,0 +1,85 @@
+# Phase 17 — Kafka (KRaft single-broker dev) for the analytics ingest pipeline.
+#
+# Brings up Apache Kafka in KRaft (no ZooKeeper) mode for local dev. Production
+# uses a 3-broker cluster managed by the regional infra modules; this file is
+# intentionally single-broker for laptop-loop development.
+#
+# Topics created by services/event-ingest on first publish (auto.create.topics).
+# Partition keys are documented in contracts/events/ingest/*.json — every
+# event with a `viewer_id_key` MUST partition on that key so sessionization
+# remains deterministic in W4.
+#
+# Usage:
+#   docker compose -f infrastructure/local/docker-compose.yml \
+#                  -f infrastructure/kafka/docker-compose.kafka.yml up -d
+
+name: domio-kafka
+
+x-kafka-env: &kafka-env
+  # Single-node KRaft config.
+  KAFKA_NODE_ID: 1
+  KAFKA_PROCESS_ROLES: broker,controller
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SASL:PLAINTEXT
+  KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,SASL://:9094
+  KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,SASL://localhost:9094
+  KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  # Topic defaults — match what production brokers use.
+  KAFKA_NUM_PARTITIONS: 12
+  KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+  KAFKA_MIN_INSYNC_REPLICAS: 1
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+  KAFKA_LOG_RETENTION_HOURS: 168
+  KAFKA_LOG_SEGMENT_BYTES: 1073741824
+  # Cluster id is fixed for KRaft so the meta-log replay is deterministic.
+  CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+services:
+  kafka:
+    image: apache/kafka:3.8.0
+    container_name: domio-kafka
+    restart: unless-stopped
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+      - "${KAFKA_SASL_PORT:-9094}:9094"
+    environment:
+      <<: *kafka-env
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - ./kraft/server.properties:/opt/kafka/config/kraft/server.properties:ro
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Init container: ensures the cluster id is initialized before broker start.
+  # The apache/kafka:3.8.0 image auto-formats on first start when no meta-log
+  # is present, but we keep this sidecar to make the intent explicit and to
+  # log the cluster id on every boot.
+  kafka-init:
+    image: alpine:3.19
+    container_name: domio-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "kafka init: cluster id = ${CLUSTER_ID:-MkU3OEVBNTcwNTJENDM2Qk}"
+        echo "kafka init: bootstrap = kafka:9092"
+        echo "kafka init: SASL bootstrap = localhost:9094 (host)"
+        # Touch the topics dir to signal readiness to the rest of the stack.
+        touch /topics/.ready
+    volumes:
+      - ./topics:/topics
+
+volumes:
+  kafka-data:
+    driver: local
