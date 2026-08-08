@@ -1,0 +1,129 @@
+# Phase 21 — Recording & Studio PagerDuty alert routing rules.
+#
+# Severity mapping:
+#   critical → page on-call
+#   warning  → open ticket, no page
+#   info     → log only
+#
+# Routes are namespace-scoped to the recording + replay + paywall + SCORM
+# stacks. Add new alerts below using the canonical metric names from:
+#   - services/recording-orchestrator/src/observability/metrics.ts
+#   - services/transcript-service/internal/observability/metrics.go
+#   - services/clip-engine/internal/observability/metrics.go
+#   - services/paywall-service/internal/observability/metrics.go
+#   - services/search-service/internal/observability/metrics.go
+#   - workers/replay-scorm-packager/internal/observability/metrics.go
+#   - workers/audit-verifier/internal/observability/metrics.go
+
+routes:
+  - name: phase-21-recording-studio
+    description: Recording & Studio stack
+    services:
+      - recording-orchestrator
+      - transcript-service
+      - clip-engine
+      - engagement-graph
+      - search-service
+      - paywall-service
+      - entitlement-service
+      - recording-finalizer
+      - replay-scorm-packager
+      - audit-verifier
+      - studio
+      - replay-web
+    rules:
+      - name: Chunk commit error rate critical
+        severity: critical
+        window: 5m
+        condition: |
+          (
+            sum(rate(recording_orchestrator_chunk_conflict_total[5m]))
+            / clamp_min(sum(rate(recording_orchestrator_chunk_committed_total[5m])), 1)
+          ) > 0.02
+        runbook: runbooks/recording-chunk-error-rate.md
+
+      - name: Recording failures critical
+        severity: critical
+        window: 5m
+        condition: |
+          sum(rate(recording_orchestrator_failed_total[5m])) > 0.5
+        runbook: runbooks/recording-failures.md
+
+      - name: STT Deepgram down
+        severity: warning
+        window: 10m
+        condition: |
+          (
+            sum(rate(transcript_service_stt_provider_errors_total{provider="deepgram"}[10m]))
+            / clamp_min(sum(rate(transcript_service_stt_provider_attempts_total{provider="deepgram"}[10m])), 1)
+          ) > 0.1
+        runbook: runbooks/transcript-stt-failover.md
+
+      - name: Render pool saturated
+        severity: warning
+        window: 5m
+        condition: |
+          sum(clip_engine_lease_queue_depth) > 0.8 * on() sum(clip_engine_pool_size)
+        runbook: runbooks/clip-render-pool.md
+
+      - name: Paywall checkout errors
+        severity: critical
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(paywall_service_checkout_seconds_bucket[5m]))
+          ) > 1.5
+        runbook: runbooks/paywall-checkout.md
+
+      - name: bKash webhook 5xx
+        severity: critical
+        window: 5m
+        condition: |
+          (
+            sum(rate(paywall_service_webhook_5xx_total[5m]))
+            / clamp_min(sum(rate(paywall_service_webhook_total[5m])), 1)
+          ) > 0.005
+        runbook: runbooks/bkash-webhook.md
+
+      - name: SCORM pack failures
+        severity: critical
+        window: 10m
+        condition: |
+          (
+            sum(rate(replay_scorm_packager_failure_total[10m]))
+            / clamp_min(sum(rate(replay_scorm_packager_job_total[10m])), 1)
+          ) > 0.05
+        runbook: runbooks/scorm-pack-failures.md
+
+      - name: Hash chain mismatch
+        severity: critical
+        window: 1h
+        condition: |
+          sum(increase(audit_verifier_mismatch_total[1h])) > 0
+        runbook: runbooks/audit-chain-mismatch.md
+
+      - name: Object store 5xx
+        severity: critical
+        window: 5m
+        condition: |
+          (
+            sum(rate(object_store_requests_total{status_class="5xx"}[5m]))
+            / clamp_min(sum(rate(object_store_requests_total[5m])), 1)
+          ) > 0.005
+        runbook: runbooks/object-store-5xx.md
+
+      - name: Replay viewer ceiling
+        severity: info
+        window: 5m
+        condition: |
+          sum(replay_web_active_sessions) > 200
+        runbook: runbooks/replay-viewer-ceiling.md
+
+      - name: Search query latency warning
+        severity: warning
+        window: 5m
+        condition: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(search_service_query_seconds_bucket[5m]))
+          ) > 0.8
+        runbook: runbooks/search-latency.md

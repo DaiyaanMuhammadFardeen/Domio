@@ -1,0 +1,182 @@
+# Phase 21 — Recording & Studio feature flags.
+#
+# These flags are consumed by apps/editor + the recording/transcript/
+# clip + replay services. Follow the convention `FEATURE_<GROUP>_<NAME>`
+# and the structure of `phase-16.yaml`. Defaults shown below are for
+# local dev / dev-up all. Production overrides are in the platform Helm umbrella.
+
+flags:
+  # W1 — Capture pipeline
+  recording.start:
+    default: true
+    description: Allow new recording sessions to start.
+    owner: recording-team
+    srm: low
+  recording.multi_track:
+    default: true
+    description: Capture 4 parallel tracks (screen, camera, mic, system_audio).
+    owner: recording-team
+    srm: medium
+  recording.chunked_upload:
+    default: true
+    description: Stream chunks to object-store as they're recorded.
+    owner: recording-team
+    srm: medium
+  recording.lease_check:
+    default: true
+    description: Enforce chunk lease TTL on commit.
+    owner: recording-team
+    srm: medium
+
+  # W2 — Transcript + alignment
+  recording.transcript:
+    default: true
+    description: Run the STT pipeline (Deepgram + AssemblyAI).
+    owner: transcript-team
+    srm: low
+  recording.transcript_stt_deepgram:
+    default: true
+    description: Use Deepgram as the primary STT provider.
+    owner: transcript-team
+    srm: medium
+  recording.transcript_stt_assemblyai:
+    default: false
+    description: Use AssemblyAI as the failover STT provider.
+    owner: transcript-team
+    srm: medium
+  recording.transcript_failover:
+    default: true
+    description: Health-aware failover between Deepgram and AssemblyAI.
+    owner: transcript-team
+    srm: medium
+  recording.transcript_moderation:
+    default: true
+    description: Run transcript text through the moderation blocklist.
+    owner: moderation-team
+    srm: medium
+  recording.transcript_translation:
+    default: true
+    description: Translate captions to additional languages via the translation pipeline.
+    owner: transcript-team
+    srm: medium
+
+  # W3 — Clip engine
+  clip.shortcut:
+    default: true
+    description: Enable clip shortcut UI in the recording panel.
+    owner: studio-team
+    srm: low
+  clip.render_pool:
+    default: true
+    description: Use the in-cluster ffmpeg render pool.
+    owner: studio-team
+    srm: medium
+  clip.captioned_hls:
+    default: true
+    description: Render captioned HLS output by default.
+    owner: studio-team
+    srm: low
+
+  # W4 — Studio editor
+  studio.co_edit:
+    default: false
+    description: Allow two-editor co-editing via Yjs CRDT (single-user at launch).
+    owner: studio-team
+    srm: medium
+  studio.brand_kit:
+    default: true
+    description: Load the per-workspace brand kit in the studio editor.
+    owner: studio-team
+    srm: low
+
+  # W5 — Replay PWA
+  replay.pwa:
+    default: true
+    description: Serve the replay PWA at /r/[token].
+    owner: replay-team
+    srm: low
+  replay.pip:
+    default: true
+    description: Enable picture-in-picture on the replay player.
+    owner: replay-team
+    srm: low
+  replay.airplay_chromecast:
+    default: true
+    description: Enable AirPlay + Chromecast on the replay player.
+    owner: replay-team
+    srm: low
+  replay.offline_cache:
+    default: true
+    description: Cache recent replays via the PWA service worker (LRU, 5 entries).
+    owner: replay-team
+    srm: medium
+
+  # W6 — Engagement graph
+  engagement.heatmap:
+    default: true
+    description: Render the engagement heatmap widget on replay.
+    owner: engagement-team
+    srm: low
+  engagement.retention:
+    default: true
+    description: Render the retention/dropoff curve on replay.
+    owner: engagement-team
+    srm: low
+
+  # W7 — Search
+  search.bm25:
+    default: true
+    description: Enable BM25 keyword search across the transcript + clip indexes.
+    owner: search-team
+    srm: low
+  search.semantic:
+    default: false
+    description: Enable semantic search via @domio/embedding (off for cost at launch).
+    owner: search-team
+    srm: medium
+
+  # W8 — Paywall + Entitlement (bKash)
+  paywall.bkash:
+    default: true
+    description: Surface the bKash paywall gate on paywalled replays.
+    owner: paywall-team
+    srm: high
+  paywall.bkash_sandbox:
+    default: true
+    description: Use the bKash sandbox; disable for production tokenized checkout.
+    owner: paywall-team
+    srm: high
+  paywall.free_preview_watermark:
+    default: true
+    description: Watermark free preview windows.
+    owner: paywall-team
+    srm: low
+  paywall.bulk_seat_grants:
+    default: false
+    description: Allow bulk seat grants from the admin tool (deferred to P22).
+    owner: paywall-team
+    srm: medium
+
+  # W9 — Observability + LMS export
+  scorm.packager:
+    default: true
+    description: Generate SCORM 2004 (4th Ed) zip packages for replays.
+    owner: scorm-team
+    srm: low
+  scorm.recording_sco:
+    default: true
+    description: Use the recording SCO template (vs legacy sc-1.2 fallback).
+    owner: scorm-team
+    srm: low
+  audit.audit_verifier:
+    default: true
+    description: Run the daily hash-chain audit verifier worker.
+    owner: platform-team
+    srm: high
+
+  # Compliance
+  recording.pdpa_anonymous_toggle:
+    default: true
+    description: Allow anonymous-identified toggle per workspace.
+    owner: privacy-team
+    srm: high
