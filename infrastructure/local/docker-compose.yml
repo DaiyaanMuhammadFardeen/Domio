@@ -412,6 +412,32 @@ services:
       - "3020:3020"
     profiles: ["phase17", "all"]
 
+  # ---------------------------------------------------------------------------
+  # Phase 17 — Analytics warehouse (W2). Read API + rollup
+  # orchestrator over ClickHouse. REST + GraphQL.
+  # ---------------------------------------------------------------------------
+  analytics-warehouse:
+    build:
+      context: ../..
+      dockerfile: services/analytics-warehouse/Dockerfile
+    image: domio/analytics-warehouse:dev
+    container_name: domio-analytics-warehouse
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3030
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_DB: domio_analytics
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      READ_ONLY: "true"
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "3030:3030"
+    profiles: ["phase17", "all"]
+
 volumes:
   postgres-data:
   redis-data:

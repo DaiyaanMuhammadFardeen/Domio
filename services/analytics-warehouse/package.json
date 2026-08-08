@@ -1,0 +1,32 @@
+{
+  "name": "@domio/analytics-warehouse",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 17 W2 — Read API + rollup orchestrator over ClickHouse. Surfaces REST + GraphQL endpoints that the dashboard consumes.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/observability": "workspace:^",
+    "@graphql-tools/schema": "^10.0.6",
+    "graphql": "^16.9.0",
+    "graphql-yoga": "^5.7.0",
+    "hono": "4.6.13"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}
