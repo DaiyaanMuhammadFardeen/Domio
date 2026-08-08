@@ -136,6 +136,8 @@ TTL toDateTime(erased_at) + INTERVAL 7 YEAR DELETE;
 -- lookups during ingestion).
 CREATE TABLE IF NOT EXISTS domio_analytics.consent_events
 (
+    event_id        String,
+    viewer_id       String,
     viewer_id_key   String,
     workspace_id    LowCardinality(String),
     ts              DateTime64(3, 'UTC'),
@@ -159,3 +161,28 @@ ENGINE = MergeTree
 PARTITION BY toYYYYMM(ts)
 ORDER BY (workspace_id, viewer_id_key, ts)
 TTL toDateTime(ts) + INTERVAL 13 MONTH DELETE;
+
+-- Viewer identity long table (mirrored from Postgres viewer table for
+-- fast privacy-mode lookups during ingestion and GDPR verification).
+CREATE TABLE IF NOT EXISTS domio_analytics.viewer_identity_long
+(
+    viewer_id       String,
+    workspace_id    LowCardinality(String),
+    viewer_id_key   String,
+    privacy_mode    Enum8(
+        'identified'      = 1,
+        'pseudonymous'    = 2,
+        'anon_consent'    = 3,
+        'anon_no_track'   = 4
+    ),
+    region_pinned   LowCardinality(String) DEFAULT '',
+    canonical_id    String DEFAULT '',
+    created_at      DateTime64(3, 'UTC'),
+    last_seen_at    DateTime64(3, 'UTC'),
+    -- ReplacingMergeTree so the latest snapshot of a viewer wins.
+    updated_at      DateTime64(3, 'UTC') DEFAULT now64(3)
+)
+ENGINE = ReplacingMergeTree(updated_at)
+PARTITION BY toYYYYMM(last_seen_at)
+ORDER BY (workspace_id, viewer_id_key)
+TTL toDateTime(last_seen_at) + INTERVAL 13 MONTH DELETE;
