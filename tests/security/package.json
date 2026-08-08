@@ -1,0 +1,18 @@
+{
+  "name": "@domio/test-security",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 17 — security tests. Covers RLS isolation for the Phase 17 Postgres tables and other workspace-isolation invariants.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --max-warnings 0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

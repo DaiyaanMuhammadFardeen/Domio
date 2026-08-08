@@ -1,0 +1,137 @@
+# Phase 17 — PagerDuty alert routing rules.
+#
+# Severity mapping:
+#   critical -> page on-call
+#   warning  -> open ticket, no page
+#   info     -> log only
+#
+# This file is the **canonical** PagerDuty routing layer for Phase 17;
+# the broader `infrastructure/observability/pagerduty-phase17.yaml` keeps
+# PromQL-only alert definitions for the Prometheus side, while this
+# file adds the operational alerts requested at sign-off:
+#
+#   * ingest lag > 60s = page
+#   * ClickHouse replication lag > 5m = warn
+#   * CRM DLQ depth > 1000 = page
+#   * A/B sequential test stuck > 24h = warn
+#   * benchmark ingestion error rate > 5 percent = warn
+#
+# Runbook references live in `runbook-links.md` (same dir).
+
+version: 1
+defaults:
+  escalation_policy: analytics-oncall
+  acknowledgement_timeout_minutes: 5
+  auto_resolve_timeout_minutes: 30
+
+severity_policies:
+  critical:
+    notification_channels:
+      - pd-service:analytics
+      - pd-team:domio-platform
+      - slack:#analytics-oncall
+  warning:
+    notification_channels:
+      - pd-team:domio-platform
+      - slack:#analytics-oncall
+  info:
+    notification_channels:
+      - slack:#analytics-oncall
+
+rules:
+  - name: ingest-lag-page
+    alert: alertmanager
+    severity: critical
+    description: |
+      event-ingest lag > 60 s sustained for 5 m.  Indicates the
+      ingest path (Fastify -> Kafka -> clickhouse-loader) is not
+      keeping up.  Check Kafka broker health, backpressure disk
+      spool size, and columnar loader lag.
+    runbook_url: docs/analytics-runbook.md#ingest-lag
+    suspected_services:
+      - event-ingest
+      - clickhouse-loader
+    auto_page: true
+    condition: |
+      histogram_quantile(0.95,
+        sum by (le) (rate(event_ingest_request_seconds_bucket[5m]))
+      ) > 60
+
+  - name: clickhouse-replication-lag-warn
+    alert: alertmanager
+    severity: warning
+    description: |
+      ClickHouse replication lag > 5 m.  ZooKeeper / ClickHouse
+      Keeper health, network between replicas, or merge backlog
+      are the typical root causes.
+    runbook_url: docs/analytics-runbook.md#clickhouse-replication-lag
+    suspected_services:
+      - clickhouse
+    auto_page: false
+    condition: |
+      max(clickhouse_replication_lag_seconds) > 300
+
+  - name: crm-dlq-depth-page
+    alert: alertmanager
+    severity: critical
+    description: |
+      CRM sync DLQ depth > 1000.  Indicates sustained adapter
+      failures (token bucket exhaustion, OAuth refresh, or
+      provider outage).  Drain via workers/crm-reconciler or
+      page the provider account team.
+    runbook_url: docs/analytics-runbook.md#crm-dlq-depth
+    suspected_services:
+      - crm-sync
+      - crm-reconciler
+    auto_page: true
+    condition: |
+      sum(crm_sync_dlq_depth) > 1000
+
+  - name: ab-sequential-test-stuck-warn
+    alert: alertmanager
+    severity: warning
+    description: |
+      A sequential mSPRT test has been running > 24 h without
+      reaching a decision.  Usually caused by a too-tight alpha
+      or insufficient traffic.  Open a ticket to review the
+      experiment's planned horizon and effect size.
+    runbook_url: docs/analytics-runbook.md#ab-sequential-stuck
+    suspected_services:
+      - ab-statistics
+      - ab-measurement
+    auto_page: false
+    condition: |
+      (
+        now() - max(ab_statistics_last_decision_timestamp_seconds{decision="inconclusive"})
+      ) > 86400
+
+  - name: benchmark-ingestion-error-warn
+    alert: alertmanager
+    severity: warning
+    description: |
+      Benchmark ingestion error rate > 5 percent over 10 m.  Check
+      API key validity, schema validation rejects, and target
+      ClickHouse shard health.
+    runbook_url: docs/analytics-runbook.md#benchmark-ingest-error-rate
+    suspected_services:
+      - benchmark
+    auto_page: false
+    condition: |
+      (
+        sum(rate(benchmark_ingest_errors_total[10m]))
+        / clamp_min(sum(rate(benchmark_ingest_total[10m])), 1)
+      ) > 0.05
+
+suppressions:
+  - name: ingest-lag-page
+    match:
+      label: maintenance
+    during:
+      crontab: "0 2 * * 0"
+    duration_minutes: 60
+    reason: "weekly ClickHouse maintenance window"
+
+test_pager:
+  schedule: "0 16 * * 5"
+  target: analytics-oncall
+  message: "Synthetic Phase 17 alert — verify pager end-to-end."

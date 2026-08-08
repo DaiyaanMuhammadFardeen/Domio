@@ -1,0 +1,202 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:00000000-0000-0000-0000-000000000017",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-08-08T00:00:00Z",
+    "tools": [
+      {
+        "vendor": "domio",
+        "name": "phase-17-sbom",
+        "version": "1.0.0"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "phase-17-analytics",
+      "version": "0.0.0",
+      "description": "Phase 17 — Analytics & Engagement Intelligence. 12 services (8 TS, 4 Go) shipping event ingestion, OLAP warehouse, identity, sessionization, heatmaps, A/B testing, CRM sync, notifications, team + live analytics, and benchmarks."
+    }
+  },
+  "components": [
+    {
+      "type": "application",
+      "bom-ref": "service:event-ingest",
+      "name": "event-ingest",
+      "version": "0.0.0",
+      "description": "Fastify + Zod edge service. HMAC verify, PII strip, KafkaJS producer, disk-spool backpressure.",
+      "purl": "pkg:domio/event-ingest@0.0.0",
+      "dependencies": [
+        "pkg:npm/fastify@5.2.0",
+        "pkg:npm/zod@3.23.8",
+        "pkg:npm/kafkajs@2.2.4",
+        "pkg:npm/hono@4.6.14",
+        "pkg:npm/pino@9.5.0"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:analytics-warehouse",
+      "name": "analytics-warehouse",
+      "version": "0.0.0",
+      "description": "Read API + rollup orchestrator over ClickHouse. REST + GraphQL (Yoga).",
+      "purl": "pkg:domio/analytics-warehouse@0.0.0",
+      "dependencies": [
+        "pkg:npm/hono@4.6.14",
+        "pkg:npm/graphql-yoga@5.7.0",
+        "pkg:npm/@clickhouse/client@1.8.1"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:viewer-identity",
+      "name": "viewer-identity",
+      "version": "0.0.0",
+      "description": "Identity graph, 4 privacy modes, GDPR export/erase endpoints.",
+      "purl": "pkg:domio/viewer-identity@0.0.0",
+      "dependencies": [
+        "pkg:npm/hono@4.6.14",
+        "pkg:npm/@clickhouse/client@1.8.1",
+        "pkg:npm/pg@8.13.1"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:sessionization",
+      "name": "sessionization",
+      "version": "0.0.0",
+      "description": "30-min inactivity rule, per-partition deterministic consumer.",
+      "purl": "pkg:domio/sessionization@0.0.0",
+      "dependencies": [
+        "pkg:npm/hono@4.6.14",
+        "pkg:npm/kafkajs@2.2.4",
+        "pkg:npm/@clickhouse/client@1.8.1"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:heatmap-generator",
+      "name": "heatmap-generator",
+      "version": "0.0.0",
+      "description": "ClickHouse AggregatingMergeTree rollup (32x18 grid), PNG/JSON export.",
+      "purl": "pkg:domio/heatmap-generator@0.0.0",
+      "dependencies": [
+        "pkg:npm/hono@4.6.14",
+        "pkg:npm/@clickhouse/client@1.8.1"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:team-analytics",
+      "name": "team-analytics",
+      "version": "0.0.0",
+      "description": "Workspace template/component/brand engagement rollups.",
+      "purl": "pkg:domio/team-analytics@0.0.0",
+      "dependencies": [
+        "pkg:npm/hono@4.6.14",
+        "pkg:npm/@clickhouse/client@1.8.1"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:live-analytics",
+      "name": "live-analytics",
+      "version": "0.0.0",
+      "description": "Real-time attendance + post-session summary. NATS -> WebSocket HUD.",
+      "purl": "pkg:domio/live-analytics@0.0.0",
+      "dependencies": [
+        "pkg:npm/hono@4.6.14",
+        "pkg:npm/nats@2.29.0",
+        "pkg:domio/ws@8.18.0"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:notification-dispatcher",
+      "name": "notification-dispatcher",
+      "version": "0.0.0",
+      "description": "CEP rules engine, multi-channel (email / Slack / Teams / webhook / mobile push).",
+      "purl": "pkg:domio/notification-dispatcher@0.0.0",
+      "dependencies": [
+        "pkg:npm/hono@4.6.14",
+        "pkg:npm/nodemailer@6.9.16"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:clickhouse-loader",
+      "name": "clickhouse-loader",
+      "version": "0.0.0",
+      "description": "Go -- Kafka consumer, batch 5k/1s, native protocol INSERT.",
+      "purl": "pkg:domio/clickhouse-loader@0.0.0",
+      "dependencies": [
+        "pkg:golang/github.com/segmentio/kafka-go@0.4.47",
+        "pkg:golang/github.com/ClickHouse/clickhouse-go/v2@2.30.0"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:ab-assignment",
+      "name": "ab-assignment",
+      "version": "0.0.0",
+      "description": "Go -- deterministic hash assignment, sub-ms hot path.",
+      "purl": "pkg:domio/ab-assignment@0.0.0",
+      "dependencies": [
+        "pkg:golang/github.com/go-chi/chi/v5@5.1.0",
+        "pkg:golang/github.com/ClickHouse/clickhouse-go/v2@2.30.0"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:ab-measurement",
+      "name": "ab-measurement",
+      "version": "0.0.0",
+      "description": "Go -- Bayesian Beta-Binomial + frequentist z-test.",
+      "purl": "pkg:domio/ab-measurement@0.0.0",
+      "dependencies": [
+        "pkg:golang/github.com/go-chi/chi/v5@5.1.0",
+        "pkg:golang/gonum.org/v1/gonum@0.15.0"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:ab-statistics",
+      "name": "ab-statistics",
+      "version": "0.0.0",
+      "description": "Go -- sequential mSPRT + early stopping.",
+      "purl": "pkg:domio/ab-statistics@0.0.0",
+      "dependencies": [
+        "pkg:golang/github.com/go-chi/chi/v5@5.1.0",
+        "pkg:golang/gonum.org/v1/gonum@0.15.0"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:crm-sync",
+      "name": "crm-sync",
+      "version": "0.0.0",
+      "description": "Go -- Salesforce / HubSpot / Pipedrive / Dynamics adapters; token bucket + DLQ.",
+      "purl": "pkg:domio/crm-sync@0.0.0",
+      "dependencies": [
+        "pkg:golang/github.com/go-chi/chi/v5@5.1.0",
+        "pkg:golang/github.com/segmentio/kafka-go@0.4.47",
+        "pkg:golang/golang.org/x/oauth2@0.24.0"
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "service:benchmark",
+      "name": "benchmark",
+      "version": "0.0.0",
+      "description": "Go -- t-digest + HDR histograms, cohort eligibility, outlier exclusion.",
+      "purl": "pkg:domio/benchmark@0.0.0",
+      "dependencies": [
+        "pkg:golang/github.com/go-chi/chi/v5@5.1.0",
+        "pkg:golang/github.com/influxdata/tdigest@0.0.3",
+        "pkg:golang/github.com/HdrHistogram/hdrhistogram-go@1.1.2"
+      ]
+    }
+  ]
+}

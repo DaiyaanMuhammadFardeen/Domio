@@ -1,0 +1,17 @@
+{
+  "name": "@domio/test-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Phase 17 — end-to-end dashboard Playwright suite. Boots apps/dashboard, exercises navigation, /export flow, and the A/B decision flow.",
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium",
+    "test:dashboard": "playwright test --project=dashboard",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1",
+    "typescript": "5.7.2"
+  }
+}

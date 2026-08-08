@@ -1,0 +1,323 @@
+{
+  "annotations": { "list": [] },
+  "description": "Phase 17 — Analytics & Engagement Intelligence. Mirrors the local dev dashboard but uses the production Prometheus datasource `prometheus-prod`. Panels cover ingest lag, Kafka consumer lag, ClickHouse disk + replication, materialized-view freshness, A/B decisions, CRM sync success, notification dispatch latency, heatmap queue depth, session archiver lag, and benchmark ingestion rate.",
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": ["phase-17"],
+      "targetBlank": true,
+      "title": "Runbook",
+      "tooltip": "Phase 17 analytics on-call runbook",
+      "type": "link",
+      "url": "https://runbooks.domio.internal/analytics/phase17"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "Phase 17 W1 SLO: event-ingest end-to-end p95 < 50 ms. Sustained breach > 5 min pages on-call.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "orange", "value": 0.03 },
+              { "color": "red",    "value": 0.05 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "event-ingest p95 lag",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(event_ingest_request_seconds_bucket[5m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "clickhouse-loader Kafka consumer lag (sum of partition lag). Sustained > 60 s pages on-call.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "orange", "value": 30 },
+              { "color": "red",    "value": 60 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "id": 2,
+      "title": "clickhouse-loader Kafka consumer lag",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(kafka_consumergroup_lag{consumergroup=\"clickhouse-loader\"})",
+          "legendFormat": "lag",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "ClickHouse disk usage per shard. Warn > 70 percent, page > 85 percent.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "orange", "value": 0.7 },
+              { "color": "red",    "value": 0.85 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "id": 3,
+      "title": "ClickHouse disk usage",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(clickhouse_disk_used_bytes) by (instance) / sum(clickhouse_disk_total_bytes) by (instance)",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "Materialized view freshness (now() - max last-update timestamp) per MV. SLO < 5 min.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "orange", "value": 180 },
+              { "color": "red",    "value": 300 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 6 },
+      "id": 4,
+      "title": "Materialized view freshness",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "now() - max(clickhouse_materialized_view_last_update_timestamp_seconds) by (view)",
+          "legendFormat": "{{view}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "A/B sequential test decisions per day, broken out by outcome (significant / underpowered / inconclusive).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 6 },
+      "id": 5,
+      "title": "A/B decisions per day",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (decision) (increase(ab_statistics_decisions_total[1d]))",
+          "legendFormat": "{{decision}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "CRM sync success rate per provider. SLO > 99 percent.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "percentunit",
+          "min": 0.9,
+          "max": 1.0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red",    "value": null },
+              { "color": "orange", "value": 0.95 },
+              { "color": "green",  "value": 0.99 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 6 },
+      "id": 6,
+      "title": "CRM sync success rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (provider) (rate(crm_sync_success_total[5m])) / clamp_min(sum by (provider) (rate(crm_sync_total[5m])), 1)",
+          "legendFormat": "{{provider}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "Notification dispatcher end-to-end p95 (rule match -> channel send). SLO < 10 s.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "orange", "value": 5 },
+              { "color": "red",    "value": 10 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 12 },
+      "id": 7,
+      "title": "Notification dispatch latency (p95)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(notification_dispatcher_trigger_seconds_bucket[5m])))",
+          "legendFormat": "p95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "Heatmap generator queue depth (Redis-backed job queue). Page > 10 000.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "orange", "value": 1000 },
+              { "color": "red",    "value": 10000 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 12 },
+      "id": 8,
+      "title": "Heatmap generation queue depth",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(heatmap_generator_queue_depth) by (queue)",
+          "legendFormat": "{{queue}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "Session archiver (Kafka session.ended -> cold Parquet) consumer lag.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green",  "value": null },
+              { "color": "orange", "value": 5000 },
+              { "color": "red",    "value": 30000 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 12 },
+      "id": 9,
+      "title": "Session archiver lag",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(kafka_consumergroup_lag{consumergroup=\"session-archiver\"})",
+          "legendFormat": "lag",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus-prod" },
+      "description": "Benchmark ingestion rate (events/sec into benchmark service).",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 18 },
+      "id": 10,
+      "title": "Benchmark ingestion rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum by (workspace) (rate(benchmark_ingest_total[1m]))",
+          "legendFormat": "{{workspace}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["phase-17", "analytics", "production"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Phase 17 — Analytics & Engagement Intelligence (prod)",
+  "uid": "phase-17-analytics-prod",
+  "version": 1,
+  "weekStart": ""
+}
