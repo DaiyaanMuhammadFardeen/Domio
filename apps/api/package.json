@@ -16,7 +16,10 @@
     "clean": "rm -rf dist .turbo coverage"
   },
   "dependencies": {
+    "@domio/annotation-engine": "workspace:*",
     "@domio/common": "workspace:*",
+    "@domio/observability": "workspace:^",
+    "@domio/presenter-session": "workspace:*",
     "@hono/node-server": "1.13.7",
     "@hono/zod-validator": "0.4.1",
     "hono": "4.6.13",

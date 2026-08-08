@@ -62,9 +62,18 @@ importers:
 
   apps/api:
     dependencies:
+      '@domio/annotation-engine':
+        specifier: workspace:*
+        version: link:../../services/annotation-engine
       '@domio/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@domio/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
+      '@domio/presenter-session':
+        specifier: workspace:*
+        version: link:../../services/presenter-session
       '@hono/node-server':
         specifier: 1.13.7
         version: 1.13.7(hono@4.6.13)
@@ -218,6 +227,49 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  apps/join-web:
+    dependencies:
+      '@domio/audience-service':
+        specifier: workspace:^
+        version: link:../../services/audience
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../../services/edge-pubsub
+      '@domio/participant-session':
+        specifier: workspace:*
+        version: link:../../services/participant-session
+      '@domio/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@domio/session-code':
+        specifier: workspace:*
+        version: link:../../packages/session-code
+      next:
+        specifier: 15.1.3
+        version: 15.1.3(@babel/core@7.29.7)(@playwright/test@1.62.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.2
+        version: 19.0.2(@types/react@19.0.1)
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   apps/landing:
     dependencies:
       next:
@@ -248,6 +300,9 @@ importers:
 
   apps/presenter:
     dependencies:
+      '@domio/annotation-engine':
+        specifier: workspace:*
+        version: link:../../services/annotation-engine
       next:
         specifier: 15.1.3
         version: 15.1.3(@babel/core@7.29.7)(@playwright/test@1.62.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -645,6 +700,22 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  packages/moderation:
+    dependencies:
+      '@domio/text-normalize':
+        specifier: workspace:*
+        version: link:../text-normalize
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   packages/observability:
     dependencies:
       '@domio/redact-pii':
@@ -697,6 +768,18 @@ importers:
       eslint:
         specifier: 9.17.0
         version: 9.17.0(jiti@1.21.7)
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  packages/protocol:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -814,7 +897,31 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  packages/session-code:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   packages/signed-link-token:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  packages/text-normalize:
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -940,6 +1047,28 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/annotation-engine:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/ar-sessions:
     dependencies:
       hono:
@@ -971,6 +1100,19 @@ importers:
       '@types/node':
         specifier: 22.10.1
         version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/attendance-logger:
+    dependencies:
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1140,6 +1282,19 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/edge-pubsub:
+    dependencies:
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/embed-proxy:
     devDependencies:
       '@types/node':
@@ -1160,6 +1315,15 @@ importers:
       gifenc:
         specifier: ^1.0.3
         version: 1.0.3
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/feedback-collector:
+    devDependencies:
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1299,6 +1463,140 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/moderation-blocklist:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/moderation-ml:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/mt-provider:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/nav-vote-collector:
+    dependencies:
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/participant-session:
+    dependencies:
+      '@domio/audience-service':
+        specifier: workspace:^
+        version: link:../audience
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+      '@domio/session-code':
+        specifier: workspace:*
+        version: link:../../packages/session-code
+      '@domio/text-normalize':
+        specifier: workspace:*
+        version: link:../../packages/text-normalize
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/phone-pairing:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/poll-engine:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/presenter-session:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+      '@domio/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
+      '@domio/signed-link-token':
+        specifier: workspace:*
+        version: link:../../packages/signed-link-token
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/prototype-recorder:
     devDependencies:
       '@types/node':
@@ -1336,11 +1634,69 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/qa-engine:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/query-gateway:
     devDependencies:
       '@types/node':
         specifier: 22.10.1
         version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/quiz-engine:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/raise-hand-queue:
+    dependencies:
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/reaction-broadcaster:
+    dependencies:
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1398,6 +1754,38 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/sentiment-collector:
+    dependencies:
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/session-coordinator:
+    dependencies:
+      '@domio/audience-service':
+        specifier: workspace:^
+        version: link:../audience
+      '@domio/participant-session':
+        specifier: workspace:*
+        version: link:../participant-session
+      '@domio/session-code':
+        specifier: workspace:*
+        version: link:../../packages/session-code
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/shader-registry:
     dependencies:
       ajv:
@@ -1445,6 +1833,15 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/stt-provider:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/theme:
     dependencies:
       '@domio/schema':
@@ -1456,6 +1853,22 @@ importers:
       '@domio/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/thumbnail:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -1479,6 +1892,34 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/translation-pipeline:
+    dependencies:
+      '@domio/mt-provider':
+        specifier: workspace:*
+        version: link:../mt-provider
+      '@domio/stt-provider':
+        specifier: workspace:*
+        version: link:../stt-provider
+      '@domio/tts-provider':
+        specifier: workspace:*
+        version: link:../tts-provider
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/tts-provider:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/video-pipeline:
     dependencies:
       ajv:
@@ -1494,6 +1935,22 @@ importers:
       '@types/node':
         specifier: 22.10.1
         version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/word-cloud-engine:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../edge-pubsub
+    devDependencies:
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1621,7 +2078,29 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  workers/handout-generator:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   workers/magic-move:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  workers/moderation-flagger:
+    dependencies:
+      '@domio/moderation-ml':
+        specifier: workspace:*
+        version: link:../../services/moderation-ml
     devDependencies:
       typescript:
         specifier: 5.7.2
@@ -1652,6 +2131,31 @@ importers:
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
   workers/render:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  workers/scorm-packager:
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  workers/session-archiver:
+    dependencies:
+      '@domio/edge-pubsub':
+        specifier: workspace:*
+        version: link:../../services/edge-pubsub
+      '@domio/participant-session':
+        specifier: workspace:*
+        version: link:../../services/participant-session
     devDependencies:
       typescript:
         specifier: 5.7.2

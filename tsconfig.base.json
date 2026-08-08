@@ -76,7 +76,9 @@
       "@domio/model-adapter": ["./packages/model-adapter/src/index.ts"],
       "@domio/model-adapter/*": ["./packages/model-adapter/src/*"],
       "@domio/prompt-registry": ["./packages/prompt-registry/src/index.ts"],
-      "@domio/prompt-registry/*": ["./packages/prompt-registry/src/*"]
+      "@domio/prompt-registry/*": ["./packages/prompt-registry/src/*"],
+      "@domio/annotation-engine": ["./services/annotation-engine/src/index.ts"],
+      "@domio/annotation-engine/*": ["./services/annotation-engine/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", "build", ".next", ".turbo", "**/gen/**", "**/generated/**"]

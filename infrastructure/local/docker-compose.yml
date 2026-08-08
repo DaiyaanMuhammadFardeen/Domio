@@ -236,6 +236,118 @@ services:
       - "14268:14268"   # Jaeger HTTP
       - "14250:14250"   # Jaeger gRPC
 
+  # ---------------------------------------------------------------------------
+  # Phase 15 — Presenter session service (W1).
+  #
+  # Library package — wired through apps/api in production. The container
+  # is kept available so that the P15 workstream can be integration-tested
+  # against a fully-running local stack (Postgres + Redis + MinIO).
+  # ---------------------------------------------------------------------------
+  presenter-session:
+    build:
+      context: ../..
+      dockerfile: services/presenter-session/Dockerfile
+      args:
+        SERVICE_DIR: services/presenter-session
+        SERVICE_PORT: 3010
+    image: domio/presenter-session:dev
+    container_name: domio-presenter-session
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
+      REDIS_URL: redis://redis:6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3010:3010"
+    profiles: ["phase15", "all"]
+
+  # ---------------------------------------------------------------------------
+  # Phase 15 — Phone pairing service (W6).
+  # ---------------------------------------------------------------------------
+  phone-pairing:
+    build:
+      context: ../..
+      dockerfile: services/presenter-session/Dockerfile
+      args:
+        SERVICE_DIR: services/phone-pairing
+        SERVICE_PORT: 3011
+    image: domio/phone-pairing:dev
+    container_name: domio-phone-pairing
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
+      REDIS_URL: redis://redis:6379
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3011:3011"
+    profiles: ["phase15", "all"]
+
+  # ---------------------------------------------------------------------------
+  # Phase 15 — Thumbnail service (W3).
+  # ---------------------------------------------------------------------------
+  thumbnail:
+    build:
+      context: ../..
+      dockerfile: services/presenter-session/Dockerfile
+      args:
+        SERVICE_DIR: services/thumbnail
+        SERVICE_PORT: 3012
+    image: domio/thumbnail:dev
+    container_name: domio-thumbnail
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
+      REDIS_URL: redis://redis:6379
+      S3_ENDPOINT: http://minio:9000
+      S3_BUCKET: ${S3_BUCKET:-domio-assets}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-domio}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-domio-dev-only}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    ports:
+      - "3012:3012"
+    profiles: ["phase15", "all"]
+
+  # ---------------------------------------------------------------------------
+  # Phase 15 — Presenter Next.js app (W2).
+  # ---------------------------------------------------------------------------
+  presenter-app:
+    build:
+      context: ../..
+      dockerfile: apps/presenter/Dockerfile
+    image: domio/presenter-app:dev
+    container_name: domio-presenter-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PRESENTER_API_BASE_URL: http://presenter-session:3010
+      PHONE_PAIRING_API_BASE_URL: http://phone-pairing:3011
+      NEXT_PUBLIC_CDN_BASE_URL: http://localhost:3012/thumbs
+    depends_on:
+      - presenter-session
+      - phone-pairing
+      - thumbnail
+    ports:
+      - "3002:3002"
+    profiles: ["phase15", "all"]
+
 volumes:
   postgres-data:
   redis-data:
