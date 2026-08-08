@@ -32,6 +32,8 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/domio/platform/services/benchmark/internal/hmac"
+	"github.com/domio/platform/services/benchmark/internal/httpapi"
 	"github.com/domio/platform/services/benchmark/internal/registry"
 	"github.com/domio/platform/services/benchmark/internal/store"
 )
@@ -42,6 +44,7 @@ func main() {
 	clickhouseDB := getEnv("CLICKHOUSE_DB", "domio_analytics")
 	clickhouseUser := getEnv("CLICKHOUSE_USER", "default")
 	clickhousePassword := getEnv("CLICKHOUSE_PASSWORD", "")
+	ingestKey := getEnv("BENCHMARK_INGEST_KEY", "")
 
 	logger, err := zap.NewProduction()
 	if err != nil {
@@ -55,6 +58,14 @@ func main() {
 	_, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// HMAC signing key (read once at startup).
+	hmac.SetSigningKey(ingestKey)
+	if ingestKey != "" {
+		logger.Info("benchmark: HMAC ingest key set")
+	} else {
+		logger.Warn("benchmark: BENCHMARK_INGEST_KEY not set; ingest endpoint will reject all requests")
+	}
+
 	// Layered persistence: in-memory (always) + ClickHouse sink (if URL provided).
 	mem := store.NewSeededInMemoryStore()
 	svc := registry.New(mem)
@@ -64,11 +75,13 @@ func main() {
 		chs = store.NewClickHouseSnapshotWriter(clickhouseURL, clickhouseDB, clickhouseUser, clickhousePassword)
 		logger.Info("benchmark: clickhouse sink configured", zap.String("url", clickhouseURL))
 	}
+	_ = chs // wired in commit 3 once the table exists
 
-	handler := newMux(svc, chs, logger)
+	// chi-based HTTP server.
+	api := &httpapi.Server{Registry: svc, Store: mem}
 	srv := &http.Server{
 		Addr:              net.JoinHostPort("0.0.0.0", port),
-		Handler:           handler,
+		Handler:           api.Routes(),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,
