@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/comment.mentioned.json",
+  "title": "CollabCommentMentioned",
+  "description": "Emitted when a user is mentioned in a comment. Carries the mention details for notification dispatch.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "comment.mentioned"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["comment_id", "thread_id", "mention", "body_md"],
+      "properties": {
+        "comment_id": {
+          "type": "string"
+        },
+        "thread_id": {
+          "type": "string"
+        },
+        "mention": {
+          "type": "object",
+          "required": ["mentioned_id", "mentioned_type"],
+          "properties": {
+            "mentioned_id": {
+              "type": "string",
+              "description": "UUID of the mentioned user, role, or group."
+            },
+            "mentioned_type": {
+              "type": "string",
+              "enum": ["user", "role", "group"]
+            }
+          }
+        },
+        "body_md": {
+          "type": "string",
+          "description": "Markdown body of the comment containing the mention."
+        },
+        "anchor": {
+          "type": "object",
+          "description": "Optional anchor with element/slide coordinates.",
+          "properties": {
+            "element": {
+              "type": "object",
+              "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" }
+              }
+            },
+            "slide": {
+              "type": "object",
+              "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

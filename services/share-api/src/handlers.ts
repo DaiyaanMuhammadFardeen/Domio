@@ -25,6 +25,7 @@ import type {
   ViewerTuple,
 } from './types.js';
 import {
+  ShareApprovalRequiredError,
   ShareConflictError,
   ShareNotFoundError,
   ShareRevokedError,
@@ -77,6 +78,17 @@ function notFound(message: string): HttpResponse {
 }
 function conflict(message: string, code: string): HttpResponse {
   return { status: 409, body: { error: message, code } };
+}
+function forbidden(detail: string): HttpResponse {
+  return {
+    status: 403,
+    body: {
+      type: 'external_share_requires_approval',
+      status: 403,
+      title: 'External share requires approval',
+      detail,
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -200,6 +212,7 @@ export async function createShareHandler(
     if (e instanceof ShareValidationError) return badRequest(e.message, e.code);
     if (e instanceof ShortIdCollisionError) return conflict(e.message, e.code);
     if (e instanceof ShareConflictError) return conflict(e.message, e.code);
+    if (e instanceof ShareApprovalRequiredError) return forbidden(e.message);
     throw e;
   }
 }
@@ -419,6 +432,7 @@ export async function shareIntrospectHandler(
     if (e instanceof ShareValidationError) return badRequest(e.message, e.code);
     if (e instanceof ShareNotFoundError) return notFound(e.message);
     if (e instanceof ShareRevokedError) return conflict(e.message, e.code);
+    if (e instanceof ShareApprovalRequiredError) return forbidden(e.message);
     throw e;
   }
 }

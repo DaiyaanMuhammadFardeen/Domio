@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CalendarEventLinked",
+  "description": "Emitted when a calendar link is created for a deck.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "deck_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_type": { "const": "calendar.event_linked" },
+    "ts_ms": { "type": "integer" },
+    "workspace_id": { "type": "string" },
+    "deck_id": { "type": "string" },
+    "actor_id": { "type": "string" },
+    "actor_type": { "enum": ["member", "guest", "agent", "system"] },
+    "payload": {
+      "type": "object",
+      "required": ["calendar_link_id", "deck_id", "vendor", "event_id"],
+      "properties": {
+        "calendar_link_id": { "type": "string" },
+        "deck_id": { "type": "string" },
+        "vendor": { "enum": ["google", "outlook", "icloud"] },
+        "event_id": { "type": "string" }
+      }
+    }
+  }
+}

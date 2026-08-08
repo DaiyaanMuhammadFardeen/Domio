@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/task.sync_completed.json",
+  "title": "CollabTaskSyncCompleted",
+  "description": "Emitted when a task sync completes between Domio and an external tracker.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "task.sync_completed"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["task_link_id", "assignment_id", "vendor", "status"],
+      "properties": {
+        "task_link_id": {
+          "type": "string"
+        },
+        "assignment_id": {
+          "type": "string"
+        },
+        "vendor": {
+          "type": "string",
+          "enum": ["asana", "jira", "linear"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["synced", "skipped", "conflict"]
+        },
+        "conflict_resolution": {
+          "type": "string",
+          "enum": ["domio_wins", "task_wins", "last_write_wins"],
+          "description": "Resolution strategy applied when status=conflict."
+        }
+      }
+    }
+  }
+}

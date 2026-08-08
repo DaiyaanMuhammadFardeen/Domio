@@ -2,14 +2,21 @@
  * Notification dispatcher — service entrypoint.
  *
  * Wires the rules engine, channel router, daily-cap store, and
- * audit logger into a process that subscribes to NATS subject
- * `crm.sync.events` and dispatches notifications on each
- * incoming event.
+ * audit logger into a process that subscribes to NATS subjects
+ * `crm.sync.events` and `collab.events.>`, dispatching
+ * notifications on each incoming event.
  *
- * The main loop is intentionally left as a placeholder for the
- * next milestone — Phase 17 W8 ships the building blocks
- * (rules, channels, caps, redaction, dispatcher) and the
- * subscription loop lands once `crm.sync.events` is finalized.
+ * ── Environment variables ───────────────────────────────────────
+ *   NATS_URL               NATS server URL (default: nats://localhost:4222)
+ *   NATS_MAX_RECONNECT     Max connection attempts before degraded mode (default: 3)
+ *   COLLAB_EVENTS_ENABLED  Enable collab.events.* subscription (default: true)
+ *   REDIS_URL              Redis URL (default: redis://localhost:6379)
+ *   NOTIFICATION_DISPATCHER_TEST_EVENT  One-shot test event (JSON)
+ *
+ * ── Degraded mode ───────────────────────────────────────────────
+ *   If NATS connection fails after retries, the service logs a
+ *   structured warning and continues running — the test-event
+ *   smoke path and any HTTP health endpoints remain available.
  */
 
 import { evaluateAll } from './rules/evaluate.js';
@@ -26,16 +33,19 @@ import {
 import { MemoryDailyCap } from './caps/daily.js';
 import { NoopAuditWriter } from './audit/redact.js';
 import { Dispatcher } from './dispatcher.js';
+import { parseCollabEvent } from './collab/parse.js';
+import { mapCollabEvent } from './collab/mapper.js';
+import { MentionDedup } from './collab/dedup.js';
+import { NatsSubscriptionManager, connectWithRetry } from './nats_manager.js';
 import type { CRMSyncEvent } from './types.js';
 
 async function main() {
   const natsUrl = process.env.NATS_URL ?? 'nats://localhost:4222';
   const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+  const maxReconnect = Number(process.env.NATS_MAX_RECONNECT ?? 3);
+  const collabEnabled = (process.env.COLLAB_EVENTS_ENABLED ?? 'true') !== 'false';
 
   // ─── Channel router ──────────────────────────────────────────
-  // For v1 we use a no-op email transport. Production wires
-  // nodemailer + SMTP; the transport is pluggable so this stays
-  // a one-line swap.
   const emailTransport: EmailTransport = {
     send: async () => ({ ok: true }),
   };
@@ -51,28 +61,28 @@ async function main() {
   ]);
 
   // ─── Daily-cap store (Redis) ────────────────────────────────
-  // We use MemoryDailyCap here so the process can boot without
-  // a Redis dependency; production swaps in RedisDailyCap.
   const caps = new MemoryDailyCap();
 
   // ─── Audit writer ───────────────────────────────────────────
-  // NoopAuditWriter for v1; production wires a Postgres writer.
   const audit = new NoopAuditWriter();
 
   // ─── Dispatcher ─────────────────────────────────────────────
   const dispatcher = new Dispatcher({ router, caps, audit });
 
-  // ─── NATS subscriber (placeholder) ──────────────────────────
+  // ─── Mention dedup (collaboration path) ─────────────────────
+  const mentionDedup = new MentionDedup();
+
+  // ─── NATS subscriber ────────────────────────────────────────
   console.log(JSON.stringify({
     msg: 'notification-dispatcher: starting',
     nats: natsUrl,
     redis: redisUrl,
     channels: ['slack', 'teams', 'email', 'in_app', 'webhook'],
+    collab_enabled: collabEnabled,
   }));
 
   // Test-only: if NOTIFICATION_DISPATCHER_TEST_EVENT is set, evaluate
-  // and dispatch a single event from the environment. This lets the
-  // smoke test exercise the wiring without a NATS broker.
+  // and dispatch a single event from the environment.
   const testEvent = process.env.NOTIFICATION_DISPATCHER_TEST_EVENT;
   if (testEvent) {
     const event: CRMSyncEvent = JSON.parse(testEvent);
@@ -85,9 +95,76 @@ async function main() {
     }));
   }
 
+  // ─── CRM event handler ───────────────────────────────────────
+  async function handleCrmEvent(raw: string): Promise<void> {
+    const event: CRMSyncEvent = JSON.parse(raw);
+    const rules: Array<import('./types.js').NotificationRule> = [];
+    await dispatcher.dispatch(rules, event);
+  }
+
+  // ─── Collaboration event handler ─────────────────────────────
+  // Processes a single collab event: parse → map → dedup → dispatch → audit.
+  async function handleCollabEvent(raw: string): Promise<void> {
+    let envelope;
+    try {
+      envelope = parseCollabEvent(raw);
+    } catch (err) {
+      console.error(JSON.stringify({
+        msg: 'notification-dispatcher: collab event parse failed',
+        error: err instanceof Error ? err.message : String(err),
+      }));
+      return;
+    }
+
+    const notifications = mapCollabEvent(envelope);
+    if (notifications.length === 0) return;
+
+    // Filter out deduped mentions.
+    const toDispatch = notifications.filter((n) => {
+      if (n.rule_id === 'collab-comment.mentioned') {
+        return !mentionDedup.isDeduped(n.viewer_id_key, envelope.timestamp);
+      }
+      return true;
+    });
+
+    if (toDispatch.length === 0) return;
+
+    const rows = await dispatcher.dispatchNotifications(toDispatch);
+    console.log(JSON.stringify({
+      msg: 'notification-dispatcher: collab event dispatched',
+      event_type: envelope.event_type,
+      notifications: rows.length,
+    }));
+  }
+
+  // ─── Connect to NATS ────────────────────────────────────────
+  const { StringCodec } = await import('nats');
+  const nc = await connectWithRetry({ servers: natsUrl, maxReconnect });
+
+  if (nc) {
+    const sc = StringCodec();
+    const manager = new NatsSubscriptionManager({
+      nc,
+      sc,
+      handlers: { onCrmEvent: handleCrmEvent, onCollabEvent: handleCollabEvent },
+      collabEnabled,
+    });
+    manager.start();
+  }
+
+  // ─── Graceful shutdown ──────────────────────────────────────
+  const shutdown = async () => {
+    console.log(JSON.stringify({ msg: 'notification-dispatcher: shutting down' }));
+    if (nc) {
+      try { await nc.drain(); } catch { /* already draining */ }
+    }
+    process.exit(0);
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+
   // Touch evaluateAll so the import isn't tree-shaken when we run
-  // with the test event above (also documents that this is the
-  // public entry point for the rules engine).
+  // with the test event above.
   void evaluateAll;
 }
 

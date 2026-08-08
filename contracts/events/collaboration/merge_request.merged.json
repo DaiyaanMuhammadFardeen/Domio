@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/merge_request.merged.json",
+  "title": "CollabMergeRequestMerged",
+  "description": "Emitted when a merge request is successfully merged.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "merge_request.merged"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["mr_id", "deck_id", "merged_by", "merge_commit_id"],
+      "properties": {
+        "mr_id": {
+          "type": "string"
+        },
+        "deck_id": {
+          "type": "string"
+        },
+        "merged_by": {
+          "type": "string"
+        },
+        "merge_commit_id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

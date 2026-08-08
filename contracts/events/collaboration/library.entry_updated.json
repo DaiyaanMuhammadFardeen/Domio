@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/library.entry_updated.json",
+  "title": "CollabLibraryEntryUpdated",
+  "description": "Emitted when a library entry receives a new version.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "library.entry_updated"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["entry_id", "version_id", "version_num"],
+      "properties": {
+        "entry_id": {
+          "type": "string"
+        },
+        "version_id": {
+          "type": "string"
+        },
+        "version_num": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/expiry.share_revoked.json",
+  "title": "CollabExpiryShareRevoked",
+  "description": "Emitted when an expiry policy auto-revokes a share link.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "expiry.share_revoked"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["policy_id", "resource_type", "resource_id", "share_link_id"],
+      "properties": {
+        "policy_id": {
+          "type": "string"
+        },
+        "resource_type": {
+          "type": "string"
+        },
+        "resource_id": {
+          "type": "string"
+        },
+        "share_link_id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

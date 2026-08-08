@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/suggestion.created.json",
+  "title": "CollabSuggestionCreated",
+  "description": "Emitted when a new suggestion is created on a deck element.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "suggestion.created"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["suggestion_id", "deck_id", "author_id", "target_type", "target_id", "operation"],
+      "properties": {
+        "suggestion_id": {
+          "type": "string"
+        },
+        "deck_id": {
+          "type": "string"
+        },
+        "author_id": {
+          "type": "string"
+        },
+        "target_type": {
+          "type": "string",
+          "enum": ["element", "slide", "data_binding"]
+        },
+        "target_id": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "object",
+          "description": "Structured CRDT operation: {type, params, before_state, after_state}."
+        }
+      }
+    }
+  }
+}

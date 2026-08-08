@@ -1,0 +1,171 @@
+openapi: 3.1.0
+info:
+  title: Domio Teams Webhooks API (Phase 18 W9)
+  version: 0.1.0
+  description: |
+    Inbound webhook receivers for Microsoft Teams integration.
+    All endpoints are unauthenticated but HMAC-verified at the API gateway layer.
+    Callers MUST supply a valid `X-Teams-Signature` header.
+
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://api.domio.example.com
+    description: Production
+security: []
+paths:
+  /webhooks/teams/actions:
+    post:
+      tags: [teams-webhooks]
+      operationId: receiveTeamsAction
+      summary: Receive a Teams adaptive card action (button click, form submit, etc.).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TeamsActionInput' }
+      responses:
+        '200':
+          description: Action acknowledged.
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '401':
+          description: HMAC signature invalid.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /webhooks/teams/commands:
+    post:
+      tags: [teams-webhooks]
+      operationId: receiveTeamsCommand
+      summary: Receive a Teams bot message extension command or compose extension.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TeamsCommandInput' }
+      responses:
+        '200':
+          description: Command acknowledged.
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '401':
+          description: HMAC signature invalid.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+# ════════════════════════════════════════════════════════════════════════════
+# Components
+# ════════════════════════════════════════════════════════════════════════════
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference identifying the problem type.
+          example: "https://domio.example/problems/not-found"
+        title:
+          type: string
+          description: Short human-readable summary.
+          example: "Resource not found"
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          example: "Deck with id 'abc-123' does not exist in workspace 'w-1'."
+        instance:
+          type: string
+          format: uri
+          description: URI reference identifying the specific occurrence.
+          example: "https://api.domio.example.com/webhooks/teams/actions"
+    TeamsActionInput:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: object
+          description: The adaptive card action payload.
+          properties:
+            actionId:
+              type: string
+              description: Action identifier (e.g. approve, reject, open, resolve).
+            actionData:
+              type: object
+              description: Action-specific data (resource IDs, etc.).
+        from:
+          type: object
+          description: Sender information.
+          properties:
+            id:
+              type: string
+              description: Teams user AAD object ID.
+            name:
+              type: string
+              description: Display name.
+        conversation:
+          type: object
+          description: Conversation context.
+          properties:
+            id:
+              type: string
+              description: Conversation or channel ID.
+            conversationType:
+              type: string
+              description: Channel, personalChat, groupChat, etc.
+        recipient:
+          type: object
+          description: Bot recipient information.
+          properties:
+            id:
+              type: string
+    TeamsCommandInput:
+      type: object
+      required: [commandId]
+      properties:
+        commandId:
+          type: string
+          description: Command identifier (e.g. domio-decks, domio-status).
+        commandData:
+          type: string
+          description: Command arguments or query text.
+        from:
+          type: object
+          description: Sender information.
+          properties:
+            id:
+              type: string
+              description: Teams user AAD object ID.
+            name:
+              type: string
+              description: Display name.
+        conversation:
+          type: object
+          description: Conversation context.
+          properties:
+            id:
+              type: string
+              description: Conversation or channel ID.
+            conversationType:
+              type: string
+        recipient:
+          type: object
+          description: Bot recipient information.
+          properties:
+            id:
+              type: string

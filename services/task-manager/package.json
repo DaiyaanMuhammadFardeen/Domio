@@ -1,0 +1,27 @@
+{
+  "name": "@domio/task-manager-service",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Task managers (Asana/Jira/Linear) service (Phase 18 #191).",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "dependencies": {
+    "@domio/audit-ts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "@types/pg": "^8.20.3",
+    "pg": "^8.22.0",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

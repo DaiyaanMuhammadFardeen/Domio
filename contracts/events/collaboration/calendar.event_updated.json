@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CalendarEventUpdated",
+  "description": "Emitted when a calendar event is synced and state changed.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "deck_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "event_type": { "const": "calendar.event_updated" },
+    "ts_ms": { "type": "integer" },
+    "workspace_id": { "type": "string" },
+    "deck_id": { "type": "string" },
+    "actor_id": { "type": "string" },
+    "actor_type": { "enum": ["member", "guest", "agent", "system"] },
+    "payload": {
+      "type": "object",
+      "required": ["calendar_link_id", "deck_id", "vendor", "event_id", "change_type"],
+      "properties": {
+        "calendar_link_id": { "type": "string" },
+        "deck_id": { "type": "string" },
+        "vendor": { "enum": ["google", "outlook", "icloud"] },
+        "event_id": { "type": "string" },
+        "change_type": { "enum": ["created", "updated", "canceled"] }
+      }
+    }
+  }
+}

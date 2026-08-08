@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/guest.access_granted.json",
+  "title": "CollabGuestAccessGranted",
+  "description": "Emitted when a workspace member grants a guest scoped access and mints the first magic link.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "guest.access_granted"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["guest_access_id", "inviter_id", "guest_email", "scope_type", "scope_id", "capabilities", "expires_at"],
+      "properties": {
+        "guest_access_id": {
+          "type": "string"
+        },
+        "inviter_id": {
+          "type": "string"
+        },
+        "guest_email": {
+          "type": "string",
+          "format": "email"
+        },
+        "scope_type": {
+          "type": "string",
+          "enum": ["folder", "project", "deck"]
+        },
+        "scope_id": {
+          "type": "string"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["comment", "suggest", "view"]
+          }
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

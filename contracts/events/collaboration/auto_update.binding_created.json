@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/auto_update.binding_created.json",
+  "title": "CollabAutoUpdateBindingCreated",
+  "description": "Emitted when an auto-update binding is created (reference insert from the slide library).",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "auto_update.binding_created"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["binding_id", "library_entry_id", "mode"],
+      "properties": {
+        "binding_id": {
+          "type": "string"
+        },
+        "library_entry_id": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["immediate", "scheduled", "manual", "frozen"]
+        }
+      }
+    }
+  }
+}

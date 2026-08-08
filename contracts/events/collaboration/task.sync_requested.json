@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/task.sync_requested.json",
+  "title": "CollabTaskSyncRequested",
+  "description": "Emitted when a task sync is requested between Domio and an external tracker.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "task.sync_requested"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["task_link_id", "assignment_id", "vendor", "direction"],
+      "properties": {
+        "task_link_id": {
+          "type": "string"
+        },
+        "assignment_id": {
+          "type": "string"
+        },
+        "vendor": {
+          "type": "string",
+          "enum": ["asana", "jira", "linear"]
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["domio_to_task", "task_to_domio"]
+        }
+      }
+    }
+  }
+}

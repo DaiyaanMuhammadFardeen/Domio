@@ -27,12 +27,18 @@ export interface ChannelSender {
   send(notification: Notification): Promise<SendResult>;
 }
 
+/** Outbound payload signer — inject for HMAC signing. */
+export interface OutboundSigner {
+  sign(body: string): string;
+}
+
 /** SlackSender POSTs a chat.postMessage-style payload to a webhook URL. */
 export class SlackSender implements ChannelSender {
   readonly channel = 'slack' as const;
   constructor(
     private readonly fetchImpl: typeof fetch = fetch,
     private readonly defaultTimeoutMs = 5000,
+    private readonly signer?: OutboundSigner | undefined,
   ) {}
 
   async send(n: Notification): Promise<SendResult> {
@@ -52,13 +58,18 @@ export class SlackSender implements ChannelSender {
   }
 
   private async doFetch(url: string, body: unknown): Promise<SendResult> {
+    const bodyStr = JSON.stringify(body);
+    const headers: Record<string, string> = { 'content-type': 'application/json' };
+    if (this.signer) {
+      headers['X-Domio-Signature'] = this.signer.sign(bodyStr);
+    }
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), this.defaultTimeoutMs);
     try {
       const res = await this.fetchImpl(url, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
+        headers,
+        body: bodyStr,
         signal: ctl.signal,
       });
       if (!res.ok) {
@@ -77,7 +88,10 @@ export class SlackSender implements ChannelSender {
 /** TeamsSender POSTs a MessageCard to the Teams incoming webhook URL. */
 export class TeamsSender implements ChannelSender {
   readonly channel = 'teams' as const;
-  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+  constructor(
+    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly signer?: OutboundSigner | undefined,
+  ) {}
 
   async send(n: Notification): Promise<SendResult> {
     const url = n.recipient;
@@ -91,13 +105,18 @@ export class TeamsSender implements ChannelSender {
       text: n.payload.body,
       ...(n.payload.link ? { potentialAction: [{ '@type': 'OpenUri', name: 'Open', targets: [{ os: 'default', uri: n.payload.link }] }] } : {}),
     };
+    const bodyStr = JSON.stringify(body);
+    const headers: Record<string, string> = { 'content-type': 'application/json' };
+    if (this.signer) {
+      headers['X-Domio-Signature'] = this.signer.sign(bodyStr);
+    }
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 5000);
     try {
       const res = await this.fetchImpl(url, {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
+        headers,
+        body: bodyStr,
         signal: ctl.signal,
       });
       if (!res.ok) {

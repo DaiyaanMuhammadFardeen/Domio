@@ -51,6 +51,28 @@ export class Dispatcher {
     return rows;
   }
 
+  /**
+   * dispatchNotifications processes pre-built Notification objects
+   * directly (bypassing rules evaluation). Used by the collaboration
+   * event path where notifications are constructed by the collab
+   * mapper, not the rules engine.
+   *
+   * @param notifications  Pre-built notifications to dispatch.
+   * @param dailyCap       Optional per-recipient daily cap. Falls back
+   *                       to a very high default when omitted.
+   */
+  async dispatchNotifications(
+    notifications: Notification[],
+    dailyCap = 1_000_000,
+  ): Promise<AuditEntryWithRedaction[]> {
+    const rows: AuditEntryWithRedaction[] = [];
+    for (const n of notifications) {
+      const row = await this.processWithCap(n, dailyCap);
+      rows.push(row);
+    }
+    return rows;
+  }
+
   private async process(n: Notification, rules: NotificationRule[]): Promise<AuditEntryWithRedaction> {
     const cap = this.capFor(n.rule_id, rules);
     const allowed = await this.deps.caps.allowAndIncr(n.recipient, cap);
@@ -88,5 +110,38 @@ export class Dispatcher {
   private capFor(ruleID: string, rules: NotificationRule[]): number {
     const r = rules.find((x) => x.rule_id === ruleID);
     return r?.daily_cap ?? 1_000_000;
+  }
+
+  /**
+   * processWithCap is like `process` but takes a fixed daily cap
+   * instead of looking it up from the rules list. Used by the
+   * collaboration event path.
+   */
+  private async processWithCap(n: Notification, dailyCap: number): Promise<AuditEntryWithRedaction> {
+    const allowed = await this.deps.caps.allowAndIncr(n.recipient, dailyCap);
+    if (!allowed) {
+      const entry = buildAuditEntryWithRedaction(n, 'suppressed', 'daily_cap_exceeded');
+      await this.deps.audit.write(entry);
+      return entry;
+    }
+
+    let result: SendResult;
+    try {
+      result = await this.deps.router.send(n);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const entry = buildAuditEntryWithRedaction(n, 'failed', msg);
+      await this.deps.audit.write(entry);
+      return entry;
+    }
+
+    if (result.ok) {
+      const entry = buildAuditEntryWithRedaction(n, 'sent');
+      await this.deps.audit.write(entry);
+      return entry;
+    }
+    const entry = buildAuditEntryWithRedaction(n, 'failed', result.error ?? 'unknown');
+    await this.deps.audit.write(entry);
+    return entry;
   }
 }

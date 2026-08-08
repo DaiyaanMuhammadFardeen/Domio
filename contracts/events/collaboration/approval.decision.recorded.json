@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/approval.decision.recorded.json",
+  "title": "CollabApprovalDecisionRecorded",
+  "description": "Emitted when an approver records a decision on an approval request.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "approval.decision.recorded"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["request_id", "lane", "approver_id", "decision"],
+      "properties": {
+        "request_id": {
+          "type": "string"
+        },
+        "lane": {
+          "type": "string",
+          "description": "The approval lane this decision covers."
+        },
+        "approver_id": {
+          "type": "string"
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["approved", "rejected", "changes_requested"]
+        },
+        "justification": {
+          "type": "string",
+          "nullable": true,
+          "description": "Optional justification text."
+        }
+      }
+    }
+  }
+}

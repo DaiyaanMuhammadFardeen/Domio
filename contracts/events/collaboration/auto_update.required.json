@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/auto_update.required.json",
+  "title": "CollabAutoUpdateRequired",
+  "description": "Emitted when a consumer slide requires an update from its linked library entry.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "auto_update.required"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["binding_id", "consumer_deck_id", "consumer_slide_id", "library_entry_id", "new_version_id"],
+      "properties": {
+        "binding_id": {
+          "type": "string"
+        },
+        "consumer_deck_id": {
+          "type": "string"
+        },
+        "consumer_slide_id": {
+          "type": "string"
+        },
+        "library_entry_id": {
+          "type": "string"
+        },
+        "new_version_id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

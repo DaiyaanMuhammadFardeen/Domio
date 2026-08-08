@@ -1,0 +1,3104 @@
+openapi: 3.1.0
+info:
+  title: Domio Collab API (Phase 18 W1)
+  version: 0.1.0
+  description: |
+    Collaboration & workflow data plane. REST CRUD over comments,
+    approval requests, assignments, and permission grants.
+
+    Auth model:
+      - All endpoints require a workspace bearer session (cookie or
+        `Authorization: Bearer ...`).
+      - The actor identity is injected via the `x-actor-id` header
+        by the API gateway; callers MUST NOT spoof it.
+      - Capability checks are enforced at the handler level via
+        `POST /v1/permissions/check`.
+
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://api.domio.example.com
+    description: Production
+  - url: http://localhost:8087
+    description: Local development
+tags:
+  - name: comments
+    description: Threaded comments with reactions and attachments.
+  - name: approvals
+    description: Multi-lane approval workflows with SLA policy.
+  - name: assignments
+    description: Task assignments with slide ranges, watchers, and status tracking.
+  - name: permissions
+    description: Fine-grained RBAC permission grants with deny-first + temporal evaluation.
+  - name: library
+    description: Slide library — reusable slide templates with versioning and approval workflows.
+  - name: auto-update
+    description: Auto-update bindings that sync consumer slides to library entries.
+  - name: expiry
+    description: Expiry policies, freshness flags, and content lifecycle dashboard.
+  - name: suggestions
+    description: CRDT-operation suggestions on deck content — propose, accept, reject, or mark obsolete.
+  - name: merge-requests
+    description: Branch-based merge requests for deck content with diff computation and conflict resolution.
+  - name: meeting
+    description: Video meeting integrations — connect vendors, issue scoped tokens, record slide markers.
+  - name: calendar
+    description: Calendar links — schedule deck events with Google, Outlook, or iCloud.
+  - name: guests
+    description: External guest access — invite, manage, and revoke guest permissions on decks.
+  - name: task-managers
+    description: External task tracker links — bidirectional sync with Asana, Jira, and Linear.
+paths:
+  # ──────────────────────────────────────────────────────────────────────────
+  # Comments
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/decks/{deck_id}/comments:
+    parameters:
+      - in: path
+        name: deck_id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [comments]
+      operationId: createComment
+      summary: Create a new comment on a deck (or a specific slide/element).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CommentInput' }
+      responses:
+        '201':
+          description: Comment created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comment' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [comments]
+      operationId: listComments
+      summary: List comments for a deck, optionally filtered by thread or status.
+      parameters:
+        - in: query
+          name: thread_id
+          required: false
+          schema: { type: string }
+          description: Filter to a specific thread.
+        - in: query
+          name: status
+          required: false
+          schema: { type: string, enum: [open, resolved] }
+          description: Filter by thread status.
+      responses:
+        '200':
+          description: List of comments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Comment' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/comments/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [comments]
+      operationId: updateComment
+      summary: Update a comment's body or status (resolve/unresolve).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                body_md:
+                  type: string
+                  description: New Markdown body.
+                status:
+                  type: string
+                  enum: [open, resolved]
+                  description: New thread status.
+      responses:
+        '200':
+          description: Updated comment.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comment' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Comment not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/comments/{id}/resolved:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [comments]
+      operationId: resolveComment
+      summary: Mark a comment thread as resolved.
+      responses:
+        '200':
+          description: Comment resolved.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comment' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Comment not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/comments/{id}/reactions:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [comments]
+      operationId: addReaction
+      summary: Add an emoji reaction to a comment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [emoji, user_id]
+              properties:
+                emoji:
+                  type: string
+                  description: The emoji shortcode.
+                user_id:
+                  type: string
+                  description: UUID of the user adding the reaction.
+      responses:
+        '201':
+          description: Reaction added.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comment' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Comment not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    delete:
+      tags: [comments]
+      operationId: removeReaction
+      summary: Remove an emoji reaction from a comment.
+      parameters:
+        - in: query
+          name: emoji
+          required: true
+          schema: { type: string }
+          description: The emoji shortcode to remove.
+        - in: query
+          name: user_id
+          required: true
+          schema: { type: string }
+          description: UUID of the user whose reaction to remove.
+      responses:
+        '200':
+          description: Reaction removed.
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Comment or reaction not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Approval Requests
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/decks/{deck_id}/approval-requests:
+    parameters:
+      - in: path
+        name: deck_id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [approvals]
+      operationId: createApprovalRequest
+      summary: Create a new approval request for a deck version.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApprovalRequestInput' }
+      responses:
+        '201':
+          description: Approval request created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApprovalRequest' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Active approval request already exists for this deck version.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [approvals]
+      operationId: listApprovalRequests
+      summary: List approval requests for a deck.
+      responses:
+        '200':
+          description: List of approval requests.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ApprovalRequest' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/approval-requests/{id}/submit:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [approvals]
+      operationId: submitApprovalRequest
+      summary: Submit a draft approval request for review (draft → pending).
+      responses:
+        '200':
+          description: Approval request submitted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApprovalRequest' }
+        '400':
+          description: Request is not in draft status.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Approval request not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/approval-requests/{id}/decisions:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [approvals]
+      operationId: recordDecision
+      summary: Record an approver's decision on an approval request.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ApprovalDecisionInput' }
+      responses:
+        '201':
+          description: Decision recorded.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApprovalDecision' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions or not an assigned approver.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Approval request not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Approver has already decided on this lane.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Assignments
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/decks/{deck_id}/assignments:
+    parameters:
+      - in: path
+        name: deck_id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [assignments]
+      operationId: createAssignment
+      summary: Create a task assignment scoped to a slide range.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssignmentInput' }
+      responses:
+        '201':
+          description: Assignment created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Assignment' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/assignments/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [assignments]
+      operationId: updateAssignment
+      summary: Update an assignment's status, due date, watchers, or blocked reason.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [not_started, in_progress, blocked, review, done]
+                blocked_reason:
+                  type: string
+                  nullable: true
+                due_at:
+                  type: string
+                  format: date-time
+                  nullable: true
+                watchers:
+                  type: array
+                  items: { type: string }
+                  description: Replacement list of watcher user IDs.
+      responses:
+        '200':
+          description: Updated assignment.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Assignment' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Assignment not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/users/{user_id}/assignments:
+    parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [assignments]
+      operationId: listUserAssignments
+      summary: List all assignments for a user across the workspace.
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema: { type: string, enum: [not_started, in_progress, blocked, review, done] }
+          description: Filter by assignment status.
+      responses:
+        '200':
+          description: List of assignments.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Assignment' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: User not found in workspace.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Permissions
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/permissions/grants:
+    get:
+      tags: [permissions]
+      operationId: listGrants
+      summary: List permission grants, optionally filtered by resource.
+      parameters:
+        - in: query
+          name: resource_type
+          required: false
+          schema: { type: string, enum: [workspace, folder, project, deck, slide] }
+        - in: query
+          name: resource_id
+          required: false
+          schema: { type: string }
+        - in: header
+          name: x-actor-id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of permission grants.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PermissionGrant' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    post:
+      tags: [permissions]
+      operationId: createGrant
+      summary: Create a permission grant for a principal on a resource.
+      parameters:
+        - in: header
+          name: x-actor-id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GrantInput' }
+      responses:
+        '201':
+          description: Permission grant created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PermissionGrant' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/permissions/check:
+    post:
+      tags: [permissions]
+      operationId: checkPermission
+      summary: Check whether an actor has a specific capability on a resource.
+      parameters:
+        - in: header
+          name: x-actor-id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PermissionCheckInput' }
+      responses:
+        '200':
+          description: Permission evaluation result.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PermissionEvaluation' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions to perform the check.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Slide Library
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/library/entries:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [library]
+      operationId: createLibraryEntry
+      summary: Create a new slide library entry with an initial version snapshot.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LibraryEntryInput' }
+      responses:
+        '201':
+          description: Library entry created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LibraryEntry' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [library]
+      operationId: listLibraryEntries
+      summary: List library entries, optionally filtered by scope and status.
+      parameters:
+        - in: query
+          name: scope
+          required: false
+          schema: { type: string, enum: [workspace, org, team] }
+          description: Filter by scope.
+        - in: query
+          name: status
+          required: false
+          schema: { type: string, enum: [draft, pending, approved, retired] }
+          description: Filter by status.
+      responses:
+        '200':
+          description: List of library entries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/LibraryEntry' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/library/entries/{id}/versions:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [library]
+      operationId: addLibraryVersion
+      summary: Add a new version snapshot to an existing library entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LibraryVersionInput' }
+      responses:
+        '201':
+          description: Library version created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LibraryVersion' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Library entry not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/library/entries/{id}/retire:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [library]
+      operationId: retireLibraryEntry
+      summary: Retire a library entry (optionally superseded by another entry).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                superseded_by:
+                  type: string
+                  nullable: true
+                  description: ID of the replacement entry, if any.
+      responses:
+        '200':
+          description: Library entry retired.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LibraryEntry' }
+        '400':
+          description: Entry is not in a retirable state.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Library entry not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/decks/{deck_id}/slides/insert-from-library:
+    parameters:
+      - in: path
+        name: deck_id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [library]
+      operationId: insertLibrarySlide
+      summary: Insert a slide from the library into a deck (reference or copy mode).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [library_entry_id, mode]
+              properties:
+                library_entry_id:
+                  type: string
+                  description: ID of the library entry to insert from.
+                version_id:
+                  type: string
+                  nullable: true
+                  description: Specific version to use; null = latest approved.
+                mode:
+                  type: string
+                  enum: [reference, copy]
+                  description: 'reference = linked (auto-updates); copy = standalone snapshot.'
+      responses:
+        '201':
+          description: Slide inserted into deck.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  slide_id:
+                    type: string
+                    description: ID of the newly inserted slide.
+                  binding_id:
+                    type: string
+                    nullable: true
+                    description: Auto-update binding ID if mode=reference.
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck or library entry not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Auto-Update Bindings
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/auto-update/bindings:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [auto-update]
+      operationId: createAutoUpdateBinding
+      summary: Create a binding that syncs a consumer slide to a library entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AutoUpdateBindingInput' }
+      responses:
+        '201':
+          description: Auto-update binding created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AutoUpdateBinding' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [auto-update]
+      operationId: listAutoUpdateBindings
+      summary: List auto-update bindings, optionally filtered by consumer deck.
+      parameters:
+        - in: query
+          name: consumer_deck_id
+          required: false
+          schema: { type: string }
+          description: Filter by consumer deck ID.
+      responses:
+        '200':
+          description: List of auto-update bindings.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AutoUpdateBinding' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/auto-update/bindings/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [auto-update]
+      operationId: updateAutoUpdateBinding
+      summary: Update an auto-update binding (mode, schedule, pinned version, mandatory flag).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [immediate, scheduled, manual, frozen]
+                schedule:
+                  type: object
+                  description: Schedule configuration (cron/interval) when mode=scheduled.
+                pinned_version_id:
+                  type: string
+                  nullable: true
+                  description: Pin to a specific version; null = latest.
+                is_mandatory:
+                  type: boolean
+                  description: If true, consumer cannot override the binding.
+      responses:
+        '200':
+          description: Updated auto-update binding.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AutoUpdateBinding' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Binding not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    delete:
+      tags: [auto-update]
+      operationId: deleteAutoUpdateBinding
+      summary: Delete an auto-update binding.
+      responses:
+        '204':
+          description: Binding deleted.
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Binding not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Expiry Policies & Dashboard
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/expiry-policies:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [expiry]
+      operationId: createExpiryPolicy
+      summary: Create an expiry policy for a resource.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExpiryPolicyInput' }
+      responses:
+        '201':
+          description: Expiry policy created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExpiryPolicy' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [expiry]
+      operationId: listExpiryPolicies
+      summary: List expiry policies, optionally filtered by resource.
+      parameters:
+        - in: query
+          name: resource_type
+          required: false
+          schema: { type: string }
+          description: Filter by resource type.
+        - in: query
+          name: resource_id
+          required: false
+          schema: { type: string }
+          description: Filter by resource ID.
+      responses:
+        '200':
+          description: List of expiry policies.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ExpiryPolicy' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/expiry-dashboard/confirm-freshness:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [expiry]
+      operationId: confirmFreshness
+      summary: Confirm freshness for a resource (resolve a freshness flag).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resource_type, resource_id, confirmed_by]
+              properties:
+                resource_type:
+                  type: string
+                  description: Type of the resource being confirmed.
+                resource_id:
+                  type: string
+                  description: ID of the resource being confirmed.
+                confirmed_by:
+                  type: string
+                  description: UUID of the user confirming freshness.
+      responses:
+        '200':
+          description: Freshness confirmed; flags resolved.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FreshnessFlag' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: No active flags found for this resource.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/expiry-dashboard:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [expiry]
+      operationId: getExpiryDashboard
+      summary: Get the expiry dashboard — resources flagged/overdue by escalation tier.
+      responses:
+        '200':
+          description: Expiry dashboard with flagged resources grouped by tier.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gentle:
+                    type: array
+                    items: { $ref: '#/components/schemas/FreshnessFlag' }
+                    description: Resources with gentle escalation.
+                  moderate:
+                    type: array
+                    items: { $ref: '#/components/schemas/FreshnessFlag' }
+                    description: Resources with moderate escalation.
+                  strict:
+                    type: array
+                    items: { $ref: '#/components/schemas/FreshnessFlag' }
+                    description: Resources with strict escalation.
+                  summary:
+                    type: object
+                    properties:
+                      total_flagged:
+                        type: integer
+                      overdue_count:
+                        type: integer
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Suggestions
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/decks/{deck_id}/suggestions:
+    parameters:
+      - in: path
+        name: deck_id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [suggestions]
+      operationId: createSuggestion
+      summary: Create a new suggestion on a deck element, slide, or data binding.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SuggestionInput' }
+      responses:
+        '201':
+          description: Suggestion created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Suggestion' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [suggestions]
+      operationId: listSuggestions
+      summary: List suggestions for a deck, optionally filtered by status.
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema: { type: string, enum: [open, accepted, rejected, obsolete] }
+          description: Filter by suggestion status.
+      responses:
+        '200':
+          description: List of suggestions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Suggestion' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/suggestions/{id}/accept:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [suggestions]
+      operationId: acceptSuggestion
+      summary: Accept and apply a suggestion.
+      responses:
+        '200':
+          description: Suggestion accepted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Suggestion' }
+        '400':
+          description: Suggestion is not in open status.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Suggestion not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/suggestions/{id}/reject:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [suggestions]
+      operationId: rejectSuggestion
+      summary: Reject a suggestion with an optional reason.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Optional reason for rejection.
+      responses:
+        '200':
+          description: Suggestion rejected.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Suggestion' }
+        '400':
+          description: Suggestion is not in open status.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Suggestion not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Merge Requests
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/decks/{deck_id}/merge-requests:
+    parameters:
+      - in: path
+        name: deck_id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [merge-requests]
+      operationId: createMergeRequest
+      summary: Create a new merge request between branches.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MergeRequestInput' }
+      responses:
+        '201':
+          description: Merge request created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MergeRequest' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [merge-requests]
+      operationId: listMergeRequests
+      summary: List merge requests for a deck.
+      responses:
+        '200':
+          description: List of merge requests.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MergeRequest' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Deck not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/merge-requests/{id}/diffs:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [merge-requests]
+      operationId: getMergeRequestDiffs
+      summary: Get the computed diffs for a merge request.
+      parameters:
+        - in: query
+          name: level
+          required: false
+          schema: { type: string, enum: [slide, element, data_binding], default: slide }
+          description: Diff granularity level.
+      responses:
+        '200':
+          description: Merge request diffs.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SlideDiff' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Merge request not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/merge-requests/{id}/merge:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [merge-requests]
+      operationId: mergeMergeRequest
+      summary: Merge the source branch into the target branch.
+      responses:
+        '200':
+          description: Merge request merged.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, merge_commit_id]
+                properties:
+                  status:
+                    type: string
+                    enum: [merged]
+                  merge_commit_id:
+                    type: string
+        '400':
+          description: Merge request is not in a mergable state.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Merge request not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Merge conflict detected.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/merge-requests/{id}/resolve-conflict:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [merge-requests]
+      operationId: resolveMergeRequestConflict
+      summary: Resolve a merge conflict for a specific slide.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slide_id, resolution]
+              properties:
+                slide_id:
+                  type: string
+                  description: UUID of the conflicting slide.
+                resolution:
+                  type: object
+                  description: Resolution payload (accept source, accept target, or manual merge).
+      responses:
+        '200':
+          description: Conflict resolved.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MergeRequest' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Merge request not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Meeting Integrations
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/integrations/meeting/status:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [meeting]
+      operationId: getMeetingIntegrationStatus
+      summary: Get meeting integration connection status for the workspace.
+      responses:
+        '200':
+          description: Current meeting integration status.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingIntegration' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/integrations/meeting/connect:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [meeting]
+      operationId: connectMeetingIntegration
+      summary: Initiate an OAuth connection to a meeting vendor.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingIntegrationInput' }
+      responses:
+        '201':
+          description: Connection initiated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingIntegration' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/integrations/meeting/{id}/disconnect:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [meeting]
+      operationId: disconnectMeetingIntegration
+      summary: Disconnect a meeting vendor integration.
+      responses:
+        '200':
+          description: Integration disconnected.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingIntegration' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Integration not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/integrations/meeting/token:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [meeting]
+      operationId: issueMeetingToken
+      summary: Issue a scoped token for a meeting participant (expires 1h after meeting end).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingTokenRequest' }
+      responses:
+        '201':
+          description: Token issued.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeetingToken' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/integrations/meeting/markers:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [meeting]
+      operationId: recordMeetingMarker
+      summary: Record a recording marker at a slide transition during a meeting.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MeetingMarkerInput' }
+      responses:
+        '201':
+          description: Marker recorded.
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Calendar
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/calendar/links:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [calendar]
+      operationId: createCalendarLink
+      summary: Link a deck to a calendar event.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CalendarLinkInput' }
+      responses:
+        '201':
+          description: Calendar link created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CalendarLink' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [calendar]
+      operationId: listCalendarLinks
+      summary: List calendar links for the workspace.
+      responses:
+        '200':
+          description: List of calendar links.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CalendarLink' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/calendar/links/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [calendar]
+      operationId: deleteCalendarLink
+      summary: Remove a calendar link.
+      responses:
+        '204':
+          description: Calendar link deleted.
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Calendar link not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/calendar/links/{id}/sync:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [calendar]
+      operationId: syncCalendarLink
+      summary: Manually trigger a sync with the calendar vendor.
+      responses:
+        '200':
+          description: Sync completed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CalendarLink' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Calendar link not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/calendar/today:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [calendar]
+      operationId: getPresenterTodayView
+      summary: Get today's presenter view — upcoming calendar-linked decks for the current user.
+      responses:
+        '200':
+          description: Today's calendar-linked decks.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CalendarLink' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Guests
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/guests:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [guests]
+      operationId: createGuest
+      summary: Create a scoped guest invitation and mint its first magic link.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GuestInput' }
+      responses:
+        '201':
+          description: Guest access created with a magic link.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Guest' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Feature disabled.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/guests/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    get:
+      tags: [guests]
+      operationId: getGuest
+      summary: Get a guest access record by ID.
+      responses:
+        '200':
+          description: Guest access details.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Guest' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Guest not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    delete:
+      tags: [guests]
+      operationId: deleteGuest
+      summary: Revoke a guest's access (soft revoke; invalidates open magic links).
+      responses:
+        '204':
+          description: Guest access revoked.
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Guest not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/guests/{id}/magic-link:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [guests]
+      operationId: resendGuestMagicLink
+      summary: Resend a magic link (invalidates prior open links for this guest).
+      responses:
+        '200':
+          description: New magic link issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Magic link token to send to the guest.
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Guest not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/guest-access/consume:
+    post:
+      tags: [guests]
+      operationId: consumeGuestMagicLink
+      summary: Exchange a magic link token for guest access (unauthenticated; the token is the credential).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MagicLinkConsumeInput' }
+      responses:
+        '200':
+          description: Magic link consumed; guest access resolved.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MagicLinkConsumeResult' }
+        '401':
+          description: Invalid, expired, consumed, or revoked magic link.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security: []
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Task Manager Links
+  # ──────────────────────────────────────────────────────────────────────────
+  /v1/task-links:
+    parameters:
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [task-managers]
+      operationId: createTaskLink
+      summary: Create a bidirectional sync link between an assignment and an external task.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskLinkInput' }
+      responses:
+        '201':
+          description: Task link created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskLink' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    get:
+      tags: [task-managers]
+      operationId: listTaskLinks
+      summary: List task links for the workspace.
+      responses:
+        '200':
+          description: List of task links.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/TaskLink' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/task-links/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [task-managers]
+      operationId: updateTaskLink
+      summary: Update a task link's field mapping or sync mode.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                field_map:
+                  type: object
+                  description: Updated declarative field mapping.
+                sync_mode:
+                  type: string
+                  enum: [domio_wins, task_wins, last_write_wins]
+      responses:
+        '200':
+          description: Task link updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskLink' }
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Task link not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+    delete:
+      tags: [task-managers]
+      operationId: deleteTaskLink
+      summary: Delete a task link.
+      responses:
+        '204':
+          description: Task link deleted.
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Task link not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+  /v1/task-links/{id}/sync:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+      - in: header
+        name: x-actor-id
+        required: true
+        schema: { type: string }
+    post:
+      tags: [task-managers]
+      operationId: syncTaskLink
+      summary: Manually trigger a sync with the external task tracker.
+      responses:
+        '200':
+          description: Sync completed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskLink' }
+        '403':
+          description: Insufficient permissions.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Task link not found.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+
+# ════════════════════════════════════════════════════════════════════════════
+# Components
+# ════════════════════════════════════════════════════════════════════════════
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: domio_session
+  schemas:
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference identifying the problem type.
+          example: "https://domio.example/problems/not-found"
+        title:
+          type: string
+          description: Short human-readable summary.
+          example: "Resource not found"
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          example: "Deck with id 'abc-123' does not exist in workspace 'w-1'."
+        instance:
+          type: string
+          format: uri
+          description: URI reference identifying the specific occurrence.
+          example: "https://api.domio.example.com/v1/decks/abc-123/comments"
+    CommentInput:
+      type: object
+      required: [body_md, target_type, target_id]
+      properties:
+        body_md:
+          type: string
+          description: Markdown body of the comment.
+        target_type:
+          type: string
+          enum: [element, slide, deck]
+        target_id:
+          type: string
+        parent_id:
+          type: string
+          nullable: true
+          description: Parent comment ID for replies.
+        anchor:
+          type: object
+          description: Optional anchor with element/slide coordinates.
+          properties:
+            element:
+              type: object
+              properties:
+                x: { type: number }
+                y: { type: number }
+            slide:
+              type: object
+              properties:
+                x: { type: number }
+                y: { type: number }
+        attachments:
+          type: array
+          items: { type: object }
+          description: Optional array of attachment objects.
+    Comment:
+      type: object
+      required: [id, workspace_id, deck_id, thread_id, author_id, author_type, body_md, target_type, target_id, status, created_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        deck_id: { type: string }
+        thread_id: { type: string }
+        parent_id: { type: string, nullable: true }
+        author_id: { type: string }
+        author_type:
+          type: string
+          enum: [member, guest, agent]
+        body_md: { type: string }
+        target_type:
+          type: string
+          enum: [element, slide, deck]
+        target_id: { type: string }
+        anchor:
+          type: object
+          nullable: true
+          properties:
+            element:
+              type: object
+              properties:
+                x: { type: number }
+                y: { type: number }
+            slide:
+              type: object
+              properties:
+                x: { type: number }
+                y: { type: number }
+        status:
+          type: string
+          enum: [open, resolved]
+        is_orphaned: { type: boolean }
+        emoji_reactions: { type: object, description: "JSONB map of emoji → user_id[]" }
+        attachments: { type: array, items: { type: object } }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        resolved_at: { type: string, format: date-time, nullable: true }
+        resolved_by: { type: string, nullable: true }
+    ApprovalRequestInput:
+      type: object
+      required: [deck_id, version_id, policy]
+      properties:
+        deck_id: { type: string }
+        version_id: { type: string, description: Immutable snapshot/version of the deck under review. }
+        policy:
+          type: object
+          required: [lanes]
+          description: Approval policy with lane definitions.
+          properties:
+            lanes:
+              type: array
+              items:
+                type: object
+                required: [lane, role, required]
+                properties:
+                  lane:
+                    type: string
+                    description: "Lane identifier (e.g. design, content, executive)."
+                  role:
+                    type: string
+                    description: Required workspace role for approvers in this lane.
+                  required:
+                    type: boolean
+                    description: Whether this lane must approve for overall approval.
+                  sla_hours:
+                    type: number
+                    description: SLA in hours for this lane to respond.
+        submit_now:
+          type: boolean
+          description: If true, submit immediately (draft → pending).
+    ApprovalRequest:
+      type: object
+      required: [id, workspace_id, deck_id, version_id, requested_by, requested_at, policy, status, created_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        deck_id: { type: string }
+        version_id: { type: string }
+        requested_by: { type: string }
+        requested_at: { type: string, format: date-time }
+        policy:
+          type: object
+          required: [lanes]
+          properties:
+            lanes:
+              type: array
+              items:
+                type: object
+                properties:
+                  lane: { type: string }
+                  role: { type: string }
+                  required: { type: boolean }
+                  sla_hours: { type: number }
+        status:
+          type: string
+          enum: [draft, pending, approved, rejected, changes_requested]
+        closed_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    ApprovalDecisionInput:
+      type: object
+      required: [lane, decision]
+      properties:
+        lane: { type: string }
+        decision:
+          type: string
+          enum: [approved, rejected, changes_requested]
+        justification: { type: string, nullable: true }
+    ApprovalDecision:
+      type: object
+      required: [id, workspace_id, request_id, lane, approver_id, decision, decided_at, version_id]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        request_id: { type: string }
+        lane: { type: string }
+        approver_id: { type: string }
+        decision:
+          type: string
+          enum: [approved, rejected, changes_requested]
+        justification: { type: string, nullable: true }
+        decided_at: { type: string, format: date-time }
+        version_id: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    AssignmentInput:
+      type: object
+      required: [deck_id, slide_range, primary_id]
+      properties:
+        deck_id: { type: string }
+        slide_range:
+          type: array
+          items: { type: integer }
+          minItems: 2
+          maxItems: 2
+          description: Inclusive slide index range [lo, hi].
+        primary_id: { type: string, description: UUID of the user primarily responsible. }
+        watchers:
+          type: array
+          items: { type: string }
+          description: UUIDs of users to watch this assignment.
+        due_at: { type: string, format: date-time, nullable: true }
+    Assignment:
+      type: object
+      required: [id, workspace_id, deck_id, slide_range, primary_id, watchers, status, created_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        deck_id: { type: string }
+        slide_range:
+          type: array
+          items: { type: integer }
+          minItems: 2
+          maxItems: 2
+          description: Inclusive slide index range [lo, hi].
+        primary_id: { type: string }
+        watchers:
+          type: array
+          items: { type: string }
+        status:
+          type: string
+          enum: [not_started, in_progress, blocked, review, done]
+        blocked_reason: { type: string, nullable: true }
+        due_at: { type: string, format: date-time, nullable: true }
+        completed_at: { type: string, format: date-time, nullable: true }
+        task_link_id: { type: string, nullable: true, description: Optional FK to external task tracker. }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    GrantInput:
+      type: object
+      required: [resource_type, resource_id, principal_id, principal_type, capabilities]
+      properties:
+        resource_type: { type: string, enum: [workspace, folder, project, deck, slide] }
+        resource_id: { type: string }
+        principal_id: { type: string }
+        principal_type: { type: string, enum: [user, group] }
+        capabilities: { type: array, items: { type: string }, description: Array of granular capabilities. }
+        is_deny: { type: boolean, default: false, description: When true, this is a deny grant (deny-first evaluation). }
+        effective_from: { type: string, format: date-time, description: Start of the grant's temporal window. }
+        effective_to: { type: string, format: date-time, nullable: true, description: End of the grant's temporal window; null = indefinite. }
+    PermissionGrant:
+      type: object
+      required: [id, workspace_id, resource_type, resource_id, principal_id, principal_type, capabilities, is_deny, effective_from, created_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        resource_type: { type: string, enum: [workspace, folder, project, deck, slide] }
+        resource_id: { type: string }
+        principal_id: { type: string }
+        principal_type: { type: string, enum: [user, group] }
+        capabilities: { type: array, items: { type: string } }
+        is_deny: { type: boolean }
+        effective_from: { type: string, format: date-time }
+        effective_to: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    PermissionCheckInput:
+      type: object
+      required: [workspace_id, actor_id, resource_type, resource_id, capability]
+      properties:
+        workspace_id: { type: string }
+        actor_id: { type: string }
+        resource_type: { type: string, enum: [workspace, folder, project, deck, slide] }
+        resource_id: { type: string }
+        capability: { type: string }
+        at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Point-in-time evaluation; null means 'now'.
+    PermissionEvaluation:
+      type: object
+      required: [allowed]
+      properties:
+        allowed: { type: boolean }
+        reason: { type: string, nullable: true, description: Human-readable reason for the evaluation result. }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Library
+    # ──────────────────────────────────────────────────────────────────────
+    LibraryEntryInput:
+      type: object
+      required: [workspace_id, scope, title, owner_id, initial_snapshot]
+      properties:
+        workspace_id: { type: string }
+        scope:
+          type: string
+          enum: [workspace, org, team]
+        team_id: { type: string, nullable: true, description: Required when scope=team. }
+        title: { type: string }
+        description: { type: string, nullable: true }
+        tags:
+          type: array
+          items: { type: string }
+          default: []
+        owner_id: { type: string, description: UUID of the owner responsible for this entry. }
+        approval_chain:
+          type: object
+          description: Optional JSONB approval lane/role configuration.
+          default: {}
+        initial_snapshot:
+          type: object
+          required: [slide_snapshot]
+          description: The first version snapshot for this entry.
+          properties:
+            slide_snapshot:
+              type: object
+              description: Full slide structure JSONB.
+            data_bindings:
+              type: array
+              items: { type: object }
+              default: []
+            brand_locked:
+              type: boolean
+              default: false
+    LibraryEntry:
+      type: object
+      required: [id, workspace_id, scope, title, owner_id, status, version_id, created_at, updated_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        scope:
+          type: string
+          enum: [workspace, org, team]
+        team_id: { type: string, nullable: true }
+        title: { type: string }
+        description: { type: string, nullable: true }
+        tags:
+          type: array
+          items: { type: string }
+        owner_id: { type: string }
+        approval_chain: { type: object, description: JSONB approval lane/role configuration. }
+        status:
+          type: string
+          enum: [draft, pending, approved, retired]
+        version_id: { type: string, description: UUID of the current version. }
+        superseded_by: { type: string, nullable: true }
+        last_reviewed_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    LibraryVersionInput:
+      type: object
+      required: [slide_snapshot]
+      properties:
+        slide_snapshot:
+          type: object
+          description: Full slide structure JSONB.
+        data_bindings:
+          type: array
+          items: { type: object }
+          default: []
+        brand_locked:
+          type: boolean
+          default: false
+    LibraryVersion:
+      type: object
+      required: [id, entry_id, version_num, slide_snapshot, data_bindings, brand_locked, created_by, created_at]
+      properties:
+        id: { type: string }
+        entry_id: { type: string }
+        version_num: { type: integer }
+        slide_snapshot: { type: object, description: Full slide structure JSONB. }
+        data_bindings: { type: array, items: { type: object } }
+        brand_locked: { type: boolean }
+        created_by: { type: string }
+        created_at: { type: string, format: date-time }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Auto-Update
+    # ──────────────────────────────────────────────────────────────────────
+    AutoUpdateBindingInput:
+      type: object
+      required: [consumer_deck_id, consumer_slide_id, library_entry_id, mode]
+      properties:
+        consumer_deck_id: { type: string }
+        consumer_slide_id: { type: string }
+        library_entry_id: { type: string }
+        pinned_version_id: { type: string, nullable: true, description: Pin to a specific version; null = latest. }
+        mode:
+          type: string
+          enum: [immediate, scheduled, manual, frozen]
+          default: manual
+        schedule:
+          type: object
+          description: Schedule configuration (cron/interval) when mode=scheduled.
+          default: {}
+        is_mandatory:
+          type: boolean
+          default: false
+          description: If true, consumer cannot override the binding.
+    AutoUpdateBinding:
+      type: object
+      required: [id, consumer_deck_id, consumer_slide_id, library_entry_id, mode, is_mandatory, created_at, updated_at]
+      properties:
+        id: { type: string }
+        consumer_deck_id: { type: string }
+        consumer_slide_id: { type: string }
+        library_entry_id: { type: string }
+        pinned_version_id: { type: string, nullable: true }
+        mode:
+          type: string
+          enum: [immediate, scheduled, manual, frozen]
+        schedule: { type: object }
+        is_mandatory: { type: boolean }
+        last_synced_at: { type: string, format: date-time, nullable: true }
+        last_sync_status: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Expiry
+    # ──────────────────────────────────────────────────────────────────────
+    ExpiryPolicyInput:
+      type: object
+      required: [resource_type, resource_id, interval_days]
+      properties:
+        resource_type: { type: string, description: Polymorphic resource type (e.g. deck, slide, library_entry). }
+        resource_id: { type: string, description: UUID of the resource being governed. }
+        interval_days: { type: integer, description: Review interval in days (must be > 0). }
+        responsible_id: { type: string, nullable: true, description: UUID of the responsible reviewer. }
+        escalation:
+          type: string
+          enum: [gentle, moderate, strict]
+          default: gentle
+        auto_revoke_share:
+          type: boolean
+          default: false
+          description: If true, revoke share links when policy expires.
+    ExpiryPolicy:
+      type: object
+      required: [id, resource_type, resource_id, interval_days, escalation, auto_revoke_share, created_at]
+      properties:
+        id: { type: string }
+        resource_type: { type: string }
+        resource_id: { type: string }
+        interval_days: { type: integer }
+        responsible_id: { type: string, nullable: true }
+        escalation:
+          type: string
+          enum: [gentle, moderate, strict]
+        auto_revoke_share: { type: boolean }
+        created_at: { type: string, format: date-time }
+    FreshnessFlag:
+      type: object
+      required: [id, resource_type, resource_id, flagged_at, reason]
+      properties:
+        id: { type: string }
+        resource_type: { type: string }
+        resource_id: { type: string }
+        flagged_at: { type: string, format: date-time }
+        reason:
+          type: string
+          enum: [policy_overdue, manual, ai_detected]
+        resolved_at: { type: string, format: date-time, nullable: true }
+        resolved_by: { type: string, nullable: true }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Suggestions
+    # ──────────────────────────────────────────────────────────────────────
+    SuggestionInput:
+      type: object
+      required: [target_type, target_id, operation]
+      properties:
+        target_type:
+          type: string
+          enum: [element, slide, data_binding]
+          description: Type of the target being modified.
+        target_id:
+          type: string
+          description: UUID of the target element, slide, or data binding.
+        operation:
+          type: object
+          description: Structured CRDT operation {type, params, before_state, after_state}.
+        thread_id:
+          type: string
+          nullable: true
+          description: Optional thread ID for discussion.
+    Suggestion:
+      type: object
+      required: [suggestion_id, deck_id, session_id, author_id, target_type, target_id, operation, status, created_at]
+      properties:
+        suggestion_id: { type: string }
+        deck_id: { type: string }
+        session_id: { type: string }
+        author_id: { type: string }
+        target_type:
+          type: string
+          enum: [element, slide, data_binding]
+        target_id: { type: string }
+        operation:
+          type: object
+          description: Structured CRDT operation {type, params, before_state, after_state}.
+        status:
+          type: string
+          enum: [open, accepted, rejected, obsolete]
+        thread_id: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        resolved_at: { type: string, format: date-time, nullable: true }
+        resolved_by: { type: string, nullable: true }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Merge Requests
+    # ──────────────────────────────────────────────────────────────────────
+    MergeRequestInput:
+      type: object
+      required: [source_branch, target_branch, title]
+      properties:
+        source_branch:
+          type: string
+          description: Source branch name.
+        target_branch:
+          type: string
+          description: Target branch name.
+        title:
+          type: string
+          description: Title of the merge request.
+        description:
+          type: string
+          nullable: true
+          description: Optional description of the merge request.
+    MergeRequest:
+      type: object
+      required: [mr_id, deck_id, source_branch, target_branch, title, author_id, status, created_at]
+      properties:
+        mr_id: { type: string }
+        deck_id: { type: string }
+        source_branch: { type: string }
+        target_branch: { type: string }
+        title: { type: string }
+        description: { type: string, nullable: true }
+        author_id: { type: string }
+        status:
+          type: string
+          enum: [open, approved, merged, closed, conflict]
+        diff_id: { type: string, nullable: true, description: UUID of the computed slide diff. }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        merged_at: { type: string, format: date-time, nullable: true }
+        merged_by: { type: string, nullable: true }
+        merge_commit_id: { type: string, nullable: true }
+    SlideDiff:
+      type: object
+      required: [mr_id, base_version_id, target_version_id, source_version_id, slide_diffs, binding_diffs, computed_at]
+      properties:
+        mr_id: { type: string }
+        base_version_id: { type: string }
+        target_version_id: { type: string }
+        source_version_id: { type: string }
+        slide_diffs:
+          type: array
+          items: { type: object }
+          description: Per-slide diff objects.
+        binding_diffs:
+          type: array
+          items: { type: object }
+          description: Per-binding diff objects.
+        computed_at: { type: string, format: date-time }
+    SlideDiffLevel:
+      type: string
+      enum: [slide, element, data_binding]
+      description: Diff granularity level.
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Meeting Integrations
+    # ──────────────────────────────────────────────────────────────────────
+    MeetingIntegrationInput:
+      type: object
+      required: [vendor]
+      properties:
+        vendor:
+          type: string
+          enum: [zoom, meet, teams]
+          description: Meeting vendor to connect.
+    MeetingIntegration:
+      type: object
+      required: [id, workspace_id, vendor, status, connected_by, connected_at, created_at, updated_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        vendor:
+          type: string
+          enum: [zoom, meet, teams]
+        status:
+          type: string
+          enum: [disconnected, connecting, connected, error]
+        connected_by: { type: string }
+        connected_at: { type: string, format: date-time }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    MeetingTokenRequest:
+      type: object
+      required: [meeting_id, presenter_id, deck_id]
+      properties:
+        meeting_id:
+          type: string
+          description: Vendor-specific meeting ID.
+        presenter_id:
+          type: string
+          description: UUID of the presenter requesting the token.
+        deck_id:
+          type: string
+          description: UUID of the deck being presented.
+    MeetingToken:
+      type: object
+      required: [token, meeting_id, presenter_id, deck_id, expires_at]
+      properties:
+        token:
+          type: string
+          description: Scoped meeting token (JWT, expires 1h after meeting end).
+        meeting_id:
+          type: string
+        presenter_id:
+          type: string
+        deck_id:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+          description: Token expiration time (1h after meeting end).
+    MeetingMarkerInput:
+      type: object
+      required: [meeting_id, slide_id, transitioned_at]
+      properties:
+        meeting_id:
+          type: string
+          description: Vendor-specific meeting ID.
+        slide_id:
+          type: string
+          description: UUID of the slide the presenter transitioned to.
+        transitioned_at:
+          type: string
+          format: date-time
+          description: Timestamp of the slide transition.
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Calendar
+    # ──────────────────────────────────────────────────────────────────────
+    CalendarLinkInput:
+      type: object
+      required: [deck_id, vendor, event_id, event_start_at]
+      properties:
+        deck_id:
+          type: string
+          description: UUID of the deck to link.
+        vendor:
+          type: string
+          enum: [google, outlook, icloud]
+          description: Calendar vendor.
+        event_id:
+          type: string
+          description: Vendor-specific calendar event identifier.
+        event_start_at:
+          type: string
+          format: date-time
+          description: Start time of the calendar event.
+        is_recurring:
+          type: boolean
+          default: false
+          description: Whether this is a recurring event.
+        recurrence_id:
+          type: string
+          nullable: true
+          description: Recurrence identifier for recurring events.
+    CalendarLink:
+      type: object
+      required: [id, workspace_id, deck_id, user_id, vendor, event_id, event_start_at, is_recurring, last_synced_at, created_at, updated_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        deck_id: { type: string }
+        user_id: { type: string }
+        vendor:
+          type: string
+          enum: [google, outlook, icloud]
+        event_id: { type: string }
+        event_start_at: { type: string, format: date-time }
+        is_recurring: { type: boolean }
+        recurrence_id: { type: string, nullable: true }
+        last_synced_at: { type: string, format: date-time }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Task Manager Links
+    # ──────────────────────────────────────────────────────────────────────
+    TaskLinkInput:
+      type: object
+      required: [assignment_id, vendor, external_task_id, external_project_id]
+      properties:
+        assignment_id:
+          type: string
+          description: UUID of the Domio assignment to link.
+        vendor:
+          type: string
+          enum: [asana, jira, linear]
+          description: External task tracker vendor.
+        external_task_id:
+          type: string
+          description: Vendor-specific task identifier.
+        external_project_id:
+          type: string
+          description: Vendor-specific project identifier.
+        field_map:
+          type: object
+          default: {}
+          description: Declarative field mapping {status, priority, ...}.
+        sync_mode:
+          type: string
+          enum: [domio_wins, task_wins, last_write_wins]
+          default: last_write_wins
+          description: Conflict resolution strategy for bidirectional sync.
+    TaskLink:
+      type: object
+      required: [id, workspace_id, assignment_id, vendor, external_task_id, external_project_id, field_map, sync_mode, created_at, updated_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        assignment_id: { type: string }
+        vendor:
+          type: string
+          enum: [asana, jira, linear]
+        external_task_id: { type: string }
+        external_project_id: { type: string }
+        field_map:
+          type: object
+          description: Declarative field mapping {status, priority, ...}.
+        sync_mode:
+          type: string
+          enum: [domio_wins, task_wins, last_write_wins]
+        last_synced_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    # ──────────────────────────────────────────────────────────────────────
+    # Guests
+    # ──────────────────────────────────────────────────────────────────────
+    GuestInput:
+      type: object
+      required: [guest_email, scope_type, scope_id, inviter_id]
+      properties:
+        guest_email:
+          type: string
+          format: email
+          description: Email address of the external guest.
+        scope_type:
+          type: string
+          enum: [folder, project, deck]
+          description: Resource type the guest can access.
+        scope_id:
+          type: string
+          description: UUID of the folder, project, or deck.
+        capabilities:
+          type: array
+          items: { type: string, enum: [comment, suggest, view] }
+          default: [comment, suggest, view]
+          description: Guest capabilities. Download/export are never granted by default.
+        expires_in_minutes:
+          type: integer
+          default: 15
+          minimum: 1
+          description: Magic link lifetime in minutes (default 15).
+        inviter_id:
+          type: string
+          description: UUID of the workspace member creating the invitation.
+    Guest:
+      type: object
+      required: [guest_access_id, inviter_id, guest_email, scope_type, scope_id, capabilities, expires_at, created_at]
+      properties:
+        guest_access_id: { type: string }
+        inviter_id: { type: string, description: UUID of the workspace member who sent the invitation. }
+        guest_email: { type: string, format: email }
+        guest_user_id: { type: string, nullable: true, description: Populated on first sign-in. }
+        scope_type: { type: string, enum: [folder, project, deck] }
+        scope_id: { type: string }
+        capabilities:
+          type: array
+          items: { type: string, enum: [comment, suggest, view] }
+        expires_at: { type: string, format: date-time }
+        created_at: { type: string, format: date-time }
+        revoked_at: { type: string, format: date-time, nullable: true }
+    MagicLinkConsumeInput:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: Magic link token received in the invite email.
+    MagicLinkConsumeResult:
+      type: object
+      required: [guest_access_id, scope_type, scope_id, capabilities, expires_at, guest_email]
+      properties:
+        guest_access_id: { type: string }
+        scope_type: { type: string, enum: [folder, project, deck] }
+        scope_id: { type: string }
+        capabilities:
+          type: array
+          items: { type: string, enum: [comment, suggest, view] }
+        expires_at: { type: string, format: date-time }
+        guest_email: { type: string, format: email }

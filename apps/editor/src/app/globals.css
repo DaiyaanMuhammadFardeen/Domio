@@ -2478,3 +2478,309 @@ code {
   color: var(--text);
   border-color: var(--border);
 }
+
+/* ===================================================================
+   Collaboration surfaces (P18 — W14)
+   =================================================================== */
+
+/* -- Comment Pins -------------------------------------------------- */
+
+.comment-pin {
+  position: absolute;
+  z-index: 950;
+  transform: translate(-50%, -50%);
+}
+
+.comment-pin__badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease;
+  padding: 0;
+}
+
+.comment-pin__badge:hover {
+  transform: scale(1.15);
+}
+
+.comment-pin__thread {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  min-width: 180px;
+  max-width: 260px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  font-size: 13px;
+}
+
+.comment-pin__body {
+  margin: 0 0 6px;
+  color: var(--fg);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.comment-pin__actions {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.comment-pin__author {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* -- Approval Banner ----------------------------------------------- */
+
+.collab-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  flex-shrink: 0;
+}
+
+.collab-banner--pending {
+  background: #3b2f00;
+  border-bottom-color: #6b5a10;
+}
+
+.collab-banner--approved {
+  background: #0a2e10;
+  border-bottom-color: #1a6b2a;
+}
+
+.collab-banner--rejected {
+  background: #2e0a0a;
+  border-bottom-color: #6b1a1a;
+}
+
+.collab-banner--draft {
+  background: var(--panel);
+}
+
+.collab-banner__label {
+  color: var(--fg);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.collab-banner__actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.collab-banner__error {
+  color: #ff7b72;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+/* -- Shared collab buttons ---------------------------------------- */
+
+.collab-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: var(--sans);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.collab-btn:hover {
+  background: var(--border);
+}
+
+.collab-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.collab-btn--subtle {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.collab-btn--subtle:hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.collab-btn--approve {
+  background: #1a6b2a;
+  border-color: #1a6b2a;
+  color: #fff;
+}
+
+.collab-btn--approve:hover {
+  background: #22843a;
+}
+
+.collab-btn--reject {
+  background: #6b1a1a;
+  border-color: #6b1a1a;
+  color: #fff;
+}
+
+.collab-btn--reject:hover {
+  background: #8b2a2a;
+}
+
+/* -- Assignment Panel --------------------------------------------- */
+
+.collab-panel {
+  padding: 12px 16px;
+}
+
+.collab-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.collab-panel__header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.collab-panel__muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.collab-panel__error {
+  color: #ff7b72;
+  font-size: 12px;
+  margin: 0;
+}
+
+.collab-assignment {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.collab-assignment:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.collab-assignment__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.collab-assignment__role {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.collab-assignment__you {
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* -- Segmented status control ------------------------------------- */
+
+.collab-segmented {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.collab-segmented__btn {
+  flex: 1;
+  font-size: 11px;
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--sans);
+  white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.collab-segmented__btn:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.collab-segmented__btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--fg);
+}
+
+.collab-segmented__btn.is-active {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.collab-segmented__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* -- Blocked reason input ----------------------------------------- */
+
+.collab-assignment__blocked {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.collab-assignment__blocked-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.collab-assignment__blocked-input {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+}
+
+.collab-assignment__blocked-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.collab-assignment__watchers {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 4px 0 0;
+}

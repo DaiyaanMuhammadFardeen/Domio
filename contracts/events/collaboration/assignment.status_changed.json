@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/assignment.status_changed.json",
+  "title": "CollabAssignmentStatusChanged",
+  "description": "Emitted when an assignment's status is changed (including reassignment for audit).",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "assignment.status_changed"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["assignment_id", "status", "changed_by"],
+      "properties": {
+        "assignment_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["not_started", "in_progress", "blocked", "review", "done"]
+        },
+        "blocked_reason": {
+          "type": "string",
+          "nullable": true,
+          "description": "Reason for blocking, if status changed to 'blocked'."
+        },
+        "changed_by": {
+          "type": "string",
+          "description": "UUID of the user who changed the status."
+        }
+      }
+    }
+  }
+}

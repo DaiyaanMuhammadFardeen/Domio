@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/assignment.created.json",
+  "title": "CollabAssignmentCreated",
+  "description": "Emitted when a task assignment is created on a deck, scoped to a slide range.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "assignment.created"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["assignment_id", "deck_id", "slide_range", "primary_id", "watchers", "status"],
+      "properties": {
+        "assignment_id": {
+          "type": "string"
+        },
+        "deck_id": {
+          "type": "string"
+        },
+        "slide_range": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Inclusive slide index range [lo, hi]."
+        },
+        "primary_id": {
+          "type": "string",
+          "description": "UUID of the user primarily responsible."
+        },
+        "watchers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "UUIDs of users watching this assignment."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["not_started", "in_progress", "blocked", "review", "done"]
+        }
+      }
+    }
+  }
+}

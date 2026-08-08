@@ -1,0 +1,207 @@
+openapi: 3.1.0
+info:
+  title: Domio Slack Webhooks API (Phase 18 W9)
+  version: 0.1.0
+  description: |
+    Inbound webhook receivers for Slack integration.
+    All endpoints are unauthenticated but HMAC-verified at the API gateway layer.
+    Callers MUST supply a valid `X-Slack-Signature` header.
+
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://api.domio.example.com
+    description: Production
+security: []
+paths:
+  /webhooks/slack/events:
+    post:
+      tags: [slack-webhooks]
+      operationId: receiveSlackEvent
+      summary: Receive a Slack event (message, reaction, app_mention, etc.).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SlackEventInput' }
+      responses:
+        '200':
+          description: Event acknowledged.
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '401':
+          description: HMAC signature invalid.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /webhooks/slack/interactions:
+    post:
+      tags: [slack-webhooks]
+      operationId: receiveSlackInteraction
+      summary: "Receive a Slack interaction (action buttons: Approve, Reject, Open, Resolve)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SlackInteractionInput' }
+      responses:
+        '200':
+          description: Interaction acknowledged.
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '401':
+          description: HMAC signature invalid.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /webhooks/slack/commands:
+    post:
+      tags: [slack-webhooks]
+      operationId: receiveSlackCommand
+      summary: Receive a Slack slash command.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema: { $ref: '#/components/schemas/SlackCommandInput' }
+      responses:
+        '200':
+          description: Command acknowledged.
+        '400':
+          description: Validation error.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '401':
+          description: HMAC signature invalid.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+# ════════════════════════════════════════════════════════════════════════════
+# Components
+# ════════════════════════════════════════════════════════════════════════════
+components:
+  schemas:
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference identifying the problem type.
+          example: "https://domio.example/problems/not-found"
+        title:
+          type: string
+          description: Short human-readable summary.
+          example: "Resource not found"
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          example: "Deck with id 'abc-123' does not exist in workspace 'w-1'."
+        instance:
+          type: string
+          format: uri
+          description: URI reference identifying the specific occurrence.
+          example: "https://api.domio.example.com/webhooks/slack/events"
+    SlackEventInput:
+      type: object
+      required: [type]
+      properties:
+        token:
+          type: string
+          description: Verification token (deprecated but present in Slack payloads).
+        challenge:
+          type: string
+          description: Present in URL verification requests.
+        type:
+          type: string
+          description: Event type (e.g. url_verification, event_callback).
+        event:
+          type: object
+          description: The event payload (present when type=event_callback).
+          properties:
+            type:
+              type: string
+              description: Slack event subtype (e.g. message, reaction_added).
+            user:
+              type: string
+              description: Slack user ID.
+            channel:
+              type: string
+              description: Slack channel ID.
+            text:
+              type: string
+              description: Message text.
+            ts:
+              type: string
+              description: Slack timestamp.
+    SlackInteractionInput:
+      type: object
+      required: [type, payload]
+      properties:
+        type:
+          type: string
+          description: Interaction type (e.g. block_actions, view_submission).
+        payload:
+          type: object
+          description: Full interaction payload.
+          properties:
+            actions:
+              type: array
+              items:
+                type: object
+                properties:
+                  action_id:
+                    type: string
+                    description: Action identifier (e.g. approve, reject, open, resolve).
+                  value:
+                    type: string
+                    description: Action value (resource IDs, etc.).
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+            team:
+              type: object
+              properties:
+                id:
+                  type: string
+    SlackCommandInput:
+      type: object
+      required: [command, user_id]
+      properties:
+        command:
+          type: string
+          description: The slash command (e.g. /domio).
+        text:
+          type: string
+          description: Command arguments.
+        user_id:
+          type: string
+          description: Slack user ID.
+        channel_id:
+          type: string
+          description: Slack channel ID.
+        team_id:
+          type: string
+          description: Slack team/workspace ID.
+        response_url:
+          type: string
+          format: uri
+          description: URL to POST deferred responses to.

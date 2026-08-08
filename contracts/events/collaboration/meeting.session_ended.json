@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/meeting.session_ended.json",
+  "title": "CollabMeetingSessionEnded",
+  "description": "Emitted when a meeting session ends.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "meeting.session_ended"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["meeting_id", "deck_id", "vendor", "presenter_id", "ended_at"],
+      "properties": {
+        "meeting_id": {
+          "type": "string"
+        },
+        "deck_id": {
+          "type": "string"
+        },
+        "vendor": {
+          "type": "string",
+          "enum": ["zoom", "meet", "teams"]
+        },
+        "presenter_id": {
+          "type": "string"
+        },
+        "ended_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

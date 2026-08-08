@@ -1,0 +1,29 @@
+{
+  "name": "@domio/magic-link-landing",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Landing page for Domio guest-invite magic links. Phase 18 guest collaborators.",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev -p 3005",
+    "start": "next start -p 3005",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .next dist .turbo coverage"
+  },
+  "dependencies": {
+    "next": "15.1.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.2",
+    "typescript": "5.7.2"
+  },
+  "engines": {
+    "node": ">=22.11.0"
+  }
+}

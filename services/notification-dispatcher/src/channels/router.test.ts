@@ -126,4 +126,44 @@ describe('channels/router', () => {
     expect(r.ok).toBe(false);
     expect(r.error).toContain('ECONNRESET');
   });
+
+  it('SlackSender includes X-Domio-Signature when signer is provided', async () => {
+    const headers: Record<string, string> = {};
+    const fakeFetch: typeof fetch = async (_url, init) => {
+      const h = init?.headers as Record<string, string>;
+      Object.assign(headers, h);
+      return new Response('ok', { status: 200 });
+    };
+    const signer = { sign: (body: string) => `hmac-${body.length}` };
+    const sender = new SlackSender(fakeFetch, 5000, signer);
+    await sender.send(notif({ recipient: 'https://hooks.slack/test' }));
+    expect(headers['X-Domio-Signature']).toBeDefined();
+    expect(headers['X-Domio-Signature']).toMatch(/^hmac-/);
+  });
+
+  it('TeamsSender includes X-Domio-Signature when signer is provided', async () => {
+    const headers: Record<string, string> = {};
+    const fakeFetch: typeof fetch = async (_url, init) => {
+      const h = init?.headers as Record<string, string>;
+      Object.assign(headers, h);
+      return new Response('ok', { status: 200 });
+    };
+    const signer = { sign: (body: string) => `teams-sig-${body.length}` };
+    const sender = new TeamsSender(fakeFetch, signer);
+    await sender.send(notif({ channel: 'teams', recipient: 'https://teams.webhook' }));
+    expect(headers['X-Domio-Signature']).toBeDefined();
+    expect(headers['X-Domio-Signature']).toMatch(/^teams-sig-/);
+  });
+
+  it('SlackSender omits signature header when no signer', async () => {
+    const headers: Record<string, string> = {};
+    const fakeFetch: typeof fetch = async (_url, init) => {
+      const h = init?.headers as Record<string, string>;
+      Object.assign(headers, h);
+      return new Response('ok', { status: 200 });
+    };
+    const sender = new SlackSender(fakeFetch);
+    await sender.send(notif({ recipient: 'https://hooks.slack/test' }));
+    expect(headers['X-Domio-Signature']).toBeUndefined();
+  });
 });

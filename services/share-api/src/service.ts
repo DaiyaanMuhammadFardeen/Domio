@@ -33,10 +33,13 @@ import type {
   CreateShareInput,
   ExtendExpiryInput,
   LinkPolicy,
+  ShareApprovalGate,
   ShareLink,
   UpdateShareInput,
 } from './types.js';
 import {
+  AllowAllApprovalGate,
+  ShareApprovalRequiredError,
   ShareNotFoundError,
   ShareRevokedError,
   ShareValidationError,
@@ -76,6 +79,14 @@ export interface ShareServiceOptions {
   readonly policyIdGenerator?: () => string;
   /** Clock. Default `Date.now`. */
   readonly clock?: () => Date;
+  /**
+   * Optional pluggable approval gate (Phase 18 #180).
+   * When set, `createShare` and `introspect` are gated — if the gate
+   * denies, `ShareApprovalRequiredError` is thrown (→ 403 in handlers).
+   * Default: {@link AllowAllApprovalGate} (no-op, preserves backward
+   * compatibility).
+   */
+  readonly approvalGate?: ShareApprovalGate;
 }
 
 // ---------------------------------------------------------------------------
@@ -91,6 +102,7 @@ export class ShareService {
   private readonly idGen: () => string;
   private readonly policyIdGen: () => string;
   private readonly clock: () => Date;
+  private readonly approvalGate: ShareApprovalGate;
 
   constructor(opts: ShareServiceOptions) {
     if (!isStore(opts.store)) {
@@ -110,6 +122,7 @@ export class ShareService {
     this.idGen = opts.idGenerator ?? defaultLinkId;
     this.policyIdGen = opts.policyIdGenerator ?? defaultPolicyId;
     this.clock = opts.clock ?? (() => new Date());
+    this.approvalGate = opts.approvalGate ?? AllowAllApprovalGate;
   }
 
   // -------------------------------------------------------------------------
@@ -118,6 +131,12 @@ export class ShareService {
 
   async createShare(input: CreateShareInput): Promise<{ snapshot: ShareLinkSnapshot; token: string }> {
     validateCreateInput(input);
+
+    // Phase 18 #180 — approval gate: consult before creating an external share link.
+    const approved = await this.approvalGate.isShareApproved(input.workspaceId, input.deckId);
+    if (!approved) {
+      throw new ShareApprovalRequiredError(input.workspaceId, input.deckId);
+    }
 
     // Generate a short id; retry up to 5 times on collision.
     let shortId = '';
@@ -375,6 +394,13 @@ export class ShareService {
     const snap = await this.store.findByShortId(workspaceId, shortId);
     if (!snap) throw new ShareNotFoundError(shortId);
     if (snap.link.status === 'revoked') throw new ShareRevokedError(snap.link.id);
+
+    // Phase 18 #180 — approval gate: consult before delivering content.
+    const approved = await this.approvalGate.isShareApproved(workspaceId, snap.link.deckId);
+    if (!approved) {
+      throw new ShareApprovalRequiredError(workspaceId, snap.link.deckId);
+    }
+
     return { claims: result.claims, expiresAtSec: result.expiresAtSec };
   }
 

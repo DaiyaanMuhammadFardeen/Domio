@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/guest.access_revoked.json",
+  "title": "CollabGuestAccessRevoked",
+  "description": "Emitted when a workspace member revokes a guest's access.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "guest.access_revoked"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["guest_access_id", "revoked_at", "revoked_by"],
+      "properties": {
+        "guest_access_id": {
+          "type": "string"
+        },
+        "revoked_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked_by": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

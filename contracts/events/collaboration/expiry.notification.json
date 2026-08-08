@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/expiry.notification.json",
+  "title": "CollabExpiryNotification",
+  "description": "Emitted when an expiry policy at moderate (or higher) escalation emits a freshness notification for a resource.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "expiry.notification"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["resource_type", "resource_id", "escalation", "action"],
+      "properties": {
+        "resource_type": {
+          "type": "string"
+        },
+        "resource_id": {
+          "type": "string"
+        },
+        "escalation": {
+          "type": "string",
+          "enum": ["gentle", "moderate", "strict"]
+        },
+        "action": {
+          "type": "string",
+          "const": "notify"
+        }
+      }
+    }
+  }
+}

@@ -74,11 +74,20 @@ import { ShareStateButton, type ShareStateButtonCurrentState } from '../componen
 import { AuditTrail, type AuditEntryView } from './prototyping/agent/AuditTrail';
 import { NlPatchPanel, type NlToolCallSummary } from '../panels/nl-patch-panel';
 import { DeckDiffPanel, type DeckDiffEntry } from '../panels/deck-diff-panel';
+import { CommentPins } from '../collab/comment-pins';
+import { ApprovalBanner } from '../collab/approval-banner';
+import { AssignmentPanel } from '../collab/assignment-panel';
 import type { LayerTimeline, SlideTransition, ReducedMotionPolicy } from '@domio/canvas';
 import { timelineOp, transitionOp, magicMoveOp, reducedMotionOp } from '@domio/canvas';
 import { hotspotOp, overlayOp, branchingEdgeOp, variableOp } from '@domio/canvas';
 import type { A11yAuditFinding } from '../lib/theme-audit';
 import { addToLibrary } from '../lib/library';
+
+/** Actor ID placeholder — the control plane sets identity; this is a dev fallback. */
+const ACTOR_ID: string =
+  (typeof process !== 'undefined'
+    ? (process.env.NEXT_PUBLIC_ACTOR_ID as string | undefined)
+    : undefined) ?? 'actor-local';
 
 export interface EditorRootProps {
   doc: DeckDocument;
@@ -1519,10 +1528,17 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
                       )}
         </aside>
         <section className="editor-canvas" ref={pingRef as React.RefObject<HTMLDivElement>}>
+          <ApprovalBanner deckId={deck.id} slideId={activeSlideId} currentActorId={ACTOR_ID} />
           <LocalPing adapter={pingAdapter} container={pingRef as React.RefObject<HTMLElement>} />
           {activeSlide ? <SlidePreview slide={activeSlide} /> : null}
+          <CommentPins deckId={deck.id} slideId={activeSlideId} currentActorId={ACTOR_ID} />
         </section>
         <aside className="editor-side editor-side--right">
+          <AssignmentPanel
+            deckId={deck.id}
+            slidePosition={activeSlide?.position ?? 0}
+            currentActorId={ACTOR_ID}
+          />
           {selectedComponent ? (
             <PropsPanel
               element={selectedComponent}

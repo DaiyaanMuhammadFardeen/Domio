@@ -140,6 +140,57 @@ export class ShareRevokedError extends Error {
 }
 
 // ---------------------------------------------------------------------------
+// Approval gate (Phase 18 — Wave 5 #180)
+// ---------------------------------------------------------------------------
+
+/**
+ * Pluggable gate that the control plane wires in to enforce approval
+ * requirements on external share links.  The share-api never imports
+ * `@domio/collab` directly — it only knows this interface.
+ *
+ * The gate is consulted on content-delivery surfaces (createShare,
+ * shareIntrospect).  Administrative operations (getShare, updateShare,
+ * rotateToken, extendExpiry, revokeShare, getPolicy, putPolicy) are
+ * intentionally ungated.
+ */
+export interface ShareApprovalGate {
+  /**
+   * Return `true` if the share link is approved for creation / delivery.
+   * The `deckId` is provided so the gate can consult the approval engine.
+   *
+   * @throws any error that should be surfaced (the handler maps
+   *   `ShareApprovalRequiredError` → 403; other errors propagate).
+   */
+  isShareApproved(workspaceId: string, deckId: string): Promise<boolean>;
+}
+
+/**
+ * Default gate — always allows.  Used when no gate is injected so
+ * existing behaviour is preserved (backward-compatible).
+ */
+export const AllowAllApprovalGate: ShareApprovalGate = {
+  async isShareApproved(): Promise<boolean> {
+    return true;
+  },
+};
+
+/**
+ * Thrown when a share operation is blocked by the approval gate.
+ * The handler layer maps this to a 403 ProblemDetail response.
+ */
+export class ShareApprovalRequiredError extends Error {
+  readonly code = 'SHARE_APPROVAL_REQUIRED' as const;
+  constructor(
+    public readonly workspaceId: string,
+    public readonly deckId: string,
+    detail?: string,
+  ) {
+    super(detail ?? `External share requires approval for deck ${deckId} in workspace ${workspaceId}`);
+    this.name = 'ShareApprovalRequiredError';
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Validation helpers
 // ---------------------------------------------------------------------------
 

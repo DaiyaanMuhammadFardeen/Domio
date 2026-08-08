@@ -65,15 +65,45 @@ importers:
       '@domio/annotation-engine':
         specifier: workspace:*
         version: link:../../services/annotation-engine
+      '@domio/calendar-service':
+        specifier: workspace:*
+        version: link:../../services/calendar
+      '@domio/collab-service':
+        specifier: workspace:*
+        version: link:../../services/collab
       '@domio/common':
         specifier: workspace:*
         version: link:../../packages/common
+      '@domio/expiry-service':
+        specifier: workspace:*
+        version: link:../../services/expiry
+      '@domio/guests-service':
+        specifier: workspace:*
+        version: link:../../services/guests
+      '@domio/library-service':
+        specifier: workspace:*
+        version: link:../../services/library
+      '@domio/meeting-integration-service':
+        specifier: workspace:*
+        version: link:../../services/meeting-integration
+      '@domio/merge-request-service':
+        specifier: workspace:*
+        version: link:../../services/merge-requests
       '@domio/observability':
         specifier: workspace:^
         version: link:../../packages/observability
+      '@domio/permission-engine':
+        specifier: workspace:*
+        version: link:../../services/permission-engine
       '@domio/presenter-session':
         specifier: workspace:*
         version: link:../../services/presenter-session
+      '@domio/suggestions-service':
+        specifier: workspace:*
+        version: link:../../services/suggestions
+      '@domio/task-manager-service':
+        specifier: workspace:*
+        version: link:../../services/task-manager
       '@hono/node-server':
         specifier: 1.13.7
         version: 1.13.7(hono@4.6.13)
@@ -105,6 +135,85 @@ importers:
       tsx:
         specifier: 4.19.2
         version: 4.19.2
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  apps/dashboard:
+    dependencies:
+      '@domio/chart':
+        specifier: workspace:*
+        version: link:../../packages/chart
+      '@domio/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
+      '@graphql-tools/schema':
+        specifier: 10.0.16
+        version: 10.0.16(graphql@16.10.0)
+      graphql:
+        specifier: 16.10.0
+        version: 16.10.0
+      graphql-ws:
+        specifier: 5.16.0
+        version: 5.16.0(graphql@16.10.0)
+      graphql-yoga:
+        specifier: 5.10.4
+        version: 5.10.4(graphql@16.10.0)
+      lucide-react:
+        specifier: ^0.469.0
+        version: 0.469.0(react@19.0.0)
+      motion:
+        specifier: ^12.43.0
+        version: 12.43.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      next:
+        specifier: 15.1.3
+        version: 15.1.3(@babel/core@7.29.7)(@playwright/test@1.62.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
+    devDependencies:
+      '@testing-library/jest-dom':
+        specifier: ^6.6.3
+        version: 6.6.3
+      '@testing-library/react':
+        specifier: ^16.1.0
+        version: 16.1.0(@testing-library/dom@10.4.1)(@types/react-dom@19.0.2(@types/react@19.0.1))(@types/react@19.0.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.2
+        version: 19.0.2(@types/react@19.0.1)
+      '@vitejs/plugin-react':
+        specifier: 4.3.4
+        version: 4.3.4(vite@5.4.21(@types/node@22.10.1))
+      autoprefixer:
+        specifier: ^10.5.4
+        version: 10.5.4(postcss@8.5.25)
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      jsdom:
+        specifier: ^25.0.1
+        version: 25.0.1
+      postcss:
+        specifier: ^8.5.25
+        version: 8.5.25
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19(tsx@4.19.2)(yaml@2.9.0)
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -306,6 +415,31 @@ importers:
       vitest:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  apps/magic-link-landing:
+    dependencies:
+      next:
+        specifier: 15.1.3
+        version: 15.1.3(@babel/core@7.29.7)(@playwright/test@1.62.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.2
+        version: 19.0.2(@types/react@19.0.1)
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
 
   apps/presenter:
     dependencies:
@@ -1257,6 +1391,24 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/calendar:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/code-sandbox:
     dependencies:
       hono:
@@ -1277,7 +1429,20 @@ importers:
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
   services/collab:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
     devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1422,6 +1587,28 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/expiry:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/export-pipeline:
     devDependencies:
       '@types/node':
@@ -1452,6 +1639,24 @@ importers:
         specifier: workspace:*
         version: link:../../packages/schema
     devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/guests:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1528,6 +1733,28 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/library:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/lint:
     dependencies:
       '@domio/schema':
@@ -1537,6 +1764,37 @@ importers:
         specifier: workspace:*
         version: link:../../packages/tokens
     devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/live-analytics:
+    dependencies:
+      '@domio/observability':
+        specifier: workspace:^
+        version: link:../../packages/observability
+      graphql-ws:
+        specifier: 5.16.0
+        version: 5.16.0(graphql@16.14.2)
+      hono:
+        specifier: 4.6.13
+        version: 4.6.13
+      nats:
+        specifier: ^2.29.0
+        version: 2.29.3
+      ws:
+        specifier: 8.18.0
+        version: 8.18.0
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/ws':
+        specifier: 8.5.13
+        version: 8.5.13
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1596,6 +1854,46 @@ importers:
 
   services/mcp-server:
     devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/meeting-integration:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/merge-requests:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -1682,6 +1980,24 @@ importers:
       '@domio/text-normalize':
         specifier: workspace:*
         version: link:../../packages/text-normalize
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/permission-engine:
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -2048,6 +2364,53 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  services/suggestions:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+      yjs:
+        specifier: ^13.6.27
+        version: 13.6.27
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  services/task-manager:
+    dependencies:
+      '@domio/audit-ts':
+        specifier: workspace:*
+        version: link:../../packages/audit-ts
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/pg':
+        specifier: ^8.20.3
+        version: 8.20.3
+      pg:
+        specifier: ^8.22.0
+        version: 8.22.0
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   services/team-analytics:
     dependencies:
       '@domio/observability':
@@ -2214,6 +2577,31 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  tests/a11y:
+    dependencies:
+      '@domio/dashboard':
+        specifier: workspace:*
+        version: link:../../apps/dashboard
+    devDependencies:
+      '@axe-core/playwright':
+        specifier: 4.10.1
+        version: 4.10.1(playwright-core@1.62.1)
+      '@playwright/test':
+        specifier: 1.49.1
+        version: 1.49.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+
+  tests/e2e:
+    devDependencies:
+      '@playwright/test':
+        specifier: 1.49.1
+        version: 1.49.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+
   tests/integration/phase17:
     dependencies:
       '@domio/analytics-warehouse':
@@ -2250,6 +2638,30 @@ importers:
       '@domio/recording-orchestrator':
         specifier: workspace:*
         version: link:../../../services/recording-orchestrator
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  tests/load/replay-corpora:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  tests/security:
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -2354,6 +2766,38 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  workers/diff-engine:
+    dependencies:
+      '@domio/merge-request-service':
+        specifier: workspace:*
+        version: link:../../services/merge-requests
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  workers/expiry-scanner:
+    dependencies:
+      '@domio/expiry-service':
+        specifier: workspace:*
+        version: link:../../services/expiry
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
   workers/export:
     devDependencies:
       typescript:
@@ -2383,6 +2827,22 @@ importers:
 
   workers/handout-generator:
     devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  workers/library-propagator:
+    dependencies:
+      '@domio/library-service':
+        specifier: workspace:*
+        version: link:../../services/library
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -2508,6 +2968,11 @@ packages:
 
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
+
+  '@axe-core/playwright@4.10.1':
+    resolution: {integrity: sha512-EV5t39VV68kuAfMKqb/RL+YjYKhfuGim9rgIaQ6Vntb2HgaCaau0h98Y3WEUqW1+PbdzxDtDNjFAipbtZuBmEA==}
+    peerDependencies:
+      playwright-core: '>= 1.0.0'
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -3028,6 +3493,12 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
+  '@graphql-tools/schema@10.0.16':
+    resolution: {integrity: sha512-G2zgb8hNg9Sx6Z2FSXm57ToNcwMls9A9cUm+EsCrnGGDsryzN5cONYePUpSGj5NCFivVp3o1FT5dg19P/1qeqQ==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+
   '@graphql-tools/schema@10.0.38':
     resolution: {integrity: sha512-Kckk2/vm+rELJ7ijvFaAn9ouWSVUTD0D4SJIvYF4rKeuQHAfCzE/jzMFonZVpTXleqJjPXLZjVbuaMorw7A5Og==}
     engines: {node: '>=16.0.0'}
@@ -3343,6 +3814,11 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
+  '@playwright/test@1.49.1':
+    resolution: {integrity: sha512-Ky+BVzPz8pL6PQxHqNRW1k3mIyv933LML7HktS8uik0bUXNCdPhoS/kLihiO1tMf/egaJb4IutXd7UywvXEW+g==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@playwright/test@1.62.1':
     resolution: {integrity: sha512-DTcUc8qii+cpHvtOwggMtBRMjKZHXYWdw8syRYu2vtzuq4Wxphqq4NfCs5Zt44L6mA8rfDfj+PHnxFc/FeK6mQ==}
     engines: {node: '>=20'}
@@ -3590,6 +4066,9 @@ packages:
 
   '@types/react@19.0.1':
     resolution: {integrity: sha512-YW6614BDhqbpR5KtUYzTA+zlA7nayzJRA9ljz9CQoxthR0sDisYZLuvSMsil36t4EH/uAt8T52Xb4sVw17G+SQ==}
+
+  '@types/ws@8.5.13':
+    resolution: {integrity: sha512-osM/gWBTPKgHV8XkTunnegTRIsvF6owmf5w+JtAfOw472dptdm0dlGv4xCt6GwQRcC2XVOvvRE/0bAoQcL2QkA==}
 
   '@typescript-eslint/eslint-plugin@8.19.0':
     resolution: {integrity: sha512-NggSaEZCdSrFddbctrVjkVZvFC6KGfKfNK0CU7mNK/iKHGKbzT4Wmgm08dKpcZECBu9f5FypndoMyRHkdqfT1Q==}
@@ -3883,6 +4362,10 @@ packages:
     resolution: {integrity: sha512-VSdkwnJRr8Yv9UgB2aXB3VUPWwd6Oqnn0hycFwhg9pZgWxJXb7JmhsiXe9tmpMwjHFxli12PGcz9aI63YYloGQ==}
     engines: {node: '>=18.0.0'}
 
+  '@whatwg-node/server@0.9.71':
+    resolution: {integrity: sha512-ueFCcIPaMgtuYDS9u0qlUoEvj6GiSsKrwnOLPp9SshqjtcRaR1IEHRjoReq3sXNydsF5i0ZnmuYgXq9dV53t0g==}
+    engines: {node: '>=18.0.0'}
+
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -4018,6 +4501,10 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
+
+  axe-core@4.10.3:
+    resolution: {integrity: sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==}
+    engines: {node: '>=4'}
 
   axe-core@4.12.1:
     resolution: {integrity: sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==}
@@ -4290,6 +4777,10 @@ packages:
 
   dom-accessibility-api@0.6.3:
     resolution: {integrity: sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==}
+
+  dset@3.1.4:
+    resolution: {integrity: sha512-2QF/g9/zTaPDc3BjNcVTGoBbXBgYfMTTceLaYcFJ/W9kggFUkhxD/hMEeuLKbugyef9SqAx8cpgwlIP/jinUTA==}
+    engines: {node: '>=4'}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -4700,11 +5191,27 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
+  graphql-ws@5.16.0:
+    resolution: {integrity: sha512-Ju2RCU2dQMgSKtArPbEtsK5gNLnsQyTNIo/T7cZNp96niC1x0KdJNZV0TIoilceBPQwfb5itrGl8pkFeOUMl4A==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      graphql: '>=0.11 <=16'
+
+  graphql-yoga@5.10.4:
+    resolution: {integrity: sha512-kS/Cymz+rTVWWKthHFoX3XjAdhFCpDlqXBR/M+1WfyMQhY8I3nXCkoZjYMUZTmljJeYN69rBPSsqkRVCmNtwww==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      graphql: ^15.2.0 || ^16.0.0
+
   graphql-yoga@5.21.2:
     resolution: {integrity: sha512-IIRF/3xtjj2D6caAWL9177hQ8tV3mWB3hve1GRnz7njPhQ3iY1jFtSp98fNGv0yV9kaPh9kKQ8JWdJZnedVmDw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
+
+  graphql@16.10.0:
+    resolution: {integrity: sha512-AjqGKbDGUFRKIRCP9tCKiIGHyriz2oHEbPIbEtcSLSs4YjReZOIPQQWek4+6hjw62H9QShXHyaGivGiYVLeYFQ==}
+    engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   graphql@16.14.2:
     resolution: {integrity: sha512-Chq1s4CY7jmh8gO2qvLIJyfCDIN+EHLFW/9iShnp1z8FjBQMoodWP1kDC36VAMXXIvAjj4ARa7ntfAV2BrjsbA==}
@@ -5104,6 +5611,11 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
+  lucide-react@0.469.0:
+    resolution: {integrity: sha512-28vvUnnKQ/dBwiCQtwJw7QauYnE7yd2Cyp4tTTJpvglX4EMpbflcdBgrgToX2j71B3YvugK/NH3BGUk+E/p/Fw==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   lucide-react@1.28.0:
     resolution: {integrity: sha512-fARAFJULsGuDDydjp6+6blekG/sBIM29TerzLjc9bQUKAcEfrSc4ZQKb25KRz4OMKd87cZTb5dgq0w/T6KufVg==}
     peerDependencies:
@@ -5443,9 +5955,19 @@ packages:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
 
+  playwright-core@1.49.1:
+    resolution: {integrity: sha512-BzmpVcs4kE2CH15rWfzpjzVGhWERJfmnXmniSyKeRZUs9Ws65m+RGIi7mjJK/euCegfn3i7jvqWeWyHe9y3Vgg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   playwright-core@1.62.1:
     resolution: {integrity: sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw==}
     engines: {node: '>=20'}
+    hasBin: true
+
+  playwright@1.49.1:
+    resolution: {integrity: sha512-VYL8zLoNTBxVOrJBbDuRgDWa3i+mfQgDTrL8Ah9QXZ7ax4Dsj0MSq5bYgytRnDVVe+njoKnfsYkH3HzqVj5UZA==}
+    engines: {node: '>=18'}
     hasBin: true
 
   playwright@1.62.1:
@@ -6077,6 +6599,10 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
+  value-or-promise@1.0.12:
+    resolution: {integrity: sha512-Z6Uz+TYwEqE7ZN50gwn+1LCVo9ZVrpxRPOhOLnncYkY1ZzOYtrX8Fwf/rFktZ8R5mJms6EZf5TqNOMeZmnPq9Q==}
+    engines: {node: '>=12'}
+
   vite-node@2.1.8:
     resolution: {integrity: sha512-uPAwSr57kYjAUux+8E2j0q0Fxpn8M9VoyfGiRI8Kfktz9NcYMCenwY5RnZxnF1WTu3TGiYipirIzacLL3VVGFg==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -6204,8 +6730,8 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
-  ws@8.21.1:
-    resolution: {integrity: sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw==}
+  ws@8.18.0:
+    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -6293,6 +6819,11 @@ snapshots:
       '@csstools/css-parser-algorithms': 3.0.5(@csstools/css-tokenizer@3.0.4)
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
+
+  '@axe-core/playwright@4.10.1(playwright-core@1.62.1)':
+    dependencies:
+      axe-core: 4.10.3
+      playwright-core: 1.62.1
 
   '@babel/code-frame@7.29.7':
     dependencies:
@@ -6697,6 +7228,16 @@ snapshots:
 
   '@fastify/busboy@3.2.0': {}
 
+  '@graphql-tools/executor@1.5.7(graphql@16.10.0)':
+    dependencies:
+      '@graphql-tools/utils': 11.2.2(graphql@16.10.0)
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
+      '@repeaterjs/repeater': 3.1.0
+      '@whatwg-node/disposablestack': 0.0.6
+      '@whatwg-node/promise-helpers': 1.3.2
+      graphql: 16.10.0
+      tslib: 2.8.1
+
   '@graphql-tools/executor@1.5.7(graphql@16.14.2)':
     dependencies:
       '@graphql-tools/utils': 11.2.2(graphql@16.14.2)
@@ -6707,17 +7248,47 @@ snapshots:
       graphql: 16.14.2
       tslib: 2.8.1
 
+  '@graphql-tools/merge@9.2.2(graphql@16.10.0)':
+    dependencies:
+      '@graphql-tools/utils': 11.2.2(graphql@16.10.0)
+      graphql: 16.10.0
+      tslib: 2.8.1
+
   '@graphql-tools/merge@9.2.2(graphql@16.14.2)':
     dependencies:
       '@graphql-tools/utils': 11.2.2(graphql@16.14.2)
       graphql: 16.14.2
       tslib: 2.8.1
 
+  '@graphql-tools/schema@10.0.16(graphql@16.10.0)':
+    dependencies:
+      '@graphql-tools/merge': 9.2.2(graphql@16.10.0)
+      '@graphql-tools/utils': 10.11.0(graphql@16.10.0)
+      graphql: 16.10.0
+      tslib: 2.8.1
+      value-or-promise: 1.0.12
+
+  '@graphql-tools/schema@10.0.16(graphql@16.14.2)':
+    dependencies:
+      '@graphql-tools/merge': 9.2.2(graphql@16.14.2)
+      '@graphql-tools/utils': 10.11.0(graphql@16.14.2)
+      graphql: 16.14.2
+      tslib: 2.8.1
+      value-or-promise: 1.0.12
+
   '@graphql-tools/schema@10.0.38(graphql@16.14.2)':
     dependencies:
       '@graphql-tools/merge': 9.2.2(graphql@16.14.2)
       '@graphql-tools/utils': 11.2.2(graphql@16.14.2)
       graphql: 16.14.2
+      tslib: 2.8.1
+
+  '@graphql-tools/utils@10.11.0(graphql@16.10.0)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
+      '@whatwg-node/promise-helpers': 1.3.2
+      cross-inspect: 1.0.1
+      graphql: 16.10.0
       tslib: 2.8.1
 
   '@graphql-tools/utils@10.11.0(graphql@16.14.2)':
@@ -6728,6 +7299,14 @@ snapshots:
       graphql: 16.14.2
       tslib: 2.8.1
 
+  '@graphql-tools/utils@11.2.2(graphql@16.10.0)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.10.0)
+      '@whatwg-node/promise-helpers': 1.3.2
+      cross-inspect: 1.0.1
+      graphql: 16.10.0
+      tslib: 2.8.1
+
   '@graphql-tools/utils@11.2.2(graphql@16.14.2)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.14.2)
@@ -6735,6 +7314,10 @@ snapshots:
       cross-inspect: 1.0.1
       graphql: 16.14.2
       tslib: 2.8.1
+
+  '@graphql-typed-document-node/core@3.2.0(graphql@16.10.0)':
+    dependencies:
+      graphql: 16.10.0
 
   '@graphql-typed-document-node/core@3.2.0(graphql@16.14.2)':
     dependencies:
@@ -6983,6 +7566,10 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
+  '@playwright/test@1.49.1':
+    dependencies:
+      playwright: 1.49.1
+
   '@playwright/test@1.62.1':
     dependencies:
       playwright: 1.62.1
@@ -7184,6 +7771,10 @@ snapshots:
   '@types/react@19.0.1':
     dependencies:
       csstype: 3.2.3
+
+  '@types/ws@8.5.13':
+    dependencies:
+      '@types/node': 22.10.1
 
   '@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2)':
     dependencies:
@@ -7536,6 +8127,13 @@ snapshots:
       '@whatwg-node/promise-helpers': 1.3.2
       tslib: 2.8.1
 
+  '@whatwg-node/server@0.9.71':
+    dependencies:
+      '@whatwg-node/disposablestack': 0.0.6
+      '@whatwg-node/fetch': 0.10.13
+      '@whatwg-node/promise-helpers': 1.3.2
+      tslib: 2.8.1
+
   acorn-jsx@5.3.2(acorn@8.18.0):
     dependencies:
       acorn: 8.18.0
@@ -7695,6 +8293,8 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
+
+  axe-core@4.10.3: {}
 
   axe-core@4.12.1: {}
 
@@ -7946,6 +8546,8 @@ snapshots:
 
   dom-accessibility-api@0.6.3: {}
 
+  dset@3.1.4: {}
+
   dunder-proto@1.0.1:
     dependencies:
       call-bind-apply-helpers: 1.0.2
@@ -8148,7 +8750,7 @@ snapshots:
       '@typescript-eslint/parser': 8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2)
       eslint: 9.17.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0)(eslint@9.17.0(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint-import-resolver-typescript@3.10.1)(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.17.0(jiti@1.21.7))
       eslint-plugin-react: 7.37.5(eslint@9.17.0(jiti@1.21.7))
@@ -8168,7 +8770,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0)(eslint@9.17.0(jiti@1.21.7)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -8193,14 +8795,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.17.0(jiti@1.21.7)):
+  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2)
       eslint: 9.17.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0)(eslint@9.17.0(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7))
     transitivePeerDependencies:
       - supports-color
 
@@ -8244,7 +8846,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.17.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.17.0(jiti@1.21.7))
+      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.65.0(eslint@9.17.0(jiti@1.21.7))(typescript@5.7.2))(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7)))(eslint@9.17.0(jiti@1.21.7))
       hasown: 2.0.4
       is-core-module: 2.16.2
       is-glob: 4.0.3
@@ -8581,12 +9183,35 @@ snapshots:
 
   graphemer@1.4.0: {}
 
+  graphql-ws@5.16.0(graphql@16.10.0):
+    dependencies:
+      graphql: 16.10.0
+
+  graphql-ws@5.16.0(graphql@16.14.2):
+    dependencies:
+      graphql: 16.14.2
+
+  graphql-yoga@5.10.4(graphql@16.10.0):
+    dependencies:
+      '@envelop/core': 5.5.1
+      '@graphql-tools/executor': 1.5.7(graphql@16.10.0)
+      '@graphql-tools/schema': 10.0.16(graphql@16.10.0)
+      '@graphql-tools/utils': 10.11.0(graphql@16.10.0)
+      '@graphql-yoga/logger': 2.0.1
+      '@graphql-yoga/subscription': 5.0.5
+      '@whatwg-node/fetch': 0.10.13
+      '@whatwg-node/server': 0.9.71
+      dset: 3.1.4
+      graphql: 16.10.0
+      lru-cache: 10.4.3
+      tslib: 2.8.1
+
   graphql-yoga@5.21.2(graphql@16.14.2):
     dependencies:
       '@envelop/core': 5.5.1
       '@envelop/instrumentation': 1.0.0
       '@graphql-tools/executor': 1.5.7(graphql@16.14.2)
-      '@graphql-tools/schema': 10.0.38(graphql@16.14.2)
+      '@graphql-tools/schema': 10.0.16(graphql@16.14.2)
       '@graphql-tools/utils': 10.11.0(graphql@16.14.2)
       '@graphql-yoga/logger': 2.0.1
       '@graphql-yoga/subscription': 5.0.5
@@ -8596,6 +9221,8 @@ snapshots:
       graphql: 16.14.2
       lru-cache: 10.4.3
       tslib: 2.8.1
+
+  graphql@16.10.0: {}
 
   graphql@16.14.2: {}
 
@@ -8894,7 +9521,7 @@ snapshots:
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.2.0
-      ws: 8.21.1
+      ws: 8.18.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -9020,6 +9647,10 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  lucide-react@0.469.0(react@19.0.0):
+    dependencies:
+      react: 19.0.0
 
   lucide-react@1.28.0(react@19.0.0):
     dependencies:
@@ -9358,7 +9989,15 @@ snapshots:
 
   pirates@4.0.7: {}
 
+  playwright-core@1.49.1: {}
+
   playwright-core@1.62.1: {}
+
+  playwright@1.49.1:
+    dependencies:
+      playwright-core: 1.49.1
+    optionalDependencies:
+      fsevents: 2.3.2
 
   playwright@1.62.1:
     dependencies:
@@ -10117,6 +10756,8 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
+  value-or-promise@1.0.12: {}
+
   vite-node@2.1.8(@types/node@22.10.1):
     dependencies:
       cac: 6.7.14
@@ -10269,7 +10910,7 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@8.21.1: {}
+  ws@8.18.0: {}
 
   xml-name-validator@5.0.0: {}
 

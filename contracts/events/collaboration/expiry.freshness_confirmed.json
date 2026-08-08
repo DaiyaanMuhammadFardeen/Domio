@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/expiry.freshness_confirmed.json",
+  "title": "CollabExpiryFreshnessConfirmed",
+  "description": "Emitted when a user confirms a resource is fresh, resolving its open freshness flags.",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "expiry.freshness_confirmed"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent", "system"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["resource_type", "resource_id", "resolved_count"],
+      "properties": {
+        "resource_type": {
+          "type": "string"
+        },
+        "resource_id": {
+          "type": "string"
+        },
+        "resolved_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,90 @@
+# Phase 18 — Collaboration & Workflow feature flags.
+#
+# These flags are consumed by:
+#   - services/collab-* (comments, approvals, assignments, permissions)
+#   - apps/{viewer,presenter,dashboard} for client-side collab surfaces
+#   - workers/{collab-sync,notification-dispatcher}
+#
+# Follow the convention `collab.<feature>` and mirror the structure of
+# phase-17.yaml. Defaults shown are for local dev / dev-up all. Production
+# overrides live in the platform Helm umbrella.
+
+flags:
+  # W1 — Core collaboration
+  collab.comments:
+    default: false
+    description: Enable threaded comments on decks, slides, and elements.
+    owner: collab-team
+    srm: medium
+  collab.approval:
+    default: false
+    description: Enable multi-lane approval workflows with gate enforcement.
+    owner: collab-team
+    srm: medium
+  collab.assignments:
+    default: false
+    description: Enable task assignments with due dates, watchers, and status tracking.
+    owner: collab-team
+    srm: medium
+  collab.suggestions:
+    default: false
+    description: Enable suggestion mode (commenter proposes change, editor accepts/rejects).
+    owner: collab-team
+    srm: low
+  collab.mr:
+    default: false
+    description: Enable merge-request-style review flows for deck changes.
+    owner: collab-team
+    srm: low
+  collab.permissions:
+    default: false
+    description: Enable fine-grained RBAC permission grants with capability checking.
+    owner: collab-team
+    srm: medium
+  collab.library:
+    default: false
+    description: Enable shared component/template library within workspace.
+    owner: collab-team
+    srm: low
+  collab.autoupdate:
+    default: false
+    description: Auto-update shared components when source deck changes.
+    owner: collab-team
+    srm: low
+  collab.expiry:
+    default: false
+    description: Enable time-bound access expiry for guest and external collaborators.
+    owner: collab-team
+    srm: medium
+  collab.guests:
+    default: false
+    description: Enable guest access invitations with scoped capabilities.
+    owner: collab-team
+    srm: medium
+
+  # W2 — Integrations
+  collab.integrations.meeting:
+    default: false
+    description: Enable meeting platform integration (Google Meet, Zoom link embedding).
+    owner: integrations-team
+    srm: low
+  collab.integrations.slack:
+    default: false
+    description: Enable Slack integration for notifications and link unfurling.
+    owner: integrations-team
+    srm: medium
+  collab.integrations.teams:
+    default: false
+    description: Enable Microsoft Teams integration for notifications and link unfurling.
+    owner: integrations-team
+    srm: medium
+  collab.integrations.calendar:
+    default: false
+    description: Enable calendar integration (Google Calendar, Outlook) for scheduling.
+    owner: integrations-team
+    srm: low
+  collab.integrations.tasks:
+    default: false
+    description: Enable task tracker integration (Jira, Linear, Asana) for assignment sync.
+    owner: integrations-team
+    srm: low

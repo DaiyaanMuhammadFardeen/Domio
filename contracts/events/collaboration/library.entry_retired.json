@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://domio.example/contracts/events/collaboration/library.entry_retired.json",
+  "title": "CollabLibraryEntryRetired",
+  "description": "Emitted when a library entry is retired (replaced or removed from active use).",
+  "type": "object",
+  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Globally-unique ULID."
+    },
+    "event_type": {
+      "type": "string",
+      "const": "library.entry_retired"
+    },
+    "ts_ms": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "workspace_id": {
+      "type": "string"
+    },
+    "deck_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": ["member", "guest", "agent"]
+    },
+    "payload": {
+      "type": "object",
+      "required": ["entry_id"],
+      "properties": {
+        "entry_id": {
+          "type": "string"
+        },
+        "superseded_by": {
+          "type": "string",
+          "description": "ID of the replacement entry, if any."
+        }
+      }
+    }
+  }
+}
