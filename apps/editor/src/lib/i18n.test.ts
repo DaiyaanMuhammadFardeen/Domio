@@ -2,15 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { LOCALES, missingKeys, translate } from './i18n.js';
 
 describe('i18n', () => {
-  it('has complete dictionaries for all 7 locales (no missing English keys)', () => {
+  it('has complete dictionaries for all 9 locales (no missing English keys)', () => {
     for (const locale of LOCALES) {
       expect(missingKeys(locale), `missing keys for ${locale}`).toEqual([]);
     }
   });
 
-  it('has 7 distinct locales', () => {
-    expect(LOCALES).toHaveLength(7);
-    expect(LOCALES).toEqual(['en', 'bn', 'es', 'fr', 'de', 'ja', 'zh-CN']);
+  it('has 9 distinct locales', () => {
+    expect(LOCALES).toHaveLength(9);
+    expect(LOCALES).toEqual(['en', 'bn', 'es', 'fr', 'de', 'ja', 'zh-CN', 'ar', 'ur']);
   });
 
   it('falls back to English for unknown keys', () => {
@@ -30,6 +30,9 @@ describe('i18n', () => {
       ['stickers.title', 'zh-CN'],
       ['icons.title', 'bn'],
       ['props.title', 'ja'],
+      // RTL stubs (fallback to English copy until P22b translations land)
+      ['insert.title', 'ar'],
+      ['insert.title', 'ur'],
     ];
     for (const [key, locale] of checks) {
       const value = translate(key, locale as never);

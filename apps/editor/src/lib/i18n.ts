@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
-export type Locale = 'en' | 'bn' | 'es' | 'fr' | 'de' | 'ja' | 'zh-CN';
+export type Locale = 'en' | 'bn' | 'es' | 'fr' | 'de' | 'ja' | 'zh-CN' | 'ar' | 'ur';
 
-export const LOCALES: Locale[] = ['en', 'bn', 'es', 'fr', 'de', 'ja', 'zh-CN'];
+export const LOCALES: Locale[] = ['en', 'bn', 'es', 'fr', 'de', 'ja', 'zh-CN', 'ar', 'ur'];
 
 export interface I18nDict {
   [key: string]: string;
@@ -2063,7 +2063,29 @@ const zhCN: I18nDict = {
   'marketplace.changelog': '更新日志',
 };
 
-const DICTS: Record<Locale, I18nDict> = { en, bn, es, fr, de, ja, 'zh-CN': zhCN };
+/**
+ * Phase 22-beta G5: Arabic and Urdu are RTL locales. For P22-beta
+ * we ship them as fallback-to-English copies — full RTL translation
+ * lands in P22b once we have the Bengali team confirmed for parallel
+ * translation work. The keys are mirrored from `en` so the
+ * completeness gate (`missingKeys`) reports zero gaps today and the
+ * RTL rendering pipeline (root layout `<html dir>` + Tailwind logical
+ * properties) can be exercised end-to-end.
+ */
+const ar: I18nDict = Object.fromEntries(Object.entries(en));
+const ur: I18nDict = Object.fromEntries(Object.entries(en));
+
+const DICTS: Record<Locale, I18nDict> = {
+  en,
+  bn,
+  es,
+  fr,
+  de,
+  ja,
+  'zh-CN': zhCN,
+  ar,
+  ur,
+};
 
 export function translate(key: string, locale: Locale): string {
   return DICTS[locale][key] ?? DICTS.en[key] ?? key;

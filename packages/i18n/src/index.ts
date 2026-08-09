@@ -4,7 +4,15 @@
  * @packageDocumentation
  */
 
-export { isLocaleId, DEFAULT_LOCALE, SUPPORTED_LOCALES } from './locales.js';
+export {
+  isLocaleId,
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  RTL_LOCALES,
+  isRtlLocale,
+  toHtmlLang,
+  toHtmlDir,
+} from './locales.js';
 export type { LocaleId } from './locales.js';
 
 export { toBengaliDigits } from './bengali-digits.js';

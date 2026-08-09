@@ -31,3 +31,33 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* Phase 22-beta G5: RTL support. When the active locale is Arabic or
+ * Urdu, the root layout sets `<html dir="rtl">` and Tailwind's logical
+ * properties (ps-*, pe-*, ms-*, me-*, start-*, end-*) automatically
+ * mirror. Anything that uses absolute left/right needs to be flipped
+ * explicitly here — keeping a short list, not a wholesale rewrite. */
+[dir='rtl'] .ltr-only {
+  display: none !important;
+}
+[dir='ltr'] .rtl-only {
+  display: none !important;
+}
+[dir='rtl'] .flip-x {
+  transform: scaleX(-1);
+}
+[dir='rtl'] .text-start {
+  text-align: right;
+}
+[dir='rtl'] .text-end {
+  text-align: left;
+}
+
+/* Bengali (`bn`) uses Latin font fallback but Eastern Arabic digits
+ * are sometimes preferred by users. Numeric strings may opt into
+ * the Bengali digit set via the `lang="bn"` attribute — handled by
+ * @domio/i18n's `toBengaliDigits` helper. */
+[lang='bn'] .number,
+[lang='bn'] .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
