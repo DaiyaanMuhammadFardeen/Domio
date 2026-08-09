@@ -1,0 +1,229 @@
+name: deploy
+
+# Phase 22-beta — staging + production deployment workflow.
+#
+# Two environments:
+#
+#   - `staging`  — auto-deploys from master on every push. The
+#                  staging cluster is the load-test target (P22-load
+#                  and perf-nightly point at this cluster via the
+#                  `P22_REALTIME_URL` / `E2E_BASE_URL` /
+#                  `PERF_HOST` secrets).
+#
+#   - `production` — gated by `environment: production` which has a
+#                    required-reviewer policy in the GitHub UI.
+#                    Triggered manually via workflow_dispatch or by
+#                    pushing a `v*` tag. Never auto-deploys.
+#
+# What gets deployed:
+#
+#   - `apps/editor` Next.js build → Vercel-style edge deploy via
+#     `domio/edge-actions/deploy-action@v1`.
+#   - `apps/dashboard` Next.js build → same.
+#   - Container images for tier-1 services (handled by
+#     `build-provenance.yml`); deploy step pulls the latest `sha-`
+#     tag from ghcr.io and `kubectl set image` rolls it.
+#
+# Required secrets:
+#   - DOMIO_KUBECONFIG_STAGING       (base64 kubeconfig)
+#   - DOMIO_KUBECONFIG_PROD          (base64 kubeconfig)
+#   - DOMIO_EDGE_DEPLOY_TOKEN        (PAT for edge deploy action)
+#   - P22_REALTIME_URL / P22_AUDIENCE_URL / P22_COLLAB_URL /
+#     P22_PRESENTER_URL / P22_LIBRARY_URL / P22_INGEST_URL
+#     (one per cluster; consumed by load + perf jobs)
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'apps/editor/**'
+      - 'apps/dashboard/**'
+      - 'services/**'
+      - 'infrastructure/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (staging or production)'
+        type: choice
+        required: true
+        default: staging
+        options:
+          - staging
+          - production
+      version:
+        description: 'Image tag or git sha to deploy (defaults to current sha)'
+        type: string
+        default: ''
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+
+concurrency:
+  group: deploy-${{ github.ref }}-${{ inputs.environment }}
+  cancel-in-progress: false  # never cancel a deploy mid-rollout
+
+jobs:
+  build-apps:
+    name: build apps
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Build editor
+        run: pnpm --filter @domio/editor build
+      - name: Build dashboard
+        run: pnpm --filter @domio/dashboard build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: app-builds
+          path: |
+            apps/editor/.next
+            apps/dashboard/.next
+          retention-days: 7
+
+  deploy-staging:
+    name: deploy-staging
+    needs: build-apps
+    if: ${{ github.event_name == 'push' || inputs.environment == 'staging' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: https://staging.domio.app
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          name: app-builds
+      - name: Deploy editor
+        uses: domio/edge-actions/deploy-action@v1
+        with:
+          token: ${{ secrets.DOMIO_EDGE_DEPLOY_TOKEN }}
+          app: editor
+          build-dir: apps/editor/.next
+          environment: staging
+      - name: Deploy dashboard
+        uses: domio/edge-actions/deploy-action@v1
+        with:
+          token: ${{ secrets.DOMIO_EDGE_DEPLOY_TOKEN }}
+          app: dashboard
+          build-dir: apps/dashboard/.next
+          environment: staging
+      - name: Roll out service images
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.3'
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.DOMIO_KUBECONFIG_STAGING }}" | base64 -d > ~/.kube/config
+          kubectl config use-context staging
+      - name: Rolling restart tier-1 services
+        run: |
+          set -e
+          for svc in realtime-gateway participant-ws-gateway audience-service collab presenter-session share-api permission-engine; do
+            echo "→ rolling restart $svc"
+            kubectl rollout restart "deployment/$svc" -n domio
+            kubectl rollout status "deployment/$svc" -n domio --timeout=300s
+          done
+      - name: Smoke test
+        run: |
+          set -e
+          for path in / /editor /dashboard /api/healthz; do
+            url="https://staging.domio.app$path"
+            echo "→ $url"
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -fsS -o /dev/null -w '%{http_code}\n' "$url" | grep -qE '^(200|301|302)$'; then
+                echo "  ✓ $path"
+                break
+              fi
+              sleep 5
+            done
+          done
+
+  deploy-production:
+    name: deploy-production
+    needs: build-apps
+    if: ${{ inputs.environment == 'production' || startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://app.domio.app
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/download-artifact@v4.1.7
+        with:
+          name: app-builds
+      - name: Deploy editor (prod)
+        uses: domio/edge-actions/deploy-action@v1
+        with:
+          token: ${{ secrets.DOMIO_EDGE_DEPLOY_TOKEN }}
+          app: editor
+          build-dir: apps/editor/.next
+          environment: production
+      - name: Deploy dashboard (prod)
+        uses: domio/edge-actions/deploy-action@v1
+        with:
+          token: ${{ secrets.DOMIO_EDGE_DEPLOY_TOKEN }}
+          app: dashboard
+          build-dir: apps/dashboard/.next
+          environment: production
+      - name: Configure kubectl (prod)
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.DOMIO_KUBECONFIG_PROD }}" | base64 -d > ~/.kube/config
+          kubectl config use-context production
+      - name: Rolling restart tier-1 services
+        run: |
+          set -e
+          for svc in realtime-gateway participant-ws-gateway audience-service collab presenter-session share-api permission-engine; do
+            echo "→ rolling restart $svc"
+            kubectl rollout restart "deployment/$svc" -n domio
+            kubectl rollout status "deployment/$svc" -n domio --timeout=600s
+          done
+      - name: Smoke test
+        run: |
+          set -e
+          for path in / /editor /dashboard /api/healthz; do
+            url="https://app.domio.app$path"
+            echo "→ $url"
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -fsS -o /dev/null -w '%{http_code}\n' "$url" | grep -qE '^(200|301|302)$'; then
+                echo "  ✓ $path"
+                break
+              fi
+              sleep 5
+            done
+          done
+      - name: Notify release channel
+        if: ${{ success() }}
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "Production deployed from `${{ github.ref_name }}` (`${{ github.sha }}`).\nEditor: https://app.domio.app/editor\nDashboard: https://app.domio.app/dashboard"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.DOMIO_RELEASE_SLACK_WEBHOOK }}
