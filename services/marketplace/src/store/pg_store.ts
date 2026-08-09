@@ -28,6 +28,12 @@ import type {
   PayoutLedgerEntry,
 } from '../types.js';
 import { ListingNotFoundError, ReviewNotFoundError } from '../types.js';
+import type {
+  CreatorProfile,
+  KycSession,
+  CreatorPayoutMethod,
+  KycStatus,
+} from '../creator/types.js';
 import type { MarketplaceStore } from './store.js';
 
 // ---------------------------------------------------------------------------
@@ -700,6 +706,233 @@ export class PgMarketplaceStore implements MarketplaceStore {
     );
     return rows.map(revenueShareEventRowToDomain);
   }
+
+  // -------------------------------------------------------------------------
+  // Creator Profiles (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async createCreatorProfile(profile: CreatorProfile): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('createCreatorProfile');
+    await this.pool.query(
+      `INSERT INTO creator_profile (
+        id, user_id, display_name, slug, bio, country_code,
+        payout_method, payout_ready, kyc_status, onboarding_state,
+        balance_cents, currency, created_at, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6,
+        $7, $8, $9, $10,
+        $11, $12, $13, $14
+      )`,
+      [
+        profile.id,
+        profile.userId,
+        profile.displayName,
+        profile.slug,
+        profile.bio,
+        profile.countryCode,
+        profile.payoutMethod,
+        profile.payoutReady,
+        profile.kycStatus,
+        profile.onboardingState,
+        profile.balanceCents,
+        profile.currency,
+        profile.createdAt,
+        profile.updatedAt,
+      ],
+    );
+  }
+
+  async getCreatorProfile(userId: string): Promise<CreatorProfile | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getCreatorProfile');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM creator_profile WHERE user_id = $1',
+      [userId],
+    );
+    if (rows.length === 0) return null;
+    return creatorProfileRowToDomain(rows[0]!);
+  }
+
+  async updateCreatorProfile(
+    userId: string,
+    patch: Partial<Pick<CreatorProfile,
+      'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod' |
+      'payoutReady' | 'kycStatus' | 'onboardingState' | 'balanceCents' | 'currency' | 'updatedAt'
+    >>,
+  ): Promise<CreatorProfile> {
+    if (!this.pool) throw new StoreNotConfiguredError('updateCreatorProfile');
+
+    const setClauses: string[] = [];
+    const params: unknown[] = [];
+    let idx = 1;
+
+    // Scalar text fields
+    const scalarFields: Array<{ key: string; dbCol: string }> = [
+      { key: 'displayName', dbCol: 'display_name' },
+      { key: 'slug', dbCol: 'slug' },
+      { key: 'bio', dbCol: 'bio' },
+      { key: 'countryCode', dbCol: 'country_code' },
+      { key: 'payoutMethod', dbCol: 'payout_method' },
+      { key: 'kycStatus', dbCol: 'kyc_status' },
+      { key: 'onboardingState', dbCol: 'onboarding_state' },
+      { key: 'currency', dbCol: 'currency' },
+    ];
+    for (const f of scalarFields) {
+      if (f.key in patch) {
+        setClauses.push(`${f.dbCol} = $${idx++}`);
+        params.push((patch as Record<string, unknown>)[f.key]);
+      }
+    }
+
+    // Boolean fields
+    if ('payoutReady' in patch) {
+      setClauses.push(`payout_ready = $${idx++}`);
+      params.push(patch.payoutReady);
+    }
+
+    // Integer fields
+    if ('balanceCents' in patch) {
+      setClauses.push(`balance_cents = $${idx++}`);
+      params.push(patch.balanceCents);
+    }
+
+    // Always bump updated_at
+    if (!('updatedAt' in patch)) {
+      setClauses.push(`updated_at = $${idx++}`);
+      params.push(new Date());
+    }
+
+    if (setClauses.length === 0) {
+      const existing = await this.getCreatorProfile(userId);
+      if (!existing) throw new ListingNotFoundError(userId);
+      return existing;
+    }
+
+    params.push(userId);
+    const sql = `UPDATE creator_profile SET ${setClauses.join(', ')} WHERE user_id = $${idx} RETURNING *`;
+    const { rows } = await this.pool.query(sql, params);
+    if (rows.length === 0) throw new ListingNotFoundError(userId);
+    return creatorProfileRowToDomain(rows[0]!);
+  }
+
+  async getCreatorByUserId(userId: string): Promise<CreatorProfile | null> {
+    return this.getCreatorProfile(userId);
+  }
+
+  // -------------------------------------------------------------------------
+  // KYC Sessions (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async createKycSession(session: KycSession): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('createKycSession');
+    await this.pool.query(
+      `INSERT INTO kyc_session (
+        id, creator_id, vendor, vendor_session_id, status,
+        last_polled_at, raw, created_at
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7::jsonb, $8
+      )`,
+      [
+        session.id,
+        session.creatorId,
+        session.vendor,
+        session.vendorSessionId,
+        session.status,
+        session.lastPolledAt,
+        session.raw != null ? JSON.stringify(session.raw) : null,
+        session.createdAt,
+      ],
+    );
+  }
+
+  async getKycSessionByCreator(creatorId: string): Promise<KycSession | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getKycSessionByCreator');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM kyc_session WHERE creator_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [creatorId],
+    );
+    if (rows.length === 0) return null;
+    return kycSessionRowToDomain(rows[0]!);
+  }
+
+  async updateKycSessionStatus(
+    sessionId: string,
+    status: KycStatus,
+    patch?: Partial<Pick<KycSession, 'lastPolledAt' | 'raw'>>,
+  ): Promise<KycSession> {
+    if (!this.pool) throw new StoreNotConfiguredError('updateKycSessionStatus');
+
+    const setClauses: string[] = ['status = $1'];
+    const params: unknown[] = [status];
+    let idx = 2;
+
+    if (patch?.lastPolledAt !== undefined) {
+      setClauses.push(`last_polled_at = $${idx++}`);
+      params.push(patch.lastPolledAt);
+    }
+    if (patch?.raw !== undefined) {
+      setClauses.push(`raw = $${idx++}::jsonb`);
+      params.push(JSON.stringify(patch.raw));
+    }
+
+    params.push(sessionId);
+    const sql = `UPDATE kyc_session SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`;
+    const { rows } = await this.pool.query(sql, params);
+    if (rows.length === 0) throw new ListingNotFoundError(sessionId);
+    return kycSessionRowToDomain(rows[0]!);
+  }
+
+  // -------------------------------------------------------------------------
+  // Creator Payout Methods (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async createPayoutMethod(method: CreatorPayoutMethod): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('createPayoutMethod');
+    await this.pool.query(
+      `INSERT INTO creator_payout_method (
+        id, creator_id, kind, external_account_id, verified,
+        metadata, created_at, updated_at
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        $6::jsonb, $7, $8
+      )`,
+      [
+        method.id,
+        method.creatorId,
+        method.kind,
+        method.externalAccountId,
+        method.verified,
+        method.metadata != null ? JSON.stringify(method.metadata) : null,
+        method.createdAt,
+        method.updatedAt,
+      ],
+    );
+  }
+
+  async listPayoutMethodsByCreator(creatorId: string): Promise<CreatorPayoutMethod[]> {
+    if (!this.pool) throw new StoreNotConfiguredError('listPayoutMethodsByCreator');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM creator_payout_method WHERE creator_id = $1 ORDER BY created_at ASC',
+      [creatorId],
+    );
+    return rows.map(creatorPayoutMethodRowToDomain);
+  }
+
+  async updatePayoutMethodVerified(
+    methodId: string,
+    verified: boolean,
+  ): Promise<CreatorPayoutMethod> {
+    if (!this.pool) throw new StoreNotConfiguredError('updatePayoutMethodVerified');
+    const { rows } = await this.pool.query(
+      `UPDATE creator_payout_method
+       SET verified = $1, updated_at = $2
+       WHERE id = $3
+       RETURNING *`,
+      [verified, new Date(), methodId],
+    );
+    if (rows.length === 0) throw new ListingNotFoundError(methodId);
+    return creatorPayoutMethodRowToDomain(rows[0]!);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -798,6 +1031,51 @@ function revenueShareEventRowToDomain(row: Record<string, unknown>): RevenueShar
     eventType: row.event_type as string,
     payoutStatus: row.payout_status as RevenueShareEvent['payoutStatus'],
     createdAt: toDate(row.created_at),
+  };
+}
+
+function creatorProfileRowToDomain(row: Record<string, unknown>): CreatorProfile {
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    displayName: row.display_name as string | null,
+    slug: row.slug as string | null,
+    bio: row.bio as string | null,
+    countryCode: row.country_code as string | null,
+    payoutMethod: row.payout_method as string | null,
+    payoutReady: row.payout_ready as boolean,
+    kycStatus: row.kyc_status as KycStatus,
+    onboardingState: row.onboarding_state as CreatorProfile['onboardingState'],
+    balanceCents: Number(row.balance_cents),
+    currency: row.currency as string,
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
+  };
+}
+
+function kycSessionRowToDomain(row: Record<string, unknown>): KycSession {
+  return {
+    id: row.id as string,
+    creatorId: row.creator_id as string,
+    vendor: row.vendor as string,
+    vendorSessionId: row.vendor_session_id as string | null,
+    status: row.status as KycStatus,
+    lastPolledAt: row.last_polled_at != null ? toDate(row.last_polled_at) : null,
+    raw: row.raw != null ? parseJsonb(row.raw) as Record<string, unknown> : null,
+    createdAt: toDate(row.created_at),
+  };
+}
+
+function creatorPayoutMethodRowToDomain(row: Record<string, unknown>): CreatorPayoutMethod {
+  return {
+    id: row.id as string,
+    creatorId: row.creator_id as string,
+    kind: row.kind as CreatorPayoutMethod['kind'],
+    externalAccountId: row.external_account_id as string,
+    verified: row.verified as boolean,
+    metadata: row.metadata != null ? parseJsonb(row.metadata) as Record<string, unknown> : null,
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
   };
 }
 

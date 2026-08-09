@@ -33,6 +33,14 @@ tags:
     description: Brand-locked curated marketplace listings.
   - name: marketplace-checkout
     description: Purchase, refund, and payment webhook handling.
+  - name: marketplace-creator
+    description: Creator profile, KYC onboarding, and payout methods.
+  - name: marketplace-payout
+    description: Payout runs and payout policy.
+  - name: marketplace-finance
+    description: FX rates and financial data.
+  - name: marketplace-analytics
+    description: Creator analytics and statements.
 paths:
   /v1/marketplace/listings:
     post:
@@ -595,6 +603,425 @@ paths:
             application/problem+json:
               schema: { $ref: '#/components/schemas/ProblemDetail' }
 
+  # ── Creator Profile (Phase 19 W3) ───────────────────────────────────────
+
+  /v1/creator/profile:
+    get:
+      tags: [marketplace-creator]
+      summary: Get the authenticated creator's profile
+      operationId: getCreatorProfile
+      responses:
+        '200':
+          description: Creator profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreatorProfile' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Creator profile not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+    patch:
+      tags: [marketplace-creator]
+      summary: Update the authenticated creator's profile
+      operationId: updateCreatorProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatorProfileUpdate' }
+      responses:
+        '200':
+          description: Creator profile updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreatorProfile' }
+        '400':
+          description: Validation error
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Creator profile not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/creator/kyc/start:
+    post:
+      tags: [marketplace-creator]
+      summary: Start a new KYC verification session
+      operationId: startKycSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vendor]
+              properties:
+                vendor: { type: string, description: "KYC vendor to use (e.g. 'persona', 'sumsub')." }
+      responses:
+        '200':
+          description: KYC session started
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/KycSessionStart' }
+        '400':
+          description: Invalid vendor or creator not eligible
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Active KYC session already in progress (ERR_KYC_SESSION_ACTIVE)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: KYC vendor unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/creator/kyc/status:
+    get:
+      tags: [marketplace-creator]
+      summary: Get current KYC session status for the creator
+      operationId: getKycStatus
+      responses:
+        '200':
+          description: KYC status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/KycStatusResult' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: No KYC session found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: KYC vendor unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/creator/payout-methods:
+    post:
+      tags: [marketplace-creator]
+      summary: Add a new payout method for the creator
+      operationId: createCreatorPayoutMethod
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind, external_account_id]
+              properties:
+                kind: { type: string, enum: [stripe_connect, bkash, nagad, bank], description: "Payout method type." }
+                external_account_id: { type: string, description: "Provider-side account identifier." }
+                metadata: { type: object, description: "Provider-specific metadata." }
+      responses:
+        '201':
+          description: Payout method created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreatorPayoutMethod' }
+        '400':
+          description: Validation error
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+    get:
+      tags: [marketplace-creator]
+      summary: List payout methods for the creator
+      operationId: listCreatorPayoutMethods
+      responses:
+        '200':
+          description: Payout methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CreatorPayoutMethod' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/creator/payout/connect-link:
+    post:
+      tags: [marketplace-creator]
+      summary: Generate a Stripe Connect onboarding link
+      operationId: getPayoutConnectLink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [return_url]
+              properties:
+                return_url: { type: string, format: uri, description: "URL to redirect after onboarding." }
+      responses:
+        '200':
+          description: Connect link generated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PayoutConnectLink' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Creator profile not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Stripe unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  # ── Payouts (Phase 19 W3) ──────────────────────────────────────────────
+
+  /v1/payouts:
+    get:
+      tags: [marketplace-payout]
+      summary: List payout runs for the creator
+      operationId: listPayoutRuns
+      parameters:
+        - name: period_month
+          in: query
+          schema: { type: string, pattern: "^\\d{4}-\\d{2}$" }
+          description: Filter by period (YYYY-MM).
+      responses:
+        '200':
+          description: Payout runs
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PayoutRun' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/payouts/{run_id}:
+    get:
+      tags: [marketplace-payout]
+      summary: Get a specific payout run
+      operationId: getPayoutRun
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Payout run identifier.
+      responses:
+        '200':
+          description: Payout run details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PayoutRun' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Payout run not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  # ── FX (Phase 19 W3) ───────────────────────────────────────────────────
+
+  /v1/fx/rates:
+    get:
+      tags: [marketplace-finance]
+      summary: Get current FX rate between two currencies
+      operationId: getFxRate
+      parameters:
+        - name: base
+          in: query
+          required: true
+          schema: { type: string, pattern: '^[A-Z]{3}$' }
+          description: Base currency (e.g. USD).
+        - name: quote
+          in: query
+          required: true
+          schema: { type: string, pattern: '^[A-Z]{3}$' }
+          description: Quote currency (e.g. BDT).
+      responses:
+        '200':
+          description: FX rate
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FxRate' }
+        '400':
+          description: Invalid currency pair
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: FX provider unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  # ── Analytics (Phase 19 W3) ────────────────────────────────────────────
+
+  /v1/creator/analytics:
+    get:
+      tags: [marketplace-analytics]
+      summary: Get analytics for the creator's listings in a period
+      operationId: getCreatorAnalytics
+      parameters:
+        - name: period
+          in: query
+          required: true
+          schema: { type: string, pattern: "^\\d{4}-\\d{2}$" }
+          description: Period in YYYY-MM format.
+      responses:
+        '200':
+          description: Creator analytics
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreatorAnalytics' }
+        '400':
+          description: Invalid period format
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/creator/statements:
+    get:
+      tags: [marketplace-analytics]
+      summary: List tax statements for the creator
+      operationId: listCreatorStatements
+      responses:
+        '200':
+          description: Statement summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/StatementSummary' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/creator/statements/{statement_id}:
+    get:
+      tags: [marketplace-analytics]
+      summary: Get a specific tax statement
+      operationId: getCreatorStatement
+      parameters:
+        - name: statement_id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Statement identifier.
+      responses:
+        '200':
+          description: Statement summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatementSummary' }
+        '403':
+          description: Not a creator (ERR_NOT_CREATOR)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Statement not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
 # ════════════════════════════════════════════════════════════════════════════
 # Components
 # ════════════════════════════════════════════════════════════════════════════
@@ -833,3 +1260,130 @@ components:
       required: [received]
       properties:
         received: { type: boolean, description: "Always true when the webhook is acknowledged." }
+
+    # ── Creator Profile (Phase 19 W3) ────────────────────────────────────
+    CreatorProfile:
+      type: object
+      required: [user_id, display_name, slug, kyc_status, payout_ready, onboarding_state, currency]
+      properties:
+        user_id: { type: string, description: "Platform user identifier." }
+        display_name: { type: string, description: "Public display name." }
+        slug: { type: string, description: "URL-safe creator slug." }
+        bio: { type: string, description: "Creator biography." }
+        country_code: { type: string, pattern: '^[A-Z]{2}$', description: "ISO 3166-1 alpha-2 country code." }
+        payout_method: { type: string, enum: [stripe_connect, bkash, nagad, bank], description: "Default payout method." }
+        payout_ready: { type: boolean, description: "True if creator can receive payouts." }
+        kyc_status: { type: string, enum: [pending, approved, rejected, expired], description: "Current KYC verification status." }
+        balance_cents: { type: integer, description: "Accumulated unpaid balance in integer cents." }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+        onboarding_state: { type: string, enum: [pending, profile_complete, kyc_required, kyc_submitted, kyc_approved, payout_ready, active], description: "Current onboarding funnel state." }
+        created_at_ms: { type: integer, description: "Profile creation timestamp (epoch ms)." }
+        updated_at_ms: { type: integer, description: "Last update timestamp (epoch ms)." }
+
+    CreatorProfileUpdate:
+      type: object
+      properties:
+        display_name: { type: string, minLength: 1, maxLength: 120 }
+        bio: { type: string, maxLength: 4096 }
+        country_code: { type: string, pattern: '^[A-Z]{2}$', description: "ISO 3166-1 alpha-2 country code." }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+
+    KycSessionStart:
+      type: object
+      required: [kyc_session_id, session_url]
+      properties:
+        kyc_session_id: { type: string, description: "KYC session identifier." }
+        session_url: { type: string, format: uri, description: "URL to redirect the creator to the KYC vendor." }
+
+    KycStatusResult:
+      type: object
+      required: [kyc_session_id, status, onboarding_state]
+      properties:
+        kyc_session_id: { type: string, description: "KYC session identifier." }
+        status: { type: string, enum: [pending, submitted, approved, rejected], description: "Current KYC session status." }
+        onboarding_state: { type: string, enum: [pending, profile_complete, kyc_required, kyc_submitted, kyc_approved, payout_ready, active], description: "Creator onboarding state." }
+
+    CreatorPayoutMethod:
+      type: object
+      required: [id, creator_id, kind, verified, external_account_id]
+      properties:
+        id: { type: string, description: "Payout method identifier." }
+        creator_id: { type: string, description: "Owner creator identifier." }
+        kind: { type: string, enum: [stripe_connect, bkash, nagad, bank], description: "Payout method type." }
+        verified: { type: boolean, description: "True if provider has confirmed the account." }
+        external_account_id: { type: string, description: "Provider-side account identifier." }
+        metadata: { type: object, description: "Provider-specific metadata." }
+        created_at_ms: { type: integer, description: "Creation timestamp (epoch ms)." }
+        updated_at_ms: { type: integer, description: "Last update timestamp (epoch ms)." }
+
+    PayoutConnectLink:
+      type: object
+      required: [connect_url, expires_at]
+      properties:
+        connect_url: { type: string, format: uri, description: "Stripe Connect onboarding URL." }
+        expires_at: { type: integer, description: "Epoch milliseconds when the link expires." }
+
+    # ── Payout Runs (Phase 19 W3) ────────────────────────────────────────
+    PayoutRun:
+      type: object
+      required: [id, period_month, status, total_creators, total_payout_cents, currency]
+      properties:
+        id: { type: string, description: "Payout run identifier." }
+        period_month: { type: string, pattern: "^\\d{4}-\\d{2}$", description: "Period in YYYY-MM format." }
+        status: { type: string, enum: [pending, processing, completed, failed], description: "Payout run status." }
+        total_creators: { type: integer, description: "Number of creators included in this run." }
+        total_payout_cents: { type: integer, description: "Total payout amount in integer cents." }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+        created_at_ms: { type: integer, description: "Run creation timestamp (epoch ms)." }
+        completed_at_ms: { type: integer, description: "Run completion timestamp (epoch ms)." }
+
+    # ── FX (Phase 19 W3) ─────────────────────────────────────────────────
+    FxRate:
+      type: object
+      required: [base, quote, rate, fetched_at, source]
+      properties:
+        base: { type: string, pattern: '^[A-Z]{3}$', description: "Base currency code." }
+        quote: { type: string, pattern: '^[A-Z]{3}$', description: "Quote currency code." }
+        rate: { type: number, description: "Exchange rate (quote per base)." }
+        fetched_at: { type: integer, description: "Epoch milliseconds when the rate was fetched." }
+        source: { type: string, description: "FX rate data provider (e.g. 'openexchangerates')." }
+
+    # ── Creator Analytics (Phase 19 W3) ──────────────────────────────────
+    CreatorAnalytics:
+      type: object
+      required: [creator_id, period, downloads, installs, mrr_cents, conversion_rate, refund_rate, top_geos]
+      properties:
+        creator_id: { type: string, description: "Creator identifier." }
+        period: { type: string, pattern: "^\\d{4}-\\d{2}$", description: "Period in YYYY-MM format." }
+        downloads: { type: integer, description: "Total downloads across all listings." }
+        installs: { type: integer, description: "Total installs across all listings." }
+        mrr_cents: { type: integer, description: "Monthly recurring revenue in integer cents." }
+        conversion_rate: { type: number, description: "Listing view-to-install conversion rate (0.0–1.0)." }
+        refund_rate: { type: number, description: "Refund rate (0.0–1.0)." }
+        top_geos:
+          type: array
+          items:
+            type: object
+            required: [country_code, installs]
+            properties:
+              country_code: { type: string, pattern: '^[A-Z]{2}$', description: "ISO 3166-1 alpha-2 country code." }
+              installs: { type: integer, description: "Install count for this country." }
+          description: "Top geographies by install count."
+        listings: { type: integer, description: "Number of active listings." }
+        avg_rating: { type: number, description: "Average review rating across all listings." }
+        created_at_ms: { type: integer, description: "Analytics snapshot timestamp (epoch ms)." }
+
+    # ── Statements (Phase 19 W3) ─────────────────────────────────────────
+    StatementSummary:
+      type: object
+      required: [statement_id, creator_id, period_month, kind, total_gross_cents, total_fee_cents, total_net_cents, currency, generated_at]
+      properties:
+        statement_id: { type: string, description: "Statement identifier." }
+        creator_id: { type: string, description: "Creator identifier." }
+        period_month: { type: string, pattern: "^\\d{4}-\\d{2}$", description: "Period in YYYY-MM format." }
+        kind: { type: string, enum: [monthly, yearly_1099k], description: "Statement type." }
+        total_gross_cents: { type: integer, description: "Total gross revenue in integer cents." }
+        total_fee_cents: { type: integer, description: "Total platform fees in integer cents." }
+        total_net_cents: { type: integer, description: "Total net payout in integer cents." }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+        generated_at: { type: integer, description: "Epoch milliseconds when the statement was generated." }

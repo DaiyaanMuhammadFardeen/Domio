@@ -482,4 +482,167 @@ describe('InMemoryMarketplaceStore', () => {
       expect(events[0]!.id).toBe('rse-1');
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Creator Profiles (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  describe('creator profiles', () => {
+    it('inserts and retrieves a creator profile', async () => {
+      const profile = {
+        id: 'cp-1',
+        userId: 'u1',
+        displayName: 'Test Creator',
+        slug: 'test-creator',
+        bio: 'A test creator',
+        countryCode: 'US',
+        payoutMethod: null,
+        payoutReady: false,
+        kycStatus: 'pending' as const,
+        onboardingState: 'pending' as const,
+        balanceCents: 0,
+        currency: 'USD',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.createCreatorProfile(profile);
+      const found = await store.getCreatorProfile('u1');
+      expect(found?.id).toBe('cp-1');
+    });
+
+    it('getCreatorByUserId returns profile', async () => {
+      const profile = {
+        id: 'cp-1',
+        userId: 'u1',
+        displayName: 'Test Creator',
+        slug: 'test-creator',
+        bio: null,
+        countryCode: 'US',
+        payoutMethod: null,
+        payoutReady: false,
+        kycStatus: 'pending' as const,
+        onboardingState: 'pending' as const,
+        balanceCents: 0,
+        currency: 'USD',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.createCreatorProfile(profile);
+      const found = await store.getCreatorByUserId('u1');
+      expect(found?.id).toBe('cp-1');
+    });
+
+    it('updateCreatorProfile updates fields', async () => {
+      const profile = {
+        id: 'cp-1',
+        userId: 'u1',
+        displayName: null,
+        slug: null,
+        bio: null,
+        countryCode: null,
+        payoutMethod: null,
+        payoutReady: false,
+        kycStatus: 'pending' as const,
+        onboardingState: 'pending' as const,
+        balanceCents: 0,
+        currency: 'USD',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.createCreatorProfile(profile);
+      const updated = await store.updateCreatorProfile('u1', { displayName: 'Updated' });
+      expect(updated.displayName).toBe('Updated');
+    });
+
+    it('updateCreatorProfile throws for unknown user', async () => {
+      await expect(store.updateCreatorProfile('nonexistent', { displayName: 'X' })).rejects.toThrow(ListingNotFoundError);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // KYC Sessions (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  describe('kyc sessions', () => {
+    it('inserts and retrieves a kyc session', async () => {
+      const session = {
+        id: 'ks-1',
+        creatorId: 'c1',
+        vendor: 'sandbox',
+        vendorSessionId: 'vs-1',
+        status: 'pending' as const,
+        lastPolledAt: null,
+        raw: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.createKycSession(session);
+      const found = await store.getKycSessionByCreator('c1');
+      expect(found?.id).toBe('ks-1');
+    });
+
+    it('updateKycSessionStatus updates status', async () => {
+      const session = {
+        id: 'ks-1',
+        creatorId: 'c1',
+        vendor: 'sandbox',
+        vendorSessionId: 'vs-1',
+        status: 'pending' as const,
+        lastPolledAt: null,
+        raw: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.createKycSession(session);
+      const updated = await store.updateKycSessionStatus('ks-1', 'approved');
+      expect(updated.status).toBe('approved');
+    });
+
+    it('updateKycSessionStatus throws for unknown session', async () => {
+      await expect(store.updateKycSessionStatus('nonexistent', 'approved')).rejects.toThrow(ListingNotFoundError);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Creator Payout Methods (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  describe('creator payout methods', () => {
+    it('inserts and retrieves a payout method', async () => {
+      const method = {
+        id: 'pm-1',
+        creatorId: 'c1',
+        kind: 'stripe_connect' as const,
+        externalAccountId: 'acct_123',
+        verified: false,
+        metadata: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.createPayoutMethod(method);
+      const found = await store.listPayoutMethodsByCreator('c1');
+      expect(found).toHaveLength(1);
+      expect(found[0]!.id).toBe('pm-1');
+    });
+
+    it('updatePayoutMethodVerified updates verified', async () => {
+      const method = {
+        id: 'pm-1',
+        creatorId: 'c1',
+        kind: 'stripe_connect' as const,
+        externalAccountId: 'acct_123',
+        verified: false,
+        metadata: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      await store.createPayoutMethod(method);
+      const updated = await store.updatePayoutMethodVerified('pm-1', true);
+      expect(updated.verified).toBe(true);
+    });
+
+    it('updatePayoutMethodVerified throws for unknown method', async () => {
+      await expect(store.updatePayoutMethodVerified('nonexistent', true)).rejects.toThrow(ListingNotFoundError);
+    });
+  });
 });

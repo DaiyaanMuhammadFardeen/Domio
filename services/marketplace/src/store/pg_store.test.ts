@@ -183,5 +183,121 @@ describe('PgMarketplaceStore', () => {
       const hash = await store.getLastAuditHash('ws1', 'purchase');
       expect(hash).toBe('');
     });
+
+    it('insertCreatorProfile calls pool.query with INSERT SQL', async () => {
+      await store.createCreatorProfile({
+        id: 'cp-1',
+        userId: 'u1',
+        displayName: 'Test',
+        slug: 'test',
+        bio: null,
+        countryCode: 'US',
+        payoutMethod: null,
+        payoutReady: false,
+        kycStatus: 'pending',
+        onboardingState: 'pending',
+        balanceCents: 0,
+        currency: 'USD',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      const [sql] = pool.query.mock.calls[0]!;
+      expect(sql).toContain('INSERT INTO creator_profile');
+      expect(sql).toContain('$1');
+    });
+
+    it('getCreatorProfile calls pool.query with SELECT SQL', async () => {
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      await store.getCreatorProfile('u1');
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      const [sql, params] = pool.query.mock.calls[0]!;
+      expect(sql).toContain('SELECT * FROM creator_profile WHERE user_id = $1');
+      expect(params).toEqual(['u1']);
+    });
+
+    it('getCreatorProfile returns null when no rows', async () => {
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      const result = await store.getCreatorProfile('nonexistent');
+      expect(result).toBeNull();
+    });
+
+    it('updateCreatorProfile builds dynamic SET clause', async () => {
+      pool.query.mockResolvedValueOnce({
+        rows: [{ id: 'cp-1', user_id: 'u1', display_name: 'Updated', slug: 'test',
+          bio: null, country_code: 'US', payout_method: null, payout_ready: false,
+          kyc_status: 'pending', onboarding_state: 'pending', balance_cents: 0,
+          currency: 'USD', created_at: new Date(), updated_at: new Date() }],
+      });
+      await store.updateCreatorProfile('u1', { displayName: 'Updated' });
+      const [sql] = pool.query.mock.calls[0]!;
+      expect(sql).toContain('UPDATE creator_profile SET');
+      expect(sql).toContain('display_name = $1');
+    });
+
+    it('insertKycSession calls pool.query with INSERT SQL', async () => {
+      await store.createKycSession({
+        id: 'ks-1',
+        creatorId: 'c1',
+        vendor: 'sandbox',
+        vendorSessionId: 'vs-1',
+        status: 'pending',
+        lastPolledAt: null,
+        raw: null,
+        createdAt: new Date(),
+      });
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      const [sql] = pool.query.mock.calls[0]!;
+      expect(sql).toContain('INSERT INTO kyc_session');
+      expect(sql).toContain('$1');
+    });
+
+    it('getKycSessionByCreator calls pool.query with SELECT SQL', async () => {
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      await store.getKycSessionByCreator('c1');
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      const [sql, params] = pool.query.mock.calls[0]!;
+      expect(sql).toContain('SELECT * FROM kyc_session WHERE creator_id = $1');
+      expect(params).toEqual(['c1']);
+    });
+
+    it('insertPayoutMethod calls pool.query with INSERT SQL', async () => {
+      await store.createPayoutMethod({
+        id: 'pm-1',
+        creatorId: 'c1',
+        kind: 'stripe_connect',
+        externalAccountId: 'acct_123',
+        verified: false,
+        metadata: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      const [sql] = pool.query.mock.calls[0]!;
+      expect(sql).toContain('INSERT INTO creator_payout_method');
+      expect(sql).toContain('$1');
+    });
+
+    it('listPayoutMethodsByCreator calls pool.query with SELECT SQL', async () => {
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      await store.listPayoutMethodsByCreator('c1');
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      const [sql, params] = pool.query.mock.calls[0]!;
+      expect(sql).toContain('SELECT * FROM creator_payout_method WHERE creator_id = $1');
+      expect(params).toEqual(['c1']);
+    });
+
+    it('updatePayoutMethodVerified calls pool.query with UPDATE SQL', async () => {
+      pool.query.mockResolvedValueOnce({
+        rows: [{ id: 'pm-1', creator_id: 'c1', kind: 'stripe_connect',
+          external_account_id: 'acct_123', verified: true, metadata: null,
+          created_at: new Date(), updated_at: new Date() }],
+      });
+      await store.updatePayoutMethodVerified('pm-1', true);
+      expect(pool.query).toHaveBeenCalledTimes(1);
+      const [sql] = pool.query.mock.calls[0]!;
+      expect(sql).toContain('UPDATE creator_payout_method');
+      expect(sql).toContain('verified = $1');
+    });
   });
 });

@@ -1,6 +1,6 @@
 # Domio Marketplace Runbook (Phase 19)
 
-Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 complete (2026-08-09)** — Money-moving (checkout, refund, chargeback). Remaining: Waves 3, 4, 5.
+Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 complete (2026-08-09)** — Money-moving (checkout, refund, chargeback). **Wave 3 complete (2026-08-09)** — Creator economy (onboarding, KYC, payouts, FX, analytics). Remaining: Waves 4, 5.
 
 ## What Wave 1 shipped
 
@@ -29,11 +29,14 @@ Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 
 - `services/marketplace` (`@domio/marketplace-service`) — **138 tests**, typecheck clean. Listing CRUD + lifecycle transitions (draft→in_review→published→deprecated/removed matching P06 registry), listing versions + changelog, pricing calculator (integer cents, 70/30 split floor rounding, free/enterprise_quote, USD|BDT|EUR), reviews (verified-buyer gate, rating 1-5, body ≤4KB, reply-once, report), payout policy read, curated stub. Full pg DML + withTransaction. 16 handlers matching the 16 operationIds exactly. Self-contained HMAC-SHA256 audit recorder (prev_hash chain, kid='mk1').
 
 ### Follow-ups (deferred to later waves)
-1. P06 `payout_executor_enabled` flag is doc-only (never wired in code) — wire alongside Wave 3 payout machinery.
-2. Verified-buyer review gate uses in-memory license check — real `license_grant` lookup in Wave 3 (post-checkout grants now exist in the store, just not queried by the review gate).
+1. P06 `payout_executor_enabled` flag is doc-only (never wired in code) — the payout-executor worker (Wave 3) drives payouts; wire the flag to gate it.
+2. Verified-buyer review gate uses in-memory license check — real `license_grant` lookup still deferred (post-checkout grants exist in store, not queried by review gate).
 3. `getCuratedMarketplaceListings` returns `[]` stub — real brand-locked curated logic in Wave 4 (WS-MKT-5).
 4. Real vendor adapters (Stripe/bKash/Nagad/KYC/FX) are external — sandbox providers + narrow interfaces now, real providers later (P18 vendor-adapter pattern).
-5. Migrations 0079–0089 not yet applied to a live DB (no local Postgres in authoring environment) — run `make migrate-up` before exercising services.
+5. Migrations 0079–0090 not yet applied to a live DB (no local Postgres in authoring environment) — run `make migrate-up` before exercising services.
+6. KYC: real Persona/Sumsub vendor (SandboxKycClient deterministic), kyc-webhook receiver, `kyc_session` status domain value 'submitted' vs DB CHECK 'started' mapping is intentional (pg_store handles mapping).
+7. Payout: payout-executor uses injected InMemoryPayoutProvider — real Stripe Connect Transfer / bKash Disburse / Nagad Disburse adapters later; statement_record payload is structured JSON (real PDF generation deferred).
+8. Creator analytics: `creator_profile.kyc_status` CHECK includes 'expired' (used by KYC rescreen freeze) not in domain KycStatus — fine for Wave 3.
 
 ## What Wave 2 shipped (Money-moving, WS-MKT-4)
 
@@ -54,8 +57,28 @@ Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 
 - `workers/subscription-billing` (`@domio/subscription-billing-worker`) — **9 tests**. SubscriptionBillingWorker (setInterval tick, WORKER_TICK_MS 60000, start/stop/runOnce → {scanned,canceled,revoked}); injected SubscriptionProvider (InMemorySubscriptionProvider default): listDueForCancellation (cancel_at_period_end ≤ now), listGraceExpired (grace_ends_at ≤ now, not yet revoked); cancel → canceled_at, revoke → revoked_at after 7-day grace. Idempotent (skips already-canceled/revoked).
 - `workers/refund-processor` (`@domio/refund-processor-worker`) — **8 tests**. RefundProcessorWorker (same tick pattern, runOnce → {scanned,auto_approved,review_required}); injected RefundProvider (InMemoryRefundProvider default): listRefundRequests('requested'), approveRefund (→ refund_status 'refunded'), flagForReview (admin queue). Auto-approve if within 14 days + usage <5 inserts, else admin.
 
+## What Wave 3 shipped (Creator economy, WS-MKT-6/7)
+
+### Migration `0090_phase19_creator_onboarding`
+- `creator_profile` + `onboarding_state` CHECK(pending|profile_complete|kyc_required|kyc_submitted|kyc_approved|payout_ready|active) DEFAULT 'pending'.
+- `kyc_rescreen_hit` (creator_id FK, kind pep|sanctions, matched_entity, decision freeze|review). Workspace RLS.
+- `statement_record` (creator_id FK, period_month, kind monthly|yearly_1099k, total_gross/fee/net_cents, currency, payload jsonb). Workspace RLS.
+
+### Contracts (append-only, 21 → **34 operationIds**)
+- New tags marketplace-creator, marketplace-payout, marketplace-finance, marketplace-analytics. 13 new operationIds: getCreatorProfile, updateCreatorProfile, startKycSession, getKycStatus, createCreatorPayoutMethod, listCreatorPayoutMethods, getPayoutConnectLink, listPayoutRuns, getPayoutRun, getFxRate, getCreatorAnalytics, listCreatorStatements, getCreatorStatement. 10 new schemas (CreatorProfile, CreatorProfileUpdate, KycSessionStart, KycStatusResult, CreatorPayoutMethod, PayoutConnectLink, PayoutRun, FxRate, CreatorAnalytics, StatementSummary).
+- Webhook catalog → **12 events** (+kyc.status_changed). Proto `marketplace_creator.proto` + `OnboardingState` enum (0-7).
+
+### Services
+- `services/marketplace` (`@domio/marketplace-service`) — **292 tests** (182 + 110 new). Creator module: onboarding state machine (transitions map + canSellPaidListings), KycProvider interface + SandboxKycProvider (deterministic poll sequence), PayoutConnectProvider + SandboxPayoutConnectProvider, startKycSession (emits kyc.status_changed) / getKycStatus / createPayoutMethod / listPayoutMethods / getPayoutConnectLink, 11 new store methods with full pg DML (creator_profile, creator_payout_method, kyc_session), 7 new handlers. Bug fixed during reconcile: kyc_session has no updated_at column in 0079 — removed from domain type + pg_store DML.
+- `services/creator-analytics` (`@domio/creator-analytics-service`) — **72 tests**, NEW service. computeAnalyticsBody (downloads, installs, mrr_cents, conversion_rate, refund_rate, top 5 geos), buildStatementBody + buildYearly1099KBody, validatePeriod YYYY-MM, generateMonthlyStatement idempotent, generateYearly1099K. AnalyticsStore interface + InMemoryAnalyticsStore + PgAnalyticsStore full DML (revenue_share_event via seller_id, payment_intent join marketplace_listing for seller, license_grant via user_id). 4 handlers. Feature flag FEATURE_MARKETPLACE_ANALYTICS.
+
+### Workers
+- `workers/kyc-poller` (`@domio/kyc-poller-worker`) — **11 tests**. KycPollerWorker polls pending KYC sessions; SandboxKycClient deterministic (vendor_session_id -ok→approved, -no→rejected); runOnce → {polled, approved, rejected, still_pending, errored}; per-session error resilience.
+- `workers/kyc-rescreen` (`@domio/kyc-rescreen-worker`) — **10 tests**. Nightly identity drift + sanctions; InMemoryRescreenProvider (name contains 'sanc'→sanctions/freeze, 'pep'→review); sanctions → freezeCreator + recordRescreenHit; PEP → flagForReview; idempotent (frozen excluded from listApprovedCreators).
+- `workers/payout-executor` (`@domio/payout-executor-worker`) — **12 tests**. Monthly payout: group eligible revenue_share_events by creator, skip <$50 min / 30-day hold not met / no verified method, transfer with idempotency_key `${run_id}:${creator_id}`, ledger entries UNIQUE(executor_run_id,event_id) dedup, partial failure no batch rollback. runOnce({period_month}) → {run_id, creators_paid, total_payout_cents, skipped, failed}.
+- `workers/fx-rate-cacher` (`@domio/fx-rate-cacher-worker`) — **9 tests**. Daily mid-rate for 6 USD/BDT/EUR pairs (cross-rates via USD); upsert to fx_rate UNIQUE(base,quote,fetched_at); idempotent same-day dedup.
+
 ## Waves remaining
 
-- **Wave 3 — Creator economy (WS-MKT-6/7)**: onboarding/KYC state machine (pending→profile_complete→kyc_required→kyc_submitted→kyc_approved→payout_ready→active; free listings at profile_complete, paid requires payout_ready), KYC vendor-agnostic interface + kyc-webhook poll worker, payout setup (Stripe Connect Express OAuth / bKash-Nagad + bank fallback), `payout-executor` (monthly, groups by seller, idempotent on (executor_run_id,event_id), partial-failure no batch rollback, $50 min + 30-day hold), `fx-rate-cacher` (daily mid-rate) + VAT tax records, creator analytics (downloads/installs/MRR/conversion/refund rate/top geos) + PDF statements + 1099-K.
 - **Wave 4 — Trust/curation/integrations (WS-MKT-5/8/9)**: brand-locked curated filter + 403 guard on direct API bypass, takedown intake/workflow/counter-notice + trust-scanner, partner API (OAuth 2.1 scopes, rate limits 600/min Pro / 6000/min Enterprise, `marketplace-partner.yaml`), MCP tools (`purchase_marketplace` capability OFF by default), webhook-dispatcher (HMAC idempotent), audit coverage.
 - **Wave 5 — Frontend + finalize (WS-MKT-1 + cross-cutting)**: `apps/marketplace-web` storefront (SSR facets, LCP ≤2s, Lighthouse ≥90), editor Insert→Marketplace panel re-skin (brand-locked overlay), `apps/creator-console` studio (drag-upload, manifest, price, license) + analytics + statements, `apps/admin-console` brand-lock UI, i18n 7 locales (en, bn, es, fr, de, ja, zh-CN; bn first-class ৳ numerals), contracts tag `phase-19-contracts-v1.0.0`, runbook, full cross-service verify.

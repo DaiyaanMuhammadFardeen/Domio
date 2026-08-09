@@ -19,6 +19,12 @@ import type {
   RevenueShareEvent,
   PayoutLedgerEntry,
 } from '../types.js';
+import type {
+  CreatorProfile,
+  KycSession,
+  CreatorPayoutMethod,
+  KycStatus,
+} from '../creator/types.js';
 
 // ---------------------------------------------------------------------------
 // Store interface
@@ -111,6 +117,44 @@ export interface MarketplaceStore {
 
   insertPayoutLedgerEntry(entry: PayoutLedgerEntry): Promise<void>;
   listEligiblePayoutEvents(periodMonth: string): Promise<RevenueShareEvent[]>;
+
+  // -------------------------------------------------------------------------
+  // Creator Profiles (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  createCreatorProfile(profile: CreatorProfile): Promise<void>;
+  getCreatorProfile(userId: string): Promise<CreatorProfile | null>;
+  updateCreatorProfile(
+    userId: string,
+    patch: Partial<Pick<CreatorProfile,
+      'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod' |
+      'payoutReady' | 'kycStatus' | 'onboardingState' | 'balanceCents' | 'currency' | 'updatedAt'
+    >>,
+  ): Promise<CreatorProfile>;
+  getCreatorByUserId(userId: string): Promise<CreatorProfile | null>;
+
+  // -------------------------------------------------------------------------
+  // KYC Sessions (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  createKycSession(session: KycSession): Promise<void>;
+  getKycSessionByCreator(creatorId: string): Promise<KycSession | null>;
+  updateKycSessionStatus(
+    sessionId: string,
+    status: KycStatus,
+    patch?: Partial<Pick<KycSession, 'lastPolledAt' | 'raw'>>,
+  ): Promise<KycSession>;
+
+  // -------------------------------------------------------------------------
+  // Creator Payout Methods (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  createPayoutMethod(method: CreatorPayoutMethod): Promise<void>;
+  listPayoutMethodsByCreator(creatorId: string): Promise<CreatorPayoutMethod[]>;
+  updatePayoutMethodVerified(
+    methodId: string,
+    verified: boolean,
+  ): Promise<CreatorPayoutMethod>;
 
   // -------------------------------------------------------------------------
   // Transaction support

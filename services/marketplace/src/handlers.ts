@@ -39,6 +39,13 @@ import {
   StoreNotImplementedError,
 } from './store/pg_store.js';
 import type { ChargebackEventType } from './types.js';
+import type { PayoutMethodKind } from './creator/types.js';
+import {
+  OnboardingTransitionError,
+  KycNotStartedError,
+  KycInProgressError,
+  PayoutNotReadyError,
+} from './creator/types.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -129,6 +136,18 @@ function mapError(e: unknown): HttpResponse {
   }
   if (e instanceof StoreNotImplementedError) {
     return problemDetail('Store Not Implemented', 503, e.message);
+  }
+  if (e instanceof OnboardingTransitionError) {
+    return problemDetail('Invalid Onboarding Transition', 409, e.message);
+  }
+  if (e instanceof KycNotStartedError) {
+    return problemDetail('KYC Not Started', 400, e.message);
+  }
+  if (e instanceof KycInProgressError) {
+    return problemDetail('KYC In Progress', 409, e.message);
+  }
+  if (e instanceof PayoutNotReadyError) {
+    return problemDetail('Payout Not Ready', 400, e.message);
   }
   if (e instanceof Error && e.message.includes('not found')) {
     return problemDetail('Not Found', 404, e.message);
@@ -599,6 +618,131 @@ export async function handleChargebackHandler(
 }
 
 // ---------------------------------------------------------------------------
+// GET /v1/marketplace/creators/{user_id}/profile
+// ---------------------------------------------------------------------------
+
+export async function getCreatorProfileHandler(
+  req: HttpRequest<{ user_id: string }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const profile = await ctx.service.getCreatorProfile(req.params.user_id);
+    return ok({ profile });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PATCH /v1/marketplace/creators/{user_id}/profile
+// ---------------------------------------------------------------------------
+
+export async function updateCreatorProfileHandler(
+  req: HttpRequest<{ user_id: string }, {
+    displayName?: string;
+    slug?: string;
+    bio?: string;
+    countryCode?: string;
+    payoutMethod?: string;
+  }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const profile = await ctx.service.updateCreatorProfile(req.params.user_id, req.body);
+    return ok({ profile });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/creators/{user_id}/kyc/start  (200)
+// ---------------------------------------------------------------------------
+
+export async function startKycSessionHandler(
+  req: HttpRequest<{ user_id: string }, { country_code: string }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const session = await ctx.service.startKycSession(req.params.user_id, req.body.country_code);
+    return ok({ session });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /v1/marketplace/creators/{user_id}/kyc/status  (200)
+// ---------------------------------------------------------------------------
+
+export async function getKycStatusHandler(
+  req: HttpRequest<{ user_id: string }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const result = await ctx.service.getKycStatus(req.params.user_id);
+    return ok(result);
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/creators/{user_id}/payout-methods  (201)
+// ---------------------------------------------------------------------------
+
+export async function createCreatorPayoutMethodHandler(
+  req: HttpRequest<{ user_id: string }, {
+    kind: string;
+    external_account_id: string;
+  }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const method = await ctx.service.createPayoutMethod(
+      req.params.user_id,
+      req.body.kind,
+      req.body.external_account_id,
+    );
+    return created({ method });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /v1/marketplace/creators/{user_id}/payout-methods  (200)
+// ---------------------------------------------------------------------------
+
+export async function listCreatorPayoutMethodsHandler(
+  req: HttpRequest<{ user_id: string }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const methods = await ctx.service.listPayoutMethods(req.params.user_id);
+    return ok({ methods });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// POST /v1/marketplace/creators/{user_id}/payout/connect-link  (200)
+// ---------------------------------------------------------------------------
+
+export async function getPayoutConnectLinkHandler(
+  req: HttpRequest<{ user_id: string }, { kind: PayoutMethodKind }>,
+  ctx: MarketplaceHandlerContext,
+): Promise<HttpResponse> {
+  try {
+    const link = await ctx.service.getPayoutConnectLink(req.params.user_id, req.body.kind);
+    return ok({ link });
+  } catch (e) {
+    return mapError(e);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Export handlers map
 // ---------------------------------------------------------------------------
 
@@ -625,4 +769,11 @@ export const handlers = {
   receiveBkashWebhook: receiveBkashWebhookHandler,
   receiveNagadWebhook: receiveNagadWebhookHandler,
   handleChargeback: handleChargebackHandler,
+  getCreatorProfile: getCreatorProfileHandler,
+  updateCreatorProfile: updateCreatorProfileHandler,
+  startKycSession: startKycSessionHandler,
+  getKycStatus: getKycStatusHandler,
+  createCreatorPayoutMethod: createCreatorPayoutMethodHandler,
+  listCreatorPayoutMethods: listCreatorPayoutMethodsHandler,
+  getPayoutConnectLink: getPayoutConnectLinkHandler,
 } as const;

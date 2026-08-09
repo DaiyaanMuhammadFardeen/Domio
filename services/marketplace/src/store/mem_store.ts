@@ -20,6 +20,12 @@ import {
   ListingNotFoundError,
   ReviewNotFoundError,
 } from '../types.js';
+import type {
+  CreatorProfile,
+  KycSession,
+  CreatorPayoutMethod,
+  KycStatus,
+} from '../creator/types.js';
 import type { MarketplaceStore } from './store.js';
 
 export class InMemoryMarketplaceStore implements MarketplaceStore {
@@ -31,6 +37,9 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   private readonly licenseGrants: LicenseGrant[] = [];
   private readonly revenueShareEvents: RevenueShareEvent[] = [];
   private readonly payoutLedgerEntries: PayoutLedgerEntry[] = [];
+  private readonly creatorProfiles = new Map<string, CreatorProfile>();
+  private readonly kycSessions = new Map<string, KycSession>();
+  private readonly payoutMethods = new Map<string, CreatorPayoutMethod>();
   private payoutPolicy: PayoutPolicy = {
     id: 'default',
     splitCreatorBps: 7000,
@@ -285,6 +294,90 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   }
 
   // -------------------------------------------------------------------------
+  // Creator Profiles (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async createCreatorProfile(profile: CreatorProfile): Promise<void> {
+    this.creatorProfiles.set(profile.userId, profile);
+  }
+
+  async getCreatorProfile(userId: string): Promise<CreatorProfile | null> {
+    return this.creatorProfiles.get(userId) ?? null;
+  }
+
+  async updateCreatorProfile(
+    userId: string,
+    patch: Partial<Pick<CreatorProfile,
+      'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod' |
+      'payoutReady' | 'kycStatus' | 'onboardingState' | 'balanceCents' | 'currency' | 'updatedAt'
+    >>,
+  ): Promise<CreatorProfile> {
+    const existing = this.creatorProfiles.get(userId);
+    if (!existing) throw new ListingNotFoundError(userId);
+    const updated: CreatorProfile = { ...existing, ...patch } as CreatorProfile;
+    this.creatorProfiles.set(userId, updated);
+    return updated;
+  }
+
+  async getCreatorByUserId(userId: string): Promise<CreatorProfile | null> {
+    return this.creatorProfiles.get(userId) ?? null;
+  }
+
+  // -------------------------------------------------------------------------
+  // KYC Sessions (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async createKycSession(session: KycSession): Promise<void> {
+    this.kycSessions.set(session.id, session);
+  }
+
+  async getKycSessionByCreator(creatorId: string): Promise<KycSession | null> {
+    for (const session of this.kycSessions.values()) {
+      if (session.creatorId === creatorId) return session;
+    }
+    return null;
+  }
+
+  async updateKycSessionStatus(
+    sessionId: string,
+    status: KycStatus,
+    patch?: Partial<Pick<KycSession, 'lastPolledAt' | 'raw'>>,
+  ): Promise<KycSession> {
+    const existing = this.kycSessions.get(sessionId);
+    if (!existing) throw new ListingNotFoundError(sessionId);
+    const updated: KycSession = { ...existing, status, ...patch } as KycSession;
+    this.kycSessions.set(sessionId, updated);
+    return updated;
+  }
+
+  // -------------------------------------------------------------------------
+  // Creator Payout Methods (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async createPayoutMethod(method: CreatorPayoutMethod): Promise<void> {
+    this.payoutMethods.set(method.id, method);
+  }
+
+  async listPayoutMethodsByCreator(creatorId: string): Promise<CreatorPayoutMethod[]> {
+    const results: CreatorPayoutMethod[] = [];
+    for (const method of this.payoutMethods.values()) {
+      if (method.creatorId === creatorId) results.push(method);
+    }
+    return results;
+  }
+
+  async updatePayoutMethodVerified(
+    methodId: string,
+    verified: boolean,
+  ): Promise<CreatorPayoutMethod> {
+    const existing = this.payoutMethods.get(methodId);
+    if (!existing) throw new ListingNotFoundError(methodId);
+    const updated: CreatorPayoutMethod = { ...existing, verified, updatedAt: new Date() } as CreatorPayoutMethod;
+    this.payoutMethods.set(methodId, updated);
+    return updated;
+  }
+
+  // -------------------------------------------------------------------------
   // Test helpers
   // -------------------------------------------------------------------------
 
@@ -297,5 +390,8 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
     this.licenseGrants.length = 0;
     this.revenueShareEvents.length = 0;
     this.payoutLedgerEntries.length = 0;
+    this.creatorProfiles.clear();
+    this.kycSessions.clear();
+    this.payoutMethods.clear();
   }
 }

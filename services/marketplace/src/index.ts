@@ -1,11 +1,11 @@
 /**
- * Domio marketplace-service (Phase 19 Wave 1+2).
+ * Domio marketplace-service (Phase 19 Wave 1+2+3).
  *
  * Marketplace & Creator Economy service.
  *
  * Exports:
  *  - Service, handlers, store, types, feature flags, pricing, audit,
- *    payments, license.
+ *    payments, license, creator.
  */
 
 export { MarketplaceService } from './service.js';
@@ -28,6 +28,29 @@ export type { PaymentProvider, CreateCheckoutInput, CreateCheckoutResult } from 
 // License signer (Phase 19 Wave 2)
 export { SandboxLicenseSigner, verifyLicenseToken } from './license.js';
 export type { LicenseSigner } from './license.js';
+
+// Creator module (Phase 19 Wave 3)
+export { SandboxKycProvider, SandboxPayoutConnectProvider } from './creator/providers.js';
+export { validateTransition, canSellPaidListings, ONBOARDING_TRANSITIONS } from './creator/onboarding.js';
+export { startKycSessionBody, pollKycStatusBody } from './creator/kyc.js';
+export { validatePayoutMethodKind, createPayoutMethodBody, connectLinkBody } from './creator/payout.js';
+export type {
+  CreatorProfile,
+  KycSession,
+  CreatorPayoutMethod,
+  OnboardingState,
+  KycStatus,
+  PayoutMethodKind,
+  KycProvider,
+  PayoutConnectProvider,
+} from './creator/types.js';
+export {
+  OnboardingTransitionError,
+  KycNotStartedError,
+  KycInProgressError,
+  PayoutMethodNotFoundError,
+  PayoutNotReadyError,
+} from './creator/types.js';
 
 // Types
 export type {

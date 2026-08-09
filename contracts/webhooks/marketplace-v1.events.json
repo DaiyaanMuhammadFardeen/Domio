@@ -180,6 +180,20 @@
         },
         "additionalProperties": false
       }
+    },
+    {
+      "event_type": "kyc.status_changed",
+      "description": "Emitted when a creator's KYC verification session changes status (submitted, approved, rejected, etc.).",
+      "payload": {
+        "type": "object",
+        "required": ["creator_id", "kyc_session_id", "status"],
+        "properties": {
+          "creator_id": { "type": "string", "description": "Creator whose KYC status changed." },
+          "kyc_session_id": { "type": "string", "description": "KYC session identifier." },
+          "status": { "type": "string", "enum": ["pending", "submitted", "approved", "rejected"], "description": "New KYC session status." }
+        },
+        "additionalProperties": false
+      }
     }
   ]
 }

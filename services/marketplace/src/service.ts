@@ -42,6 +42,23 @@ import type { PaymentProvider, CreateCheckoutInput } from './payments/types.js';
 import { StripeSandboxProvider, BkashSandboxProvider, NagadSandboxProvider } from './payments/providers.js';
 import type { LicenseSigner } from './license.js';
 import { SandboxLicenseSigner } from './license.js';
+import type {
+  CreatorProfile,
+  KycSession,
+  CreatorPayoutMethod,
+  OnboardingState,
+  KycProvider,
+  PayoutConnectProvider,
+  PayoutMethodKind,
+} from './creator/types.js';
+import {
+  OnboardingTransitionError,
+  KycInProgressError,
+} from './creator/types.js';
+import { SandboxKycProvider, SandboxPayoutConnectProvider } from './creator/providers.js';
+import { validateTransition } from './creator/onboarding.js';
+import { startKycSessionBody } from './creator/kyc.js';
+import { createPayoutMethodBody, connectLinkBody } from './creator/payout.js';
 
 // ---------------------------------------------------------------------------
 // Service options
@@ -60,6 +77,10 @@ export interface MarketplaceServiceOptions {
   readonly usageProvider?: UsageProvider;
   /** Audit recorder. Default: InMemoryAuditRecorder. */
   readonly auditRecorder?: AuditRecorder;
+  /** KYC provider. Default: SandboxKycProvider. */
+  readonly kycProvider?: KycProvider;
+  /** Payout connect provider. Default: SandboxPayoutConnectProvider. */
+  readonly payoutConnectProvider?: PayoutConnectProvider;
 }
 
 // ---------------------------------------------------------------------------
@@ -74,6 +95,8 @@ export class MarketplaceService {
   private readonly licenseSigner: LicenseSigner;
   private readonly usageProvider: UsageProvider;
   private readonly auditRecorder: AuditRecorder;
+  private readonly kycProvider: KycProvider;
+  private readonly payoutConnectProvider: PayoutConnectProvider;
 
   constructor(opts: MarketplaceServiceOptions) {
     if (!opts.store) throw new Error('MarketplaceService: store is required');
@@ -88,6 +111,8 @@ export class MarketplaceService {
     this.licenseSigner = opts.licenseSigner ?? new SandboxLicenseSigner();
     this.usageProvider = opts.usageProvider ?? defaultUsageProvider;
     this.auditRecorder = opts.auditRecorder ?? new InMemoryAuditRecorder(opts.store);
+    this.kycProvider = opts.kycProvider ?? new SandboxKycProvider();
+    this.payoutConnectProvider = opts.payoutConnectProvider ?? new SandboxPayoutConnectProvider();
   }
 
   private idGen(): string {
@@ -799,5 +824,223 @@ export class MarketplaceService {
       return (payload.payment_token as string) ?? (payload.provider_intent_id as string) ?? null;
     }
     return null;
+  }
+
+  // -------------------------------------------------------------------------
+  // Creator Profile (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async getCreatorProfile(userId: string): Promise<CreatorProfile> {
+    checkFeature(FEATURE_FLAGS.kyc);
+
+    let profile = await this.store.getCreatorProfile(userId);
+    if (!profile) {
+      // Auto-create with defaults
+      const now = this.now();
+      profile = {
+        id: this.idGen(),
+        userId,
+        displayName: null,
+        slug: null,
+        bio: null,
+        countryCode: null,
+        payoutMethod: null,
+        payoutReady: false,
+        kycStatus: 'pending',
+        onboardingState: 'pending',
+        balanceCents: 0,
+        currency: 'USD',
+        createdAt: now,
+        updatedAt: now,
+      };
+      await this.store.createCreatorProfile(profile);
+    }
+    return profile;
+  }
+
+  async updateCreatorProfile(
+    userId: string,
+    patch: Partial<Pick<CreatorProfile,
+      'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod'
+    >>,
+  ): Promise<CreatorProfile> {
+    checkFeature(FEATURE_FLAGS.kyc);
+
+    const profile = await this.getCreatorProfile(userId);
+    const currentState = profile.onboardingState;
+
+    // Determine if profile fields are complete
+    const displayName = patch.displayName ?? profile.displayName;
+    const slug = patch.slug ?? profile.slug;
+    const countryCode = patch.countryCode ?? profile.countryCode;
+
+    let nextState: OnboardingState = currentState;
+    if (currentState === 'pending' && displayName && slug && countryCode) {
+      nextState = 'profile_complete';
+    }
+
+    // Validate transition
+    if (nextState !== currentState) {
+      validateTransition(currentState, nextState);
+    }
+
+    const now = this.now();
+    const updated = await this.store.updateCreatorProfile(userId, {
+      ...patch,
+      onboardingState: nextState,
+      updatedAt: now,
+    });
+
+    // Emit event if state changed
+    if (nextState !== currentState) {
+      await this.emitter.publish('creator.onboardingStateChanged', {
+        event_id: this.idGen(),
+        event_type: 'creator.onboardingStateChanged',
+        ts_ms: now.getTime(),
+        workspace_id: userId,
+        actor_id: userId,
+        actor_type: 'member',
+        payload: { from: currentState, to: nextState, user_id: userId },
+      });
+    }
+
+    return updated;
+  }
+
+  // -------------------------------------------------------------------------
+  // KYC (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async startKycSession(userId: string, countryCode: string): Promise<KycSession> {
+    checkFeature(FEATURE_FLAGS.kyc);
+
+    const profile = await this.getCreatorProfile(userId);
+    const currentState = profile.onboardingState;
+
+    // Must be profile_complete
+    if (currentState !== 'profile_complete') {
+      throw new OnboardingTransitionError(currentState, 'kyc_submitted');
+    }
+
+    // Check for existing open session
+    const existingSession = await this.store.getKycSessionByCreator(profile.id);
+    if (existingSession && existingSession.status !== 'rejected') {
+      throw new KycInProgressError();
+    }
+
+    // Start KYC session
+    const result = await this.kycProvider.startSession({
+      creator_id: profile.id,
+      country_code: countryCode,
+    });
+
+    const now = this.now();
+    const session: KycSession = {
+      id: this.idGen(),
+      creatorId: profile.id,
+      vendor: 'sandbox',
+      vendorSessionId: result.vendor_session_id,
+      status: 'submitted',
+      lastPolledAt: null,
+      raw: null,
+      createdAt: now,
+    };
+
+    await this.store.createKycSession(session);
+
+    // Advance onboarding state
+    const { nextState } = startKycSessionBody(currentState);
+    await this.store.updateCreatorProfile(userId, {
+      onboardingState: nextState,
+      kycStatus: 'submitted',
+      updatedAt: now,
+    });
+
+    // Emit event
+    await this.emitter.publish('kyc.status_changed', {
+      event_id: this.idGen(),
+      event_type: 'kyc.status_changed',
+      ts_ms: now.getTime(),
+      workspace_id: userId,
+      actor_id: userId,
+      actor_type: 'member',
+      payload: {
+        creator_id: profile.id,
+        kyc_session_id: session.id,
+        status: 'submitted',
+      },
+    });
+
+    return session;
+  }
+
+  async getKycStatus(userId: string): Promise<{ session: KycSession | null; profile: CreatorProfile }> {
+    checkFeature(FEATURE_FLAGS.kyc);
+
+    const profile = await this.getCreatorProfile(userId);
+    const session = await this.store.getKycSessionByCreator(profile.id);
+    return { session, profile };
+  }
+
+  // -------------------------------------------------------------------------
+  // Payout Methods (Phase 19 Wave 3)
+  // -------------------------------------------------------------------------
+
+  async createPayoutMethod(
+    userId: string,
+    kind: string,
+    externalAccountId: string,
+  ): Promise<CreatorPayoutMethod> {
+    checkFeature(FEATURE_FLAGS.payout);
+
+    const profile = await this.getCreatorProfile(userId);
+    const currentState = profile.onboardingState;
+
+    // Validate input
+    createPayoutMethodBody(currentState, kind, externalAccountId);
+
+    const now = this.now();
+    const method: CreatorPayoutMethod = {
+      id: this.idGen(),
+      creatorId: profile.id,
+      kind: kind as PayoutMethodKind,
+      externalAccountId,
+      verified: false,
+      metadata: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await this.store.createPayoutMethod(method);
+
+    // Update profile payout method
+    await this.store.updateCreatorProfile(userId, {
+      payoutMethod: kind,
+      updatedAt: now,
+    });
+
+    return method;
+  }
+
+  async listPayoutMethods(userId: string): Promise<CreatorPayoutMethod[]> {
+    checkFeature(FEATURE_FLAGS.payout);
+
+    const profile = await this.getCreatorProfile(userId);
+    return this.store.listPayoutMethodsByCreator(profile.id);
+  }
+
+  async getPayoutConnectLink(userId: string, kind: PayoutMethodKind): Promise<{ connect_url: string; expires_at: Date }> {
+    checkFeature(FEATURE_FLAGS.payout);
+
+    const profile = await this.getCreatorProfile(userId);
+    const currentState = profile.onboardingState;
+
+    // Validate state
+    connectLinkBody(currentState);
+
+    return this.payoutConnectProvider.getConnectLink({
+      creator_id: profile.id,
+      kind,
+    });
   }
 }

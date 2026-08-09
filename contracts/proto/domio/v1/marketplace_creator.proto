@@ -32,6 +32,18 @@ enum KycStatus {
   KYC_STATUS_EXPIRED = 4;
 }
 
+// OnboardingState tracks the creator onboarding funnel.
+enum OnboardingState {
+  ONBOARDING_STATE_UNSPECIFIED = 0;
+  ONBOARDING_STATE_PENDING = 1;
+  ONBOARDING_STATE_PROFILE_COMPLETE = 2;
+  ONBOARDING_STATE_KYC_REQUIRED = 3;
+  ONBOARDING_STATE_KYC_SUBMITTED = 4;
+  ONBOARDING_STATE_KYC_APPROVED = 5;
+  ONBOARDING_STATE_PAYOUT_READY = 6;
+  ONBOARDING_STATE_ACTIVE = 7;
+}
+
 // -----------------------------------------------------------------------------
 // Messages
 // -----------------------------------------------------------------------------
@@ -52,6 +64,7 @@ message CreatorProfile {
   string currency = 11;     // ISO 4217 char(3)
   int64 created_at_ms = 12;
   int64 updated_at_ms = 13;
+  OnboardingState onboarding_state = 14;
 }
 
 // CreatorPayoutMethod represents a payout instrument bound to a creator.
