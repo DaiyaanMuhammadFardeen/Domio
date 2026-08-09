@@ -308,6 +308,25 @@ const en: I18nDict = {
   'p12.copilot.deleteSlide': 'Delete slide',
   'p12.copilot.chartType': 'Chart type',
   'p12.copilot.newOutline': 'Start new outline',
+
+  // Phase 19 — Marketplace
+  'marketplace.title': 'Marketplace',
+  'marketplace.searchPlaceholder': 'Search marketplace…',
+  'marketplace.kindFilter': 'Kind',
+  'marketplace.all': 'All',
+  'marketplace.loading': 'Loading marketplace…',
+  'marketplace.error': 'Unable to load marketplace listings.',
+  'marketplace.selectBrandKit': 'Select a brand kit to browse curated listings.',
+  'marketplace.itemsCount': '{count} listings',
+  'marketplace.noResults': 'No listings match "{query}".',
+  'marketplace.insert': 'Insert',
+  'marketplace.locked': 'Locked',
+  'marketplace.freeBadge': 'Free',
+  'marketplace.brandLocked': 'Locked by brand policy',
+  'marketplace.brandOverride': 'Brand price applied',
+  'marketplace.lockedInsertDisabled': 'This listing is locked by your brand policy',
+  'marketplace.offlineCache': 'Offline — showing cached listings',
+  'marketplace.changelog': 'Changelog',
 };
 
 const bn: I18nDict = {
@@ -578,6 +597,25 @@ const bn: I18nDict = {
   'p12.copilot.deleteSlide': 'স্লাইড মুছুন',
   'p12.copilot.chartType': 'চার্ট ধরন',
   'p12.copilot.newOutline': 'নতুন রূপরেখা শুরু করুন',
+
+  // Phase 19 — Marketplace
+  'marketplace.title': 'মার্কেটপ্লেস',
+  'marketplace.searchPlaceholder': 'মার্কেটপ্লেসে অনুসন্ধান করুন…',
+  'marketplace.kindFilter': 'ধরন',
+  'marketplace.all': 'সব',
+  'marketplace.loading': 'মার্কেটপ্লেস লোড হচ্ছে…',
+  'marketplace.error': 'মার্কেটপ্লেস লোড করা যায়নি।',
+  'marketplace.selectBrandKit': 'কিউরেটেড তালিকা দেখতে একটি ব্র্যান্ড কিট নির্বাচন করুন।',
+  'marketplace.itemsCount': '{count}টি তালিকা',
+  'marketplace.noResults': '"{query}" কোনো তালিকা মেলেনি।',
+  'marketplace.insert': 'ঢোকান',
+  'marketplace.locked': 'লক',
+  'marketplace.freeBadge': 'বিনামূল্যে',
+  'marketplace.brandLocked': 'ব্র্যান্ড নীতিতে লক',
+  'marketplace.brandOverride': 'ব্র্যান্ড মূল্য প্রয়োগ করা হয়েছে',
+  'marketplace.lockedInsertDisabled': 'আপনার ব্র্যান্ড নীতি দ্বারা এই তালিকা লক করা হয়েছে',
+  'marketplace.offlineCache': 'অফলাইন — ক্যাশ করা তালিকা দেখাচ্ছে',
+  'marketplace.changelog': 'পরিবর্তনের তালিকা',
 };
 
 const es: I18nDict = {
@@ -848,6 +886,25 @@ const es: I18nDict = {
   'p12.copilot.deleteSlide': 'Eliminar diapositiva',
   'p12.copilot.chartType': 'Tipo de gráfico',
   'p12.copilot.newOutline': 'Nuevo esquema',
+
+  // Phase 19 — Marketplace
+  'marketplace.title': 'Mercado',
+  'marketplace.searchPlaceholder': 'Buscar en el mercado…',
+  'marketplace.kindFilter': 'Tipo',
+  'marketplace.all': 'Todo',
+  'marketplace.loading': 'Cargando mercado…',
+  'marketplace.error': 'No se pudieron cargar los listados del mercado.',
+  'marketplace.selectBrandKit': 'Selecciona un kit de marca para ver los listados curados.',
+  'marketplace.itemsCount': '{count} listados',
+  'marketplace.noResults': 'No hay listados que coincidan con "{query}".',
+  'marketplace.insert': 'Insertar',
+  'marketplace.locked': 'Bloqueado',
+  'marketplace.freeBadge': 'Gratis',
+  'marketplace.brandLocked': 'Bloqueado por política de marca',
+  'marketplace.brandOverride': 'Precio de marca aplicado',
+  'marketplace.lockedInsertDisabled': 'Este listado está bloqueado por la política de tu marca',
+  'marketplace.offlineCache': 'Sin conexión — mostrando listados en caché',
+  'marketplace.changelog': 'Registro de cambios',
 };
 
 const fr: I18nDict = {
@@ -1118,6 +1175,25 @@ const fr: I18nDict = {
   'p12.copilot.deleteSlide': 'Supprimer la diapositive',
   'p12.copilot.chartType': 'Type de graphique',
   'p12.copilot.newOutline': 'Nouveau plan',
+
+  // Phase 19 — Marketplace
+  'marketplace.title': 'Place de marché',
+  'marketplace.searchPlaceholder': 'Rechercher sur la place de marché…',
+  'marketplace.kindFilter': 'Type',
+  'marketplace.all': 'Tout',
+  'marketplace.loading': 'Chargement de la place de marché…',
+  'marketplace.error': 'Impossible de charger les annonces de la place de marché.',
+  'marketplace.selectBrandKit': 'Sélectionnez un kit de marque pour parcourir les annonces sélectionnées.',
+  'marketplace.itemsCount': '{count} annonces',
+  'marketplace.noResults': 'Aucune annonce ne correspond à « {query} ».',
+  'marketplace.insert': 'Insérer',
+  'marketplace.locked': 'Verrouillé',
+  'marketplace.freeBadge': 'Gratuit',
+  'marketplace.brandLocked': 'Verrouillé par la politique de marque',
+  'marketplace.brandOverride': 'Prix de marque appliqué',
+  'marketplace.lockedInsertDisabled': 'Cette annonce est verrouillée par la politique de votre marque',
+  'marketplace.offlineCache': 'Hors ligne — affichage des annonces en cache',
+  'marketplace.changelog': 'Journal des modifications',
 };
 
 const de: I18nDict = {
@@ -1388,6 +1464,25 @@ const de: I18nDict = {
   'p12.copilot.deleteSlide': 'Folie löschen',
   'p12.copilot.chartType': 'Diagrammtyp',
   'p12.copilot.newOutline': 'Neue Gliederung',
+
+  // Phase 19 — Marketplace
+  'marketplace.title': 'Marktplatz',
+  'marketplace.searchPlaceholder': 'Im Marktplatz suchen…',
+  'marketplace.kindFilter': 'Art',
+  'marketplace.all': 'Alle',
+  'marketplace.loading': 'Marktplatz wird geladen…',
+  'marketplace.error': 'Marktplatz-Angebote konnten nicht geladen werden.',
+  'marketplace.selectBrandKit': 'Wählen Sie ein Brand-Kit aus, um kuratierte Angebote zu durchsuchen.',
+  'marketplace.itemsCount': '{count} Angebote',
+  'marketplace.noResults': 'Keine Angebote passen zu „{query}".',
+  'marketplace.insert': 'Einfügen',
+  'marketplace.locked': 'Gesperrt',
+  'marketplace.freeBadge': 'Kostenlos',
+  'marketplace.brandLocked': 'Durch Brand-Richtlinie gesperrt',
+  'marketplace.brandOverride': 'Brand-Preis angewendet',
+  'marketplace.lockedInsertDisabled': 'Dieses Angebot ist durch Ihre Brand-Richtlinie gesperrt',
+  'marketplace.offlineCache': 'Offline — Zwischengespeicherte Angebote werden angezeigt',
+  'marketplace.changelog': 'Änderungsprotokoll',
 };
 
 const ja: I18nDict = {
@@ -1658,6 +1753,25 @@ const ja: I18nDict = {
   'p12.copilot.deleteSlide': 'スライドを削除',
   'p12.copilot.chartType': 'チャートタイプ',
   'p12.copilot.newOutline': '新しいアウトライン',
+
+  // Phase 19 — Marketplace
+  'marketplace.title': 'マーケットプレイス',
+  'marketplace.searchPlaceholder': 'マーケットプレイスを検索…',
+  'marketplace.kindFilter': '種類',
+  'marketplace.all': 'すべて',
+  'marketplace.loading': 'マーケットプレイスを読み込み中…',
+  'marketplace.error': 'マーケットプレイスのリスティングを読み込めませんでした。',
+  'marketplace.selectBrandKit': 'キュレーションされたリスティングを表示するには、ブランドキットを選択してください。',
+  'marketplace.itemsCount': '{count}件のリスティング',
+  'marketplace.noResults': '"{query}"に一致するリスティングはありません。',
+  'marketplace.insert': '挿入',
+  'marketplace.locked': 'ロック済み',
+  'marketplace.freeBadge': '無料',
+  'marketplace.brandLocked': 'ブランドポリシーによりロック済み',
+  'marketplace.brandOverride': 'ブランド価格が適用されています',
+  'marketplace.lockedInsertDisabled': 'このリスティングはブランドポリシーによりロックされています',
+  'marketplace.offlineCache': 'オフライン — キャッシュされたリスティングを表示中',
+  'marketplace.changelog': '変更履歴',
 };
 
 const zhCN: I18nDict = {
@@ -1928,6 +2042,25 @@ const zhCN: I18nDict = {
   'p12.copilot.deleteSlide': '删除幻灯片',
   'p12.copilot.chartType': '图表类型',
   'p12.copilot.newOutline': '新建大纲',
+
+  // Phase 19 — Marketplace
+  'marketplace.title': '市场',
+  'marketplace.searchPlaceholder': '搜索市场…',
+  'marketplace.kindFilter': '类型',
+  'marketplace.all': '全部',
+  'marketplace.loading': '加载市场中…',
+  'marketplace.error': '无法加载市场列表。',
+  'marketplace.selectBrandKit': '请选择品牌套件以浏览精选列表。',
+  'marketplace.itemsCount': '{count} 个列表',
+  'marketplace.noResults': '没有与 "{query}" 匹配的列表。',
+  'marketplace.insert': '插入',
+  'marketplace.locked': '已锁定',
+  'marketplace.freeBadge': '免费',
+  'marketplace.brandLocked': '品牌策略已锁定',
+  'marketplace.brandOverride': '品牌价格已应用',
+  'marketplace.lockedInsertDisabled': '此列表已被品牌策略锁定',
+  'marketplace.offlineCache': '离线 — 显示缓存的列表',
+  'marketplace.changelog': '更新日志',
 };
 
 const DICTS: Record<Locale, I18nDict> = { en, bn, es, fr, de, ja, 'zh-CN': zhCN };

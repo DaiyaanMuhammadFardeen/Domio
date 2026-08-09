@@ -1,0 +1,29 @@
+{
+  "name": "@domio/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Internationalization utilities — locale definitions, currency formatting (with Bengali numeral support), and pluralization for the Domio marketplace frontend.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo coverage"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "eslint": "9.17.0",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  },
+  "engines": {
+    "node": ">=22.11.0"
+  }
+}

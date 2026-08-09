@@ -60,6 +60,46 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
+  apps/admin-console:
+    dependencies:
+      lucide-react:
+        specifier: ^0.469.0
+        version: 0.469.0(react@19.0.0)
+      next:
+        specifier: 15.1.3
+        version: 15.1.3(@babel/core@7.29.7)(@playwright/test@1.62.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.2
+        version: 19.0.2(@types/react@19.0.1)
+      autoprefixer:
+        specifier: ^10.5.4
+        version: 10.5.4(postcss@8.5.25)
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      postcss:
+        specifier: ^8.5.25
+        version: 8.5.25
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19(tsx@4.19.2)(yaml@2.9.0)
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+
   apps/api:
     dependencies:
       '@domio/annotation-engine':
@@ -141,6 +181,55 @@ importers:
       vitest:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  apps/creator-console:
+    dependencies:
+      '@domio/chart':
+        specifier: workspace:*
+        version: link:../../packages/chart
+      '@domio/i18n':
+        specifier: workspace:^
+        version: link:../../packages/i18n
+      lucide-react:
+        specifier: ^0.469.0
+        version: 0.469.0(react@19.0.0)
+      next:
+        specifier: 15.1.3
+        version: 15.1.3(@babel/core@7.29.7)(@playwright/test@1.62.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.2
+        version: 19.0.2(@types/react@19.0.1)
+      autoprefixer:
+        specifier: ^10.5.4
+        version: 10.5.4(postcss@8.5.25)
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      postcss:
+        specifier: ^8.5.25
+        version: 8.5.25
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19(tsx@4.19.2)(yaml@2.9.0)
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
 
   apps/dashboard:
     dependencies:
@@ -437,6 +526,43 @@ importers:
       '@types/react-dom':
         specifier: 19.0.2
         version: 19.0.2(@types/react@19.0.1)
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+
+  apps/marketplace-web:
+    dependencies:
+      '@domio/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      next:
+        specifier: 15.1.3
+        version: 15.1.3(@babel/core@7.29.7)(@playwright/test@1.62.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.2
+        version: 19.0.2(@types/react@19.0.1)
+      autoprefixer:
+        specifier: ^10.5.4
+        version: 10.5.4(postcss@8.5.25)
+      postcss:
+        specifier: ^8.5.25
+        version: 8.5.25
+      tailwindcss:
+        specifier: ^3.4.17
+        version: 3.4.19(tsx@4.19.2)(yaml@2.9.0)
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -773,6 +899,21 @@ importers:
 
   packages/formula-engine:
     devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
+      vitest:
+        specifier: 2.1.8
+        version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
+
+  packages/i18n:
+    devDependencies:
+      '@types/node':
+        specifier: 22.10.1
+        version: 22.10.1
+      eslint:
+        specifier: 9.17.0
+        version: 9.17.0(jiti@1.21.7)
       typescript:
         specifier: 5.7.2
         version: 5.7.2

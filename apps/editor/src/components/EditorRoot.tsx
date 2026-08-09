@@ -74,6 +74,7 @@ import { ShareStateButton, type ShareStateButtonCurrentState } from '../componen
 import { AuditTrail, type AuditEntryView } from './prototyping/agent/AuditTrail';
 import { NlPatchPanel, type NlToolCallSummary } from '../panels/nl-patch-panel';
 import { DeckDiffPanel, type DeckDiffEntry } from '../panels/deck-diff-panel';
+import { MarketplacePanel } from '../panels/marketplace-panel';
 import { CommentPins } from '../collab/comment-pins';
 import { ApprovalBanner } from '../collab/approval-banner';
 import { AssignmentPanel } from '../collab/assignment-panel';
@@ -158,6 +159,7 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     | 'm11-licenses'
     | 'm11-recording'
     | 'p12-copilot'
+    | 'marketplace'
   >('layers');
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | null>(null);
   const [promoteOpen, setPromoteOpen] = useState(false);
@@ -1288,6 +1290,16 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
             >
               Copilot
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={leftTab === 'marketplace'}
+              className={`side-tab${leftTab === 'marketplace' ? ' is-active' : ''}`}
+              onClick={() => setLeftTab('marketplace')}
+              data-testid="tab-marketplace"
+            >
+              Marketplace
+            </button>
           </div>
           {leftTab === 'layers'
             ? activeSlide
@@ -1508,7 +1520,14 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
                                               ? (
                                                   <OutlineApproval />
                                                 )
-                                              : (
+                                              : leftTab === 'marketplace'
+                                                ? (
+                                                    <MarketplacePanel
+                                                      onInsert={handleInsertComponent}
+                                                      brandKitId={activeBrandKitId}
+                                                    />
+                                                  )
+                                                : (
                         <ThemeBrandPanel
                           themes={PHASE_07_THEMES}
                           activeThemeId={activeThemeId}

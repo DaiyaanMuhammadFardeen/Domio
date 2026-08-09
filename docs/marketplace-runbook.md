@@ -1,6 +1,6 @@
 # Domio Marketplace Runbook (Phase 19)
 
-Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 complete (2026-08-09)** — Money-moving (checkout, refund, chargeback). **Wave 3 complete (2026-08-09)** — Creator economy (onboarding, KYC, payouts, FX, analytics). **Wave 4 complete (2026-08-09)** — Trust, curation, integrations. Remaining: Wave 5.
+Status: **Phase 19 complete (2026-08-09)** — all 9 workstreams WS-MKT-1..9 shipped across 5 waves. Wave 1: Foundation + core domain. Wave 2: Money-moving (checkout, refund, chargeback). Wave 3: Creator economy (onboarding, KYC, payouts, FX, analytics). Wave 4: Trust, curation, integrations. Wave 5: Frontend (marketplace-web, creator-console, admin-console, editor panel, i18n).
 
 ## What Wave 1 shipped
 
@@ -107,6 +107,22 @@ Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 
 8. KYC real Persona/Sumsub + kyc-webhook receiver later (SandboxKycClient deterministic now).
 9. statement_record payload structured JSON (real PDF generation deferred).
 
-## Waves remaining
+## What Wave 5 shipped (Frontend + finalize, WS-MKT-1)
 
-- **Wave 5 — Frontend + finalize (WS-MKT-1 + cross-cutting)**: `apps/marketplace-web` storefront (SSR facets, LCP ≤2s, Lighthouse ≥90), editor Insert→Marketplace panel re-skin (brand-locked overlay), `apps/creator-console` studio (drag-upload, manifest, price, license) + analytics + statements, `apps/admin-console` brand-lock UI, i18n 7 locales (en, bn, es, fr, de, ja, zh-CN; bn first-class ৳ numerals), contracts tag `phase-19-contracts-v1.0.0`, runbook, full cross-service verify.
+- **`apps/marketplace-web`** (`@domio/marketplace-web`) — storefront: home (hero, search, facet sidebar kind + price tier, curated/featured, listing grid with ৳ bn-first currency) + `/listing/[slug]` (preview, price + license, Buy/Install CTA → createPurchase, reviews listMarketplaceReviews, changelog getMarketplaceListingChangelog, related listings) + purchase state. SSR for LCP ≤2s. Dark theme: Space Grotesk (display) + DM Sans (body), canonical tokens (--bg #0a0e14, --accent #58a6ff), gold ratings, skeleton shimmer, staggered grid reveal, responsive 1→2→3 col. i18n via app-local lib/i18n.ts (editor useT pattern; bn full Bengali + ৳ + toBengaliDigits). `npx tsc --noEmit` clean + `next build` passes (/ 4.67 KB, /listing/[slug] 5.58 KB). Deviations: hand-rolled CSS (no MagicUI MCP needed), curated data fetched but not yet visually surfaced on home, slug = listing ID (API has no slugs).
+- **`apps/creator-console`** (`@domio/creator-console`) — dashboard shell LIFTED from apps/dashboard (Sidebar/Header/KpiTile/Badge/SortableTable/Sparkline); pages `/listings` (table + create flow: kind selector, manifest, price model free|one_time|subscription|team_seats|enterprise_quote, license scopes, submit/publish), `/analytics` (getCreatorAnalytics KPI tiles + top geos), `/statements` (listCreatorStatements/generate), `/settings` (getCreatorProfile/update, KYC startKycSession/getKycStatus, payout methods + connect link). `npx tsc --noEmit` clean. Deviation: seller_id hardcoded 'current-user' (real auth context later).
+- **`apps/admin-console`** (`@domio/admin-console`) — brand-locks page (listBrandLocks + getCuratedMarketplaceListings; createBrandLock allow|deny|override_price_cents; deleteBrandLock; CSV bulk-import client-side placeholder), takedowns queue (listTakedownRequests status/kind badges, detail drawer, resolveTakedownRequest confirmed|dismissed + notes, submitCounterNotice), trust scores, payout policy (getPayoutPolicy stat cards split 7000/3000 / min 5000 / hold 30 + listPayoutRuns), KPI overview. `npx tsc --noEmit` clean. KpiTile gained 'danger' tone; Badge tone mappers (brand-lock/takedown-status/kind/payout/listing); SortableTable format col accepts ReactElement.
+- **Editor Insert→Marketplace panel** — `apps/editor/src/panels/marketplace-panel.tsx` {onInsert(catalogId, version?), brandKitId?}: injected fetchListings (default GET /v1/marketplace/curated?brand_kit_id=...), search + kind filters, grid reusing magic-card.tsx + marquee.tsx, Insert button, changelog/version, STALE-CACHE localStorage last-good + offline-cache note, BRAND-LOCKED OVERLAY (denied → locked badge + disabled Insert; override → override price + Insert allowed; handles allow|deny|override defensively). EditorRoot.tsx wired (import :77, tab type 'marketplace' :162, tab button :1296-1299 data-testid=tab-marketplace, panel branch :1523). Typecheck: 3 pre-existing @domio/audience-service errors, 0 new.
+- **`packages/i18n`** (`@domio/i18n`) — 7 locales en|bn|es|fr|de|ja|zh-CN: locales.ts (SUPPORTED_LOCALES, DEFAULT_LOCALE en, isLocaleId), bengali-digits.ts (toBengaliDigits ASCII 0-9→০-৯), pluralization.ts (CLDR; bn one/other, ja/zh-CN other-only), format-currency.ts (formatCurrency(amountCents, BDT|USD|EUR, locale)), formatNumber/formatDate. 39/39 tests, tsc clean. tsconfig.base.json + @domio/i18n path aliases.
+
+## Follow-ups (final)
+
+1. Real vendor adapters (Stripe/bKash/Nagad/KYC/FX) — sandbox providers + narrow interfaces shipped; real providers later (P18 vendor-adapter pattern).
+2. Partner API: REST handlers + OAuth 2.1 token issuance not yet wired to apps (verifyClient/checkScope/rate-limit primitives exist in services/marketplace).
+3. MCP tools delivered: get_listing/search_listings/install_listing/purchase_marketplace/get_reviews/get_creator_profile; get_license_grant/request_refund/get_payout_status/file_takedown/lint_marketplace_listing optional (service methods exist).
+4. webhook_delivery outbound sender is in-memory scaffold — real HTTP sender later.
+5. Migrations 0079–0091 not yet applied to a live DB — run `make migrate-up` before exercising services.
+6. Verified-buyer review gate still in-memory license check — real license_grant lookup later.
+7. statement_record payload is structured JSON — real PDF generation later.
+8. marketplace-web: curated surface + slug generation pending; creator-console seller_id real auth context pending.
+9. `payout_executor_enabled` flag doc-only — wire to gate payout-executor worker.
