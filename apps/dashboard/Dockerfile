@@ -12,22 +12,25 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # Copy workspace manifests.
-COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
 
-# Copy package manifests for all workspaces we touch so install is
-# hermetic. The find picks up every package.json; we only ship the
-# dashboard's tree in the runtime stage below.
+# Copy every workspace's package.json so pnpm can resolve transitive
+# workspace deps regardless of what the dashboard pulls in.
 COPY apps/dashboard/package.json ./apps/dashboard/
-COPY packages/chart/package.json ./packages/chart/ 2>/dev/null || true
-COPY packages/observability/package.json ./packages/observability/ 2>/dev/null || true
+COPY packages packages
 
 RUN pnpm install --frozen-lockfile || pnpm install
 
 # Copy source for the dashboard and its workspace dependencies.
+# .dockerignore excludes node_modules, .turbo, dist, coverage.
 COPY apps/dashboard ./apps/dashboard
-COPY packages/chart ./packages/chart 2>/dev/null || true
-COPY packages/observability ./packages/observability 2>/dev/null || true
+COPY packages packages
 COPY tsconfig.base.json ./tsconfig.base.json
+
+# Build @domio/web-security first — its package.json `main` points at
+# dist/index.js so node ESM (used to load next.config.mjs) can resolve
+# it without needing to strip TypeScript.
+RUN pnpm --filter @domio/web-security build
 
 # Build.
 RUN pnpm --filter @domio/dashboard build
@@ -42,12 +45,12 @@ RUN groupadd --system domio && useradd --system --gid domio domio
 
 # Copy the production build artifacts.
 COPY --from=builder /app/apps/dashboard/.next ./apps/dashboard/.next
-COPY --from=builder /app/apps/dashboard/public ./apps/dashboard/public 2>/dev/null || true
 COPY --from=builder /app/apps/dashboard/package.json ./apps/dashboard/package.json
 COPY --from=builder /app/apps/dashboard/next.config.mjs ./apps/dashboard/next.config.mjs
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=builder /app/packages ./packages
 
 WORKDIR /app/apps/dashboard

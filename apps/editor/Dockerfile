@@ -15,48 +15,25 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # Copy workspace manifests.
-COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
 
-# Copy package manifests for every workspace the editor touches.
-# The `2>/dev/null || true` keeps the COPY resilient if a workspace
-# is missing in a sparse-checkout / monorepo-split setup.
+# Copy every workspace's package.json so pnpm can resolve transitive
+# workspace deps regardless of what the editor pulls in.
 COPY apps/editor/package.json ./apps/editor/
-COPY packages/api-client/package.json ./packages/api-client/ 2>/dev/null || true
-COPY packages/canvas/package.json ./packages/canvas/ 2>/dev/null || true
-COPY packages/common/package.json ./packages/common/ 2>/dev/null || true
-COPY packages/components/package.json ./packages/components/ 2>/dev/null || true
-COPY packages/deep-link/package.json ./packages/deep-link/ 2>/dev/null || true
-COPY packages/i18n/package.json ./packages/i18n/ 2>/dev/null || true
-COPY packages/observability/package.json ./packages/observability/ 2>/dev/null || true
-COPY packages/prototype-runtime/package.json ./packages/prototype-runtime/ 2>/dev/null || true
-COPY packages/recording/package.json ./packages/recording/ 2>/dev/null || true
-COPY packages/recording-extensions/package.json ./packages/recording-extensions/ 2>/dev/null || true
-COPY packages/object-store/package.json ./packages/object-store/ 2>/dev/null || true
-COPY packages/schema/package.json ./packages/schema/ 2>/dev/null || true
-COPY packages/schema-prop/package.json ./packages/schema-prop/ 2>/dev/null || true
-COPY packages/sdk/package.json ./packages/sdk/ 2>/dev/null || true
-COPY packages/yjs-shared/package.json ./packages/yjs-shared/ 2>/dev/null || true
+COPY packages packages
 
 RUN pnpm install --frozen-lockfile || pnpm install
 
 # Copy source for the editor and its workspace dependencies.
+# .dockerignore excludes node_modules, .turbo, dist, coverage.
 COPY apps/editor ./apps/editor
-COPY packages/api-client ./packages/api-client 2>/dev/null || true
-COPY packages/canvas ./packages/canvas 2>/dev/null || true
-COPY packages/common ./packages/common 2>/dev/null || true
-COPY packages/components ./packages/components 2>/dev/null || true
-COPY packages/deep-link ./packages/deep-link 2>/dev/null || true
-COPY packages/i18n ./packages/i18n 2>/dev/null || true
-COPY packages/observability ./packages/observability 2>/dev/null || true
-COPY packages/prototype-runtime ./packages/prototype-runtime 2>/dev/null || true
-COPY packages/recording ./packages/recording 2>/dev/null || true
-COPY packages/recording-extensions ./packages/recording-extensions 2>/dev/null || true
-COPY packages/object-store ./packages/object-store 2>/dev/null || true
-COPY packages/schema ./packages/schema 2>/dev/null || true
-COPY packages/schema-prop ./packages/schema-prop 2>/dev/null || true
-COPY packages/sdk ./packages/sdk 2>/dev/null || true
-COPY packages/yjs-shared ./packages/yjs-shared 2>/dev/null || true
+COPY packages packages
 COPY tsconfig.base.json ./tsconfig.base.json
+
+# Build @domio/web-security first — its package.json `main` points at
+# dist/index.js so node ESM (used to load next.config.mjs) can resolve
+# it without needing to strip TypeScript.
+RUN pnpm --filter @domio/web-security build
 
 # Build.
 RUN pnpm --filter @domio/editor build
@@ -71,12 +48,12 @@ RUN groupadd --system domio && useradd --system --gid domio domio
 
 # Copy the production build artifacts.
 COPY --from=builder /app/apps/editor/.next ./apps/editor/.next
-COPY --from=builder /app/apps/editor/public ./apps/editor/public 2>/dev/null || true
 COPY --from=builder /app/apps/editor/package.json ./apps/editor/package.json
-COPY --from=builder /app/apps/editor/next.config.mjs ./apps/editor/next.config.mjs 2>/dev/null || true
+COPY --from=builder /app/apps/editor/next.config.mjs ./apps/editor/next.config.mjs
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=builder /app/packages ./packages
 
 WORKDIR /app/apps/editor

@@ -7,12 +7,14 @@
  * Supported categories per locale:
  *  - `en`, `es`, `de`, `fr`: `one` | `other`  (standard CLDR)
  *  - `bn`:                  `one` | `other`  (Bengali: singular / plural)
+ *  - `ar`:                  `zero` | `one` | `two` | `few` | `many` | `other`  (full CLDR)
+ *  - `ur`:                  `one` | `other`  (Urdu: singular / plural)
  *  - `ja`, `zh-CN`:         `other`           (no grammatical plural)
  */
 
 import type { LocaleId } from './locales.js';
 
-export type PluralCategory = 'zero' | 'one' | 'few' | 'many' | 'other';
+export type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
 
 /**
  * Return the CLDR plural category for `count` in the given `locale`.
@@ -43,6 +45,19 @@ export function getPluralCategory(
     case 'es':
     case 'de':
     case 'fr':
+      return n === 1 ? 'one' : 'other';
+
+    // Arabic — full CLDR six-form plural.
+    case 'ar':
+      if (n === 0) return 'zero';
+      if (n === 1) return 'one';
+      if (n === 2) return 'two';
+      if (n % 100 >= 3 && n % 100 <= 10) return 'few';
+      if (n % 100 >= 11 && n % 100 <= 99) return 'many';
+      return 'other';
+
+    // Urdu — singular when n == 1, otherwise plural.
+    case 'ur':
       return n === 1 ? 'one' : 'other';
 
     // Japanese and Chinese have no grammatical plural distinction.

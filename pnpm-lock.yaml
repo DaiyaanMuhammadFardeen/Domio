@@ -236,9 +236,15 @@ importers:
       '@domio/chart':
         specifier: workspace:*
         version: link:../../packages/chart
+      '@domio/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@domio/observability':
         specifier: workspace:^
         version: link:../../packages/observability
+      '@domio/web-security':
+        specifier: workspace:*
+        version: link:../../packages/web-security
       '@graphql-tools/schema':
         specifier: 10.0.16
         version: 10.0.16(graphql@16.10.0)
@@ -270,6 +276,9 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.62.1
+        version: 1.62.1
       '@testing-library/jest-dom':
         specifier: ^6.6.3
         version: 6.6.3
@@ -297,6 +306,9 @@ importers:
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
+      playwright:
+        specifier: ^1.62.1
+        version: 1.62.1
       postcss:
         specifier: ^8.5.25
         version: 8.5.25
@@ -327,9 +339,15 @@ importers:
       '@domio/deep-link':
         specifier: workspace:*
         version: link:../../packages/deep-link
+      '@domio/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@domio/object-store':
         specifier: workspace:*
         version: link:../../packages/object-store
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@domio/prototype-runtime':
         specifier: workspace:*
         version: link:../../packages/prototype-runtime
@@ -348,6 +366,9 @@ importers:
       '@domio/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk-ts
+      '@domio/web-security':
+        specifier: workspace:*
+        version: link:../../packages/web-security
       '@domio/yjs-shared':
         specifier: workspace:*
         version: link:../../packages/yjs-shared
@@ -1557,6 +1578,10 @@ importers:
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
   services/audience:
+    dependencies:
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
     devDependencies:
       typescript:
         specifier: 5.7.2
@@ -1570,6 +1595,9 @@ importers:
       '@domio/audit-ts':
         specifier: workspace:*
         version: link:../../packages/audit-ts
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -1583,6 +1611,9 @@ importers:
 
   services/brand:
     dependencies:
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@domio/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -1661,6 +1692,9 @@ importers:
       '@domio/audit-ts':
         specifier: workspace:*
         version: link:../../packages/audit-ts
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -1984,6 +2018,9 @@ importers:
       '@domio/audit-ts':
         specifier: workspace:*
         version: link:../../packages/audit-ts
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -2083,6 +2120,10 @@ importers:
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
   services/marketplace:
+    dependencies:
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -2166,6 +2207,10 @@ importers:
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
   services/moderation-blocklist:
+    dependencies:
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
     devDependencies:
       typescript:
         specifier: 5.7.2
@@ -2253,6 +2298,9 @@ importers:
       '@domio/edge-pubsub':
         specifier: workspace:*
         version: link:../edge-pubsub
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@domio/session-code':
         specifier: workspace:*
         version: link:../../packages/session-code
@@ -2277,6 +2325,10 @@ importers:
         version: 2.1.8(@types/node@22.10.1)(jsdom@25.0.1)
 
   services/permission-engine:
+    dependencies:
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
     devDependencies:
       '@types/node':
         specifier: 22.10.1
@@ -2491,6 +2543,9 @@ importers:
       '@domio/components':
         specifier: workspace:*
         version: link:../../packages/components
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@domio/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -2554,6 +2609,9 @@ importers:
       '@domio/audience-service':
         specifier: workspace:^
         version: link:../audience
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@domio/participant-session':
         specifier: workspace:*
         version: link:../participant-session
@@ -2614,6 +2672,9 @@ importers:
       '@domio/audit-ts':
         specifier: workspace:*
         version: link:../../packages/audit-ts
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@domio/signed-link-token':
         specifier: workspace:*
         version: link:../../packages/signed-link-token
@@ -2711,6 +2772,9 @@ importers:
 
   services/theme:
     dependencies:
+      '@domio/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@domio/schema':
         specifier: workspace:*
         version: link:../../packages/schema

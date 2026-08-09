@@ -44,7 +44,7 @@ RUN groupadd --system domio && useradd --system --gid domio domio
 COPY --from=builder /app/apps/presenter/.next ./apps/presenter/.next
 COPY --from=builder /app/apps/presenter/public ./apps/presenter/public
 COPY --from=builder /app/apps/presenter/package.json ./apps/presenter/package.json
-COPY --from=builder /app/apps/presenter/next.config.* ./apps/presenter/ 2>/dev/null || true
+COPY --from=builder /app/apps/presenter/next.config.* ./apps/presenter/
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/presenter/node_modules ./apps/presenter/node_modules
 COPY --from=builder /app/services ./services
