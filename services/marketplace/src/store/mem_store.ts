@@ -15,6 +15,10 @@ import type {
   LicenseGrant,
   RevenueShareEvent,
   PayoutLedgerEntry,
+  FxRate,
+  PayoutRun,
+  WebhookDelivery,
+  PartnerClient,
 } from '../types.js';
 import {
   ListingNotFoundError,
@@ -26,6 +30,10 @@ import type {
   CreatorPayoutMethod,
   KycStatus,
 } from '../creator/types.js';
+import type { BrandLockedListing } from '../curated/types.js';
+import { BrandLockNotFoundError } from '../curated/types.js';
+import type { TakedownRequest, TrustScore, TakedownStatus, TakedownKind } from '../takedown/types.js';
+import { TakedownNotFoundError } from '../takedown/types.js';
 import type { MarketplaceStore } from './store.js';
 
 export class InMemoryMarketplaceStore implements MarketplaceStore {
@@ -378,6 +386,203 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   }
 
   // -------------------------------------------------------------------------
+  // Brand-Locked Listings (Phase 19 Wave 4 — WS-MKT-5)
+  // -------------------------------------------------------------------------
+
+  private readonly brandLocks = new Map<string, BrandLockedListing>();
+
+  async insertBrandLock(lock: BrandLockedListing): Promise<void> {
+    this.brandLocks.set(lock.id, lock);
+  }
+
+  async getBrandLock(workspaceId: string, brandKitId: string, marketplaceListingId: string): Promise<BrandLockedListing | null> {
+    for (const lock of this.brandLocks.values()) {
+      if (lock.workspaceId === workspaceId && lock.brandKitId === brandKitId && lock.marketplaceListingId === marketplaceListingId) {
+        return lock;
+      }
+    }
+    return null;
+  }
+
+  async listBrandLocksByBrand(workspaceId: string, brandKitId: string): Promise<BrandLockedListing[]> {
+    const results: BrandLockedListing[] = [];
+    for (const lock of this.brandLocks.values()) {
+      if (lock.workspaceId === workspaceId && lock.brandKitId === brandKitId) {
+        results.push(lock);
+      }
+    }
+    return results;
+  }
+
+  async listBrandLocksByListing(marketplaceListingId: string): Promise<BrandLockedListing[]> {
+    const results: BrandLockedListing[] = [];
+    for (const lock of this.brandLocks.values()) {
+      if (lock.marketplaceListingId === marketplaceListingId) {
+        results.push(lock);
+      }
+    }
+    return results;
+  }
+
+  async updateBrandLock(
+    lockId: string,
+    patch: Partial<Pick<BrandLockedListing, 'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'>>,
+  ): Promise<BrandLockedListing> {
+    const existing = this.brandLocks.get(lockId);
+    if (!existing) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
+    const updated: BrandLockedListing = { ...existing, ...patch, updatedAt: new Date() } as BrandLockedListing;
+    this.brandLocks.set(lockId, updated);
+    return updated;
+  }
+
+  async deleteBrandLock(lockId: string): Promise<void> {
+    if (!this.brandLocks.has(lockId)) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
+    this.brandLocks.delete(lockId);
+  }
+
+  // -------------------------------------------------------------------------
+  // Takedown Requests (Phase 19 Wave 4 — WS-MKT-8)
+  // -------------------------------------------------------------------------
+
+  private readonly takedownRequests = new Map<string, TakedownRequest>();
+
+  async insertTakedownRequest(request: TakedownRequest): Promise<void> {
+    this.takedownRequests.set(request.id, request);
+  }
+
+  async getTakedownRequest(takedownId: string): Promise<TakedownRequest | null> {
+    return this.takedownRequests.get(takedownId) ?? null;
+  }
+
+  async listTakedownRequestsByListing(listingId: string): Promise<TakedownRequest[]> {
+    const results: TakedownRequest[] = [];
+    for (const req of this.takedownRequests.values()) {
+      if (req.listingId === listingId) results.push(req);
+    }
+    return results;
+  }
+
+  async listTakedownRequests(opts?: { status?: TakedownStatus; kind?: TakedownKind }): Promise<TakedownRequest[]> {
+    const results: TakedownRequest[] = [];
+    for (const req of this.takedownRequests.values()) {
+      if (opts?.status && req.status !== opts.status) continue;
+      if (opts?.kind && req.kind !== opts.kind) continue;
+      results.push(req);
+    }
+    return results;
+  }
+
+  async updateTakedownStatus(
+    takedownId: string,
+    status: TakedownStatus,
+    patch?: Partial<Pick<TakedownRequest, 'resolutionNotes' | 'resolvedAt' | 'updatedBy'>>,
+  ): Promise<TakedownRequest> {
+    const existing = this.takedownRequests.get(takedownId);
+    if (!existing) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+    const updated: TakedownRequest = { ...existing, status, ...patch, updatedAt: new Date() } as TakedownRequest;
+    this.takedownRequests.set(takedownId, updated);
+    return updated;
+  }
+
+  // -------------------------------------------------------------------------
+  // Trust Scores (Phase 19 Wave 4 — WS-MKT-8)
+  // -------------------------------------------------------------------------
+
+  private readonly trustScores = new Map<string, TrustScore>();
+
+  async upsertTrustScore(score: TrustScore): Promise<void> {
+    this.trustScores.set(score.listingId, score);
+  }
+
+  async getTrustScoreByListing(listingId: string): Promise<TrustScore | null> {
+    return this.trustScores.get(listingId) ?? null;
+  }
+
+  // -------------------------------------------------------------------------
+  // FX Rates (Phase 19 Wave 5 — WS-MKT-7)
+  // -------------------------------------------------------------------------
+
+  private readonly fxRates: FxRate[] = [];
+
+  async getLatestFxRate(base: string, quote: string): Promise<FxRate | null> {
+    let latest: FxRate | null = null;
+    for (const r of this.fxRates) {
+      if (r.base === base && r.quote === quote) {
+        if (!latest || r.fetchedAt > latest.fetchedAt) latest = r;
+      }
+    }
+    return latest;
+  }
+
+  // -------------------------------------------------------------------------
+  // Payout Runs (Phase 19 Wave 5 — WS-MKT-7)
+  // -------------------------------------------------------------------------
+
+  private readonly payoutRuns = new Map<string, PayoutRun>();
+
+  async listPayoutRuns(opts?: { periodMonth?: string }): Promise<PayoutRun[]> {
+    const results: PayoutRun[] = [];
+    for (const run of this.payoutRuns.values()) {
+      if (opts?.periodMonth && run.periodMonth !== opts.periodMonth) continue;
+      results.push(run);
+    }
+    return results;
+  }
+
+  async getPayoutRun(runId: string): Promise<PayoutRun | null> {
+    return this.payoutRuns.get(runId) ?? null;
+  }
+
+  // -------------------------------------------------------------------------
+  // Webhook Deliveries (Phase 19 Wave 5 — WS-MKT-5/8/9)
+  // -------------------------------------------------------------------------
+
+  private readonly webhookDeliveries = new Map<string, WebhookDelivery>();
+
+  async createWebhookDelivery(delivery: WebhookDelivery): Promise<void> {
+    this.webhookDeliveries.set(delivery.id, delivery);
+  }
+
+  async getWebhookDelivery(deliveryId: string): Promise<WebhookDelivery | null> {
+    return this.webhookDeliveries.get(deliveryId) ?? null;
+  }
+
+  async updateWebhookDeliveryStatus(
+    deliveryId: string,
+    status: WebhookDelivery['status'],
+    patch?: Partial<Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>>,
+  ): Promise<WebhookDelivery> {
+    const existing = this.webhookDeliveries.get(deliveryId);
+    if (!existing) throw new ListingNotFoundError(deliveryId);
+    const updated: WebhookDelivery = { ...existing, status, ...patch } as WebhookDelivery;
+    this.webhookDeliveries.set(deliveryId, updated);
+    return updated;
+  }
+
+  async listWebhookDeliveriesDue(nextRetryAt: Date): Promise<WebhookDelivery[]> {
+    const results: WebhookDelivery[] = [];
+    for (const d of this.webhookDeliveries.values()) {
+      if (d.status === 'pending' && d.nextRetryAt && d.nextRetryAt <= nextRetryAt) {
+        results.push(d);
+      }
+    }
+    return results;
+  }
+
+  // -------------------------------------------------------------------------
+  // Partner Clients (Phase 19 Wave 5 — WS-MKT-5/8/9)
+  // -------------------------------------------------------------------------
+
+  private readonly partnerClients = new Map<string, PartnerClient>();
+
+  async getPartnerClientByClientId(clientId: string): Promise<PartnerClient | null> {
+    for (const client of this.partnerClients.values()) {
+      if (client.clientId === clientId) return client;
+    }
+    return null;
+  }
+
+  // -------------------------------------------------------------------------
   // Test helpers
   // -------------------------------------------------------------------------
 
@@ -393,5 +598,12 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
     this.creatorProfiles.clear();
     this.kycSessions.clear();
     this.payoutMethods.clear();
+    this.brandLocks.clear();
+    this.takedownRequests.clear();
+    this.trustScores.clear();
+    this.fxRates.length = 0;
+    this.payoutRuns.clear();
+    this.webhookDeliveries.clear();
+    this.partnerClients.clear();
   }
 }

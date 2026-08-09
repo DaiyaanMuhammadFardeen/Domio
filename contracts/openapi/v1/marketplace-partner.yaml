@@ -1,0 +1,326 @@
+openapi: 3.1.0
+info:
+  title: Domio Marketplace Partner API (Phase 19)
+  version: 0.1.0
+  description: |
+    Partner consumer API for third-party integrations. Provides read access
+    to marketplace listings and license installation/purchase capabilities.
+
+    OAuth 2.1 scopes:
+      - marketplace:read — Read-only access to listing metadata.
+      - marketplace:install — Install free listings into a workspace.
+      - marketplace:purchase — Initiate purchases of paid listings.
+
+    Rate limits:
+      - Pro tier: 600 requests per minute.
+      - Enterprise tier: 6000 requests per minute.
+
+    When rate limited, the response includes a Retry-After header indicating
+    seconds until the client may retry.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://api.domio.example.com
+    description: Production (placeholder)
+  - url: http://localhost:8080
+    description: Local development
+security:
+  - partnerOAuth: []
+tags:
+  - name: partner-listings
+    description: Marketplace listing search and retrieval for partners.
+  - name: partner-license
+    description: License installation and purchase for partners.
+paths:
+  /v1/partner/listings:
+    get:
+      tags: [partner-listings]
+      summary: Search marketplace listings
+      operationId: listPartnerListings
+      parameters:
+        - name: query
+          in: query
+          schema: { type: string }
+          description: Full-text search query.
+        - name: kind
+          in: query
+          schema: { type: string, enum: [component, template, theme, sticker_pack, icon_pack] }
+          description: Filter by listing kind.
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+          description: Number of results to return.
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+          description: Number of results to skip.
+      responses:
+        '200':
+          description: Listing search results
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PartnerListingPage' }
+        '401':
+          description: Missing or invalid OAuth token
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '403':
+          description: OAuth token lacks marketplace:read scope
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Seconds until the client may retry.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/PartnerRateLimitError' }
+
+  /v1/partner/listings/{slug}:
+    get:
+      tags: [partner-listings]
+      summary: Get a marketplace listing by slug
+      operationId: getPartnerListing
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+          description: Listing URL slug.
+      responses:
+        '200':
+          description: Listing details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PartnerListing' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Seconds until the client may retry.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/PartnerRateLimitError' }
+
+  /v1/partner/listings/{slug}/install:
+    post:
+      tags: [partner-license]
+      summary: Install a free listing into a workspace
+      operationId: installPartnerListing
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+          description: Listing URL slug.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [workspace_id]
+              properties:
+                workspace_id: { type: string, minLength: 1, description: "Target workspace identifier." }
+                target_deck_id: { type: string, description: "Optional target deck for component/template installations." }
+      responses:
+        '200':
+          description: Installation result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PartnerInstallResult' }
+        '403':
+          description: OAuth token lacks marketplace:install scope
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Seconds until the client may retry.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/PartnerRateLimitError' }
+
+  /v1/partner/listings/{slug}/purchase:
+    post:
+      tags: [partner-license]
+      summary: Initiate a purchase of a paid listing
+      operationId: purchasePartnerListing
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+          description: Listing URL slug.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [workspace_id, idempotency_key]
+              properties:
+                workspace_id: { type: string, minLength: 1, description: "Target workspace identifier." }
+                idempotency_key: { type: string, minLength: 1, description: "Client-generated idempotency key (UUID v4/v7). Prevents duplicate charges." }
+                success_url: { type: string, format: uri, description: "Redirect URL after successful payment." }
+                cancel_url: { type: string, format: uri, description: "Redirect URL if the buyer cancels." }
+      responses:
+        '200':
+          description: Purchase initiated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PurchaseInitiation' }
+        '403':
+          description: OAuth token lacks marketplace:purchase scope
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Duplicate idempotency key (ERR_IDEMPOTENCY_KEY_REUSED)
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Seconds until the client may retry.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/PartnerRateLimitError' }
+
+# ════════════════════════════════════════════════════════════════════════════
+# Components
+# ════════════════════════════════════════════════════════════════════════════
+components:
+  securitySchemes:
+    partnerOAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.domio.example.com/oauth/authorize
+          tokenUrl: https://auth.domio.example.com/oauth/token
+          scopes:
+            marketplace:read: Read-only access to marketplace listing metadata.
+            marketplace:install: Install free listings into a workspace.
+            marketplace:purchase: Initiate purchases of paid listings.
+
+  schemas:
+    # ── RFC-7807 ──────────────────────────────────────────────────────────
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference identifying the problem type.
+          example: "https://domio.example/problems/not-found"
+        title:
+          type: string
+          description: Short human-readable summary.
+          example: "Resource not found"
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          example: "Listing with slug 'my-template' does not exist."
+        instance:
+          type: string
+          format: uri
+          description: URI reference identifying the specific occurrence.
+          example: "https://api.domio.example.com/v1/partner/listings/my-template"
+
+    # ── Partner Listing ───────────────────────────────────────────────────
+    PartnerListing:
+      type: object
+      required: [title, slug, kind, is_free, price_cents, currency, published_at_ms]
+      properties:
+        title: { type: string, description: "Listing title." }
+        slug: { type: string, description: "URL-safe listing slug." }
+        kind: { type: string, enum: [component, template, theme, sticker_pack, icon_pack], description: "Listing type." }
+        is_free: { type: boolean, description: "Whether the listing is free." }
+        price_cents: { type: integer, description: "Listing price in integer cents (0 for free listings)." }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+        preview:
+          type: object
+          nullable: true
+          properties:
+            poster_ref: { type: string, description: "Reference to the poster preview asset." }
+            loop_ref: { type: string, description: "Reference to the loop preview asset." }
+        published_at_ms: { type: integer, description: "Epoch milliseconds when the listing was published." }
+
+    PartnerListingPage:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/PartnerListing' }
+          description: "List of marketplace listings."
+        total: { type: integer, description: "Total number of matching listings." }
+        limit: { type: integer, description: "Page size." }
+        offset: { type: integer, description: "Number of results skipped." }
+
+    PartnerInstallResult:
+      type: object
+      required: [license_grant_id, status]
+      properties:
+        license_grant_id: { type: string, description: "Identifier of the granted license." }
+        status: { type: string, enum: [installed, pending], description: "Installation status." }
+
+    PurchaseInitiation:
+      type: object
+      required: [purchase_id, provider, status, expires_at]
+      properties:
+        purchase_id: { type: string, description: "Application-level purchase identifier." }
+        provider: { type: string, enum: [stripe, bkash, nagad], description: "Payment provider used." }
+        provider_intent_id: { type: string, description: "Provider-side payment intent identifier." }
+        checkout_url: { type: string, format: uri, nullable: true, description: "Provider checkout URL. Null for redirect-less flows." }
+        status: { type: string, enum: [pending, processing, succeeded, failed, expired], description: "Current purchase status." }
+        expires_at: { type: integer, description: "Epoch milliseconds when this purchase intent expires." }
+
+    PartnerRateLimitError:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI reference identifying the problem type.
+          example: "https://domio.example/problems/rate-limited"
+        title:
+          type: string
+          description: Short human-readable summary.
+          example: "Rate limit exceeded"
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 429
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          example: "Rate limit of 600 requests per minute exceeded. Retry after 42 seconds."
+        instance:
+          type: string
+          format: uri
+          description: URI reference identifying the specific occurrence.
+          example: "https://api.domio.example.com/v1/partner/listings"

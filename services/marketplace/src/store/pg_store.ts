@@ -26,6 +26,12 @@ import type {
   LicenseGrant,
   RevenueShareEvent,
   PayoutLedgerEntry,
+  FxRate,
+  PayoutRun,
+  PayoutRunStatus,
+  WebhookDelivery,
+  PartnerClient,
+  PartnerClientTier,
 } from '../types.js';
 import { ListingNotFoundError, ReviewNotFoundError } from '../types.js';
 import type {
@@ -34,6 +40,10 @@ import type {
   CreatorPayoutMethod,
   KycStatus,
 } from '../creator/types.js';
+import type { BrandLockedListing } from '../curated/types.js';
+import { BrandLockNotFoundError } from '../curated/types.js';
+import type { TakedownRequest, TrustScore, TakedownStatus, TakedownKind } from '../takedown/types.js';
+import { TakedownNotFoundError } from '../takedown/types.js';
 import type { MarketplaceStore } from './store.js';
 
 // ---------------------------------------------------------------------------
@@ -933,6 +943,432 @@ export class PgMarketplaceStore implements MarketplaceStore {
     if (rows.length === 0) throw new ListingNotFoundError(methodId);
     return creatorPayoutMethodRowToDomain(rows[0]!);
   }
+
+  // -------------------------------------------------------------------------
+  // Brand-Locked Listings (Phase 19 Wave 4 — WS-MKT-5)
+  // -------------------------------------------------------------------------
+
+  async insertBrandLock(lock: BrandLockedListing): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('insertBrandLock');
+    await this.pool.query(
+      `INSERT INTO brand_locked_listing (
+        id, workspace_id, brand_kit_id, marketplace_listing_id,
+        state, override_price_cents, notes, audit_actor_id,
+        created_at, updated_at, created_by, updated_by
+      ) VALUES (
+        $1, $2, $3, $4,
+        $5, $6, $7, $8,
+        $9, $10, $11, $12
+      )`,
+      [
+        lock.id,
+        lock.workspaceId,
+        lock.brandKitId,
+        lock.marketplaceListingId,
+        lock.state,
+        lock.overridePriceCents,
+        lock.notes,
+        lock.auditActorId,
+        lock.createdAt,
+        lock.updatedAt,
+        lock.createdBy,
+        lock.updatedBy,
+      ],
+    );
+  }
+
+  async getBrandLock(workspaceId: string, brandKitId: string, marketplaceListingId: string): Promise<BrandLockedListing | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getBrandLock');
+    const { rows } = await this.pool.query(
+      `SELECT * FROM brand_locked_listing
+       WHERE workspace_id = $1 AND brand_kit_id = $2 AND marketplace_listing_id = $3`,
+      [workspaceId, brandKitId, marketplaceListingId],
+    );
+    if (rows.length === 0) return null;
+    return brandLockRowToDomain(rows[0]!);
+  }
+
+  async listBrandLocksByBrand(workspaceId: string, brandKitId: string): Promise<BrandLockedListing[]> {
+    if (!this.pool) throw new StoreNotConfiguredError('listBrandLocksByBrand');
+    const { rows } = await this.pool.query(
+      `SELECT * FROM brand_locked_listing
+       WHERE workspace_id = $1 AND brand_kit_id = $2
+       ORDER BY created_at ASC`,
+      [workspaceId, brandKitId],
+    );
+    return rows.map(brandLockRowToDomain);
+  }
+
+  async listBrandLocksByListing(marketplaceListingId: string): Promise<BrandLockedListing[]> {
+    if (!this.pool) throw new StoreNotConfiguredError('listBrandLocksByListing');
+    const { rows } = await this.pool.query(
+      `SELECT * FROM brand_locked_listing
+       WHERE marketplace_listing_id = $1
+       ORDER BY created_at ASC`,
+      [marketplaceListingId],
+    );
+    return rows.map(brandLockRowToDomain);
+  }
+
+  async updateBrandLock(
+    lockId: string,
+    patch: Partial<Pick<BrandLockedListing, 'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'>>,
+  ): Promise<BrandLockedListing> {
+    if (!this.pool) throw new StoreNotConfiguredError('updateBrandLock');
+
+    const setClauses: string[] = [];
+    const params: unknown[] = [];
+    let idx = 1;
+
+    if ('state' in patch) {
+      setClauses.push(`state = $${idx++}`);
+      params.push(patch.state);
+    }
+    if ('overridePriceCents' in patch) {
+      setClauses.push(`override_price_cents = $${idx++}`);
+      params.push(patch.overridePriceCents);
+    }
+    if ('notes' in patch) {
+      setClauses.push(`notes = $${idx++}`);
+      params.push(patch.notes);
+    }
+    if ('auditActorId' in patch) {
+      setClauses.push(`audit_actor_id = $${idx++}`);
+      params.push(patch.auditActorId);
+    }
+    if ('updatedBy' in patch) {
+      setClauses.push(`updated_by = $${idx++}`);
+      params.push(patch.updatedBy);
+    }
+
+    if (setClauses.length === 0) {
+      const existing = await this.getBrandLock(
+        (await this.pool.query('SELECT workspace_id, brand_kit_id, marketplace_listing_id FROM brand_locked_listing WHERE id = $1', [lockId])).rows[0]?.workspace_id ?? '',
+        (await this.pool.query('SELECT brand_kit_id FROM brand_locked_listing WHERE id = $1', [lockId])).rows[0]?.brand_kit_id ?? '',
+        (await this.pool.query('SELECT marketplace_listing_id FROM brand_locked_listing WHERE id = $1', [lockId])).rows[0]?.marketplace_listing_id ?? '',
+      );
+      if (!existing) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
+      return existing;
+    }
+
+    setClauses.push(`updated_at = $${idx++}`);
+    params.push(new Date());
+
+    params.push(lockId);
+    const sql = `UPDATE brand_locked_listing SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`;
+    const { rows } = await this.pool.query(sql, params);
+    if (rows.length === 0) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
+    return brandLockRowToDomain(rows[0]!);
+  }
+
+  async deleteBrandLock(lockId: string): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('deleteBrandLock');
+    const { rowCount } = await this.pool.query(
+      'DELETE FROM brand_locked_listing WHERE id = $1',
+      [lockId],
+    );
+    if (rowCount === 0) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
+  }
+
+  // -------------------------------------------------------------------------
+  // Takedown Requests (Phase 19 Wave 4 — WS-MKT-8)
+  // -------------------------------------------------------------------------
+
+  async insertTakedownRequest(request: TakedownRequest): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('insertTakedownRequest');
+    await this.pool.query(
+      `INSERT INTO takedown_request (
+        id, workspace_id, listing_id, claimant_id, kind,
+        evidence_url, statement, status, resolution_notes,
+        submitted_at, resolved_at, created_at, updated_at,
+        created_by, updated_by
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7, $8, $9,
+        $10, $11, $12, $13,
+        $14, $15
+      )`,
+      [
+        request.id,
+        request.workspaceId,
+        request.listingId,
+        request.claimantId,
+        request.kind,
+        request.evidenceUrl,
+        request.statement,
+        request.status,
+        request.resolutionNotes,
+        request.submittedAt,
+        request.resolvedAt,
+        request.createdAt,
+        request.updatedAt,
+        request.createdBy,
+        request.updatedBy,
+      ],
+    );
+  }
+
+  async getTakedownRequest(takedownId: string): Promise<TakedownRequest | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getTakedownRequest');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM takedown_request WHERE id = $1',
+      [takedownId],
+    );
+    if (rows.length === 0) return null;
+    return takedownRequestRowToDomain(rows[0]!);
+  }
+
+  async listTakedownRequestsByListing(listingId: string): Promise<TakedownRequest[]> {
+    if (!this.pool) throw new StoreNotConfiguredError('listTakedownRequestsByListing');
+    const { rows } = await this.pool.query(
+      `SELECT * FROM takedown_request
+       WHERE listing_id = $1
+       ORDER BY submitted_at DESC`,
+      [listingId],
+    );
+    return rows.map(takedownRequestRowToDomain);
+  }
+
+  async listTakedownRequests(opts?: { status?: TakedownStatus; kind?: TakedownKind }): Promise<TakedownRequest[]> {
+    if (!this.pool) throw new StoreNotConfiguredError('listTakedownRequests');
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    let idx = 1;
+
+    if (opts?.status) {
+      conditions.push(`status = $${idx++}`);
+      params.push(opts.status);
+    }
+    if (opts?.kind) {
+      conditions.push(`kind = $${idx++}`);
+      params.push(opts.kind);
+    }
+
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const sql = `SELECT * FROM takedown_request ${where} ORDER BY submitted_at DESC`;
+    const { rows } = await this.pool.query(sql, params);
+    return rows.map(takedownRequestRowToDomain);
+  }
+
+  async updateTakedownStatus(
+    takedownId: string,
+    status: TakedownStatus,
+    patch?: Partial<Pick<TakedownRequest, 'resolutionNotes' | 'resolvedAt' | 'updatedBy'>>,
+  ): Promise<TakedownRequest> {
+    if (!this.pool) throw new StoreNotConfiguredError('updateTakedownStatus');
+
+    const setClauses: string[] = ['status = $1'];
+    const params: unknown[] = [status];
+    let idx = 2;
+
+    if ('resolutionNotes' in (patch ?? {})) {
+      setClauses.push(`resolution_notes = $${idx++}`);
+      params.push(patch!.resolutionNotes);
+    }
+    if ('resolvedAt' in (patch ?? {})) {
+      setClauses.push(`resolved_at = $${idx++}`);
+      params.push(patch!.resolvedAt);
+    }
+    if ('updatedBy' in (patch ?? {})) {
+      setClauses.push(`updated_by = $${idx++}`);
+      params.push(patch!.updatedBy);
+    }
+
+    setClauses.push(`updated_at = $${idx++}`);
+    params.push(new Date());
+
+    params.push(takedownId);
+    const sql = `UPDATE takedown_request SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`;
+    const { rows } = await this.pool.query(sql, params);
+    if (rows.length === 0) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+    return takedownRequestRowToDomain(rows[0]!);
+  }
+
+  // -------------------------------------------------------------------------
+  // Trust Scores (Phase 19 Wave 4 — WS-MKT-8)
+  // -------------------------------------------------------------------------
+
+  async upsertTrustScore(score: TrustScore): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('upsertTrustScore');
+    await this.pool.query(
+      `INSERT INTO trust_score (id, listing_id, score, signals, computed_at)
+       VALUES ($1, $2, $3, $4::jsonb, $5)
+       ON CONFLICT (listing_id) DO UPDATE SET
+         score = EXCLUDED.score,
+         signals = EXCLUDED.signals,
+         computed_at = EXCLUDED.computed_at`,
+      [
+        score.id,
+        score.listingId,
+        score.score,
+        JSON.stringify(score.signals),
+        score.computedAt,
+      ],
+    );
+  }
+
+  async getTrustScoreByListing(listingId: string): Promise<TrustScore | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getTrustScoreByListing');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM trust_score WHERE listing_id = $1',
+      [listingId],
+    );
+    if (rows.length === 0) return null;
+    return trustScoreRowToDomain(rows[0]!);
+  }
+
+  // -------------------------------------------------------------------------
+  // FX Rates (Phase 19 Wave 5 — WS-MKT-7)
+  // -------------------------------------------------------------------------
+
+  async getLatestFxRate(base: string, quote: string): Promise<FxRate | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getLatestFxRate');
+    const { rows } = await this.pool.query(
+      `SELECT * FROM fx_rate
+       WHERE base = $1 AND quote = $2
+       ORDER BY fetched_at DESC
+       LIMIT 1`,
+      [base, quote],
+    );
+    if (rows.length === 0) return null;
+    return fxRateRowToDomain(rows[0]!);
+  }
+
+  // -------------------------------------------------------------------------
+  // Payout Runs (Phase 19 Wave 5 — WS-MKT-7)
+  // -------------------------------------------------------------------------
+
+  async listPayoutRuns(opts?: { periodMonth?: string }): Promise<PayoutRun[]> {
+    if (!this.pool) throw new StoreNotConfiguredError('listPayoutRuns');
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    let idx = 1;
+
+    if (opts?.periodMonth) {
+      conditions.push(`period_month = $${idx++}`);
+      params.push(opts.periodMonth);
+    }
+
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const sql = `SELECT * FROM payout_run ${where} ORDER BY created_at DESC`;
+    const { rows } = await this.pool.query(sql, params);
+    return rows.map(payoutRunRowToDomain);
+  }
+
+  async getPayoutRun(runId: string): Promise<PayoutRun | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getPayoutRun');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM payout_run WHERE id = $1',
+      [runId],
+    );
+    if (rows.length === 0) return null;
+    return payoutRunRowToDomain(rows[0]!);
+  }
+
+  // -------------------------------------------------------------------------
+  // Webhook Deliveries (Phase 19 Wave 5 — WS-MKT-5/8/9)
+  // -------------------------------------------------------------------------
+
+  async createWebhookDelivery(delivery: WebhookDelivery): Promise<void> {
+    if (!this.pool) throw new StoreNotConfiguredError('createWebhookDelivery');
+    await this.pool.query(
+      `INSERT INTO webhook_delivery (
+        id, workspace_id, event_type, event_id, payload,
+        signature, target_url, status, attempts,
+        last_error, next_retry_at, created_at, delivered_at
+      ) VALUES (
+        $1, $2, $3, $4, $5::jsonb,
+        $6, $7, $8, $9,
+        $10, $11, $12, $13
+      )`,
+      [
+        delivery.id,
+        delivery.workspaceId,
+        delivery.eventType,
+        delivery.eventId,
+        JSON.stringify(delivery.payload),
+        delivery.signature,
+        delivery.targetUrl,
+        delivery.status,
+        delivery.attempts,
+        delivery.lastError,
+        delivery.nextRetryAt,
+        delivery.createdAt,
+        delivery.deliveredAt,
+      ],
+    );
+  }
+
+  async getWebhookDelivery(deliveryId: string): Promise<WebhookDelivery | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getWebhookDelivery');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM webhook_delivery WHERE id = $1',
+      [deliveryId],
+    );
+    if (rows.length === 0) return null;
+    return webhookDeliveryRowToDomain(rows[0]!);
+  }
+
+  async updateWebhookDeliveryStatus(
+    deliveryId: string,
+    status: WebhookDelivery['status'],
+    patch?: Partial<Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>>,
+  ): Promise<WebhookDelivery> {
+    if (!this.pool) throw new StoreNotConfiguredError('updateWebhookDeliveryStatus');
+
+    const setClauses: string[] = ['status = $1'];
+    const params: unknown[] = [status];
+    let idx = 2;
+
+    if ('lastError' in (patch ?? {})) {
+      setClauses.push(`last_error = $${idx++}`);
+      params.push(patch!.lastError);
+    }
+    if ('attempts' in (patch ?? {})) {
+      setClauses.push(`attempts = $${idx++}`);
+      params.push(patch!.attempts);
+    }
+    if ('deliveredAt' in (patch ?? {})) {
+      setClauses.push(`delivered_at = $${idx++}`);
+      params.push(patch!.deliveredAt);
+    }
+    if ('nextRetryAt' in (patch ?? {})) {
+      setClauses.push(`next_retry_at = $${idx++}`);
+      params.push(patch!.nextRetryAt);
+    }
+
+    params.push(deliveryId);
+    const sql = `UPDATE webhook_delivery SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`;
+    const { rows } = await this.pool.query(sql, params);
+    if (rows.length === 0) throw new ListingNotFoundError(deliveryId);
+    return webhookDeliveryRowToDomain(rows[0]!);
+  }
+
+  async listWebhookDeliveriesDue(nextRetryAt: Date): Promise<WebhookDelivery[]> {
+    if (!this.pool) throw new StoreNotConfiguredError('listWebhookDeliveriesDue');
+    const { rows } = await this.pool.query(
+      `SELECT * FROM webhook_delivery
+       WHERE status = 'pending' AND next_retry_at IS NOT NULL AND next_retry_at <= $1
+       ORDER BY next_retry_at ASC
+       LIMIT 100`,
+      [nextRetryAt],
+    );
+    return rows.map(webhookDeliveryRowToDomain);
+  }
+
+  // -------------------------------------------------------------------------
+  // Partner Clients (Phase 19 Wave 5 — WS-MKT-5/8/9)
+  // -------------------------------------------------------------------------
+
+  async getPartnerClientByClientId(clientId: string): Promise<PartnerClient | null> {
+    if (!this.pool) throw new StoreNotConfiguredError('getPartnerClientByClientId');
+    const { rows } = await this.pool.query(
+      'SELECT * FROM partner_client WHERE client_id = $1',
+      [clientId],
+    );
+    if (rows.length === 0) return null;
+    return partnerClientRowToDomain(rows[0]!);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1074,6 +1510,111 @@ function creatorPayoutMethodRowToDomain(row: Record<string, unknown>): CreatorPa
     externalAccountId: row.external_account_id as string,
     verified: row.verified as boolean,
     metadata: row.metadata != null ? parseJsonb(row.metadata) as Record<string, unknown> : null,
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
+  };
+}
+
+function brandLockRowToDomain(row: Record<string, unknown>): BrandLockedListing {
+  return {
+    id: row.id as string,
+    workspaceId: row.workspace_id as string,
+    brandKitId: row.brand_kit_id as string,
+    marketplaceListingId: row.marketplace_listing_id as string,
+    state: row.state as BrandLockedListing['state'],
+    overridePriceCents: row.override_price_cents != null ? Number(row.override_price_cents) : null,
+    notes: row.notes as string | null,
+    auditActorId: row.audit_actor_id as string | null,
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
+    createdBy: row.created_by as string | null,
+    updatedBy: row.updated_by as string | null,
+  };
+}
+
+function takedownRequestRowToDomain(row: Record<string, unknown>): TakedownRequest {
+  return {
+    id: row.id as string,
+    workspaceId: row.workspace_id as string,
+    listingId: row.listing_id as string,
+    claimantId: row.claimant_id as string,
+    kind: row.kind as TakedownRequest['kind'],
+    evidenceUrl: row.evidence_url as string | null,
+    statement: row.statement as string,
+    status: row.status as TakedownRequest['status'],
+    resolutionNotes: row.resolution_notes as string | null,
+    submittedAt: toDate(row.submitted_at),
+    resolvedAt: row.resolved_at != null ? toDate(row.resolved_at) : null,
+    createdAt: toDate(row.created_at),
+    updatedAt: toDate(row.updated_at),
+    createdBy: row.created_by as string | null,
+    updatedBy: row.updated_by as string | null,
+  };
+}
+
+function trustScoreRowToDomain(row: Record<string, unknown>): TrustScore {
+  return {
+    id: row.id as string,
+    listingId: row.listing_id as string,
+    score: Number(row.score),
+    signals: row.signals != null ? parseJsonb(row.signals) as Record<string, unknown> : {},
+    computedAt: toDate(row.computed_at),
+  };
+}
+
+function fxRateRowToDomain(row: Record<string, unknown>): FxRate {
+  return {
+    id: row.id as string,
+    base: row.base as string,
+    quote: row.quote as string,
+    rate: Number(row.rate),
+    fetchedAt: toDate(row.fetched_at),
+    source: row.source as string,
+  };
+}
+
+function payoutRunRowToDomain(row: Record<string, unknown>): PayoutRun {
+  return {
+    id: row.id as string,
+    workspaceId: row.workspace_id as string,
+    periodMonth: row.period_month as string,
+    executedAt: toDate(row.executed_at),
+    totalCreators: row.total_creators as number,
+    totalPayoutCents: Number(row.total_payout_cents),
+    currency: row.currency as string,
+    status: row.status as PayoutRunStatus,
+    createdAt: toDate(row.created_at),
+  };
+}
+
+function webhookDeliveryRowToDomain(row: Record<string, unknown>): WebhookDelivery {
+  return {
+    id: row.id as string,
+    workspaceId: row.workspace_id as string,
+    eventType: row.event_type as string,
+    eventId: row.event_id as string,
+    payload: row.payload != null ? parseJsonb(row.payload) as Record<string, unknown> : {},
+    signature: row.signature as string,
+    targetUrl: row.target_url as string,
+    status: row.status as WebhookDelivery['status'],
+    attempts: row.attempts as number,
+    lastError: row.last_error as string | null,
+    nextRetryAt: row.next_retry_at != null ? toDate(row.next_retry_at) : null,
+    createdAt: toDate(row.created_at),
+    deliveredAt: row.delivered_at != null ? toDate(row.delivered_at) : null,
+  };
+}
+
+function partnerClientRowToDomain(row: Record<string, unknown>): PartnerClient {
+  return {
+    id: row.id as string,
+    workspaceId: row.workspace_id as string,
+    name: row.name as string,
+    clientId: row.client_id as string,
+    clientSecretHash: row.client_secret_hash as string,
+    scopes: row.scopes as readonly string[],
+    tier: row.tier as PartnerClientTier,
+    createdBy: row.created_by as string | null,
     createdAt: toDate(row.created_at),
     updatedAt: toDate(row.updated_at),
   };

@@ -18,6 +18,10 @@ import type {
   LicenseGrant,
   RevenueShareEvent,
   PayoutLedgerEntry,
+  FxRate,
+  PayoutRun,
+  WebhookDelivery,
+  PartnerClient,
 } from '../types.js';
 import type {
   CreatorProfile,
@@ -25,6 +29,8 @@ import type {
   CreatorPayoutMethod,
   KycStatus,
 } from '../creator/types.js';
+import type { BrandLockedListing } from '../curated/types.js';
+import type { TakedownRequest, TrustScore, TakedownStatus, TakedownKind } from '../takedown/types.js';
 
 // ---------------------------------------------------------------------------
 // Store interface
@@ -161,4 +167,67 @@ export interface MarketplaceStore {
   // -------------------------------------------------------------------------
 
   withTransaction<T>(fn: () => Promise<T>): Promise<T>;
+
+  // -------------------------------------------------------------------------
+  // Brand-Locked Listings (Phase 19 Wave 4 — WS-MKT-5)
+  // -------------------------------------------------------------------------
+
+  insertBrandLock(lock: BrandLockedListing): Promise<void>;
+  getBrandLock(workspaceId: string, brandKitId: string, marketplaceListingId: string): Promise<BrandLockedListing | null>;
+  listBrandLocksByBrand(workspaceId: string, brandKitId: string): Promise<BrandLockedListing[]>;
+  listBrandLocksByListing(marketplaceListingId: string): Promise<BrandLockedListing[]>;
+  updateBrandLock(
+    lockId: string,
+    patch: Partial<Pick<BrandLockedListing, 'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'>>,
+  ): Promise<BrandLockedListing>;
+  deleteBrandLock(lockId: string): Promise<void>;
+
+  // -------------------------------------------------------------------------
+  // Takedown Requests (Phase 19 Wave 4 — WS-MKT-8)
+  // -------------------------------------------------------------------------
+
+  insertTakedownRequest(request: TakedownRequest): Promise<void>;
+  getTakedownRequest(takedownId: string): Promise<TakedownRequest | null>;
+  listTakedownRequests(opts?: { status?: TakedownStatus; kind?: TakedownKind }): Promise<TakedownRequest[]>;
+  listTakedownRequestsByListing(listingId: string): Promise<TakedownRequest[]>;
+  updateTakedownStatus(
+    takedownId: string,
+    status: TakedownStatus,
+    patch?: Partial<Pick<TakedownRequest, 'resolutionNotes' | 'resolvedAt' | 'updatedBy'>>,
+  ): Promise<TakedownRequest>;
+
+  // -------------------------------------------------------------------------
+  // Trust Scores (Phase 19 Wave 4 — WS-MKT-8)
+  // -------------------------------------------------------------------------
+
+  upsertTrustScore(score: TrustScore): Promise<void>;
+  getTrustScoreByListing(listingId: string): Promise<TrustScore | null>;
+
+  // -------------------------------------------------------------------------
+  // FX Rates (Phase 19 Wave 5 — WS-MKT-7)
+  // -------------------------------------------------------------------------
+
+  getLatestFxRate(base: string, quote: string): Promise<FxRate | null>;
+
+  // -------------------------------------------------------------------------
+  // Payout Runs (Phase 19 Wave 5 — WS-MKT-7)
+  // -------------------------------------------------------------------------
+
+  listPayoutRuns(opts?: { periodMonth?: string }): Promise<PayoutRun[]>;
+  getPayoutRun(runId: string): Promise<PayoutRun | null>;
+
+  // -------------------------------------------------------------------------
+  // Webhook Deliveries (Phase 19 Wave 5 — WS-MKT-5/8/9)
+  // -------------------------------------------------------------------------
+
+  createWebhookDelivery(delivery: WebhookDelivery): Promise<void>;
+  getWebhookDelivery(deliveryId: string): Promise<WebhookDelivery | null>;
+  updateWebhookDeliveryStatus(deliveryId: string, status: WebhookDelivery['status'], patch?: Partial<Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>>): Promise<WebhookDelivery>;
+  listWebhookDeliveriesDue(nextRetryAt: Date): Promise<WebhookDelivery[]>;
+
+  // -------------------------------------------------------------------------
+  // Partner Clients (Phase 19 Wave 5 — WS-MKT-5/8/9)
+  // -------------------------------------------------------------------------
+
+  getPartnerClientByClientId(clientId: string): Promise<PartnerClient | null>;
 }

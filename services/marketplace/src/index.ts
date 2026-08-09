@@ -1,11 +1,11 @@
 /**
- * Domio marketplace-service (Phase 19 Wave 1+2+3).
+ * Domio marketplace-service (Phase 19 Wave 1+2+3+4+5).
  *
  * Marketplace & Creator Economy service.
  *
  * Exports:
  *  - Service, handlers, store, types, feature flags, pricing, audit,
- *    payments, license, creator.
+ *    payments, license, creator, curated, takedown, mcp, webhooks, partner.
  */
 
 export { MarketplaceService } from './service.js';
@@ -51,6 +51,56 @@ export {
   PayoutMethodNotFoundError,
   PayoutNotReadyError,
 } from './creator/types.js';
+
+// Curated / Brand-Lock module (Phase 19 Wave 4 — WS-MKT-5)
+export { validateBrandLockInput, assertNotDenied, resolveVisibleListingIds, getOverridePrice } from './curated/logic.js';
+export type { BrandLockedListing, BrandLockState } from './curated/types.js';
+export { BrandLockDeniedError, InvalidBrandLockError, BrandLockNotFoundError } from './curated/types.js';
+
+// Takedown + Trust module (Phase 19 Wave 4 — WS-MKT-8)
+export {
+  TAKEDOWN_TRANSITIONS,
+  validateTakedownTransition,
+  validateTakedownInput,
+  fileTakedownBody,
+  resolveBody,
+  dismissBody,
+  counterNoticeBody,
+  computeTrustScore,
+} from './takedown/logic.js';
+export type { TakedownRequest, TakedownKind, TakedownStatus, TrustScore } from './takedown/types.js';
+export { InvalidTakedownTransitionError, TakedownNotFoundError, TrustScoreNotFoundError } from './takedown/types.js';
+
+// MCP module (Phase 19 Wave 5 — WS-MKT-9)
+export { checkMcpCapability, validateMcpToolInput } from './mcp/access.js';
+export { MCP_TOOL_DEFINITIONS, CAPABILITY_TOOLS, executeMcpTool } from './mcp/tools.js';
+
+// Webhooks module (Phase 19 Wave 5 — WS-MKT-5/8/9)
+export { WebhookDispatcher, RateLimiter } from './webhooks/dispatcher.js';
+
+// Partner module (Phase 19 Wave 5 — WS-MKT-5/8/9)
+export { PartnerClientService } from './partner/client.js';
+export { hasScope, getRateLimit, validatePartnerAccess } from './partner/access.js';
+export type { PartnerClientServiceOptions } from './partner/client.js';
+export {
+  PartnerClientNotFoundError,
+  InvalidClientSecretError,
+  InsufficientScopeError,
+  McpPermissionDeniedError,
+} from './types.js';
+export type {
+  FxRate,
+  PayoutRun,
+  PayoutRunStatus,
+  WebhookDelivery,
+  WebhookDeliveryStatus,
+  PartnerClient,
+  PartnerClientTier,
+  McpCapability,
+  McpToolName,
+  McpToolResult,
+  McpToolInput,
+} from './types.js';
 
 // Types
 export type {

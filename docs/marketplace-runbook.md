@@ -1,6 +1,6 @@
 # Domio Marketplace Runbook (Phase 19)
 
-Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 complete (2026-08-09)** — Money-moving (checkout, refund, chargeback). **Wave 3 complete (2026-08-09)** — Creator economy (onboarding, KYC, payouts, FX, analytics). Remaining: Waves 4, 5.
+Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 complete (2026-08-09)** — Money-moving (checkout, refund, chargeback). **Wave 3 complete (2026-08-09)** — Creator economy (onboarding, KYC, payouts, FX, analytics). **Wave 4 complete (2026-08-09)** — Trust, curation, integrations. Remaining: Wave 5.
 
 ## What Wave 1 shipped
 
@@ -78,7 +78,35 @@ Status: **Wave 1 complete (2026-08-09)** — Foundation + core domain. **Wave 2 
 - `workers/payout-executor` (`@domio/payout-executor-worker`) — **12 tests**. Monthly payout: group eligible revenue_share_events by creator, skip <$50 min / 30-day hold not met / no verified method, transfer with idempotency_key `${run_id}:${creator_id}`, ledger entries UNIQUE(executor_run_id,event_id) dedup, partial failure no batch rollback. runOnce({period_month}) → {run_id, creators_paid, total_payout_cents, skipped, failed}.
 - `workers/fx-rate-cacher` (`@domio/fx-rate-cacher-worker`) — **9 tests**. Daily mid-rate for 6 USD/BDT/EUR pairs (cross-rates via USD); upsert to fx_rate UNIQUE(base,quote,fetched_at); idempotent same-day dedup.
 
+## What Wave 4 shipped (Trust/curation/integrations, WS-MKT-5/8/9)
+
+### Migration `0091_phase19_partner_webhooks`
+- `partner_client` (workspace_id, name, client_id UNIQUE, client_secret_hash, scopes text[], tier CHECK(pro,enterprise) DEFAULT 'pro'). Workspace RLS.
+- `webhook_delivery` (workspace_id, event_type, event_id, payload jsonb, signature, target_url, status CHECK(pending,sent,failed) DEFAULT 'pending', attempts, last_error, next_retry_at, delivered_at; UNIQUE(event_id,target_url) idempotent dedup). Workspace RLS.
+
+### Contracts
+- `marketplace-service.yaml` 34 → **42 operationIds** (+8: fileTakedown, listTakedownRequests, getTakedownRequest, resolveTakedownRequest, submitCounterNotice, createBrandLock, listBrandLocks, deleteBrandLock; schemas TakedownInput/TakedownRequest/ResolveTakedownInput/CounterNoticeInput/BrandLockInput/BrandLock/CuratedListingPage).
+- NEW `contracts/openapi/v1/marketplace-partner.yaml` — **4 operationIds** (listPartnerListings, getPartnerListing, installPartnerListing, purchasePartnerListing), OAuth 2.1 scopes marketplace:read/install/purchase, rate limits 600/min pro / 6000/min enterprise, 429 Retry-After.
+
+### Services (`@domio/marketplace-service` — **426 tests**, 18 files)
+- **Curated (WS-MKT-5)**: brand_locked_listing filter — brandKitId query param, DENY overrides global visibility, `assertNotDenied` 403 guard on direct API bypass, override_price_cents applied for override state; `getCuratedMarketplaceListings` now real (was [] stub).
+- **Takedown (WS-MKT-8)**: workflow received→in_review→confirmed|dismissed→counter_notice→resolved; fileTakedown/listTakedownRequests (status/kind filters)/getTakedownRequest/resolveTakedownRequest({decision})/submitCounterNotice; trust-scoring auto-hide below threshold (computeTrustScore/upsertTrustScore).
+- **Audit wiring**: marketplace_audit_event (0085) recorded for brand_lock_curation (createBrandLock/updateBrandLock/deleteBrandLock) + takedown (fileTakedown/confirmTakedown/dismissTakedown/resolveTakedown).
+- **Partner API (WS-MKT-9)**: PartnerClientService.verifyClient (sha256 client_secret_hash compare) + checkScope (InsufficientScopeError) + RATE_LIMIT_TIERS pro 600/min enterprise 6000/min; handlers getFxRate/listPayoutRuns/getPayoutRun gap-closed (GET /v1/fx/rates, /v1/payouts, /v1/payouts/{run_id}).
+- **MCP**: src/mcp/{access,tools}.ts — 6 tools (get_listing, search_listings, install_listing, purchase_marketplace, get_reviews, get_creator_profile) gated by capability (marketplace:read/install/purchase); purchase_marketplace capability OFF by default → McpPermissionDeniedError (ERR_PERMISSION_DENIED); executeMcpTool dispatch.
+- **Webhooks**: WebhookDispatcher — HMAC-SHA256 signing, createWebhookDelivery, retry with exponential backoff, token-bucket RateLimiter, idempotent UNIQUE(event_id,target_url).
+
+### Follow-ups (updated Wave 4)
+1. P06 `payout_executor_enabled` flag still doc-only — wire to gate payout-executor worker.
+2. Verified-buyer review gate still in-memory license check (real license_grant lookup deferred).
+3. Real vendor adapters (Stripe/bKash/Nagad/KYC/FX) — sandbox providers + narrow interfaces now, real providers later.
+4. Migrations 0079–0091 not yet applied to a live DB — run `make migrate-up` before exercising services.
+5. MCP tool names deviated from phase-doc list: delivered get_listing/search_listings/install_listing/purchase_marketplace/get_reviews/get_creator_profile; get_license_grant/request_refund/get_payout_status/file_takedown/lint_marketplace_listing NOT implemented (service methods exist — createPurchase/requestRefund/fileTakedown + listEligiblePayoutEvents; optional Wave 5).
+6. Partner API: REST handlers + OAuth token issuance deferred to frontend lane (verifyClient/checkScope + rate-limit primitives exist).
+7. webhook_delivery outbound sender is in-memory scaffold (createWebhookDelivery + retry bookkeeping) — real HTTP sender later.
+8. KYC real Persona/Sumsub + kyc-webhook receiver later (SandboxKycClient deterministic now).
+9. statement_record payload structured JSON (real PDF generation deferred).
+
 ## Waves remaining
 
-- **Wave 4 — Trust/curation/integrations (WS-MKT-5/8/9)**: brand-locked curated filter + 403 guard on direct API bypass, takedown intake/workflow/counter-notice + trust-scanner, partner API (OAuth 2.1 scopes, rate limits 600/min Pro / 6000/min Enterprise, `marketplace-partner.yaml`), MCP tools (`purchase_marketplace` capability OFF by default), webhook-dispatcher (HMAC idempotent), audit coverage.
 - **Wave 5 — Frontend + finalize (WS-MKT-1 + cross-cutting)**: `apps/marketplace-web` storefront (SSR facets, LCP ≤2s, Lighthouse ≥90), editor Insert→Marketplace panel re-skin (brand-locked overlay), `apps/creator-console` studio (drag-upload, manifest, price, license) + analytics + statements, `apps/admin-console` brand-lock UI, i18n 7 locales (en, bn, es, fr, de, ja, zh-CN; bn first-class ৳ numerals), contracts tag `phase-19-contracts-v1.0.0`, runbook, full cross-service verify.

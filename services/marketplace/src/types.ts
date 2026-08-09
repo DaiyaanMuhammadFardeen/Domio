@@ -1,8 +1,9 @@
 /**
- * Marketplace service — shared types and errors (Phase 19 Wave 1).
+ * Marketplace service — shared types and errors (Phase 19 Wave 1–5).
  *
  * Domain types for listings, reviews, pricing, payout policy,
- * listing versions, and audit events.
+ * listing versions, audit events, FX rates, payout runs, webhooks,
+ * partner API, and MCP tools.
  */
 
 // ---------------------------------------------------------------------------
@@ -228,6 +229,18 @@ export class MarketplaceValidationError extends Error {
 }
 
 // ---------------------------------------------------------------------------
+// Brand Lock Errors (Phase 19 Wave 4 — WS-MKT-5)
+// ---------------------------------------------------------------------------
+
+export { BrandLockDeniedError, InvalidBrandLockError, BrandLockNotFoundError } from './curated/types.js';
+
+// ---------------------------------------------------------------------------
+// Takedown Errors (Phase 19 Wave 4 — WS-MKT-8)
+// ---------------------------------------------------------------------------
+
+export { InvalidTakedownTransitionError, TakedownNotFoundError, TrustScoreNotFoundError } from './takedown/types.js';
+
+// ---------------------------------------------------------------------------
 // Payment Intent (Phase 19 Wave 2)
 // ---------------------------------------------------------------------------
 
@@ -368,3 +381,143 @@ export const defaultUsageProvider: UsageProvider = {
     return 0;
   },
 };
+
+// ---------------------------------------------------------------------------
+// FX Rate (Phase 19 Wave 5 — WS-MKT-7)
+// ---------------------------------------------------------------------------
+
+export interface FxRate {
+  readonly id: string;
+  readonly base: string;
+  readonly quote: string;
+  readonly rate: number;
+  readonly fetchedAt: Date;
+  readonly source: string;
+}
+
+// ---------------------------------------------------------------------------
+// Payout Run (Phase 19 Wave 5 — WS-MKT-7)
+// ---------------------------------------------------------------------------
+
+export type PayoutRunStatus = 'running' | 'completed' | 'partial_failure';
+
+export interface PayoutRun {
+  readonly id: string;
+  readonly workspaceId: string;
+  readonly periodMonth: string;
+  readonly executedAt: Date;
+  readonly totalCreators: number;
+  readonly totalPayoutCents: number;
+  readonly currency: string;
+  readonly status: PayoutRunStatus;
+  readonly createdAt: Date;
+}
+
+// ---------------------------------------------------------------------------
+// Webhook Delivery (Phase 19 Wave 5 — WS-MKT-5/8/9)
+// ---------------------------------------------------------------------------
+
+export type WebhookDeliveryStatus = 'pending' | 'sent' | 'failed';
+
+export interface WebhookDelivery {
+  readonly id: string;
+  readonly workspaceId: string;
+  readonly eventType: string;
+  readonly eventId: string;
+  readonly payload: Record<string, unknown>;
+  readonly signature: string;
+  readonly targetUrl: string;
+  readonly status: WebhookDeliveryStatus;
+  readonly attempts: number;
+  readonly lastError: string | null;
+  readonly nextRetryAt: Date | null;
+  readonly createdAt: Date;
+  readonly deliveredAt: Date | null;
+}
+
+// ---------------------------------------------------------------------------
+// Partner Client (Phase 19 Wave 5 — WS-MKT-5/8/9)
+// ---------------------------------------------------------------------------
+
+export type PartnerClientTier = 'pro' | 'enterprise';
+
+export interface PartnerClient {
+  readonly id: string;
+  readonly workspaceId: string;
+  readonly name: string;
+  readonly clientId: string;
+  readonly clientSecretHash: string;
+  readonly scopes: readonly string[];
+  readonly tier: PartnerClientTier;
+  readonly createdBy: string | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+// ---------------------------------------------------------------------------
+// MCP Tool Surface (Phase 19 Wave 5 — WS-MKT-9)
+// ---------------------------------------------------------------------------
+
+export type McpCapability = 'marketplace:read' | 'marketplace:install' | 'marketplace:purchase';
+
+export type McpToolName =
+  | 'get_listing'
+  | 'search_listings'
+  | 'install_listing'
+  | 'purchase_marketplace'
+  | 'get_reviews'
+  | 'get_creator_profile';
+
+export interface McpToolResult {
+  readonly ok: boolean;
+  readonly data?: Record<string, unknown>;
+  readonly errors?: Array<{
+    readonly level: 'error' | 'warning';
+    readonly code: string;
+    readonly message: string;
+  }>;
+}
+
+export interface McpToolInput {
+  readonly workspaceId: string;
+  readonly actorId: string;
+  readonly tool: McpToolName;
+  readonly params: Record<string, unknown>;
+  readonly grantedCapabilities: readonly McpCapability[];
+}
+
+// ---------------------------------------------------------------------------
+// Partner API Error Types
+// ---------------------------------------------------------------------------
+
+export class PartnerClientNotFoundError extends Error {
+  readonly code = 'PARTNER_CLIENT_NOT_FOUND' as const;
+  constructor(public readonly clientId: string) {
+    super(`Partner client not found: ${clientId}`);
+    this.name = 'PartnerClientNotFoundError';
+  }
+}
+
+export class InvalidClientSecretError extends Error {
+  readonly code = 'INVALID_CLIENT_SECRET' as const;
+  constructor() {
+    super('Invalid client secret');
+    this.name = 'InvalidClientSecretError';
+  }
+}
+
+export class InsufficientScopeError extends Error {
+  readonly code = 'INSUFFICIENT_SCOPE' as const;
+  constructor(public readonly required: string, public readonly granted: readonly string[]) {
+    super(`Insufficient scope: ${required} required, granted: [${granted.join(', ')}]`);
+    this.name = 'InsufficientScopeError';
+  }
+}
+
+export class McpPermissionDeniedError extends Error {
+  readonly code = 'ERR_PERMISSION_DENIED' as const;
+  constructor(public readonly capability: string) {
+    super(`${capability} capability not enabled`);
+    this.name = 'McpPermissionDeniedError';
+  }
+}

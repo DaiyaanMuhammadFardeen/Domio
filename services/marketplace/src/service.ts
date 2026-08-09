@@ -23,6 +23,7 @@ import {
   type UsageProvider,
   defaultUsageProvider,
   type ChargebackEventType,
+  type PayoutRun,
 } from './types.js';
 import {
   ListingNotFoundError,
@@ -59,6 +60,32 @@ import { SandboxKycProvider, SandboxPayoutConnectProvider } from './creator/prov
 import { validateTransition } from './creator/onboarding.js';
 import { startKycSessionBody } from './creator/kyc.js';
 import { createPayoutMethodBody, connectLinkBody } from './creator/payout.js';
+import type {
+  BrandLockedListing,
+  BrandLockState,
+} from './curated/types.js';
+import {
+  InvalidBrandLockError,
+  BrandLockNotFoundError,
+} from './curated/types.js';
+import { validateBrandLockInput, assertNotDenied } from './curated/logic.js';
+import type {
+  TakedownRequest,
+  TakedownKind,
+  TrustScore,
+} from './takedown/types.js';
+import {
+  TakedownNotFoundError,
+} from './takedown/types.js';
+import {
+  validateTakedownInput,
+  validateTakedownTransition,
+  fileTakedownBody,
+  resolveBody as takedownResolveBody,
+  dismissBody as takedownDismissBody,
+  counterNoticeBody,
+  computeTrustScore,
+} from './takedown/logic.js';
 
 // ---------------------------------------------------------------------------
 // Service options
@@ -1042,5 +1069,421 @@ export class MarketplaceService {
       creator_id: profile.id,
       kind,
     });
+  }
+
+  // -------------------------------------------------------------------------
+  // Curated Listings (Phase 19 Wave 4 — WS-MKT-5)
+  // -------------------------------------------------------------------------
+
+  async createBrandLock(input: {
+    workspaceId: string;
+    brandKitId: string;
+    marketplaceListingId: string;
+    state: BrandLockState;
+    overridePriceCents?: number | null;
+    notes?: string | null;
+    auditActorId?: string | null;
+    createdBy?: string | null;
+  }): Promise<BrandLockedListing> {
+    checkFeature(FEATURE_FLAGS.curated);
+
+    validateBrandLockInput({
+      workspaceId: input.workspaceId,
+      brandKitId: input.brandKitId,
+      marketplaceListingId: input.marketplaceListingId,
+      state: input.state,
+      overridePriceCents: input.overridePriceCents ?? null,
+      notes: input.notes ?? null,
+    });
+
+    // Check if lock already exists
+    const existing = await this.store.getBrandLock(
+      input.workspaceId,
+      input.brandKitId,
+      input.marketplaceListingId,
+    );
+    if (existing) {
+      throw new InvalidBrandLockError(
+        `Brand lock already exists for listing ${input.marketplaceListingId} in brand ${input.brandKitId}`,
+      );
+    }
+
+    const now = this.now();
+    const lock: BrandLockedListing = {
+      id: this.idGen(),
+      workspaceId: input.workspaceId,
+      brandKitId: input.brandKitId,
+      marketplaceListingId: input.marketplaceListingId,
+      state: input.state,
+      overridePriceCents: input.overridePriceCents ?? null,
+      notes: input.notes ?? null,
+      auditActorId: input.auditActorId ?? null,
+      createdAt: now,
+      updatedAt: now,
+      createdBy: input.createdBy ?? null,
+      updatedBy: input.createdBy ?? null,
+    };
+
+    await this.store.insertBrandLock(lock);
+
+    // Audit event
+    await this.auditRecorder.record({
+      workspaceId: input.workspaceId,
+      actorId: input.auditActorId ?? input.createdBy ?? 'system',
+      actorType: 'user',
+      actorKind: 'human',
+      eventKind: 'brand_lock_curation',
+      eventType: 'brand_lock.created',
+      payload: {
+        brand_lock_id: lock.id,
+        brand_kit_id: input.brandKitId,
+        listing_id: input.marketplaceListingId,
+        state: input.state,
+      },
+    });
+
+    return lock;
+  }
+
+  async getBrandLock(
+    workspaceId: string,
+    brandKitId: string,
+    marketplaceListingId: string,
+  ): Promise<BrandLockedListing> {
+    checkFeature(FEATURE_FLAGS.curated);
+    const lock = await this.store.getBrandLock(workspaceId, brandKitId, marketplaceListingId);
+    if (!lock) throw new BrandLockNotFoundError(
+      `Brand lock not found for listing ${marketplaceListingId} in brand ${brandKitId}`,
+    );
+    return lock;
+  }
+
+  async listBrandLocks(workspaceId: string, brandKitId: string): Promise<BrandLockedListing[]> {
+    checkFeature(FEATURE_FLAGS.curated);
+    return this.store.listBrandLocksByBrand(workspaceId, brandKitId);
+  }
+
+  async updateBrandLock(
+    lockId: string,
+    patch: Partial<Pick<BrandLockedListing, 'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'>>,
+  ): Promise<BrandLockedListing> {
+    checkFeature(FEATURE_FLAGS.curated);
+
+    if (patch.state !== undefined) {
+      // Validate state transition is valid
+      const validStates: BrandLockState[] = ['allow', 'deny', 'override'];
+      if (!validStates.includes(patch.state)) {
+        throw new InvalidBrandLockError(`Invalid state: ${patch.state}`);
+      }
+    }
+
+    const updated = await this.store.updateBrandLock(lockId, patch);
+
+    // Audit event
+    await this.auditRecorder.record({
+      workspaceId: updated.workspaceId,
+      actorId: patch.auditActorId ?? patch.updatedBy ?? 'system',
+      actorType: 'user',
+      actorKind: 'human',
+      eventKind: 'brand_lock_curation',
+      eventType: 'brand_lock.updated',
+      payload: {
+        brand_lock_id: lockId,
+        changes: Object.keys(patch),
+      },
+    });
+
+    return updated;
+  }
+
+  async deleteBrandLock(lockId: string): Promise<void> {
+    checkFeature(FEATURE_FLAGS.curated);
+    await this.store.deleteBrandLock(lockId);
+  }
+
+  async assertBrandLockAllowed(
+    workspaceId: string,
+    brandKitId: string,
+    marketplaceListingId: string,
+  ): Promise<void> {
+    checkFeature(FEATURE_FLAGS.curated);
+    const locks = await this.store.listBrandLocksByBrand(workspaceId, brandKitId);
+    assertNotDenied(locks, workspaceId, brandKitId, marketplaceListingId);
+  }
+
+  // -------------------------------------------------------------------------
+  // Takedowns (Phase 19 Wave 4 — WS-MKT-8)
+  // -------------------------------------------------------------------------
+
+  async fileTakedown(input: {
+    workspaceId: string;
+    listingId: string;
+    claimantId: string;
+    kind: TakedownKind;
+    evidenceUrl?: string | null | undefined;
+    statement: string;
+    createdBy?: string | null;
+  }): Promise<TakedownRequest> {
+    checkFeature(FEATURE_FLAGS.takedown);
+
+    validateTakedownInput({
+      kind: input.kind,
+      statement: input.statement,
+      evidenceUrl: input.evidenceUrl ?? undefined,
+    });
+
+    // Verify listing exists
+    const listing = await this.store.getListing(input.listingId);
+    if (!listing) throw new ListingNotFoundError(input.listingId);
+
+    const body = fileTakedownBody();
+    const now = this.now();
+
+    const request: TakedownRequest = {
+      id: this.idGen(),
+      workspaceId: input.workspaceId,
+      listingId: input.listingId,
+      claimantId: input.claimantId,
+      kind: input.kind,
+      evidenceUrl: input.evidenceUrl ?? null,
+      statement: input.statement,
+      status: body.status,
+      resolutionNotes: null,
+      submittedAt: body.submittedAt,
+      resolvedAt: null,
+      createdAt: now,
+      updatedAt: now,
+      createdBy: input.createdBy ?? null,
+      updatedBy: input.createdBy ?? null,
+    };
+
+    await this.store.insertTakedownRequest(request);
+
+    // Audit event
+    await this.auditRecorder.record({
+      workspaceId: input.workspaceId,
+      actorId: input.claimantId,
+      actorType: 'user',
+      actorKind: 'human',
+      eventKind: 'takedown',
+      eventType: 'takedown.filed',
+      payload: {
+        takedown_id: request.id,
+        listing_id: input.listingId,
+        kind: input.kind,
+        claimant_id: input.claimantId,
+      },
+    });
+
+    return request;
+  }
+
+  async getTakedownRequest(takedownId: string): Promise<TakedownRequest> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    const request = await this.store.getTakedownRequest(takedownId);
+    if (!request) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+    return request;
+  }
+
+  async listTakedownsByListing(listingId: string): Promise<TakedownRequest[]> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    return this.store.listTakedownRequestsByListing(listingId);
+  }
+
+  async listTakedownRequests(opts?: { status?: TakedownRequest['status']; kind?: TakedownKind }): Promise<TakedownRequest[]> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    return this.store.listTakedownRequests(opts);
+  }
+
+  async reviewTakedown(takedownId: string): Promise<TakedownRequest> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    const existing = await this.store.getTakedownRequest(takedownId);
+    if (!existing) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+
+    validateTakedownTransition(existing.status, 'in_review');
+
+    return this.store.updateTakedownStatus(takedownId, 'in_review');
+  }
+
+  async confirmTakedown(takedownId: string, resolutionNotes?: string): Promise<TakedownRequest> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    const existing = await this.store.getTakedownRequest(takedownId);
+    if (!existing) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+
+    validateTakedownTransition(existing.status, 'confirmed');
+
+    const updated = await this.store.updateTakedownStatus(takedownId, 'confirmed', {
+      resolutionNotes: resolutionNotes ?? null,
+    });
+
+    // Transition listing to 'removed'
+    const listing = await this.store.getListing(existing.listingId);
+    if (listing) {
+      await this.store.updateListing(existing.listingId, {
+        status: 'removed',
+        updatedAt: this.now(),
+      });
+    }
+
+    // Audit event
+    await this.auditRecorder.record({
+      workspaceId: existing.workspaceId,
+      actorId: 'system',
+      actorType: 'system',
+      actorKind: 'agent',
+      eventKind: 'takedown',
+      eventType: 'takedown.confirmed',
+      payload: {
+        takedown_id: takedownId,
+        listing_id: existing.listingId,
+        resolution_notes: resolutionNotes,
+      },
+    });
+
+    return updated;
+  }
+
+  async dismissTakedown(takedownId: string, resolutionNotes?: string): Promise<TakedownRequest> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    const existing = await this.store.getTakedownRequest(takedownId);
+    if (!existing) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+
+    validateTakedownTransition(existing.status, 'dismissed');
+
+    const body = takedownDismissBody(existing.status);
+    return this.store.updateTakedownStatus(takedownId, body.status, {
+      resolutionNotes: resolutionNotes ?? null,
+      resolvedAt: body.resolvedAt,
+    });
+  }
+
+  async counterNoticeTakedown(takedownId: string): Promise<TakedownRequest> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    const existing = await this.store.getTakedownRequest(takedownId);
+    if (!existing) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+
+    validateTakedownTransition(existing.status, 'counter_notice');
+    counterNoticeBody(existing.status);
+
+    return this.store.updateTakedownStatus(takedownId, 'counter_notice');
+  }
+
+  async resolveTakedown(takedownId: string, resolutionNotes?: string): Promise<TakedownRequest> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    const existing = await this.store.getTakedownRequest(takedownId);
+    if (!existing) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+
+    validateTakedownTransition(existing.status, 'resolved');
+    const body = takedownResolveBody(existing.status);
+
+    const updated = await this.store.updateTakedownStatus(takedownId, body.status, {
+      resolutionNotes: resolutionNotes ?? null,
+      resolvedAt: body.resolvedAt,
+    });
+
+    // If confirmed → remove listing
+    if (body.listingStatus === 'removed') {
+      const listing = await this.store.getListing(existing.listingId);
+      if (listing) {
+        await this.store.updateListing(existing.listingId, {
+          status: 'removed',
+          updatedAt: this.now(),
+        });
+      }
+    }
+
+    // Audit event
+    await this.auditRecorder.record({
+      workspaceId: existing.workspaceId,
+      actorId: 'system',
+      actorType: 'system',
+      actorKind: 'agent',
+      eventKind: 'takedown',
+      eventType: 'takedown.resolved',
+      payload: {
+        takedown_id: takedownId,
+        listing_id: existing.listingId,
+        resolution_notes: resolutionNotes,
+      },
+    });
+
+    return updated;
+  }
+
+  // -------------------------------------------------------------------------
+  // Trust Scoring (Phase 19 Wave 4 — WS-MKT-8)
+  // -------------------------------------------------------------------------
+
+  async computeAndStoreTrustScore(
+    listingId: string,
+    signals: Record<string, unknown>,
+  ): Promise<TrustScore> {
+    checkFeature(FEATURE_FLAGS.takedown);
+
+    // Verify listing exists
+    const listing = await this.store.getListing(listingId);
+    if (!listing) throw new ListingNotFoundError(listingId);
+
+    const score = computeTrustScore(signals);
+    const now = this.now();
+
+    const trustScore: TrustScore = {
+      id: this.idGen(),
+      listingId,
+      score,
+      signals,
+      computedAt: now,
+    };
+
+    await this.store.upsertTrustScore(trustScore);
+    return trustScore;
+  }
+
+  async getTrustScore(listingId: string): Promise<TrustScore | null> {
+    checkFeature(FEATURE_FLAGS.takedown);
+    return this.store.getTrustScoreByListing(listingId);
+  }
+
+  // -------------------------------------------------------------------------
+  // FX Rates (Phase 19 Wave 5 — WS-MKT-7)
+  // -------------------------------------------------------------------------
+
+  async getFxRate(base: string, quote: string): Promise<{ base: string; quote: string; rate: number; fetched_at: Date; source: string }> {
+    checkFeature(FEATURE_FLAGS.payout);
+
+    if (!base || !quote) {
+      throw new MarketplaceValidationError('base and quote currencies are required', 'INVALID_CURRENCY_PAIR');
+    }
+
+    const rate = await this.store.getLatestFxRate(base, quote);
+    if (!rate) {
+      throw new MarketplaceValidationError(`No FX rate found for ${base}/${quote}`, 'FX_RATE_NOT_FOUND');
+    }
+
+    return {
+      base: rate.base,
+      quote: rate.quote,
+      rate: rate.rate,
+      fetched_at: rate.fetchedAt,
+      source: rate.source,
+    };
+  }
+
+  // -------------------------------------------------------------------------
+  // Payout Runs (Phase 19 Wave 5 — WS-MKT-7)
+  // -------------------------------------------------------------------------
+
+  async listPayoutRuns(opts?: { periodMonth?: string }): Promise<PayoutRun[]> {
+    checkFeature(FEATURE_FLAGS.payout);
+    return this.store.listPayoutRuns(opts);
+  }
+
+  async getPayoutRun(runId: string): Promise<PayoutRun> {
+    checkFeature(FEATURE_FLAGS.payout);
+    const run = await this.store.getPayoutRun(runId);
+    if (!run) {
+      throw new MarketplaceValidationError(`Payout run not found: ${runId}`, 'PAYOUT_RUN_NOT_FOUND');
+    }
+    return run;
   }
 }

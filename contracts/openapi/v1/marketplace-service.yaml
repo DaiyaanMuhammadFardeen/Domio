@@ -41,6 +41,8 @@ tags:
     description: FX rates and financial data.
   - name: marketplace-analytics
     description: Creator analytics and statements.
+  - name: marketplace-takedown
+    description: Takedown requests, resolution, and counter-notice workflow.
 paths:
   /v1/marketplace/listings:
     post:
@@ -418,16 +420,20 @@ paths:
           required: true
           schema: { type: string }
           description: Brand-kit identifier to filter curated listings for.
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+          description: Number of results to return.
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0, default: 0 }
+          description: Number of results to skip.
       responses:
         '200':
           description: Curated listing results
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  items: { type: array, items: { $ref: '#/components/schemas/CuratedListing' } }
-                  total: { type: integer }
+              schema: { $ref: '#/components/schemas/CuratedListingPage' }
         '400':
           description: Missing required brand_kit_id query parameter
           content:
@@ -1022,6 +1028,210 @@ paths:
             application/problem+json:
               schema: { $ref: '#/components/schemas/ProblemDetail' }
 
+  # ── Takedowns (Phase 19 W4) ────────────────────────────────────────────
+
+  /v1/takedowns:
+    post:
+      tags: [marketplace-takedown]
+      summary: File a takedown request against a marketplace listing
+      operationId: fileTakedown
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TakedownInput' }
+      responses:
+        '201':
+          description: Takedown request created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TakedownRequest' }
+        '400':
+          description: Validation error
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '404':
+          description: Listing not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+    get:
+      tags: [marketplace-takedown]
+      summary: List takedown requests
+      operationId: listTakedownRequests
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [received, in_review, confirmed, dismissed, counter_notice, resolved] }
+        - name: kind
+          in: query
+          schema: { type: string, enum: [dmca, trademark, policy] }
+      responses:
+        '200':
+          description: Takedown request list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TakedownRequestList' }
+
+  /v1/takedowns/{request_id}:
+    get:
+      tags: [marketplace-takedown]
+      summary: Get a takedown request by ID
+      operationId: getTakedownRequest
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Takedown request identifier.
+      responses:
+        '200':
+          description: Takedown request details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TakedownRequest' }
+        '404':
+          description: Takedown request not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/takedowns/{request_id}/resolve:
+    post:
+      tags: [marketplace-takedown]
+      summary: Resolve a takedown request
+      operationId: resolveTakedownRequest
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Takedown request identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResolveTakedownInput' }
+      responses:
+        '200':
+          description: Takedown request resolved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TakedownRequest' }
+        '404':
+          description: Takedown request not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Invalid status transition
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  /v1/takedowns/{request_id}/counter-notice:
+    post:
+      tags: [marketplace-takedown]
+      summary: Submit a counter-notice for a takedown request
+      operationId: submitCounterNotice
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Takedown request identifier.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CounterNoticeInput' }
+      responses:
+        '200':
+          description: Counter-notice submitted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TakedownRequest' }
+        '404':
+          description: Takedown request not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '409':
+          description: Counter-notice not allowed for current status
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
+  # ── Brand Locks (Phase 19 W4) ──────────────────────────────────────────
+
+  /v1/marketplace/brand-locks:
+    post:
+      tags: [marketplace-curated]
+      summary: Create a brand lock for a marketplace listing
+      operationId: createBrandLock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BrandLockInput' }
+      responses:
+        '201':
+          description: Brand lock created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BrandLock' }
+        '409':
+          description: Brand lock already exists for this listing and brand kit
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+        '503':
+          description: Service unavailable
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+    get:
+      tags: [marketplace-curated]
+      summary: List brand locks
+      operationId: listBrandLocks
+      parameters:
+        - name: brand_kit_id
+          in: query
+          schema: { type: string }
+          description: Filter by brand kit identifier.
+      responses:
+        '200':
+          description: Brand lock list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BrandLockList' }
+
+  /v1/marketplace/brand-locks/{brand_lock_id}:
+    delete:
+      tags: [marketplace-curated]
+      summary: Delete a brand lock
+      operationId: deleteBrandLock
+      parameters:
+        - name: brand_lock_id
+          in: path
+          required: true
+          schema: { type: string }
+          description: Brand lock identifier.
+      responses:
+        '204':
+          description: Brand lock deleted
+        '404':
+          description: Brand lock not found
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetail' }
+
 # ════════════════════════════════════════════════════════════════════════════
 # Components
 # ════════════════════════════════════════════════════════════════════════════
@@ -1198,29 +1408,16 @@ components:
     # ── Curated Listing ────────────────────────────────────────────────────
     CuratedListing:
       type: object
+      required: [listing_id, title, slug, is_free, price_cents, currency, brand_locked_state]
       properties:
-        id: { type: string }
-        catalog_id: { type: string }
-        seller_id: { type: string }
-        title: { type: string }
-        description: { type: string }
-        status: { type: string, enum: [draft, in_review, published, deprecated, removed] }
-        is_free: { type: boolean }
-        price_cents: { type: integer }
-        currency: { type: string }
-        tags: { type: array, items: { type: string } }
-        preview:
-          type: object
-          properties:
-            poster_ref: { type: string }
-            loop_ref: { type: string }
-        published_at_ms: { type: integer }
-        deprecated_at_ms: { type: integer }
-        version: { type: string }
-        created_at: { type: integer }
-        updated_at: { type: integer }
-        state: { type: string, enum: [allow, deny, override], description: "Brand-lock curation state." }
-        override_price_cents: { type: integer, description: "Per-brand price override in integer cents." }
+        listing_id: { type: string, description: "Marketplace listing identifier." }
+        title: { type: string, description: "Listing title." }
+        slug: { type: string, description: "URL-safe listing slug." }
+        is_free: { type: boolean, description: "Whether the listing is free." }
+        price_cents: { type: integer, description: "Listing price in integer cents." }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+        override_price_cents: { type: integer, nullable: true, description: "Per-brand price override in integer cents." }
+        brand_locked_state: { type: string, enum: [allow, override], description: "Brand-lock curation state." }
 
     # ── Checkout (Phase 19 W2) ──────────────────────────────────────────
     PurchaseInput:
@@ -1387,3 +1584,93 @@ components:
         total_net_cents: { type: integer, description: "Total net payout in integer cents." }
         currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
         generated_at: { type: integer, description: "Epoch milliseconds when the statement was generated." }
+
+    # ── Takedowns (Phase 19 W4) ──────────────────────────────────────────
+    TakedownInput:
+      type: object
+      required: [listing_id, claimant_id, kind, statement]
+      properties:
+        listing_id: { type: string, minLength: 1, description: "Target marketplace listing identifier." }
+        claimant_id: { type: string, minLength: 1, description: "Identifier of the party filing the takedown." }
+        kind: { type: string, enum: [dmca, trademark, policy], description: "Type of takedown request." }
+        evidence_url: { type: string, format: uri, description: "URL to supporting evidence document." }
+        statement: { type: string, minLength: 1, maxLength: 4096, description: "Takedown statement or justification." }
+        email: { type: string, format: email, description: "Contact email for the claimant." }
+
+    TakedownRequest:
+      type: object
+      required: [request_id, listing_id, claimant_id, kind, statement, status, submitted_at]
+      properties:
+        request_id: { type: string, description: "Takedown request identifier." }
+        listing_id: { type: string, description: "Target marketplace listing identifier." }
+        claimant_id: { type: string, description: "Identifier of the party filing the takedown." }
+        kind: { type: string, enum: [dmca, trademark, policy], description: "Type of takedown request." }
+        evidence_url: { type: string, format: uri, nullable: true, description: "URL to supporting evidence document." }
+        statement: { type: string, description: "Takedown statement or justification." }
+        status: { type: string, enum: [received, in_review, confirmed, dismissed, counter_notice, resolved], description: "Current takedown status." }
+        resolution_notes: { type: string, nullable: true, description: "Notes from the resolution process." }
+        submitted_at: { type: integer, description: "Epoch milliseconds when the takedown was submitted." }
+        resolved_at: { type: integer, nullable: true, description: "Epoch milliseconds when the takedown was resolved." }
+
+    TakedownRequestList:
+      type: object
+      required: [items, total]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/TakedownRequest' }, description: "List of takedown requests." }
+        total: { type: integer, description: "Total number of matching takedown requests." }
+
+    ResolveTakedownInput:
+      type: object
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [confirmed, dismissed], description: "Resolution decision." }
+        resolution_notes: { type: string, maxLength: 4096, description: "Optional notes for the resolution." }
+
+    CounterNoticeInput:
+      type: object
+      required: [statement]
+      properties:
+        statement: { type: string, minLength: 1, maxLength: 4096, description: "Counter-notice statement." }
+
+    # ── Brand Locks (Phase 19 W4) ────────────────────────────────────────
+    BrandLockInput:
+      type: object
+      required: [tenant_id, brand_kit_id, marketplace_listing_id, state]
+      properties:
+        tenant_id: { type: string, minLength: 1, description: "Tenant identifier." }
+        brand_kit_id: { type: string, minLength: 1, description: "Brand kit identifier." }
+        marketplace_listing_id: { type: string, minLength: 1, description: "Marketplace listing identifier." }
+        state: { type: string, enum: [allow, deny, override], description: "Brand-lock curation state." }
+        override_price_cents: { type: integer, minimum: 0, description: "Per-brand price override in integer cents." }
+        notes: { type: string, maxLength: 4096, description: "Optional notes about this brand lock." }
+
+    BrandLock:
+      type: object
+      required: [id, tenant_id, brand_kit_id, marketplace_listing_id, state, created_at]
+      properties:
+        id: { type: string, description: "Brand lock identifier." }
+        tenant_id: { type: string, description: "Tenant identifier." }
+        brand_kit_id: { type: string, description: "Brand kit identifier." }
+        marketplace_listing_id: { type: string, description: "Marketplace listing identifier." }
+        state: { type: string, enum: [allow, deny, override], description: "Brand-lock curation state." }
+        override_price_cents: { type: integer, nullable: true, description: "Per-brand price override in integer cents." }
+        notes: { type: string, nullable: true, description: "Optional notes about this brand lock." }
+        created_at: { type: integer, description: "Epoch milliseconds when the brand lock was created." }
+
+    BrandLockList:
+      type: object
+      required: [items, total]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/BrandLock' }, description: "List of brand locks." }
+        total: { type: integer, description: "Total number of matching brand locks." }
+
+    # ── Curated Listing (Phase 19 W4 update) ─────────────────────────────
+    CuratedListingPage:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CuratedListing' }
+          description: "Curated listing results."
+        total: { type: integer, description: "Total number of matching curated listings." }
