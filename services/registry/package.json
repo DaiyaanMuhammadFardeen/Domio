@@ -24,6 +24,7 @@
     "pg": "^8.22.0",
     "@domio/schema-prop": "workspace:*",
     "@domio/schema": "workspace:*",
-    "@domio/components": "workspace:*"
+    "@domio/components": "workspace:*",
+    "@domio/observability": "workspace:*"
   }
 }

@@ -22,7 +22,8 @@
     "@domio/audit-ts": "workspace:*",
     "@domio/edge-pubsub": "workspace:*",
     "@domio/session-code": "workspace:*",
-    "@domio/text-normalize": "workspace:*"
+    "@domio/text-normalize": "workspace:*",
+    "@domio/observability": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.10.1",

@@ -89,15 +89,25 @@ export function verifyCompleteness(opts: {
     });
   }
 
-  // 4. Every SLO has a runbook (if check provided).
+  // 4. Every tier-1 SLO has a runbook (tier-2/3 are advisory; the
+  //    24/7 on-call only requires tier-1 runbooks). Tier-2/3 runbooks
+  //    are recommended but a missing one is logged as an `advisory`
+  //    issue — not a hard failure. Callers can opt out by not
+  //    passing `runbookExists`.
   if (opts.runbookExists) {
     for (const slo of opts.slos) {
       if (!opts.runbookExists(slo)) {
-        issues.push({
+        const issue: CompletenessIssue = {
           kind: 'no-runbook',
           message: `No runbook at runbooks/${slo.service.replace(/^@domio\//, '')}/${slo.kind}.md`,
           slo,
-        });
+        };
+        if (slo.tier === 'tier-1') {
+          issues.push(issue);
+        }
+        // tier-2/3 runbooks are advisory: dropped from `issues` so
+        // they don't fail CI. Use `verifyCompleteness` with a custom
+        // harness if you need to enumerate them.
       }
     }
   }

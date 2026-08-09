@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@domio/audit-ts": "workspace:*",
-    "@domio/signed-link-token": "workspace:*"
+    "@domio/signed-link-token": "workspace:*",
+    "@domio/observability": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.10.1",

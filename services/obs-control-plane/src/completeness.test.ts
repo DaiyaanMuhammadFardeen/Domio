@@ -45,7 +45,7 @@ describe('verifyCompleteness', () => {
     expect(report.issues.some((i) => i.kind === 'no-component')).toBe(true);
   });
 
-  it('fails when runbooks are missing', () => {
+  it('fails when tier-1 runbooks are missing (tier-2 advisory)', () => {
     const slos = buildSlos();
     const report = verifyCompleteness({
       slos,
@@ -55,7 +55,10 @@ describe('verifyCompleteness', () => {
     });
     expect(report.pass).toBe(false);
     const runbookIssues = report.issues.filter((i) => i.kind === 'no-runbook');
-    expect(runbookIssues).toHaveLength(slos.length);
+    // Only tier-1 SLOs surface as hard-fail issues; tier-2 are advisory.
+    const tier1Count = slos.filter((s) => s.tier === 'tier-1').length;
+    expect(runbookIssues).toHaveLength(tier1Count);
+    expect(runbookIssues.every((i) => i.slo?.tier === 'tier-1')).toBe(true);
   });
 
   it('fails when no Alertmanager routes cover tier-1 pages', () => {

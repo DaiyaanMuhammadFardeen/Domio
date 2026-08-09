@@ -20,7 +20,8 @@
   "dependencies": {
     "@domio/audience-service": "workspace:^",
     "@domio/participant-session": "workspace:*",
-    "@domio/session-code": "workspace:*"
+    "@domio/session-code": "workspace:*",
+    "@domio/observability": "workspace:*"
   },
   "devDependencies": {
     "typescript": "5.7.2",

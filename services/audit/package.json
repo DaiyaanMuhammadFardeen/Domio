@@ -18,7 +18,8 @@
     "clean": "rm -rf dist .turbo coverage"
   },
   "dependencies": {
-    "@domio/audit-ts": "workspace:*"
+    "@domio/audit-ts": "workspace:*",
+    "@domio/observability": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.10.1",

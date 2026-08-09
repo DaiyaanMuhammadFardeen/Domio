@@ -20,7 +20,8 @@
   "dependencies": {
     "@domio/schema": "workspace:*",
     "@domio/theme": "workspace:*",
-    "@domio/tokens": "workspace:*"
+    "@domio/tokens": "workspace:*",
+    "@domio/observability": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.10.1",
