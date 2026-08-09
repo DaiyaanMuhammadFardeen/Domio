@@ -1,0 +1,62 @@
+name: public-beta-gate
+
+# Phase 22-beta — release readiness gate.
+#
+# Aggregates the four P22 DoD streams (G1 perf, G2 reliability, G3
+# load, G5 a11y/i18n) and the workflow-presence check into one
+# pre-merge gate. Failing this workflow blocks the public-beta
+# release.
+#
+# Implementation: runs `services/obs-control-plane/scripts/verify-beta.mjs`
+# which executes the actual `checkTracingCoverage` and
+# `verifyCompleteness` against `docs/slos/catalogue.md`, then asserts
+# every required workflow file is on disk.
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-beta-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: public-beta gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build obs-control-plane
+        run: pnpm --filter @domio/obs-control-plane build
+      - name: Run gate verification
+        id: verify
+        run: |
+          node services/obs-control-plane/scripts/verify-beta.mjs 2>&1 | tee artifacts/gate.log
+      - name: Upload gate log
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: public-beta-gate-log
+          path: artifacts/gate.log
+          retention-days: 30
+      - name: Annotate summary
+        if: ${{ !cancelled() }}
+        run: |
+          echo "## Public-beta gate result" >> $GITHUB_STEP_SUMMARY
+          tail -3 artifacts/gate.log >> $GITHUB_STEP_SUMMARY

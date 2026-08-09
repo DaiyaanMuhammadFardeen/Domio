@@ -1,0 +1,143 @@
+name: perf-nightly
+
+# Phase 22-beta — G1-3 canvas FPS regression.
+#
+# Runs `apps/editor/perf/canvas_fps.spec.ts` nightly against the
+# editor on port 3100 to detect frame-rate regressions against the
+# stored baseline at `apps/editor/perf/baselines/canvas_fps.json`.
+# The spec asserts:
+#   - 60 fps p50
+#   - ≥55 fps p95
+#   - <10% p95 regression vs baseline
+#
+# On regression the baseline is **not** updated; the baseline file is
+# only updated by a follow-up manual PR. Uploads:
+#   - perf-canvas-fps-report: junit XML + playwright report
+#   - perf-canvas-fps-baseline: the prior baseline (for diffing)
+#
+# Schedule: 04:00 UTC daily (after P17 load @ 02:00, after P22 load @ 03:00).
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      update_baseline:
+        description: 'Record this run as the new baseline (only on workflow_dispatch)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: perf-nightly-${{ github.ref }}
+  cancel-in-progress: false  # never cancel a nightly perf run
+
+jobs:
+  setup:
+    name: install-deps
+    uses: ./.github/workflows/reusable/setup-node.yml
+    with:
+      node-version: '22.11.0'
+
+  build:
+    name: build editor
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Build editor
+        run: pnpm --filter @domio/editor build
+
+  canvas-fps:
+    name: canvas FPS (G1-3)
+    needs: [setup, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      UPDATE_BASELINE: ${{ inputs.update_baseline == true && '1' || '' }}
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright
+        run: pnpm --filter @domio/editor exec playwright install --with-deps chromium
+      - name: Start editor (production build)
+        run: |
+          pnpm --filter @domio/editor start:3100 &
+          SERVE_PID=$!
+          echo "SERVE_PID=$SERVE_PID" >> $GITHUB_ENV
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3100 > /dev/null 2>&1; then break; fi
+            sleep 2
+          done
+      - name: Run canvas FPS spec
+        id: fps
+        run: |
+          mkdir -p artifacts
+          pnpm --filter @domio/editor exec playwright test \
+            perf/canvas_fps.spec.ts \
+            --reporter=github \
+            --reporter=html \
+            --reporter=junit \
+            --output-dir=artifacts/playwright \
+            2>&1 | tee artifacts/fps.log || FPS_EXIT=$?
+          FPS_EXIT=${FPS_EXIT:-0}
+          echo "fps_exit=$FPS_EXIT" >> $GITHUB_OUTPUT
+      - name: Print baseline diff summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f apps/editor/perf/baselines/canvas_fps.json ]; then
+            echo "## Current baseline"
+            cat apps/editor/perf/baselines/canvas_fps.json
+          else
+            echo "::warning::No baseline recorded yet — first run will create one."
+          fi
+      - name: Upload playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: perf-canvas-fps-report
+          path: |
+            artifacts/
+            apps/editor/playwright-report/
+            apps/editor/test-results/
+          retention-days: 30
+      - name: Upload baseline (if present)
+        if: ${{ !cancelled() && hashFiles('apps/editor/perf/baselines/canvas_fps.json') != '' }}
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: perf-canvas-fps-baseline
+          path: apps/editor/perf/baselines/canvas_fps.json
+          retention-days: 90
+      - name: Tear down
+        if: ${{ always() }}
+        run: |
+          if [ -n "$SERVE_PID" ]; then kill "$SERVE_PID" || true; fi
+          pkill -f "next start" || true

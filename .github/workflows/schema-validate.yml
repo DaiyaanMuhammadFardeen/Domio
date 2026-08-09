@@ -99,9 +99,10 @@ jobs:
     timeout-minutes: 1
     steps:
       - name: Block on failure
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         run: |
-          if [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "true" ]; then
-            echo "Phase 02 schema validation failed"
-            exit 1
-          fi
-          echo "Phase 02 schema validation passed"
+          echo "Phase 02 schema validation failed"
+          exit 1
+      - name: Success
+        if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+        run: echo "Phase 02 schema validation passed"

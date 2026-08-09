@@ -1,0 +1,66 @@
+name: tracing-coverage
+
+# Phase 22-beta — G2 tracing coverage gate.
+#
+# Asserts that every tier-1 service in the SLO catalogue has:
+#   1. `@domio/observability` declared as a dependency, and
+#   2. at least one Tracer instantiation + root-span call in its `src/`.
+#
+# Tier-2/3 services are advisory (warning only). Defer-list services
+# (`@domio/auth`, `@domio/billing`, `@domio/component`) are also
+# advisory — they are listed in the catalogue as inherited / P22
+# stretch / placeholder but do not yet ship their own implementation.
+#
+# Triggers on PR/push touching service code or the catalogue.
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'services/**'
+      - 'docs/slos/**'
+      - 'packages/observability/**'
+      - '.github/workflows/tracing-coverage.yml'
+  push:
+    branches: [master, main]
+    paths:
+      - 'services/**'
+      - 'docs/slos/**'
+      - 'packages/observability/**'
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tracing-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: tracing coverage gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build obs-control-plane
+        run: pnpm --filter @domio/obs-control-plane build
+      - name: Run tracing coverage check
+        id: check
+        run: |
+          node scripts/tracing-coverage.mjs | tee artifacts/coverage.log
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: tracing-coverage-report
+          path: artifacts/coverage.log
+          retention-days: 14

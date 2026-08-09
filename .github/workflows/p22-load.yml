@@ -1,0 +1,195 @@
+name: p22-load
+
+# Phase 22-beta WS-B — k6 load orchestrator for the 5 P22 scenarios
+# in `infra/loadtest/`. Runs nightly against the staging cluster and
+# uploads k6 summary JSON. Each scenario is its own job so a slow
+# scenario doesn't block the others.
+#
+# Scenarios:
+#   - audience_50k   — 50k concurrent audience WS
+#   - editors_10k    — 10k concurrent editors
+#   - presenter_2h   — 2h sustained presenter
+#   - decks_100k     — 100k-deck library read traffic
+#   - ingest_timeline — 10k/s event ingest sustained
+
+on:
+  schedule:
+    # 03:00 UTC daily (after P17 load at 02:00 UTC).
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Run only one scenario (audience_50k, editors_10k, presenter_2h, decks_100k, ingest_timeline, or all)'
+        type: choice
+        default: all
+        options:
+          - all
+          - audience_50k
+          - editors_10k
+          - presenter_2h
+          - decks_100k
+          - ingest_timeline
+      scale:
+        description: 'Scale factor (0.01 = 1% of design-partner scale; default 0.05 for CI safety)'
+        type: string
+        default: '0.05'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: p22-load-${{ github.ref }}
+  cancel-in-progress: false  # never cancel a nightly load run
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # audience_50k — 50k concurrent WS presence + reaction fanout.
+  # ---------------------------------------------------------------------------
+  audience_50k:
+    name: audience_50k
+    if: ${{ inputs.scenario == 'all' || inputs.scenario == 'audience_50k' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      REALTIME_URL: ${{ vars.P22_REALTIME_URL || 'http://localhost:8080' }}
+      AUDIENCE_URL: ${{ vars.P22_AUDIENCE_URL || 'http://localhost:8080' }}
+      AUDIENCE_VU: ${{ inputs.scale && format('{0}', math.ceil(50000 * inputs.scale)) || '2500' }}
+      AUDIENCE_DURATION: '15m'
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: infra/loadtest/audience_50k.js
+          cloud: false
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-audience-50k
+          path: summary.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # editors_10k — 10k concurrent editor sessions on the realtime-gateway.
+  # ---------------------------------------------------------------------------
+  editors_10k:
+    name: editors_10k
+    if: ${{ inputs.scenario == 'all' || inputs.scenario == 'editors_10k' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      REALTIME_URL: ${{ vars.P22_REALTIME_URL || 'http://localhost:8080' }}
+      COLLAB_URL: ${{ vars.P22_COLLAB_URL || 'http://localhost:8080' }}
+      EDITORS_VU: ${{ inputs.scale && format('{0}', math.ceil(10000 * inputs.scale)) || '500' }}
+      EDITORS_DURATION: '15m'
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: infra/loadtest/editors_10k.js
+          cloud: false
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-editors-10k
+          path: summary.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # presenter_2h — single-VU sustained presenter session.
+  # ---------------------------------------------------------------------------
+  presenter_2h:
+    name: presenter_2h
+    if: ${{ inputs.scenario == 'all' || inputs.scenario == 'presenter_2h' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 130
+    env:
+      PRESENTER_URL: ${{ vars.P22_PRESENTER_URL || 'http://localhost:8080' }}
+      PRESENTER_DURATION: '120m'
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: infra/loadtest/presenter_2h.js
+          cloud: false
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-presenter-2h
+          path: summary.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # decks_100k — 100k-deck library read traffic.
+  # ---------------------------------------------------------------------------
+  decks_100k:
+    name: decks_100k
+    if: ${{ inputs.scenario == 'all' || inputs.scenario == 'decks_100k' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      LIBRARY_URL: ${{ vars.P22_LIBRARY_URL || 'http://localhost:8080' }}
+      READ_RPS: ${{ inputs.scale && format('{0}', math.ceil(5000 * inputs.scale)) || '250' }}
+      LIBRARY_DURATION: '60m'
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: infra/loadtest/decks_100k.js
+          cloud: false
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-decks-100k
+          path: summary.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # ingest_timeline — 10k/s event-ingest sustained.
+  # ---------------------------------------------------------------------------
+  ingest_timeline:
+    name: ingest_timeline
+    if: ${{ inputs.scenario == 'all' || inputs.scenario == 'ingest_timeline' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      INGEST_URL: ${{ vars.P22_INGEST_URL || 'http://localhost:8080' }}
+      INGEST_RATE: ${{ inputs.scale && format('{0}', math.ceil(10000 * inputs.scale)) || '500' }}
+      INGEST_DURATION: '60m'
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: grafana/k6-action@v0.3.1
+        with:
+          filename: infra/loadtest/ingest_timeline.js
+          cloud: false
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: k6-summary-ingest-timeline
+          path: summary.json
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # summary — aggregate per-script k6 summaries into a single report.
+  # ---------------------------------------------------------------------------
+  summary:
+    name: p22-load-summary
+    needs: [audience_50k, editors_10k, presenter_2h, decks_100k, ingest_timeline]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: Aggregate k6 summaries
+        run: |
+          mkdir -p artifacts
+          for f in k6-summary-*; do
+            echo "## $f" >> artifacts/index.md
+            jq '{metrics: (.metrics | to_entries | map({key, value: .value}))}' \
+              "$f/summary.json" 2>/dev/null >> artifacts/index.md || echo "no summary for $f" >> artifacts/index.md
+          done
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: p22-load-all
+          path: artifacts/
+          retention-days: 30

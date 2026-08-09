@@ -137,7 +137,7 @@ jobs:
         run: pkill -f "next start" || true
 
   test:
-    name: vitest + playwright
+    name: vitest
     needs: [setup, build]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -164,3 +164,82 @@ jobs:
           name: dashboard-coverage-report
           path: apps/dashboard/coverage/
           retention-days: 14
+
+  e2e:
+    name: playwright e2e
+    needs: [setup, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
+      REDIS_URL: redis://localhost:6379
+      NATS_URL: nats://localhost:4222
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      nats:
+        image: nats:2.10-alpine
+        ports: ['4222:4222']
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm --filter @domio/dashboard exec playwright install --with-deps chromium
+      - name: Start dashboard (production build)
+        run: |
+          pnpm --filter @domio/dashboard start:3010 &
+          SERVE_PID=$!
+          echo "SERVE_PID=$SERVE_PID" >> $GITHUB_ENV
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3010 > /dev/null 2>&1; then break; fi
+            sleep 2
+          done
+      - name: Run e2e specs
+        run: |
+          E2E_BASE_URL=http://localhost:3010 \
+            pnpm --filter @domio/dashboard exec playwright test --reporter=github
+      - name: Upload HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: dashboard-e2e-report
+          path: apps/dashboard/playwright-report/
+          retention-days: 14
+      - name: Upload test-results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: dashboard-e2e-results
+          path: apps/dashboard/test-results/
+          retention-days: 14
+      - name: Tear down
+        if: ${{ always() }}
+        run: |
+          if [ -n "$SERVE_PID" ]; then kill "$SERVE_PID" || true; fi
+          pkill -f "next start" || true
