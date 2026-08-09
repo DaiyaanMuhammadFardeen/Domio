@@ -33,6 +33,7 @@
 | 18 | Collaboration & workflow | surface | **yes (Stream F)** | `collaboration-workflow` | #179–#192 |
 | 19 | Marketplace & creator economy | cross-cutting | **yes (Stream A)** | `components-templates`, `theming-branding`, `enterprise-governance` | parts of #28, #41 |
 | 20 | Security, governance, enterprise | cross-cutting | continuous | `07`, `enterprise-governance`, `11` | #193–#204 |
+| 20.5 | Beta security hardening (app-only subset of P20) | beta-launch gate | yes (gates public beta) | `07` | #193a–c, #195a, #196a |
 | 21 | Novel & frontier features | frontier | late | `novel-frontier` | #205–#219 |
 | 22 | Polish, scale, hardening, GA | frontier | last | all | all gaps |
 
@@ -72,7 +73,7 @@ After phases 00–05 (the critical-path foundation) most work proceeds in parall
 - **Stream D — AI & agents** (3–5 engineers): P12 AI copilot, P13 agentic surface
 - **Stream E — Live experience** (4–6 engineers): P14 sharing, P15 presenter, P16 audience
 - **Stream F — Insights & workflow** (3–4 engineers): P17 analytics, P18 collaboration
-- **Cross-cutting** (3–5 engineers): P20 security & enterprise, runs from P01 onwards
+- **Cross-cutting** (3–5 engineers): P20 security & enterprise, runs from P01 onwards. P20.5 is the beta-launch cut of P20 (application-security subset); it gates public beta and must be staffed alongside P03–P14.
 
 Total: ~24–35 engineers at peak, with 5–7 engineers required for the foundation (P00–P05).
 

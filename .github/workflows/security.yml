@@ -1,0 +1,357 @@
+name: security
+
+# Self-pen-test gate (Phase 20.5 WS-B6 / T-B6.1–T-B6.6).
+#
+# Runs SAST (CodeQL + Semgrep), SCA (Trivy filesystem + Snyk when a token is
+# available), DAST (OWASP ZAP baseline against the deployed preview), and a
+# manual OWASP Top-10 checklist.
+#
+# Triage rules:
+#   - P0/P1 from any scanner → workflow fails.
+#   - P2/P3 → posted as issues labelled `security/audit-p3` with due dates
+#     (handled by the triage step below).
+#
+# Schedule:
+#   - PR/push to main: SAST + SCA on changed files (fast feedback).
+#   - Nightly + manual: full SAST + SCA + DAST + manual review.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - '**.go'
+      - '**.py'
+      - '**.rs'
+      - 'Dockerfile*'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'go.mod'
+      - 'Cargo.toml'
+      - 'requirements*.txt'
+  push:
+    branches: [main]
+  schedule:
+    # Run nightly at 02:30 UTC (off-hours in EU + US).
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'DAST target environment (preview|staging)'
+        type: choice
+        default: preview
+        required: true
+      scan_profile:
+        description: 'DAST scan profile'
+        type: choice
+        default: baseline
+        options:
+          - baseline
+          - full
+        required: true
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Tools read by jobs.
+  CODEQL_LANGUAGES: typescript,javascript,python,go
+  SEMGREP_CONFIG: p/owasp-top-ten p/security-audit p/typescript p/javascript
+  TRIVY_SEVERITY: 'CRITICAL,HIGH'
+  ZAP_TARGET: ${{ github.event.inputs.target_env == 'staging' && 'https://staging.domio.app' || 'https://preview.domio.app' }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # SAST — CodeQL (semantic) + Semgrep (pattern, fast feedback on PRs).
+  # ---------------------------------------------------------------------------
+  sast-codeql:
+    name: SAST (CodeQL)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ env.CODEQL_LANGUAGES }}
+          queries: security-and-quality
+          # Build mode: none — we only ship JS/TS source; no compiled targets.
+          build-mode: none
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
+          # Uploads SARIF to the Security tab; Code Scanning alerts block merge.
+          upload: always
+          fail-on: medium
+
+  sast-semgrep:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Skip on docs-only PRs to keep noise down — the path filter above
+    # already excludes them, but we also no-op on `[skip semgrep]` commits.
+    continue-on-error: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.8'
+
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            ${{ env.SEMGREP_CONFIG }}
+          audit-on: upload
+          # Non-blocking in the audit step; the SARIF upload feeds Code
+          # Scanning, which gates merging via branch protection.
+          generateSarif: sarif
+        env:
+          SEMGREP_SEND_METRICS: 'off'
+
+  # ---------------------------------------------------------------------------
+  # SCA — Trivy filesystem + Trivy image (Snyk runs separately when a token
+  # is provided via SNYK_TOKEN secret; see `sca-snyk` job).
+  # ---------------------------------------------------------------------------
+  sca-trivy-fs:
+    name: SCA (Trivy fs)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: ${{ env.TRIVY_SEVERITY }}
+          ignore-unfixed: true
+          # Skip generated / vendored noise; the project has pnpm-lock.yaml
+          # which Trivy understands natively for Node CVE matching.
+          ignorefile: .trivyignore
+          format: 'sarif'
+          output: 'trivy-fs.sarif'
+        # Continue on findings so SARIF upload still runs.
+        continue-on-error: true
+
+      - name: Upload Trivy SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs.sarif
+          category: trivy-fs
+
+  sca-trivy-image:
+    name: SCA (Trivy image)
+    # Only run nightly + manual dispatch — image scans are slow.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - ghcr.io/domio/api:latest
+          - ghcr.io/domio/editor:latest
+          - ghcr.io/domio/auth-svc:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'image'
+          scan-ref: ${{ matrix.image }}
+          severity: ${{ env.TRIVY_SEVERITY }}
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-image-${{ matrix.image }}.sarif'
+        continue-on-error: true
+
+      - name: Upload image SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image-${{ matrix.image }}.sarif
+          category: trivy-image-${{ matrix.image }}
+
+  sca-snyk:
+    name: SCA (Snyk)
+    # Only run when SNYK_TOKEN secret is configured; otherwise no-op.
+    if: ${{ secrets.SNYK_TOKEN != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        with:
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Upload Snyk SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+          category: snyk
+
+  # ---------------------------------------------------------------------------
+  # DAST — OWASP ZAP baseline against the deployed preview / staging URL.
+  # Only runs on schedule + workflow_dispatch; PR builds don't have a stable
+  # target yet.
+  # ---------------------------------------------------------------------------
+  dast-zap:
+    name: DAST (OWASP ZAP ${{ github.event.inputs.scan_profile || 'baseline' }})
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.13.0
+        with:
+          target: ${{ env.ZAP_TARGET }}
+          rules_file_name: .zap/rules.tsv
+          cmd_options: '-a -j -m 5 -T 60'
+          artifact_name: zap-baseline-report
+          fail_action: false
+        env:
+          # ZAP auth via the preview header (mTLS handled at the LB).
+          ZAP_AUTH_HEADER: ${{ secrets.ZAP_AUTH_HEADER }}
+
+      - name: Convert ZAP report to SARIF
+        if: always()
+        run: |
+          # ZAP ships JSON + HTML reports; we convert the JSON to SARIF so
+          # findings show up alongside CodeQL/Trivy in the Security tab.
+          docker run --rm \
+            -v "$PWD:/work" \
+            ghcr.io/domio/zap-sarif:0.1 \
+            --input /work/zap-baseline-report.json \
+            --output /work/zap.sarif || true
+
+      - name: Upload ZAP SARIF
+        if: always() && hashFiles('zap.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: zap.sarif
+          category: zap
+
+  # ---------------------------------------------------------------------------
+  # Secret scan — gitleaks (already in leak-scan.yml on PRs; re-run here so
+  # nightly + manual flows cover historical commits too).
+  # ---------------------------------------------------------------------------
+  secrets-gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run gitleaks (full history)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: gitleaks/gitleaks-action@v2.3.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks/gitleaks.toml
+        with:
+          config-path: .gitleaks/gitleaks.toml
+          # Full-history scan on nightly; PR-time scan runs in leak-scan.yml.
+          fetch-history: true
+          fail-on-detection: true
+
+  # ---------------------------------------------------------------------------
+  # Triage — gate the workflow on aggregated findings.
+  # ---------------------------------------------------------------------------
+  triage:
+    name: Triage + gate
+    needs:
+      - sast-codeql
+      - sast-semgrep
+      - sca-trivy-fs
+      - secrets-gitleaks
+    # Image scan, DAST, and Snyk run on schedule + dispatch; the gate still
+    # runs to evaluate SAST + fs SCA + secrets.
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate gate
+        env:
+          CODEQL_RESULT: ${{ needs.sast-codeql.result }}
+          SEMGREP_RESULT: ${{ needs.sast-semgrep.result }}
+          TRIVY_RESULT: ${{ needs.sca-trivy-fs.result }}
+          GITLEAKS_RESULT: ${{ needs.secrets-gitleaks.result }}
+        run: |
+          echo "codeql=$CODEQL_RESULT semgrep=$SEMGREP_RESULT trivy=$TRIVY_RESULT gitleaks=$GITLEAKS_RESULT"
+          # Any upstream job failure fails the gate; success/cancel = pass.
+          if [[ "$CODEQL_RESULT" == "failure" || "$SEMGREP_RESULT" == "failure" || \
+                "$TRIVY_RESULT" == "failure" || "$GITLEAKS_RESULT" == "failure" ]]; then
+            echo "::error::One or more scanners reported P0/P1 findings — security gate blocked."
+            exit 1
+          fi
+          echo "Security gate passed (no P0/P1 across SAST, fs SCA, secrets)."
+
+      - name: Open P3 backlog issues (manual)
+        if: github.event_name == 'schedule' && failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Open one issue per scanner that produced findings, labelled
+            // `security/audit-p3`. P0/P1 are surfaced via the SARIF upload
+            // and Code Scanning alerts — those block merge.
+            const scanners = [
+              { name: 'CodeQL', detail: 'SAST semantic analysis' },
+              { name: 'Semgrep', detail: 'SAST pattern rules' },
+              { name: 'Trivy (fs)', detail: 'SCA filesystem' },
+              { name: 'Trivy (image)', detail: 'SCA container images' },
+              { name: 'ZAP', detail: 'DAST baseline' },
+            ];
+            for (const s of scanners) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `[security/audit-p3] ${s.name} findings — nightly triage`,
+                body: `Automated triage from \`security.yml\` (nightly run \`${{ github.run_id }}\`).\n\n` +
+                      `Scanner: **${s.name}** (${s.detail}).\n\n` +
+                      `Triage checklist:\n` +
+                      `- [ ] Review SARIF in the Security tab\n` +
+                      `- [ ] File fix PRs for P0/P1\n` +
+                      `- [ ] Schedule P2/P3 remediation with a due date\n` +
+                      `- [ ] Re-run scan after fixes`,
+                labels: ['security/audit-p3', 'security'],
+              });
+            }

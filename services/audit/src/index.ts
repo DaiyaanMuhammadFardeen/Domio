@@ -1,9 +1,20 @@
 /**
- * Domio audit-service — Phase 0 stub.
+ * @domio/audit-service — public surface.
  *
- * Append-only audit log.
+ * P20.5 B2 (lightweight audit log). Append-only Postgres-backed audit log
+ * with synchronous outbox emit, query, CSV export, and 90-day retention.
  *
- * Real implementation lands in Phase 20.
+ * Public exports:
+ *   - `AuditService` — emits and queries events.
+ *   - `AuditHandlers` — REST handlers for `/v1/admin/audit/*`.
+ *   - `InMemoryAuditStore` / `PgAuditStore` — store adapters.
+ *   - `parseAuditQuery`, `serializeEvent` — request/response helpers.
+ *   - `AuditEvent`, `AuditEventInput`, `AuditQuery`, `AuditQueryResult` — types.
+ *   - `AuditAction`, `AUDIT_ACTIONS`, `ACTOR_KINDS`, `ActorKind` — enums.
+ *   - `DEFAULT_RETENTION_DAYS`, `MAX_QUERY_LIMIT`, `DEFAULT_QUERY_LIMIT` — constants.
  */
 
-export {};
+export * from './types.js';
+export * from './stores.js';
+export * from './service.js';
+export * from './handlers.js';

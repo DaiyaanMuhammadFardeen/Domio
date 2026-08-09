@@ -61,6 +61,13 @@ flowchart TD
     P21 --> P22[Phase 22<br/>Polish, scale, GA]
 
     P20 -.continuous.-> P22
+    P205[Phase 20.5<br/>Beta security hardening] -.beta-launch gate.-> P14
+    P205 -.beta-launch gate.-> P15
+    P205 -.beta-launch gate.-> P16
+    P205 -.beta-launch gate.-> P17
+    P205 -.beta-launch gate.-> P18
+    P205 -.beta-launch gate.-> P19
+    P205 -.subset of.-> P20
 ```
 
 ## Critical path
@@ -163,6 +170,7 @@ Most phases share contracts defined in earlier phases. The minimum contract surf
 | 18 | 05, 13 | comment/approval/MR APIs |
 | 19 | 06, 07, 20 | marketplace billing & payout events |
 | 20 | (all) | governance, DLP, audit, residency APIs |
+| 20.5 | 00, 01, 03, 05 | policy-engine API, audit-event API, dlp-warn API, rate-limit middleware; gates public beta |
 | 21 | (most) | novel state timeline, gaze/voice consent APIs, knowledge graph API |
 | 22 | (all) | (closes gaps) |
 
@@ -174,6 +182,7 @@ The most likely bottlenecks:
 - **Phase 04 (CRDT).** Real-time collab is the hardest technical milestone and blocks parallel streams that need live presence (#142 audience, #126 presenter). Mitigate by de-risking with a spike in phase 00 or 02.
 - **Phase 14 (sharing).** Many streams converge here. The publishing pipeline is also where revenue, compliance, and CDN meet. Mitigate by limiting the phase 14 scope to "minimum publishable deck" and deferring polish.
 - **Phase 20 (security & enterprise).** This runs continuously, but enterprise pilots cannot start without it. Mitigate by setting an "enterprise-ready" gate earlier than "GA".
+- **Phase 20.5 (beta security hardening).** This is the beta-launch cut of P20 and must complete before public signup opens. It is a subset of P20's application-security work; the rest (SSO/SCIM, residency, DLP hard-blocks, audit hash chain, etc.) is deferred to full P20 after product-market fit.
 
 ## Critical-path minimization
 

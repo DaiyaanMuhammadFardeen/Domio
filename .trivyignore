@@ -1,0 +1,17 @@
+# Trivy ignore file — Phase 20.5 WS-B6.
+#
+# Format: one CVE per line, optionally followed by an expiry date and reason.
+# Anything listed here will be skipped by `trivy fs` and `trivy image`.
+#
+# Keep this file empty unless we have a documented reason to accept a CVE.
+# Each entry MUST include:
+#   1. The CVE / GHSA / ID
+#   2. The package + version pinned
+#   3. The reason (transitive dep, no upstream fix yet, etc.)
+#   4. A link to the security ticket tracking remediation
+#   5. An expiry date (yyyy-mm-dd) when the suppression must be revisited
+#
+# Example format:
+#   CVE-2024-12345  expires 2026-12-31  reason="no upstream fix; tracked in #1234"
+
+# End of file.

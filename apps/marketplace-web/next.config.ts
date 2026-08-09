@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { nextSecurityHeaders } from '@domio/web-security';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -9,6 +10,20 @@ const nextConfig: NextConfig = {
         hostname: '**.domio.example.com',
       },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: nextSecurityHeaders({
+          https: process.env.NODE_ENV === 'production',
+          allowlist: {
+            connect: ['https://*.domio.example.com'],
+            img: ['https://*.domio.example.com', 'data:', 'blob:'],
+          },
+        }),
+      },
+    ];
   },
   // Workspace packages that use .js extensions in TS source (ESM convention)
   // need webpack alias resolution so the bundled build can find the .ts files.

@@ -357,6 +357,20 @@ Abuse signals: high velocity, low dwell time, suspicious UA, geo-anomaly. Captch
 | Plugin escape | sandbox | e2e + manual |
 | Residency | policy | policy tests |
 
+### 7.16.3 Beta-launch security gate (P20.5 subset)
+
+Public beta launches only after the **P20.5 subset** of this matrix is green. P20.5 (`phase-20.5-beta-security-hardening.md`) is the application-security subset of P20 that ships before any external user can sign up. It is a strict subset of the controls above and **does not** introduce new controls — it tightens the existing ones to a beta-launch threshold:
+
+- **Auth (passkeys/MFA, password hashing):** Default-on MFA for `admin`/`owner`; Argon2id cost ≥ 19 MiB; rate limit on `/auth/login` (10/min/IP); gitleaks in CI.
+- **Authz (policy engine):** RBAC hierarchy + two ABAC cases (brand-lock, restricted-data share); ≤ 5 ms p95; bypass detection.
+- **Audit (lightweight):** Every state-changing action writes to `audit_event` via synchronous outbox; 90-day retention; admin query UI; no hash chain yet (full P20 adds it).
+- **DLP (warning-only):** Regex scan for credit-card, email, SSN on share/export; warning banner + audited bypass; no hard block yet (full P20 adds it).
+- **Web security:** CSP on every web response; cookies `Secure` + `HttpOnly` + `SameSite=Lax`; CSRF on state-changing endpoints.
+- **Rate limiting + abuse:** Per-IP and per-user sliding-window limits; CAPTCHA on signup; tenant circuit breaker; anomaly alert.
+- **Self-pen-test:** SAST + SCA + DAST + manual OWASP top-10 review; 0 P0/P1.
+
+Controls that **are not** in P20.5 (deferred to full P20) and therefore **not** required for beta launch: SSO/SCIM, domain capture, JIT, hash-chained audit, WORM bucket, residency, `bd-dhaka`, retention policies, legal hold, DSR endpoints, hard DLP blocks, brand governance, public API/SDKs, webhooks, seat analytics, plugin sandbox, headless rendering. These are documented in `phase-20-security-enterprise.md` and gated on enterprise-pilot readiness, not beta.
+
 ---
 
 ## 7.17 Decisions Log

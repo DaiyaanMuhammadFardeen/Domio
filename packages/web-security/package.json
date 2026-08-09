@@ -1,9 +1,9 @@
 {
-  "name": "@domio/audit-service",
+  "name": "@domio/web-security",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Append-only audit log. P20.5 B2 (lightweight; full hash-chained log is P20 WS-X2).",
+  "description": "Security headers (CSP, HSTS, cookie hardening) shared across Domio web apps. P20.5 B5.",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "exports": {
@@ -16,9 +16,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf dist .turbo coverage"
-  },
-  "dependencies": {
-    "@domio/audit-ts": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.10.1",
