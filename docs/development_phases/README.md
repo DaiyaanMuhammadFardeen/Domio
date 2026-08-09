@@ -35,6 +35,7 @@
 | 20 | Security, governance, enterprise | cross-cutting | continuous | `07`, `enterprise-governance`, `11` | #193–#204 |
 | 20.5 | Beta security hardening (app-only subset of P20) | beta-launch gate | yes (gates public beta) | `07` | #193a–c, #195a, #196a |
 | 21 | Novel & frontier features | frontier | late | `novel-frontier` | #205–#219 |
+| 22-beta | Beta → Public-beta hardening (P21-independent subset of P22) | public-beta gate | yes (gates public-beta) | `07`, `08`, `09`, `11` | #1–#204 + infra |
 | 22 | Polish, scale, hardening, GA | frontier | last | all | all gaps |
 
 The full dependency graph is in `phase-graph.md`.

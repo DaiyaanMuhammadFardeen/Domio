@@ -371,6 +371,22 @@ Public beta launches only after the **P20.5 subset** of this matrix is green. P2
 
 Controls that **are not** in P20.5 (deferred to full P20) and therefore **not** required for beta launch: SSO/SCIM, domain capture, JIT, hash-chained audit, WORM bucket, residency, `bd-dhaka`, retention policies, legal hold, DSR endpoints, hard DLP blocks, brand governance, public API/SDKs, webhooks, seat analytics, plugin sandbox, headless rendering. These are documented in `phase-20-security-enterprise.md` and gated on enterprise-pilot readiness, not beta.
 
+### 7.16.4 Public-beta security gate (P22-beta subset)
+
+Public-beta (open sign-ups beyond the design-partner / closed-beta cohort) launches only after **P22-beta** (`phase-22-beta-hardening.md`) is green. P22-beta is the P21-independent subset of P22 that hardens the *existing* (non-frontier) surface for production scale. It includes the full P20 / P20.5 controls above plus:
+
+- **External security review passed** (firm engaged in P22-beta-B; criticals / highs closed by P22-beta-D).
+- **Penetration test passed** (public API + MCP server + sharing endpoints; zero criticals / highs open).
+- **SOC 2 Type II evidence binder handed to the auditor**; observation period begins at public-beta cut.
+- **PDPA / GDPR binder finalised**; DSR endpoints tested in staging.
+- **Status page live** with all existing services monitored.
+- **On-call rotation staffed 24/7** with primary + secondary on-call; escalation tree documented.
+- **RTO ≤ 1 h / RPO ≤ 15 min for tier-1 services** validated by game day.
+- **WCAG 2.2 AA certification** issued by external firm.
+- **Bangla UI shipped** with verified Unicode / bidi rendering and numeral handling.
+
+P22-beta explicitly defers the P21-dependent security controls (biometric consent envelope for F207/F208/F209/F214, biometric sandbox escape drill, F213 sync budget, kiosk soak, KG query perf) to **P22b**, which lands after P21 ships and joins P22-beta to form the full P22 GA gate.
+
 ---
 
 ## 7.17 Decisions Log

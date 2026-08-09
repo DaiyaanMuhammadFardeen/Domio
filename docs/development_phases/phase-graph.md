@@ -68,6 +68,14 @@ flowchart TD
     P205 -.beta-launch gate.-> P18
     P205 -.beta-launch gate.-> P19
     P205 -.subset of.-> P20
+
+    P22b[Phase 22-beta<br/>Public-beta hardening] -.public-beta gate.-> P14
+    P22b -.public-beta gate.-> P15
+    P22b -.public-beta gate.-> P16
+    P22b -.public-beta gate.-> P17
+    P22b -.public-beta gate.-> P18
+    P22b -.public-beta gate.-> P19
+    P22b -.extends.-> P22
 ```
 
 ## Critical path
