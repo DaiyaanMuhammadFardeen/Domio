@@ -26,24 +26,24 @@ The architecture is in [`docs/`](docs/) and the ADRs are in [`docs/adr/`](docs/a
 git clone git@github.com:DaiyaanMuhammadFardeen/Domio.git
 cd Domio
 
-# 2. Install toolchain (one-time, requires asdf)
-#    See .tool-versions for the pinned set.
+# 2a. EITHER — full containerized stack (recommended for public-beta review):
+./bin/up                  # infra + services + editor (3100) + dashboard (3000)
+./bin/down --volumes      # to reset
+
+# 2b. OR — host-based dev (requires asdf + Node 22.11.0 + pnpm 9.12.3 + Docker):
 asdf install
-
-# 3. Bootstrap dev environment
 ./bin/bootstrap
+./bin/dev-up              # infra containers only
+./bin/dev                 # editor + API on host, watch mode
 
-# 4. Bring up local infrastructure (postgres, redis, nats, minio, ...)
-./bin/dev-up
-
-# 5. Run the editor + API in watch mode
-./bin/dev
-
-# 6. Open
-#    Editor:   http://localhost:3000
-#    API:      http://localhost:8080
-#    Health:   http://localhost:8080/healthz
-#    Ready:    http://localhost:8080/readyz
+# 3. Open
+#    Editor:       http://localhost:3100
+#    Dashboard:    http://localhost:3000
+#    Grafana:      http://localhost:3001  (admin/admin)
+#    Jaeger:       http://localhost:16686
+#    Prometheus:   http://localhost:9090
+#
+# See DOCKER.md for the full containerized workflow and profile matrix.
 ```
 
 ---

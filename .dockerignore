@@ -1,0 +1,50 @@
+# .dockerignore — keep images small and build cache efficient.
+
+# Node
+node_modules
+.npm
+.pnpm-store
+.turbo
+.next
+dist
+coverage
+.eslintcache
+.tsbuildinfo
+*.tsbuildinfo
+
+# Tests
+test-results
+playwright-report
+playwright/.cache
+
+# Data + git + IDE
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+
+# Puku CLI session state
+.puku-cli
+.puku-cli/worktrees
+
+# Infra / docs that aren't needed in images
+docs
+**/*.md
+!apps/editor/README.md
+!apps/dashboard/README.md
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.key
+
+# Logs
+*.log
+logs
+
+# OS
+.DS_Store
+Thumbs.db

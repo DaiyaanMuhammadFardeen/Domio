@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+# up — bring up the entire Domio public-beta stack (infra + apps + services).
+#
+# Equivalent to running:
+#   docker compose -f docker-compose.full.yml --profile full up -d
+# but with extra preflight checks and a friendlier summary.
+#
+# Profiles:
+#   ./bin/up              full stack (default)
+#   ./bin/up core         data plane only
+#   ./bin/up services     core + tier-1 services
+#   ./bin/up apps         core + editor + dashboard
+#   ./bin/up obs          core + observability (Prometheus/Grafana/Jaeger)
+#   ./bin/up k6           core + k6 runner (for load testing)
+#
+# After it comes up:
+#   - Editor:       http://localhost:3100
+#   - Dashboard:    http://localhost:3000
+#   - Postgres:     localhost:5432
+#   - Redis:        localhost:6379
+#   - NATS:         localhost:4222
+#   - MinIO:        localhost:9000 (console 9001)
+#   - ClickHouse:   localhost:8123 (native 9002)
+#   - OpenSearch:   localhost:9200
+#   - MailHog:      localhost:8025
+#   - OTel:         localhost:4317 (gRPC) / 4318 (HTTP)
+#   - Prometheus:   localhost:9090
+#   - Grafana:      localhost:3001 (admin/admin)
+#   - Jaeger:       localhost:16686
+#   - Event ingest: localhost:3020
+#   - Warehouse:    localhost:3030
+#   - Clickhouse loader: localhost:3040
+#   - Presenter:    localhost:3010
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+red() { printf "\033[31m%s\033[0m\n" "$*" >&2; }
+green() { printf "\033[32m%s\033[0m\n" "$*"; }
+yellow() { printf "\033[33m%s\033[0m\n" "$*"; }
+bold() { printf "\033[1m%s\033[0m\n" "$*"; }
+
+# Preflight.
+if ! command -v docker >/dev/null 2>&1; then
+  red "docker not installed. Install Docker Desktop or podman-compose."
+  exit 1
+fi
+
+# Detect docker vs podman compose.
+if docker compose version >/dev/null 2>&1; then
+  COMPOSE_CMD="docker compose"
+elif command -v podman-compose >/dev/null 2>&1; then
+  COMPOSE_CMD="podman-compose"
+else
+  red "Neither 'docker compose' nor 'podman-compose' is available."
+  exit 1
+fi
+
+# Ensure .env exists.
+if [ ! -f .env ]; then
+  yellow ".env not found. Copying from .env.example."
+  cp .env.example .env
+fi
+
+# Pick profile.
+profile="${1:-full}"
+case "$profile" in
+  core|services|apps|full|obs|observability|k6)
+    ;;
+  *)
+    red "Unknown profile: $profile"
+    echo "Valid: core, services, apps, full, obs, k6"
+    exit 1
+    ;;
+esac
+
+# Build args depending on profile.
+case "$profile" in
+  obs|observability) profile_arg="--profile observability" ;;
+  *) profile_arg="--profile $profile" ;;
+esac
+
+# Ensure Docker is running.
+if ! docker info >/dev/null 2>&1; then
+  red "Docker daemon is not running. Start Docker Desktop or `dockerd`."
+  exit 1
+fi
+
+bold "→ Bringing up Domio stack (profile: $profile) via $COMPOSE_CMD"
+
+# shellcheck disable=SC2086
+$COMPOSE_CMD -f docker-compose.full.yml $profile_arg up -d --remove-orphans
+
+bold ""
+bold "→ Service status:"
+# shellcheck disable=SC2086
+$COMPOSE_CMD -f docker-compose.full.yml $profile_arg ps --format 'table {{.Name}}\t{{.Status}}\t{{.Ports}}'
+
+# Wait for Postgres readiness if it's part of the profile.
+if [ "$profile" = "core" ] || [ "$profile" = "services" ] || [ "$profile" = "apps" ] || [ "$profile" = "full" ]; then
+  bold ""
+  bold "→ Waiting for Postgres to be healthy..."
+  for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+    if docker exec domio-postgres pg_isready -U "${POSTGRES_USER:-domio}" 2>/dev/null; then
+      green "  ✓ Postgres ready"
+      break
+    fi
+    sleep 2
+  done
+fi
+
+green ""
+green "→ Stack is up. Try:"
+green "  curl http://localhost:3000/         # dashboard"
+green "  curl http://localhost:3100/         # editor"
+green "  curl http://localhost:9090/-/ready  # prometheus"
+green "  open http://localhost:3001/         # grafana (admin/admin)"
+green "  open http://localhost:16686/        # jaeger"
+green ""
+green "Tear down: ./bin/down"

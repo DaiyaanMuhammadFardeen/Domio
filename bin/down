@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# down — tear down the Domio stack.
+#
+#   ./bin/down         stop containers (data preserved)
+#   ./bin/down --volumes  wipe volumes (full reset)
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "docker not installed." >&2
+  exit 1
+fi
+
+if docker compose version >/dev/null 2>&1; then
+  COMPOSE_CMD="docker compose"
+elif command -v podman-compose >/dev/null 2>&1; then
+  COMPOSE_CMD="podman-compose"
+else
+  echo "Neither 'docker compose' nor 'podman-compose' is available." >&2
+  exit 1
+fi
+
+ARGS=("-f" "docker-compose.full.yml")
+case "${1:-}" in
+  --volumes|-v)
+    ARGS+=("--volumes")
+    echo "→ Wiping volumes (full reset)"
+    ;;
+  *) ;;
+esac
+
+# Tear down all profiles so dangling services from a previous profile are
+# cleaned up.
+for prof in full apps services core observability; do
+  $COMPOSE_CMD "${ARGS[@]}" --profile "$prof" down 2>/dev/null || true
+done
+
+echo "✓ Stack down."

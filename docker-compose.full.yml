@@ -1,0 +1,429 @@
+# Domio — full local stack.
+#
+# Brings up the entire public-beta surface in one command:
+#
+#   docker compose -f docker-compose.full.yml up -d
+#
+# Layers:
+#   1. Infrastructure (Postgres, Redis, NATS, MinIO, ClickHouse, OpenSearch,
+#      MailHog, OTel collector, Prometheus, Grafana, Jaeger).
+#   2. Tier-1 backend services (event-ingest, clickhouse-loader,
+#      analytics-warehouse, presenter-session).
+#   3. Front-end apps (editor, dashboard).
+#
+# Profiles let you opt in/out of heavyweight components:
+#
+#   --profile core          infra only (default)
+#   --profile services      core + tier-1 services
+#   --profile apps          core + editor + dashboard
+#   --profile full          core + services + apps (everything)
+#   --profile observability core + observability tier
+#
+# Usage examples:
+#
+#   # Just the data plane + observability:
+#   docker compose -f docker-compose.full.yml --profile core up
+#
+#   # Everything (default — same as `docker compose -f docker-compose.full.yml up`):
+#   docker compose -f docker-compose.full.yml --profile full up -d
+#
+#   # Tear down:
+#   docker compose -f docker-compose.full.yml down
+#
+#   # Reset (wipe volumes):
+#   docker compose -f docker-compose.full.yml down --volumes
+#
+# This file composes the existing `infrastructure/local/docker-compose.yml`
+# for the data plane; front-end apps and tier-1 services are defined
+# inline here. The two compose files share the `domio-dev` network.
+
+name: domio-full
+
+x-pnpm-base: &pnpm-base
+  image: node:22.11.0-bookworm-slim
+  working_dir: /app
+
+x-observability-env: &observability-env
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+  OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-domio}
+  OTEL_RESOURCE_ATTRIBUTES: service.namespace=domio,deployment.environment=local
+
+services:
+  # ---------------------------------------------------------------------------
+  # Layer 1 — Infrastructure (Postgres, Redis, NATS, MinIO, ClickHouse, etc.)
+  # Re-exposed from infrastructure/local/docker-compose.yml via `extends`.
+  # ---------------------------------------------------------------------------
+  postgres:
+    profiles: [core, services, apps, full, observability]
+    image: pgvector/pgvector:pg16
+    container_name: domio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-domio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-domio}
+      POSTGRES_DB: ${POSTGRES_DB:-domio}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-domio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - domio-dev
+
+  redis:
+    profiles: [core, services, apps, full, observability]
+    image: redis:7.4-alpine
+    container_name: domio-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - domio-dev
+
+  nats:
+    profiles: [core, services, full]
+    image: nats:2.10.22-alpine
+    container_name: domio-nats
+    restart: unless-stopped
+    command: ["nats-server", "-js", "-sd", "/data", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - domio-dev
+
+  minio:
+    profiles: [core, services, full]
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    container_name: domio-minio
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-domio}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-domio-dev-only}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - domio-dev
+
+  clickhouse:
+    profiles: [core, services, full]
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: domio-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-domio_analytics}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-domio}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-domio}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "8123:8123"
+      - "9002:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--user", "domio", "--password", "domio", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - domio-dev
+
+  opensearch:
+    profiles: [core]
+    image: opensearchproject/opensearch:2.18.0
+    container_name: domio-opensearch
+    restart: unless-stopped
+    environment:
+      cluster.name: domio-dev
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      "OPENSEARCH_JAVA_OPTS": "-Xms512m -Xmx512m"
+      "DISABLE_SECURITY_PLUGIN": "true"
+      "DISABLE_INSTALL_DEMO_CONFIG": "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    networks:
+      - domio-dev
+
+  mailhog:
+    profiles: [core]
+    image: mailhog/mailhog:v1.0.1
+    container_name: domio-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - domio-dev
+
+  otel-collector:
+    profiles: [observability, full]
+    image: otel/opentelemetry-collector-contrib:0.114.0
+    container_name: domio-otel-collector
+    restart: unless-stopped
+    volumes:
+      - ./infrastructure/local/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - domio-dev
+
+  prometheus:
+    profiles: [observability, full]
+    image: prom/prometheus:v2.55.0
+    container_name: domio-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./infrastructure/local/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - domio-dev
+
+  grafana:
+    profiles: [observability, full]
+    image: grafana/grafana:11.3.0
+    container_name: domio-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infrastructure/local/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    networks:
+      - domio-dev
+
+  jaeger:
+    profiles: [observability, full]
+    image: jaegertracing/all-in-one:1.62.0
+    container_name: domio-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    networks:
+      - domio-dev
+
+  # ---------------------------------------------------------------------------
+  # Layer 2 — Tier-1 backend services (event ingest, warehouse, presenter).
+  # ---------------------------------------------------------------------------
+  event-ingest:
+    profiles: [services, full]
+    build:
+      context: .
+      dockerfile: services/event-ingest/Dockerfile
+    container_name: domio-event-ingest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3020
+      INGEST_KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
+      INGEST_KAFKA_TOPIC: events.ingest.raw
+      INGEST_KAFKA_DLQ_TOPIC: events.ingest.dlq
+      INGEST_REDIS_URL: redis://redis:6379
+      INGEST_NATS_URL: nats://nats:4222
+      INGEST_SPOOL_DIR: /var/lib/domio/spool
+      INGEST_HMAC_KEY_HEX: ${INGEST_HMAC_KEY_HEX:-00112233445566778899aabbccddeeff}
+      DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
+      <<: *observability-env
+    depends_on:
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    ports:
+      - "3020:3020"
+    networks:
+      - domio-dev
+
+  clickhouse-loader:
+    profiles: [services, full]
+    build:
+      context: .
+      dockerfile: services/clickhouse-loader/Dockerfile
+    container_name: domio-clickhouse-loader
+    restart: unless-stopped
+    environment:
+      KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
+      KAFKA_TOPIC: events.ingest.raw
+      KAFKA_GROUP_ID: clickhouse-loader
+      KAFKA_DLQ_TOPIC: events.ingest.dlq
+      CLICKHOUSE_ADDR: clickhouse:9000
+      CLICKHOUSE_DB: domio_analytics
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      LOG_LEVEL: info
+      HEALTH_PORT: 8080
+      <<: *observability-env
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "3040:8080"
+    networks:
+      - domio-dev
+
+  analytics-warehouse:
+    profiles: [services, full]
+    build:
+      context: .
+      dockerfile: services/analytics-warehouse/Dockerfile
+    container_name: domio-analytics-warehouse
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3030
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_DB: domio_analytics
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      READ_ONLY: "true"
+      DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
+      <<: *observability-env
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "3030:3030"
+    networks:
+      - domio-dev
+
+  presenter-session:
+    profiles: [services, full]
+    build:
+      context: .
+      dockerfile: services/presenter-session/Dockerfile
+      args:
+        SERVICE_DIR: services/presenter-session
+        SERVICE_PORT: 3010
+    container_name: domio-presenter-session
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
+      REDIS_URL: redis://redis:6379
+      <<: *observability-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3010:3010"
+    networks:
+      - domio-dev
+
+  # ---------------------------------------------------------------------------
+  # Layer 3 — Front-end apps (editor + dashboard).
+  # ---------------------------------------------------------------------------
+  editor:
+    profiles: [apps, full]
+    build:
+      context: .
+      dockerfile: apps/editor/Dockerfile
+    container_name: domio-editor
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      EDITOR_PORT: 3100
+      HOST: 0.0.0.0
+      DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
+      REDIS_URL: redis://redis:6379
+      REALTIME_GATEWAY_URL: ws://nats:4222
+      <<: *observability-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3100:3100"
+    networks:
+      - domio-dev
+
+  dashboard:
+    profiles: [apps, full]
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+    container_name: domio-dashboard
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DASHBOARD_PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
+      REDIS_URL: redis://redis:6379
+      CLICKHOUSE_URL: http://clickhouse:8123
+      <<: *observability-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks:
+      - domio-dev
+
+volumes:
+  postgres-data:
+  redis-data:
+  nats-data:
+  minio-data:
+  clickhouse-data:
+  opensearch-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  domio-dev:
+    name: domio-dev
+    driver: bridge
