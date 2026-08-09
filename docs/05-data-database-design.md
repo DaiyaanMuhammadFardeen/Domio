@@ -1032,4 +1032,85 @@ Major indexes enumerated per table above. Additional principles:
 
 ---
 
+## 5.15 Hot-Query & Index Plan (Phase 22-beta G1-6)
+
+This section enumerates the **top-20 hot queries** that carry the bulk
+of P22-beta traffic, the indexes each one depends on, and the
+follow-up actions captured during the G1-6 query-plan review.
+
+### 5.15.1 Top-20 hot queries
+
+| # | Service | Table(s) | Query intent | Existing index | G1-6 action |
+|---|---|---|---|---|---|
+| 1 | `collab` | `comments` | `select * where deck_id=$1 and parent_id is null order by created_at desc` | `idx_comments_deck_parent_created` | Verify partial index `parent_id is null` is in place. |
+| 2 | `collab` | `comments` | `insert (deck_id, parent_id, body, ...)` returning id | PK + `idx_comments_deck_parent_created` | None — covered. |
+| 3 | `collab` | `assignments` | `select * where assignee_id=$1 and status='open' order by due_at asc` | `idx_assignments_assignee_status_due` | None — covered. |
+| 4 | `collab` | `approval_requests` | `select count(*) where deck_id=$1 and status='pending'` | `idx_approval_deck_status` | None — covered. |
+| 5 | `collab` | `presence` | `upsert (user_id, deck_id, last_seen)` | PK `(user_id, deck_id)` | None — covered. |
+| 6 | `query-gateway` | `slides` | `select * where deck_id=$1 order by position asc` | `idx_slides_deck_position` | None — covered. |
+| 7 | `query-gateway` | `elements` | `select * where slide_id=$1` | `idx_elements_slide` | None — covered. |
+| 8 | `query-gateway` | `decks` | `select * where workspace_id=$1 and deleted_at is null order by updated_at desc limit 50` | `idx_decks_ws_updated` (partial) | None — covered. |
+| 9 | `query-gateway` | `decks` | `select count(*) where workspace_id=$1 and created_at > now() - interval '7 days'` | `idx_decks_ws_created` | **Add** if missing — drives usage dashboards. |
+| 10 | `share-api` | `share_links` | `select * where token=$1` | PK on token | None — covered. |
+| 11 | `share-api` | `share_links` | `select * where deck_id=$1 and expires_at > now()` | `idx_share_deck_active` | None — covered. |
+| 12 | `audit` | `audit_events` | `insert (...)` | BRIN on `occurred_at` | None — covered. |
+| 13 | `audit` | `audit_events` | `select * where workspace_id=$1 and occurred_at > $2 order by occurred_at desc limit 100` | `idx_audit_ws_occurred` | None — covered. |
+| 14 | `presenter-session` | `sessions` | `select * where id=$1 for update` | PK | None — covered. |
+| 15 | `presenter-session` | `sessions` | `update ... where id=$1 and version=$2` (CAS) | PK + `version` | None — covered. |
+| 16 | `event-ingest` | `events_raw` | `insert ... returning id` | PK | None — covered. |
+| 17 | `analytics-warehouse` | `events_aggregated` | `select bucket, count(*) ... where tenant_id=$1 group by bucket` | `idx_agg_tenant_bucket` | None — covered. |
+| 18 | `library` | `library_items` | `select * where workspace_id=$1 and kind=$2 order by created_at desc` | `idx_library_ws_kind_created` | None — covered. |
+| 19 | `notification-dispatcher` | `notifications` | `select * where recipient_id=$1 and read_at is null order by created_at desc limit 50` | `idx_notif_recipient_unread` (partial) | None — covered. |
+| 20 | `merge-requests` | `merge_requests` | `select * where target_deck_id=$1 and status='open'` | `idx_mr_target_status` | None — covered. |
+
+### 5.15.2 New / verified indexes (G1-6 follow-up)
+
+The G1-6 review identified the following indexes as **required** by the
+hot-query set above. They are either new or need verification on
+staging that the planner picks them up:
+
+```sql
+-- #1: comments root listing
+create index if not exists idx_comments_deck_root_created
+  on comments (deck_id, created_at desc)
+  where parent_id is null and deleted_at is null;
+
+-- #9: deck usage dashboard
+create index if not exists idx_decks_ws_created
+  on decks (workspace_id, created_at desc)
+  where deleted_at is null;
+
+-- #19: unread notification feed
+create index if not exists idx_notif_recipient_unread
+  on notifications (recipient_id, created_at desc)
+  where read_at is null;
+```
+
+### 5.15.3 Query-plan verification
+
+For each row in §5.15.1, run `EXPLAIN (ANALYZE, BUFFERS)` against a
+synthetic dataset of **1M rows per hot table** on staging. The
+expected access path is `Index Scan` or `Index Only Scan`; any
+`Seq Scan` on a table > 100k rows is a regression that must be
+remediated before sign-off.
+
+Verification commands:
+
+```bash
+infra/db/scripts/verify_hot_query_plans.sh \
+  --profile=staging \
+  --rows-per-table=1000000
+```
+
+The script emits a markdown report at
+`docs/05-data-database-design/query-plans/<date>.md`.
+
+### 5.15.4 Out-of-scope
+
+- Per-tenant row-level security policies (handled in §5.4).
+- Partition DDL for time-series tables (handled in §5.5).
+- Read-replica routing (handled in §8 of the infra doc).
+
+---
+
 _End of 05-data-database-design.md._

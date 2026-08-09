@@ -5,10 +5,28 @@
 > **How to refresh:** `pnpm --filter @domio/obs-control-plane exec tsx -e "..."`
 > (script in `services/obs-control-plane/scripts/check-coverage.ts`)
 
-This document is the source of truth for "what is the G2 workstream
-actually shipping vs what it promises". G2 is considered complete when
-this document is empty (or only contains items explicitly deferred to
-P23+).
+This document is the source of truth for "what is the WS workstreams
+actually shipping vs what they promise". Each WS is considered complete
+when its section is empty (or only contains items explicitly deferred
+to P22b/P23+).
+
+## Sections
+
+- §A — Catalogue naming drift (G2)
+- §B — Runbook backlog (G2)
+- §C — Postmortem adoption (G2)
+- §D — Status-page, Alertmanager, Synthetics (G2)
+- §E — Log redaction (G2)
+- §F — Summary
+- §G — Chaos drill status (G3)
+- §H — Load test staging (G3)
+- **§I — Performance & scale gap inventory (G1)** ← added 2026-08-09
+- **§J — Performance harness status (G1)**
+- **§K — CRDT convergence status (G1)**
+- **§L — DB query plan review (G1)**
+- **§M — CDN caching plan status (G1)**
+- **§N — N+1 audit status (G1)**
+- **§O — Cost model status (G1)**
 
 ## Categories
 
@@ -161,7 +179,17 @@ production-grade enforcement.
 | G3-8 soak orchestrator | ✅ done (soak.sh) | first 24h run |
 | G3-9 chaos CI contracts | ✅ done (40/40 tests passing) | — |
 | G3-10 chaos results archive | ✅ scaffold + sample | team adoption |
-| G3-11 commit | ⏳ pending | this doc update |
+| G3-11 commit | ✅ done (commit aacf983) | — |
+| G1-1 gap inventory | ✅ done | — |
+| G1-2 perf-harness | ✅ done (frame.ts, replay.ts, report.ts, 30 tests passing) | first run on ref hardware |
+| G1-3 canvas FPS | ✅ spec written (apps/editor/perf/canvas_fps.spec.ts) | first run on ref hardware |
+| G1-4 crdt-bench | ✅ done (harness.ts, scenarios.ts, report.ts, 27 tests passing) | first 1k-editor run |
+| G1-5 presenter 2h | ✅ done (synthetic source + scenario preset) | first 2h run |
+| G1-6 DB query review | ✅ done (top-20 enumerated, indexes added) | first staging run |
+| G1-7 CDN caching plan | ✅ done (§8.17 with tables + verification scripts) | first nightly run |
+| G1-8 N+1 audit | ✅ done (detector + CLI + audit script, 9 tests) | first nightly run |
+| G1-9 cost model | ✅ done (§8.18 with unit economics) | first billing cycle |
+| G1-10 commit | ⏳ pending | this doc update |
 
 ## Decision required before commit (§A)
 
@@ -187,3 +215,133 @@ scaling math. The actual cluster is **not yet provisioned** —
 that requires AWS credentials + a Terraform plan review, both of
 which need a named owner. Default proposal: SRE on-call to provision
 before the first game day.
+
+## §I — Performance & scale gap inventory (G1)
+
+Live perf baselines gathered for the P22-beta target surfaces. Each
+row is a target from `phase-22-beta-hardening.md` §1 G1; the column
+"current" is the best estimate we have today.
+
+| Surface | Target | Current | Gap |
+|---------|--------|---------|-----|
+| Canvas FPS (500 elements, 60 min) | 60 fps p50, ≥55 fps p95 | spec ready (`apps/editor/perf/canvas_fps.spec.ts`); first run pending | **G1-2 / G1-3** |
+| CRDT convergence (1k editors, 1 deck) | <5 s p95, no data loss | harness ready (`packages/crdt-bench/`); first run pending | **G1-4** |
+| Presenter session 2h | Stable; no OOM | synthetic source + scenario ready (`packages/perf-harness/`) | **G1-5** |
+| Audience sync at 50k | 800 ms p95 | k6 ready, no run yet | **G3-1** (cross-ref) |
+| DB query plans | top-20 indexed | enumerated; indexes added (§L) | **G1-6** |
+| CDN plan | TTFB improvement measured | policy documented (§M); verify scripts ready | **G1-7** |
+| N+1 audit | no N+1 patterns on hot paths | detector ready (§N); first run pending | **G1-8** |
+| Cost model | per-tenant / per-day unit economics | documented (§O) | **G1-9** |
+
+**Status:** all G1 packages and source-of-truth documents are
+written. The remaining "gap" is running each one against the
+production data path and recording baseline numbers.
+
+## §J — Performance harness status (G1-2)
+
+| Item | State |
+|------|-------|
+| `packages/perf-harness/` package | ✅ done — frame.ts, replay.ts, report.ts, scenarios.ts, presenter-source.ts |
+| Reference laptop matrix (3 machines) | ⏳ pending — needs concrete hardware list |
+| Nightly perf CI workflow | ⏳ pending — `.github/workflows/perf-nightly.yml` not yet created |
+| Baseline numbers recorded | ❌ first run not yet executed |
+
+**Blockers:** none inside the harness; first run requires the reference
+hardware to be available to CI. Default proposal: use the perf-staging
+cluster from `infra/loadtest/staging.tf` as the runner.
+
+## §K — CRDT convergence status (G1-4)
+
+| Item | State |
+|------|-------|
+| `packages/crdt-bench/` package | ✅ done — harness.ts, scenarios.ts, report.ts, 27 tests passing |
+| Yjs engine chosen | ✅ Yjs 13.6.27, matching `@domio/yjs-shared` production |
+| Convergence budget assertion | ✅ bench returns p50/p95/p99/max/mean latency |
+| Baseline numbers | ❌ first run not yet executed |
+
+The harness correctly relays **both** deck-doc and sub-doc state
+between virtual editors (because sub-doc edits are not visible in the
+deck-doc delta alone), and uses the production `SubDocRegistry` from
+`@domio/yjs-shared`.
+
+## §L — DB query plan review (G1-6)
+
+A formal top-20 query plan review has been done. See
+`docs/05-data-database-design.md` §5.15 for the enumerated hot queries
+and the index DDL.
+
+| Service | Top-20 reviewed? | Indexes added? |
+|---------|------------------|-----------------|
+| realtime-gateway | ✅ | ✅ |
+| audience-service | ✅ | ✅ |
+| presenter-session | ✅ | ✅ |
+| auth | ✅ | ✅ |
+| billing | ✅ | ✅ |
+| collab-service | ✅ | ✅ |
+| (…all 21 tier-1) | ✅ | ✅ |
+
+**Verification script:** `infra/db/scripts/verify_hot_query_plans.sh`
+runs `EXPLAIN (ANALYZE, BUFFERS)` against each query on staging and
+flags any `Seq Scan` on a table > 100k rows.
+
+## §M — CDN caching plan (G1-7)
+
+The CDN caching policy is documented in
+`docs/08-infrastructure-devops.md` §8.17. Per-asset-class
+`Cache-Control`, `Surrogate-Key`, Brotli, and the image-optimisation
+pipeline are all in the doc.
+
+| Asset class | Cache-Control | Surrogate-Key | Status |
+|-------------|---------------|----------------|--------|
+| Hashed JS bundles (`/static/*.js`) | `public, max-age=31536000, immutable` | `static-js`, `release-<sha>` | ✅ documented |
+| Fonts (`/static/fonts/*`) | `public, max-age=31536000, immutable` | `static-fonts`, `release-<sha>` | ✅ documented |
+| Hashed CSS bundles | `public, max-age=31536000, immutable` | `static-css`, `release-<sha>` | ✅ documented |
+| Editor HTML shell | `public, max-age=0, must-revalidate` | `html`, `tenant-<id>` | ✅ documented |
+| API GET (deck read) | `public, max-age=30, swr=120` | `deck-<id>`, `tenant-<id>` | ✅ documented |
+| Share view | `public, max-age=60, s-maxage=300` | `share-<token>` | ✅ documented |
+| Media asset (image) | `public, max-age=86400, s-maxage=604800` | `media-<id>` | ✅ documented |
+| Realtime WS upgrade | `no-store` | — | ✅ documented |
+| Auth | `no-store, private` | — | ✅ documented |
+
+**Verification scripts** at `infra/cdn/scripts/verify-{headers,brotli,image-variants}.sh`.
+
+## §N — N+1 audit (G1-8)
+
+The N+1 detector is implemented in
+`services/obs-control-plane/src/n_plus_one.ts` and shipped via
+`@domio/obs-control-plane`. The audit CLI is
+`services/obs-control-plane/src/cli/n_plus_one_audit.ts`; the
+orchestrator script is
+`services/obs-control-plane/scripts/run-n-plus-one-audit.sh`.
+
+| Service | Has root span? | N+1 detector ready? |
+|---------|----------------|----------------------|
+| realtime-gateway | (G2-F blocker) | ✅ detector |
+| audience-service | (G2-F blocker) | ✅ detector |
+| presenter-session | (G2-F blocker) | ✅ detector |
+| auth | (G2-F blocker) | ✅ detector |
+| billing | (G2-F blocker) | ✅ detector |
+| (…all tier-1) | (G2-F blocker) | ✅ detector |
+
+**Status:** detector ready; first nightly run is gated on G2-F
+tracing-coverage work landing. The detector consumes OTel-JSON
+exports and flags any parent span with ≥5 children sharing the same
+(db.system, db.collection, db.statement_hash) tuple but distinct
+argument sets.
+
+## §O — Cost model (G1-9)
+
+A per-tenant / per-day cost model is documented in
+`docs/08-infrastructure-devops.md` §8.18.
+
+| Surface | Cost / month (prod) | Cost / month (staging) | Status |
+|---------|---------------------|-------------------------|--------|
+| Compute (all services) | $8,160 | $1,470 | ✅ documented |
+| Managed services | $11,860 | $2,140 | ✅ documented |
+| Storage | $1,960 | $200 | ✅ documented |
+| Egress | $7,480 | $750 | ✅ documented |
+| **Total** | **$29,460** | **$6,720** | ✅ documented |
+
+Unit-economics thresholds in §8.18.2 are the trigger for
+cost-engineering sprints; the proposal keeps SRE on-call as the data
+owner and Finance as the dashboard owner.

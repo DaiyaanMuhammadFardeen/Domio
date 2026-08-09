@@ -368,4 +368,182 @@ Each runbook has: trigger conditions, mitigation steps, escalation, comms templa
 
 ---
 
+## 8.17 CDN Caching Plan (Phase 22-beta G1-7)
+
+This section is the source of truth for HTTP caching headers, edge
+purge, and image-optimisation strategy across Domio's CDN. It is
+the contract that `services/asset-api/`, `apps/editor/`, and the
+CDN edge config all agree on.
+
+### 8.17.1 Cache-Control per asset class
+
+| Asset class | Path pattern | `Cache-Control` | `Surrogate-Key` | Notes |
+|-------------|--------------|-----------------|------------------|-------|
+| Editor JS bundle (hashed) | `/_next/static/*` | `public, max-age=31536000, immutable` | `static-js`, `release-<sha>` | Hash = build id; never re-publish in place. |
+| Editor CSS bundle (hashed) | `/_next/static/css/*` | `public, max-age=31536000, immutable` | `static-css`, `release-<sha>` | Same as JS. |
+| Editor HTML shell | `/*` (HTML responses) | `public, max-age=0, must-revalidate` | `html`, `tenant-<id>` | Always revalidate; SPA shell. |
+| Public API GET (deck read) | `/v1/decks/:id` | `public, max-age=30, stale-while-revalidate=120` | `deck-<id>`, `tenant-<id>` | 30s hot, 120s stale. |
+| Public API GET (deck list) | `/v1/decks` | `public, max-age=15, s-maxage=60` | `deck-list`, `tenant-<id>` | CDN-only s-maxage. |
+| Share view (anonymous) | `/v1/share/:token` | `public, max-age=60, s-maxage=300` | `share-<token>` | Bounded by share-revoke webhook. |
+| Media asset (image) | `/media/*` | `public, max-age=86400, s-maxage=604800` | `media-<id>`, `tenant-<id>` | 1d browser, 7d CDN. |
+| Media asset (video) | `/media/video/*` | `public, max-age=86400, s-maxage=2592000` | `media-<id>`, `tenant-<id>` | 1d browser, 30d CDN. |
+| Thumbnails | `/v1/thumbnails/:id` | `public, max-age=300, s-maxage=86400` | `thumb-<id>`, `deck-<id>` | 5m hot, 1d CDN. |
+| Avatar (user) | `/v1/users/:id/avatar` | `public, max-age=3600, s-maxage=86400` | `avatar-<id>` | 1h hot, 1d CDN. |
+| AI-generated image | `/v1/ai/:run_id/image` | `public, max-age=86400, immutable` | `ai-image-<run_id>` | Hash in URL. |
+| Realtime WS upgrade | `/v1/realtime` | `no-store` | — | Never cache. |
+| Auth endpoints | `/v1/auth/*` | `no-store, private` | — | Sensitive. |
+
+### 8.17.2 Surrogate-Key conventions
+
+We use `Surrogate-Key` (Fastly) / `Cache-Tag` (Cloudflare) so we can
+purge by entity without invalidating the whole CDN.
+
+- `tenant-<workspace_id>` — purge on workspace-level events
+  (workspace plan change, member removed, etc.).
+- `deck-<deck_id>` — purge on deck publish, deck delete, deck
+  schema-version bump.
+- `share-<token>` — purge on share revoke.
+- `media-<media_id>` — purge on media replace / delete.
+- `release-<short_sha>` — purge on canary cutover for edge configs.
+- `static-js`, `static-css`, `static-fonts` — purge on a release
+  roll-out (rare; hashed names usually invalidate naturally).
+
+Edge rules:
+
+- Purges MUST be authenticated via signed edge API token
+  (`CDN_API_TOKEN`, scoped per environment).
+- Purges MUST emit a Prometheus counter
+  (`cdn_purge_total{service,reason}`).
+- Mass purges (>10k keys) MUST be soft-purged then soft-purge
+  revalidated by the origin's `must-revalidate`.
+
+### 8.17.3 Compression
+
+- **Brotli** (`br`) for all text-based responses
+  (`text/*`, `application/javascript`, `application/json`,
+  `application/wasm`, `image/svg+xml`).
+- **Gzip** (`gzip`) as a fallback for clients that don't advertise
+  `br`. Order: `br, gzip`.
+- Min Brotli quality level: 4 (CDN-side). Origin may pre-compress
+  static assets at quality 11 and store both.
+- WASM modules are pre-compressed with `brotli -q 11` and served as
+  `application/wasm` + `Content-Encoding: br`.
+- Do NOT Brotli-compress already-compressed formats
+  (`image/png`, `image/jpeg`, `video/mp4`, `font/woff2`).
+
+### 8.17.4 Image-optimisation pipeline
+
+Every user-uploaded image passes through the pipeline below before
+the CDN URL is published:
+
+1. **Decoding & metadata strip.** EXIF / GPS / ICC stripped on
+   upload. Colour profile normalised to sRGB.
+2. **Re-encode.**
+   - Photos → AVIF (preferred) or WebP (fallback). Quality 75.
+   - Graphics → PNG (palette) or WebP. Quality 80.
+   - Animated → AVIF (animated) or GIF fallback.
+3. **Responsive variants.** Widths: 320, 640, 960, 1280, 1920, 2560.
+   Each variant retains aspect ratio.
+4. **Lazy-src placeholder.** A 32px wide, 12-byte LQIP is stored
+   alongside the asset and emitted in HTML as `src` while the real
+   `srcset` lazy-loads.
+5. **CDN URL format.** `/media/<id>/<width>.<ext>` — `ext` chosen
+   by `Accept` negotiation. `Vary: Accept`.
+6. **Cache busts.** Image variants are immutable by URL (URL
+   encodes width + content hash). Replacing an asset uploads a new
+   `<id>`; old URLs 410 after 30 days.
+
+### 8.17.5 Verification
+
+- `infra/cdn/scripts/verify-headers.sh` runs against the staging
+  CDN URL and asserts each asset class returns the expected
+  `Cache-Control` + `Surrogate-Key` pair.
+- `infra/cdn/scripts/verify-brotli.sh` asserts that text assets
+  return `Content-Encoding: br` for clients that advertise `br`.
+- `infra/cdn/scripts/verify-image-variants.sh` asserts that each
+  uploaded image returns the expected width variants and that the
+  LQIP placeholder is served.
+
+These three scripts run nightly in CI against staging. Any failure
+is a G1-7 regression and blocks the canary promotion.
+
+---
+
+## 8.18 Cost Model (Phase 22-beta G1-9)
+
+This appendix is the source of truth for **monthly run-rate** per
+service and per environment, and the unit-economics thresholds that
+trigger cost-engineering work. Numbers below are calibrated against
+the staging topology; production runs are extrapolated from the
+`infra/loadtest/*` k6 scripts that drive 1.5× peak headroom.
+
+### 8.18.1 Per-service monthly run-rate (USD)
+
+Numbers below are for the **production** tier, with the
+"staging-equivalent" multiplier (0.18×) noted where relevant. They
+include compute, storage, egress, and managed-service fees but not
+human review or on-call labour.
+
+| Service / Resource | Compute | Managed svc | Storage | Egress | Subtotal |
+|--------------------|---------|-------------|---------|--------|----------|
+| `realtime-gateway` (EKS × 6 nodes)        | $1,920 | — | — | $720  | **$2,640** |
+| `collab` (EKS × 4 nodes)                   | $1,280 | — | — | $480  | **$1,760** |
+| `query-gateway` (EKS × 3 nodes)            | $960   | — | — | $240  | **$1,200** |
+| `share-api` (EKS × 2 nodes)                | $640   | — | — | $120  | **$760**   |
+| `audience` (EKS × 2 nodes + NATS)          | $640   | $360 | — | $240  | **$1,240** |
+| `presenter-session` (EKS × 2 nodes)        | $640   | — | — | $120  | **$760**   |
+| `analytics-warehouse` (ClickHouse cluster) | $1,440 | $1,200 | $720 | $480  | **$3,840** |
+| `asset-api` + S3 + CDN egress              | $640   | $480 | $320 | $4,800 | **$6,240** |
+| `ai-orchestrator` (queued inference)       | $1,200 | $3,600 | — | — | **$4,800**   |
+| `event-ingest` (Kinesis + Lambda)          | $480   | $1,100 | $80 | $160  | **$1,820**   |
+| Postgres RDS (primary + 2 replicas)        | — | $2,400 | $480 | — | **$2,880**   |
+| NATS cluster (managed)                     | — | $960 | — | — | **$960**     |
+| Observability (logs + metrics + traces)    | $240   | $1,440 | $320 | $120  | **$2,120**   |
+| Misc (auth, KMS, secrets, etc.)            | $80    | $320 | $40 | — | **$440**     |
+| **Total** | **$8,160** | **$11,860** | **$1,960** | **$7,480** | **$29,460** |
+
+Staging-equivalent run-rate (0.18× of compute, 0.10× of egress): **~$6,720/mo**.
+
+Game-day load (2× peak) is projected to **~$44,200/mo** if sustained
+24/7 — used as the cap for cost-engineering decisions.
+
+### 8.18.2 Unit-economics thresholds
+
+Per active-workspace per month, P22-beta targets are:
+
+| Metric | Target | Trigger if exceeded |
+|--------|--------|---------------------|
+| Cost / WAU | ≤ $0.42 | Optimization sprint |
+| Cost / editor-hour | ≤ $0.018 | Cache/edge review |
+| Cost / audience-minute (live) | ≤ $0.003 | Egress or NATS tuning |
+| Cost / AI run | ≤ $0.06 | Prompt-cache + model mix |
+| Cost / GB egress | ≤ $0.08 | CDN re-tier |
+
+### 8.18.3 Cost-engineering triggers
+
+A service crosses into cost-engineering review if **any** of:
+
+1. Subtotal in §8.18.1 grew > 15% MoM with no headcount change.
+2. Per-unit cost in §8.18.2 exceeds target for two consecutive weeks.
+3. Game-day projection (§8.18.1) > $50k/mo.
+
+The review owner is the **SRE rotation** for the tier; the deliverable
+is a written cost plan filed under `docs/handoff/cost/<service>/`.
+
+### 8.18.4 Tools
+
+- `infra/cost/scripts/project.sh` — projects the run-rate from the
+  current month's billing CSV.
+- `infra/cost/scripts/per-unit.sh` — computes the §8.18.2 metrics
+  against the warehouse rollup.
+- `infra/cost/dashboards/cost-overview.json` — Grafana dashboard
+  imported by `infra/grafana/` provisioning.
+
+These are run nightly and the resulting dashboard is reviewed in the
+weekly SRE cost standup.
+
+---
+
+_End of 08-infrastructure-devops.md._
+
 _End of 08-infrastructure-devops.md._

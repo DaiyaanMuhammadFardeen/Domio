@@ -35,3 +35,4 @@ export * from './completeness.js';
 export * from './log_redaction.js';
 export * from './tracing_coverage.js';
 export * from './synthetics.js';
+export * from './n_plus_one.js';
