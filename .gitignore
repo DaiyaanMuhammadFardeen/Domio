@@ -122,3 +122,4 @@ playwright/.cache/
 # Local agent/harness scratch
 .hive/
 .slim/deepwork/
+infra/loadtest/fixtures/*.json

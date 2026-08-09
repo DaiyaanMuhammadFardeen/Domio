@@ -150,9 +150,40 @@ production-grade enforcement.
 | G2-I postmortem | ✅ template + sample | team adoption |
 | G2-J alertmanager | ✅ routes generated + tested | — |
 | G2-K this doc | ✅ | — |
-| G2-L commit | ⏳ pending | this doc + decision on §A |
+| G2-L commit | ✅ done (commit 91bbbf2) | — |
+| G3-1 k6 scripts | ✅ done (5 scripts + README) | first game day |
+| G3-2 staging topology | ✅ done (Terraform plan) | actual cluster provisioning |
+| G3-3 postgres failover | ✅ done (TF + asserts) | first game day |
+| G3-4 nats partition | ✅ done (TF + asserts) | first game day |
+| G3-5 ai provider fail | ✅ done (TF + asserts) | first game day |
+| G3-6 cdn outage | ✅ done (TF + asserts) | first game day |
+| G3-7 region isolation | ✅ done (TF + asserts) | first game day |
+| G3-8 soak orchestrator | ✅ done (soak.sh) | first 24h run |
+| G3-9 chaos CI contracts | ✅ done (40/40 tests passing) | — |
+| G3-10 chaos results archive | ✅ scaffold + sample | team adoption |
+| G3-11 commit | ⏳ pending | this doc update |
 
 ## Decision required before commit (§A)
 
 Pick one: keep `-service` suffix in catalogue (move dirs) or drop it
 (rename catalogue entries). Recommended: **drop it** (option B).
+
+## §G — Chaos drill status
+
+The five P22-beta chaos drills are wired (Terraform + Python
+assertion scripts + CloudWatch alarms). The CI test
+`tests/chaos/drill-contracts.test.ts` (40 tests) verifies that the
+drill artifacts exist and have the right shape. Actual drill runs
+happen on game day in staging — see `runbooks/chaos/README.md`.
+
+**First scheduled game day: not yet scheduled.** Open question:
+which team owns the calendar? Default proposal: SRE on-call
+facilitates, security on-call observes.
+
+## §H — Load test staging
+
+`infra/loadtest/staging.tf` defines the staging cluster topology and
+scaling math. The actual cluster is **not yet provisioned** —
+that requires AWS credentials + a Terraform plan review, both of
+which need a named owner. Default proposal: SRE on-call to provision
+before the first game day.
