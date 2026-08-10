@@ -13,7 +13,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # Copy workspace manifests first for caching.
-COPY package.json pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json ./
 COPY tsconfig.base.json ./
 
 # Copy package manifests so pnpm install can resolve workspace deps.

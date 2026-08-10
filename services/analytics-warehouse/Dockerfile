@@ -6,7 +6,7 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
-COPY package.json pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json ./
 COPY tsconfig.base.json ./
 COPY services/analytics-warehouse/package.json ./services/analytics-warehouse/
 COPY packages/observability/package.json ./packages/observability/

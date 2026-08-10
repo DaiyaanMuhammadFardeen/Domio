@@ -31,9 +31,10 @@ import {
   ShareRevokedError,
   ShareValidationError,
 } from './types.js';
+import type {
+  ShareLinkSnapshot} from './store/store.js';
 import {
   ConcurrentModificationError,
-  ShareLinkSnapshot,
   ShortIdCollisionError,
 } from './store/store.js';
 import type { ShareService } from './service.js';

@@ -22,10 +22,11 @@
  *  - {@link ShareServiceOptions} — constructor options.
  */
 
+import type {
+  ViewerClaims} from '@domio/signed-link-token';
 import {
   mintLinkToken,
   mintShortId,
-  ViewerClaims,
   type NonceStore,
 } from '@domio/signed-link-token';
 import { createHash } from 'crypto';
@@ -47,12 +48,13 @@ import {
   validateExtendExpiry,
   validateUpdateInput,
 } from './types.js';
-import {
+import type {
   ShareLinkSnapshot,
-  ShareStore,
+  ShareStore} from './store/store.js';
+import {
   isStore,
 } from './store/store.js';
-import {
+import type {
   AuditEmitter,
   ShareAuditAction,
   ShareAuditEvent,

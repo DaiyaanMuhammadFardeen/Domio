@@ -6,6 +6,16 @@
   "description": "Deep-link state codec — encode/decode the runtime VarStore snapshot into an HMAC-signed base64url token. Phase 10 M7.",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./server": {
+      "types": "./src/server.ts",
+      "default": "./src/server.ts"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint src --max-warnings 0",

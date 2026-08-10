@@ -8,7 +8,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # Workspace manifests + service package manifests.
-COPY package.json pnpm-workspace.yaml turbo.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json ./
 COPY tsconfig.base.json ./
 COPY apps/presenter/package.json ./apps/presenter/
 

@@ -17,8 +17,9 @@
  *   GET    /v1/marketplace/reviews/:listingId listReviews
  */
 
+import type {
+  MarketplacePreviewService} from './service.js';
 import {
-  MarketplacePreviewService,
   type AddReviewInput,
   type CreateListingInput,
   type InstallThemeInput,

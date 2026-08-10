@@ -12,9 +12,11 @@ import {
   type DeepLink,
   type DeepLinkPayload,
   type DeepLinkSigningKey,
-  type ShortLinkStore,
   type KeyRotationStore,
 } from '@domio/deep-link';
+import {
+  type ShortLinkStore,
+} from '@domio/deep-link/server';
 
 // ── Repository interfaces ──────────────────────────────────────────────
 

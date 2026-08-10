@@ -37,7 +37,7 @@ import { parseCollabEvent } from './collab/parse.js';
 import { mapCollabEvent } from './collab/mapper.js';
 import { MentionDedup } from './collab/dedup.js';
 import { NatsSubscriptionManager, connectWithRetry } from './nats_manager.js';
-import type { CRMSyncEvent } from './types.js';
+import type { CRMSyncEvent, NotificationRule } from './types.js';
 
 async function main() {
   const natsUrl = process.env.NATS_URL ?? 'nats://localhost:4222';
@@ -86,7 +86,7 @@ async function main() {
   const testEvent = process.env.NOTIFICATION_DISPATCHER_TEST_EVENT;
   if (testEvent) {
     const event: CRMSyncEvent = JSON.parse(testEvent);
-    const rules: Array<import('./types.js').NotificationRule> = [];
+    const rules: NotificationRule[] = [];
     const rows = await dispatcher.dispatch(rules, event);
     console.log(JSON.stringify({
       msg: 'notification-dispatcher: test event processed',
@@ -98,7 +98,7 @@ async function main() {
   // ─── CRM event handler ───────────────────────────────────────
   async function handleCrmEvent(raw: string): Promise<void> {
     const event: CRMSyncEvent = JSON.parse(raw);
-    const rules: Array<import('./types.js').NotificationRule> = [];
+    const rules: NotificationRule[] = [];
     await dispatcher.dispatch(rules, event);
   }
 

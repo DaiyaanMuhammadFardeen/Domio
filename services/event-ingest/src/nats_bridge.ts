@@ -50,7 +50,7 @@ export async function buildNatsBridge(url: string): Promise<NatsBridge> {
   const nats = (await import('nats')) as unknown as NatsModule;
   let conn: NatsConnection | null = null;
   let sub: NatsSubscription | null = null;
-  let counter = { received: 0, forwarded: 0 };
+  const counter = { received: 0, forwarded: 0 };
 
   return {
     received() {
@@ -102,6 +102,7 @@ async function* iterMessages(sub: NatsSubscription): AsyncGenerator<BridgeMessag
   // invoke; we keep it to make the type checker happy without a real
   // nats iterator type.
   void sub;
+  yield undefined as unknown as BridgeMessage;
   throw new Error('iterMessages is unused — see start() body');
 }
 

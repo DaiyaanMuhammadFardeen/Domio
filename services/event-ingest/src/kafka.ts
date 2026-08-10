@@ -29,9 +29,11 @@ function partitionKeyFor(event: AnalyticsEvent): string {
   return `${event.workspace_id}:${event.viewer_id_key}`;
 }
 
+import type { Kafka, CompressionTypes } from 'kafkajs';
+
 interface KafkaJsModule {
-  Kafka: typeof import('kafkajs').Kafka;
-  CompressionTypes: typeof import('kafkajs').CompressionTypes;
+  Kafka: typeof Kafka;
+  CompressionTypes: typeof CompressionTypes;
 }
 
 let cachedKafkaJs: KafkaJsModule | null = null;

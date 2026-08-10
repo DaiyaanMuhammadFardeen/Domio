@@ -11,6 +11,8 @@ import {
   Shortener,
   newShortId,
   type ShortLinkStore,
+} from './server.js';
+import {
   type DeepLink,
 } from './index.js';
 import {

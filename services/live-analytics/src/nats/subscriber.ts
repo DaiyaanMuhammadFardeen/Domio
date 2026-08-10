@@ -44,7 +44,7 @@ export async function buildNatsSubscriber(url: string): Promise<NatsSubscriber> 
   const nats = (await import('nats')) as unknown as NatsModule;
   let conn: NatsConnection | null = null;
   let sub: NatsSubscription | null = null;
-  let counter = { received: 0, forwarded: 0 };
+  const counter = { received: 0, forwarded: 0 };
 
   return {
     received() {

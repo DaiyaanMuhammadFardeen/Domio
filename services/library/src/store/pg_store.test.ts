@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * PgLibraryStore unit tests with fake pool (Phase 18 Wave 3).
  *

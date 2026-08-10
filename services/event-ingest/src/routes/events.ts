@@ -91,7 +91,7 @@ export function eventsRoutes(deps: IngestDeps): Hono {
       let parsed: unknown;
       try {
         parsed = JSON.parse(raw);
-      } catch (err) {
+      } catch {
         deps.metrics.recordBatch('rejected');
         return c.json({ error: { code: 'malformed_json', message: 'request body must be valid JSON' } }, 400);
       }
@@ -106,7 +106,7 @@ export function eventsRoutes(deps: IngestDeps): Hono {
       const accepted: AnalyticsEvent[] = [];
       let rejected = 0;
       let piiStripped = 0;
-      let seqStart = deps.nextSeq();
+      const seqStart = deps.nextSeq();
       let seq = seqStart;
       for (const rawEvent of batch) {
         const err = deps.validator.tryValidate(rawEvent);

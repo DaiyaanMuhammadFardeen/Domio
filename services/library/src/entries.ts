@@ -11,6 +11,7 @@ import type {
   LibrarySnapshotInput,
   EntryStatus,
   AutoUpdateBinding,
+  LibraryScope,
 } from './types.js';
 import {
   LibraryValidationError,
@@ -62,7 +63,7 @@ export function createEntryBody(
   const entryBase = {
     id: opts.idGen(),
     workspace_id: input.workspace_id,
-    scope: input.scope as import('./types.js').LibraryScope,
+    scope: input.scope as LibraryScope,
     title: input.title.trim(),
     tags: input.tags ?? [],
     owner_id: input.owner_id,
@@ -172,7 +173,7 @@ export function retireEntryBody(
     throw new LibraryValidationError('Cannot retire: would leave no active approved entry');
   }
 
-  let resolvedSupersededBy: string | undefined = supersededBy;
+  const resolvedSupersededBy: string | undefined = supersededBy;
   if (supersededBy) {
     const target = allEntries.find((e) => e.id === supersededBy);
     if (!target) {

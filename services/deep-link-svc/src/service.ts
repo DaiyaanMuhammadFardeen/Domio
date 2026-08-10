@@ -14,7 +14,6 @@ import {
   DEEP_LINK_VERSION,
   StateEncoder,
   StateDecoder,
-  Shortener,
   KeyRotator,
   encodePayload,
   decodePayload,
@@ -24,8 +23,11 @@ import {
   type DeepLinkVarEntry,
   type DeepLinkAudience,
   type DeepLinkViewerScope,
-  type ShortenInput,
 } from '@domio/deep-link';
+import {
+  Shortener,
+  type ShortenInput,
+} from '@domio/deep-link/server';
 
 import {
   NotFoundError,

@@ -20,7 +20,8 @@
  * every pulse update.
  */
 
-import type { Server } from 'node:http';
+import type { Server, IncomingMessage } from 'node:http';
+import type { WebSocket } from 'ws';
 import type { Orchestrator } from '../orchestrator.js';
 import type { Hub, SubscriberId } from '../ws/hub.js';
 import type { LivePulse } from '../types.js';
@@ -66,15 +67,14 @@ export async function attachWebSocket(
   orch: Orchestrator,
 ): Promise<void> {
   // Lazy-import so the module is optional in non-WS environments.
-  let WebSocketServer: typeof import('ws').WebSocketServer;
+  let wss;
   try {
-    const mod = await import('ws');
-    WebSocketServer = mod.WebSocketServer;
+    const { WebSocketServer } = await import('ws');
+    wss = new WebSocketServer({ noServer: true });
   } catch {
     // ws not installed in this env — skip.
     return;
   }
-  const wss = new WebSocketServer({ noServer: true });
 
   server.on('upgrade', (req, socket, head) => {
     const url = new URL(req.url ?? '/', 'http://localhost');
@@ -86,7 +86,7 @@ export async function attachWebSocket(
     });
   });
 
-  wss.on('connection', (ws: import('ws').WebSocket, _req: import('node:http').IncomingMessage, sessionId: string) => {
+  wss.on('connection', (ws: WebSocket, _req: IncomingMessage, sessionId: string) => {
     let attached: AttachedConnection | null = null;
     let ack = false;
 

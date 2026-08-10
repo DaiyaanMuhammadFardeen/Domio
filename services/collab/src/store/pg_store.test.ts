@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * PgCollabStore unit tests with fake pool (Phase 18).
  *

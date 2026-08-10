@@ -22,7 +22,7 @@
  */
 
 import type { Event } from '@domio/audit-ts';
-import { Chain } from '@domio/audit-ts';
+import type { Chain } from '@domio/audit-ts';
 import type { JsonObject } from '@domio/audit-ts';
 import type {
   LinkPolicy,
@@ -79,7 +79,7 @@ export class ChainAuditEmitter implements AuditEmitter {
   /** In-memory event log so tests can assert on what was emitted.
    *  Production writes to the agent_audit_event table via the
    *  `commit()` step in the two-phase build/commit pattern. */
-  readonly events: import('@domio/audit-ts').Event[] = [];
+  readonly events: Event[] = [];
 
   constructor(
     private readonly chain: Chain,
