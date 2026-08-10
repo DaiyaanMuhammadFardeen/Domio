@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS domio_analytics.events
     dwell_ms         Int32 DEFAULT 0 CODEC(ZSTD(1)),
     scroll_depth     Float32 DEFAULT 0 CODEC(ZSTD(1)),
     interaction_kind LowCardinality(String) DEFAULT '',
-    interaction_data String CODEC(ZSTD(3)) DEFAULT '', -- JSON blob
+    interaction_data String DEFAULT '' CODEC(ZSTD(3)),-- JSON blob
 
     -- Source metadata
     source_app       LowCardinality(String) DEFAULT '', -- 'viewer' | 'presenter' | 'join-web'

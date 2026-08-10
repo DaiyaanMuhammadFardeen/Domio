@@ -1,3 +1,5 @@
+'use client';
+
 import { Clock, Eye, ListChecks, Users } from 'lucide-react';
 
 export interface DeckSummaryCardProps {

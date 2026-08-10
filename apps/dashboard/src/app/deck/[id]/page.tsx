@@ -15,16 +15,6 @@ import {
 
 const WAREHOUSE_URL = process.env['WAREHOUSE_URL'] ?? 'http://localhost:8088';
 
-interface SlideBreakdownRow {
-  workspaceId: string;
-  deckId: string;
-  slideId: string;
-  views: number;
-  uniqueViewers: number;
-  avgDwellMs: number;
-  bounceRate: number;
-}
-
 interface DeckSummaryRow {
   workspaceId: string;
   deckId: string;
@@ -47,8 +37,19 @@ async function fetchDeckSummary(
   try {
     const res = await fetch(url.toString(), { cache: 'no-store' });
     if (!res.ok) return null;
-    const json = (await res.json()) as { rows: DeckSummaryRow[] };
-    return json.rows?.[0] ?? null;
+    const json = (await res.json()) as { rows: Record<string, unknown>[] };
+    const r = json.rows?.[0];
+    if (!r) return null;
+    // Warehouse returns snake_case; map to the camelCase shape DeckSummaryCard expects.
+    return {
+      workspaceId: String(r['workspace_id'] ?? ''),
+      deckId: String(r['deck_id'] ?? ''),
+      sessionCount: Number(r['session_count'] ?? 0),
+      viewerCount: Number(r['viewer_count'] ?? 0),
+      totalEvents: Number(r['total_events'] ?? 0),
+      avgSessionMs: Number(r['avg_session_ms'] ?? 0),
+      completionRate: Number(r['completion_rate'] ?? 0),
+    };
   } catch {
     return null;
   }
@@ -65,13 +66,13 @@ async function fetchSlideBreakdown(
   try {
     const res = await fetch(url.toString(), { cache: 'no-store' });
     if (!res.ok) return [];
-    const json = (await res.json()) as { rows: SlideBreakdownRow[] };
+    const json = (await res.json()) as { rows: Record<string, unknown>[] };
     return (json.rows ?? []).map((r) => ({
-      slideId: r.slideId,
-      views: r.views,
-      uniqueViewers: r.uniqueViewers,
-      avgDwellMs: r.avgDwellMs,
-      bounceRate: r.bounceRate,
+      slideId: String(r['slide_id'] ?? ''),
+      views: Number(r['views'] ?? 0),
+      uniqueViewers: Number(r['unique_viewers'] ?? 0),
+      avgDwellMs: Number(r['avg_dwell_ms'] ?? 0),
+      bounceRate: Number(r['bounce_rate'] ?? 0),
     }));
   } catch {
     return [];

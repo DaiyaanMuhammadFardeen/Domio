@@ -30,6 +30,14 @@ export interface WebSecurityOptions {
   };
   /** Whether this app runs over HTTPS in production (set false for local dev). */
   readonly https?: boolean;
+  /**
+   * CSP nonce to permit inline scripts (Next.js hydration, RSC payload,
+   * webpack-hmr). When provided, `script-src` includes `'nonce-<value>'`
+   * AND `'strict-dynamic'` so the browser trusts only nonced scripts.
+   * Set via Next.js middleware that injects the same nonce into every
+   * generated `<script>` tag's nonce attribute.
+   */
+  readonly scriptNonce?: string;
 }
 
 /**
@@ -44,9 +52,18 @@ export interface WebSecurityOptions {
  * Apps may override via `allowlist.script` for known third-party SDKs.
  */
 export function buildCsp(options: WebSecurityOptions = {}): string {
+  const scriptSrc: string[] = ["'self'"];
+  if (options.scriptNonce) {
+    // `'strict-dynamic'` lets any nonced script load arbitrary further
+    // scripts without per-script hashes — recommended by Next.js docs
+    // for production CSP with nonces.
+    scriptSrc.push(`'nonce-${options.scriptNonce}'`, "'strict-dynamic'");
+  }
+  scriptSrc.push(...(options.allowlist?.script ?? []));
+
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
-    "script-src": ["'self'", ...(options.allowlist?.script ?? [])],
+    "script-src": scriptSrc,
     "style-src": ["'self'", "'unsafe-inline'", ...(options.allowlist?.style ?? [])],
     "img-src": ["'self'", "data:", "blob:", ...(options.allowlist?.img ?? [])],
     "font-src": ["'self'", "data:", ...(options.allowlist?.font ?? [])],

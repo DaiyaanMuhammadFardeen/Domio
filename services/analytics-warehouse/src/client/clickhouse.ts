@@ -33,29 +33,47 @@ export function buildClickHouseClient(cfg: WarehouseConfig): ClickHouseClient {
       ? 'Basic ' + Buffer.from(`${cfg.clickhouseUser}:${cfg.clickhousePassword}`).toString('base64')
       : '';
 
-  function buildUrl(sql: string, params: Record<string, unknown> | undefined, format: string): string {
+  function buildUrl(params: Record<string, unknown> | undefined): string {
     const url = new URL(base);
     if (cfg.clickhouseDb) {
       url.searchParams.set('database', cfg.clickhouseDb);
     }
-    url.searchParams.set('query', sql);
     if (params) {
       for (const [k, v] of Object.entries(params)) {
         url.searchParams.set(`param_${k}`, formatParam(v));
       }
     }
-    url.searchParams.set(format, '');
     return url.toString();
   }
 
-  async function fetchOnce(sql: string, params: Record<string, unknown> | undefined, format: string): Promise<Response> {
-    const url = buildUrl(sql, params, format);
+  // Map from our logical format names to ClickHouse 24.x format names.
+  // ClickHouse uses `JSONEachRow` (camel-cased) for the row-oriented JSON
+  // output, not `format_json_each_row` (snake-cased). Passing the wrong
+  // name yields UNKNOWN_FORMAT.
+  const FORMAT_MAP: Record<string, string> = {
+    format_json_each_row: 'JSONEachRow',
+    format_tsv: 'TSV',
+  };
+
+  async function fetchOnce(
+    sql: string,
+    params: Record<string, unknown> | undefined,
+    format: string,
+  ): Promise<Response> {
+    // ClickHouse expects the output format inside the query body (`... FORMAT JSONEachRow`),
+    // not as a URL parameter. Putting it in the URL causes 24.x to interpret it as a
+    // user-defined setting, which is rejected with UNKNOWN_SETTING.
+    const chFormat = FORMAT_MAP[format] ?? format;
+    const sqlWithFormat = sql.trimEnd().endsWith('FORMAT ' + chFormat)
+      ? sql
+      : `${sql.trimEnd()} FORMAT ${chFormat}`;
+    const url = buildUrl(params);
     const headers: Record<string, string> = { 'content-type': 'text/plain' };
     if (auth) headers['authorization'] = auth;
     if (cfg.readOnly) {
       headers['x-clickhouse-setting'] = 'readonly = 1';
     }
-    const res = await fetch(url, { method: 'POST', headers });
+    const res = await fetch(url, { method: 'POST', headers, body: sqlWithFormat });
     if (!res.ok) {
       const body = await res.text();
       throw new ClickHouseError(`clickhouse error ${res.status}: ${body}`, res.status);
@@ -101,16 +119,41 @@ export class ClickHouseError extends Error {
   }
 }
 
+/**
+ * Format a query parameter value for ClickHouse's URL `param_*` substitution.
+ *
+ * ClickHouse parses URL params natively — the SQL placeholder type
+ * (`{x:String}`, `{x:UInt64}`, `{x:Array(String)}`) tells the server
+ * how to interpret the value. So scalar strings/numbers must NOT be
+ * wrapped in extra quotes here; doing so sends a literal `'foo'`
+ * (apostrophes included) to the server, which never matches any
+ * column value.
+ *
+ * Array elements DO need internal quoting per the Array(T) parser,
+ * so we recurse through `formatArrayElement` for elements while
+ * keeping scalars un-quoted.
+ */
 function formatParam(v: unknown): string {
   if (v === null || v === undefined) return 'NULL';
   if (typeof v === 'number') return String(v);
   if (typeof v === 'boolean') return v ? '1' : '0';
   if (typeof v === 'string') {
-    // Wrap in single quotes and escape backslashes + single quotes.
-    return `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+    return v.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   }
   if (Array.isArray(v)) {
-    return '[' + v.map((x) => formatParam(x)).join(',') + ']';
+    return '[' + v.map(formatArrayElement).join(',') + ']';
   }
-  return `'${JSON.stringify(v)}'`;
+  return JSON.stringify(v);
+}
+
+/**
+ * Format a single array element so the result can be parsed by the
+ * Array(T) parser. Strings get the standard SQL single-quote wrap,
+ * numbers/booleans/objects fall through to `formatParam`.
+ */
+function formatArrayElement(v: unknown): string {
+  if (typeof v === 'string') {
+    return `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+  }
+  return formatParam(v);
 }

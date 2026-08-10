@@ -1,3 +1,5 @@
+'use client';
+
 import { Badge, toneForStatus } from '../../components/Badge';
 import { SortableTable, type SortableColumn } from '../../components/SortableTable';
 

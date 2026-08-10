@@ -11,8 +11,10 @@ import { buildClickHouseClient } from './clickhouse.js';
 describe('clickhouse client url builder', () => {
   it('encodes scalar params with the right ClickHouse syntax', async () => {
     let capturedUrl: string | undefined;
-    const fakeFetch = (async (url: string) => {
+    let capturedBody: string | undefined;
+    const fakeFetch = (async (url: string, init?: RequestInit) => {
       capturedUrl = url;
+      capturedBody = typeof init?.body === 'string' ? init.body : undefined;
       return new Response('{"x":1}\n', { status: 200 });
     }) as unknown as typeof fetch;
     const oldFetch = (globalThis as { fetch?: unknown }).fetch;
@@ -29,9 +31,11 @@ describe('clickhouse client url builder', () => {
       await client.query('SELECT {x:Int32}', { x: 42 });
       expect(capturedUrl).toBeDefined();
       const u = new URL(capturedUrl as string);
-      expect(u.searchParams.get('query')).toBe('SELECT {x:Int32}');
+      // Format is in the body, not the URL.
       expect(u.searchParams.get('param_x')).toBe('42');
       expect(u.searchParams.get('database')).toBe('domio');
+      expect(u.searchParams.get('query')).toBeNull();
+      expect(capturedBody).toBe('SELECT {x:Int32} FORMAT JSONEachRow');
     } finally {
       (globalThis as { fetch: typeof fetch }).fetch = oldFetch as typeof fetch;
     }
@@ -56,7 +60,10 @@ describe('clickhouse client url builder', () => {
       });
       await client.query("SELECT {s:String}", { s: "o'malley" });
       const u = new URL(capturedUrl as string);
-      expect(u.searchParams.get('param_s')).toBe("'o\\'malley'");
+      // ClickHouse URL params are parsed natively (typed by the SQL
+      // placeholder), so we must NOT add surrounding quotes — only
+      // escape the inner apostrophe.
+      expect(u.searchParams.get('param_s')).toBe("o\\'malley");
     } finally {
       (globalThis as { fetch: typeof fetch }).fetch = oldFetch as typeof fetch;
     }

@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS domio_analytics.heatmap_tile
     slide_id          LowCardinality(String) DEFAULT '',
     tile_x            UInt16,
     tile_y            UInt16,
-    bucket            Date('UTC'),
+    bucket            Date,
     impressions       AggregateFunction(uniq, String),  -- unique viewers
     pause_count       UInt64 CODEC(ZSTD(1)),
     pause_total_ms    Int64 CODEC(ZSTD(1)),
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS domio_analytics.heatmap_tile_dwell
     slide_id          LowCardinality(String) DEFAULT '',
     tile_x            UInt16,
     tile_y            UInt16,
-    bucket            Date('UTC'),
+    bucket            Date,
     -- Per-viewer dwell_ms aggregated via quantileState so we can read
     -- p50/p90/p99 without re-scanning events.
     dwell_p50         AggregateFunction(quantile, Int64),

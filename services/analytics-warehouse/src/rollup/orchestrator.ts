@@ -15,6 +15,12 @@
  * instance, no leader election. The service is sized for a single
  * shard; horizontal scaling is done by running additional replicas
  * behind a job queue (not in scope for W2).
+ *
+ * NOTE on the OPTIMIZE list: ClickHouse's `OPTIMIZE TABLE` only
+ * works on physical tables, not on materialized views. We list the
+ * underlying tables here (`session_agg`, not `session_agg_mv`). The
+ * MV auto-refreshes when new rows hit `session_agg` so the underlying
+ * compaction is what we actually want.
  */
 
 import type { ClickHouseClient } from '../client/clickhouse.js';
@@ -40,7 +46,7 @@ export function defaultRollupConfig(): RollupConfig {
   return {
     hourlyOptimizeTables: [
       'events',
-      'session_agg_mv',
+      'session_agg',
       'slide_metric_5m',
     ],
     nightlyRebuildTables: [

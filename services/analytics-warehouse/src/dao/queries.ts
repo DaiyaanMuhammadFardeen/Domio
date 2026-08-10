@@ -52,11 +52,11 @@ export function buildAnalyticsDao(ch: ClickHouseClient): AnalyticsDao {
         SELECT
           workspace_id,
           deck_id,
-          countDistinct(session_id_key) AS session_count,
+          countDistinct(session_id) AS session_count,
           countDistinct(viewer_id_key) AS viewer_count,
           sum(event_count) AS total_events,
-          avg(avg_session_ms) AS avg_session_ms,
-          avg(completion_rate) AS completion_rate
+          avg(duration_ms) AS avg_session_ms,
+          avgIf(completed, completed > 0) AS completion_rate
         FROM session_agg_mv
         WHERE workspace_id = {workspace_id:String}
           AND bucket_ts_ms >= {from_ms:UInt64}
@@ -92,7 +92,7 @@ export function buildAnalyticsDao(ch: ClickHouseClient): AnalyticsDao {
           deck_id,
           slide_id,
           sum(views) AS views,
-          countDistinct(viewer_id_key) AS unique_viewers,
+          sum(distinct_viewers) AS unique_viewers,
           avg(avg_dwell_ms) AS avg_dwell_ms,
           avg(bounce_rate) AS bounce_rate
         FROM slide_metric_5m
@@ -126,19 +126,22 @@ export function buildAnalyticsDao(ch: ClickHouseClient): AnalyticsDao {
         to_ms: scope.to_ms,
       };
       // Each step is a window event_name. We rank by step index and
-      // count distinct viewers who triggered step i after step i-1.
+      // count distinct viewers who triggered step i in the window.
+      // `ts` is DateTime64(3) so we convert to ms before comparison.
       const sql = `
         WITH step_viewers AS (
           SELECT
+            workspace_id,
+            deck_id,
             arrayJoin(arrayEnumerate(arrayMap(x -> x, {steps:Array(String)}))) AS step_idx,
             arrayJoin(arrayMap(x -> x, {steps:Array(String)})) AS step_name,
             countDistinctIf(viewer_id_key, event_name = step_name) AS viewers
           FROM events
           WHERE workspace_id = {workspace_id:String}
             AND deck_id      = {deck_id:String}
-            AND ts_ms >= {from_ms:UInt64}
-            AND ts_ms <  {to_ms:UInt64}
-          GROUP BY step_idx, step_name
+            AND toUnixTimestamp64Milli(ts) >= {from_ms:UInt64}
+            AND toUnixTimestamp64Milli(ts) <  {to_ms:UInt64}
+          GROUP BY workspace_id, deck_id, step_idx, step_name
         )
         SELECT
           workspace_id,
@@ -173,18 +176,24 @@ export function buildAnalyticsDao(ch: ClickHouseClient): AnalyticsDao {
         from_ms: scope.from_ms,
         to_ms: scope.to_ms,
       };
+      // `heatmap_tile` is an AggregatingMergeTree keyed by
+      // (workspace, deck, slide, tile_x, tile_y, bucket=Date). The
+      // dashboard wants scalar `intensity` per tile (here we use
+      // pause_count + scrollthrough_ms as a proxy for engagement, since
+      // `impressions` is an uniqState and would need uniqMerge).
+      // bucket is filtered by converting from_ms/to_ms to Date range.
       const sql = `
         SELECT
           slide_id,
-          x,
-          y,
-          sum(intensity) AS intensity
+          tile_x AS x,
+          tile_y AS y,
+          sum(pause_count + scrollthrough_ms) AS intensity
         FROM heatmap_tile
         WHERE workspace_id = {workspace_id:String}
           AND deck_id      = {deck_id:String}
           AND slide_id     = {slide_id:String}
-          AND bucket_ts_ms >= {from_ms:UInt64}
-          AND bucket_ts_ms <  {to_ms:UInt64}
+          AND bucket >= toDate(toDateTime({from_ms:UInt64} / 1000))
+          AND bucket <  toDate(toDateTime({to_ms:UInt64}   / 1000)) + INTERVAL 1 DAY
         GROUP BY slide_id, x, y
       `;
       const rows = await ch.query<Record<string, unknown>>(sql, params);

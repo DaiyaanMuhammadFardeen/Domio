@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS domio_analytics.ab_variant_metric
     workspace_id   LowCardinality(String),
     test_id        LowCardinality(String),
     variant_id     LowCardinality(String),
-    bucket         Date('UTC'),
+    bucket         Date,
     exposures      UInt64 CODEC(ZSTD(1)),
     conversions    UInt64 CODEC(ZSTD(1))
 )

@@ -95,7 +95,9 @@ USER domio
 ENV NODE_ENV=production \
     DASHBOARD_PORT=3000 \
     HOST=0.0.0.0 \
-    WAREHOUSE_URL=http://warehouse:8088 \
+    # In docker-compose the warehouse is the
+    # `analytics-warehouse` service listening on :3030.
+    WAREHOUSE_URL=http://analytics-warehouse:3030 \
     AB_ASSIGNMENT_URL=http://ab-assignment:8090 \
     AB_MEASUREMENT_URL=http://ab-measurement:8091 \
     AB_STATISTICS_URL=http://ab-statistics:8092 \

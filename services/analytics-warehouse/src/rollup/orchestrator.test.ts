@@ -20,7 +20,8 @@ describe('rollup orchestrator', () => {
     const ch = new FakeCh();
     const orch = buildOrchestrator(ch, defaultRollupConfig(), { info: () => {}, warn: () => {} });
     const { optimized } = await orch.runHourly();
-    expect(optimized).toEqual(['events', 'session_agg_mv', 'slide_metric_5m']);
+    // Lists the underlying physical tables, not the materialized views.
+    expect(optimized).toEqual(['events', 'session_agg', 'slide_metric_5m']);
     for (const t of optimized) {
       expect(ch.executed).toContain(`OPTIMIZE TABLE ${t} FINAL`);
     }
@@ -47,7 +48,7 @@ describe('rollup orchestrator', () => {
     };
     const orch = buildOrchestrator(failing, defaultRollupConfig(), { info: () => {}, warn: () => {} });
     const { optimized } = await orch.runHourly();
-    expect(optimized).toEqual(['session_agg_mv', 'slide_metric_5m']);
+    expect(optimized).toEqual(['session_agg', 'slide_metric_5m']);
   });
 
   it('stop() removes all timers', () => {

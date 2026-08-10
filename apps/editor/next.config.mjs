@@ -17,19 +17,12 @@ const nextConfig = {
     typedRoutes: true,
   },
   async headers() {
-    return [
-      {
-        // Apply to every route in this Next.js app.
-        source: '/:path*',
-        headers: nextSecurityHeaders({
-          https: process.env.NODE_ENV === 'production',
-          allowlist: {
-            connect: ['https://*.domio.example.com', 'wss://*.domio.example.com'],
-            img: ['https://*.domio.example.com', 'data:', 'blob:'],
-          },
-        }),
-      },
-    ];
+    // Skip CSP here — middleware sets it per-request with a nonce. The
+    // remaining headers stay at static config time.
+    const headers = nextSecurityHeaders({
+      https: process.env.NODE_ENV === 'production',
+    }).filter((h) => h.key !== 'Content-Security-Policy');
+    return [{ source: '/:path*', headers }];
   },
   webpack: (config, { isServer, webpack }) => {
     // Workspace packages import each other with ESM-style `.js` extensions.

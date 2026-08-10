@@ -4,8 +4,10 @@
  * Transpiles the workspace packages we import directly so Next.js can
  * bundle their TypeScript sources without a build step.
  *
- * P20.5 B5: applies strict security headers (CSP, HSTS, X-Frame-Options,
+ * P20.5 B5: applies strict security headers (HSTS, X-Frame-Options,
  * X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
+ * Content-Security-Policy is emitted dynamically by `src/middleware.ts`
+ * because it needs a per-request nonce for inline scripts.
  */
 
 import { nextSecurityHeaders } from '@domio/web-security';
@@ -18,18 +20,12 @@ const nextConfig = {
     typedRoutes: true,
   },
   async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: nextSecurityHeaders({
-          https: process.env.NODE_ENV === 'production',
-          allowlist: {
-            connect: ['https://*.domio.example.com'],
-            img: ['https://*.domio.example.com', 'data:', 'blob:'],
-          },
-        }),
-      },
-    ];
+    // Skip CSP here — middleware sets it per-request with a nonce. The
+    // remaining headers stay at static config time.
+    const headers = nextSecurityHeaders({
+      https: process.env.NODE_ENV === 'production',
+    }).filter((h) => h.key !== 'Content-Security-Policy');
+    return [{ source: '/:path*', headers }];
   },
   webpack: (config) => {
     config.resolve.extensionAlias = {

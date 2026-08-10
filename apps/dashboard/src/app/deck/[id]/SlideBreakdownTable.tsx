@@ -1,3 +1,5 @@
+'use client';
+
 import { SortableTable, type SortableColumn } from '../../../components/SortableTable';
 
 export interface SlideRow extends Record<string, unknown> {

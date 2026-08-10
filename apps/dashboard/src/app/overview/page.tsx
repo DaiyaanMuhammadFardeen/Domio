@@ -10,15 +10,6 @@ import { OverviewClient, type OverviewKpis } from './OverviewClient';
 
 const WAREHOUSE_URL = process.env['WAREHOUSE_URL'] ?? 'http://localhost:8088';
 
-interface DeckSummaryRow {
-  workspaceId: string;
-  deckId: string;
-  sessionCount: number;
-  viewerCount: number;
-  avgSessionMs: number;
-  completionRate: number;
-}
-
 async function fetchOverviewKpis(workspaceId: string): Promise<OverviewKpis> {
   const now = Date.now();
   const url = new URL('/v1/decks/summary', WAREHOUSE_URL);
@@ -29,16 +20,17 @@ async function fetchOverviewKpis(workspaceId: string): Promise<OverviewKpis> {
   try {
     const res = await fetch(url.toString(), { cache: 'no-store' });
     if (!res.ok) throw new Error(`warehouse ${res.status}`);
-    const json = (await res.json()) as { rows: DeckSummaryRow[] };
+    const json = (await res.json()) as { rows: Record<string, unknown>[] };
     const rows = json.rows ?? [];
-    const sessions = rows.reduce((acc, r) => acc + r.sessionCount, 0);
-    const viewers = rows.reduce((acc, r) => acc + r.viewerCount, 0);
+    // Warehouse returns snake_case; read with the same key names.
+    const sessions = rows.reduce((acc, r) => acc + Number(r['session_count'] ?? 0), 0);
+    const viewers = rows.reduce((acc, r) => acc + Number(r['viewer_count'] ?? 0), 0);
     const avgDwell = rows.length
-      ? rows.reduce((acc, r) => acc + r.avgSessionMs, 0) / rows.length
+      ? rows.reduce((acc, r) => acc + Number(r['avg_session_ms'] ?? 0), 0) / rows.length
       : 0;
     const completion =
       rows.length > 0
-        ? rows.reduce((acc, r) => acc + r.completionRate, 0) / rows.length
+        ? rows.reduce((acc, r) => acc + Number(r['completion_rate'] ?? 0), 0) / rows.length
         : 0;
     // Synthetic per-day series: distribute the totals uniformly across 7 days.
     const perDay = (total: number): number[] =>

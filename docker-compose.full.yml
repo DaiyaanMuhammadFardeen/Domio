@@ -400,6 +400,19 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
       REDIS_URL: redis://redis:6379
       CLICKHOUSE_URL: http://clickhouse:8123
+      # Server-side fetches in apps/dashboard/src/app/overview/page.tsx
+      # (and other server-component pages) hit the warehouse service
+      # via this URL. The compose service is named
+      # `analytics-warehouse` and listens on :3030.
+      WAREHOUSE_URL: http://analytics-warehouse:3030
+      # Service URLs for client-side fetches in components.
+      AB_ASSIGNMENT_URL: http://ab-assignment:8090
+      AB_MEASUREMENT_URL: http://ab-measurement:8091
+      AB_STATISTICS_URL: http://ab-statistics:8092
+      TEAM_ANALYTICS_URL: http://team-analytics:8093
+      LIVE_ANALYTICS_URL: http://live-analytics:8094
+      CRM_SYNC_URL: http://crm-sync:8095
+      BENCHMARK_URL: http://benchmark:8096
       <<: *observability-env
     depends_on:
       postgres:
