@@ -32,7 +32,11 @@ export interface NatsBridge {
 }
 
 interface NatsModule {
-  connect: (url: string, opts?: Record<string, unknown>) => Promise<NatsConnection>;
+  // nats@2.29.x — `connect(opts)` only. The (url, opts) overload was
+  // removed; passing a string as the first arg triggers an internal
+  // `opts.servers = ...` on a string, which throws "Cannot create
+  // property 'servers' on string '<url>'".
+  connect: (opts: Record<string, unknown>) => Promise<NatsConnection>;
 }
 
 interface NatsConnection {
@@ -61,20 +65,33 @@ export async function buildNatsBridge(url: string): Promise<NatsBridge> {
     },
     async start(handler) {
       if (conn) return;
-      conn = await nats.connect(url, { name: 'event-ingest' });
+      conn = await nats.connect({ servers: [url], name: 'event-ingest' });
       sub = await conn.subscribe(NATS_LIVE_SUBJECT, { queue: 'event-ingest' });
       void (async () => {
         if (!sub) return;
-        for await (const m of iterMessages(sub)) {
-          counter.received += 1;
-          try {
-            const json = JSON.parse(new TextDecoder().decode(m.raw));
-            const event = normalizeNatsEvent(json, m.subject);
-            await handler(event);
-            counter.forwarded += 1;
-          } catch {
-            // bad message: drop. (DLQ emission lives at the route layer.)
+        // `sub` is a NATS subscription. The for-await iterator yields
+        // `{ raw: Uint8Array, subject: string }` shaped messages
+        // (nats@2.x contract). We keep the type as `unknown` so we
+        // don't pull in @types/nats just for the generator shape.
+        // The normalization in normalizeNatsEvent() is the contract.
+        const iter = sub as unknown as AsyncIterable<BridgeMessage>;
+        try {
+          for await (const m of iter) {
+            counter.received += 1;
+            try {
+              const json = JSON.parse(new TextDecoder().decode(m.raw));
+              const event = normalizeNatsEvent(json, m.subject);
+              await handler(event);
+              counter.forwarded += 1;
+            } catch {
+                // bad message: drop. (DLQ emission lives at the route layer.)
+            }
           }
+        } catch (err) {
+          // Iterator errors (NATS disconnect, protocol error, etc.)
+          // must not crash the process — log and let the rest of the
+          // service keep running.
+          process.stderr.write(`event-ingest: nats iterator ended: ${err instanceof Error ? err.message : String(err)}\n`);
         }
       })();
     },
@@ -93,17 +110,6 @@ export async function buildNatsBridge(url: string): Promise<NatsBridge> {
       }
     },
   };
-}
-
-async function* iterMessages(sub: NatsSubscription): AsyncGenerator<BridgeMessage> {
-  // We don't use the actual nats types here — the for-await iterator
-  // is wired through the queue subscription in the start() body
-  // above. This generator is a placeholder that we never actually
-  // invoke; we keep it to make the type checker happy without a real
-  // nats iterator type.
-  void sub;
-  yield undefined as unknown as BridgeMessage;
-  throw new Error('iterMessages is unused — see start() body');
 }
 
 interface UnknownRec {

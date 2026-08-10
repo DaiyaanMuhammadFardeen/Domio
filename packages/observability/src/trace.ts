@@ -20,7 +20,12 @@ export interface SpanContext {
 }
 
 export interface SpanOptions {
-  name: string;
+  /**
+   * Optional span name override. When omitted, the name passed as the
+   * first positional argument to `Tracer.startSpan` is used. The runtime
+   * implementation defaults `options` to `{ name }` for this reason.
+   */
+  name?: string;
   attributes?: Record<string, string | number | boolean>;
   parent?: SpanContext;
   startTime?: number; // ms epoch

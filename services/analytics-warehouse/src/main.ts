@@ -12,7 +12,7 @@ import { buildAnalyticsDao } from './dao/queries.js';
 import { buildApp } from './server.js';
 import { startOrchestrator } from './rollup/orchestrator.js';
 
-declare const process: { env: Record<string, string | undefined>; exit: (code: number) => never; on: (sig: string, fn: () => void) => void };
+declare const process: { env: Record<string, string | undefined>; exit: (code: number) => never; on: (sig: string, fn: () => void) => void; argv: string[] };
 declare const console: { log: (...args: unknown[]) => void; error: (...args: unknown[]) => void };
 
 export async function boot(cfg: WarehouseConfig = loadConfigFromEnv()): Promise<{ port: number; close: () => Promise<void> }> {
@@ -56,7 +56,22 @@ export async function boot(cfg: WarehouseConfig = loadConfigFromEnv()): Promise<
 }
 
 declare const require: { main?: unknown };
-const isMain = typeof require === 'object' && require?.main === (module as unknown);
+// ESM entrypoint detection. The CommonJS `require.main === module` idiom
+// doesn't work under `"type": "module"` — `require` is undefined outside
+// CJS. `import.meta.url` always points at this file; compare against the
+// `process.argv[1]` entry used to launch the process (which is the
+// compiled `dist/main.js` path). Only run boot() when this file is the
+// actual entrypoint, not when it's imported by tests.
+const isMain = (() => {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    const entryUrl = new URL(`file://${entry}`).href;
+    return import.meta.url === entryUrl;
+  } catch {
+    return false;
+  }
+})();
 
 if (isMain) {
   const cfg = loadConfigFromEnv();

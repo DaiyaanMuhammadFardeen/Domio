@@ -4,15 +4,33 @@
   "private": true,
   "type": "module",
   "description": "Domio observability SDK — OTLP HTTP exporter, trace/metrics/log APIs, PII redaction, no-op fallback. Phase 01 Stream B.",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "types": "src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./trace": "./src/trace.ts",
-    "./metrics": "./src/metrics.ts",
-    "./logs": "./src/logs.ts",
-    "./resource": "./src/resource.ts",
-    "./redaction": "./src/redaction.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./trace": {
+      "types": "./src/trace.ts",
+      "default": "./dist/trace.js"
+    },
+    "./metrics": {
+      "types": "./src/metrics.ts",
+      "default": "./dist/metrics.js"
+    },
+    "./logs": {
+      "types": "./src/logs.ts",
+      "default": "./dist/logs.js"
+    },
+    "./resource": {
+      "types": "./src/resource.ts",
+      "default": "./dist/resource.js"
+    },
+    "./redaction": {
+      "types": "./src/redaction.ts",
+      "default": "./dist/redaction.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

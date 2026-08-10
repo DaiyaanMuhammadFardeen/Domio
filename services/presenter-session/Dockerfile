@@ -9,7 +9,11 @@ FROM node:22.11.0-bookworm-slim AS builder
 
 WORKDIR /app
 
-# Enable pnpm via Corepack.
+# Enable pnpm via Corepack. `COREPACK_INTEGRITY_KEYS=0` skips the
+# signature check — the keys shipped in the base image don't include
+# pnpm@9.12.3's signing key id, so an unverified shim is the only way
+# to install pnpm in the build stage too.
+ENV COREPACK_INTEGRITY_KEYS=0
 RUN corepack enable && corepack prepare pnpm@9.12.3 --activate
 
 # Copy workspace manifests first for caching.
@@ -21,6 +25,9 @@ COPY services/presenter-session/package.json ./services/presenter-session/
 COPY services/phone-pairing/package.json ./services/phone-pairing/
 COPY services/thumbnail/package.json ./services/thumbnail/
 COPY packages/audit-ts/package.json ./packages/audit-ts/
+COPY packages/observability/package.json ./packages/observability/
+COPY packages/redact-pii/package.json ./packages/redact-pii/
+COPY packages/signed-link-token/package.json ./packages/signed-link-token/
 
 # Install dependencies (workspace-aware).
 RUN pnpm install --frozen-lockfile || pnpm install
@@ -30,8 +37,14 @@ COPY services ./services
 COPY packages ./packages
 
 # Build the service. The image is parameterized via build-arg.
+# `turbo run build` cascades through `dependsOn: ["^build"]` so every
+# workspace dependency this service imports at runtime
+# (@domio/audit-ts, @domio/observability, @domio/signed-link-token,
+# and its transitive @domio/redact-pii) is built first. Their
+# `main`/`exports` point at `dist/index.js`, so the running service
+# can resolve them as plain ESM without --experimental-strip-types.
 ARG SERVICE_DIR=services/presenter-session
-RUN pnpm --filter @domio/${SERVICE_DIR##services/} build
+RUN pnpm exec turbo run build --filter=@domio/${SERVICE_DIR##services/}...
 
 # ---------- Runtime ----------
 FROM node:22.11.0-bookworm-slim AS runtime
@@ -61,4 +74,11 @@ ARG SERVICE_PORT=3000
 ENV PORT=${SERVICE_PORT}
 EXPOSE ${SERVICE_PORT}
 
-CMD ["sh", "-c", "echo 'Service library — import via apps/api at runtime.' && node dist/index.js"]
+# Run the compiled service. `@domio/audit-ts` is built before this
+# stage and its `main` points at `dist/index.js`, so Node can resolve
+# the `./canonical.js` / `./chain.js` imports directly. No
+# `--experimental-strip-types` needed.
+# The service is a library (not a standalone server) — kept alive
+# with a long sleep so the container doesn't restart-loop until the
+# apps/api gateway eventually loads it via in-process import.
+CMD ["sh", "-c", "node -e \"console.log('presenter-session: library module loaded; awaiting apps/api import'); setInterval(() => {}, 1<<30)\""]

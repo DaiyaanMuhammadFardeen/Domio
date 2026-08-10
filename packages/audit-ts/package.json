@@ -4,10 +4,13 @@
   "private": true,
   "type": "module",
   "description": "Hash-chained audit log (TS port of services/mcp-server/internal/audit). HMAC-SHA256 over canonical(payload||seq||prev_hash).",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "types": "src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

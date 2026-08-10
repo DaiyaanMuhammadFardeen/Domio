@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@domio/api-client": "workspace:*",
+    "@domio/audience-service": "workspace:*",
     "@domio/canvas": "workspace:*",
     "@domio/common": "workspace:*",
     "@domio/components": "workspace:*",

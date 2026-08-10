@@ -26,7 +26,11 @@ export interface NatsSubscriber {
 }
 
 interface NatsModule {
-  connect: (url: string, opts?: Record<string, unknown>) => Promise<NatsConnection>;
+  // nats@2.29.x — `connect(opts)` only. The (url, opts) overload was
+  // removed; passing a string as the first arg triggers an internal
+  // `opts.servers = ...` on a string, which throws "Cannot create
+  // property 'servers' on string '<url>'".
+  connect: (opts: Record<string, unknown>) => Promise<NatsConnection>;
 }
 
 interface NatsConnection {
@@ -55,7 +59,7 @@ export async function buildNatsSubscriber(url: string): Promise<NatsSubscriber> 
     },
     async start(handler) {
       if (conn) return;
-      conn = await nats.connect(url, { name: 'live-analytics' });
+      conn = await nats.connect({ servers: [url], name: 'live-analytics' });
       sub = await conn.subscribe(NATS_LIVE_SUBJECT, { queue: 'live-analytics' });
       void (async () => {
         if (!sub) return;
@@ -65,17 +69,24 @@ export async function buildNatsSubscriber(url: string): Promise<NatsSubscriber> 
         // generator shape. The normalization in normalizeLiveEvent()
         // is the contract.
         const iter = sub as unknown as AsyncIterable<{ raw: Uint8Array; subject: string }>;
-        for await (const m of iter) {
-          counter.received += 1;
-          try {
-            const json = JSON.parse(new TextDecoder().decode(m.raw));
-            const sessionId = extractSessionId(m.subject);
-            const event = normalizeLiveEvent(json, sessionId);
-            await handler(event);
-            counter.forwarded += 1;
-          } catch {
-            // drop malformed events; we surface counter deltas only.
+        try {
+          for await (const m of iter) {
+            counter.received += 1;
+            try {
+              const json = JSON.parse(new TextDecoder().decode(m.raw));
+              const sessionId = extractSessionId(m.subject);
+              const event = normalizeLiveEvent(json, sessionId);
+              await handler(event);
+              counter.forwarded += 1;
+            } catch {
+              // drop malformed events; we surface counter deltas only.
+            }
           }
+        } catch (err) {
+          // Iterator errors (NATS disconnect, protocol error, etc.)
+          // must not crash the process — log and let the rest of the
+          // service keep running.
+          process.stderr.write(`live-analytics: nats iterator ended: ${err instanceof Error ? err.message : String(err)}\n`);
         }
       })();
     },
