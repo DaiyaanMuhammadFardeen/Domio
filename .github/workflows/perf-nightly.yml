@@ -37,7 +37,7 @@ concurrency:
 jobs:
   setup:
     name: install-deps
-    uses: ./.github/workflows/reusable/setup-node.yml
+    uses: ./.github/workflows/setup-node.yml
     with:
       node-version: '22.11.0'
 
@@ -92,8 +92,8 @@ jobs:
         run: |
           pnpm --filter @domio/editor start:3100 &
           SERVE_PID=$!
-          echo "SERVE_PID=$SERVE_PID" >> $GITHUB_ENV
-          for i in $(seq 1 30); do
+          echo "SERVE_PID=$SERVE_PID" >> "$GITHUB_ENV"
+          for _ in $(seq 1 30); do
             if curl -fsS http://localhost:3100 > /dev/null 2>&1; then break; fi
             sleep 2
           done
@@ -109,7 +109,7 @@ jobs:
             --output-dir=artifacts/playwright \
             2>&1 | tee artifacts/fps.log || FPS_EXIT=$?
           FPS_EXIT=${FPS_EXIT:-0}
-          echo "fps_exit=$FPS_EXIT" >> $GITHUB_OUTPUT
+          echo "fps_exit=$FPS_EXIT" >> "$GITHUB_OUTPUT"
       - name: Print baseline diff summary
         if: ${{ !cancelled() }}
         run: |

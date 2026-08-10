@@ -29,7 +29,7 @@ concurrency:
 jobs:
   setup:
     name: install-deps
-    uses: ./.github/workflows/reusable/setup-node.yml
+    uses: ./.github/workflows/setup-node.yml
     with:
       node-version: '22.11.0'
 
@@ -52,13 +52,15 @@ jobs:
           path: ~/.local/share/pnpm/store
           key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
       - run: pnpm install --frozen-lockfile
+      - name: Build shared packages
+        run: pnpm --filter @domio/web-security build
       - name: Build editor
         run: pnpm --filter @domio/editor build
       - name: Serve editor for scan
         run: |
           pnpm --filter @domio/editor start &
-          SERVE_PID=$!
-          for i in 1 2 3 4 5 6 7 8 9 10; do
+          _SERVE_PID=$!
+          for _ in 1 2 3 4 5 6 7 8 9 10; do
             if curl -fsS http://localhost:3000 > /dev/null; then break; fi
             sleep 2
           done

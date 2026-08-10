@@ -148,6 +148,8 @@ jobs:
           node-version: '22.11.0'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Build shared packages
+        run: pnpm --filter @domio/web-security build
       - name: Install Playwright
         run: pnpm --filter @domio/dashboard exec playwright install --with-deps chromium
       - name: Build dashboard for scan
@@ -156,8 +158,8 @@ jobs:
         run: |
           pnpm --filter @domio/dashboard start &
           SERVE_PID=$!
-          echo "SERVE_PID=$SERVE_PID" >> $GITHUB_ENV
-          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+          echo "SERVE_PID=$SERVE_PID" >> "$GITHUB_ENV"
+          for _ in 1 2 3 4 5 6 7 8 9 10 11 12; do
             if curl -fsS http://localhost:3000 > /dev/null; then break; fi
             sleep 2
           done

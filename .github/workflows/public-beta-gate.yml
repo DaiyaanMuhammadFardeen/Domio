@@ -47,7 +47,7 @@ jobs:
       - name: Run gate verification
         id: verify
         run: |
-          node services/obs-control-plane/scripts/verify-beta.mjs 2>&1 | tee artifacts/gate.log
+          mkdir -p artifacts && node services/obs-control-plane/scripts/verify-beta.mjs 2>&1 | tee artifacts/gate.log
       - name: Upload gate log
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4.4.3
@@ -58,5 +58,5 @@ jobs:
       - name: Annotate summary
         if: ${{ !cancelled() }}
         run: |
-          echo "## Public-beta gate result" >> $GITHUB_STEP_SUMMARY
-          tail -3 artifacts/gate.log >> $GITHUB_STEP_SUMMARY
+          echo "## Public-beta gate result" >> "$GITHUB_STEP_SUMMARY"
+          tail -3 artifacts/gate.log >> "$GITHUB_STEP_SUMMARY"

@@ -61,7 +61,7 @@ message CreatorProfile {
   bool payout_ready = 8;
   KycStatus kyc_status = 9;
   int64 balance_cents = 10; // accumulated unpaid balance in integer cents
-  string currency = 11;     // ISO 4217 char(3)
+  string currency = 11; // ISO 4217 char(3)
   int64 created_at_ms = 12;
   int64 updated_at_ms = 13;
   OnboardingState onboarding_state = 14;

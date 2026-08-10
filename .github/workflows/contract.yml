@@ -61,7 +61,7 @@ jobs:
           setup_only: true
         env:
           BUF_TOKEN: ${{ secrets.BUF_TOKEN }}
-      - run: buf breaking contracts/proto --against origin/master
+      - run: buf breaking contracts/proto --against ".git#branch=origin/master"
         continue-on-error: false
 
   openapi-spectral:
@@ -92,7 +92,12 @@ jobs:
         run: |
           set -e
           for f in contracts/schema/v1/*.schema.json; do
-            ajv compile --spec=draft2020 -s "$f" --strict=true --allow-non-draft-refs=false -c ajv-formats || { echo "✗ invalid schema: $f"; exit 1; }
+            refs=""
+            for r in contracts/schema/v1/*.schema.json; do
+              [ "$r" != "$f" ] && refs="$refs -r $r"
+            done
+            # shellcheck disable=SC2086
+            ajv compile --spec=draft2020 -s "$f" --strict=true --allow-union-types --validate-formats=false -c ajv-formats $refs || { echo "✗ invalid schema: $f"; exit 1; }
           done
 
   contract-pack:

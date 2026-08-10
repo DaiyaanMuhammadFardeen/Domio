@@ -445,21 +445,21 @@ components:
   schemas:
     IngestEvent:
       oneOf:
-        - $ref: 'https://domio.example/contracts/events/ingest/view.json'
-        - $ref: 'https://domio.example/contracts/events/ingest/interaction.json'
-        - $ref: 'https://domio.example/contracts/events/ingest/scroll_progress.json'
-        - $ref: 'https://domio.example/contracts/events/ingest/scroll_pause.json'
-        - $ref: 'https://domio.example/contracts/events/ingest/presenter_event.json'
-        - $ref: 'https://domio.example/contracts/events/ingest/live_session_event.json'
+        - $ref: '../../events/ingest/view.json'
+        - $ref: '../../events/ingest/interaction.json'
+        - $ref: '../../events/ingest/scroll_progress.json'
+        - $ref: '../../events/ingest/scroll_pause.json'
+        - $ref: '../../events/ingest/presenter_event.json'
+        - $ref: '../../events/ingest/live_session_event.json'
       discriminator:
         propertyName: event_name
         mapping:
-          view: 'https://domio.example/contracts/events/ingest/view.json'
-          interaction: 'https://domio.example/contracts/events/ingest/interaction.json'
-          scroll_progress: 'https://domio.example/contracts/events/ingest/scroll_progress.json'
-          scroll_pause: 'https://domio.example/contracts/events/ingest/scroll_pause.json'
-          presenter_event: 'https://domio.example/contracts/events/ingest/presenter_event.json'
-          live_session_event: 'https://domio.example/contracts/events/ingest/live_session_event.json'
+          view: '../../events/ingest/view.json'
+          interaction: '../../events/ingest/interaction.json'
+          scroll_progress: '../../events/ingest/scroll_progress.json'
+          scroll_pause: '../../events/ingest/scroll_pause.json'
+          presenter_event: '../../events/ingest/presenter_event.json'
+          live_session_event: '../../events/ingest/live_session_event.json'
 
     IngestEventBatch:
       type: object

@@ -99,7 +99,7 @@ message AbMeasureRequest {
   ResourceId experiment_id = 1;
   string variant_id = 2;
   string event_name = 3; // 'view' | 'interaction' | 'session_complete' | ...
-  uint32 weight = 4;     // 1 for binary conversion; numeric for dwell/conversion
+  uint32 weight = 4; // 1 for binary conversion; numeric for dwell/conversion
   google.protobuf.Timestamp ts = 5;
 }
 

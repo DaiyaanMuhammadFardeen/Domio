@@ -47,7 +47,7 @@ message TakedownRequest {
   string claimant_id = 4;
   TakedownKind kind = 5;
   string evidence_url = 6;
-  string statement = 7;          // good-faith statement (DMCA §512(c) elements)
+  string statement = 7; // good-faith statement (DMCA §512(c) elements)
   TakedownStatus status = 8;
   string resolution_notes = 9;
   int64 submitted_at_ms = 10;
@@ -63,7 +63,7 @@ message TakedownRequest {
 message TrustScore {
   string id = 1;
   string listing_id = 2;
-  double score = 3;           // 0.0–1.0 trust score
-  string signals_json = 4;    // JSON-encoded trust signal details
+  double score = 3; // 0.0–1.0 trust score
+  string signals_json = 4; // JSON-encoded trust signal details
   int64 computed_at_ms = 5;
 }

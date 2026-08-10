@@ -53,10 +53,16 @@ jobs:
     env:
       REALTIME_URL: ${{ vars.P22_REALTIME_URL || 'http://localhost:8080' }}
       AUDIENCE_URL: ${{ vars.P22_AUDIENCE_URL || 'http://localhost:8080' }}
-      AUDIENCE_VU: ${{ inputs.scale && format('{0}', math.ceil(50000 * inputs.scale)) || '2500' }}
+      AUDIENCE_VU: '2500'
       AUDIENCE_DURATION: '15m'
     steps:
       - uses: actions/checkout@v4.2.2
+      - name: Compute AUDIENCE_VU
+        env:
+          SCALE: ${{ inputs.scale }}
+        run: |
+          SCALE="${SCALE:-0.05}"
+          echo "AUDIENCE_VU=$(python3 -c 'import math,sys; print(math.ceil(50000*float(sys.argv[1])))' "$SCALE")" >> "$GITHUB_ENV"
       - uses: grafana/k6-action@v0.3.1
         with:
           filename: infra/loadtest/audience_50k.js
@@ -79,10 +85,16 @@ jobs:
     env:
       REALTIME_URL: ${{ vars.P22_REALTIME_URL || 'http://localhost:8080' }}
       COLLAB_URL: ${{ vars.P22_COLLAB_URL || 'http://localhost:8080' }}
-      EDITORS_VU: ${{ inputs.scale && format('{0}', math.ceil(10000 * inputs.scale)) || '500' }}
+      EDITORS_VU: '500'
       EDITORS_DURATION: '15m'
     steps:
       - uses: actions/checkout@v4.2.2
+      - name: Compute EDITORS_VU
+        env:
+          SCALE: ${{ inputs.scale }}
+        run: |
+          SCALE="${SCALE:-0.05}"
+          echo "EDITORS_VU=$(python3 -c 'import math,sys; print(math.ceil(10000*float(sys.argv[1])))' "$SCALE")" >> "$GITHUB_ENV"
       - uses: grafana/k6-action@v0.3.1
         with:
           filename: infra/loadtest/editors_10k.js
@@ -128,10 +140,16 @@ jobs:
     timeout-minutes: 75
     env:
       LIBRARY_URL: ${{ vars.P22_LIBRARY_URL || 'http://localhost:8080' }}
-      READ_RPS: ${{ inputs.scale && format('{0}', math.ceil(5000 * inputs.scale)) || '250' }}
+      READ_RPS: '250'
       LIBRARY_DURATION: '60m'
     steps:
       - uses: actions/checkout@v4.2.2
+      - name: Compute READ_RPS
+        env:
+          SCALE: ${{ inputs.scale }}
+        run: |
+          SCALE="${SCALE:-0.05}"
+          echo "READ_RPS=$(python3 -c 'import math,sys; print(math.ceil(5000*float(sys.argv[1])))' "$SCALE")" >> "$GITHUB_ENV"
       - uses: grafana/k6-action@v0.3.1
         with:
           filename: infra/loadtest/decks_100k.js
@@ -153,10 +171,16 @@ jobs:
     timeout-minutes: 75
     env:
       INGEST_URL: ${{ vars.P22_INGEST_URL || 'http://localhost:8080' }}
-      INGEST_RATE: ${{ inputs.scale && format('{0}', math.ceil(10000 * inputs.scale)) || '500' }}
+      INGEST_RATE: '500'
       INGEST_DURATION: '60m'
     steps:
       - uses: actions/checkout@v4.2.2
+      - name: Compute INGEST_RATE
+        env:
+          SCALE: ${{ inputs.scale }}
+        run: |
+          SCALE="${SCALE:-0.05}"
+          echo "INGEST_RATE=$(python3 -c 'import math,sys; print(math.ceil(10000*float(sys.argv[1])))' "$SCALE")" >> "$GITHUB_ENV"
       - uses: grafana/k6-action@v0.3.1
         with:
           filename: infra/loadtest/ingest_timeline.js

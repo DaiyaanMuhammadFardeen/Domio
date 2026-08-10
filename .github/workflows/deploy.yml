@@ -89,6 +89,8 @@ jobs:
           path: ~/.local/share/pnpm/store
           key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
       - run: pnpm install --frozen-lockfile
+      - name: Build shared packages
+        run: pnpm --filter @domio/web-security build
       - name: Build editor
         run: pnpm --filter @domio/editor build
       - name: Build dashboard
@@ -153,7 +155,7 @@ jobs:
           for path in / /editor /dashboard /api/healthz; do
             url="https://staging.domio.app$path"
             echo "→ $url"
-            for i in 1 2 3 4 5 6 7 8 9 10; do
+            for _ in 1 2 3 4 5 6 7 8 9 10; do
               if curl -fsS -o /dev/null -w '%{http_code}\n' "$url" | grep -qE '^(200|301|302)$'; then
                 echo "  ✓ $path"
                 break
@@ -209,7 +211,7 @@ jobs:
           for path in / /editor /dashboard /api/healthz; do
             url="https://app.domio.app$path"
             echo "→ $url"
-            for i in 1 2 3 4 5 6 7 8 9 10; do
+            for _ in 1 2 3 4 5 6 7 8 9 10; do
               if curl -fsS -o /dev/null -w '%{http_code}\n' "$url" | grep -qE '^(200|301|302)$'; then
                 echo "  ✓ $path"
                 break

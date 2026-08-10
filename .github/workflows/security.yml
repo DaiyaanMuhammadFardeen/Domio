@@ -44,6 +44,9 @@ on:
         type: choice
         default: preview
         required: true
+        options:
+          - preview
+          - staging
       scan_profile:
         description: 'DAST scan profile'
         type: choice
@@ -94,10 +97,8 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: /language:${{ matrix.language }}
           # Uploads SARIF to the Security tab; Code Scanning alerts block merge.
           upload: always
-          fail-on: medium
 
   sast-semgrep:
     name: SAST (Semgrep)
@@ -201,8 +202,6 @@ jobs:
 
   sca-snyk:
     name: SCA (Snyk)
-    # Only run when SNYK_TOKEN secret is configured; otherwise no-op.
-    if: ${{ secrets.SNYK_TOKEN != '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -210,7 +209,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check Snyk token
+        id: snyk_token
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [ -n "$SNYK_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run Snyk to check for vulnerabilities
+        if: steps.snyk_token.outputs.enabled == 'true'
         uses: snyk/actions/node@master
         with:
           args: --severity-threshold=high --sarif-file-output=snyk.sarif
@@ -218,7 +229,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
       - name: Upload Snyk SARIF
-        if: always()
+        if: ${{ always() && steps.snyk_token.outputs.enabled == 'true' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif

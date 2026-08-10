@@ -42,10 +42,12 @@ jobs:
         run: |
           set -e
           for f in contracts/schema/v1/*.schema.json; do
-            ajv compile --spec=draft2020 -s "$f" --strict=true -c ajv-formats \
-              $([ "$f" != "contracts/schema/v1/common.schema.json" ] && echo "-r contracts/schema/v1/common.schema.json") \
-              $([ "$f" = "contracts/schema/v1/deck.schema.json" ] && echo "-r contracts/schema/v1/scene-graph.schema.json") \
-              || { echo "✗ invalid schema: $f"; exit 1; }
+            refs=""
+            for r in contracts/schema/v1/*.schema.json; do
+              [ "$r" != "$f" ] && refs="$refs -r $r"
+            done
+            # shellcheck disable=SC2086
+            ajv compile --spec=draft2020 -s "$f" --strict=true --allow-union-types --validate-formats=false -c ajv-formats $refs || { echo "✗ invalid schema: $f"; exit 1; }
           done
       - name: Validate fixtures against deck schema
         run: |

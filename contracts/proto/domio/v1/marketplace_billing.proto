@@ -143,9 +143,9 @@ message PayoutRun {
 // 30-day first-payout hold.
 message PayoutPolicy {
   string id = 1;
-  int32 split_creator_bps = 2;  // basis points (7000 = 70%)
+  int32 split_creator_bps = 2; // basis points (7000 = 70%)
   int32 split_platform_bps = 3; // basis points (3000 = 30%)
-  int64 min_payout_cents = 4;   // minimum payout threshold in integer cents
+  int64 min_payout_cents = 4; // minimum payout threshold in integer cents
   int32 first_payout_hold_days = 5; // hold period for first-ever payout
   int64 updated_at_ms = 6;
 }
