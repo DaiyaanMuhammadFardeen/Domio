@@ -21,6 +21,16 @@ out/
 .turbo/
 *.tsbuildinfo
 
+# Source maps — regeneratable on every tsc build because tsconfig.base.json
+# sets `sourceMap: true` and `declarationMap: true`. tsc re-emits these
+# deterministically, so committing them only bloats the repo without
+# enabling any production debugging workflow (we don't upload maps to
+# Sentry/Datadog today — see .github/workflows/deploy.yml).
+*.js.map
+*.mjs.map
+*.cjs.map
+*.d.ts.map
+
 # Test coverage
 coverage/
 *.lcov

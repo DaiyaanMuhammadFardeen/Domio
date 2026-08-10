@@ -15,4 +15,49 @@ echo "→ removing dist / build artifacts"
 find . -type d \( -name dist -o -name build -o -name .next -o -name .turbo -o -name coverage \) \
   -not -path '*/node_modules/*' -not -path '*/.git/*' -prune -exec rm -rf {} + 2>/dev/null || true
 
+# Remove stale tsc output that ended up under src/ (typically from a build
+# run that overrode outDir, or from a stale incremental cache). Only delete
+# files that have a sibling .ts source so hand-written .d.ts modules
+# (e.g. services/export-pipeline/src/gifenc.d.ts) are preserved.
+echo "→ removing stale src/ build artifacts (*.js, *.d.ts, *.map next to *.ts)"
+removed=0
+while IFS= read -r -d '' js; do
+  sibling_ts="${js%.js}.ts"
+  if [ -f "$sibling_ts" ]; then
+    rm -f "$js"
+    removed=$((removed + 1))
+  fi
+done < <(find services packages apps tools workers \
+           -path '*/src/*' \( -name '*.js' -o -name '*.mjs' -o -name '*.cjs' \) \
+           -not -path '*/node_modules/*' -not -path '*/dist/*' \
+           -not -path '*/.next/*' -not -path '*/.turbo/*' \
+           -print0 2>/dev/null)
+
+while IFS= read -r -d '' dts; do
+  sibling_ts="${dts%.d.ts}.ts"
+  if [ -f "$sibling_ts" ]; then
+    rm -f "$dts"
+    removed=$((removed + 1))
+  fi
+done < <(find services packages apps tools workers \
+           -path '*/src/*' -name '*.d.ts' \
+           -not -path '*/node_modules/*' -not -path '*/dist/*' \
+           -not -path '*/.next/*' -not -path '*/.turbo/*' \
+           -not -path '*/gen/*' \
+           -print0 2>/dev/null)
+
+# Source maps are regeneratable; always remove under src/ regardless of
+# sibling .ts to clean up orphan maps after a partial build.
+map_removed=0
+while IFS= read -r -d '' m; do
+  rm -f "$m"
+  map_removed=$((map_removed + 1))
+done < <(find services packages apps tools workers \
+           -path '*/src/*' \( -name '*.js.map' -o -name '*.mjs.map' -o -name '*.cjs.map' -o -name '*.d.ts.map' \) \
+           -not -path '*/node_modules/*' -not -path '*/dist/*' \
+           -not -path '*/.next/*' -not -path '*/.turbo/*' \
+           -print0 2>/dev/null)
+
+echo "  removed $removed stale src/.js/.d.ts files, $map_removed source maps"
+
 echo "Clean complete."
