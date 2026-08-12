@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import type { Slide } from '@domio/schema/generated/scene-graph';
+import type { DeckDocument, Slide } from '@domio/schema/generated/scene-graph';
 import { useEditorStore } from '../store/editor-store';
 
 export interface UseActiveSlideResult {
@@ -16,9 +16,25 @@ export interface UseActiveSlideResult {
   index: number;
 }
 
-export function useActiveSlide(): UseActiveSlideResult {
-  const deck = useEditorStore((s) => s.deck);
-  const activeSlideId = useEditorStore((s) => s.activeSlideId);
+export interface UseActiveSlideOptions {
+  /**
+   * SSR safety net — during the very first render (before the
+   * parent has had a chance to seed the store) the Zustand
+   * selector returns `null`. Pass the prop deck here so SSR
+   * still renders the active slide.
+   */
+  fallbackDeck?: DeckDocument | null;
+  fallbackActiveId?: string | null;
+}
+
+export function useActiveSlide(
+  options: UseActiveSlideOptions = {},
+): UseActiveSlideResult {
+  const { fallbackDeck = null, fallbackActiveId = null } = options;
+  const storeDeck = useEditorStore((s) => s.deck);
+  const storeId = useEditorStore((s) => s.activeSlideId);
+  const deck = storeDeck ?? fallbackDeck;
+  const activeSlideId = (storeId ?? fallbackActiveId) ?? null;
   return useMemo<UseActiveSlideResult>(() => {
     if (!deck) return { slide: undefined, index: -1 };
     const slides = deck.slides ?? [];

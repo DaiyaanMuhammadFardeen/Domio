@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { Element, ULID } from '@domio/schema/generated/scene-graph';
+import type { DeckDocument, Element, ULID } from '@domio/schema/generated/scene-graph';
 import { useEditorStore } from '../store/editor-store';
 
 export interface UseSelectionResult {
@@ -28,9 +28,20 @@ export interface UseSelectionResult {
   clear: () => void;
 }
 
-export function useSelection(): UseSelectionResult {
+export interface UseSelectionOptions {
+  /**
+   * SSR safety net — falls back to the prop deck before the store
+   * has been seeded (first render on the server, before
+   * `useRef`-gated seed runs in EditorRoot).
+   */
+  fallbackDeck?: DeckDocument | null;
+}
+
+export function useSelection(options: UseSelectionOptions = {}): UseSelectionResult {
+  const { fallbackDeck = null } = options;
   const ids = useEditorStore((s) => s.selectedIds);
-  const deck = useEditorStore((s) => s.deck);
+  const storeDeck = useEditorStore((s) => s.deck);
+  const deck = storeDeck ?? fallbackDeck;
   const toggleSelected = useEditorStore((s) => s.toggleSelected);
   const setSelected = useEditorStore((s) => s.setSelected);
   const addSelected = useEditorStore((s) => s.addSelected);

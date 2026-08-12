@@ -31,7 +31,7 @@ const page = await ctx.newPage();
 for (const t of targets) {
   console.log(`→ ${t.name}: ${t.url}`);
   await page.goto(t.url, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1500);
   await page.screenshot({
     path: resolve(OUT, `${t.name}.png`),
     fullPage: true,

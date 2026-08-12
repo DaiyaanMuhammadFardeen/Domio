@@ -110,10 +110,12 @@ export function snapshotHistory(): {
   past: ReturnType<HistoryEngine['pastEntries']>;
   future: ReturnType<HistoryEngine['futureEntries']>;
 } {
-  const engine = ensureEngine();
+  if (!engineRef) {
+    return { past: [], future: [] };
+  }
   return {
-    past: engine.pastEntries(),
-    future: engine.futureEntries(),
+    past: engineRef.pastEntries(),
+    future: engineRef.futureEntries(),
   };
 }
 
@@ -121,7 +123,10 @@ export function snapshotHistory(): {
 export function onEngineEvent(
   listener: () => void,
 ): () => void {
-  const engine = ensureEngine();
+  if (!engineRef) {
+    return () => {};
+  }
+  const engine = engineRef;
   engine.onEvent(listener);
   // HistoryEngine currently lacks off(); wrap so callers can use
   // the standard cleanup pattern.

@@ -853,6 +853,149 @@ export function handleClearThemeOverride(): void {
 }
 
 // ---------------------------------------------------------------------------
+// Panel handler aggregator — single object every left-rail panel reads
+// via `EditorPanelContext.handlers`. Returning one object means
+// EditorRoot doesn't need to know about individual handler signatures;
+// new handlers just add themselves to this map.
+// ---------------------------------------------------------------------------
+
+export interface PanelHandlersMap {
+  // Layers / selection
+  onSelect: typeof handleSelect;
+  onReorder: typeof handleReorder;
+  onToggleFlag: typeof handleToggleFlag;
+  onSelectDataSource: typeof handleSelectDataSource;
+
+  // Insertion
+  onInsert: typeof handleInsertComponent;
+  onInsertIcon: typeof handleInsertIcon;
+  onInsertMedia: typeof handleInsertMedia;
+  onPropEdit: typeof handlePropEdit;
+  onVariantChange: typeof handleVariantChange;
+  onFilterChange: typeof handleFilterChange;
+
+  // Theme / brand
+  onThemeChange: typeof handleThemeChange;
+  onBrandKitChange: typeof handleBrandKitChange;
+  onSchemeToggle: typeof handleSchemeToggle;
+  onOverrideChange: typeof handleOverrideChange;
+  onAudit: typeof handleA11yAudit;
+
+  // Animation
+  onTimelineChange: typeof handleTimelineChange;
+  onTransitionChange: typeof handleTransitionChange;
+  onMagicRoleChange: typeof handleMagicRoleChange;
+  onReducedMotionChange: typeof handleReducedMotionChange;
+  onCopyAnimation: typeof handleCopyAnimation;
+  onPasteAnimation: typeof handlePasteAnimation;
+
+  // Connections / variables / state
+  onAddHotspot: typeof handleAddHotspot;
+  onRemoveHotspot: typeof handleRemoveHotspot;
+  onAddOverlay: typeof handleAddOverlay;
+  onRemoveOverlay: typeof handleRemoveOverlay;
+  onAddEdge: typeof handleAddEdge;
+  onRemoveEdge: typeof handleRemoveEdge;
+  onAddVariable: typeof handleAddVariable;
+  onRemoveVariable: typeof handleRemoveVariable;
+  onAddRule: typeof handleAddRule;
+  onRemoveRule: typeof handleRemoveRule;
+  onAddStateMachine: typeof handleAddStateMachine;
+  onRemoveStateMachine: typeof handleRemoveStateMachine;
+  onAdvanceStateMachine: typeof handleAdvanceStateMachine;
+  onTogglePersistInstanceState: typeof handleTogglePersistInstanceState;
+
+  // Audience (M6)
+  onQuizPatch: typeof handleQuizPatch;
+  onQuizDelete: typeof handleQuizDelete;
+  onLeaderboardUpdate: typeof handleLeaderboardUpdate;
+  onSequencePatch: typeof handleSequencePatch;
+  onSequenceDelete: typeof handleSequenceDelete;
+
+  // Deep links (M7)
+  onCreateDeepLinkSample: typeof handleCreateDeepLinkSample;
+  onResolveDeepLink: typeof handleResolveDeepLink;
+  onDeleteDeepLink: typeof handleDeleteDeepLink;
+
+  // Agent (M8)
+  onNlParse: typeof handleNlParse;
+  onNlApply: typeof handleNlApply;
+  onNlRollback: typeof handleNlRollback;
+  onDeckDiffCompare: typeof handleDeckDiffCompare;
+  onAuditDiff: typeof handleAuditDiff;
+
+  // Media (M11)
+  fetchGrants: typeof handleFetchGrants;
+  onRevoke: typeof handleRevokeGrant;
+  onFinalizeRecording: typeof handleFinalizeRecording;
+
+  // Promote
+  onPromote: typeof handlePromote;
+}
+
+/**
+ * Build the single handlers object every left-rail panel reads. Memoised
+ * by `useMemo(() => buildPanelHandlers(), [])` so consumers don't get
+ * spurious re-renders from referential churn.
+ */
+export function buildPanelHandlers(): PanelHandlersMap {
+  return {
+    onSelect: handleSelect,
+    onReorder: handleReorder,
+    onToggleFlag: handleToggleFlag,
+    onSelectDataSource: handleSelectDataSource,
+    onInsert: handleInsertComponent,
+    onInsertIcon: handleInsertIcon,
+    onInsertMedia: handleInsertMedia,
+    onPropEdit: handlePropEdit,
+    onVariantChange: handleVariantChange,
+    onFilterChange: handleFilterChange,
+    onThemeChange: handleThemeChange,
+    onBrandKitChange: handleBrandKitChange,
+    onSchemeToggle: handleSchemeToggle,
+    onOverrideChange: handleOverrideChange,
+    onAudit: handleA11yAudit,
+    onTimelineChange: handleTimelineChange,
+    onTransitionChange: handleTransitionChange,
+    onMagicRoleChange: handleMagicRoleChange,
+    onReducedMotionChange: handleReducedMotionChange,
+    onCopyAnimation: handleCopyAnimation,
+    onPasteAnimation: handlePasteAnimation,
+    onAddHotspot: handleAddHotspot,
+    onRemoveHotspot: handleRemoveHotspot,
+    onAddOverlay: handleAddOverlay,
+    onRemoveOverlay: handleRemoveOverlay,
+    onAddEdge: handleAddEdge,
+    onRemoveEdge: handleRemoveEdge,
+    onAddVariable: handleAddVariable,
+    onRemoveVariable: handleRemoveVariable,
+    onAddRule: handleAddRule,
+    onRemoveRule: handleRemoveRule,
+    onAddStateMachine: handleAddStateMachine,
+    onRemoveStateMachine: handleRemoveStateMachine,
+    onAdvanceStateMachine: handleAdvanceStateMachine,
+    onTogglePersistInstanceState: handleTogglePersistInstanceState,
+    onQuizPatch: handleQuizPatch,
+    onQuizDelete: handleQuizDelete,
+    onLeaderboardUpdate: handleLeaderboardUpdate,
+    onSequencePatch: handleSequencePatch,
+    onSequenceDelete: handleSequenceDelete,
+    onCreateDeepLinkSample: handleCreateDeepLinkSample,
+    onResolveDeepLink: handleResolveDeepLink,
+    onDeleteDeepLink: handleDeleteDeepLink,
+    onNlParse: handleNlParse,
+    onNlApply: handleNlApply,
+    onNlRollback: handleNlRollback,
+    onDeckDiffCompare: handleDeckDiffCompare,
+    onAuditDiff: handleAuditDiff,
+    fetchGrants: handleFetchGrants,
+    onRevoke: handleRevokeGrant,
+    onFinalizeRecording: handleFinalizeRecording,
+    onPromote: handlePromote,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Re-exports
 // ---------------------------------------------------------------------------
 

@@ -24,7 +24,7 @@
  * does NOT require touching this file.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import type {
   DeckDocument,
@@ -68,7 +68,6 @@ import { useEditorStore } from '../store/editor-store';
 import {
   editorBootstrapBrandKits,
   editorBootstrapThemes,
-  handleSelect,
   handleSetActiveSlide,
   handleSetLeftTab,
   handleSetPaletteOpen,
@@ -76,7 +75,6 @@ import {
   handleClearSelection,
   handleOpenContextMenu,
   handleContextMenuSelected,
-  handlePromote,
   handlePropEdit,
   handleVariantChange,
   handleUndo,
@@ -86,6 +84,8 @@ import {
   handleZoom100,
   handleZoom200,
   handleResetViewport,
+  buildPanelHandlers,
+  type PanelHandlersMap,
 } from '../store/handlers';
 import { useEditorShortcuts } from '../hooks/useEditorShortcuts';
 import { useSelection } from '../hooks/useSelection';
@@ -117,8 +117,20 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
   const { doc } = props;
 
   // ---------------------------------------------------------------------
-  // Store initialisation — set the deck, active slide, and panel on mount.
+  // Store initialisation — seed the store synchronously on first
+  // render so SSR + first client paint both see the deck. The Zustand
+  // store is module-level; calling the setters during render is safe
+  // and keeps `useState(doc)`-style initial seeding semantics without
+  // a one-tick delay. The `useRef` gates re-seeding across re-renders.
   // ---------------------------------------------------------------------
+  const seededRef = useRef(false);
+  if (!seededRef.current) {
+    useEditorStore.getState().setDeck(doc);
+    useEditorStore.getState().setActiveSlideId(doc.slides[0]?.id ?? null);
+    if (props.initialPanel) useEditorStore.getState().setLeftTab(props.initialPanel);
+    seededRef.current = true;
+  }
+
   const setDeck = useEditorStore((s) => s.setDeck);
   const setActiveSlideId = useEditorStore((s) => s.setActiveSlideId);
   const setLeftTab = useEditorStore((s) => s.setLeftTab);
@@ -131,13 +143,26 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
 
   // ---------------------------------------------------------------------
   // Reactive store reads — these subscribe so the toolbar / panel
-  // chrome updates when the underlying state changes.
+  // chrome updates when the underlying state changes. The `?? doc`
+  // fallback is the SSR safety net: a Zustand selector returns the
+  // value snapshotted when the hook first ran, which on the first
+  // render is before the seed above executes. We fall back to the
+  // prop so the SSR HTML reflects the deck.
   // ---------------------------------------------------------------------
-  const deck = useEditorStore((s) => s.deck);
-  const activeSlideId = useEditorStore((s) => s.activeSlideId);
+  const deck = useEditorStore((s) => s.deck) ?? doc;
+  const activeSlideId =
+    useEditorStore((s) => s.activeSlideId) ?? doc.slides[0]?.id ?? null;
   const paletteOpen = useEditorStore((s) => s.paletteOpen);
   const contextMenu = useEditorStore((s) => s.contextMenu);
-  const leftTab = useEditorStore((s) => s.leftTab);
+  const storeLeftTab = useEditorStore((s) => s.leftTab);
+  // SSR fallback — when the store hasn't been seeded yet (the
+  // selector still returns the default 'layers'), fall back to the
+  // initialPanel prop so deep-links like `?panel=theme-brand`
+  // render the right panel on first paint.
+  const leftTab =
+    storeLeftTab && storeLeftTab !== 'layers'
+      ? storeLeftTab
+      : (props.initialPanel ?? storeLeftTab ?? 'layers');
   const promoteOpen = useEditorStore((s) => s.promoteOpen);
   const auditEntries = useEditorStore((s) => s.auditEntries) as readonly AuditEntryView[];
 
@@ -163,14 +188,19 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
 
   // ---------------------------------------------------------------------
   // Derived state — selection + active slide go through their hooks.
+  // Pass the prop deck as a fallback so SSR / first render still
+  // resolves the active slide before the store-seed useRef gate runs.
   // ---------------------------------------------------------------------
-  const { slide: activeSlide } = useActiveSlide();
+  const { slide: activeSlide } = useActiveSlide({
+    fallbackDeck: doc,
+    fallbackActiveId: doc.slides[0]?.id ?? null,
+  });
   const {
     ids: selectedIds,
     elements: selectedElements,
     single: selectedComponent,
     isComponent: isComponentSelected,
-  } = useSelection();
+  } = useSelection({ fallbackDeck: doc });
 
   // ---------------------------------------------------------------------
   // Shortcut bindings — every editor action goes through one of these.
@@ -201,9 +231,10 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
 
   // ---------------------------------------------------------------------
   // Panel context — single shared shape every left-rail panel reads.
-  // Built from store selectors + handler functions so adding a new
-  // panel does not require touching this file.
+  // Built from store selectors + a single aggregated handler map so
+  // adding a new panel does not require touching this file.
   // ---------------------------------------------------------------------
+  const panelHandlers = useMemo(() => buildPanelHandlers(), []);
   const panelContext = useEditorPanelContext({
     selectedIds,
     selectedElements,
@@ -211,8 +242,8 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
     activeSlide,
     activeSlideId,
     auditEntries,
-    onSelect: handleSelect,
-    onPromote: handlePromote,
+    fallbackDeck: doc,
+    handlers: panelHandlers,
   });
 
   // ---------------------------------------------------------------------
@@ -392,7 +423,7 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
         open={promoteOpen}
         elements={[...selectedElements]}
         onClose={() => handleSetPromoteOpen(false)}
-        onPromote={(def, replace) => handlePromote(def, replace)}
+        onPromote={(def, replace) => panelHandlers.onPromote(def, replace)}
       />
     </div>
   );
@@ -432,17 +463,19 @@ interface PanelContextInputs {
   activeSlide: Slide | undefined;
   activeSlideId: ULID | null;
   auditEntries: readonly AuditEntryView[];
-  onSelect: (id: ULID, modifiers: { shift: boolean; alt: boolean }) => void;
-  onPromote: (
-    def: Parameters<typeof handlePromote>[0],
-    replace: boolean,
-  ) => void;
+  fallbackDeck: DeckDocument;
+  handlers: PanelHandlersMap;
 }
 
 /**
  * Build the single shared panel context the registry feeds into every
  * left-rail panel. Pulled into a hook so the EditorRoot render path
  * stays flat.
+ *
+ * `fallbackDeck` covers the SSR case where `useEditorStore.getState()`
+ * runs synchronously inside `useMemo` before the parent has had a
+ * chance to seed the store; in that case the prop deck is used
+ * instead of an empty object.
  */
 function useEditorPanelContext(inputs: PanelContextInputs): EditorPanelContext {
   const {
@@ -452,20 +485,19 @@ function useEditorPanelContext(inputs: PanelContextInputs): EditorPanelContext {
     activeSlide,
     activeSlideId,
     auditEntries,
-    onSelect,
-    onPromote,
+    fallbackDeck,
+    handlers,
   } = inputs;
 
   return useMemo<EditorPanelContext>(() => {
     const store = useEditorStore.getState();
     const overrides = store.overrides as Record<string, unknown>;
-    const fallbackDeck = (deck: DeckDocument | null): DeckDocument =>
-      (deck ?? ({} as DeckDocument));
+    const deck = (store.deck ?? fallbackDeck) as DeckDocument;
     return {
       themes: editorBootstrapThemes,
       brandKits: editorBootstrapBrandKits,
       state: {
-        deck: fallbackDeck(store.deck),
+        deck,
         activeSlide,
         activeSlideId: (activeSlide?.id ?? activeSlideId ?? '') as ULID,
         selectedIds,
@@ -498,10 +530,7 @@ function useEditorPanelContext(inputs: PanelContextInputs): EditorPanelContext {
         selectedMediaKind: null,
         selectedMediaProps: null,
       },
-      handlers: {
-        onSelect,
-        onPromote,
-      },
+      handlers,
     };
   }, [
     selectedIds,
@@ -510,8 +539,8 @@ function useEditorPanelContext(inputs: PanelContextInputs): EditorPanelContext {
     activeSlide,
     activeSlideId,
     auditEntries,
-    onSelect,
-    onPromote,
+    fallbackDeck,
+    handlers,
   ]);
 }
 
