@@ -7,11 +7,16 @@
  * Renders one row per element in the active slide, top z at the top of the
  * list. Selection is a pure `Set<ULID>`; reordering dispatches a
  * `ReorderOp` via the supplied callback.
+ *
+ * Wave 2 §S2.2 adds the Outline tab sibling: a recursive tree view
+ * via `OutlineTree`. The tab strip is local state — the underlying
+ * panel context doesn't care which view is active.
  */
 
 import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Element, Slide, ULID } from '@domio/schema/generated/scene-graph';
+import { OutlineTree } from '../components/canvas/OutlineTree';
 
 export interface LayersPanelProps {
   slide: Slide;
@@ -21,8 +26,11 @@ export interface LayersPanelProps {
   onToggleFlag: (id: ULID, flag: 'locked' | 'hidden') => void;
 }
 
+type Tab = 'flat' | 'outline';
+
 export function LayersPanel(props: LayersPanelProps): ReactElement {
   const { slide, selectedIds, onSelect, onReorder, onToggleFlag } = props;
+  const [tab, setTab] = useState<Tab>('flat');
   const [query, setQuery] = useState('');
   const [showHidden, setShowHidden] = useState(false);
   const [dragSource, setDragSource] = useState<ULID | null>(null);
@@ -44,14 +52,36 @@ export function LayersPanel(props: LayersPanelProps): ReactElement {
   return (
     <section className="layers" aria-label="Layers">
       <header className="layers__header">
-        <input
-          className="layers__search"
-          type="search"
-          placeholder="Search layers"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="Search layers"
-        />
+        <div className="layers__tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'flat'}
+            className={`layers__tab${tab === 'flat' ? ' is-active' : ''}`}
+            onClick={() => setTab('flat')}
+          >
+            Flat
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'outline'}
+            className={`layers__tab${tab === 'outline' ? ' is-active' : ''}`}
+            onClick={() => setTab('outline')}
+          >
+            Outline
+          </button>
+        </div>
+        {tab === 'flat' ? (
+          <input
+            className="layers__search"
+            type="search"
+            placeholder="Search layers"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Search layers"
+          />
+        ) : null}
         <label className="layers__show-hidden">
           <input
             type="checkbox"
@@ -61,53 +91,63 @@ export function LayersPanel(props: LayersPanelProps): ReactElement {
           Show hidden
         </label>
       </header>
-      <ul className="layers__list" role="listbox" aria-label="Layer list">
-        {rows.map((el) => (
-          <li
-            key={el.id}
-            className={`layers__row${selectedIds.has(el.id) ? ' is-selected' : ''}`}
-            draggable
-            onDragStart={() => setDragSource(el.id)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              if (!dragSource || dragSource === el.id) return;
-              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-              const place = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
-              onReorder(dragSource, el.id, place);
-              setDragSource(null);
-            }}
-          >
-            <button
-              className="layers__row-main"
-              onClick={(e) => onSelect(el.id, { shift: e.shiftKey, alt: e.altKey })}
-              type="button"
+      {tab === 'flat' ? (
+        <ul className="layers__list" role="listbox" aria-label="Layer list">
+          {rows.map((el) => (
+            <li
+              key={el.id}
+              className={`layers__row${selectedIds.has(el.id) ? ' is-selected' : ''}`}
+              draggable
+              onDragStart={() => setDragSource(el.id)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                if (!dragSource || dragSource === el.id) return;
+                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                const place = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+                onReorder(dragSource, el.id, place);
+                setDragSource(null);
+              }}
             >
-              <span className={`layers__type layers__type--${el.type}`}>{el.type}</span>
-              <span className="layers__name">{el.name}</span>
-              {el.locked ? <span className="layers__badge">locked</span> : null}
-              {el.hidden ? <span className="layers__badge">hidden</span> : null}
-            </button>
-            <span className="layers__row-actions">
               <button
+                className="layers__row-main"
+                onClick={(e) => onSelect(el.id, { shift: e.shiftKey, alt: e.altKey })}
                 type="button"
-                onClick={() => onToggleFlag(el.id, 'locked')}
-                aria-label="Toggle lock"
-                aria-pressed={el.locked === true}
               >
-                {el.locked ? '🔒' : '🔓'}
+                <span className={`layers__type layers__type--${el.type}`}>{el.type}</span>
+                <span className="layers__name">{el.name}</span>
+                {el.locked ? <span className="layers__badge">locked</span> : null}
+                {el.hidden ? <span className="layers__badge">hidden</span> : null}
               </button>
-              <button
-                type="button"
-                onClick={() => onToggleFlag(el.id, 'hidden')}
-                aria-label="Toggle hide"
-                aria-pressed={el.hidden === true}
-              >
-                {el.hidden ? '◉' : '◌'}
-              </button>
-            </span>
-          </li>
-        ))}
-      </ul>
+              <span className="layers__row-actions">
+                <button
+                  type="button"
+                  onClick={() => onToggleFlag(el.id, 'locked')}
+                  aria-label="Toggle lock"
+                  aria-pressed={el.locked === true}
+                >
+                  {el.locked ? '🔒' : '🔓'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onToggleFlag(el.id, 'hidden')}
+                  aria-label="Toggle hide"
+                  aria-pressed={el.hidden === true}
+                >
+                  {el.hidden ? '◉' : '◌'}
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <OutlineTree
+          slideElements={slide.elements}
+          selectedIds={selectedIds}
+          onSelect={onSelect}
+          onReorder={onReorder}
+          onToggleFlag={onToggleFlag}
+        />
+      )}
     </section>
   );
 }

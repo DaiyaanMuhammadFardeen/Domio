@@ -11,5 +11,11 @@
   "editor.theme.title": "Theme & brand",
   "editor.data.title": "Data sources",
   "editor.data.empty": "No data sources connected. Open the Connectors panel to link a CSV, webhook, or HTTP API.",
-  "editor.marketplace.title": "Marketplace"
+  "editor.marketplace.title": "Marketplace",
+  "editor.canvasControls.title": "Canvas",
+  "editor.canvasControls.subtitle": "Chrome toggles and viewport shortcuts.",
+  "editor.canvasControls.rulers": "Rulers",
+  "editor.canvasControls.grid": "Grid",
+  "editor.canvasControls.snap": "Snap",
+  "editor.canvasControls.zoom": "Zoom"
 }

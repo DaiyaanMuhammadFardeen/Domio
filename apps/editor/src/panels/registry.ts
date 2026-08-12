@@ -42,6 +42,7 @@ import {
   M11RecordingEntry,
   P12CopilotEntry,
   MarketplaceEntry,
+  CanvasControlsEntry,
 } from './entries';
 
 /**
@@ -103,6 +104,13 @@ REGISTRY.add({
   group: 'core',
   surface: 'left',
   Component: ThemeBrandEntry.Component,
+});
+REGISTRY.add({
+  id: 'canvas-controls',
+  label: 'Canvas',
+  group: 'core',
+  surface: 'left',
+  Component: CanvasControlsEntry.Component,
 });
 
 REGISTRY.add({

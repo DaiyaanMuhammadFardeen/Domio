@@ -118,7 +118,8 @@ export type EditorLeftTab =
   | 'm11-licenses'
   | 'm11-recording'
   | 'p12-copilot'
-  | 'marketplace';
+  | 'marketplace'
+  | 'canvas-controls';
 
 export interface EditorRootProps {
   doc: DeckDocument;

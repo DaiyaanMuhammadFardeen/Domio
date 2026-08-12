@@ -39,6 +39,7 @@ import { RecordingPanel } from './recording-panel';
 import { NlPatchPanel, type NlToolCallSummary } from './nl-patch-panel';
 import { DeckDiffPanel, type DeckDiffEntry } from './deck-diff-panel';
 import { MarketplacePanel } from './marketplace-panel';
+import { CanvasControlsPanel } from './canvas-controls-panel';
 import { OutlineApproval } from '../components/copilot/OutlineApproval';
 import { AuditTrail, type AuditEntryView } from '../components/prototyping/agent/AuditTrail';
 
@@ -435,6 +436,13 @@ export const HistoryEntry: PanelModule = {
   // shell. The shell renders it directly on the right rail rather than
   // through the registry.
   Component: (): ReactElement | null => null,
+};
+
+export const CanvasControlsEntry: PanelModule = {
+  // Wave 2 §S2.1. The canvas chrome controls panel reads everything
+  // it needs from the editor store and the viewport hook, so it
+  // doesn't depend on any context handler.
+  Component: (): ReactElement | null => <CanvasControlsPanel />,
 };
 
 // Type re-export so callers can import the component type.
