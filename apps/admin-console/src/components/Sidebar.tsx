@@ -7,7 +7,7 @@ import { clsx } from 'clsx';
 interface NavItem {
   href: string;
   label: string;
-  group: 'Curation' | 'Moderation' | 'Finance';
+  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing';
 }
 
 const NAV: ReadonlyArray<NavItem> = [
@@ -16,6 +16,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: '/trust', label: 'Trust Scoring', group: 'Curation' },
   { href: '/takedowns', label: 'Takedowns', group: 'Moderation' },
   { href: '/payouts', label: 'Payout Policy', group: 'Finance' },
+  { href: '/custom-domains', label: 'Custom Domains', group: 'Publishing' },
 ];
 
 function isActive(pathname: string, href: string): boolean {

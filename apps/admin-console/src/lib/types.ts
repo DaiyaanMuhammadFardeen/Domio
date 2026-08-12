@@ -127,6 +127,66 @@ export interface PayoutRun {
   completed_at_ms: number | null;
 }
 
+// ── Custom Domain ──────────────────────────────────────────────────────
+//
+// Per Wave 3 §S3.5 of docs/frontend-roadmap/03-wave-viewer-publishing.md.
+//
+// Each tenant can register one or more custom domains for their viewer
+// links. Verification is via CNAME DNS record pointing at
+// `cname.domio.app`. SSL provisioning happens once `verified` flips to
+// `true`. After that, share links for that tenant are rewritten to use
+// the custom domain.
+
+export type CustomDomainState =
+  | 'pending_dns' // awaiting CNAME creation
+  | 'verifying' // DNS detected, propagating
+  | 'verified' // live + SSL provisioned
+  | 'failed' // DNS error / validation failed
+  | 'revoked'; // removed; links revert to deck.domio.app
+
+export interface CustomDomain {
+  id: string;
+  tenant_id: string;
+  workspace_id: string;
+  /** Fully-qualified hostname, e.g. `decks.acme.com`. */
+  hostname: string;
+  state: CustomDomainState;
+  /** Where the CNAME must point. */
+  cname_target: string;
+  /** Last DNS check timestamp (epoch ms). */
+  last_checked_at_ms: number | null;
+  /** Human-readable note about the latest check. */
+  last_check_note: string | null;
+  /** When the domain first went verified (epoch ms). */
+  verified_at_ms: number | null;
+  /** Free-form tags / project label for filtering. */
+  label: string | null;
+  created_at_ms: number;
+  updated_at_ms: number;
+}
+
+export interface CustomDomainList {
+  items: CustomDomain[];
+  total: number;
+}
+
+export interface CustomDomainInput {
+  tenant_id: string;
+  workspace_id: string;
+  hostname: string;
+  label?: string;
+}
+
+export interface CustomDomainVerifyResult {
+  domain: CustomDomain;
+  /** True when DNS resolves to the expected CNAME target. */
+  cname_ok: boolean;
+  /** True when an A record falls back to a Domio IP range. */
+  a_record_ok: boolean;
+  /** Diagnostic message from the verifier. */
+  message: string;
+}
+
 // ── Problem Detail (RFC-7807) ───────────────────────────────────────────
 export interface ProblemDetail {
   type: string;

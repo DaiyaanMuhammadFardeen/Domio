@@ -7,6 +7,7 @@ const NAV_ITEMS: ReadonlyArray<{ route: AdminRoute; label: string }> = [
   { route: 'takedowns', label: 'Takedowns' },
   { route: 'trust', label: 'Trust' },
   { route: 'payouts', label: 'Payouts' },
+  { route: 'custom-domains', label: 'Custom Domains' },
 ];
 
 export function Header() {

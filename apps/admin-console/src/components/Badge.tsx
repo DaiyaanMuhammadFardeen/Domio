@@ -109,3 +109,21 @@ export function toneForListingStatus(status: string): BadgeTone {
       return 'grey';
   }
 }
+
+/** Map custom-domain state to badge tone (Wave 3 §S3.5). */
+export function toneForCustomDomainState(state: string): BadgeTone {
+  switch (state) {
+    case 'verified':
+      return 'green';
+    case 'verifying':
+      return 'amber';
+    case 'pending_dns':
+      return 'yellow';
+    case 'failed':
+      return 'red';
+    case 'revoked':
+      return 'grey';
+    default:
+      return 'grey';
+  }
+}

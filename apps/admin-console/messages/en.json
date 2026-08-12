@@ -10,5 +10,8 @@
   "admin.takedowns.heading": "Takedown queue",
   "admin.takedowns.empty": "No takedowns pending.",
   "admin.payouts.heading": "Payouts",
-  "admin.payouts.empty": "No payouts queued."
+  "admin.payouts.empty": "No payouts queued.",
+  "admin.nav.customDomains": "Custom Domains",
+  "admin.customDomains.heading": "Custom domains",
+  "admin.customDomains.empty": "No custom domains registered yet for this tenant."
 }
