@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { MobileShell } from '@/components/layout/MobileShell';
+import { submitFeedback } from '@/lib/feedback-service';
 
 export default function FeedbackPage() {
   const params = useParams<{ session_id: string }>();
@@ -25,11 +26,9 @@ export default function FeedbackPage() {
         onSubmit={(e) => {
           e.preventDefault();
           if (stars === 0 || nps === null) return;
-          fetch(`/api/feedback/${encodeURIComponent(params?.session_id ?? '')}`, {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ stars, nps, note }),
-          }).finally(() => setSubmitted(true));
+          submitFeedback(params?.session_id ?? '', { stars, nps, note })
+            .catch(() => { /* best-effort; the form closes either way */ })
+            .finally(() => setSubmitted(true));
         }}
         className="flex flex-col gap-4 max-w-md mx-auto"
       >

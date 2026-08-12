@@ -1,0 +1,14 @@
+{
+  "admin.title": "Domio Admin Console",
+  "admin.nav.overview": "Overview",
+  "admin.nav.brandLocks": "Brand Locks",
+  "admin.nav.takedowns": "Takedowns",
+  "admin.nav.trust": "Trust",
+  "admin.nav.payouts": "Payouts",
+  "admin.trust.heading": "Trust scores",
+  "admin.trust.empty": "No trust scores yet.",
+  "admin.takedowns.heading": "Takedown queue",
+  "admin.takedowns.empty": "No takedowns pending.",
+  "admin.payouts.heading": "Payouts",
+  "admin.payouts.empty": "No payouts queued."
+}

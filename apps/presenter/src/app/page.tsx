@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { presenter } from '@domio/ui/routing';
 
 export default function PresenterHomePage() {
   return (
@@ -17,10 +18,10 @@ export default function PresenterHomePage() {
         </p>
         <ul className="boot__list">
           <li>
-            <Link href="/session/demo">Open demo session</Link>
+            <Link href={presenter('demo')}>Open demo session</Link>
           </li>
           <li>
-            <Link href="/session/demo?display=secondary">
+            <Link href={`${presenter('demo')}?display=secondary`}>
               Open on secondary display
             </Link>
           </li>

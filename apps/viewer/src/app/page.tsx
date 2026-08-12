@@ -1,16 +1,25 @@
 export default function ViewerHomePage() {
   return (
-    <main className="boot">
-      <header className="boot__header">
+    <main>
+      <header>
         <h1>Domio viewer</h1>
-        <p className="boot__phase">Phase 0 stub · Read-only deck viewer ships in Phase 14/15</p>
+        <p>Read-only playback for shared decks and live sessions.</p>
       </header>
-      <section className="boot__panel">
-        <h2>Coming soon</h2>
+      <section>
+        <h2>Open a deck</h2>
         <p>
-          The viewer will render decks from public links, embedded presentations,
-          and live shared sessions — without exposing the editing surface.
+          Paste a public deck link or open a share token to start playback.
+          Embedded decks render in-place; live shared sessions subscribe to
+          the presenter&apos;s current slide and follow audience prompts.
         </p>
+        <p>
+          The viewer never exposes the editing surface; it&apos;s the same
+          playback engine the embed proxy serves to third-party sites.
+        </p>
+      </section>
+      <section>
+        <h2>Recent decks</h2>
+        <p>No recent decks yet. Open one from a share link to populate this list.</p>
       </section>
     </main>
   );

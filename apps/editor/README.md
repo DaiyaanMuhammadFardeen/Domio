@@ -1,9 +1,8 @@
 # @domio/editor
 
-> **Phase 0 stub.** The real canvas editor (Next.js 15 + Vite + WebGL2 /
-> WebGPU + Yjs CRDT) lands in Phase 03. This package exists so the
-> monorepo boots end-to-end and `pnpm dev` brings up a working editor
-> placeholder.
+Domio canvas editor — Next.js 15 + Vite + WebGL2/WebGPU + Yjs CRDT.
+Reactive decks with live-data bindings, branching flows, brand-aware
+NL patches, and the registry-driven left rail.
 
 ## Owner
 

@@ -42,6 +42,8 @@ const COLUMNS: ReadonlyArray<SortableColumn<SlideRow>> = [
   },
 ];
 
-export function SlideBreakdownTable({ rows }: { rows: SlideRow[] }) {
-  return <SortableTable rows={rows} columns={COLUMNS} emptyMessage="No slide data" />;
+export function SlideBreakdownTable({ rows }: { rows: ReadonlyArray<SlideRow> }) {
+  // SortableTable mutates `rows` internally; pass a copy to satisfy
+  // the readonly contract at this seam.
+  return <SortableTable rows={[...rows]} columns={COLUMNS} emptyMessage="No slide data" />;
 }

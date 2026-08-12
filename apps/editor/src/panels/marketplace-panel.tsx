@@ -2,9 +2,10 @@
  * MarketplacePanel — Phase 19, Wave 5, WS-MKT-1.
  *
  * Insert → Marketplace surface with brand-locked curated listings.
- * Fetching is injected via `fetchListings` for testability (same
- * pattern as LicenseDashboard). Falls back to localStorage cache
- * on network failure so the panel never crashes.
+ * Fetching is injected via `fetchListings` for testability (the
+ * default delegates to `marketplace-service.fetchCuratedListings`).
+ * Falls back to localStorage cache on network failure so the panel
+ * never crashes.
  */
 
 'use client';
@@ -14,31 +15,15 @@ import type { ReactElement } from 'react';
 import { MagicCard } from '../components/ui/magic-card';
 import { Marquee } from '../components/ui/marquee';
 import { useT } from '../lib/locale';
+import {
+  fetchCuratedListings,
+  type CuratedListingView,
+  type CuratedListingPage,
+} from '../lib/marketplace-service';
 
-// ─── Types (aligned with contracts/openapi/v1/marketplace-service.yaml) ─────
+// ─── Types (re-exported from marketplace-service for legacy callers) ────────
 
-/** Mirrors the CuratedListing schema from the OpenAPI spec. */
-export interface CuratedListingView {
-  readonly listing_id: string;
-  readonly title: string;
-  readonly slug: string;
-  readonly is_free: boolean;
-  readonly price_cents: number;
-  readonly currency: string;
-  readonly override_price_cents: number | null;
-  readonly brand_locked_state: 'allow' | 'override' | 'deny';
-  /** Optional — may be added by future API revisions. */
-  readonly kind?: string;
-  readonly description?: string;
-  readonly seller_name?: string;
-  readonly version?: string;
-  readonly poster_ref?: string;
-}
-
-export interface CuratedListingPage {
-  readonly items: readonly CuratedListingView[];
-  readonly total: number;
-}
+export type { CuratedListingView, CuratedListingPage };
 
 export type ListingKind = 'component' | 'template' | 'theme' | 'sticker_pack' | 'icon_pack';
 
@@ -63,28 +48,14 @@ export interface MarketplacePanelProps {
   fetchListings?: (brandKitId: string, limit: number, offset: number) => Promise<CuratedListingPage>;
 }
 
-// ─── Default fetcher ────────────────────────────────────────────────────────
-
-const API_BASE: string =
-  (typeof process !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_API_URL as string | undefined)
-    : undefined) ?? 'http://localhost:8080';
+// ─── Default fetcher — delegates to marketplace-service ─────────────────────
 
 async function defaultFetchListings(
   brandKitId: string,
   limit: number,
   offset: number,
 ): Promise<CuratedListingPage> {
-  const params = new URLSearchParams({
-    brand_kit_id: brandKitId,
-    limit: String(limit),
-    offset: String(offset),
-  });
-  const res = await fetch(`${API_BASE}/v1/marketplace/curated?${params}`);
-  if (!res.ok) {
-    throw new Error(`Marketplace API ${res.status}: ${res.statusText}`);
-  }
-  return res.json() as Promise<CuratedListingPage>;
+  return fetchCuratedListings(brandKitId, limit, offset);
 }
 
 // ─── Cache helpers ──────────────────────────────────────────────────────────

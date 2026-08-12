@@ -21,7 +21,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { AnnotationClient, type AnnotationClientError, type AnnotationLayerDto } from '../../runtime/annotation-client';
+import { AnnotationClient, type AnnotationClientError, type AnnotationCommitBody, type AnnotationLayerDto } from '../../lib/annotation-service';
 import type { AnnotationKind, PenGeometry } from '@domio/annotation-engine';
 import { AnnotationCanvas, type AnnotationCanvasHandle } from './AnnotationCanvas';
 import { InkToolbar } from './InkToolbar';
@@ -70,7 +70,7 @@ export function AnnotationOverlay(props: AnnotationOverlayProps) {
 
   const onStrokeComplete = useCallback(async (geom: PenGeometry) => {
     try {
-      const commitBody: import('../../runtime/annotation-client').AnnotationCommitBody = {
+      const commitBody: AnnotationCommitBody = {
         slide_id: slideId,
         kind: tool === 'highlighter' ? 'highlighter' : 'pen',
         geometry: geom,

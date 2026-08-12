@@ -3,7 +3,8 @@ import { Hono } from 'hono';
 /**
  * Root routes — landing JSON for unauthenticated GETs.
  *
- * Real auth + tenant routing lands in Phase 20.
+ * Returns the service's identity, version, and endpoint inventory so
+ * operators can verify a deployment without auth.
  */
 
 const root = new Hono();
@@ -12,7 +13,7 @@ root.get('/', (c) =>
   c.json({
     name: 'domio-api',
     version: '0.0.0',
-    phase: 'Phase 0 — Repository, contracts, dev environment',
+    phase: 'Domio control plane',
     docs: 'https://github.com/DaiyaanMuhammadFardeen/Domio/tree/main/docs',
     endpoints: {
       healthz: 'GET /healthz',

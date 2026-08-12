@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { MobileShell } from '@/components/layout/MobileShell';
+import { resolveHandoutToken } from '@/lib/handout-service';
 
 export default function HandoutPage() {
   const params = useParams<{ token: string }>();
@@ -13,9 +14,8 @@ export default function HandoutPage() {
     // The signed-link-token package is verified on the server; here we
     // simply route to /j/[code] after stripping the workspace prefix.
     if (!params?.token) return;
-    fetch(`/api/handout/${encodeURIComponent(params.token)}/resolve`)
-      .then((r) => r.ok ? r.json() : Promise.reject(r.status))
-      .then((body: { session_code?: string }) => {
+    resolveHandoutToken(params.token)
+      .then((body) => {
         if (body.session_code) {
           router.push(`/j/${body.session_code}`);
         } else {

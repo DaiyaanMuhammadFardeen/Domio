@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { toHtmlDir, toHtmlLang, isLocaleId, DEFAULT_LOCALE } from '@domio/i18n';
+import { resolveLocaleFromHeaders } from '@domio/ui';
 import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
@@ -9,22 +9,23 @@ export const metadata: Metadata = {
 };
 
 /**
- * Phase 22-beta G5: read the active locale from the `domio-locale`
- * cookie (set by the locale switcher in the editor topbar) and reflect
- * it on `<html lang>` and `<html dir>`. Falls back to en/ltr when no
+ * Resolve the active locale from the request headers and reflect it
+ * on `<html lang>` and `<html dir>`. Falls back to en/ltr when no
  * preference is stored — matches the documented default in
  * @domio/i18n.
  *
  * Server-component because Next.js requires `<html>` to render in a
  * server context (no client-side useState).
+ *
+ * Per Wave 1 §S1.8 of docs/frontend-roadmap/01-wave-productionization.md.
  */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieHeader = (await headers()).get('cookie') ?? '';
-  const match = /(?:^|;\s*)domio-locale=([^;]+)/.exec(cookieHeader);
-  const raw = match ? decodeURIComponent(match[1] ?? '') : '';
-  const locale = isLocaleId(raw) ? raw : DEFAULT_LOCALE;
+  const h = await headers();
+  const cookie = h.get('cookie');
+  const acceptLanguage = h.get('accept-language');
+  const { lang, dir } = resolveLocaleFromHeaders({ cookie, acceptLanguage });
   return (
-    <html lang={toHtmlLang(locale)} dir={toHtmlDir(locale)}>
+    <html lang={lang} dir={dir}>
       <body>{children}</body>
     </html>
   );

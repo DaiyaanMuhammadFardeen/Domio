@@ -1,0 +1,15 @@
+{
+  "landing.title": "Domio",
+  "landing.subtitle": "Interactive decks, shared sessions, and live presentations.",
+  "landing.features.editor.title": "Editor",
+  "landing.features.editor.body": "Build reactive decks with live data sources, branching flows, and brand-aware copy.",
+  "landing.features.presenter.title": "Presenter",
+  "landing.features.presenter.body": "Drive live sessions with audience prompts, hand-offs, and offline-friendly rehearsals.",
+  "landing.features.viewer.title": "Viewer & Join",
+  "landing.features.viewer.body": "Read-only playback and lightweight audience participation, embeddable anywhere.",
+  "landing.builders.heading": "For builders",
+  "landing.builders.body": "See the repository README for setup instructions, the contracts/ directory for the API surface, and the SDK packages under packages/ for the typed clients apps consume.",
+  "landing.cta.openEditor": "Open the editor",
+  "landing.cta.openPresenter": "Open the presenter",
+  "landing.cta.openViewer": "Open the viewer"
+}

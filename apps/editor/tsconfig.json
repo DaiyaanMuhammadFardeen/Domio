@@ -34,7 +34,9 @@
       "@domio/recording-extensions/*": ["../../packages/recording-extensions/src/*"],
       "@domio/object-store": ["../../packages/object-store/src/index.ts"],
       "@domio/object-store/*": ["../../packages/object-store/src/*"],
-      "@domio/audience-service": ["../../services/audience/src/index.ts"]
+      "@domio/audience-service": ["../../services/audience/src/index.ts"],
+      "@domio/ui": ["../../packages/ui/src/index.ts"],
+      "@domio/ui/*": ["../../packages/ui/src/*"]
     }
   },
   "include": [

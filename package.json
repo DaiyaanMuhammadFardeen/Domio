@@ -20,6 +20,7 @@
     "test:watch": "turbo run test:watch",
     "test:workspace": "VITEST_WORKSPACE=1 vitest run --config vitest.config.ts",
     "typecheck": "turbo run typecheck",
+    "i18n:check": "node tools/i18n-check.mjs",
     "clean": "turbo run clean && rm -rf node_modules .turbo",
     "gen": "turbo run gen",
     "prepare": "husky install || true"

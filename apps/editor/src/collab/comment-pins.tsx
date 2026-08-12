@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Comment, CommentStatus } from './types.js';
-import { listComments, resolveComment, addReaction } from './api.js';
+import { listComments, resolveComment, addReaction } from '../lib/collaboration-service.js';
 
 // ----- Types -----
 

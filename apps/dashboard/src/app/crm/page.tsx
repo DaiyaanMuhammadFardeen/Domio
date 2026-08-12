@@ -2,51 +2,12 @@
  * /crm — server component.
  *
  * Renders per-provider adapter health + DLQ depth for the crm-sync
- * worker. Falls back to representative stub data when the worker
- * isn't reachable.
+ * worker. When the worker is unreachable the page renders an empty
+ * state — no fabricated adapter list.
  */
 
 import { Badge } from '../../components/Badge';
-
-const CRM_SYNC_URL = process.env['CRM_SYNC_URL'] ?? 'http://localhost:8095';
-
-interface AdapterHealth {
-  provider: string;
-  status: 'healthy' | 'degraded' | 'down';
-  lastRunMs: number | null;
-  avgDurationMs: number;
-}
-
-interface SyncStats {
-  adapters: AdapterHealth[];
-  idempotencyCollisions24h: number;
-  dlqDepth: number;
-}
-
-const STUB: SyncStats = {
-  adapters: [
-    { provider: 'HubSpot', status: 'healthy', lastRunMs: Date.now() - 12_000, avgDurationMs: 220 },
-    { provider: 'Salesforce', status: 'healthy', lastRunMs: Date.now() - 8_000, avgDurationMs: 410 },
-    { provider: 'Intercom', status: 'degraded', lastRunMs: Date.now() - 45_000, avgDurationMs: 980 },
-    { provider: 'Outreach', status: 'down', lastRunMs: Date.now() - 600_000, avgDurationMs: 1200 },
-  ],
-  idempotencyCollisions24h: 4,
-  dlqDepth: 2,
-};
-
-async function fetchSyncStats(workspaceId: string): Promise<SyncStats> {
-  try {
-    // The crm-sync service is a Go NATS consumer; we expose a status
-    // endpoint at /v1/health/stats when CRM_SYNC_STATS=1.
-    const url = new URL('/v1/health/stats', CRM_SYNC_URL);
-    url.searchParams.set('workspace_id', workspaceId);
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) return STUB;
-    return (await res.json()) as SyncStats;
-  } catch {
-    return STUB;
-  }
-}
+import { fetchSyncStats, type AdapterHealth } from '../../lib/crm-service';
 
 function toneForHealth(status: AdapterHealth['status']) {
   switch (status) {
@@ -86,34 +47,47 @@ export default async function CrmPage() {
         <Stat label="Adapters" value={stats.adapters.length} />
       </section>
 
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
-            <tr>
-              <th className="px-4 py-2 text-left">Provider</th>
-              <th className="px-4 py-2 text-left">Status</th>
-              <th className="px-4 py-2 text-right">Last run</th>
-              <th className="px-4 py-2 text-right">Avg duration</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {stats.adapters.map((a) => (
-              <tr key={a.provider}>
-                <td className="px-4 py-2 font-medium text-slate-900">{a.provider}</td>
-                <td className="px-4 py-2">
-                  <Badge tone={toneForHealth(a.status)}>{a.status}</Badge>
-                </td>
-                <td className="px-4 py-2 text-right tabular-nums text-slate-700">
-                  {formatAge(a.lastRunMs)}
-                </td>
-                <td className="px-4 py-2 text-right tabular-nums text-slate-700">
-                  {a.avgDurationMs} ms
-                </td>
+      {stats.adapters.length === 0 ? (
+        <div
+          className="rounded-xl border border-slate-200 bg-white p-8 text-center"
+          role="status"
+        >
+          <h2 className="text-base font-semibold text-slate-900">No adapter data</h2>
+          <p className="mt-2 text-sm text-slate-500">
+            crm-sync is not reporting. Once the worker is reachable, adapter health,
+            idempotency collisions, and DLQ depth will populate here.
+          </p>
+        </div>
+      ) : (
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th className="px-4 py-2 text-left">Provider</th>
+                <th className="px-4 py-2 text-left">Status</th>
+                <th className="px-4 py-2 text-right">Last run</th>
+                <th className="px-4 py-2 text-right">Avg duration</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {stats.adapters.map((a) => (
+                <tr key={a.provider}>
+                  <td className="px-4 py-2 font-medium text-slate-900">{a.provider}</td>
+                  <td className="px-4 py-2">
+                    <Badge tone={toneForHealth(a.status)}>{a.status}</Badge>
+                  </td>
+                  <td className="px-4 py-2 text-right tabular-nums text-slate-700">
+                    {formatAge(a.lastRunMs)}
+                  </td>
+                  <td className="px-4 py-2 text-right tabular-nums text-slate-700">
+                    {a.avgDurationMs} ms
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
     </div>
   );
 }

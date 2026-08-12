@@ -15,7 +15,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { ParkingLotClient, type ParkingLotItem } from '../../runtime/parking-lot-client';
+import { ParkingLotClient, type ParkingLotItem } from '../../lib/parking-lot-service';
 
 export interface ParkingLotDrawerProps {
   sessionId: string;

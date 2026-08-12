@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { Assignment, AssignmentStatus } from './types.js';
-import { listAssignments, patchAssignment } from './api.js';
+import { listAssignments, patchAssignment } from '../lib/collaboration-service.js';
 
 // ----- Types -----
 

@@ -2,16 +2,17 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback, Suspense } from 'react';
+import {
+  consumeMagicLink,
+  type MagicLinkConsumeResult,
+  type MagicLinkErrorCode,
+} from '@domio/magic-link-service';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-type ConsumeResult = {
-  scope_type: string;
-  scope_id: string;
-  guest_email: string;
-};
+type ConsumeResult = MagicLinkConsumeResult;
 
 type Status =
   | 'loading'
@@ -22,17 +23,10 @@ type Status =
   | 'error-network'
   | 'error-unknown';
 
-type ErrorBody = {
-  error: string;
-  message: string;
-};
-
 // ---------------------------------------------------------------------------
 // Config (env vars with sensible defaults)
 // ---------------------------------------------------------------------------
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8080';
 const APP_BASE =
   process.env.NEXT_PUBLIC_APP_BASE ?? 'http://localhost:3000';
 
@@ -92,45 +86,27 @@ function MagicLinkPageInner() {
     setStatus('loading');
 
     try {
-      const res = await fetch(`${API_BASE}/v1/guest-access/consume`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
+      const data = await consumeMagicLink(token);
+      setResult(data);
+      setStatus('success');
 
-      if (res.ok) {
-        const data: ConsumeResult = await res.json();
-        setResult(data);
-        setStatus('success');
-
-        // Redirect after a short pause so the user sees confirmation
-        setTimeout(() => {
-          window.location.href = `${APP_BASE}/${data.scope_id}`;
-        }, 1800);
-        return;
-      }
-
-      // Parse error body
-      let body: ErrorBody;
-      try {
-        body = await res.json();
-      } catch {
-        body = { error: 'unknown', message: 'An unexpected error occurred.' };
-      }
-
-      const errorKey = body.error ?? 'unknown';
-
-      if (res.status === 401 || errorKey === 'invalid_token' || errorKey === 'expired') {
+      // Redirect after a short pause so the user sees confirmation
+      setTimeout(() => {
+        window.location.href = `${APP_BASE}/${data.scope_id}`;
+      }, 1800);
+    } catch (e) {
+      const err = e as { status: number; code: MagicLinkErrorCode };
+      if (err.status === 0) {
+        setStatus('error-network');
+      } else if (err.code === 'invalid_token' || err.code === 'expired') {
         setStatus('error-invalid');
-      } else if (errorKey === 'consumed' || errorKey === 'already_consumed') {
+      } else if (err.code === 'consumed' || err.code === 'already_consumed') {
         setStatus('error-consumed');
-      } else if (errorKey === 'revoked') {
+      } else if (err.code === 'revoked') {
         setStatus('error-revoked');
       } else {
         setStatus('error-unknown');
       }
-    } catch {
-      setStatus('error-network');
     }
   }, [token]);
 

@@ -1,0 +1,26 @@
+{
+  "name": "@domio/eslint-plugin",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Custom ESLint rules for Domio (no-raw-href, no-raw-fetch, no-raw-hex).",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "eslint": ">=9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "9.17.0",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

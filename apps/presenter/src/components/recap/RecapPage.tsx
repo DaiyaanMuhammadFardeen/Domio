@@ -17,7 +17,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { RecapClient, type RecapSummary } from '../../runtime/recap/recap-client';
+import { RecapClient, type RecapSummary } from '../../lib/recap-service';
 
 export interface RecapPageProps {
   sessionId: string;

@@ -1,17 +1,16 @@
 # @domio/api
 
-> **Phase 0 stub.** The control plane modular monolith in TypeScript on
-> Hono + Node 22. This package is intentionally empty in Phase 0 — only
-> the wire-format endpoints (health, readiness, deck placeholder) ship
-> here. Business modules (decks, themes, brand kits, AI, …) land in
-> Phase 02+.
+Domio control plane — TypeScript modular monolith on Hono + Node 22
+that mounts the SDK-shaped services apps consume. Health + readiness
+endpoints plus the deck summary route ship here; business modules
+(decks, themes, brand kits, AI, …) are added as the surface demands.
 
 ## Endpoints
 
 - `GET /` — landing JSON.
 - `GET /healthz` — process liveness.
-- `GET /readyz` — process readiness (Phase 0 always returns ready).
-- `GET /v1/decks/:org_id/:tenant_id/:deck_id` — placeholder deck summary.
+- `GET /readyz` — process readiness.
+- `GET /v1/decks/:org_id/:tenant_id/:deck_id` — deck summary.
 
 ## Owner
 

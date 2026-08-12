@@ -1,5 +1,5 @@
 import { PresenterView } from '../../../components/PresenterView';
-import type { PairingInfo, PresenterSessionState } from '../../../runtime/types';
+import { fetchPairingForSsr, fetchSessionForSsr } from '../../../lib/session-loader';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -7,43 +7,12 @@ interface RouteParams {
 }
 
 const PRESENTER_API = process.env.PRESENTER_API_BASE_URL ?? '';
-const PHONE_PAIRING_API = process.env.PHONE_PAIRING_API_BASE_URL ?? '';
-
-async function fetchSession(id: string): Promise<PresenterSessionState | null> {
-  try {
-    const res = await fetch(`${PRESENTER_API}/api/v1/presenter/sessions/${id}`, {
-      headers: { accept: 'application/json' },
-      cache: 'no-store',
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as PresenterSessionState;
-  } catch { return null; }
-}
-
-async function fetchPairing(id: string): Promise<PairingInfo> {
-  try {
-    const res = await fetch(`${PHONE_PAIRING_API}/api/v1/presenter/sessions/${id}/pairing`, {
-      headers: { accept: 'application/json' },
-      cache: 'no-store',
-    });
-    if (res.ok) return (await res.json()) as PairingInfo;
-  } catch { /* fall through */ }
-  // Pairing might not be available yet (no presenter runtime running).
-  // Return a placeholder; the client will refetch on mount.
-  return {
-    token: '',
-    deep_link: 'domio://pair?token=…',
-    epoch: 0,
-    expires_at_ms: Date.now() + 60_000,
-    paired_devices: 0,
-  };
-}
 
 export default async function PresenterSessionPage({ params, searchParams }: RouteParams) {
   const { id: sessionId } = await params;
   const sp = await searchParams;
-  const initial = await fetchSession(sessionId);
-  const pairing = await fetchPairing(sessionId);
+  const initial = await fetchSessionForSsr(sessionId);
+  const pairing = await fetchPairingForSsr(sessionId);
 
   if (!initial) {
     return (

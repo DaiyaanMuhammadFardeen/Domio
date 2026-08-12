@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Domio',
-  description: 'Domio — Phase 0 stub landing',
+  description: 'Domio — interactive decks, shared sessions, and live presentations.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

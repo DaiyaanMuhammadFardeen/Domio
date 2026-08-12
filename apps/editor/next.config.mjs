@@ -1,4 +1,5 @@
 import { nextSecurityHeaders } from '@domio/web-security';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -52,4 +53,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(nextConfig);

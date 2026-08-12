@@ -1,50 +1,15 @@
 /**
  * /deck — index page (decks list).
  *
- * Server component. Fetches the workspace's decks from the warehouse
- * REST endpoint and lists them with deep links into /deck/[id].
- *
- * On any failure (warehouse unavailable, ClickHouse unreachable) we
- * render an empty list so the page is still navigable.
+ * Server component. Fetches the workspace's decks via
+ * `deck-service.fetchDecks` and lists them with deep links into
+ * /deck/[id]. On any failure the page renders an empty list — never
+ * fabricated decks.
  */
 
 import Link from 'next/link';
-
-const WAREHOUSE_URL = process.env['WAREHOUSE_URL'] ?? 'http://localhost:8088';
-
-interface DeckRow {
-  workspaceId: string;
-  deckId: string;
-  sessionCount: number;
-  viewerCount: number;
-  avgSessionMs: number;
-  completionRate: number;
-}
-
-async function fetchDecks(workspaceId: string): Promise<DeckRow[]> {
-  const now = Date.now();
-  const url = new URL('/v1/decks/summary', WAREHOUSE_URL);
-  url.searchParams.set('workspace_id', workspaceId);
-  url.searchParams.set('from_ms', String(now - 30 * 24 * 60 * 60 * 1000));
-  url.searchParams.set('to_ms', String(now));
-
-  try {
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) return [];
-    const json = (await res.json()) as { rows?: Record<string, unknown>[] };
-    // Warehouse returns snake_case; map to camelCase for the table.
-    return (json.rows ?? []).map((r) => ({
-      workspaceId: String(r['workspace_id'] ?? ''),
-      deckId: String(r['deck_id'] ?? ''),
-      sessionCount: Number(r['session_count'] ?? 0),
-      viewerCount: Number(r['viewer_count'] ?? 0),
-      avgSessionMs: Number(r['avg_session_ms'] ?? 0),
-      completionRate: Number(r['completion_rate'] ?? 0),
-    }));
-  } catch {
-    return [];
-  }
-}
+import { dashboard } from '@domio/ui/routing';
+import { fetchDecks } from '../../lib/deck-service';
 
 function formatDuration(ms: number): string {
   if (!Number.isFinite(ms) || ms <= 0) return '—';
@@ -79,7 +44,7 @@ export default async function DecksIndexPage() {
           <p>
             Deck analytics will appear here as soon as the event-ingest pipeline
             receives viewer traffic. See{' '}
-            <Link href="/overview" className="text-brand-600 underline">
+            <Link href={dashboard('overview')} className="text-brand-600 underline">
               Overview
             </Link>{' '}
             for aggregate activity.
@@ -108,7 +73,7 @@ export default async function DecksIndexPage() {
                   <td className="px-4 py-3 text-right tabular-nums">{formatPct(r.completionRate)}</td>
                   <td className="px-4 py-3 text-right">
                     <Link
-                      href={`/deck/${encodeURIComponent(r.deckId)}`}
+                      href={dashboard('deck-detail', { id: r.deckId })}
                       className="text-xs font-medium text-brand-600 hover:underline"
                     >
                       View →

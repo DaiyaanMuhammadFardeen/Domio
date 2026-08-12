@@ -1,0 +1,9 @@
+{
+  "viewer.title": "Domio viewer",
+  "viewer.subtitle": "Read-only playback for published decks.",
+  "viewer.recentDecks": "Recent decks",
+  "viewer.noDecks": "No published decks yet. Publish a deck from the editor to see it here.",
+  "viewer.openDeck": "Open",
+  "viewer.nextSlide": "Next slide",
+  "viewer.previousSlide": "Previous slide"
+}

@@ -1,0 +1,14 @@
+{
+  "presenter.title": "Domio presenter",
+  "presenter.openSession": "Open demo session",
+  "presenter.openSecondary": "Open on secondary display",
+  "presenter.heartbeat.live": "live",
+  "presenter.heartbeat.stale": "heartbeat stale",
+  "presenter.sessionEnded": "Session ended.",
+  "presenter.teleprompter": "Teleprompter",
+  "presenter.parkingLot": "Parking lot",
+  "presenter.handoff": "Hand off",
+  "presenter.recap": "Recap",
+  "presenter.notFound.title": "Session not found",
+  "presenter.notFound.body": "Session {id} could not be loaded. Make sure the presenter-session service is running and the id is correct."
+}

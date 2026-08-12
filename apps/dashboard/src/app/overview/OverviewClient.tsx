@@ -2,13 +2,9 @@
 
 import { KpiTile } from '../../components/KpiTile';
 import { Sparkline } from '../../components/Sparkline';
+import type { OverviewKpis } from '../../lib/analytics-service';
 
-export interface OverviewKpis {
-  sessions: { value: number; delta: number; series: number[] };
-  viewers: { value: number; delta: number; series: number[] };
-  avgDwellMs: { value: number; delta: number; series: number[] };
-  completionRate: { value: number; delta: number; series: number[] };
-}
+export type { OverviewKpis };
 
 const DEFAULT_KPIS: OverviewKpis = {
   sessions: { value: 0, delta: 0, series: [0, 0, 0, 0, 0, 0, 0] },

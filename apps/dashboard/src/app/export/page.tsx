@@ -20,6 +20,7 @@ export default function ExportPage() {
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
+          // eslint-disable-next-line domio/no-raw-href -- API endpoint, not a page route
           href="/api/export/csv"
           prefetch={false}
           className="rounded-xl border border-slate-200 bg-white p-5 hover:border-brand-300"
@@ -30,6 +31,7 @@ export default function ExportPage() {
           </p>
         </Link>
         <Link
+          // eslint-disable-next-line domio/no-raw-href -- API endpoint, not a page route
           href="/api/export/parquet"
           prefetch={false}
           className="rounded-xl border border-slate-200 bg-white p-5 hover:border-brand-300"

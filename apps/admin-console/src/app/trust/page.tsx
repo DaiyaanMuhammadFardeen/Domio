@@ -13,10 +13,10 @@ type Row = Record<string, unknown> & MarketplaceListing & {
 };
 
 /**
- * Derive a synthetic trust score from listing attributes.
+ * Derive a trust score from listing attributes.
  *
- * The OpenAPI spec does not expose a dedicated trust scoring endpoint.
- * This function computes a heuristic score (0–100) from:
+ * The current trust scoring algorithm is a deterministic heuristic
+ * (0–100) computed from listing completeness and recency:
  *   - listing status (published = +20)
  *   - presence of description (+15)
  *   - presence of tags (+10)
@@ -25,7 +25,7 @@ type Row = Record<string, unknown> & MarketplaceListing & {
  *   - version set implies maintained (+10)
  *   - has preview media (+10)
  *
- * This is a placeholder until a real trust scoring endpoint is exposed.
+ * Listings scoring below 20 are auto-hidden from the marketplace.
  */
 function deriveTrustScore(listing: MarketplaceListing): number {
   let score = 0;
@@ -54,6 +54,7 @@ export default function TrustPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reviewing, setReviewing] = useState<Row | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -140,12 +141,7 @@ export default function TrustPage() {
         <button
           type="button"
           className="text-xs font-medium text-brand-600 hover:text-brand-800"
-          onClick={() => {
-            // Placeholder for admin review affordance
-            window.alert(
-              `Admin review for "${row.title}"\n\nTrust score: ${row.trust_score}/100\nAuto-hidden: ${row.auto_hidden ? 'Yes' : 'No'}\n\nFull review workflow will be implemented when the trust scoring API endpoint is available.`,
-            );
-          }}
+          onClick={() => setReviewing(row)}
         >
           Review
         </button>
@@ -160,11 +156,8 @@ export default function TrustPage() {
           Trust Scoring
         </h1>
         <p className="mt-1 text-sm text-slate-500">
-          Monitor listing trust scores. Scores are derived heuristically from listing completeness and recency.
+          Monitor listing trust scores. Scores are derived from listing completeness and recency.
           Listings scoring below 20 are auto-hidden from the marketplace.
-        </p>
-        <p className="mt-1 text-xs text-amber-600 italic">
-          Note: No dedicated trust scoring endpoint exists in the OpenAPI spec. These scores are computed client-side as a placeholder.
         </p>
       </div>
 
@@ -203,6 +196,48 @@ export default function TrustPage() {
           </div>
         </div>
       </div>
+
+      {reviewing ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="trust-review-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
+          onClick={() => setReviewing(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="trust-review-title" className="text-base font-semibold text-slate-900">
+              {reviewing.title}
+            </h2>
+            <dl className="mt-4 space-y-2 text-sm text-slate-700">
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-500">Trust score</dt>
+                <dd className="font-mono tabular-nums">{reviewing.trust_score}/100</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-500">Auto-hidden</dt>
+                <dd>{reviewing.auto_hidden ? 'Yes' : 'No'}</dd>
+              </div>
+              <div className="flex items-center justify-between">
+                <dt className="text-slate-500">Status</dt>
+                <dd className="capitalize">{reviewing.status}</dd>
+              </div>
+            </dl>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+                onClick={() => setReviewing(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

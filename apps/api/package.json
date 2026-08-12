@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Domio control plane (Phase 0 stub). Modular monolith in TypeScript on Hono + Node 22. Real modules land in Phase 02+.",
+  "description": "Domio control plane — TypeScript modular monolith on Hono + Node 22 that mounts the SDK-shaped services apps consume.",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",

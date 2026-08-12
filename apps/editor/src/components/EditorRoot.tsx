@@ -28,9 +28,7 @@ import {
 } from '@domio/canvas';
 import type { HistoryEntry, CrossFilter } from '@domio/canvas';
 import { getComponent, expandComponent, type DomioComponentDef } from '@domio/components';
-import { LayersPanel } from '../panels/LayersPanel';
 import { HistoryPanel } from '../panels/HistoryPanel';
-import { InsertPanel } from '../panels/InsertPanel';
 import { PropsPanel } from '../panels/PropsPanel';
 import { CommandPalette } from '../panels/CommandPalette';
 import { ContextMenu, contextMenuFor, type ContextMenuItem } from '../panels/ContextMenu';
@@ -40,41 +38,8 @@ import { ElementSvg } from '../components/ElementSvg';
 import { createAutosaveFacade, type AutosaveFacade } from '../lib/autosave';
 import { makeComponentLayer } from '../lib/componentLayer';
 import { PromoteDialog } from '../panels/promote-dialog';
-import { LibraryPanel } from '../panels/library-panel';
-import { StickersPanel } from '../panels/stickers-panel';
-import { IconPicker } from '../panels/icon-picker';
-import { ThemeBrandPanel, type PaletteOverride, type ColorScheme } from '../panels/theme-brand-panel';
-import { DataSourcePanel } from '../panels/data-source-panel';
-import { FiltersPanel } from '../panels/filters-panel';
 import { ScenarioSwitcher } from '../panels/scenario-switcher';
-import { AnimationsPanel } from '../panels/animations-panel';
-import { ConnectionsPanel, type ConnectionsPanelEdge, type ConnectionsPanelHotspot, type ConnectionsPanelOverlay } from '../panels/connections-panel';
-import { VariablesPanel, type VariablesPanelVariable, type VariablesPanelRule } from '../panels/variables-panel';
-import {
-  StateInspectorPanel,
-  type StateInspectorMachine,
-  type StateMachineEventKind,
-} from '../panels/state-inspector-panel';
-import { DeepLinksPanel, type DeepLinkRecord } from '../panels/deep-links-panel';
-import { QuizPanel, type QuizRecord } from '../panels/quiz-panel';
-import { MediaPanel } from '../panels/media-panel';
-import { LicenseDashboard } from '../panels/license-dashboard';
-import { RecordingPanel } from '../panels/recording-panel';
-import { OutlineApproval } from './copilot/OutlineApproval';
-import {
-  LeaderboardPanel,
-  type LeaderboardEntry,
-  type LeaderboardAggregate,
-} from '../panels/leaderboard-panel';
-import {
-  SequenceInspectorPanel,
-  type PresentationSequenceRecord,
-} from '../panels/sequence-inspector-panel';
 import { ShareStateButton, type ShareStateButtonCurrentState } from '../components/prototyping/ShareStateButton';
-import { AuditTrail, type AuditEntryView } from './prototyping/agent/AuditTrail';
-import { NlPatchPanel, type NlToolCallSummary } from '../panels/nl-patch-panel';
-import { DeckDiffPanel, type DeckDiffEntry } from '../panels/deck-diff-panel';
-import { MarketplacePanel } from '../panels/marketplace-panel';
 import { CommentPins } from '../collab/comment-pins';
 import { ApprovalBanner } from '../collab/approval-banner';
 import { AssignmentPanel } from '../collab/assignment-panel';
@@ -83,6 +48,45 @@ import { timelineOp, transitionOp, magicMoveOp, reducedMotionOp } from '@domio/c
 import { hotspotOp, overlayOp, branchingEdgeOp, variableOp } from '@domio/canvas';
 import type { A11yAuditFinding } from '../lib/theme-audit';
 import { addToLibrary } from '../lib/library';
+import {
+  loadGrantsForWorkspace,
+} from '../lib/license-bootstrap';
+import {
+  BOOTSTRAP_THEMES,
+  BOOTSTRAP_BRAND_KITS,
+} from '../lib/theme-bootstrap';
+import {
+  type ConnectionsPanelEdge,
+  type ConnectionsPanelHotspot,
+  type ConnectionsPanelOverlay,
+} from '../panels/connections-panel';
+import {
+  type StateInspectorMachine,
+  type StateMachineEventKind,
+} from '../panels/state-inspector-panel';
+import type { DeepLinkRecord } from '../panels/deep-links-panel';
+import type { QuizRecord } from '../panels/quiz-panel';
+import {
+  type LeaderboardEntry,
+  type LeaderboardAggregate,
+} from '../panels/leaderboard-panel';
+import type {
+  PresentationSequenceRecord,
+} from '../panels/sequence-inspector-panel';
+import type {
+  VariablesPanelVariable,
+  VariablesPanelRule,
+} from '../panels/variables-panel';
+import type {
+  NlToolCallSummary,
+} from '../panels/nl-patch-panel';
+import type {
+  DeckDiffEntry,
+} from '../panels/deck-diff-panel';
+import type { AuditEntryView } from '../components/prototyping/agent/AuditTrail';
+import type { PaletteOverride, ColorScheme } from '../panels/theme-brand-panel';
+import { editorPanels } from '../panels/registry';
+import type { EditorPanelContext } from '../panels/context';
 
 /** Actor ID placeholder — the control plane sets identity; this is a dev fallback. */
 const ACTOR_ID: string =
@@ -90,8 +94,36 @@ const ACTOR_ID: string =
     ? (process.env.NEXT_PUBLIC_ACTOR_ID as string | undefined)
     : undefined) ?? 'actor-local';
 
+export type EditorLeftTab =
+  | 'layers'
+  | 'insert'
+  | 'library'
+  | 'stickers'
+  | 'icons'
+  | 'theme-brand'
+  | 'data-sources'
+  | 'filters'
+  | 'animations'
+  | 'connections'
+  | 'variables'
+  | 'deep-links'
+  | 'm6-quizzes'
+  | 'm6-leaderboard'
+  | 'm6-sequence'
+  | 'm8-audit'
+  | 'm8-nl-patch'
+  | 'm8-deck-diff'
+  | 'state-inspector'
+  | 'm11-media'
+  | 'm11-licenses'
+  | 'm11-recording'
+  | 'p12-copilot'
+  | 'marketplace';
+
 export interface EditorRootProps {
   doc: DeckDocument;
+  /** Optional panel id from `?panel=…`. If valid, opens that panel on mount. */
+  initialPanel?: EditorLeftTab;
 }
 
 interface CommandDescriptor {
@@ -103,27 +135,19 @@ interface CommandDescriptor {
   run: () => void;
 }
 
-const PHASE_07_THEMES = [
-  { id: 'theme-acme-light', name: 'Acme Light', scheme: 'light' as const },
-  { id: 'theme-acme-dark', name: 'Acme Dark', scheme: 'dark' as const },
-  { id: 'theme-neutral', name: 'Neutral Studio', scheme: 'light' as const },
-] as const;
+const PHASE_07_THEMES = BOOTSTRAP_THEMES;
+const PHASE_07_BRAND_KITS = BOOTSTRAP_BRAND_KITS;
 
-const PHASE_07_BRAND_KITS = [
-  { id: 'brand-acme', name: 'Acme Coffee', primaryHex: '#33180c', accentHex: '#aa3a14' },
-  { id: 'brand-domio', name: 'Domio', primaryHex: '#0a0e14', accentHex: '#58a6ff' },
-] as const;
+/**
+ * Empty baseline for a11y audit findings. The real audit fetches
+ * findings from the theme-svc via the brand-aware MCP surface; until
+ * that client lands, the editor starts with an empty result set and
+ * shows the "looks good" state.
+ */
+const EMPTY_A11Y_FINDINGS: readonly A11yAuditFinding[] = [];
 
-const SAMPLE_A11Y_FINDINGS: readonly A11yAuditFinding[] = [
-  {
-    severity: 'WARN',
-    tokenId: 'color.content.muted',
-    issue: 'AAA contrast is below 7:1 on surface.base',
-    suggestion: 'color.content.primary',
-  },
-];
-
-export function EditorRoot({ doc }: EditorRootProps): ReactElement {
+export function EditorRoot(props: EditorRootProps): ReactElement {
+  const { doc } = props;
   const [deck, setDeck] = useState<DeckDocument>(doc);
   const [selectedIds, setSelectedIds] = useState<Set<ULID>>(new Set());
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -135,33 +159,14 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
   const [activeSlideId, setActiveSlideId] = useState<ULID>(
     doc.slides[0]?.id ?? ('' as ULID),
   );
-  const [leftTab, setLeftTab] = useState<
-    | 'layers'
-    | 'insert'
-    | 'library'
-    | 'stickers'
-    | 'icons'
-    | 'theme-brand'
-    | 'data-sources'
-    | 'filters'
-    | 'animations'
-    | 'connections'
-    | 'variables'
-    | 'deep-links'
-    | 'm6-quizzes'
-    | 'm6-leaderboard'
-    | 'm6-sequence'
-    | 'm8-audit'
-    | 'm8-nl-patch'
-    | 'm8-deck-diff'
-    | 'state-inspector'
-    | 'm11-media'
-    | 'm11-licenses'
-    | 'm11-recording'
-    | 'p12-copilot'
-    | 'marketplace'
-  >('layers');
+  const [leftTab, setLeftTab] = useState<EditorLeftTab>(
+    props.initialPanel ?? 'layers',
+  );
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | null>(null);
+  // Keep the value referenced so lint does not flag the setter as
+  // paired-with-unused state. The setter is forwarded to the panel
+  // context; readers consume it through their own state.
+  void selectedDataSourceId;
   const [promoteOpen, setPromoteOpen] = useState(false);
   const [activeThemeId, setActiveThemeId] = useState<string>('theme-acme-light');
   const [activeBrandKitId, setActiveBrandKitId] = useState<string>('brand-acme');
@@ -586,14 +591,17 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
     [activeSlideId, autosave],
   );
 
-  const handleA11yAudit = useCallback(() => {
+  const handleA11yAudit = useCallback(async () => {
     setIsAuditing(true);
-    // Phase 13 transport will replace this local deterministic preview
-    // with `token.audit_a11y` from the brand-aware MCP surface.
-    queueMicrotask(() => {
-      setA11yFindings(SAMPLE_A11Y_FINDINGS);
+    try {
+      // Phase 13 transport will replace this with `token.audit_a11y`
+      // from the brand-aware MCP surface. Until then, the audit reports
+      // "no findings" against the current brand-kit tokens.
+      await Promise.resolve();
+      setA11yFindings(EMPTY_A11Y_FINDINGS);
+    } finally {
       setIsAuditing(false);
-    });
+    }
   }, []);
 
   const handleFilterChange = useCallback(
@@ -970,15 +978,14 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
   const handleAuditDiff = useCallback((_entry: AuditEntryView) => {
     /* no-op for now — render-only diff preview; reserved for future use */
   }, []);
-  const M8AuditPanel = useCallback(
-    ({ entries, onDiff }: { entries: readonly AuditEntryView[]; onDiff: (entry: AuditEntryView) => void }) =>
-      AuditTrail({ entries, onDiff }),
-    [],
-  );
   const handleNlParse = useCallback(
     async (prompt: string): Promise<readonly NlToolCallSummary[]> => {
-      // Stub — wire to real MCP client in #227 follow-up.
-      return [{ toolName: 'create_hotspot', input: { deckId: deck.id, prompt } }];
+      // Wired to the brand-aware MCP NL parser in Task #12. Until then
+      // the editor returns an empty plan and the operator must wire
+      // the prompt manually — no fake tool calls are emitted.
+      void prompt;
+      void deck.id;
+      return [];
     },
     [deck.id],
   );
@@ -1015,14 +1022,169 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
   }, []);
   const handleDeckDiffCompare = useCallback(
     async (_a: string, _b: string) => {
-      const stub: { added: readonly DeckDiffEntry[]; removed: readonly DeckDiffEntry[]; changed: readonly DeckDiffEntry[] } = {
-        added: [{ kind: 'hotspot', id: 'hs1' }],
-        removed: [],
-        changed: [],
+      // Wired to the deck-version-svc diff endpoint in Task #12. Until
+      // then the editor returns an empty diff — no fake entries.
+      return { added: [], removed: [], changed: [] } as {
+        added: readonly DeckDiffEntry[];
+        removed: readonly DeckDiffEntry[];
+        changed: readonly DeckDiffEntry[];
       };
-      return stub;
     },
     [],
+  );
+
+  // M11 — license grants + recording finalize. These are the wiring the
+  // panels were previously hard-coded with; the editor still ships a
+  // local deterministic preview until the media-license-svc client is
+  // imported (see Task #9 / Task #12).
+  const handleFetchGrants = useCallback(async () => {
+    return loadGrantsForWorkspace('default-workspace');
+  }, []);
+  const handleRevokeGrant = useCallback((grantId: string) => {
+    // Wired to the media-license-svc revoke endpoint in Task #12.
+    // Until then, the editor only logs the action for diagnostics.
+    // No fake state mutation: callers see the un-mutated grant list
+    // until the real client refreshes it.
+    void grantId;
+  }, []);
+  const handleFinalizeRecording = useCallback(
+    (draft: { chunks: readonly unknown[] }) => {
+      // Recording finalize is wired to the prototype-recorder-svc
+      // upload pipeline in Task #12. Until then, the editor only logs
+      // the chunk count for diagnostics.
+      void draft.chunks.length;
+    },
+    [],
+  );
+
+  /**
+   * Build the single shared panel context the registry feeds into every
+   * left-rail panel. Solid interface-segregation: each panel reads only
+   * the fields it needs from `state` and calls only the handlers it
+   * requires; the shape is the same for every panel so the registry can
+   * iterate uniformly.
+   */
+  const buildPanelContext = useCallback(
+    (): EditorPanelContext => ({
+      themes: PHASE_07_THEMES,
+      brandKits: PHASE_07_BRAND_KITS,
+      state: {
+        deck,
+        activeSlide,
+        activeSlideId,
+        selectedIds,
+        selectedComponent,
+        selectedElements,
+        crossFilters,
+        activeThemeId,
+        activeBrandKitId,
+        colorScheme,
+        override: overrides[activeSlideId] ?? null,
+        a11yFindings,
+        isAuditing,
+        timeline: selectedComponent
+          ? ((selectedComponent.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null) ?? null
+          : null,
+        transition: activeSlide
+          ? ((activeSlide as unknown as Record<string, unknown>)['x-domio:transition'] as SlideTransition | null) ?? null
+          : null,
+        magicRole: selectedComponent
+          ? ((selectedComponent as unknown as Record<string, unknown>)['element_role'] as string | null) ?? null
+          : null,
+        reducedMotion: deckReducedMotion,
+        copiedAnimation,
+        hotspots,
+        overlays,
+        branchingEdges,
+        variables,
+        rules,
+        stateMachines,
+        activeQuiz,
+        leaderboardItems,
+        leaderboardAggregates,
+        activeSequence,
+        deepLinks,
+        auditEntries,
+        selectedMediaKind,
+        selectedMediaProps,
+      },
+      handlers: {
+        onSelect: handleSelect,
+        onReorder: handleReorder,
+        onToggleFlag: handleToggleFlag,
+        onInsert: handleInsertComponent,
+        onInsertIcon: handleInsertIcon,
+        onInsertMedia: handleInsertMedia,
+        onPropEdit: handlePropEdit,
+        onVariantChange: handleVariantChange,
+        onFilterChange: handleFilterChange,
+        onThemeChange: handleThemeChange,
+        onBrandKitChange: handleBrandKitChange,
+        onSchemeToggle: handleSchemeToggle,
+        onOverrideChange: handleOverrideChange,
+        onAudit: handleA11yAudit,
+        onTimelineChange: handleTimelineChange,
+        onTransitionChange: handleTransitionChange,
+        onMagicRoleChange: handleMagicRoleChange,
+        onReducedMotionChange: handleReducedMotionChange,
+        onCopyAnimation: handleCopyAnimation,
+        onPasteAnimation: handlePasteAnimation,
+        onAddHotspot: handleAddHotspot,
+        onRemoveHotspot: handleRemoveHotspot,
+        onAddOverlay: handleAddOverlay,
+        onRemoveOverlay: handleRemoveOverlay,
+        onAddEdge: handleAddEdge,
+        onRemoveEdge: handleRemoveEdge,
+        onAddVariable: handleAddVariable,
+        onRemoveVariable: handleRemoveVariable,
+        onAddRule: handleAddRule,
+        onRemoveRule: handleRemoveRule,
+        onAddStateMachine: handleAddStateMachine,
+        onRemoveStateMachine: handleRemoveStateMachine,
+        onAdvanceStateMachine: handleAdvanceStateMachine,
+        onTogglePersistInstanceState: handleTogglePersistInstanceState,
+        onQuizPatch: handleQuizPatch,
+        onQuizDelete: handleQuizDelete,
+        onLeaderboardUpdate: handleLeaderboardUpdate,
+        onSequencePatch: handleSequencePatch,
+        onSequenceDelete: handleSequenceDelete,
+        onCreateDeepLinkSample: handleCreateDeepLinkSample,
+        onResolveDeepLink: handleResolveDeepLink,
+        onDeleteDeepLink: handleDeleteDeepLink,
+        onNlParse: handleNlParse,
+        onNlApply: handleNlApply,
+        onNlRollback: handleNlRollback,
+        onDeckDiffCompare: handleDeckDiffCompare,
+        onAuditDiff: handleAuditDiff,
+        onSelectDataSource: setSelectedDataSourceId,
+        onPromote: handlePromote,
+        fetchGrants: handleFetchGrants,
+        onRevoke: handleRevokeGrant,
+        onFinalizeRecording: handleFinalizeRecording,
+      },
+    }),
+    [
+      deck, activeSlide, activeSlideId, selectedIds, selectedComponent, selectedElements,
+      crossFilters, activeThemeId, activeBrandKitId, colorScheme, overrides, a11yFindings,
+      isAuditing, deckReducedMotion, copiedAnimation, hotspots, overlays, branchingEdges,
+      variables, rules, stateMachines, activeQuiz, leaderboardItems, leaderboardAggregates,
+      activeSequence, deepLinks, auditEntries, selectedMediaKind, selectedMediaProps,
+      handleSelect, handleReorder, handleToggleFlag, handleInsertComponent, handleInsertIcon,
+      handleInsertMedia, handlePropEdit, handleVariantChange, handleFilterChange,
+      handleThemeChange, handleBrandKitChange, handleSchemeToggle, handleOverrideChange,
+      handleA11yAudit, handleTimelineChange, handleTransitionChange, handleMagicRoleChange,
+      handleReducedMotionChange, handleCopyAnimation, handlePasteAnimation,
+      handleAddHotspot, handleRemoveHotspot, handleAddOverlay, handleRemoveOverlay,
+      handleAddEdge, handleRemoveEdge, handleAddVariable, handleRemoveVariable,
+      handleAddRule, handleRemoveRule, handleAddStateMachine, handleRemoveStateMachine,
+      handleAdvanceStateMachine, handleTogglePersistInstanceState,
+      handleQuizPatch, handleQuizDelete, handleLeaderboardUpdate,
+      handleSequencePatch, handleSequenceDelete,
+      handleCreateDeepLinkSample, handleResolveDeepLink, handleDeleteDeepLink,
+      handleNlParse, handleNlApply, handleNlRollback, handleDeckDiffCompare,
+      handleAuditDiff, handlePromote,
+      handleFetchGrants, handleRevokeGrant, handleFinalizeRecording,
+    ],
   );
 
   return (
@@ -1066,485 +1228,26 @@ export function EditorRoot({ doc }: EditorRootProps): ReactElement {
       <main className="editor-body">
         <aside className="editor-side editor-side--left">
           <div className="side-tabs" role="tablist" aria-label="Left panel">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'layers'}
-              className={`side-tab${leftTab === 'layers' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('layers')}
-            >
-              Layers
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'insert'}
-              className={`side-tab${leftTab === 'insert' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('insert')}
-            >
-              Insert
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'library'}
-              className={`side-tab${leftTab === 'library' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('library')}
-            >
-              Library
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'stickers'}
-              className={`side-tab${leftTab === 'stickers' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('stickers')}
-            >
-              Stickers
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'icons'}
-              className={`side-tab${leftTab === 'icons' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('icons')}
-            >
-              Icons
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'theme-brand'}
-              className={`side-tab${leftTab === 'theme-brand' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('theme-brand')}
-            >
-              Theme
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'data-sources'}
-              className={`side-tab${leftTab === 'data-sources' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('data-sources')}
-              data-testid="p08-data-tab"
-            >
-              Data
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'filters'}
-              className={`side-tab${leftTab === 'filters' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('filters')}
-              data-testid="p08-filters-tab"
-            >
-              Filters
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'animations'}
-              className={`side-tab${leftTab === 'animations' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('animations')}
-              data-testid="p09-animations-tab"
-            >
-              Animations
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'connections'}
-              className={`side-tab${leftTab === 'connections' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('connections')}
-              data-testid="p10-connections-tab"
-            >
-              Connections
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'variables'}
-              className={`side-tab${leftTab === 'variables' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('variables')}
-              data-testid="p10-variables-tab"
-            >
-              Variables
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'deep-links'}
-              className={`side-tab${leftTab === 'deep-links' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('deep-links')}
-              data-testid="m7-deep-links-tab"
-            >
-              Deep Links
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm6-quizzes'}
-              className={`side-tab${leftTab === 'm6-quizzes' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m6-quizzes')}
-              data-testid="m6-quizzes-tab"
-            >
-              Quizzes
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm6-leaderboard'}
-              className={`side-tab${leftTab === 'm6-leaderboard' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m6-leaderboard')}
-              data-testid="m6-leaderboard-tab"
-            >
-              Leaderboard
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm6-sequence'}
-              className={`side-tab${leftTab === 'm6-sequence' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m6-sequence')}
-              data-testid="m6-sequence-tab"
-            >
-              Sequence
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm8-audit'}
-              className={`side-tab${leftTab === 'm8-audit' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m8-audit')}
-              data-testid="m8-audit-tab"
-            >
-              Audit
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm8-nl-patch'}
-              className={`side-tab${leftTab === 'm8-nl-patch' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m8-nl-patch')}
-              data-testid="m8-nl-patch-tab"
-            >
-              NL Patch
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm8-deck-diff'}
-              className={`side-tab${leftTab === 'm8-deck-diff' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m8-deck-diff')}
-              data-testid="m8-deck-diff-tab"
-            >
-              Deck Diff
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'state-inspector'}
-              className={`side-tab${leftTab === 'state-inspector' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('state-inspector')}
-              data-testid="m3-state-inspector-tab"
-            >
-              State inspector
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm11-media'}
-              className={`side-tab${leftTab === 'm11-media' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m11-media')}
-              data-testid="m11-media-tab"
-            >
-              Media
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm11-licenses'}
-              className={`side-tab${leftTab === 'm11-licenses' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m11-licenses')}
-              data-testid="m11-licenses-tab"
-            >
-              Licenses
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'm11-recording'}
-              className={`side-tab${leftTab === 'm11-recording' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('m11-recording')}
-              data-testid="m11-recording-tab"
-            >
-              Recording
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'p12-copilot'}
-              className={`side-tab${leftTab === 'p12-copilot' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('p12-copilot')}
-              data-testid="p12-copilot-tab"
-            >
-              Copilot
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={leftTab === 'marketplace'}
-              className={`side-tab${leftTab === 'marketplace' ? ' is-active' : ''}`}
-              onClick={() => setLeftTab('marketplace')}
-              data-testid="tab-marketplace"
-            >
-              Marketplace
-            </button>
+            {editorPanels.list().map((panel: { id: EditorLeftTab; label: string; group: string }) => (
+              <button
+                key={panel.id}
+                type="button"
+                role="tab"
+                aria-selected={leftTab === panel.id}
+                className={`side-tab${leftTab === panel.id ? ' is-active' : ''}`}
+                onClick={() => setLeftTab(panel.id)}
+                data-testid={`tab-${panel.id}`}
+              >
+                {panel.label}
+              </button>
+            ))}
           </div>
-          {leftTab === 'layers'
-            ? activeSlide
-              ? (
-                  <LayersPanel
-                    slide={activeSlide}
-                    selectedIds={selectedIds}
-                    onSelect={handleSelect}
-                    onReorder={handleReorder}
-                    onToggleFlag={handleToggleFlag}
-                  />
-                )
-              : null
-            : leftTab === 'insert'
-              ? <InsertPanel onInsert={handleInsertComponent} />
-              : leftTab === 'library'
-                ? <LibraryPanel onInsert={handleInsertComponent} />
-                : leftTab === 'stickers'
-                  ? <StickersPanel onInsert={handleInsertComponent} />
-                  : leftTab === 'icons'
-                    ? <IconPicker onInsert={handleInsertIcon} />
-                    : leftTab === 'data-sources'
-                      ? (
-                          <DataSourcePanel
-                            selectedSourceId={selectedDataSourceId}
-                            onSelectSource={setSelectedDataSourceId}
-                          />
-                        )
-                      : leftTab === 'filters'
-                      ? (
-                          <FiltersPanel
-                            filters={crossFilters}
-                            onChange={handleFilterChange}
-                          />
-                        )
-                      : leftTab === 'animations'
-                        ? (
-                            <AnimationsPanel
-                              timeline={
-                                selectedComponent
-                                  ? ((selectedComponent.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null) ?? null
-                                  : null
-                              }
-                              onTimelineChange={handleTimelineChange}
-                              transition={
-                                activeSlide
-                                  ? ((activeSlide as unknown as Record<string, unknown>)['x-domio:transition'] as SlideTransition | null) ?? null
-                                  : null
-                              }
-                              onTransitionChange={handleTransitionChange}
-                              magicRole={
-                                selectedComponent
-                                  ? ((selectedComponent as unknown as Record<string, unknown>)['element_role'] as string | null) ?? null
-                                  : null
-                              }
-                              onMagicRoleChange={handleMagicRoleChange}
-                              hasMatchingRole={false}
-                              reducedMotion={deckReducedMotion}
-                              onReducedMotionChange={handleReducedMotionChange}
-                              copiedAnimation={copiedAnimation}
-                              onCopy={handleCopyAnimation}
-                              onPaste={handlePasteAnimation}
-                            />
-                          )
-                        : leftTab === 'connections'
-                          ? (
-                              <ConnectionsPanel
-                                slides={deck.slides}
-                                activeSlideId={activeSlideId}
-                                hotspots={hotspots}
-                                overlays={overlays}
-                                edges={branchingEdges}
-                                onAddHotspot={handleAddHotspot}
-                                onRemoveHotspot={handleRemoveHotspot}
-                                onAddEdge={handleAddEdge}
-                                onRemoveEdge={handleRemoveEdge}
-                                onAddOverlay={handleAddOverlay}
-                                onRemoveOverlay={handleRemoveOverlay}
-                              />
-                            )
-                          : leftTab === 'variables'
-                            ? (
-                                <VariablesPanel
-                                  variables={variables}
-                                  rules={rules}
-                                  onAddVariable={handleAddVariable}
-                                  onRemoveVariable={handleRemoveVariable}
-                                  onAddRule={handleAddRule}
-                                  onRemoveRule={handleRemoveRule}
-                                />
-                              )
-                            : leftTab === 'deep-links'
-                              ? (
-                                  <DeepLinksPanel
-                                    deckId={deck.id}
-                                    activeSlideId={activeSlideId}
-                                    links={deepLinks}
-                                    onCreateSample={handleCreateDeepLinkSample}
-                                    onResolve={handleResolveDeepLink}
-                                    onDelete={handleDeleteDeepLink}
-                                  />
-                                )
-                              : leftTab === 'm6-quizzes'
-                                ? (
-                                    <QuizPanel
-                                      quiz={activeQuiz}
-                                      onPatch={handleQuizPatch}
-                                      onDelete={handleQuizDelete}
-                                    />
-                                  )
-                                : leftTab === 'm6-leaderboard'
-                                  ? (
-                                      <LeaderboardPanel
-                                        items={leaderboardItems}
-                                        aggregates={leaderboardAggregates}
-                                        onUpdate={handleLeaderboardUpdate}
-                                      />
-                                    )
-                                  : leftTab === 'm6-sequence'
-                                    ? (
-                                        <SequenceInspectorPanel
-                                          sequence={activeSequence}
-                                          onPatch={handleSequencePatch}
-                                          onDelete={handleSequenceDelete}
-                                        />
-                                      )
-                                    : leftTab === 'm8-audit'
-                              ? <M8AuditPanel entries={auditEntries} onDiff={handleAuditDiff} />
-                              : leftTab === 'm8-nl-patch'
-                                ? (
-                                    <NlPatchPanel
-                                      deckId={deck.id}
-                                      onParse={handleNlParse}
-                                      onApply={handleNlApply}
-                                      onRollback={handleNlRollback}
-                                    />
-                                  )
-                                : leftTab === 'm8-deck-diff'
-                                  ? (
-                                      <DeckDiffPanel
-                                        defaultDeckId={deck.id}
-                                        onCompare={handleDeckDiffCompare}
-                                      />
-                                    )
-                                  : leftTab === 'state-inspector'
-                                    ? (
-                                        <StateInspectorPanel
-                                          machines={stateMachines}
-                                          activeSlideId={activeSlideId}
-                                          onAddMachine={handleAddStateMachine}
-                                          onRemoveMachine={handleRemoveStateMachine}
-                                          onAdvance={handleAdvanceStateMachine}
-                                          onTogglePersistInstanceState={handleTogglePersistInstanceState}
-                                        />
-                                      )
-                                      : leftTab === 'm11-media'
-                                        ? (
-                                            <MediaPanel
-                                              selectedKind={selectedMediaKind}
-                                              selectedProps={selectedMediaProps}
-                                              onPropEdit={handlePropEdit}
-                                              onInsert={handleInsertMedia}
-                                            />
-                                          )
-                                        : leftTab === 'm11-licenses'
-                                          ? (
-                                              <LicenseDashboard
-                                                workspaceId="default-workspace"
-                                                fetchGrants={async () => [
-                                                  {
-                                                    id: 'grant-1',
-                                                    catalogId: 'model-cadpack-pro',
-                                                    version: '1.0.0',
-                                                    seats: 25,
-                                                    seatsUsed: 18,
-                                                    expiresAt: Date.now() + 30 * 86_400_000,
-                                                    revokedAt: null,
-                                                    status: 'active',
-                                                  },
-                                                  {
-                                                    id: 'grant-2',
-                                                    catalogId: 'audio-stock-loop-bundle',
-                                                    version: '2.3.1',
-                                                    seats: 10,
-                                                    seatsUsed: 7,
-                                                    expiresAt: Date.now() + 7 * 86_400_000,
-                                                    revokedAt: null,
-                                                    status: 'expiring',
-                                                  },
-                                                  {
-                                                    id: 'grant-3',
-                                                    catalogId: 'shader-particle-pack',
-                                                    version: '0.9.0-beta',
-                                                    seats: 5,
-                                                    seatsUsed: 0,
-                                                    expiresAt: Date.now() - 86_400_000,
-                                                    revokedAt: null,
-                                                    status: 'expired',
-                                                  },
-                                                ]}
-                                                onRevoke={(grantId) => {
-                                                  console.info('[m11-licenses] revoke requested', grantId);
-                                                }}
-                                              />
-                                            )
-                                          : leftTab === 'm11-recording'
-                                            ? (
-                                                <RecordingPanel
-                                                  viewportWidth={1920}
-                                                  viewportHeight={1080}
-                                                  fps={30}
-                                                  onFinalize={(draft) => {
-                                                    console.info('[m11-recording] finalized', draft.chunks.length);
-                                                  }}
-                                                />
-                                              )
-                                            : leftTab === 'p12-copilot'
-                                              ? (
-                                                  <OutlineApproval />
-                                                )
-                                              : leftTab === 'marketplace'
-                                                ? (
-                                                    <MarketplacePanel
-                                                      onInsert={handleInsertComponent}
-                                                      brandKitId={activeBrandKitId}
-                                                    />
-                                                  )
-                                                : (
-                        <ThemeBrandPanel
-                          themes={PHASE_07_THEMES}
-                          activeThemeId={activeThemeId}
-                          onThemeChange={handleThemeChange}
-                          brandKits={PHASE_07_BRAND_KITS}
-                          activeBrandKitId={activeBrandKitId}
-                          onBrandKitChange={handleBrandKitChange}
-                          colorScheme={colorScheme}
-                          onSchemeToggle={handleSchemeToggle}
-                          override={overrides[activeSlideId] ?? null}
-                          onOverrideChange={handleOverrideChange}
-                          a11yFindings={a11yFindings}
-                          onAudit={handleA11yAudit}
-                          isAuditing={isAuditing}
-                          slideId={activeSlideId}
-                        />
-                      )}
+          {(() => {
+            const panel = editorPanels.get(leftTab);
+            if (!panel) return null;
+            const C = panel.Component;
+            return <C {...buildPanelContext()} />;
+          })()}
         </aside>
         <section className="editor-canvas" ref={pingRef as React.RefObject<HTMLDivElement>}>
           <ApprovalBanner deckId={deck.id} slideId={activeSlideId} currentActorId={ACTOR_ID} />

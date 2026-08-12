@@ -32,8 +32,8 @@ import { JumpGrid } from './JumpGrid';
 import { NotesPane } from './NotesPane';
 import { PairingQR } from './PairingQR';
 import { TimerDisplay } from './TimerDisplay';
-import { SessionClient } from '../runtime/session-client';
-import type { SessionClientError } from '../runtime/session-client';
+import { SessionClient } from '../lib/session-service';
+import type { SessionClientError } from '../lib/session-service';
 import type { PairingInfo, PresenterSessionState, SlideSnapshot } from '../runtime/types';
 import { AnnotationOverlay } from './annotation/AnnotationOverlay';
 import { DynamicPlanPanel } from './plan/DynamicPlanPanel';
@@ -172,26 +172,14 @@ export function PresenterView({
   const handleEnd = useCallback(async () => {
     if (!confirm('End this session?')) return;
     try {
-      const res = await fetch(`${apiBaseUrl ?? ''}/api/v1/presenter/sessions/${sessionId}/end`, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          ...(client.etag() ? { 'if-match': client.etag() as string } : {}),
-        },
-        credentials: 'same-origin',
-      });
-      if (!res.ok) {
-        setStatus({ kind: 'error', message: `End failed: HTTP ${res.status}` });
-        return;
-      }
-      const body = (await res.json()) as PresenterSessionState;
-      setState(body);
+      const next = await client.end(sessionId);
+      setState(next);
       setStatus({ kind: 'ok', message: 'Session ended.' });
     } catch (e) {
-      const err = e as Error;
-      setStatus({ kind: 'error', message: err.message });
+      const err = e as SessionClientError;
+      setStatus({ kind: 'error', message: `End failed: HTTP ${err.status}` });
     }
-  }, [apiBaseUrl, client, sessionId]);
+  }, [client, sessionId]);
 
   // Keyboard navigation: → / ← / Home / End / Esc.
   useEffect(() => {

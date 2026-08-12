@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ApprovalRequest, ApprovalStatus } from './types.js';
-import { listApprovalRequests, postDecision } from './api.js';
+import { listApprovalRequests, postDecision } from '../lib/collaboration-service.js';
 
 // ----- Types -----
 

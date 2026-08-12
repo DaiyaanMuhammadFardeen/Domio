@@ -1,3 +1,4 @@
 # @domio/presenter
 
-> **Phase 0 stub.** Presenter mode lands in Phase 15.
+Domio presenter mode — live session driver with audience prompts,
+hand-offs, rehearsal, recording, and recap surfaces.

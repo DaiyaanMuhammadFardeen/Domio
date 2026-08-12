@@ -51,21 +51,6 @@ describe('DataSourcePanel', () => {
     expect(onSelect).toHaveBeenCalledWith(null);
   });
 
-  it('shows the add mock dataset form', () => {
-    render(<DataSourcePanel selectedSourceId={null} onSelectSource={vi.fn()} />);
-    expect(screen.getByLabelText('Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Seed')).toBeInTheDocument();
-    expect(screen.getByLabelText('Rows')).toBeInTheDocument();
-    expect(screen.getByTestId('p08-add-dataset-btn')).toBeInTheDocument();
-  });
-
-  it('adds a new mock dataset when clicking Add', () => {
-    render(<DataSourcePanel selectedSourceId={null} onSelectSource={vi.fn()} />);
-    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Test Data' } });
-    fireEvent.click(screen.getByTestId('p08-add-dataset-btn'));
-    expect(screen.getByText('Test Data')).toBeInTheDocument();
-  });
-
   it('shows freshness dots', () => {
     render(<DataSourcePanel selectedSourceId={null} onSelectSource={vi.fn()} />);
     const dots = document.querySelectorAll('.freshness-dot--fresh');

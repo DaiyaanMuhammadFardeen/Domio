@@ -11,6 +11,7 @@
  */
 
 import { nextSecurityHeaders } from '@domio/web-security';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -36,4 +37,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(nextConfig);

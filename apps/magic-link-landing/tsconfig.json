@@ -8,7 +8,8 @@
     "plugins": [{ "name": "next" }],
     "allowJs": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@domio/magic-link-service": ["../join-web/src/lib/magic-link-service.ts"]
     }
   },
   "include": [

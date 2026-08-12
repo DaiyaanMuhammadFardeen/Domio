@@ -1,18 +1,18 @@
 /**
  * DataSourcePanel — left-side panel for managing live data sources.
- * Lists demo mock datasets with freshness indicators, provides
- * a "Add mock dataset" affordance, and shows connection state.
+ * Lists connected sources with freshness indicators and shows
+ * connection state. New sources connect via the connector panel,
+ * not by generating fake data in-app.
  *
  * P08 — live data & interactive charts.
  */
 
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import {
   getDataSources,
-  addMockDataset,
   removeDataSource,
   refreshSource,
   subscribe,
@@ -30,9 +30,6 @@ export function DataSourcePanel({
   onSelectSource,
 }: DataSourcePanelProps): ReactElement {
   const [tick, setTick] = useState(0);
-  const [newName, setNewName] = useState('');
-  const [newSeed, setNewSeed] = useState('100');
-  const [newRows, setNewRows] = useState('20');
 
   // Re-render on store changes
   useEffect(() => {
@@ -47,16 +44,6 @@ export function DataSourcePanel({
 
   const sources = useMemo(() => getDataSources(), [tick]);
 
-  const handleAdd = useCallback(() => {
-    const name = newName.trim() || `Mock Dataset ${sources.length + 1}`;
-    const seed = parseInt(newSeed, 10) || 100;
-    const rows = parseInt(newRows, 10) || 20;
-    addMockDataset(name, seed, Math.min(rows, 500));
-    setNewName('');
-    setNewSeed(String(seed + 1));
-    setNewRows('20');
-  }, [newName, newSeed, newRows, sources.length]);
-
   return (
     <section className="data-panel" data-testid="data-panel">
       <header className="data-panel__header">
@@ -67,7 +54,10 @@ export function DataSourcePanel({
       <div className="data-panel__section">
         <div className="data-panel__section-title">Sources</div>
         {sources.length === 0 ? (
-          <div className="data-panel__empty">No data sources</div>
+          <div className="data-panel__empty" data-testid="data-panel-empty-state">
+            No data sources connected. Open the Connectors panel to link a CSV,
+            webhook, or HTTP API.
+          </div>
         ) : (
           sources.map((ds) => (
             <DataSourceRow
@@ -80,53 +70,6 @@ export function DataSourcePanel({
             />
           ))
         )}
-      </div>
-
-      <div className="data-panel__section">
-        <div className="data-panel__section-title">Add mock dataset</div>
-        <div className="data-panel__add-row">
-          <div>
-            <label htmlFor="ds-name">Name</label>
-            <input
-              id="ds-name"
-              className="data-panel__add-input"
-              placeholder="Dataset name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="ds-seed">Seed</label>
-            <input
-              id="ds-seed"
-              className="data-panel__add-input"
-              type="number"
-              min={1}
-              value={newSeed}
-              onChange={(e) => setNewSeed(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="ds-rows">Rows</label>
-            <input
-              id="ds-rows"
-              className="data-panel__add-input"
-              type="number"
-              min={1}
-              max={500}
-              value={newRows}
-              onChange={(e) => setNewRows(e.target.value)}
-            />
-          </div>
-          <button
-            type="button"
-            className="data-panel__add-btn"
-            onClick={handleAdd}
-            data-testid="p08-add-dataset-btn"
-          >
-            Add
-          </button>
-        </div>
       </div>
     </section>
   );

@@ -1,10 +1,10 @@
 /**
- * Domio control plane — Phase 0 stub + Phase 18 service mounting.
+ * Domio control plane entrypoint.
  *
- * This is intentionally minimal: it exposes the wire-format contracts
- * (health, readiness, deck placeholder) so the monorepo boots end-to-end.
- * No business modules, no auth, no Postgres writes. Real modules land
- * in Phase 02+.
+ * Boots the Hono-based modular monolith on Node 22 and mounts the
+ * SDK-shaped routes apps consume (health, readiness, deck summary).
+ * Service modules (decks, themes, brand kits, AI, …) are wired in
+ * as the surface demands them.
  */
 
 import { serve } from '@hono/node-server';

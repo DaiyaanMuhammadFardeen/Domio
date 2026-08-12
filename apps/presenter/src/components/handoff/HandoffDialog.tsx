@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { HandoffClient, HandoffClientError } from '../../runtime/handoff/handoff-client';
+import { HandoffClient, type HandoffClientError } from '../../runtime/handoff/handoff-client';
 import type { PresenterSessionState } from '../../runtime/types';
 
 export interface HandoffDialogProps {

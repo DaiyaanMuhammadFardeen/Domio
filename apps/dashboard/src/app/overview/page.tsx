@@ -1,59 +1,13 @@
 /**
  * /overview — server component that fetches the four KPI series
- * via the dashboard GraphQL gateway (persisted query OverviewKPI).
+ * via the analytics-service against the warehouse.
  *
- * On any failure we render with zeros so the page stays usable in
- * dev when no warehouse is running.
+ * On any failure the page renders with zeros — never fabricated
+ * numbers — so the page stays honest when the warehouse is offline.
  */
 
-import { OverviewClient, type OverviewKpis } from './OverviewClient';
-
-const WAREHOUSE_URL = process.env['WAREHOUSE_URL'] ?? 'http://localhost:8088';
-
-async function fetchOverviewKpis(workspaceId: string): Promise<OverviewKpis> {
-  const now = Date.now();
-  const url = new URL('/v1/decks/summary', WAREHOUSE_URL);
-  url.searchParams.set('workspace_id', workspaceId);
-  url.searchParams.set('from_ms', String(now - 7 * 24 * 60 * 60 * 1000));
-  url.searchParams.set('to_ms', String(now));
-
-  try {
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) throw new Error(`warehouse ${res.status}`);
-    const json = (await res.json()) as { rows: Record<string, unknown>[] };
-    const rows = json.rows ?? [];
-    // Warehouse returns snake_case; read with the same key names.
-    const sessions = rows.reduce((acc, r) => acc + Number(r['session_count'] ?? 0), 0);
-    const viewers = rows.reduce((acc, r) => acc + Number(r['viewer_count'] ?? 0), 0);
-    const avgDwell = rows.length
-      ? rows.reduce((acc, r) => acc + Number(r['avg_session_ms'] ?? 0), 0) / rows.length
-      : 0;
-    const completion =
-      rows.length > 0
-        ? rows.reduce((acc, r) => acc + Number(r['completion_rate'] ?? 0), 0) / rows.length
-        : 0;
-    // Synthetic per-day series: distribute the totals uniformly across 7 days.
-    const perDay = (total: number): number[] =>
-      Array.from({ length: 7 }, (_, i) => Math.round(total / 7 + i));
-    return {
-      sessions: { value: sessions, delta: 4.2, series: perDay(sessions) },
-      viewers: { value: viewers, delta: -1.8, series: perDay(viewers) },
-      avgDwellMs: { value: avgDwell, delta: 2.5, series: perDay(avgDwell) },
-      completionRate: {
-        value: completion,
-        delta: 0.6,
-        series: perDay(completion * 1000),
-      },
-    };
-  } catch {
-    return {
-      sessions: { value: 0, delta: 0, series: [0, 0, 0, 0, 0, 0, 0] },
-      viewers: { value: 0, delta: 0, series: [0, 0, 0, 0, 0, 0, 0] },
-      avgDwellMs: { value: 0, delta: 0, series: [0, 0, 0, 0, 0, 0, 0] },
-      completionRate: { value: 0, delta: 0, series: [0, 0, 0, 0, 0, 0, 0] },
-    };
-  }
-}
+import { OverviewClient } from './OverviewClient';
+import { fetchOverviewKpis } from '../../lib/analytics-service';
 
 export default async function OverviewPage() {
   const workspaceId = process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';

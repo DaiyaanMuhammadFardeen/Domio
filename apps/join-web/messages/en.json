@@ -1,0 +1,15 @@
+{
+  "join.title": "Join a session",
+  "join.scanPrompt": "Scan the QR code or enter a session code",
+  "join.placeholder": "Session code",
+  "join.submit": "Join",
+  "join.feedback.title": "Session feedback",
+  "join.feedback.stars": "How would you rate this session?",
+  "join.feedback.nps": "How likely are you to recommend Domio?",
+  "join.feedback.note": "Anything to add?",
+  "join.feedback.send": "Send feedback",
+  "join.handout.opening": "Opening handout…",
+  "join.handout.resolving": "Resolving your handout link…",
+  "join.handout.invalid": "handout link is invalid or expired",
+  "join.handout.unreachable": "handout link could not be resolved"
+}

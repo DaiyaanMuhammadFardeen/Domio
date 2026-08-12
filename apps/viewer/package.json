@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Domio read-only web viewer. Phase 0 stub. Full viewer lands in Phase 14 (sharing) and Phase 15 (presenter).",
+  "description": "Domio read-only web viewer — playback engine for shared decks, live sessions, and embedded presentations.",
   "scripts": {
     "build": "next build",
     "dev": "next dev -p 3001",

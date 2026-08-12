@@ -1,0 +1,16 @@
+{
+  "dashboard.title": "Domio dashboard",
+  "dashboard.overview.heading": "Overview",
+  "dashboard.overview.deckCount": "Decks",
+  "dashboard.overview.viewerCount": "Viewers",
+  "dashboard.overview.avgDuration": "Avg session",
+  "dashboard.overview.completionRate": "Completion rate",
+  "dashboard.heatmap.heading": "Heatmap",
+  "dashboard.heatmap.empty": "No heatmap data yet.",
+  "dashboard.ab.heading": "A/B experiments",
+  "dashboard.ab.empty": "No active experiments.",
+  "dashboard.crm.heading": "CRM sync",
+  "dashboard.crm.empty": "No CRM connectors configured.",
+  "dashboard.team.heading": "Team",
+  "dashboard.team.empty": "No team members yet."
+}

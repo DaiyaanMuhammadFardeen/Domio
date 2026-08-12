@@ -1,0 +1,13 @@
+{
+  "creator.title": "Creator console",
+  "creator.nav.listings": "Listings",
+  "creator.nav.analytics": "Analytics",
+  "creator.nav.statements": "Statements",
+  "creator.nav.settings": "Settings",
+  "creator.listings.heading": "Your listings",
+  "creator.listings.empty": "No listings yet. Create one to start selling in the marketplace.",
+  "creator.statements.heading": "Statements",
+  "creator.statements.empty": "No statements available yet.",
+  "creator.payouts.heading": "Payouts",
+  "creator.payouts.empty": "No payouts yet."
+}

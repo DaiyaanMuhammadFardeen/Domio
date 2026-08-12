@@ -1,0 +1,15 @@
+{
+  "editor.title": "Domio editor",
+  "editor.workspace": "Workspace",
+  "editor.openDemo": "Open demo deck",
+  "editor.decks.heading": "Your decks",
+  "editor.decks.empty": "No decks yet.",
+  "editor.panels.heading": "Open the editor with a panel pre-selected",
+  "editor.panels.hint": "Each card opens the demo deck with that panel already active on the left rail.",
+  "editor.layers.title": "Layers",
+  "editor.insert.title": "Insert",
+  "editor.theme.title": "Theme & brand",
+  "editor.data.title": "Data sources",
+  "editor.data.empty": "No data sources connected. Open the Connectors panel to link a CSV, webhook, or HTTP API.",
+  "editor.marketplace.title": "Marketplace"
+}
