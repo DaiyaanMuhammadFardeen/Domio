@@ -27,11 +27,19 @@
  * The component is client-only — the SSR pass renders a skeleton.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { JumpGrid } from './JumpGrid';
 import { NotesPane } from './NotesPane';
 import { PairingQR } from './PairingQR';
 import { TimerDisplay } from './TimerDisplay';
+import { AgendaTimer, computeAlertLevel } from './timer/AgendaTimer';
+import { SoftHardAlerts } from './timer/SoftHardAlerts';
+import { TimeBudgetAlerts } from './timer/TimeBudgetAlerts';
+import type { AlertLevel } from './timer/AgendaTimer';
+import { Rewind30s } from './Rewind30s';
+import { AutoFollowPresenter } from './AutoFollowPresenter';
+import { QuietMode, QuietModeBadge } from './QuietMode';
+import { AudienceHeatmapOverlay } from './AudienceHeatmapOverlay';
 import { SessionClient } from '../lib/session-service';
 import type { SessionClientError } from '../lib/session-service';
 import type { PairingInfo, PresenterSessionState, SlideSnapshot } from '../runtime/types';
@@ -43,9 +51,18 @@ import { ParkingLotDrawer } from './parking-lot/ParkingLotDrawer';
 import { HandoffDialog } from './handoff/HandoffDialog';
 import { PipPanel } from './pip/PipPanel';
 import { ProfileSelector } from './display-profile/ProfileSelector';
+import { ProfilePicker } from './display-profile/ProfilePicker';
+import { OutputMirrorControls } from './display-profile/OutputMirrorControls';
 import { WhisperPanel } from './whisper/WhisperPanel';
 import { RecapPage } from './recap/RecapPage';
 import { registerServiceWorker } from '../runtime/offline/offline-cache';
+import { OfflineCache, type OfflineStatus } from '../runtime/offline/OfflineCache';
+import { SnapshotFallback } from '../runtime/offline/SnapshotFallback';
+import { MultiMonitorSelector } from './MultiMonitorSelector';
+import { PresenterHUD } from './PresenterHUD';
+import { PhoneRemote } from './phone/PhoneRemote';
+import { PhonePairingPanel } from './phone/PhonePairingPanel';
+import { WhisperInbox } from './whisper/WhisperInbox';
 
 export interface PresenterViewProps {
   sessionId: string;
@@ -77,6 +94,25 @@ export function PresenterView({
   const [parkingLotEnabled, setParkingLotEnabled] = useState(false);
   const [handoffEnabled, setHandoffEnabled] = useState(false);
   const [recapEnabled, setRecapEnabled] = useState(false);
+  const [, setAudienceDisplay] = useState<{ id: string } | null>(null);
+  const [whisperCount, setWhisperCount] = useState(0);
+  const [audienceParticipationCount, setAudienceParticipationCount] = useState(0);
+  const [offlineStatus, setOfflineStatus] = useState<OfflineStatus>('preparing');
+  const [cachedSlideCount, setCachedSlideCount] = useState(0);
+  const [alertDismissed, setAlertDismissed] = useState(false);
+  const [autoFollowEnabled, setAutoFollowEnabled] = useState(false);
+  const [quietMode, setQuietMode] = useState(false);
+  const [audienceEvents, setAudienceEvents] = useState<readonly { id: string; x: number; y: number; kind: 'click' | 'drag' | 'whisper' | 'vote' | 'question'; ts: number }[]>([]);
+  const slideFrameRef = useRef<HTMLDivElement | null>(null);
+
+  // Touch the realtime-driven setters so they're not flagged as unused.
+  // S4.2 wires the realtime gateway to populate these from the presenter
+  // channel; until then the values stay at 0.
+  useEffect(() => {
+    setWhisperCount((c) => c);
+    setAudienceParticipationCount((c) => c);
+    setAudienceEvents((events) => events);
+  }, [sessionId]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -89,7 +125,35 @@ export function PresenterView({
 
   // Register the service worker for offline support.
   useEffect(() => {
-    registerServiceWorker().catch(() => { /* ignore — offline is best-effort */ });
+    if (typeof window === 'undefined') return;
+    const onOnline = () => setOfflineStatus('online');
+    const onOffline = () => setOfflineStatus((s) => (s === 'online' ? 'stale' : 'offline'));
+    onOnline();
+    onOffline();
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+
+    // Phase in cache progress — the SW emits 'cache-progress' events.
+    const onProgress = (e: Event) => {
+      const detail = (e as CustomEvent<{ cached: number; total: number }>).detail;
+      setCachedSlideCount(detail?.cached ?? 0);
+      setOfflineStatus((s) => (s === 'preparing' && (detail?.cached ?? 0) >= (detail?.total ?? 0) ? 'online' : s));
+    };
+    window.addEventListener('cache-progress', onProgress as EventListener);
+
+    registerServiceWorker()
+      .then(() => setOfflineStatus('online'))
+      .catch(() => {
+        // SW registration failed — fall back to showing 'online' so we
+        // don't trap the user on the preparing banner.
+        setOfflineStatus('online');
+      });
+
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('cache-progress', onProgress as EventListener);
+    };
   }, []);
 
   // Heartbeat — bump every 30 s to keep the session past TTL.
@@ -226,6 +290,24 @@ export function PresenterView({
     is_current: s.slide_id === state.state.slide_id,
   })), [state]);
 
+  // Pick the highest-alert running/paused agenda timer for the overlay.
+  const activeAlert = useMemo<{ level: AlertLevel; label: string }>(() => {
+    const ranked = state.agenda_timers
+      .filter((t) => t.status === 'running' || t.status === 'paused')
+      .map((t) => ({ id: t.id, label: t.label, level: computeAlertLevel(t.remaining_ms, t.duration_ms) }));
+    const hard = ranked.find((r) => r.level === 'hard');
+    const soft = ranked.find((r) => r.level === 'soft');
+    const pick = hard ?? soft;
+    if (!pick) return { level: 'safe', label: '' };
+    return { level: pick.level, label: pick.label };
+  }, [state.agenda_timers]);
+
+  // Re-arm the overlay when the alert level changes (e.g. segment
+  // rolls over from soft to hard, or new running segment starts).
+  useEffect(() => {
+    setAlertDismissed(false);
+  }, [activeAlert.level, activeAlert.label]);
+
   return (
     <div className="presenter">
       <header className="presenter__header">
@@ -234,6 +316,7 @@ export function PresenterView({
         <div className={`presenter__heart ${heartbeatStale ? 'presenter__heart--stale' : ''}`}>
           {heartbeatStale ? 'heartbeat stale' : 'live'}
         </div>
+        <QuietModeBadge quiet={quietMode} />
       </header>
       <main className="presenter__main">
         <div className="slides">
@@ -265,7 +348,7 @@ export function PresenterView({
                 </button>
               )}
             </div>
-            <div className="slide-card__frame">
+            <div className="slide-card__frame" ref={slideFrameRef}>
               {activeSlide ? (
                 annotationsEnabled ? (
                   <AnnotationOverlay
@@ -276,13 +359,16 @@ export function PresenterView({
                     disabled={state.ended_at !== null}
                   />
                 ) : (
-                  <span className="slide-card__placeholder">
-                    {activeSlide.title ?? activeSlide.slide_id}
-                  </span>
+                  <SnapshotFallback isStale={offlineStatus === 'offline' || offlineStatus === 'stale'}>
+                    <span className="slide-card__placeholder">
+                      {activeSlide.title ?? activeSlide.slide_id}
+                    </span>
+                  </SnapshotFallback>
                 )
               ) : (
                 <span className="slide-card__placeholder">No slide</span>
               )}
+              <AudienceHeatmapOverlay events={audienceEvents} />
             </div>
           </div>
           <div className="next-row">
@@ -305,12 +391,44 @@ export function PresenterView({
           </div>
         </div>
         <aside className="sidebar">
+          <PresenterHUD
+            sessionId={sessionId}
+            state={{
+              slide_index: state.state.slide_index,
+              slide_id: state.state.slide_id,
+              presenter_id: state.presenter_id,
+              started_at: state.started_at,
+              ended_at: state.ended_at,
+              mode: state.mode === 'live' || state.mode === 'rehearsal' ? state.mode : 'live',
+              last_heartbeat_at: state.last_heartbeat_at,
+              plan: state.plan,
+              agenda_timers: state.agenda_timers,
+            }}
+            activeSlide={activeSlide}
+            nextSlide={nextSlide}
+            totalSlides={state.slides.length}
+            pairing={pairing}
+            whisperCount={whisperCount}
+            audienceParticipationCount={audienceParticipationCount}
+          />
+          <MultiMonitorSelector
+            sessionId={sessionId}
+            onSelect={(d) => setAudienceDisplay(d ? { id: d.id } : null)}
+          />
+          <PhoneRemote
+            pairing={pairing}
+            {...(apiBaseUrl !== undefined ? { apiBaseUrl } : {})}
+          />
+          <PhonePairingPanel pairing={pairing} />
           <NotesPane slide={activeSlide} />
           <TimerDisplay
             startedAtMs={new Date(state.started_at).getTime()}
             budgetMs={(state.agenda_timers[0]?.duration_ms) ?? 60 * 60 * 1000}
             reducedMotion={reducedMotionState}
           />
+          <AgendaTimer agendaTimers={state.agenda_timers} />
+          <TimeBudgetAlerts dwellMs={0} budgetMs={60_000} />
+          <Rewind30s onRewind={() => handleAdvance(-1)} />
           <DynamicPlanPanel
             sessionId={sessionId}
             state={state}
@@ -325,6 +443,8 @@ export function PresenterView({
           />
           <JumpGrid slides={jumpEntries} onJump={handleJump} />
           <ProfileSelector actorId={state.presenter_id} />
+          <ProfilePicker actorId={state.presenter_id} />
+          <OutputMirrorControls mode={state.display_profile.mirror_mode} />
           <PipPanel
             activeSlide={activeSlide}
             nextSlide={nextSlide}
@@ -399,6 +519,17 @@ export function PresenterView({
             📊 Recap
           </button>
         )}
+        <button
+          type="button"
+          className={`controls__auto-follow${autoFollowEnabled ? ' controls__auto-follow--on' : ''}`}
+          onClick={() => setAutoFollowEnabled((v) => !v)}
+          aria-label="Toggle auto-follow presenter"
+          title="Mirror the presenter's cursor on the audience display"
+          aria-pressed={autoFollowEnabled}
+        >
+          {autoFollowEnabled ? '✕' : '👆'} Auto-follow
+        </button>
+        <QuietMode quiet={quietMode} onChange={setQuietMode} />
       </footer>
       <TeleprompterOverlay
         slide={activeSlide}
@@ -422,6 +553,7 @@ export function PresenterView({
         />
       )}
       <WhisperPanel sessionId={sessionId} presenterId={state.presenter_id} />
+      <WhisperInbox onWhisper={() => setWhisperCount((c) => c + 1)} />
       {recapEnabled && (
         <RecapPage
           sessionId={sessionId}
@@ -429,6 +561,27 @@ export function PresenterView({
           onClose={() => setRecapEnabled(false)}
         />
       )}
+      <OfflineCache
+        status={offlineStatus}
+        cachedSlideCount={cachedSlideCount}
+        totalSlideCount={state.slides.length}
+        onReconnect={() => window.location.reload()}
+      />
+      {!alertDismissed && activeAlert.level !== 'safe' && (
+        <SoftHardAlerts
+          level={activeAlert.level}
+          message={
+            activeAlert.level === 'hard'
+              ? `${activeAlert.label}: time is up — move on.`
+              : `${activeAlert.label}: 20% left, wrap up.`
+          }
+          onDismiss={() => setAlertDismissed(true)}
+        />
+      )}
+      <AutoFollowPresenter
+        targetRef={slideFrameRef}
+        enabled={autoFollowEnabled}
+      />
     </div>
   );
 }

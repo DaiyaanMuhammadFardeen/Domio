@@ -18,6 +18,7 @@
 
 import { useEffect, useState } from 'react';
 import { RecapClient, type RecapSummary } from '../../lib/recap-service';
+import { RecordingExportButton } from './RecordingExportButton';
 
 export interface RecapPageProps {
   sessionId: string;
@@ -94,6 +95,7 @@ export function RecapPage({ sessionId, apiBaseUrl, onClose }: RecapPageProps) {
           )}
         </div>
       )}
+      <RecordingExportButton sessionId={sessionId} {...(apiBaseUrl !== undefined ? { apiBaseUrl } : {})} />
     </section>
   );
 }
