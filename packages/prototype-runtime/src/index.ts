@@ -34,5 +34,8 @@ export {
   OverlayNotOpenError,
 } from './overlay/stack.js';
 export * from './state-machines/index.js';
-// Sibling slices (M4–M7) are kept out of this barrel until each phase
-// stabilizes; see `docs/handoff/P09-to-P10.md` for the roadmap.
+// Wave 2 §S2.12 — editor surfaces wired up here. Forms + device-frames
+// are now part of the editor's import surface; see
+// `apps/editor/src/components/prototyping/`.
+export * from './forms/index.js';
+export * from './device-frames/index.js';

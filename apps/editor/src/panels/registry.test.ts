@@ -39,6 +39,8 @@ import {
   P12CopilotEntry,
   MarketplaceEntry,
   CanvasControlsEntry,
+  PrototypingEntry,
+  DeviceFrameEntry,
 } from './entries';
 
 describe('editor panel registry', () => {
@@ -49,6 +51,7 @@ describe('editor panel registry', () => {
     M6LeaderboardEntry, M6SequenceEntry, M8AuditEntry, M8NlPatchEntry,
     M8DeckDiffEntry, StateInspectorEntry, M11MediaEntry, M11LicensesEntry,
     M11RecordingEntry, P12CopilotEntry, MarketplaceEntry, CanvasControlsEntry,
+    PrototypingEntry, DeviceFrameEntry,
   ];
 
   it('registers every panel module', () => {

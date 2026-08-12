@@ -43,6 +43,8 @@ import {
   P12CopilotEntry,
   MarketplaceEntry,
   CanvasControlsEntry,
+  PrototypingEntry,
+  DeviceFrameEntry,
 } from './entries';
 
 /**
@@ -141,6 +143,20 @@ REGISTRY.add({
   group: 'interaction',
   surface: 'left',
   Component: ConnectionsEntry.Component,
+});
+REGISTRY.add({
+  id: 'prototyping',
+  label: 'Prototyping',
+  group: 'interaction',
+  surface: 'left',
+  Component: PrototypingEntry.Component,
+});
+REGISTRY.add({
+  id: 'device-frame',
+  label: 'Device Frame',
+  group: 'interaction',
+  surface: 'left',
+  Component: DeviceFrameEntry.Component,
 });
 REGISTRY.add({
   id: 'variables',

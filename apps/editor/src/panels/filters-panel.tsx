@@ -3,7 +3,7 @@
  * Each filter = { id, dimension, value } where dimension is a column name
  * shared across datasets. Charts opt in via `listenToFilters` on their binding.
  *
- * P08 — cross-chart filter (CrossLink) feature.
+ * Wave 2 §S2.7 — Data sources. Adds "Apply to all slides on this deck" CTA.
  */
 
 'use client';
@@ -20,9 +20,11 @@ const KNOWN_DIMENSIONS = [
 interface FiltersPanelProps {
   filters: CrossFilter[];
   onChange: (filters: CrossFilter[]) => void;
+  /** Optional callback when "apply to all slides" is clicked. */
+  onApplyAllSlides?: ((filter: CrossFilter) => void) | undefined;
 }
 
-export function FiltersPanel({ filters, onChange }: FiltersPanelProps): ReactElement {
+export function FiltersPanel({ filters, onChange, onApplyAllSlides }: FiltersPanelProps): ReactElement {
   const [newDimension, setNewDimension] = useState<string>(KNOWN_DIMENSIONS[0]);
   const [newValue, setNewValue] = useState('');
 
@@ -74,6 +76,17 @@ export function FiltersPanel({ filters, onChange }: FiltersPanelProps): ReactEle
                   {' = '}
                   {f.value}
                 </span>
+              </span>
+              <span
+                role="button"
+                tabIndex={0}
+                title="Apply to all slides on this deck"
+                onClick={() => onApplyAllSlides?.(f)}
+                onKeyDown={(e) => { if (e.key === 'Enter') onApplyAllSlides?.(f); }}
+                style={{ cursor: 'pointer', fontSize: 14, color: 'var(--muted)', padding: '2px 4px' }}
+                data-testid={`p08-filter-apply-all-${f.id}`}
+              >
+                ⤢
               </span>
               <span
                 role="button"

@@ -42,7 +42,7 @@ describe('ThresholdPanel', () => {
     const onChange = vi.fn();
     const rules = [makeRule({ id: 'thr-1' }), makeRule({ id: 'thr-2' })];
     render(<ThresholdPanel rules={rules} onChange={onChange} />);
-    const removeButtons = screen.getAllByTestId('p08-threshold-remove');
+    const removeButtons = screen.getAllByTestId(/p08-threshold-remove-/);
     fireEvent.click(removeButtons[0]!);
     expect(onChange).toHaveBeenCalledTimes(1);
     const newRules = onChange.mock.calls[0]![0] as ThresholdRule[];

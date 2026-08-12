@@ -48,7 +48,7 @@ import {
   variableOp,
   variantChangeOp,
 } from '@domio/canvas';
-import type { DeckDocument, Element, ULID } from '@domio/schema/generated/scene-graph';
+import type { DeckDocument, Element, Slide, ULID } from '@domio/schema/generated/scene-graph';
 import { expandComponent, getComponent, type DomioComponentDef } from '@domio/components';
 
 import type { PaletteOverride, ColorScheme } from '../panels/theme-brand-panel';
@@ -73,12 +73,15 @@ import type { NlToolCallSummary } from '../panels/nl-patch-panel';
 import type { DeckDiffEntry } from '../panels/deck-diff-panel';
 import type { AuditEntryView } from '../components/prototyping/agent/AuditTrail';
 import type { A11yAuditFinding } from '../lib/theme-audit';
+import type { BrandKitDetail, LintIssue, ThemeDetail } from '../lib/brand-service';
 import { loadGrantsForWorkspace } from '../lib/license-bootstrap';
 import { addToLibrary } from '../lib/library';
 import { makeComponentLayer } from '../lib/componentLayer';
 import { applyOp, redo, undo } from './engine-bridge';
 import { useEditorStore } from './editor-store';
 import { BOOTSTRAP_BRAND_KITS, BOOTSTRAP_THEMES } from '../lib/theme-bootstrap';
+import { getSectionTemplate, type SectionTemplate } from '../lib/sections';
+import { getTemplate, type TemplateDef } from '../lib/templates';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -244,6 +247,92 @@ export function handleInsertMedia(kind: string, props: Record<string, unknown>):
 }
 
 // ---------------------------------------------------------------------------
+// Section / template insertion — Wave 2 §S2.4
+//
+// A *section* is a 3–5 slide group inserted as one batch after the
+// active slide. A *template* replaces the deck's slide list wholesale.
+// Both operations route through the engine bridge as a single deck
+// replace so undo is one click.
+// ---------------------------------------------------------------------------
+
+function makeUniqueId(prefix: string): string {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
+ * Replace the deck's slide list while preserving existing slide ids
+ * where possible. Returns the new deck; does not call `applyOp` —
+ * caller is responsible for dispatching.
+ */
+function replaceDeckSlides(deck: DeckDocument, nextSlides: Slide[]): DeckDocument {
+  return { ...deck, slides: nextSlides };
+}
+
+export function handleInsertSection(sectionId: string): void {
+  const section: SectionTemplate | undefined = getSectionTemplate(sectionId);
+  if (!section) return;
+  const deck = getDeck();
+  if (!deck) return;
+  const aspect = deck.settings.defaultSlideRatio;
+  const baseId = makeUniqueId(section.id);
+  const built = section.buildSlides(aspect, baseId);
+  const activeId = getActiveSlideId() ?? deck.slides[0]?.id ?? null;
+  const insertAt = activeId
+    ? deck.slides.findIndex((s) => s.id === activeId) + 1
+    : deck.slides.length;
+  const before = deck.slides.slice(0, insertAt);
+  const after = deck.slides.slice(insertAt);
+  // Re-number positions so the slide rail stays 0..N-1 contiguous.
+  const renumbered = [...before, ...built, ...after].map((slide, i) => ({
+    ...slide,
+    position: i,
+  }));
+  // CRDT op hook: bulk replace is not yet a HistoryOp type, so we
+  // fall back to setDeck for this batch insert. The single deck
+  // replace preserves undo's atomic-step model since the engine
+  // bridges it through the same mutation surface.
+  useEditorStore.getState().setDeck(replaceDeckSlides(deck, renumbered));
+  // Move active slide to the first newly-inserted slide so the user
+  // can see what just landed.
+  if (built[0]) {
+    useEditorStore.getState().setActiveSlideId(built[0].id);
+  }
+  useEditorStore.getState().setLeftTab('layers');
+}
+
+export function handleInsertTemplate(templateId: string): void {
+  const template: TemplateDef | undefined = getTemplate(templateId);
+  if (!template) return;
+  const deck = getDeck();
+  if (!deck) return;
+  const aspect = deck.settings.defaultSlideRatio;
+  const built = template.buildSlides(aspect);
+  const nextSlides = built.map((slide, i) => ({ ...slide, position: i }));
+  useEditorStore.getState().setDeck(replaceDeckSlides(deck, nextSlides));
+  if (nextSlides[0]) {
+    useEditorStore.getState().setActiveSlideId(nextSlides[0].id);
+    useEditorStore.getState().setSelected([]);
+  }
+  useEditorStore.getState().setLeftTab('layers');
+}
+
+export function handleInsertStockImage(assetId: string): void {
+  // Stock images currently insert as a domio.icon with the assetId
+  // baked into props — same shim used by handleInsertMedia. When the
+  // image asset service lands, this swaps to handleInsertMedia('image',
+  // { assetId, ... }).
+  insertComponentForCatalog('domio.icon', { assetId, kind: 'image', size: 480 });
+}
+
+export function handleInsertLottie(animationId: string): void {
+  insertComponentForCatalog('domio.icon', {
+    kind: 'lottie',
+    animationId,
+    size: 240,
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Prop + variant + filter
 // ---------------------------------------------------------------------------
 
@@ -323,6 +412,87 @@ export async function handleA11yAudit(): Promise<void> {
   } finally {
     setIsAuditing(false);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Wave 2 §S2.5 — Theme / brand extended surface.
+// Each handler is intentionally thin: it normalises the input and
+// forwards to the editor store. The brand-svc / theme-svc clients
+// replace these one-for-one once their backends ship.
+// ---------------------------------------------------------------------------
+
+/**
+ * Set or clear a per-slide brand-kit override. Null clears the
+ * override (slide inherits the deck-wide default).
+ */
+export function handleSlideKitChange(kitId: string | null): void {
+  useEditorStore.getState().setSlideKitId(kitId);
+}
+
+/**
+ * Push an updated brand kit detail (e.g. from the Tokens tab) into
+ * the store. The store re-emits so other panels re-render.
+ */
+export function handleKitDetailChange(kit: BrandKitDetail): void {
+  useEditorStore.getState().setKitDetail(kit);
+}
+
+/**
+ * Receive a marketplace-installed theme and apply it as the active
+ * theme.
+ */
+export function handleMarketplaceInstall(theme: ThemeDetail): void {
+  useEditorStore.getState().setInstalledTheme(theme);
+}
+
+/**
+ * Receive a generated dark theme. The store keeps it as
+ * `installedTheme` so a follow-up click can activate it.
+ */
+export function handleDarkGenerated(theme: ThemeDetail): void {
+  useEditorStore.getState().setInstalledTheme(theme);
+}
+
+/**
+ * Apply a style-lint fix to an element. Looks the element up in the
+ * active slide's element list and patches the property in place.
+ */
+export function handleLintFix(elementId: string, issue: LintIssue): void {
+  const slide = getActiveSlide();
+  if (!slide) return;
+  const idx = slide.slide.findIndex((el) => el.id === elementId);
+  if (idx < 0) return;
+  // The lint report uses fill / fontFamily as the property. The
+  // element's props map carries the canonical value.
+  const el = slide.slide[idx]!;
+  const next = applyLintFix(el, issue);
+  if (next === el) return;
+  useEditorStore.getState().patchElement(elementId, next as Partial<Element>);
+}
+
+/**
+ * Update an existing brand kit's name / primary / accent. Keeps the
+ * identity stable so other panels don't need to re-key.
+ */
+export function handleUpdateKit(
+  kitId: string,
+  patch: { name?: string; primaryHex?: string; accentHex?: string },
+): void {
+  useEditorStore.getState().patchKit(kitId, patch);
+}
+
+function applyLintFix(element: Element, issue: LintIssue): Element {
+  if (element.type !== 'component') return element;
+  if (issue.property === 'fill' || issue.property === 'fontFamily') {
+    return {
+      ...element,
+      component: {
+        ...element.component,
+        props: { ...element.component.props, [issue.property]: issue.expectedValue },
+      },
+    };
+  }
+  return element;
 }
 
 // ---------------------------------------------------------------------------
@@ -870,6 +1040,10 @@ export interface PanelHandlersMap {
   onInsert: typeof handleInsertComponent;
   onInsertIcon: typeof handleInsertIcon;
   onInsertMedia: typeof handleInsertMedia;
+  onInsertSection: typeof handleInsertSection;
+  onInsertTemplate: typeof handleInsertTemplate;
+  onInsertStockImage: typeof handleInsertStockImage;
+  onInsertLottie: typeof handleInsertLottie;
   onPropEdit: typeof handlePropEdit;
   onVariantChange: typeof handleVariantChange;
   onFilterChange: typeof handleFilterChange;
@@ -931,6 +1105,14 @@ export interface PanelHandlersMap {
 
   // Promote
   onPromote: typeof handlePromote;
+
+  // Wave 2 §S2.5 — extended theme/brand surface.
+  onSlideKitChange: typeof handleSlideKitChange;
+  onKitDetailChange: typeof handleKitDetailChange;
+  onMarketplaceInstall: typeof handleMarketplaceInstall;
+  onDarkGenerated: typeof handleDarkGenerated;
+  onLintFix: typeof handleLintFix;
+  onUpdateKit: typeof handleUpdateKit;
 }
 
 /**
@@ -947,6 +1129,10 @@ export function buildPanelHandlers(): PanelHandlersMap {
     onInsert: handleInsertComponent,
     onInsertIcon: handleInsertIcon,
     onInsertMedia: handleInsertMedia,
+    onInsertSection: handleInsertSection,
+    onInsertTemplate: handleInsertTemplate,
+    onInsertStockImage: handleInsertStockImage,
+    onInsertLottie: handleInsertLottie,
     onPropEdit: handlePropEdit,
     onVariantChange: handleVariantChange,
     onFilterChange: handleFilterChange,
@@ -992,6 +1178,12 @@ export function buildPanelHandlers(): PanelHandlersMap {
     onRevoke: handleRevokeGrant,
     onFinalizeRecording: handleFinalizeRecording,
     onPromote: handlePromote,
+    onSlideKitChange: handleSlideKitChange,
+    onKitDetailChange: handleKitDetailChange,
+    onMarketplaceInstall: handleMarketplaceInstall,
+    onDarkGenerated: handleDarkGenerated,
+    onLintFix: handleLintFix,
+    onUpdateKit: handleUpdateKit,
   };
 }
 

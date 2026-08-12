@@ -35,6 +35,8 @@ import type {
 } from '@domio/canvas';
 
 import type { PaletteOverride, ColorScheme } from '../panels/theme-brand-panel';
+import type { BrandKitDetail, ThemeDetail } from '../lib/brand-service';
+import { DEFAULT_BRAND_KITS } from '../lib/brand-service';
 import type {
   ConnectionsPanelEdge,
   ConnectionsPanelHotspot,
@@ -211,6 +213,23 @@ export interface ThemeSlice {
   setA11yFindings: (findings: readonly A11yAuditFinding[]) => void;
   isAuditing: boolean;
   setIsAuditing: (busy: boolean) => void;
+  // Wave 2 §S2.5 extended surface.
+  /** Per-slide brand kit override id (or null = inherit). */
+  slideKitId: string | null;
+  setSlideKitId: (id: string | null) => void;
+  /** Full brand kit detail for the active kit (Tokens tab source). */
+  activeKitDetail: BrandKitDetail;
+  setKitDetail: (kit: BrandKitDetail) => void;
+  /** Marketplace-installed or dark-generated theme. */
+  installedTheme: ThemeDetail | null;
+  setInstalledTheme: (theme: ThemeDetail | null) => void;
+  /** Patch the active kit's identity fields. */
+  patchKit: (
+    kitId: string,
+    patch: { name?: string; primaryHex?: string; accentHex?: string },
+  ) => void;
+  /** Patch a slide element by id (used by the lint-fix handler). */
+  patchElement: (elementId: string, next: Partial<unknown>) => void;
 }
 
 export const createThemeSlice = (
@@ -236,6 +255,40 @@ export const createThemeSlice = (
   setA11yFindings: (findings) => set({ a11yFindings: findings }),
   isAuditing: false,
   setIsAuditing: (busy) => set({ isAuditing: busy }),
+  slideKitId: null,
+  setSlideKitId: (id) => set({ slideKitId: id }),
+  activeKitDetail: DEFAULT_BRAND_KITS[0]!,
+  setKitDetail: (kit) => set({ activeKitDetail: kit }),
+  installedTheme: null,
+  setInstalledTheme: (theme) => set({ installedTheme: theme }),
+  patchKit: (kitId, patch) =>
+    set((s) => {
+      if (s.activeKitDetail.id !== kitId) return {};
+      return {
+        activeKitDetail: {
+          ...s.activeKitDetail,
+          ...patch,
+        },
+      };
+    }),
+  patchElement: (elementId, next) =>
+    set((s) => {
+      if (!s.deck) return {};
+      const slide = s.deck.slides.find((sl) => sl.elements.some((el) => el.id === elementId));
+      if (!slide) return {};
+      const updatedSlide = {
+        ...slide,
+        elements: slide.elements.map((el) =>
+          el.id === elementId ? ({ ...el, ...(next as object) } as typeof el) : el,
+        ),
+      };
+      return {
+        deck: {
+          ...s.deck,
+          slides: s.deck.slides.map((sl) => (sl.id === slide.id ? updatedSlide : sl)),
+        },
+      };
+    }),
 });
 
 // ---------------------------------------------------------------------------

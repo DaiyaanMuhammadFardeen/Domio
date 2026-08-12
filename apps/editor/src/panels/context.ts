@@ -39,6 +39,8 @@ import type { DomioComponentDef } from '@domio/components';
 import type { NlToolCallSummary } from './nl-patch-panel';
 import type { DeckDiffEntry } from './deck-diff-panel';
 import type { AuditEntryView } from '../components/prototyping/agent/AuditTrail';
+import type { BrandKitDetail, LintIssue, ThemeDetail } from '../lib/brand-service';
+import type { LintElementSummary } from '../components/brand/StyleLintPanel';
 
 // ---------------------------------------------------------------------------
 // Handler shapes — single-responsibility (SOLID S) callbacks the panels fire.
@@ -52,6 +54,14 @@ export interface PanelHandlers {
   onInsert?: (catalogId: string) => void;
   onInsertIcon?: (iconId: string, color: string) => void;
   onInsertMedia?: (kind: string, props: Record<string, unknown>) => void;
+  /** Wave 2 §S2.4 — insert a section template (3–5 slides). */
+  onInsertSection?: (sectionId: string) => void;
+  /** Wave 2 §S2.4 — replace the deck with a full template. */
+  onInsertTemplate?: (templateId: string) => void;
+  /** Wave 2 §S2.4 — insert a stock photo. */
+  onInsertStockImage?: (assetId: string) => void;
+  /** Wave 2 §S2.4 — insert a Lottie animation. */
+  onInsertLottie?: (animationId: string) => void;
   onPropEdit?: (key: string, from: unknown, to: unknown) => void;
   onVariantChange?: (from: string, to: string) => void;
   onFilterChange?: (filters: CrossFilter[]) => void;
@@ -62,6 +72,19 @@ export interface PanelHandlers {
   onSchemeToggle?: (scheme: ColorScheme) => void;
   onOverrideChange?: (next: PaletteOverride | null) => void;
   onAudit?: () => void;
+  // Wave 2 §S2.5 — extended theme/brand panel surface.
+  /** Per-slide brand kit override; null = inherit from deck. */
+  onSlideKitChange?: (kitId: string | null) => void;
+  /** Push a (possibly edited) brand kit detail through the engine. */
+  onKitDetailChange?: (kit: BrandKitDetail) => void;
+  /** Receive a marketplace-installed theme. */
+  onMarketplaceInstall?: (theme: ThemeDetail) => void;
+  /** Receive a freshly generated dark theme. */
+  onDarkGenerated?: (theme: ThemeDetail) => void;
+  /** Apply a style-lint fix to an element. */
+  onLintFix?: (elementId: string, issue: LintIssue) => void;
+  /** Update a brand kit (rename / recolor). */
+  onUpdateKit?: (kitId: string, patch: { name?: string; primaryHex?: string; accentHex?: string }) => void;
 
   // Animation
   onTimelineChange?: (timeline: LayerTimeline | null) => void;
@@ -160,10 +183,16 @@ export interface PanelState {
   // Theme / brand
   activeThemeId: string;
   activeBrandKitId: string;
+  /** Active brand kit's full token detail (for the Tokens tab). */
+  activeKitDetail: BrandKitDetail;
+  /** Per-slide brand kit override id (or null = inherit). */
+  slideKitId: string | null;
   colorScheme: ColorScheme;
   override: PaletteOverride | null;
   a11yFindings: readonly A11yAuditFinding[];
   isAuditing: boolean;
+  /** Element summaries for the Style Lint tab. */
+  lintElements: readonly LintElementSummary[];
 
   // Animation
   timeline: LayerTimeline | null;

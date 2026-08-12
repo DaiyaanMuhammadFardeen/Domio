@@ -44,6 +44,14 @@ export interface MarketplacePanelProps {
   onInsert: (catalogId: string, version?: string) => void;
   /** Brand kit ID from editor context. Undefined = no brand filter. */
   brandKitId?: string;
+  /**
+   * Wave 2 §S2.6: the active brand kit ID the editor is bound to.
+   * Used to compute whether a `deny` listing still installs at a
+   * discount — when `activeBrandKitId` is set, brand-locked items
+   * surface the install at the override price; when not, the install
+   * is hidden entirely.
+   */
+  activeBrandKitId?: string;
   /** Injectable data fetcher for tests and production. */
   fetchListings?: (brandKitId: string, limit: number, offset: number) => Promise<CuratedListingPage>;
 }
@@ -104,6 +112,7 @@ const PAGE_SIZE = 40;
 export function MarketplacePanel({
   onInsert,
   brandKitId = '',
+  activeBrandKitId = '',
   fetchListings = defaultFetchListings,
 }: MarketplacePanelProps): ReactElement {
   const t = useT();
@@ -272,6 +281,7 @@ export function MarketplacePanel({
           <MarketplaceCard
             key={item.listing_id}
             item={item}
+            activeBrandKitId={activeBrandKitId}
             onInsert={() => onInsert(item.listing_id, item.version)}
           />
         ))}
@@ -289,13 +299,20 @@ export function MarketplacePanel({
 
 interface MarketplaceCardProps {
   item: CuratedListingView;
+  activeBrandKitId?: string;
   onInsert: () => void;
 }
 
-function MarketplaceCard({ item, onInsert }: MarketplaceCardProps): ReactElement {
+function MarketplaceCard({ item, activeBrandKitId, onInsert }: MarketplaceCardProps): ReactElement {
   const t = useT();
   const isDenied = item.brand_locked_state === 'deny';
   const isOverride = item.brand_locked_state === 'override';
+  // When the editor has an active brand kit, brand-locked items
+  // become installable at the override price (refuse the price, but
+  // still allow install under the active brand). Without an active
+  // brand, the install stays disabled.
+  const canInstallWhenLocked = isOverride && !!activeBrandKitId;
+  const lockBlocksInsert = isDenied || (isOverride && !canInstallWhenLocked);
   const displayPrice = isOverride && item.override_price_cents !== null
     ? item.override_price_cents
     : item.price_cents;
@@ -380,14 +397,14 @@ function MarketplaceCard({ item, onInsert }: MarketplaceCardProps): ReactElement
       {/* Insert button */}
       <button
         type="button"
-        className={`marketplace-card__insert${isDenied ? ' marketplace-card__insert--disabled' : ''}`}
-        onClick={isDenied ? undefined : onInsert}
-        disabled={isDenied}
-        aria-disabled={isDenied}
-        aria-label={isDenied ? t('marketplace.lockedInsertDisabled') : t('marketplace.insert')}
+        className={`marketplace-card__insert${lockBlocksInsert ? ' marketplace-card__insert--disabled' : ''}`}
+        onClick={lockBlocksInsert ? undefined : onInsert}
+        disabled={lockBlocksInsert}
+        aria-disabled={lockBlocksInsert}
+        aria-label={lockBlocksInsert ? t('marketplace.lockedInsertDisabled') : t('marketplace.insert')}
         data-testid={`marketplace-insert-${item.listing_id}`}
       >
-        {isDenied ? t('marketplace.locked') : t('marketplace.insert')}
+        {lockBlocksInsert ? t('marketplace.locked') : t('marketplace.insert')}
       </button>
     </MagicCard>
   );

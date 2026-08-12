@@ -19,6 +19,7 @@ export interface LibraryItem {
 
 function readLibrary(): LibraryItem[] {
   try {
+    if (typeof localStorage === 'undefined') return [];
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
@@ -30,7 +31,12 @@ function readLibrary(): LibraryItem[] {
 }
 
 function writeLibrary(items: LibraryItem[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  } catch {
+    // swallow — quota / private mode / disabled storage
+  }
 }
 
 export function getLibraryItems(): LibraryItem[] {

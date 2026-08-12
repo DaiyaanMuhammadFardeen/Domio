@@ -506,10 +506,23 @@ function useEditorPanelContext(inputs: PanelContextInputs): EditorPanelContext {
         crossFilters: store.crossFilters,
         activeThemeId: store.activeThemeId,
         activeBrandKitId: store.activeBrandKitId,
+        activeKitDetail: store.activeKitDetail,
+        slideKitId: store.slideKitId,
         colorScheme: store.colorScheme,
         override: (overrides[(activeSlide?.id ?? '') as string] ?? null) as never,
         a11yFindings: store.a11yFindings,
         isAuditing: store.isAuditing,
+        lintElements: (activeSlide?.elements ?? [])
+          .filter((el): el is Element & { type: 'component' } => el.type === 'component')
+          .map((el) => ({
+            id: el.id,
+            name: el.name,
+            fill: typeof el.component.props.fill === 'string' ? el.component.props.fill : undefined,
+            fontFamily:
+              typeof el.component.props.fontFamily === 'string'
+                ? el.component.props.fontFamily
+                : undefined,
+          })),
         timeline: null,
         transition: null,
         magicRole: null,

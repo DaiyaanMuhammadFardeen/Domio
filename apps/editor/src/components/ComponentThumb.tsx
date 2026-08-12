@@ -11,7 +11,13 @@ import { asULID, type ComponentLayer } from '@domio/schema';
 import { expandComponent, type DomioComponentDef } from '@domio/components';
 import { ElementSvg } from './ElementSvg';
 
-function ComponentThumbInner({ def }: { def: DomioComponentDef }): ReactElement {
+function ComponentThumbInner({
+  def,
+  variant,
+}: {
+  def: DomioComponentDef;
+  variant?: string;
+}): ReactElement {
   const layer: ComponentLayer = {
     id: asULID('01HZX01HZX01HZX01HZX01HZ'),
     semanticId: 'thumb',
@@ -22,7 +28,7 @@ function ComponentThumbInner({ def }: { def: DomioComponentDef }): ReactElement 
     component: {
       catalogId: def.catalogId,
       version: def.version,
-      variant: def.defaultVariant,
+      variant: variant ?? def.defaultVariant,
       props: {},
     },
   };

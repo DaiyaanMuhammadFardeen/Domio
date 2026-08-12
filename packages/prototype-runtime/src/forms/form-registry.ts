@@ -11,7 +11,6 @@ import type {
   FormId,
   FormValidationResult,
   FormValues,
-  InputDefinition,
   InputType,
 } from './types.js';
 import { validateForm } from './input-validator.js';

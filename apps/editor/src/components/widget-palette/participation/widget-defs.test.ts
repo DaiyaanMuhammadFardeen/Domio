@@ -27,7 +27,7 @@ describe('participation widget palette', () => {
   it('findWidget returns the right entry', () => {
     expect(findWidget('poll')?.label).toBe('Poll');
     expect(findWidget('quiz')?.emoji).toBe('🧠');
-    expect(findWidget('missing')).toBeUndefined();
+    expect(findWidget('missing' as unknown as Parameters<typeof findWidget>[0])).toBeUndefined();
   });
 
   it('every widget type matches an audience type', () => {

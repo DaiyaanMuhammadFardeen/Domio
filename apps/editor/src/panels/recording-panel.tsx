@@ -29,6 +29,7 @@ import {
   type EncoderResult,
   type DraftMachine,
   type DraftState,
+  type DraftAction,
   type FinalizedDraft,
   type BitrateParams,
   type TimingConfig,
@@ -105,7 +106,7 @@ export function RecordingPanel({
   // useReducer only sees (state, action) and we pass `Date.now()` as the
   // wall-clock source for `startedAt`.
   const reducer = useMemo(
-    () => (state: DraftMachine, action: import('@domio/recording').DraftAction): DraftMachine =>
+    () => (state: DraftMachine, action: DraftAction): DraftMachine =>
       draftReducer(state, action, Date.now()),
     [],
   );

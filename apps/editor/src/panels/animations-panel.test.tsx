@@ -17,6 +17,8 @@ function defaultProps(overrides?: Partial<React.ComponentProps<typeof Animations
     copiedAnimation: null as LayerTimeline | null,
     onCopy: vi.fn(),
     onPaste: vi.fn(),
+    motionPath: null,
+    onMotionPathChange: vi.fn(),
     ...overrides,
   };
 }
@@ -44,11 +46,12 @@ describe('AnimationsPanel', () => {
     expect(screen.getByText('Animations')).toBeInTheDocument();
   });
 
-  it('renders all four tabs', () => {
+  it('renders all five tabs', () => {
     render(<AnimationsPanel {...defaultProps()} />);
     expect(screen.getByTestId('p09-tab-timeline')).toHaveTextContent('Timeline');
     expect(screen.getByTestId('p09-tab-transition')).toHaveTextContent('Transition');
     expect(screen.getByTestId('p09-tab-magicMove')).toHaveTextContent('Magic Move');
+    expect(screen.getByTestId('p09-tab-motionPath')).toHaveTextContent('Motion Path');
     expect(screen.getByTestId('p09-tab-accessibility')).toHaveTextContent('Accessibility');
   });
 
@@ -185,5 +188,67 @@ describe('AnimationsPanel', () => {
     render(<AnimationsPanel {...defaultProps()} timeline={sampleTimeline} onTimelineChange={onTimelineChange} />);
     fireEvent.click(screen.getByTestId('p09-clear-timeline'));
     expect(onTimelineChange).toHaveBeenCalledWith(null);
+  });
+
+  it('renders a Motion Path tab', () => {
+    render(<AnimationsPanel {...defaultProps()} timeline={sampleTimeline} />);
+    expect(screen.getByTestId('p09-tab-motionPath')).toHaveTextContent('Motion Path');
+  });
+
+  it('opens the Motion Path Editor when the tab is clicked', () => {
+    render(<AnimationsPanel {...defaultProps()} timeline={sampleTimeline} />);
+    fireEvent.click(screen.getByTestId('p09-tab-motionPath'));
+    expect(screen.getByTestId('motion-path-editor')).toBeInTheDocument();
+  });
+
+  it('shows the motion-path "add timeline first" empty state when no timeline exists', () => {
+    render(<AnimationsPanel {...defaultProps()} />);
+    fireEvent.click(screen.getByTestId('p09-tab-motionPath'));
+    expect(screen.getByText(/Add a timeline first/i)).toBeInTheDocument();
+  });
+
+  it('expands the per-keyframe bezier editor and renders the easing curves', () => {
+    const timelineWithBezierEasing: LayerTimeline = {
+      ...sampleTimeline,
+      tracks: [
+        {
+          property: 'opacity',
+          keyframes: [
+            { timeMs: 0, value: 1, easing: 'cubic-bezier(0.42, 0, 0.58, 1)' },
+            { timeMs: 1000, value: 0 },
+          ],
+        },
+      ],
+    };
+    render(<AnimationsPanel {...defaultProps()} timeline={timelineWithBezierEasing} />);
+    fireEvent.click(screen.getByTestId('p09-keyframe-bezier-toggle-0-0'));
+    expect(screen.getByTestId('p09-keyframe-bezier-editor-0-0')).toBeInTheDocument();
+  });
+
+  it('shows the easing dropdown but no bezier editor when the easing is not a bezier', () => {
+    render(<AnimationsPanel {...defaultProps()} timeline={sampleTimeline} />);
+    fireEvent.click(screen.getByTestId('p09-keyframe-bezier-toggle-0-0'));
+    // The easing dropdown is always shown when expanded.
+    expect(screen.getByTestId('p09-keyframe-easing-select-0-0')).toBeInTheDocument();
+    // But the bezier editor is only rendered when the easing is a cubic-bezier.
+    expect(screen.queryByTestId('p09-keyframe-bezier-editor-0-0')).toBeNull();
+  });
+
+  it('commits easing string when the per-keyframe easing dropdown switches to bezier', () => {
+    const onTimelineChange = vi.fn();
+    render(<AnimationsPanel {...defaultProps()} timeline={sampleTimeline} onTimelineChange={onTimelineChange} />);
+    fireEvent.click(screen.getByTestId('p09-keyframe-bezier-toggle-0-0'));
+    fireEvent.change(screen.getByTestId('p09-keyframe-easing-select-0-0'), { target: { value: '__bezier' } });
+    expect(onTimelineChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tracks: expect.arrayContaining([
+          expect.objectContaining({
+            keyframes: expect.arrayContaining([
+              expect.objectContaining({ easing: expect.stringContaining('cubic-bezier(') }),
+            ]),
+          }),
+        ]),
+      }),
+    );
   });
 });

@@ -14,6 +14,17 @@ import {
   getModels, getVideos, getAudio, getLottie,
   getMapStyles, getCodeLanguages,
 } from '../lib/p11-store';
+import {
+  Model3DEditor,
+  CadImportDialog,
+  ARPreviewButton,
+  VideoTrimmer,
+  AudioVoiceoverPanel,
+  CodeBlockEditor,
+  LatexEditor,
+  MapPicker,
+  LiveAppEmbed,
+} from '../components/media';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -63,6 +74,9 @@ const MEDIA_TABS: { id: MediaTab; icon: string; labelKey: string }[] = [
 function Model3DTab({ onInsert }: { onInsert: (kind: string, props: Record<string, unknown>) => void }): ReactElement {
   const t = useT();
   const [dragOver, setDragOver] = useState(false);
+  const [cadOpen, setCadOpen] = useState(false);
+  const [hotspots, setHotspots] = useState<readonly { id: string; x: number; y: number; action: string }[]>([]);
+  const [keyframes, setKeyframes] = useState<readonly { id: string; t: number; orbit: number; distance: number }[]>([]);
   const models = getModels();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +89,11 @@ function Model3DTab({ onInsert }: { onInsert: (kind: string, props: Record<strin
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (ext !== 'glb' && ext !== 'gltf' && ext !== 'usdz') return;
     onInsert('model3d', { modelAssetId: `local:${file.name}`, name: file.name });
+  }, [onInsert]);
+
+  const handleCadImport = useCallback((glbUrl: string, fileName: string) => {
+    onInsert('model3d', { modelAssetId: glbUrl, name: fileName, fromCad: true });
+    setCadOpen(false);
   }, [onInsert]);
 
   return (
@@ -169,6 +188,35 @@ function Model3DTab({ onInsert }: { onInsert: (kind: string, props: Record<strin
           </div>
         </div>
       </div>
+
+      {/* Wave 2 §S2.10 — CAD import + 3D viewport + hotspots + keyframes */}
+      <div style={{ marginTop: 12 }}>
+        <div className="data-panel__section-title">CAD Import</div>
+        <button
+          type="button"
+          className="data-panel__add-btn"
+          onClick={() => setCadOpen(true)}
+          data-testid="p11-3d-cad-btn"
+        >
+          Import STEP / FBX / IGES
+        </button>
+        <CadImportDialog open={cadOpen} onClose={() => setCadOpen(false)} onImport={handleCadImport} />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <div className="data-panel__section-title">3D Editor</div>
+        <Model3DEditor
+          src=""
+          hotspots={hotspots}
+          keyframes={keyframes}
+          onHotspotsChange={setHotspots}
+          onKeyframesChange={setKeyframes}
+        />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <ARPreviewButton slideId="active-slide" />
+      </div>
     </div>
   );
 }
@@ -176,6 +224,7 @@ function Model3DTab({ onInsert }: { onInsert: (kind: string, props: Record<strin
 function VideoTab({ onInsert }: { onInsert: (kind: string, props: Record<string, unknown>) => void }): ReactElement {
   const t = useT();
   const videos = getVideos();
+  const [trim, setTrim] = useState<{ startMs: number; endMs: number }>({ startMs: 0, endMs: 10000 });
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -292,6 +341,16 @@ function VideoTab({ onInsert }: { onInsert: (kind: string, props: Record<string,
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Wave 2 §S2.10 — non-destructive clip mask */}
+      <div style={{ marginTop: 12 }}>
+        <div className="data-panel__section-title">Clip trim</div>
+        <VideoTrimmer
+          durationMs={Math.max(trim.endMs, 10000)}
+          value={trim}
+          onChange={setTrim}
+        />
       </div>
     </div>
   );
@@ -412,6 +471,15 @@ function AudioTab({ onInsert }: { onInsert: (kind: string, props: Record<string,
             {t('p11.audio.loop')}
           </label>
         </div>
+      </div>
+
+      {/* Wave 2 §S2.10 — voiceover */}
+      <div style={{ marginTop: 12 }}>
+        <div className="data-panel__section-title">Voiceover</div>
+        <AudioVoiceoverPanel
+          slideId="active-slide"
+          onUploaded={(info) => onInsert('audio', { assetId: info.url, name: info.id, durationMs: info.durationMs })}
+        />
       </div>
     </div>
   );
@@ -569,6 +637,19 @@ function EmbedTab({ onInsert }: { onInsert: (kind: string, props: Record<string,
           {t('p11.embed.insert')}
         </button>
       </div>
+
+      {/* Wave 2 §S2.10 — live app embed config */}
+      <div style={{ marginTop: 12 }}>
+        <div className="data-panel__section-title">Embed config (origins, permissions, JWT)</div>
+        <LiveAppEmbed
+          initialUrl={url || 'https://example.com'}
+          onChange={(config) => {
+            // Wire frame config through to onInsert payload later — for now surface it.
+            // eslint-disable-next-line no-console
+            console.debug('LiveAppEmbed config changed', config);
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -648,6 +729,12 @@ function CodeBlockTab({ onInsert }: { onInsert: (kind: string, props: Record<str
           {t('p11.code.insert')}
         </button>
       </div>
+
+      {/* Wave 2 §S2.10 — sandbox runner preview */}
+      <div style={{ marginTop: 12 }}>
+        <div className="data-panel__section-title">Run &amp; preview</div>
+        <CodeBlockEditor initialSource={code || 'console.log("Hello from Domio")'} language={lang === 'python' ? 'python' : lang === 'typescript' ? 'ts' : 'js'} />
+      </div>
     </div>
   );
 }
@@ -715,6 +802,12 @@ function LatexTab({ onInsert }: { onInsert: (kind: string, props: Record<string,
         >
           {t('p11.latex.insert')}
         </button>
+      </div>
+
+      {/* Wave 2 §S2.10 — live preview */}
+      <div style={{ marginTop: 12 }}>
+        <div className="data-panel__section-title">Live preview</div>
+        <LatexEditor initialSource={source || 'E = mc^2'} />
       </div>
     </div>
   );
@@ -824,6 +917,18 @@ function MapTab({ onInsert }: { onInsert: (kind: string, props: Record<string, u
         >
           {t('p11.map.insert')}
         </button>
+      </div>
+
+      {/* Wave 2 §S2.10 — visual marker picker */}
+      <div style={{ marginTop: 12 }}>
+        <div className="data-panel__section-title">Marker picker</div>
+        <MapPicker
+          value={{ lat, lng, label: selectedStyle }}
+          onChange={(next) => {
+            if (typeof next.lat === 'number') setLat(next.lat);
+            if (typeof next.lng === 'number') setLng(next.lng);
+          }}
+        />
       </div>
     </div>
   );

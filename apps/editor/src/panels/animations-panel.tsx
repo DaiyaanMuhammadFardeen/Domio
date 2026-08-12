@@ -2,17 +2,21 @@
 
 /**
  * AnimationsPanel — left-side panel for configuring animations & transitions.
- * Contains four tabs: Timeline, Transition, Magic Move, and Accessibility.
+ * Contains five tabs: Timeline, Transition, Magic Move, Motion Path, and Accessibility.
  *
  * P09 — animation & transition UI.
+ * Wave 2 §S2.11 — motion path editor + per-keyframe easing bezier editor.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { LayerTimeline, SlideTransition, TimelineTrack, TriggerConfig, ReducedMotionPolicy } from '@domio/canvas';
 import { EasingPicker } from './easing-picker';
+import { MotionPathEditor } from '../components/animation/MotionPathEditor';
+import { EasingBezierEditor, formatBezierTuple, parseBezierTuple } from '../components/animation/EasingBezierEditor';
+import { defaultMotionPath, type MotionPath } from '../lib/motion-path';
 
-type AnimTab = 'timeline' | 'transition' | 'magicMove' | 'accessibility';
+type AnimTab = 'timeline' | 'transition' | 'magicMove' | 'motionPath' | 'accessibility';
 
 interface AnimationsPanelProps {
   /** Current timeline on the selected element (null = none configured) */
@@ -38,6 +42,10 @@ interface AnimationsPanelProps {
   copiedAnimation: LayerTimeline | null;
   onCopy: () => void;
   onPaste: () => void;
+
+  /** Optional motion path (Wave 2 §S2.11) */
+  motionPath?: MotionPath | null | undefined;
+  onMotionPathChange?: ((path: MotionPath | null) => void) | undefined;
 }
 
 const TRIGGER_OPTIONS: { value: TriggerConfig['kind']; label: string }[] = [
@@ -87,6 +95,8 @@ export function AnimationsPanel({
   copiedAnimation,
   onCopy,
   onPaste,
+  motionPath: motionPathProp,
+  onMotionPathChange,
 }: AnimationsPanelProps): ReactElement {
   const [activeTab, setActiveTab] = useState<AnimTab>('timeline');
 
@@ -97,6 +107,17 @@ export function AnimationsPanel({
   // becomes non-null (i.e. the doc has been updated).
   const [localDraft, setLocalDraft] = useState<LayerTimeline | null>(null);
   const [localMagicRole, setLocalMagicRole] = useState<string | null>(null);
+  // Set of "trackIdx-keyframeIdx" keys whose bezier editor is expanded.
+  const [expandedKeyframes, setExpandedKeyframes] = useState<ReadonlySet<string>>(new Set());
+  const toggleKeyframeExpanded = useCallback((tIdx: number, kIdx: number) => {
+    const key = `${tIdx}-${kIdx}`;
+    setExpandedKeyframes((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }, []);
 
   // Sync with prop (source of truth)
   useEffect(() => { if (timelineProp !== null) setLocalDraft(null); }, [timelineProp]);
@@ -262,6 +283,7 @@ export function AnimationsPanel({
     { id: 'timeline', label: 'Timeline' },
     { id: 'transition', label: 'Transition' },
     { id: 'magicMove', label: 'Magic Move' },
+    { id: 'motionPath', label: 'Motion Path' },
     { id: 'accessibility', label: 'Accessibility' },
   ];
 
@@ -528,39 +550,99 @@ export function AnimationsPanel({
                       </div>
 
                       {/* Keyframes */}
-                      {track.keyframes.map((kf, kIdx) => (
-                        <div
-                          key={kIdx}
-                          style={{ display: 'flex', gap: 4, alignItems: 'center', marginBottom: 4 }}
-                          data-testid={`p09-keyframe-${tIdx}-${kIdx}`}
-                        >
-                          <input
-                            type="number"
-                            className="data-panel__add-input"
-                            value={kf.timeMs}
-                            min={0}
-                            max={timeline.durationMs}
-                            style={{ width: 60 }}
-                            onChange={(e) => handleKeyframeChange(tIdx, kIdx, 'timeMs', Math.max(0, Number(e.target.value)))}
-                            title="Time (ms)"
-                          />
-                          <input
-                            className="data-panel__add-input"
-                            value={String(kf.value)}
-                            style={{ flex: 1 }}
-                            onChange={(e) => handleKeyframeChange(tIdx, kIdx, 'value', e.target.value)}
-                            title="Value"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveKeyframe(tIdx, kIdx)}
-                            style={{ background: 'none', border: 'none', color: 'var(--muted, #888)', cursor: 'pointer', fontSize: 12 }}
-                            title="Remove keyframe"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
+                      {track.keyframes.map((kf, kIdx) => {
+                        const easingTuple = kf.easing ? parseBezierTuple(kf.easing) : null;
+                        const isBezier = easingTuple !== null;
+                        const isExpanded = expandedKeyframes.has(`${tIdx}-${kIdx}`);
+                        return (
+                          <div key={kIdx} style={{ marginBottom: 6 }} data-testid={`p09-keyframe-${tIdx}-${kIdx}`}>
+                            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                              <input
+                                type="number"
+                                className="data-panel__add-input"
+                                value={kf.timeMs}
+                                min={0}
+                                max={timeline.durationMs}
+                                style={{ width: 60 }}
+                                onChange={(e) => handleKeyframeChange(tIdx, kIdx, 'timeMs', Math.max(0, Number(e.target.value)))}
+                                title="Time (ms)"
+                              />
+                              <input
+                                className="data-panel__add-input"
+                                value={String(kf.value)}
+                                style={{ flex: 1 }}
+                                onChange={(e) => handleKeyframeChange(tIdx, kIdx, 'value', e.target.value)}
+                                title="Value"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => toggleKeyframeExpanded(tIdx, kIdx)}
+                                style={{ background: 'none', border: 'none', color: 'var(--muted, #888)', cursor: 'pointer', fontSize: 12 }}
+                                title={isExpanded ? 'Hide bezier editor' : 'Edit bezier easing'}
+                                data-testid={`p09-keyframe-bezier-toggle-${tIdx}-${kIdx}`}
+                              >
+                                〰
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveKeyframe(tIdx, kIdx)}
+                                style={{ background: 'none', border: 'none', color: 'var(--muted, #888)', cursor: 'pointer', fontSize: 12 }}
+                                title="Remove keyframe"
+                              >
+                                ×
+                              </button>
+                            </div>
+                            {isExpanded && (
+                              <div
+                                style={{
+                                  marginTop: 6,
+                                  padding: 8,
+                                  background: 'var(--bg-secondary, #0c0c0c)',
+                                  borderRadius: 4,
+                                  border: '1px solid var(--border, #333)',
+                                }}
+                                data-testid={`p09-keyframe-bezier-${tIdx}-${kIdx}`}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                                  <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>Easing</label>
+                                  <select
+                                    className="data-panel__add-input"
+                                    style={{ flex: 1, fontSize: 11 }}
+                                    value={isBezier ? '__bezier' : (kf.easing ?? 'linear')}
+                                    onChange={(e) => {
+                                      const v = e.target.value;
+                                      if (v === '__bezier') {
+                                        handleKeyframeChange(tIdx, kIdx, 'easing', 'cubic-bezier(0.42, 0, 0.58, 1)');
+                                      } else {
+                                        handleKeyframeChange(tIdx, kIdx, 'easing', v);
+                                      }
+                                    }}
+                                    data-testid={`p09-keyframe-easing-select-${tIdx}-${kIdx}`}
+                                  >
+                                    <option value="linear">Linear</option>
+                                    <option value="ease-in">Ease in</option>
+                                    <option value="ease-out">Ease out</option>
+                                    <option value="ease-in-out">Ease in-out</option>
+                                    <option value="spring">Spring</option>
+                                    <option value="bounce">Bounce</option>
+                                    <option value="__bezier">Custom bezier…</option>
+                                  </select>
+                                </div>
+                                {isBezier && (
+                                  <EasingBezierEditor
+                                    value={easingTuple!}
+                                    size={140}
+                                    onChange={(next) =>
+                                      handleKeyframeChange(tIdx, kIdx, 'easing', formatBezierTuple(next))
+                                    }
+                                    id={`p09-keyframe-bezier-editor-${tIdx}-${kIdx}`}
+                                  />
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
 
                       <button
                         type="button"
@@ -719,6 +801,64 @@ export function AnimationsPanel({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Motion Path Tab */}
+      {activeTab === 'motionPath' && (
+        <div className="data-panel__section">
+          <div className="data-panel__section-title">Motion Path</div>
+          {!timeline ? (
+            <div className="data-panel__empty">
+              Add a timeline first — motion paths animate along the timeline's duration and trigger.
+            </div>
+          ) : (
+            <MotionPathEditor
+              value={motionPathProp ?? defaultMotionPath()}
+              durationMs={timeline.durationMs}
+              trigger={timeline.trigger}
+              width={280}
+              onChange={(path) => {
+                onMotionPathChange?.(path);
+                if (path) {
+                  // Path needs at least one track for the runtime to animate
+                  // along it; ensure an `x` + `y` track exists so the viewer
+                  // can play the path. We don't mutate keyframes here — the
+                  // engine reads the path from the same prop bag.
+                  const hasPosTrack = timeline.tracks.some((t) => t.property === 'x' || t.property === 'y');
+                  if (!hasPosTrack) {
+                    const tl: LayerTimeline = {
+                      ...timeline,
+                      tracks: [
+                        ...timeline.tracks,
+                        {
+                          property: 'x',
+                          keyframes: path.keyframes.map((kf) => ({
+                            timeMs: kf.timeMs,
+                            value: kf.x,
+                            ...(kf.easing ? { easing: kf.easing } : {}),
+                          })),
+                        },
+                        {
+                          property: 'y',
+                          keyframes: path.keyframes.map((kf) => ({
+                            timeMs: kf.timeMs,
+                            value: kf.y,
+                            ...(kf.easing ? { easing: kf.easing } : {}),
+                          })),
+                        },
+                      ],
+                    };
+                    commitTimelineChange(tl);
+                  }
+                }
+              }}
+              onTriggerChange={(trigger) => {
+                if (!timeline) return;
+                commitTimelineChange({ ...timeline, ...(trigger ? { trigger } : {}) });
+              }}
+            />
+          )}
         </div>
       )}
 

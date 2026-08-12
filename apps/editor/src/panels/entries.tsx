@@ -23,6 +23,7 @@ import { LibraryPanel } from './library-panel';
 import { StickersPanel } from './stickers-panel';
 import { IconPicker } from './icon-picker';
 import { ThemeBrandPanel } from './theme-brand-panel';
+import { ThemePanel } from '../components/brand/ThemePanel';
 import { DataSourcePanel } from './data-source-panel';
 import { FiltersPanel } from './filters-panel';
 import { AnimationsPanel } from './animations-panel';
@@ -42,6 +43,8 @@ import { MarketplacePanel } from './marketplace-panel';
 import { CanvasControlsPanel } from './canvas-controls-panel';
 import { OutlineApproval } from '../components/copilot/OutlineApproval';
 import { AuditTrail, type AuditEntryView } from '../components/prototyping/agent/AuditTrail';
+import { PrototypingPanel } from '../components/prototyping/PrototypingPanel';
+import { DeviceFramePicker } from '../components/prototyping/DeviceFramePicker';
 
 // ---------------------------------------------------------------------------
 // Core / structure
@@ -67,7 +70,16 @@ export const LayersEntry: PanelModule = {
 export const InsertEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
     if (!ctx.handlers.onInsert) return null;
-    return <InsertPanel onInsert={ctx.handlers.onInsert} />;
+    return (
+      <InsertPanel
+        onInsert={ctx.handlers.onInsert}
+        onInsertSection={ctx.handlers.onInsertSection}
+        onInsertTemplate={ctx.handlers.onInsertTemplate}
+        onInsertStockImage={ctx.handlers.onInsertStockImage}
+        onInsertLottie={ctx.handlers.onInsertLottie}
+        onInsertIcon={ctx.handlers.onInsertIcon}
+      />
+    );
   },
 };
 
@@ -95,25 +107,58 @@ export const IconsEntry: PanelModule = {
 export const ThemeBrandEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
     const h = ctx.handlers;
-    if (!h.onThemeChange || !h.onBrandKitChange || !h.onSchemeToggle || !h.onOverrideChange || !h.onAudit) {
-      return null;
+    // The new ThemePanel supersedes the legacy one. If the host
+    // doesn't provide the extended kit-detail + handlers, fall back
+    // to the legacy panel so existing contexts keep rendering.
+    const hasFullSurface =
+      !!h.onKitDetailChange &&
+      !!h.onSlideKitChange &&
+      !!h.onMarketplaceInstall &&
+      !!h.onDarkGenerated &&
+      !!h.onLintFix;
+    if (!hasFullSurface) {
+      if (!h.onThemeChange || !h.onBrandKitChange || !h.onSchemeToggle || !h.onOverrideChange || !h.onAudit) {
+        return null;
+      }
+      return (
+        <ThemeBrandPanel
+          themes={ctx.themes}
+          activeThemeId={ctx.state.activeThemeId}
+          onThemeChange={h.onThemeChange}
+          brandKits={ctx.brandKits}
+          activeBrandKitId={ctx.state.activeBrandKitId}
+          onBrandKitChange={h.onBrandKitChange}
+          colorScheme={ctx.state.colorScheme}
+          onSchemeToggle={h.onSchemeToggle}
+          override={ctx.state.override}
+          onOverrideChange={h.onOverrideChange}
+          a11yFindings={ctx.state.a11yFindings}
+          onAudit={h.onAudit}
+          isAuditing={ctx.state.isAuditing}
+          slideId={ctx.state.activeSlideId}
+        />
+      );
     }
     return (
-      <ThemeBrandPanel
+      <ThemePanel
         themes={ctx.themes}
         activeThemeId={ctx.state.activeThemeId}
-        onThemeChange={h.onThemeChange}
+        onThemeChange={h.onThemeChange ?? (() => {})}
         brandKits={ctx.brandKits}
         activeBrandKitId={ctx.state.activeBrandKitId}
-        onBrandKitChange={h.onBrandKitChange}
+        onBrandKitChange={h.onBrandKitChange ?? (() => {})}
         colorScheme={ctx.state.colorScheme}
-        onSchemeToggle={h.onSchemeToggle}
+        onSchemeToggle={h.onSchemeToggle ?? (() => {})}
         override={ctx.state.override}
-        onOverrideChange={h.onOverrideChange}
-        a11yFindings={ctx.state.a11yFindings}
-        onAudit={h.onAudit}
-        isAuditing={ctx.state.isAuditing}
-        slideId={ctx.state.activeSlideId}
+        onOverrideChange={h.onOverrideChange ?? (() => {})}
+        activeKitDetail={ctx.state.activeKitDetail}
+        onKitDetailChange={h.onKitDetailChange ?? (() => {})}
+        slideKitId={ctx.state.slideKitId}
+        onSlideKitChange={h.onSlideKitChange ?? (() => {})}
+        lintElements={ctx.state.lintElements}
+        onLintFix={h.onLintFix ?? (() => {})}
+        onMarketplaceInstall={h.onMarketplaceInstall ?? (() => {})}
+        onDarkGenerated={h.onDarkGenerated ?? (() => {})}
       />
     );
   },
@@ -191,6 +236,43 @@ export const ConnectionsEntry: PanelModule = {
         onRemoveEdge={h.onRemoveEdge}
         onAddOverlay={h.onAddOverlay}
         onRemoveOverlay={h.onRemoveOverlay}
+      />
+    );
+  },
+};
+
+/**
+ * Wave 2 §S2.12 — Prototyping entry: voice triggers + gesture picker +
+ * conditional logic builder + form palette.
+ */
+export const PrototypingEntry: PanelModule = {
+  Component: (_ctx: EditorPanelContext): ReactElement | null => {
+    return (
+      <PrototypingPanel
+        initialGestures={['click']}
+        onChangeGestures={() => {
+          // Persistence wired in once editor-store gains prototyping slots.
+        }}
+        onChangeTrigger={() => {}}
+        onChangeLogic={() => {}}
+        onInsertFormInput={() => {}}
+      />
+    );
+  },
+};
+
+/**
+ * Wave 2 §S2.12 — Device-frame picker entry. Used by the preview
+ * chrome; surfaces both list + grid modes via `display` prop.
+ */
+export const DeviceFrameEntry: PanelModule = {
+  Component: (_ctx: EditorPanelContext): ReactElement | null => {
+    return (
+      <DeviceFramePicker
+        display="grid"
+        onChange={() => {
+          // Persistence wired in once editor-store gains preview frame slot.
+        }}
       />
     );
   },
