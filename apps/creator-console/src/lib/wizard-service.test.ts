@@ -88,7 +88,7 @@ describe('wizard-service', () => {
     expect(after?.assets ?? []).toHaveLength(0);
   });
 
-  it('savePricing advances to review when details + pricing are valid', async () => {
+  it('savePricing advances to pricing step when details + pricing are valid', async () => {
     const draft = await createDraft();
     await saveDetails(draft.id, FULL_DETAILS);
     const updated = await savePricing(draft.id, {
@@ -98,7 +98,7 @@ describe('wizard-service', () => {
       subscription_interval: null,
       royalty_bps: null,
     });
-    expect(updated.step).toBe('review');
+    expect(updated.step).toBe('pricing');
     expect(updated.pricing?.price_cents).toBe(1900);
   });
 

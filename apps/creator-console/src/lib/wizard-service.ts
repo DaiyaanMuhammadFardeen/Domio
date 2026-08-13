@@ -177,17 +177,12 @@ export async function savePricing(
   if (!draft) {
     throw new Error(`Draft not found: ${draftId}`);
   }
+  // Stay on the pricing step so the next button can submit once both
+  // details + pricing are present and valid. The UI surfaces `submit`
+  // as the call-to-action when on the pricing step.
   const updated = update(draft, { pricing, step: 'pricing' });
   drafts.set(draftId, updated);
-  // Surface an explicit `review` marker — caller can submit once both
-  // details + pricing are present and valid.
-  if (draft.details && detailsValid(draft.details) && pricingValid(pricing)) {
-    drafts.set(
-      draftId,
-      update(updated, { step: 'review' as WizardStep, pricing }),
-    );
-  }
-  return drafts.get(draftId) ?? updated;
+  return updated;
 }
 
 export async function submitForReview(draftId: string): Promise<MarketplaceListing> {
