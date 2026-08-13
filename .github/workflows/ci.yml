@@ -30,22 +30,6 @@ on:
     # 02:30 nightly security sweep and 02:00 nightly load test.
     - cron: '0 3 * * *'
   workflow_dispatch:
-    inputs:
-      skip_load:
-        description: Skip load test (faster local validation)
-        type: boolean
-        default: false
-      skip_e2e:
-        description: Skip external-user e2e
-        type: boolean
-        default: false
-      target_env:
-        description: 'Where to run DAST (preview|staging)'
-        type: choice
-        default: preview
-        options:
-          - preview
-          - staging
 
 # Cancel superseded runs on the same branch.
 concurrency:
@@ -61,7 +45,9 @@ permissions:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-  ZAP_TARGET: ${{ github.event.inputs.target_env == 'staging' && 'https://staging.domio.app' || 'https://preview.domio.app' }}
+  # ZAP_TARGET defaults to preview; the security workflow receives
+  # target_env via workflow_call inputs in production deployments.
+  ZAP_TARGET: ${{ vars.ZAP_TARGET || 'https://preview.domio.app' }}
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────
@@ -110,7 +96,6 @@ jobs:
 
   external-e2e:
     name: External-user e2e (all apps)
-    if: ${{ !inputs.skip_e2e }}
     uses: ./.github/workflows/external-e2e.yml
 
   editor-e2e:
@@ -131,7 +116,7 @@ jobs:
 
   load:
     name: Load test (k6)
-    if: ${{ !inputs.skip_load }}
+    if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/load.yml
 
   chaos:
