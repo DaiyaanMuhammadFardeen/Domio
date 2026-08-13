@@ -115,6 +115,23 @@ const en: I18nDict = {
   'settings.payouts.empty': 'No payout methods configured',
   'settings.save': 'Save Changes',
   'settings.saving': 'Saving...',
+
+  // Reviews page
+  'reviews.heading': 'Reviews',
+  'reviews.subheading': 'Reviews of your listings. Reply once per review.',
+  'reviews.empty': 'No reviews yet.',
+  'reviews.col.listing': 'Listing',
+  'reviews.col.reviewer': 'Reviewer',
+  'reviews.col.rating': 'Rating',
+  'reviews.col.body': 'Body',
+  'reviews.col.status': 'Status',
+  'reviews.col.replyState': 'Reply',
+  'reviews.reply.replyNow': 'Reply',
+  'reviews.reply.alreadyReplied': 'Replied',
+  'reviews.reply.placeholder': 'Write a reply…',
+  'reviews.status.accepted': 'Accepted',
+  'reviews.status.queued': 'In moderation',
+  'reviews.status.flagged': 'Flagged',
 };
 
 const bn: I18nDict = {
