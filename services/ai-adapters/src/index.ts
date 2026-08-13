@@ -243,7 +243,9 @@ function loadProtoAndBind(
   const proto = grpc.loadPackageDefinition(packageDef) as unknown as Record<string, unknown>;
   // The ai.proto package is `domio.ai.v1`. proto-loader represents
   // dots as nested objects.
-  const domioAi = proto['domio']?.['ai']?.['v1'] as Record<string, unknown> | undefined;
+  const domioNs = (proto['domio'] ?? {}) as Record<string, unknown>;
+  const aiNs = (domioNs['ai'] ?? {}) as Record<string, unknown>;
+  const domioAi = (aiNs['v1'] ?? undefined) as Record<string, unknown> | undefined;
   const AdapterService = domioAi?.['AdapterService'] as
     | { service: grpc.ServiceDefinition<grpc.UntypedHandleCall> }
     | undefined;

@@ -145,7 +145,7 @@ export class XapiEmitter {
       'experienced',
       object,
       { completion: false },
-      { registration: ctx.attemptId },
+      { ...(ctx.attemptId !== undefined ? { registration: ctx.attemptId } : {}) },
     );
   }
 
@@ -170,7 +170,7 @@ export class XapiEmitter {
         response: ctx.response,
       },
       {
-        registration: ctx.attemptId,
+        ...(ctx.attemptId !== undefined ? { registration: ctx.attemptId } : {}),
         extensions: {
           'https://domio.dev/xapi/quiz-id': ctx.quizId,
           'https://domio.dev/xapi/deck-id': ctx.deckId,
@@ -205,7 +205,7 @@ export class XapiEmitter {
       'completed',
       object,
       completedResult,
-      { registration: ctx.attemptId },
+      { ...(ctx.attemptId !== undefined ? { registration: ctx.attemptId } : {}) },
     );
     if (passed) {
       const passedStatement = this.emit(
@@ -213,7 +213,7 @@ export class XapiEmitter {
         'passed',
         object,
         { score, success: true },
-        { registration: ctx.attemptId },
+        { ...(ctx.attemptId !== undefined ? { registration: ctx.attemptId } : {}) },
       );
       return [completedStatement, passedStatement];
     }
@@ -222,7 +222,7 @@ export class XapiEmitter {
       'failed',
       object,
       { score, success: false },
-      { registration: ctx.attemptId },
+      { ...(ctx.attemptId !== undefined ? { registration: ctx.attemptId } : {}) },
     );
     return [completedStatement, failedStatement];
   }

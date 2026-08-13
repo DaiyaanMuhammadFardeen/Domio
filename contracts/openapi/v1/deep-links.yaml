@@ -207,9 +207,9 @@ components:
         id: { type: string, pattern: '^[0-9A-HJKMNP-TV-Z]{9}$' }
         kid: { type: string }
         click_count: { type: integer, minimum: 0 }
-        payload: { $ref: './deep-link-payload-v1.schema.json' }
+        payload: { $ref: '../../schema/v1/deep-link-payload-v1.schema.json' }
     DeepLink:
-      $ref: './deep-link-v1.schema.json'
+      $ref: '../../schema/v1/deep-link-v1.schema.json'
     DeepLinkStats:
       type: object
       required: [id, click_count, expires_at, viewer_scope, single_use, created_at]

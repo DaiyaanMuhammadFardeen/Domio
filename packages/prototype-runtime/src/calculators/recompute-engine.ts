@@ -284,22 +284,39 @@ const BUILTINS: Readonly<
       fn: (
         args: ReadonlyArray<number | string | readonly number[]>,
         ctx: RecomputeContext,
-      ) => number | string;
+      ) => number | string | readonly number[];
     }
   >
 > = {
-  sum: { arity: 'min', fn: (a) => a.reduce((s, x) => Number(decAdd(s, x).value), 0) },
+  sum: {
+    arity: 'min',
+    fn: (a) => a.reduce((s, x) => Number(decAdd(s, x as number).value), 0 as number),
+  },
   average: {
     arity: 'min',
     fn: (a) => {
       if (a.length === 0) return 0;
-      const total = a.reduce((s, x) => Number(decAdd(s, x).value), 0);
+      const total = a.reduce((s, x) => Number(decAdd(s, x as number).value), 0 as number);
       return Number(div(total, a.length));
     },
   },
-  min: { arity: 'min', fn: (a) => a.reduce((m, x) => Math.min(m, x), Number.POSITIVE_INFINITY) },
-  max: { arity: 'min', fn: (a) => a.reduce((m, x) => Math.max(m, x), Number.NEGATIVE_INFINITY) },
-  if: { arity: 3, fn: ([cond, a, b]) => (cond !== 0 ? a : b) },
+  min: {
+    arity: 'min',
+    fn: (a) =>
+      a.reduce(
+        (m, x) => Math.min(m, x as number),
+        Number.POSITIVE_INFINITY,
+      ),
+  },
+  max: {
+    arity: 'min',
+    fn: (a) =>
+      a.reduce(
+        (m, x) => Math.max(m, x as number),
+        Number.NEGATIVE_INFINITY,
+      ),
+  },
+  if: { arity: 3, fn: ([cond, a, b]) => (cond as number !== 0 ? a : b) },
   coalesce: {
     arity: 'min',
     fn: (a) => {
@@ -307,14 +324,14 @@ const BUILTINS: Readonly<
       return 0;
     },
   },
-  clamp: { arity: 3, fn: ([v, lo, hi]) => Math.min(hi, Math.max(lo, v)) },
+  clamp: { arity: 3, fn: ([v, lo, hi]) => Math.min(hi as number, Math.max(lo as number, v as number)) },
   // Use 'half-down' so 1.55 rounds to 1.5 (matches the most
   // user-friendly intuition; 0.5 always rounds toward zero).
   // decimal128's default is banker's rounding (1.55 → 1.6).
-  round: { arity: 'min', fn: (a) => Number(decRound(a[0]!, a[1] ?? 0, 'half-down').value) },
+  round: { arity: 'min', fn: (a) => Number(decRound(a[0] as number | string, a[1] as number ?? 0, 'half-down').value) },
   formatcurrency: {
     arity: 'min',
-    fn: (a, ctx) => decFormatCurrency(a[0]!, ctx.currency, ctx.locale),
+    fn: (a, ctx) => decFormatCurrency(a[0] as number | string, ctx.currency, ctx.locale),
   },
   // Finance
   irr: { arity: 1, fn: (a) => irr(a[0] as readonly number[]).value },
@@ -335,13 +352,13 @@ const BUILTINS: Readonly<
 function evalFormula(
   src: string,
   ctx: RecomputeContext | RecomputeContextWithSelf,
-): number | string {
+): number | string | readonly number[] {
   const tokens = tokenize(src);
   let i = 0;
   const peek = (): string | undefined => tokens[i];
   const consume = (): string | undefined => tokens[i++];
   const ctxFinal: RecomputeContext =
-    'ctx' in (ctx as RecomputeContextWithSelf) ? (ctx as RecomputeContextWithSelf).ctx : ctx;
+    'ctx' in ctx ? ctx.ctx : (ctx as RecomputeContext);
 
   const parseExpr = (): number | string | readonly number[] => parseAddSub();
 

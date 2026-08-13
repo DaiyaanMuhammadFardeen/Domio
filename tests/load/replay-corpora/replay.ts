@@ -105,9 +105,7 @@ async function main() {
 
 const isMain = (() => {
   try {
-    // @ts-expect-error - import.meta is non-standard in some runtimes
     if (typeof import.meta !== 'undefined' && import.meta.url) {
-      // @ts-expect-error - import.meta is non-standard in some runtimes
       return import.meta.url === `file://${process.argv[1]}`;
     }
   } catch {

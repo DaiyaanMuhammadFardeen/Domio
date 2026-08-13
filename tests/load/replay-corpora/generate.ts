@@ -17,20 +17,9 @@
 import { createWriteStream } from 'node:fs';
 import { argv, exit } from 'node:process';
 
-const SEED = 0xdeadbeef >>> 0;
 const DEFAULT_COUNT = 1_000_000;
 const GAP_MS = 31 * 60 * 1000;
 const GAP_INTERVAL_MS = 4 * 60 * 60 * 1000;
-
-function lcg(state: { x: number }): number {
-  state.x = (state.x * 1664525 + 1013904223) >>> 0;
-  return state.x;
-}
-
-function makeRng(seed: number) {
-  const state = { x: seed >>> 0 };
-  return () => lcg(state);
-}
 
 export interface CorpusEvent {
   event_id: string;
@@ -56,7 +45,6 @@ export interface CorpusOptions {
 export function generateCorpus(opts: CorpusOptions = {}): CorpusEvent[] {
   const eventCount = opts.eventCount ?? DEFAULT_COUNT;
   const startTsMs = opts.startTsMs ?? 1_700_000_000_000;
-  const rng = makeRng(opts.seed ?? SEED);
 
   const half = Math.floor(eventCount / 2);
   const events: CorpusEvent[] = [];
@@ -136,9 +124,7 @@ function main() {
 
 const isMain = (() => {
   try {
-    // @ts-expect-error - import.meta is non-standard in some runtimes
     if (typeof import.meta !== 'undefined' && import.meta.url) {
-      // @ts-expect-error - import.meta is non-standard in some runtimes
       return import.meta.url === `file://${process.argv[1]}`;
     }
   } catch {

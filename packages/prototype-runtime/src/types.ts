@@ -397,6 +397,8 @@ export type QuestionSpec =
       readonly front: string;
       /** Back of the card. */
       readonly back: string;
+      /** Optional points; flash cards default to 0 (binary reveal). */
+      readonly points?: number;
     }
   | {
       readonly id: string;

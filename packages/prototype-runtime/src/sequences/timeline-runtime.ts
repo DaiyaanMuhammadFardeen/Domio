@@ -36,7 +36,7 @@ export interface TimelineRuntimeOptions {
 
 interface InternalState {
   readonly seq: PresentationSequence;
-  readonly interruptionState: InterruptionPolicyState;
+  interruptionState: InterruptionPolicyState;
   playing: boolean;
   pausedAt: number | null;
   pausedTotalMs: number;

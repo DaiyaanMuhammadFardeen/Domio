@@ -80,7 +80,7 @@ jobs:
           - live-analytics
           - notification-dispatcher
     env:
-      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
       REDIS_URL: redis://localhost:6379
       NATS_URL: nats://localhost:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4318
@@ -146,7 +146,7 @@ jobs:
           - ab-statistics
           - crm-sync
     env:
-      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
       CLICKHOUSE_URL: http://localhost:8123
     services:
       postgres:

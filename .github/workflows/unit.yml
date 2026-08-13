@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
       REDIS_URL: redis://localhost:6379
       NATS_URL: nats://localhost:4222
       OTEL_EXPORTER_OTLP_ENDPOINT: http://localhost:4318

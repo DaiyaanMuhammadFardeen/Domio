@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      DATABASE_URL: postgres://domio:domio@localhost:5433/domio
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
       REDIS_URL: redis://localhost:6379
       NATS_URL: nats://localhost:4222
     services:

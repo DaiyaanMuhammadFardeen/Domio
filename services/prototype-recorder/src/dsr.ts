@@ -20,9 +20,6 @@ import type { HttpRequest, HttpResponse, PrototypeRecorderContext } from './hand
 function ok<T>(body: T): HttpResponse {
   return { status: 200, body };
 }
-function noContent(): HttpResponse {
-  return { status: 204, body: null };
-}
 function badRequest(message: string, code: string): HttpResponse {
   return { status: 400, body: { error: message, code } };
 }

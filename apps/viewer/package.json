@@ -20,8 +20,6 @@
     "@domio/audio": "workspace:*",
     "@domio/easing": "workspace:*",
     "@domio/embed-proxy": "workspace:*",
-    "@domio/lottie": "workspace:*",
-    "@domio/maps": "workspace:*",
     "@domio/physics": "workspace:*",
     "@domio/video": "workspace:*",
     "next": "15.1.3",

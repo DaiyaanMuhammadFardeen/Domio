@@ -1,10 +1,8 @@
 /**
  * Phase 17 — RLS isolation test.
  *
- * Boots a Postgres test container (when `testcontainers` is in
- * package.json — see `bootstrapPostgres()` below), seeds the seven
- * Phase-17 tables with rows belonging to `ws-A` and `ws-B`, then
- * sets `app.tenant_id = 'ws-A'` and asserts that:
+ * Seeds the seven Phase-17 tables with rows belonging to `ws-A` and
+ * `ws-B`, then sets `app.tenant_id = 'ws-A'` and asserts that:
  *
  *   * `viewer`, `identity_link`, `consent_event`, `event_index`,
  *     `session`, `benchmark_metric`, `benchmark_snapshot` queries
@@ -14,10 +12,11 @@
  * RLS policies declared in
  * `infrastructure/postgres/migrations/0055_participation_session.up.sql:83-104`.
  *
- * When `testcontainers` is not installed (CI without Docker), the
- * test falls back to a stub adapter that simulates the same
- * isolation behaviour in-memory.  Both paths exercise the same
- * `applyTenant()` helper that production code uses.
+ * The test runs against an in-memory stub of the RLS-aware tenant
+ * client so it exercises the same `applyTenant()` predicate that
+ * production code uses, without spinning up a Postgres container in
+ * CI. The integration workflow boots a real Postgres service and
+ * runs the matching harness against it.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 
@@ -25,39 +24,6 @@ interface TenantClient {
   query(sql: string, params?: unknown[]): Promise<{ rows: unknown[] }>;
   close(): Promise<void>;
   readonly id: string;
-}
-
-async function bootstrapPostgres(): Promise<TenantClient> {
-  try {
-    const { GenericContainer } = await import('testcontainers');
-    const container = await new GenericContainer('pgvector/pgvector:pg16')
-      .withEnvironment({
-        POSTGRES_USER: 'domio',
-        POSTGRES_PASSWORD: 'domio',
-        POSTGRES_DB: 'domio_rls_test',
-      })
-      .withExposedPorts(5432)
-      .start();
-    return {
-      id: container.getId(),
-      async query(sql) {
-        return stubQuery(sql);
-      },
-      async close() {
-        await container.stop();
-      },
-    };
-  } catch {
-    return {
-      id: 'in-memory-stub',
-      async query(sql) {
-        return stubQuery(sql);
-      },
-      async close() {
-        // no-op
-      },
-    };
-  }
 }
 
 interface Row {
@@ -114,11 +80,19 @@ function stubQuery(sql: string): Promise<{ rows: unknown[] }> {
   return Promise.resolve({ rows: [] });
 }
 
+const stubClient: TenantClient = {
+  id: 'in-memory-stub',
+  query: (sql) => stubQuery(sql),
+  async close() {
+    // no-op
+  },
+};
+
 describe('Phase 17 RLS isolation', () => {
   let client: TenantClient;
 
-  beforeAll(async () => {
-    client = await bootstrapPostgres();
+  beforeAll(() => {
+    client = stubClient;
   });
 
   it('applies tenant scope via SET app.tenant_id', async () => {

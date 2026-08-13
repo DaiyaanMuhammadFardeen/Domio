@@ -12,7 +12,7 @@
 
 import type { FontAxes, FontFormat, FontLicenseStatus } from './dal.js';
 import {
-  FontService,
+  type FontService,
   type UploadFontInput,
   FontNotFoundError,
   FontValidationError,

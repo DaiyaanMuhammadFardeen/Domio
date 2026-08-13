@@ -25,7 +25,7 @@ const ALLOWED_EVENT_TYPES = [
   'consent_change',
 ] as const;
 
-export interface ValidationError {
+export interface ValidationIssue {
   readonly path: string;
   readonly message: string;
 }
@@ -33,13 +33,13 @@ export interface ValidationError {
 export interface ValidationResult<T> {
   readonly valid: boolean;
   readonly value?: T;
-  readonly errors: readonly ValidationError[];
+  readonly errors: readonly ValidationIssue[];
 }
 
 function ok<T>(value: T): ValidationResult<T> {
   return { valid: true, value, errors: [] };
 }
-function fail(errors: ValidationError[]): ValidationResult<never> {
+function fail(errors: ValidationIssue[]): ValidationResult<never> {
   return { valid: false, errors };
 }
 
@@ -76,7 +76,7 @@ export interface StartSessionBody {
 
 export function validateStartSession(body: unknown): ValidationResult<StartSessionBody> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
-  const errors: ValidationError[] = [];
+  const errors: ValidationIssue[] = [];
   const consent = (body as { consent?: unknown }).consent;
   const region = (body as { region?: unknown }).region;
   if (!inSet(ALLOWED_CONSENT, consent))
@@ -135,12 +135,16 @@ export interface IngestEventBody {
   readonly createdAt?: number;
   readonly signedEvent?: {
     readonly id: string;
+    readonly tenantId: string;
+    readonly deckId: string;
+    readonly sessionId: string;
     readonly seq: number;
     readonly prevHash: string;
     readonly eventHash: string;
     readonly kid: string;
     readonly clientFingerprint: string;
-    readonly region: string;
+    readonly region: (typeof ALLOWED_REGIONS)[number];
+    readonly eventType: (typeof ALLOWED_EVENT_TYPES)[number];
     readonly createdAt: number;
     readonly payload: Readonly<Record<string, unknown>>;
   };
@@ -162,7 +166,7 @@ export function validateIngestBatch(body: unknown): ValidationResult<IngestBatch
     return fail([{ path: 'events', message: 'non-empty array required' }]);
   }
 
-  const errors: ValidationError[] = [];
+  const errors: ValidationIssue[] = [];
   const validated: IngestEventBody[] = [];
   for (let i = 0; i < events.length; i++) {
     const raw = events[i];
@@ -198,15 +202,19 @@ export function validateIngestBatch(body: unknown): ValidationResult<IngestBatch
     }
 
     if (errors.length === 0 || !errors.some((e) => e.path.startsWith(`events[${i}]`))) {
-      validated.push({
+      const event: IngestEventBody = {
         eventType: eventType as (typeof ALLOWED_EVENT_TYPES)[number],
         payload: payload as Readonly<Record<string, unknown>>,
         clientFingerprint: clientFingerprint as string,
-        ...(typeof createdAt === 'number' ? { createdAt } : {}),
-        ...(isObject(signedEvent)
-          ? { signedEvent: signedEvent as IngestEventBody['signedEvent'] }
-          : {}),
-      });
+      };
+      if (typeof createdAt === 'number') {
+        (event as { createdAt?: number }).createdAt = createdAt;
+      }
+      if (isObject(signedEvent)) {
+        (event as { signedEvent?: IngestEventBody['signedEvent'] }).signedEvent =
+          signedEvent as IngestEventBody['signedEvent'];
+      }
+      validated.push(event);
     }
   }
 

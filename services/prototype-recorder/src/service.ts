@@ -190,7 +190,9 @@ export class PrototypeRecorderService {
     deckId: string,
     opts?: { region?: Region },
   ): Promise<PrototypeSession[]> {
-    return this.sessions.listByDeck(deckId, tenantId, opts ? { region: opts.region } : {});
+    const repoOpts: { subjectId?: string; region?: Region } = {};
+    if (opts?.region !== undefined) repoOpts.region = opts.region;
+    return this.sessions.listByDeck(deckId, tenantId, repoOpts);
   }
 
   async listEventsForSession(tenantId: string, sessionId: string): Promise<PrototypeEvent[]> {
@@ -271,7 +273,10 @@ export class PrototypeRecorderService {
     return event;
   }
 
-  async ingestBatch(tenantId: string, input: IngestBatchInput): Promise<readonly PrototypeEvent[]> {
+  async ingestBatch(
+    tenantId: string,
+    input: { sessionId: string; events: readonly Omit<IngestEventInput, 'sessionId'>[] },
+  ): Promise<readonly PrototypeEvent[]> {
     const out: PrototypeEvent[] = [];
     for (const e of input.events) {
       const ingest: IngestEventInput = { ...e, sessionId: input.sessionId };
