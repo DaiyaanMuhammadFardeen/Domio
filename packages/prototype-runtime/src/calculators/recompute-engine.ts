@@ -45,6 +45,7 @@ export class CalculatorEvalError extends Error {
 
 export interface ComputeOptions {
   readonly now?: () => number;
+  readonly clock?: () => number;
   /** Override input values for form-mode recalculation. */
   readonly inputsOverride?: Readonly<Record<string, number>>;
 }
@@ -61,11 +62,17 @@ export const calculator = {
     currency?: string;
     locale?: string;
     inputs: ReadonlyArray<
-      Omit<import('./calculator-def.js').CalculatorInput, 'defaultValue'> & {
+      Partial<import('./calculator-def.js').CalculatorInput> & {
+        readonly id: string;
         defaultValue?: number;
       }
     >;
-    outputs: ReadonlyArray<import('./calculator-def.js').CalculatorOutput>;
+    outputs: ReadonlyArray<
+      Partial<import('./calculator-def.js').CalculatorOutput> & {
+        readonly id: string;
+        readonly formula: string;
+      }
+    >;
   }): import('./calculator-def.js').CalculatorDef {
     return {
       id: spec.id,
@@ -74,8 +81,22 @@ export const calculator = {
       precision: spec.precision ?? 2,
       ...(spec.currency !== undefined ? { currency: spec.currency } : {}),
       ...(spec.locale !== undefined ? { locale: spec.locale } : {}),
-      inputs: spec.inputs.map((i) => ({ ...i, defaultValue: i.defaultValue ?? 0 })),
-      outputs: spec.outputs,
+      inputs: spec.inputs.map((i) => ({
+        id: i.id,
+        label: i.label ?? i.id,
+        defaultValue: i.defaultValue ?? 0,
+        ...(i.min !== undefined ? { min: i.min } : {}),
+        ...(i.max !== undefined ? { max: i.max } : {}),
+        ...(i.step !== undefined ? { step: i.step } : {}),
+      })),
+      outputs: spec.outputs.map((o) => ({
+        id: o.id,
+        label: o.label ?? o.id,
+        formula: o.formula,
+        ...(o.format !== undefined ? { format: o.format } : {}),
+        ...(o.locale !== undefined ? { locale: o.locale } : {}),
+        ...(o.currency !== undefined ? { currency: o.currency } : {}),
+      })),
     };
   },
   graph(spec: {
@@ -83,7 +104,9 @@ export const calculator = {
     name?: string;
     precision?: number;
     nodes: ReadonlyArray<
-      Omit<import('./calculator-def.js').CalculatorNode, 'dependsOn'> & {
+      Partial<import('./calculator-def.js').CalculatorNode> & {
+        readonly id: string;
+        readonly formula: string;
         dependsOn?: readonly string[];
       }
     >;
@@ -93,7 +116,13 @@ export const calculator = {
       name: spec.name ?? spec.id,
       mode: 'graph',
       precision: spec.precision ?? 2,
-      nodes: spec.nodes.map((n) => ({ ...n, dependsOn: n.dependsOn ?? [] })),
+      nodes: spec.nodes.map((n) => ({
+        id: n.id,
+        label: n.label ?? n.id,
+        formula: n.formula,
+        dependsOn: n.dependsOn ?? [],
+        ...(n.precision !== undefined ? { precision: n.precision } : {}),
+      })),
     };
   },
 };
