@@ -37,8 +37,21 @@ export const options = {
   },
 };
 
-const INGEST_URL = __ENV.INGEST_URL || 'http://event-ingest:3020';
+// INGEST_URL may be a base URL or a full URL (with path). INGEST_PATH
+// is appended only when INGEST_URL doesn't already include a path.
+const RAW_INGEST_URL = __ENV.INGEST_URL || 'http://event-ingest:3020';
 const INGEST_PATH = __ENV.INGEST_PATH || '/v1/events';
+const INGEST_URL = (() => {
+  try {
+    const u = new URL(RAW_INGEST_URL);
+    if (u.pathname && u.pathname !== '/' && u.pathname !== '') {
+      return RAW_INGEST_URL;
+    }
+  } catch (_e) {
+    // fall through
+  }
+  return RAW_INGEST_URL.replace(/\/+$/, '') + INGEST_PATH;
+})();
 
 function buildEvent(vu, iter) {
   return JSON.stringify({
@@ -60,7 +73,7 @@ function buildEvent(vu, iter) {
 export default function () {
   const payload = buildEvent(__VU, __ITER);
 
-  const res = http.post(INGEST_URL + INGEST_PATH, payload, {
+  const res = http.post(INGEST_URL, payload, {
     headers: { 'Content-Type': 'application/json' },
     tags: { name: 'ingest' },
   });

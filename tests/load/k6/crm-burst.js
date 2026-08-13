@@ -41,8 +41,21 @@ export const options = {
   },
 };
 
-const CRM_SYNC_URL = __ENV.CRM_SYNC_URL || 'http://crm-sync:3060';
+// CRM_SYNC_URL may be a base URL or a full URL (with path). The path
+// is appended only when the base URL doesn't include one.
+const RAW_CRM_SYNC_URL = __ENV.CRM_SYNC_URL || 'http://crm-sync:3060';
 const CRM_SYNC_PATH = __ENV.CRM_SYNC_PATH || '/v1/sync';
+const CRM_SYNC_URL = (() => {
+  try {
+    const u = new URL(RAW_CRM_SYNC_URL);
+    if (u.pathname && u.pathname !== '/' && u.pathname !== '') {
+      return RAW_CRM_SYNC_URL;
+    }
+  } catch (_e) {
+    // fall through
+  }
+  return RAW_CRM_SYNC_URL.replace(/\/+$/, '') + CRM_SYNC_PATH;
+})();
 
 function buildSync(vu, iter) {
   return JSON.stringify({
@@ -59,7 +72,7 @@ function buildSync(vu, iter) {
 export default function () {
   const body = buildSync(__VU, __ITER);
 
-  const res = http.post(CRM_SYNC_URL + CRM_SYNC_PATH, body, {
+  const res = http.post(CRM_SYNC_URL, body, {
     headers: { 'Content-Type': 'application/json' },
     tags: { name: 'crm' },
   });

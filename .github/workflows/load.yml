@@ -6,6 +6,12 @@ name: load
 # reference scenarios defined in tests/load/k6/ and asserts the SLO
 # thresholds from slo/phase-17.md. Fails the build if any threshold is
 # breached so we catch regressions before the user does.
+#
+# Each scenario boots the service it hammers on the same runner
+# (event-ingest on 8787, crm-sync on 8082, dashboard on 3010) and
+# waits for the port to accept connections before invoking k6. This
+# keeps the load run hermetic so it works on both nightly-scheduled
+# and ad-hoc `workflow_dispatch` runs.
 
 on:
   schedule:
@@ -76,13 +82,46 @@ jobs:
       REDIS_URL: redis://localhost:6379
       KAFKA_BROKERS: localhost:9092
       CLICKHOUSE_URL: http://localhost:8123
+      # Event-ingest configuration
+      PORT: '8787'
+      INGEST_HMAC_KEY_HEX: '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff'
+      INGEST_REDIS_URL: redis://localhost:6379
+      INGEST_KAFKA_BROKERS: localhost:9092
+      INGEST_NATS_URL: 'memory'
+      INGEST_SPOOL_DIR: /tmp/domio-event-ingest-spool
     steps:
       - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-go@v5.2.0
+        with:
+          go-version: '1.23'
+      - name: Install workspace deps
+        run: pnpm install --frozen-lockfile
+      - name: Build event-ingest
+        run: pnpm --filter @domio/event-ingest build
+      - name: Start event-ingest
+        run: |
+          mkdir -p "$INGEST_SPOOL_DIR"
+          nohup node services/event-ingest/dist/index.js > /tmp/event-ingest.log 2>&1 &
+          echo "$!" > /tmp/event-ingest.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8787/healthz > /dev/null 2>&1; then
+              echo "event-ingest ready"
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS http://localhost:8787/healthz || (echo "event-ingest failed to start"; tail -50 /tmp/event-ingest.log; exit 1)
       - uses: grafana/k6-action@v0.3.1
         with:
           filename: tests/load/k6/ingest-200k.js
         env:
-          INGEST_URL: http://localhost:8081
+          INGEST_URL: http://localhost:8787
+      - name: Stop event-ingest
+        if: always()
+        run: |
+          if [ -f /tmp/event-ingest.pid ]; then
+            kill "$(cat /tmp/event-ingest.pid)" 2>/dev/null || true
+          fi
       - uses: actions/upload-artifact@v4.4.3
         if: ${{ !cancelled() }}
         with:
@@ -116,13 +155,39 @@ jobs:
     env:
       DATABASE_URL: postgres://domio:domio@localhost:5432/domio
       CLICKHOUSE_URL: http://localhost:8123
+      PORT: '3010'
     steps:
       - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-go@v5.2.0
+        with:
+          go-version: '1.23'
+      - name: Install workspace deps
+        run: pnpm install --frozen-lockfile
+      - name: Build dashboard
+        run: pnpm --filter @domio/dashboard build
+      - name: Start dashboard
+        run: |
+          nohup pnpm --filter @domio/dashboard start:3010 > /tmp/dashboard.log 2>&1 &
+          echo "$!" > /tmp/dashboard.pid
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:3010/ > /dev/null 2>&1; then
+              echo "dashboard ready"
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS http://localhost:3010/ || (echo "dashboard failed to start"; tail -100 /tmp/dashboard.log; exit 1)
       - uses: grafana/k6-action@v0.3.1
         with:
           filename: tests/load/k6/dashboard-10k.js
         env:
-          DASHBOARD_URL: http://localhost:3010/api/graphql
+          DASHBOARD_URL: http://localhost:3010
+      - name: Stop dashboard
+        if: always()
+        run: |
+          if [ -f /tmp/dashboard.pid ]; then
+            kill "$(cat /tmp/dashboard.pid)" 2>/dev/null || true
+          fi
       - uses: actions/upload-artifact@v4.4.3
         if: ${{ !cancelled() }}
         with:
@@ -154,16 +219,57 @@ jobs:
         image: redis:7.4-alpine
         ports: ['6379:6379']
         options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      nats:
+        image: nats:2.10-alpine
+        ports: ['4222:4222']
+      clickhouse:
+        image: clickhouse/clickhouse-server:24.3
+        ports: ['8123:8123', '9000:9000']
     env:
       DATABASE_URL: postgres://domio:domio@localhost:5432/domio
       REDIS_URL: redis://localhost:6379
+      CLICKHOUSE_URL: http://localhost:8123
+      NATS_URL: nats://localhost:4222
+      PORT: '8082'
     steps:
       - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-go@v5.2.0
+        with:
+          go-version: '1.23'
+      - name: Install workspace deps
+        run: pnpm install --frozen-lockfile
+      - name: Build crm-sync
+        run: |
+          cd services/crm-sync
+          go mod download
+          go build -o /tmp/crm-sync ./cmd/crm-sync
+      - name: Start crm-sync
+        run: |
+          nohup /tmp/crm-sync > /tmp/crm-sync.log 2>&1 &
+          echo "$!" > /tmp/crm-sync.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8082/healthz > /dev/null 2>&1 || \
+               curl -fsS http://localhost:8082/v1/sync/options > /dev/null 2>&1; then
+              echo "crm-sync ready"
+              break
+            fi
+            sleep 1
+          done
+          # Best-effort readiness check; tolerate absence of /healthz
+          if ! curl -fsS http://localhost:8082/ > /dev/null 2>&1; then
+            echo "crm-sync failed to start"; tail -50 /tmp/crm-sync.log; exit 1
+          fi
       - uses: grafana/k6-action@v0.3.1
         with:
           filename: tests/load/k6/crm-burst.js
         env:
-          CRM_URL: http://localhost:8082
+          CRM_SYNC_URL: http://localhost:8082
+      - name: Stop crm-sync
+        if: always()
+        run: |
+          if [ -f /tmp/crm-sync.pid ]; then
+            kill "$(cat /tmp/crm-sync.pid)" 2>/dev/null || true
+          fi
       - uses: actions/upload-artifact@v4.4.3
         if: ${{ !cancelled() }}
         with:

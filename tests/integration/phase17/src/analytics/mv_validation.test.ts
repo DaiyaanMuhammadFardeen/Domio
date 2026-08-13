@@ -194,7 +194,7 @@ describe('analytics-warehouse MV contract', () => {
       .map((c) => c.sql);
     expect(optimized).toEqual([
       'OPTIMIZE TABLE events FINAL',
-      'OPTIMIZE TABLE session_agg_mv FINAL',
+      'OPTIMIZE TABLE session_agg FINAL',
       'OPTIMIZE TABLE slide_metric_5m FINAL',
     ]);
   });

@@ -40,8 +40,23 @@ export const options = {
   },
 };
 
-const DASHBOARD_URL = __ENV.DASHBOARD_URL || 'http://localhost:3003';
+// DASHBOARD_URL may be either a base URL (http://host:port) or a
+// full URL including the GraphQL path (http://host:port/api/graphql).
+// GRAPHQL_PATH is appended only when DASHBOARD_URL doesn't already
+// include a path component.
+const RAW_DASHBOARD_URL = __ENV.DASHBOARD_URL || 'http://localhost:3003';
 const GRAPHQL_PATH = __ENV.GRAPHQL_PATH || '/api/graphql';
+const DASHBOARD_URL = (() => {
+  try {
+    const u = new URL(RAW_DASHBOARD_URL);
+    if (u.pathname && u.pathname !== '/' && u.pathname !== '') {
+      return RAW_DASHBOARD_URL;
+    }
+  } catch (_e) {
+    // fall through to concatenation
+  }
+  return RAW_DASHBOARD_URL.replace(/\/+$/, '') + GRAPHQL_PATH;
+})();
 
 export default function () {
   const body = JSON.stringify({
@@ -53,7 +68,7 @@ export default function () {
     },
   });
 
-  const res = http.post(DASHBOARD_URL + GRAPHQL_PATH, body, {
+  const res = http.post(DASHBOARD_URL, body, {
     headers: { 'Content-Type': 'application/json' },
     tags: { name: 'graphql' },
   });
