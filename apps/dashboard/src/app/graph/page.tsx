@@ -1,30 +1,33 @@
 /**
- * /graph — cross-deck knowledge graph preview.
+ * /graph — cross-deck knowledge graph (Wave 11 §S11.15).
  *
- * Per Wave 7 §S7.12 of docs/frontend-roadmap/07-wave-analytics-insights.md.
+ * Per docs/frontend-roadmap/11-wave-novel-frontier.md §S11.15:
+ * three-pane layout with a filter sidebar, force-directed graph
+ * canvas, and selected-entity detail panel.
  *
- * Renders the SVG node-link diagram from `KnowledgeGraph`. The
- * server prefetches the initial graph so the page is interactive on
- * first paint; the client component also re-queries on search input.
+ * The page prefetches the initial graph on the server so the
+ * canvas is interactive on first paint. Filtering re-queries
+ * the service via the client component.
  */
 
-import { KnowledgeGraph } from '../../components/KnowledgeGraph';
-import { fetchKnowledgeGraph } from '../../lib/knowledge-graph-service';
+import { getGraph } from '../../lib/knowledge-graph-service';
+import { GraphExperience } from './GraphExperience';
 
 export default async function GraphPage() {
-  const workspaceId = process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
-  const initial = await fetchKnowledgeGraph(workspaceId);
+  const initial = await getGraph();
 
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Knowledge graph</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Cross-deck knowledge graph
+        </h1>
         <p className="text-sm text-slate-500">
-          Claims, source slides, and citations across every deck in this workspace
+          Discover connections across every deck.
         </p>
       </header>
 
-      <KnowledgeGraph workspaceId={workspaceId} initial={initial} />
+      <GraphExperience initial={initial} />
     </div>
   );
 }
