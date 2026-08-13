@@ -47,15 +47,9 @@ jobs:
       - name: Install Postgres extensions
         run: |
           PGPASSWORD=domio psql -h localhost -U domio -d domio -c "CREATE EXTENSION IF NOT EXISTS vector;"
-      - name: Build API dependencies
-        run: |
-          pnpm --filter @domio/observability build
-          pnpm --filter @domio/web-security build
-          pnpm --filter @domio/permission-engine build || true
-      - name: Build @domio/api
-        run: pnpm --filter @domio/api build
       - name: Start API
         run: |
+          # tsx loads .ts sources directly — no compile step needed.
           nohup pnpm --filter @domio/api start > /tmp/api.log 2>&1 &
           echo $! > /tmp/api.pid
           for _ in $(seq 1 30); do

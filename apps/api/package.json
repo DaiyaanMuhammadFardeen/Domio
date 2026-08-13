@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Domio control plane — TypeScript modular monolith on Hono + Node 22 that mounts the SDK-shaped services apps consume.",
-  "main": "dist/server.js",
+  "main": "src/server.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js",
+    "start": "tsx src/server.ts",
     "lint": "eslint src --max-warnings 0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",

@@ -844,7 +844,6 @@ function EmbedTab({
           initialUrl={url || 'https://example.com'}
           onChange={(config) => {
             // Wire frame config through to onInsert payload later — for now surface it.
-            // eslint-disable-next-line no-console
             console.debug('LiveAppEmbed config changed', config);
           }}
         />

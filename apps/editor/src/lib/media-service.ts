@@ -109,7 +109,6 @@ function executeLocally(req: SandboxRunRequest): SandboxRunResult {
         errs.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ')),
     };
     try {
-      // eslint-disable-next-line no-new-func
       const fn = new Function('console', `'use strict'; ${req.source}`);
       const result = fn(fakeConsole);
       if (result !== undefined) logs.push(String(result));

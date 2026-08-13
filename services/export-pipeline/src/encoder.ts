@@ -292,16 +292,19 @@ async function encodeWithFfmpeg(
   fps: number,
   format: 'mp4' | 'webm',
 ): Promise<Uint8Array | { unsupported: true }> {
+  // Budget enforcement runs BEFORE capability probing — callers have a
+  // contract that says oversize requests fail loudly regardless of
+  // whether the underlying encoder is installed.
+  const totalSeconds = frames.length / fps;
+  if (totalSeconds > VIDEO_MAX_SECONDS) {
+    throw new ExportBudgetError(format, VIDEO_MAX_SECONDS, totalSeconds);
+  }
+
   // Check ffmpeg availability
   try {
     await execFileAsync('ffmpeg', ['-version']);
   } catch {
     return { unsupported: true };
-  }
-
-  const totalSeconds = frames.length / fps;
-  if (totalSeconds > VIDEO_MAX_SECONDS) {
-    throw new ExportBudgetError(format, VIDEO_MAX_SECONDS, totalSeconds);
   }
 
   // For now, return the raw frames as a placeholder — real implementation

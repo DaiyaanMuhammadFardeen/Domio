@@ -49,6 +49,28 @@ function makeComponentElement(overrides: Partial<Element> = {}): Element {
   } as unknown as Element;
 }
 
+/**
+ * Test-only escape hatch for creating partial Elements in test code.
+ * Lets us build mock objects without exhaustive property lists.
+ */
+function mockElement(partial: Partial<Element> & Record<string, unknown>): Element {
+  return partial as unknown as Element;
+}
+
+function textOverrides(content: string): Partial<Element> {
+  return {
+    text: {
+      content,
+      fontSize: 16,
+      fontFamily: 'sans',
+      color: '#E6EDF3',
+      fontWeight: 400,
+      lineHeight: 1.4,
+      align: 'left',
+    },
+  };
+}
+
 describe('inferPropsSchema', () => {
   it('returns empty schema for empty selection', () => {
     const schema = inferPropsSchema([]);
@@ -57,17 +79,7 @@ describe('inferPropsSchema', () => {
   });
 
   it('infers string prop for text content', () => {
-    const el = makeTextElement({
-      text: {
-        content: 'Hello World',
-        fontSize: 16,
-        fontFamily: 'sans',
-        color: '#E6EDF3',
-        fontWeight: 400,
-        lineHeight: 1.4,
-        align: 'left',
-      },
-    } as any);
+    const el = makeTextElement(textOverrides('Hello World'));
     const schema = inferPropsSchema([el]);
     expect(schema.properties).toHaveProperty('prop0');
     expect(schema.properties.prop0).toMatchObject({ type: 'string', default: 'Hello World' });
@@ -75,80 +87,40 @@ describe('inferPropsSchema', () => {
   });
 
   it('infers number prop for numeric content', () => {
-    const el = makeTextElement({
-      text: {
-        content: '42',
-        fontSize: 16,
-        fontFamily: 'sans',
-        color: '#E6EDF3',
-        fontWeight: 400,
-        lineHeight: 1.4,
-        align: 'left',
-      },
-    } as any);
+    const el = makeTextElement(textOverrides('42'));
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({ type: 'number', default: 42 });
   });
 
   it('infers number prop for decimal content', () => {
-    const el = makeTextElement({
-      text: {
-        content: '3.14',
-        fontSize: 16,
-        fontFamily: 'sans',
-        color: '#E6EDF3',
-        fontWeight: 400,
-        lineHeight: 1.4,
-        align: 'left',
-      },
-    } as any);
+    const el = makeTextElement(textOverrides('3.14'));
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({ type: 'number', default: 3.14 });
   });
 
   it('infers boolean prop for true/false content', () => {
-    const el = makeTextElement({
-      text: {
-        content: 'true',
-        fontSize: 16,
-        fontFamily: 'sans',
-        color: '#E6EDF3',
-        fontWeight: 400,
-        lineHeight: 1.4,
-        align: 'left',
-      },
-    } as any);
+    const el = makeTextElement(textOverrides('true'));
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({ type: 'boolean', default: true });
   });
 
   it('infers boolean prop for false content', () => {
-    const el = makeTextElement({
-      text: {
-        content: 'false',
-        fontSize: 16,
-        fontFamily: 'sans',
-        color: '#E6EDF3',
-        fontWeight: 400,
-        lineHeight: 1.4,
-        align: 'left',
-      },
-    } as any);
+    const el = makeTextElement(textOverrides('false'));
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({ type: 'boolean', default: false });
   });
 
   it('infers color prop from fill', () => {
     // Use an element without text content so only the color prop appears
-    const el = {
-      id: 'test-el-color' as any,
+    const el = mockElement({
+      id: 'test-el-color',
       type: 'rect',
       semanticId: 's-c',
       name: 'Rect',
       parentId: null,
       fill: { type: 'solid', color: { r: 0.345, g: 0.651, b: 1, a: 1 } },
       transform: { x: 0, y: 0, w: 100, h: 50 },
-    } as unknown as Element;
+    });
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({
       type: 'string',
@@ -158,26 +130,16 @@ describe('inferPropsSchema', () => {
   });
 
   it('handles mixed selection with text + color element', () => {
-    const textEl = makeTextElement({
-      text: {
-        content: 'Revenue',
-        fontSize: 16,
-        fontFamily: 'sans',
-        color: '#E6EDF3',
-        fontWeight: 400,
-        lineHeight: 1.4,
-        align: 'left',
-      },
-    } as any);
-    const colorEl = {
-      id: 'test-el-2' as any,
+    const textEl = makeTextElement(textOverrides('Revenue'));
+    const colorEl = mockElement({
+      id: 'test-el-2',
       type: 'rect',
       semanticId: 's-c2',
       name: 'Box',
       parentId: null,
       fill: { type: 'solid', color: { r: 0.247, g: 0.725, b: 0.314, a: 1 } },
       transform: { x: 0, y: 0, w: 100, h: 50 },
-    } as unknown as Element;
+    });
     const schema = inferPropsSchema([textEl, colorEl]);
     expect(Object.keys(schema.properties)).toHaveLength(2);
     expect(schema.properties.prop0).toMatchObject({ type: 'string', default: 'Revenue' });
@@ -207,17 +169,7 @@ describe('buildComponentDef', () => {
   });
 
   it('build function produces elements with mapped props', () => {
-    const el = makeTextElement({
-      text: {
-        content: 'placeholder',
-        fontSize: 16,
-        fontFamily: 'sans',
-        color: '#E6EDF3',
-        fontWeight: 400,
-        lineHeight: 1.4,
-        align: 'left',
-      },
-    } as any);
+    const el = makeTextElement(textOverrides('placeholder'));
     const schema = inferPropsSchema([el]);
     const def = buildComponentDef({
       name: 'Test',
@@ -230,7 +182,7 @@ describe('buildComponentDef', () => {
       { prop0: 'Revenue' },
       {
         variantId: 'default',
-        id: () => 'new-id' as any,
+        id: () => 'new-id',
         semanticId: (s: string) => s,
       },
     );
@@ -242,9 +194,9 @@ describe('buildComponentDef', () => {
 
 describe('replaceWithComponentOp', () => {
   it('creates a forward/inverse op pair', () => {
-    const removed = [makeTextElement({ id: 'rm1' } as any)];
-    const added = [makeComponentElement({ id: 'add1' } as any)];
-    const op = replaceWithComponentOp('slide-1' as any, removed, added);
+    const removed = [makeTextElement({ id: 'rm1' as Element['id'] })];
+    const added = [makeComponentElement({ id: 'add1' as Element['id'] })];
+    const op = replaceWithComponentOp('slide-1', removed, added);
 
     expect(op.name).toBe('AddElementOp');
     expect(op.forward.slideId).toBe('slide-1');
@@ -257,9 +209,9 @@ describe('replaceWithComponentOp', () => {
 
 describe('detachFromComponentOp', () => {
   it('creates a forward/inverse op pair', () => {
-    const removed = [makeComponentElement({ id: 'comp1' } as any)];
-    const added = [makeTextElement({ id: 'txt1' } as any)];
-    const op = detachFromComponentOp('slide-1' as any, removed, added);
+    const removed = [makeComponentElement({ id: 'comp1' as Element['id'] })];
+    const added = [makeTextElement({ id: 'txt1' as Element['id'] })];
+    const op = detachFromComponentOp('slide-1', removed, added);
 
     expect(op.name).toBe('AddElementOp');
     expect(op.forward.removedId).toBe('comp1');
