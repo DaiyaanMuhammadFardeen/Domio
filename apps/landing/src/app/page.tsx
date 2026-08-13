@@ -1,3 +1,5 @@
+import { landing } from '@domio/ui';
+
 export default function LandingHomePage() {
   return (
     <main>
@@ -28,6 +30,13 @@ export default function LandingHomePage() {
           See the repository README for setup instructions, the contracts/
           directory for the API surface, and the SDK packages under packages/
           for the typed clients apps consume.
+        </p>
+      </section>
+      <section>
+        <h2>From your terminal</h2>
+        <p>
+          Prefer a CLI? <a href={landing('cli')}>Install <code>deckctl</code></a> and
+          manage decks without opening the editor.
         </p>
       </section>
     </main>
