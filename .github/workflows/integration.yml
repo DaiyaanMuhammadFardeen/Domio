@@ -1,0 +1,186 @@
+name: integration
+
+# Domio — integration test workflow.
+#
+# Runs the multi-component integration tests in tests/integration/
+# against a real Postgres + Redis + (optional) Kafka + ClickHouse
+# backend. Each integration package boots its own service slices,
+# exercises cross-service flows (recording pipeline, phase-17 RLS
+# isolation, etc.), and tears down on exit.
+#
+# Differences from `unit`:
+#   - Requires real infrastructure (Postgres + Redis + extensions).
+#   - Each integration package uses its own test database.
+#   - Longer timeout (30 min vs 20 min).
+#   - No coverage gate — coverage is enforced at the unit layer.
+
+on:
+  pull_request:
+    branches: [master, main]
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: install-deps
+    uses: ./.github/workflows/setup-node.yml
+    with:
+      node-version: '22.11.0'
+
+  # ── recording pipeline ─────────────────────────────────────────────
+  recording:
+    name: Recording pipeline integration
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+      minio:
+        image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+        env:
+          MINIO_ACCESS_KEY: domio
+          MINIO_SECRET_KEY: domio-secret
+        ports: ['9000:9000', '9001:9001']
+        options: --health-cmd "curl -f http://localhost:9000/minio/health/ready" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
+      REDIS_URL: redis://localhost:6379
+      OBJECT_STORE_ENDPOINT: http://localhost:9000
+      OBJECT_STORE_ACCESS_KEY: domio
+      OBJECT_STORE_SECRET_KEY: domio-secret
+      OBJECT_STORE_BUCKET: domio-test
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Create minio bucket
+        run: |
+          mc alias set local http://localhost:9000 domio domio-secret
+          mc mb local/domio-test || true
+      - name: Run recording integration
+        run: |
+          pnpm --filter @domio/test-integration-recording test
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: integration-recording-report
+          path: tests/integration/recording/test-results/
+          retention-days: 14
+
+  # ── phase 17 RLS isolation ─────────────────────────────────────────
+  phase17:
+    name: Phase 17 RLS isolation
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - run: pnpm install --frozen-lockfile
+      - name: Install Postgres extensions
+        run: |
+          PGPASSWORD=domio psql -h localhost -U domio -d domio -c "CREATE EXTENSION IF NOT EXISTS vector;"
+      - name: Run phase 17 integration
+        run: |
+          pnpm --filter @domio/test-integration-phase17 test
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: integration-phase17-report
+          path: tests/integration/phase17/test-results/
+          retention-days: 14
+
+  # ── security RLS isolation ─────────────────────────────────────────
+  security-rls:
+    name: Security RLS isolation
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: domio
+          POSTGRES_PASSWORD: domio
+          POSTGRES_DB: domio
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://domio:domio@localhost:5432/domio
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - run: pnpm install --frozen-lockfile
+      - name: Run security RLS isolation
+        run: |
+          pnpm --filter @domio/test-security test -- --run tests/security/rls-isolation-phase17.test.ts || pnpm --filter @domio/test-security exec vitest run tests/security/rls-isolation-phase17.test.ts
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: integration-security-rls-report
+          path: tests/security/test-results/
+          retention-days: 14

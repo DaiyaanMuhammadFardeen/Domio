@@ -17,7 +17,7 @@ name: security
 
 on:
   pull_request:
-    branches: [main]
+    branches: [master, main]
     paths:
       - '**.ts'
       - '**.tsx'
@@ -33,7 +33,7 @@ on:
       - 'Cargo.toml'
       - 'requirements*.txt'
   push:
-    branches: [main]
+    branches: [master, main]
   schedule:
     # Run nightly at 02:30 UTC (off-hours in EU + US).
     - cron: '30 2 * * *'
@@ -55,6 +55,7 @@ on:
           - baseline
           - full
         required: true
+  workflow_call:
 
 permissions:
   contents: read

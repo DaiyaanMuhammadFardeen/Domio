@@ -45,6 +45,7 @@ on:
         description: 'Comma-separated locale list to scan (default: en,bn,ar)'
         type: string
         default: 'en,bn,ar'
+  workflow_call:
 
 permissions:
   contents: read

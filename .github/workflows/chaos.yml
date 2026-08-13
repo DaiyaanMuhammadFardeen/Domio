@@ -1,0 +1,72 @@
+name: chaos
+
+# Domio — chaos drill contracts.
+#
+# Validates that the chaos-drill scripts under tests/chaos/ correctly
+# describe the resilience contracts (process kill, network partition,
+# database failover, retry-with-backoff, idempotency under retry).
+#
+# The drills themselves are manual or run via the weekly chaos
+# pipeline; this workflow just makes sure the drill *contracts*
+# (test fixtures, scripts, scenarios) remain runnable.
+#
+# Triggered on push + PR + manual dispatch.
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'tests/chaos/**'
+      - 'services/**'
+      - 'workers/**'
+      - 'packages/**'
+      - '.github/workflows/chaos.yml'
+  push:
+    branches: [master, main]
+    paths:
+      - 'tests/chaos/**'
+      - '.github/workflows/chaos.yml'
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chaos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: install-deps
+    uses: ./.github/workflows/setup-node.yml
+    with:
+      node-version: '22.11.0'
+
+  contracts:
+    name: Chaos drill contracts
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - run: pnpm install --frozen-lockfile
+      - name: Validate drill-contracts tests run
+        run: |
+          pnpm exec vitest run tests/chaos/drill-contracts.test.ts --reporter=verbose
+      - name: Validate chaos scripts parse
+        run: |
+          bash -n tests/chaos/run.sh && echo "run.sh parses ok" || exit 1
+          chmod +x tests/chaos/run.sh
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: chaos-contracts-report
+          path: tests/chaos/test-results/
+          retention-days: 14

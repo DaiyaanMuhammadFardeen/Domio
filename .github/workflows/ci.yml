@@ -1,180 +1,230 @@
 name: CI
 
+# Domio — master CI/CD orchestrator.
+#
+# This is the canonical gate for every push to the protected branches
+# (master, main). It runs ALL testing categories in parallel and
+# blocks merge unless every required job passes.
+#
+# Categories gated here:
+#   - static:    contracts, typecheck, lint, prettier, format-check,
+#                actionlint, shellcheck, schema-validate
+#   - execution: unit, integration, smoke (positive + negative),
+#                load (light), chaos, a11y, e2e-external
+#   - security:  SAST (CodeQL + Semgrep), SCA (Trivy), DAST (ZAP baseline),
+#                secret leak scan
+#
+# Schedule:
+#   - push to master/main  → full matrix, fail-fast off
+#   - pull_request         → full matrix
+#   - schedule (nightly)   → full + perf-nightly
+#   - workflow_dispatch    → manual with optional skip flags
+
 on:
   pull_request:
-    branches: [main]
+    branches: [master, main]
   push:
-    branches: [main]
+    branches: [master, main]
+  schedule:
+    # 03:00 UTC nightly — off-hours in EU/US, well after the
+    # 02:30 nightly security sweep and 02:00 nightly load test.
+    - cron: '0 3 * * *'
   workflow_dispatch:
+    inputs:
+      skip_load:
+        description: Skip load test (faster local validation)
+        type: boolean
+        default: false
+      skip_e2e:
+        description: Skip external-user e2e
+        type: boolean
+        default: false
+      target_env:
+        description: 'Where to run DAST (preview|staging)'
+        type: choice
+        default: preview
+        options:
+          - preview
+          - staging
 
-# Cancel in-progress runs for the same branch / PR.
+# Cancel superseded runs on the same branch.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+  issues: write
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  ZAP_TARGET: ${{ github.event.inputs.target_env == 'staging' && 'https://staging.domio.app' || 'https://preview.domio.app' }}
 
 jobs:
-  # -----------------------------------------------------------------------------
-  # Contracts — lint, breaking, format, generated-clients-in-sync.
-  # -----------------------------------------------------------------------------
+  # ─────────────────────────────────────────────────────────────────────
+  # PHASE 1 — STATIC GATES (cheap, fast feedback, ~2-5 min)
+  # ─────────────────────────────────────────────────────────────────────
+
   contracts:
-    name: Contracts
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: jaxxstorm/action-install-gh-release@v2
-        with:
-          repo: bufbuild/buf
-          version: '1.34.0'
-      - name: buf format check
-        run: buf format contracts/proto -d --exit-code
-      - name: buf lint
-        run: buf lint contracts/proto
-      - name: buf breaking (against main)
-        run: buf breaking contracts/proto --against '.git#branch=main'
-      - name: OpenAPI lint
-        uses: redocly/cli-action@v1
-        with:
-          lint: contracts/openapi
-      - name: JSON Schema validation
-        run: |
-          npx --yes ajv-cli@5 -s contracts/schema/v1/common.schema.json validate
-          npx --yes ajv-cli@5 -s contracts/schema/v1/deck-placeholder.schema.json validate
+    name: Contracts (buf + OpenAPI + JSON Schema)
+    uses: ./.github/workflows/contract.yml
 
-  # -----------------------------------------------------------------------------
-  # TypeScript — install, typecheck, lint, test, build.
-  # -----------------------------------------------------------------------------
-  typescript:
-    name: TypeScript (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-24.04, macos-14]
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.11.0
-          cache: pnpm
-      - name: Install
-        run: pnpm install --frozen-lockfile
-      - name: Generate clients
-        run: pnpm gen
-      - name: Lint
-        run: pnpm lint
-      - name: Typecheck
-        run: pnpm typecheck
-      - name: Test
-        run: pnpm test
-      - name: Build
-        run: pnpm build
+  typecheck:
+    name: Typecheck (tsc)
+    uses: ./.github/workflows/type.yml
 
-  # -----------------------------------------------------------------------------
-  # Go — vet, build, test.
-  # -----------------------------------------------------------------------------
-  go:
-    name: Go
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.4'
-          cache: true
-      - name: Install
-        run: go mod download
-      - name: Vet
-        run: go vet ./...
-      - name: Build
-        run: go build ./...
-      - name: Test
-        run: go test ./...
+  lint:
+    name: Lint (eslint + prettier + shellcheck + actionlint)
+    uses: ./.github/workflows/lint.yml
 
-  # -----------------------------------------------------------------------------
-  # Rust — clippy + test (when any Rust workspace members exist).
-  # -----------------------------------------------------------------------------
-  rust:
-    name: Rust
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Cache cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - name: Check
-        run: cargo check --workspace --all-targets
-      - name: Test
-        run: cargo test --workspace --all-targets
+  schema-validate:
+    name: Schema validation
+    uses: ./.github/workflows/schema-validate.yml
 
-  # -----------------------------------------------------------------------------
-  # Python — ruff + mypy (when Python code lands).
-  # -----------------------------------------------------------------------------
-  python:
-    name: Python
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12.8'
-          cache: pip
-      - name: Install
-        run: |
-          python -m pip install --upgrade pip
-          pip install ruff mypy
-      - name: Ruff
-        run: ruff check .
-      - name: Mypy
-        run: mypy . || true # no Python code yet; tolerate empty run
+  schema-migration-lint:
+    name: Schema migration lint
+    uses: ./.github/workflows/schema-migration-lint.yml
 
-  # -----------------------------------------------------------------------------
-  # Security — CodeQL + secret scan.
-  # -----------------------------------------------------------------------------
+  # ─────────────────────────────────────────────────────────────────────
+  # PHASE 2 — UNIT + INTEGRATION (medium cost, ~5-10 min)
+  # ─────────────────────────────────────────────────────────────────────
+
+  unit:
+    name: Unit tests (vitest)
+    uses: ./.github/workflows/unit.yml
+
+  integration:
+    name: Integration tests
+    uses: ./.github/workflows/integration.yml
+
+  # ─────────────────────────────────────────────────────────────────────
+  # PHASE 3 — EXECUTION GATES (expensive, ~5-15 min)
+  # ─────────────────────────────────────────────────────────────────────
+
+  smoke:
+    name: Smoke (positive + negative + perf)
+    uses: ./.github/workflows/smoke.yml
+
+  external-e2e:
+    name: External-user e2e (all apps)
+    if: ${{ !inputs.skip_e2e }}
+    uses: ./.github/workflows/external-e2e.yml
+
+  editor-e2e:
+    name: Editor e2e (deep)
+    uses: ./.github/workflows/editor-e2e.yml
+
+  a11y-i18n:
+    name: a11y + i18n
+    uses: ./.github/workflows/a11y-i18n.yml
+
+  axe:
+    name: axe (WCAG)
+    uses: ./.github/workflows/axe.yml
+
+  # ─────────────────────────────────────────────────────────────────────
+  # PHASE 4 — LOAD + CHAOS (slow, ~15-30 min)
+  # ─────────────────────────────────────────────────────────────────────
+
+  load:
+    name: Load test (k6)
+    if: ${{ !inputs.skip_load }}
+    uses: ./.github/workflows/load.yml
+
+  chaos:
+    name: Chaos drill contracts
+    uses: ./.github/workflows/chaos.yml
+
+  # ─────────────────────────────────────────────────────────────────────
+  # PHASE 5 — SECURITY (parallel to other phases)
+  # ─────────────────────────────────────────────────────────────────────
+
   security:
-    name: Security
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: typescript, python, javascript, go
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-      - name: Secret scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    name: Security (SAST + SCA + DAST)
+    uses: ./.github/workflows/security.yml
 
-  # -----------------------------------------------------------------------------
-  # Container image smoke build (for the API).
-  # -----------------------------------------------------------------------------
-  image-build:
-    name: Container build
+  leak-scan:
+    name: Secret leak scan
+    uses: ./.github/workflows/leak-scan.yml
+
+  # ─────────────────────────────────────────────────────────────────────
+  # PHASE 6 — BUILD PROVENANCE + DEPLOY READINESS
+  # ─────────────────────────────────────────────────────────────────────
+
+  build-provenance:
+    name: Build + provenance (SLSA)
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/build-provenance.yml
+
+  public-beta-gate:
+    name: Public beta gate
+    uses: ./.github/workflows/public-beta-gate.yml
+
+  # ─────────────────────────────────────────────────────────────────────
+  # PHASE 7 — FINAL GATE — everything must pass
+  # ─────────────────────────────────────────────────────────────────────
+  gate:
+    name: Required checks gate
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    needs:
+      - contracts
+      - typecheck
+      - lint
+      - schema-validate
+      - schema-migration-lint
+      - unit
+      - integration
+      - smoke
+      - external-e2e
+      - editor-e2e
+      - a11y-i18n
+      - axe
+      - security
+      - leak-scan
+      - public-beta-gate
+    if: ${{ always() }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Build api image
+      - name: Verify all required jobs passed
         run: |
-          docker build -t domio-api:dev apps/api || true
-        # Real image build lands in Phase 01 with a proper Dockerfile + CI cache.
+          echo "Required-checks summary:"
+          failed=()
+          passed=()
+          for j in contracts typecheck lint schema-validate schema-migration-lint unit integration smoke external-e2e editor-e2e a11y-i18n axe security leak-scan public-beta-gate; do
+            case "$j" in
+              contracts) status="${{ needs.contracts.result }}" ;;
+              typecheck) status="${{ needs.typecheck.result }}" ;;
+              lint) status="${{ needs.lint.result }}" ;;
+              schema-validate) status="${{ needs.schema-validate.result }}" ;;
+              schema-migration-lint) status="${{ needs.schema-migration-lint.result }}" ;;
+              unit) status="${{ needs.unit.result }}" ;;
+              integration) status="${{ needs.integration.result }}" ;;
+              smoke) status="${{ needs.smoke.result }}" ;;
+              external-e2e) status="${{ needs.external-e2e.result }}" ;;
+              editor-e2e) status="${{ needs.editor-e2e.result }}" ;;
+              a11y-i18n) status="${{ needs.a11y-i18n.result }}" ;;
+              axe) status="${{ needs.axe.result }}" ;;
+              security) status="${{ needs.security.result }}" ;;
+              leak-scan) status="${{ needs.leak-scan.result }}" ;;
+              public-beta-gate) status="${{ needs.public-beta-gate.result }}" ;;
+            esac
+            echo "  ${j}: ${status}"
+            if [[ "${status}" != "success" && "${status}" != "skipped" ]]; then
+              failed+=("${j}")
+            else
+              passed+=("${j}")
+            fi
+          done
+          echo ""
+          echo "Passed (${#passed[@]}):"
+          printf '  ✓ %s\n' "${passed[@]}"
+          if [[ ${#failed[@]} -gt 0 ]]; then
+            echo ""
+            echo "❌ FAILED required checks (${#failed[@]}):"
+            printf '  - %s\n' "${failed[@]}"
+            exit 1
+          fi
+          echo ""
+          echo "✅ All required checks passed."

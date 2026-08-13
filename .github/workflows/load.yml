@@ -17,6 +17,7 @@ on:
         description: Skip ingest-200k.js (longest scenario)
         type: boolean
         default: false
+  workflow_call:
 
 permissions:
   contents: read

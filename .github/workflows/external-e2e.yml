@@ -1,0 +1,200 @@
+name: external-e2e
+
+# Domio — external-user end-to-end workflow.
+#
+# Drives every public-facing app from the perspective of an
+# unauthenticated visitor. Each app boots on its own port and runs
+# its dedicated Playwright project; tests assert:
+#
+#   - Page renders without 5xx.
+#   - No data leaks to anonymous users.
+#   - Smoke-level interactive flows work (open deck, join session).
+#   - Negative paths (unicode, oversized, control chars) don't crash.
+#
+# Apps covered:
+#   - landing (3007), viewer (3005), presenter (3006), join-web (3008),
+#     dashboard (3003), admin-console (3009), marketplace-web (3010),
+#     creator-console (3011), magic-link-landing (3012).
+#
+# Triggered on push + PR + manual dispatch.
+
+on:
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'tests/e2e/**'
+      - '.github/workflows/external-e2e.yml'
+      - '.github/workflows/_external-e2e-setup.yml'
+  push:
+    branches: [master, main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'tests/e2e/**'
+      - '.github/workflows/external-e2e.yml'
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      skip_slow:
+        description: Skip the slowest apps (admin-console + dashboard full sweep)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: external-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PNPM_VERSION: '9.12.3'
+  NODE_VERSION: '22.11.0'
+  PLAYWRIGHT_VERSION: '1.49.1'
+
+jobs:
+  # ── shared setup ──────────────────────────────────────────────────
+  setup:
+    name: install-deps
+    uses: ./.github/workflows/setup-node.yml
+    with:
+      node-version: '22.11.0'
+
+  # ── build all packages + apps ─────────────────────────────────────
+  build:
+    name: Build apps + packages
+    needs: setup
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Generate clients
+        run: pnpm gen || true
+      - name: Build all Next.js apps
+        run: |
+          pnpm --filter @domio/landing build
+          pnpm --filter @domio/viewer build
+          pnpm --filter @domio/presenter build
+          pnpm --filter @domio/join-web build
+          pnpm --filter @domio/dashboard build
+          pnpm --filter @domio/admin-console build
+          pnpm --filter @domio/marketplace-web build
+          pnpm --filter @domio/creator-console build
+          pnpm --filter @domio/magic-link-landing build
+
+  # ── serve all apps ────────────────────────────────────────────────
+  serve:
+    name: Serve apps for e2e
+    needs: [setup, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NODE_ENV: production
+      PORT_BASE: '3000'
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Start all apps (one per port)
+        run: |
+          mkdir -p /tmp/apps
+          declare -A apps=(
+            [landing]=3007
+            [viewer]=3005
+            [presenter]=3006
+            [join-web]=3008
+            [dashboard]=3003
+            [admin-console]=3009
+            [marketplace-web]=3010
+            [creator-console]=3011
+            [magic-link-landing]=3012
+          )
+          for app in "${!apps[@]}"; do
+            port=${apps[$app]}
+            echo "Starting $app on port $port..."
+            nohup pnpm --filter "@domio/$app" start -- --port "$port" > "/tmp/apps/${app}.log" 2>&1 &
+            echo $! > "/tmp/apps/${app}.pid"
+          done
+          # Wait for all ports to be ready
+          for port in 3003 3005 3006 3007 3008 3009 3010 3011 3012; do
+            for _ in $(seq 1 60); do
+              if curl -fsS "http://localhost:${port}/" > /dev/null 2>&1 || \
+                 curl -fsS "http://localhost:${port}/healthz" > /dev/null 2>&1; then
+                echo "  port $port ready"
+                break
+              fi
+              sleep 1
+            done
+          done
+      - name: Keep services alive (extended timeout)
+        run: |
+          # Hold the job open for 20 minutes so e2e can run in parallel jobs.
+          sleep 1200
+
+  # ── run all e2e projects ──────────────────────────────────────────
+  e2e:
+    name: Playwright e2e (all apps)
+    needs: [setup, serve]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Cache pnpm store
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ runner.os }}-${{ env.NODE_VERSION }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm --filter tests-e2e exec playwright install --with-deps chromium
+      - name: Run external-user e2e
+        env:
+          CI: '1'
+        run: |
+          cd tests/e2e
+          pnpm exec playwright test --project=dashboard --project=viewer --project=presenter \
+            --project=landing --project=join-web --project=admin-console \
+            --project=marketplace-web --project=creator-console \
+            --project=magic-link-landing
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: external-e2e-report
+          path: tests/e2e/test-results/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4.4.3
+        if: ${{ !cancelled() }}
+        with:
+          name: external-e2e-html
+          path: tests/e2e/playwright-report/
+          retention-days: 14
