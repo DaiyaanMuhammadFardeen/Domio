@@ -1,19 +1,93 @@
 name: CI
 
+# Domio — master CI/CD orchestrator.
+#
+# Runs all testing categories in parallel. Each category is its own
+# reusable workflow (./.github/workflows/<name>.yml). When the
+# individual checks complete, the workflow's overall conclusion is
+# the union of their results — branch protection rules on master
+# + main gate merges on this workflow succeeding.
+#
+# Categories (each maps to a reusable workflow):
+#   - contracts       — buf, OpenAPI, JSON Schema
+#   - typecheck       — tsc across the monorepo
+#   - lint            — eslint, prettier, shellcheck, actionlint
+#   - schema-*        — schema migration + JSON schema validation
+#   - unit            — vitest unit suite (with coverage gate)
+#   - integration     — multi-component integration tests
+#   - smoke           — API positive + negative + perf sanity
+#   - external-e2e    — every public app, unauthenticated flows
+#   - editor-e2e      — editor deep Playwright specs
+#   - a11y-i18n       — WCAG + RTL/Bengali locale coverage
+#   - axe             — axe-core across landing/viewer/presenter/editor
+#   - chaos           — chaos drill contracts
+#   - security        — SAST (CodeQL+Semgrep), SCA (Trivy), DAST (ZAP)
+#   - leak-scan       — gitleaks secret scan
+#   - load            — k6 (push/schedule only, not PR)
+#   - build-provenance — SLSA build + provenance (push/schedule only)
+#   - public-beta-gate — release-readiness gate
+
 on:
   pull_request:
     branches: [master, main]
   push:
     branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
+  # ── static gates ────────────────────────────────────────────────
+  contracts:
+    uses: ./.github/workflows/contract.yml
   typecheck:
     uses: ./.github/workflows/type.yml
   lint:
     uses: ./.github/workflows/lint.yml
+  schema-validate:
+    uses: ./.github/workflows/schema-validate.yml
+  schema-migration-lint:
+    uses: ./.github/workflows/schema-migration-lint.yml
+
+  # ── unit + integration ──────────────────────────────────────────
   unit:
     uses: ./.github/workflows/unit.yml
+  integration:
+    uses: ./.github/workflows/integration.yml
+
+  # ── execution ───────────────────────────────────────────────────
   smoke:
     uses: ./.github/workflows/smoke.yml
+  external-e2e:
+    uses: ./.github/workflows/external-e2e.yml
+  editor-e2e:
+    uses: ./.github/workflows/editor-e2e.yml
+  a11y-i18n:
+    uses: ./.github/workflows/a11y-i18n.yml
+  axe:
+    uses: ./.github/workflows/axe.yml
+
+  # ── load + chaos ────────────────────────────────────────────────
+  chaos:
+    uses: ./.github/workflows/chaos.yml
+
+  # ── security ────────────────────────────────────────────────────
+  security:
+    uses: ./.github/workflows/security.yml
   leak-scan:
     uses: ./.github/workflows/leak-scan.yml
+
+  # ── deploy readiness ────────────────────────────────────────────
+  public-beta-gate:
+    uses: ./.github/workflows/public-beta-gate.yml
+  load:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/load.yml
+  build-provenance:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/build-provenance.yml
