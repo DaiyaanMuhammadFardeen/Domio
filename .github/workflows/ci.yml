@@ -37,3 +37,7 @@ jobs:
     uses: ./.github/workflows/editor-e2e.yml
   a11y-i18n:
     uses: ./.github/workflows/a11y-i18n.yml
+  axe:
+    uses: ./.github/workflows/axe.yml
+  chaos:
+    uses: ./.github/workflows/chaos.yml
