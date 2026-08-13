@@ -1,5 +1,33 @@
 name: CI
 
+# Domio — master CI/CD orchestrator.
+#
+# Runs all primary testing categories in parallel. Each category is
+# its own reusable workflow (./.github/workflows/<name>.yml). The
+# workflow's overall conclusion is the union of their results.
+# Branch protection on master + main gates merges on this workflow
+# succeeding.
+#
+# GitHub caps the number of reusable-workflow calls in a single
+# workflow file (~12 reliably on this account); supplementary
+# workflows run standalone via their own push triggers and feed
+# the same branch-protection checks list.
+#
+# Categories (each maps to a reusable workflow):
+#   static      — contracts, typecheck, lint
+#   unit+integ  — unit, integration
+#   execution   — smoke, external-e2e, editor-e2e
+#   a11y        — a11y-i18n, axe
+#   ops         — chaos
+#   security    — security, leak-scan
+#   deploy      — load (push/schedule only)
+#
+# Supplementary standalone (run via their own push triggers):
+#   - schema-validate.yml
+#   - schema-migration-lint.yml
+#   - public-beta-gate.yml
+#   - build-provenance.yml (push/schedule only)
+
 on:
   pull_request:
     branches: [master, main]
@@ -15,31 +43,37 @@ permissions:
   contents: read
 
 jobs:
+  # ── static gates ────────────────────────────────────────────────
+  contracts:
+    uses: ./.github/workflows/contract.yml
   typecheck:
     uses: ./.github/workflows/type.yml
   lint:
     uses: ./.github/workflows/lint.yml
+
+  # ── unit + integration ──────────────────────────────────────────
   unit:
     uses: ./.github/workflows/unit.yml
-  smoke:
-    uses: ./.github/workflows/smoke.yml
-  leak-scan:
-    uses: ./.github/workflows/leak-scan.yml
-  contracts:
-    uses: ./.github/workflows/contract.yml
-  schema-validate:
-    uses: ./.github/workflows/schema-validate.yml
   integration:
     uses: ./.github/workflows/integration.yml
+
+  # ── execution ───────────────────────────────────────────────────
+  smoke:
+    uses: ./.github/workflows/smoke.yml
   external-e2e:
     uses: ./.github/workflows/external-e2e.yml
   editor-e2e:
     uses: ./.github/workflows/editor-e2e.yml
+
+  # ── a11y + chaos ────────────────────────────────────────────────
   a11y-i18n:
     uses: ./.github/workflows/a11y-i18n.yml
-  axe:
-    uses: ./.github/workflows/axe.yml
   chaos:
     uses: ./.github/workflows/chaos.yml
-  security:
-    uses: ./.github/workflows/security.yml
+
+  # ── security ────────────────────────────────────────────────────
+  leak-scan:
+    uses: ./.github/workflows/leak-scan.yml
+  load:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/load.yml
