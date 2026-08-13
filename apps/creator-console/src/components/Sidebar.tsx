@@ -16,6 +16,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: creatorConsole('listings-create'), label: 'Create listing', group: 'Studio' },
   { href: creatorConsole('analytics'), label: 'Analytics', group: 'Insights' },
   { href: creatorConsole('statements'), label: 'Statements', group: 'Insights' },
+  { href: creatorConsole('payouts'), label: 'Payouts', group: 'Insights' },
   { href: creatorConsole('settings'), label: 'Settings', group: 'Account' },
 ];
 
