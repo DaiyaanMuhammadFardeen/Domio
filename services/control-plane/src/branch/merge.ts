@@ -21,7 +21,7 @@
 
 import { asULID, type ULID, type DeckDocument } from '@domio/schema';
 
-import { BranchService, BranchNotFoundError } from './service.js';
+import { type BranchService, BranchNotFoundError } from './service.js';
 import {
   type MergeRequestRecord,
   type MergeRequestRepository,

@@ -27,7 +27,7 @@ const ctx: AnalyticsContext = {
   device_class: 'desktop',
 };
 
-function makeClient(overrides: Partial<Parameters<typeof AnalyticsClient.prototype.flush>> = {}) {
+function makeClient(overrides: Record<string, unknown> = {}) {
   const transport = new InMemoryTransport();
   const queue = new MemoryQueueStore();
   const client = new AnalyticsClient({
@@ -42,7 +42,7 @@ function makeClient(overrides: Partial<Parameters<typeof AnalyticsClient.prototy
     now: () => 1_700_000_000_000,
     detectDnt: () => false,
     ...overrides,
-  });
+  } as ConstructorParameters<typeof AnalyticsClient>[0]);
   return { client, transport, queue };
 }
 

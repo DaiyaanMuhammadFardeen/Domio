@@ -3,13 +3,35 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { MeetingIntegrationService } from './service.js';
+import { MeetingIntegrationService, type MeetingIntegrationServiceOptions } from './service.js';
 import { InMemoryMeetingStore } from './store/mem_store.js';
-import type { MeetingEventEmitter, Vendor } from './types.js';
+import type {
+  MeetingEventEmitter,
+  RecordMarkerInput,
+  Vendor,
+} from './types.js';
 import { IntegrationNotFoundError, FeatureDisabledError, ValidationError } from './types.js';
 import { setTokenSecret } from './tokens.js';
 import { handlers } from './handlers.js';
 import type { HttpRequest } from './handlers.js';
+
+type ConnectBody = {
+  workspace_id: string;
+  vendor: Vendor;
+  auth: Record<string, unknown>;
+  connected_by: string;
+  deck_id?: string;
+};
+
+type DisconnectBody = { deck_id?: string };
+
+type TokenBody = {
+  workspace_id: string;
+  meeting_id: string;
+  presenter_id: string;
+  deck_id: string;
+  meeting_end_at: string;
+};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -27,7 +49,7 @@ function createService(opts?: {
   if (opts?.idGen !== undefined) serviceOpts.idGen = opts.idGen;
   return {
     service: new MeetingIntegrationService(
-      serviceOpts as unknown as import('./service.js').MeetingIntegrationServiceOptions,
+      serviceOpts as unknown as MeetingIntegrationServiceOptions,
     ),
     store,
   };
@@ -391,12 +413,12 @@ describe('MeetingIntegrationService', () => {
 
       const res = await handlers.getMeetingIntegrationStatus(req, { service });
       expect(res.status).toBe(200);
-      expect((res.body as any).status).toBe('connected');
+      expect((res.body as Record<string, unknown>).status).toBe('connected');
     });
 
     it('connectMeetingIntegration returns 201', async () => {
       const { service } = createService();
-      const req: HttpRequest<{ vendor: Vendor }, any> = {
+      const req: HttpRequest<{ vendor: Vendor }, ConnectBody> = {
         method: 'POST',
         path: '/v1/meeting-integrations/zoom/connect',
         params: { vendor: 'zoom' },
@@ -412,7 +434,8 @@ describe('MeetingIntegrationService', () => {
 
       const res = await handlers.connectMeetingIntegration(req, { service });
       expect(res.status).toBe(201);
-      expect((res.body as any).integration.status).toBe('connected');
+      const body = res.body as { integration: { status: string } };
+      expect(body.integration.status).toBe('connected');
     });
 
     it('disconnectMeetingIntegration returns 200', async () => {
@@ -424,7 +447,7 @@ describe('MeetingIntegrationService', () => {
         connected_by: 'user1',
       });
 
-      const req: HttpRequest<{ vendor: Vendor }, any, { workspace_id?: string }> = {
+      const req: HttpRequest<{ vendor: Vendor }, DisconnectBody, { workspace_id?: string }> = {
         method: 'POST',
         path: '/v1/meeting-integrations/zoom/disconnect',
         params: { vendor: 'zoom' },
@@ -435,7 +458,8 @@ describe('MeetingIntegrationService', () => {
 
       const res = await handlers.disconnectMeetingIntegration(req, { service });
       expect(res.status).toBe(200);
-      expect((res.body as any).integration.status).toBe('disconnected');
+      const body = res.body as { integration: { status: string } };
+      expect(body.integration.status).toBe('disconnected');
     });
 
     it('issueMeetingToken returns 201 with token', async () => {
@@ -447,7 +471,7 @@ describe('MeetingIntegrationService', () => {
         connected_by: 'user1',
       });
 
-      const req: HttpRequest<{ vendor: Vendor }, any> = {
+      const req: HttpRequest<{ vendor: Vendor }, TokenBody> = {
         method: 'POST',
         path: '/v1/meeting-integrations/zoom/token',
         params: { vendor: 'zoom' },
@@ -464,19 +488,20 @@ describe('MeetingIntegrationService', () => {
 
       const res = await handlers.issueMeetingToken(req, { service });
       expect(res.status).toBe(201);
-      expect((res.body as any).token.token).toBeTruthy();
+      const body = res.body as { token: { token: string } };
+      expect(body.token.token).toBeTruthy();
     });
 
     it('recordMeetingMarker returns 201', async () => {
       const { service } = createService();
-      const req: HttpRequest<Record<string, never>, any> = {
+      const req: HttpRequest<Record<string, never>, RecordMarkerInput> = {
         method: 'POST',
         path: '/v1/meeting-markers',
         params: {},
         body: {
           meeting_id: 'meet-1',
           slide_id: 'slide-1',
-          transitioned_at: '2025-06-01T10:00:00Z',
+          transitioned_at: new Date('2025-06-01T10:00:00Z'),
         },
         query: {},
         headers: {},
@@ -484,12 +509,13 @@ describe('MeetingIntegrationService', () => {
 
       const res = await handlers.recordMeetingMarker(req, { service });
       expect(res.status).toBe(201);
-      expect((res.body as any).is_first).toBe(true);
+      const body = res.body as { is_first: boolean };
+      expect(body.is_first).toBe(true);
     });
 
     it('handler error mapping: IntegrationNotFoundError → 404', async () => {
       const { service } = createService();
-      const req: HttpRequest<{ vendor: Vendor }, any, { workspace_id?: string }> = {
+      const req: HttpRequest<{ vendor: Vendor }, DisconnectBody, { workspace_id?: string }> = {
         method: 'POST',
         path: '/v1/meeting-integrations/zoom/disconnect',
         params: { vendor: 'zoom' },

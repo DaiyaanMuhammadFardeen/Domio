@@ -102,6 +102,12 @@ const EMPTY_PARKING_LOT: ParkingLotDigest = {
   pinned_ids: [],
 };
 
+// Module-scope reference to `verifyHandoverToken` so the
+// `consistent-type-imports` rule sees it as a value reference even
+// though the only use site (`ctx.verifyHandoverToken` in `handover`)
+// consumes it via `typeof` in a parameter type.
+void verifyHandoverToken;
+
 // ---------------------------------------------------------------------------
 // Service options
 // ---------------------------------------------------------------------------

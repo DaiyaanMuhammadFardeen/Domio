@@ -7,6 +7,7 @@ import {
   CheckpointNotFoundError,
   InvalidCheckpointNameError,
 } from './index.js';
+import type { BranchService } from '../branch/service.js';
 
 const DECK_ID = asULID('01H00000000000000000000000');
 
@@ -120,7 +121,7 @@ describe('CheckpointService', () => {
         id: asULID('01H00000000000000000000000B'),
         headRevision: 6,
       }),
-    } as unknown as import('../branch/service.js').BranchService;
+    } as unknown as BranchService;
     const svc = new CheckpointService(repo, branchSvc, ids());
     const cp = await svc.create({
       deckId: DECK_ID,

@@ -18,7 +18,7 @@ const IPV4_REGEX = /\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\
 // E.164 + common national formats. Permissive: catches + and 7–15 digits.
 const PHONE_REGEX = /(?:\+?\d[\s\-.]?){7,15}/g;
 // 13-19 digits separated by optional spaces/dashes — covers Visa/MC/Amex/etc.
-const CC_REGEX = /\b(?:\d[ \-]?){13,19}\b/g;
+const CC_REGEX = /\b(?:\d[ -]?){13,19}\b/g;
 // SSN-shaped strings (US only).
 const SSN_REGEX = /\b\d{3}-\d{2}-\d{4}\b/g;
 

@@ -32,21 +32,22 @@ export interface PgClient {
   withTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T>;
 }
 
-function rowToSession(row: any): PresenterSession {
+function rowToSession(row: unknown): PresenterSession {
+  const r = row as Record<string, unknown>;
   return {
-    id: row.id,
-    workspace_id: row.workspace_id,
-    deck_id: row.deck_id,
-    presenter_id: row.presenter_id,
-    state: row.state as StageState,
-    agenda_timers: row.agenda_timers ?? [],
-    parking_lot: (row.parking_lot ?? {
+    id: r.id as string,
+    workspace_id: r.workspace_id as string,
+    deck_id: r.deck_id as string,
+    presenter_id: r.presenter_id as string,
+    state: r.state as StageState,
+    agenda_timers: (r.agenda_timers ?? []) as PresenterSession['agenda_timers'],
+    parking_lot: (r.parking_lot ?? {
       pinned_count: 0,
       open_count: 0,
       pinned_ids: [],
     }) as ParkingLotDigest,
-    display_profile: (row.display_profile ?? {}) as DisplayProfileSnapshot,
-    pip_config: (row.pip_config ?? {
+    display_profile: (r.display_profile ?? {}) as DisplayProfileSnapshot,
+    pip_config: (r.pip_config ?? {
       position: 'corner',
       shape: 'rect',
       width_px: 320,
@@ -55,19 +56,19 @@ function rowToSession(row: any): PresenterSession {
       shadow: true,
       segmentation_model: 'mediapipe_selfie',
     }) as PipConfig,
-    mode: row.mode as SessionMode,
-    version: Number(row.version),
-    started_at: (row.started_at instanceof Date
-      ? row.started_at
-      : new Date(row.started_at)
+    mode: r.mode as SessionMode,
+    version: Number(r.version),
+    started_at: (r.started_at instanceof Date
+      ? r.started_at
+      : new Date(r.started_at as string | number)
     ).toISOString(),
-    ended_at: row.ended_at
-      ? (row.ended_at instanceof Date ? row.ended_at : new Date(row.ended_at)).toISOString()
+    ended_at: r.ended_at
+      ? (r.ended_at instanceof Date ? r.ended_at : new Date(r.ended_at as string | number)).toISOString()
       : null,
-    last_heartbeat_at: row.last_heartbeat_at
-      ? (row.last_heartbeat_at instanceof Date
-          ? row.last_heartbeat_at
-          : new Date(row.last_heartbeat_at)
+    last_heartbeat_at: r.last_heartbeat_at
+      ? (r.last_heartbeat_at instanceof Date
+          ? r.last_heartbeat_at
+          : new Date(r.last_heartbeat_at as string | number)
         ).toISOString()
       : null,
   };
@@ -203,6 +204,7 @@ export class PoolPgClient implements PgClient {
   constructor(
     private readonly pool: {
       query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[] }>;
+      connect: () => Promise<PoolClient>;
     },
   ) {}
 
@@ -212,7 +214,7 @@ export class PoolPgClient implements PgClient {
   }
 
   async withTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
-    const client = await (this.pool as any).connect();
+    const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
       const result = await fn(client);

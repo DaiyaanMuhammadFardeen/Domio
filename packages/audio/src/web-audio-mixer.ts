@@ -17,6 +17,7 @@ import {
   type TrackConfig,
   type GainBusState,
 } from './index.js';
+import type { ExportBus, ExportBusContext } from './exportBus.js';
 
 // ---------------------------------------------------------------------------
 // Mixer options
@@ -238,7 +239,8 @@ export class WebAudioMixer {
   // -------------------------------------------------------------------------
 
   private wireNodes(): void {
-    for (const _ of this.state.tracks) {
+    for (const tracks of this.state.tracks) {
+      void tracks;
       const gain = this.ctx.createGain();
       gain.connect(this.ctx.destination);
       this.nodes.push({ gain });
@@ -267,11 +269,11 @@ export interface ExportMixerOptions {
  */
 export class ExportMixer {
   readonly mixer: WebAudioMixer;
-  readonly bus: import('./exportBus.js').ExportBus;
+  readonly bus: ExportBus;
 
   constructor(
     renderCtx: AudioContextLike,
-    exportCtx: import('./exportBus.js').ExportBusContext,
+    exportCtx: ExportBusContext,
     options: ExportMixerOptions & WebAudioMixerOptions = {},
   ) {
     this.mixer = new WebAudioMixer(renderCtx, options);

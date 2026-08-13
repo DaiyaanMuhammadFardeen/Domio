@@ -9,11 +9,9 @@
  *   - audit recording when enabled
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { PermissionService } from './service.js';
-import type { PermissionServiceOptions } from './service.js';
 import { ValidationError, PermissionDeniedError } from './types.js';
-import type { ResourceType } from './types.js';
 import {
   InMemoryPermissionGrantStore,
   InMemoryWorkspaceMemberStore,
@@ -449,7 +447,7 @@ describe('PermissionService — group membership integration', () => {
 describe('PermissionService — workspace role baseline', () => {
   it('allows viewer to view via role baseline', async () => {
     const { svc, workspaceMembers } = await makeService();
-    await (workspaceMembers as any).upsert({
+    await workspaceMembers.upsert({
       id: 'wm-1',
       workspaceId: W,
       userId: U,
@@ -472,7 +470,7 @@ describe('PermissionService — workspace role baseline', () => {
 
   it('denies viewer to edit via role baseline', async () => {
     const { svc, workspaceMembers } = await makeService();
-    await (workspaceMembers as any).upsert({
+    await workspaceMembers.upsert({
       id: 'wm-1',
       workspaceId: W,
       userId: U,

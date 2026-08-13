@@ -18,7 +18,7 @@ import {
   CheckpointAlreadyExistsError,
   CheckpointNotFoundError,
 } from './dal.js';
-import { BranchService } from '../branch/service.js';
+import type { BranchService } from '../branch/service.js';
 
 export interface CreateCheckpointArgs {
   deckId: ULID;

@@ -116,7 +116,7 @@ export class HashChainedAuditEmitter implements AuditEmitter {
       const slice = this.records.slice(0, count).map((r) => r.signed);
       await this.chain.verifyChain(slice);
       return { ok: true };
-    } catch (e) {
+    } catch {
       return { ok: false, brokenAt: 0 };
     }
   }

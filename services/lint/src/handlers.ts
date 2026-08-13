@@ -10,7 +10,7 @@
  */
 
 import {
-  LintService,
+  type LintService,
   type LintRunRequest,
   LintValidationError,
   type LintFinding,

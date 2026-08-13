@@ -4,7 +4,7 @@
  * and asserts on the HTTP status + body.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { ULID } from '@domio/schema';
 import { asULID } from '@domio/schema';
 

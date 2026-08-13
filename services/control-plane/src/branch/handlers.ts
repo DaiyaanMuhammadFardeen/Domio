@@ -15,7 +15,7 @@ import type { ULID, DeckDocument } from '@domio/schema';
 import { asULID } from '@domio/schema';
 
 import {
-  BranchService,
+  type BranchService,
   type BranchRecord,
   BranchAlreadyExistsError,
   BranchNotFoundError,
@@ -24,7 +24,7 @@ import {
   MAIN_BRANCH,
 } from './service.js';
 import { computeLineage } from './lineage.js';
-import { MergeService } from './merge.js';
+import { type MergeService } from './merge.js';
 import { computeDiff, type DiffSummary } from './diff.js';
 import type { ResolveRequest } from './resolver.js';
 import { MissingManualResolutionsError } from './resolver.js';
@@ -33,12 +33,14 @@ import {
   NoChangesToMergeError,
   TargetBranchArchivedError,
 } from './merge.js';
+import type { AuditRecorder } from './audit.js';
+import type { MergeRequestRecord } from './merge_request_dal.js';
 
 /** Server-side data sources the handlers need. */
 export interface BranchHandlerContext {
   branches: BranchService;
   /** Optional audit sink for security/audit event emission. */
-  audit?: import('./audit.js').AuditRecorder;
+  audit?: AuditRecorder;
   /** Optional ACL guard; should reject viewers before data is read. */
   authorize?: (args: {
     actorId?: string;
@@ -252,12 +254,12 @@ export interface ResolveMergeRequestRequest {
 }
 
 export interface MergeRequestResponse {
-  mergeRequest: import('./merge_request_dal.js').MergeRequestRecord;
+  mergeRequest: MergeRequestRecord;
   traceId?: string;
 }
 
 export interface CommitMergeResponse {
-  mergeRequest: import('./merge_request_dal.js').MergeRequestRecord;
+  mergeRequest: MergeRequestRecord;
   newRevision: number;
   traceId?: string;
 }

@@ -22,7 +22,7 @@
  */
 
 import type { IdentityStore } from '../store/inmemory.js';
-import type { PrivacyMode } from '../types.js';
+import type { ConsentEvent, IdentityLink, PrivacyMode, ViewerRecord } from '../types.js';
 import { CURRENT_POLICY_VERSION } from '../consent/policy.js';
 import { randomUUID } from 'node:crypto';
 
@@ -114,7 +114,7 @@ export class GdprError extends Error {
   }
 }
 
-function serializeViewer(v: import('../types.js').ViewerRecord): Record<string, unknown> {
+function serializeViewer(v: ViewerRecord): Record<string, unknown> {
   return {
     viewer_id: v.viewer_id,
     workspace_id: v.workspace_id,
@@ -128,7 +128,7 @@ function serializeViewer(v: import('../types.js').ViewerRecord): Record<string, 
   };
 }
 
-function serializeLink(l: import('../types.js').IdentityLink): Record<string, unknown> {
+function serializeLink(l: IdentityLink): Record<string, unknown> {
   return {
     link_id: l.link_id,
     workspace_id: l.workspace_id,
@@ -140,7 +140,7 @@ function serializeLink(l: import('../types.js').IdentityLink): Record<string, un
   };
 }
 
-function serializeConsent(c: import('../types.js').ConsentEvent): Record<string, unknown> {
+function serializeConsent(c: ConsentEvent): Record<string, unknown> {
   return {
     event_id: c.event_id,
     workspace_id: c.workspace_id,

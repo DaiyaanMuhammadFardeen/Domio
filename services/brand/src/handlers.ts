@@ -35,7 +35,7 @@ import type {
   BrandKitRecord,
 } from './dal.js';
 import {
-  BrandService,
+  type BrandService,
   type CreateBrandKitInput,
   type UpdateBrandKitInput,
   type CreateBrandContextInput,

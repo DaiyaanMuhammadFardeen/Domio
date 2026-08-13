@@ -11,10 +11,10 @@
  *   - Point-in-time resolution
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { resolvePermission, buildAncestorChain } from './resolver.js';
 import type { ResolverContext } from './resolver.js';
-import type { ResourceType, PermissionGrant, WorkspaceRole } from './types.js';
+import type { PermissionGrant, WorkspaceRole } from './types.js';
 import {
   InMemoryPermissionGrantStore,
   InMemoryWorkspaceMemberStore,
@@ -62,54 +62,6 @@ function grant(
   };
 }
 
-function buildCtx(opts: {
-  grants?: PermissionGrant[];
-  role?: WorkspaceRole;
-  groups?: string[];
-}): ResolverContext {
-  const grantStore = new InMemoryPermissionGrantStore();
-  const memberStore = new InMemoryWorkspaceMemberStore();
-  const groupStore = new InMemoryGroupMembershipStore();
-  const hierarchyStore = new InMemoryResourceHierarchyStore();
-
-  // Wire up hierarchy: slide → deck → project → folder → workspace
-  const setup = async () => {
-    await hierarchyStore.setParent('slide', S, 'deck', D);
-    await hierarchyStore.setParent('deck', D, 'project', P);
-    await hierarchyStore.setParent('project', P, 'folder', F);
-    await hierarchyStore.setParent('folder', F, 'workspace', W);
-
-    for (const g of opts.grants ?? []) {
-      await grantStore.insert(g);
-    }
-
-    if (opts.role) {
-      const now = new Date('2026-01-01T00:00:00Z');
-      await (memberStore as any).upsert({
-        id: `wm-${Math.random().toString(36).slice(2, 8)}`,
-        workspaceId: W,
-        userId: U,
-        role: opts.role,
-        capabilities: [],
-        effectiveFrom: now,
-        effectiveTo: null,
-      });
-    }
-
-    for (const gid of opts.groups ?? []) {
-      await groupStore.addMembership(gid, U);
-    }
-  };
-
-  // We return a "thenable" that resolves to the context
-  return {
-    getGrantsForResource: (rt, rid) => grantStore.findByResource(rt, rid),
-    getWorkspaceMember: (wid, uid) => memberStore.findByWorkspaceAndUser(wid, uid),
-    getGroupIdsForUser: (uid) => groupStore.findGroupsForUser(uid),
-    getParentResource: (rt, rid) => hierarchyStore.findParent(rt, rid),
-  };
-}
-
 async function setupCtx(opts: {
   grants?: PermissionGrant[];
   role?: WorkspaceRole;
@@ -131,7 +83,7 @@ async function setupCtx(opts: {
 
   if (opts.role) {
     const now = new Date('2026-01-01T00:00:00Z');
-    await (memberStore as any).upsert({
+    await memberStore.upsert({
       id: `wm-${Math.random().toString(36).slice(2, 8)}`,
       workspaceId: W,
       userId: U,
@@ -325,7 +277,6 @@ describe('resolvePermission — temporal grants', () => {
     const futureStart = new Date('2027-01-01T00:00:00Z');
     const memberStore = new InMemoryWorkspaceMemberStore();
     const grantStore = new InMemoryPermissionGrantStore();
-    const groupStore = new InMemoryGroupMembershipStore();
     const hierarchyStore = new InMemoryResourceHierarchyStore();
 
     await hierarchyStore.setParent('slide', S, 'deck', D);
@@ -333,7 +284,7 @@ describe('resolvePermission — temporal grants', () => {
     await hierarchyStore.setParent('project', P, 'folder', F);
     await hierarchyStore.setParent('folder', F, 'workspace', W);
 
-    await (memberStore as any).upsert({
+    await memberStore.upsert({
       id: 'wm-1',
       workspaceId: W,
       userId: U,

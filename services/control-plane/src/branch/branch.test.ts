@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { asULID, type ULID, type DeckDocument } from '@domio/schema';
+import { asULID, type ULID } from '@domio/schema';
 import {
   BranchService,
   BranchAlreadyExistsError,

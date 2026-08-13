@@ -16,8 +16,8 @@
  *  - `parseToken(token)` — debug-only helper that decodes WITHOUT verifying.
  */
 
-import { NonceStore } from './nonce_store.js';
-import { ViewerClaims } from './mint.js';
+import type { NonceStore } from './nonce_store.js';
+import type { ViewerClaims } from './mint.js';
 
 // ---------------------------------------------------------------------------
 // Result

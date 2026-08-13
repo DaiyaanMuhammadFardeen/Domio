@@ -228,7 +228,6 @@ describe('DELETE /v1/cad_jobs/:id', () => {
 
   it('returns 409 when job is already done', async () => {
     const repo = new InMemoryCadJobRepository();
-    const worker = new CadWorkerSimulator(repo, { stageDelayMs: 1 });
     const app = createApp({ repo, workerConfig: { stageDelayMs: 1 } });
     const create = await createJob(app, { modelAssetId: 'a5' });
     const { id } = await create.json();

@@ -289,9 +289,8 @@ async function runWithQuickJs(
           .map((a) => {
             if (typeof a === 'string') return a;
             // QuickJS passes handles; ctx.dump converts them to JS values
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             try {
-              return ctx.dump(a as any);
+              return ctx.dump(a as unknown as Parameters<typeof ctx.dump>[0]);
             } catch {
               return String(a);
             }

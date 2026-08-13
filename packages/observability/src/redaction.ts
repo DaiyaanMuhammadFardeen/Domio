@@ -95,8 +95,8 @@ export async function ensureRedactor(): Promise<RedactPiiLike> {
       const url = (import.meta as { url?: string }).url ?? '';
       if (url) {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { createRequire } = require('node:module') as typeof import('node:module');
-        const req = createRequire(url);
+        const nodeModule = require('node:module') as { createRequire: (u: string) => NodeRequire };
+        const req = nodeModule.createRequire(url);
         const mod = req('@domio/redact-pii') as unknown;
         const c = coerce(mod);
         if (c) {

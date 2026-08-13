@@ -16,7 +16,7 @@ import {
   type CheckpointKind,
   CheckpointAlreadyExistsError,
   CheckpointNotFoundError,
-  CheckpointService,
+  type CheckpointService,
   InvalidCheckpointNameError,
 } from './service.js';
 

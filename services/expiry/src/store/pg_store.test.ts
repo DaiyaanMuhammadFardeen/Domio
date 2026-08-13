@@ -13,6 +13,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
+import type { Pool as PgPool } from 'pg';
 import { PgExpiryStore, StoreNotConfiguredError } from './pg_store.js';
 import type { ExpiryPolicy, FreshnessFlag } from '../types.js';
 
@@ -27,12 +28,15 @@ interface FakeQueryResult {
 
 type QueryHandler = (sql: string, params?: unknown[]) => FakeQueryResult;
 
-function createFakePool(queryHandler: QueryHandler) {
+function createFakePool(queryHandler: QueryHandler): PgPool {
+  // The fake only implements the `query`/`connect`/`end` surface that the
+  // store touches. The double cast keeps `PgPool` honest without forcing
+  // the test to mock every node-pg method.
   return {
     query: vi.fn(queryHandler),
     connect: vi.fn(),
     end: vi.fn(),
-  };
+  } as unknown as PgPool;
 }
 
 // ---------------------------------------------------------------------------
@@ -136,7 +140,7 @@ describe('PgExpiryStore — upsertPolicy', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 1 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const policy = makePolicy();
 
     await store.upsertPolicy(policy);
@@ -160,7 +164,7 @@ describe('PgExpiryStore — upsertPolicy', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 1 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const policy = makePolicy({ responsible_id: null });
 
     await store.upsertPolicy(policy);
@@ -177,7 +181,7 @@ describe('PgExpiryStore — upsertPolicy', () => {
 describe('PgExpiryStore — getPolicy', () => {
   it('returns null when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const result = await store.getPolicy('deck', 'nonexistent');
     expect(result).toBeNull();
   });
@@ -185,7 +189,7 @@ describe('PgExpiryStore — getPolicy', () => {
   it('returns domain policy when found', async () => {
     const policy = makePolicy();
     const pool = createFakePool(() => ({ rows: [policyToRow(policy)], rowCount: 1 }));
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const result = await store.getPolicy('deck', 'deck-001');
     expect(result).not.toBeNull();
     expect(result!.id).toBe('pol-001');
@@ -198,7 +202,7 @@ describe('PgExpiryStore — getPolicy', () => {
   it('handles nullable responsible_id', async () => {
     const policy = makePolicy({ responsible_id: null });
     const pool = createFakePool(() => ({ rows: [policyToRow(policy)], rowCount: 1 }));
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const result = await store.getPolicy('deck', 'deck-001');
     expect(result!.responsible_id).toBeNull();
   });
@@ -215,7 +219,7 @@ describe('PgExpiryStore — listPolicies', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 0 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
 
     await store.listPolicies('ws-001');
 
@@ -232,7 +236,7 @@ describe('PgExpiryStore — listPolicies', () => {
       rows: [policyToRow(p1), policyToRow(p2)],
       rowCount: 2,
     }));
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const results = await store.listPolicies('ws-001');
     expect(results).toHaveLength(2);
     expect(results[0]!.id).toBe('pol-1');
@@ -251,7 +255,7 @@ describe('PgExpiryStore — insertFlag', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 1 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const flag = makeFlag();
 
     await store.insertFlag(flag);
@@ -272,7 +276,7 @@ describe('PgExpiryStore — insertFlag', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 1 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const flag = makeFlag({
       resolved_at: new Date('2026-01-20T00:00:00Z'),
       resolved_by: 'user-002',
@@ -297,7 +301,7 @@ describe('PgExpiryStore — listOpenFlags', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 0 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
 
     await store.listOpenFlags();
 
@@ -312,7 +316,7 @@ describe('PgExpiryStore — listOpenFlags', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 0 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
 
     await store.listOpenFlags('deck');
 
@@ -327,7 +331,7 @@ describe('PgExpiryStore — listOpenFlags', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 0 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
 
     await store.listOpenFlags('deck', 'deck-001');
 
@@ -343,7 +347,7 @@ describe('PgExpiryStore — listOpenFlags', () => {
       rows: [flagToRow(flag)],
       rowCount: 1,
     }));
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const results = await store.listOpenFlags();
     expect(results).toHaveLength(1);
     expect(results[0]!.resolved_at).toBeNull();
@@ -363,7 +367,7 @@ describe('PgExpiryStore — resolveFlags', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 3 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
 
     const resolvedAt = new Date('2026-01-20T00:00:00Z');
     const count = await store.resolveFlags('deck', 'deck-001', {
@@ -387,7 +391,7 @@ describe('PgExpiryStore — resolveFlags', () => {
 
   it('returns 0 when no rows match', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const count = await store.resolveFlags('deck', 'nonexistent', {
       resolvedAt: new Date(),
       resolvedBy: 'user',
@@ -407,7 +411,7 @@ describe('PgExpiryStore — getFlagHistory', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 0 };
     });
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
 
     await store.getFlagHistory('deck', 'deck-001');
 
@@ -429,7 +433,7 @@ describe('PgExpiryStore — getFlagHistory', () => {
       rows: [flagToRow(f1), flagToRow(f2)],
       rowCount: 2,
     }));
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
     const results = await store.getFlagHistory('deck', 'deck-001');
     expect(results).toHaveLength(2);
     expect(results[0]!.resolved_at).toBeNull();
@@ -456,7 +460,7 @@ describe('PgExpiryStore — withTransaction', () => {
       connect: vi.fn(async () => fakeClient),
       end: vi.fn(),
     };
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
 
     const result = await store.withTransaction(async (client) => {
       await client.query('INSERT INTO expiry_policy (...) VALUES (...)');
@@ -482,7 +486,7 @@ describe('PgExpiryStore — withTransaction', () => {
       connect: vi.fn(async () => fakeClient),
       end: vi.fn(),
     };
-    const store = new PgExpiryStore(pool as any);
+    const store = new PgExpiryStore(pool);
 
     await expect(
       store.withTransaction(async () => {

@@ -37,7 +37,7 @@ import { isPairingStore, type PairingStore } from './store/store.js';
 import { mintPairingToken, parsePairingToken, verifyPairingToken } from './token.js';
 import { PairingSignatureError } from './types.js';
 import type { TokenSigner } from './token.js';
-import { Chain, type JsonObject, GenesisHash } from '@domio/audit-ts';
+import { GenesisHash, type Chain, type JsonObject } from '@domio/audit-ts';
 
 export interface PhonePairingServiceOptions {
   readonly store: PairingStore;

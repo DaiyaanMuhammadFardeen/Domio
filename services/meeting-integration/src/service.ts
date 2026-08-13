@@ -16,7 +16,9 @@ import type {
   MeetingIntegrationInput,
   MeetingEventEmitter,
   MeetingMarker,
+  RecordMarkerInput,
   Vendor,
+  MeetingToken,
 } from './types.js';
 import { IntegrationNotFoundError, noopEmitter } from './types.js';
 import type { MeetingStore } from './store/store.js';
@@ -201,7 +203,7 @@ export class MeetingIntegrationService {
     presenterId: string,
     deckId: string,
     meetingEndAt: Date,
-  ): Promise<import('./types.js').MeetingToken> {
+  ): Promise<MeetingToken> {
     checkFeature(FEATURE_FLAGS.integrations);
 
     const integration = await this.store.getIntegration(workspaceId, vendor);
@@ -226,7 +228,7 @@ export class MeetingIntegrationService {
   // -------------------------------------------------------------------------
 
   async recordMarker(
-    input: import('./types.js').RecordMarkerInput,
+    input: RecordMarkerInput,
   ): Promise<{ marker: MeetingMarker; isFirst: boolean }> {
     checkFeature(FEATURE_FLAGS.integrations);
 

@@ -88,7 +88,7 @@ export async function startMultiTrackRecorder(
     });
     mimeTypes.set(track, mime);
     let sequence = 0;
-    let trackStart = Date.now();
+    const trackStart = Date.now();
     recorder.ondataavailable = async (event: BlobEvent) => {
       if (!event.data || event.data.size === 0) return;
       const buf = new Uint8Array(await event.data.arrayBuffer());

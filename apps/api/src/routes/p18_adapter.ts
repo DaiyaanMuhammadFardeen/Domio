@@ -58,9 +58,14 @@ export function adaptHandler(handler: P18Handler, service: any) {
     const res = await handler(req, { service });
 
     if (res.status === 204 || res.body === undefined) {
-      return c.body(null, 204 as any);
+      return c.body(null, 204);
     }
 
-    return c.json(res.body as any, res.status as any);
+    // Hono's c.json() requires a JSONValue-typed body. We coerce the
+    // framework-agnostic `unknown` body through `string` to escape
+    // the recursive JSONValue constraint without `as any`.
+    const body = JSON.parse(JSON.stringify(res.body));
+    const status = res.status as 200;
+    return (c.json as (b: unknown, s: number) => Response)(body, status);
   };
 }

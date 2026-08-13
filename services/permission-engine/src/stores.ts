@@ -26,6 +26,7 @@ export interface PermissionGrantStore {
 // ---------------------------------------------------------------------------
 
 export interface WorkspaceMemberStore {
+  upsert(member: WorkspaceMember): Promise<void>;
   findByWorkspaceAndUser(workspaceId: string, userId: string): Promise<WorkspaceMember | null>;
 }
 

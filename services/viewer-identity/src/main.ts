@@ -60,7 +60,6 @@ export async function boot(): Promise<{ port: number; close: () => Promise<void>
   return { port: cfg.port, close };
 }
 
-declare const require: { main?: unknown };
 // ESM entrypoint detection. The CommonJS `require.main === module` idiom
 // doesn't work under `"type": "module"` — `require` is undefined outside
 // CJS. `import.meta.url` always points at this file; compare against the

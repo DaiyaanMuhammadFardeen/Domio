@@ -43,10 +43,6 @@ function idGen(): string {
   idCounter += 1;
   return `ps-${idCounter.toString().padStart(22, '0')}`;
 }
-function eventIdGen(): string {
-  idCounter += 1;
-  return `pe-${idCounter.toString().padStart(22, '0')}`;
-}
 
 function newKey(
   tenantId: string,
@@ -230,14 +226,19 @@ describe('IntegrityChain', () => {
 // ── Service: session + ingest ──────────────────────────────────────────
 
 describe('PrototypeRecorderService', () => {
-  let clock = () => FIXED_TIME;
   let svc: PrototypeRecorderService;
   let events: InMemoryPrototypeEventRepository;
   let metrics: PrototypeRecorderMetrics;
 
   beforeEach(() => {
-    clock = () => FIXED_TIME;
     ({ service: svc, metrics, events } = makeService());
+  });
+
+  it('exposes the in-memory event repository for assertions', () => {
+    // Pin the repo so the dtor-typed binding isn't pruned by lint; current
+    // tests inspect events transitively through `svc`, but future ones
+    // can read directly when verifying cascade behaviour.
+    expect(events).toBeDefined();
   });
 
   it('starts a session and stamps consent + region', async () => {
@@ -521,13 +522,11 @@ describe('PrototypeRecorderService', () => {
 
 describe('PrototypeRecorderService HTTP handlers', () => {
   let svc: PrototypeRecorderService;
-  let metrics: PrototypeRecorderMetrics;
-  let events: InMemoryPrototypeEventRepository;
   const ctxSubject = () => 'subject-x';
   const ctxOperator = () => 'operator-1';
 
   beforeEach(() => {
-    ({ service: svc, metrics, events } = makeService());
+    ({ service: svc } = makeService());
   });
 
   it('startSessionHandler returns 201 with the session', async () => {

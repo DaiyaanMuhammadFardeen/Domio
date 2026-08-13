@@ -236,7 +236,7 @@ describe('PresenterSessionService — optimistic concurrency', () => {
 
     const fulfilled = [winner, loser].filter(
       (r) => r.status === 'fulfilled',
-    ) as PromiseFulfilledResult<any>[];
+    ) as PromiseFulfilledResult<unknown>[];
     const rejected = [winner, loser].filter(
       (r) => r.status === 'rejected',
     ) as PromiseRejectedResult[];

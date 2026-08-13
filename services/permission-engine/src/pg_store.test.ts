@@ -11,8 +11,9 @@
  * No live DB required.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ResourceType, PermissionGrant, WorkspaceMember } from './types.js';
+import { describe, it, expect, beforeEach } from 'vitest';
+import type { Pool as PgPool } from 'pg';
+import type { PermissionGrant, WorkspaceMember } from './types.js';
 import {
   PgPermissionGrantStore,
   PgWorkspaceMemberStore,
@@ -115,7 +116,7 @@ describe('PgPermissionGrantStore', () => {
 
   beforeEach(() => {
     pool = new FakePool();
-    store = new PgPermissionGrantStore({ pool: pool as unknown as any });
+    store = new PgPermissionGrantStore({ pool: pool as unknown as PgPool });
   });
 
   describe('insert', () => {
@@ -306,7 +307,7 @@ describe('PgWorkspaceMemberStore', () => {
 
   beforeEach(() => {
     pool = new FakePool();
-    store = new PgWorkspaceMemberStore({ pool: pool as unknown as any });
+    store = new PgWorkspaceMemberStore({ pool: pool as unknown as PgPool });
   });
 
   describe('findByWorkspaceAndUser', () => {
@@ -374,7 +375,7 @@ describe('PgGroupMembershipStore', () => {
 
   beforeEach(() => {
     pool = new FakePool();
-    store = new PgGroupMembershipStore({ pool: pool as unknown as any });
+    store = new PgGroupMembershipStore({ pool: pool as unknown as PgPool });
   });
 
   describe('findGroupsForUser', () => {
@@ -422,7 +423,7 @@ describe('PgResourceHierarchyStore', () => {
 
   beforeEach(() => {
     pool = new FakePool();
-    store = new PgResourceHierarchyStore({ pool: pool as unknown as any });
+    store = new PgResourceHierarchyStore({ pool: pool as unknown as PgPool });
   });
 
   describe('findParent', () => {
@@ -492,7 +493,7 @@ describe('SQL conventions', () => {
   });
 
   it('uses parameterized queries ($1..$n) for all SQL', async () => {
-    const store = new PgPermissionGrantStore({ pool: pool as unknown as any });
+    const store = new PgPermissionGrantStore({ pool: pool as unknown as PgPool });
     pool.respond([
       {
         id: '1',
@@ -524,7 +525,7 @@ describe('SQL conventions', () => {
   });
 
   it('uses snake_case column names matching migration schema', async () => {
-    const store = new PgPermissionGrantStore({ pool: pool as unknown as any });
+    const store = new PgPermissionGrantStore({ pool: pool as unknown as PgPool });
     pool.respond([
       {
         id: '1',
@@ -560,7 +561,7 @@ describe('SQL conventions', () => {
   });
 
   it('capabilities array is passed as parameter (text[])', async () => {
-    const store = new PgPermissionGrantStore({ pool: pool as unknown as any });
+    const store = new PgPermissionGrantStore({ pool: pool as unknown as PgPool });
     const grant = makeGrant({ capabilities: ['edit', 'view', 'comment'] });
 
     await store.insert(grant);

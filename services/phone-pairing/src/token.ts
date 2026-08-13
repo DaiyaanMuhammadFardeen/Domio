@@ -143,6 +143,7 @@ export function parsePairingToken(token: string):
       ok: true;
       header: Record<string, unknown>;
       payload: Record<string, unknown>;
+      _sig: string;
     }
   | {
       ok: false;
@@ -160,7 +161,7 @@ export function parsePairingToken(token: string):
     if (header.alg !== 'HS256' || header.typ !== 'pairing.v1') {
       return { ok: false, reason: 'unsupported algorithm or type' };
     }
-    return { ok: true, header, payload, _sig: sigB64 } as any;
+    return { ok: true, header, payload, _sig: sigB64 };
   } catch {
     return { ok: false, reason: 'invalid base64 or json' };
   }

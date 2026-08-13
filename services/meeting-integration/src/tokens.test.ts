@@ -10,6 +10,20 @@ import {
   setTokenSecret,
 } from './tokens.js';
 import { TokenInvalidError } from './types.js';
+import type { MeetingIntegration } from './types.js';
+
+/** Stub integration — tokens only sign the meeting_id/presenter_id/deck_id/expires_at, not the integration blob. */
+const stubIntegration: MeetingIntegration = {
+  id: 'stub',
+  workspace_id: 'ws1',
+  vendor: 'zoom',
+  auth: {},
+  status: 'connected',
+  connected_by: 'user1',
+  connected_at: new Date(),
+  created_at: new Date(),
+  updated_at: new Date(),
+};
 
 describe('Meeting tokens', () => {
   const testSecret = 'test-secret-key-for-meeting-tokens';
@@ -25,7 +39,7 @@ describe('Meeting tokens', () => {
 
       const token = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-1',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',
@@ -48,7 +62,7 @@ describe('Meeting tokens', () => {
 
       const token = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-2',
           presenter_id: 'presenter-2',
           deck_id: 'deck-2',
@@ -67,7 +81,7 @@ describe('Meeting tokens', () => {
 
       const token1 = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-1',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',
@@ -78,7 +92,7 @@ describe('Meeting tokens', () => {
 
       const token2 = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-2',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',
@@ -99,7 +113,7 @@ describe('Meeting tokens', () => {
 
       const token = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-1',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',
@@ -129,7 +143,7 @@ describe('Meeting tokens', () => {
 
       const token = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-1',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',
@@ -159,7 +173,7 @@ describe('Meeting tokens', () => {
 
       const token = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-1',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',
@@ -190,7 +204,7 @@ describe('Meeting tokens', () => {
 
       const token = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-1',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',
@@ -222,7 +236,7 @@ describe('Meeting tokens', () => {
 
       const token = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-1',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',
@@ -250,7 +264,7 @@ describe('Meeting tokens', () => {
 
       const token = issueMeetingToken(
         {
-          integration: {} as any,
+          integration: stubIntegration,
           meeting_id: 'meet-1',
           presenter_id: 'presenter-1',
           deck_id: 'deck-1',

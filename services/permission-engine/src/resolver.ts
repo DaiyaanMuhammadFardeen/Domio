@@ -121,7 +121,6 @@ export async function buildAncestorChain(
   let currentType: ResourceType | null = resourceType;
   let currentId: string = resourceId;
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     chain.push({ resourceType: currentType, resourceId: currentId });
     if (currentType === 'workspace') break;

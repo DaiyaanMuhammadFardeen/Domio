@@ -28,7 +28,7 @@
 
 import type { TokenValue } from '@domio/tokens';
 import {
-  ThemeService,
+  type ThemeService,
   type ApplyThemeResult,
   type CreateTokenInput,
   type CreateAliasInput,

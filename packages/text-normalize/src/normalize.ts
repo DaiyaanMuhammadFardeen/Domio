@@ -47,8 +47,8 @@ export function normalize(input: string, opts: NormalizeOptions = {}): string {
   if (caseFold) text = text.toLowerCase();
   text = text.replace(/\s+/g, ' ').trim();
   if (trimPunctuation) {
-    text = text.replace(/^[\s.,;:!?¿¡'"`~()\[\]{}]+/u, '');
-    text = text.replace(/[\s.,;:!?¿¡'"`~()\[\]{}]+$/u, '');
+    text = text.replace(/^[\s.,;:!?¿¡'"`~()[\]{}]+/u, '');
+    text = text.replace(/[\s.,;:!?¿¡'"`~()[\]{}]+$/u, '');
   }
   if (text.length > maxLength) text = text.slice(0, maxLength);
   return text;

@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { ExpiryService } from './service.js';
+import { ExpiryService, type ExpiryServiceOptions } from './service.js';
 import { InMemoryExpiryStore } from './store/mem_store.js';
 import type { ExpiryEventEmitter, ShareRevoker, WorkspaceDefaults } from './types.js';
 import { FeatureDisabledError, PolicyNotFoundError } from './types.js';
@@ -29,9 +29,7 @@ function createService(opts?: {
     serviceOpts.getWorkspaceDefaults = opts.getWorkspaceDefaults;
   if (opts?.now !== undefined) serviceOpts.now = opts.now;
   return {
-    service: new ExpiryService(
-      serviceOpts as unknown as import('./service.js').ExpiryServiceOptions,
-    ),
+    service: new ExpiryService(serviceOpts as unknown as ExpiryServiceOptions),
     store,
   };
 }

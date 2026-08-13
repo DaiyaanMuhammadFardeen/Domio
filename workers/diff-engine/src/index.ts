@@ -137,7 +137,7 @@ function createDefaultDiffRunner(
               // Not a fast-forward or other issue — skip
             }
           }
-        } catch (err) {
+        } catch {
           // Log and continue with next MR
         }
       }

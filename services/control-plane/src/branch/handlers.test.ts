@@ -14,7 +14,6 @@ import {
   resolveMergeRequest,
   commitMergeRequest,
   computeDiffHandler,
-  MAIN_BRANCH,
 } from './index.js';
 import type { BranchHandlerContext } from './handlers.js';
 import { BranchAlreadyExistsError } from './dal.js';
