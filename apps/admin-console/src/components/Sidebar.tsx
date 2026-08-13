@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
+import { adminConsole } from '@domio/ui';
 
 interface NavItem {
   href: string;
   label: string;
-  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing';
+  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing' | 'Identity' | 'Billing' | 'Build' | 'Governance' | 'Integrations';
 }
 
 const NAV: ReadonlyArray<NavItem> = [
@@ -17,6 +18,15 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: '/takedowns', label: 'Takedowns', group: 'Moderation' },
   { href: '/payouts', label: 'Payout Policy', group: 'Finance' },
   { href: '/custom-domains', label: 'Custom Domains', group: 'Publishing' },
+  { href: adminConsole('sso'), label: 'SSO', group: 'Identity' },
+  { href: adminConsole('scim'), label: 'SCIM', group: 'Identity' },
+  { href: adminConsole('seats'), label: 'Seat Analytics', group: 'Billing' },
+  { href: adminConsole('component-sdk'), label: 'Component SDK', group: 'Build' },
+  { href: adminConsole('dlp'), label: 'DLP', group: 'Governance' },
+  { href: adminConsole('residency'), label: 'Residency', group: 'Governance' },
+  { href: adminConsole('api-keys'), label: 'API Keys', group: 'Integrations' },
+  { href: adminConsole('webhooks'), label: 'Webhooks', group: 'Integrations' },
+  { href: adminConsole('sdk'), label: 'SDK', group: 'Integrations' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
