@@ -17,9 +17,9 @@ export interface ConfigFormProps {
 }
 
 interface FieldError {
-  readonly parallelism?: string;
-  readonly retention?: string;
-  readonly rateLimit?: string;
+  parallelism?: string;
+  retention?: string;
+  rateLimit?: string;
 }
 
 export function ConfigForm({ config, onSave }: ConfigFormProps) {

@@ -269,7 +269,7 @@ export async function getPluginAuditLog(id: string): Promise<ReadonlyArray<Plugi
   ];
   // Stable per-id offset so different plugins look distinct.
   const offset = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const out = events.map((e, i) => ({
+  const out = events.map((e) => ({
     timestamp_ms: e.timestamp_ms + offset * 1000 * 60,
     action: e.action,
     actor: e.actor,

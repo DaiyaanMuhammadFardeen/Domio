@@ -173,7 +173,6 @@ const USER_ACTIVITY_SEED: ReadonlyArray<UserActivity> = [
 // ── Public API ───────────────────────────────────────────────────────────
 
 export async function getLicenseSummary(): Promise<LicenseSummary> {
-  // eslint-disable-next-line domio/no-raw-fetch
   try {
     const json = await fetcher<LicenseSummary>('/v1/admin/seats/license');
     if (json && typeof json.seats_total === 'number' && typeof json.seats_used === 'number') {
@@ -189,7 +188,6 @@ export async function getSeatUsageHistory(
   days: number,
 ): Promise<ReadonlyArray<SeatUsagePoint>> {
   const safe = Math.max(1, Math.min(365, Math.floor(days)));
-  // eslint-disable-next-line domio/no-raw-fetch
   try {
     const json = await fetcher<{ items?: SeatUsagePoint[] }>(
       `/v1/admin/seats/usage?days=${safe}`,
@@ -204,7 +202,6 @@ export async function getSeatUsageHistory(
 }
 
 export async function listUserActivity(): Promise<ReadonlyArray<UserActivity>> {
-  // eslint-disable-next-line domio/no-raw-fetch
   try {
     const json = await fetcher<{ items?: UserActivity[] }>(
       '/v1/admin/seats/users',

@@ -64,6 +64,8 @@ function seededSamples(): RenderSample[] {
   const list: RenderSample[] = [];
   for (let i = 0; i < 20; i += 1) {
     // Mostly succeeded with a sprinkle of failed/running/queued.
+    const fallback: RenderJobStatus =
+      STATUSES[i % STATUSES.length] ?? 'succeeded';
     const status: RenderJobStatus =
       i < 2
         ? 'running'
@@ -73,7 +75,7 @@ function seededSamples(): RenderSample[] {
         ? 'failed'
         : i === 5
         ? 'cancelled'
-        : STATUSES[i % STATUSES.length];
+        : fallback;
     const started = NOW - i * 1000 * 60 * 3;
     const duration =
       status === 'succeeded' || status === 'failed' || status === 'cancelled'
@@ -198,7 +200,6 @@ export async function updateRenderConfig(
 }
 
 export async function cancelRender(id: string): Promise<RenderSample> {
-  // eslint-disable-next-line domio/no-raw-fetch -- fetcher wraps fetch with auth + tracing.
   try {
     await fetcher<void>(
       `/v1/admin/rendering/samples/${encodeURIComponent(id)}/cancel`,
