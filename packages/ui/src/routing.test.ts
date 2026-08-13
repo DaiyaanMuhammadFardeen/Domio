@@ -80,6 +80,9 @@ describe('routing — admin-console', () => {
   it('builds plugin detail with id', () => {
     expect(adminConsole('plugin-detail', { id: 'plug-1' })).toBe('/plugins/plug-1');
   });
+  it('builds takedown detail with id', () => {
+    expect(adminConsole('takedown-detail', { id: 'tk-1' })).toBe('/takedowns/tk-1');
+  });
 });
 
 describe('routing — creator-console', () => {

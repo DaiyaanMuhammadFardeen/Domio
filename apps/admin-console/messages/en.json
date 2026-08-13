@@ -233,5 +233,17 @@
   "admin.audit.pagination.prev": "Previous",
   "admin.audit.detail.heading": "Event detail",
   "admin.audit.detail.json": "Raw event",
-  "admin.audit.detail.diff": "Diff"
+  "admin.audit.detail.diff": "Diff",
+  "admin.takedowns.detail.heading": "Takedown {id}",
+  "admin.takedowns.detail.claimant": "Claimant",
+  "admin.takedowns.detail.respondent": "Respondent",
+  "admin.takedowns.detail.evidence": "Evidence",
+  "admin.takedowns.detail.statement": "Statement",
+  "admin.takedowns.detail.notes": "Resolution notes",
+  "admin.takedowns.detail.events": "Timeline",
+  "admin.takedowns.detail.resolve": "Resolve",
+  "admin.takedowns.detail.confirm": "Confirm takedown",
+  "admin.takedowns.detail.dismiss": "Dismiss",
+  "admin.takedowns.detail.counterNotice": "Counter notice filed",
+  "admin.takedowns.detail.backToQueue": "Back to queue"
 }

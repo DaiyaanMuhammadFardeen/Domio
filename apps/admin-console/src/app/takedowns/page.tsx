@@ -1,20 +1,33 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ExternalLink, X } from 'lucide-react';
+import Link from 'next/link';
+import { X } from 'lucide-react';
+import { adminConsole } from '@domio/ui';
 import { SortableTable, type SortableColumn } from '../../components/SortableTable';
-import { Badge, toneForTakedownStatus, toneForTakedownKind } from '../../components/Badge';
+import { TakedownDetailPanel } from '../../components/takedowns/TakedownDetailPanel';
 import { fetcher } from '../../lib/fetcher';
 import type { TakedownRequest, TakedownStatus } from '../../lib/types';
+import type { TakedownEvent } from '../../lib/takedown-service';
+import type { ResolveDecision } from '../../components/takedowns/ResolveForm';
 
 type Row = Record<string, unknown> & TakedownRequest;
 
-function formatDate(ms: number | null): string {
-  if (!ms) return '—';
-  return new Date(ms).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
-}
+const DRAWER_LABELS = {
+  claimant: 'Claimant',
+  respondent: 'Respondent',
+  evidence: 'Evidence',
+  statement: 'Statement',
+  notes: 'Resolution notes',
+  events: 'Timeline',
+  confirm: 'Confirm takedown',
+  dismiss: 'Dismiss',
+  counterNotice:
+    'A counter-notice has been submitted for this request. The original claimant has 10 business days to respond with legal action before the listing is restored.',
+  notesPlaceholder: 'Add notes about this resolution…',
+  submitted: 'Submitted',
+  resolved: 'Resolved',
+};
 
 export default function TakedownsPage() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -23,8 +36,8 @@ export default function TakedownsPage() {
   const [statusFilter, setStatusFilter] = useState<TakedownStatus | ''>('');
   const [kindFilter, setKindFilter] = useState('');
   const [selected, setSelected] = useState<Row | null>(null);
+  const [events, setEvents] = useState<ReadonlyArray<TakedownEvent>>([]);
   const [resolveBusy, setResolveBusy] = useState(false);
-  const [resolveNotes, setResolveNotes] = useState('');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -49,16 +62,38 @@ export default function TakedownsPage() {
     loadData();
   }, [loadData]);
 
-  async function handleResolve(decision: 'confirmed' | 'dismissed') {
+  // When the drawer opens for a row, attempt to load the event trail for it.
+  useEffect(() => {
+    if (!selected) {
+      setEvents([]);
+      return;
+    }
+    const id = selected.request_id;
+    let cancelled = false;
+    (async () => {
+      try {
+        const json = await fetcher<{ events?: TakedownEvent[] }>(
+          `/v1/takedowns/${encodeURIComponent(id)}/events`,
+        );
+        if (!cancelled) setEvents(json.events ?? []);
+      } catch {
+        if (!cancelled) setEvents([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selected]);
+
+  async function handleResolve(decision: ResolveDecision, notes: string) {
     if (!selected) return;
     setResolveBusy(true);
     try {
       await fetcher(`/v1/takedowns/${selected.request_id}/resolve`, {
         method: 'POST',
-        body: { decision, resolution_notes: resolveNotes || undefined },
+        body: { decision, resolution_notes: notes || undefined },
       });
       setSelected(null);
-      setResolveNotes('');
       await loadData();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to resolve');
@@ -75,32 +110,48 @@ export default function TakedownsPage() {
       key: 'kind',
       header: 'Kind',
       type: 'string',
-      format: (val) => <Badge tone={toneForTakedownKind(String(val))}>{String(val)}</Badge>,
+      format: (val) => String(val),
     },
     {
       key: 'status',
       header: 'Status',
       type: 'string',
-      format: (val) => <Badge tone={toneForTakedownStatus(String(val))}>{String(val)}</Badge>,
+      format: (val) => String(val),
     },
     {
       key: 'submitted_at',
       header: 'Submitted',
       type: 'number',
-      format: (val) => formatDate(val as number),
+      format: (val) => {
+        if (!val) return '—';
+        return new Date(val as number).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        });
+      },
     },
     {
       key: 'request_id',
       header: '',
       type: 'string',
       format: (_val, row) => (
-        <button
-          type="button"
-          onClick={() => setSelected(row)}
-          className="text-xs font-medium text-brand-600 hover:text-brand-800"
-        >
-          View details
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSelected(row)}
+            className="text-xs font-medium text-slate-600 hover:text-slate-800"
+          >
+            Quick view
+          </button>
+          <Link
+            href={adminConsole('takedown-detail', { id: row.request_id })}
+            data-testid={`takedown-detail-${row.request_id}`}
+            className="text-xs font-medium text-brand-600 hover:text-brand-800"
+          >
+            View details
+          </Link>
+        </div>
       ),
     },
   ];
@@ -179,7 +230,15 @@ export default function TakedownsPage() {
           <div className="absolute inset-0 bg-black/30" onClick={() => setSelected(null)} />
           <div className="relative ml-auto flex h-full w-full max-w-lg flex-col overflow-y-auto bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-              <h2 className="text-lg font-semibold text-slate-900">Takedown Details</h2>
+              <div className="flex flex-col gap-1">
+                <h2 className="text-lg font-semibold text-slate-900">Takedown Details</h2>
+                <Link
+                  href={adminConsole('takedown-detail', { id: selected.request_id })}
+                  className="text-xs text-brand-600 hover:text-brand-800"
+                >
+                  Open in full page →
+                </Link>
+              </div>
               <button
                 type="button"
                 onClick={() => setSelected(null)}
@@ -190,103 +249,14 @@ export default function TakedownsPage() {
               </button>
             </div>
 
-            <div className="flex-1 px-6 py-4 space-y-5">
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Request ID</div>
-                <div className="mt-0.5 font-mono text-sm text-slate-900">{selected.request_id}</div>
-              </div>
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Listing</div>
-                <div className="mt-0.5 font-mono text-sm text-slate-900">{selected.listing_id}</div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Kind</div>
-                  <div className="mt-1"><Badge tone={toneForTakedownKind(selected.kind)}>{selected.kind}</Badge></div>
-                </div>
-                <div>
-                  <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Status</div>
-                  <div className="mt-1"><Badge tone={toneForTakedownStatus(selected.status)}>{selected.status}</Badge></div>
-                </div>
-              </div>
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Claimant</div>
-                <div className="mt-0.5 text-sm text-slate-900">{selected.claimant_id}</div>
-              </div>
-              {selected.evidence_url && (
-                <div>
-                  <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Evidence</div>
-                  <a
-                    href={selected.evidence_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-0.5 inline-flex items-center gap-1 text-sm text-brand-600 hover:text-brand-800"
-                  >
-                    View evidence <ExternalLink className="h-3 w-3" aria-hidden />
-                  </a>
-                </div>
-              )}
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Statement</div>
-                <p className="mt-0.5 text-sm text-slate-700 leading-relaxed">{selected.statement}</p>
-              </div>
-              {selected.resolution_notes && (
-                <div>
-                  <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Resolution Notes</div>
-                  <p className="mt-0.5 text-sm text-slate-700">{selected.resolution_notes}</p>
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-4 text-xs text-slate-500">
-                <div>
-                  <span className="font-medium">Submitted:</span> {formatDate(selected.submitted_at)}
-                </div>
-                <div>
-                  <span className="font-medium">Resolved:</span> {formatDate(selected.resolved_at)}
-                </div>
-              </div>
+            <div className="flex-1 px-6 py-4">
+              <TakedownDetailPanel
+                request={selected}
+                events={events}
+                labels={DRAWER_LABELS}
+                onResolve={resolveBusy ? undefined : handleResolve}
+              />
             </div>
-
-            {(selected.status === 'received' || selected.status === 'in_review') && (
-              <div className="border-t border-slate-200 px-6 py-4 space-y-3">
-                <label htmlFor="resolve-notes" className="text-xs font-medium text-slate-600">
-                  Resolution Notes (optional)
-                </label>
-                <textarea
-                  id="resolve-notes"
-                  value={resolveNotes}
-                  onChange={(e) => setResolveNotes(e.target.value)}
-                  rows={3}
-                  placeholder="Add notes about this resolution..."
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
-                />
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={resolveBusy}
-                    onClick={() => handleResolve('confirmed')}
-                    className="rounded-md bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700 disabled:opacity-50"
-                  >
-                    Confirm Takedown
-                  </button>
-                  <button
-                    type="button"
-                    disabled={resolveBusy}
-                    onClick={() => handleResolve('dismissed')}
-                    className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {selected.status === 'counter_notice' && (
-              <div className="border-t border-slate-200 px-6 py-4">
-                <p className="text-sm text-amber-700 bg-amber-50 rounded-lg p-3">
-                  A counter-notice has been submitted for this request. The original claimant has 10 business days to respond with legal action before the listing is restored.
-                </p>
-              </div>
-            )}
           </div>
         </div>
       )}

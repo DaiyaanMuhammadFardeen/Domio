@@ -209,6 +209,7 @@ export type AdminRoute =
   | 'sdk'
   | 'plugins'
   | 'plugin-detail'
+  | 'takedown-detail'
   | 'component-sdk'
   | 'rendering'
   | 'mcp'
@@ -263,6 +264,8 @@ export function adminConsole(
       return '/plugins';
     case 'plugin-detail':
       return `/plugins/${encodeURIComponent(params['id'] ?? '')}`;
+    case 'takedown-detail':
+      return `/takedowns/${encodeURIComponent(params['id'] ?? '')}`;
     case 'component-sdk':
       return '/component-sdk';
     case 'rendering':
