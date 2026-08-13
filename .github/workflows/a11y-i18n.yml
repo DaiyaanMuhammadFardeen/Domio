@@ -23,7 +23,7 @@ on:
     branches: [master, main]
     paths:
       - 'packages/i18n/**'
-      - 'apps/editor/src/lib/i18n.ts'
+      - 'apps/editor/src/lib/locale.ts'
       - 'apps/dashboard/**'
       - '.axe/**'
       - 'tests/axe/**'
@@ -87,7 +87,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Run editor i18n suite
-        run: pnpm --filter @domio/editor test -- src/lib/i18n.test.ts
+        run: pnpm --filter @domio/editor test -- src/lib/locale.test.ts
 
   dashboard-i18n:
     name: dashboard i18n tests
