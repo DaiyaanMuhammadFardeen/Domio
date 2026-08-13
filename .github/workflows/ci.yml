@@ -38,16 +38,6 @@ concurrency:
 
 permissions:
   contents: read
-  security-events: write
-  pull-requests: write
-  issues: write
-
-env:
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-  # ZAP_TARGET defaults to preview; the security workflow receives
-  # target_env via workflow_call inputs in production deployments.
-  ZAP_TARGET: ${{ vars.ZAP_TARGET || 'https://preview.domio.app' }}
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────
