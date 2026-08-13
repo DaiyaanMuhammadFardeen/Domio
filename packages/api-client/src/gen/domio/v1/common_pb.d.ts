@@ -561,6 +561,70 @@ export declare class IdempotencyKey extends Message<IdempotencyKey> {
 }
 
 /**
+ * LicenseGrant is a JWT-signed entitlement issued by the license service.
+ * It grants access to a catalog listing within a workspace scope.
+ *
+ * @generated from message domio.v1.LicenseGrant
+ */
+export declare class LicenseGrant extends Message<LicenseGrant> {
+  /**
+   * Signed JWT token. Clients may cache and present this for verification.
+   *
+   * @generated from field: string token = 1;
+   */
+  token: string;
+
+  /**
+   * Marketplace listing this grant covers.
+   *
+   * @generated from field: string listing_id = 2;
+   */
+  listingId: string;
+
+  /**
+   * License identifier.
+   *
+   * @generated from field: string license_id = 3;
+   */
+  licenseId: string;
+
+  /**
+   * Seat limit for this grant. Zero means unlimited.
+   *
+   * @generated from field: int32 seats = 4;
+   */
+  seats: number;
+
+  /**
+   * Issued-at (epoch milliseconds).
+   *
+   * @generated from field: int64 issued_at_ms = 5;
+   */
+  issuedAtMs: bigint;
+
+  /**
+   * Expiration (epoch milliseconds). Zero means no expiry.
+   *
+   * @generated from field: int64 expires_at_ms = 6;
+   */
+  expiresAtMs: bigint;
+
+  constructor(data?: PartialMessage<LicenseGrant>);
+
+  static readonly runtime: typeof proto3;
+  static readonly typeName = "domio.v1.LicenseGrant";
+  static readonly fields: FieldList;
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LicenseGrant;
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): LicenseGrant;
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): LicenseGrant;
+
+  static equals(a: LicenseGrant | PlainMessage<LicenseGrant> | undefined, b: LicenseGrant | PlainMessage<LicenseGrant> | undefined): boolean;
+}
+
+/**
  * AuditActor describes who performed an action. actor_kind values are
  * "user", "agent", "system", "cron", "admin", "service".
  *

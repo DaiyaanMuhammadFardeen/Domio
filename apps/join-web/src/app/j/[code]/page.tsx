@@ -62,7 +62,6 @@ export default function JoinPage() {
       client?.close();
     };
     void apiBase; // currently unused but keeps apiBase in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, form.code]);
 
   const onEnvelope = (msg: AudienceEnvelope): void => {

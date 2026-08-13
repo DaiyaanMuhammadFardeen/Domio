@@ -1,12 +1,45 @@
 /**
- * handout-service — resolves a signed handout link to a session code.
+ * handout-service — resolves a signed handout link and fetches the
+ * per-participant handout descriptor.
  *
- * Per Wave 1 §S1.2 of docs/frontend-roadmap/01-wave-productionization.md.
- * Replaces the inline fetch in apps/join-web/src/app/h/[token]/page.tsx.
+ * Per Wave 5 §S5.3 of docs/frontend-roadmap/05-wave-audience-participation.md.
+ * Two operations:
+ *  - resolveHandoutToken(token): confirmed-token -> session code (used
+ *    by the legacy redirect path).
+ *  - fetchHandout(token): token -> HandoutDescriptor (the per-user
+ *    handout, including attended slide references, personalized notes,
+ *    and a call-to-action).
  */
 
 export interface HandoutResolveResult {
   readonly session_code: string;
+}
+
+export interface HandoutAttendedSlide {
+  readonly slide_id: string;
+  readonly title: string;
+  readonly index: number;
+  readonly thumbnail_url: string | null;
+}
+
+export interface HandoutCta {
+  readonly label: string;
+  readonly href: string;
+  readonly variant: 'primary' | 'secondary';
+}
+
+export interface HandoutDescriptor {
+  readonly token: string;
+  readonly session_id: string;
+  readonly session_title: string;
+  readonly presenter_display_name: string;
+  readonly attended_slides: readonly HandoutAttendedSlide[];
+  readonly notes: string;
+  readonly call_to_action: HandoutCta | null;
+  /** Optional PDF URL rendered by the handout-generator service. */
+  readonly pdf_url: string | null;
+  readonly issued_at: string;
+  readonly expires_at: string;
 }
 
 export class HandoutResolveError extends Error {
@@ -42,3 +75,35 @@ export async function resolveHandoutToken(
   }
   return (await res.json()) as HandoutResolveResult;
 }
+
+/**
+ * Fetch the per-user handout descriptor for a signed token. The
+ * descriptor powers the /h/{token} surface: attended slide list,
+ * personalized notes, call-to-action, and an optional PDF export URL.
+ */
+export async function fetchHandout(
+  token: string,
+  baseUrl: string = DEFAULT_BASE,
+  fetchFn: typeof fetch = fetch,
+): Promise<HandoutDescriptor> {
+  const url = `${baseUrl}/api/handout/${encodeURIComponent(token)}`;
+  const res = await fetchFn(url, {
+    headers: { accept: 'application/json' },
+    cache: 'no-store',
+  });
+  if (!res.ok) {
+    throw new HandoutResolveError(res.status, `handout fetch failed: ${res.status}`);
+  }
+  return (await res.json()) as HandoutDescriptor;
+}
+
+/**
+ * Service-shape export so callers can write
+ * `import { handoutService } from '@/lib/handout-service'`
+ * and then `await handoutService.fetch(token)`. The named functions
+ * remain the source of truth — this is a thin aggregator.
+ */
+export const handoutService = {
+  fetch: fetchHandout,
+  resolve: resolveHandoutToken,
+} as const;
