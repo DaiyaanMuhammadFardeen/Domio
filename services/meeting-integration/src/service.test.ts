@@ -5,11 +5,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MeetingIntegrationService, type MeetingIntegrationServiceOptions } from './service.js';
 import { InMemoryMeetingStore } from './store/mem_store.js';
-import type {
-  MeetingEventEmitter,
-  RecordMarkerInput,
-  Vendor,
-} from './types.js';
+import type { MeetingEventEmitter, RecordMarkerInput, Vendor } from './types.js';
 import { IntegrationNotFoundError, FeatureDisabledError, ValidationError } from './types.js';
 import { setTokenSecret } from './tokens.js';
 import { handlers } from './handlers.js';

@@ -19,11 +19,16 @@ import { Trend, Rate } from 'k6/metrics';
 const ingestLatencyMs = new Trend('ingest_latency_ms');
 const ingestErrorRate = new Rate('ingest_errors');
 
+// Default rate is the reference 200k events/sec across 5 s. CI runners
+// cap this at K6_RATE=2000 events/sec to keep the scenario hermetic
+// while still exercising the same code paths.
+const K6_RATE = parseInt(__ENV.K6_RATE || '200000', 10);
+
 export const options = {
   scenarios: {
     ingest_200k: {
       executor: 'constant-arrival-rate',
-      rate: 200000,
+      rate: K6_RATE,
       timeUnit: '1s',
       duration: '5s',
       preAllocatedVUs: 50,

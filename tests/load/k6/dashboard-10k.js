@@ -23,11 +23,19 @@ const dashboardErrorRate = new Rate('dashboard_errors');
 const OVERVIEW_KPI_PERSISTED_QUERY_SHA =
   'a4f9b6c8d2e1f3a7b5c9d8e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f900';
 
+// VUs default to 10k for the reference scenario, but CI runners
+// (single 7 GB / 2 CPU GitHub-hosted ubuntu-24.04) can sustain only
+// a few hundred concurrent users before the Next.js server runs
+// out of memory. CI workflows pass K6_VUS=200 to keep this
+// scenario hermetic while preserving the SLO thresholds.
+const VUS = parseInt(__ENV.K6_VUS || '10000', 10);
+const VUS_MAX = VUS + Math.floor(VUS * 0.1);
+
 export const options = {
   scenarios: {
     dashboard_10k: {
       executor: 'constant-vus',
-      vus: 10000,
+      vus: VUS,
       duration: '30s',
       gracefulStop: '5s',
     },
@@ -36,7 +44,7 @@ export const options = {
     'http_req_duration{name:graphql}': ['p(95)<800'],
     dashboard_errors: ['rate<0.01'],
     checks: ['rate>0.99'],
-    vus: ['value<11000'],
+    vus: [`value<${VUS_MAX}`],
   },
 };
 

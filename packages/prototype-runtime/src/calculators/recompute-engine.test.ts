@@ -196,7 +196,10 @@ describe('calculator builtins', () => {
     };
     const state = recompute(def, { a: 1, b: 10, c: 20 });
     expect(state.outputs.pick).toBe(10);
-    const def2: CalculatorDef = { ...def, outputs: [{ id: 'pick', label: 'Pick', formula: 'if($a, $b, $c)' }] };
+    const def2: CalculatorDef = {
+      ...def,
+      outputs: [{ id: 'pick', label: 'Pick', formula: 'if($a, $b, $c)' }],
+    };
     const state2 = recompute(def2, { a: 0, b: 10, c: 20 });
     expect(state2.outputs.pick).toBe(20);
   });

@@ -114,13 +114,11 @@ function composeVariant(source: string, tone: CopyTone, salt: string): string {
   const base = trimmed.length > 0 ? trimmed : 'Your selected text';
 
   switch (tone) {
-    case 'shorter': // Drop redundant trailing words to roughly halve length.
-    {
+    case 'shorter': { // Drop redundant trailing words to roughly halve length.
       const half = Math.max(8, Math.ceil(trimmed.length * 0.55));
       return `${base.slice(0, half).trimEnd()}${hash(salt + 'e') % 2 === 0 ? '.' : ''}`;
     }
-    case 'punchier': // Capitalize key tokens + add an em dash for emphasis.
-    {
+    case 'punchier': { // Capitalize key tokens + add an em dash for emphasis.
       const exclaim = hash(salt + 'p') % 2 === 0 ? '!' : '.';
       const words = base.split(/\s+/);
       if (words.length >= 2) {

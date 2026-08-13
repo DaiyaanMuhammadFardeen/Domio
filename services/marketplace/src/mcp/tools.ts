@@ -104,11 +104,7 @@ export function executeMcpTool(
 
   // Check capability
   try {
-    checkMcpCapability(
-      input.workspaceId,
-      toolDef.requiredCapability,
-      input.grantedCapabilities,
-    );
+    checkMcpCapability(input.workspaceId, toolDef.requiredCapability, input.grantedCapabilities);
     extraCapabilityCheck?.(toolDef.requiredCapability);
   } catch (e) {
     if (e instanceof Error) {

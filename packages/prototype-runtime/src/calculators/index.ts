@@ -9,10 +9,7 @@
 
 import { recompute } from './recompute-engine.js';
 import { validateCalculatorDef } from './calculator-def.js';
-import type {
-  CalculatorDef,
-  CalculatorState,
-} from './calculator-def.js';
+import type { CalculatorDef, CalculatorState } from './calculator-def.js';
 
 export type {
   CalculatorMode,
@@ -90,7 +87,11 @@ export class RecomputeEngine {
     inputValues: Readonly<Record<string, number>>,
     opts?: { clock?: () => number },
   ): RecomputeResult {
-    const state = recompute(def, inputValues, opts?.clock !== undefined ? { clock: opts.clock } : {});
+    const state = recompute(
+      def,
+      inputValues,
+      opts?.clock !== undefined ? { clock: opts.clock } : {},
+    );
     this.cache.set(def.id, state);
     return { state, errors: state.errors };
   }

@@ -36,17 +36,15 @@ function createMockService(overrides?: Partial<MergeRequestService>): MergeReque
 
 function createMockMrProvider() {
   return {
-    getOpenMergeRequests: vi
-      .fn()
-      .mockResolvedValue([
-        {
-          id: 'mr-1',
-          workspace_id: 'ws-1',
-          deck_id: 'deck-1',
-          source_branch: 'feature',
-          target_branch: 'main',
-        },
-      ]),
+    getOpenMergeRequests: vi.fn().mockResolvedValue([
+      {
+        id: 'mr-1',
+        workspace_id: 'ws-1',
+        deck_id: 'deck-1',
+        source_branch: 'feature',
+        target_branch: 'main',
+      },
+    ]),
   };
 }
 
@@ -154,14 +152,12 @@ describe('DiffEngineWorker', () => {
           binding_diffs: [],
           computed_at: new Date(),
         }),
-        getMergeRequest: vi
-          .fn()
-          .mockResolvedValue({
-            id: 'mr-1',
-            status: 'open',
-            deck_id: 'deck-1',
-            workspace_id: 'ws-1',
-          }),
+        getMergeRequest: vi.fn().mockResolvedValue({
+          id: 'mr-1',
+          status: 'open',
+          deck_id: 'deck-1',
+          workspace_id: 'ws-1',
+        }),
       });
 
       const worker = new DiffEngineWorker({

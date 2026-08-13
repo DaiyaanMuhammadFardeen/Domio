@@ -425,8 +425,7 @@ function evalFormula(
   let i = 0;
   const peek = (): string | undefined => tokens[i];
   const consume = (): string | undefined => tokens[i++];
-  const ctxFinal: RecomputeContext =
-    'ctx' in ctx ? ctx.ctx : (ctx as RecomputeContext);
+  const ctxFinal: RecomputeContext = 'ctx' in ctx ? ctx.ctx : (ctx as RecomputeContext);
 
   const parseExpr = (): number | string | readonly number[] => parseAddSub();
 

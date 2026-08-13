@@ -16,7 +16,9 @@ import type {
 
 export default function CheckoutPageRoute() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-12" data-testid="checkout-loading" />}>
+    <Suspense
+      fallback={<div className="mx-auto max-w-7xl px-4 py-12" data-testid="checkout-loading" />}
+    >
       <CheckoutPage />
     </Suspense>
   );

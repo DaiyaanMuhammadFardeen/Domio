@@ -63,7 +63,10 @@ function rowToSession(row: unknown): PresenterSession {
       : new Date(r.started_at as string | number)
     ).toISOString(),
     ended_at: r.ended_at
-      ? (r.ended_at instanceof Date ? r.ended_at : new Date(r.ended_at as string | number)).toISOString()
+      ? (r.ended_at instanceof Date
+          ? r.ended_at
+          : new Date(r.ended_at as string | number)
+        ).toISOString()
       : null,
     last_heartbeat_at: r.last_heartbeat_at
       ? (r.last_heartbeat_at instanceof Date

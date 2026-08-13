@@ -86,6 +86,7 @@ jobs:
         run: pnpm gen || true
       - name: Build workspace packages (dist-only deps)
         run: |
+          pnpm --filter @domio/eslint-plugin build
           pnpm --filter @domio/web-security build
       - name: Build all Next.js apps
         run: |

@@ -22,11 +22,16 @@ const crmErrorRate = new Rate('crm_errors');
 const crmAccepted = new Counter('crm_accepted_total');
 const crmDlq = new Counter('crm_dlq_total');
 
+// Default rate is the reference 10 k events/sec burst. CI runners cap
+// this at K6_RATE=500 events/sec to keep the scenario hermetic while
+// still exercising the rate-limiter path.
+const K6_RATE = parseInt(__ENV.K6_RATE || '10000', 10);
+
 export const options = {
   scenarios: {
     crm_burst: {
       executor: 'constant-arrival-rate',
-      rate: 10000,
+      rate: K6_RATE,
       timeUnit: '1s',
       duration: '1s',
       preAllocatedVUs: 200,
@@ -36,7 +41,7 @@ export const options = {
   thresholds: {
     'http_req_duration{name:crm}': ['p(95)<200'],
     crm_errors: ['rate<0.05'],
-    crm_dlq_total: ['count<10000'],
+    crm_dlq_total: [`count<${K6_RATE}`],
     checks: ['rate>0.95'],
   },
 };

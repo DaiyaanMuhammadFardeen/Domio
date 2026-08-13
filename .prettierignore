@@ -27,3 +27,15 @@ redisdata
 clickhousedata
 opensearchdata
 docs/development_phases/*.md
+
+# Helm templates use Go template syntax that prettier can't parse.
+infrastructure/helm/
+infra/prometheus/
+infrastructure/feature-flags/
+infrastructure/kustomize/
+infra/k8s/
+
+# Generated/managed files
+contracts/openapi/v1/mcp-prototyping.yaml
+**/*.generated.*
+**/CHANGELOG.md

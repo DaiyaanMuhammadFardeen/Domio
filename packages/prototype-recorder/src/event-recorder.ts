@@ -75,9 +75,7 @@ export class EventRecorder {
     // missing/invalid fetchImpl is caught now rather than on first use.
     new ChunkedUploadStream({ fetchImpl });
     this.idb =
-      cfg.useIndexedDb && deps.indexedDb
-        ? new IndexedDBQueue({ indexedDB: deps.indexedDb })
-        : null;
+      cfg.useIndexedDb && deps.indexedDb ? new IndexedDBQueue({ indexedDB: deps.indexedDb }) : null;
   }
 
   /** Start the auto-flush timer. Idempotent. */

@@ -217,9 +217,7 @@ function firstEnum(fragment: PropSchemaFragment): unknown {
 }
 
 /** Ordered, category-grouped control descriptors for the whole schema. */
-export function controlDescriptors(
-  schema: DomioPropsSchema,
-): Array<{
+export function controlDescriptors(schema: DomioPropsSchema): Array<{
   category: NonNullable<DomioPropExtension['category']>;
   controls: TypedControlDescriptor[];
 }> {

@@ -43,10 +43,15 @@ jobs:
       - name: Build @domio/eslint-plugin
         run: pnpm --filter @domio/eslint-plugin build
       - run: pnpm lint
-      - name: Fail when any warnings present
+      # The `pnpm lint` script runs `eslint --max-warnings 0` for every
+      # package, which already exits non-zero on any warning. The grep
+      # check below was previously a second line of defence but it
+      # matched `--max-warnings` substrings in the script banner and
+      # produced a false positive. Removed.
+      - name: Verify no warnings present
         run: |
-          if pnpm lint 2>&1 | grep -E "warning" | grep -v "warnings or errors" | grep -q .; then
-            echo "Warnings found in lint output" >&2
+          if pnpm lint 2>&1 | grep -E "^\\s*[0-9]+:[0-9]+\\s+(warning|error)" | grep -v "warnings or errors" | grep -q .; then
+            echo "Lint warnings found in output" >&2
             exit 1
           fi
 

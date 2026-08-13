@@ -57,7 +57,10 @@ describe('PartnerClientService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      await (store as unknown as { partnerClients: Map<string, PartnerClient> }).partnerClients.set('partner-1', client);
+      await (store as unknown as { partnerClients: Map<string, PartnerClient> }).partnerClients.set(
+        'partner-1',
+        client,
+      );
 
       await expect(service.verifyClient('partner-1', '')).rejects.toThrow(InvalidClientSecretError);
     });
@@ -75,7 +78,10 @@ describe('PartnerClientService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      await (store as unknown as { partnerClients: Map<string, PartnerClient> }).partnerClients.set('partner-1', client);
+      await (store as unknown as { partnerClients: Map<string, PartnerClient> }).partnerClients.set(
+        'partner-1',
+        client,
+      );
 
       const result = await service.verifyClient('partner-1', 'secret');
       expect(result.clientId).toBe('partner-1');

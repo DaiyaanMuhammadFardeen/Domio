@@ -177,9 +177,7 @@ export class RecordingOrchestrator {
     );
   }
 
-  async commitChunk(
-    input: CommitChunkInput,
-  ): Promise<{
+  async commitChunk(input: CommitChunkInput): Promise<{
     workspace_id: string;
     recording_session_id: string;
     track_kind: TrackKind;

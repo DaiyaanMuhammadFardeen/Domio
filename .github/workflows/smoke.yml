@@ -47,9 +47,16 @@ jobs:
       - name: Install Postgres extensions
         run: |
           PGPASSWORD=domio psql -h localhost -U domio -d domio -c "CREATE EXTENSION IF NOT EXISTS vector;"
+      # Workspace packages (e.g. @domio/observability) export JS via
+      # `dist/index.js`; build them so the API's tsx-resolved imports
+      # have a real file to load.
+      - name: Build API workspace deps
+        run: |
+          pnpm exec turbo run build --filter='@domio/api...'
       - name: Start API
         run: |
-          # tsx loads .ts sources directly — no compile step needed.
+          # tsx loads the API's own .ts sources directly, but workspace
+          # deps resolve through compiled dist/ — see Build step above.
           nohup pnpm --filter @domio/api start > /tmp/api.log 2>&1 &
           echo $! > /tmp/api.pid
           for _ in $(seq 1 30); do

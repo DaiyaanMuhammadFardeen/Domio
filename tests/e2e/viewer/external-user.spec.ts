@@ -12,7 +12,9 @@ test.describe('viewer — external user', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1, name: /domio viewer/i })).toBeVisible();
     // Open form (deck id + button) should be present
-    await expect(page.locator('input[name="deckId"], input[placeholder*="deck" i]').first()).toBeVisible();
+    await expect(
+      page.locator('input[name="deckId"], input[placeholder*="deck" i]').first(),
+    ).toBeVisible();
   });
 
   test('submitting a deck id navigates to the viewer', async ({ page }) => {
@@ -68,9 +70,7 @@ test.describe('viewer — external user', () => {
       if (await submit.count()) {
         await submit.click();
         await page.waitForLoadState('networkidle');
-        const recent = await page.evaluate(() =>
-          localStorage.getItem('domio-viewer-recent'),
-        );
+        const recent = await page.evaluate(() => localStorage.getItem('domio-viewer-recent'));
         expect(recent).not.toBeNull();
         expect(recent).toContain('recent-test-deck');
       }

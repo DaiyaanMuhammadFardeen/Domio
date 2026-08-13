@@ -31,7 +31,9 @@ test.describe('landing — external user', () => {
 
   test('FAQ accordion expands at least one item', async ({ page }) => {
     await page.goto('/');
-    const faqItem = page.locator('[data-testid^="faq-item-"], details, button[aria-expanded]').first();
+    const faqItem = page
+      .locator('[data-testid^="faq-item-"], details, button[aria-expanded]')
+      .first();
     if (await faqItem.count()) {
       await faqItem.click();
       await expect(faqItem).toBeVisible();

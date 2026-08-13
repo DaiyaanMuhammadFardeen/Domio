@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import type { Pool as PgPool } from 'pg';
 import {
   rowToPackage,
   pkgToRow,
@@ -527,7 +528,7 @@ describe('rowToAuditRow', () => {
 const hasDb = !!process.env.DATABASE_URL;
 
 describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
-  let pool: unknown;
+  let pool: PgPool;
   let SqlStoreClass: typeof SqlStore;
 
   beforeAll(async () => {
@@ -544,7 +545,7 @@ describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
   });
 
   it('full CRUD lifecycle for packages', async () => {
-    const store = new SqlStoreClass(pool);
+    const store = new SqlStoreClass(pool!);
     const pkg: ComponentPackage = {
       id: 'test-pkg-001',
       catalogId: 'test-catalog',
@@ -581,7 +582,7 @@ describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
   });
 
   it('CRUD for smart props', async () => {
-    const store = new SqlStoreClass(pool);
+    const store = new SqlStoreClass(pool!);
     const props: SmartProp[] = [
       { propKey: 'label', propSchema: { type: 'string' }, required: true, controlHint: 'text' },
       { propKey: 'count', propSchema: { type: 'number' }, required: false, default: 0 },
@@ -598,7 +599,7 @@ describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
   });
 
   it('CRUD for user library items', async () => {
-    const store = new SqlStoreClass(pool);
+    const store = new SqlStoreClass(pool!);
     const item: UserLibraryItem = {
       id: 'uli-001',
       userId: 'user-test',
@@ -624,7 +625,7 @@ describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
   });
 
   it('CRUD for team library + events', async () => {
-    const store = new SqlStoreClass(pool);
+    const store = new SqlStoreClass(pool!);
     const lib: TeamLibrary = {
       id: 'tl-test',
       workspaceId: 'ws-test',
@@ -663,7 +664,7 @@ describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
   });
 
   it('CRUD for listings, reviews, license grants', async () => {
-    const store = new SqlStoreClass(pool);
+    const store = new SqlStoreClass(pool!);
     const listing: MarketplaceListing = {
       id: 'ls-test',
       catalogId: 'test-catalog',
@@ -722,7 +723,7 @@ describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
   });
 
   it('CRUD for templates, sticker packs, brand locks', async () => {
-    const store = new SqlStoreClass(pool);
+    const store = new SqlStoreClass(pool!);
     const tmpl: Template = {
       id: 'tmpl-test',
       kind: 'full_deck',
@@ -781,7 +782,7 @@ describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
   });
 
   it('CRUD for icons', async () => {
-    const store = new SqlStoreClass(pool);
+    const store = new SqlStoreClass(pool!);
     const icon: IconRecord = {
       id: 'icon-test',
       name: 'test-icon',
@@ -810,7 +811,7 @@ describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
   });
 
   it('CRUD for audit log', async () => {
-    const store = new SqlStoreClass(pool);
+    const store = new SqlStoreClass(pool!);
     const row: AuditRow = {
       id: 'audit-test',
       actorId: 'user-test',
