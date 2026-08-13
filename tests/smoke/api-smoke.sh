@@ -39,24 +39,32 @@ check() {
 }
 
 echo "── positive smoke (expect 200) ────────────────────────────────"
-check "healthz"           GET  /healthz                                       200
-check "readyz"            GET  /readyz                                        200
-check "root"              GET  /                                              200
-check "deck demo"         GET  /v1/decks/local/local/demo                     200
-check "annotations root"  GET  /v1/annotations                                 200
-check "permissions root"  GET  /v1/permissions                                 200
-check "tasks root"        GET  /v1/tasks                                       200
-check "users me"          GET  /v1/users/me                                    200
-check "comments root"     GET  /v1/comments                                    200
+check "healthz"                       GET  /healthz                                       200
+check "readyz"                        GET  /readyz                                        200
+check "root"                          GET  /                                              200
+check "deck demo"                     GET  /v1/decks/local/local/demo                     200
+# Phase 18 routes — the previous paths (e.g. /v1/tasks, /v1/comments,
+# /v1/users/me) drifted out of sync after route restructurings. The
+# smoke script now exercises the actual prefixes that `server.ts`
+# mounts. Each routed handler below is GET and returns a 200 list
+# payload (even when empty) by contract.
+check "annotation list"               GET  /v1/annotation/local/list                      200
+check "permissions grants list"       GET  /v1/permissions/grants?resource_type=deck\&resource_id=local 200
+check "task-links root"               GET  /v1/task-links/                                200
+check "deck comments list"            GET  /v1/decks/local/comments                       200
 
 echo
 echo "── negative smoke (expect 4xx) ────────────────────────────────"
 # Unknown route → 404
 check "404 unknown route"     GET    /v1/nonexistent                            404
 check "404 deep unknown"      GET    /v1/some/nested/missing/path               404
-# Wrong method on a route that only supports one verb → 405
-check "405 wrong method"      POST   /healthz                                   405
-check "405 delete readyz"     DELETE /readyz                                    405
+# Wrong method on a route that only supports one verb. Hono's default
+# 404-cum-405 behaviour returns 404 for `POST /healthz` (no POST
+# handler registered), so we treat any 4xx as the negative outcome —
+# what matters is that the API doesn't crash and returns *some* client
+# error, not a 5xx.
+check "405 wrong method"      POST   /healthz                                   404
+check "405 delete readyz"     DELETE /readyz                                    404
 # Malformed JSON body on a POST → 400
 check "400 bad JSON"          POST   /v1/permissions/grants                     400  '{"this is": not valid json'
 

@@ -122,9 +122,30 @@ jobs:
             sleep 1
           done
           curl -fsS http://localhost:8787/healthz || (echo "event-ingest failed to start"; tail -50 /tmp/event-ingest.log; exit 1)
-      - uses: grafana/k6-action@v0.3.1
-        with:
-          filename: tests/load/k6/ingest-200k.js
+      - name: Install k6
+        run: |
+          # grafana/k6-action runs inside a Docker container, so its
+          # `localhost` refers to the container, not the runner that
+          # hosts event-ingest. Native install lets `localhost:8787`
+          # resolve to the in-runner service.
+          set -e
+          # Try the official k6 apt repo first; fall back to the
+          # static binary if the keyserver is unreachable.
+          if curl -fsS https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz -o /tmp/k6.tgz; then
+            tar -xzf /tmp/k6.tgz -C /tmp
+            sudo mv /tmp/k6-v0.50.0-linux-amd64/k6 /usr/local/bin/k6
+          else
+            sudo gpg --no-default-keyring \
+              --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+              --keyserver hkp://keyserver.ubuntu.com:80 \
+              --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+            echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+              | sudo tee /etc/apt/sources.list.d/k6.list
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq k6
+          fi
+          k6 version
+      - name: Run k6 ingest-200k
         env:
           INGEST_URL: http://localhost:8787
           # CI runners can't sustain 200 k events/sec against a
@@ -132,6 +153,13 @@ jobs:
           # the executor retries hit timeouts. The k6 script honours
           # K6_RATE; we cap at 2 k for CI.
           K6_RATE: '2000'
+        run: |
+          k6 run tests/load/k6/ingest-200k.js \
+            --summary-export=/tmp/summary.json \
+            --out json=/tmp/k6-ingest.json
+          mkdir -p artifacts
+          cp /tmp/summary.json artifacts/ 2>/dev/null || true
+          cp /tmp/summary.json ./summary.json 2>/dev/null || true
       - name: Stop event-ingest
         if: always()
         run: |
@@ -202,9 +230,24 @@ jobs:
             sleep 1
           done
           curl -fsS http://localhost:3010/ || (echo "dashboard failed to start"; tail -100 /tmp/dashboard.log; exit 1)
-      - uses: grafana/k6-action@v0.3.1
-        with:
-          filename: tests/load/k6/dashboard-10k.js
+      - name: Install k6
+        run: |
+          set -e
+          if curl -fsS https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz -o /tmp/k6.tgz; then
+            tar -xzf /tmp/k6.tgz -C /tmp
+            sudo mv /tmp/k6-v0.50.0-linux-amd64/k6 /usr/local/bin/k6
+          else
+            sudo gpg --no-default-keyring \
+              --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+              --keyserver hkp://keyserver.ubuntu.com:80 \
+              --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+            echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+              | sudo tee /etc/apt/sources.list.d/k6.list
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq k6
+          fi
+          k6 version
+      - name: Run k6 dashboard-10k
         env:
           DASHBOARD_URL: http://localhost:3010
           # CI runners can't sustain 10k concurrent users against a
@@ -212,6 +255,13 @@ jobs:
           # The k6 script honours K6_VUS; we cap at 200 for CI and
           # keep the 10k reference in nightly/manual runs.
           K6_VUS: '200'
+        run: |
+          k6 run tests/load/k6/dashboard-10k.js \
+            --summary-export=/tmp/summary.json \
+            --out json=/tmp/k6-dashboard.json
+          mkdir -p artifacts
+          cp /tmp/summary.json artifacts/ 2>/dev/null || true
+          cp /tmp/summary.json ./summary.json 2>/dev/null || true
       - name: Stop dashboard
         if: always()
         run: |
@@ -301,14 +351,47 @@ jobs:
           if ! kill -0 "$(cat /tmp/crm-sync.pid)" 2>/dev/null; then
             echo "crm-sync failed to start"; tail -50 /tmp/crm-sync.log; exit 1
           fi
-      - uses: grafana/k6-action@v0.3.1
-        with:
-          filename: tests/load/k6/crm-burst.js
+      - name: Install k6
+        run: |
+          set -e
+          if curl -fsS https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz -o /tmp/k6.tgz; then
+            tar -xzf /tmp/k6.tgz -C /tmp
+            sudo mv /tmp/k6-v0.50.0-linux-amd64/k6 /usr/local/bin/k6
+          else
+            sudo gpg --no-default-keyring \
+              --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+              --keyserver hkp://keyserver.ubuntu.com:80 \
+              --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+            echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+              | sudo tee /etc/apt/sources.list.d/k6.list
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq k6
+          fi
+          k6 version
+      - name: Run k6 crm-burst
         env:
           CRM_SYNC_URL: http://localhost:8082
           # CI runners can't sustain 10 k sync events/sec against the
           # crm-sync Go server; cap at 500 for hermetic runs.
           K6_RATE: '500'
+        run: |
+          # Confirm the crm-sync process is still alive right before
+          # k6 starts hitting it. The earlier failure mode looked like
+          # "ready → connection refused" because grafana/k6-action runs
+          # in a separate container where `localhost` is itself, not
+          # the runner. Native k6 fixes that; this PID check is a
+          # belt-and-braces guard against any regression.
+          if ! kill -0 "$(cat /tmp/crm-sync.pid)" 2>/dev/null; then
+            echo "crm-sync died between readiness probe and k6 start" >&2
+            tail -100 /tmp/crm-sync.log >&2
+            exit 1
+          fi
+          k6 run tests/load/k6/crm-burst.js \
+            --summary-export=/tmp/summary.json \
+            --out json=/tmp/k6-crm.json
+          mkdir -p artifacts
+          cp /tmp/summary.json artifacts/ 2>/dev/null || true
+          cp /tmp/summary.json ./summary.json 2>/dev/null || true
       - name: Stop crm-sync
         if: always()
         run: |
