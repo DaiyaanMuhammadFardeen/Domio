@@ -19,6 +19,7 @@ import {
   tsToMs,
   bigintToNum,
 } from './sql.js';
+import type { SqlStore } from './sql.js';
 import type {
   ComponentPackage,
   SmartProp,
@@ -526,8 +527,8 @@ describe('rowToAuditRow', () => {
 const hasDb = !!process.env.DATABASE_URL;
 
 describe.skipIf(!hasDb)('SqlStore integration (requires Postgres)', () => {
-  let pool: any;
-  let SqlStoreClass: typeof import('./sql.js').SqlStore;
+  let pool: unknown;
+  let SqlStoreClass: typeof SqlStore;
 
   beforeAll(async () => {
     const { Pool } = await import('pg');

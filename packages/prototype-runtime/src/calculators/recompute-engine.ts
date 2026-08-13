@@ -61,18 +61,18 @@ export const calculator = {
     currency?: string;
     locale?: string;
     inputs: ReadonlyArray<
-      Partial<import('./calculator-def.js').CalculatorInput> & {
+      Partial<CalculatorInput> & {
         readonly id: string;
         defaultValue?: number;
       }
     >;
     outputs: ReadonlyArray<
-      Partial<import('./calculator-def.js').CalculatorOutput> & {
+      Partial<CalculatorOutput> & {
         readonly id: string;
         readonly formula: string;
       }
     >;
-  }): import('./calculator-def.js').CalculatorDef {
+  }): CalculatorDef {
     return {
       id: spec.id,
       name: spec.name ?? spec.id,
@@ -103,13 +103,13 @@ export const calculator = {
     name?: string;
     precision?: number;
     nodes: ReadonlyArray<
-      Partial<import('./calculator-def.js').CalculatorNode> & {
+      Partial<CalculatorNode> & {
         readonly id: string;
         readonly formula: string;
         dependsOn?: readonly string[];
       }
     >;
-  }): import('./calculator-def.js').CalculatorDef {
+  }): CalculatorDef {
     return {
       id: spec.id,
       name: spec.name ?? spec.id,

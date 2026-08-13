@@ -12,6 +12,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
+import type { Pool as PgPool } from 'pg';
 import { PgGuestStore, StoreNotConfiguredError } from './pg_store.js';
 import { GuestNotFoundError } from '../types.js';
 import type { GuestAccess, GuestMagicLink } from '../types.js';
@@ -142,7 +143,7 @@ describe('PgGuestStore — createGuestAccess', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 1 };
     });
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     const ga = makeGuestAccess();
 
     await store.createGuestAccess(ga);
@@ -165,7 +166,7 @@ describe('PgGuestStore — createGuestAccess', () => {
 describe('PgGuestStore — getGuestAccess', () => {
   it('returns null when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     const result = await store.getGuestAccess('nonexistent');
     expect(result).toBeNull();
   });
@@ -173,7 +174,7 @@ describe('PgGuestStore — getGuestAccess', () => {
   it('returns domain guest access when found', async () => {
     const ga = makeGuestAccess();
     const pool = createFakePool(() => ({ rows: [guestAccessToRow(ga)], rowCount: 1 }));
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     const result = await store.getGuestAccess('ga-001');
     expect(result).not.toBeNull();
     expect(result!.guest_access_id).toBe('ga-001');
@@ -193,7 +194,7 @@ describe('PgGuestStore — getGuestAccessByEmail', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 0 };
     });
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
 
     await store.getGuestAccessByEmail('deck', 'deck-001', 'guest@example.com');
 
@@ -213,7 +214,7 @@ describe('PgGuestStore — getMagicLinkByHash', () => {
   it('returns magic link matching hash', async () => {
     const ml = makeMagicLink();
     const pool = createFakePool(() => ({ rows: [magicLinkToRow(ml)], rowCount: 1 }));
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     const result = await store.getMagicLinkByHash('hash-abc123');
     expect(result).not.toBeNull();
     expect(result!.id).toBe('ml-001');
@@ -221,7 +222,7 @@ describe('PgGuestStore — getMagicLinkByHash', () => {
 
   it('returns null when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     expect(await store.getMagicLinkByHash('nonexistent')).toBeNull();
   });
 });
@@ -237,7 +238,7 @@ describe('PgGuestStore — getOpenMagicLinks', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 0 };
     });
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
 
     await store.getOpenMagicLinks('ga-001');
 
@@ -260,7 +261,7 @@ describe('PgGuestStore — markMagicLinkConsumed', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [{ id: 'ml-001' }], rowCount: 1 };
     });
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     const now = new Date();
 
     await store.markMagicLinkConsumed('ml-001', now);
@@ -273,7 +274,7 @@ describe('PgGuestStore — markMagicLinkConsumed', () => {
 
   it('throws GuestNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     await expect(store.markMagicLinkConsumed('nonexistent', new Date())).rejects.toThrow(
       GuestNotFoundError,
     );
@@ -291,7 +292,7 @@ describe('PgGuestStore — invalidateMagicLinks', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [], rowCount: 2 };
     });
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     const now = new Date();
 
     await store.invalidateMagicLinks('ga-001', now);
@@ -318,7 +319,7 @@ describe('PgGuestStore — setGuestRevoked', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [{ id: 'ga-001' }], rowCount: 1 };
     });
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     const now = new Date();
 
     await store.setGuestRevoked('ga-001', now);
@@ -331,7 +332,7 @@ describe('PgGuestStore — setGuestRevoked', () => {
 
   it('throws GuestNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     await expect(store.setGuestRevoked('nonexistent', new Date())).rejects.toThrow(
       GuestNotFoundError,
     );
@@ -349,7 +350,7 @@ describe('PgGuestStore — markGuestUser', () => {
       captured.push({ sql, params: params ?? [] });
       return { rows: [{ id: 'ga-001' }], rowCount: 1 };
     });
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
 
     await store.markGuestUser('ga-001', 'user-001');
 
@@ -361,7 +362,7 @@ describe('PgGuestStore — markGuestUser', () => {
 
   it('throws GuestNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
     await expect(store.markGuestUser('nonexistent', 'user-001')).rejects.toThrow(
       GuestNotFoundError,
     );
@@ -387,7 +388,7 @@ describe('PgGuestStore — withTransaction', () => {
       connect: vi.fn(async () => fakeClient),
       end: vi.fn(),
     };
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
 
     const result = await store.withTransaction(async (client) => {
       await client.query('INSERT INTO guest_access (...) VALUES (...)');
@@ -413,7 +414,7 @@ describe('PgGuestStore — withTransaction', () => {
       connect: vi.fn(async () => fakeClient),
       end: vi.fn(),
     };
-    const store = new PgGuestStore(pool as any);
+    const store = new PgGuestStore(pool as unknown as PgPool);
 
     await expect(
       store.withTransaction(async () => {

@@ -5,7 +5,7 @@
  * Expired open suggestions (90 days) are treated as obsolete.
  */
 
-import type { Suggestion, SuggestionStatus, SuggestionOperation } from '../types.js';
+import type { Suggestion, SuggestionStatus, SuggestionOperation, TargetType } from '../types.js';
 import { SuggestionValidationError, InvalidStatusTransitionError } from '../types.js';
 import { markConflictingObsolete } from './conflict.js';
 
@@ -60,7 +60,7 @@ export function createSuggestionBody(
     deck_id: input.deck_id,
     session_id: input.session_id,
     author_id: input.author_id,
-    target_type: input.target_type as import('../types.js').TargetType,
+    target_type: input.target_type as TargetType,
     target_id: input.target_id,
     operation: input.operation,
     status: 'open',

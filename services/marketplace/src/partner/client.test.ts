@@ -13,6 +13,13 @@ import {
 import type { PartnerClient } from '../types.js';
 import { hasScope, getRateLimit, validatePartnerAccess } from './access.js';
 
+// Minimal PartnerClient shape for test mocks. We cast through
+// unknown to a Partial<PartnerClient> so callers can build objects
+// with only the fields they exercise.
+function asClient(partial: Partial<PartnerClient>): PartnerClient {
+  return partial as unknown as PartnerClient;
+}
+
 describe('PartnerClientService', () => {
   let store: InMemoryMarketplaceStore;
   let service: PartnerClientService;
@@ -50,7 +57,7 @@ describe('PartnerClientService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      await (store as any).partnerClients.set('partner-1', client);
+      await (store as unknown as { partnerClients: Map<string, PartnerClient> }).partnerClients.set('partner-1', client);
 
       await expect(service.verifyClient('partner-1', '')).rejects.toThrow(InvalidClientSecretError);
     });
@@ -68,7 +75,7 @@ describe('PartnerClientService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      await (store as any).partnerClients.set('partner-1', client);
+      await (store as unknown as { partnerClients: Map<string, PartnerClient> }).partnerClients.set('partner-1', client);
 
       const result = await service.verifyClient('partner-1', 'secret');
       expect(result.clientId).toBe('partner-1');
@@ -116,16 +123,12 @@ describe('PartnerClientService', () => {
 
 describe('Partner Access', () => {
   it('hasScope returns true when scope is present', () => {
-    const client = {
-      scopes: ['marketplace:read', 'marketplace:install'],
-    } as any;
+    const client = asClient({ scopes: ['marketplace:read', 'marketplace:install'] });
     expect(hasScope(client, 'marketplace:read')).toBe(true);
   });
 
   it('hasScope returns false when scope is missing', () => {
-    const client = {
-      scopes: ['marketplace:read'],
-    } as any;
+    const client = asClient({ scopes: ['marketplace:read'] });
     expect(hasScope(client, 'marketplace:purchase')).toBe(false);
   });
 
@@ -138,18 +141,14 @@ describe('Partner Access', () => {
   });
 
   it('validatePartnerAccess returns valid for correct scope', () => {
-    const client = {
-      scopes: ['marketplace:read'],
-    } as any;
+    const client = asClient({ scopes: ['marketplace:read'] });
     expect(validatePartnerAccess(client, 'marketplace:read')).toEqual({ valid: true });
   });
 
   it('validatePartnerAccess returns invalid for missing scope', () => {
-    const client = {
-      scopes: ['marketplace:read'],
-    } as any;
+    const client = asClient({ scopes: ['marketplace:read'] });
     const result = validatePartnerAccess(client, 'marketplace:purchase');
     expect(result.valid).toBe(false);
-    expect((result as any).code).toBe('INSUFFICIENT_SCOPE');
+    expect((result as { code?: string }).code).toBe('INSUFFICIENT_SCOPE');
   });
 });

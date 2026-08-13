@@ -9,6 +9,10 @@
 
 import { recompute } from './recompute-engine.js';
 import { validateCalculatorDef } from './calculator-def.js';
+import type {
+  CalculatorDef,
+  CalculatorState,
+} from './calculator-def.js';
 
 export type {
   CalculatorMode,
@@ -33,7 +37,7 @@ export {
 
 export interface CalculatorRegistration {
   readonly id: string;
-  readonly def: import('./calculator-def.js').CalculatorDef;
+  readonly def: CalculatorDef;
   readonly createdAt: number;
 }
 
@@ -46,7 +50,7 @@ export interface CalculatorVariableSpec {
 export class CalculatorRegistry {
   private readonly store = new Map<string, CalculatorRegistration>();
 
-  register(def: import('./calculator-def.js').CalculatorDef, clock: () => number = Date.now): void {
+  register(def: CalculatorDef, clock: () => number = Date.now): void {
     validateCalculatorDef(def);
     this.store.set(def.id, { id: def.id, def, createdAt: clock() });
   }
@@ -69,7 +73,7 @@ export class CalculatorRegistry {
 }
 
 export interface RecomputeResult {
-  readonly state: import('./calculator-def.js').CalculatorState;
+  readonly state: CalculatorState;
   readonly errors: readonly { readonly nodeId: string; readonly message: string }[];
 }
 
@@ -79,10 +83,10 @@ export interface RecomputeResult {
  * API ergonomic for the editor preview and the bindings DAG.
  */
 export class RecomputeEngine {
-  private readonly cache = new Map<string, import('./calculator-def.js').CalculatorState>();
+  private readonly cache = new Map<string, CalculatorState>();
 
   recompute(
-    def: import('./calculator-def.js').CalculatorDef,
+    def: CalculatorDef,
     inputValues: Readonly<Record<string, number>>,
     opts?: { clock?: () => number },
   ): RecomputeResult {
@@ -92,7 +96,7 @@ export class RecomputeEngine {
   }
 
   /** Most recent state for a calculator id (or null). */
-  getCached(id: string): import('./calculator-def.js').CalculatorState | null {
+  getCached(id: string): CalculatorState | null {
     return this.cache.get(id) ?? null;
   }
 

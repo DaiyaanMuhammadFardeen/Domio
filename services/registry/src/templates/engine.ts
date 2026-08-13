@@ -24,7 +24,7 @@ function parseBindingPath(binding: string): Segment[] {
   // Split on '.' but keep bracket content attached to the preceding key.
   const parts = binding.split('.');
   for (const part of parts) {
-    const match = part.match(/^([^\[]+)(?:\[(\d+)\])?$/);
+    const match = part.match(/^([^[]+)(?:\[(\d+)\])?$/);
     if (!match) {
       throw Errors.validation(`Invalid binding segment "${part}" in path "${binding}"`);
     }

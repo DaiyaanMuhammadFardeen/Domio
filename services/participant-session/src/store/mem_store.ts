@@ -16,7 +16,7 @@ import type {
 import type { ListActiveInput, ListActiveResult, ParticipantSession } from '../types.js';
 
 class StoreConflictError extends Error {
-  readonly kind: 'conflict' = 'conflict';
+  readonly kind = 'conflict' as const;
   readonly current: ParticipantSession;
   constructor(current: ParticipantSession) {
     super(`version conflict (expected=${current.version})`);
@@ -25,7 +25,7 @@ class StoreConflictError extends Error {
 }
 
 class StoreNotFoundError extends Error {
-  readonly kind: 'not_found' = 'not_found';
+  readonly kind = 'not_found' as const;
   readonly id: string;
   constructor(id: string) {
     super(`participant ${id} not found`);

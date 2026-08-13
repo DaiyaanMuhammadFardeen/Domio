@@ -41,7 +41,6 @@ export async function runCodeSandbox(request: CodeRunRequest): Promise<CodeRunRe
     warn: (...args: unknown[]) => logs.push(`warn: ${args.map(format).join(' ')}`),
   };
   try {
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
     const fn = new Function('console', `"use strict";\n${request.code}\n`);
     fn(sandboxConsole);
     return {

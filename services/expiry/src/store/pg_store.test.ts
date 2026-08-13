@@ -460,7 +460,7 @@ describe('PgExpiryStore — withTransaction', () => {
       connect: vi.fn(async () => fakeClient),
       end: vi.fn(),
     };
-    const store = new PgExpiryStore(pool);
+    const store = new PgExpiryStore(pool as unknown as PgPool);
 
     const result = await store.withTransaction(async (client) => {
       await client.query('INSERT INTO expiry_policy (...) VALUES (...)');
@@ -486,7 +486,7 @@ describe('PgExpiryStore — withTransaction', () => {
       connect: vi.fn(async () => fakeClient),
       end: vi.fn(),
     };
-    const store = new PgExpiryStore(pool);
+    const store = new PgExpiryStore(pool as unknown as PgPool);
 
     await expect(
       store.withTransaction(async () => {

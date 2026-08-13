@@ -132,10 +132,8 @@ export function generateLightTheme(
   opts: { brandKitId?: string } = {},
 ): ThemePair {
   const light = new Map<string, TokenValue>();
-  let colorCount = 0;
   for (const [tokenId, value] of dark) {
     if (value.type === 'color') {
-      colorCount++;
       const [r, g, b] = value.value.channels;
       const oklch = srgbToOklch(r, g, b);
       if (!oklch) {

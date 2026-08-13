@@ -13,7 +13,7 @@
  *   - get_creator_profile: Read-only creator profile lookup (marketplace:read)
  */
 
-import type { McpToolInput, McpToolResult } from '../types.js';
+import type { McpCapability, McpToolInput, McpToolResult } from '../types.js';
 import type { MarketplaceService } from '../service.js';
 import { checkMcpCapability } from './access.js';
 
@@ -25,7 +25,7 @@ export const MCP_TOOL_DEFINITIONS: Record<
   string,
   {
     name: string;
-    requiredCapability: string;
+    requiredCapability: McpCapability;
     description: string;
   }
 > = {
@@ -106,7 +106,7 @@ export function executeMcpTool(
   try {
     checkMcpCapability(
       input.workspaceId,
-      toolDef.requiredCapability as any,
+      toolDef.requiredCapability,
       input.grantedCapabilities,
     );
     extraCapabilityCheck?.(toolDef.requiredCapability);

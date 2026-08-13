@@ -46,12 +46,15 @@ function parseJson<T>(value: unknown): T {
   return value as T;
 }
 
+/** A loose row object — pg returns key/value pairs with arbitrary value types. */
+type Row = Record<string, unknown>;
+
 // ---------------------------------------------------------------------------
 // Entity ↔ Row mappers (exported pure functions for testing)
 // ---------------------------------------------------------------------------
 
 export function rowToPackage(row: Record<string, unknown>): ComponentPackage {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   const pkg: ComponentPackage = {
     id: String(r.id),
     catalogId: String(r.catalog_id),
@@ -107,7 +110,7 @@ export function pkgToRow(pkg: ComponentPackage): Record<string, unknown> {
 }
 
 export function rowToSmartProp(row: Record<string, unknown>): SmartProp {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   const prop: SmartProp = {
     propKey: String(r.prop_key),
     propSchema: parseJson<Record<string, unknown>>(r.prop_schema),
@@ -119,7 +122,7 @@ export function rowToSmartProp(row: Record<string, unknown>): SmartProp {
 }
 
 export function rowToLibraryItem(row: Record<string, unknown>): UserLibraryItem {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   const item: UserLibraryItem = {
     id: String(r.id),
     userId: String(r.user_id),
@@ -136,7 +139,7 @@ export function rowToLibraryItem(row: Record<string, unknown>): UserLibraryItem 
 }
 
 export function rowToTeamLibrary(row: Record<string, unknown>): TeamLibrary {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   return {
     id: String(r.id),
     workspaceId: String(r.workspace_id),
@@ -149,7 +152,7 @@ export function rowToTeamLibrary(row: Record<string, unknown>): TeamLibrary {
 }
 
 export function rowToLibraryEvent(row: Record<string, unknown>): TeamLibraryEvent {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   const evt: TeamLibraryEvent = {
     id: String(r.id),
     libraryId: String(r.library_id),
@@ -166,7 +169,7 @@ export function rowToLibraryEvent(row: Record<string, unknown>): TeamLibraryEven
 }
 
 export function rowToListing(row: Record<string, unknown>): MarketplaceListing {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   const listing: MarketplaceListing = {
     id: String(r.id),
     catalogId: String(r.catalog_id),
@@ -188,7 +191,7 @@ export function rowToListing(row: Record<string, unknown>): MarketplaceListing {
 }
 
 export function rowToReview(row: Record<string, unknown>): Review {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   return {
     id: String(r.id),
     listingId: String(r.listing_id),
@@ -202,7 +205,7 @@ export function rowToReview(row: Record<string, unknown>): Review {
 }
 
 export function rowToLicenseGrant(row: Record<string, unknown>): LicenseGrant {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   const grant: LicenseGrant = {
     id: String(r.id),
     workspaceId: String(r.workspace_id),
@@ -224,7 +227,7 @@ export function rowToLicenseGrant(row: Record<string, unknown>): LicenseGrant {
 }
 
 export function rowToRevenueEvent(row: Record<string, unknown>): RevenueEvent {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   return {
     id: String(r.id),
     listingId: String(r.listing_id),
@@ -242,7 +245,7 @@ export function rowToRevenueEvent(row: Record<string, unknown>): RevenueEvent {
 }
 
 export function rowToTemplate(row: Record<string, unknown>): Template {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   const tmpl: Template = {
     id: String(r.id),
     kind: r.kind as Template['kind'],
@@ -259,7 +262,7 @@ export function rowToTemplate(row: Record<string, unknown>): Template {
 }
 
 export function rowToSectionTemplate(row: Record<string, unknown>): SectionTemplate {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   return {
     id: String(r.id),
     templateId: String(r.template_id),
@@ -271,7 +274,7 @@ export function rowToSectionTemplate(row: Record<string, unknown>): SectionTempl
 }
 
 export function rowToStickerPack(row: Record<string, unknown>): StickerPack {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   return {
     id: String(r.id),
     name: String(r.name),
@@ -283,7 +286,7 @@ export function rowToStickerPack(row: Record<string, unknown>): StickerPack {
 }
 
 export function rowToBrandLock(row: Record<string, unknown>): BrandLockRegion {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   return {
     id: String(r.id),
     deckId: String(r.deck_id),
@@ -298,7 +301,7 @@ export function rowToBrandLock(row: Record<string, unknown>): BrandLockRegion {
 }
 
 export function rowToIcon(row: Record<string, unknown>): IconRecord {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   const icon: IconRecord = {
     id: String(r.id),
     name: String(r.name),
@@ -315,7 +318,7 @@ export function rowToIcon(row: Record<string, unknown>): IconRecord {
 }
 
 export function rowToAuditRow(row: Record<string, unknown>): AuditRow {
-  const r = row as Record<string, any>;
+  const r = row as Row;
   return {
     id: String(r.id),
     actorId: String(r.actor_id),
@@ -369,7 +372,7 @@ export class SqlStore implements RegistryStore {
       [sha256],
     );
     if (rows.length === 0) return undefined;
-    const r = rows[0] as Record<string, any>;
+    const r = rows[0] as Row;
     return {
       sha256: String(r.sha256),
       bytes: new Uint8Array(r.bytes as Buffer),
