@@ -6,10 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/hooks/useLocale';
 import { getMarketplaceListing, listMarketplaceReviews, getMarketplaceListingChangelog } from '@/lib/api';
 import { marketplaceWeb } from '@domio/ui/routing';
-import {
-  getRelatedListings,
-  toCardVM,
-} from '@/lib/search-service';
+import { getRelatedListings } from '@/lib/search-service';
 import type {
   MarketplaceListing,
   Review,
@@ -70,7 +67,7 @@ export default function ListingPage({ params }: ListingPageProps) {
           setReviewsTotal(rv.value.total);
         }
         if (cl.status === 'fulfilled') setChangelog(cl.value);
-        if (rl.status === 'fulfilled') setRelated(rl.value);
+        if (rl.status === 'fulfilled') setRelated([...rl.value]);
       } catch {
         if (!cancelled) setError(true);
       } finally {

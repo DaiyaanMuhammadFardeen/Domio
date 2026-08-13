@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useLocale } from '@/hooks/useLocale';
 import { LOCALES, type LocaleId } from '@/lib/i18n';
+import { marketplaceWeb } from '@domio/ui/routing';
 
 const LOCALE_LABELS: Record<LocaleId, string> = {
   en: 'EN',
@@ -25,7 +26,7 @@ export function Header() {
         {/* Logo + nav */}
         <div className="flex items-center gap-8">
           <Link
-            href="/"
+            href={marketplaceWeb('home')}
             className="font-display text-lg font-bold tracking-tight text-fg transition-opacity hover:opacity-80"
             aria-label="Domio Marketplace — Home"
           >
@@ -35,7 +36,7 @@ export function Header() {
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
             <Link
-              href="/"
+              href={marketplaceWeb('home')}
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-panel hover:text-fg"
             >
               {t('nav.browse')}

@@ -32,18 +32,19 @@ export default function SearchPage() {
   const runSearch = useCallback(async () => {
     setLoading(true);
     try {
-      const out = await searchListings({
-        q: q || undefined,
-        kind: kind[0] as never,
-        theme: theme[0],
-        color: color[0],
-        language: language[0],
-        min_rating: rating ?? undefined,
+      const query: Parameters<typeof searchListings>[0] = {
         sort,
         page,
         page_size: PAGE_SIZE,
-        price_max_cents: price === 'free' ? 0 : undefined,
-      });
+        ...(q ? { q } : {}),
+        ...(kind[0] ? { kind: kind[0] as never } : {}),
+        ...(theme[0] ? { theme: theme[0] } : {}),
+        ...(color[0] ? { color: color[0] } : {}),
+        ...(language[0] ? { language: language[0] } : {}),
+        ...(rating !== null ? { min_rating: rating } : {}),
+        ...(price === 'free' ? { price_max_cents: 0 } : {}),
+      };
+      const out = await searchListings(query);
       setResult(out);
     } finally {
       setLoading(false);

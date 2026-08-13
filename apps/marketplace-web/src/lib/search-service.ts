@@ -10,6 +10,7 @@
  */
 
 import type {
+  ListingCardVM,
   ListingKind,
   MarketplaceListing,
   MarketplaceListingWithMeta,
@@ -336,7 +337,7 @@ export async function getByCategory(): Promise<Record<ListingKind, MarketplaceLi
  */
 export async function getRelatedListings(
   listingId: string,
-): Promise<ReadonlyArray<ReturnType<typeof toCardVM>>> {
+): Promise<ReadonlyArray<ListingCardVM>> {
   const source = ALL.find((l) => l.id === listingId);
   const others = ALL.filter((l) => l.id !== listingId);
   if (source?.kind) {
@@ -351,25 +352,8 @@ export async function getRelatedListings(
 
 /** Convert a `MarketplaceListingWithMeta` into a `ListingCardVM`
  *  for the existing `ListingCard` component. */
-export function toCardVM(l: MarketplaceListingWithMeta): Readonly<{
-  id: string;
-  slug: string;
-  title: string;
-  kind: ListingKind;
-  price_cents: number;
-  currency: string;
-  is_free: boolean;
-  price_model: 'free' | 'one_time' | 'subscription' | 'team_seats' | 'enterprise_quote';
-  creator_name: string;
-  creator_avatar?: string;
-  rating_avg: number;
-  rating_count: number;
-  download_count: number;
-  poster_url?: string | undefined;
-  tags: string[];
-  created_at: number;
-}> {
-  return {
+export function toCardVM(l: MarketplaceListingWithMeta): ListingCardVM {
+  const vm: ListingCardVM = {
     id: l.id,
     slug: l.slug ?? l.id,
     title: l.title,
@@ -379,12 +363,13 @@ export function toCardVM(l: MarketplaceListingWithMeta): Readonly<{
     is_free: l.is_free,
     price_model: l.price_model ?? 'one_time',
     creator_name: l.creator_name ?? l.seller_id,
-    creator_avatar: l.creator_avatar,
     rating_avg: l.rating_avg ?? 0,
     rating_count: l.rating_count ?? 0,
     download_count: l.download_count ?? 0,
-    poster_url: l.preview?.poster_ref,
     tags: l.tags ?? [],
     created_at: l.created_at,
   };
+  if (l.creator_avatar) vm.creator_avatar = l.creator_avatar;
+  if (l.preview?.poster_ref) vm.poster_url = l.preview.poster_ref;
+  return vm;
 }

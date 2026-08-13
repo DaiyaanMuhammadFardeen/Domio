@@ -8,10 +8,11 @@ const here = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: {
-      '@domio/ui': resolve(here, '../../packages/ui/src/index.ts'),
-      '@': resolve(here, './src'),
-    },
+    alias: [
+      { find: /^@domio\/ui\/routing$/, replacement: resolve(here, '../../packages/ui/src/routing.ts') },
+      { find: '@domio/ui', replacement: resolve(here, '../../packages/ui/src/index.ts') },
+      { find: '@', replacement: resolve(here, './src') },
+    ],
   },
   test: {
     include: ['src/**/*.test.{ts,tsx}'],

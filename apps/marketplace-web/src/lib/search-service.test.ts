@@ -9,6 +9,7 @@ import {
   getRecentlyAdded,
   getByCategory,
 } from './search-service';
+import type { MarketplaceListingWithMeta } from './types';
 
 describe('search-service', () => {
   it('searchListings with empty query returns all 24 listings', async () => {
@@ -20,7 +21,8 @@ describe('search-service', () => {
   it('searchListings filters by kind', async () => {
     const res = await searchListings({ kind: 'template' });
     expect(res.total).toBeGreaterThan(0);
-    for (const item of res.items) {
+    const items = res.items as ReadonlyArray<MarketplaceListingWithMeta>;
+    for (const item of items) {
       expect(item.kind).toBe('template');
     }
   });
@@ -40,7 +42,8 @@ describe('search-service', () => {
 
   it('searchListings filters by min_rating', async () => {
     const res = await searchListings({ min_rating: 4 });
-    for (const item of res.items) {
+    const items = res.items as ReadonlyArray<MarketplaceListingWithMeta>;
+    for (const item of items) {
       expect(item.rating_avg ?? 0).toBeGreaterThanOrEqual(4);
     }
   });

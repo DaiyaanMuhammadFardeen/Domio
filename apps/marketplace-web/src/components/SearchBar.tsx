@@ -21,7 +21,6 @@ export function SearchBar({
   const { t } = useLocale();
   const [local, setLocal] = useState(value);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const firstRender = useRef(true);
 
   // When external value changes (e.g. URL cleared), mirror to local.
   useEffect(() => {
@@ -50,14 +49,7 @@ export function SearchBar({
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-    // We intentionally omit `value` from deps to debounce around rapid external updates.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [local, debounceMs, syncToUrl]);
-
-  // Skip the first render so we don't immediately rewrite the URL before hydration.
-  useEffect(() => {
-    firstRender.current = false;
-  }, []);
+  }, [local, value, onChange, debounceMs, syncToUrl]);
 
   return (
     <div className="relative w-full">
