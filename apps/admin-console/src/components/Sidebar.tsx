@@ -8,7 +8,7 @@ import { adminConsole } from '@domio/ui';
 interface NavItem {
   href: string;
   label: string;
-  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing' | 'Identity' | 'Billing' | 'Build' | 'Governance' | 'Integrations';
+  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing' | 'Identity' | 'Billing' | 'Build' | 'Governance' | 'Integrations' | 'Lifecycle';
 }
 
 const NAV: ReadonlyArray<NavItem> = [
@@ -27,6 +27,8 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: adminConsole('api-keys'), label: 'API Keys', group: 'Integrations' },
   { href: adminConsole('webhooks'), label: 'Webhooks', group: 'Integrations' },
   { href: adminConsole('sdk'), label: 'SDK', group: 'Integrations' },
+  { href: adminConsole('legal-hold'), label: 'Legal Hold', group: 'Lifecycle' },
+  { href: adminConsole('retention'), label: 'Retention', group: 'Lifecycle' },
 ];
 
 function isActive(pathname: string, href: string): boolean {

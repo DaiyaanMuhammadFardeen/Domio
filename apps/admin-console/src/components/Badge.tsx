@@ -127,3 +127,19 @@ export function toneForCustomDomainState(state: string): BadgeTone {
       return 'grey';
   }
 }
+
+/** Map SSO provider status to badge tone (Wave 8 §S8.1). */
+export function toneForSSOProviderStatus(status: string): BadgeTone {
+  switch (status) {
+    case 'connected':
+      return 'green';
+    case 'degraded':
+      return 'amber';
+    case 'disconnected':
+      return 'red';
+    case 'pending':
+      return 'grey';
+    default:
+      return 'grey';
+  }
+}
