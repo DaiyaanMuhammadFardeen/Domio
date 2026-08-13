@@ -1,37 +1,18 @@
 name: CI
 
-# Domio — master CI/CD orchestrator.
+# Domio — master CI/CD orchestrator (production gate).
 #
-# This is the canonical gate for every push to the protected branches
-# (master, main). It runs ALL testing categories in parallel and
-# blocks merge unless every required job passes.
-#
-# Categories gated here:
-#   - static:    contracts, typecheck, lint, prettier, format-check,
-#                actionlint, shellcheck, schema-validate
-#   - execution: unit, integration, smoke (positive + negative),
-#                load (light), chaos, a11y, e2e-external
-#   - security:  SAST (CodeQL + Semgrep), SCA (Trivy), DAST (ZAP baseline),
-#                secret leak scan
-#
-# Schedule:
-#   - push to master/main  → full matrix, fail-fast off
-#   - pull_request         → full matrix
-#   - schedule (nightly)   → full + perf-nightly
-#   - workflow_dispatch    → manual with optional skip flags
+# All required checks must pass for this workflow to succeed. The
+# individual checks live in their own reusable workflows (see
+# .github/workflows/*.yml) and run in parallel.
 
 on:
   pull_request:
     branches: [master, main]
   push:
     branches: [master, main]
-  schedule:
-    # 03:00 UTC nightly — off-hours in EU/US, well after the
-    # 02:30 nightly security sweep and 02:00 nightly load test.
-    - cron: '0 3 * * *'
   workflow_dispatch:
 
-# Cancel superseded runs on the same branch.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -40,110 +21,48 @@ permissions:
   contents: read
 
 jobs:
-  # ─────────────────────────────────────────────────────────────────────
-  # PHASE 1 — STATIC GATES (cheap, fast feedback, ~2-5 min)
-  # ─────────────────────────────────────────────────────────────────────
-
   contracts:
-    name: Contracts (buf + OpenAPI + JSON Schema)
     uses: ./.github/workflows/contract.yml
-
   typecheck:
-    name: Typecheck (tsc)
     uses: ./.github/workflows/type.yml
-
   lint:
-    name: Lint (eslint + prettier + shellcheck + actionlint)
     uses: ./.github/workflows/lint.yml
-
   schema-validate:
-    name: Schema validation
     uses: ./.github/workflows/schema-validate.yml
-
   schema-migration-lint:
-    name: Schema migration lint
     uses: ./.github/workflows/schema-migration-lint.yml
-
-  # ─────────────────────────────────────────────────────────────────────
-  # PHASE 2 — UNIT + INTEGRATION (medium cost, ~5-10 min)
-  # ─────────────────────────────────────────────────────────────────────
-
   unit:
-    name: Unit tests (vitest)
     uses: ./.github/workflows/unit.yml
-
   integration:
-    name: Integration tests
     uses: ./.github/workflows/integration.yml
-
-  # ─────────────────────────────────────────────────────────────────────
-  # PHASE 3 — EXECUTION GATES (expensive, ~5-15 min)
-  # ─────────────────────────────────────────────────────────────────────
-
   smoke:
-    name: Smoke (positive + negative + perf)
     uses: ./.github/workflows/smoke.yml
-
   external-e2e:
-    name: External-user e2e (all apps)
     uses: ./.github/workflows/external-e2e.yml
-
   editor-e2e:
-    name: Editor e2e (deep)
     uses: ./.github/workflows/editor-e2e.yml
-
   a11y-i18n:
-    name: a11y + i18n
     uses: ./.github/workflows/a11y-i18n.yml
-
   axe:
-    name: axe (WCAG)
     uses: ./.github/workflows/axe.yml
-
-  # ─────────────────────────────────────────────────────────────────────
-  # PHASE 4 — LOAD + CHAOS (slow, ~15-30 min)
-  # ─────────────────────────────────────────────────────────────────────
-
-  load:
-    name: Load test (k6)
-    if: ${{ github.event_name != 'pull_request' }}
-    uses: ./.github/workflows/load.yml
-
   chaos:
-    name: Chaos drill contracts
     uses: ./.github/workflows/chaos.yml
-
-  # ─────────────────────────────────────────────────────────────────────
-  # PHASE 5 — SECURITY (parallel to other phases)
-  # ─────────────────────────────────────────────────────────────────────
-
   security:
-    name: Security (SAST + SCA + DAST)
     uses: ./.github/workflows/security.yml
-
   leak-scan:
-    name: Secret leak scan
     uses: ./.github/workflows/leak-scan.yml
-
-  # ─────────────────────────────────────────────────────────────────────
-  # PHASE 6 — BUILD PROVENANCE + DEPLOY READINESS
-  # ─────────────────────────────────────────────────────────────────────
-
-  build-provenance:
-    name: Build + provenance (SLSA)
-    if: ${{ github.event_name != 'pull_request' }}
-    uses: ./.github/workflows/build-provenance.yml
-
   public-beta-gate:
-    name: Public beta gate
     uses: ./.github/workflows/public-beta-gate.yml
 
-  # ─────────────────────────────────────────────────────────────────────
-  # PHASE 7 — FINAL GATE — everything must pass
-  # ─────────────────────────────────────────────────────────────────────
+  load:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/load.yml
+
+  build-provenance:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/build-provenance.yml
+
   gate:
-    name: Required checks gate
-    runs-on: ubuntu-24.04
     needs:
       - contracts
       - typecheck
@@ -157,49 +76,43 @@ jobs:
       - editor-e2e
       - a11y-i18n
       - axe
+      - chaos
       - security
       - leak-scan
       - public-beta-gate
     if: ${{ always() }}
+    runs-on: ubuntu-24.04
     steps:
       - name: Verify all required jobs passed
         run: |
-          echo "Required-checks summary:"
+          set +e
           failed=()
-          passed=()
-          for j in contracts typecheck lint schema-validate schema-migration-lint unit integration smoke external-e2e editor-e2e a11y-i18n axe security leak-scan public-beta-gate; do
+          for j in contracts typecheck lint schema-validate schema-migration-lint unit integration smoke external-e2e editor-e2e a11y-i18n axe chaos security leak-scan public-beta-gate; do
             case "$j" in
-              contracts) status="${{ needs.contracts.result }}" ;;
-              typecheck) status="${{ needs.typecheck.result }}" ;;
-              lint) status="${{ needs.lint.result }}" ;;
-              schema-validate) status="${{ needs.schema-validate.result }}" ;;
-              schema-migration-lint) status="${{ needs.schema-migration-lint.result }}" ;;
-              unit) status="${{ needs.unit.result }}" ;;
-              integration) status="${{ needs.integration.result }}" ;;
-              smoke) status="${{ needs.smoke.result }}" ;;
-              external-e2e) status="${{ needs.external-e2e.result }}" ;;
-              editor-e2e) status="${{ needs.editor-e2e.result }}" ;;
-              a11y-i18n) status="${{ needs.a11y-i18n.result }}" ;;
-              axe) status="${{ needs.axe.result }}" ;;
-              security) status="${{ needs.security.result }}" ;;
-              leak-scan) status="${{ needs.leak-scan.result }}" ;;
-              public-beta-gate) status="${{ needs.public-beta-gate.result }}" ;;
+              contracts) s="${{ needs.contracts.result }}" ;;
+              typecheck) s="${{ needs.typecheck.result }}" ;;
+              lint) s="${{ needs.lint.result }}" ;;
+              schema-validate) s="${{ needs.schema-validate.result }}" ;;
+              schema-migration-lint) s="${{ needs.schema-migration-lint.result }}" ;;
+              unit) s="${{ needs.unit.result }}" ;;
+              integration) s="${{ needs.integration.result }}" ;;
+              smoke) s="${{ needs.smoke.result }}" ;;
+              external-e2e) s="${{ needs.external-e2e.result }}" ;;
+              editor-e2e) s="${{ needs.editor-e2e.result }}" ;;
+              a11y-i18n) s="${{ needs.a11y-i18n.result }}" ;;
+              axe) s="${{ needs.axe.result }}" ;;
+              chaos) s="${{ needs.chaos.result }}" ;;
+              security) s="${{ needs.security.result }}" ;;
+              leak-scan) s="${{ needs.leak-scan.result }}" ;;
+              public-beta-gate) s="${{ needs.public-beta-gate.result }}" ;;
             esac
-            echo "  ${j}: ${status}"
-            if [[ "${status}" != "success" && "${status}" != "skipped" ]]; then
+            echo "  ${j}: ${s}"
+            if [[ "$s" != "success" && "$s" != "skipped" ]]; then
               failed+=("${j}")
-            else
-              passed+=("${j}")
             fi
           done
-          echo ""
-          echo "Passed (${#passed[@]}):"
-          printf '  ✓ %s\n' "${passed[@]}"
           if [[ ${#failed[@]} -gt 0 ]]; then
-            echo ""
-            echo "❌ FAILED required checks (${#failed[@]}):"
-            printf '  - %s\n' "${failed[@]}"
+            echo "❌ FAILED required checks: ${failed[@]}"
             exit 1
           fi
-          echo ""
           echo "✅ All required checks passed."
