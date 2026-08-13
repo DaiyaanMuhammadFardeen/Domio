@@ -181,6 +181,13 @@ components:
         retry_after_seconds:
           type: integer
           minimum: 0
+    ErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+      description: |
+        Standard error envelope returned by all endpoints. Identical
+        shape to `Error`; kept as a separate name so individual
+        endpoints can opt into richer error contracts in the future.
     HealthStatus:
       type: string
       enum: [healthy, degraded, unhealthy]
@@ -309,3 +316,34 @@ components:
           type: string
           minLength: 1
           maxLength: 128
+  responses:
+    BadRequest:
+      description: Request payload is invalid or missing required fields.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication credentials were missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Request conflicts with the current state of the target resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unprocessable:
+      description: Request is well-formed but semantically invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

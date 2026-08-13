@@ -125,6 +125,14 @@ components:
           type: string
           format: date-time
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+
   responses:
     BadRequest:
       description: Bad request
@@ -150,11 +158,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          type: string
-        code:
-          type: string

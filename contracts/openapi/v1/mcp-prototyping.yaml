@@ -161,6 +161,7 @@ paths:
   /tools/create_hotspot:
     post:
       summary: create_hotspot
+      operationId: create_hotspot
       requestBody:
         required: true
         content:
@@ -187,6 +188,7 @@ paths:
   /tools/update_hotspot:
     post:
       summary: update_hotspot
+      operationId: update_hotspot
       requestBody:
         required: true
         content:
@@ -206,92 +208,93 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_hotspot:
-    post: { summary: delete_hotspot, responses: { '200': { description: OK } } }
+    post: { operationId: delete_hotspot, summary: delete_hotspot, responses: { '200': { description: OK } } }
   /tools/list_hotspots:
-    post: { summary: list_hotspots, responses: { '200': { description: OK } } }
+    post: { operationId: list_hotspots, summary: list_hotspots, responses: { '200': { description: OK } } }
   /tools/create_overlay:
-    post: { summary: create_overlay, responses: { '200': { description: OK } } }
+    post: { operationId: create_overlay, summary: create_overlay, responses: { '200': { description: OK } } }
   /tools/update_overlay:
-    post: { summary: update_overlay, responses: { '200': { description: OK } } }
+    post: { operationId: update_overlay, summary: update_overlay, responses: { '200': { description: OK } } }
   /tools/delete_overlay:
-    post: { summary: delete_overlay, responses: { '200': { description: OK } } }
+    post: { operationId: delete_overlay, summary: delete_overlay, responses: { '200': { description: OK } } }
   /tools/list_overlays:
-    post: { summary: list_overlays, responses: { '200': { description: OK } } }
+    post: { operationId: list_overlays, summary: list_overlays, responses: { '200': { description: OK } } }
   /tools/set_state_machine:
-    post: { summary: set_state_machine, responses: { '200': { description: OK } } }
+    post: { operationId: set_state_machine, summary: set_state_machine, responses: { '200': { description: OK } } }
   /tools/transition_state:
-    post: { summary: transition_state, responses: { '200': { description: OK } } }
+    post: { operationId: transition_state, summary: transition_state, responses: { '200': { description: OK } } }
   /tools/list_state_machines:
-    post: { summary: list_state_machines, responses: { '200': { description: OK } } }
+    post: { operationId: list_state_machines, summary: list_state_machines, responses: { '200': { description: OK } } }
   /tools/create_variable:
-    post: { summary: create_variable, responses: { '200': { description: OK } } }
+    post: { operationId: create_variable, summary: create_variable, responses: { '200': { description: OK } } }
   /tools/update_variable:
-    post: { summary: update_variable, responses: { '200': { description: OK } } }
+    post: { operationId: update_variable, summary: update_variable, responses: { '200': { description: OK } } }
   /tools/delete_variable:
-    post: { summary: delete_variable, responses: { '200': { description: OK } } }
+    post: { operationId: delete_variable, summary: delete_variable, responses: { '200': { description: OK } } }
   /tools/list_variables:
-    post: { summary: list_variables, responses: { '200': { description: OK } } }
+    post: { operationId: list_variables, summary: list_variables, responses: { '200': { description: OK } } }
   /tools/set_variable:
-    post: { summary: set_variable, responses: { '200': { description: OK } } }
+    post: { operationId: set_variable, summary: set_variable, responses: { '200': { description: OK } } }
   /tools/create_rule:
-    post: { summary: create_rule, responses: { '200': { description: OK } } }
+    post: { operationId: create_rule, summary: create_rule, responses: { '200': { description: OK } } }
   /tools/update_rule:
-    post: { summary: update_rule, responses: { '200': { description: OK } } }
+    post: { operationId: update_rule, summary: update_rule, responses: { '200': { description: OK } } }
   /tools/delete_rule:
-    post: { summary: delete_rule, responses: { '200': { description: OK } } }
+    post: { operationId: delete_rule, summary: delete_rule, responses: { '200': { description: OK } } }
   /tools/list_rules:
-    post: { summary: list_rules, responses: { '200': { description: OK } } }
+    post: { operationId: list_rules, summary: list_rules, responses: { '200': { description: OK } } }
   /tools/test_rule:
-    post: { summary: test_rule, responses: { '200': { description: OK } } }
+    post: { operationId: test_rule, summary: test_rule, responses: { '200': { description: OK } } }
   /tools/create_binding:
-    post: { summary: create_binding, responses: { '200': { description: OK } } }
+    post: { operationId: create_binding, summary: create_binding, responses: { '200': { description: OK } } }
   /tools/update_binding:
-    post: { summary: update_binding, responses: { '200': { description: OK } } }
+    post: { operationId: update_binding, summary: update_binding, responses: { '200': { description: OK } } }
   /tools/delete_binding:
-    post: { summary: delete_binding, responses: { '200': { description: OK } } }
+    post: { operationId: delete_binding, summary: delete_binding, responses: { '200': { description: OK } } }
   /tools/list_bindings:
-    post: { summary: list_bindings, responses: { '200': { description: OK } } }
+    post: { operationId: list_bindings, summary: list_bindings, responses: { '200': { description: OK } } }
   /tools/create_form:
-    post: { summary: create_form, responses: { '200': { description: OK } } }
+    post: { operationId: create_form, summary: create_form, responses: { '200': { description: OK } } }
   /tools/update_form:
-    post: { summary: update_form, responses: { '200': { description: OK } } }
+    post: { operationId: update_form, summary: update_form, responses: { '200': { description: OK } } }
   /tools/submit_form:
-    post: { summary: submit_form, responses: { '200': { description: OK } } }
+    post: { operationId: submit_form, summary: submit_form, responses: { '200': { description: OK } } }
   /tools/list_forms:
-    post: { summary: list_forms, responses: { '200': { description: OK } } }
+    post: { operationId: list_forms, summary: list_forms, responses: { '200': { description: OK } } }
   /tools/create_calculator:
-    post: { summary: create_calculator, responses: { '200': { description: OK } } }
+    post: { operationId: create_calculator, summary: create_calculator, responses: { '200': { description: OK } } }
   /tools/compute_calculator:
-    post: { summary: compute_calculator, responses: { '200': { description: OK } } }
+    post: { operationId: compute_calculator, summary: compute_calculator, responses: { '200': { description: OK } } }
   /tools/list_calculators:
-    post: { summary: list_calculators, responses: { '200': { description: OK } } }
+    post: { operationId: list_calculators, summary: list_calculators, responses: { '200': { description: OK } } }
   /tools/create_device_frame:
-    post: { summary: create_device_frame, responses: { '200': { description: OK } } }
+    post: { operationId: create_device_frame, summary: create_device_frame, responses: { '200': { description: OK } } }
   /tools/list_device_frames:
-    post: { summary: list_device_frames, responses: { '200': { description: OK } } }
+    post: { operationId: list_device_frames, summary: list_device_frames, responses: { '200': { description: OK } } }
   /tools/create_quiz:
-    post: { summary: create_quiz, responses: { '200': { description: OK } } }
+    post: { operationId: create_quiz, summary: create_quiz, responses: { '200': { description: OK } } }
   /tools/submit_answer:
-    post: { summary: submit_answer, responses: { '200': { description: OK } } }
+    post: { operationId: submit_answer, summary: submit_answer, responses: { '200': { description: OK } } }
   /tools/list_quizzes:
-    post: { summary: list_quizzes, responses: { '200': { description: OK } } }
+    post: { operationId: list_quizzes, summary: list_quizzes, responses: { '200': { description: OK } } }
   /tools/create_sequence:
-    post: { summary: create_sequence, responses: { '200': { description: OK } } }
+    post: { operationId: create_sequence, summary: create_sequence, responses: { '200': { description: OK } } }
   /tools/start_sequence:
-    post: { summary: start_sequence, responses: { '200': { description: OK } } }
+    post: { operationId: start_sequence, summary: start_sequence, responses: { '200': { description: OK } } }
   /tools/pause_sequence:
-    post: { summary: pause_sequence, responses: { '200': { description: OK } } }
+    post: { operationId: pause_sequence, summary: pause_sequence, responses: { '200': { description: OK } } }
   /tools/list_sequences:
-    post: { summary: list_sequences, responses: { '200': { description: OK } } }
+    post: { operationId: list_sequences, summary: list_sequences, responses: { '200': { description: OK } } }
   /tools/shorten_deep_link:
-    post: { summary: shorten_deep_link, responses: { '200': { description: OK } } }
+    post: { operationId: shorten_deep_link, summary: shorten_deep_link, responses: { '200': { description: OK } } }
   /tools/resolve_deep_link:
-    post: { summary: resolve_deep_link, responses: { '200': { description: OK } } }
+    post: { operationId: resolve_deep_link, summary: resolve_deep_link, responses: { '200': { description: OK } } }
   /tools/list_deep_links:
-    post: { summary: list_deep_links, responses: { '200': { description: OK } } }
+    post: { operationId: list_deep_links, summary: list_deep_links, responses: { '200': { description: OK } } }
   /tools/nl_patch:
     post:
       summary: nl_patch
+      operationId: nl_patch
       requestBody:
         required: true
         content:
@@ -316,6 +319,7 @@ paths:
   /tools/simulate_sweep:
     post:
       summary: simulate_sweep
+      operationId: simulate_sweep
       requestBody:
         required: true
         content:
@@ -345,6 +349,7 @@ paths:
   /tools/deck_diff:
     post:
       summary: deck_diff
+      operationId: deck_diff
       requestBody:
         required: true
         content:

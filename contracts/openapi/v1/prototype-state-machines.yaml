@@ -142,13 +142,13 @@ components:
     bearerAuth: { type: http, scheme: bearer }
   parameters:
     TenantId:
-      in: query
-      name: tenant_id
+      in: path
+      name: tenantId
       required: true
       schema: { type: string }
     DeckId:
       in: path
-      name: deck_id
+      name: deckId
       required: true
       schema: { type: string }
     Id:

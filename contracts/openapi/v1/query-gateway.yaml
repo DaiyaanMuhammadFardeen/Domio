@@ -262,6 +262,7 @@ components:
           type: array
           items:
             type: array
+            items: {}
         rowCount:
           type: integer
         createdAt:
@@ -312,6 +313,7 @@ components:
           type: string
         params:
           type: array
+          items: {}
         freshnessPolicy:
           $ref: '#/components/schemas/FreshnessPolicy'
         createdBy:

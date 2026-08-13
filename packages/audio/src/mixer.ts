@@ -98,8 +98,12 @@ export function computeTrackPan(state: GainBusState, trackId: string): number {
  */
 export function computeAllGains(state: GainBusState): Map<string, number> {
   const result = new Map<string, number>();
+  const global = clamp(state.globalVolume, 0, 1);
+  const master = clamp(state.masterVolume, 0, 1);
   for (const track of state.tracks) {
-    result.set(track.id, computeTrackGain(state, track.id));
+    const muteFactor = track.mute ? 0 : 1;
+    const raw = global * master * clamp(track.volume, 0, 1) * muteFactor;
+    result.set(track.id, clamp(raw, 0, 1));
   }
   return result;
 }
