@@ -24,6 +24,7 @@ import {
   LatexEditor,
   MapPicker,
   LiveAppEmbed,
+  AIImageGenerator,
 } from '../components/media';
 
 // ---------------------------------------------------------------------------
@@ -38,7 +39,8 @@ export type MediaTab =
   | 'embed'
   | 'codeBlock'
   | 'latex'
-  | 'map';
+  | 'map'
+  | 'aiGenerate';
 
 /** Callback shape: fires an insert-element op for the given layer kind + props. */
 export interface MediaPanelProps {
@@ -65,6 +67,7 @@ const MEDIA_TABS: { id: MediaTab; icon: string; labelKey: string }[] = [
   { id: 'codeBlock', icon: '💻', labelKey: 'p11.tab.code' },
   { id: 'latex', icon: '📐', labelKey: 'p11.tab.latex' },
   { id: 'map', icon: '🗺️', labelKey: 'p11.tab.map' },
+  { id: 'aiGenerate', icon: '🪄', labelKey: 'p6.copilot.aiImage.tab' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -934,6 +937,17 @@ function MapTab({ onInsert }: { onInsert: (kind: string, props: Record<string, u
   );
 }
 
+function AiGenerateTab({ onInsert }: { onInsert: (kind: string, props: Record<string, unknown>) => void }): ReactElement {
+  return (
+    <div className="data-panel__section" data-testid="p11-ai-generate-tab">
+      <div className="data-panel__section-title">AI Generate</div>
+      <AIImageGenerator
+        onInsert={(kind, props) => onInsert(kind, props)}
+      />
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main panel
 // ---------------------------------------------------------------------------
@@ -957,6 +971,7 @@ export function MediaPanel({
       case 'codeBlock': return <CodeBlockTab onInsert={onInsert} />;
       case 'latex': return <LatexTab onInsert={onInsert} />;
       case 'map': return <MapTab onInsert={onInsert} />;
+      case 'aiGenerate': return <AiGenerateTab onInsert={onInsert} />;
     }
   };
 

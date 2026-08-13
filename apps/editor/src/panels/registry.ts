@@ -46,6 +46,7 @@ import {
   PrototypingEntry,
   DeviceFrameEntry,
 } from './entries';
+import { CopilotHubEntry } from './copilot-panel';
 
 /**
  * Panel groups — used to organize the chrome (e.g. vertical separators
@@ -56,7 +57,8 @@ export type EditorPanelGroup =
   | 'data'
   | 'interaction'
   | 'audience'
-  | 'agentic';
+  | 'agentic'
+  | 'ai';
 
 const REGISTRY = createPanelRegistry<EditorLeftTab, EditorPanelGroup, EditorPanelContext>();
 
@@ -259,6 +261,14 @@ REGISTRY.add({
   group: 'core',
   surface: 'left',
   Component: MarketplaceEntry.Component,
+});
+
+REGISTRY.add({
+  id: 'copilot-hub',
+  label: 'Copilot Hub',
+  group: 'ai',
+  surface: 'right',
+  Component: CopilotHubEntry.Component,
 });
 
 /**

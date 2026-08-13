@@ -42,6 +42,7 @@ import {
   PrototypingEntry,
   DeviceFrameEntry,
 } from './entries';
+import { CopilotHubEntry } from './copilot-panel';
 
 describe('editor panel registry', () => {
   const allEntries = [
@@ -51,16 +52,17 @@ describe('editor panel registry', () => {
     M6LeaderboardEntry, M6SequenceEntry, M8AuditEntry, M8NlPatchEntry,
     M8DeckDiffEntry, StateInspectorEntry, M11MediaEntry, M11LicensesEntry,
     M11RecordingEntry, P12CopilotEntry, MarketplaceEntry, CanvasControlsEntry,
-    PrototypingEntry, DeviceFrameEntry,
+    PrototypingEntry, DeviceFrameEntry, CopilotHubEntry,
   ];
 
   it('registers every panel module', () => {
     expect(editorPanels.list().length).toBe(allEntries.length);
   });
 
-  it('exposes only left-rail surfaces', () => {
+  it('every panel uses an allowed surface (left or right)', () => {
     for (const panel of editorPanels.list()) {
-      expect(panel.surface ?? 'left').toBe('left');
+      const surface = panel.surface ?? 'left';
+      expect(['left', 'right']).toContain(surface);
     }
   });
 
@@ -71,6 +73,7 @@ describe('editor panel registry', () => {
     expect(groups).toContain('interaction');
     expect(groups).toContain('audience');
     expect(groups).toContain('agentic');
+    expect(groups).toContain('ai');
   });
 
   it('looks up a registered panel by id', () => {
