@@ -112,7 +112,7 @@ jobs:
       - name: Start event-ingest
         run: |
           mkdir -p "$INGEST_SPOOL_DIR"
-          nohup node services/event-ingest/dist/index.js > /tmp/event-ingest.log 2>&1 &
+          nohup node services/event-ingest/dist/main.js > /tmp/event-ingest.log 2>&1 &
           echo "$!" > /tmp/event-ingest.pid
           for _ in $(seq 1 60); do
             if curl -fsS http://localhost:8787/healthz > /dev/null 2>&1; then

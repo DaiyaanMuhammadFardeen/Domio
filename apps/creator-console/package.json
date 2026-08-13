@@ -19,6 +19,7 @@
     "@domio/chart": "workspace:*",
     "@domio/i18n": "workspace:^",
     "@domio/ui": "workspace:*",
+    "@domio/web-security": "workspace:*",
     "lucide-react": "^0.469.0",
     "next": "15.1.3",
     "react": "19.0.0",
