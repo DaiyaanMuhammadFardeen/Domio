@@ -27,6 +27,8 @@ jobs:
     uses: ./.github/workflows/leak-scan.yml
   contracts:
     uses: ./.github/workflows/contract.yml
+  schema-validate:
+    uses: ./.github/workflows/schema-validate.yml
   integration:
     uses: ./.github/workflows/integration.yml
   external-e2e:
