@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { AppNav } from '@domio/ui';
 
 export const metadata: Metadata = {
   title: 'Domio — Guest Access',
@@ -15,7 +14,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AppNav activeSurface="magicLinkLanding" currentPath="/" brandHref="/" />
         {children}
       </body>
     </html>

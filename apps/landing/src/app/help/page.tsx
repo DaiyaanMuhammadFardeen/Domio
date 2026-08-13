@@ -10,6 +10,7 @@ import type { Metadata } from 'next';
 import type { JSX } from 'react';
 import { HelpClient } from './HelpClient';
 import { KB_ARTICLES, KB_CATEGORIES } from '../../lib/help-data';
+import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Help center — Domio',
@@ -18,5 +19,9 @@ export const metadata: Metadata = {
 };
 
 export default function HelpIndexPage(): JSX.Element {
-  return <HelpClient initialCategories={KB_CATEGORIES} initialArticles={KB_ARTICLES} />;
+  return (
+    <PageShell currentId="help-index" relatedTitle="Still need help?" hideRelated>
+      <HelpClient initialCategories={KB_CATEGORIES} initialArticles={KB_ARTICLES} />
+    </PageShell>
+  );
 }

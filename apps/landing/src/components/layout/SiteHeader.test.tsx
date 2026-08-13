@@ -1,9 +1,10 @@
 /**
  * Smoke tests for the global site chrome — SiteHeader and SiteFooter.
  *
- * Locks in the Wave 12 §S12.1 primary-nav expansion (added Plugins,
- * Demos, Status, Blog, Help alongside the S10.4 Docs / Features / CLI
- * / Pricing) and the footer Resource column.
+ * Per Wave 13. The header now delegates to `<AppNav>` (with `site-header*`
+ * BEM overrides) and the nav list is driven by `nav-sitemap.ts` instead
+ * of being hardcoded. The footer pulls its columns from the same
+ * sitemap module.
  */
 
 import { cleanup, render, screen, within } from '@testing-library/react';
@@ -13,20 +14,19 @@ import { SiteFooter } from './SiteFooter';
 
 afterEach(cleanup);
 
-describe('SiteHeader (Wave 12)', () => {
-  it('renders all primary nav links via typed routing builders', () => {
+describe('SiteHeader (Wave 13)', () => {
+  it('renders every sitemap primary landing link with a relative href', () => {
     render(<SiteHeader />);
     const nav = screen.getByRole('navigation', { name: 'Primary' });
     const labels = [
-      'Product',
-      'CLI',
-      'Plugins',
-      'Docs',
+      'Features',
       'Pricing',
-      'Demos',
-      'Status',
+      'Docs',
       'Blog',
       'Help',
+      'Status',
+      'Trust center',
+      'Services',
     ];
     for (const label of labels) {
       const link = within(nav).getByRole('link', { name: label });
@@ -34,33 +34,40 @@ describe('SiteHeader (Wave 12)', () => {
     }
   });
 
-  it('marks the active link via aria-current', () => {
+  it('marks the active primary link via aria-current', () => {
     render(<SiteHeader currentPath="/blog" />);
     const nav = screen.getByRole('navigation', { name: 'Primary' });
     const active = within(nav).getByRole('link', { name: 'Blog' });
     expect(active.getAttribute('aria-current')).toBe('page');
   });
 
-  it('renders the Sign-in CTA pointing to /login', () => {
+it('renders the cross-app switcher in the header chrome', () => {
+    render(<SiteHeader />);
+    const switcher = screen.getByRole('navigation', { name: 'Switch surface' });
+    expect(switcher).toBeTruthy();
+    expect(within(switcher).getAllByRole('link').length).toBeGreaterThan(0);
+  });
+
+  it('renders the Sign-in CTA pointing at /login', () => {
     render(<SiteHeader />);
     const cta = screen.getByRole('link', { name: 'Sign in' });
     expect(cta.getAttribute('href')).toBe('/login');
   });
 });
 
-describe('SiteFooter (Wave 12)', () => {
-  it('lists Wave 12 surfaces under the Resources nav', () => {
+describe('SiteFooter (Wave 13)', () => {
+  it('lists Resources links from the sitemap', () => {
     render(<SiteFooter />);
     const nav = screen.getByRole('navigation', { name: 'Resources' });
     for (const label of [
-      'Docs',
+      'Blog',
       'Changelog',
       'Demos',
       'Status',
       'Trust center',
       'Help',
       'Community',
-      'Blog',
+      'Services',
     ]) {
       expect(within(nav).getByRole('link', { name: label })).toBeTruthy();
     }
@@ -71,5 +78,21 @@ describe('SiteFooter (Wave 12)', () => {
     const nav = screen.getByRole('navigation', { name: 'Product' });
     const link = within(nav).getByRole('link', { name: 'Plugins SDK' });
     expect(link.getAttribute('href')).toBe('/plugins-sdk');
+  });
+
+  it('lists every cross-app surface under the Apps nav', () => {
+    render(<SiteFooter />);
+    const nav = screen.getByRole('navigation', { name: 'Apps' });
+    for (const label of ['Editor', 'Viewer', 'Presenter', 'Dashboard', 'Marketplace', 'Creator', 'Admin']) {
+      expect(within(nav).getByRole('link', { name: label })).toBeTruthy();
+    }
+  });
+
+  it('lists legal links inline (Terms, Privacy, DPA, Subprocessors, Security)', () => {
+    render(<SiteFooter />);
+    const nav = screen.getByRole('navigation', { name: 'Legal' });
+    for (const label of ['Terms', 'Privacy', 'DPA', 'Subprocessors', 'Security']) {
+      expect(within(nav).getByRole('link', { name: label })).toBeTruthy();
+    }
   });
 });

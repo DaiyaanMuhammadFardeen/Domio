@@ -16,6 +16,7 @@ import {
   categoryForSlug,
   type KbArticle,
 } from '../../../lib/help-data';
+import { PageShell } from '../../../components/layout/PageShell';
 
 interface ArticleRouteParams {
   readonly slug: string;
@@ -73,5 +74,9 @@ export default async function HelpArticlePage({
   const category = categoryForSlug(article.category_id);
   const related = resolveRelated(article.related_slugs);
 
-  return <ArticleClient article={article} category={category} related={related} />;
+  return (
+    <PageShell currentId="help-index" relatedTitle="Need more?" hideRelated>
+      <ArticleClient article={article} category={category} related={related} />
+    </PageShell>
+  );
 }

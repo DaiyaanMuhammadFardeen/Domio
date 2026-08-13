@@ -11,6 +11,7 @@ import type { Metadata } from 'next';
 import type { JSX } from 'react';
 import { landing } from '@domio/ui';
 import PricingClient from './PricingClient';
+import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Pricing — Domio',
@@ -106,30 +107,32 @@ export default function PricingPage(): JSX.Element {
   const signupHref = landing('signup');
 
   return (
-    <main className="pricing-page" data-testid="pricing-page">
-      <header className="pricing-page__header">
-        <p className="pricing-page__eyebrow">Pricing</p>
-        <h1 className="pricing-page__title">Simple plans. Powerful decks.</h1>
-        <p className="pricing-page__subtitle">
-          Start free. Upgrade when your team is ready. Cancel any time.
-        </p>
-      </header>
+    <PageShell currentId="pricing" relatedTitle="Get started">
+      <main className="pricing-page" data-testid="pricing-page">
+        <header className="pricing-page__header">
+          <p className="pricing-page__eyebrow">Pricing</p>
+          <h1 className="pricing-page__title">Simple plans. Powerful decks.</h1>
+          <p className="pricing-page__subtitle">
+            Start free. Upgrade when your team is ready. Cancel any time.
+          </p>
+        </header>
 
-      <PricingClient tiers={TIERS} signupHref={signupHref} />
+        <PricingClient tiers={TIERS} signupHref={signupHref} />
 
-      <section className="pricing-page__faq" aria-labelledby="pricing-faq-heading">
-        <h2 id="pricing-faq-heading" className="pricing-page__faq-heading">
-          Frequently asked questions
-        </h2>
-        <dl className="pricing-page__faq-list">
-          {FAQ.map((entry) => (
-            <div key={entry.question} className="pricing-page__faq-row">
-              <dt className="pricing-page__faq-q">{entry.question}</dt>
-              <dd className="pricing-page__faq-a">{entry.answer}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-    </main>
+        <section className="pricing-page__faq" aria-labelledby="pricing-faq-heading">
+          <h2 id="pricing-faq-heading" className="pricing-page__faq-heading">
+            Frequently asked questions
+          </h2>
+          <dl className="pricing-page__faq-list">
+            {FAQ.map((entry) => (
+              <div key={entry.question} className="pricing-page__faq-row">
+                <dt className="pricing-page__faq-q">{entry.question}</dt>
+                <dd className="pricing-page__faq-a">{entry.answer}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      </main>
+    </PageShell>
   );
 }

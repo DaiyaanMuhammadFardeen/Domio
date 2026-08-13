@@ -155,4 +155,8 @@ export {
 export { Breadcrumbs, type BreadcrumbsProps } from './Breadcrumbs.js';
 export { RelatedLinks, type RelatedLinksProps } from './RelatedLinks.js';
 export { Pager, type PagerProps } from './Pager.js';
-export { AppNav, type AppNavProps } from './AppNav.js';
+export {
+  AppNav,
+  type AppNavProps,
+  type AppNavClassNames,
+} from './AppNav.js';

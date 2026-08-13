@@ -32,7 +32,6 @@ describe('landing smoke', () => {
       'how-it-works',
       'pricing-section',
       'faq-section',
-      'marketing-footer',
     ];
     for (const id of testids) {
       expect(

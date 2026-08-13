@@ -15,6 +15,7 @@ import { IncidentList } from '../../components/status/IncidentList';
 import { StatusClient } from './StatusClient';
 import { fetchStatus } from '../../lib/status-service';
 import type { ServiceHealth } from '../../lib/status-types';
+import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Domio Status',
@@ -52,48 +53,50 @@ export default async function StatusPage(): Promise<JSX.Element> {
   const snapshot = await fetchStatus();
 
   return (
-    <main className="status-page">
-      <header className="status-hero" aria-labelledby="status-hero-heading">
-        <p className="status-hero__eyebrow">System status</p>
-        <h1 id="status-hero-heading" className="status-hero__title">
-          Domio service status
-        </h1>
-        <p className="status-hero__sub">
-          Live availability for every public Domio service. We refresh this
-          page every minute; subscribe below to be notified by email when an
-          incident opens or resolves.
-        </p>
-      </header>
+    <PageShell currentId="status" relatedTitle="Check before you ship">
+      <main className="status-page">
+        <header className="status-hero" aria-labelledby="status-hero-heading">
+          <p className="status-hero__eyebrow">System status</p>
+          <h1 id="status-hero-heading" className="status-hero__title">
+            Domio service status
+          </h1>
+          <p className="status-hero__sub">
+            Live availability for every public Domio service. We refresh this
+            page every minute; subscribe below to be notified by email when an
+            incident opens or resolves.
+          </p>
+        </header>
 
-      <section
-        className={`status-banner ${OVERALL_CLASS[snapshot.overall]}`}
-        data-testid="status-banner"
-        aria-live="polite"
-      >
-        <span className="status-banner__dot" aria-hidden="true" />
-        <span className="status-banner__label">
-          {OVERALL_LABEL[snapshot.overall]}
-        </span>
-        <span className="status-banner__fetched">
-          Last updated {formatFetchedAt(snapshot.fetched_at_ms)}
-        </span>
-      </section>
+        <section
+          className={`status-banner ${OVERALL_CLASS[snapshot.overall]}`}
+          data-testid="status-banner"
+          aria-live="polite"
+        >
+          <span className="status-banner__dot" aria-hidden="true" />
+          <span className="status-banner__label">
+            {OVERALL_LABEL[snapshot.overall]}
+          </span>
+          <span className="status-banner__fetched">
+            Last updated {formatFetchedAt(snapshot.fetched_at_ms)}
+          </span>
+        </section>
 
-      <section
-        className="status-services"
-        aria-labelledby="status-services-heading"
-      >
-        <h2 id="status-services-heading">Services</h2>
-        <ul className="status-services__list">
-          {snapshot.services.map((svc) => (
-            <ServiceRow key={svc.id} service={svc} />
-          ))}
-        </ul>
-      </section>
+        <section
+          className="status-services"
+          aria-labelledby="status-services-heading"
+        >
+          <h2 id="status-services-heading">Services</h2>
+          <ul className="status-services__list">
+            {snapshot.services.map((svc) => (
+              <ServiceRow key={svc.id} service={svc} />
+            ))}
+          </ul>
+        </section>
 
-      <IncidentList incidents={snapshot.incidents} />
+        <IncidentList incidents={snapshot.incidents} />
 
-      <StatusClient statusEndpoint="/v1/status" />
-    </main>
+        <StatusClient statusEndpoint="/v1/status" />
+      </main>
+    </PageShell>
   );
 }

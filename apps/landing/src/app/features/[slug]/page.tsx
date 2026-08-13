@@ -23,9 +23,12 @@ import type { JSX } from 'react';
 import { Hero } from '../../../components/feature-page/Hero';
 import { GifDemo } from '../../../components/feature-page/GifDemo';
 import { TutorialSteps } from '../../../components/feature-page/TutorialSteps';
-import { RelatedFeatures } from '../../../components/feature-page/RelatedFeatures';
 import { FeaturePageClient } from './FeaturePageClient';
+import { BreadcrumbsShell } from '../../../components/layout/BreadcrumbsShell';
 import { getFeature, listAllFeatures } from '../../../lib/feature-catalog';
+import { landingNodeById } from '../../../lib/nav-sitemap';
+import { relatedFor } from '@domio/ui';
+import { RelatedLinks } from '@domio/ui';
 
 interface FeaturePageParams {
   readonly slug: string;
@@ -61,6 +64,12 @@ export default async function FeaturePage({ params }: FeaturePageProps): Promise
     notFound();
   }
 
+  // Resolve related nodes via the global nav-graph: siblings (other
+  // features in the same category) + seeAlso (docs, services).
+  const nodeId = `feature-${feature.slug}`;
+  const node = landingNodeById(nodeId);
+  const related = node ? relatedFor(node) : [];
+
   const body = (
     <>
       <Hero feature={feature} />
@@ -70,7 +79,7 @@ export default async function FeaturePage({ params }: FeaturePageProps): Promise
         description={feature.tagline}
       />
       <TutorialSteps feature={feature} />
-      <RelatedFeatures current={feature} />
+      <RelatedLinks items={related} title="Related features" className="fp-related" testId="fp-related" />
       <section className="fp-bottom-cta" aria-label="Get started" data-testid="fp-bottom-cta">
         <h2 className="fp-bottom-cta__heading">
           Ready to try {feature.title}?
@@ -89,9 +98,11 @@ export default async function FeaturePage({ params }: FeaturePageProps): Promise
 
   return (
     <main className="fp-main" data-testid="fp-page" data-slug={feature.slug}>
-      <FeaturePageClient feature={feature}>
-        {body}
-      </FeaturePageClient>
+      <BreadcrumbsShell currentId={nodeId}>
+        <FeaturePageClient feature={feature}>
+          {body}
+        </FeaturePageClient>
+      </BreadcrumbsShell>
     </main>
   );
 }

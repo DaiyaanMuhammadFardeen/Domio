@@ -24,6 +24,7 @@ import {
   TUTORIALS,
   type PluginTutorial,
 } from '../../lib/plugin-sdk-data';
+import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Domio Plugin SDK',
@@ -118,66 +119,68 @@ function formatMinutes(n: number): string {
 
 export default function PluginsSdkPage(): ReactElement {
   return (
-    <main className="psdk">
-      <header className="psdk-hero">
-        <h1>Domio Plugin SDK</h1>
-        <p>Extend the canvas, the editor, and the data layer.</p>
-      </header>
+    <PageShell currentId="plugins-sdk" relatedTitle="Go deeper">
+      <main className="psdk">
+        <header className="psdk-hero">
+          <h1>Domio Plugin SDK</h1>
+          <p>Extend the canvas, the editor, and the data layer.</p>
+        </header>
 
-      <Quickstart heading="Quickstart — scaffold in 5 minutes" steps={QUICKSTART_STEPS} />
+        <Quickstart heading="Quickstart — scaffold in 5 minutes" steps={QUICKSTART_STEPS} />
 
-      <Tutorials
-        heading="Tutorials"
-        startLabel="Start tutorial"
-        minutesLabel={formatMinutes}
-        tutorials={TUTORIALS}
-      />
+        <Tutorials
+          heading="Tutorials"
+          startLabel="Start tutorial"
+          minutesLabel={formatMinutes}
+          tutorials={TUTORIALS}
+        />
 
-      {/* Deeper tutorial anchor sections — reachable via the card links. */}
-      <section className="psdk-section" aria-label="Tutorial deep dives">
-        <h2 className="visually-hidden">Tutorial deep dives</h2>
-        {TUTORIALS.map((tutorial) => (
-          <article
-            key={tutorial.slug}
-            id={`tutorial-${tutorial.slug}`}
-            className="psdk-tutorial-detail"
-          >
-            <header>
-              <h3>{tutorial.title}</h3>
+        {/* Deeper tutorial anchor sections — reachable via the card links. */}
+        <section className="psdk-section" aria-label="Tutorial deep dives">
+          <h2 className="visually-hidden">Tutorial deep dives</h2>
+          {TUTORIALS.map((tutorial) => (
+            <article
+              key={tutorial.slug}
+              id={`tutorial-${tutorial.slug}`}
+              className="psdk-tutorial-detail"
+            >
+              <header>
+                <h3>{tutorial.title}</h3>
+                <p>
+                  <span>{formatMinutes(tutorial.time_estimate_min)}</span>
+                  <span aria-hidden="true"> · </span>
+                  <span>{tutorial.difficulty}</span>
+                </p>
+              </header>
+              <p>{TUTORIAL_BODY[tutorial.slug]}</p>
               <p>
-                <span>{formatMinutes(tutorial.time_estimate_min)}</span>
-                <span aria-hidden="true"> · </span>
-                <span>{tutorial.difficulty}</span>
+                <a href={`${SAMPLE_PLUGIN_REPO_URL}#${tutorial.slug}`} rel="noopener noreferrer" target="_blank">
+                  Open the full guide on GitHub ↗
+                </a>
               </p>
-            </header>
-            <p>{TUTORIAL_BODY[tutorial.slug]}</p>
-            <p>
-              <a href={`${SAMPLE_PLUGIN_REPO_URL}#${tutorial.slug}`} rel="noopener noreferrer" target="_blank">
-                Open the full guide on GitHub ↗
-              </a>
-            </p>
-          </article>
-        ))}
-      </section>
+            </article>
+          ))}
+        </section>
 
-      <SamplePlugin
-        heading="Sample plugin"
-        downloadLabel="Download ZIP"
-        repoLabel="View on GitHub"
-        readmeExcerpt={SAMPLE_README}
-        fileTree={SAMPLE_FILE_TREE}
-      />
+        <SamplePlugin
+          heading="Sample plugin"
+          downloadLabel="Download ZIP"
+          repoLabel="View on GitHub"
+          readmeExcerpt={SAMPLE_README}
+          fileTree={SAMPLE_FILE_TREE}
+        />
 
-      <PublishFlow heading="Publish flow" steps={PUBLISH_STEPS} />
+        <PublishFlow heading="Publish flow" steps={PUBLISH_STEPS} />
 
-      <section className="psdk-cta" aria-label="Next steps">
-        <a className="psdk-button psdk-button--primary" href={MARKETPLACE_PATH}>
-          Browse marketplace →
-        </a>
-        <a className="psdk-button psdk-button--secondary" href={SCAFFOLD_ANCHOR}>
-          Build a plugin →
-        </a>
-      </section>
-    </main>
+        <section className="psdk-cta" aria-label="Next steps">
+          <a className="psdk-button psdk-button--primary" href={MARKETPLACE_PATH}>
+            Browse marketplace →
+          </a>
+          <a className="psdk-button psdk-button--secondary" href={SCAFFOLD_ANCHOR}>
+            Build a plugin →
+          </a>
+        </section>
+      </main>
+    </PageShell>
   );
 }

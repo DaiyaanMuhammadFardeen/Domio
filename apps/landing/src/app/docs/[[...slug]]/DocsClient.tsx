@@ -6,10 +6,13 @@
  * search bar, page header, and rendered body. The wrapper itself is a
  * server component so the initial HTML ships fully formed; it only
  * nests the (already client-marked) SearchBar.
+ *
+ * Per Wave 13: prev/next navigation now uses the generic `<Pager>`
+ * from `@domio/ui`.
  */
 
 import type { JSX } from 'react';
-import { landing } from '@domio/ui';
+import { Pager } from '@domio/ui';
 import { Sidebar } from '../../../components/docs/Sidebar';
 import { SearchBar } from '../../../components/docs/SearchBar';
 import { PageHeader } from '../../../components/docs/PageHeader';
@@ -46,35 +49,30 @@ const DOCS_FLAT: ReadonlyArray<{ section: DocsSection; page: DocsPage }> = DOCS_
 
 function Paginator({ section, page }: { section: DocsSection; page: DocsPage }): JSX.Element {
   const flat = DOCS_FLAT;
-  const index = flat.findIndex((entry) => entry.section.id === section.id && entry.page.slug === page.slug);
-  const prev = index > 0 ? flat[index - 1] : undefined;
-  const next = index >= 0 && index < flat.length - 1 ? flat[index + 1] : undefined;
-  return (
-    <div className="docs-pager__row" data-testid="docs-pager">
-      {prev ? (
-        <a
-          className="docs-pager__link docs-pager__link--prev"
-          href={landing('docs', { slug: `${prev.section.id}/${prev.page.slug}` })}
-        >
-          <span className="docs-pager__direction">← Previous</span>
-          <span className="docs-pager__title">{prev.page.title}</span>
-        </a>
-      ) : (
-        <span className="docs-pager__placeholder" />
-      )}
-      {next ? (
-        <a
-          className="docs-pager__link docs-pager__link--next"
-          href={landing('docs', { slug: `${next.section.id}/${next.page.slug}` })}
-        >
-          <span className="docs-pager__direction">Next →</span>
-          <span className="docs-pager__title">{next.page.title}</span>
-        </a>
-      ) : (
-        <span className="docs-pager__placeholder" />
-      )}
-    </div>
+  const index = flat.findIndex(
+    (entry) => entry.section.id === section.id && entry.page.slug === page.slug,
   );
+  const prevEntry = index > 0 ? flat[index - 1] : undefined;
+  const nextEntry = index >= 0 && index < flat.length - 1 ? flat[index + 1] : undefined;
+  const prev = prevEntry
+    ? {
+        id: `docs-page-${prevEntry.section.id}-${prevEntry.page.slug}`,
+        surface: 'landing' as const,
+        category: 'docs' as const,
+        label: prevEntry.page.title,
+        href: `/docs/${prevEntry.section.id}/${prevEntry.page.slug}`,
+      }
+    : undefined;
+  const next = nextEntry
+    ? {
+        id: `docs-page-${nextEntry.section.id}-${nextEntry.page.slug}`,
+        surface: 'landing' as const,
+        category: 'docs' as const,
+        label: nextEntry.page.title,
+        href: `/docs/${nextEntry.section.id}/${nextEntry.page.slug}`,
+      }
+    : undefined;
+  return <Pager {...(prev ? { prev } : {})} {...(next ? { next } : {})} />;
 }
 
 export function DocsClient({ section, page, slugSegments }: DocsClientProps): JSX.Element {

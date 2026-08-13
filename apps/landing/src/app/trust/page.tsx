@@ -21,6 +21,7 @@ import {
   SECURITY_CONTACT,
 } from '../../lib/trust-data';
 import TrustClient from './TrustClient';
+import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Trust & security — Domio',
@@ -32,48 +33,50 @@ export default function TrustLandingPage(): JSX.Element {
   const enterpriseHref = ENTERPRISE_HREF;
 
   return (
-    <div className="trust-page">
-      <section className="trust-hero" aria-labelledby="trust-hero-heading">
-        <div className="trust-hero__inner">
-          <p className="trust-hero__eyebrow">Trust &amp; security</p>
-          <h1 id="trust-hero-heading" className="trust-hero__title">
-            Built for procurement review
-          </h1>
-          <p className="trust-hero__subtitle">
-            Independent attestations, region-pinned data, and a security
-            team that responds within a business day. Everything you need
-            to clear vendor review is below.
+    <PageShell currentId="trust" relatedTitle="Stay informed">
+      <div className="trust-page">
+        <section className="trust-hero" aria-labelledby="trust-hero-heading">
+          <div className="trust-hero__inner">
+            <p className="trust-hero__eyebrow">Trust &amp; security</p>
+            <h1 id="trust-hero-heading" className="trust-hero__title">
+              Built for procurement review
+            </h1>
+            <p className="trust-hero__subtitle">
+              Independent attestations, region-pinned data, and a security
+              team that responds within a business day. Everything you need
+              to clear vendor review is below.
+            </p>
+          </div>
+        </section>
+
+        <TrustClient
+          badges={COMPLIANCE_BADGES}
+          regions={RESIDENCY_REGIONS}
+          reports={SECURITY_REPORTS}
+          pgpFingerprint={SECURITY_CONTACT.pgp_fingerprint}
+        />
+
+        <section className="trust-cta" aria-labelledby="trust-cta-heading">
+          <h2 id="trust-cta-heading" className="trust-cta__heading">
+            Need a signed DPA or BAA?
+          </h2>
+          <p className="trust-cta__sub">
+            Our enterprise team will route your request to legal and turn
+            around a counter-signed agreement within five business days.
           </p>
-        </div>
-      </section>
-
-      <TrustClient
-        badges={COMPLIANCE_BADGES}
-        regions={RESIDENCY_REGIONS}
-        reports={SECURITY_REPORTS}
-        pgpFingerprint={SECURITY_CONTACT.pgp_fingerprint}
-      />
-
-      <section className="trust-cta" aria-labelledby="trust-cta-heading">
-        <h2 id="trust-cta-heading" className="trust-cta__heading">
-          Need a signed DPA or BAA?
-        </h2>
-        <p className="trust-cta__sub">
-          Our enterprise team will route your request to legal and turn
-          around a counter-signed agreement within five business days.
-        </p>
-        <div className="trust-cta__actions">
-          <a className="trust-cta__button trust-cta__button--primary" href={enterpriseHref}>
-            Talk to enterprise →
-          </a>
-          <a
-            className="trust-cta__button trust-cta__button--secondary"
-            href={`mailto:${SECURITY_CONTACT.email}`}
-          >
-            Email security
-          </a>
-        </div>
-      </section>
-    </div>
+          <div className="trust-cta__actions">
+            <a className="trust-cta__button trust-cta__button--primary" href={enterpriseHref}>
+              Talk to enterprise →
+            </a>
+            <a
+              className="trust-cta__button trust-cta__button--secondary"
+              href={`mailto:${SECURITY_CONTACT.email}`}
+            >
+              Email security
+            </a>
+          </div>
+        </section>
+      </div>
+    </PageShell>
   );
 }

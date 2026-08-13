@@ -22,7 +22,6 @@ import Features from './(sections)/features';
 import HowItWorks from './(sections)/how-it-works';
 import Pricing from './(sections)/pricing';
 import Faq from './(sections)/faq';
-import MarketingFooter from './(sections)/footer';
 
 export const metadata: Metadata = {
   title: 'Domio — Interactive decks, shared sessions, live presentations',
@@ -39,7 +38,6 @@ export default function LandingHomePage(): JSX.Element {
       <HowItWorks />
       <Pricing />
       <Faq />
-      <MarketingFooter />
     </main>
   );
 }

@@ -1,48 +1,26 @@
 /**
  * Footer for the public marketing site. Pairs with SiteHeader.
  *
- * Wave 12 §S12.1 expands this from the S10.4 four-column legal
- * colophon to a full sitemap that covers every Wave 12 surface
- * (Docs, Plugins SDK, Demos, Status, Blog, Help, Community,
- * Trust, Careers, Changelog).
+ * Per Wave 13. Every column except `Legal` is now driven by
+ * `nav-sitemap.ts`. The sitemap is the single source of truth for
+ * cross-app navigation: adding a new top-level page means adding one
+ * node there, and the footer picks it up.
+ *
+ * The `Legal` column (Terms, Privacy, DPA, etc.) is intentionally
+ * declared inline because legal pages are pure-marketing and have no
+ * related-links or breadcrumbs.
  */
 
 import type { JSX } from 'react';
-import { landing, localUrl } from '@domio/ui';
+import { landing } from '@domio/ui';
+import { footerColumns } from '../../lib/nav-sitemap';
 
-interface FooterLink {
+interface LegalLink {
   readonly label: string;
   readonly href: string;
 }
 
-const PRODUCT: ReadonlyArray<FooterLink> = [
-  { label: 'Editor', href: localUrl('editor', '/') },
-  { label: 'Presenter', href: localUrl('presenter', '/') },
-  { label: 'Viewer', href: localUrl('viewer', '/') },
-  { label: 'Dashboard', href: localUrl('dashboard', '/overview') },
-  { label: 'Marketplace', href: localUrl('marketplaceWeb', '/') },
-  { label: 'CLI', href: landing('cli') },
-  { label: 'Plugins SDK', href: landing('plugins-sdk') },
-];
-
-const RESOURCES: ReadonlyArray<FooterLink> = [
-  { label: 'Docs', href: landing('docs') },
-  { label: 'Changelog', href: landing('changelog') },
-  { label: 'Demos', href: landing('demos') },
-  { label: 'Status', href: landing('status') },
-  { label: 'Trust center', href: landing('trust') },
-  { label: 'Help', href: landing('help') },
-  { label: 'Community', href: landing('community') },
-  { label: 'Blog', href: landing('blog') },
-];
-
-const COMPANY: ReadonlyArray<FooterLink> = [
-  { label: 'About', href: '/about' },
-  { label: 'Careers', href: landing('careers') },
-  { label: 'Contact', href: '/contact' },
-];
-
-const LEGAL: ReadonlyArray<FooterLink> = [
+const LEGAL_LINKS: ReadonlyArray<LegalLink> = [
   { label: 'Terms', href: '/legal/terms' },
   { label: 'Privacy', href: '/legal/privacy' },
   { label: 'Security', href: '/security' },
@@ -51,6 +29,8 @@ const LEGAL: ReadonlyArray<FooterLink> = [
 ];
 
 export function SiteFooter(): JSX.Element {
+  const columns = footerColumns();
+
   return (
     <footer className="site-footer" data-testid="site-footer">
       <div className="site-footer__inner">
@@ -65,57 +45,60 @@ export function SiteFooter(): JSX.Element {
             Interactive decks, shared sessions, and live presentations.
           </p>
         </div>
-        <nav className="site-footer__col" aria-label="Product">
-          <h2 className="site-footer__heading">Product</h2>
-          <ul className="site-footer__list">
-            {PRODUCT.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} className="site-footer__link">
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <nav className="site-footer__col" aria-label="Resources">
-          <h2 className="site-footer__heading">Resources</h2>
-          <ul className="site-footer__list">
-            {RESOURCES.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} className="site-footer__link">
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <nav className="site-footer__col" aria-label="Company">
-          <h2 className="site-footer__heading">Company</h2>
-          <ul className="site-footer__list">
-            {COMPANY.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} className="site-footer__link">
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <nav className="site-footer__col" aria-label="Legal">
-          <h2 className="site-footer__heading">Legal</h2>
-          <ul className="site-footer__list">
-            {LEGAL.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} className="site-footer__link">
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+
+        {columns.map((column) => (
+          <nav
+            key={column.heading}
+            className="site-footer__col"
+            aria-label={column.heading}
+            data-testid={`site-footer-col-${column.heading.toLowerCase()}`}
+          >
+            <h2 className="site-footer__heading">{column.heading}</h2>
+            {column.heading === 'Legal' ? (
+              <ul className="site-footer__list">
+                {LEGAL_LINKS.map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      className="site-footer__link"
+                      data-testid={`site-footer-link-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : column.links.length === 0 ? (
+              <p className="site-footer__empty">—</p>
+            ) : (
+              <ul className="site-footer__list">
+                {column.links.map((link) => (
+                  <li key={link.id}>
+                    <a
+                      href={link.href}
+                      className="site-footer__link"
+                      data-testid={`site-footer-link-${link.id}`}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </nav>
+        ))}
       </div>
       <div className="site-footer__bottom">
         <p className="site-footer__copyright">© 2026 Domio, Inc.</p>
+        <p className="site-footer__services-link">
+          <a
+            href={landing('docs')}
+            className="site-footer__link"
+            data-testid="site-footer-docs-link"
+          >
+            Documentation
+          </a>
+        </p>
       </div>
     </footer>
   );

@@ -10,6 +10,7 @@ import type { JSX } from 'react';
 import { landing } from '@domio/ui';
 import AuthShell from '../../components/auth/AuthShell';
 import LoginForm from './LoginForm';
+import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Sign in to Domio',
@@ -22,21 +23,23 @@ export default function LoginPage(): JSX.Element {
   const forgotHref = landing('forgot-password');
 
   return (
-    <AuthShell
-      heading="Sign in to Domio"
-      subtitle="Welcome back. Pick up where you left off."
-      footer={
-        <nav className="auth-shell__footer" aria-label="Auth cross-links">
-          <p className="auth-shell__footer-text">
-            New here? <a href={signupHref}>Create an account</a>
-          </p>
-          <p className="auth-shell__footer-text">
-            <a href={forgotHref}>Forgot your password?</a>
-          </p>
-        </nav>
-      }
-    >
-      <LoginForm />
-    </AuthShell>
+    <PageShell currentId="login" relatedTitle="Auth">
+      <AuthShell
+        heading="Sign in to Domio"
+        subtitle="Welcome back. Pick up where you left off."
+        footer={
+          <nav className="auth-shell__footer" aria-label="Auth cross-links">
+            <p className="auth-shell__footer-text">
+              New here? <a href={signupHref}>Create an account</a>
+            </p>
+            <p className="auth-shell__footer-text">
+              <a href={forgotHref}>Forgot your password?</a>
+            </p>
+          </nav>
+        }
+      >
+        <LoginForm />
+      </AuthShell>
+    </PageShell>
   );
 }

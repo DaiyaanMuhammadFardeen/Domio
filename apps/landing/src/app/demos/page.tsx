@@ -13,6 +13,7 @@
 import type { Metadata } from 'next';
 import type { JSX } from 'react';
 import { DemosClient } from './DemosClient';
+import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Demos — Domio',
@@ -22,14 +23,16 @@ export const metadata: Metadata = {
 
 export default function DemosPage(): JSX.Element {
   return (
-    <main className="demos-page">
-      <DemosClient
-        heading="Demos"
-        intro="Every Domio feature on a 30-second loop. Open one in the editor to inspect the source."
-        openLabel="Open in editor"
-        allLabel="All"
-        emptyLabel="No demos match this tag yet — try another filter."
-      />
-    </main>
+    <PageShell currentId="demos" relatedTitle="Keep exploring">
+      <main className="demos-page">
+        <DemosClient
+          heading="Demos"
+          intro="Every Domio feature on a 30-second loop. Open one in the editor to inspect the source."
+          openLabel="Open in editor"
+          allLabel="All"
+          emptyLabel="No demos match this tag yet — try another filter."
+        />
+      </main>
+    </PageShell>
   );
 }

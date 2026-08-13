@@ -11,6 +11,7 @@ import type { JSX } from 'react';
 import { landing } from '@domio/ui';
 import { DiscordWidget } from '../../components/community/DiscordWidget';
 import { ForumLink } from '../../components/community/ForumLink';
+import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Community — Domio',
@@ -26,39 +27,41 @@ const FORUM_TOPIC_COUNT = 5320;
 
 export default function CommunityPage(): JSX.Element {
   return (
-    <main className="community-page" data-testid="community-page">
-      <header className="community-page__hero">
-        <p className="community-page__eyebrow">Community</p>
-        <h1 className="community-page__title">Talk to other Domio builders</h1>
-        <p className="community-page__lede">
-          Two places to hang out. Discord for quick chat and live office hours; the forum for
-          longer questions, plugin discussion, and announcements that should be Googleable.
-        </p>
-      </header>
+    <PageShell currentId="community" relatedTitle="Get help">
+      <main className="community-page" data-testid="community-page">
+        <header className="community-page__hero">
+          <p className="community-page__eyebrow">Community</p>
+          <h1 className="community-page__title">Talk to other Domio builders</h1>
+          <p className="community-page__lede">
+            Two places to hang out. Discord for quick chat and live office hours; the forum for
+            longer questions, plugin discussion, and announcements that should be Googleable.
+          </p>
+        </header>
 
-      <section className="community-page__cards" aria-label="Community channels">
-        <DiscordWidget
-          inviteUrl={DISCORD_INVITE_URL}
-          memberCount={DISCORD_MEMBER_COUNT}
-          onlineCount={DISCORD_ONLINE_COUNT}
-        />
-        <ForumLink forumUrl={FORUM_URL} topicCount={FORUM_TOPIC_COUNT} />
-      </section>
+        <section className="community-page__cards" aria-label="Community channels">
+          <DiscordWidget
+            inviteUrl={DISCORD_INVITE_URL}
+            memberCount={DISCORD_MEMBER_COUNT}
+            onlineCount={DISCORD_ONLINE_COUNT}
+          />
+          <ForumLink forumUrl={FORUM_URL} topicCount={FORUM_TOPIC_COUNT} />
+        </section>
 
-      <section className="community-page__help-cta" aria-label="Need help instead?">
-        <h2 className="community-page__help-heading">Prefer the docs?</h2>
-        <p className="community-page__help-body">
-          The Help center covers the same ground in a searchable, deterministic form — perfect when
-          you need a written reference at 2am.
-        </p>
-        <a
-          className="community-page__help-link"
-          href={landing('help')}
-          data-testid="community-help-link"
-        >
-          Browse the Help center →
-        </a>
-      </section>
-    </main>
+        <section className="community-page__help-cta" aria-label="Need help instead?">
+          <h2 className="community-page__help-heading">Prefer the docs?</h2>
+          <p className="community-page__help-body">
+            The Help center covers the same ground in a searchable, deterministic form — perfect when
+            you need a written reference at 2am.
+          </p>
+          <a
+            className="community-page__help-link"
+            href={landing('help')}
+            data-testid="community-help-link"
+          >
+            Browse the Help center →
+          </a>
+        </section>
+      </main>
+    </PageShell>
   );
 }
