@@ -28,7 +28,7 @@ function mkEvent(overrides: Partial<AnalyticsEvent> = {}): AnalyticsEvent {
     deck_id: 'deck-1',
     slide_id: 's-1',
     viewer_id_key: 'v-1',
-    session_id_key: 'sess-1',
+    session_id: 'sess-1',
     privacy_mode: 'identified',
     device_class: 'desktop',
     source_app: 'viewer',

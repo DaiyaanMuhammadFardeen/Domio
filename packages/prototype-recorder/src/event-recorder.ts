@@ -55,7 +55,6 @@ export class EventRecorder {
   private bufferBytes = 0;
   private readonly cap: number;
   private readonly flushIntervalMs: number;
-  private readonly chunked: ChunkedUploadStream;
   private timer: ReturnType<typeof setInterval> | null = null;
   private inFlight = false;
   private lastDroppedCount = 0;
@@ -72,8 +71,13 @@ export class EventRecorder {
     const fetchImpl =
       deps.fetchImpl ?? cfg.fetchImpl ?? (typeof fetch !== 'undefined' ? fetch : undefined);
     if (!fetchImpl) throw new Error('fetch is required');
-    this.chunked = new ChunkedUploadStream({ fetchImpl });
-    this.idb = cfg.useIndexedDb ? new IndexedDBQueue({ indexedDB: deps.indexedDb }) : null;
+    // Reserved for the future chunked-upload path. Construct eagerly so a
+    // missing/invalid fetchImpl is caught now rather than on first use.
+    new ChunkedUploadStream({ fetchImpl });
+    this.idb =
+      cfg.useIndexedDb && deps.indexedDb
+        ? new IndexedDBQueue({ indexedDB: deps.indexedDb })
+        : null;
   }
 
   /** Start the auto-flush timer. Idempotent. */

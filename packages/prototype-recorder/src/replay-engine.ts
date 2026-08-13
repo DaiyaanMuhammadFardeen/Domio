@@ -27,7 +27,7 @@ export class ReplayEngine {
   private pausedAt = 0;
 
   constructor(events: readonly ReplayEvent[], opts: ReplayEngineOptions = {}) {
-    this.events = [...events].sort((a, b) => a.seq - b.seq);
+    this.events = [...events].sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0));
     this.vars = new VarStore();
     this.clock = opts.clock ?? (() => Date.now());
     if (opts.initialVariables) {
@@ -86,7 +86,7 @@ export class ReplayEngine {
     const target = this.events.findIndex((e) => e.seq === seq);
     if (target < 0) {
       // snap to nearest
-      const below = this.events.filter((e) => e.seq <= seq).slice(-1)[0];
+      const below = this.events.filter((e) => (e.seq ?? 0) <= seq).slice(-1)[0];
       if (below) {
         this.cursor = this.events.indexOf(below);
       }

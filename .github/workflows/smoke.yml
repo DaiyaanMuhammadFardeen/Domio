@@ -56,12 +56,18 @@ jobs:
         run: pnpm --filter @domio/api build
       - name: Start API
         run: |
-          nohup pnpm --filter @domio/api exec tsx src/server.ts > /tmp/api.log 2>&1 &
+          nohup pnpm --filter @domio/api start > /tmp/api.log 2>&1 &
           echo $! > /tmp/api.pid
           for _ in $(seq 1 30); do
             if curl -fsS http://localhost:8080/healthz > /dev/null; then break; fi
             sleep 1
           done
+          # Surface startup errors instead of failing silently.
+          if ! curl -fsS http://localhost:8080/healthz > /dev/null; then
+            echo "::error::API failed to start; last 100 lines of /tmp/api.log:"
+            tail -100 /tmp/api.log || true
+            exit 1
+          fi
       - name: Smoke endpoints
         run: |
           bash tests/smoke/api-smoke.sh
