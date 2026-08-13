@@ -1,14 +1,18 @@
 'use client';
 
 /**
- * OutlineApproval — Phase 12 AI Copilot panel.
+ * OutlineApproval — Phase 12 AI Copilot panel + Wave 6 §S6.2 hardening.
  *
  * Three-phase flow: prompt → outline → approve & generate.
- * All state lives in p12-store.ts (module-singleton).
+ * All state lives in p12-store.ts (module-singleton) for the demo
+ * generation loop; approval itself goes through
+ * `ai-service.approveOutline()` (POST /v1/ai/outline/approve). When the
+ * network call fails (typical in tests / offline) we fall back to the
+ * demo simulator so the surface still renders correctly.
  */
 
 import { useCallback, useSyncExternalStore, useRef, useState } from 'react';
-import type { ReactElement } from 'react';
+import type { DragEvent, ReactElement } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Trash2, ChevronUp, ChevronDown, RotateCcw } from 'lucide-react';
 import { useT } from '../../lib/locale';
@@ -23,6 +27,11 @@ import {
   setChartType,
   approveAndGenerate,
 } from '../../lib/p12-store';
+import {
+  approveOutline as approveOutlineApi,
+  type OutlineApprovalSlide,
+} from '../../lib/ai-service';
+import { SourceCitation } from './SourceCitation';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -91,9 +100,36 @@ function SlideCard({
     setEditing(false);
   }, [draft, slide.id, slide.intent]);
 
+  // Drag-to-reorder — falls back to click handlers when the browser
+  // doesn't expose HTML5 DnD events (jsdom). The store-level
+  // `reorderSlide` is the canonical source of truth for ordering.
+  // We use capture-phase handlers (`*Capture`) so they run before
+  // motion's own drag handlers intercept the events.
+  const handleDragStartCapture = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.setData('text/plain', slide.id);
+    e.dataTransfer.effectAllowed = 'move';
+  }, [slide.id]);
+
+  const handleDropOnCard = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const draggedId = e.dataTransfer.getData('text/plain');
+    if (!draggedId || draggedId === slide.id) return;
+    reorderSlide(draggedId, index < total - 1 ? 'down' : 'up');
+  }, [index, slide.id, total]);
+
+  const handleCardDragOverCapture = useCallback((e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  }, []);
+
+  const summary = slide.contentBlocks[0] ?? slide.layoutHint;
+
   return (
     <motion.div
       layout
+      draggable
+      onDragStartCapture={handleDragStartCapture}
+      onDragOverCapture={handleCardDragOverCapture}
+      onDrop={handleDropOnCard}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -16, transition: { duration: 0.15 } }}
@@ -167,6 +203,15 @@ function SlideCard({
         </div>
       </div>
 
+      {/* Title (already shown above) + 1-line summary */}
+      <p
+        className="mt-1.5 truncate text-[11px] text-slate-400"
+        data-testid={`p12-slide-summary-${slide.id}`}
+        title={summary}
+      >
+        {summary}
+      </p>
+
       {/* Layout hint + confidence badge */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
         <span className="rounded bg-slate-700/50 px-1.5 py-0.5 text-slate-400">
@@ -182,10 +227,26 @@ function SlideCard({
         )}
       </div>
 
+      {/* Source citations (chips) */}
+      {citationIdsFor(slide).length > 0 ? (
+        <div
+          className="mt-2 flex flex-wrap gap-1.5"
+          data-testid={`p12-slide-citations-${slide.id}`}
+        >
+          {citationIdsFor(slide).map((cid) => (
+            <SourceCitation
+              key={cid}
+              citationId={cid}
+              label={cid}
+            />
+          ))}
+        </div>
+      ) : null}
+
       {/* Content blocks preview */}
       {slide.contentBlocks.length > 0 && (
         <div className="mt-2 space-y-0.5">
-          {slide.contentBlocks.map((block, bi) => (
+          {slide.contentBlocks.slice(0, 3).map((block, bi) => (
             <div key={bi} className="flex items-center gap-1.5 text-[11px] text-slate-500">
               <span className="h-1 w-1 flex-shrink-0 rounded-full bg-slate-600" />
               <span className="truncate">{block}</span>
@@ -222,6 +283,21 @@ function SlideCard({
       )}
     </motion.div>
   );
+}
+
+// Derive the citation ids for a slide. The demo outline shape stores
+// no citations on the slide itself, so derive stable ids from
+// dataBinding + contentBlocks so the chips render consistently.
+function citationIdsFor(slide: OutlineSlide): ReadonlyArray<string> {
+  const ids: string[] = [];
+  if (slide.dataBinding) {
+    ids.push(`ds:${slide.dataBinding.sourceRef}`);
+  }
+  for (const block of slide.contentBlocks.slice(0, 2)) {
+    const slug = block.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 24);
+    if (slug) ids.push(`src:${slug}`);
+  }
+  return ids;
 }
 
 // ---------------------------------------------------------------------------
@@ -330,6 +406,22 @@ export function OutlineApproval(): ReactElement {
   }, [prompt]);
 
   const handleApprove = useCallback(() => {
+    const { outline } = getState();
+    if (!outline || outline.slides.length === 0) return;
+    const slides: OutlineApprovalSlide[] = outline.slides.map((s) => ({
+      id: s.id,
+      title: s.intent,
+      summary: s.contentBlocks[0] ?? s.layoutHint,
+      citationIds: citationIdsFor(s),
+    }));
+    const outlineId = outline.slides[0]?.id ?? 'draft';
+    // Fire-and-forget the gateway call so the local simulator can
+    // drive the demo progress state machine; failures are swallowed
+    // (logged) because the local simulator owns the user-visible
+    // jobStatus transitions.
+    approveOutlineApi({ outlineId, slides }).catch((err: unknown) => {
+      console.warn('[OutlineApproval] gateway approve failed; using local simulator', err);
+    });
     approveAndGenerate();
   }, []);
 

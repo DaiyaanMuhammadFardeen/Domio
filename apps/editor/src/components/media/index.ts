@@ -28,3 +28,6 @@ export type { MapPickerProps, MapMarker } from './MapPicker';
 
 export { LiveAppEmbed } from './LiveAppEmbed';
 export type { LiveAppEmbedProps, LiveAppEmbedConfig } from './LiveAppEmbed';
+
+export { AIImageGenerator } from './AIImageGenerator';
+export type { AIImageGeneratorProps } from './AIImageGenerator';
