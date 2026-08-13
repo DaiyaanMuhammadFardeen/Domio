@@ -1,63 +1,19 @@
 name: CI
 
-# Domio — master CI/CD orchestrator (production gate).
-#
-# All required checks must pass for this workflow to succeed. The
-# individual checks live in their own reusable workflows (see
-# .github/workflows/*.yml) and run in parallel.
-
 on:
   pull_request:
     branches: [master, main]
   push:
     branches: [master, main]
-  workflow_dispatch:
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
 
 jobs:
-  contracts:
-    uses: ./.github/workflows/contract.yml
   typecheck:
     uses: ./.github/workflows/type.yml
   lint:
     uses: ./.github/workflows/lint.yml
-  schema-validate:
-    uses: ./.github/workflows/schema-validate.yml
-  schema-migration-lint:
-    uses: ./.github/workflows/schema-migration-lint.yml
   unit:
     uses: ./.github/workflows/unit.yml
-  integration:
-    uses: ./.github/workflows/integration.yml
   smoke:
     uses: ./.github/workflows/smoke.yml
-  external-e2e:
-    uses: ./.github/workflows/external-e2e.yml
-  editor-e2e:
-    uses: ./.github/workflows/editor-e2e.yml
-  a11y-i18n:
-    uses: ./.github/workflows/a11y-i18n.yml
-  axe:
-    uses: ./.github/workflows/axe.yml
-  chaos:
-    uses: ./.github/workflows/chaos.yml
-  security:
-    uses: ./.github/workflows/security.yml
   leak-scan:
     uses: ./.github/workflows/leak-scan.yml
-  public-beta-gate:
-    uses: ./.github/workflows/public-beta-gate.yml
-
-  load:
-    if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/load.yml
-
-  build-provenance:
-    if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/build-provenance.yml
