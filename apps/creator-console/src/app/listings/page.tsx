@@ -7,6 +7,7 @@ import { Badge, toneForListingStatus } from '../../components/Badge';
 import { useI18n } from '../../lib/i18n';
 import type { MarketplaceListing } from '../../lib/types';
 import { fetcher } from '../../lib/fetcher';
+import { creatorConsole } from '@domio/ui/routing';
 
 const API_BASE = process.env['NEXT_PUBLIC_API_BASE'] ?? 'http://localhost:8080';
 
@@ -90,7 +91,7 @@ export default function ListingsPage() {
           </p>
         </div>
         <Link
-          href="/listings/create"
+          href={creatorConsole('listings-create')}
           className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors"
         >
           <Plus className="h-4 w-4" />
@@ -116,7 +117,7 @@ export default function ListingsPage() {
           <div className="text-sm font-medium text-slate-900">{t('listings.empty')}</div>
           <p className="mt-1 text-sm text-slate-500">{t('listings.emptyHint')}</p>
           <Link
-            href="/listings/create"
+            href={creatorConsole('listings-create')}
             className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700 transition-colors"
           >
             <Plus className="h-4 w-4" />

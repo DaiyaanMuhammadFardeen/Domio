@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
+import { creatorConsole } from '@domio/ui/routing';
 
 interface NavItem {
   href: string;
@@ -11,10 +12,11 @@ interface NavItem {
 }
 
 const NAV: ReadonlyArray<NavItem> = [
-  { href: '/listings', label: 'Listings', group: 'Studio' },
-  { href: '/analytics', label: 'Analytics', group: 'Insights' },
-  { href: '/statements', label: 'Statements', group: 'Insights' },
-  { href: '/settings', label: 'Settings', group: 'Account' },
+  { href: creatorConsole('listings'), label: 'Listings', group: 'Studio' },
+  { href: creatorConsole('listings-create'), label: 'Create listing', group: 'Studio' },
+  { href: creatorConsole('analytics'), label: 'Analytics', group: 'Insights' },
+  { href: creatorConsole('statements'), label: 'Statements', group: 'Insights' },
+  { href: creatorConsole('settings'), label: 'Settings', group: 'Account' },
 ];
 
 function isActive(pathname: string, href: string): boolean {

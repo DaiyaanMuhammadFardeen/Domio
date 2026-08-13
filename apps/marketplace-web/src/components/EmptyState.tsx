@@ -1,6 +1,10 @@
 import { useLocale } from '@/hooks/useLocale';
 
-export function EmptyState() {
+interface EmptyStateProps {
+  message?: string;
+}
+
+export function EmptyState({ message }: EmptyStateProps = {}) {
   const { t } = useLocale();
 
   return (
@@ -25,7 +29,7 @@ export function EmptyState() {
         {t('empty.title')}
       </h3>
       <p className="mt-2 max-w-sm text-sm text-muted">
-        {t('empty.subtitle')}
+        {message ?? t('empty.subtitle')}
       </p>
     </div>
   );

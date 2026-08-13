@@ -493,6 +493,8 @@ const zhCN: Dict = {
 
 const dictionaries: Record<LocaleId, Dict> = {
   en, bn, es, fr, de, ja, 'zh-CN': zhCN,
+  ar: en,
+  ur: en,
 };
 
 /* ── Translation function ───────────────────────────────────────────── */

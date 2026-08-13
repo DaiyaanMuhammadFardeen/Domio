@@ -207,7 +207,7 @@ const bn: I18nDict = {
   'settings.saving': 'সংরক্ষণ হচ্ছে...',
 };
 
-const DICTS: Record<Locale, I18nDict> = { en, bn, es: en, fr: en, de: en, ja: en, 'zh-CN': en };
+const DICTS: Record<Locale, I18nDict> = { en, bn, es: en, fr: en, de: en, ja: en, 'zh-CN': en, ar: en, ur: en };
 
 export function translate(key: string, locale: Locale): string {
   return DICTS[locale]?.[key] ?? DICTS.en[key] ?? key;

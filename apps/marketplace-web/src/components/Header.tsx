@@ -12,6 +12,8 @@ const LOCALE_LABELS: Record<LocaleId, string> = {
   de: 'DE',
   ja: 'JA',
   'zh-CN': '中',
+  ar: 'عر',
+  ur: 'اردو',
 };
 
 export function Header() {

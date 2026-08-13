@@ -1,44 +1,43 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useLocale } from '@/hooks/useLocale';
+import { getMarketplaceListing, listMarketplaceReviews, getMarketplaceListingChangelog } from '@/lib/api';
+import { marketplaceWeb } from '@domio/ui/routing';
 import {
-  getMarketplaceListing,
-  listMarketplaceReviews,
-  getMarketplaceListingChangelog,
-  listMarketplaceListings,
-} from '@/lib/api';
+  getRelatedListings,
+  toCardVM,
+} from '@/lib/search-service';
 import type {
   MarketplaceListing,
   Review,
   ChangelogEntry,
-  ListingCardVM,
   ListingKind,
+  ListingCardVM,
 } from '@/lib/types';
-import { PurchaseButton } from '@/components/PurchaseButton';
 import { ReviewsList } from '@/components/ReviewsList';
 import { ChangelogTimeline } from '@/components/ChangelogTimeline';
-import { RelatedListings } from '@/components/RelatedListings';
+import { ListingCard } from '@/components/ListingCard';
 import { ListingDetailSkeleton } from '@/components/LoadingSkeletons';
 import { NotFoundState, ErrorState } from '@/components/EmptyState';
-
-function formatDate(ms: number): string {
-  return new Date(ms).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
 
 interface ListingPageProps {
   params: Promise<{ slug: string }>;
 }
 
+const KIND_TAG: Record<string, string> = {
+  component: 'Component',
+  template: 'Template',
+  theme: 'Theme',
+  sticker_pack: 'Sticker Pack',
+  icon_pack: 'Icon Pack',
+};
+
 export default function ListingPage({ params }: ListingPageProps) {
   const { slug } = use(params);
-  const searchParams = useSearchParams();
+  const router = useRouter();
   const { t, formatPrice } = useLocale();
 
   const [listing, setListing] = useState<MarketplaceListing | null>(null);
@@ -50,95 +49,56 @@ export default function ListingPage({ params }: ListingPageProps) {
   const [error, setError] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
-  const purchaseStatus = searchParams.get('purchase');
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(false);
-    setNotFound(false);
-
-    try {
-      // The slug in our URL maps to listing_id — try fetching by id
-      const listingData = await getMarketplaceListing(slug);
-      setListing(listingData);
-
-      // Fetch reviews, changelog, and related in parallel
-      const [reviewsRes, changelogData, relatedRes] = await Promise.allSettled([
-        listMarketplaceReviews(listingData.id),
-        getMarketplaceListingChangelog(listingData.id),
-        listMarketplaceListings({ status: 'published' }),
-      ]);
-
-      if (reviewsRes.status === 'fulfilled') {
-        setReviews(reviewsRes.value.items);
-        setReviewsTotal(reviewsRes.value.total);
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchData() {
+      setLoading(true);
+      setError(false);
+      setNotFound(false);
+      try {
+        const data = await getMarketplaceListing(slug);
+        if (cancelled) return;
+        setListing(data);
+        const [rv, cl, rl] = await Promise.allSettled([
+          listMarketplaceReviews(data.id),
+          getMarketplaceListingChangelog(data.id),
+          getRelatedListings(data.id),
+        ]);
+        if (cancelled) return;
+        if (rv.status === 'fulfilled') {
+          setReviews(rv.value.items);
+          setReviewsTotal(rv.value.total);
+        }
+        if (cl.status === 'fulfilled') setChangelog(cl.value);
+        if (rl.status === 'fulfilled') setRelated(rl.value);
+      } catch {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-
-      if (changelogData.status === 'fulfilled') {
-        setChangelog(changelogData.value);
-      }
-
-      if (relatedRes.status === 'fulfilled') {
-        const vms = relatedRes.value.items
-          .filter((l) => l.id !== listingData.id)
-          .slice(0, 3)
-          .map((l): ListingCardVM => ({
-            id: l.id,
-            slug: l.id,
-            title: l.title,
-            kind: 'component' as ListingKind,
-            price_cents: l.price_cents,
-            currency: l.currency,
-            is_free: l.is_free,
-            price_model: 'one_time',
-            creator_name: l.seller_id,
-            rating_avg: 0,
-            rating_count: 0,
-            download_count: 0,
-            poster_url: l.preview?.poster_ref,
-            tags: l.tags ?? [],
-            created_at: l.created_at,
-          }));
-        setRelated(vms);
-      }
-    } catch (err) {
-      const isNotFound = err instanceof Error && 'body' in err
-        ? (err as { body: { status: number } }).body?.status === 404
-        : false;
-      if (isNotFound) {
-        setNotFound(true);
-      } else {
-        setError(true);
-      }
-    } finally {
-      setLoading(false);
     }
+    void fetchData();
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  if (loading) return <ListingDetailSkeleton />;
 
-  // Loading
-  if (loading) {
-    return <ListingDetailSkeleton />;
-  }
-
-  // Error
   if (error) {
-    return <ErrorState onRetry={fetchData} />;
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-12">
+        <ErrorState onRetry={() => window.location.reload()} />
+      </div>
+    );
   }
 
-  // Not found
   if (notFound || !listing) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-12">
         <NotFoundState />
         <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="text-sm text-accent hover:underline"
-          >
+          <Link href={marketplaceWeb('home')} className="text-sm text-accent hover:underline">
             {t('detail.backToBrowse')}
           </Link>
         </div>
@@ -147,25 +107,15 @@ export default function ListingPage({ params }: ListingPageProps) {
   }
 
   const priceText = formatPrice(listing.price_cents, listing.currency, listing.is_free);
+  const kind: ListingKind =
+    (listing.tags?.find((tag) => tag === 'component' || tag === 'template' || tag === 'theme' || tag === 'sticker_pack' || tag === 'icon_pack') as ListingKind) ??
+    'component';
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
-      {/* Purchase success/failed banner */}
-      {purchaseStatus === 'success' && (
-        <div className="mb-8 rounded-xl bg-success/8 p-4 text-center animate-fade-in" role="status">
-          <p className="text-sm font-medium text-success">{t('checkout.success')}</p>
-        </div>
-      )}
-      {purchaseStatus === 'cancelled' && (
-        <div className="mb-8 rounded-xl bg-error/8 p-4 text-center animate-fade-in" role="alert">
-          <p className="text-sm text-error">{t('checkout.failed')}</p>
-        </div>
-      )}
-
-      {/* Back link */}
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8" data-testid="listing-page">
       <nav className="mb-8" aria-label="Breadcrumb">
         <Link
-          href="/"
+          href={marketplaceWeb('home')}
           className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-fg"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -175,12 +125,10 @@ export default function ListingPage({ params }: ListingPageProps) {
         </Link>
       </nav>
 
-      {/* Main grid */}
-      <div className="grid gap-8 lg:grid-cols-[1fr,360px]">
-        {/* Left: preview + details */}
-        <div className="space-y-8">
-          {/* Preview hero */}
-          <div className="aspect-video w-full overflow-hidden rounded-2xl bg-surface border border-border">
+      <div className="grid gap-8 lg:grid-cols-[1.1fr,1.4fr,360px]">
+        {/* Left: poster + gallery + video */}
+        <div className="space-y-4" data-testid="listing-preview">
+          <div className="aspect-square overflow-hidden rounded-2xl border border-border bg-surface">
             {listing.preview?.poster_ref ? (
               <img
                 src={listing.preview.poster_ref}
@@ -189,106 +137,142 @@ export default function ListingPage({ params }: ListingPageProps) {
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
-                <svg className="h-16 w-16 text-border" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <span className="font-display text-3xl font-bold text-muted">
+                  {listing.title.slice(0, 2).toUpperCase()}
+                </span>
               </div>
             )}
           </div>
 
-          {/* Description */}
-          {listing.description && (
-            <section>
-              <h2 className="mb-3 font-display text-base font-semibold text-fg">
-                {t('detail.about')}
-              </h2>
-              <p className="text-sm leading-relaxed text-fg/70">
-                {listing.description}
-              </p>
-            </section>
-          )}
+          <div className="grid grid-cols-4 gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="aspect-square rounded-lg border border-border bg-surface"
+                aria-hidden="true"
+              />
+            ))}
+          </div>
 
-          {/* Reviews */}
-          <section>
-            <ReviewsList reviews={reviews} total={reviewsTotal} />
-          </section>
-
-          {/* Changelog */}
-          <section>
-            <ChangelogTimeline entries={changelog} />
-          </section>
+          <div className="aspect-video rounded-2xl border border-border bg-surface flex items-center justify-center">
+            <span className="text-xs text-muted">▶ Video preview</span>
+          </div>
         </div>
 
-        {/* Right: purchase sidebar */}
-        <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          {/* Title + meta */}
+        {/* Middle: title, description, tags, changelog, reviews */}
+        <div className="space-y-8">
           <div>
-            <h1 className="font-display text-2xl font-bold text-fg sm:text-3xl">
+            <span className="mb-2 inline-block rounded-md bg-panel px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted">
+              {KIND_TAG[kind] ?? kind}
+            </span>
+            <h1 className="font-display text-3xl font-bold text-fg" data-testid="listing-title">
               {listing.title}
             </h1>
             <p className="mt-2 text-sm text-muted">
-              {listing.seller_id}
+              {t('market.listing.published')}{' '}
+              {listing.published_at_ms
+                ? new Date(listing.published_at_ms).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })
+                : '—'}
             </p>
           </div>
 
-          {/* Stats row */}
-          <div className="flex items-center gap-4 text-xs text-muted">
-            {listing.version && (
-              <span className="flex items-center gap-1">
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-                {t('detail.version')} {listing.version}
-              </span>
-            )}
-            {listing.published_at_ms && (
-              <span>
-                {t('detail.lastUpdated')} {formatDate(listing.published_at_ms)}
-              </span>
-            )}
-          </div>
+          {listing.description && (
+            <section>
+              <p className="text-sm leading-relaxed text-fg/80">{listing.description}</p>
+            </section>
+          )}
 
-          {/* Tags */}
           {listing.tags && listing.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {listing.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-md bg-panel px-2 py-1 text-[11px] font-medium text-muted"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            <section>
+              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">
+                Tags
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {listing.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-md bg-panel px-2 py-1 text-[11px] font-medium text-muted"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </section>
           )}
 
-          {/* Divider */}
-          <hr className="border-border" />
+          <section data-testid="listing-changelog">
+            <ChangelogTimeline entries={changelog} />
+          </section>
 
-          {/* Purchase CTA */}
-          <PurchaseButton
-            listingId={listing.id}
-            priceCents={listing.price_cents}
-            currency={listing.currency}
-            isFree={listing.is_free}
-            slug={slug}
-          />
-
-          {/* Price detail (for paid items) */}
-          {!listing.is_free && listing.price_cents > 0 && (
-            <div className="rounded-xl bg-surface p-4 text-center">
-              <p className="text-2xl font-bold font-display text-fg">{priceText}</p>
-              <p className="mt-1 text-xs text-muted">{t('detail.license')}</p>
-            </div>
-          )}
+          <section data-testid="listing-reviews">
+            <ReviewsList reviews={reviews} total={reviewsTotal} />
+          </section>
         </div>
+
+        {/* Right: pricing card */}
+        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-2xl border border-border bg-panel p-6">
+            <div className="mb-4">
+              <p className="text-xs uppercase tracking-wider text-muted">
+                {t('market.listing.version')} {listing.version}
+              </p>
+              <p
+                className={`mt-2 font-display text-3xl font-bold ${
+                  listing.is_free ? 'text-success' : 'text-fg'
+                }`}
+                data-testid="listing-price"
+              >
+                {priceText}
+              </p>
+            </div>
+
+            {listing.is_free ? (
+              <button
+                type="button"
+                data-testid="listing-cta"
+                onClick={() => router.push(marketplaceWeb('library'))}
+                className="w-full rounded-xl bg-accent py-3.5 text-sm font-semibold text-white transition-all hover:opacity-90"
+              >
+                {t('market.listing.addToLibrary')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                data-testid="listing-cta"
+                onClick={() =>
+                  router.push(marketplaceWeb('checkout', { listing: listing.id }))
+                }
+                className="w-full rounded-xl bg-accent py-3.5 text-sm font-semibold text-white transition-all hover:opacity-90"
+              >
+                {t('market.listing.buyNow')}
+              </button>
+            )}
+
+            <p className="mt-3 text-center text-[11px] text-muted">
+              {t('market.listing.installed')}
+            </p>
+          </div>
+        </aside>
       </div>
 
-      {/* Related listings */}
       {related.length > 0 && (
-        <div className="mt-16 border-t border-border pt-12">
-          <RelatedListings listings={related} />
-        </div>
+        <section
+          className="mt-16 border-t border-border pt-12"
+          data-testid="listing-related"
+        >
+          <h2 className="mb-6 font-display text-2xl font-bold text-fg">
+            {t('market.listing.related')}
+          </h2>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {related.map((l) => (
+              <ListingCard key={l.id} listing={l} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );
