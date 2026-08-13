@@ -20,18 +20,27 @@
       "properties": {
         "x": { "type": "string", "description": "Category / x dimension column." },
         "y": { "type": "string", "description": "Measure / y value column." },
-        "series": { "type": "string", "description": "Series-grouping column (multi-series charts)." },
+        "series": {
+          "type": "string",
+          "description": "Series-grouping column (multi-series charts)."
+        },
         "size": { "type": "string", "description": "Bubble size column (scatter)." },
         "color": { "type": "string", "description": "Color-coded category column." },
         "source": { "type": "string", "description": "Sankey source node column." },
         "target": { "type": "string", "description": "Sankey target node column." },
-        "value": { "type": "string", "description": "Sankey / treemap / funnel / waterfall value column." },
+        "value": {
+          "type": "string",
+          "description": "Sankey / treemap / funnel / waterfall value column."
+        },
         "open": { "type": "string", "description": "Candlestick open column." },
         "high": { "type": "string", "description": "Candlestick high column." },
         "low": { "type": "string", "description": "Candlestick low column." },
         "close": { "type": "string", "description": "Candlestick close column." },
         "volume": { "type": "string", "description": "Candlestick volume column." },
-        "label": { "type": "string", "description": "Dimension column rendered as a label (pie/treemap/gauge/radar)." },
+        "label": {
+          "type": "string",
+          "description": "Dimension column rendered as a label (pie/treemap/gauge/radar)."
+        },
         "measure": { "type": "string", "description": "Bullet chart actual-value column." },
         "target_value": { "type": "string", "description": "Bullet chart target column." }
       }
@@ -56,8 +65,20 @@
     "ChartType": {
       "type": "string",
       "enum": [
-        "bar", "line", "area", "pie", "scatter", "funnel", "sankey",
-        "treemap", "heatmap", "waterfall", "gauge", "radar", "candlestick", "bullet"
+        "bar",
+        "line",
+        "area",
+        "pie",
+        "scatter",
+        "funnel",
+        "sankey",
+        "treemap",
+        "heatmap",
+        "waterfall",
+        "gauge",
+        "radar",
+        "candlestick",
+        "bullet"
       ]
     },
     "FreshnessPolicy": {

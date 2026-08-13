@@ -352,7 +352,9 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
  * Falls back to `DEFAULT_BRAND_KITS` on network failure so the panel
  * always has something to render.
  */
-export async function fetchBrandKits(baseUrl: string = DEFAULT_API_BASE): Promise<ReadonlyArray<BrandKitDetail>> {
+export async function fetchBrandKits(
+  baseUrl: string = DEFAULT_API_BASE,
+): Promise<ReadonlyArray<BrandKitDetail>> {
   try {
     const remote = await getJson<ReadonlyArray<BrandKitDetail>>(`${baseUrl}/v1/brand/kits`);
     if (Array.isArray(remote) && remote.length > 0) return remote;
@@ -392,7 +394,9 @@ export async function fetchTheme(
 /**
  * List themes with full token detail.
  */
-export async function fetchThemes(baseUrl: string = DEFAULT_API_BASE): Promise<ReadonlyArray<ThemeDetail>> {
+export async function fetchThemes(
+  baseUrl: string = DEFAULT_API_BASE,
+): Promise<ReadonlyArray<ThemeDetail>> {
   try {
     const remote = await getJson<ReadonlyArray<ThemeDetail>>(`${baseUrl}/v1/theme`);
     if (Array.isArray(remote) && remote.length > 0) return remote;
@@ -462,7 +466,9 @@ export async function generateDarkTheme(
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<ThemeDetail> {
   try {
-    return await postJson<ThemeDetail>(`${baseUrl}/v1/theme/generate-dark`, { themeId: sourceThemeId });
+    return await postJson<ThemeDetail>(`${baseUrl}/v1/theme/generate-dark`, {
+      themeId: sourceThemeId,
+    });
   } catch {
     // Bootstrap fallback — derive dark from light by inverting fg/bg.
     const source = DEFAULT_THEMES.find((t) => t.id === sourceThemeId) ?? DEFAULT_THEMES[0]!;
@@ -494,7 +500,12 @@ export async function generateDarkTheme(
  */
 export async function lintStyle(
   brandKitId: string,
-  elements: ReadonlyArray<{ readonly id: string; readonly name: string; readonly fill?: string | undefined; readonly fontFamily?: string | undefined }>,
+  elements: ReadonlyArray<{
+    readonly id: string;
+    readonly name: string;
+    readonly fill?: string | undefined;
+    readonly fontFamily?: string | undefined;
+  }>,
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<LintReport> {
   try {

@@ -163,7 +163,9 @@ describe('OverviewGrid', () => {
   });
 
   it('renders one button per slide when open', () => {
-    render(<OverviewGrid deck={deck} currentIdx={0} open={true} onClose={vi.fn()} onPick={vi.fn()} />);
+    render(
+      <OverviewGrid deck={deck} currentIdx={0} open={true} onClose={vi.fn()} onPick={vi.fn()} />,
+    );
     const grid = screen.getByTestId('overview-grid-grid');
     const buttons = grid.querySelectorAll('button[data-testid^="overview-grid-slide-"]');
     expect(buttons.length).toBe(deck.slides.length);
@@ -172,7 +174,9 @@ describe('OverviewGrid', () => {
   it('emits onPick and onClose when a slide is clicked', () => {
     const onPick = vi.fn();
     const onClose = vi.fn();
-    render(<OverviewGrid deck={deck} currentIdx={0} open={true} onClose={onClose} onPick={onPick} />);
+    render(
+      <OverviewGrid deck={deck} currentIdx={0} open={true} onClose={onClose} onPick={onPick} />,
+    );
     fireEvent.click(screen.getByTestId('overview-grid-slide-0'));
     expect(onPick).toHaveBeenCalledWith(0);
     expect(onClose).toHaveBeenCalled();

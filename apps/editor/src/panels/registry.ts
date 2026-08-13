@@ -52,13 +52,7 @@ import { CopilotHubEntry } from './copilot-panel';
  * Panel groups — used to organize the chrome (e.g. vertical separators
  * in the rail). Stable ordering; lower index = rendered earlier.
  */
-export type EditorPanelGroup =
-  | 'core'
-  | 'data'
-  | 'interaction'
-  | 'audience'
-  | 'agentic'
-  | 'ai';
+export type EditorPanelGroup = 'core' | 'data' | 'interaction' | 'audience' | 'agentic' | 'ai';
 
 const REGISTRY = createPanelRegistry<EditorLeftTab, EditorPanelGroup, EditorPanelContext>();
 

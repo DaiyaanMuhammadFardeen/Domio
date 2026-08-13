@@ -26,41 +26,41 @@ These streams share contracts (e.g., `theme.proto` is consumed by Streams A, B, 
 
 Each stream owns a durable capability end-to-end (see `/docs/10-project-team-planning.md` §10.0.1). When work crosses capability boundaries, the **owner of the destination capability has the final say** on the contract. The crossing stream proposes, the owning stream ratifies.
 
-| Capability | Owner stream |
-|---|---|
-| Deck schema, scene graph, canvas | (foundation, P00–P05; thereafter shared by all streams) |
-| Components & templates registry | A |
-| Theming & brand | A |
-| Marketplace billing & payouts | A |
-| Live data & charts | B |
-| Animation & transitions | B |
-| Prototyping & interactivity | C |
-| 3D, motion, rich media | C |
-| AI copilot | D |
-| Agentic interfaces (MCP, deck-as-code) | D |
-| Sharing, publishing, deck-as-website | E |
-| Presenter experience | E |
-| Audience participation | E |
-| Analytics & engagement intelligence | F |
-| Collaboration & workflow | F |
-| Security, governance, enterprise | (cross-cutting) |
-| Identity & tenancy | (cross-cutting) |
-| Platform infrastructure (gateway, workers, storage) | (cross-cutting) |
+| Capability                                          | Owner stream                                            |
+| --------------------------------------------------- | ------------------------------------------------------- |
+| Deck schema, scene graph, canvas                    | (foundation, P00–P05; thereafter shared by all streams) |
+| Components & templates registry                     | A                                                       |
+| Theming & brand                                     | A                                                       |
+| Marketplace billing & payouts                       | A                                                       |
+| Live data & charts                                  | B                                                       |
+| Animation & transitions                             | B                                                       |
+| Prototyping & interactivity                         | C                                                       |
+| 3D, motion, rich media                              | C                                                       |
+| AI copilot                                          | D                                                       |
+| Agentic interfaces (MCP, deck-as-code)              | D                                                       |
+| Sharing, publishing, deck-as-website                | E                                                       |
+| Presenter experience                                | E                                                       |
+| Audience participation                              | E                                                       |
+| Analytics & engagement intelligence                 | F                                                       |
+| Collaboration & workflow                            | F                                                       |
+| Security, governance, enterprise                    | (cross-cutting)                                         |
+| Identity & tenancy                                  | (cross-cutting)                                         |
+| Platform infrastructure (gateway, workers, storage) | (cross-cutting)                                         |
 
 ### 2.2 Shared seams
 
 Streams do not share source code. Streams share **contracts**. The seams between streams are exclusively:
 
-| Seam | Form | Owner | Consumers |
-|---|---|---|---|
-| Deck schema | Protobuf + JSON Schema | Foundation | All streams |
-| Token registry | `theme-service` gRPC + REST | A | All streams (every render resolves tokens) |
-| Component registry | `registry-service` gRPC + REST | A | All streams (charts use smart components; presenter reads props) |
-| Live data / query gateway | `data-service` gRPC + REST | B | E (presenter reads scenario values), F (analytics consumes events) |
-| MCP tool surface | Protobuf + JSON-RPC | D | External agents + internal automation |
-| Sharing / export jobs | `publish-service` gRPC + REST | E | F (analytics on published decks), A (marketplace listings), P20 (DLP) |
-| Analytics events | `analytics-service` ingest (OTel) | F | All streams emit; F consumes + projects |
-| Audit events | `audit-service` append-only log | P20 | All streams emit; P20 consumes + projects |
+| Seam                      | Form                              | Owner      | Consumers                                                             |
+| ------------------------- | --------------------------------- | ---------- | --------------------------------------------------------------------- |
+| Deck schema               | Protobuf + JSON Schema            | Foundation | All streams                                                           |
+| Token registry            | `theme-service` gRPC + REST       | A          | All streams (every render resolves tokens)                            |
+| Component registry        | `registry-service` gRPC + REST    | A          | All streams (charts use smart components; presenter reads props)      |
+| Live data / query gateway | `data-service` gRPC + REST        | B          | E (presenter reads scenario values), F (analytics consumes events)    |
+| MCP tool surface          | Protobuf + JSON-RPC               | D          | External agents + internal automation                                 |
+| Sharing / export jobs     | `publish-service` gRPC + REST     | E          | F (analytics on published decks), A (marketplace listings), P20 (DLP) |
+| Analytics events          | `analytics-service` ingest (OTel) | F          | All streams emit; F consumes + projects                               |
+| Audit events              | `audit-service` append-only log   | P20        | All streams emit; P20 consumes + projects                             |
 
 No stream imports another stream's source code. Every cross-stream call goes through one of the seams above. (See ADR-ARCH-10 in `/docs/04-system-architecture.md`.)
 
@@ -125,16 +125,16 @@ No stream imports another stream's source code. Every cross-stream call goes thr
 
 ## 4. Cross-stream coordination rituals
 
-| Ritual | Frequency | Attendees | Purpose |
-|---|---|---|---|
-| Stream demo | Weekly (Wed 14:00) | All stream leads + architecture council | Surface cross-stream blockers; demo progress |
-| Architecture Council | Weekly (Thu 10:00) | Principal architect + affected leads + security/SRE | ADR review; system health |
-| Cross-stream sync | Bi-weekly (Mon 11:00) | Stream leads | Coordinate on shared contracts and shared infra capacity |
-| Security review | Per phase | Stream lead + security lead | Sign off on phase security gate |
-| Demo Friday | Bi-weekly (Fri 15:00) | All engineers + product | Cross-team showcase; informal feedback |
-| Design-partner demo | Per phase milestone | Stream lead + product + design partner | Validate in front of customer |
-| Post-incident review | Per incident | Incident commander + affected stream leads | Root-cause; action items; runbook update |
-| Capacity review | Monthly | Platform team + stream leads | Provisioning, cost, SLO budget |
+| Ritual               | Frequency             | Attendees                                           | Purpose                                                  |
+| -------------------- | --------------------- | --------------------------------------------------- | -------------------------------------------------------- |
+| Stream demo          | Weekly (Wed 14:00)    | All stream leads + architecture council             | Surface cross-stream blockers; demo progress             |
+| Architecture Council | Weekly (Thu 10:00)    | Principal architect + affected leads + security/SRE | ADR review; system health                                |
+| Cross-stream sync    | Bi-weekly (Mon 11:00) | Stream leads                                        | Coordinate on shared contracts and shared infra capacity |
+| Security review      | Per phase             | Stream lead + security lead                         | Sign off on phase security gate                          |
+| Demo Friday          | Bi-weekly (Fri 15:00) | All engineers + product                             | Cross-team showcase; informal feedback                   |
+| Design-partner demo  | Per phase milestone   | Stream lead + product + design partner              | Validate in front of customer                            |
+| Post-incident review | Per incident          | Incident commander + affected stream leads          | Root-cause; action items; runbook update                 |
+| Capacity review      | Monthly               | Platform team + stream leads                        | Provisioning, cost, SLO budget                           |
 
 ---
 
@@ -154,12 +154,12 @@ Stream pairs interact in one of four patterns. Pick the right one early.
 
 ### 5.2 Choosing the pattern
 
-| Scenario | Pattern |
-|---|---|
-| Stream B wants to react when Stream A's state changes | 1 (Consumer-Producer) |
-| Stream B wants to call Stream A synchronously | 3 (Service-Call) |
-| Stream B wants Stream A's types in its own contract | 2 (Contract-Reference) |
-| Stream B and Stream A jointly own a feature | 4 (Shared-Worktree) |
+| Scenario                                              | Pattern                |
+| ----------------------------------------------------- | ---------------------- |
+| Stream B wants to react when Stream A's state changes | 1 (Consumer-Producer)  |
+| Stream B wants to call Stream A synchronously         | 3 (Service-Call)       |
+| Stream B wants Stream A's types in its own contract   | 2 (Contract-Reference) |
+| Stream B and Stream A jointly own a feature           | 4 (Shared-Worktree)    |
 
 Pattern 4 is the heaviest; reserve it for cases where 1–3 genuinely cannot work. Most cross-stream work falls into Pattern 1 or 2.
 
@@ -169,12 +169,12 @@ Pattern 4 is the heaviest; reserve it for cases where 1–3 genuinely cannot wor
 
 When a feature or contract has two streams asking for it, use this matrix:
 
-| Question | If yes | If no |
-|---|---|---|
-| Is the artifact rendered or stored in a capability we own? | We own it | Next question |
-| Does the artifact's primary API consumer belong to our stream? | We own it | Next question |
-| Does the artifact exist already in another stream's seam? | That stream owns it; we consume | Next question |
-| Is it cross-cutting (security, audit, tenancy)? | Cross-cutting owns it | **Architecture Council decides** |
+| Question                                                       | If yes                          | If no                            |
+| -------------------------------------------------------------- | ------------------------------- | -------------------------------- |
+| Is the artifact rendered or stored in a capability we own?     | We own it                       | Next question                    |
+| Does the artifact's primary API consumer belong to our stream? | We own it                       | Next question                    |
+| Does the artifact exist already in another stream's seam?      | That stream owns it; we consume | Next question                    |
+| Is it cross-cutting (security, audit, tenancy)?                | Cross-cutting owns it           | **Architecture Council decides** |
 
 If the matrix returns "Architecture Council decides," open an ADR with the two competing proposals. The Council picks within 1 week.
 
@@ -307,17 +307,17 @@ When a phase ends and downstream phases start:
 
 ## 10. Anti-patterns
 
-| Anti-pattern | Why it's bad | What to do instead |
-|---|---|---|
-| Two streams jointly edit the same `*.proto` file | Merge conflicts; ownership confusion | One stream owns the seam; consumers propose additions via PR |
-| Stream B reaches into Stream A's database directly | Coupling; brittle; bypasses seam | Use the seam (gRPC, REST, event) |
-| Stream B forks a shared component to add a feature | Drift; upstream can't patch you | Add the feature to the shared component via PR |
-| Stream A ships a feature without consulting Stream B's contract | Breaking change downstream | 24-hour review window in `#domio-contracts` |
-| Stream E demos without Stream F's analytics | Stakeholders can't measure success | F co-presents analytics for every E demo |
-| Stream C uses a vendor SDK not approved by Stream D's AI eval | Compliance gap | Vendor SDKs go through the same review as model APIs |
-| Stream D ships an MCP tool without Stream P20's audit hook | Agents operate outside the audit trail | P20 reviews every agent surface |
-| Stream A ships a marketplace listing without Stream P19's payout flow | Revenue flows without governance | Marketplace listings gate on payout wiring |
-| Streams fight in PR comments | Slow; demoralizing | Escalate to stream leads per §8 |
+| Anti-pattern                                                          | Why it's bad                           | What to do instead                                           |
+| --------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| Two streams jointly edit the same `*.proto` file                      | Merge conflicts; ownership confusion   | One stream owns the seam; consumers propose additions via PR |
+| Stream B reaches into Stream A's database directly                    | Coupling; brittle; bypasses seam       | Use the seam (gRPC, REST, event)                             |
+| Stream B forks a shared component to add a feature                    | Drift; upstream can't patch you        | Add the feature to the shared component via PR               |
+| Stream A ships a feature without consulting Stream B's contract       | Breaking change downstream             | 24-hour review window in `#domio-contracts`                  |
+| Stream E demos without Stream F's analytics                           | Stakeholders can't measure success     | F co-presents analytics for every E demo                     |
+| Stream C uses a vendor SDK not approved by Stream D's AI eval         | Compliance gap                         | Vendor SDKs go through the same review as model APIs         |
+| Stream D ships an MCP tool without Stream P20's audit hook            | Agents operate outside the audit trail | P20 reviews every agent surface                              |
+| Stream A ships a marketplace listing without Stream P19's payout flow | Revenue flows without governance       | Marketplace listings gate on payout wiring                   |
+| Streams fight in PR comments                                          | Slow; demoralizing                     | Escalate to stream leads per §8                              |
 
 ---
 

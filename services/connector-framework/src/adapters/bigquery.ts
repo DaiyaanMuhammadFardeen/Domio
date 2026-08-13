@@ -42,22 +42,27 @@ export class BigQueryAdapter implements ConnectorAdapter {
 
   async ping(ctx: AdapterContext): Promise<{ ok: boolean; latency_ms: number }> {
     const t0 = Date.now();
-    await ctx.transport.request({ method: 'GET', url: 'https://bigquery.googleapis.com/bigquery/v2/projects/fixture-project/datasets' });
+    await ctx.transport.request({
+      method: 'GET',
+      url: 'https://bigquery.googleapis.com/bigquery/v2/projects/fixture-project/datasets',
+    });
     return { ok: true, latency_ms: Date.now() - t0 };
   }
 
   async discover(_ctx: AdapterContext, _spec: DiscoverSpec): Promise<DiscoverResult> {
     return {
-      tables: [{
-        name: 'project.dataset.events',
-        columns: [
-          { name: 'event_id', type: 'string', semantic_role: 'id' },
-          { name: 'event_type', type: 'string', semantic_role: 'dimension' },
-          { name: 'timestamp', type: 'date', semantic_role: 'date' },
-          { name: 'value', type: 'number', semantic_role: 'measure' },
-        ],
-        row_count_estimate: 10000,
-      }],
+      tables: [
+        {
+          name: 'project.dataset.events',
+          columns: [
+            { name: 'event_id', type: 'string', semantic_role: 'id' },
+            { name: 'event_type', type: 'string', semantic_role: 'dimension' },
+            { name: 'timestamp', type: 'date', semantic_role: 'date' },
+            { name: 'value', type: 'number', semantic_role: 'measure' },
+          ],
+          row_count_estimate: 10000,
+        },
+      ],
     };
   }
 

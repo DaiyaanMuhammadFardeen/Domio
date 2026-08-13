@@ -22,9 +22,15 @@ beforeEach(() => {
   Object.defineProperty(globalThis, 'localStorage', {
     value: {
       getItem: (key: string) => store.get(key) ?? null,
-      setItem: (key: string, value: string) => { store.set(key, value); },
-      removeItem: (key: string) => { store.delete(key); },
-      clear: () => { store.clear(); },
+      setItem: (key: string, value: string) => {
+        store.set(key, value);
+      },
+      removeItem: (key: string) => {
+        store.delete(key);
+      },
+      clear: () => {
+        store.clear();
+      },
     },
     writable: true,
     configurable: true,
@@ -45,7 +51,14 @@ describe('team-library-service', () => {
 
   it('listLibraryEntries returns the remote payload when reachable', async () => {
     const remote = [
-      { catalogId: 'c-1', name: 'Foo', version: '1.0.0', scope: 'team', brandLocked: true, publishedAtMs: 0 },
+      {
+        catalogId: 'c-1',
+        name: 'Foo',
+        version: '1.0.0',
+        scope: 'team',
+        brandLocked: true,
+        publishedAtMs: 0,
+      },
     ];
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -57,9 +70,19 @@ describe('team-library-service', () => {
 
   it('listLibraryEntries falls back to localStorage entries for personal scope', async () => {
     globalThis.fetch = vi.fn().mockRejectedValue(new Error('offline')) as unknown as typeof fetch;
-    localStorage.setItem('domio.my-library', JSON.stringify([
-      { catalogId: 'c-1', name: 'Foo', version: '1.0.0', pinMode: 'track', pinValue: '', addedAt: 1000 },
-    ]));
+    localStorage.setItem(
+      'domio.my-library',
+      JSON.stringify([
+        {
+          catalogId: 'c-1',
+          name: 'Foo',
+          version: '1.0.0',
+          pinMode: 'track',
+          pinValue: '',
+          addedAt: 1000,
+        },
+      ]),
+    );
     const entries = await listLibraryEntries('personal');
     expect(entries.length).toBe(1);
     expect(entries[0]?.catalogId).toBe('c-1');
@@ -68,9 +91,19 @@ describe('team-library-service', () => {
 
   it('listLibraryEntries respects the brand-lock list when mapping local entries', async () => {
     globalThis.fetch = vi.fn().mockRejectedValue(new Error('offline')) as unknown as typeof fetch;
-    localStorage.setItem('domio.my-library', JSON.stringify([
-      { catalogId: 'c-locked', name: 'Locked', version: '1.0.0', pinMode: 'track', pinValue: '', addedAt: 0 },
-    ]));
+    localStorage.setItem(
+      'domio.my-library',
+      JSON.stringify([
+        {
+          catalogId: 'c-locked',
+          name: 'Locked',
+          version: '1.0.0',
+          pinMode: 'track',
+          pinValue: '',
+          addedAt: 0,
+        },
+      ]),
+    );
     localStorage.setItem('domio.brand-lock', JSON.stringify(['c-locked']));
     const entries = await listLibraryEntries('personal');
     expect(entries[0]?.brandLocked).toBe(true);
@@ -139,9 +172,19 @@ describe('team-library-service', () => {
       ok: true,
       json: async () => ({ ok: true }),
     }) as unknown as typeof fetch;
-    localStorage.setItem('domio.my-library', JSON.stringify([
-      { catalogId: 'c-bump', name: 'Foo', version: '1.0.0', pinMode: 'track', pinValue: '', addedAt: 0 },
-    ]));
+    localStorage.setItem(
+      'domio.my-library',
+      JSON.stringify([
+        {
+          catalogId: 'c-bump',
+          name: 'Foo',
+          version: '1.0.0',
+          pinMode: 'track',
+          pinValue: '',
+          addedAt: 0,
+        },
+      ]),
+    );
     await updateLibraryVersion('c-bump', '2.0.0');
     const raw = localStorage.getItem('domio.my-library') ?? '[]';
     const arr = JSON.parse(raw) as Array<{ catalogId: string; version: string }>;
@@ -153,9 +196,19 @@ describe('team-library-service', () => {
       ok: true,
       json: async () => ({ ok: true }),
     }) as unknown as typeof fetch;
-    localStorage.setItem('domio.my-library', JSON.stringify([
-      { catalogId: 'c-rm', name: 'Foo', version: '1.0.0', pinMode: 'track', pinValue: '', addedAt: 0 },
-    ]));
+    localStorage.setItem(
+      'domio.my-library',
+      JSON.stringify([
+        {
+          catalogId: 'c-rm',
+          name: 'Foo',
+          version: '1.0.0',
+          pinMode: 'track',
+          pinValue: '',
+          addedAt: 0,
+        },
+      ]),
+    );
     await removeFromLibraryService('c-rm');
     const raw = localStorage.getItem('domio.my-library') ?? '[]';
     const arr = JSON.parse(raw) as Array<{ catalogId: string }>;
@@ -165,7 +218,14 @@ describe('team-library-service', () => {
   it('isBrandLocked returns true when the entry is brand-locked', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ catalogId: 'c-lk', name: 'X', version: '1', scope: 'team', brandLocked: true, publishedAtMs: 0 }),
+      json: async () => ({
+        catalogId: 'c-lk',
+        name: 'X',
+        version: '1',
+        scope: 'team',
+        brandLocked: true,
+        publishedAtMs: 0,
+      }),
     }) as unknown as typeof fetch;
     const out = await isBrandLocked('c-lk');
     expect(out).toBe(true);

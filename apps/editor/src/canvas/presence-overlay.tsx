@@ -98,11 +98,7 @@ function AvatarChip({
   );
 }
 
-function CursorOverlay({
-  peer,
-}: {
-  peer: RemotePeer;
-}): ReactElement | null {
+function CursorOverlay({ peer }: { peer: RemotePeer }): ReactElement | null {
   const cursor = peer.state.cursor;
   if (!cursor) return null;
 
@@ -120,12 +116,7 @@ function CursorOverlay({
       }}
     >
       {/* Cursor triangle */}
-      <svg
-        width="16"
-        height="20"
-        viewBox="0 0 16 20"
-        style={{ display: 'block' }}
-      >
+      <svg width="16" height="20" viewBox="0 0 16 20" style={{ display: 'block' }}>
         <path
           d="M0 0 L16 12 L8 12 L12 20 L8 18 L4 12 L0 16 Z"
           fill={color}

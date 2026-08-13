@@ -49,7 +49,7 @@ describe('review-moderator worker', () => {
     // First call
     const p1 = run(d);
     // Second call while first is in flight should return 0
-    // Since these are in-memory and synchronous under the hood, 
+    // Since these are in-memory and synchronous under the hood,
     // the guard works at the async boundary
     const p2 = run(d);
     const [result1, result2] = await Promise.all([p1, p2]);

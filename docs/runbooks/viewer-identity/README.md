@@ -8,9 +8,9 @@ Anonymous viewer identity; ephemeral viewer tokens.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-viewer-identity` | availability | 99.9% | 30d |
+| SLO                     | Kind         | Target | Window |
+| ----------------------- | ------------ | ------ | ------ |
+| `avail-viewer-identity` | availability | 99.9%  | 30d    |
 
 ## Triage
 

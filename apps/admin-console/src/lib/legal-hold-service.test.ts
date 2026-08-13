@@ -83,10 +83,7 @@ describe('legal-hold-service', () => {
   it('releaseLegalHold throws LegalHoldError on already-released', async () => {
     // lh-initech-user is seeded as released — first call must throw.
     await expect(
-      releaseLegalHold(
-        'lh-initech-user',
-        'Already released in seed; testing guard.',
-      ),
+      releaseLegalHold('lh-initech-user', 'Already released in seed; testing guard.'),
     ).rejects.toBeInstanceOf(LegalHoldError);
   });
 
@@ -97,9 +94,9 @@ describe('legal-hold-service', () => {
   });
 
   it('releaseLegalHold throws on unknown id', async () => {
-    await expect(
-      releaseLegalHold('lh-nope', 'some valid notes here'),
-    ).rejects.toBeInstanceOf(LegalHoldError);
+    await expect(releaseLegalHold('lh-nope', 'some valid notes here')).rejects.toBeInstanceOf(
+      LegalHoldError,
+    );
   });
 
   it('getAffectedItems returns array (deck target)', async () => {

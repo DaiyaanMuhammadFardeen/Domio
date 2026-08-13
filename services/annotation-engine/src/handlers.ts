@@ -78,16 +78,16 @@ export interface AnnotationCommitBody {
 export class AnnotationHandlers {
   constructor(private readonly deps: AnnotationHandlerDeps) {}
 
-  commit = async (
-    req: HandlerRequest<AnnotationCommitBody>,
-  ): Promise<HandlerResponse<unknown>> => {
+  commit = async (req: HandlerRequest<AnnotationCommitBody>): Promise<HandlerResponse<unknown>> => {
     const sessionId = req.params['sessionId'];
     if (!sessionId) return mapDomainError(new AnnotationValidationError('sessionId required'));
     const ifMatch = readHeader(req.headers, 'if-match');
     const headerVersion = ifMatch ? parseInt(stripQuotes(ifMatch), 10) : undefined;
     const expected = headerVersion ?? req.body.expected_version;
     if (expected === undefined || !Number.isInteger(expected) || expected < 1) {
-      return mapDomainError(new AnnotationValidationError('expected_version required (If-Match header)'));
+      return mapDomainError(
+        new AnnotationValidationError('expected_version required (If-Match header)'),
+      );
     }
 
     try {
@@ -109,10 +109,7 @@ export class AnnotationHandlers {
         commitInput.drawn_by_display_name = req.body.drawn_by_display_name;
       }
       if (req.idempotencyKey !== undefined) commitInput.idempotency_key = req.idempotencyKey;
-      const result = await this.deps.service.commit(
-        commitInput,
-        { actorId: req.actor.id },
-      );
+      const result = await this.deps.service.commit(commitInput, { actorId: req.actor.id });
       return json(201, result, { etag: `"${result.version}"` });
     } catch (e) {
       return mapDomainError(e);
@@ -127,7 +124,9 @@ export class AnnotationHandlers {
     const ifMatch = readHeader(req.headers, 'if-match');
     const expected = ifMatch ? parseInt(stripQuotes(ifMatch), 10) : 1;
     if (!Number.isInteger(expected) || expected < 1) {
-      return mapDomainError(new AnnotationValidationError('expected_version required (If-Match header)'));
+      return mapDomainError(
+        new AnnotationValidationError('expected_version required (If-Match header)'),
+      );
     }
     const body: AnnotationRollbackInput = {
       session_id: sessionId,
@@ -154,7 +153,9 @@ export class AnnotationHandlers {
     const ifMatch = readHeader(req.headers, 'if-match');
     const expected = ifMatch ? parseInt(stripQuotes(ifMatch), 10) : 1;
     if (!Number.isInteger(expected) || expected < 1) {
-      return mapDomainError(new AnnotationValidationError('expected_version required (If-Match header)'));
+      return mapDomainError(
+        new AnnotationValidationError('expected_version required (If-Match header)'),
+      );
     }
     const body: AnnotationPromoteInput = {
       session_id: sessionId,

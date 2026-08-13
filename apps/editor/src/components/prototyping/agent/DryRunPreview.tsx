@@ -66,10 +66,7 @@ export function DryRunPreview({
   const [submitting, setSubmitting] = useState<'approve' | 'reject' | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const { added, changed, removed } = useMemo(
-    () => groupBy(diff?.items ?? []),
-    [diff],
-  );
+  const { added, changed, removed } = useMemo(() => groupBy(diff?.items ?? []), [diff]);
 
   const isApplied = diff?.applied_at_ms !== undefined;
   const disabled = diff === null || isApplied || submitting !== null || loading;
@@ -150,21 +147,9 @@ export function DryRunPreview({
         </p>
       </header>
 
-      <DiffSection
-        kind="add"
-        items={added}
-        dataTestId={`${dataTestId}-added`}
-      />
-      <DiffSection
-        kind="change"
-        items={changed}
-        dataTestId={`${dataTestId}-changed`}
-      />
-      <DiffSection
-        kind="remove"
-        items={removed}
-        dataTestId={`${dataTestId}-removed`}
-      />
+      <DiffSection kind="add" items={added} dataTestId={`${dataTestId}-added`} />
+      <DiffSection kind="change" items={changed} dataTestId={`${dataTestId}-changed`} />
+      <DiffSection kind="remove" items={removed} dataTestId={`${dataTestId}-removed`} />
 
       {submitError !== null ? (
         <p data-testid={`${dataTestId}-submit-error`} role="alert">

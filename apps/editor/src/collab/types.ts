@@ -32,12 +32,7 @@ export interface Comment {
 
 // ----- Approvals (#180) -----
 
-export type ApprovalStatus =
-  | 'draft'
-  | 'pending'
-  | 'approved'
-  | 'rejected'
-  | 'changes_requested';
+export type ApprovalStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'changes_requested';
 
 export interface ApprovalRequest {
   id: string;
@@ -56,12 +51,7 @@ export interface ApprovalDecision {
 
 // ----- Assignments (#181) -----
 
-export type AssignmentStatus =
-  | 'not_started'
-  | 'in_progress'
-  | 'blocked'
-  | 'review'
-  | 'done';
+export type AssignmentStatus = 'not_started' | 'in_progress' | 'blocked' | 'review' | 'done';
 
 export interface Assignment {
   id: string;

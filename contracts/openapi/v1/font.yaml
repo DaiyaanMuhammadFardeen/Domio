@@ -29,13 +29,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Font asset details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FontAsset"
-        "404":
+                $ref: '#/components/schemas/FontAsset'
+        '404':
           description: Font asset not found.
   /v1/fonts:
     get:
@@ -59,12 +59,12 @@ paths:
             type: integer
             default: 50
       responses:
-        "200":
+        '200':
           description: List of font assets.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListFontAssetsResponse"
+                $ref: '#/components/schemas/ListFontAssetsResponse'
     post:
       tags: [fonts]
       operationId: uploadFont
@@ -91,13 +91,13 @@ paths:
                   items:
                     type: string
       responses:
-        "201":
+        '201':
           description: Font asset uploaded.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FontAsset"
-        "400":
+                $ref: '#/components/schemas/FontAsset'
+        '400':
           description: Invalid font file or parameters.
 components:
   securitySchemes:
@@ -177,7 +177,7 @@ components:
         fontAssets:
           type: array
           items:
-            $ref: "#/components/schemas/FontAsset"
+            $ref: '#/components/schemas/FontAsset'
         pageInfo:
           type: object
           properties:

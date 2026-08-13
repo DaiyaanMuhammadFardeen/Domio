@@ -28,21 +28,21 @@
 
 ### 2.1 In scope — gap closures and hardening (feature ranges vary, all are residual gaps from earlier phases)
 
-| Area | What "in scope" means for P22 |
-|---|---|
-| Performance & scale | Canvas FPS, CRDT convergence, presenter-session stability, frontier-feature budgets, DB query plans, CDN caching. |
-| Reliability | SLO definitions, alert routing, runbook completeness, dashboard coverage, error budgets, post-mortem template. |
-| Load tests | k6 / Locust scripts in `infra/loadtest/` for the design-partner scale targets in §6; nightly CI run. |
-| Chaos engineering | Litmus / Gremlin drills (Postgres failover, NATS partition, AI provider failure, CDN outage, regional isolation, biometric-service sandbox escape attempts). |
-| Documentation | Every feature has a doc; every doc has a demo video; every runbook has a tabletop test pass. |
-| Accessibility | WCAG 2.2 AA certification with axe + manual keyboard + screen-reader pass on every surface. |
-| Internationalization | Bangla full UI; RTL-ready scaffolds; locale/timezone/currency consistency; numeral display choices. |
-| GA gate | Security review pass; pentest closeout; SOC 2 evidence; PDPA binder; pricing/billing live; status page live; on-call staffed; RTO/RPO validated. |
+| Area                       | What "in scope" means for P22                                                                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Performance & scale        | Canvas FPS, CRDT convergence, presenter-session stability, frontier-feature budgets, DB query plans, CDN caching.                                                        |
+| Reliability                | SLO definitions, alert routing, runbook completeness, dashboard coverage, error budgets, post-mortem template.                                                           |
+| Load tests                 | k6 / Locust scripts in `infra/loadtest/` for the design-partner scale targets in §6; nightly CI run.                                                                     |
+| Chaos engineering          | Litmus / Gremlin drills (Postgres failover, NATS partition, AI provider failure, CDN outage, regional isolation, biometric-service sandbox escape attempts).             |
+| Documentation              | Every feature has a doc; every doc has a demo video; every runbook has a tabletop test pass.                                                                             |
+| Accessibility              | WCAG 2.2 AA certification with axe + manual keyboard + screen-reader pass on every surface.                                                                              |
+| Internationalization       | Bangla full UI; RTL-ready scaffolds; locale/timezone/currency consistency; numeral display choices.                                                                      |
+| GA gate                    | Security review pass; pentest closeout; SOC 2 evidence; PDPA binder; pricing/billing live; status page live; on-call staffed; RTO/RPO validated.                         |
 | Frontier feature hardening | F205–F219 performance, consent UX polish, KG precision regression fixes, kiosk watchdog reliability, haptics fallback, podcast cost guardrails — all **non-functional**. |
-| Enterprise hardening | All P20 Bronze/Silver/Gold gaps closed; enterprise-ready rung achieved. |
-| Pricing & billing | Finalise pricing model, plumb through `services/billing-svc`, integrate with tax & invoicing. |
-| Status page | `status.domio.app` live with all P21 services + edge nodes + DB clusters probing. |
-| Migration plan | Design-partner data migration to GA; archival of design-partner-only flags; remove "BETA" UI. |
+| Enterprise hardening       | All P20 Bronze/Silver/Gold gaps closed; enterprise-ready rung achieved.                                                                                                  |
+| Pricing & billing          | Finalise pricing model, plumb through `services/billing-svc`, integrate with tax & invoicing.                                                                            |
+| Status page                | `status.domio.app` live with all P21 services + edge nodes + DB clusters probing.                                                                                        |
+| Migration plan             | Design-partner data migration to GA; archival of design-partner-only flags; remove "BETA" UI.                                                                            |
 
 ### 2.2 Out of scope (explicit)
 
@@ -109,7 +109,7 @@ P22-E (final): GA gate sign-off; design-partner migration; blog + demo assets
 5. **T-G1.5 — Presenter 2-hour stability.** Synthetic 2-hour presenter session with all frontier features on (F205 record, F213 broadcast with 1k audience, F214 listener, F207 gaze, F208 gestures, F209 voice); CPU/RAM/latency budget verified end of session.
 6. **T-G1.6 — DB query-plan review.** Per service: `EXPLAIN ANALYZE` on the top-20 hot queries; add missing indexes (Postgres); document the top-20 in `docs/05-data-database-design.md`'s perf appendix.
 7. **T-G1.7 — CDN plan.** Finalise caching headers (`Cache-Control`, `Surrogate-Key`), Brotli, image optimisation pipeline (`apps/cdn-cache/`); measured TTFB improvement.
-8. **T-G1.8 — N+1 audit.** Use OpenTelemetry traces to detect N+1 patterns in /services/* read paths; fix at the source rather than papering over.
+8. **T-G1.8 — N+1 audit.** Use OpenTelemetry traces to detect N+1 patterns in /services/\* read paths; fix at the source rather than papering over.
 9. **T-G1.9 — Frontier perf verification.** F205 ≤30 KB/min and ≤200 KB/min storage budget at scale; F213 800 ms p95 / 400 ms p50 holds with 10k audience; F214 <1.5 s detection→surface; F219 <1 s entity lookup with 100k-deck workspace; F218 99.99% reset reliability across 100 kiosks in a 7-day soak.
 10. **T-G1.10 — Cost model finalised.** Update `docs/08-infrastructure-devops.md` cost appendix with measured per-tenant per-day cost at 100k decks / 50k audience; per-feature unit economics reported.
 11. **T-G1.11 — Definition of Done.** All perf regressions caught in CI nightly; 2-hour bench green on three reference machines; all frontier perf budgets met; cost model approved by Finance.
@@ -266,42 +266,42 @@ None. P22 does not add new API surface; it hardens the existing surface.
 
 ### 6.1 Master matrix
 
-| Area | Test | Expected result | Owner | Master doc reference |
-|---|---|---|---|---|
-| Canvas FPS | `packages/perf-harness/` on 3 reference laptops | 60 fps p50, ≥55 fps p95 with 500 elements over 60 min | PERF | `/docs/09-testing-strategy.md` §9.4 |
-| CRDT convergence | 1k editors, 1 deck, 30 min | No data loss; merge within 5 s p95 | PERF | `/docs/04-system-architecture.md` |
-| Presenter 2h | Synthetic 2-hour session with all frontier features on | Stable; no OOM; F205 ≤30 KB/min storage; F213 within budget | PERF | `/docs/novel-frontier.md` §3.1, §3.9 |
-| Audience sync at 50k | k6 `audience_50k.js` | 800 ms p95 / 400 ms p50 holds | PERF | `/docs/novel-frontier.md` §3.9 |
-| Knowledge-graph 100k-deck workspace | k6 `kg_query.js` | Lookup <1 s p95, citations <3 s p95 | PERF | `/docs/novel-frontier.md` §3.15 |
-| Kiosk 100-device soak | 7-day continuous | Reset reliability ≥99.99% | PERF + CHAOS | `/docs/novel-frontier.md` §3.14 |
-| SLO catalogue completeness | `docs/slos/catalogue.md` | Every service + every frontier feature has an SLO | REL | `/docs/08-infrastructure-devops.md` |
-| Alert routing | PagerDuty integration test | Every alert reaches on-call | REL | same |
-| Runbook completeness | Walk all alerts; every alert has a runbook with a tabletop pass | 100% | REL | same |
-| Dashboard coverage | Grafana audit | Every service + frontier feature has a dashboard | REL | same |
-| Log redaction | Grep + OTel assertions across all services | No raw biometric / PII in logs | REL + SEC | `/docs/07-security-planning.md` |
-| Tracing coverage | Per-user-journey root trace | 100% | REL | `/docs/09-testing-strategy.md` §9.4 |
-| Status page | status.domio.app live; all P21 services monitored | Probes healthy; incident flow tested | REL | same |
-| Postgres failover | `infra/chaos/postgres_failover.tf` | RTO ≤ 60 s; RPO = 0 (sync replicas) | CHAOS | `/docs/08-infrastructure-devops.md` |
-| NATS partition | `infra/chaos/nats_partition.tf` | Backpressure; no data loss on resume | CHAOS | same |
-| AI provider failure | `infra/chaos/ai_provider_fail.tf` | Fallback within 5 s; no user-visible crash | CHAOS | `/docs/novel-frontier.md` §3.10 |
-| CDN outage | `infra/chaos/cdn_outage.tf` | Core renders still served; status page incident opens | CHAOS | `/docs/08-infrastructure-devops.md` |
-| Regional isolation | `infra/chaos/region_isolation.tf` | Traffic shift within 30 s | CHAOS | same |
-| Biometric sandbox escape | Red-team fuzz | Escape fails closed | CHAOS + SEC | `/docs/07-security-planning.md` |
-| 24h soak | All load tests run continuously | No memory leaks, no clock skew | CHAOS | same |
-| WCAG 2.2 AA axe pass | Every surface in axe-core CI | Zero violations | A11Y | `/docs/07-security-planning.md` §7.x (a11y cross-ref) |
-| WCAG 2.2 AA manual keyboard pass | Per T-G4.3 | Recorded demos | A11Y | same |
-| WCAG 2.2 AA screen-reader pass | NVDA + VoiceOver | Transcripts clean | A11Y | same |
-| Bangla UI | `apps/*/locales/bn.json` complete; numerals policy enforced | Smoke tests pass | I18N | `/docs/11-legal-compliance-bangladesh.md` §12.4 |
-| RTL scaffolds | Arabic + Hebrew skeletons | bidi verified | I18N | same |
-| Locale / currency / timezone end-to-end | Test deck presented from Dhaka + NY | Numbers / dates / currency localised per user | I18N | `/docs/05-data-database-design.md` §5.7 |
-| External pentest | Public API + MCP + sharing surface | Zero criticals / highs open | SEC | `/docs/07-security-planning.md` |
-| SOC 2 binder | Auditor evidence review | Audit observation period begins | SEC + FIN | same |
-| PDPA / GDPR binder | DSR endpoints tested in staging | Round-trip access, erasure, portability | SEC | `/docs/11-legal-compliance-bangladesh.md` §11 |
-| Pricing & billing | `services/billing-svc` integration tests | BDT + USD invoicing; dunning; refunds | BILL | `/docs/06-technology-stack.md` |
-| On-call rotation | PagerDuty schedule | 24/7 staffed; escalation tree | GA + REL | `/docs/08-infrastructure-devops.md` |
-| RTO/RPO game day | Kill primary region | RTO ≤ 1 h, RPO ≤ 15 min for tier-1 | GA | same |
-| Support runbooks | Top 50 categories documented; tier-1/2/3 split; SLAs | Verified | GA + Support | `/runbooks/support/` |
-| Documentation completeness | `docs/dashboard.md` | Zero gaps | GA | `/docs/README.md` |
+| Area                                    | Test                                                            | Expected result                                             | Owner        | Master doc reference                                  |
+| --------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------- | ------------ | ----------------------------------------------------- |
+| Canvas FPS                              | `packages/perf-harness/` on 3 reference laptops                 | 60 fps p50, ≥55 fps p95 with 500 elements over 60 min       | PERF         | `/docs/09-testing-strategy.md` §9.4                   |
+| CRDT convergence                        | 1k editors, 1 deck, 30 min                                      | No data loss; merge within 5 s p95                          | PERF         | `/docs/04-system-architecture.md`                     |
+| Presenter 2h                            | Synthetic 2-hour session with all frontier features on          | Stable; no OOM; F205 ≤30 KB/min storage; F213 within budget | PERF         | `/docs/novel-frontier.md` §3.1, §3.9                  |
+| Audience sync at 50k                    | k6 `audience_50k.js`                                            | 800 ms p95 / 400 ms p50 holds                               | PERF         | `/docs/novel-frontier.md` §3.9                        |
+| Knowledge-graph 100k-deck workspace     | k6 `kg_query.js`                                                | Lookup <1 s p95, citations <3 s p95                         | PERF         | `/docs/novel-frontier.md` §3.15                       |
+| Kiosk 100-device soak                   | 7-day continuous                                                | Reset reliability ≥99.99%                                   | PERF + CHAOS | `/docs/novel-frontier.md` §3.14                       |
+| SLO catalogue completeness              | `docs/slos/catalogue.md`                                        | Every service + every frontier feature has an SLO           | REL          | `/docs/08-infrastructure-devops.md`                   |
+| Alert routing                           | PagerDuty integration test                                      | Every alert reaches on-call                                 | REL          | same                                                  |
+| Runbook completeness                    | Walk all alerts; every alert has a runbook with a tabletop pass | 100%                                                        | REL          | same                                                  |
+| Dashboard coverage                      | Grafana audit                                                   | Every service + frontier feature has a dashboard            | REL          | same                                                  |
+| Log redaction                           | Grep + OTel assertions across all services                      | No raw biometric / PII in logs                              | REL + SEC    | `/docs/07-security-planning.md`                       |
+| Tracing coverage                        | Per-user-journey root trace                                     | 100%                                                        | REL          | `/docs/09-testing-strategy.md` §9.4                   |
+| Status page                             | status.domio.app live; all P21 services monitored               | Probes healthy; incident flow tested                        | REL          | same                                                  |
+| Postgres failover                       | `infra/chaos/postgres_failover.tf`                              | RTO ≤ 60 s; RPO = 0 (sync replicas)                         | CHAOS        | `/docs/08-infrastructure-devops.md`                   |
+| NATS partition                          | `infra/chaos/nats_partition.tf`                                 | Backpressure; no data loss on resume                        | CHAOS        | same                                                  |
+| AI provider failure                     | `infra/chaos/ai_provider_fail.tf`                               | Fallback within 5 s; no user-visible crash                  | CHAOS        | `/docs/novel-frontier.md` §3.10                       |
+| CDN outage                              | `infra/chaos/cdn_outage.tf`                                     | Core renders still served; status page incident opens       | CHAOS        | `/docs/08-infrastructure-devops.md`                   |
+| Regional isolation                      | `infra/chaos/region_isolation.tf`                               | Traffic shift within 30 s                                   | CHAOS        | same                                                  |
+| Biometric sandbox escape                | Red-team fuzz                                                   | Escape fails closed                                         | CHAOS + SEC  | `/docs/07-security-planning.md`                       |
+| 24h soak                                | All load tests run continuously                                 | No memory leaks, no clock skew                              | CHAOS        | same                                                  |
+| WCAG 2.2 AA axe pass                    | Every surface in axe-core CI                                    | Zero violations                                             | A11Y         | `/docs/07-security-planning.md` §7.x (a11y cross-ref) |
+| WCAG 2.2 AA manual keyboard pass        | Per T-G4.3                                                      | Recorded demos                                              | A11Y         | same                                                  |
+| WCAG 2.2 AA screen-reader pass          | NVDA + VoiceOver                                                | Transcripts clean                                           | A11Y         | same                                                  |
+| Bangla UI                               | `apps/*/locales/bn.json` complete; numerals policy enforced     | Smoke tests pass                                            | I18N         | `/docs/11-legal-compliance-bangladesh.md` §12.4       |
+| RTL scaffolds                           | Arabic + Hebrew skeletons                                       | bidi verified                                               | I18N         | same                                                  |
+| Locale / currency / timezone end-to-end | Test deck presented from Dhaka + NY                             | Numbers / dates / currency localised per user               | I18N         | `/docs/05-data-database-design.md` §5.7               |
+| External pentest                        | Public API + MCP + sharing surface                              | Zero criticals / highs open                                 | SEC          | `/docs/07-security-planning.md`                       |
+| SOC 2 binder                            | Auditor evidence review                                         | Audit observation period begins                             | SEC + FIN    | same                                                  |
+| PDPA / GDPR binder                      | DSR endpoints tested in staging                                 | Round-trip access, erasure, portability                     | SEC          | `/docs/11-legal-compliance-bangladesh.md` §11         |
+| Pricing & billing                       | `services/billing-svc` integration tests                        | BDT + USD invoicing; dunning; refunds                       | BILL         | `/docs/06-technology-stack.md`                        |
+| On-call rotation                        | PagerDuty schedule                                              | 24/7 staffed; escalation tree                               | GA + REL     | `/docs/08-infrastructure-devops.md`                   |
+| RTO/RPO game day                        | Kill primary region                                             | RTO ≤ 1 h, RPO ≤ 15 min for tier-1                          | GA           | same                                                  |
+| Support runbooks                        | Top 50 categories documented; tier-1/2/3 split; SLAs            | Verified                                                    | GA + Support | `/runbooks/support/`                                  |
+| Documentation completeness              | `docs/dashboard.md`                                             | Zero gaps                                                   | GA           | `/docs/README.md`                                     |
 
 ### 6.2 GA gate checklist (explicit)
 
@@ -334,18 +334,18 @@ None. P22 does not add new API surface; it hardens the existing surface.
 
 ## 7. Risks & open decisions
 
-1. **R1 — External security review delays.** Pentest reports often surface criticals mid-P22. *Mitigation:* security firm engaged in P22-B to leave P22-D for closeouts; release captain may extend P22 if a critical blocks GA.
-2. **R2 — SOC 2 audit observation period.** SOC 2 Type II is observation-based; the audit begins at GA. We cannot pre-certify the GA date; we can only hand the binder. *Mitigation:* clear communication in `/docs/11-legal-compliance-bangladesh.md` binder.
-3. **R3 — Cost model regression.** Performance wins may come at increased infra cost (more edge regions, bigger DB clusters). *Mitigation:* cost model finalised in T-G1.10; Finance signoff is a GA gate; cheaper-architecture trade-offs documented for post-GA.
-4. **R4 — Bangla UI completeness.** Translating the full surface may surface smaller UX bugs. *Mitigation:* translation partner engaged in P22-C to leave P22-D for remediation; per-feature "i18n owner" named across all squads.
-5. **R5 — WCAG manual pass surface.** Screen readers behave differently; manual sign-off takes time. *Mitigation:* A11Y lead starts in P22-B; external firm engaged in P22-C for the formal certificate.
-6. **R6 — Chaos drills in staging only.** Some failures (e.g., real-region isolation) cannot be drilled in prod until GA. *Mitigation:* staging environment with prod-equivalent topology; post-GA chaos drills in prod are a post-GA workstream.
-7. **R7 — Status page accuracy.** A wrong status page is worse than no status page. *Mitigation:* every probe tied to a synthetic that has been green for ≥24 h before flipping to "operational."
-8. **R8 — Support runbook coverage.** The first 200 customers will hit bugs not in the top 50 issue categories. *Mitigation:* on-call rotation has authority to author new runbooks during incidents; weekly review adds new ones to the catalogue.
-9. **R9 — Pricing / billing rollout in Bangladeshi market.** bKash / Nagad / SSLCommerz integration may hit regulatory friction. *Mitigation:* Bangladesh counsel engaged in P22-B; counsel sign-off is a GA gate; aggregator approach (SSLCommerz / ShurjoPay) reduces regulatory exposure vs. direct integration.
-10. **R10 — Open decision: GA scope.** Does GA include all of F205–F219, or only the safe-by-default ones? *Decision owner:* Head of Product + DPO. *Default proposal:* ship P21 features behind per-tenant opt-in flags; default off until tenant enable; the four biometric features require an extra tenant-level consent and are off by default. Decision recorded in the GA sign-off doc.
-11. **R11 — Open decision: design-partner BETA labels.** Strip BETA UI at GA, or grandfather design partners? *Decision owner:* PMM + UX. *Default proposal:* strip BETA at GA for new sign-ups; grandfather design partners for 30 days then strip.
-12. **R12 — Open decision: post-GA roadmap freeze.** Hold all post-GA roadmap work for 30 days post-GA to absorb incidents? *Decision owner:* Head of Product + Eng Manager. *Default proposal:* 30-day stabilisation window; only critical fixes land.
+1. **R1 — External security review delays.** Pentest reports often surface criticals mid-P22. _Mitigation:_ security firm engaged in P22-B to leave P22-D for closeouts; release captain may extend P22 if a critical blocks GA.
+2. **R2 — SOC 2 audit observation period.** SOC 2 Type II is observation-based; the audit begins at GA. We cannot pre-certify the GA date; we can only hand the binder. _Mitigation:_ clear communication in `/docs/11-legal-compliance-bangladesh.md` binder.
+3. **R3 — Cost model regression.** Performance wins may come at increased infra cost (more edge regions, bigger DB clusters). _Mitigation:_ cost model finalised in T-G1.10; Finance signoff is a GA gate; cheaper-architecture trade-offs documented for post-GA.
+4. **R4 — Bangla UI completeness.** Translating the full surface may surface smaller UX bugs. _Mitigation:_ translation partner engaged in P22-C to leave P22-D for remediation; per-feature "i18n owner" named across all squads.
+5. **R5 — WCAG manual pass surface.** Screen readers behave differently; manual sign-off takes time. _Mitigation:_ A11Y lead starts in P22-B; external firm engaged in P22-C for the formal certificate.
+6. **R6 — Chaos drills in staging only.** Some failures (e.g., real-region isolation) cannot be drilled in prod until GA. _Mitigation:_ staging environment with prod-equivalent topology; post-GA chaos drills in prod are a post-GA workstream.
+7. **R7 — Status page accuracy.** A wrong status page is worse than no status page. _Mitigation:_ every probe tied to a synthetic that has been green for ≥24 h before flipping to "operational."
+8. **R8 — Support runbook coverage.** The first 200 customers will hit bugs not in the top 50 issue categories. _Mitigation:_ on-call rotation has authority to author new runbooks during incidents; weekly review adds new ones to the catalogue.
+9. **R9 — Pricing / billing rollout in Bangladeshi market.** bKash / Nagad / SSLCommerz integration may hit regulatory friction. _Mitigation:_ Bangladesh counsel engaged in P22-B; counsel sign-off is a GA gate; aggregator approach (SSLCommerz / ShurjoPay) reduces regulatory exposure vs. direct integration.
+10. **R10 — Open decision: GA scope.** Does GA include all of F205–F219, or only the safe-by-default ones? _Decision owner:_ Head of Product + DPO. _Default proposal:_ ship P21 features behind per-tenant opt-in flags; default off until tenant enable; the four biometric features require an extra tenant-level consent and are off by default. Decision recorded in the GA sign-off doc.
+11. **R11 — Open decision: design-partner BETA labels.** Strip BETA UI at GA, or grandfather design partners? _Decision owner:_ PMM + UX. _Default proposal:_ strip BETA at GA for new sign-ups; grandfather design partners for 30 days then strip.
+12. **R12 — Open decision: post-GA roadmap freeze.** Hold all post-GA roadmap work for 30 days post-GA to absorb incidents? _Decision owner:_ Head of Product + Eng Manager. _Default proposal:_ 30-day stabilisation window; only critical fixes land.
 
 ---
 
@@ -422,7 +422,7 @@ This is the canonical Domio demo that the marketing team will use as the GA anno
 
 ## 9. Definition of Done — **GA gate**
 
-P22 is **done** when *every* box below is checked. The list is the gate for the GA flag to flip.
+P22 is **done** when _every_ box below is checked. The list is the gate for the GA flag to flip.
 
 ### 9.1 Performance & scale
 

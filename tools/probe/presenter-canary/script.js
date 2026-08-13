@@ -35,11 +35,11 @@ export const options = {
     },
   },
   thresholds: {
-    'presenter_ws_open_ms':       ['p(95)<800'],
-    'presenter_handoff_ms':       ['p(95)<1500'],
-    'presenter_annotation_replay_ms': ['p(95)<200'],
-    'presenter_recap_ms':         ['p(95)<2000'],
-    'checks':                     ['rate>0.95'],
+    presenter_ws_open_ms: ['p(95)<800'],
+    presenter_handoff_ms: ['p(95)<1500'],
+    presenter_annotation_replay_ms: ['p(95)<200'],
+    presenter_recap_ms: ['p(95)<2000'],
+    checks: ['rate>0.95'],
   },
 };
 
@@ -151,7 +151,9 @@ export default function () {
     const handoverRes = http.post(
       `${API_BASE}/v1/presenter/sessions/${sessionId}/handover`,
       JSON.stringify({
-        to_presenter_id: initBody.expected_version ? `canary-target-${__VU}` : `canary-target-${__VU}`,
+        to_presenter_id: initBody.expected_version
+          ? `canary-target-${__VU}`
+          : `canary-target-${__VU}`,
         state_snapshot: {},
         transfer_token: initBody.token,
         client_started_at_ms: handoverStartedAt,
@@ -171,11 +173,13 @@ export default function () {
     }
 
     // 5. End the session.
-    const endRes = http.post(
-      `${API_BASE}/v1/presenter/sessions/${sessionId}/end`,
-      '{}',
-      { headers: { 'content-type': 'application/json', 'x-actor-id': `canary-${__VU}`, 'if-match': `"${version}"` } },
-    );
+    const endRes = http.post(`${API_BASE}/v1/presenter/sessions/${sessionId}/end`, '{}', {
+      headers: {
+        'content-type': 'application/json',
+        'x-actor-id': `canary-${__VU}`,
+        'if-match': `"${version}"`,
+      },
+    });
     check(endRes, { 'end ok': (r) => r.status === 200 });
 
     // 6. Recap read.
@@ -206,11 +210,16 @@ export function handleSummary(data) {
 
 function textSummary(data) {
   const m = data.metrics || {};
-  const trends = ['presenter_ws_open_ms', 'presenter_handoff_ms', 'presenter_annotation_replay_ms', 'presenter_recap_ms'];
+  const trends = [
+    'presenter_ws_open_ms',
+    'presenter_handoff_ms',
+    'presenter_annotation_replay_ms',
+    'presenter_recap_ms',
+  ];
   let text = '\nPresenter canary — SLO snapshot\n\n';
   for (const name of trends) {
     const t = m[name] || {};
-    text += `  ${name.padEnd(38)} p95=${(t.values && t.values['p(95)'] || 0).toFixed(2)} ms\n`;
+    text += `  ${name.padEnd(38)} p95=${((t.values && t.values['p(95)']) || 0).toFixed(2)} ms\n`;
   }
   return text + '\n';
 }

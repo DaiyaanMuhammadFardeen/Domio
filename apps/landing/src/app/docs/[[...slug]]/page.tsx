@@ -14,11 +14,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
-import {
-  DOCS_TREE,
-  type DocsPage,
-  type DocsSection,
-} from '../../../lib/docs-tree';
+import { DOCS_TREE, type DocsPage, type DocsSection } from '../../../lib/docs-tree';
 import { DocsClient } from './DocsClient';
 
 interface DocsRouteParams {

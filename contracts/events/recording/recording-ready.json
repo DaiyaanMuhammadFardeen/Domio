@@ -4,7 +4,15 @@
   "title": "RecordingReady",
   "description": "Emitted by the recording-orchestrator when a recording transitions to ready (finalization complete). Subscribers include the SCORM packager (build the LMS package), the search service (index the transcript + clips), and the engagement-graph (close the replay window).",
   "type": "object",
-  "required": ["event_id", "ts_ms", "workspace_id", "recording_session_id", "finalized_at", "total_chunks", "total_bytes"],
+  "required": [
+    "event_id",
+    "ts_ms",
+    "workspace_id",
+    "recording_session_id",
+    "finalized_at",
+    "total_chunks",
+    "total_bytes"
+  ],
   "properties": {
     "event_id": { "type": "string" },
     "ts_ms": { "type": "integer", "format": "int64" },

@@ -39,7 +39,10 @@ class FakePool {
     this.responses.push({ rows, rowCount });
   }
 
-  async query(text: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[]; rowCount: number }> {
+  async query(
+    text: string,
+    values?: unknown[],
+  ): Promise<{ rows: Record<string, unknown>[]; rowCount: number }> {
     this.calls.push({ text, values: values ?? [] });
     const resp = this.responses[this.responseIndex] ?? { rows: [], rowCount: 0 };
     this.responseIndex++;
@@ -146,21 +149,23 @@ describe('PgPermissionGrantStore', () => {
   describe('findById', () => {
     it('executes correct SELECT SQL with $1 parameter', async () => {
       const grant = makeGrant();
-      pool.respond([{
-        id: grant.id,
-        resource_type: grant.resourceType,
-        resource_id: grant.resourceId,
-        principal_id: grant.principalId,
-        principal_type: grant.principalType,
-        capabilities: grant.capabilities,
-        is_deny: grant.isDeny,
-        effective_from: grant.effectiveFrom,
-        effective_to: grant.effectiveTo,
-        created_at: grant.createdAt,
-        updated_at: grant.updatedAt,
-        created_by: grant.createdBy,
-        updated_by: grant.updatedBy,
-      }]);
+      pool.respond([
+        {
+          id: grant.id,
+          resource_type: grant.resourceType,
+          resource_id: grant.resourceId,
+          principal_id: grant.principalId,
+          principal_type: grant.principalType,
+          capabilities: grant.capabilities,
+          is_deny: grant.isDeny,
+          effective_from: grant.effectiveFrom,
+          effective_to: grant.effectiveTo,
+          created_at: grant.createdAt,
+          updated_at: grant.updatedAt,
+          created_by: grant.createdBy,
+          updated_by: grant.updatedBy,
+        },
+      ]);
 
       const result = await store.findById('grant-1');
 
@@ -182,21 +187,23 @@ describe('PgPermissionGrantStore', () => {
   describe('findByResource', () => {
     it('executes correct SELECT with resource_type and resource_id parameters', async () => {
       const grant = makeGrant();
-      pool.respond([{
-        id: grant.id,
-        resource_type: grant.resourceType,
-        resource_id: grant.resourceId,
-        principal_id: grant.principalId,
-        principal_type: grant.principalType,
-        capabilities: grant.capabilities,
-        is_deny: grant.isDeny,
-        effective_from: grant.effectiveFrom,
-        effective_to: grant.effectiveTo,
-        created_at: grant.createdAt,
-        updated_at: grant.updatedAt,
-        created_by: grant.createdBy,
-        updated_by: grant.updatedBy,
-      }]);
+      pool.respond([
+        {
+          id: grant.id,
+          resource_type: grant.resourceType,
+          resource_id: grant.resourceId,
+          principal_id: grant.principalId,
+          principal_type: grant.principalType,
+          capabilities: grant.capabilities,
+          is_deny: grant.isDeny,
+          effective_from: grant.effectiveFrom,
+          effective_to: grant.effectiveTo,
+          created_at: grant.createdAt,
+          updated_at: grant.updatedAt,
+          created_by: grant.createdBy,
+          updated_by: grant.updatedBy,
+        },
+      ]);
 
       const result = await store.findByResource('deck', 'deck-uuid-1');
 
@@ -264,21 +271,23 @@ describe('PgPermissionGrantStore', () => {
     });
 
     it('handles null effective_to correctly', async () => {
-      pool.respond([{
-        id: 'test-id',
-        resource_type: 'workspace',
-        resource_id: 'ws-uuid',
-        principal_id: 'user-uuid',
-        principal_type: 'user',
-        capabilities: ['manage_permissions'],
-        is_deny: false,
-        effective_from: NOW,
-        effective_to: null,
-        created_at: NOW,
-        updated_at: NOW,
-        created_by: 'admin-uuid',
-        updated_by: 'admin-uuid',
-      }]);
+      pool.respond([
+        {
+          id: 'test-id',
+          resource_type: 'workspace',
+          resource_id: 'ws-uuid',
+          principal_id: 'user-uuid',
+          principal_type: 'user',
+          capabilities: ['manage_permissions'],
+          is_deny: false,
+          effective_from: NOW,
+          effective_to: null,
+          created_at: NOW,
+          updated_at: NOW,
+          created_by: 'admin-uuid',
+          updated_by: 'admin-uuid',
+        },
+      ]);
 
       const result = await store.findById('test-id');
 
@@ -303,15 +312,17 @@ describe('PgWorkspaceMemberStore', () => {
   describe('findByWorkspaceAndUser', () => {
     it('executes correct SELECT with workspace_id and user_id parameters', async () => {
       const member = makeMember();
-      pool.respond([{
-        id: member.id,
-        workspace_id: member.workspaceId,
-        user_id: member.userId,
-        role: member.role,
-        capabilities: member.capabilities,
-        effective_from: member.effectiveFrom,
-        effective_to: member.effectiveTo,
-      }]);
+      pool.respond([
+        {
+          id: member.id,
+          workspace_id: member.workspaceId,
+          user_id: member.userId,
+          role: member.role,
+          capabilities: member.capabilities,
+          effective_from: member.effectiveFrom,
+          effective_to: member.effectiveTo,
+        },
+      ]);
 
       const result = await store.findByWorkspaceAndUser('ws-uuid-1', 'user-uuid-1');
 
@@ -368,11 +379,7 @@ describe('PgGroupMembershipStore', () => {
 
   describe('findGroupsForUser', () => {
     it('executes correct SELECT with user_id parameter', async () => {
-      pool.respond([
-        { group_id: 'group-a' },
-        { group_id: 'group-b' },
-        { group_id: 'group-c' },
-      ]);
+      pool.respond([{ group_id: 'group-a' }, { group_id: 'group-b' }, { group_id: 'group-c' }]);
 
       const result = await store.findGroupsForUser('user-uuid-1');
 
@@ -420,10 +427,12 @@ describe('PgResourceHierarchyStore', () => {
 
   describe('findParent', () => {
     it('executes correct SELECT with child_type and child_id parameters', async () => {
-      pool.respond([{
-        parent_type: 'deck',
-        parent_id: 'deck-uuid-1',
-      }]);
+      pool.respond([
+        {
+          parent_type: 'deck',
+          parent_id: 'deck-uuid-1',
+        },
+      ]);
 
       const result = await store.findParent('slide', 'slide-uuid-1');
 
@@ -442,10 +451,12 @@ describe('PgResourceHierarchyStore', () => {
     });
 
     it('correctly maps parent_type to parentType', async () => {
-      pool.respond([{
-        parent_type: 'folder',
-        parent_id: 'folder-uuid-1',
-      }]);
+      pool.respond([
+        {
+          parent_type: 'folder',
+          parent_id: 'folder-uuid-1',
+        },
+      ]);
 
       const result = await store.findParent('project', 'proj-uuid-1');
 
@@ -482,7 +493,23 @@ describe('SQL conventions', () => {
 
   it('uses parameterized queries ($1..$n) for all SQL', async () => {
     const store = new PgPermissionGrantStore({ pool: pool as unknown as any });
-    pool.respond([{ id: '1', resource_type: 'deck', resource_id: '1', principal_id: '1', principal_type: 'user', capabilities: [], is_deny: false, effective_from: NOW, effective_to: null, created_at: NOW, updated_at: NOW, created_by: '1', updated_by: '1' }]);
+    pool.respond([
+      {
+        id: '1',
+        resource_type: 'deck',
+        resource_id: '1',
+        principal_id: '1',
+        principal_type: 'user',
+        capabilities: [],
+        is_deny: false,
+        effective_from: NOW,
+        effective_to: null,
+        created_at: NOW,
+        updated_at: NOW,
+        created_by: '1',
+        updated_by: '1',
+      },
+    ]);
 
     await store.findById('test-id');
     await store.findByResource('deck', 'deck-1');
@@ -498,21 +525,23 @@ describe('SQL conventions', () => {
 
   it('uses snake_case column names matching migration schema', async () => {
     const store = new PgPermissionGrantStore({ pool: pool as unknown as any });
-    pool.respond([{
-      id: '1',
-      resource_type: 'deck',
-      resource_id: '1',
-      principal_id: '1',
-      principal_type: 'user',
-      capabilities: [],
-      is_deny: false,
-      effective_from: NOW,
-      effective_to: null,
-      created_at: NOW,
-      updated_at: NOW,
-      created_by: '1',
-      updated_by: '1',
-    }]);
+    pool.respond([
+      {
+        id: '1',
+        resource_type: 'deck',
+        resource_id: '1',
+        principal_id: '1',
+        principal_type: 'user',
+        capabilities: [],
+        is_deny: false,
+        effective_from: NOW,
+        effective_to: null,
+        created_at: NOW,
+        updated_at: NOW,
+        created_by: '1',
+        updated_by: '1',
+      },
+    ]);
 
     await store.findById('1');
 

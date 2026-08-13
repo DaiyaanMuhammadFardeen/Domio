@@ -118,7 +118,10 @@ describe('ThemeService — token CRUD', () => {
         group: 'color' as never,
         type: 'color',
         // Pass a TokenValue with an unknown type discriminator
-        value: { type: 'gradient', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } } as never,
+        value: {
+          type: 'gradient',
+          value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 },
+        } as never,
         createdBy: 'alice',
       }),
     ).rejects.toBeInstanceOf(TokenValidationError);
@@ -169,10 +172,18 @@ describe('ThemeService — token CRUD', () => {
 describe('ThemeService — alias cycle detection', () => {
   it('accepts a valid linear chain', async () => {
     const { svc } = makeService();
-    const a = await svc.createAlias({ aliasTokenId: 'color.bg.surface', targetTokenId: 'color.brand.primary', orgId: ORG });
+    const a = await svc.createAlias({
+      aliasTokenId: 'color.bg.surface',
+      targetTokenId: 'color.brand.primary',
+      orgId: ORG,
+    });
     expect(a.aliasTokenId).toBe('color.bg.surface');
     // Second alias in chain
-    await svc.createAlias({ aliasTokenId: 'color.brand.primary', targetTokenId: 'color.semantic.primary', orgId: ORG });
+    await svc.createAlias({
+      aliasTokenId: 'color.brand.primary',
+      targetTokenId: 'color.semantic.primary',
+      orgId: ORG,
+    });
   });
 
   it('rejects a self-loop', async () => {
@@ -293,9 +304,24 @@ describe('ThemeService — theme CRUD + apply', () => {
       toThemeId: theme.themeId,
       actorId: 'alice',
       deckElements: [
-        { slideId: 's1', elementId: 'e1', tokenRef: 'color.brand.primary', currentResolved: color(0.2, 0.2, 0.2) },
-        { slideId: 's1', elementId: 'e2', tokenRef: 'color.brand.secondary', currentResolved: null },
-        { slideId: 's2', elementId: 'e3', tokenRef: 'color.brand.primary', currentResolved: color(0.2, 0.2, 0.2) },
+        {
+          slideId: 's1',
+          elementId: 'e1',
+          tokenRef: 'color.brand.primary',
+          currentResolved: color(0.2, 0.2, 0.2),
+        },
+        {
+          slideId: 's1',
+          elementId: 'e2',
+          tokenRef: 'color.brand.secondary',
+          currentResolved: null,
+        },
+        {
+          slideId: 's2',
+          elementId: 'e3',
+          tokenRef: 'color.brand.primary',
+          currentResolved: color(0.2, 0.2, 0.2),
+        },
       ],
     });
 
@@ -320,7 +346,12 @@ describe('ThemeService — theme CRUD + apply', () => {
       toThemeId: theme.themeId,
       actorId: 'alice',
       deckElements: [
-        { slideId: 's1', elementId: 'e1', tokenRef: 'color.brand.primary', currentResolved: color(1, 0.5, 0) },
+        {
+          slideId: 's1',
+          elementId: 'e1',
+          tokenRef: 'color.brand.primary',
+          currentResolved: color(1, 0.5, 0),
+        },
       ],
     });
 

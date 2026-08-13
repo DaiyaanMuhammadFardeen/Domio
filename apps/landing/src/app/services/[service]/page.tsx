@@ -10,9 +10,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import type { JSX } from 'react';
 import { PageShell } from '../../../components/layout/PageShell';
-import {
-  USER_FACING_SERVICES,
-} from '../../../lib/services-registry';
+import { USER_FACING_SERVICES } from '../../../lib/services-registry';
 import { buildServiceDoc } from '../../../lib/services-docs';
 
 interface ServicePageParams {
@@ -27,9 +25,7 @@ export function generateStaticParams(): Array<ServicePageParams> {
   return USER_FACING_SERVICES.map((svc) => ({ service: svc.id }));
 }
 
-export async function generateMetadata({
-  params,
-}: ServicePageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
   const resolved = await params;
   const doc = buildServiceDoc(resolved.service);
   if (!doc) {
@@ -67,10 +63,7 @@ export default async function ServiceDetailPage({
           <p className="service-detail__summary">{doc.summary}</p>
         </header>
 
-        <section
-          className="service-detail__section"
-          aria-labelledby="service-detail-meta"
-        >
+        <section className="service-detail__section" aria-labelledby="service-detail-meta">
           <h2 id="service-detail-meta" className="service-detail__heading">
             Metadata
           </h2>
@@ -100,10 +93,7 @@ export default async function ServiceDetailPage({
           </dl>
         </section>
 
-        <section
-          className="service-detail__section"
-          aria-labelledby="service-detail-api"
-        >
+        <section className="service-detail__section" aria-labelledby="service-detail-api">
           <h2 id="service-detail-api" className="service-detail__heading">
             API surface
           </h2>
@@ -116,10 +106,7 @@ export default async function ServiceDetailPage({
           </ul>
         </section>
 
-        <section
-          className="service-detail__section"
-          aria-labelledby="service-detail-runbook"
-        >
+        <section className="service-detail__section" aria-labelledby="service-detail-runbook">
           <h2 id="service-detail-runbook" className="service-detail__heading">
             Runbook
           </h2>

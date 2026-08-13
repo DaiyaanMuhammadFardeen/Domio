@@ -12,7 +12,11 @@ export type { TaskManagerServiceOptions, SyncLinksSummary } from './service.js';
 export { handlers } from './handlers.js';
 export type { HttpRequest, HttpResponse, TaskManagerHandlerContext } from './handlers.js';
 export { InMemoryTaskLinkStore } from './store/mem_store.js';
-export { PgTaskLinkStore, StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
+export {
+  PgTaskLinkStore,
+  StoreNotConfiguredError,
+  StoreNotImplementedError,
+} from './store/pg_store.js';
 export type { TaskLinkStore } from './store/store.js';
 export { FEATURE_FLAGS, checkFeature } from './feature_flags.js';
 export type { FeatureFlag } from './feature_flags.js';
@@ -43,15 +47,7 @@ export {
 } from './types.js';
 
 // Pure logic — mapping
-export {
-  FIELD_MAP_KEYS,
-  validateFieldMap,
-  applyFieldMap,
-  describeMapping,
-} from './mapping.js';
+export { FIELD_MAP_KEYS, validateFieldMap, applyFieldMap, describeMapping } from './mapping.js';
 
 // Pure logic — conflicts
-export {
-  detectConflict,
-  resolveSyncConflict,
-} from './conflicts.js';
+export { detectConflict, resolveSyncConflict } from './conflicts.js';

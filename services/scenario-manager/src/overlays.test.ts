@@ -21,7 +21,10 @@ function scenario(id: string, parentId: string | null = null): ScenarioRecord {
   };
 }
 
-function overlay(scenarioId: string, opts: Partial<Omit<OverlayRecord, 'id' | 'scenarioId' | 'tenantId'>> = {}): OverlayRecord {
+function overlay(
+  scenarioId: string,
+  opts: Partial<Omit<OverlayRecord, 'id' | 'scenarioId' | 'tenantId'>> = {},
+): OverlayRecord {
   return {
     id: `ov_${scenarioId}`,
     scenarioId,
@@ -44,14 +47,20 @@ describe('applyOverlays — merge order', () => {
     const allScenarios = [root, child];
 
     const overlayMap = new Map<string, OverlayRecord>();
-    overlayMap.set('root', overlay('root', {
-      formulaConstantOverrides: new Map([['interest_rate', 5]]),
-      sliderValueOverrides: new Map([['growth', 3]]),
-    }));
-    overlayMap.set('child', overlay('child', {
-      formulaConstantOverrides: new Map([['interest_rate', 7]]),
-      annotationOverrides: new Map([['note', 'child override']]),
-    }));
+    overlayMap.set(
+      'root',
+      overlay('root', {
+        formulaConstantOverrides: new Map([['interest_rate', 5]]),
+        sliderValueOverrides: new Map([['growth', 3]]),
+      }),
+    );
+    overlayMap.set(
+      'child',
+      overlay('child', {
+        formulaConstantOverrides: new Map([['interest_rate', 7]]),
+        annotationOverrides: new Map([['note', 'child override']]),
+      }),
+    );
 
     const result = applyOverlays(child, overlayMap, allScenarios);
     // Child's interest_rate (7) should win over parent's (5)
@@ -69,15 +78,27 @@ describe('applyOverlays — merge order', () => {
     const allScenarios = [root, mid, leaf];
 
     const overlayMap = new Map<string, OverlayRecord>();
-    overlayMap.set('root', overlay('root', {
-      formulaConstantOverrides: new Map([['x', 1], ['y', 10]]),
-    }));
-    overlayMap.set('mid', overlay('mid', {
-      formulaConstantOverrides: new Map([['x', 2]]),
-    }));
-    overlayMap.set('leaf', overlay('leaf', {
-      formulaConstantOverrides: new Map([['x', 3]]),
-    }));
+    overlayMap.set(
+      'root',
+      overlay('root', {
+        formulaConstantOverrides: new Map([
+          ['x', 1],
+          ['y', 10],
+        ]),
+      }),
+    );
+    overlayMap.set(
+      'mid',
+      overlay('mid', {
+        formulaConstantOverrides: new Map([['x', 2]]),
+      }),
+    );
+    overlayMap.set(
+      'leaf',
+      overlay('leaf', {
+        formulaConstantOverrides: new Map([['x', 3]]),
+      }),
+    );
 
     const result = applyOverlays(leaf, overlayMap, allScenarios);
     expect(result.formulaConstantOverrides.get('x')).toBe(3);

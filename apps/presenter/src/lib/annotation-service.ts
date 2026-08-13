@@ -8,10 +8,7 @@
  * persists the strokes — the runtime draws them on the overlay.
  */
 
-import type {
-  AnnotationKind,
-  AnnotationGeometry,
-} from '@domio/annotation-engine';
+import type { AnnotationKind, AnnotationGeometry } from '@domio/annotation-engine';
 
 export interface AnnotationLayerDto {
   id: string;
@@ -71,16 +68,27 @@ export class AnnotationClient {
     this.fetcher = opts.fetcher ?? fetch;
   }
 
-  etag(): string | null { return this.cachedEtag; }
-  setEtag(etag: string | null): void { this.cachedEtag = etag; }
+  etag(): string | null {
+    return this.cachedEtag;
+  }
+  setEtag(etag: string | null): void {
+    this.cachedEtag = etag;
+  }
 
   async list(sessionId: string, ephemeral = true): Promise<AnnotationLayerDto[]> {
-    const res = await this.fetcher(`${this.baseUrl}/api/v1/annotation/${sessionId}/list?ephemeral=${ephemeral}`, {
-      headers: { accept: 'application/json' },
-      credentials: 'same-origin',
-    });
+    const res = await this.fetcher(
+      `${this.baseUrl}/api/v1/annotation/${sessionId}/list?ephemeral=${ephemeral}`,
+      {
+        headers: { accept: 'application/json' },
+        credentials: 'same-origin',
+      },
+    );
     if (!res.ok) {
-      throw new AnnotationClientError(res.status, `list annotations: ${res.status}`, await safeBody(res));
+      throw new AnnotationClientError(
+        res.status,
+        `list annotations: ${res.status}`,
+        await safeBody(res),
+      );
     }
     const body = (await res.json()) as { items: AnnotationLayerDto[] };
     return body.items;
@@ -100,7 +108,11 @@ export class AnnotationClient {
       body: JSON.stringify(body),
     });
     if (!res.ok) {
-      throw new AnnotationClientError(res.status, `commit annotation: ${res.status}`, await safeBody(res));
+      throw new AnnotationClientError(
+        res.status,
+        `commit annotation: ${res.status}`,
+        await safeBody(res),
+      );
     }
     const etag = res.headers.get('etag');
     if (etag) this.cachedEtag = etag;
@@ -122,7 +134,11 @@ export class AnnotationClient {
       body: JSON.stringify({ annotation_id: annotationId }),
     });
     if (!res.ok) {
-      throw new AnnotationClientError(res.status, `rollback annotation: ${res.status}`, await safeBody(res));
+      throw new AnnotationClientError(
+        res.status,
+        `rollback annotation: ${res.status}`,
+        await safeBody(res),
+      );
     }
     const etag = res.headers.get('etag');
     if (etag) this.cachedEtag = etag;
@@ -142,7 +158,11 @@ export class AnnotationClient {
       body: JSON.stringify({ annotation_id: annotationId }),
     });
     if (!res.ok) {
-      throw new AnnotationClientError(res.status, `promote annotation: ${res.status}`, await safeBody(res));
+      throw new AnnotationClientError(
+        res.status,
+        `promote annotation: ${res.status}`,
+        await safeBody(res),
+      );
     }
     const etag = res.headers.get('etag');
     if (etag) this.cachedEtag = etag;
@@ -152,7 +172,11 @@ export class AnnotationClient {
 }
 
 async function safeBody(res: Response): Promise<unknown> {
-  try { return await res.json(); } catch { return null; }
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
 
 const NS = 'domio.presenter.annotation.idem';

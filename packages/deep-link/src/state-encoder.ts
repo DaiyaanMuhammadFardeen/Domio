@@ -67,9 +67,7 @@ export function canonicalJson(value: unknown): string {
   }
   const obj = value as Record<string, unknown>;
   const keys = Object.keys(obj).sort();
-  const body = keys
-    .map((k) => `${JSON.stringify(k)}:${canonicalJson(obj[k])}`)
-    .join(',');
+  const body = keys.map((k) => `${JSON.stringify(k)}:${canonicalJson(obj[k])}`).join(',');
   return `{${body}}`;
 }
 
@@ -127,7 +125,9 @@ export function encodePayload(input: WireInput, opts: StateEncoderOptions): stri
     }
   }
   if (input.v !== DEEP_LINK_VERSION) {
-    throw new DeepLinkVersionError(`Cannot encode wire version ${input.v}; expected ${DEEP_LINK_VERSION}`);
+    throw new DeepLinkVersionError(
+      `Cannot encode wire version ${input.v}; expected ${DEEP_LINK_VERSION}`,
+    );
   }
   const sig = hmacSign(opts.key, canonicalJson(input));
   const signed: DeepLinkPayload = { ...input, sig };
@@ -174,7 +174,9 @@ export function decodePayload(token: string, opts: StateDecoderOptions): DeepLin
     }
   }
   if (obj['v'] !== DEEP_LINK_VERSION) {
-    throw new DeepLinkVersionError(`Wire version mismatch: got ${String(obj['v'])}, expected ${DEEP_LINK_VERSION}`);
+    throw new DeepLinkVersionError(
+      `Wire version mismatch: got ${String(obj['v'])}, expected ${DEEP_LINK_VERSION}`,
+    );
   }
   if (obj['aud'] !== opts.audience) {
     throw new DeepLinkAudienceMismatchError(
@@ -199,7 +201,9 @@ export function decodePayload(token: string, opts: StateDecoderOptions): DeepLin
     deck_id: String(obj['deck_id']),
     slide_id: String(obj['slide_id']),
     path_stack: Array.isArray(obj['path_stack']) ? (obj['path_stack'] as string[]).slice() : [],
-    overlay_stack: Array.isArray(obj['overlay_stack']) ? (obj['overlay_stack'] as string[]).slice() : [],
+    overlay_stack: Array.isArray(obj['overlay_stack'])
+      ? (obj['overlay_stack'] as string[]).slice()
+      : [],
     var_snapshot: Array.isArray(obj['var_snapshot'])
       ? (obj['var_snapshot'] as DeepLinkVarEntry[]).slice()
       : [],
@@ -231,7 +235,9 @@ export class StateEncoder {
     if (!opts.key) throw new Error('StateEncoder requires a key');
     this.opts = opts;
   }
-  get kid(): string { return this.opts.kid; }
+  get kid(): string {
+    return this.opts.kid;
+  }
   encode(payload: WireInput): string {
     return encodePayload(payload, this.opts);
   }
@@ -245,7 +251,9 @@ export class StateDecoder {
     if (!opts.key) throw new Error('StateDecoder requires a key');
     this.opts = opts;
   }
-  get kid(): string { return this.opts.kid; }
+  get kid(): string {
+    return this.opts.kid;
+  }
   decode(token: string): DeepLinkPayload {
     return decodePayload(token, this.opts);
   }

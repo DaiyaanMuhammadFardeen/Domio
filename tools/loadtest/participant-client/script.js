@@ -67,16 +67,18 @@ export default function () {
     socket.on('open', () => {
       wsOpenMs.add(Date.now() - t0);
       const helloAt = Date.now();
-      socket.send(JSON.stringify({
-        kind: 'hello',
-        session_code: SessionCode,
-        workspace_id: WorkspaceId,
-        participant_id: `p-${randomString(8)}`,
-        display_name: `vu-${__VU}`,
-        locale: 'en-US',
-        ts_ms: Date.now(),
-        idempotency_key: randomString(16),
-      }));
+      socket.send(
+        JSON.stringify({
+          kind: 'hello',
+          session_code: SessionCode,
+          workspace_id: WorkspaceId,
+          participant_id: `p-${randomString(8)}`,
+          display_name: `vu-${__VU}`,
+          locale: 'en-US',
+          ts_ms: Date.now(),
+          idempotency_key: randomString(16),
+        }),
+      );
       socket.on('message', (msg) => {
         try {
           const env = JSON.parse(msg);
@@ -98,30 +100,37 @@ export default function () {
     let pollAt = 0;
     socket.setInterval(() => {
       pollAt = Date.now();
-      socket.send(JSON.stringify({
-        kind: 'poll_vote',
-        poll_id: `poll-${randomString(6)}`,
-        option_id: 'yes',
-        session_code: SessionCode,
-        participant_id: `p-${__VU}`,
-        ts_ms: Date.now(),
-        idempotency_key: randomString(16),
-      }));
+      socket.send(
+        JSON.stringify({
+          kind: 'poll_vote',
+          poll_id: `poll-${randomString(6)}`,
+          option_id: 'yes',
+          session_code: SessionCode,
+          participant_id: `p-${__VU}`,
+          ts_ms: Date.now(),
+          idempotency_key: randomString(16),
+        }),
+      );
     }, 60_000);
 
     socket.setTimeout(() => {
-      socket.send(JSON.stringify({
-        kind: 'heartbeat',
-        session_code: SessionCode,
-        participant_id: `p-${__VU}`,
-        ts_ms: Date.now(),
-        idempotency_key: randomString(16),
-      }));
+      socket.send(
+        JSON.stringify({
+          kind: 'heartbeat',
+          session_code: SessionCode,
+          participant_id: `p-${__VU}`,
+          ts_ms: Date.now(),
+          idempotency_key: randomString(16),
+        }),
+      );
     }, 30_000);
 
-    socket.setTimeout(() => {
-      socket.close();
-    }, 55 * 60 * 1000);
+    socket.setTimeout(
+      () => {
+        socket.close();
+      },
+      55 * 60 * 1000,
+    );
   });
-  check(res, { 'connected': (r) => r && r.status === 101 });
+  check(res, { connected: (r) => r && r.status === 101 });
 }

@@ -27,7 +27,7 @@ Ship a single-user, keyboard-first, GPU-accelerated canvas editor that proves th
 
 **In scope (feature numbers):**
 
-- **#1** — Infinite canvas (data model from P02; *rendering* is the new work here).
+- **#1** — Infinite canvas (data model from P02; _rendering_ is the new work here).
 - **#2** — Drag-drop WYSIWYG editing with pixel-perfect and snap-to-grid modes.
 - **#3** — Smart alignment guides, spacing hints, and distribution tools.
 - **#4** — Multi-select, group/ungroup, lock, hide layers.
@@ -43,7 +43,7 @@ Ship a single-user, keyboard-first, GPU-accelerated canvas editor that proves th
 - **#14** — Copy/paste styles, format painter, "paste to match destination" (uses theme tokens from P02; full theme system lands in P07).
 - **#15** — Eyedropper color picking.
 - **#16** — Right-click contextual menus tuned per element type.
-- **#18** — Cursor chat and pointer "ping". **Note:** #18 is *partial* in P03 — the local UX (T-to-chat, Cmd+Shift+P ping) is wired; the multiplayer transport (presence service, remote broadcast) lands in P04. P03 implements the input bindings and the local "ping" animation.
+- **#18** — Cursor chat and pointer "ping". **Note:** #18 is _partial_ in P03 — the local UX (T-to-chat, Cmd+Shift+P ping) is wired; the multiplayer transport (presence service, remote broadcast) lands in P04. P03 implements the input bindings and the local "ping" animation.
 - **#22** — Autosave every keystroke. P03 implements the **editor half**: per-keystroke op generation, debounced durable write to IndexedDB, the "synced / syncing… N pending" indicator. **Remote push is P04/P05.**
 
 **Out of scope (deferred):**
@@ -53,7 +53,7 @@ Ship a single-user, keyboard-first, GPU-accelerated canvas editor that proves th
 - **#19** — Branching and merging (P05).
 - **#20** — Named checkpoints and version history UI (P05).
 - **#21** — Offline CRDT-based sync (P04).
-- **CRDT transport** — P03 emits ops to the local `AutosaveQueue` (P02 stub) and IndexedDB; the server endpoint `POST /v1/decks/{id}/schema` is *callable* but P03 only uses it on a manual "save now" button hidden behind a feature flag (default off).
+- **CRDT transport** — P03 emits ops to the local `AutosaveQueue` (P02 stub) and IndexedDB; the server endpoint `POST /v1/decks/{id}/schema` is _callable_ but P03 only uses it on a manual "save now" button hidden behind a feature flag (default off).
 - **#23–#240** — All deepening/surface features: components, theming, charts, animation, prototyping, 3D, AI, presenter, audience, sharing, analytics. Each has its own phase.
 - **Per-element animations** (P09) — the schema slot exists from P02; no timeline UI in P03.
 - **3D / media** (P11) — schema slots exist; no runtime in P03.
@@ -84,12 +84,14 @@ P03 has six workstreams. Each task lists files/packages touched, contracts added
 ### WS-A — Editor app shell and routing (2 tasks)
 
 **A.1 — Next.js web app skeleton with viewer route.**
+
 - Files touched: `/apps/web/package.json`, `/apps/web/next.config.ts`, `/apps/web/src/pages/index.tsx`, `/apps/web/src/pages/decks/[id].tsx`, `/apps/web/src/pages/viewer/[id].tsx`, `/apps/web/src/lib/document-loader-client.ts`.
 - Contracts consumed: `@domio/sdk` `DeckDocument`; `ClientDocumentLoader` from P02.
 - Tests written: `/apps/web/__tests__/viewer.test.tsx` (renders a deck JSON via the SSR viewer; matches the example fixture's first slide; axe clean).
 - DoD: `pnpm --filter @domio/web dev` serves a working viewer at `http://localhost:3000/decks/{id}`; viewer is SSR-rendered for SEO; viewer route is keyboard-navigable (next/prev slide, fullscreen, escape).
 
 **A.2 — Vite editor app route mounted from the Next.js shell.**
+
 - Files touched: `/apps/editor/package.json`, `/apps/editor/vite.config.ts`, `/apps/editor/src/main.tsx`, `/apps/editor/src/App.tsx`, `/apps/web/src/pages/editor/[id].tsx` (mounts the editor in a portal/iframe).
 - Contracts consumed: `packages/canvas`, `packages/schema`, `@domio/sdk`; `Worker` API for layout.
 - Tests written: `/apps/editor/__tests__/boot.test.ts` (editor route renders a frame within 200 ms; `DocumentLoader.load` resolves; first frame within 16 ms of layout).
@@ -98,30 +100,35 @@ P03 has six workstreams. Each task lists files/packages touched, contracts added
 ### WS-B — Canvas renderer package (`packages/canvas`) (5 tasks)
 
 **B.1 — Bootstrap `packages/canvas` with WebGL2 + WebGPU adapter selection.**
+
 - Files touched: `/packages/canvas/package.json`, `/packages/canvas/src/renderer/index.ts`, `/packages/canvas/src/renderer/gpu-adapter.ts`, `/packages/canvas/src/renderer/canvas2d-fallback.ts`.
 - Contracts added: `Renderer` interface (`init(canvas, scene)`, `draw(scene)`, `dispose()`, `setCamera(camera)`); `RenderCapabilities` (`webgpu`, `webgl2`, `canvas2d`); adapter selector.
 - Tests written: `/packages/canvas/__tests__/adapter-selection.test.ts` (selects WebGPU when available, falls back to WebGL2, then Canvas2D; user-visible warning when forced to Canvas2D).
 - DoD: adapter selection is deterministic and unit-tested; the renderer survives a `WEBGL_lose_context` event by re-initializing.
 
 **B.2 — Tile cache and render command pipeline.**
+
 - Files touched: `/packages/canvas/src/renderer/tile-cache.ts`, `/packages/canvas/src/renderer/commands.ts`, `/packages/canvas/src/renderer/passes.ts`.
 - Contracts added: `RenderCommand` (typed: `drawRect`, `drawText`, `drawPath`, `drawImage`, `drawGroup`, `clip`, `transform`); `TileCache` (LRU at 256 MB, 30 s TTL); `RenderPass` (`OpaquePass`, `TextPass`, `OverlayPass`).
 - Tests written: `/packages/canvas/__tests__/tile-cache.test.ts` (LRU eviction; 30 s TTL; tile invalidation on transform mutation).
 - DoD: render command list is consumed zero-copy by the GPU buffer; at 100 layers the frame time is ≤ 16 ms (p95) on the reference hardware per `docs/editor-canvas.md` §3.2.
 
 **B.3 — Layout worker.**
+
 - Files touched: `/packages/canvas/src/worker/layout.ts`, `/packages/canvas/src/worker/auto-layout.ts`, `/packages/canvas/src/worker/constraints.ts`, `/packages/canvas/src/scene/normalize.ts`.
 - Contracts consumed: `@domio/sdk` `Element`, `AutoLayoutSpec`, `LayerConstraints`; `yoga-layout` for flexbox (per `docs/06-technology-stack.md` §6.1.4).
 - Tests written: `/packages/canvas/__tests__/auto-layout.test.ts` (row/column/wrap, padding, gap, align, justify; `position: absolute` escapes layout); `/packages/canvas/__tests__/constraints.test.ts` (left/right/top/bottom/center/scale/stretch per axis; mixed constraints; scale clamps to min/max).
-- DoD: layout runs in a web worker; incremental layout updates on a single element ≤ 6 ms p95; constraints are applied *after* auto-layout per `docs/editor-canvas.md` §1 Feature 7.
+- DoD: layout runs in a web worker; incremental layout updates on a single element ≤ 6 ms p95; constraints are applied _after_ auto-layout per `docs/editor-canvas.md` §1 Feature 7.
 
 **B.4 — Hit testing and scene graph reactive bridge.**
+
 - Files touched: `/packages/canvas/src/scene/scene-graph.ts`, `/packages/canvas/src/scene/hit-test.ts`, `/packages/canvas/src/scene/spatial-index.ts`.
 - Contracts added: `SceneNode` (discriminated union mirror of `Element`); `SceneGraph` API (`addNode`, `removeNode`, `updateTransform`, `reorder`, `query`); `SpatialIndex` (R-tree over layer bounds for guide calculation per `docs/editor-canvas.md` §1 Feature 3).
 - Tests written: `/packages/canvas/__tests__/hit-test.test.ts` (click on nested frame, group, locked layer, hidden layer); `/packages/canvas/__tests__/spatial-index.test.ts` (R-tree queries return correct guides in O(log n) up to 10,000 layers).
 - DoD: hit testing handles z-order, locked layers (skipped), hidden layers (skipped), and frame clipping correctly; spatial index is used by the guides feature in WS-C.
 
 **B.5 — Camera and zoom 2–6400 %.**
+
 - Files touched: `/packages/canvas/src/renderer/camera.ts`, `/packages/canvas/src/renderer/zoom.ts`, `/packages/canvas/src/renderer/tile-coords.ts`.
 - Contracts added: `Camera` (`{x, y, zoom}`, with origin offset for far frames); `zoomTo(value)`, `fit(bounds)`, `panBy(dx, dy)`.
 - Tests written: `/packages/canvas/__tests__/zoom.test.ts` (clamp to [0.02, 64.0]; Cmd-held snap to fit/100%/200%; 1:1 at zoom=1.0).
@@ -130,36 +137,42 @@ P03 has six workstreams. Each task lists files/packages touched, contracts added
 ### WS-C — Input pipeline and editor interactions (6 tasks)
 
 **C.1 — Pointer and keyboard arbitration.**
+
 - Files touched: `/packages/canvas/src/input/pointer.ts`, `/packages/canvas/src/input/keyboard.ts`, `/packages/canvas/src/input/gestures.ts`, `/packages/canvas/src/input/commands.ts`.
 - Contracts added: `PointerEvent` (normalized: `down`, `move`, `up`, `wheel`, `pinch`); `KeyboardEvent` (with platform mapping `Cmd` vs. `Ctrl`); semantic `Intent` (`beginDrag`, `beginMarquee`, `beginTextEdit`, `commitOp`).
 - Tests written: `/packages/canvas/__tests__/pointer.test.ts` (pointer-down to first frame ≤ 8 ms; multi-touch arbitration; long-press recognition); `/packages/canvas/__tests__/keyboard.test.ts` (platform mapping; focus-aware — text-input does not steal `B` for bold).
 - DoD: pointer and keyboard produce semantic intents only; they never touch the scene graph directly (per `docs/editor-canvas.md` §4.2).
 
 **C.2 — Drag-drop with snap modes (#2).**
+
 - Files touched: `/packages/canvas/src/commands/drag.ts`, `/packages/canvas/src/commands/transform.ts`, `/packages/canvas/src/input/snap.ts`.
 - Contracts added: `DragOp` (ephemeral during gesture, committed on pointer-up); `SnapMode` (`none | pixel | grid`); `Shift` (constrain), `Alt`/`Option` (disable snap).
 - Tests written: `/packages/canvas/__tests__/drag.test.ts` (drag starts within 8 ms; snap resolves to nearest multiple of `gridStep`; Shift constrains rotation/resize; auto-layout reflows on drop into a container).
 - DoD: drag generates a single committed `MoveOp` / `ResizeOp` on pointer-up; intermediate drags use an ephemeral layer that the history engine does not see.
 
 **C.3 — Smart guides, spacing hints, distribution (#3).**
+
 - Files touched: `/packages/canvas/src/guides/alignment.ts`, `/packages/canvas/src/guides/spacing.ts`, `/packages/canvas/src/guides/distribute.ts`, `/packages/canvas/src/renderer/overlay/guides.ts`.
 - Contracts added: `Guide` (`type: 'align' | 'spacing' | 'equal-spacing'`, `axis`, `position`, `targets`).
 - Tests written: `/packages/canvas/__tests__/alignment.test.ts` (R-tree query under 1 ms for 1,000 layers; equal-spacing detection tolerance `Math.max(1, 1/zoom)`); `/packages/canvas/__tests__/distribute.test.ts` (`evenly` and `toCanvas` modes).
 - DoD: guides render within one frame after pointer-move; locked/hidden layers are excluded per `docs/editor-canvas.md` §1 Feature 3; distribution commands equalize spacing correctly.
 
 **C.4 — Multi-select, group/ungroup, lock/hide (#4).**
+
 - Files touched: `/packages/canvas/src/selection/marquee.ts`, `/packages/canvas/src/selection/group.ts`, `/packages/canvas/src/selection/lock-hide.ts`.
 - Contracts added: `Selection` (immutable set of `ElementId`); `Marquee` (Shift add / Alt subtract); `GroupOp`, `UngroupOp`, `LockOp`, `HideOp`.
 - Tests written: `/packages/canvas/__tests__/marquee.test.ts` (Shift add, Alt subtract, locked layers skipped); `/packages/canvas/__tests__/group.test.ts` (children's absolute transforms preserved on ungroup; group is itself multi-selectable).
 - DoD: marquee respects locked layers visually and operationally; group preserves z-order; hidden layers are excluded from render and bounds queries but persist in the scene graph per `docs/editor-canvas.md` §1 Feature 4.
 
 **C.5 — Layers panel (#5).**
+
 - Files touched: `/apps/editor/src/panels/LayersPanel.tsx`, `/apps/editor/src/panels/LayersPanel.search.ts`, `/apps/editor/src/panels/LayersPanel.filter.ts`, `/apps/editor/src/panels/LayersPanel.dnd.tsx`.
 - Contracts consumed: `Element` discriminator; `componentInstanceId` filter; `dataSourceId` filter (slot exists; live data is P08).
 - Tests written: `/apps/editor/__tests__/layers-panel.test.tsx` (drag-reorder is a single `ReorderOp`; search matches `name`/`role`/`dataTags`; filter by type/locked/data source/component instance; "show hidden" toggle).
 - DoD: layers panel shows the full logical tree (including children of hidden frames); reorder across frames re-parents correctly; virtualization kicks in at 500 visible rows per `docs/editor-canvas.md` §7.2.
 
 **C.6 — Frames, rulers, guides, grid systems (#6, #10).**
+
 - Files touched: `/packages/canvas/src/frames/frame.ts`, `/packages/canvas/src/renderer/overlay/rulers.tsx`, `/packages/canvas/src/renderer/overlay/guides.tsx`, `/packages/canvas/src/grid/grid.ts`.
 - Contracts added: `Frame` (own viewport, scroll bounds, clip behavior); `Ruler`, `Guide`, `GridSpec` (square, columns, baseline); `overflow: visible | clip`.
 - Tests written: `/packages/canvas/__tests__/frame.test.ts` (nested frame clipping; `Cmd+Alt+Up` selects parent; column grids apply to auto-layout); `/packages/canvas/__tests__/rulers-guides.test.ts` (drag from ruler creates guide; guides snap to grid intersections).
@@ -168,18 +181,21 @@ P03 has six workstreams. Each task lists files/packages touched, contracts added
 ### WS-D — Vector pen, eyedropper, styles (#9 partial, #14, #15) (3 tasks)
 
 **D.1 — Vector pen primitive (#9 partial).**
+
 - Files touched: `/packages/canvas/src/pen/pen-tool.ts`, `/packages/canvas/src/pen/path.ts`, `/packages/canvas/src/pen/anchor.ts`.
 - Contracts added: `VectorPath` (cubic Béziers with `x1,y1,x2,y2` handles per anchor); `BooleanShape` (schema slot exists; runtime deferred); `fillRule: 'evenodd' | 'nonzero'`.
 - Tests written: `/packages/canvas/__tests__/pen.test.ts` (click adds anchor; double-click closes; `Esc` ends open path; `Alt` breaks handle symmetry).
 - DoD: pen creates vector layers in the schema; paths are saved/loaded; boolean ops slot exists but is not wired to runtime.
 
 **D.2 — Eyedropper (#15).**
+
 - Files touched: `/packages/canvas/src/eyedropper/index.ts`, `/packages/canvas/src/color/spaces.ts`, `/packages/canvas/src/color/theme-match.ts`.
 - Contracts added: `Eyedropper` API (`start()`, `sample(x, y)`, `cancel()`); `Color` in sRGB and P3; delta-E warning when out-of-gamut.
 - Tests written: `/packages/canvas/__tests__/eyedropper.test.ts` (`I` activates; 8x magnifier; continuous sampling at 8 Hz; multi-display; theme token matching when match found).
 - DoD: sampled colors are expressed in sRGB and converted to the deck's working color space; P3 fallback is hard-coded; lint flag for out-of-palette is wired (full lint rules land with theming in P07).
 
 **D.3 — Style engine: copy/paste/painter/match (#14).**
+
 - Files touched: `/packages/canvas/src/styles/style-snapshot.ts`, `/packages/canvas/src/styles/copy-paste.ts`, `/packages/canvas/src/styles/format-painter.ts`, `/packages/canvas/src/styles/theme-map.ts`.
 - Contracts added: `StyleSnapshot` (versioned via `StyleFormatVersion`); `copyStyleCommand`, `applyStyleCommand`; `themeMapping` block for cross-deck paste.
 - Tests written: `/packages/canvas/__tests__/style-copy-paste.test.ts` (`Cmd+Alt+C` copies style only; double-click enters persistent mode; `Esc` exits; cross-deck paste carries `themeMapping`).
@@ -188,18 +204,21 @@ P03 has six workstreams. Each task lists files/packages touched, contracts added
 ### WS-E — History engine, undo/redo, autosave (#12, #22 editor half) (3 tasks)
 
 **E.1 — History engine with command pattern.**
+
 - Files touched: `/packages/canvas/src/history/engine.ts`, `/packages/canvas/src/history/ops.ts`, `/packages/canvas/src/history/checkpoint.ts`, `/packages/canvas/src/history/snapshot.ts`.
 - Contracts added: `HistoryOp` (named, with `forward` and `inverse`); `HistoryEngine` API (`apply`, `undo`, `redo`, `checkpoint`, `restore`); `HistoryEntry` (`{ opId, opName, authorId?, timestamp, thumbnail? }`).
 - Tests written: `/packages/canvas/__tests__/history.test.ts` (unbounded depth; cross-deck operations as single entries; per-op `apply`/`inverse` symmetry; `opId` is ULID).
 - DoD: every operation is reversible; `Cmd+Z` / `Cmd+Shift+Z` work; branch-merge operations collapse to a single history entry (per `docs/editor-canvas.md` §1 Feature 12); named checkpoints are pinned history entries.
 
 **E.2 — Visual history timeline UI.**
+
 - Files touched: `/apps/editor/src/panels/HistoryPanel.tsx`, `/apps/canvas/src/history/thumbnail.ts`.
 - Contracts added: `HistoryPanel` shows entries with timestamp, author, and thumbnail; `scrubTo(opId)` previews the state without committing; `releaseScrub()` commits.
 - Tests written: `/apps/editor/__tests__/history-panel.test.tsx` (timeline renders ≥ 1,000 entries virtualized; scrub latency ≤ 200 ms per `docs/editor-canvas.md` §3.2; thumbnails computed for the example deck).
 - DoD: scrubbing previews state without committing until release; cross-deck operations appear as a single named entry; named checkpoints are pinned.
 
 **E.3 — Autosave queue integration (#22 editor half).**
+
 - Files touched: `/packages/sdk-ts/src/autosave-queue.ts` (extend P02 stub), `/apps/editor/src/lib/autosave.ts`, `/apps/editor/src/components/SyncIndicator.tsx`.
 - Contracts added: `SyncIndicator` shows `synced` / `syncing… N pending`; `flush()` is idempotent; quota exceeded returns graceful error.
 - Tests written: `/apps/editor/__tests__/autosave.test.ts` (every op durable within 16 ms; pending count updates per keystroke; `flush()` is idempotent; manual "save now" calls `DocumentLoader.save`).
@@ -208,18 +227,21 @@ P03 has six workstreams. Each task lists files/packages touched, contracts added
 ### WS-F — Keyboard, command palette, context menus (#13, #16, #18 partial) (3 tasks)
 
 **F.1 — Shortcut registry and Cmd+K palette.**
+
 - Files touched: `/packages/canvas/src/keyboard/registry.ts`, `/packages/canvas/src/keyboard/chord.ts`, `/apps/editor/src/panels/CommandPalette.tsx`, `/apps/editor/src/state/shortcut-map.ts`.
 - Contracts added: `Shortcut` (with conflict detection at registration); `Chord` (`G then G` → "go to slide", 1 s timeout); `CommandPalette` searches actions, layers, components, themes; remappable per-user.
 - Tests written: `/packages/canvas/__tests__/shortcut.test.ts` (conflict refused at registration; chord timer resets; platform mapping `Cmd` vs. `Ctrl`); `/apps/editor/__tests__/command-palette.test.tsx` (Cmd+K cold ≤ 50 ms, warm ≤ 16 ms; searches examples).
 - DoD: every action reachable via a single keystroke or via Cmd+K; chord timer resets on any keypress; remappings persist per-user in IndexedDB.
 
 **F.2 — Right-click context menus (#16).**
+
 - Files touched: `/apps/editor/src/panels/ContextMenu.tsx`, `/packages/canvas/src/menus/registry.ts`, `/apps/editor/src/menus/per-type.ts`.
 - Contracts added: `MenuEntry` registered per `LayerType`; sub-menus nest up to 2 levels (deeper flattens); keyboard navigation (arrow keys, Enter).
 - Tests written: `/apps/editor/__tests__/context-menu.test.tsx` (text layer menu differs from frame layer menu; long menus scroll; most-used pinned at top; feature-flag hidden items are not shown).
 - DoD: each layer type has a tuned menu; per-user pinning learns from frequency (initial implementation: last-used order, no telemetry-based ranking yet — that comes with P17 analytics).
 
 **F.3 — Cursor chat + ping (local UX, transport deferred) (#18 partial).**
+
 - Files touched: `/packages/canvas/src/presence/local-chat.ts`, `/packages/canvas/src/presence/ping.ts`, `/apps/editor/src/components/LocalPing.tsx`.
 - Contracts added: `localChat.open()` (T held); `localPing.emit()` (Cmd+Shift+P) — emits a 1.2 s expanding-ring animation at the cursor; both are local-only in P03.
 - Tests written: `/apps/editor/__tests__/local-ping.test.tsx` (Cmd+Shift+P emits visible ring; T-held opens chat input; rate limit 1 per 2 s).
@@ -235,7 +257,7 @@ P03 has six workstreams. Each task lists files/packages touched, contracts added
 
 ### 6.2 New tables
 
-- **No new tables in P03.** All schema is already in P02 (`decks`, `slides`, `elements`, `element_overrides`, `deck_schemas`, `component_instances`). P03 *reads and writes* through `DocumentLoader`; the only durable additions are:
+- **No new tables in P03.** All schema is already in P02 (`decks`, `slides`, `elements`, `element_overrides`, `deck_schemas`, `component_instances`). P03 _reads and writes_ through `DocumentLoader`; the only durable additions are:
   - Per-user shortcut map: persisted in IndexedDB (no Postgres table in P03; sync to a future `user_preferences` table is a P22 polish item).
   - Per-user context-menu pinning: same as above.
 
@@ -262,56 +284,56 @@ P03 has six workstreams. Each task lists files/packages touched, contracts added
 
 ## 7. Verification
 
-| # | Feature | Test | Expected result | Owner |
-|---|---|---|---|---|
-| 1 | #1 | Playwright e2e: open example deck, see 2 slides as frames on infinite canvas | All 10 layers render; world coords visible; pan in 4 directions | Editor lead |
-| 2 | #1 | Playwright e2e: drop a new slide at the cursor | Frame inserted at grid-snapped position; world origin offset maintained | Editor lead |
-| 3 | #2 | `packages/canvas/__tests__/drag.test.ts` | pointer-down → first frame ≤ 8 ms; snap to nearest `gridStep`; Shift constrains | Canvas lead |
-| 4 | #2 | Playwright e2e: drag element into auto-layout container | Container reflows on drop; one `MoveOp` committed | Editor lead |
-| 5 | #3 | `packages/canvas/__tests__/alignment.test.ts` | R-tree query under 1 ms for 1,000 layers; equal-spacing tolerance `Math.max(1, 1/zoom)` | Canvas lead |
-| 6 | #3 | Playwright e2e: select 3 elements, distribute evenly | Spacing equalized; locked/hidden layers excluded | Editor lead |
-| 7 | #4 | `packages/canvas/__tests__/marquee.test.ts` | Shift add, Alt subtract; locked layers skipped | Canvas lead |
-| 8 | #4 | Playwright e2e: group 3 layers, ungroup | Children's absolute transforms preserved | Editor lead |
-| 9 | #5 | `/apps/editor/__tests__/layers-panel.test.tsx` | Drag-reorder = 1 `ReorderOp`; search by `name`/`role`/`dataTags` | Editor lead |
-| 10 | #5 | Playwright e2e: filter by `type=text` | Only text layers shown; show-hidden toggle works | Editor lead |
-| 11 | #6 | `packages/canvas/__tests__/frame.test.ts` | Nested frame clipping; `Cmd+Alt+Up` selects parent | Canvas lead |
-| 12 | #7 | `packages/canvas/__tests__/auto-layout.test.ts` | Yoga layout matches flexbox semantics | Canvas lead |
-| 13 | #8 | `packages/canvas/__tests__/constraints.test.ts` | left/right/top/bottom/center/scale/stretch per axis; scale clamps | Canvas lead |
-| 14 | #9 | `packages/canvas/__tests__/pen.test.ts` | Click anchor; double-click closes; `Esc` ends; `Alt` breaks handle | Canvas lead |
-| 15 | #10 | `packages/canvas/__tests__/rulers-guides.test.ts` | Rulers show world coords; drag from ruler creates guide; guides snap to grid | Canvas lead |
-| 16 | #11 | `packages/canvas/__tests__/zoom.test.ts` | Clamp [0.02, 64.0]; Cmd-snap to 100%/200%; 1:1 at 100% | Canvas lead |
-| 17 | #11 | Playwright perf: 5,000 layers, drag, FPS | ≥ 30 FPS p95 on reference hardware | Editor lead |
-| 18 | #11 | Playwright perf: 100 layers, drag, FPS | ≥ 55 FPS p95 on reference hardware | Editor lead |
-| 19 | #12 | `packages/canvas/__tests__/history.test.ts` | Unbounded depth; per-op `apply`/`inverse` symmetry; ULID `opId` | Canvas lead |
-| 20 | #12 | Playwright e2e: scrub history | Latency ≤ 200 ms per scrub; release commits | Editor lead |
-| 21 | #13 | `packages/canvas/__tests__/shortcut.test.ts` | Conflict refused; chord timer; platform mapping | Canvas lead |
-| 22 | #13 | Playwright e2e: Cmd+K, search "frame" | Cold ≤ 50 ms; warm ≤ 16 ms; lists frames in deck | Editor lead |
-| 23 | #14 | `packages/canvas/__tests__/style-copy-paste.test.ts` | `Cmd+Alt+C`; double-click persistent; cross-deck carries `themeMapping` | Canvas lead |
-| 24 | #15 | `packages/canvas/__tests__/eyedropper.test.ts` | 8x magnifier; 8 Hz continuous sample; multi-display; P3 delta-E | Canvas lead |
-| 25 | #16 | `/apps/editor/__tests__/context-menu.test.tsx` | Per-type menus; long menu scroll; feature-flagged items hidden | Editor lead |
-| 26 | #18 | `/apps/editor/__tests__/local-ping.test.tsx` | Cmd+Shift+P emits visible ring; rate limit 1/2s | Editor lead |
-| 27 | #22 | `packages/sdk-ts/__tests__/autosave-queue.test.ts` | Op durable in 16 ms; pending count updates | Editor lead |
-| 28 | #22 | Playwright e2e: reload page mid-edit | Queued ops replay; "syncing… N pending" indicator shows | Editor lead |
-| 29 | A11y | `/apps/editor/__tests__/axe.test.tsx` | axe-core clean on every panel; keyboard nav full | UX lead |
-| 30 | Adapter | `packages/canvas/__tests__/adapter-selection.test.ts` | WebGPU → WebGL2 → Canvas2D fallback; user-visible warning on Canvas2D | Canvas lead |
-| 31 | Adapter | Playwright e2e: force Canvas2D via feature flag | Warning shown; editing still works | Editor lead |
-| 32 | Bundle | `pnpm --filter @domio/editor build` | ≤ 1.5 MB gzipped; source maps present | Devx |
+| #   | Feature | Test                                                                         | Expected result                                                                         | Owner       |
+| --- | ------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ----------- |
+| 1   | #1      | Playwright e2e: open example deck, see 2 slides as frames on infinite canvas | All 10 layers render; world coords visible; pan in 4 directions                         | Editor lead |
+| 2   | #1      | Playwright e2e: drop a new slide at the cursor                               | Frame inserted at grid-snapped position; world origin offset maintained                 | Editor lead |
+| 3   | #2      | `packages/canvas/__tests__/drag.test.ts`                                     | pointer-down → first frame ≤ 8 ms; snap to nearest `gridStep`; Shift constrains         | Canvas lead |
+| 4   | #2      | Playwright e2e: drag element into auto-layout container                      | Container reflows on drop; one `MoveOp` committed                                       | Editor lead |
+| 5   | #3      | `packages/canvas/__tests__/alignment.test.ts`                                | R-tree query under 1 ms for 1,000 layers; equal-spacing tolerance `Math.max(1, 1/zoom)` | Canvas lead |
+| 6   | #3      | Playwright e2e: select 3 elements, distribute evenly                         | Spacing equalized; locked/hidden layers excluded                                        | Editor lead |
+| 7   | #4      | `packages/canvas/__tests__/marquee.test.ts`                                  | Shift add, Alt subtract; locked layers skipped                                          | Canvas lead |
+| 8   | #4      | Playwright e2e: group 3 layers, ungroup                                      | Children's absolute transforms preserved                                                | Editor lead |
+| 9   | #5      | `/apps/editor/__tests__/layers-panel.test.tsx`                               | Drag-reorder = 1 `ReorderOp`; search by `name`/`role`/`dataTags`                        | Editor lead |
+| 10  | #5      | Playwright e2e: filter by `type=text`                                        | Only text layers shown; show-hidden toggle works                                        | Editor lead |
+| 11  | #6      | `packages/canvas/__tests__/frame.test.ts`                                    | Nested frame clipping; `Cmd+Alt+Up` selects parent                                      | Canvas lead |
+| 12  | #7      | `packages/canvas/__tests__/auto-layout.test.ts`                              | Yoga layout matches flexbox semantics                                                   | Canvas lead |
+| 13  | #8      | `packages/canvas/__tests__/constraints.test.ts`                              | left/right/top/bottom/center/scale/stretch per axis; scale clamps                       | Canvas lead |
+| 14  | #9      | `packages/canvas/__tests__/pen.test.ts`                                      | Click anchor; double-click closes; `Esc` ends; `Alt` breaks handle                      | Canvas lead |
+| 15  | #10     | `packages/canvas/__tests__/rulers-guides.test.ts`                            | Rulers show world coords; drag from ruler creates guide; guides snap to grid            | Canvas lead |
+| 16  | #11     | `packages/canvas/__tests__/zoom.test.ts`                                     | Clamp [0.02, 64.0]; Cmd-snap to 100%/200%; 1:1 at 100%                                  | Canvas lead |
+| 17  | #11     | Playwright perf: 5,000 layers, drag, FPS                                     | ≥ 30 FPS p95 on reference hardware                                                      | Editor lead |
+| 18  | #11     | Playwright perf: 100 layers, drag, FPS                                       | ≥ 55 FPS p95 on reference hardware                                                      | Editor lead |
+| 19  | #12     | `packages/canvas/__tests__/history.test.ts`                                  | Unbounded depth; per-op `apply`/`inverse` symmetry; ULID `opId`                         | Canvas lead |
+| 20  | #12     | Playwright e2e: scrub history                                                | Latency ≤ 200 ms per scrub; release commits                                             | Editor lead |
+| 21  | #13     | `packages/canvas/__tests__/shortcut.test.ts`                                 | Conflict refused; chord timer; platform mapping                                         | Canvas lead |
+| 22  | #13     | Playwright e2e: Cmd+K, search "frame"                                        | Cold ≤ 50 ms; warm ≤ 16 ms; lists frames in deck                                        | Editor lead |
+| 23  | #14     | `packages/canvas/__tests__/style-copy-paste.test.ts`                         | `Cmd+Alt+C`; double-click persistent; cross-deck carries `themeMapping`                 | Canvas lead |
+| 24  | #15     | `packages/canvas/__tests__/eyedropper.test.ts`                               | 8x magnifier; 8 Hz continuous sample; multi-display; P3 delta-E                         | Canvas lead |
+| 25  | #16     | `/apps/editor/__tests__/context-menu.test.tsx`                               | Per-type menus; long menu scroll; feature-flagged items hidden                          | Editor lead |
+| 26  | #18     | `/apps/editor/__tests__/local-ping.test.tsx`                                 | Cmd+Shift+P emits visible ring; rate limit 1/2s                                         | Editor lead |
+| 27  | #22     | `packages/sdk-ts/__tests__/autosave-queue.test.ts`                           | Op durable in 16 ms; pending count updates                                              | Editor lead |
+| 28  | #22     | Playwright e2e: reload page mid-edit                                         | Queued ops replay; "syncing… N pending" indicator shows                                 | Editor lead |
+| 29  | A11y    | `/apps/editor/__tests__/axe.test.tsx`                                        | axe-core clean on every panel; keyboard nav full                                        | UX lead     |
+| 30  | Adapter | `packages/canvas/__tests__/adapter-selection.test.ts`                        | WebGPU → WebGL2 → Canvas2D fallback; user-visible warning on Canvas2D                   | Canvas lead |
+| 31  | Adapter | Playwright e2e: force Canvas2D via feature flag                              | Warning shown; editing still works                                                      | Editor lead |
+| 32  | Bundle  | `pnpm --filter @domio/editor build`                                          | ≤ 1.5 MB gzipped; source maps present                                                   | Devx        |
 
 ## 8. Risks & open decisions
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| **GPU adapter variance** — WebGPU/WebGL2 inconsistencies across browsers | Mid | Adapter selection unit-tested; Canvas2D fallback is always available; per-browser test matrix in Playwright (Chrome stable, Edge, Firefox, Safari Tech Preview) |
-| **Frame budget regression** at 5,000 layers | High | Continuous perf tracking; p95 FPS gate in CI; render profiling in DevTools when budget exceeded |
-| **Bundle size bloat** — editor bundle exceeds 1.5 MB | High | Bundle analyzer in CI; per-route code splitting; Vite tree-shaking; defer non-critical libs (e.g., Lottie) to lazy chunks |
-| **History engine unbounded growth** | Mid | Disk-quota bound; 5,000-op snapshot compaction; client prunes older ops on snapshot receipt (logic from `docs/editor-canvas.md` §3.4) |
-| **Auto-layout interaction with constraints** — edge cases | Mid | `position: absolute` escapes; constraints run *after* layout; comprehensive fixtures in `packages/canvas/__tests__/auto-layout-constraints.test.ts` |
-| **Pen tool + boolean ops confusion** — users may expect booleans in P03 | Low | Schema slot exists; runtime deferred; UX explicitly says "combine shapes" lands later; lint message in P03 |
-| **Local ping without remote broadcast** — confusing for multi-user testing | Low | Banner "presence transport not yet enabled" in P03; `LocalPresenceAdapter` is a stub |
-| **CRDT layering (P04) requires changing the history engine** | Mid | P03's history engine emits typed `HistoryOp` with `forward`/`inverse` — these map cleanly to Yjs updates in P04; ADR required before P04 starts |
-| **WebGPU-only when available vs parallel WebGL2 always** (OD-STK-01) | Low | Default to adapter selection (WebGPU when present, WebGL2 otherwise); document in code; revisit if profiling shows WebGL2 startup cost |
-| **OSM-ARCH-06 — ORM choice** | Low (resolved in P02) | Drizzle for query building, raw SQL for migrations |
-| **Layer panel virtualization library choice** | Low | Default to `react-virtuoso` (well-maintained, headless); alternative TanStack Virtual; pick during implementation, document in PR |
+| Risk                                                                       | Impact                | Mitigation                                                                                                                                                      |
+| -------------------------------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **GPU adapter variance** — WebGPU/WebGL2 inconsistencies across browsers   | Mid                   | Adapter selection unit-tested; Canvas2D fallback is always available; per-browser test matrix in Playwright (Chrome stable, Edge, Firefox, Safari Tech Preview) |
+| **Frame budget regression** at 5,000 layers                                | High                  | Continuous perf tracking; p95 FPS gate in CI; render profiling in DevTools when budget exceeded                                                                 |
+| **Bundle size bloat** — editor bundle exceeds 1.5 MB                       | High                  | Bundle analyzer in CI; per-route code splitting; Vite tree-shaking; defer non-critical libs (e.g., Lottie) to lazy chunks                                       |
+| **History engine unbounded growth**                                        | Mid                   | Disk-quota bound; 5,000-op snapshot compaction; client prunes older ops on snapshot receipt (logic from `docs/editor-canvas.md` §3.4)                           |
+| **Auto-layout interaction with constraints** — edge cases                  | Mid                   | `position: absolute` escapes; constraints run _after_ layout; comprehensive fixtures in `packages/canvas/__tests__/auto-layout-constraints.test.ts`             |
+| **Pen tool + boolean ops confusion** — users may expect booleans in P03    | Low                   | Schema slot exists; runtime deferred; UX explicitly says "combine shapes" lands later; lint message in P03                                                      |
+| **Local ping without remote broadcast** — confusing for multi-user testing | Low                   | Banner "presence transport not yet enabled" in P03; `LocalPresenceAdapter` is a stub                                                                            |
+| **CRDT layering (P04) requires changing the history engine**               | Mid                   | P03's history engine emits typed `HistoryOp` with `forward`/`inverse` — these map cleanly to Yjs updates in P04; ADR required before P04 starts                 |
+| **WebGPU-only when available vs parallel WebGL2 always** (OD-STK-01)       | Low                   | Default to adapter selection (WebGPU when present, WebGL2 otherwise); document in code; revisit if profiling shows WebGL2 startup cost                          |
+| **OSM-ARCH-06 — ORM choice**                                               | Low (resolved in P02) | Drizzle for query building, raw SQL for migrations                                                                                                              |
+| **Layer panel virtualization library choice**                              | Low                   | Default to `react-virtuoso` (well-maintained, headless); alternative TanStack Virtual; pick during implementation, document in PR                               |
 
 **Open decisions to resolve during P03:**
 

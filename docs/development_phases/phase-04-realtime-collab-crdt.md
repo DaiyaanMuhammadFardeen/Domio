@@ -23,11 +23,13 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 ## 3. Scope
 
 **In scope (feature numbers):**
+
 - #17 Multiplayer live editing with cursors, selections, presence avatars
-- #19 Branching & merging of decks — *infrastructure only* (branch creation, switch, lineage, op-log isolation). The merge resolution UI and merge request lifecycle fully land in Phase 05.
+- #19 Branching & merging of decks — _infrastructure only_ (branch creation, switch, lineage, op-log isolation). The merge resolution UI and merge request lifecycle fully land in Phase 05.
 - #21 Offline editing with conflict-free sync on reconnect (CRDT-based)
 
 **Out of scope (handled in later phases):**
+
 - Suggestion mode (`#182`) and the deck merge request visual diff UI (`#183`) — Phase 05 / Phase 18.
 - Named checkpoints and visual diffs (`#20`) — Phase 05.
 - Comments and thread resolution (`#179`) — Phase 18.
@@ -38,12 +40,14 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 ## 4. Dependencies
 
 **Upstream phases (must be complete):**
+
 - **Phase 00** — repo, monorepo conventions, contract rule, generated clients, contract CI.
 - **Phase 01** — observability SDK, OpenTelemetry, Prometheus, NATS JetStream, Redis/Valkey, CI/CD pipeline, container images.
 - **Phase 02** — `decks`, `slides`, `elements`, `crdt_logs` table skeleton; `packages/schema`; deck JSON shape.
 - **Phase 03** — canvas editor MVP, scene graph, history engine, single-user autosave, command dispatcher; the inputs that produce Yjs updates come from Phase 03's history engine.
 
 **Downstream phases (this phase unblocks):**
+
 - **Phase 05** — reads the CRDT log and sub-documents to build versioned snapshots, branches, merge requests, and 3-way diff.
 - **Phase 06** — components run on the same CRDT substrate; per-slide sub-documents carry component overrides.
 - **Phase 10** — prototype variables and interactions ride the same CRDT layer.
@@ -57,6 +61,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 **Owner:** Realtime lead. **Critical path task.** Run in parallel with Stream B.
 
 **A.1 Service skeleton and WS endpoint**
+
 - Files: `/services/realtime-gateway/cmd/rtgw/main.go`, `/services/realtime-gateway/internal/{router,handshake,session}.go`, `/services/realtime-gateway/internal/transport/ws.go`, `/services/realtime-gateway/internal/transport/grpc.go`.
 - Packages added: `services/realtime-gateway` (Go), `services/realtime-gateway/gen/domio/realtime/v1` (generated), `packages/sdk-go/realtime` (generated client wrapper).
 - Contracts added: `contracts/proto/domio/realtime/v1/realtime.proto` (Hello, Welcome, Op, OpAck, Presence, PeerJoined, PeerLeft, BranchSwitch, BranchHead, Error); generated clients committed under `services/realtime-gateway/gen/`.
@@ -66,6 +71,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 - DoD: a deck subscription succeeds with a valid JWT, returns the server's current HLC, and streams live ops to the client.
 
 **A.2 NATS JetStream integration and topic layout**
+
 - Files: `/services/realtime-gateway/internal/bus/nats.go`, `/services/realtime-gateway/internal/topics/topics.go`.
 - Topics: `realtime.deck.{deckId}.crdt` (CRDT updates), `realtime.deck.{deckId}.presence` (presence deltas), `realtime.deck.{deckId}.meta` (peer joins/leaves, branch switches).
 - Use JetStream consumer groups per (deck, branch) for replay; reject "consume from latest" only — must support resume from `clientVectorHLC`.
@@ -73,6 +79,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 - DoD: a second tenant process can replay all missed ops after a 30 s network partition and converge.
 
 **A.3 Presence channel and ephemeral state**
+
 - Files: `/services/realtime-gateway/internal/presence/{redis.go,fanout.go,avatar.go}`, `/services/realtime-gateway/internal/presence/chat.go`, `/services/realtime-gateway/internal/presence/ping.go`.
 - Backed by Redis with `EXPIRE 60` per session; presence is rebuilt deterministically on reconnect from the join sequence.
 - Cursor updates throttled to 30 Hz client-side; chat messages rate-limited to 1 per 2 s per user; ping rate-limited to 1 per 2 s.
@@ -80,6 +87,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 - DoD: cursor positions render on receivers within 80 ms p95 on reference LAN; chat bubbles auto-fade after 8 s.
 
 **A.4 HLC clock, op validation, idempotency**
+
 - Files: `/services/realtime-gateway/internal/hlc/hlc.go`, `/services/realtime-gateway/internal/ops/validate.go`.
 - Every op carries `op_id` (ULID), `author_id`, `hlc`, `parent_hlc`. Server validates HLC ordering, rejects reordered duplicates, and applies idempotency via `(op_id)` primary key.
 - Tests: unit table-driven for HLC monotonicity, op replay idempotency, malicious op rejection.
@@ -90,6 +98,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 **Owner:** Editor lead. **Critical path task.** Run in parallel with Stream A.
 
 **B.1 Yjs substrate and sub-document map**
+
 - Files: `/packages/yjs-shared/src/index.ts`, `/packages/yjs-shared/src/subdocs.ts`, `/packages/yjs-shared/src/awareness.ts`, `/apps/editor/src/sync/{provider,subdocs,awareness-client}.ts`.
 - One `Y.Doc` per slide; one `Y.Doc` per theme; one `Y.Doc` for deck-level metadata (slide order, names).
 - Sub-document map: `deck:{deckId}` → root metadata doc, `slide:{slideId}` → slide doc, `theme:{themeId}` → theme doc. The deck root doc holds the slide RGA order and per-slide sub-doc GUID refs.
@@ -99,6 +108,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 - DoD: a single slide with 500 elements converges deterministically across three browser instances.
 
 **B.2 Local op queue, IndexedDB persistence, offline**
+
 - Files: `/apps/editor/src/sync/{local-queue.ts,indexeddb-provider.ts,backoff.ts}`, `/packages/yjs-shared/src/persistence.ts`.
 - y-indexeddb persists the full sub-doc set; outbound queue persists until server ack; inbound queue applies Yjs updates in causal order.
 - Network drop detection: 2 missed heartbeats @ 5 s = offline; recover on reconnect by sending local vector HLC gap to server.
@@ -106,6 +116,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 - DoD: offline works in production-equivalent Chromium with the service worker cache + IndexedDB queue.
 
 **B.3 CRDT ⇄ history engine bridge**
+
 - Files: `/apps/editor/src/sync/bridge.ts`, `/apps/editor/src/history/command-pattern.ts` (extended), `/apps/editor/src/history/remote-op-applier.ts`.
 - Local commands continue to write to the history engine (Phase 03). A new "bridge" turns local committed commands into Yjs updates and emits remote ops as new history entries tagged with `author_id` of the remote user.
 - Bidirectional: a remote op applies to the local replica and emits a single `RemoteOpApplied` history entry (no per-op undo on the remote side).
@@ -113,6 +124,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 - DoD: undo on a multi-client session undoes only the local user's edits, never remote edits.
 
 **B.4 Awareness / presence client**
+
 - Files: `/apps/editor/src/sync/awareness-client.ts`, `/apps/editor/src/canvas/presence-overlay.tsx`, `/apps/editor/src/canvas/cursor-chat.tsx`, `/apps/editor/src/canvas/pointer-ping.tsx`.
 - Uses Yjs's `Awareness` protocol over the realtime gateway's presence channel. Cursor colors are deterministic from `user_id` hash.
 - "Follow user" feature: clicking an avatar in the avatar list pins the local viewport to the remote user's viewport.
@@ -123,16 +135,19 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 **Owner:** Platform lead. **Run in parallel with Streams A and B.**
 
 **C.1 Proto contracts**
+
 - Files: `contracts/proto/domio/realtime/v1/realtime.proto`, `contracts/proto/domio/controlplane/v1/command.proto` (extended for branch ops), `contracts/proto/domio/identity/v1/auth.proto` (extended with `session_kind`).
 - Generated clients commit to `services/realtime-gateway/gen/`, `services/control-plane/gen/`, `packages/sdk-go/realtime/`, `packages/sdk-ts/realtime/`.
 - CI: `buf breaking --against '.git#branch=main'` must pass.
 - DoD: any breaking change between phases fails CI.
 
 **C.2 OpenAPI touch-ups**
+
 - Files: `contracts/openapi/v1/realtime.yaml` (sync status, presence status endpoints), `contracts/openapi/v1/internal.yaml` (admin-only ops replay).
 - DoD: SDKs regenerate without manual edits.
 
 **C.3 Observability and metrics**
+
 - Files: `/services/realtime-gateway/internal/observability/metrics.go`, `/apps/editor/src/observability/rum.ts`.
 - Metrics: `sync_op_apply_duration_ms`, `sync_op_round_trip_ms`, `sync_active_connections`, `sync_crdt_convergence_ms`, `presence_active_sessions`, `presence_cursor_latency_ms`.
 - Traces: spans for `realtime.hello`, `realtime.op.apply`, `realtime.presence.fanout`, `yjs.bridge.apply`.
@@ -144,6 +159,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 **Owner:** QA + SRE. **Run after Streams A, B, C merge.**
 
 **D.1 Convergence tests**
+
 - Files: `/tests/convergence/yjs-scenarios.test.ts`, `/tests/convergence/presence.test.ts`.
 - Scenario corpus: 200 generated concurrent-edit scripts (concurrent property edits, concurrent reorders, concurrent text + image, concurrent drag across two decks) plus 50 presence scripts.
 - For each scenario: run two replicas offline, sync, assert byte-equal `Y.encodeStateAsUpdate(state)` and `Y.encodeStateVector(state)`.
@@ -151,6 +167,7 @@ Phase 04 turns the single-user editor from Phase 03 into a multiplayer experienc
 - DoD: 0 failing scenarios on 100 different seeds.
 
 **D.2 Load and chaos**
+
 - Files: `/tests/load/k6-realtime.js`, `/tests/chaos/toxiproxy-realtime.yaml`.
 - 50 concurrent editors per deck, 10 decks, 1k cursors per session, op sustained 200 ops/sec for 10 minutes; assert p95 round-trip < 200 ms.
 - Toxiproxy: 300 ms latency + 1% loss; assert graceful degradation and no data loss.
@@ -211,38 +228,38 @@ Reference `/docs/05-data-database-design.md`. Migrations owned by data platform;
 
 ## 7. Verification
 
-| Feature | Test | Expected result | Owner |
-|---------|------|-----------------|-------|
-| #17 cursor fan-out | 2 browsers edit same deck over LAN, move cursor continuously | Remote cursor renders within 80 ms p95 | Editor lead |
-| #17 selection visibility | User A selects layer; User B sees matching colored outline | Selection rendered within 120 ms p95 | Editor lead |
-| #17 avatar join/leave | User C joins; Users A and B see avatar chip | Avatar visible within 200 ms | Editor lead |
-| #18 cursor chat | User A holds T, types, sends | Chat bubble appears on User B at the same world position, fades after 8 s | Editor lead |
-| #18 pointer ping | User A presses Cmd+Shift+P | 1.2 s expanding ring visible on User B at the same world position | Editor lead |
-| #19 branch infra (split) | Create branch from named checkpoint via REST | `branches` row created; `branch_id` carried in subsequent ops | Realtime lead |
-| #19 branch switch | Editor calls branch switch | Local replica swaps to branch sub-doc; remote peers see branch change | Editor lead |
-| #21 offline edit | Chrome devtools: offline 5 min, 200 ops, reconnect | Server state synced to identical Yjs state; no data loss | Editor lead |
-| #21 convergence | 200-script convergence suite | 0 failing scenarios; byte-equal state on both replicas | QA lead |
-| #21 reconnect | WS reconnect after 30 s partition | Replay from last HLC; deterministic state | Realtime lead |
-| HLC safety | 100k ops replay test | Final state identical to live | Realtime lead |
-| Idempotency | Submit same op 3× | Single apply; rest are no-op | Realtime lead |
-| Load 50/10 | k6 50 editors × 10 decks, 200 ops/sec | p95 round-trip < 200 ms; no dropped ops | SRE |
-| Chaos | Toxiproxy 300 ms latency + 1% loss | No data loss; degraded latency only | SRE |
-| Security gate | Threat model diff for `realtime.proto` enumerated and reviewed | All risks mitigated or explicitly accepted | Security lead |
-| Observability | Grafana dashboard with required metrics | All panels populated in staging | SRE |
-| Contract CI | `buf breaking` + OpenAPI lint | Pass on PR | Platform lead |
+| Feature                  | Test                                                           | Expected result                                                           | Owner         |
+| ------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------- |
+| #17 cursor fan-out       | 2 browsers edit same deck over LAN, move cursor continuously   | Remote cursor renders within 80 ms p95                                    | Editor lead   |
+| #17 selection visibility | User A selects layer; User B sees matching colored outline     | Selection rendered within 120 ms p95                                      | Editor lead   |
+| #17 avatar join/leave    | User C joins; Users A and B see avatar chip                    | Avatar visible within 200 ms                                              | Editor lead   |
+| #18 cursor chat          | User A holds T, types, sends                                   | Chat bubble appears on User B at the same world position, fades after 8 s | Editor lead   |
+| #18 pointer ping         | User A presses Cmd+Shift+P                                     | 1.2 s expanding ring visible on User B at the same world position         | Editor lead   |
+| #19 branch infra (split) | Create branch from named checkpoint via REST                   | `branches` row created; `branch_id` carried in subsequent ops             | Realtime lead |
+| #19 branch switch        | Editor calls branch switch                                     | Local replica swaps to branch sub-doc; remote peers see branch change     | Editor lead   |
+| #21 offline edit         | Chrome devtools: offline 5 min, 200 ops, reconnect             | Server state synced to identical Yjs state; no data loss                  | Editor lead   |
+| #21 convergence          | 200-script convergence suite                                   | 0 failing scenarios; byte-equal state on both replicas                    | QA lead       |
+| #21 reconnect            | WS reconnect after 30 s partition                              | Replay from last HLC; deterministic state                                 | Realtime lead |
+| HLC safety               | 100k ops replay test                                           | Final state identical to live                                             | Realtime lead |
+| Idempotency              | Submit same op 3×                                              | Single apply; rest are no-op                                              | Realtime lead |
+| Load 50/10               | k6 50 editors × 10 decks, 200 ops/sec                          | p95 round-trip < 200 ms; no dropped ops                                   | SRE           |
+| Chaos                    | Toxiproxy 300 ms latency + 1% loss                             | No data loss; degraded latency only                                       | SRE           |
+| Security gate            | Threat model diff for `realtime.proto` enumerated and reviewed | All risks mitigated or explicitly accepted                                | Security lead |
+| Observability            | Grafana dashboard with required metrics                        | All panels populated in staging                                           | SRE           |
+| Contract CI              | `buf breaking` + OpenAPI lint                                  | Pass on PR                                                                | Platform lead |
 
 ## 8. Risks & open decisions
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Yjs sub-doc fan-out cost blows up at 500+ slides | medium | high | Per-slide sub-doc isolation; snapshot every 5,000 ops; benchmark on a 1,000-slide synthetic deck before G1 |
-| HLC clock skew breaks causal ordering across regions | medium | high | Use monotonic HLC with PTP-synced clocks in production; assert clock-drift alerts in Phase 01 |
-| WebSocket connection storms on deck open | medium | high | Per-tenant connection quotas (per `/docs/04` §4.12); jittered backoff on client |
-| IndexedDB quota exceeds browser limit on long offline sessions | medium | medium | Apply ring buffer of last 5,000 ops per slide; warn on >80% quota |
-| Concurrent ordering of slide RGA collapses under heavy reorder | low | high | Phase 02 RGA choice; convergence test in §D.1 catches regressions |
-| Adoption of Liveblocks/Ably managed fallback | n/a | cost | Adapter in place; decision deferred to `/docs/04` OD-ARCH-02 |
-| Cursor color hashing collisions | low | low | Stable seeded hash + uniqueness fallback to a palette of 64 deterministic colors |
-| Open: WebGPU vs WebGL2 cursor overlay precision | low | low | Use offscreen canvas + GPU transforms; OD-STK-01 |
+| Risk                                                           | Likelihood | Impact | Mitigation                                                                                                 |
+| -------------------------------------------------------------- | ---------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| Yjs sub-doc fan-out cost blows up at 500+ slides               | medium     | high   | Per-slide sub-doc isolation; snapshot every 5,000 ops; benchmark on a 1,000-slide synthetic deck before G1 |
+| HLC clock skew breaks causal ordering across regions           | medium     | high   | Use monotonic HLC with PTP-synced clocks in production; assert clock-drift alerts in Phase 01              |
+| WebSocket connection storms on deck open                       | medium     | high   | Per-tenant connection quotas (per `/docs/04` §4.12); jittered backoff on client                            |
+| IndexedDB quota exceeds browser limit on long offline sessions | medium     | medium | Apply ring buffer of last 5,000 ops per slide; warn on >80% quota                                          |
+| Concurrent ordering of slide RGA collapses under heavy reorder | low        | high   | Phase 02 RGA choice; convergence test in §D.1 catches regressions                                          |
+| Adoption of Liveblocks/Ably managed fallback                   | n/a        | cost   | Adapter in place; decision deferred to `/docs/04` OD-ARCH-02                                               |
+| Cursor color hashing collisions                                | low        | low    | Stable seeded hash + uniqueness fallback to a palette of 64 deterministic colors                           |
+| Open: WebGPU vs WebGL2 cursor overlay precision                | low        | low    | Use offscreen canvas + GPU transforms; OD-STK-01                                                           |
 
 ## 9. Demo
 

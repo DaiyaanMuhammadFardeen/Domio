@@ -19,11 +19,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 
-import {
-  adjustBidirSlider,
-  listBidirSliders,
-  type BidirSlider,
-} from '@/lib/two-way-service';
+import { adjustBidirSlider, listBidirSliders, type BidirSlider } from '@/lib/two-way-service';
 
 export interface SliderBidirectionalProps {
   readonly slideId: string;
@@ -31,11 +27,7 @@ export interface SliderBidirectionalProps {
   /** Optional loader override (used by tests). */
   readonly loadSliders?: (slideId: string) => Promise<BidirSlider[]>;
   /** Optional adjuster override (used by tests). */
-  readonly onAdjust?: (
-    slideId: string,
-    sliderId: string,
-    value: number,
-  ) => Promise<BidirSlider>;
+  readonly onAdjust?: (slideId: string, sliderId: string, value: number) => Promise<BidirSlider>;
   /** Optional current presenter value (synced from the engine). */
   readonly presenterValue?: number;
   readonly dataTestId?: string;
@@ -58,7 +50,9 @@ export function SliderBidirectional({
   const [error, setError] = useState<string | null>(null);
 
   const adjustImpl = useMemo(
-    () => onAdjust ?? ((sid: string, sidId: string, value: number) => adjustBidirSlider(sid, sidId, value)),
+    () =>
+      onAdjust ??
+      ((sid: string, sidId: string, value: number) => adjustBidirSlider(sid, sidId, value)),
     [onAdjust],
   );
 

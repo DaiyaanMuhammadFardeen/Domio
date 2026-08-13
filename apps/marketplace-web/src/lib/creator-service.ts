@@ -161,9 +161,7 @@ export async function getCreator(handle: string): Promise<CreatorProfile | null>
 
 export async function listFeaturedCreators(): Promise<FeaturedCreator[]> {
   try {
-    const remote = await apiFetch<FeaturedCreator[]>(
-      '/v1/marketplace/creators/featured',
-    );
+    const remote = await apiFetch<FeaturedCreator[]>('/v1/marketplace/creators/featured');
     if (remote && Array.isArray(remote) && remote.length > 0) return remote;
   } catch {
     // fall through to seed

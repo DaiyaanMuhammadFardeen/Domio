@@ -4,9 +4,15 @@ import { fileURLToPath } from 'node:url';
 export default defineConfig({
   resolve: {
     alias: {
-      '@domio/schema-prop': fileURLToPath(new URL('./../../packages/schema-prop/src/index.ts', import.meta.url)),
-      '@domio/schema': fileURLToPath(new URL('./../../packages/schema/src/index.ts', import.meta.url)),
-      '@domio/components': fileURLToPath(new URL('./../../packages/components/src/index.ts', import.meta.url)),
+      '@domio/schema-prop': fileURLToPath(
+        new URL('./../../packages/schema-prop/src/index.ts', import.meta.url),
+      ),
+      '@domio/schema': fileURLToPath(
+        new URL('./../../packages/schema/src/index.ts', import.meta.url),
+      ),
+      '@domio/components': fileURLToPath(
+        new URL('./../../packages/components/src/index.ts', import.meta.url),
+      ),
     },
   },
   test: {

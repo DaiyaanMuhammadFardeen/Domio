@@ -21,7 +21,10 @@ export function videoRoutes(service: AssetService): Hono {
   app.get('/v1/video', async (c) => {
     const workspaceId = c.req.query('workspace_id');
     if (!workspaceId) {
-      return c.json({ error: 'Missing required query param: workspace_id', code: 'VALIDATION_ERROR' }, 400);
+      return c.json(
+        { error: 'Missing required query param: workspace_id', code: 'VALIDATION_ERROR' },
+        400,
+      );
     }
     const items = await service.listVideoAssets(workspaceId);
     return c.json({ items });
@@ -32,11 +35,14 @@ export function videoRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validateCreateVideoAsset(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
     const video = await service.createVideoAsset(body);
     return c.json(video, 201);
@@ -48,7 +54,8 @@ export function videoRoutes(service: AssetService): Hono {
       const video = await service.getVideoAsset(c.req.param('id'));
       return c.json(video);
     } catch (e) {
-      if (e instanceof VideoAssetNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof VideoAssetNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -58,17 +65,21 @@ export function videoRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validatePatchVideoAsset(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
     try {
       const video = await service.patchVideoAsset(c.req.param('id'), body);
       return c.json(video);
     } catch (e) {
-      if (e instanceof VideoAssetNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof VideoAssetNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -79,7 +90,8 @@ export function videoRoutes(service: AssetService): Hono {
       await service.deleteVideoAsset(c.req.param('id'));
       return c.body(null, 204);
     } catch (e) {
-      if (e instanceof VideoAssetNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof VideoAssetNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -90,7 +102,10 @@ export function videoRoutes(service: AssetService): Hono {
     const workspaceId = body['workspaceId'];
     const format = body['format'];
     if (typeof workspaceId !== 'string' || typeof format !== 'string') {
-      return c.json({ error: 'workspaceId and format are required', code: 'VALIDATION_ERROR' }, 400);
+      return c.json(
+        { error: 'workspaceId and format are required', code: 'VALIDATION_ERROR' },
+        400,
+      );
     }
     const contents = body['buffer'];
     let buffer: ArrayBuffer;
@@ -102,7 +117,10 @@ export function videoRoutes(service: AssetService): Hono {
     } else if (Array.isArray(contents)) {
       buffer = new Uint8Array(contents as number[]).buffer;
     } else {
-      return c.json({ error: 'buffer (base64 or byte array) is required', code: 'VALIDATION_ERROR' }, 400);
+      return c.json(
+        { error: 'buffer (base64 or byte array) is required', code: 'VALIDATION_ERROR' },
+        400,
+      );
     }
     const result = await service.processVideoUpload({
       buffer,
@@ -110,7 +128,9 @@ export function videoRoutes(service: AssetService): Hono {
       workspaceId,
       ...(typeof body['name'] === 'string' ? { name: body['name'] as string } : {}),
       ...(typeof body['licenseId'] === 'string' ? { licenseId: body['licenseId'] as string } : {}),
-      ...(typeof body['uploaderId'] === 'string' ? { uploaderId: body['uploaderId'] as string } : {}),
+      ...(typeof body['uploaderId'] === 'string'
+        ? { uploaderId: body['uploaderId'] as string }
+        : {}),
     });
     if (result.rejected) {
       return c.json(result, 400);

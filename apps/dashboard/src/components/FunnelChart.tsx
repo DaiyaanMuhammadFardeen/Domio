@@ -23,11 +23,11 @@ export interface FunnelChartProps {
 // Palette uses Tailwind 600-step colors expressed as rgb() so the
 // chart is theme-agnostic and never falls back to raw hex literals.
 const PALETTE = [
-  'rgb(67, 56, 202)',   // indigo-700
-  'rgb(37, 99, 235)',   // blue-600
-  'rgb(8, 145, 178)',    // cyan-600
-  'rgb(5, 150, 105)',   // emerald-600
-  'rgb(217, 119, 6)',   // amber-600
+  'rgb(67, 56, 202)', // indigo-700
+  'rgb(37, 99, 235)', // blue-600
+  'rgb(8, 145, 178)', // cyan-600
+  'rgb(5, 150, 105)', // emerald-600
+  'rgb(217, 119, 6)', // amber-600
 ];
 
 function pct(value: number, total: number): string {
@@ -60,17 +60,14 @@ export function FunnelChart({
         role="status"
         data-testid={`${testId}-empty`}
       >
-        No funnel data. Once the warehouse reports viewer traffic for this
-        deck, the funnel will populate.
+        No funnel data. Once the warehouse reports viewer traffic for this deck, the funnel will
+        populate.
       </div>
     );
   }
 
   return (
-    <div
-      className="rounded-xl border border-slate-200 bg-white p-3"
-      data-testid={testId}
-    >
+    <div className="rounded-xl border border-slate-200 bg-white p-3" data-testid={testId}>
       <svg
         viewBox={`0 0 ${width} ${height}`}
         width={width}
@@ -88,20 +85,12 @@ export function FunnelChart({
           const y = pad + i * slotH;
           const h = Math.max(18, slotH - 18);
           const color = PALETTE[i % PALETTE.length] ?? 'var(--accent-3)';
-          const drop = i === 0 ? null : dropoffLabel?.(step, i) ?? null;
+          const drop = i === 0 ? null : (dropoffLabel?.(step, i) ?? null);
           const dropPct = i === 0 ? null : pct(value, headValue);
 
           return (
             <g key={`${step.label}-${i}`} data-testid={`${testId}-step-${i}`}>
-              <rect
-                x={x}
-                y={y}
-                width={w}
-                height={h}
-                fill={color}
-                rx={4}
-                ry={4}
-              />
+              <rect x={x} y={y} width={w} height={h} fill={color} rx={4} ry={4} />
               <text
                 x={pad + 8}
                 y={y + h / 2 + 4}

@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "clickhouse-loader"
-  ],
+  "tags": ["tier-2", "domio", "clickhouse-loader"],
   "panels": [
     {
       "id": 1,

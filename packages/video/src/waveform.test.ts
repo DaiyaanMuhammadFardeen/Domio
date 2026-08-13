@@ -5,7 +5,7 @@ describe('computeWaveform', () => {
   it('returns zero bars for empty input', () => {
     const result = computeWaveform(new Float32Array(0), 48);
     expect(result.bars).toHaveLength(48);
-    result.bars.forEach(bar => {
+    result.bars.forEach((bar) => {
       expect(bar.min).toBe(0);
       expect(bar.max).toBe(0);
     });
@@ -13,8 +13,12 @@ describe('computeWaveform', () => {
   });
 
   it('throws for non-positive barCount', () => {
-    expect(() => computeWaveform(new Float32Array(100), 0)).toThrow('barCount must be greater than 0');
-    expect(() => computeWaveform(new Float32Array(100), -1)).toThrow('barCount must be greater than 0');
+    expect(() => computeWaveform(new Float32Array(100), 0)).toThrow(
+      'barCount must be greater than 0',
+    );
+    expect(() => computeWaveform(new Float32Array(100), -1)).toThrow(
+      'barCount must be greater than 0',
+    );
   });
 
   it('computes bars for simple even division', () => {

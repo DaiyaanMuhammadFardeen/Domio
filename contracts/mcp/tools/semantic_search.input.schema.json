@@ -7,9 +7,9 @@
   "required": ["query"],
   "additionalProperties": false,
   "properties": {
-    "query":   { "type": "string", "minLength": 1 },
+    "query": { "type": "string", "minLength": 1 },
     "deck_id": { "type": "string", "format": "uuid" },
-    "k":       { "type": "integer", "minimum": 1, "maximum": 50, "default": 5 },
+    "k": { "type": "integer", "minimum": 1, "maximum": 50, "default": 5 },
     "slides": {
       "description": "Optional corpus. Each entry: { id, title, content }.",
       "type": "array",
@@ -18,8 +18,8 @@
         "required": ["id"],
         "additionalProperties": false,
         "properties": {
-          "id":      { "type": "string" },
-          "title":   { "type": "string" },
+          "id": { "type": "string" },
+          "title": { "type": "string" },
           "content": { "type": "string" }
         }
       }

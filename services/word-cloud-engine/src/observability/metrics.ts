@@ -31,6 +31,12 @@ export class NullWordCloudEngineMetrics implements WordCloudEngineMetrics {
   open_clouds = makeUpDown();
 }
 
-function makeCounter(): CounterLike { return { inc: () => undefined }; }
-function makeHistogram(): HistogramLike { return { observe: () => undefined }; }
-function makeUpDown(): UpDownCounterLike { return { inc: () => undefined, dec: () => undefined }; }
+function makeCounter(): CounterLike {
+  return { inc: () => undefined };
+}
+function makeHistogram(): HistogramLike {
+  return { observe: () => undefined };
+}
+function makeUpDown(): UpDownCounterLike {
+  return { inc: () => undefined, dec: () => undefined };
+}

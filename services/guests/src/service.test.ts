@@ -281,7 +281,8 @@ describe('GuestService — deleteGuest', () => {
 
     // Find the access_revoked event
     const revokedCall = emitter.publish.mock.calls.find(
-      (call) => (call as unknown as [string, Record<string, unknown>])[0] === 'guest.access_revoked',
+      (call) =>
+        (call as unknown as [string, Record<string, unknown>])[0] === 'guest.access_revoked',
     );
     expect(revokedCall).toBeDefined();
     const payload = (revokedCall as unknown as [string, Record<string, unknown>])[1];
@@ -293,7 +294,9 @@ describe('GuestService — deleteGuest', () => {
 
   it('throws GuestNotFoundError for nonexistent id', async () => {
     const service = new GuestService({ store });
-    await expect(service.deleteGuest('nonexistent', 'inviter-001')).rejects.toThrow(GuestNotFoundError);
+    await expect(service.deleteGuest('nonexistent', 'inviter-001')).rejects.toThrow(
+      GuestNotFoundError,
+    );
   });
 });
 
@@ -391,9 +394,9 @@ describe('GuestService — resendMagicLink', () => {
 
     await service.deleteGuest(guest.guest_access_id, 'inviter-001');
 
-    await expect(
-      service.resendMagicLink(guest.guest_access_id, 'inviter-001'),
-    ).rejects.toThrow(GuestRevokedError);
+    await expect(service.resendMagicLink(guest.guest_access_id, 'inviter-001')).rejects.toThrow(
+      GuestRevokedError,
+    );
   });
 });
 
@@ -453,9 +456,9 @@ describe('GuestService — consumeMagicLink', () => {
     );
 
     await service.consumeMagicLink(magic_link_token, baseTime, 'user-001');
-    await expect(
-      service.consumeMagicLink(magic_link_token, baseTime, 'user-002'),
-    ).rejects.toThrow(MagicLinkConsumedError);
+    await expect(service.consumeMagicLink(magic_link_token, baseTime, 'user-002')).rejects.toThrow(
+      MagicLinkConsumedError,
+    );
   });
 
   it('rejects expired token (guest access expired)', async () => {
@@ -473,9 +476,9 @@ describe('GuestService — consumeMagicLink', () => {
     );
 
     const futureTime = new Date(baseTime.getTime() + 16 * 60_000);
-    await expect(
-      service.consumeMagicLink(magic_link_token, futureTime),
-    ).rejects.toThrow(GuestExpiredError);
+    await expect(service.consumeMagicLink(magic_link_token, futureTime)).rejects.toThrow(
+      GuestExpiredError,
+    );
   });
 
   it('rejects invalidated token', async () => {
@@ -494,9 +497,9 @@ describe('GuestService — consumeMagicLink', () => {
     // Resend invalidates the original
     await service.resendMagicLink(guest.guest_access_id, 'inviter-001');
 
-    await expect(
-      service.consumeMagicLink(magic_link_token, baseTime),
-    ).rejects.toThrow(MagicLinkInvalidatedError);
+    await expect(service.consumeMagicLink(magic_link_token, baseTime)).rejects.toThrow(
+      MagicLinkInvalidatedError,
+    );
   });
 
   it('rejects token for revoked guest', async () => {
@@ -514,9 +517,9 @@ describe('GuestService — consumeMagicLink', () => {
 
     await service.deleteGuest(guest.guest_access_id, 'inviter-001');
 
-    await expect(
-      service.consumeMagicLink(magic_link_token, baseTime),
-    ).rejects.toThrow(GuestRevokedError);
+    await expect(service.consumeMagicLink(magic_link_token, baseTime)).rejects.toThrow(
+      GuestRevokedError,
+    );
   });
 
   it('rejects token for expired guest access', async () => {
@@ -536,9 +539,9 @@ describe('GuestService — consumeMagicLink', () => {
     const futureTime = new Date(baseTime.getTime() + 16 * 60_000);
     const futureService = new GuestService({ store, now: fixedClock(futureTime) });
 
-    await expect(
-      futureService.consumeMagicLink(magic_link_token, futureTime),
-    ).rejects.toThrow(GuestExpiredError);
+    await expect(futureService.consumeMagicLink(magic_link_token, futureTime)).rejects.toThrow(
+      GuestExpiredError,
+    );
   });
 });
 

@@ -51,11 +51,11 @@
 
 ### 12.1.2 Trade-offs
 
-| Option | Latency (BD) | Residency | Cost (BDT) | Currency risk | Operational risk |
-|---|---|---|---|---|---|
-| Foreign cloud (us/eu) | higher | weaker | USD-denominated | high | geopolitical |
-| Foreign cloud (ap-south) | medium | regional | USD-denominated | medium | regulatory |
-| BD local hosting | lowest | strongest | BDT-denominated | low | smaller scale, fewer managed services |
+| Option                   | Latency (BD) | Residency | Cost (BDT)      | Currency risk | Operational risk                      |
+| ------------------------ | ------------ | --------- | --------------- | ------------- | ------------------------------------- |
+| Foreign cloud (us/eu)    | higher       | weaker    | USD-denominated | high          | geopolitical                          |
+| Foreign cloud (ap-south) | medium       | regional  | USD-denominated | medium        | regulatory                            |
+| BD local hosting         | lowest       | strongest | BDT-denominated | low           | smaller scale, fewer managed services |
 
 ### 12.1.3 Decision principle
 
@@ -196,17 +196,17 @@
 
 ## 12.9 Device / Browser Matrix
 
-| Class | Browser | Min version | Notes |
-|---|---|---|---|
-| Desktop | Chrome | latest 2 | primary dev target |
-| Desktop | Edge | latest 2 | supported |
-| Desktop | Firefox | latest 2 | supported |
-| Desktop | Safari | latest 2 | supported (limited WebGPU) |
-| Mobile | Safari iOS | latest 2 | audience + presenter remote |
-| Mobile | Chrome Android | latest 2 | audience + presenter remote |
-| Mobile | Samsung Internet | latest 1 | supported |
-| Tablet | iPadOS Safari | latest 2 | full editor on large tablets |
-| Tablet | Android Chrome | latest 2 | full editor on large tablets |
+| Class   | Browser          | Min version | Notes                        |
+| ------- | ---------------- | ----------- | ---------------------------- |
+| Desktop | Chrome           | latest 2    | primary dev target           |
+| Desktop | Edge             | latest 2    | supported                    |
+| Desktop | Firefox          | latest 2    | supported                    |
+| Desktop | Safari           | latest 2    | supported (limited WebGPU)   |
+| Mobile  | Safari iOS       | latest 2    | audience + presenter remote  |
+| Mobile  | Chrome Android   | latest 2    | audience + presenter remote  |
+| Mobile  | Samsung Internet | latest 1    | supported                    |
+| Tablet  | iPadOS Safari    | latest 2    | full editor on large tablets |
+| Tablet  | Android Chrome   | latest 2    | full editor on large tablets |
 
 - No IE or Edge Legacy.
 - WebGPU progressive enhancement; WebGL2 fallback.
@@ -258,27 +258,27 @@
 
 ## 12.14 Open Decisions
 
-| ID | Decision | Owner |
-|---|---|---|
-| OD-BD-01 | BD local hosting partner selection. | BD ops + Legal |
-| OD-BD-02 | Whether to ship a Bangla-first default for BD-detected users. | i18n + Product |
-| OD-BD-03 | Default payment aggregator and backup. | BD ops |
-| OD-BD-04 | Whether to commission a Bangla-native UX variant beyond translation. | Design |
-| OD-BD-05 | Local field research cadence. | Research + GTM |
+| ID       | Decision                                                             | Owner          |
+| -------- | -------------------------------------------------------------------- | -------------- |
+| OD-BD-01 | BD local hosting partner selection.                                  | BD ops + Legal |
+| OD-BD-02 | Whether to ship a Bangla-first default for BD-detected users.        | i18n + Product |
+| OD-BD-03 | Default payment aggregator and backup.                               | BD ops         |
+| OD-BD-04 | Whether to commission a Bangla-native UX variant beyond translation. | Design         |
+| OD-BD-05 | Local field research cadence.                                        | Research + GTM |
 
 ---
 
 ## 12.15 Decisions Log
 
-| ID | Decision | Rationale | Alternative |
-|---|---|---|---|
-| D-BD-01 | Offline-first editor and presenter | Connectivity reality | Online-only — rejected |
-| D-BD-02 | BD local hosting option required | Localization law + latency | SaaS-only — rejected |
-| D-BD-03 | Aggregator-first BD payments | Faster, lower risk | Direct MFS only — rejected |
-| D-BD-04 | Bangla tier-1 locale | Market reality | English-only-then-localize — rejected |
-| D-BD-05 | Local CDN/edge | Latency | Single region — rejected |
-| D-BD-06 | Dependency and image mirrors | Bandwidth/reliability | Direct pulls — rejected |
-| D-BD-07 | Simple mode toggle | Digital literacy | Always advanced — rejected |
+| ID      | Decision                           | Rationale                  | Alternative                           |
+| ------- | ---------------------------------- | -------------------------- | ------------------------------------- |
+| D-BD-01 | Offline-first editor and presenter | Connectivity reality       | Online-only — rejected                |
+| D-BD-02 | BD local hosting option required   | Localization law + latency | SaaS-only — rejected                  |
+| D-BD-03 | Aggregator-first BD payments       | Faster, lower risk         | Direct MFS only — rejected            |
+| D-BD-04 | Bangla tier-1 locale               | Market reality             | English-only-then-localize — rejected |
+| D-BD-05 | Local CDN/edge                     | Latency                    | Single region — rejected              |
+| D-BD-06 | Dependency and image mirrors       | Bandwidth/reliability      | Direct pulls — rejected               |
+| D-BD-07 | Simple mode toggle                 | Digital literacy           | Always advanced — rejected            |
 
 ---
 

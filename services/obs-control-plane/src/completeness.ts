@@ -27,12 +27,7 @@ export interface CompletenessReport {
 }
 
 export interface CompletenessIssue {
-  readonly kind:
-    | 'no-alert'
-    | 'no-route'
-    | 'no-component'
-    | 'no-runbook'
-    | 'duplicate-alert-name';
+  readonly kind: 'no-alert' | 'no-route' | 'no-component' | 'no-runbook' | 'duplicate-alert-name';
   readonly message: string;
   readonly slo?: SloEntry;
   readonly alert?: BurnRateAlert;

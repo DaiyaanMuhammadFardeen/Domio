@@ -172,7 +172,10 @@ export function IdleReset({
           data-testid={`${dataTestId}-progress`}
         />
       </svg>
-      <span data-testid={`${dataTestId}-label`} style={{ position: 'relative', fontVariantNumeric: 'tabular-nums' }}>
+      <span
+        data-testid={`${dataTestId}-label`}
+        style={{ position: 'relative', fontVariantNumeric: 'tabular-nums' }}
+      >
         {display}
       </span>
     </div>

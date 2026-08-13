@@ -41,7 +41,9 @@ describe('install', () => {
     it('installs a free component', async () => {
       await seedPackage();
       const result = await installPackage(deps, {
-        workspaceId: 'ws-1', userId: 'u-1', catalogId: 'comp.btn',
+        workspaceId: 'ws-1',
+        userId: 'u-1',
+        catalogId: 'comp.btn',
       });
       expect(result.version).toBe('1.0.0');
       expect(result.item.catalogId).toBe('comp.btn');
@@ -52,36 +54,64 @@ describe('install', () => {
     it('installs paid component and issues license', async () => {
       await seedPackage();
       const listing: MarketplaceListing = {
-        id: 'list-1', catalogId: 'comp.btn', sellerId: 's-1', title: 'Button', description: '',
-        status: 'published', isFree: false, priceCents: 500, currency: 'usd', tags: [],
-        createdAt: Date.now(), updatedAt: Date.now(),
+        id: 'list-1',
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Button',
+        description: '',
+        status: 'published',
+        isFree: false,
+        priceCents: 500,
+        currency: 'usd',
+        tags: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       };
       await store.putListing(listing);
       const result = await installPackage(deps, {
-        workspaceId: 'ws-1', userId: 'u-1', catalogId: 'comp.btn', seats: 3,
+        workspaceId: 'ws-1',
+        userId: 'u-1',
+        catalogId: 'comp.btn',
+        seats: 3,
       });
       expect(result.licenseGrant).toBeDefined();
       expect(result.licenseGrant!.seats).toBe(3);
     });
 
     it('throws when component not found', async () => {
-      await expect(installPackage(deps, {
-        workspaceId: 'ws-1', userId: 'u-1', catalogId: 'missing',
-      })).rejects.toThrow('not found');
+      await expect(
+        installPackage(deps, {
+          workspaceId: 'ws-1',
+          userId: 'u-1',
+          catalogId: 'missing',
+        }),
+      ).rejects.toThrow('not found');
     });
 
     it('throws when blob missing (tampered)', async () => {
       const pkg: ComponentPackage = {
-        id: 'comp.tamper:1.0.0', catalogId: 'comp.tamper', version: '1.0.0', kind: 'component',
-        name: 'Tamper', description: '',
-        propsSchema: { type: 'object', properties: {} }, variants: [],
-        files: { 'index.js': 'a'.repeat(64) }, packageHash: '', sizeBudgetBytes: 0,
-        createdAt: Date.now(), updatedAt: Date.now(),
+        id: 'comp.tamper:1.0.0',
+        catalogId: 'comp.tamper',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Tamper',
+        description: '',
+        propsSchema: { type: 'object', properties: {} },
+        variants: [],
+        files: { 'index.js': 'a'.repeat(64) },
+        packageHash: '',
+        sizeBudgetBytes: 0,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       };
       await store.putPackage(pkg);
-      await expect(installPackage(deps, {
-        workspaceId: 'ws-1', userId: 'u-1', catalogId: 'comp.tamper',
-      })).rejects.toThrow('missing from store');
+      await expect(
+        installPackage(deps, {
+          workspaceId: 'ws-1',
+          userId: 'u-1',
+          catalogId: 'comp.tamper',
+        }),
+      ).rejects.toThrow('missing from store');
     });
 
     it('returns updated=true when updating existing install', async () => {
@@ -90,16 +120,34 @@ describe('install', () => {
       const v2Hash = sha256Hex(v2Bytes);
       await store.putBlob({ sha256: v2Hash, bytes: v2Bytes, storedAt: Date.now() });
       const v2: ComponentPackage = {
-        id: 'comp.btn:2.0.0', catalogId: 'comp.btn', version: '2.0.0', kind: 'component',
-        name: 'Btn', description: '',
-        propsSchema: { type: 'object', properties: {} }, variants: [],
-        files: { 'index.js': v2Hash }, packageHash: '', sizeBudgetBytes: 0,
-        createdAt: Date.now(), updatedAt: Date.now(),
+        id: 'comp.btn:2.0.0',
+        catalogId: 'comp.btn',
+        version: '2.0.0',
+        kind: 'component',
+        name: 'Btn',
+        description: '',
+        propsSchema: { type: 'object', properties: {} },
+        variants: [],
+        files: { 'index.js': v2Hash },
+        packageHash: '',
+        sizeBudgetBytes: 0,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       };
       await store.putPackage(v2);
 
-      await installPackage(deps, { workspaceId: 'ws-1', userId: 'u-1', catalogId: 'comp.btn', version: '1.0.0' });
-      const result = await installPackage(deps, { workspaceId: 'ws-1', userId: 'u-1', catalogId: 'comp.btn', version: '2.0.0' });
+      await installPackage(deps, {
+        workspaceId: 'ws-1',
+        userId: 'u-1',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+      });
+      const result = await installPackage(deps, {
+        workspaceId: 'ws-1',
+        userId: 'u-1',
+        catalogId: 'comp.btn',
+        version: '2.0.0',
+      });
       expect(result.updated).toBe(true);
     });
   });
@@ -119,14 +167,27 @@ describe('install', () => {
       const v2Hash = sha256Hex(v2Bytes);
       await store.putBlob({ sha256: v2Hash, bytes: v2Bytes, storedAt: Date.now() });
       await store.putPackage({
-        id: 'comp.btn:2.0.0', catalogId: 'comp.btn', version: '2.0.0', kind: 'component',
-        name: 'btn', description: '',
-        propsSchema: { type: 'object', properties: {} }, variants: [],
-        files: { 'index.js': v2Hash }, packageHash: '', sizeBudgetBytes: 0,
-        createdAt: Date.now(), updatedAt: Date.now(),
+        id: 'comp.btn:2.0.0',
+        catalogId: 'comp.btn',
+        version: '2.0.0',
+        kind: 'component',
+        name: 'btn',
+        description: '',
+        propsSchema: { type: 'object', properties: {} },
+        variants: [],
+        files: { 'index.js': v2Hash },
+        packageHash: '',
+        sizeBudgetBytes: 0,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
 
-      await installPackage(deps, { workspaceId: 'ws-1', userId: 'u-1', catalogId: 'comp.btn', version: '1.0.0' });
+      await installPackage(deps, {
+        workspaceId: 'ws-1',
+        userId: 'u-1',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+      });
       const updates = await checkForUpdates(deps, { userId: 'u-1', workspaceId: 'ws-1' });
       expect(updates.length).toBe(1);
       expect(updates[0]!.updateAvailable).toBe(true);

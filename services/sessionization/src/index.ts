@@ -20,7 +20,11 @@ export {
 } from './engine/consumer.js';
 
 export { buildInMemoryStore, type SessionStore } from './store/inmemory.js';
-export { buildSessionSink, type SessionSink, type SessionWriterClient } from './store/clickhouse.js';
+export {
+  buildSessionSink,
+  type SessionSink,
+  type SessionWriterClient,
+} from './store/clickhouse.js';
 
 export {
   buildSessionEmitter,

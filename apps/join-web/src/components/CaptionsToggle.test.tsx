@@ -17,7 +17,9 @@ describe('CaptionsToggle', () => {
   it('marks the active option with aria-checked=true', () => {
     render(<CaptionsToggle value="audio" onChange={() => {}} />);
     expect(screen.getByTestId('captions-toggle-audio').getAttribute('aria-checked')).toBe('true');
-    expect(screen.getByTestId('captions-toggle-captions').getAttribute('aria-checked')).toBe('false');
+    expect(screen.getByTestId('captions-toggle-captions').getAttribute('aria-checked')).toBe(
+      'false',
+    );
     expect(screen.getByTestId('captions-toggle-both').getAttribute('aria-checked')).toBe('false');
   });
 

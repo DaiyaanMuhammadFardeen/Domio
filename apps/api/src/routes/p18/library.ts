@@ -9,7 +9,8 @@ import { adaptHandler, type P18Handler } from '../p18_adapter.js';
 
 export function libraryRoutes(service: LibraryService): Hono {
   const r = new Hono();
-  const h = (name: string) => adaptHandler(handlers[name as keyof typeof handlers] as unknown as P18Handler, service);
+  const h = (name: string) =>
+    adaptHandler(handlers[name as keyof typeof handlers] as unknown as P18Handler, service);
 
   // Library entries
   r.post('/v1/library/entries', h('createEntry'));

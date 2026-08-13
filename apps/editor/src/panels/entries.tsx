@@ -117,7 +117,13 @@ export const ThemeBrandEntry: PanelModule = {
       !!h.onDarkGenerated &&
       !!h.onLintFix;
     if (!hasFullSurface) {
-      if (!h.onThemeChange || !h.onBrandKitChange || !h.onSchemeToggle || !h.onOverrideChange || !h.onAudit) {
+      if (
+        !h.onThemeChange ||
+        !h.onBrandKitChange ||
+        !h.onSchemeToggle ||
+        !h.onOverrideChange ||
+        !h.onAudit
+      ) {
         return null;
       }
       return (
@@ -172,10 +178,7 @@ export const DataSourcesEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
     if (!ctx.handlers.onSelectDataSource) return null;
     return (
-      <DataSourcePanel
-        selectedSourceId={null}
-        onSelectSource={ctx.handlers.onSelectDataSource}
-      />
+      <DataSourcePanel selectedSourceId={null} onSelectSource={ctx.handlers.onSelectDataSource} />
     );
   },
 };
@@ -195,7 +198,14 @@ export const FiltersEntry: PanelModule = {
 export const AnimationsEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
     const h = ctx.handlers;
-    if (!h.onTimelineChange || !h.onTransitionChange || !h.onMagicRoleChange || !h.onReducedMotionChange || !h.onCopyAnimation || !h.onPasteAnimation) {
+    if (
+      !h.onTimelineChange ||
+      !h.onTransitionChange ||
+      !h.onMagicRoleChange ||
+      !h.onReducedMotionChange ||
+      !h.onCopyAnimation ||
+      !h.onPasteAnimation
+    ) {
       return null;
     }
     return (
@@ -220,7 +230,14 @@ export const AnimationsEntry: PanelModule = {
 export const ConnectionsEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
     const h = ctx.handlers;
-    if (!h.onAddHotspot || !h.onRemoveHotspot || !h.onAddEdge || !h.onRemoveEdge || !h.onAddOverlay || !h.onRemoveOverlay) {
+    if (
+      !h.onAddHotspot ||
+      !h.onRemoveHotspot ||
+      !h.onAddEdge ||
+      !h.onRemoveEdge ||
+      !h.onAddOverlay ||
+      !h.onRemoveOverlay
+    ) {
       return null;
     }
     return (
@@ -321,7 +338,12 @@ export const DeepLinksEntry: PanelModule = {
 export const StateInspectorEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
     const h = ctx.handlers;
-    if (!h.onAddStateMachine || !h.onRemoveStateMachine || !h.onAdvanceStateMachine || !h.onTogglePersistInstanceState) {
+    if (
+      !h.onAddStateMachine ||
+      !h.onRemoveStateMachine ||
+      !h.onAdvanceStateMachine ||
+      !h.onTogglePersistInstanceState
+    ) {
       return null;
     }
     return (
@@ -386,12 +408,11 @@ export const M6SequenceEntry: PanelModule = {
 
 export const M8AuditEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
-    const onDiff = (ctx.handlers.onAuditDiff ?? (() => undefined)) as (entry: AuditEntryView) => void;
+    const onDiff = (ctx.handlers.onAuditDiff ?? (() => undefined)) as (
+      entry: AuditEntryView,
+    ) => void;
     return (
-      <AuditTrail
-        entries={ctx.state.auditEntries as readonly AuditEntryView[]}
-        onDiff={onDiff}
-      />
+      <AuditTrail entries={ctx.state.auditEntries as readonly AuditEntryView[]} onDiff={onDiff} />
     );
   },
 };
@@ -417,11 +438,16 @@ export const M8DeckDiffEntry: PanelModule = {
     return (
       <DeckDiffPanel
         defaultDeckId={ctx.state.deck.id}
-        onCompare={ctx.handlers.onDeckDiffCompare as (a: string, b: string) => Promise<{
-          added: readonly DeckDiffEntry[];
-          removed: readonly DeckDiffEntry[];
-          changed: readonly DeckDiffEntry[];
-        }>}
+        onCompare={
+          ctx.handlers.onDeckDiffCompare as (
+            a: string,
+            b: string,
+          ) => Promise<{
+            added: readonly DeckDiffEntry[];
+            removed: readonly DeckDiffEntry[];
+            changed: readonly DeckDiffEntry[];
+          }>
+        }
       />
     );
   },
@@ -484,10 +510,7 @@ export const MarketplaceEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
     if (!ctx.handlers.onInsert) return null;
     return (
-      <MarketplacePanel
-        onInsert={ctx.handlers.onInsert}
-        brandKitId={ctx.state.activeBrandKitId}
-      />
+      <MarketplacePanel onInsert={ctx.handlers.onInsert} brandKitId={ctx.state.activeBrandKitId} />
     );
   },
 };
@@ -500,7 +523,12 @@ export const MarketplaceEntry: PanelModule = {
 export const PropsEntry: PanelModule = {
   Component: (ctx: EditorPanelContext): ReactElement | null => {
     const el = ctx.state.selectedComponent;
-    if (!el || el.type !== 'component' || !ctx.handlers.onPropEdit || !ctx.handlers.onVariantChange) {
+    if (
+      !el ||
+      el.type !== 'component' ||
+      !ctx.handlers.onPropEdit ||
+      !ctx.handlers.onVariantChange
+    ) {
       return null;
     }
     return (

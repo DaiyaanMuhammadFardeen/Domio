@@ -53,7 +53,12 @@ function formatLatency(ms: number | undefined): string {
   return `${(ms / 1000).toFixed(2)} s`;
 }
 
-const COLUMNS: ReadonlyArray<{ key: SortKey; label: string; type: 'string' | 'number'; align?: 'left' | 'right' }> = [
+const COLUMNS: ReadonlyArray<{
+  key: SortKey;
+  label: string;
+  type: 'string' | 'number';
+  align?: 'left' | 'right';
+}> = [
   { key: 'run_id', label: 'Run', type: 'string' },
   { key: 'deck_id', label: 'Deck', type: 'string' },
   { key: 'status', label: 'Status', type: 'string' },
@@ -118,7 +123,10 @@ export function PipelineTable({
   }
 
   return (
-    <div data-testid="pipeline-table" className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div
+      data-testid="pipeline-table"
+      className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+    >
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50">
@@ -145,7 +153,9 @@ export function PipelineTable({
                     >
                       {col.label}
                       {active && sortDir === 'asc' && <ArrowUp className="h-3 w-3" aria-hidden />}
-                      {active && sortDir === 'desc' && <ArrowDown className="h-3 w-3" aria-hidden />}
+                      {active && sortDir === 'desc' && (
+                        <ArrowDown className="h-3 w-3" aria-hidden />
+                      )}
                       {!active && <ArrowUpDown className="h-3 w-3 opacity-30" aria-hidden />}
                     </button>
                   </th>
@@ -183,7 +193,10 @@ export function PipelineTable({
                   <td className="whitespace-nowrap px-4 py-2.5">
                     <Badge tone={statusTone(p.status)}>{p.status}</Badge>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-right text-slate-600 tabular-nums" title={new Date(p.started_at_ms).toISOString()}>
+                  <td
+                    className="whitespace-nowrap px-4 py-2.5 text-right text-slate-600 tabular-nums"
+                    title={new Date(p.started_at_ms).toISOString()}
+                  >
                     {formatRelTime(p.started_at_ms)}
                   </td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono text-xs text-slate-700 tabular-nums">

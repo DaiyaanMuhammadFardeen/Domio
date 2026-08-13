@@ -46,7 +46,10 @@ const createShaderSchema = {
         required: ['type'],
         additionalProperties: false,
         properties: {
-          type: { type: 'string', enum: ['float', 'vec2', 'vec3', 'vec4', 'mat4', 'texture2d', 'sampler'] },
+          type: {
+            type: 'string',
+            enum: ['float', 'vec2', 'vec3', 'vec4', 'mat4', 'texture2d', 'sampler'],
+          },
           default: {},
           description: { type: 'string' },
         },
@@ -73,7 +76,10 @@ const updateShaderSchema = {
         required: ['type'],
         additionalProperties: false,
         properties: {
-          type: { type: 'string', enum: ['float', 'vec2', 'vec3', 'vec4', 'mat4', 'texture2d', 'sampler'] },
+          type: {
+            type: 'string',
+            enum: ['float', 'vec2', 'vec3', 'vec4', 'mat4', 'texture2d', 'sampler'],
+          },
           default: {},
           description: { type: 'string' },
         },
@@ -92,7 +98,10 @@ const validateUpdate = ajv.compile(updateShaderSchema);
 
 type AjvError = { instancePath: string; message?: string; keyword: string };
 
-function toValidationResult(valid: boolean, errors: AjvError[] | null | undefined): ValidationResult {
+function toValidationResult(
+  valid: boolean,
+  errors: AjvError[] | null | undefined,
+): ValidationResult {
   if (valid || !errors) return { valid: true, errors: [] };
   const mapped: ValidationError[] = errors.map((e: AjvError) => ({
     path: e.instancePath || '/',
@@ -116,19 +125,14 @@ export function validateUpdateShader(body: unknown): ValidationResult {
 // Host-environment access patterns
 // ---------------------------------------------------------------------------
 
-const HOST_ACCESS_PATTERNS = [
-  'fetch(',
-  'XMLHttpRequest',
-  'importScripts',
-  'process.',
-];
+const HOST_ACCESS_PATTERNS = ['fetch(', 'XMLHttpRequest', 'importScripts', 'process.'];
 
 /**
  * Check if source code contains host-environment access patterns
  * that are not allowed in shaders.
  */
 export function containsHostAccess(source: string): boolean {
-  return HOST_ACCESS_PATTERNS.some(pattern => source.includes(pattern));
+  return HOST_ACCESS_PATTERNS.some((pattern) => source.includes(pattern));
 }
 
 // ---------------------------------------------------------------------------
@@ -170,6 +174,6 @@ export function detectExtensions(source: string): ExtensionDetection {
     w = wgslRe.exec(source);
   }
 
-  const unsupported = extensions.filter(ext => !KNOWN_SUPPORTED.has(ext));
+  const unsupported = extensions.filter((ext) => !KNOWN_SUPPORTED.has(ext));
   return { extensions, unsupported };
 }

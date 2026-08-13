@@ -36,53 +36,27 @@ describe('Captions', () => {
   });
 
   it('shows the audio indicator when mode includes audio', () => {
-    render(
-      <Captions
-        enabled={true}
-        mode="both"
-        currentText="hi"
-        interimText=""
-        isFinal={true}
-      />,
-    );
+    render(<Captions enabled={true} mode="both" currentText="hi" interimText="" isFinal={true} />);
     expect(screen.getByTestId('captions-audio-indicator')).toBeInTheDocument();
   });
 
   it('hides the audio indicator when mode is captions only', () => {
     render(
-      <Captions
-        enabled={true}
-        mode="captions"
-        currentText="hi"
-        interimText=""
-        isFinal={true}
-      />,
+      <Captions enabled={true} mode="captions" currentText="hi" interimText="" isFinal={true} />,
     );
     expect(screen.queryByTestId('captions-audio-indicator')).toBeNull();
   });
 
   it('shows a disabled bar when enabled is false', () => {
     render(
-      <Captions
-        enabled={false}
-        mode="captions"
-        currentText="hi"
-        interimText=""
-        isFinal={true}
-      />,
+      <Captions enabled={false} mode="captions" currentText="hi" interimText="" isFinal={true} />,
     );
     expect(screen.getByTestId('captions-disabled')).toBeInTheDocument();
   });
 
   it('falls back to a placeholder when no text is provided', () => {
     render(
-      <Captions
-        enabled={true}
-        mode="captions"
-        currentText=""
-        interimText=""
-        isFinal={true}
-      />,
+      <Captions enabled={true} mode="captions" currentText="" interimText="" isFinal={true} />,
     );
     expect(screen.getByText(/waiting for captions/)).toBeInTheDocument();
   });

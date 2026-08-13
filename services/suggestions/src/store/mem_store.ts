@@ -20,10 +20,7 @@ export class InMemorySuggestionsStore implements SuggestionsStore {
     return this.suggestions.get(suggestionId) ?? null;
   }
 
-  async listSuggestionsByDeck(
-    deckId: string,
-    status?: SuggestionStatus,
-  ): Promise<Suggestion[]> {
+  async listSuggestionsByDeck(deckId: string, status?: SuggestionStatus): Promise<Suggestion[]> {
     const results: Suggestion[] = [];
     for (const s of this.suggestions.values()) {
       if (s.deck_id !== deckId) continue;
@@ -43,7 +40,9 @@ export class InMemorySuggestionsStore implements SuggestionsStore {
 
   async updateSuggestion(
     suggestionId: string,
-    patch: Partial<Pick<Suggestion, 'status' | 'resolved_at' | 'resolved_by' | 'updated_at' | 'updated_by'>>,
+    patch: Partial<
+      Pick<Suggestion, 'status' | 'resolved_at' | 'resolved_by' | 'updated_at' | 'updated_by'>
+    >,
   ): Promise<Suggestion> {
     const existing = this.suggestions.get(suggestionId);
     if (!existing) throw new SuggestionNotFoundError(suggestionId);

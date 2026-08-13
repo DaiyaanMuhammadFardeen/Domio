@@ -163,11 +163,7 @@ const NOW = new Date('2026-06-01T12:00:00Z');
 describe('buildAncestorChain', () => {
   it('builds full chain from slide to workspace', async () => {
     const ctx = await setupCtx({});
-    const chain = await buildAncestorChain(
-      (rt, rid) => ctx.getParentResource(rt, rid),
-      'slide',
-      S,
-    );
+    const chain = await buildAncestorChain((rt, rid) => ctx.getParentResource(rt, rid), 'slide', S);
     expect(chain).toEqual([
       { resourceType: 'slide', resourceId: S },
       { resourceType: 'deck', resourceId: D },
@@ -184,9 +180,7 @@ describe('buildAncestorChain', () => {
       'workspace',
       W,
     );
-    expect(chain).toEqual([
-      { resourceType: 'workspace', resourceId: W },
-    ]);
+    expect(chain).toEqual([{ resourceType: 'workspace', resourceId: W }]);
   });
 });
 

@@ -371,7 +371,9 @@ describe('TransitionOp', () => {
     const op = transitionOp(SLIDE_ID, SAMPLE_TRANSITION, undefined, 0);
     const next = applyOp(doc, op);
     const slide = next.slides.find((s) => s.id === SLIDE_ID)!;
-    expect((slide as unknown as Record<string, unknown>)['x-domio:transition']).toEqual(SAMPLE_TRANSITION);
+    expect((slide as unknown as Record<string, unknown>)['x-domio:transition']).toEqual(
+      SAMPLE_TRANSITION,
+    );
   });
 
   it('clear transition (null) deletes x-domio:transition from the slide', () => {
@@ -401,7 +403,9 @@ describe('TransitionOp', () => {
     const op = transitionOp(SLIDE_ID, SAMPLE_TRANSITION, undefined, 0);
     const next = applyOp(doc, op);
     const otherSlide = next.slides.find((s) => s.id === SLIDE_ID_2)!;
-    expect((otherSlide as unknown as Record<string, unknown>)['x-domio:transition']).toBeUndefined();
+    expect(
+      (otherSlide as unknown as Record<string, unknown>)['x-domio:transition'],
+    ).toBeUndefined();
   });
 
   it('ops are pure — input deck is not mutated', () => {
@@ -480,7 +484,9 @@ describe('ReducedMotionOp', () => {
     const doc = buildDoc();
     const op = reducedMotionOp('always_reduced', undefined, 0);
     const next = applyOp(doc, op);
-    expect((next as unknown as Record<string, unknown>)['x-domio:reduced-motion']).toBe('always_reduced');
+    expect((next as unknown as Record<string, unknown>)['x-domio:reduced-motion']).toBe(
+      'always_reduced',
+    );
   });
 
   it('clear policy (null) removes x-domio:reduced-motion from the deck', () => {
@@ -489,7 +495,9 @@ describe('ReducedMotionOp', () => {
     const bound = applyOp(doc, set);
     const clear = reducedMotionOp(null, 'always_reduced', 1);
     const cleared = applyOp(bound, clear);
-    expect((cleared as unknown as Record<string, unknown>)['x-domio:reduced-motion']).toBeUndefined();
+    expect(
+      (cleared as unknown as Record<string, unknown>)['x-domio:reduced-motion'],
+    ).toBeUndefined();
   });
 
   it('revert restores the pre-op deck state', () => {
@@ -526,7 +534,9 @@ describe('ReducedMotionOp', () => {
     const step1 = applyOp(doc, set1);
     const set2 = reducedMotionOp('always_full', 'always_reduced', 1);
     const step2 = applyOp(step1, set2);
-    expect((step2 as unknown as Record<string, unknown>)['x-domio:reduced-motion']).toBe('always_full');
+    expect((step2 as unknown as Record<string, unknown>)['x-domio:reduced-motion']).toBe(
+      'always_full',
+    );
   });
 });
 
@@ -638,7 +648,14 @@ describe('HotspotOp', () => {
     const doc = buildDoc();
     const op = hotspotOp(SLIDE_ID, SAMPLE_HOTSPOT, null, 0);
     const withHotspot = applyOp(doc, op);
-    const reverted = applyOp(withHotspot, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    const reverted = applyOp(withHotspot, {
+      ...op,
+      forward: op.inverse,
+      inverse: op.forward,
+      name: op.name,
+      id: op.id,
+      timestamp: op.timestamp,
+    });
     expect(slideLevel(reverted, SLIDE_ID)).not.toHaveProperty('x-domio:hotspots');
   });
 
@@ -670,7 +687,14 @@ describe('OverlayOp', () => {
     const doc = buildDoc();
     const op = overlayOp(SLIDE_ID, SAMPLE_OVERLAY, null, 0);
     const withOverlay = applyOp(doc, op);
-    const reverted = applyOp(withOverlay, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    const reverted = applyOp(withOverlay, {
+      ...op,
+      forward: op.inverse,
+      inverse: op.forward,
+      name: op.name,
+      id: op.id,
+      timestamp: op.timestamp,
+    });
     expect(slideLevel(reverted, SLIDE_ID)).not.toHaveProperty('x-domio:overlays');
   });
 
@@ -689,7 +713,14 @@ describe('BranchingEdgeOp', () => {
     const doc = buildDoc();
     const op = branchingEdgeOp(SLIDE_ID, SAMPLE_EDGE, null, 0);
     const withEdge = applyOp(doc, op);
-    const reverted = applyOp(withEdge, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    const reverted = applyOp(withEdge, {
+      ...op,
+      forward: op.inverse,
+      inverse: op.forward,
+      name: op.name,
+      id: op.id,
+      timestamp: op.timestamp,
+    });
     expect(slideLevel(reverted, SLIDE_ID)).not.toHaveProperty('x-domio:branching-edges');
   });
 
@@ -708,7 +739,14 @@ describe('VariableOp', () => {
     const doc = buildDoc();
     const op = variableOp(SLIDE_ID, SAMPLE_VARIABLE, null, 0);
     const withVar = applyOp(doc, op);
-    const reverted = applyOp(withVar, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    const reverted = applyOp(withVar, {
+      ...op,
+      forward: op.inverse,
+      inverse: op.forward,
+      name: op.name,
+      id: op.id,
+      timestamp: op.timestamp,
+    });
     expect(slideLevel(reverted, SLIDE_ID)).not.toHaveProperty('x-domio:variables');
   });
 
@@ -728,7 +766,14 @@ describe('ConditionalRuleOp', () => {
     const doc = buildDoc();
     const op = conditionalRuleOp(COMP_A, SAMPLE_RULE, null, 0);
     const withRule = applyOp(doc, op);
-    const reverted = applyOp(withRule, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    const reverted = applyOp(withRule, {
+      ...op,
+      forward: op.inverse,
+      inverse: op.forward,
+      name: op.name,
+      id: op.id,
+      timestamp: op.timestamp,
+    });
     expect(comp(reverted, COMP_A).component.props).not.toHaveProperty('x-domio:conditional-rule');
   });
 
@@ -755,7 +800,14 @@ describe('VariableBindingOp', () => {
     const doc = buildDoc();
     const op = variableBindingOp(COMP_A, SAMPLE_VAR_BINDING, null, 0);
     const withBinding = applyOp(doc, op);
-    const reverted = applyOp(withBinding, { ...op, forward: op.inverse, inverse: op.forward, name: op.name, id: op.id, timestamp: op.timestamp });
+    const reverted = applyOp(withBinding, {
+      ...op,
+      forward: op.inverse,
+      inverse: op.forward,
+      name: op.name,
+      id: op.id,
+      timestamp: op.timestamp,
+    });
     expect(comp(reverted, COMP_A).component.props).not.toHaveProperty('x-domio:variable-binding');
   });
 
@@ -772,10 +824,7 @@ describe('VariableBindingOp', () => {
 
   it('P10 ops do not collide with existing props', () => {
     const doc = buildDoc();
-    const next = applyOp(
-      doc,
-      conditionalRuleOp(COMP_A, SAMPLE_RULE, null, 0),
-    );
+    const next = applyOp(doc, conditionalRuleOp(COMP_A, SAMPLE_RULE, null, 0));
     // existing props (color, size) preserved
     const el = comp(next, COMP_A);
     expect(el.component.props?.color).toBe('blue');

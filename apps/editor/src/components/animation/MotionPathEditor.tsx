@@ -125,15 +125,18 @@ export function MotionPathEditor(props: MotionPathEditorProps): ReactElement {
     [centreX, centreY],
   );
 
-  const eventToSvg = useCallback((clientX: number, clientY: number): { x: number; y: number } => {
-    const svg = svgRef.current;
-    if (!svg) return { x: 0, y: 0 };
-    const rect = svg.getBoundingClientRect();
-    return {
-      x: ((clientX - rect.left) / rect.width) * width,
-      y: ((clientY - rect.top) / rect.height) * height,
-    };
-  }, [width, height]);
+  const eventToSvg = useCallback(
+    (clientX: number, clientY: number): { x: number; y: number } => {
+      const svg = svgRef.current;
+      if (!svg) return { x: 0, y: 0 };
+      const rect = svg.getBoundingClientRect();
+      return {
+        x: ((clientX - rect.left) / rect.width) * width,
+        y: ((clientY - rect.top) / rect.height) * height,
+      };
+    },
+    [width, height],
+  );
 
   // ── Drag handlers ──────────────────────────────────────────────────
   const beginDrag = useCallback(
@@ -281,7 +284,9 @@ export function MotionPathEditor(props: MotionPathEditorProps): ReactElement {
         >
           <option value="none">None (manual)</option>
           {TRIGGER_KINDS.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
           ))}
         </select>
         <button
@@ -309,14 +314,36 @@ export function MotionPathEditor(props: MotionPathEditorProps): ReactElement {
         {/* Grid */}
         <defs>
           <pattern id="mp-grid" width={20} height={20} patternUnits="userSpaceOnUse">
-            <path d={`M 20 0 L 0 0 0 20`} fill="none" stroke="var(--border, #333)" strokeOpacity={0.4} strokeWidth={0.5} />
+            <path
+              d={`M 20 0 L 0 0 0 20`}
+              fill="none"
+              stroke="var(--border, #333)"
+              strokeOpacity={0.4}
+              strokeWidth={0.5}
+            />
           </pattern>
         </defs>
         <rect width={width} height={height} fill="url(#mp-grid)" />
 
         {/* Centre cross */}
-        <line x1={centreX} x2={centreX} y1={0} y2={height} stroke="var(--border, #555)" strokeDasharray="2,4" strokeOpacity={0.4} />
-        <line y1={centreY} y2={centreY} x1={0} x2={width} stroke="var(--border, #555)" strokeDasharray="2,4" strokeOpacity={0.4} />
+        <line
+          x1={centreX}
+          x2={centreX}
+          y1={0}
+          y2={height}
+          stroke="var(--border, #555)"
+          strokeDasharray="2,4"
+          strokeOpacity={0.4}
+        />
+        <line
+          y1={centreY}
+          y2={centreY}
+          x1={0}
+          x2={width}
+          stroke="var(--border, #555)"
+          strokeDasharray="2,4"
+          strokeOpacity={0.4}
+        />
         <circle cx={centreX} cy={centreY} r={3} fill="var(--muted, #666)" />
 
         {/* Bezier handle segments (dashed lines from each anchor to its control) */}
@@ -421,7 +448,11 @@ export function MotionPathEditor(props: MotionPathEditorProps): ReactElement {
           </button>
         </div>
         {working.keyframes.map((kf, i) => (
-          <div key={`kf-row-${i}`} className="motion-path-editor__kf-row" data-testid={`motion-path-kf-${i}`}>
+          <div
+            key={`kf-row-${i}`}
+            className="motion-path-editor__kf-row"
+            data-testid={`motion-path-kf-${i}`}
+          >
             <span className="motion-path-editor__kf-idx">{i}</span>
             <label className="motion-path-editor__field">
               <span>time (ms)</span>
@@ -442,7 +473,10 @@ export function MotionPathEditor(props: MotionPathEditorProps): ReactElement {
                 type="number"
                 value={Math.round(kf.x)}
                 onChange={(e) => {
-                  const next = updateKeyframe(working, i, (k) => ({ ...k, x: Number(e.target.value) }));
+                  const next = updateKeyframe(working, i, (k) => ({
+                    ...k,
+                    x: Number(e.target.value),
+                  }));
                   props.onChange(next);
                 }}
                 disabled={props.readOnly}
@@ -456,7 +490,10 @@ export function MotionPathEditor(props: MotionPathEditorProps): ReactElement {
                 type="number"
                 value={Math.round(kf.y)}
                 onChange={(e) => {
-                  const next = updateKeyframe(working, i, (k) => ({ ...k, y: Number(e.target.value) }));
+                  const next = updateKeyframe(working, i, (k) => ({
+                    ...k,
+                    y: Number(e.target.value),
+                  }));
                   props.onChange(next);
                 }}
                 disabled={props.readOnly}

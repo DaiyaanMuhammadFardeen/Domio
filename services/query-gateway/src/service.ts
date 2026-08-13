@@ -108,7 +108,11 @@ export interface QueryGatewayServiceOptions {
   /** Caller-provided clock (deterministic in tests). */
   readonly clock?: () => Date;
   /** Execute function: called to run the actual query. */
-  readonly executeFn?: (sql: string, params: readonly unknown[], connectorId: string) => Promise<{ columns: string[]; rows: readonly (readonly unknown[])[] }>;
+  readonly executeFn?: (
+    sql: string,
+    params: readonly unknown[],
+    connectorId: string,
+  ) => Promise<{ columns: string[]; rows: readonly (readonly unknown[])[] }>;
 }
 
 const defaultId = (): string => {
@@ -154,7 +158,11 @@ export class QueryGatewayService {
   private readonly cacheTtlMs: number;
   private readonly idGen: () => string;
   private readonly clock: () => Date;
-  private readonly executeFn: (sql: string, params: readonly unknown[], connectorId: string) => Promise<{ columns: string[]; rows: readonly (readonly unknown[])[] }>;
+  private readonly executeFn: (
+    sql: string,
+    params: readonly unknown[],
+    connectorId: string,
+  ) => Promise<{ columns: string[]; rows: readonly (readonly unknown[])[] }>;
 
   /** In-memory rate-limit buckets keyed by `orgId::actorId`. */
   private rateLimitBuckets = new Map<string, RateLimitBucket>();
@@ -191,7 +199,7 @@ export class QueryGatewayService {
 
   authorize(actorId: string | undefined, action: ACLRule['action'], orgId: string): void {
     if (!actorId) throw new ACLDeniedError('anonymous', action);
-    void this.acl.find({ orgId, actorId, action }).then(rule => {
+    void this.acl.find({ orgId, actorId, action }).then((rule) => {
       if (rule && !rule.allowed) throw new ACLDeniedError(actorId, action);
     });
     // Default deny: if no rule exists and action is not 'execute' or 'read', deny.
@@ -199,7 +207,11 @@ export class QueryGatewayService {
   }
 
   /** Synchronous ACL check: throws if denied. */
-  async checkACL(actorId: string | undefined, action: ACLRule['action'], orgId: string): Promise<void> {
+  async checkACL(
+    actorId: string | undefined,
+    action: ACLRule['action'],
+    orgId: string,
+  ): Promise<void> {
     if (!actorId) throw new ACLDeniedError('anonymous', action);
     const rule = await this.acl.find({ orgId, actorId, action });
     if (rule && !rule.allowed) throw new ACLDeniedError(actorId, action);
@@ -304,7 +316,12 @@ export class QueryGatewayService {
     orgId: string,
     actorId: string,
     opts: { forceRefresh?: boolean } = {},
-  ): Promise<{ snapshot: DatasetSnapshot; freshness: FreshnessRecord; fromCache: boolean; cacheTier: 'hit' | 'miss' }> {
+  ): Promise<{
+    snapshot: DatasetSnapshot;
+    freshness: FreshnessRecord;
+    fromCache: boolean;
+    cacheTier: 'hit' | 'miss';
+  }> {
     // ACL check
     await this.checkACL(actorId, 'execute', orgId);
 
@@ -436,9 +453,7 @@ export class QueryGatewayService {
     await this.checkACL(actorId, 'webhook', orgId);
 
     // HMAC verification
-    const expectedSig = createHmac('sha256', this.webhookSecret)
-      .update(payload)
-      .digest('hex');
+    const expectedSig = createHmac('sha256', this.webhookSecret).update(payload).digest('hex');
     const sigBytes = Buffer.from(signature, 'hex');
     const expectedBytes = Buffer.from(expectedSig, 'hex');
     if (sigBytes.length !== expectedBytes.length || !timingSafeEqual(sigBytes, expectedBytes)) {
@@ -486,11 +501,7 @@ export class QueryGatewayService {
   // Invalidation
   // -------------------------------------------------------------------------
 
-  async invalidateQuery(
-    queryId: string,
-    orgId: string,
-    actorId: string,
-  ): Promise<void> {
+  async invalidateQuery(queryId: string, orgId: string, actorId: string): Promise<void> {
     await this.checkACL(actorId, 'invalidate', orgId);
     this.cacheInvalidate(queryId);
 
@@ -577,7 +588,10 @@ export class QueryGatewayService {
   /**
    * Get a query with its latest snapshot and freshness record.
    */
-  async getQueryStatus(queryId: string, orgId: string): Promise<{
+  async getQueryStatus(
+    queryId: string,
+    orgId: string,
+  ): Promise<{
     query: QueryRecord;
     latestSnapshot: DatasetSnapshot | null;
     latestFreshness: FreshnessRecord | null;

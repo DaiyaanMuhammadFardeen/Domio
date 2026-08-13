@@ -15,11 +15,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import type { DeckDocument } from '@domio/schema/generated/scene-graph';
-import {
-  AdminPinDialog,
-  TouchGestureOverlay,
-  IdleReset,
-} from '../../../components/kiosk';
+import { AdminPinDialog, TouchGestureOverlay, IdleReset } from '../../../components/kiosk';
 import { SlideStage } from '../../../components/SlideStage';
 import { getKioskConfig, verifyAdminPin, type KioskConfig } from '../../../lib/kiosk-service';
 

@@ -4,7 +4,20 @@
   "title": "Domio Code Sandbox Policy V1",
   "description": "Code sandbox policy for Phase 11 runnable JS snippets. Defines CPU/memory limits, capability flags (network, DOM, console, import), and module allowlists.",
   "type": "object",
-  "required": ["schemaVersion", "id", "workspaceId", "name", "maxCpuMs", "maxMemoryMb", "allowNetwork", "allowDom", "allowConsole", "allowImport", "moduleAllowlist", "createdAt"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "workspaceId",
+    "name",
+    "maxCpuMs",
+    "maxMemoryMb",
+    "allowNetwork",
+    "allowDom",
+    "allowConsole",
+    "allowImport",
+    "moduleAllowlist",
+    "createdAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {

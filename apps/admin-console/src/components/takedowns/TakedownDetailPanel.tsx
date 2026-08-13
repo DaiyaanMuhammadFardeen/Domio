@@ -38,7 +38,9 @@ export interface TakedownDetailPanelProps {
   readonly request: TakedownRequest;
   readonly events: ReadonlyArray<TakedownEvent>;
   /** When provided, shows the resolve form for `received` / `in_review` requests. */
-  readonly onResolve?: ((decision: ResolveDecision, notes: string) => Promise<void> | void) | undefined;
+  readonly onResolve?:
+    | ((decision: ResolveDecision, notes: string) => Promise<void> | void)
+    | undefined;
   readonly labels: TakedownDetailPanelLabels;
 }
 
@@ -64,24 +66,19 @@ export function TakedownDetailPanel({
   );
 
   const showResolveForm =
-    onResolve !== undefined &&
-    (request.status === 'received' || request.status === 'in_review');
+    onResolve !== undefined && (request.status === 'received' || request.status === 'in_review');
 
   return (
     <div className="space-y-5" data-testid="takedown-detail-panel">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Kind
-          </div>
+          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Kind</div>
           <div className="mt-1">
             <Badge tone={toneForTakedownKind(request.kind)}>{request.kind}</Badge>
           </div>
         </div>
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Status
-          </div>
+          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Status</div>
           <div className="mt-1">
             <Badge tone={toneForTakedownStatus(request.status as TakedownStatus)}>
               {request.status}
@@ -94,18 +91,14 @@ export function TakedownDetailPanel({
         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
           {labels.claimant}
         </div>
-        <div className="mt-0.5 font-mono text-sm text-slate-900">
-          {request.claimant_id}
-        </div>
+        <div className="mt-0.5 font-mono text-sm text-slate-900">{request.claimant_id}</div>
       </div>
 
       <div>
         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
           {labels.respondent}
         </div>
-        <div className="mt-0.5 font-mono text-sm text-slate-900">
-          {request.listing_id}
-        </div>
+        <div className="mt-0.5 font-mono text-sm text-slate-900">{request.listing_id}</div>
       </div>
 
       {request.evidence_url && (
@@ -119,8 +112,7 @@ export function TakedownDetailPanel({
             rel="noopener noreferrer"
             className="mt-0.5 inline-flex items-center gap-1 text-sm text-brand-600 hover:text-brand-800"
           >
-            {request.evidence_url}{' '}
-            <ExternalLink className="h-3 w-3" aria-hidden />
+            {request.evidence_url} <ExternalLink className="h-3 w-3" aria-hidden />
           </a>
         </div>
       )}
@@ -129,9 +121,7 @@ export function TakedownDetailPanel({
         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
           {labels.statement}
         </div>
-        <p className="mt-0.5 text-sm leading-relaxed text-slate-700">
-          {request.statement}
-        </p>
+        <p className="mt-0.5 text-sm leading-relaxed text-slate-700">{request.statement}</p>
       </div>
 
       {request.resolution_notes && (
@@ -158,8 +148,7 @@ export function TakedownDetailPanel({
           {formatDate(request.submitted_at)}
         </div>
         <div>
-          <span className="font-medium">{labels.resolved}:</span>{' '}
-          {formatDate(request.resolved_at)}
+          <span className="font-medium">{labels.resolved}:</span> {formatDate(request.resolved_at)}
         </div>
       </div>
 

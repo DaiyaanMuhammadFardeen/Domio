@@ -13,17 +13,37 @@ import type { ComponentPackage, MarketplaceListing } from '../store/types.js';
 
 async function seedPackage(store: InMemoryStore, catalogId: string): Promise<void> {
   const pkg: ComponentPackage = {
-    id: `${catalogId}:1.0.0`, catalogId, version: '1.0.0', kind: 'component', name: catalogId, description: '',
-    propsSchema: { type: 'object', properties: {} }, variants: [], files: {}, packageHash: '', sizeBudgetBytes: 0,
-    createdAt: Date.now(), updatedAt: Date.now(),
+    id: `${catalogId}:1.0.0`,
+    catalogId,
+    version: '1.0.0',
+    kind: 'component',
+    name: catalogId,
+    description: '',
+    propsSchema: { type: 'object', properties: {} },
+    variants: [],
+    files: {},
+    packageHash: '',
+    sizeBudgetBytes: 0,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
   };
   await store.putPackage(pkg);
 }
 
-async function seedListing(store: InMemoryStore, overrides: Partial<MarketplaceListing> & { id: string }): Promise<MarketplaceListing> {
+async function seedListing(
+  store: InMemoryStore,
+  overrides: Partial<MarketplaceListing> & { id: string },
+): Promise<MarketplaceListing> {
   const listing: MarketplaceListing = {
-    catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '',
-    status: 'draft', isFree: true, tags: [], createdAt: Date.now(), updatedAt: Date.now(),
+    catalogId: 'comp.btn',
+    sellerId: 's-1',
+    title: 'Btn',
+    description: '',
+    status: 'draft',
+    isFree: true,
+    tags: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
     ...overrides,
   };
   await store.putListing(listing);
@@ -66,43 +86,77 @@ describe('listings', () => {
     it('creates a draft listing', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: 'desc',
-        priceCents: 0, isFree: true,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: 'desc',
+        priceCents: 0,
+        isFree: true,
       });
       expect(listing.status).toBe('draft');
       expect(listing.isFree).toBe(true);
     });
     it('throws when component not found', async () => {
-      await expect(createListing(deps, {
-        catalogId: 'missing', sellerId: 's-1', title: 'X', description: '', priceCents: 0,
-      })).rejects.toThrow('not found');
+      await expect(
+        createListing(deps, {
+          catalogId: 'missing',
+          sellerId: 's-1',
+          title: 'X',
+          description: '',
+          priceCents: 0,
+        }),
+      ).rejects.toThrow('not found');
     });
     it('throws conflict when active listing exists', async () => {
       await seedPackage(store, 'comp.btn');
       await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 100,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 100,
       });
-      await expect(createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn2', description: '', priceCents: 200,
-      })).rejects.toThrow();
+      await expect(
+        createListing(deps, {
+          catalogId: 'comp.btn',
+          sellerId: 's-1',
+          title: 'Btn2',
+          description: '',
+          priceCents: 200,
+        }),
+      ).rejects.toThrow();
     });
     it('allows create when existing listing is removed', async () => {
       await seedPackage(store, 'comp.btn');
       const old = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
       await transitionListing(deps, old.id, 'in_review', 'u');
       await transitionListing(deps, old.id, 'removed', 'u');
       const newListing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-2', title: 'Btn2', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-2',
+        title: 'Btn2',
+        description: '',
+        priceCents: 0,
       });
       expect(newListing.id).not.toBe(old.id);
     });
     it('sets optional fields', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: 'desc',
-        priceCents: 500, currency: 'usd', tags: ['ui'], preview: { img: 'x.png' },
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: 'desc',
+        priceCents: 500,
+        currency: 'usd',
+        tags: ['ui'],
+        preview: { img: 'x.png' },
       });
       expect(listing.priceCents).toBe(500);
       expect(listing.currency).toBe('usd');
@@ -115,7 +169,11 @@ describe('listings', () => {
     it('transitions draft -> in_review -> published', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
       const reviewed = await transitionListing(deps, listing.id, 'in_review', 'u');
       expect(reviewed.status).toBe('in_review');
@@ -126,7 +184,11 @@ describe('listings', () => {
     it('transitions to deprecated', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
       await transitionListing(deps, listing.id, 'in_review', 'u');
       await transitionListing(deps, listing.id, 'published', 'u');
@@ -137,17 +199,29 @@ describe('listings', () => {
     it('throws for invalid transition', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
-      await expect(transitionListing(deps, listing.id, 'published', 'u')).rejects.toThrow('Invalid');
+      await expect(transitionListing(deps, listing.id, 'published', 'u')).rejects.toThrow(
+        'Invalid',
+      );
     });
     it('throws for missing listing', async () => {
-      await expect(transitionListing(deps, 'missing', 'published', 'u')).rejects.toThrow('not found');
+      await expect(transitionListing(deps, 'missing', 'published', 'u')).rejects.toThrow(
+        'not found',
+      );
     });
     it('publish requires latest package not deprecated', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
       await transitionListing(deps, listing.id, 'in_review', 'u');
       // Deprecate the package
@@ -156,32 +230,54 @@ describe('listings', () => {
         pkg.deprecation = { reason: 'old', deprecatedAt: Date.now() };
         await store.putPackage(pkg);
       }
-      await expect(transitionListing(deps, listing.id, 'published', 'u')).rejects.toThrow('deprecated');
+      await expect(transitionListing(deps, listing.id, 'published', 'u')).rejects.toThrow(
+        'deprecated',
+      );
     });
     it('records audit row', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
       await transitionListing(deps, listing.id, 'in_review', 'actor-1');
       const auditRows = await store.listAudit('human');
-      const listingAudit = auditRows.find((r) => r.resourceId === listing.id && r.action === 'listing.in_review');
+      const listingAudit = auditRows.find(
+        (r) => r.resourceId === listing.id && r.action === 'listing.in_review',
+      );
       expect(listingAudit).toBeDefined();
     });
     it('includes reason in deprecated transition', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
       await transitionListing(deps, listing.id, 'in_review', 'u');
       await transitionListing(deps, listing.id, 'published', 'u');
-      const dep = await transitionListing(deps, listing.id, 'deprecated', 'u', 'no longer maintained');
+      const dep = await transitionListing(
+        deps,
+        listing.id,
+        'deprecated',
+        'u',
+        'no longer maintained',
+      );
       expect(dep.deprecatedAt).toBeDefined();
     });
     it('transition to removed from deprecated', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
       await transitionListing(deps, listing.id, 'in_review', 'u');
       await transitionListing(deps, listing.id, 'published', 'u');
@@ -193,7 +289,11 @@ describe('listings', () => {
     it('transition from in_review back to draft', async () => {
       await seedPackage(store, 'comp.btn');
       const listing = await createListing(deps, {
-        catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '', priceCents: 0,
+        catalogId: 'comp.btn',
+        sellerId: 's-1',
+        title: 'Btn',
+        description: '',
+        priceCents: 0,
       });
       await transitionListing(deps, listing.id, 'in_review', 'u');
       const draft = await transitionListing(deps, listing.id, 'draft', 'u');
@@ -205,8 +305,20 @@ describe('listings', () => {
     it('returns non-removed listings by default', async () => {
       await seedPackage(store, 'comp.a');
       await seedPackage(store, 'comp.b');
-      await createListing(deps, { catalogId: 'comp.a', sellerId: 's', title: 'A', description: '', priceCents: 0 });
-      const l2 = await createListing(deps, { catalogId: 'comp.b', sellerId: 's', title: 'B', description: '', priceCents: 0 });
+      await createListing(deps, {
+        catalogId: 'comp.a',
+        sellerId: 's',
+        title: 'A',
+        description: '',
+        priceCents: 0,
+      });
+      const l2 = await createListing(deps, {
+        catalogId: 'comp.b',
+        sellerId: 's',
+        title: 'B',
+        description: '',
+        priceCents: 0,
+      });
       await transitionListing(deps, l2.id, 'in_review', 'u');
       await transitionListing(deps, l2.id, 'removed', 'u');
       const all = await listListings(deps);
@@ -214,7 +326,13 @@ describe('listings', () => {
     });
     it('filters by status', async () => {
       await seedPackage(store, 'comp.a');
-      const l = await createListing(deps, { catalogId: 'comp.a', sellerId: 's', title: 'A', description: '', priceCents: 0 });
+      const l = await createListing(deps, {
+        catalogId: 'comp.a',
+        sellerId: 's',
+        title: 'A',
+        description: '',
+        priceCents: 0,
+      });
       await transitionListing(deps, l.id, 'in_review', 'u');
       await transitionListing(deps, l.id, 'published', 'u');
       const published = await listListings(deps, { status: 'published' });
@@ -222,13 +340,25 @@ describe('listings', () => {
     });
     it('filters by sellerId', async () => {
       await seedPackage(store, 'comp.a');
-      await createListing(deps, { catalogId: 'comp.a', sellerId: 's1', title: 'A', description: '', priceCents: 0 });
+      await createListing(deps, {
+        catalogId: 'comp.a',
+        sellerId: 's1',
+        title: 'A',
+        description: '',
+        priceCents: 0,
+      });
       const result = await listListings(deps, { sellerId: 's1' });
       expect(result.length).toBe(1);
     });
     it('respects limit', async () => {
       await seedPackage(store, 'comp.a');
-      await createListing(deps, { catalogId: 'comp.a', sellerId: 's', title: 'A', description: '', priceCents: 0 });
+      await createListing(deps, {
+        catalogId: 'comp.a',
+        sellerId: 's',
+        title: 'A',
+        description: '',
+        priceCents: 0,
+      });
       const result = await listListings(deps, { limit: 0 });
       expect(result.length).toBe(0);
     });

@@ -15,18 +15,22 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TaskManagerService } from './service.js';
 import { InMemoryTaskLinkStore } from './store/mem_store.js';
-import type { TaskManagerEventEmitter, TaskProvider, TaskLink, TaskState, FieldMap, TaskVendor, SyncMode } from './types.js';
+import type {
+  TaskManagerEventEmitter,
+  TaskProvider,
+  TaskLink,
+  TaskState,
+  FieldMap,
+  TaskVendor,
+  SyncMode,
+} from './types.js';
 import {
   FeatureDisabledError,
   TaskLinkNotFoundError,
   DuplicateTaskLinkError,
   ValidationError,
 } from './types.js';
-import {
-  validateFieldMap,
-  applyFieldMap,
-  describeMapping,
-} from './mapping.js';
+import { validateFieldMap, applyFieldMap, describeMapping } from './mapping.js';
 import { detectConflict, resolveSyncConflict } from './conflicts.js';
 import { handlers } from './handlers.js';
 import type { HttpRequest, TaskManagerHandlerContext } from './handlers.js';
@@ -37,7 +41,9 @@ import type { HttpRequest, TaskManagerHandlerContext } from './handlers.js';
 
 const fixedDate = new Date('2026-01-15T10:00:00Z');
 
-function makeEventEmitter(): TaskManagerEventEmitter & { events: Array<{ subject: string; payload: Record<string, unknown> }> } {
+function makeEventEmitter(): TaskManagerEventEmitter & {
+  events: Array<{ subject: string; payload: Record<string, unknown> }>;
+} {
   const events: Array<{ subject: string; payload: Record<string, unknown> }> = [];
   return {
     events,
@@ -74,7 +80,11 @@ function makeTaskState(overrides: Partial<TaskState> = {}): TaskState {
   };
 }
 
-function makeReq<P = Record<string, never>, B = unknown>(params: P, body: B, headers: Record<string, string | undefined> = {}): HttpRequest<P, B> {
+function makeReq<P = Record<string, never>, B = unknown>(
+  params: P,
+  body: B,
+  headers: Record<string, string | undefined> = {},
+): HttpRequest<P, B> {
   return {
     method: 'POST',
     path: '/',
@@ -85,7 +95,9 @@ function makeReq<P = Record<string, never>, B = unknown>(params: P, body: B, hea
   };
 }
 
-function makeListReq(query: Record<string, string | undefined>): HttpRequest<Record<string, never>, undefined, Record<string, string | undefined>> {
+function makeListReq(
+  query: Record<string, string | undefined>,
+): HttpRequest<Record<string, never>, undefined, Record<string, string | undefined>> {
   return {
     method: 'GET',
     path: '/',
@@ -123,7 +135,9 @@ describe('TaskManagerService', () => {
     });
 
     it('rejects tuple with non-string from/to', () => {
-      expect(() => validateFieldMap({ status: { from: 1, to: 2 } as unknown as { from: string; to: string } })).toThrow(ValidationError);
+      expect(() =>
+        validateFieldMap({ status: { from: 1, to: 2 } as unknown as { from: string; to: string } }),
+      ).toThrow(ValidationError);
     });
 
     it('allows empty field map', () => {
@@ -166,11 +180,7 @@ describe('TaskManagerService', () => {
     });
 
     it('does not overwrite target when source key missing', () => {
-      const result = applyFieldMap(
-        { status: 'state' },
-        {},
-        { status: 'existing' },
-      );
+      const result = applyFieldMap({ status: 'state' }, {}, { status: 'existing' });
       expect(result.status).toBe('existing');
     });
   });
@@ -228,25 +238,48 @@ describe('TaskManagerService', () => {
 
   describe('resolveSyncConflict', () => {
     const fieldMap: FieldMap = { status: 'status', priority: 'priority' };
-    const domio = makeTaskState({ status: 'domio_status', priority: 'domio_pri', updatedAt: new Date('2026-01-10T10:00:00Z') });
-    const task = makeTaskState({ status: 'task_status', priority: 'task_pri', updatedAt: new Date('2026-01-15T10:00:00Z') });
+    const domio = makeTaskState({
+      status: 'domio_status',
+      priority: 'domio_pri',
+      updatedAt: new Date('2026-01-10T10:00:00Z'),
+    });
+    const task = makeTaskState({
+      status: 'task_status',
+      priority: 'task_pri',
+      updatedAt: new Date('2026-01-15T10:00:00Z'),
+    });
 
     it('domio_wins returns domioState', () => {
-      const result = resolveSyncConflict({ domioState: domio, taskState: task, syncMode: 'domio_wins', fieldMap });
+      const result = resolveSyncConflict({
+        domioState: domio,
+        taskState: task,
+        syncMode: 'domio_wins',
+        fieldMap,
+      });
       expect(result.winner).toBe('domio');
       expect(result.merged.status).toBe('domio_status');
       expect(result.resolution).toBe('domio_wins');
     });
 
     it('task_wins returns taskState', () => {
-      const result = resolveSyncConflict({ domioState: domio, taskState: task, syncMode: 'task_wins', fieldMap });
+      const result = resolveSyncConflict({
+        domioState: domio,
+        taskState: task,
+        syncMode: 'task_wins',
+        fieldMap,
+      });
       expect(result.winner).toBe('task');
       expect(result.merged.status).toBe('task_status');
       expect(result.resolution).toBe('task_wins');
     });
 
     it('last_write_wins: newer side wins per-field', () => {
-      const result = resolveSyncConflict({ domioState: domio, taskState: task, syncMode: 'last_write_wins', fieldMap });
+      const result = resolveSyncConflict({
+        domioState: domio,
+        taskState: task,
+        syncMode: 'last_write_wins',
+        fieldMap,
+      });
       expect(result.winner).toBe('task'); // task.updatedAt is newer
       expect(result.merged.status).toBe('task_status');
       expect(result.merged.priority).toBe('task_pri');
@@ -254,16 +287,32 @@ describe('TaskManagerService', () => {
     });
 
     it('last_write_wins: domio newer wins per-field', () => {
-      const newerDomio = makeTaskState({ status: 'domio_new', updatedAt: new Date('2026-01-20T10:00:00Z') });
-      const olderTask = makeTaskState({ status: 'task_old', updatedAt: new Date('2026-01-05T10:00:00Z') });
-      const result = resolveSyncConflict({ domioState: newerDomio, taskState: olderTask, syncMode: 'last_write_wins', fieldMap });
+      const newerDomio = makeTaskState({
+        status: 'domio_new',
+        updatedAt: new Date('2026-01-20T10:00:00Z'),
+      });
+      const olderTask = makeTaskState({
+        status: 'task_old',
+        updatedAt: new Date('2026-01-05T10:00:00Z'),
+      });
+      const result = resolveSyncConflict({
+        domioState: newerDomio,
+        taskState: olderTask,
+        syncMode: 'last_write_wins',
+        fieldMap,
+      });
       expect(result.winner).toBe('domio');
       expect(result.merged.status).toBe('domio_new');
     });
 
     it('last_write_wins: equal timestamps use domio', () => {
       const sameTime = makeTaskState({ updatedAt: fixedDate });
-      const result = resolveSyncConflict({ domioState: sameTime, taskState: sameTime, syncMode: 'last_write_wins', fieldMap });
+      const result = resolveSyncConflict({
+        domioState: sameTime,
+        taskState: sameTime,
+        syncMode: 'last_write_wins',
+        fieldMap,
+      });
       expect(result.winner).toBe('domio');
     });
   });
@@ -463,7 +512,11 @@ describe('TaskManagerService', () => {
         external_project_id: 'PROJ-1',
       });
 
-      const updated = await service.updateLink(created.id, { field_map: { status: 'state' } }, 'user-1');
+      const updated = await service.updateLink(
+        created.id,
+        { field_map: { status: 'state' } },
+        'user-1',
+      );
       expect(updated.field_map).toEqual({ status: 'state' });
     });
 
@@ -644,7 +697,9 @@ describe('TaskManagerService', () => {
     });
 
     it('throws for non-existent link', async () => {
-      await expect(service.syncLink('non-existent', 'domio_to_task')).rejects.toThrow(TaskLinkNotFoundError);
+      await expect(service.syncLink('non-existent', 'domio_to_task')).rejects.toThrow(
+        TaskLinkNotFoundError,
+      );
     });
 
     it('pushes state when direction is domio_to_task and no conflict', async () => {
@@ -752,13 +807,16 @@ describe('TaskManagerService', () => {
     });
 
     it('createTaskLink creates and returns 201', async () => {
-      const req = makeReq({}, {
-        workspace_id: 'ws-1',
-        assignment_id: 'asgn-1',
-        vendor: 'jira' as TaskVendor,
-        external_task_id: 'EXT-1',
-        external_project_id: 'PROJ-1',
-      });
+      const req = makeReq(
+        {},
+        {
+          workspace_id: 'ws-1',
+          assignment_id: 'asgn-1',
+          vendor: 'jira' as TaskVendor,
+          external_task_id: 'EXT-1',
+          external_project_id: 'PROJ-1',
+        },
+      );
 
       const res = await handlers.createTaskLink(req, ctx);
       expect(res.status).toBe(201);
@@ -849,25 +907,31 @@ describe('TaskManagerService', () => {
         external_project_id: 'PROJ-1',
       });
 
-      const req = makeReq({}, {
-        workspace_id: 'ws-1',
-        assignment_id: 'asgn-1',
-        vendor: 'jira' as TaskVendor,
-        external_task_id: 'EXT-2',
-        external_project_id: 'PROJ-2',
-      });
+      const req = makeReq(
+        {},
+        {
+          workspace_id: 'ws-1',
+          assignment_id: 'asgn-1',
+          vendor: 'jira' as TaskVendor,
+          external_task_id: 'EXT-2',
+          external_project_id: 'PROJ-2',
+        },
+      );
       const res = await handlers.createTaskLink(req, ctx);
       expect(res.status).toBe(409);
     });
 
     it('returns 400 for invalid vendor', async () => {
-      const req = makeReq({}, {
-        workspace_id: 'ws-1',
-        assignment_id: 'asgn-1',
-        vendor: 'invalid' as TaskVendor,
-        external_task_id: 'EXT-1',
-        external_project_id: 'PROJ-1',
-      });
+      const req = makeReq(
+        {},
+        {
+          workspace_id: 'ws-1',
+          assignment_id: 'asgn-1',
+          vendor: 'invalid' as TaskVendor,
+          external_task_id: 'EXT-1',
+          external_project_id: 'PROJ-1',
+        },
+      );
       const res = await handlers.createTaskLink(req, ctx);
       expect(res.status).toBe(400);
     });

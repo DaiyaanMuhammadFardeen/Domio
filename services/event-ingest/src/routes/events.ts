@@ -27,9 +27,10 @@ import type { AnalyticsEvent, IngestAck } from '../types.js';
 async function publishDlq(deps: IngestDeps, record: DlqRecord): Promise<void> {
   if (!deps.dlqPublisher) return;
   try {
-    const key = typeof record.raw === 'object' && record.raw !== null
-      ? String((record.raw as { event_id?: unknown }).event_id ?? 'unknown')
-      : 'unknown';
+    const key =
+      typeof record.raw === 'object' && record.raw !== null
+        ? String((record.raw as { event_id?: unknown }).event_id ?? 'unknown')
+        : 'unknown';
     await deps.dlqPublisher.publishRaw(
       KAFKA_TOPIC_DLQ,
       key,
@@ -50,7 +51,10 @@ export function eventsRoutes(deps: IngestDeps): Hono {
       const raw = await c.req.text();
       if (raw.length > deps.cfg.maxBatchBytes) {
         deps.metrics.recordBatch('rejected');
-        return c.json({ error: { code: 'payload_too_large', message: 'batch exceeds size limit' } }, 413);
+        return c.json(
+          { error: { code: 'payload_too_large', message: 'batch exceeds size limit' } },
+          413,
+        );
       }
 
       // 2. Verify HMAC.
@@ -93,7 +97,10 @@ export function eventsRoutes(deps: IngestDeps): Hono {
         parsed = JSON.parse(raw);
       } catch {
         deps.metrics.recordBatch('rejected');
-        return c.json({ error: { code: 'malformed_json', message: 'request body must be valid JSON' } }, 400);
+        return c.json(
+          { error: { code: 'malformed_json', message: 'request body must be valid JSON' } },
+          400,
+        );
       }
 
       const batch = Array.isArray(parsed) ? parsed : [parsed];
@@ -122,7 +129,7 @@ export function eventsRoutes(deps: IngestDeps): Hono {
           await publishDlq(deps, dlqRec);
           deps.metrics.recordEvent(
             typeof (rawEvent as { event_name?: unknown })?.event_name === 'string'
-              ? ((rawEvent as { event_name: string }).event_name)
+              ? (rawEvent as { event_name: string }).event_name
               : 'unknown',
             (rawEvent as { privacy_mode?: string }).privacy_mode ?? 'unknown',
             (rawEvent as { source_app?: string }).source_app ?? 'unknown',
@@ -142,7 +149,12 @@ export function eventsRoutes(deps: IngestDeps): Hono {
           };
           await deps.dlq.write(dlqRec);
           await publishDlq(deps, dlqRec);
-          deps.metrics.recordEvent(event.event_name, event.privacy_mode, event.source_app, 'rejected');
+          deps.metrics.recordEvent(
+            event.event_name,
+            event.privacy_mode,
+            event.source_app,
+            'rejected',
+          );
           deps.metrics.recordDlq('consent');
           continue;
         }
@@ -191,7 +203,10 @@ export function eventsRoutes(deps: IngestDeps): Hono {
         deps.metrics.setSpoolBytes(await deps.spool.size());
         deps.metrics.setSpoolFiles((await deps.spool.list()).length);
         deps.metrics.recordRoute('POST /v1/events', status);
-        return c.json({ ack, warning: { code: 'spooled', message: 'kafka unreachable; spooled to disk' } }, status);
+        return c.json(
+          { ack, warning: { code: 'spooled', message: 'kafka unreachable; spooled to disk' } },
+          status,
+        );
       }
       deps.metrics.observeKafkaPublish((Date.now() - kafkaStart) / 1000);
       for (const e of accepted) {

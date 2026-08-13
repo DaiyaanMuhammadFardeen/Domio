@@ -23,8 +23,11 @@ describe('buildResource — positive coverage', () => {
 
   it('accepts full-length sha (40 chars) and short sha (7 chars)', () => {
     expect(buildResource({ serviceName: 's', gitSha: '0123457' })['git.sha']).toBe('0123457');
-    expect(buildResource({ serviceName: 's', gitSha: '0123456789abcdef0123456789abcdef01234567' })['git.sha'])
-      .toBe('0123456789abcdef0123456789abcdef01234567');
+    expect(
+      buildResource({ serviceName: 's', gitSha: '0123456789abcdef0123456789abcdef01234567' })[
+        'git.sha'
+      ],
+    ).toBe('0123456789abcdef0123456789abcdef01234567');
   });
 
   it('accepts hex sha in uppercase', () => {
@@ -96,26 +99,28 @@ describe('buildResource — negative coverage', () => {
 
   it('rejects git shas that are too short or non-hex', () => {
     expect(() => buildResource({ serviceName: 's', gitSha: 'abc' })).toThrow(ResourceError);
-    expect(() => buildResource({ serviceName: 's', gitSha: 'g'.repeat(40) })).toThrow(ResourceError);
+    expect(() => buildResource({ serviceName: 's', gitSha: 'g'.repeat(40) })).toThrow(
+      ResourceError,
+    );
   });
 
   it('rejects extra attribute keys with illegal characters', () => {
-    expect(() =>
-      buildResource({ serviceName: 's', extra: { 'illegal key': 'v' } }),
-    ).toThrow(ResourceError);
-    expect(() =>
-      buildResource({ serviceName: 's', extra: { '1starts_with_digit': 'v' } }),
-    ).toThrow(ResourceError);
+    expect(() => buildResource({ serviceName: 's', extra: { 'illegal key': 'v' } })).toThrow(
+      ResourceError,
+    );
+    expect(() => buildResource({ serviceName: 's', extra: { '1starts_with_digit': 'v' } })).toThrow(
+      ResourceError,
+    );
     const longKey = 'k'.repeat(300);
-    expect(() =>
-      buildResource({ serviceName: 's', extra: { [longKey]: 'v' } }),
-    ).toThrow(ResourceError);
+    expect(() => buildResource({ serviceName: 's', extra: { [longKey]: 'v' } })).toThrow(
+      ResourceError,
+    );
   });
 
   it('rejects extra attribute values with unsafe characters', () => {
-    expect(() =>
-      buildResource({ serviceName: 's', extra: { region: 'us east 1' } }),
-    ).toThrow(ResourceError);
+    expect(() => buildResource({ serviceName: 's', extra: { region: 'us east 1' } })).toThrow(
+      ResourceError,
+    );
   });
 });
 

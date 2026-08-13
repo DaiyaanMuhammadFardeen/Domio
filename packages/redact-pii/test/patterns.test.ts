@@ -21,7 +21,9 @@ describe('redactString (positive matches)', () => {
   });
 
   it('redacts an international BD phone', () => {
-    expect(redactString('Call +8801712345678 immediately')).toBe('Call [redacted:phone-bd] immediately');
+    expect(redactString('Call +8801712345678 immediately')).toBe(
+      'Call [redacted:phone-bd] immediately',
+    );
   });
 
   it('redacts a local BD phone', () => {
@@ -49,7 +51,9 @@ describe('redactString (positive matches)', () => {
   });
 
   it('redacts a JWT', () => {
-    expect(redactString('Token eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1MSJ9.x9X-t8c7z-7YhQy7pRk2wQ')).toContain('[redacted:jwt]');
+    expect(
+      redactString('Token eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1MSJ9.x9X-t8c7z-7YhQy7pRk2wQ'),
+    ).toContain('[redacted:jwt]');
   });
 
   it('redacts an AWS access key', () => {
@@ -61,11 +65,15 @@ describe('redactString (positive matches)', () => {
   });
 
   it('redacts an OpenAI key', () => {
-    expect(redactString('OpenAI sk-proj-abcdefghijklmnopqrstuvwxyz')).toContain('[redacted:openai-key]');
+    expect(redactString('OpenAI sk-proj-abcdefghijklmnopqrstuvwxyz')).toContain(
+      '[redacted:openai-key]',
+    );
   });
 
   it('redacts an Anthropic key', () => {
-    expect(redactString('Claude sk-ant-api03-abc123def456ghi789jkl012mno345pqr678')).toContain('[redacted:anthropic-key]');
+    expect(redactString('Claude sk-ant-api03-abc123def456ghi789jkl012mno345pqr678')).toContain(
+      '[redacted:anthropic-key]',
+    );
   });
 
   it('redacts a public IPv4 address', () => {
@@ -138,9 +146,12 @@ describe('looksLikeSecretKey', () => {
     expect(looksLikeSecretKey(key)).toBe(true);
   });
 
-  it.each(['name', 'email', 'count', 'id', 'value', 'data', 'enabled'])('does NOT flag %s', (key) => {
-    expect(looksLikeSecretKey(key)).toBe(false);
-  });
+  it.each(['name', 'email', 'count', 'id', 'value', 'data', 'enabled'])(
+    'does NOT flag %s',
+    (key) => {
+      expect(looksLikeSecretKey(key)).toBe(false);
+    },
+  );
 });
 
 describe('luhnValid', () => {

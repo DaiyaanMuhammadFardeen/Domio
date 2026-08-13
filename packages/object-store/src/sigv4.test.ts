@@ -11,7 +11,10 @@ import { describe, it, expect } from 'vitest';
 import { signRequest, presignUrl, sha256Hex } from './sigv4.js';
 
 describe('SigV4 signer', () => {
-  const credentials = { accessKey: 'AKIDEXAMPLE', secretKey: 'wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY' };
+  const credentials = {
+    accessKey: 'AKIDEXAMPLE',
+    secretKey: 'wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY',
+  };
   const fixedDate = new Date('2013-05-24T00:00:00Z');
 
   it('signs a vanilla GET request matching the AWS reference vector', () => {
@@ -22,7 +25,7 @@ describe('SigV4 signer', () => {
         region: 'us-east-1',
         service: 's3',
         path: '/',
-        headers: { 'range': 'bytes=0-9' },
+        headers: { range: 'bytes=0-9' },
       },
       credentials,
       fixedDate,
@@ -39,12 +42,24 @@ describe('SigV4 signer', () => {
 
   it('produces deterministic signatures for the same input', () => {
     const a = signRequest(
-      { method: 'GET', host: 's3.amazonaws.com', region: 'us-east-1', service: 's3', path: '/bucket/key' },
+      {
+        method: 'GET',
+        host: 's3.amazonaws.com',
+        region: 'us-east-1',
+        service: 's3',
+        path: '/bucket/key',
+      },
       credentials,
       fixedDate,
     );
     const b = signRequest(
-      { method: 'GET', host: 's3.amazonaws.com', region: 'us-east-1', service: 's3', path: '/bucket/key' },
+      {
+        method: 'GET',
+        host: 's3.amazonaws.com',
+        region: 'us-east-1',
+        service: 's3',
+        path: '/bucket/key',
+      },
       credentials,
       fixedDate,
     );
@@ -53,12 +68,24 @@ describe('SigV4 signer', () => {
 
   it('changes signature when path changes', () => {
     const a = signRequest(
-      { method: 'GET', host: 's3.amazonaws.com', region: 'us-east-1', service: 's3', path: '/bucket/key1' },
+      {
+        method: 'GET',
+        host: 's3.amazonaws.com',
+        region: 'us-east-1',
+        service: 's3',
+        path: '/bucket/key1',
+      },
       credentials,
       fixedDate,
     );
     const b = signRequest(
-      { method: 'GET', host: 's3.amazonaws.com', region: 'us-east-1', service: 's3', path: '/bucket/key2' },
+      {
+        method: 'GET',
+        host: 's3.amazonaws.com',
+        region: 'us-east-1',
+        service: 's3',
+        path: '/bucket/key2',
+      },
       credentials,
       fixedDate,
     );
@@ -67,13 +94,21 @@ describe('SigV4 signer', () => {
 
   it('produces a presigned URL with all required query parameters', () => {
     const result = presignUrl(
-      { method: 'GET', host: 's3.amazonaws.com', region: 'us-east-1', service: 's3', path: '/bucket/key' },
+      {
+        method: 'GET',
+        host: 's3.amazonaws.com',
+        region: 'us-east-1',
+        service: 's3',
+        path: '/bucket/key',
+      },
       credentials,
       900,
       fixedDate,
     );
     expect(result.url).toContain('X-Amz-Algorithm=AWS4-HMAC-SHA256');
-    expect(result.url).toContain('X-Amz-Credential=AKIDEXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request');
+    expect(result.url).toContain(
+      'X-Amz-Credential=AKIDEXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request',
+    );
     expect(result.url).toContain('X-Amz-Date=20130524T000000Z');
     expect(result.url).toContain('X-Amz-Expires=900');
     expect(result.url).toContain('X-Amz-SignedHeaders=host');
@@ -83,7 +118,15 @@ describe('SigV4 signer', () => {
 
   it('honors unsignedPayload mode', () => {
     const signed = signRequest(
-      { method: 'PUT', host: 's3.amazonaws.com', region: 'us-east-1', service: 's3', path: '/bucket/key', unsignedPayload: true, body: new Uint8Array(10) },
+      {
+        method: 'PUT',
+        host: 's3.amazonaws.com',
+        region: 'us-east-1',
+        service: 's3',
+        path: '/bucket/key',
+        unsignedPayload: true,
+        body: new Uint8Array(10),
+      },
       credentials,
       fixedDate,
     );
@@ -91,7 +134,11 @@ describe('SigV4 signer', () => {
   });
 
   it('sha256Hex matches Node crypto for empty input', () => {
-    expect(sha256Hex(undefined)).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
-    expect(sha256Hex(new Uint8Array())).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+    expect(sha256Hex(undefined)).toBe(
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    );
+    expect(sha256Hex(new Uint8Array())).toBe(
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    );
   });
 });

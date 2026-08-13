@@ -83,17 +83,14 @@ export default function TimelinePage({ params }: TimelinePageProps) {
     let cancelled = false;
     async function load() {
       setLoading(true);
-      const [info, list] = await Promise.all([
-        getSession(id),
-        listSessionEvents(id),
-      ]);
+      const [info, list] = await Promise.all([getSession(id), listSessionEvents(id)]);
       if (cancelled) return;
       setSession(info);
       setEvents(list);
       if (list.length > 0) {
-        setSelectedId((prev) => prev ?? (list[0]?.id ?? null));
-        setFromId((prev) => prev ?? (list[0]?.id ?? null));
-        setToId((prev) => prev ?? (list[list.length - 1]?.id ?? null));
+        setSelectedId((prev) => prev ?? list[0]?.id ?? null);
+        setFromId((prev) => prev ?? list[0]?.id ?? null);
+        setToId((prev) => prev ?? list[list.length - 1]?.id ?? null);
       }
       setLoading(false);
     }
@@ -126,14 +123,8 @@ export default function TimelinePage({ params }: TimelinePageProps) {
     () => events.find((e) => e.id === selectedId) ?? null,
     [events, selectedId],
   );
-  const fromEvent = useMemo(
-    () => events.find((e) => e.id === fromId) ?? null,
-    [events, fromId],
-  );
-  const toEvent = useMemo(
-    () => events.find((e) => e.id === toId) ?? null,
-    [events, toId],
-  );
+  const fromEvent = useMemo(() => events.find((e) => e.id === fromId) ?? null, [events, fromId]);
+  const toEvent = useMemo(() => events.find((e) => e.id === toId) ?? null, [events, toId]);
 
   const handleReplay = useCallback(() => {
     if (!sessionId) return;
@@ -167,12 +158,8 @@ export default function TimelinePage({ params }: TimelinePageProps) {
     <div className="space-y-6">
       <header className="space-y-3" data-testid="timeline-header">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Session timeline
-          </h1>
-          <p className="text-sm text-slate-500">
-            Reconstruct every event of a live session.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">Session timeline</h1>
+          <p className="text-sm text-slate-500">Reconstruct every event of a live session.</p>
         </div>
         {session ? (
           <dl className="grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm sm:grid-cols-3">
@@ -181,10 +168,7 @@ export default function TimelinePage({ params }: TimelinePageProps) {
             <Field label="Presenter" value={session.presenter_name} />
             <Field label="Started" value={formatDate(session.started_at_ms)} />
             <Field label="Duration" value={formatDuration(durationMs)} />
-            <Field
-              label="Attendees"
-              value={String(session.attendee_count)}
-            />
+            <Field label="Attendees" value={String(session.attendee_count)} />
           </dl>
         ) : loading ? (
           <div className="h-24 animate-pulse rounded-xl bg-slate-100" />
@@ -253,9 +237,7 @@ export default function TimelinePage({ params }: TimelinePageProps) {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
-        {label}
-      </dt>
+      <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</dt>
       <dd className="mt-0.5 text-sm font-medium text-slate-900">{value}</dd>
     </div>
   );

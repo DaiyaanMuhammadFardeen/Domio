@@ -24,10 +24,7 @@ import {
   type DeepLinkAudience,
   type DeepLinkViewerScope,
 } from '@domio/deep-link';
-import {
-  Shortener,
-  type ShortenInput,
-} from '@domio/deep-link/server';
+import { Shortener, type ShortenInput } from '@domio/deep-link/server';
 
 import {
   NotFoundError,
@@ -140,8 +137,12 @@ export class DeepLinkService {
     // Apply scope filter — strip private / server_only entries
     // before they enter the token.
     const filtered = scopeFilter(input.var_snapshot ?? [], {
-      ...(input.authoring_viewer_id !== undefined ? { authoring_viewer_id: input.authoring_viewer_id } : {}),
-      ...(input.authoring_viewer_id !== undefined ? { requesting_viewer_id: input.authoring_viewer_id } : {}),
+      ...(input.authoring_viewer_id !== undefined
+        ? { authoring_viewer_id: input.authoring_viewer_id }
+        : {}),
+      ...(input.authoring_viewer_id !== undefined
+        ? { requesting_viewer_id: input.authoring_viewer_id }
+        : {}),
       viewer_scope,
     });
 
@@ -205,7 +206,10 @@ export class DeepLinkService {
     const keys = await this.rotator.verificationKeys(input.tenant_id, record.deck_id);
     const key = keys.find((k) => k.kid === record.kid);
     if (!key) {
-      throw new DeepLinkResolveError('DEEP_LINK_KEY_UNKNOWN', 'Signing key for this link is no longer valid');
+      throw new DeepLinkResolveError(
+        'DEEP_LINK_KEY_UNKNOWN',
+        'Signing key for this link is no longer valid',
+      );
     }
     // Reconstruct the signed token from the persisted payload +
     // signing key. We re-sign here so the resolver doesn't need
@@ -238,10 +242,7 @@ export class DeepLinkService {
       decoded = decoder.decode(token);
     } catch (e) {
       if (e instanceof Error && 'code' in e) {
-        throw new DeepLinkResolveError(
-          (e as { code: string }).code,
-          (e as Error).message,
-        );
+        throw new DeepLinkResolveError((e as { code: string }).code, (e as Error).message);
       }
       throw e;
     }
@@ -258,7 +259,10 @@ export class DeepLinkService {
     };
   }
 
-  async stats(tenant_id: string, id: string): Promise<{
+  async stats(
+    tenant_id: string,
+    id: string,
+  ): Promise<{
     id: string;
     click_count: number;
     expires_at: number;

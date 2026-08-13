@@ -17,13 +17,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type {
-  ChangeEvent,
-  DragEvent,
-  FormEvent,
-  KeyboardEvent,
-  ReactElement,
-} from 'react';
+import type { ChangeEvent, DragEvent, FormEvent, KeyboardEvent, ReactElement } from 'react';
 import { Mic, Square, Paperclip, Send, X } from 'lucide-react';
 import { cn } from '../../lib/cn';
 

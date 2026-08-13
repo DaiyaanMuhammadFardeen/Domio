@@ -28,10 +28,31 @@ describe('heatmap aggregator', () => {
 
   it('groups duplicate (slide, x, y) rows by summing engagement fields', () => {
     const rows: HeatmapRow[] = [
-      row({ tile_x: 1, tile_y: 2, impressions: 5, pause_count: 2, pause_total_ms: 1000, scrollthrough_ms: 2000 }),
+      row({
+        tile_x: 1,
+        tile_y: 2,
+        impressions: 5,
+        pause_count: 2,
+        pause_total_ms: 1000,
+        scrollthrough_ms: 2000,
+      }),
       // Same key — appears before SummingMergeTree flush.
-      row({ tile_x: 1, tile_y: 2, impressions: 3, pause_count: 1, pause_total_ms: 500, scrollthrough_ms: 700 }),
-      row({ tile_x: 3, tile_y: 4, impressions: 7, pause_count: 0, pause_total_ms: 0, scrollthrough_ms: 900 }),
+      row({
+        tile_x: 1,
+        tile_y: 2,
+        impressions: 3,
+        pause_count: 1,
+        pause_total_ms: 500,
+        scrollthrough_ms: 700,
+      }),
+      row({
+        tile_x: 3,
+        tile_y: 4,
+        impressions: 7,
+        pause_count: 0,
+        pause_total_ms: 0,
+        scrollthrough_ms: 900,
+      }),
     ];
     const agg = aggregate(rows);
     expect(agg.size).toBe(2);
@@ -79,7 +100,14 @@ describe('heatmap buildExport', () => {
   it('omits zero-engagement tiles', () => {
     const rows: HeatmapRow[] = [
       row({ tile_x: 0, tile_y: 0, impressions: 1, pause_total_ms: 10 }),
-      row({ tile_x: 1, tile_y: 0, impressions: 0, pause_count: 0, pause_total_ms: 0, scrollthrough_ms: 0 }),
+      row({
+        tile_x: 1,
+        tile_y: 0,
+        impressions: 0,
+        pause_count: 0,
+        pause_total_ms: 0,
+        scrollthrough_ms: 0,
+      }),
     ];
     const agg = aggregate(rows);
     const exp = buildExport('deck-1', 'slide-1', '2026-01-01', agg);
@@ -96,12 +124,7 @@ describe('heatmap buildExport', () => {
     ];
     const agg = aggregate(rows);
     const exp = buildExport('deck-1', 'slide-1', '2026-01-01', agg);
-    expect(exp.tiles.map((t) => `${t.x},${t.y}`)).toEqual([
-      '0,0',
-      '2,0',
-      '0,1',
-      '5,1',
-    ]);
+    expect(exp.tiles.map((t) => `${t.x},${t.y}`)).toEqual(['0,0', '2,0', '0,1', '5,1']);
   });
 
   it('summarizes total_dwell_ms and total_viewer_touches', () => {
@@ -117,7 +140,10 @@ describe('heatmap buildExport', () => {
   });
 
   it('embeds deck_id, slide_id, bucket, grid dims', () => {
-    const exp = buildExport('deck-1', 'slide-1', '2026-01-01', new Map(), { gridWidth: 32, gridHeight: 18 });
+    const exp = buildExport('deck-1', 'slide-1', '2026-01-01', new Map(), {
+      gridWidth: 32,
+      gridHeight: 18,
+    });
     expect(exp.deck_id).toBe('deck-1');
     expect(exp.slide_id).toBe('slide-1');
     expect(exp.bucket).toBe('2026-01-01');

@@ -143,9 +143,7 @@ describe('animations', () => {
     it('strips expression keys', () => {
       const json = {
         v: '5.7.4',
-        layers: [
-          { ty: 4, nm: 'Shape', expression: 'this.value', keyframes: [1, 2, 3] },
-        ],
+        layers: [{ ty: 4, nm: 'Shape', expression: 'this.value', keyframes: [1, 2, 3] }],
       };
       const sanitized = sanitizeLottie(json);
       expect(sanitized.layers).toBeDefined();

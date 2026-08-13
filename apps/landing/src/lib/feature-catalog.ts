@@ -16,11 +16,7 @@
  * seed so the route can still render without a hard dependency.
  */
 
-import {
-  FEATURES,
-  type FeatureCard,
-  type FeatureCategory,
-} from './marketing-data';
+import { FEATURES, type FeatureCard, type FeatureCategory } from './marketing-data';
 
 export interface FeatureStep {
   readonly title: string;
@@ -527,10 +523,7 @@ function pickSteps(category: FeatureCategory): ReadonlyArray<StepTemplate> {
   return STEPS_BY_CATEGORY[category] ?? GENERIC_STEPS;
 }
 
-function pickRelated(
-  category: FeatureCategory,
-  selfSlug: string,
-): ReadonlyArray<string> {
+function pickRelated(category: FeatureCategory, selfSlug: string): ReadonlyArray<string> {
   const siblings = RELATED_BY_CATEGORY[category] ?? [];
   return siblings.filter((slug) => slug !== selfSlug).slice(0, 4);
 }

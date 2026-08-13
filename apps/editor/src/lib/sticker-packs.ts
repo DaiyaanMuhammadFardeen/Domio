@@ -50,7 +50,9 @@ export function getStickerPacks(): readonly StickerPack[] {
   return STICKER_PACKS;
 }
 
-export function findStickerByCatalogId(catalogId: string): { pack: StickerPack; sticker: StickerEntry } | undefined {
+export function findStickerByCatalogId(
+  catalogId: string,
+): { pack: StickerPack; sticker: StickerEntry } | undefined {
   for (const pack of STICKER_PACKS) {
     const sticker = pack.stickers.find((s) => s.catalogId === catalogId);
     if (sticker) return { pack, sticker };

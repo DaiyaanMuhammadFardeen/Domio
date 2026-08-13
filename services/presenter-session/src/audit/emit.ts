@@ -13,11 +13,7 @@
  * loaded on construction. The key derivation lives in `./key.ts`.
  */
 
-import {
-  Chain,
-  type Event as AuditEvent,
-  type JsonObject,
-} from '@domio/audit-ts';
+import { Chain, type Event as AuditEvent, type JsonObject } from '@domio/audit-ts';
 import { createHash } from 'crypto';
 import type { PresenterSession } from '../types.js';
 
@@ -65,7 +61,12 @@ export class HashChainedAuditEmitter implements AuditEmitter {
   private readonly records: StoredAuditRecord[] = [];
   private readonly keyId: string;
 
-  constructor(args: { workspaceId: string; key: Uint8Array; keyId?: string; agentSessionId?: string }) {
+  constructor(args: {
+    workspaceId: string;
+    key: Uint8Array;
+    keyId?: string;
+    agentSessionId?: string;
+  }) {
     this.chain = new Chain();
     this.keyId = args.keyId ?? `presenter-session-${args.workspaceId}`;
     // Load a 32-byte key derived from the supplied material. audit-ts takes
@@ -137,7 +138,10 @@ function bytesToHex(bytes: Uint8Array): string {
 }
 
 /** Construct a before/after diff for an advance. */
-export function diffAdvance(before: PresenterSession, after: PresenterSession): {
+export function diffAdvance(
+  before: PresenterSession,
+  after: PresenterSession,
+): {
   before: JsonObject;
   after: JsonObject;
 } {
@@ -160,15 +164,17 @@ export function diffAdvance(before: PresenterSession, after: PresenterSession): 
 /** Stable SHA-256 hash of an audit event for offline verification. */
 export function hashAuditEvent(event: PresenterAuditEvent): string {
   return createHash('sha256')
-    .update(JSON.stringify({
-      actor_id: event.actor_id,
-      session_id: event.session_id,
-      workspace_id: event.workspace_id,
-      ts: event.ts,
-      action: event.action,
-      before: event.before ?? null,
-      after: event.after ?? null,
-      meta: event.meta ?? {},
-    }))
+    .update(
+      JSON.stringify({
+        actor_id: event.actor_id,
+        session_id: event.session_id,
+        workspace_id: event.workspace_id,
+        ts: event.ts,
+        action: event.action,
+        before: event.before ?? null,
+        after: event.after ?? null,
+        meta: event.meta ?? {},
+      }),
+    )
     .digest('hex');
 }

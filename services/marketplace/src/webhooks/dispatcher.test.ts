@@ -36,7 +36,7 @@ describe('RateLimiter', () => {
     expect(limiter.tryConsume('key-1')).toBe(false);
 
     // Wait for refill
-    await new Promise(resolve => setTimeout(resolve, 15));
+    await new Promise((resolve) => setTimeout(resolve, 15));
 
     // Should allow one more
     expect(limiter.tryConsume('key-1')).toBe(true);

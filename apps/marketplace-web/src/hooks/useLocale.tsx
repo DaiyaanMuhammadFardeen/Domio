@@ -2,7 +2,13 @@
 
 import { createContext, useContext, useMemo, useCallback, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { detectLocale, setLocale as persistLocale, type LocaleId, t, formatPrice } from '@/lib/i18n';
+import {
+  detectLocale,
+  setLocale as persistLocale,
+  type LocaleId,
+  t,
+  formatPrice,
+} from '@/lib/i18n';
 
 interface LocaleCtx {
   locale: LocaleId;
@@ -35,17 +41,14 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     () => ({
       locale,
       setLocale,
-      t: (key: string, params?: Record<string, string | number>) =>
-        t(key, locale, params),
+      t: (key: string, params?: Record<string, string | number>) => t(key, locale, params),
       formatPrice: (priceCents: number, currency: string, isFree: boolean) =>
         formatPrice(priceCents, currency, locale, isFree),
     }),
     [locale, setLocale],
   );
 
-  return (
-    <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
-  );
+  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
 export function useLocale(): LocaleCtx {

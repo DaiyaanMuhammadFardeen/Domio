@@ -7,13 +7,13 @@
   "required": ["deck_id", "threshold_days", "stale", "tool_version"],
   "additionalProperties": false,
   "properties": {
-    "deck_id":        { "type": "string" },
-    "data_binding":   { "type": "string" },
+    "deck_id": { "type": "string" },
+    "data_binding": { "type": "string" },
     "threshold_days": { "type": "integer", "minimum": 1 },
     "last_synced_at": { "type": "string", "format": "date-time" },
-    "age_days":       { "type": "integer", "minimum": 0 },
-    "stale":          { "type": "boolean" },
-    "reason":         { "type": "string" },
-    "tool_version":   { "type": "string" }
+    "age_days": { "type": "integer", "minimum": 0 },
+    "stale": { "type": "boolean" },
+    "reason": { "type": "string" },
+    "tool_version": { "type": "string" }
   }
 }

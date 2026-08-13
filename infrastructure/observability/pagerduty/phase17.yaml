@@ -127,11 +127,11 @@ suppressions:
     match:
       label: maintenance
     during:
-      crontab: "0 2 * * 0"
+      crontab: '0 2 * * 0'
     duration_minutes: 60
-    reason: "weekly ClickHouse maintenance window"
+    reason: 'weekly ClickHouse maintenance window'
 
 test_pager:
-  schedule: "0 16 * * 5"
+  schedule: '0 16 * * 5'
   target: analytics-oncall
-  message: "Synthetic Phase 17 alert — verify pager end-to-end."
+  message: 'Synthetic Phase 17 alert — verify pager end-to-end.'

@@ -74,7 +74,11 @@ export class InMemoryStore implements RegistryStore {
   async getPackageById(id: string): Promise<ComponentPackage | undefined> {
     return this.packagesById.get(id);
   }
-  async listPackages(opts?: { kind?: string; category?: string; limit?: number }): Promise<ComponentPackage[]> {
+  async listPackages(opts?: {
+    kind?: string;
+    category?: string;
+    limit?: number;
+  }): Promise<ComponentPackage[]> {
     let rows = [...this.packages.values()];
     if (opts?.kind) rows = rows.filter((p) => p.kind === opts.kind);
     if (opts?.category) rows = rows.filter((p) => p.category === opts.category);
@@ -84,9 +88,15 @@ export class InMemoryStore implements RegistryStore {
   async listVersions(catalogId: string): Promise<ComponentPackage[]> {
     return sortByCreatedDesc([...this.packages.values()].filter((p) => p.catalogId === catalogId));
   }
-  async searchPackages(query: string, opts?: { kind?: string; limit?: number }): Promise<ComponentPackage[]> {
+  async searchPackages(
+    query: string,
+    opts?: { kind?: string; limit?: number },
+  ): Promise<ComponentPackage[]> {
     let rows = [...this.packages.values()].filter(
-      (p) => matchesQuery(p.name, query) || matchesQuery(p.catalogId, query) || matchesQuery(p.description, query),
+      (p) =>
+        matchesQuery(p.name, query) ||
+        matchesQuery(p.catalogId, query) ||
+        matchesQuery(p.description, query),
     );
     if (opts?.kind) rows = rows.filter((p) => p.kind === opts.kind);
     rows = sortByCreatedDesc(rows);
@@ -105,12 +115,18 @@ export class InMemoryStore implements RegistryStore {
   async putLibraryItem(item: UserLibraryItem): Promise<void> {
     this.libraryItems.set(`${item.userId}|${item.workspaceId}|${item.catalogId}`, item);
   }
-  async getLibraryItem(userId: string, workspaceId: string, catalogId: string): Promise<UserLibraryItem | undefined> {
+  async getLibraryItem(
+    userId: string,
+    workspaceId: string,
+    catalogId: string,
+  ): Promise<UserLibraryItem | undefined> {
     return this.libraryItems.get(`${userId}|${workspaceId}|${catalogId}`);
   }
   async listLibraryItems(userId: string, workspaceId: string): Promise<UserLibraryItem[]> {
     return sortByCreatedDesc(
-      [...this.libraryItems.values()].filter((i) => i.userId === userId && i.workspaceId === workspaceId),
+      [...this.libraryItems.values()].filter(
+        (i) => i.userId === userId && i.workspaceId === workspaceId,
+      ),
     );
   }
   async deleteLibraryItem(userId: string, workspaceId: string, catalogId: string): Promise<void> {
@@ -132,7 +148,11 @@ export class InMemoryStore implements RegistryStore {
     rows.push(event);
     this.libraryEvents.set(event.libraryId, rows);
   }
-  async listLibraryEvents(libraryId: string, afterSeq = 0, limit = 100): Promise<TeamLibraryEvent[]> {
+  async listLibraryEvents(
+    libraryId: string,
+    afterSeq = 0,
+    limit = 100,
+  ): Promise<TeamLibraryEvent[]> {
     const rows = (this.libraryEvents.get(libraryId) ?? [])
       .filter((e) => e.seq > afterSeq)
       .sort((a, b) => a.seq - b.seq);
@@ -152,7 +172,11 @@ export class InMemoryStore implements RegistryStore {
   async getListingByCatalogId(catalogId: string): Promise<MarketplaceListing | undefined> {
     return [...this.listings.values()].find((l) => l.catalogId === catalogId);
   }
-  async listListings(opts?: { status?: string; sellerId?: string; limit?: number }): Promise<MarketplaceListing[]> {
+  async listListings(opts?: {
+    status?: string;
+    sellerId?: string;
+    limit?: number;
+  }): Promise<MarketplaceListing[]> {
     let rows = [...this.listings.values()];
     if (opts?.status) rows = rows.filter((l) => l.status === opts.status);
     if (opts?.sellerId) rows = rows.filter((l) => l.sellerId === opts.sellerId);

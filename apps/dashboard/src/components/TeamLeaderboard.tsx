@@ -1,11 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import {
-  fetchCreatorLeaderboard,
-  type CreatorRow,
-  type TemplateRow,
-} from '../lib/team-service';
+import { fetchCreatorLeaderboard, type CreatorRow, type TemplateRow } from '../lib/team-service';
 
 export interface TeamLeaderboardProps {
   workspaceId: string;
@@ -26,12 +22,8 @@ export function TeamLeaderboard({
   initialCreators,
   initialTemplates,
 }: TeamLeaderboardProps) {
-  const [creators, setCreators] = useState<ReadonlyArray<CreatorRow>>(
-    initialCreators ?? [],
-  );
-  const [templates, setTemplates] = useState<ReadonlyArray<TemplateRow>>(
-    initialTemplates ?? [],
-  );
+  const [creators, setCreators] = useState<ReadonlyArray<CreatorRow>>(initialCreators ?? []);
+  const [templates, setTemplates] = useState<ReadonlyArray<TemplateRow>>(initialTemplates ?? []);
   const [filter, setFilter] = useState<FilterKey>('all');
 
   useEffect(() => {
@@ -63,10 +55,7 @@ export function TeamLeaderboard({
   const showTemplates = filter !== 'creator';
 
   return (
-    <section
-      className="rounded-xl border border-slate-200 bg-white"
-      data-testid="team-leaderboard"
-    >
+    <section className="rounded-xl border border-slate-200 bg-white" data-testid="team-leaderboard">
       <header className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
           Leaderboard
@@ -108,9 +97,7 @@ export function TeamLeaderboard({
                         {i + 1}.
                       </span>
                       {c.displayName}
-                      <span className="ml-2 text-xs text-slate-500">
-                        {c.decksPublished} decks
-                      </span>
+                      <span className="ml-2 text-xs text-slate-500">{c.decksPublished} decks</span>
                     </span>
                     <span className="tabular-nums text-slate-500">
                       {c.totalViews.toLocaleString()} views

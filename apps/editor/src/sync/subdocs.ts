@@ -10,12 +10,7 @@
 
 import * as Y from 'yjs';
 import type { DeckDocument, Slide } from '@domio/schema/generated/scene-graph';
-import {
-  SubDocRegistry,
-  createDeckDocs,
-  ensureSlide,
-  serializeSlide,
-} from '@domio/yjs-shared';
+import { SubDocRegistry, createDeckDocs, ensureSlide, serializeSlide } from '@domio/yjs-shared';
 
 // ----- Deck sub-doc binding -----
 
@@ -102,10 +97,7 @@ export function serializeAllSlides(subdocs: DeckSubDocs): Slide[] {
 /**
  * Get a specific slide sub-doc by its semantic ID.
  */
-export function getSlideDoc(
-  subdocs: DeckSubDocs,
-  semanticId: string,
-): Y.Doc | undefined {
+export function getSlideDoc(subdocs: DeckSubDocs, semanticId: string): Y.Doc | undefined {
   return subdocs.slideDocs.get(semanticId);
 }
 

@@ -7,10 +7,7 @@
  * (flush is harmless) so dev/test flows keep working.
  */
 
-import {
-  init as initObservability,
-  type DomioObservability,
-} from '@domio/observability';
+import { init as initObservability, type DomioObservability } from '@domio/observability';
 import {
   bindPresenterMetrics,
   type PresenterMetrics,

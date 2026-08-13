@@ -16,10 +16,7 @@ export interface BenefitsGridProps {
 
 export function BenefitsGrid({ benefits }: BenefitsGridProps): JSX.Element {
   return (
-    <section
-      className="careers-benefits"
-      aria-labelledby="careers-benefits-heading"
-    >
+    <section className="careers-benefits" aria-labelledby="careers-benefits-heading">
       <h2 id="careers-benefits-heading" className="careers-section-heading">
         Benefits &amp; perks
       </h2>

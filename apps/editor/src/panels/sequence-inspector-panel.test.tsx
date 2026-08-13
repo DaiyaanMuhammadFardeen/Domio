@@ -4,7 +4,10 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { SequenceInspectorPanel, type PresentationSequenceRecord } from './sequence-inspector-panel';
+import {
+  SequenceInspectorPanel,
+  type PresentationSequenceRecord,
+} from './sequence-inspector-panel';
 
 const TENANT = 't1';
 const DECK = 'd1';
@@ -95,7 +98,9 @@ describe('SequenceInspectorPanel', () => {
 
   it('triggers delete when wired', () => {
     const onDelete = vi.fn();
-    render(<SequenceInspectorPanel sequence={makeSequence()} onPatch={vi.fn()} onDelete={onDelete} />);
+    render(
+      <SequenceInspectorPanel sequence={makeSequence()} onPatch={vi.fn()} onDelete={onDelete} />,
+    );
     fireEvent.click(screen.getByTestId('m6-sequence-delete'));
     expect(onDelete).toHaveBeenCalledTimes(1);
   });

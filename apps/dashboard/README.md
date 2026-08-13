@@ -39,19 +39,19 @@ Send `extensions.persistedQuery.sha256Hash` to skip shipping the body.
 
 ## Environment variables
 
-| Variable                  | Default                       | Purpose                          |
-|---------------------------|-------------------------------|----------------------------------|
-| `DASHBOARD_PORT`          | `3000`                        | Port for `next start`            |
-| `WAREHOUSE_URL`           | `http://localhost:8088`       | analytics-warehouse gateway      |
-| `AB_ASSIGNMENT_URL`       | `http://localhost:8090`       | ab-assignment service            |
-| `AB_MEASUREMENT_URL`      | `http://localhost:8091`       | ab-measurement service           |
-| `AB_STATISTICS_URL`       | `http://localhost:8092`       | ab-statistics service            |
-| `TEAM_ANALYTICS_URL`      | `http://localhost:8093`       | team-analytics service           |
-| `LIVE_ANALYTICS_URL`      | `http://localhost:8094`       | live-analytics service           |
-| `CRM_SYNC_URL`            | `http://localhost:8095`       | crm-sync status endpoint         |
-| `BENCHMARK_URL`           | `http://localhost:8096`       | benchmark service                |
-| `NEXT_PUBLIC_WORKSPACE_ID`| `ws-demo`                     | Workspace header injection       |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | (unset)                  | OTLP collector (no-op when unset)|
+| Variable                      | Default                 | Purpose                           |
+| ----------------------------- | ----------------------- | --------------------------------- |
+| `DASHBOARD_PORT`              | `3000`                  | Port for `next start`             |
+| `WAREHOUSE_URL`               | `http://localhost:8088` | analytics-warehouse gateway       |
+| `AB_ASSIGNMENT_URL`           | `http://localhost:8090` | ab-assignment service             |
+| `AB_MEASUREMENT_URL`          | `http://localhost:8091` | ab-measurement service            |
+| `AB_STATISTICS_URL`           | `http://localhost:8092` | ab-statistics service             |
+| `TEAM_ANALYTICS_URL`          | `http://localhost:8093` | team-analytics service            |
+| `LIVE_ANALYTICS_URL`          | `http://localhost:8094` | live-analytics service            |
+| `CRM_SYNC_URL`                | `http://localhost:8095` | crm-sync status endpoint          |
+| `BENCHMARK_URL`               | `http://localhost:8096` | benchmark service                 |
+| `NEXT_PUBLIC_WORKSPACE_ID`    | `ws-demo`               | Workspace header injection        |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | (unset)                 | OTLP collector (no-op when unset) |
 
 ## Docker
 

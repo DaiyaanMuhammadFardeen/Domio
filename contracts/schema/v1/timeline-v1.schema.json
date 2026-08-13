@@ -9,7 +9,10 @@
   "properties": {
     "id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
     "deck_id": { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
-    "element_id": { "type": ["string", "null"], "description": "null means the slide-level (transition) timeline." },
+    "element_id": {
+      "type": ["string", "null"],
+      "description": "null means the slide-level (transition) timeline."
+    },
     "duration_ms": { "type": "integer", "minimum": 1, "maximum": 60000 },
     "loop": { "type": "boolean", "default": false },
     "play_count": { "type": ["integer", "null"], "minimum": 1, "maximum": 100, "default": null },

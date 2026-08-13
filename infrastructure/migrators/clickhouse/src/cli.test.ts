@@ -66,9 +66,18 @@ describe('discoverMigrations', () => {
   it('orders migrations by ordinal', () => {
     const dir = tempDir();
     try {
-      writeFileSync(join(dir, '001_a.sql'), 'CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x;');
-      writeFileSync(join(dir, '002_b.sql'), 'CREATE TABLE b (y String) ENGINE = MergeTree ORDER BY y;');
-      writeFileSync(join(dir, '003_c.sql'), 'CREATE TABLE c (z Float64) ENGINE = MergeTree ORDER BY z;');
+      writeFileSync(
+        join(dir, '001_a.sql'),
+        'CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x;',
+      );
+      writeFileSync(
+        join(dir, '002_b.sql'),
+        'CREATE TABLE b (y String) ENGINE = MergeTree ORDER BY y;',
+      );
+      writeFileSync(
+        join(dir, '003_c.sql'),
+        'CREATE TABLE c (z Float64) ENGINE = MergeTree ORDER BY z;',
+      );
       const pairs = discoverMigrations(dir);
       expect(pairs.map((p) => p.ordinal)).toEqual(['001', '002', '003']);
       expect(pairs.map((p) => p.slug)).toEqual(['a', 'b', 'c']);
@@ -83,9 +92,15 @@ describe('discoverMigrations', () => {
   it('pairs up and down migrations by ordinal', () => {
     const dir = tempDir();
     try {
-      writeFileSync(join(dir, '001_a.sql'), 'CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x;');
+      writeFileSync(
+        join(dir, '001_a.sql'),
+        'CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x;',
+      );
       writeFileSync(join(dir, '001_a.down.sql'), 'DROP TABLE a;');
-      writeFileSync(join(dir, '002_b.sql'), 'CREATE TABLE b (y String) ENGINE = MergeTree ORDER BY y;');
+      writeFileSync(
+        join(dir, '002_b.sql'),
+        'CREATE TABLE b (y String) ENGINE = MergeTree ORDER BY y;',
+      );
       const pairs = discoverMigrations(dir);
       expect(pairs).toHaveLength(2);
       expect(pairs[0]!.down).not.toBeNull();
@@ -99,7 +114,10 @@ describe('discoverMigrations', () => {
   it('ignores non-migration files', () => {
     const dir = tempDir();
     try {
-      writeFileSync(join(dir, '001_a.sql'), 'CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x;');
+      writeFileSync(
+        join(dir, '001_a.sql'),
+        'CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x;',
+      );
       writeFileSync(join(dir, 'README.md'), '# not a migration');
       writeFileSync(join(dir, 'data.json'), '{}');
       const pairs = discoverMigrations(dir);
@@ -112,8 +130,14 @@ describe('discoverMigrations', () => {
 
 describe('checksumStatements', () => {
   it('is deterministic for the same input', () => {
-    const a = checksumStatements(['CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x', 'INSERT INTO a VALUES (1)']);
-    const b = checksumStatements(['CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x', 'INSERT INTO a VALUES (1)']);
+    const a = checksumStatements([
+      'CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x',
+      'INSERT INTO a VALUES (1)',
+    ]);
+    const b = checksumStatements([
+      'CREATE TABLE a (x UInt32) ENGINE = MergeTree ORDER BY x',
+      'INSERT INTO a VALUES (1)',
+    ]);
     expect(a).toBe(b);
     expect(a).toMatch(/^[a-f0-9]{64}$/);
   });

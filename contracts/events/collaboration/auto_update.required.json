@@ -4,7 +4,15 @@
   "title": "CollabAutoUpdateRequired",
   "description": "Emitted when a consumer slide requires an update from its linked library entry.",
   "type": "object",
-  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "required": [
+    "event_id",
+    "event_type",
+    "ts_ms",
+    "workspace_id",
+    "actor_id",
+    "actor_type",
+    "payload"
+  ],
   "properties": {
     "event_id": {
       "type": "string",
@@ -33,7 +41,13 @@
     },
     "payload": {
       "type": "object",
-      "required": ["binding_id", "consumer_deck_id", "consumer_slide_id", "library_entry_id", "new_version_id"],
+      "required": [
+        "binding_id",
+        "consumer_deck_id",
+        "consumer_slide_id",
+        "library_entry_id",
+        "new_version_id"
+      ],
       "properties": {
         "binding_id": {
           "type": "string"

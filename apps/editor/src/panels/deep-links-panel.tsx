@@ -71,10 +71,7 @@ export function DeepLinksPanel({
   const [resolveError, setResolveError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const sorted = useMemo(
-    () => [...links].sort((a, b) => b.created_at - a.created_at),
-    [links],
-  );
+  const sorted = useMemo(() => [...links].sort((a, b) => b.created_at - a.created_at), [links]);
 
   const handleCreate = useCallback(async () => {
     setCreating(true);
@@ -92,23 +89,32 @@ export function DeepLinksPanel({
     }
   }, [deckId, activeSlideId, onCreateSample]);
 
-  const handleResolve = useCallback(async (id: string) => {
-    setResolveError(null);
-    try {
-      const r = await onResolve(id);
-      if (r) setResolved({ id, ...r });
-    } catch (e) {
-      setResolveError(e instanceof Error ? e.message : 'unknown');
-    }
-  }, [onResolve]);
+  const handleResolve = useCallback(
+    async (id: string) => {
+      setResolveError(null);
+      try {
+        const r = await onResolve(id);
+        if (r) setResolved({ id, ...r });
+      } catch (e) {
+        setResolveError(e instanceof Error ? e.message : 'unknown');
+      }
+    },
+    [onResolve],
+  );
 
-  const handleDelete = useCallback(async (id: string) => {
-    await onDelete(id);
-  }, [onDelete]);
+  const handleDelete = useCallback(
+    async (id: string) => {
+      await onDelete(id);
+    },
+    [onDelete],
+  );
 
-  const handleCopy = useCallback(async (url: string) => {
-    await copyToClipboard(url);
-  }, [copyToClipboard]);
+  const handleCopy = useCallback(
+    async (url: string) => {
+      await copyToClipboard(url);
+    },
+    [copyToClipboard],
+  );
 
   return (
     <div className="deep-links-panel" data-testid="m7-deep-links-panel">
@@ -126,24 +132,21 @@ export function DeepLinksPanel({
       </header>
 
       {resolveError ? (
-        <p
-          className="deep-links-panel__error"
-          role="alert"
-          data-testid="m7-deep-link-error"
-        >
+        <p className="deep-links-panel__error" role="alert" data-testid="m7-deep-link-error">
           {resolveError}
         </p>
       ) : null}
 
       {resolved ? (
-        <section
-          className="deep-links-panel__resolved"
-          data-testid="m7-deep-link-resolved"
-        >
+        <section className="deep-links-panel__resolved" data-testid="m7-deep-link-resolved">
           <p>
-            Resolved <code>{resolved.id}</code> → slide{' '}
-            <code>{resolved.slide_id}</code>
-            {resolved.scenario ? <> · scenario <code>{resolved.scenario}</code></> : null}
+            Resolved <code>{resolved.id}</code> → slide <code>{resolved.slide_id}</code>
+            {resolved.scenario ? (
+              <>
+                {' '}
+                · scenario <code>{resolved.scenario}</code>
+              </>
+            ) : null}
           </p>
           <p className="deep-links-panel__resolved-exp">
             expires <code>{formatExpiry(resolved.exp)}</code>
@@ -151,40 +154,22 @@ export function DeepLinksPanel({
         </section>
       ) : null}
 
-      <ul
-        className="deep-links-panel__list"
-        data-testid="m7-deep-link-list"
-      >
+      <ul className="deep-links-panel__list" data-testid="m7-deep-link-list">
         {sorted.length === 0 ? (
-          <li className="deep-links-panel__empty">
-            No deep links minted yet.
-          </li>
+          <li className="deep-links-panel__empty">No deep links minted yet.</li>
         ) : null}
         {sorted.map((link) => (
-          <li
-            key={link.id}
-            className="deep-links-panel__row"
-            data-testid="m7-deep-link-row"
-          >
+          <li key={link.id} className="deep-links-panel__row" data-testid="m7-deep-link-row">
             <code className="deep-links-panel__id" data-testid="m7-deep-link-id">
               {link.id}
             </code>
-            <span
-              className="deep-links-panel__scope"
-              data-testid="m7-deep-link-scope"
-            >
+            <span className="deep-links-panel__scope" data-testid="m7-deep-link-scope">
               {link.viewer_scope}
             </span>
-            <span
-              className="deep-links-panel__clicks"
-              data-testid="m7-deep-link-clicks"
-            >
+            <span className="deep-links-panel__clicks" data-testid="m7-deep-link-clicks">
               {link.click_count} click{link.click_count === 1 ? '' : 's'}
             </span>
-            <span
-              className="deep-links-panel__expiry"
-              data-testid="m7-deep-link-expiry"
-            >
+            <span className="deep-links-panel__expiry" data-testid="m7-deep-link-expiry">
               exp {formatExpiry(link.expires_at)}
             </span>
             <button

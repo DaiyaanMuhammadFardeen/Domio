@@ -5,10 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const HEATMAP_TYPES = resolve(
-  __dirname,
-  '../../../../../services/heatmap-generator/src/types.ts',
-);
+const HEATMAP_TYPES = resolve(__dirname, '../../../../../services/heatmap-generator/src/types.ts');
 const HEATMAP_PNG_EXPORT = resolve(
   __dirname,
   '../../../../../services/heatmap-generator/src/engine/png_export.ts',

@@ -117,7 +117,9 @@ describe('PgExpiryStore — nil pool', () => {
     await expect(store.listPolicies('ws')).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.insertFlag(flag)).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.listOpenFlags()).rejects.toThrow(StoreNotConfiguredError);
-    await expect(store.resolveFlags('deck', 'id', { resolvedAt: new Date(), resolvedBy: 'u' })).rejects.toThrow(StoreNotConfiguredError);
+    await expect(
+      store.resolveFlags('deck', 'id', { resolvedAt: new Date(), resolvedBy: 'u' }),
+    ).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.getFlagHistory('deck', 'id')).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.withTransaction(async () => {})).rejects.toThrow(StoreNotConfiguredError);
   });
@@ -418,7 +420,11 @@ describe('PgExpiryStore — getFlagHistory', () => {
 
   it('returns all flags including resolved ones', async () => {
     const f1 = makeFlag({ id: 'f-1', resolved_at: null });
-    const f2 = makeFlag({ id: 'f-2', resolved_at: new Date('2026-01-20'), resolved_by: 'user-002' });
+    const f2 = makeFlag({
+      id: 'f-2',
+      resolved_at: new Date('2026-01-20'),
+      resolved_by: 'user-002',
+    });
     const pool = createFakePool(() => ({
       rows: [flagToRow(f1), flagToRow(f2)],
       rowCount: 2,

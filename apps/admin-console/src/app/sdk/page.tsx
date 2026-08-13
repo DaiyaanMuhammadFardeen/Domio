@@ -43,7 +43,8 @@ const DOWNLOADS: ReadonlyArray<DownloadLink> = [
     id: 'maven',
     label: 'Maven',
     package: 'app.domio:sdk-java',
-    command: '<dependency>\n  <groupId>app.domio</groupId>\n  <artifactId>sdk-java</artifactId>\n  <version>0.4.1</version>\n</dependency>',
+    command:
+      '<dependency>\n  <groupId>app.domio</groupId>\n  <artifactId>sdk-java</artifactId>\n  <version>0.4.1</version>\n</dependency>',
   },
   {
     id: 'pip',
@@ -118,12 +119,8 @@ export default function SDKPage() {
               className="rounded-lg border border-slate-200 bg-slate-50 p-4"
             >
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-800">
-                  {d.label}
-                </span>
-                <span className="font-mono text-xs text-slate-500">
-                  {d.package}
-                </span>
+                <span className="text-sm font-semibold text-slate-800">{d.label}</span>
+                <span className="font-mono text-xs text-slate-500">{d.package}</span>
               </div>
               <div className="relative">
                 <pre className="overflow-x-auto rounded-md bg-white p-3 font-mono text-xs text-slate-800">

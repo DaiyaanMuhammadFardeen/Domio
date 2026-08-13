@@ -4,7 +4,14 @@ import { ConflictResolver } from './conflict-resolver.js';
 import type { DiffConflict } from './types.js';
 
 const CONFLICTS: DiffConflict[] = [
-  { slideId: 's1', elementId: 'e1', path: '/text', sourceValue: 'A', targetValue: 'B', baseValue: '' },
+  {
+    slideId: 's1',
+    elementId: 'e1',
+    path: '/text',
+    sourceValue: 'A',
+    targetValue: 'B',
+    baseValue: '',
+  },
 ];
 
 describe('ConflictResolver', () => {

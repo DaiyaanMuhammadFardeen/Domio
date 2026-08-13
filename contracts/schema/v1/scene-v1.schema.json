@@ -4,7 +4,18 @@
   "title": "Domio Scene V1",
   "description": "3D scene descriptor for Phase 11. Stores lighting rig, camera rig, material bindings, and environment-map slots for a model_asset on a slide.",
   "type": "object",
-  "required": ["schemaVersion", "id", "modelAssetId", "environment", "lights", "cameras", "materials", "metadata", "createdAt", "updatedAt"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "modelAssetId",
+    "environment",
+    "lights",
+    "cameras",
+    "materials",
+    "metadata",
+    "createdAt",
+    "updatedAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -159,10 +170,7 @@
           "default": 0
         },
         "normalMapUrl": {
-          "oneOf": [
-            { "type": "string", "format": "uri" },
-            { "type": "null" }
-          ]
+          "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }]
         },
         "emissiveColor": {
           "type": "string",

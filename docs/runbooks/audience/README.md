@@ -8,10 +8,10 @@ Audience cross-shard coordinator; session-join + bundle envelope.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-audience` | availability | 99.9% | 30d |
-| `lat-audience-render-p95` | latency | < 250 ms | 30d |
+| SLO                       | Kind         | Target   | Window |
+| ------------------------- | ------------ | -------- | ------ |
+| `avail-audience`          | availability | 99.9%    | 30d    |
+| `lat-audience-render-p95` | latency      | < 250 ms | 30d    |
 
 ## Triage
 

@@ -39,15 +39,15 @@ function formatDate(iso: string): string {
   return `${year}-${month}-${day}`;
 }
 
-export function ArticleClient({
-  article,
-  category,
-  related,
-}: ArticleClientProps): JSX.Element {
+export function ArticleClient({ article, category, related }: ArticleClientProps): JSX.Element {
   return (
     <article className="help-article" data-testid={`help-article-detail-${article.slug}`}>
       <nav className="help-article__breadcrumb" aria-label="Breadcrumb">
-        <a className="help-article__breadcrumb-link" href="/help" data-testid="help-article-breadcrumb-index">
+        <a
+          className="help-article__breadcrumb-link"
+          href="/help"
+          data-testid="help-article-breadcrumb-index"
+        >
           Help center
         </a>
         {category ? (
@@ -104,7 +104,11 @@ export function ArticleClient({
         <a className="help-article__back" href="/help" data-testid="help-article-back">
           ← Back to Help center
         </a>
-        <a className="help-article__community" href="/community" data-testid="help-article-community">
+        <a
+          className="help-article__community"
+          href="/community"
+          data-testid="help-article-community"
+        >
           Still stuck? Ask the community →
         </a>
       </footer>

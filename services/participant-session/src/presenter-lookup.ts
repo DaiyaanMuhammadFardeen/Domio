@@ -33,15 +33,18 @@ export class AudienceSessionEndedError extends Error {
 /** Resolve a snapshot from a presenter-session record. The presenter
  *  service is expected to export a row with the same shape as
  *  `PresenterSession`; we only read the public fields here. */
-export function snapshotFromPresenter(row: {
-  id: string;
-  ended_at: string | null;
-  state: { slide_id: string | null };
-  presenter_id: string;
-  workspace_id: string;
-  deck_id: string;
-  started_at: string;
-}, code: SessionCode): AudienceSnapshot {
+export function snapshotFromPresenter(
+  row: {
+    id: string;
+    ended_at: string | null;
+    state: { slide_id: string | null };
+    presenter_id: string;
+    workspace_id: string;
+    deck_id: string;
+    started_at: string;
+  },
+  code: SessionCode,
+): AudienceSnapshot {
   if (row.ended_at) {
     throw new AudienceSessionEndedError(code);
   }

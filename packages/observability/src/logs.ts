@@ -127,10 +127,13 @@ function mergeAttrs(
   const merged = { ...base, ...override };
   return Object.entries(merged).map(([key, value]) => ({
     key,
-    value: typeof value === 'string'
-      ? { stringValue: value }
-      : typeof value === 'number'
-        ? Number.isInteger(value) ? { intValue: String(value) } : { doubleValue: value }
-        : { boolValue: value },
+    value:
+      typeof value === 'string'
+        ? { stringValue: value }
+        : typeof value === 'number'
+          ? Number.isInteger(value)
+            ? { intValue: String(value) }
+            : { doubleValue: value }
+          : { boolValue: value },
   }));
 }

@@ -59,13 +59,7 @@ function Text({
   );
 }
 
-function Circle({
-  size = 32,
-  style,
-}: {
-  size?: number;
-  style?: CSSProperties;
-}): ReactElement {
+function Circle({ size = 32, style }: { size?: number; style?: CSSProperties }): ReactElement {
   return (
     <>
       <Pulse />
@@ -91,13 +85,7 @@ interface BlockProps {
   ariaLabel?: string;
 }
 
-function Block({
-  rows = 1,
-  height = 16,
-  gap = 8,
-  style,
-  ariaLabel,
-}: BlockProps): ReactElement {
+function Block({ rows = 1, height = 16, gap = 8, style, ariaLabel }: BlockProps): ReactElement {
   return (
     <div
       role="status"

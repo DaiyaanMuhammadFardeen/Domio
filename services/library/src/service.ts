@@ -15,11 +15,7 @@ import type {
   AutoUpdateBinding,
   AutoUpdateMode,
 } from './types.js';
-import {
-  EntryNotFoundError,
-  VersionNotFoundError,
-  BindingNotFoundError,
-} from './types.js';
+import { EntryNotFoundError, VersionNotFoundError, BindingNotFoundError } from './types.js';
 import {
   createEntryBody,
   addVersionBody,
@@ -73,17 +69,20 @@ export class LibraryService {
   // Library entries
   // -------------------------------------------------------------------------
 
-  async createEntry(input: {
-    workspace_id: string;
-    scope: string;
-    team_id?: string;
-    title: string;
-    description?: string;
-    tags?: readonly string[];
-    owner_id: string;
-    approval_chain?: Record<string, unknown>;
-    snapshot: LibrarySnapshotInput;
-  }, actorId: string): Promise<{ entry: SlideLibraryEntry; version: LibraryVersion }> {
+  async createEntry(
+    input: {
+      workspace_id: string;
+      scope: string;
+      team_id?: string;
+      title: string;
+      description?: string;
+      tags?: readonly string[];
+      owner_id: string;
+      approval_chain?: Record<string, unknown>;
+      snapshot: LibrarySnapshotInput;
+    },
+    actorId: string,
+  ): Promise<{ entry: SlideLibraryEntry; version: LibraryVersion }> {
     checkFeature(FEATURE_FLAGS.library);
     const { entry, version } = createEntryBody(input, actorId, {
       now: () => this.now(),
@@ -165,7 +164,7 @@ export class LibraryService {
     if (versions.length === 0) {
       throw new Error('Cannot publish entry with no versions');
     }
-    const latestVersion = versions.reduce((a, b) => a.version_num > b.version_num ? a : b);
+    const latestVersion = versions.reduce((a, b) => (a.version_num > b.version_num ? a : b));
 
     const update = publishEntryBody(entry, latestVersion.id, {
       now: () => this.now(),
@@ -291,16 +290,19 @@ export class LibraryService {
   // Auto-update bindings
   // -------------------------------------------------------------------------
 
-  async createBinding(input: {
-    workspace_id: string;
-    consumer_deck_id: string;
-    consumer_slide_id: string;
-    library_entry_id: string;
-    pinned_version_id?: string;
-    mode: AutoUpdateMode;
-    schedule?: Record<string, unknown>;
-    is_mandatory?: boolean;
-  }, actorId: string): Promise<AutoUpdateBinding> {
+  async createBinding(
+    input: {
+      workspace_id: string;
+      consumer_deck_id: string;
+      consumer_slide_id: string;
+      library_entry_id: string;
+      pinned_version_id?: string;
+      mode: AutoUpdateMode;
+      schedule?: Record<string, unknown>;
+      is_mandatory?: boolean;
+    },
+    actorId: string,
+  ): Promise<AutoUpdateBinding> {
     checkFeature(FEATURE_FLAGS.autoupdate);
 
     // Verify entry exists
@@ -337,7 +339,11 @@ export class LibraryService {
       workspace_id: input.workspace_id,
       actor_id: actorId,
       actor_type: 'member',
-      payload: { binding_id: binding.id, library_entry_id: input.library_entry_id, mode: binding.mode },
+      payload: {
+        binding_id: binding.id,
+        library_entry_id: input.library_entry_id,
+        mode: binding.mode,
+      },
     });
 
     return binding;
@@ -350,7 +356,9 @@ export class LibraryService {
 
   async updateBinding(
     bindingId: string,
-    patch: Partial<Pick<AutoUpdateBinding, 'pinned_version_id' | 'mode' | 'schedule' | 'is_mandatory'>>,
+    patch: Partial<
+      Pick<AutoUpdateBinding, 'pinned_version_id' | 'mode' | 'schedule' | 'is_mandatory'>
+    >,
     actorId: string,
   ): Promise<AutoUpdateBinding> {
     checkFeature(FEATURE_FLAGS.autoupdate);
@@ -373,10 +381,12 @@ export class LibraryService {
   // Propagation (called by the worker)
   // -------------------------------------------------------------------------
 
-  async getPropagationCandidates(nowMs: number): Promise<Array<{
-    binding: AutoUpdateBinding;
-    latestVersion: LibraryVersion;
-  }>> {
+  async getPropagationCandidates(nowMs: number): Promise<
+    Array<{
+      binding: AutoUpdateBinding;
+      latestVersion: LibraryVersion;
+    }>
+  > {
     checkFeature(FEATURE_FLAGS.autoupdate);
 
     const allBindings = await this.store.listAllBindings();
@@ -392,7 +402,7 @@ export class LibraryService {
 
       const versions = await this.store.listVersionsByEntry(binding.library_entry_id);
       if (versions.length === 0) continue;
-      const latestVersion = versions.reduce((a, b) => a.version_num > b.version_num ? a : b);
+      const latestVersion = versions.reduce((a, b) => (a.version_num > b.version_num ? a : b));
 
       // Check shouldApply
       const decision = shouldApply(binding, latestVersion.version_num);

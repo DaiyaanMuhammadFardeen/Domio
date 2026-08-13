@@ -82,10 +82,7 @@
       "version": "0.0.0",
       "description": "ClickHouse AggregatingMergeTree rollup (32x18 grid), PNG/JSON export.",
       "purl": "pkg:domio/heatmap-generator@0.0.0",
-      "dependencies": [
-        "pkg:npm/hono@4.6.14",
-        "pkg:npm/@clickhouse/client@1.8.1"
-      ]
+      "dependencies": ["pkg:npm/hono@4.6.14", "pkg:npm/@clickhouse/client@1.8.1"]
     },
     {
       "type": "application",
@@ -94,10 +91,7 @@
       "version": "0.0.0",
       "description": "Workspace template/component/brand engagement rollups.",
       "purl": "pkg:domio/team-analytics@0.0.0",
-      "dependencies": [
-        "pkg:npm/hono@4.6.14",
-        "pkg:npm/@clickhouse/client@1.8.1"
-      ]
+      "dependencies": ["pkg:npm/hono@4.6.14", "pkg:npm/@clickhouse/client@1.8.1"]
     },
     {
       "type": "application",
@@ -106,11 +100,7 @@
       "version": "0.0.0",
       "description": "Real-time attendance + post-session summary. NATS -> WebSocket HUD.",
       "purl": "pkg:domio/live-analytics@0.0.0",
-      "dependencies": [
-        "pkg:npm/hono@4.6.14",
-        "pkg:npm/nats@2.29.0",
-        "pkg:domio/ws@8.18.0"
-      ]
+      "dependencies": ["pkg:npm/hono@4.6.14", "pkg:npm/nats@2.29.0", "pkg:domio/ws@8.18.0"]
     },
     {
       "type": "application",
@@ -119,10 +109,7 @@
       "version": "0.0.0",
       "description": "CEP rules engine, multi-channel (email / Slack / Teams / webhook / mobile push).",
       "purl": "pkg:domio/notification-dispatcher@0.0.0",
-      "dependencies": [
-        "pkg:npm/hono@4.6.14",
-        "pkg:npm/nodemailer@6.9.16"
-      ]
+      "dependencies": ["pkg:npm/hono@4.6.14", "pkg:npm/nodemailer@6.9.16"]
     },
     {
       "type": "application",

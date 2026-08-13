@@ -111,7 +111,16 @@ function topicsFromQuery(query: string): readonly string[] {
     .filter((w) => w.length > 2);
   if (words.length === 0) return ['topic'];
   const seed = hashSeed(words.join(' '));
-  const fallback = ['pricing', 'onboarding', 'roadmap', 'metrics', 'growth', 'integration', 'compliance', 'support'];
+  const fallback = [
+    'pricing',
+    'onboarding',
+    'roadmap',
+    'metrics',
+    'growth',
+    'integration',
+    'compliance',
+    'support',
+  ];
   const out = [...words];
   for (let i = 0; i < 4; i += 1) {
     out.push(fallback[(seed + i) % fallback.length]!);
@@ -175,17 +184,20 @@ function bootstrapChartRecs(req: ChartRecommendRequest): ChartRecommendResponse 
     recs.push({
       chartType: 'bar',
       confidence: 0.91,
-      rationale: 'Compare categorical groups across a numeric metric — bar charts surface rank order at a glance.',
+      rationale:
+        'Compare categorical groups across a numeric metric — bar charts surface rank order at a glance.',
     });
     recs.push({
       chartType: 'line',
       confidence: 0.78,
-      rationale: 'Trend over time (or ordered categories); best when the x-axis has a meaningful sequence.',
+      rationale:
+        'Trend over time (or ordered categories); best when the x-axis has a meaningful sequence.',
     });
     recs.push({
       chartType: 'scatter',
       confidence: 0.55,
-      rationale: 'Reveal correlation between two numeric dimensions; less effective with few points.',
+      rationale:
+        'Reveal correlation between two numeric dimensions; less effective with few points.',
     });
   } else if (numeric.length >= 1) {
     recs.push({
@@ -207,7 +219,8 @@ function bootstrapChartRecs(req: ChartRecommendRequest): ChartRecommendResponse 
     recs.push({
       chartType: 'pie',
       confidence: 0.72,
-      rationale: 'Show share-of-total across categorical dimensions; cap at 5–6 slices for legibility.',
+      rationale:
+        'Show share-of-total across categorical dimensions; cap at 5–6 slices for legibility.',
     });
     recs.push({
       chartType: 'bar',

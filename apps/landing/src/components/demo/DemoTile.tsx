@@ -36,11 +36,7 @@ export function DemoTile({ demo, openLabel }: DemoTileProps): JSX.Element {
         </ul>
       </header>
       <p className="demo-tile__description">{demo.description}</p>
-      <DemoEmbed
-        viewerUrl={demo.viewer_url}
-        title={demo.title}
-        thumbnailAlt={demo.thumbnail_alt}
-      />
+      <DemoEmbed viewerUrl={demo.viewer_url} title={demo.title} thumbnailAlt={demo.thumbnail_alt} />
       <footer className="demo-tile__footer">
         <a
           className="demo-tile__cta"

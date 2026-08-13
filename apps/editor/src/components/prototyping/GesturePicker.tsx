@@ -91,7 +91,8 @@ export function GesturePicker({ value, onChange, subset }: GesturePickerProps): 
               }}
               data-testid={`gesture-${g}`}
             >
-              {checked ? '✓ ' : ''}{GESTURE_LABELS[g]}
+              {checked ? '✓ ' : ''}
+              {GESTURE_LABELS[g]}
             </button>
           );
         })}

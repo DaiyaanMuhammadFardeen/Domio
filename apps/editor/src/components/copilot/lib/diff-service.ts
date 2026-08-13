@@ -131,10 +131,9 @@ export function lintDeck(
   deckId: string,
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<{ readonly violations: readonly LintViolation[] }> {
-  return postJson<{ readonly violations: readonly LintViolation[] }>(
-    `${baseUrl}/v1/lint/deck`,
-    { deck_id: deckId },
-  );
+  return postJson<{ readonly violations: readonly LintViolation[] }>(`${baseUrl}/v1/lint/deck`, {
+    deck_id: deckId,
+  });
 }
 
 /**
@@ -145,10 +144,10 @@ export function fixLintViolation(
   violationId: string,
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<LintFixResponse> {
-  return postJson<LintFixResponse>(
-    `${baseUrl}/v1/lint/deck/fix`,
-    { deck_id: deckId, violation_id: violationId },
-  );
+  return postJson<LintFixResponse>(`${baseUrl}/v1/lint/deck/fix`, {
+    deck_id: deckId,
+    violation_id: violationId,
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -159,7 +158,7 @@ export const VIOLATION_LABEL: Record<LintViolationKind, string> = {
   'broken-data-binding': 'Broken data binding',
   'orphaned-component': 'Orphaned component',
   'off-brand-color': 'Off-brand color',
-  'accessibility': 'Accessibility',
+  accessibility: 'Accessibility',
   'missing-source': 'Missing source',
 };
 
@@ -167,9 +166,11 @@ export const VIOLATION_LABEL: Record<LintViolationKind, string> = {
  * Group diff entries by `diff` classification so the panel can render
  * three sections (added / removed / changed) without re-sorting.
  */
-export function groupByDiff(
-  entries: readonly DeckDiffEntry[],
-): { readonly added: readonly DeckDiffEntry[]; readonly removed: readonly DeckDiffEntry[]; readonly changed: readonly DeckDiffEntry[] } {
+export function groupByDiff(entries: readonly DeckDiffEntry[]): {
+  readonly added: readonly DeckDiffEntry[];
+  readonly removed: readonly DeckDiffEntry[];
+  readonly changed: readonly DeckDiffEntry[];
+} {
   const added: DeckDiffEntry[] = [];
   const removed: DeckDiffEntry[] = [];
   const changed: DeckDiffEntry[] = [];
@@ -187,9 +188,12 @@ export function groupByDiff(
  */
 export function diffBorderClass(diff: DiffKind): string {
   switch (diff) {
-    case 'added': return 'border-emerald-500/60';
-    case 'removed': return 'border-red-500/60';
-    case 'changed': return 'border-amber-500/60';
+    case 'added':
+      return 'border-emerald-500/60';
+    case 'removed':
+      return 'border-red-500/60';
+    case 'changed':
+      return 'border-amber-500/60';
   }
 }
 

@@ -32,7 +32,7 @@ permissions:
 
 concurrency:
   group: perf-nightly-${{ github.ref }}
-  cancel-in-progress: false  # never cancel a nightly perf run
+  cancel-in-progress: false # never cancel a nightly perf run
 
 jobs:
   setup:

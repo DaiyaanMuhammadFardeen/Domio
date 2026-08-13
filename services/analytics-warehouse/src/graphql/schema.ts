@@ -55,8 +55,25 @@ export const analyticsTypeDefs = /* GraphQL */ `
 
   type Query {
     deckSummary(workspaceId: String!, fromMs: Float!, toMs: Float!, deckId: String): [DeckSummary!]!
-    slideBreakdown(workspaceId: String!, deckId: String!, fromMs: Float!, toMs: Float!): [SlideBreakdown!]!
-    funnel(workspaceId: String!, deckId: String!, steps: [String!]!, fromMs: Float!, toMs: Float!): [FunnelStep!]!
-    heatmap(workspaceId: String!, deckId: String!, slideId: String!, fromMs: Float!, toMs: Float!): HeatmapTile!
+    slideBreakdown(
+      workspaceId: String!
+      deckId: String!
+      fromMs: Float!
+      toMs: Float!
+    ): [SlideBreakdown!]!
+    funnel(
+      workspaceId: String!
+      deckId: String!
+      steps: [String!]!
+      fromMs: Float!
+      toMs: Float!
+    ): [FunnelStep!]!
+    heatmap(
+      workspaceId: String!
+      deckId: String!
+      slideId: String!
+      fromMs: Float!
+      toMs: Float!
+    ): HeatmapTile!
   }
 `;

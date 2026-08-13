@@ -29,7 +29,10 @@ function makeCtx() {
 describe('handlers', () => {
   it('createShare → 201 with snapshot and token', async () => {
     const { ctx } = makeCtx();
-    const req: HttpRequest<Record<string, never>, { workspaceId: string; deckId: string; actorId: string }> = {
+    const req: HttpRequest<
+      Record<string, never>,
+      { workspaceId: string; deckId: string; actorId: string }
+    > = {
       method: 'POST',
       path: '/v1/shares',
       params: {},
@@ -62,12 +65,26 @@ describe('handlers', () => {
   it('getShare returns 200 with snapshot', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
-    const linkId = ((created.body as { link: { id: string } }).link.id);
+    const linkId = (created.body as { link: { id: string } }).link.id;
     const res = await handlers.getShare(
-      { method: 'GET', path: `/v1/shares/${linkId}`, params: { link_id: linkId }, body: undefined, query: { workspaceId: 'w1' }, headers: {} },
+      {
+        method: 'GET',
+        path: `/v1/shares/${linkId}`,
+        params: { link_id: linkId },
+        body: undefined,
+        query: { workspaceId: 'w1' },
+        headers: {},
+      },
       ctx,
     );
     expect(res.status).toBe(200);
@@ -79,7 +96,14 @@ describe('handlers', () => {
   it('getShare returns 404 for missing link', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.getShare(
-      { method: 'GET', path: '/v1/shares/missing', params: { link_id: 'missing' }, body: undefined, query: { workspaceId: 'w1' }, headers: {} },
+      {
+        method: 'GET',
+        path: '/v1/shares/missing',
+        params: { link_id: 'missing' },
+        body: undefined,
+        query: { workspaceId: 'w1' },
+        headers: {},
+      },
       ctx,
     );
     expect(res.status).toBe(404);
@@ -88,12 +112,26 @@ describe('handlers', () => {
   it('shareIntrospect returns 200 with claims', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
     const body = created.body as { link: { shortId: string }; token: string };
     const res = await handlers.shareIntrospect(
-      { method: 'POST', path: '/mcp/share-introspect', params: {}, body: { workspaceId: 'w1', shortId: body.link.shortId, token: body.token }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/mcp/share-introspect',
+        params: {},
+        body: { workspaceId: 'w1', shortId: body.link.shortId, token: body.token },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
     expect(res.status).toBe(200);
@@ -105,18 +143,39 @@ describe('handlers', () => {
   it('shareIntrospect rejects replayed token with 400', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
     const body = created.body as { link: { shortId: string }; token: string };
     // First introspect succeeds.
     await handlers.shareIntrospect(
-      { method: 'POST', path: '/mcp/share-introspect', params: {}, body: { workspaceId: 'w1', shortId: body.link.shortId, token: body.token }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/mcp/share-introspect',
+        params: {},
+        body: { workspaceId: 'w1', shortId: body.link.shortId, token: body.token },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
     // Replay must fail.
     const res = await handlers.shareIntrospect(
-      { method: 'POST', path: '/mcp/share-introspect', params: {}, body: { workspaceId: 'w1', shortId: body.link.shortId, token: body.token }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/mcp/share-introspect',
+        params: {},
+        body: { workspaceId: 'w1', shortId: body.link.shortId, token: body.token },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
     expect(res.status).toBe(400);
@@ -125,12 +184,26 @@ describe('handlers', () => {
   it('getPolicy returns 200 with the policy', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
-    const linkId = ((created.body as { link: { id: string } }).link.id);
+    const linkId = (created.body as { link: { id: string } }).link.id;
     const res = await handlers.getPolicy(
-      { method: 'GET', path: `/v1/shares/${linkId}/policy`, params: { link_id: linkId }, body: undefined, query: { workspaceId: 'w1' }, headers: {} },
+      {
+        method: 'GET',
+        path: `/v1/shares/${linkId}/policy`,
+        params: { link_id: linkId },
+        body: undefined,
+        query: { workspaceId: 'w1' },
+        headers: {},
+      },
       ctx,
     );
     expect(res.status).toBe(200);
@@ -140,14 +213,26 @@ describe('handlers', () => {
   it('putPolicy updates visibility', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
-    const linkId = ((created.body as { link: { id: string } }).link.id);
+    const linkId = (created.body as { link: { id: string } }).link.id;
     const res = await handlers.putPolicy(
-      { method: 'PUT', path: `/v1/shares/${linkId}/policy`, params: { link_id: linkId },
+      {
+        method: 'PUT',
+        path: `/v1/shares/${linkId}/policy`,
+        params: { link_id: linkId },
         body: { workspaceId: 'w1', actorId: 'alice', visibility: 'public' },
-        query: {}, headers: { 'if-match': '2' } },
+        query: {},
+        headers: { 'if-match': '2' },
+      },
       ctx,
     );
     expect(res.status).toBe(200);
@@ -157,23 +242,40 @@ describe('handlers', () => {
   it('updateShare honors If-Match ETag and 409s on stale', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
-    const linkId = ((created.body as { link: { id: string } }).link.id);
+    const linkId = (created.body as { link: { id: string } }).link.id;
     // First update with seq=2 succeeds.
     const ok = await handlers.updateShare(
-      { method: 'PATCH', path: `/v1/shares/${linkId}`, params: { link_id: linkId },
+      {
+        method: 'PATCH',
+        path: `/v1/shares/${linkId}`,
+        params: { link_id: linkId },
         body: { workspaceId: 'w1', actorId: 'alice', slug: 'v2' },
-        query: {}, headers: { 'if-match': '2' } },
+        query: {},
+        headers: { 'if-match': '2' },
+      },
       ctx,
     );
     expect(ok.status).toBe(200);
     // Stale seq=2 must 409.
     const stale = await handlers.updateShare(
-      { method: 'PATCH', path: `/v1/shares/${linkId}`, params: { link_id: linkId },
+      {
+        method: 'PATCH',
+        path: `/v1/shares/${linkId}`,
+        params: { link_id: linkId },
         body: { workspaceId: 'w1', actorId: 'alice', slug: 'v3' },
-        query: {}, headers: { 'if-match': '2' } },
+        query: {},
+        headers: { 'if-match': '2' },
+      },
       ctx,
     );
     expect(stale.status).toBe(409);
@@ -182,19 +284,38 @@ describe('handlers', () => {
   it('revokeShare returns 200 and revoked link is gone', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
-    const linkId = ((created.body as { link: { id: string } }).link.id);
+    const linkId = (created.body as { link: { id: string } }).link.id;
     const res = await handlers.revokeShare(
-      { method: 'DELETE', path: `/v1/shares/${linkId}`, params: { link_id: linkId },
+      {
+        method: 'DELETE',
+        path: `/v1/shares/${linkId}`,
+        params: { link_id: linkId },
         body: { workspaceId: 'w1' },
-        query: {}, headers: { 'if-match': '2', 'x-actor-id': 'alice' } },
+        query: {},
+        headers: { 'if-match': '2', 'x-actor-id': 'alice' },
+      },
       ctx,
     );
     expect(res.status).toBe(200);
     const after = await handlers.getShare(
-      { method: 'GET', path: `/v1/shares/${linkId}`, params: { link_id: linkId }, body: undefined, query: { workspaceId: 'w1' }, headers: {} },
+      {
+        method: 'GET',
+        path: `/v1/shares/${linkId}`,
+        params: { link_id: linkId },
+        body: undefined,
+        query: { workspaceId: 'w1' },
+        headers: {},
+      },
       ctx,
     );
     expect(after.status).toBe(404);
@@ -203,15 +324,27 @@ describe('handlers', () => {
   it('rotateToken returns 200 with a fresh token', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
-    const linkId = ((created.body as { link: { id: string }; token: string }).link.id);
+    const linkId = (created.body as { link: { id: string }; token: string }).link.id;
     const originalToken = (created.body as { token: string }).token;
     const res = await handlers.rotateToken(
-      { method: 'POST', path: `/v1/shares/${linkId}/rotate-token`, params: { link_id: linkId },
+      {
+        method: 'POST',
+        path: `/v1/shares/${linkId}/rotate-token`,
+        params: { link_id: linkId },
         body: { workspaceId: 'w1' },
-        query: {}, headers: { 'if-match': '2', 'x-actor-id': 'alice' } },
+        query: {},
+        headers: { 'if-match': '2', 'x-actor-id': 'alice' },
+      },
       ctx,
     );
     expect(res.status).toBe(200);
@@ -223,15 +356,27 @@ describe('handlers', () => {
   it('extendExpiry returns 200 with the new expiry', async () => {
     const { ctx } = makeCtx();
     const created = await handlers.createShare(
-      { method: 'POST', path: '/v1/shares', params: {}, body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' }, query: {}, headers: {} },
+      {
+        method: 'POST',
+        path: '/v1/shares',
+        params: {},
+        body: { workspaceId: 'w1', deckId: 'd1', actorId: 'alice' },
+        query: {},
+        headers: {},
+      },
       ctx,
     );
-    const linkId = ((created.body as { link: { id: string } }).link.id);
+    const linkId = (created.body as { link: { id: string } }).link.id;
     const future = new Date(NOW.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
     const res = await handlers.extendExpiry(
-      { method: 'POST', path: `/v1/shares/${linkId}/extend-expiry`, params: { link_id: linkId },
+      {
+        method: 'POST',
+        path: `/v1/shares/${linkId}/extend-expiry`,
+        params: { link_id: linkId },
         body: { workspaceId: 'w1', actorId: 'alice', expiresAt: future },
-        query: {}, headers: { 'if-match': '2' } },
+        query: {},
+        headers: { 'if-match': '2' },
+      },
       ctx,
     );
     expect(res.status).toBe(200);

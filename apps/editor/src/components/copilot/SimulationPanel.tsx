@@ -64,9 +64,7 @@ export function SimulationPanel({
       {/* Header */}
       <div className="flex items-center gap-2">
         <FlaskConical size={16} className="text-violet-400" />
-        <h2 className="text-sm font-semibold text-slate-100">
-          Simulation Mode
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-100">Simulation Mode</h2>
       </div>
 
       {/* Persona picker */}
@@ -93,7 +91,12 @@ export function SimulationPanel({
               )}
               data-testid={`simulation-persona-${p.id}`}
             >
-              <span className={cn('text-xs font-medium', selected ? 'text-violet-200' : 'text-slate-200')}>
+              <span
+                className={cn(
+                  'text-xs font-medium',
+                  selected ? 'text-violet-200' : 'text-slate-200',
+                )}
+              >
                 {p.label}
               </span>
               <span className="text-[10px] text-slate-500">{p.description}</span>
@@ -131,8 +134,7 @@ export function SimulationPanel({
         <div className="flex flex-col gap-1.5" data-testid="simulation-heatmap">
           <div className="flex items-center justify-between text-[11px] text-slate-400">
             <span>
-              {PERSONAS.find((p) => p.id === result.persona)?.label} ·{' '}
-              {result.slides.length} slides
+              {PERSONAS.find((p) => p.id === result.persona)?.label} · {result.slides.length} slides
             </span>
             <span
               className={cn(

@@ -43,7 +43,11 @@ export interface RuleOutput {
   emitted: SessionEvent[];
 }
 
-export function deriveSessionId(workspace_id: string, viewer_id_key: string, started_at_ms: number): string {
+export function deriveSessionId(
+  workspace_id: string,
+  viewer_id_key: string,
+  started_at_ms: number,
+): string {
   const h = createHash('sha256');
   h.update(workspace_id);
   h.update('\0');
@@ -60,8 +64,15 @@ export function buildSessionEngine(cfg: RuleConfig) {
     return `${workspace_id}|${viewer_id_key}`;
   }
 
-  function close(session: SessionRecord, reason: SessionCloseReason): { closed: SessionRecord; emitted: SessionEvent } {
-    const ended: SessionRecord = { ...session, state: 'closed' as SessionState, ended_at_ms: session.last_event_at_ms };
+  function close(
+    session: SessionRecord,
+    reason: SessionCloseReason,
+  ): { closed: SessionRecord; emitted: SessionEvent } {
+    const ended: SessionRecord = {
+      ...session,
+      state: 'closed' as SessionState,
+      ended_at_ms: session.last_event_at_ms,
+    };
     return { closed: ended, emitted: { type: 'session.ended', session: ended, reason } };
   }
 

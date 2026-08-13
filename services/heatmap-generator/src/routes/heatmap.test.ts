@@ -61,7 +61,9 @@ describe('heatmapRoutes — JSON export shape', () => {
       fetchDeckDay: async () => [],
     };
     const app = buildApp(store);
-    const res = await app.request('http://x/v1/heatmap/ws-1/deck-1/slide-1?date=2026-01-15&format=csv');
+    const res = await app.request(
+      'http://x/v1/heatmap/ws-1/deck-1/slide-1?date=2026-01-15&format=csv',
+    );
     expect(res.status).toBe(400);
     const body = (await res.json()) as Record<string, unknown>;
     expect((body.error as Record<string, string>).code).toBe('bad_request');
@@ -74,7 +76,9 @@ describe('heatmapRoutes — JSON export shape', () => {
       fetchDeckDay: async () => [],
     };
     const app = buildApp(store);
-    const res = await app.request('http://x/v1/heatmap/ws-1/deck-1/slide-1?date=2026-01-15&format=png');
+    const res = await app.request(
+      'http://x/v1/heatmap/ws-1/deck-1/slide-1?date=2026-01-15&format=png',
+    );
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toBe('image/png');
     const buf = Buffer.from(await res.arrayBuffer());
@@ -97,7 +101,14 @@ describe('heatmapRoutes — JSON export shape', () => {
     const app = buildApp(store);
     const res = await app.request('http://x/v1/heatmap/ws-1/deck-1?date=2026-01-15');
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { deck_id: string; bucket: string; slides: Record<string, { tiles: unknown[]; deck_id: string; slide_id: string; bucket: string }> };
+    const body = (await res.json()) as {
+      deck_id: string;
+      bucket: string;
+      slides: Record<
+        string,
+        { tiles: unknown[]; deck_id: string; slide_id: string; bucket: string }
+      >;
+    };
     expect(body.deck_id).toBe('deck-1');
     expect(body.bucket).toBe('2026-01-15');
     expect(Object.keys(body.slides).sort()).toEqual(['a', 'b']);

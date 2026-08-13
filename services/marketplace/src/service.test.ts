@@ -188,21 +188,36 @@ describe('MarketplaceService', () => {
     it('throws for rating < 1', async () => {
       const listing = await service.createListing({ catalogId: 'c1', sellerId: 's1', title: 'A' });
       await expect(
-        service.submitReview({ listingId: listing.id, reviewerId: 'r1', rating: 0, verifiedBuyer: true }),
+        service.submitReview({
+          listingId: listing.id,
+          reviewerId: 'r1',
+          rating: 0,
+          verifiedBuyer: true,
+        }),
       ).rejects.toThrow(MarketplaceValidationError);
     });
 
     it('throws for rating > 5', async () => {
       const listing = await service.createListing({ catalogId: 'c1', sellerId: 's1', title: 'A' });
       await expect(
-        service.submitReview({ listingId: listing.id, reviewerId: 'r1', rating: 6, verifiedBuyer: true }),
+        service.submitReview({
+          listingId: listing.id,
+          reviewerId: 'r1',
+          rating: 6,
+          verifiedBuyer: true,
+        }),
       ).rejects.toThrow(MarketplaceValidationError);
     });
 
     it('throws for non-integer rating', async () => {
       const listing = await service.createListing({ catalogId: 'c1', sellerId: 's1', title: 'A' });
       await expect(
-        service.submitReview({ listingId: listing.id, reviewerId: 'r1', rating: 3.5, verifiedBuyer: true }),
+        service.submitReview({
+          listingId: listing.id,
+          reviewerId: 'r1',
+          rating: 3.5,
+          verifiedBuyer: true,
+        }),
       ).rejects.toThrow(MarketplaceValidationError);
     });
 
@@ -218,7 +233,11 @@ describe('MarketplaceService', () => {
       const longBody = 'x'.repeat(4097);
       await expect(
         service.submitReview({
-          listingId: listing.id, reviewerId: 'r1', rating: 4, body: longBody, verifiedBuyer: true,
+          listingId: listing.id,
+          reviewerId: 'r1',
+          rating: 4,
+          body: longBody,
+          verifiedBuyer: true,
         }),
       ).rejects.toThrow(MarketplaceValidationError);
     });
@@ -227,8 +246,18 @@ describe('MarketplaceService', () => {
   describe('listReviews', () => {
     it('returns reviews for a listing', async () => {
       const listing = await service.createListing({ catalogId: 'c1', sellerId: 's1', title: 'A' });
-      await service.submitReview({ listingId: listing.id, reviewerId: 'r1', rating: 5, verifiedBuyer: true });
-      await service.submitReview({ listingId: listing.id, reviewerId: 'r2', rating: 4, verifiedBuyer: true });
+      await service.submitReview({
+        listingId: listing.id,
+        reviewerId: 'r1',
+        rating: 5,
+        verifiedBuyer: true,
+      });
+      await service.submitReview({
+        listingId: listing.id,
+        reviewerId: 'r2',
+        rating: 4,
+        verifiedBuyer: true,
+      });
       const reviews = await service.listReviews(listing.id);
       expect(reviews).toHaveLength(2);
     });
@@ -238,7 +267,10 @@ describe('MarketplaceService', () => {
     it('adds a reply to a review', async () => {
       const listing = await service.createListing({ catalogId: 'c1', sellerId: 's1', title: 'A' });
       const review = await service.submitReview({
-        listingId: listing.id, reviewerId: 'r1', rating: 5, verifiedBuyer: true,
+        listingId: listing.id,
+        reviewerId: 'r1',
+        rating: 5,
+        verifiedBuyer: true,
       });
       const replied = await service.replyToReview(review.id, 'Thanks for the review!');
       expect(replied.replyBody).toBe('Thanks for the review!');
@@ -248,10 +280,15 @@ describe('MarketplaceService', () => {
     it('throws AlreadyRepliedError for second reply', async () => {
       const listing = await service.createListing({ catalogId: 'c1', sellerId: 's1', title: 'A' });
       const review = await service.submitReview({
-        listingId: listing.id, reviewerId: 'r1', rating: 5, verifiedBuyer: true,
+        listingId: listing.id,
+        reviewerId: 'r1',
+        rating: 5,
+        verifiedBuyer: true,
       });
       await service.replyToReview(review.id, 'First reply');
-      await expect(service.replyToReview(review.id, 'Second reply')).rejects.toThrow(AlreadyRepliedError);
+      await expect(service.replyToReview(review.id, 'Second reply')).rejects.toThrow(
+        AlreadyRepliedError,
+      );
     });
   });
 
@@ -259,7 +296,10 @@ describe('MarketplaceService', () => {
     it('sets review status to auto_flagged', async () => {
       const listing = await service.createListing({ catalogId: 'c1', sellerId: 's1', title: 'A' });
       const review = await service.submitReview({
-        listingId: listing.id, reviewerId: 'r1', rating: 5, verifiedBuyer: true,
+        listingId: listing.id,
+        reviewerId: 'r1',
+        rating: 5,
+        verifiedBuyer: true,
       });
       const reported = await service.reportReview(review.id);
       expect(reported.status).toBe('auto_flagged');
@@ -407,7 +447,10 @@ describe('MarketplaceService', () => {
 
       const result = await service.handlePaymentWebhook(
         'stripe',
-        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' }),
+        JSON.stringify({
+          session_id: purchase.provider_intent_id,
+          type: 'checkout.session.completed',
+        }),
         'valid_sig',
         'checkout.session.completed',
       );
@@ -435,7 +478,10 @@ describe('MarketplaceService', () => {
 
       const result = await service.handlePaymentWebhook(
         'stripe',
-        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.expired' }),
+        JSON.stringify({
+          session_id: purchase.provider_intent_id,
+          type: 'checkout.session.expired',
+        }),
         'valid_sig',
         'checkout.session.expired',
       );
@@ -467,9 +513,17 @@ describe('MarketplaceService', () => {
         idempotency_key: 'idem-1',
       });
 
-      const body = JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' });
+      const body = JSON.stringify({
+        session_id: purchase.provider_intent_id,
+        type: 'checkout.session.completed',
+      });
       await service.handlePaymentWebhook('stripe', body, 'valid_sig', 'checkout.session.completed');
-      const result = await service.handlePaymentWebhook('stripe', body, 'valid_sig', 'checkout.session.completed');
+      const result = await service.handlePaymentWebhook(
+        'stripe',
+        body,
+        'valid_sig',
+        'checkout.session.completed',
+      );
       expect(result.received).toBe(true);
     });
   });
@@ -496,12 +550,20 @@ describe('MarketplaceService', () => {
       // Simulate payment success
       await service.handlePaymentWebhook(
         'stripe',
-        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' }),
+        JSON.stringify({
+          session_id: purchase.provider_intent_id,
+          type: 'checkout.session.completed',
+        }),
         'valid_sig',
         'checkout.session.completed',
       );
 
-      const refund = await service.requestRefund('ws1', 'buyer-1', purchase.purchase_id, 'Changed my mind');
+      const refund = await service.requestRefund(
+        'ws1',
+        'buyer-1',
+        purchase.purchase_id,
+        'Changed my mind',
+      );
       expect(refund.refund_status).toBe('refunded');
       expect(refund.auto_approved).toBe(true);
       expect(refund.review_required).toBe(false);
@@ -528,7 +590,10 @@ describe('MarketplaceService', () => {
       // Simulate payment success
       await service.handlePaymentWebhook(
         'stripe',
-        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' }),
+        JSON.stringify({
+          session_id: purchase.provider_intent_id,
+          type: 'checkout.session.completed',
+        }),
         'valid_sig',
         'checkout.session.completed',
       );
@@ -548,7 +613,12 @@ describe('MarketplaceService', () => {
         });
       }
 
-      const refund = await service.requestRefund('ws1', 'buyer-1', purchase.purchase_id, 'Too late');
+      const refund = await service.requestRefund(
+        'ws1',
+        'buyer-1',
+        purchase.purchase_id,
+        'Too late',
+      );
       expect(refund.refund_status).toBe('requested');
       expect(refund.auto_approved).toBe(false);
       expect(refund.review_required).toBe(true);
@@ -575,7 +645,10 @@ describe('MarketplaceService', () => {
       // Simulate payment success
       await service.handlePaymentWebhook(
         'stripe',
-        JSON.stringify({ session_id: purchase.provider_intent_id, type: 'checkout.session.completed' }),
+        JSON.stringify({
+          session_id: purchase.provider_intent_id,
+          type: 'checkout.session.completed',
+        }),
         'valid_sig',
         'checkout.session.completed',
       );
@@ -679,8 +752,15 @@ describe('handlers integration', () => {
     ctx = { service };
   });
 
-  function makeReq<P = Record<string, never>, B = Record<string, never>, Q = Record<string, string | undefined>>(
-    params: P, body: B, query: Q = {} as Q, headers: Record<string, string | undefined> = {},
+  function makeReq<
+    P = Record<string, never>,
+    B = Record<string, never>,
+    Q = Record<string, string | undefined>,
+  >(
+    params: P,
+    body: B,
+    query: Q = {} as Q,
+    headers: Record<string, string | undefined> = {},
   ): HttpRequest<P, B, Q> {
     return { method: 'GET', path: '/', params, body, query, headers };
   }
@@ -807,7 +887,12 @@ describe('handlers integration', () => {
     it('returns 403 when not verified buyer', async () => {
       const listing = await service.createListing({ catalogId: 'c1', sellerId: 's1', title: 'A' });
       const res = await handlers.submitMarketplaceReview(
-        makeReq({ listing_id: listing.id }, { rating: 5, verifiedBuyer: false }, {}, { 'x-actor-id': 'r1' }),
+        makeReq(
+          { listing_id: listing.id },
+          { rating: 5, verifiedBuyer: false },
+          {},
+          { 'x-actor-id': 'r1' },
+        ),
         ctx,
       );
       expect(res.status).toBe(403);

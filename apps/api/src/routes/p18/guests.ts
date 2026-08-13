@@ -16,7 +16,8 @@ import { adaptHandler, type P18Handler } from '../p18_adapter.js';
 
 export function guestsRoutes(service: GuestService): Hono {
   const r = new Hono();
-  const h = (name: string) => adaptHandler(handlers[name as keyof typeof handlers] as unknown as P18Handler, service);
+  const h = (name: string) =>
+    adaptHandler(handlers[name as keyof typeof handlers] as unknown as P18Handler, service);
 
   // Guest CRUD — absolute paths under /v1/guests
   r.post('/v1/guests', h('createGuest'));

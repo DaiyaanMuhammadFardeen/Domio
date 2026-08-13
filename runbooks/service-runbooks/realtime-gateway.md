@@ -21,13 +21,13 @@ here.
 
 ## Health checks
 
-| Signal | Where | Threshold |
-|--------|-------|-----------|
-| Open connection count | `realtime_gateway_open_connections` | < 80k / pod |
-| 5xx rate | `rate(http_requests_total{service="realtime-gateway",status=~"5.."}[1m])` | < 0.1% |
-| Per-shard fanout imbalance | `stddev(fanout_shard_requests) / mean(fanout_shard_requests)` | < 2.0 |
-| WebSocket close code 1011 | `rate(ws_close_total{code="1011"}[5m])` | < 1 / minute |
-| Heartbeat freshness | `histogram_quantile(0.95, ws_heartbeat_age_seconds_bucket)` | < 30s |
+| Signal                     | Where                                                                     | Threshold    |
+| -------------------------- | ------------------------------------------------------------------------- | ------------ |
+| Open connection count      | `realtime_gateway_open_connections`                                       | < 80k / pod  |
+| 5xx rate                   | `rate(http_requests_total{service="realtime-gateway",status=~"5.."}[1m])` | < 0.1%       |
+| Per-shard fanout imbalance | `stddev(fanout_shard_requests) / mean(fanout_shard_requests)`             | < 2.0        |
+| WebSocket close code 1011  | `rate(ws_close_total{code="1011"}[5m])`                                   | < 1 / minute |
+| Heartbeat freshness        | `histogram_quantile(0.95, ws_heartbeat_age_seconds_bucket)`               | < 30s        |
 
 ## Common failure modes
 
@@ -38,11 +38,13 @@ Per-shard request imbalance > 2.0. 5xx concentrated on a small set of
 rooms.
 
 **Diagnosis:**
+
 ```promql
 sum by (shard) (rate(realtime_fanout_requests_total[1m]))
 ```
 
 **Mitigation:**
+
 1. Identify the hot shard: `topk(5, sum by (shard) (rate(...)))`
 2. If hot shard is from a single bad room, manually re-shard that room:
    ```sh
@@ -57,11 +59,13 @@ sum by (shard) (rate(realtime_fanout_requests_total[1m]))
 connection success rate drops.
 
 **Diagnosis:**
+
 ```promql
 sum(rate(realtime_new_connections_total[1m]))
 ```
 
 **Mitigation:**
+
 1. Check auth service for stale tokens: are clients retrying with
    expired tokens?
 2. If legitimate spike (campaign launch, scheduled event), scale up:
@@ -78,11 +82,13 @@ sum(rate(realtime_new_connections_total[1m]))
 **Symptoms:** `lat-rt-gateway-p95` rises. CRDT queue depth grows.
 
 **Diagnosis:**
+
 ```promql
 realtime_crdt_queue_depth
 ```
 
 **Mitigation:**
+
 1. Check upstream: are collab-service writes slow?
 2. Check downstream: are session-coordinator writes slow?
 3. If queue depth > 100k sustained for 5 min, scale realtime-gateway
@@ -94,11 +100,13 @@ realtime_crdt_queue_depth
 "stale" state.
 
 **Diagnosis:**
+
 ```promql
 histogram_quantile(0.95, ws_heartbeat_age_seconds_bucket)
 ```
 
 **Mitigation:**
+
 1. Check network: is there a regional issue? (`realtime_ws_rtt_ms`)
 2. Check pod CPU: is the pod CPU-saturated? `container_cpu_usage_seconds_total`
 3. If pod CPU saturated, scale up.
@@ -109,11 +117,13 @@ histogram_quantile(0.95, ws_heartbeat_age_seconds_bucket)
 connection refused.
 
 **Diagnosis:**
+
 ```promql
 sum(rate(http_requests_total{service="realtime-gateway",status=~"5..",route="/ws"}[1m]))
 ```
 
 **Mitigation:**
+
 1. Check auth-service for the auth pre-flight: are tokens valid?
 2. Check TLS termination: is the cert expiring soon?
 3. If cert issue, see [TLS rotation runbook](#tls-rotation).
@@ -134,6 +144,7 @@ kubectl -n realtime rollout status deploy realtime-gateway
 ```
 
 If rollback fails (e.g., bad image), pin to a known-good revision:
+
 ```sh
 kubectl -n realtime set image deploy/realtime-gateway \
   realtime-gateway=ghcr.io/domio/realtime-gateway@sha256:<good-sha>
@@ -150,12 +161,14 @@ kubectl -n realtime set image deploy/realtime-gateway \
 ## Dependencies
 
 **This service depends on:**
+
 - `@domio/auth` (token validation)
 - `@domio/edge-pubsub` (cross-region fanout)
 - `@domio/session-coordinator` (room state)
 - `@domio/participant-session` (presence aggregation)
 
 **Services that depend on this:**
+
 - `@domio/audience-service` (audience presence)
 - `@domio/presenter-session` (presenter presence)
 - `@domio/collab-service` (CRDT writes)

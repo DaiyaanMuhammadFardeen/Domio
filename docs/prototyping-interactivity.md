@@ -8,7 +8,7 @@
 
 ## 7.0 Section Overview
 
-Section 7 takes a presentation off the rails and onto an *interaction graph*. Where sections 1–6 give us a static + animated canvas and section 4 gives us live data, this section introduces a **runtime** that:
+Section 7 takes a presentation off the rails and onto an _interaction graph_. Where sections 1–6 give us a static + animated canvas and section 4 gives us live data, this section introduces a **runtime** that:
 
 1. makes any element addressable as an input or output (hotspots, form inputs, calculators),
 2. lets the deck author describe **state** (variables, conditional rules, branching graphs),
@@ -23,12 +23,13 @@ Everything in this section builds on top of and is constrained by:
 - **Section 5** (Live App Embeds #81) — the iframe-sandbox runtime is reused for the device-frame surface (#103).
 - **Section 6** (Animation) — per-element triggers (#88) are how interactions start animations, and timing rules here tie back to the animation evaluator.
 - **Section 8** (AI Copilot) — AI prototype generation (#108, #111–#114) consumes the prototyping schema as its target representation.
-- **Section 9** (Presenter Mode) — the prototyping runtime is also the runtime used *during* a live presentation; deep links (#107), scenario state (#57), and form/calculator inputs (#101, #102) are all replayable presenter-mode artifacts.
+- **Section 9** (Presenter Mode) — the prototyping runtime is also the runtime used _during_ a live presentation; deep links (#107), scenario state (#57), and form/calculator inputs (#101, #102) are all replayable presenter-mode artifacts.
 - **Section 12** (Analytics) — telemetry from the prototype user-testing mode (#104) and A/B testing (#173) feed into the analytics layer.
 - **Section 16** (Agentic) — every prototyping feature must be addressable via MCP (`get_deck_state`, `run_scenario`, etc., #222) and patchable via the natural-language patch API (#234).
 
 **Non-goals for this section:**
-- Authoring 3D interactions (#65–#74) — those live in section 5's runtime; we only *consume* their inputs (e.g., a hotspot tap can start a 3D animation).
+
+- Authoring 3D interactions (#65–#74) — those live in section 5's runtime; we only _consume_ their inputs (e.g., a hotspot tap can start a 3D animation).
 - Live audience participation (#142–#154) — those features reuse the **variable store** and **conditional rule engine** defined here, but the audience transport (QR join, polling) is out of scope for this section.
 - Authoring/exporting interactive content as standalone apps — that is a section 11 (publishing) concern.
 
@@ -43,6 +44,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 **Purpose.** Allow any element (or any region not covered by an element) on any slide to act as a tap target that navigates to another slide — or to any arbitrary URL, overlay, or interaction — at presentation time. This is the foundational non-linear navigation primitive that every other feature in this section depends on.
 
 **Acceptance Criteria.**
+
 - The editor exposes a "Hotspot" tool in the layers panel; selecting it lets the author draw a rectangle, ellipse, or polygon on top of any element or on empty canvas.
 - A hotspot stores: `{ id, slide_id, shape, geometry, target_type, target_ref, transition, gesture_mask }` where `target_type ∈ { slide, overlay, url, interaction }`.
 - Tapping the hotspot during a prototype / presentation / preview advances the runtime's `activeSlideId` to the target, or triggers the specified overlay/URL/interaction.
@@ -53,13 +55,15 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Branching navigation respects a **flow graph** that the author can inspect (#6's layers panel + a separate "Connections" panel), with cycle detection (see §7.3.3).
 
 **Behavioral Details.**
-- Hotspot drawing is bound to the same coordinate space as the slide frame. For responsive constraint rule variants (left/right/center pinned, top/bottom pinned, scale, etc., #8), the hotspot geometry is stored in *normalized* coordinates (0–1 on width/height) and resolved at runtime against the rendered frame's actual rect.
+
+- Hotspot drawing is bound to the same coordinate space as the slide frame. For responsive constraint rule variants (left/right/center pinned, top/bottom pinned, scale, etc., #8), the hotspot geometry is stored in _normalized_ coordinates (0–1 on width/height) and resolved at runtime against the rendered frame's actual rect.
 - A hotspot supports multiple gestures: `onClick`, `onDoubleClick`, `onLongPress`, `onHoverEnter`, `onHoverExit`, `onPress`, `onRelease`. Each can have a different `target_type` (so a hover can preview an overlay while a click commits navigation).
 - Hotspot transitions reuse the slide transition vocabulary from #91 (fade, push, morph, instant). For "morph" between slides where shared element IDs exist, #86 (magic move) is the actual transition.
 - When a hotspot targets a slide that is later deleted, the runtime logs a `warn`, marks the hotspot as `dangling: true`, and on the next editor session the author is shown a "Broken connection" panel to fix.
 - Smart components (#25) can expose a "host-able" prop that auto-generates a hotspot over their bounds when dropped onto a slide.
 
 **Edge Cases.**
+
 - A hotspot fully contained inside a hotspot (nested) — supported; innermost hotspot wins on tap. Authoring surface warns when nesting.
 - Tap target too small (< 44×44px at runtime resolution) — editor warns (accessibility, see §7.8).
 - Hotspot on a slide with `display_condition` that evaluates false — hotspot is invisible and non-interactive.
@@ -72,9 +76,10 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 
 ### #97 — Interactive branching presentations ("which topic first?" audience choice changes the path through the deck)
 
-**Purpose.** Make the deck's narrative *non-deterministic at runtime*. The author defines a directed graph over slides; the runtime resolves the next slide based on (a) explicit author wires (hotspots from #96), (b) conditional logic (#100), and (c) runtime events.
+**Purpose.** Make the deck's narrative _non-deterministic at runtime_. The author defines a directed graph over slides; the runtime resolves the next slide based on (a) explicit author wires (hotspots from #96), (b) conditional logic (#100), and (c) runtime events.
 
 **Acceptance Criteria.**
+
 - Every slide has an `entry_conditions` list and an `exit_targets` list. `entry_conditions` is evaluated before the slide is shown; if any condition is false, the slide is skipped.
 - The author's "Connections" panel shows a graph view: nodes are slides, edges are hotspots/conditional links. Graph view supports cycle highlighting.
 - The runtime supports **starting slides**: a deck has at least one slide marked `is_start: true`; multi-start decks ("choose your path" homepages) work out of the box.
@@ -83,11 +88,13 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - A "Replay with deterministic seed" mode (using the prototype session recorder from #104) lets researchers re-walk a path.
 
 **Behavioral Details.**
+
 - The slide graph is internally represented as an adjacency list: `slide.graph = { outgoing: [edge], incoming: [edge] }`, where edges are exactly the hotspots + conditional rules that target a given slide + animations that branch.
 - "Which topic first?" choice pattern: an "index" slide with N hotspots, each pointing at one branch. The runtime enters `path_tracking` mode where a `path_stack` records every transition. The stack is queryable from MCP (`get_path_state`) and visualizable in the prototype session replay.
 - The runtime supports a "skip if not yet visited" condition operator — prevents backtracking into an already-visited branch (useful for "scavenger hunt" training decks).
 
 **Edge Cases.**
+
 - Multiple `is_start: true` slides with conflicting default opening — author must mark exactly one as `default_start`; the Connections panel warns when more than one is true and none is default.
 - A slide that no edge points to (`is_island: true`) — reachable only via direct deep link (#107) or as the explicit start.
 - A cycle in the branching graph — cycle detection (§7.3.3) raises an editor warning; runtime caps traversal to ≤ N hops per session to prevent infinite loops.
@@ -98,9 +105,10 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 
 ### #98 — Overlay states (modals, tooltips, drawers inside a slide)
 
-**Purpose.** Let a slide host *secondary surfaces* (modal dialogs, slide-out drawers, hover tooltips, popovers) that share the slide's coordinate space and lifecycle but are not full slide transitions. Overlays are how product mockups show "click → menu opens" without leaving the slide.
+**Purpose.** Let a slide host _secondary surfaces_ (modal dialogs, slide-out drawers, hover tooltips, popovers) that share the slide's coordinate space and lifecycle but are not full slide transitions. Overlays are how product mockups show "click → menu opens" without leaving the slide.
 
 **Acceptance Criteria.**
+
 - Overlay types: `modal`, `drawer_left`, `drawer_right`, `drawer_top`, `drawer_bottom`, `tooltip`, `popover`, `lightbox`, `snackbar`, `fullscreen_panel`. Author picks from a preset library or defines a custom container.
 - An overlay is a **child of a slide** in the data model (§7.5), with its own list of elements copied/cloned from the slide (or referenced via a smart component variant, #25).
 - Overlays open and close on runtime events (hotspot click, hover, variable change, form submission, timer).
@@ -109,14 +117,16 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Body scroll lock when a modal/lightbox is open; focus trap + return focus to invoker on close (accessibility per §7.3.7).
 
 **Behavioral Details.**
+
 - Each overlay declares: `{ id, slide_id, type, anchor, size_strategy, open_trigger, close_trigger, dismissable, backdrop, aria_label }`.
 - `anchor` can be a hotspot (#96), a slide element, or absolute coordinates.
 - `size_strategy ∈ { fixed, auto, slide_percent, content_fit }` controls how the overlay sizes to its container.
-- The runtime maintains an **`overlay_stack`** scoped to the current slide, separate from the slide-to-slide navigation stack (#97). This means: opening an overlay does *not* reset the presentation's place in the branching graph; closing the overlay returns to where you were.
+- The runtime maintains an **`overlay_stack`** scoped to the current slide, separate from the slide-to-slide navigation stack (#97). This means: opening an overlay does _not_ reset the presentation's place in the branching graph; closing the overlay returns to where you were.
 - Closing behavior: `dismissable: true` allows backdrop/escape click; `dismissable: false` requires an explicit close trigger.
 - Overlays can also be **persistent** (`persistent: true`): once opened they remain open across slide transitions (e.g., a global "speaker notes" panel visible across an entire section).
 
 **Edge Cases.**
+
 - An overlay triggered to open while already open — author can specify `replace_existing` (default true) or `stack`.
 - An overlay referencing an element that has been deleted — overlay renders with a placeholder; runtime warns on hover.
 - A persistent overlay surviving a deep link (#107) that targets a slide where the overlay wouldn't normally be — the deep-link state serializer (§7.4.9) records that the overlay was forcibly open, restoring it on the target slide.
@@ -130,14 +140,16 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 **Purpose.** Bring Figma-grade interactive component state definitions into Domio. A "Button" component has hover, pressed, focused, disabled, loading, toggled-on, toggled-off variants; tapping a button on a slide flips its state at runtime, which in turn drives conditional logic (#100) and animations (#88).
 
 **Acceptance Criteria.**
+
 - Every component instance exposes a **state machine** (declared in the component definition, #25). States include at minimum: `default`, `hover`, `pressed`, `focused`, `disabled`, `loading`, plus any component-specific states (`toggled_on`, `expanded`, `collapsed`, `selected`, etc.).
 - The state machine is a directed graph: `{ states: [...], transitions: [{ from, event, to, condition? }] }`. State transitions fire `onTransition(prevState, nextState, payload)` events that the variable store (#100) can subscribe to.
 - State changes trigger: (a) variant swap (the canonical variant for the new state is rendered), (b) animation playback (#88), (c) variable updates, (d) overlay open/close (#98), (e) navigation (#96, #97).
-- The editor's layers panel shows the *current state* of any component instance when the prototype runtime is in `pause_and_inspect` mode.
+- The editor's layers panel shows the _current state_ of any component instance when the prototype runtime is in `pause_and_inspect` mode.
 - State transitions are replayable in the prototype session recorder (#104).
 - Components marked `brand_locked: true` (#36) can have their state machine locked too — a junior cannot redefine state transitions on a brand-locked button.
 
 **Behavioral Details.**
+
 - Underneath, #99 extends the smart-component prop system (#25) with a `state` derived prop that is computed from the state machine plus the user-controlled props (`disabled`, `loading`, etc.).
 - An instance's state is **session-scoped** by default (resets on every slide enter unless `persist_instance_state: true`), or **deck-scoped** (persists across slide transitions), or **persistent-session** (persists across the entire presentation/prototype session, serialized in deep links, #107).
 - States can be **bound to a variable** so that toggling one button toggles a master variable and updates every related component instance (see #100 conditional logic).
@@ -146,6 +158,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Disabled interactions: when a component instance is `disabled`, all its gestures are inert; the runtime skips the transition evaluator for that instance.
 
 **Edge Cases.**
+
 - Two state transitions fired on the same tick (e.g., hover enter + click) — the higher-priority event wins; resolved by a documented precedence order (focus > press > click > hover > default).
 - State transition A→B→C where B is deleted by the author mid-session — runtime falls back to the default state with a console warn.
 - An animation (#88) bound to a state transition on an element whose state changed faster than the animation duration — animations are interruptible; new state replaces the in-flight animation's target.
@@ -155,9 +168,10 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 
 ### #100 — Variables & conditional logic ("if toggle = annual, show annual pricing")
 
-**Purpose.** Provide a typed, reactive variable store and a safe conditional rule evaluator that gates what is *visible*, *enabled*, *bound*, and *navigated to* at runtime. This is the brain that turns a static deck into a true interactive experience.
+**Purpose.** Provide a typed, reactive variable store and a safe conditional rule evaluator that gates what is _visible_, _enabled_, _bound_, and _navigated to_ at runtime. This is the brain that turns a static deck into a true interactive experience.
 
 **Acceptance Criteria.**
+
 - Variables are **typed**: `string`, `number`, `integer`, `boolean`, `enum`, `date`, `datetime`, `array`, `object`, `record<T>`. Numeric values use `decimal128`-equivalent precision; calculations are deterministic.
 - Variables have a **scope**: `deck`, `slide`, `component_instance`, `session`, `viewer`. See §7.3.1.
 - Variables can be `read_only` (set by the runtime/data source/component), `read_write` (editable by the viewer), or `private` (server-only, never exposed to the runtime).
@@ -169,13 +183,15 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Variables are persisted to deep-link state (#107) and to prototype session telemetry (#104) (but with viewer-scoping respected, §7.3.1).
 
 **Behavioral Details.**
+
 - The variable store is the **single source of truth** for runtime state. Element bindings are derived from it. See §7.4 for architecture.
 - A binding is `{ source: variable_id | formula, target: element_id, prop: 'visible'|'enabled'|'text'|'value'|... }`.
-- Variable updates are **event-driven**: `onVarChange(id, oldVal, newVal)` fires *only* if the value actually changed (`Object.is` semantics), and dependents are notified in topological order to avoid cyclic re-evaluation.
+- Variable updates are **event-driven**: `onVarChange(id, oldVal, newVal)` fires _only_ if the value actually changed (`Object.is` semantics), and dependents are notified in topological order to avoid cyclic re-evaluation.
 - Formulas are a strict subset of arithmetic/string/comparison: `$x * 1.08`, `concat($firstName, ' ', $lastName)`, `$count > 0 and $status == 'open'`. No closures, no globals, no I/O, no function calls except a small builtin library (`round`, `floor`, `ceil`, `abs`, `min`, `max`, `clamp`, `if`, `coalesce`, `length`, `match`, `formatNumber`, `formatCurrency`, `formatDate`).
 - Every variable update produces an entry in the prototype session telemetry stream (#104) — except for private or session-only variables when telemetry is "anonymous" mode.
 
 **Edge Cases.**
+
 - A binding to a deleted variable — element renders with a default value and `binding_status: 'dangling'` warning.
 - A circular binding (A's value depends on B's, B's on A's) — detected at validation time (cycle in dependency graph) and rejected.
 - A formula that throws at runtime (divide by zero, NaN, type mismatch) — element renders the last good value; runtime logs `formula_eval_error`; user sees an inline "calculation error" badge if visible-bound to text.
@@ -190,6 +206,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 **Purpose.** Make slides collect structured input from viewers/audience — text fields, dropdowns, multi-select, radio groups, checkboxes, sliders, date pickers, file uploads, signature fields, rich-text editors. Each input writes into a typed variable (#100), which in turn drives the rest of the runtime.
 
 **Acceptance Criteria.**
+
 - Input types: `text`, `textarea`, `rich_text`, `number`, `integer`, `currency`, `percent`, `slider`, `date`, `datetime`, `time`, `dropdown`, `multiselect`, `radio_group`, `checkbox`, `boolean_toggle`, `file_upload`, `signature`, `rating`, `color`, `address`.
 - Every input has: `{ id, label, placeholder, help_text, default, validation_rules, bound_variable_id, scope, persist, sanitizer }`.
 - On user input, the form writes to `bound_variable_id` after **debounced validation** (defaults: 250ms for text, 16ms for sliders).
@@ -200,6 +217,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Inputs render as accessible: visible label, aria-describedby for help, `aria-invalid` on validation failure, keyboard-navigable.
 
 **Behavioral Details.**
+
 - A "form" in this context is a logical grouping: an author can name a `form_id` and explicitly "submit" it (which can fire a conditional rule, a telemetry event, a network request, or an A/B test bucket assignment).
 - Unsubmitted inputs are still read into variables immediately on change (live-binding); submitting is for grouping / network calls / final validation.
 - Date pickers respect locale (§11 of pre-development-planning-guide: i18n matters); Bangla, English, and 100+ other languages (#113).
@@ -207,6 +225,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Rich-text editor supports a sanitized markdown subset (no raw HTML, no script, no iframe).
 
 **Edge Cases.**
+
 - Text overflow on a fixed-width input — inputs grow to content within a max width, then scroll.
 - Input receives an out-of-range value via paste — sanitizer/coercion applied; validation triggers.
 - Network failure on file upload — input shows retry UI; partial uploads resumable.
@@ -220,6 +239,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 **Purpose.** Provide a sandboxed calculator runtime that can be embedded into a slide as if it were a single "Calculator" component. Authoring mode defines inputs and a formula/calculation graph; runtime mode lets the viewer drag sliders / type numbers and see live results.
 
 **Acceptance Criteria.**
+
 - A `calculator_def` is a DAG of `input_nodes`, `formula_nodes`, `output_nodes`, and `aggregation_nodes`. Variables (#100) are the binding layer.
 - Numeric precision: **decimal128-equivalent** (38 digits, configurable up to 12 shown) to avoid floating-point drift. See §7.3.5.
 - Calculator **safety**: every formula is sandboxed (§7.4.7). No external calls, no globals, no eval.
@@ -229,14 +249,16 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - `reset`, `copy_to_clipboard`, `email_results`, `export_pdf` are first-class calculator actions.
 
 **Behavioral Details.**
+
 - Two authoring modes:
   - **Form mode:** inputs and outputs, with one or more formulas linking them. Sufficient for 80% of cases (ROI, TCO, savings).
   - **Graph mode:** author connects input nodes to calculation nodes to output nodes visually. For complex calculators (multi-stage, e.g., "developer time saved" × "loaded salary" × "headcount").
 - Aggregations available: `sum`, `avg`, `count`, `min`, `max`, `weighted_avg`, `cagr`, `npv`, `irr` (Newton-Raphson, bounded), `payback_period`.
 - Charts in calculators reuse the full chart vocabulary (#50) with their data source bound to the calculator's outputs.
-- Outputs are "live" in the sense that *every* change to any input recomputes only the affected downstream nodes (DAG-based recompute), bounded by a per-frame budget (default 5ms).
+- Outputs are "live" in the sense that _every_ change to any input recomputes only the affected downstream nodes (DAG-based recompute), bounded by a per-frame budget (default 5ms).
 
 **Edge Cases.**
+
 - A formula that overflows standard `double` — uses `decimal128`; if even that overflows, clamps to `±Infinity` markers with explicit UI "value out of range, reduce inputs."
 - Slider values dragged beyond min/max — clamped; runtime warns authors if they set min > max at validation time.
 - Negative IRR — handled (no sign change ⇒ no IRR; user sees "no IRR in range").
@@ -248,9 +270,10 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 
 ### #103 — Device frames (present a mobile app flow inside an iPhone frame with working taps)
 
-**Purpose.** Author a slide that hosts an *iframe-style* rendering of a UI inside a phone/tablet/desktop/watch/TV frame, complete with simulated taps, swipes, and OS chrome. Lets a salesperson put a real product click-through inside the deck.
+**Purpose.** Author a slide that hosts an _iframe-style_ rendering of a UI inside a phone/tablet/desktop/watch/TV frame, complete with simulated taps, swipes, and OS chrome. Lets a salesperson put a real product click-through inside the deck.
 
 **Acceptance Criteria.**
+
 - Frame presets for: iPhone (multiple generations), iPad, Apple Watch, Android phones (Pixel/Samsung), Android tablets, MacBook, Windows laptop, Apple TV, generic desktop browser, custom-resolution frame.
 - The author configures: device type, chrome (notch, status bar, time, battery, signal), orientation (portrait/landscape), screen size, content source (deck slide reference or external URL via #81), safe-area insets.
 - Simulated input: tap, long-press, swipe (4 directions + multi-finger), pinch, rotate, home button, back button, recent apps, hardware keyboard.
@@ -261,17 +284,19 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Device frame state (e.g., currently-displayed app screen) is serializable into deep links (#107).
 
 **Behavioral Details.**
-- Implementation is a sandboxed iframe (#81's iframe-sandbox runtime) plus a *simulated pointer event shim* that converts slide-level pointer events into correct touch/click semantics (`pointerdown`/`pointermove`/`pointerup` for the target device's gesture map).
+
+- Implementation is a sandboxed iframe (#81's iframe-sandbox runtime) plus a _simulated pointer event shim_ that converts slide-level pointer events into correct touch/click semantics (`pointerdown`/`pointermove`/`pointerup` for the target device's gesture map).
 - The device frame is a first-class `element` type with `{ device_type, chrome_state, content_ref, orientation, safe_area }`. Rendered via the same GPU path as other elements (#11), with the iframe composited inside the element's bounding rect.
 - "Working taps" means: the iframe receives `pointerdown`/`pointerup` events with the correct coordinates mapped from slide → frame → device screen. We do **not** fake keypresses; we forward them.
 - A `simulate_device_tap(x_pct, y_pct)` action exists for use in conditional rules and AI-authored demo flows: the action is identical to a viewer tap in semantics, so the simulator and runtime share one code path.
 - During a "device demo" with an external content source (#81), if the source does not load, the frame displays a graceful fallback ("source unreachable").
 
 **Edge Cases.**
+
 - iframe sandboxed — sources that require cookies/credentials beyond what #81 allows are blocked; auth passthrough per #62 and #81 covers dashboards.
 - Multi-finger pinch — converted to a `gesturechange` event the consumer app must opt into.
 - Frame rotation animation — supports smooth transitions between portrait/landscape via the section 6 transition system.
-- Hotspot on a device frame — taps on the frame's bezel (outside the screen rectangle) are *not* forwarded into the iframe; they're available for slide-level hotspot use.
+- Hotspot on a device frame — taps on the frame's bezel (outside the screen rectangle) are _not_ forwarded into the iframe; they're available for slide-level hotspot use.
 - Frame content cached aggressively for offline presentation (#137); refresh policy configurable.
 - High-DPI rendering on 4K presentation hardware — frame renders at the device's native pixel ratio capped at 3x for performance.
 
@@ -282,6 +307,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 **Purpose.** Allow researchers and PMs to share a deck in prototype mode (no edit access, full interaction) and capture a stream of telemetry — every tap, scroll, hover, form input, calculator usage, scenario toggle, dropout, completion — that can be replayed and analyzed.
 
 **Acceptance Criteria.**
+
 - "Share as prototype" generates a distinct URL with read-only, fully-interactive access (#157 + #104).
 - The recorder captures: `{ session_id, viewer_id (pseudonymous), device, viewport, slide_enter, slide_exit, gesture, target_id, ts, path, var_snapshot }` per event.
 - Telemetry is **integrity-protected**: every record carries a monotonic `seq`, an HMAC over payload+seq, and a chained hash so any tampering is detectable (§7.7.4).
@@ -292,6 +318,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Session data can be exported as CSV/Parquet for offline analysis; deletion honored within 30 days per data subject rights.
 
 **Behavioral Details.**
+
 - Telemetry is streamed (chunked, JSON over HTTPS) to a `telemetry_ingest` endpoint, batched per playback session at viewer's session end or at 30-second intervals (whichever comes first).
 - **Sampling policy:** by default 100% capture, but configurable per deck to `1/n` to control cost; researcher can mark a study "high fidelity" to opt out of sampling.
 - **Pseudonymization:** viewer identifiers are SHA-256(session_salt + viewer_token) — the server never sees raw IP unless the researcher explicitly enables "identify individual viewers" mode.
@@ -299,6 +326,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - **A/B test support:** if the deck's URL carries a `?variant=A` query param (or the deck is configured for A/B), the recorder tags events with `variant` so downstream analytics can split.
 
 **Edge Cases.**
+
 - Viewer reloads mid-session — session continues with `rejoined_session_id` link; recorder merges telemetry via session token + IP/device fingerprinting (subject to consent).
 - Viewer navigates away before the first 250 ms — discarded as a bounce.
 - Recorder fails (network partition) — client buffers up to 5MB in IndexedDB, replays on reconnect.
@@ -309,9 +337,10 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 
 ### #105 — Mini-games/quiz mechanics for training decks (drag-to-match, hotspot quizzes)
 
-**Purpose.** Provide first-class training-game primitives so a "team onboarding" deck is a *game* rather than a slideshow. Includes: drag-to-match (connect left-column items to right-column items), hotspot quizzes (mark the region with X), multiple-choice quizzes, ordering puzzles (drag to reorder), fill-in-the-blank, true/false, timed flash cards, "find the answer" reveals.
+**Purpose.** Provide first-class training-game primitives so a "team onboarding" deck is a _game_ rather than a slideshow. Includes: drag-to-match (connect left-column items to right-column items), hotspot quizzes (mark the region with X), multiple-choice quizzes, ordering puzzles (drag to reorder), fill-in-the-blank, true/false, timed flash cards, "find the answer" reveals.
 
 **Acceptance Criteria.**
+
 - Question types: `multiple_choice` (1+ correct), `multi_select`, `true_false`, `fill_blank` (exact/regex/similarity match), `ordering`, `matching` (drag-to-pair), `hotspot` (click the right region on a slide element), `flash_card` (timed), `short_answer` (LLM-graded).
 - Each quiz is a `quiz_def` with `{ id, deck_id, slide_ids, questions: [...], passing_score, max_attempts, randomize, time_limit }`.
 - Variables (#100) receive `{ score, attempts, per_question_result, time_per_question }` after submission.
@@ -321,6 +350,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Quiz authoring lives in the same authoring surface as every other component; it does not require code.
 
 **Behavioral Details.**
+
 - **Drag-to-match** runtime: HTML5 drag-and-drop with a touch fallback; connections are stored as an `Edge[]` until submitted; on submit they're validated against the canonical matching rule.
 - **Hotspot quiz:** a region defined in normalized coords; the viewer clicks somewhere in the slide; the click distance from the region centroid (or polygon point-in-shape test) determines correctness.
 - **Fill-blank:** server-grade regex matching or string distance (Levenshtein) for typo tolerance, configurable.
@@ -329,6 +359,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - **Time limit:** enforced server-side (not just client timer); expired quiz auto-submits the current answers.
 
 **Edge Cases.**
+
 - A drag-to-match viewer uses keyboard only — full keyboard alternative (`Tab` to select, arrow keys, `Enter` to confirm) per accessibility §7.8.
 - A quiz question references a deleted hotspot — runtime flags `dangling: true` and substitutes a placeholder.
 - Multiple attempts with `randomize: true` — the order of answer options shuffles server-side and persists per session.
@@ -343,6 +374,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 **Purpose.** Provide a "kiosk-mode" timeline so a slide sequence advances by itself (with `interval` per slide, optionally per-element), and is pausable / resumable from any number of control surfaces (the slide itself, a phone remote #127, presenter mode #126, a quiz answer, etc.).
 
 **Acceptance Criteria.**
+
 - A deck can declare a `sequence` of slides with `interval_ms`, `pause_on_event`, `loop`, `count`, `interruption_policy`.
 - `pause_on_event` can be `interaction`, `hover`, `audio_playing`, `video_playing`, `scroll`, `navigate`, or any custom event.
 - Pause/resume is first-class state and is serialized into deep links (#107) and prototype sessions (#104).
@@ -350,12 +382,14 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Per-slide overrides: an individual slide can override the sequence's interval.
 
 **Behavioral Details.**
+
 - Implementation: a `timeline_runtime` that tracks `{ current_idx, current_started_at, paused_total_ms, paused_at_ms, last_resumed_at_ms }`.
 - `loop` semantics: when true, sequence restarts at slide 0 after `count` cycles (default infinite; configurable max cycles).
 - `interruption_policy ∈ { ignore, queue, abort }` — what happens if a hotspot fires mid auto-advance: ignore (next auto-tick), queue (run after auto-advance would have fired), abort (kill the timer and use the manual target).
 - **Reduced motion handling:** `prefers-reduced-motion: reduce` → auto-advance defaults to off; intervals are user-controllable; sequence disabled unless explicitly opted-in by the author.
 
 **Edge Cases.**
+
 - Browser tab is backgrounded mid-sequence — clock is paused (`document.hidden` listener) and resumed on visibility; alt: server-side ticks via a "ghost clock" sent during reconnect.
 - A user pauses, makes a hotspot tap (#96), then resumes — the slide that was displayed at pause time is what they resume to, with `paused_total_ms` correctly accumulated.
 - Multiple timers (one sequence on slide-level, one on element-level animation, #88) — single timeline source of truth; element timers derive from the sequence.
@@ -369,6 +403,7 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 **Purpose.** Make every meaningful runtime state reachable via a URL, shareable as a link, and restorable on open. This is the unit of "send to a colleague" for prototypes and live presentations.
 
 **Acceptance Criteria.**
+
 - A deep link has the shape: `https://<deck-host>/d/<deck_id>?state=<encoded>` or `/d/<deck_id>/<slide_id>?<query>` (short form for trivial cases).
 - The `state` payload encodes: `slide_id`, `path_stack` (#97), `overlay_stack` (#98), `variable_snapshot` (variables in scope, scoped-filtered, viewer-allowed subset), `device_frame_state` (#103), `scenario` (#57), `cursor_focus` (for resumption), `form_drafts`.
 - State encoding uses a **compact, signed, base64url** format (`bse.sign(state).compact_payload`), with HMAC for tamper detection and an embedded `exp` for expiry (§7.4.9).
@@ -379,19 +414,21 @@ Each feature is documented as: **Purpose / Acceptance Criteria / Behavioral Deta
 - Visible UI: a "Resuming from your last session" toast appears for ≤ 1.5s when state is restored.
 
 **Behavioral Details.**
+
 - **Encoder** (`encode_state(deck_ctx, viewer_ctx, runtime_state)`): produces an opaque token that any compatible client (web, mobile, embedded) can decode.
 - **Decoder** (`decode_state(token, viewer_ctx)`): validates signature, scopes the variable snapshot to the current viewer (i.e., strips private/session-only/other-viewer-scoped variables from a link meant for someone else), merges with current viewer context, and prepares the runtime for first paint.
 - **Link shortener** `link_svc.shorten(long)` returns a short id, stored server-side, optionally TTL'd.
-- **State authority:** the URL is *one* source of truth for "where the viewer should land." When the runtime diverges from the URL state (because the user's local state is newer), policy decides: by default, the link wins unless the user explicitly chose "continue locally."
+- **State authority:** the URL is _one_ source of truth for "where the viewer should land." When the runtime diverges from the URL state (because the user's local state is newer), policy decides: by default, the link wins unless the user explicitly chose "continue locally."
 - **Sharing intent:** when a user clicks "Share current state," the runtime grabs the current runtime state and produces a token via the encoder; the user can then paste into Slack, email, or QR. QR rendering leverages section 9 presenter-mode remote.
 
 **Edge Cases.**
+
 - **Token tampering** — HMAC fails on decode; runtime refuses to apply; opens deck at its default start instead.
 - **Expired token** — runtime offers "this link expired, retry at default" with the reason.
 - **Variables present in the snapshot but not allowed for the current viewer** — stripped silently with a warn log; the URL looks valid but the viewer's scope filters it.
 - **Deck changed since the link was created** (slide deleted, hotspot removed, variable renamed) — runtime applies best-effort: removes missing elements, falls back to `default_slide` if the target is gone; surfaces a "Some elements have changed" banner with a "go to current version" button.
-- **Anonymous vs. authenticated mismatch** — token meant for anonymous users but the viewer is signed in: the URL's *intent* (which scenario, which slide) is honored; viewer-scoped variables are taken from the viewer's session, not the URL.
-- **Pasting a link into a viewer with cookies blocked** — link works, but only restores the *anonymous* subset of state.
+- **Anonymous vs. authenticated mismatch** — token meant for anonymous users but the viewer is signed in: the URL's _intent_ (which scenario, which slide) is honored; viewer-scoped variables are taken from the viewer's session, not the URL.
+- **Pasting a link into a viewer with cookies blocked** — link works, but only restores the _anonymous_ subset of state.
 
 ---
 
@@ -496,20 +533,22 @@ This section enumerates the runtime semantics — the contract between authoring
 
 ### 7.3.1 Variable Scoping (deck / slide / component_instance / session / viewer)
 
-| Scope | Lifetime | Author mutability | Viewer mutability | Persisted in deep link (#107)? | Visible to MCP (#222)? |
-|---|---|---|---|---|---|
-| `deck` | Lives as long as the deck. Set by author or by component default. | Yes | No | Yes (read-only) | Yes |
-| `slide` | Reset on every slide enter (unless `persist: true`). | Yes | Only via rules bound to slide; otherwise no | Only when `persist: true` | Yes |
-| `component_instance` | Bound to a specific instance; resets when instance is unmounted. | Yes | Per-component rules | No | Yes |
-| `session` | Lives for the entire session (browser tab + protocol-defined extension). | Yes | Yes (via forms/calculators) | Optional | No (private to runtime) |
-| `viewer` | Lives in the viewer's account storage; key-value per deck. | Yes | Yes | No — bound to viewer's server-side profile | Yes (per-agent permission) |
+| Scope                | Lifetime                                                                 | Author mutability | Viewer mutability                           | Persisted in deep link (#107)?             | Visible to MCP (#222)?     |
+| -------------------- | ------------------------------------------------------------------------ | ----------------- | ------------------------------------------- | ------------------------------------------ | -------------------------- |
+| `deck`               | Lives as long as the deck. Set by author or by component default.        | Yes               | No                                          | Yes (read-only)                            | Yes                        |
+| `slide`              | Reset on every slide enter (unless `persist: true`).                     | Yes               | Only via rules bound to slide; otherwise no | Only when `persist: true`                  | Yes                        |
+| `component_instance` | Bound to a specific instance; resets when instance is unmounted.         | Yes               | Per-component rules                         | No                                         | Yes                        |
+| `session`            | Lives for the entire session (browser tab + protocol-defined extension). | Yes               | Yes (via forms/calculators)                 | Optional                                   | No (private to runtime)    |
+| `viewer`             | Lives in the viewer's account storage; key-value per deck.               | Yes               | Yes                                         | No — bound to viewer's server-side profile | Yes (per-agent permission) |
 
 **Functional rules:**
+
 - A binding always reads from the most specific scope available, falling back to broader scopes: `viewer → session → component_instance → slide → deck`.
 - A write only succeeds if the writing surface has write permission to the scope (e.g., a form input can write to `session`; a hotspot cannot write to `viewer`-scoped variables unless explicitly authorized).
 - Cross-deck variables (e.g., from shared components, #186) are read-only and tagged with the source deck.
 
 **Non-functional:**
+
 - Resolve latency: variable read on a hot path (visible-bound element re-render) ≤ 0.5ms p99, ≤ 1ms p99.9.
 - Storage: per-deck variable count budget 5,000 (warning at 4,000); per-component instance variable count budget 200.
 
@@ -529,7 +568,7 @@ This section enumerates the runtime semantics — the contract between authoring
 - **Data structure:** each slide node has `{ outgoing: Edge[], incoming: Edge[], metadata }`. Each edge has `{ from_slide_id, from_event_ref, to_slide_id, condition, priority, parallel_group }`.
 - **Traversal:** when the runtime needs the "next slide" (due to a hotspot fire, timer tick, conditional rule, etc.), it walks `outgoing` in `priority desc, created_at asc` order, evaluates each `condition` until one is `true`, and then transitions.
 - **Cycle detection:** the runtime maintains a `visited_set` per session that records every slide's `visit_count`. Default cap: `max_hops_per_session = 100` (configurable per deck; e.g., escape-room decks may need higher).
-- **Cycle analytics:** cycles are also detected at *authoring* time (Tarjan's SCC over the slide graph) and surfaced as warnings in the Connections panel.
+- **Cycle analytics:** cycles are also detected at _authoring_ time (Tarjan's SCC over the slide graph) and surfaced as warnings in the Connections panel.
 - **Parallel navigation:** an edge can declare `parallel_group: "<id>"` — edges in the same group all fire, opening multiple slides concurrently (read-only research use case).
 
 ### 7.3.4 Form Input Validation
@@ -548,7 +587,7 @@ This section enumerates the runtime semantics — the contract between authoring
 
 - **Internal format:** `decimal128`-equivalent (38 digits of precision, configurable 12 shown).
 - **Overflow handling:**
-  - If a calculation exceeds the type range: clamps to `±Infinity` markers in the *output*, with a visible `value_out_of_range` badge.
+  - If a calculation exceeds the type range: clamps to `±Infinity` markers in the _output_, with a visible `value_out_of_range` badge.
   - If intermediate computation exceeds: clamps silently to type range; subsequent formula evaluations re-detect and display `value_out_of_range`.
 - **Rounding:** currency uses banker's rounding to even (default); user setting can override.
 - **Floating point hazards:**
@@ -584,7 +623,7 @@ See also §7.1 #107 and §7.4.9 architecture. Summary:
 - **Sample-size sufficiency:** runtime reports a "statistical power" indicator when the recorder's `min_per_arm` threshold (default 100 sessions) is unmet; researchers see a warning until enough data is captured.
 - **Immutability:** the telemetry log is append-only; corrections happen through event-sourced reconciliation, never direct edit.
 - **Audit:** every analytics export includes the methodology (`version`, `sampling_rate`, `redaction_policy`).
-- **Cross-section tie:** the analytics layer (section 12, #173) consumes this telemetry unchanged. Prototyping records are *not* double-counted.
+- **Cross-section tie:** the analytics layer (section 12, #173) consumes this telemetry unchanged. Prototyping records are _not_ double-counted.
 
 ### 7.3.9 Accessibility (NFR)
 
@@ -595,7 +634,7 @@ WCAG 2.2 AA is the floor for all of §7. Specifically:
 - All overlays trap focus and return focus on close.
 - Auto-advance (#106) respects `prefers-reduced-motion` and provides an always-visible pause control.
 - Quiz interactions (#105) have keyboard equivalents (drag-to-match → Tab + arrow keys).
-- Color is never the sole indicator of state (e.g., a hotspot's "broken" state has both color *and* icon).
+- Color is never the sole indicator of state (e.g., a hotspot's "broken" state has both color _and_ icon).
 - Device frame (#103) is treated as a single composite element for tab order; pressing `Enter` simulates a tap.
 - Captions or transcripts for any audio associated with a quiz/overlay.
 
@@ -627,6 +666,7 @@ func (m *HotspotManager) ResolveTarget(hs *Hotspot, ctx *RuntimeContext) (Target
 ```
 
 **Implementation notes:**
+
 - Hit-test cache is invalidated on any hotspot geometry / z-order change.
 - Target resolution short-circuits on the first matching gesture's configured target.
 - A `BrokenChecker` runs as a background job, scanning for hotsposts whose targets have been deleted, and surfaces them in the editor's **Connections** panel.
@@ -636,6 +676,7 @@ func (m *HotspotManager) ResolveTarget(hs *Hotspot, ctx *RuntimeContext) (Target
 **Responsibility.** Layered compositing of overlays above a slide, with z-stack ordering, focus management, dismissability, and animation hooks.
 
 **Architecture.**
+
 - The runtime instantiates an `OverlayStack` per slide with `[]Overlay { id, contentRef, mode, dismissable, open_trigger, close_trigger, ... }`.
 - Each overlay is a React portal (or equivalent in the chosen UI framework — see §6) mounted into the slide's overlay layer container.
 - Z-stack: `last-opened-on-top` is the default. Persistent overlays layer above transient ones.
@@ -646,12 +687,14 @@ func (m *HotspotManager) ResolveTarget(hs *Hotspot, ctx *RuntimeContext) (Target
 **Responsibility.** Manage per-instance state machines (#99), fire transitions, and emit `onTransition` events.
 
 **Components.**
+
 - `StateMachine { states, transitions, initial }` declared in component metadata.
 - `InstanceRuntime { id, component_def, current_state, events: EventLog }` — one per instance on the canvas.
 - `TransitionEvaluator` — given `(current_state, event, condition_snapshot)`, returns `(next_state, side_effects)` or `(current_state, nil)` if no transition matches.
 - `EventBus` — channel for cross-runtime events: state changes broadcast here → variable store subscribers (#100).
 
 **Persistence.**
+
 - Session-scoped instance state serialized into #107 deep link state.
 - Deck-scoped instance state stored in the deck document (CRDT cell, #21).
 
@@ -660,6 +703,7 @@ func (m *HotspotManager) ResolveTarget(hs *Hotspot, ctx *RuntimeContext) (Target
 **Responsibility.** Single source of truth for runtime state. Reactive, transactional, type-safe, scope-aware.
 
 **Type signatures:**
+
 ```ts
 type VarStore = {
   // read with scope resolution: viewer > session > instance > slide > deck
@@ -681,8 +725,9 @@ type VarStore = {
 ```
 
 **Reactivity.**
+
 - A `BindingsDAG` is built at editor-load time, mapping every binding to its dependencies (variables read by `sourceExpr`).
-- Variable updates trigger a *topological* propagation: only bindings whose dependencies changed are recomputed.
+- Variable updates trigger a _topological_ propagation: only bindings whose dependencies changed are recomputed.
 - A batched transaction boundary: variable writes within the same micro-task are coalesced; bindings see a coherent update.
 
 ### 7.4.5 Conditional Logic Evaluator (with Safe Evaluation)
@@ -690,7 +735,8 @@ type VarStore = {
 **Responsibility.** Evaluate safe expressions, evaluate rules, fire actions, all in a sandbox.
 
 **Architecture.**
-- `ExprCompiler` — parses and *typechecks* the source expression (no `eval`, no `Function` ctor). Builds an `Expr` AST. Whitelist-enforced.
+
+- `ExprCompiler` — parses and _typechecks_ the source expression (no `eval`, no `Function` ctor). Builds an `Expr` AST. Whitelist-enforced.
 - `ExprEvaluator` — walks the AST against a `VariableContext` (read-only view of the variable store). Pure, no side effects, no globals beyond the builtin library (`round`, `floor`, etc.).
 - `RuleEvaluator` — iterates rules in priority order, returns first `true` rule, then `ActionExecutor` runs the action.
 - `ActionExecutor` — supports `show`/`hide`/`enable`/`disable`/`set_variable`/`navigate_to`/`play_animation`/`submit_form`/`open_overlay`/`close_overlay`.
@@ -714,6 +760,7 @@ type Action =
 **Responsibility.** Register input components, manage their lifecycle, validate, sanitize, debounce, and write to bound variables.
 
 **Components.**
+
 - `FormRegistry` — keyed by `form_id`, owns a `Map<input_id, InputDef>`.
 - `InputRenderer` — lazy-loaded per input type (`text`, `slider`, etc.) to keep the bundle slim.
 - `InputValidator` — runs the validation chain from §7.3.4.
@@ -724,6 +771,7 @@ type Action =
 **Responsibility.** Evaluate calculator DAGs in a sandboxed decimal-arithmetic runtime.
 
 **Components.**
+
 - `CalculatorDef` — the DAG, parsed from `#102`'s authoring output.
 - `DecimalRuntime` — `decimal128`-equivalent arithmetic, format-and-parse helpers.
 - `RecomputeEngine` — watches input changes, recomputes only affected nodes (DAG-based), within a per-frame budget (5ms).
@@ -734,6 +782,7 @@ type Action =
 **Responsibility.** Render the device frame, dispatch simulated input, integrate with the §5 #81 live-app-embed runtime.
 
 **Components.**
+
 - `DeviceFrameRenderer` — composes the iframe sandbox + the chrome sprite layer into the slide element.
 - `SimulatedInputShim` — maps slide pointer events to device touch events with correct semantics.
 - `DeviceState` — exposed as a binding/conditional-rule target, enabling variables (#100) and rules (deep links #107) to influence the frame.
@@ -743,6 +792,7 @@ type Action =
 **Responsibility.** Capture, stream, persist, and serve back the event log for prototype sessions.
 
 **Components.**
+
 - `EventRecorder` — runs in the viewer runtime; emits to a `chunked_upload_stream`.
 - `TelemetryIngest` — backend service: appends to a time-series store (e.g., columnar storage / Postgres + JSONB for ad-hoc queries).
 - `ReplayRenderer` — consumes the event log, fast-forwards the variable store, then plays events.
@@ -753,6 +803,7 @@ type Action =
 **Responsibility.** Encode runtime state into a URL-safe token; decode and restore on the receiving client.
 
 **Components.**
+
 - `StateEncoder` — pure function `(deck_ctx, viewer_ctx, runtime_state) → token`.
 - `StateDecoder` — `(token, viewer_ctx) → (state_or_rejection, reason?)`.
 - `LinkShortener` — server-side, maps `deep_link_id` to stored long token when state exceeds 4 KB.
@@ -970,6 +1021,7 @@ POST   /v1/hotspots/{hotspot_id}/resolve     # debug: returns the runtime-resolv
 ```
 
 Request shape (POST/PATCH):
+
 ```json
 {
   "shape": "rect",
@@ -979,13 +1031,21 @@ Request shape (POST/PATCH):
   "target_type": "slide",
   "target_ref": { "slide_id": "fcae..." },
   "transition": { "type": "fade", "duration_ms": 200 },
-  "accessibility": { "keyboard_shortcut": "Enter", "aria_label": "Open pricing slide" }
+  "accessibility": {
+    "keyboard_shortcut": "Enter",
+    "aria_label": "Open pricing slide"
+  }
 }
 ```
 
 Error format (`application/problem+json`):
+
 ```json
-{ "type": "https://errors.domio.app/hotspot/dangling-target", "title": "Target slide not found", "status": 422 }
+{
+  "type": "https://errors.domio.app/hotspot/dangling-target",
+  "title": "Target slide not found",
+  "status": 422
+}
 ```
 
 ### 7.6.2 Variable Binding
@@ -999,6 +1059,7 @@ DELETE /v1/bindings/{binding_id}
 ```
 
 Binding request:
+
 ```json
 {
   "target_kind": "element",
@@ -1019,12 +1080,16 @@ POST   /v1/rules/{rule_id}/test      # body: { snapshot } returns boolean for th
 ```
 
 Rule request:
+
 ```json
 {
   "priority": 100,
   "scope_slide_id": null,
   "condition_expr": { "op": "==", "left": "$pricingTier", "right": "annual" },
-  "action": { "type": "show", "target": { "kind": "element", "id": "abcd..." } },
+  "action": {
+    "type": "show",
+    "target": { "kind": "element", "id": "abcd..." }
+  },
   "enabled": true
 }
 ```
@@ -1044,7 +1109,9 @@ POST /v1/calculators/{calculator_id}/compute   # body: { inputs } returns output
 POST /v1/telemetry/prototype/batch
 Content-Type: application/json
 ```
+
 Body:
+
 ```json
 {
   "session_id": "fa01...",
@@ -1059,6 +1126,7 @@ Body:
   ]
 }
 ```
+
 Server returns `{ "accepted_seq": 12, "next_seq": 13, "ingest_at": "..." }`. Rejected events return `422` with a `reason` per event.
 
 ### 7.6.6 Deep-Link Resolver
@@ -1071,6 +1139,7 @@ DELETE /v1/deep_links/{id}                # author revokes a link
 ```
 
 Resolve response (server validation):
+
 ```json
 {
   "valid": true,
@@ -1111,7 +1180,7 @@ This section covers the security model for prototyping features, including the s
 
 Per `pre-development-planning-guide.md` §11.1, Bangladesh's PDPA 2026 is in force in principle and fully enforceable from May 2027. The data fiduciary (Domio) must handle consent, retention, and data subject rights for any user data flowing through telemetry. Concrete rules:
 
-- **Default PII redaction (client-side):** form inputs flagged as `pii: true` (e.g., email, phone, name) are sent to telemetry in their raw form **only** if the recorder is in an authenticated and consented mode; otherwise they are redacted to `***` *before* leaving the client.
+- **Default PII redaction (client-side):** form inputs flagged as `pii: true` (e.g., email, phone, name) are sent to telemetry in their raw form **only** if the recorder is in an authenticated and consented mode; otherwise they are redacted to `***` _before_ leaving the client.
 - **Pseudonymization:** viewer identifiers are SHA-256(session_salt + viewer_token); raw IPs are not stored unless "identify individual viewers" mode is explicitly enabled by the author and consented to by the viewer.
 - **Consent UI:** every prototype link has a top-level consent banner with three options (`opt_in`, `opt_out`, `anonymous`) and explicit retention display; the consent record is tied to the session.
 - **Retention:** configurable per deck; default 90 days; `prototype_sessions.retention_until` is set at session start and enforced by a daily cron job (hard-deletes sessions and their events).
@@ -1122,7 +1191,7 @@ Per `pre-development-planning-guide.md` §11.1, Bangladesh's PDPA 2026 is in for
 
 ### 7.7.4 Deep-Link Auth and Signed Tokens
 
-- Deep-link tokens are **signed, not encrypted.** Variables included in the snapshot must be in the `viewer_scope`-allowed set; the encoder strips any variable the current viewer cannot see *before* signing.
+- Deep-link tokens are **signed, not encrypted.** Variables included in the snapshot must be in the `viewer_scope`-allowed set; the encoder strips any variable the current viewer cannot see _before_ signing.
 - Tokens carry an `exp` (expiry) and an optional `aud` (target viewer identifier). Decoding rejects mismatches.
 - Signature: HMAC-SHA256 with a per-deck rotating `kid`. Rotation policy: 30-day rotation, with a 7-day overlap window where both old and new keys verify.
 - Long-form URLs that exceed 4 KB are stored server-side; the URL carries only an opaque `deep_link_id`. The `deep_links.click_count` and `last_clicked_at` columns are updated and `viewer_id_hash` is recorded when authenticated.
@@ -1131,16 +1200,16 @@ Per `pre-development-planning-guide.md` §11.1, Bangladesh's PDPA 2026 is in for
 
 ### 7.7.5 OWASP Coverage
 
-| Concern | Mitigation in §7 |
-|---|---|
-| A01 Broken Access Control | All hotspots/rules/forms scoped to deck + slide; agent tokens (MCP) carry capability claims (`#225`). |
-| A03 Injection (XSS, SQLi, NoSQLi) | All form input rendered with text-content APIs; rule expressions compile to a sandbox AST; SQL always parameterized. |
-| A04 Insecure Design | Layered defenses (compile-time + runtime validation); telemetry integrity chain (§7.7.4). |
-| A05 Security Misconfiguration | Default-deny variable visibility; default-deny form input storage. |
-| A07 Identification and Auth Failures | Telemetry consent + DSR endpoints; deep-link signing; PII redaction on by default. |
-| A08 Software and Data Integrity | Signed deep links, telemetry integrity chain; deck rendering integrity (CRDT version pinning). |
-| A09 Logging Failures | Every rule fire, every variable write (above a severity threshold), every deep-link resolve, every telemetry batch — logged with structured fields (§7.9). |
-| A10 SSRF | Device-frame (#103) external URL allowlist per deck author; iframe sandbox (#81) per OWASP sandbox-iframe guidance. |
+| Concern                              | Mitigation in §7                                                                                                                                           |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A01 Broken Access Control            | All hotspots/rules/forms scoped to deck + slide; agent tokens (MCP) carry capability claims (`#225`).                                                      |
+| A03 Injection (XSS, SQLi, NoSQLi)    | All form input rendered with text-content APIs; rule expressions compile to a sandbox AST; SQL always parameterized.                                       |
+| A04 Insecure Design                  | Layered defenses (compile-time + runtime validation); telemetry integrity chain (§7.7.4).                                                                  |
+| A05 Security Misconfiguration        | Default-deny variable visibility; default-deny form input storage.                                                                                         |
+| A07 Identification and Auth Failures | Telemetry consent + DSR endpoints; deep-link signing; PII redaction on by default.                                                                         |
+| A08 Software and Data Integrity      | Signed deep links, telemetry integrity chain; deck rendering integrity (CRDT version pinning).                                                             |
+| A09 Logging Failures                 | Every rule fire, every variable write (above a severity threshold), every deep-link resolve, every telemetry batch — logged with structured fields (§7.9). |
+| A10 SSRF                             | Device-frame (#103) external URL allowlist per deck author; iframe sandbox (#81) per OWASP sandbox-iframe guidance.                                        |
 
 ### 7.7.6 Secrets and Credentials
 
@@ -1256,6 +1325,7 @@ Concrete budgets. Numbers in parentheses are defaults; all are configurable per 
 ### 7.9.3 Definition of Done (per §9.3)
 
 A feature #96–#107 ships only when:
+
 - Code reviewed and merged.
 - Unit tests written with ≥ 80% line coverage on the relevant module.
 - Integration test exercising the happy path + at least 2 edge cases.
@@ -1272,84 +1342,85 @@ A feature #96–#107 ships only when:
 
 Concrete, validated integration points. This subsection is the authoritative map of "section 7 touches these other sections."
 
-| Direction | Section & feature | Integration detail |
-|---|---|---|
-| Section 1 → | #6 (frames-within-frames), #7 (auto-layout), #8 (constraints) | Hotspots (#96), overlays (#98), device frames (#103), and forms (#101) inherit the auto-layout and constraints system. Coordinates are stored normalized; hit-test resolution uses the final rendered rect after constraints are applied. |
-| Section 1 → | #11 (zoom + GPU rendering) | Hotspot overlay visibility threshold matches the editor's zoom-UI threshold; the device frame's GPU path is shared with the editor's GPU renderer. |
-| Section 1 → | #14 (format painter / paste to match destination) | Hotspot style sheets, overlay templates, form input templates are copy-paste-able. |
-| Section 1 → | #19 (deck branching/merge) | Every feature #96–#107 must survive deck merge; new IDs are content-addressable (§7.1 #96). |
-| Section 1 → | #22 (autosave) | All runtime state-related edits (hotspot geometry, rule priority, variable default) save on keystroke via the CRDT layer. |
-| Section 2 → | #25 (smart components with editable props) | Variables (#100) are exposed as Smart Component Props; the JSON Schema for props (used by #233's function-calling) is generated from the variable definitions. |
-| Section 2 → | #27 (team component libraries) | Conditional rules (#100) and calculator definitions (#102) are shared as part of component definitions in libraries. |
-| Section 4 → | #48 (live data) | Variable values (#100) can be **bound to live data sources**, e.g., a variable's value is the latest BigQuery result for a query; an updating data source triggers the same reactive bindings pipeline as a form input. |
-| Section 4 → | #52 (cross-chart filtering) | Filtering is implemented as a special variable write; cross-slide filtering is enabled by promoting the filter variable to deck scope. |
-| Section 4 → | #53 (what-if sliders), #57 (scenario manager) | Variables (§100) ARE the scenario/slider mechanism; #53 and #57 are formalized as variable bindings with `scenario` scoping. A what-if slider writes a variable; the calculator/runtime reads it. |
-| Section 4 → | #54 (formula engine) | The prototyping engine's formula runtime IS the spreadsheet-style formula engine for the deck's data layer; one compiler, one evaluator. |
-| Section 4 → | #60 (threshold alerts) | Threshold rules are a thin special case of conditional rules (#100). |
-| Section 4 → | #61 (currency localization) | Locale handling is shared; calculator formatting honors viewer locale (also §12.3 planning guide). |
-| Section 4 → | #64 (data source access control) | Live-data-backed variables follow the same access-control rules as their underlying source: viewers never see source credentials. |
-| Section 5 → | #81 (live app embedding) | Device frames (#103) reuse the iframe-sandbox runtime; the same allow-list, same auth passthrough, same fallback behavior. |
-| Section 5 → | #82 (code blocks / JS sandboxes) | The calculator sandbox (#102) uses the same safe-eval primitives. The conditional rule sandbox (#100) inherits from these primitives. |
-| Section 5 → | #84 (maps) | A "tap-to-filter" map hotspot is implemented as a hotspot (#96) targeting a variable write (#100). |
-| Section 6 → | #85 (timeline-based animation) | Triggers (#88) consumed by variable changes, gesture fires, etc.; sequence timers (#106) integrate with the animation editor's per-slide timeline. |
-| Section 6 → | #86 (magic move) | When a hotspot's target slide shares an element-id set with the source, magic move handles the transition automatically. |
-| Section 6 → | #88 (per-element animation triggers) | Animation triggers consume runtime events (hotspot fire, variable change, form submit); the on-tick animation timing is shared with the auto-advance sequence (#106). |
-| Section 6 → | #91 (slide transitions) | Hotspot-targeted transitions pick from this vocabulary. |
-| Section 6 → | #93 (reduced motion) | Auto-advance (#106) and overlay animations honor this preference. |
-| Section 8 → | #108 (full deck generation from prompt) | AI can author hotspots, branching, conditional rules, forms, calculators, quizzes by emitting the same JSON schema the editor produces. |
-| Section 8 → | #111 (AI slide designer), #112 (AI redesign) | Prototyping features are treated as design-system constraints during AI redesign; AI cannot break reachable graph invariants. |
-| Section 8 → | #113 (copy assistant) | Rule conditions and form labels are subject to AI translation; locale-aware. |
-| Section 8 → | #114 (AI image generation) | Hotspot targets can be AI-generated images with hotspot regions auto-suggested from salient objects. |
-| Section 8 → | #116 (AI speaker notes) | Speaker notes for branching slides can be auto-generated per branch. |
-| Section 8 → | #117 (AI rehearsal coach) | The presentation state timeline (#205) integrates rehearsal telemetry with prototype replay to identify where the presenter stumbled. |
-| Section 8 → | #118 (AI-anticipated Q&A) | Quizzes (#105) and quizzes embedded in Q&A flows are integrated. |
-| Section 8 → | #119 (smart summarization) | A "smart summary" can be implemented as an auto-advance sequence (#106) with rules collapsing optional branches. |
-| Section 8 → | #120 (audience-adaptive versions) | The 5-minute version uses branched entry points + auto-advance sequences; the technical version shows extra overlays; the exec version collapses branches. Variables drive the conditional routing. |
-| Section 8 → | #123 (AI chart selection) | Calculator output charts (#102) participate in this selection algorithm. |
-| Section 8 → | #125 (AI content freshness checker) | Bindings to live data (#48) automatically receive freshness flags; the freshness checker reuses the integrity chain. |
-| Section 9 → | #126 (presenter view) | All of section 7's state is "presenter mode is just a prototype with no-presentation overlay"; the auto-advance timer (#106) and the overlay stack (#98) carry over. |
-| Section 9 → | #127 (phone remote) | The phone remote's deep-link button uses the deep-link resolver (#107) to send a state token. |
-| Section 9 → | #130 (instant "jump to slide" grid) | Builds on the same slide graph data structure. |
-| Section 9 → | #129 (reorder/hide slides mid-presentation) | Hide and reorder are runtime mutators to the branching graph; the trail is recorded as events. |
-| Section 9 → | #131 (rehearsal mode) | Rehearsal uses the same prototype session recorder (#104) with the presenter as the viewer. |
-| Section 9 → | #133 (live "parking lot") | Q&A items are written to a session-scoped variable (#100); the wrap-up slide is bound to that variable. |
-| Section 9 → | #136 (presenter failover) | Failover uses deep-link state (#107) to resume the exact slide and state on the phone. |
-| Section 9 → | #137 (offline presenting) | The prototype runtime is designed offline-first; cached decks run identically without network. Telemetry is queued for later flush. |
-| Section 9 → | #141 (instant recap) | Recap is built from the same `prototype_events` stream (#104) that powers user-testing replay — single source of truth. |
-| Section 9 → | #205 (presentation state timeline) | Reuses the event log from #104 — same replay engine serves both. |
-| Section 9 → | #209 (voice-triggered slide states) | Voice commands map to variable writes (#100); e.g., "bear case" → set `$scenario = "bear"`. Conditional rules (#100) propagate. |
-| Section 9 → | #211 (two-way slides) | Two-way slides are a multi-viewer variant of section 7 — variables are `viewer`-scoped but shared across viewers in the session; variable writes propagate with CRDT semantics. |
-| Section 9 → | #212 (deck inheritance trees) | Hotspots, rules, variables inherited via the same content-addressable ID namespace as deck merge (#19). |
-| Section 9 → | #213 (real-time co-presenting) | Co-presenting is a multi-`viewer_id_hash` prototype session; `last-write-wins` per variable; conflicts surfaced. |
-| Section 9 → | #214 (AI meeting listener) | Listener can trigger `navigate_to` or `set_variable` actions — the conditional rule engine handles the rest. |
-| Section 10 → | #143 (live polls), #149 (slider sentiment) | Audience inputs are written to `session`- or `viewer`-scoped variables (#100); poll results drive conditional rules. |
-| Section 11 → | #155 (deck is a web page) | Deep links (#107) are URLs into the same web-paginated runtime; the prototyping runtime and the published web page share the same `prototype_runtime`. |
-| Section 11 → | #157 (sharing levels) | Prototype test links are a sharing level variant. |
-| Section 11 → | #159 (per-link content control) | Deep links (#107) are the implementation: a link carries the visibility map. |
-| Section 11 → | #163 (narrated auto-play) | Implemented via auto-advance (#106) bound to narration events. |
-| Section 11 → | #164 (video export with interactivity) | Interactivity degrades gracefully — hotspots, calculators are rendered as their *current state* snapshots in the export; deep links in the export let viewers recover full interactivity. |
-| Section 12 → | #169–#170 (per-viewer, per-slide analytics) | Prototype telemetry (#104) is one input; live presentation telemetry is another; analytics layer aggregates both. |
-| Section 12 → | #173 (A/B testing) | A/B variant tags originate in the prototype recorder (#104) and flow into the analytics engine. |
-| Section 12 → | #176 (CRM sync) | Form submissions (#101) and calculator submissions (#102) are the natural events to sync. |
-| Section 12 → | #177 (funnel view) | The branching graph (`#97`) IS the funnel; analytics operates on the same node/edge representation. |
-| Section 12 → | #205 (presentation state timeline) | Reuses `prototype_events`. |
-| Section 13 → | #180 (review/approval) | Conditional rules (#100) cannot be shared externally until approval is granted. |
-| Section 13 → | #186 (auto-updating shared slides) | Shared slides may carry variables/calculators/hotspots; when the source slide updates, downstream decks inherit the update via content-addressable IDs. |
-| Section 13 → | #192 (guest collaborators with scoped, expiring access) | Same scoping/token expiry machinery used for deep links (#107). |
-| Section 15 → | #205, #206, #209, #211, #212, #213 | All depend on the section 7 runtime — design references are pointers back to this document. |
-| Section 16 → | #222 (full MCP tool surface) | Every feature #96–#107 must expose MCP tools (`create_hotspot`, `update_variable`, `set_scenario`, `run_calculator`, etc.). |
-| Section 16 → | #225 (agent-scoped permissions) | MCP tokens carry capability claims; an agent given `modify_state` can update variables, but cannot query `viewer`-scoped variables without the additional `read_private` capability. |
-| Section 16 → | #226 (semantic element addressing) | Hotspot IDs, overlay IDs, form IDs are first-class in the agent-readable schema; #235's `get_deck_summary` lists them. |
-| Section 16 → | #227 (tool-call transcript) | Every MCP invocation on section 7 features is appended to the deck's audit trail (separately from human edits). |
-| Section 16 → | #228 (dry-run mode) | Conditional rules (#100), variable writes, hotspot additions can be proposed as diffs and reviewed before landing. |
-| Section 16 → | #229 (webhooks → agent triggers) | "When a variable `$customerScore` crosses 0.8, invoke agent X." is exactly the conditional-rule event-channel. |
-| Section 16 → | #233 (function-calling-ready component props) | Variables are exposed as JSON Schema so LLMs can `set_variable` via structured output. |
-| Section 16 → | #234 (natural-language patch API) | "Move the CTA hotspot to the bottom-right and add a Bear-case-triggering rule" — one patch handles hotspot + rule. |
-| Section 16 → | #237 (deck linting for agents) | Includes a lint rule for: dead hotspots, unwired conditional rules, decimal-precision-bait formulas, untestable branches, missing KB exceeds in deep links. |
-| Section 16 → | #239 (simulation mode for scenario testing) | The calculator runtime exposes `sweep(input, range)` that calls the bindings graph; an agent can sweep a slider programmatically and consume the results. |
-| Section 16 → | #240 (deck diffing API) | Structural diffs of hotspots/rules/variables/calculators are first-class types in the diff API. |
+| Direction    | Section & feature                                             | Integration detail                                                                                                                                                                                                                        |
+| ------------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Section 1 →  | #6 (frames-within-frames), #7 (auto-layout), #8 (constraints) | Hotspots (#96), overlays (#98), device frames (#103), and forms (#101) inherit the auto-layout and constraints system. Coordinates are stored normalized; hit-test resolution uses the final rendered rect after constraints are applied. |
+| Section 1 →  | #11 (zoom + GPU rendering)                                    | Hotspot overlay visibility threshold matches the editor's zoom-UI threshold; the device frame's GPU path is shared with the editor's GPU renderer.                                                                                        |
+| Section 1 →  | #14 (format painter / paste to match destination)             | Hotspot style sheets, overlay templates, form input templates are copy-paste-able.                                                                                                                                                        |
+| Section 1 →  | #19 (deck branching/merge)                                    | Every feature #96–#107 must survive deck merge; new IDs are content-addressable (§7.1 #96).                                                                                                                                               |
+| Section 1 →  | #22 (autosave)                                                | All runtime state-related edits (hotspot geometry, rule priority, variable default) save on keystroke via the CRDT layer.                                                                                                                 |
+| Section 2 →  | #25 (smart components with editable props)                    | Variables (#100) are exposed as Smart Component Props; the JSON Schema for props (used by #233's function-calling) is generated from the variable definitions.                                                                            |
+| Section 2 →  | #27 (team component libraries)                                | Conditional rules (#100) and calculator definitions (#102) are shared as part of component definitions in libraries.                                                                                                                      |
+| Section 4 →  | #48 (live data)                                               | Variable values (#100) can be **bound to live data sources**, e.g., a variable's value is the latest BigQuery result for a query; an updating data source triggers the same reactive bindings pipeline as a form input.                   |
+| Section 4 →  | #52 (cross-chart filtering)                                   | Filtering is implemented as a special variable write; cross-slide filtering is enabled by promoting the filter variable to deck scope.                                                                                                    |
+| Section 4 →  | #53 (what-if sliders), #57 (scenario manager)                 | Variables (§100) ARE the scenario/slider mechanism; #53 and #57 are formalized as variable bindings with `scenario` scoping. A what-if slider writes a variable; the calculator/runtime reads it.                                         |
+| Section 4 →  | #54 (formula engine)                                          | The prototyping engine's formula runtime IS the spreadsheet-style formula engine for the deck's data layer; one compiler, one evaluator.                                                                                                  |
+| Section 4 →  | #60 (threshold alerts)                                        | Threshold rules are a thin special case of conditional rules (#100).                                                                                                                                                                      |
+| Section 4 →  | #61 (currency localization)                                   | Locale handling is shared; calculator formatting honors viewer locale (also §12.3 planning guide).                                                                                                                                        |
+| Section 4 →  | #64 (data source access control)                              | Live-data-backed variables follow the same access-control rules as their underlying source: viewers never see source credentials.                                                                                                         |
+| Section 5 →  | #81 (live app embedding)                                      | Device frames (#103) reuse the iframe-sandbox runtime; the same allow-list, same auth passthrough, same fallback behavior.                                                                                                                |
+| Section 5 →  | #82 (code blocks / JS sandboxes)                              | The calculator sandbox (#102) uses the same safe-eval primitives. The conditional rule sandbox (#100) inherits from these primitives.                                                                                                     |
+| Section 5 →  | #84 (maps)                                                    | A "tap-to-filter" map hotspot is implemented as a hotspot (#96) targeting a variable write (#100).                                                                                                                                        |
+| Section 6 →  | #85 (timeline-based animation)                                | Triggers (#88) consumed by variable changes, gesture fires, etc.; sequence timers (#106) integrate with the animation editor's per-slide timeline.                                                                                        |
+| Section 6 →  | #86 (magic move)                                              | When a hotspot's target slide shares an element-id set with the source, magic move handles the transition automatically.                                                                                                                  |
+| Section 6 →  | #88 (per-element animation triggers)                          | Animation triggers consume runtime events (hotspot fire, variable change, form submit); the on-tick animation timing is shared with the auto-advance sequence (#106).                                                                     |
+| Section 6 →  | #91 (slide transitions)                                       | Hotspot-targeted transitions pick from this vocabulary.                                                                                                                                                                                   |
+| Section 6 →  | #93 (reduced motion)                                          | Auto-advance (#106) and overlay animations honor this preference.                                                                                                                                                                         |
+| Section 8 →  | #108 (full deck generation from prompt)                       | AI can author hotspots, branching, conditional rules, forms, calculators, quizzes by emitting the same JSON schema the editor produces.                                                                                                   |
+| Section 8 →  | #111 (AI slide designer), #112 (AI redesign)                  | Prototyping features are treated as design-system constraints during AI redesign; AI cannot break reachable graph invariants.                                                                                                             |
+| Section 8 →  | #113 (copy assistant)                                         | Rule conditions and form labels are subject to AI translation; locale-aware.                                                                                                                                                              |
+| Section 8 →  | #114 (AI image generation)                                    | Hotspot targets can be AI-generated images with hotspot regions auto-suggested from salient objects.                                                                                                                                      |
+| Section 8 →  | #116 (AI speaker notes)                                       | Speaker notes for branching slides can be auto-generated per branch.                                                                                                                                                                      |
+| Section 8 →  | #117 (AI rehearsal coach)                                     | The presentation state timeline (#205) integrates rehearsal telemetry with prototype replay to identify where the presenter stumbled.                                                                                                     |
+| Section 8 →  | #118 (AI-anticipated Q&A)                                     | Quizzes (#105) and quizzes embedded in Q&A flows are integrated.                                                                                                                                                                          |
+| Section 8 →  | #119 (smart summarization)                                    | A "smart summary" can be implemented as an auto-advance sequence (#106) with rules collapsing optional branches.                                                                                                                          |
+| Section 8 →  | #120 (audience-adaptive versions)                             | The 5-minute version uses branched entry points + auto-advance sequences; the technical version shows extra overlays; the exec version collapses branches. Variables drive the conditional routing.                                       |
+| Section 8 →  | #123 (AI chart selection)                                     | Calculator output charts (#102) participate in this selection algorithm.                                                                                                                                                                  |
+| Section 8 →  | #125 (AI content freshness checker)                           | Bindings to live data (#48) automatically receive freshness flags; the freshness checker reuses the integrity chain.                                                                                                                      |
+| Section 9 →  | #126 (presenter view)                                         | All of section 7's state is "presenter mode is just a prototype with no-presentation overlay"; the auto-advance timer (#106) and the overlay stack (#98) carry over.                                                                      |
+| Section 9 →  | #127 (phone remote)                                           | The phone remote's deep-link button uses the deep-link resolver (#107) to send a state token.                                                                                                                                             |
+| Section 9 →  | #130 (instant "jump to slide" grid)                           | Builds on the same slide graph data structure.                                                                                                                                                                                            |
+| Section 9 →  | #129 (reorder/hide slides mid-presentation)                   | Hide and reorder are runtime mutators to the branching graph; the trail is recorded as events.                                                                                                                                            |
+| Section 9 →  | #131 (rehearsal mode)                                         | Rehearsal uses the same prototype session recorder (#104) with the presenter as the viewer.                                                                                                                                               |
+| Section 9 →  | #133 (live "parking lot")                                     | Q&A items are written to a session-scoped variable (#100); the wrap-up slide is bound to that variable.                                                                                                                                   |
+| Section 9 →  | #136 (presenter failover)                                     | Failover uses deep-link state (#107) to resume the exact slide and state on the phone.                                                                                                                                                    |
+| Section 9 →  | #137 (offline presenting)                                     | The prototype runtime is designed offline-first; cached decks run identically without network. Telemetry is queued for later flush.                                                                                                       |
+| Section 9 →  | #141 (instant recap)                                          | Recap is built from the same `prototype_events` stream (#104) that powers user-testing replay — single source of truth.                                                                                                                   |
+| Section 9 →  | #205 (presentation state timeline)                            | Reuses the event log from #104 — same replay engine serves both.                                                                                                                                                                          |
+| Section 9 →  | #209 (voice-triggered slide states)                           | Voice commands map to variable writes (#100); e.g., "bear case" → set `$scenario = "bear"`. Conditional rules (#100) propagate.                                                                                                           |
+| Section 9 →  | #211 (two-way slides)                                         | Two-way slides are a multi-viewer variant of section 7 — variables are `viewer`-scoped but shared across viewers in the session; variable writes propagate with CRDT semantics.                                                           |
+| Section 9 →  | #212 (deck inheritance trees)                                 | Hotspots, rules, variables inherited via the same content-addressable ID namespace as deck merge (#19).                                                                                                                                   |
+| Section 9 →  | #213 (real-time co-presenting)                                | Co-presenting is a multi-`viewer_id_hash` prototype session; `last-write-wins` per variable; conflicts surfaced.                                                                                                                          |
+| Section 9 →  | #214 (AI meeting listener)                                    | Listener can trigger `navigate_to` or `set_variable` actions — the conditional rule engine handles the rest.                                                                                                                              |
+| Section 10 → | #143 (live polls), #149 (slider sentiment)                    | Audience inputs are written to `session`- or `viewer`-scoped variables (#100); poll results drive conditional rules.                                                                                                                      |
+| Section 11 → | #155 (deck is a web page)                                     | Deep links (#107) are URLs into the same web-paginated runtime; the prototyping runtime and the published web page share the same `prototype_runtime`.                                                                                    |
+| Section 11 → | #157 (sharing levels)                                         | Prototype test links are a sharing level variant.                                                                                                                                                                                         |
+| Section 11 → | #159 (per-link content control)                               | Deep links (#107) are the implementation: a link carries the visibility map.                                                                                                                                                              |
+| Section 11 → | #163 (narrated auto-play)                                     | Implemented via auto-advance (#106) bound to narration events.                                                                                                                                                                            |
+| Section 11 → | #164 (video export with interactivity)                        | Interactivity degrades gracefully — hotspots, calculators are rendered as their _current state_ snapshots in the export; deep links in the export let viewers recover full interactivity.                                                 |
+| Section 12 → | #169–#170 (per-viewer, per-slide analytics)                   | Prototype telemetry (#104) is one input; live presentation telemetry is another; analytics layer aggregates both.                                                                                                                         |
+| Section 12 → | #173 (A/B testing)                                            | A/B variant tags originate in the prototype recorder (#104) and flow into the analytics engine.                                                                                                                                           |
+| Section 12 → | #176 (CRM sync)                                               | Form submissions (#101) and calculator submissions (#102) are the natural events to sync.                                                                                                                                                 |
+| Section 12 → | #177 (funnel view)                                            | The branching graph (`#97`) IS the funnel; analytics operates on the same node/edge representation.                                                                                                                                       |
+| Section 12 → | #205 (presentation state timeline)                            | Reuses `prototype_events`.                                                                                                                                                                                                                |
+| Section 13 → | #180 (review/approval)                                        | Conditional rules (#100) cannot be shared externally until approval is granted.                                                                                                                                                           |
+| Section 13 → | #186 (auto-updating shared slides)                            | Shared slides may carry variables/calculators/hotspots; when the source slide updates, downstream decks inherit the update via content-addressable IDs.                                                                                   |
+| Section 13 → | #192 (guest collaborators with scoped, expiring access)       | Same scoping/token expiry machinery used for deep links (#107).                                                                                                                                                                           |
+| Section 15 → | #205, #206, #209, #211, #212, #213                            | All depend on the section 7 runtime — design references are pointers back to this document.                                                                                                                                               |
+| Section 16 → | #222 (full MCP tool surface)                                  | Every feature #96–#107 must expose MCP tools (`create_hotspot`, `update_variable`, `set_scenario`, `run_calculator`, etc.).                                                                                                               |
+| Section 16 → | #225 (agent-scoped permissions)                               | MCP tokens carry capability claims; an agent given `modify_state` can update variables, but cannot query `viewer`-scoped variables without the additional `read_private` capability.                                                      |
+| Section 16 → | #226 (semantic element addressing)                            | Hotspot IDs, overlay IDs, form IDs are first-class in the agent-readable schema; #235's `get_deck_summary` lists them.                                                                                                                    |
+| Section 16 → | #227 (tool-call transcript)                                   | Every MCP invocation on section 7 features is appended to the deck's audit trail (separately from human edits).                                                                                                                           |
+| Section 16 → | #228 (dry-run mode)                                           | Conditional rules (#100), variable writes, hotspot additions can be proposed as diffs and reviewed before landing.                                                                                                                        |
+| Section 16 → | #229 (webhooks → agent triggers)                              | "When a variable `$customerScore` crosses 0.8, invoke agent X." is exactly the conditional-rule event-channel.                                                                                                                            |
+| Section 16 → | #233 (function-calling-ready component props)                 | Variables are exposed as JSON Schema so LLMs can `set_variable` via structured output.                                                                                                                                                    |
+| Section 16 → | #234 (natural-language patch API)                             | "Move the CTA hotspot to the bottom-right and add a Bear-case-triggering rule" — one patch handles hotspot + rule.                                                                                                                        |
+| Section 16 → | #237 (deck linting for agents)                                | Includes a lint rule for: dead hotspots, unwired conditional rules, decimal-precision-bait formulas, untestable branches, missing KB exceeds in deep links.                                                                               |
+| Section 16 → | #239 (simulation mode for scenario testing)                   | The calculator runtime exposes `sweep(input, range)` that calls the bindings graph; an agent can sweep a slider programmatically and consume the results.                                                                                 |
+| Section 16 → | #240 (deck diffing API)                                       | Structural diffs of hotspots/rules/variables/calculators are first-class types in the diff API.                                                                                                                                           |
 
 **Section 7 ↔ Planning-guide section alignment.**
+
 - §1 (Problem) — target user for §7 includes deck authors, trainers, salespeople, researchers — captured explicitly per persona in this document.
 - §4 (Architecture) — modular monolith with two services (§7.4 intro) consistent with §4.2.
 - §5 (Data) — Postgres + JSONB for rule graphs (§7.5), with documented retention, classification, and DSR endpoints.
@@ -1381,7 +1452,7 @@ Concrete, validated integration points. This subsection is the authoritative map
 - **IRB / consent workflow** for academic-style user testing — PII redaction level may need a third tier ("anonymized-but-linkable" for compensation).
 - **Determinism vs. responsiveness trade-off** in deep-link state — currently "link wins" by default; may need a UX-study pass.
 - **Cross-deck deep links** — presently out of scope but architecturally easy; defer to a v2 once cross-deck knowledge graph (#219) lands.
-- **Voice-triggered states (#209)** — speech recognition is a separate infrastructure concern; section 7 only owns the *action* surface that voice triggers consume.
+- **Voice-triggered states (#209)** — speech recognition is a separate infrastructure concern; section 7 only owns the _action_ surface that voice triggers consume.
 
 ---
 

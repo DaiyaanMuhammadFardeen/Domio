@@ -11,15 +11,11 @@ import type {
   ErrorBody,
 } from './types';
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8080';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:8080';
 
 /* ── Generic fetch wrapper ──────────────────────────────────────────── */
 
-async function apiFetch<T>(
-  path: string,
-  init?: RequestInit,
-): Promise<T> {
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
@@ -94,20 +90,14 @@ export async function listMarketplaceListings(params?: {
   if (params?.status) qs.set('status', params.status);
   if (params?.seller_id) qs.set('seller_id', params.seller_id);
   const query = qs.toString();
-  return apiFetch<ListingListResponse>(
-    `/v1/marketplace/listings${query ? `?${query}` : ''}`,
-  );
+  return apiFetch<ListingListResponse>(`/v1/marketplace/listings${query ? `?${query}` : ''}`);
 }
 
 /**
  * GET /v1/marketplace/listings/:id — getMarketplaceListing
  */
-export async function getMarketplaceListing(
-  listingId: string,
-): Promise<MarketplaceListing> {
-  return apiFetch<MarketplaceListing>(
-    `/v1/marketplace/listings/${encodeURIComponent(listingId)}`,
-  );
+export async function getMarketplaceListing(listingId: string): Promise<MarketplaceListing> {
+  return apiFetch<MarketplaceListing>(`/v1/marketplace/listings/${encodeURIComponent(listingId)}`);
 }
 
 /**
@@ -123,9 +113,7 @@ export async function getCuratedMarketplaceListings(params?: {
   if (params?.limit != null) qs.set('limit', String(params.limit));
   if (params?.offset != null) qs.set('offset', String(params.offset));
   const query = qs.toString();
-  return apiFetch<CuratedListResponse>(
-    `/v1/marketplace/curated${query ? `?${query}` : ''}`,
-  );
+  return apiFetch<CuratedListResponse>(`/v1/marketplace/curated${query ? `?${query}` : ''}`);
 }
 
 /* ── Changelog ──────────────────────────────────────────────────────── */
@@ -133,9 +121,7 @@ export async function getCuratedMarketplaceListings(params?: {
 /**
  * GET /v1/marketplace/listings/:id/changelog — getMarketplaceListingChangelog
  */
-export async function getMarketplaceListingChangelog(
-  listingId: string,
-): Promise<ChangelogEntry[]> {
+export async function getMarketplaceListingChangelog(listingId: string): Promise<ChangelogEntry[]> {
   return apiFetch<ChangelogEntry[]>(
     `/v1/marketplace/listings/${encodeURIComponent(listingId)}/changelog`,
   );
@@ -151,9 +137,7 @@ export interface ReviewListResponse {
 /**
  * GET /v1/marketplace/listings/:id/reviews — listMarketplaceReviews
  */
-export async function listMarketplaceReviews(
-  listingId: string,
-): Promise<ReviewListResponse> {
+export async function listMarketplaceReviews(listingId: string): Promise<ReviewListResponse> {
   return apiFetch<ReviewListResponse>(
     `/v1/marketplace/listings/${encodeURIComponent(listingId)}/reviews`,
   );

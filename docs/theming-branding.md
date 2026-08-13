@@ -2,7 +2,7 @@
 
 > **Scope:** This document is the deep technical plan for the design-system substrate that every other section renders onto. It covers the design token registry, theme engine (resolution, inheritance, application), brand kits, brand extraction from URLs, multi-brand support, custom font upload and licensing, automatic dark/light generation, accessibility-aware theming (WCAG + colorblind safety), the theme marketplace, style linting, and per-slide theme overrides. The contracts defined here are load-bearing: every component (#23–36), every chart (#48–64), every smart component prop (#25), every AI redesign (#112), and every agent edit (#221–236) ultimately resolves to a token at some level in the inheritance chain described in §4.
 
-> **Cross-section strategy:** Theming is *not* an applied paint at the end of the pipeline — it is the resolution layer between authored intent ("use the accent color") and concrete rendered values (`#1F6FEB`). When any subsystem needs to know what color, font, spacing, or radius to render, it calls the **theme engine** and gets back a resolved value. This document defines that engine.
+> **Cross-section strategy:** Theming is _not_ an applied paint at the end of the pipeline — it is the resolution layer between authored intent ("use the accent color") and concrete rendered values (`#1F6FEB`). When any subsystem needs to know what color, font, spacing, or radius to render, it calls the **theme engine** and gets back a resolved value. This document defines that engine.
 
 ---
 
@@ -47,7 +47,7 @@ Each feature below is annotated with: a short **intent** statement, **acceptance
   - Swap is implemented as a **transactional structural update**: the deck's `themeRef` pointer updates from `themeA` → `themeB`; CRDT ops for each node's token references are generated server-side via the diff engine.
   - If `themeB` lacks a token that some element references directly (e.g., an element referenced `color.brand.accentQuaternary` and `themeB` only defines 3 levels), the missing token **falls back** through the resolution chain (see §3 inheritance) and a `WARN_TOKEN_FALLBACK` warning is emitted.
   - **Per-slide theme overrides** (#47) survive a deck-level swap unchanged — overrides are in a separate layer that takes precedence over the deck theme.
-  - **Brand-locked regions** (#36) are *not* re-themed; swap functions against locked regions like a no-op for visual properties (layout geometry on a locked region is still preserved).
+  - **Brand-locked regions** (#36) are _not_ re-themed; swap functions against locked regions like a no-op for visual properties (layout geometry on a locked region is still preserved).
 - **Dependencies:** #37 (tokens), #47 (overrides), #46 (lint post-swap warns on any missed token), #41 (multi-brand: swap can target a different brand's theme).
 
 ### Feature 39 — Brand Kit (logos, palettes, fonts, imagery rules)
@@ -82,7 +82,7 @@ Each feature below is annotated with: a short **intent** statement, **acceptance
     - Honor `robots.txt` (default: respect; opt-in override per-org for owned domains).
     - Per-org rate limit: 1 extraction per URL per 5 minutes; 10 per hour per IP; 100 per day per workspace.
     - User-Agent: `Domio-BrandExtractor/1.0 (+contact-email)`; no cookies, no JS execution of third-party trackers.
-    - **No double-hop fetching**: links inside the source page are *not* followed; only the user-provided URL is fetched. CSS/JS resources needed for analysis are fetched from the same origin only.
+    - **No double-hop fetching**: links inside the source page are _not_ followed; only the user-provided URL is fetched. CSS/JS resources needed for analysis are fetched from the same origin only.
     - **No PII capture**: page text is not stored; only assets and computed styles are.
     - **Dynamic rendering** is opt-in: a per-job toggle allows running in a headless browser; default is HTTP fetch + static HTML parsing.
   - **Logo extraction edge cases**: when multiple candidate logos exist (favicon, apple-touch, og:image, header SVG), pick the highest-resolution SVG/PNG ≥ 256 px, preferring SVG. Clearbit-style logo API fallback is **off by default**; admins can enable it for an org.
@@ -129,7 +129,7 @@ Each feature below is annotated with: a short **intent** statement, **acceptance
 
 ### Feature 43 — Dark/Light Deck Variants Generated Automatically
 
-- **Intent:** From one source theme, generate a paired theme for the other end of the light/dark axis, preserving the *identity* (hue & chroma, brand personality) rather than mechanically inverting brightness.
+- **Intent:** From one source theme, generate a paired theme for the other end of the light/dark axis, preserving the _identity_ (hue & chroma, brand personality) rather than mechanically inverting brightness.
 - **Acceptance criteria**
   - One-click "Generate Dark from Light" (or inverse) produces a paired theme with **all token categories** (color, shadow, motion) resolved.
   - Generated themes pass a **brand identity preservation test**: the OKLCH hue of each semantic color (`primary`, `accent`, etc.) is preserved within ±10°; chroma is preserved within ±10 %; only **lightness** is re-mapped per a perceptual rule.
@@ -186,7 +186,7 @@ Each feature below is annotated with: a short **intent** statement, **acceptance
 
 ### Feature 46 — Style Linting — Off-Brand Colors/Fonts with One-Click Fixes
 
-- **Intent:** A deck-wide lint pass that flags every element using a color or font *not* in the active brand kit's tokens, with batched one-click fixes (replace with the nearest brand token).
+- **Intent:** A deck-wide lint pass that flags every element using a color or font _not_ in the active brand kit's tokens, with batched one-click fixes (replace with the nearest brand token).
 - **Acceptance criteria**
   - Lint run on a 200-slide deck completes in < 1 s p95.
   - Findings are bucketed by severity: `BLOCK` (off-brand in a locked region), `WARN` (off-brand in editable regions), `INFO` (deprecated token or near-token).
@@ -248,7 +248,7 @@ Edge cases: locked regions (#36) stay unchanged; lint (#46) auto-runs and surfac
 
 1. User in Brand Kit dialog → "Generate from URL."
 2. User pastes URL, optionally ticks "Include dynamic rendering," accepts TOS.
-3. Job is queued (`brand_extraction_job`); the UI shows a progress card with stages: *Fetch → Analyze → Detect → Cluster → Propose*.
+3. Job is queued (`brand_extraction_job`); the UI shows a progress card with stages: _Fetch → Analyze → Detect → Cluster → Propose_.
 4. On completion, a draft kit appears with extracted fields: 7 colors (ranked), 2 fonts, 1 logo, plus a confidence score per field. A side-by-side viewer shows the source URL + a sample deck using extracted tokens.
 5. User accepts fields individually (or all) → system writes `extractionAttestation` and the draft kit becomes a regular brand kit draft.
 
@@ -331,7 +331,7 @@ per-slide override → slide-section override → deck theme swap
 
 Key properties:
 
-- **Aliases are resolved within their scope**. An alias referencing `color.brand.primary` from inside `deck theme` resolves to the *active* brand context's primary — which means swapping brands re-points all aliases automatically. (#38 is therefore implemented as a brand swap underneath.)
+- **Aliases are resolved within their scope**. An alias referencing `color.brand.primary` from inside `deck theme` resolves to the _active_ brand context's primary — which means swapping brands re-points all aliases automatically. (#38 is therefore implemented as a brand swap underneath.)
 - **Per-slide overrides survive deck theme swap**. The override is recorded as "this token differs from active theme by X" and re-resolves after swap.
 - **State-conditional overrides** (e.g., for #57 scenarios) are evaluated at presentation time against the deck's runtime variable state.
 
@@ -386,18 +386,18 @@ For data-vis, palettes are generated against a 12-color target with full pairwis
 
 The lint ruleset is documented in-machine and machine-queryable:
 
-| Rule ID | Trigger | Severity | Fix Action |
-|---|---|---|---|
-| `LINT_OFF_BRAND_COLOR` | element fill / stroke not within brand palette OR within ΔE ≤ 5 | BLOCK in locked, WARN elsewhere | replace with nearest by ΔE (or by semantic role) |
-| `LINT_OFF_BRAND_FONT` | element `fontFamily` not in brand typography token set | BLOCK in locked, WARN elsewhere | replace with style-metric-matched brand font |
-| `LINT_DEPRECATED_TOKEN` | element references a token deprecated since version | INFO | replace with `replacedBy` |
-| `LINT_CONTRAST_FAIL` | text contrast against background < AA | BLOCK | auto-suggest darker text or lighter bg (or `WARN` if decorative-only) |
-| `LINT_FORCED_COLORS_UNSAFE` | element that won't render correctly in forced-colors mode | WARN | provide `color.system.*` fallbacks |
-| `LINT_CHART_PALETTE_UNSAFE` | chart palette not identifiable under CVD simulation | BLOCK | offer CV-safe replacement palette |
-| `LINT_FONT_LICENSE_EXPIRY` | font license expires < 30 days | WARN | prompt to renew or swap |
-| `LINT_LOGO_SAFE_ZONE_VIOLATION` | logo closer to slide edge than declared `clearSpace` | WARN | nudge to safe zone |
-| `LINT_BRAND_LOCK_REGION_TOKEN_OVERRIDE` | token override inside a brand-locked region | BLOCK | strip override |
-| `LINT_NEAR_BRAND_TOKEN` | element fill within ΔE ≤ 5 of brand palette but not aliased | INFO | promote alias for consistency |
+| Rule ID                                 | Trigger                                                         | Severity                        | Fix Action                                                            |
+| --------------------------------------- | --------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------- |
+| `LINT_OFF_BRAND_COLOR`                  | element fill / stroke not within brand palette OR within ΔE ≤ 5 | BLOCK in locked, WARN elsewhere | replace with nearest by ΔE (or by semantic role)                      |
+| `LINT_OFF_BRAND_FONT`                   | element `fontFamily` not in brand typography token set          | BLOCK in locked, WARN elsewhere | replace with style-metric-matched brand font                          |
+| `LINT_DEPRECATED_TOKEN`                 | element references a token deprecated since version             | INFO                            | replace with `replacedBy`                                             |
+| `LINT_CONTRAST_FAIL`                    | text contrast against background < AA                           | BLOCK                           | auto-suggest darker text or lighter bg (or `WARN` if decorative-only) |
+| `LINT_FORCED_COLORS_UNSAFE`             | element that won't render correctly in forced-colors mode       | WARN                            | provide `color.system.*` fallbacks                                    |
+| `LINT_CHART_PALETTE_UNSAFE`             | chart palette not identifiable under CVD simulation             | BLOCK                           | offer CV-safe replacement palette                                     |
+| `LINT_FONT_LICENSE_EXPIRY`              | font license expires < 30 days                                  | WARN                            | prompt to renew or swap                                               |
+| `LINT_LOGO_SAFE_ZONE_VIOLATION`         | logo closer to slide edge than declared `clearSpace`            | WARN                            | nudge to safe zone                                                    |
+| `LINT_BRAND_LOCK_REGION_TOKEN_OVERRIDE` | token override inside a brand-locked region                     | BLOCK                           | strip override                                                        |
+| `LINT_NEAR_BRAND_TOKEN`                 | element fill within ΔE ≤ 5 of brand palette but not aliased     | INFO                            | promote alias for consistency                                         |
 
 A `WARN` becomes a `BLOCK` when (a) inside a brand-locked region (#36), (b) the deck is being exported for external sharing (#159), or (c) the org has enabled "strict brand governance."
 
@@ -405,7 +405,7 @@ A `WARN` becomes a `BLOCK` when (a) inside a brand-locked region (#36), (b) the 
 
 ## 4. Architecture
 
-The system decomposes into the following services / modules. The boundary between *token resolution* (must be ultra-fast, synchronous) and *brand administration* (user-paced, can be async) is intentional.
+The system decomposes into the following services / modules. The boundary between _token resolution_ (must be ultra-fast, synchronous) and _brand administration_ (user-paced, can be async) is intentional.
 
 ```text
 +---------------------+        +-----------------------+        +--------------------+
@@ -778,6 +778,7 @@ GET /v1/brand-extraction/jobs/{jobId}
 Returns full job state including `extractedColors`, `extractedFonts`, `extractedLogo`, `attribution`, `confidenceScores`.
 
 Error cases:
+
 - `429 BRAND_EXTRACT_RATE_LIMITED` — per-org URL/rate limit
 - `403 BRAND_EXTRACT_ROBOTS_BLOCKED` — robots disallow
 - `502 BRAND_EXTRACT_FETCH_FAILED` — upstream unreachable
@@ -959,15 +960,15 @@ POST /v1/decks/{deckId}/lint/fix
 
 ### 8.5 SLO Targets
 
-| Metric | Target |
-|---|---|
-| Token resolution p99 | < 5 ms (warm cache) |
-| Theme apply p95 (200-slide deck) | < 300 ms |
-| Lint pass p95 (200-slide deck) | < 1 s |
-| WCAG audit p95 (single theme) | < 50 ms |
-| Font upload validation p95 | < 2 s |
-| Brand extraction median | < 15 s; p95 < 60 s |
-| Marketplace demo frame render p95 | < 80 ms per frame |
+| Metric                            | Target              |
+| --------------------------------- | ------------------- |
+| Token resolution p99              | < 5 ms (warm cache) |
+| Theme apply p95 (200-slide deck)  | < 300 ms            |
+| Lint pass p95 (200-slide deck)    | < 1 s               |
+| WCAG audit p95 (single theme)     | < 50 ms             |
+| Font upload validation p95        | < 2 s               |
+| Brand extraction median           | < 15 s; p95 < 60 s  |
+| Marketplace demo frame render p95 | < 80 ms per frame   |
 
 ---
 
@@ -1006,6 +1007,7 @@ POST /v1/decks/{deckId}/lint/fix
 - **End-to-end agent tests**: an MCP-driven agent (test fixture) calls `apply_theme` end-to-end; agent and human edits coexist correctly in version history.
 
 Definition of done for a theme/brand feature:
+
 1. Token resolution passes full property test suite.
 2. WCAG audit and CVD simulations are regression-tested against golden palettes.
 3. License audit log entries produced for every license event path.
@@ -1070,32 +1072,32 @@ This section enumerates the dependencies on and contributions to other feature s
 
 ### 10.7 Summary of Section-Level Contracts
 
-| Section | Provides to §3 | Consumes from §3 |
-|---|---|---|
-| §1 Editor | scene graph, CRDT, format painter, eyedropper | token resolution, theme apply, lint |
-| §2 Components | smart component props, locked regions, marketplace taxonomy | token aliases, brand kit content, theme swap, lint |
-| §4 Charts | chart palette authoring, scenario state, threshold rules | chart palette tokens, theme engine, WCAG/CVD audit |
-| §8 AI Copilot | redesign intent, content tokens, accessibility fixes | token constraints, accessibility auditor, palette suggestions |
-| §14 Enterprise | governance rules, audit pipeline, public API | brand-kit service, audit log, license tracker |
-| §16 Agentic | MCP calls, agent identity, dry-run mode | full token/theme/brand API surface |
+| Section        | Provides to §3                                              | Consumes from §3                                              |
+| -------------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
+| §1 Editor      | scene graph, CRDT, format painter, eyedropper               | token resolution, theme apply, lint                           |
+| §2 Components  | smart component props, locked regions, marketplace taxonomy | token aliases, brand kit content, theme swap, lint            |
+| §4 Charts      | chart palette authoring, scenario state, threshold rules    | chart palette tokens, theme engine, WCAG/CVD audit            |
+| §8 AI Copilot  | redesign intent, content tokens, accessibility fixes        | token constraints, accessibility auditor, palette suggestions |
+| §14 Enterprise | governance rules, audit pipeline, public API                | brand-kit service, audit log, license tracker                 |
+| §16 Agentic    | MCP calls, agent identity, dry-run mode                     | full token/theme/brand API surface                            |
 
 ---
 
 ## Appendix A — Quick Reference: Feature → Component Map
 
-| Feature | Primary components |
-|---|---|
-| #37 Design token system | `design_token`, `token_group`, schema validation, alias resolver |
-| #38 One-click theme swap | `theme.apply`, CRDT diff, lint-on-apply hook |
-| #39 Brand kit | `brand_kit`, sub-brand relations, logo storage |
-| #40 Brand extraction from URL | `brand_extraction_job`, fetcher, parser, clusterer, reviewer UI |
-| #41 Multi-brand | `brand_kit` namespace + per-deck `brandRef` |
-| #42 Custom font upload | `font_asset`, `font_license`, fallback chain builder |
-| #43 Dark/light generation | theme generator (OKLCH), preview shell |
-| #44 Accessibility-aware theming | accessibility auditor (WCAG + APCA + CVD) |
-| #45 Theme marketplace | `theme_marketplace_listing`, demo renderer, integrity verifier |
-| #46 Style linting | lint engine (off-brand, contrast, forced-colors, font license) |
-| #47 Per-slide theme overrides | `theme_override`, scope resolver |
+| Feature                         | Primary components                                               |
+| ------------------------------- | ---------------------------------------------------------------- |
+| #37 Design token system         | `design_token`, `token_group`, schema validation, alias resolver |
+| #38 One-click theme swap        | `theme.apply`, CRDT diff, lint-on-apply hook                     |
+| #39 Brand kit                   | `brand_kit`, sub-brand relations, logo storage                   |
+| #40 Brand extraction from URL   | `brand_extraction_job`, fetcher, parser, clusterer, reviewer UI  |
+| #41 Multi-brand                 | `brand_kit` namespace + per-deck `brandRef`                      |
+| #42 Custom font upload          | `font_asset`, `font_license`, fallback chain builder             |
+| #43 Dark/light generation       | theme generator (OKLCH), preview shell                           |
+| #44 Accessibility-aware theming | accessibility auditor (WCAG + APCA + CVD)                        |
+| #45 Theme marketplace           | `theme_marketplace_listing`, demo renderer, integrity verifier   |
+| #46 Style linting               | lint engine (off-brand, contrast, forced-colors, font license)   |
+| #47 Per-slide theme overrides   | `theme_override`, scope resolver                                 |
 
 ## Appendix B — Glossary
 

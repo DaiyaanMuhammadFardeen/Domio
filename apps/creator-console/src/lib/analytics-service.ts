@@ -101,10 +101,7 @@ export function bucketForPeriod(period: AnalyticsPeriod): AnalyticsBucket {
   }
 }
 
-function bucketsForPeriod(
-  period: AnalyticsPeriod,
-  bucket: AnalyticsBucket,
-): number {
+function bucketsForPeriod(period: AnalyticsPeriod, bucket: AnalyticsBucket): number {
   const days = daysForPeriod(period);
   if (bucket === 'day') return Math.min(days, 90);
   if (bucket === 'week') return Math.max(1, Math.ceil(days / 7));

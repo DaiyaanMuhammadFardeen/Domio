@@ -109,23 +109,26 @@ export function SemanticSearch({
           data-testid="p6-semantic-search-input"
         />
         {busy && (
-          <span
-            className="text-[10px] text-slate-500"
-            data-testid="p6-semantic-search-busy"
-          >
+          <span className="text-[10px] text-slate-500" data-testid="p6-semantic-search-busy">
             {t('p6.copilot.search.searching')}
           </span>
         )}
       </label>
 
       {error && (
-        <div className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] text-red-300" data-testid="p6-semantic-search-error">
+        <div
+          className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] text-red-300"
+          data-testid="p6-semantic-search-error"
+        >
           {error}
         </div>
       )}
 
       {result && result.results.length === 0 && (
-        <div className="rounded-md border border-dashed border-slate-700/60 bg-slate-800/30 px-3 py-6 text-center text-xs text-slate-500" data-testid="p6-semantic-search-empty">
+        <div
+          className="rounded-md border border-dashed border-slate-700/60 bg-slate-800/30 px-3 py-6 text-center text-xs text-slate-500"
+          data-testid="p6-semantic-search-empty"
+        >
           {t('p6.copilot.search.empty')}
         </div>
       )}
@@ -140,20 +143,17 @@ export function SemanticSearch({
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-slate-100">
-                    {r.slideTitle}
-                  </span>
-                  <span className="text-[10px] text-slate-500">
-                    {r.deckTitle}
-                  </span>
+                  <span className="text-sm font-medium text-slate-100">{r.slideTitle}</span>
+                  <span className="text-[10px] text-slate-500">{r.deckTitle}</span>
                 </div>
-                <span className="rounded bg-slate-700/50 px-1.5 py-0.5 text-[10px] text-slate-300" data-testid={`${RESULT_TESTID_PREFIX}-${i}-score`}>
+                <span
+                  className="rounded bg-slate-700/50 px-1.5 py-0.5 text-[10px] text-slate-300"
+                  data-testid={`${RESULT_TESTID_PREFIX}-${i}-score`}
+                >
                   {Math.round(r.score * 100)}%
                 </span>
               </div>
-              <p className="mt-1.5 text-[11px] leading-snug text-slate-400">
-                {r.snippet}
-              </p>
+              <p className="mt-1.5 text-[11px] leading-snug text-slate-400">{r.snippet}</p>
               <div className="mt-2 flex items-center justify-end">
                 <button
                   type="button"

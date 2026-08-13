@@ -17,11 +17,7 @@ export interface SeatUsageChartProps {
   readonly height?: number;
 }
 
-export function SeatUsageChart({
-  points,
-  width = 640,
-  height = 200,
-}: SeatUsageChartProps) {
+export function SeatUsageChart({ points, width = 640, height = 200 }: SeatUsageChartProps) {
   if (points.length === 0) {
     return (
       <svg

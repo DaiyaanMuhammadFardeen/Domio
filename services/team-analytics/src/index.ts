@@ -23,4 +23,9 @@ export type {
 export { loadConfigFromEnv } from './types.js';
 export { buildRollup, type RollupHandle } from './rollup/rollup.js';
 export { computeCohorts, type RetentionEvent, type RetentionRow } from './rollup/retention.js';
-export { computeFunnel, type FunnelInput, type FunnelEvent, type FunnelStep } from './rollup/funnel.js';
+export {
+  computeFunnel,
+  type FunnelInput,
+  type FunnelEvent,
+  type FunnelStep,
+} from './rollup/funnel.js';

@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ConnectionsPanel } from './connections-panel';
 
-function defaultProps(overrides: Partial<React.ComponentProps<typeof ConnectionsPanel>> = {}): React.ComponentProps<typeof ConnectionsPanel> {
+function defaultProps(
+  overrides: Partial<React.ComponentProps<typeof ConnectionsPanel>> = {},
+): React.ComponentProps<typeof ConnectionsPanel> {
   const slides = [
     { id: 's1', elements: [], backgrounds: [] },
     { id: 's2', elements: [], backgrounds: [] },
@@ -62,15 +64,17 @@ describe('ConnectionsPanel', () => {
     render(
       <ConnectionsPanel
         {...defaultProps({
-          hotspots: [{
-            id: 'h1',
-            name: 'Next',
-            geometry: { kind: 'rect', x: 0, y: 0, w: 0.1, h: 0.1 },
-            gestureMask: ['click'],
-            targetType: 'slide',
-            targetRef: { slideId: 's2' },
-            status: 'ok',
-          }],
+          hotspots: [
+            {
+              id: 'h1',
+              name: 'Next',
+              geometry: { kind: 'rect', x: 0, y: 0, w: 0.1, h: 0.1 },
+              gestureMask: ['click'],
+              targetType: 'slide',
+              targetRef: { slideId: 's2' },
+              status: 'ok',
+            },
+          ],
           onRemoveHotspot,
         })}
       />,
@@ -100,9 +104,16 @@ describe('ConnectionsPanel', () => {
     render(
       <ConnectionsPanel
         {...defaultProps({
-          edges: [{
-            id: 'e1', fromSlideId: 's1', toSlideId: 's2', name: 'Go', ruleId: null, priority: 0,
-          }],
+          edges: [
+            {
+              id: 'e1',
+              fromSlideId: 's1',
+              toSlideId: 's2',
+              name: 'Go',
+              ruleId: null,
+              priority: 0,
+            },
+          ],
           onRemoveEdge,
         })}
       />,

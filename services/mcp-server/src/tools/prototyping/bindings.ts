@@ -147,9 +147,11 @@ export const delete_binding: McpTool<BindingDeleteInput, { deleted: boolean }> =
     const v = validateDelete(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'delete_binding', v.value, () =>
-      callPrototypeRuntime(ctx, 'DELETE', `/decks/${v.value.deckId}/bindings/${v.value.bindingId}`).then(
-        () => ({ deleted: true }),
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'DELETE',
+        `/decks/${v.value.deckId}/bindings/${v.value.bindingId}`,
+      ).then(() => ({ deleted: true })),
     );
   },
 };
@@ -165,11 +167,16 @@ export const list_bindings: McpTool<BindingListInput, readonly Binding[]> = {
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_bindings', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/bindings`).then(
-        (r) => (r as Binding[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/bindings`).then((r) =>
+        (r as Binding[]).slice(),
       ),
     );
   },
 };
 
-export const bindingTools = [create_binding, update_binding, delete_binding, list_bindings] as const;
+export const bindingTools = [
+  create_binding,
+  update_binding,
+  delete_binding,
+  list_bindings,
+] as const;

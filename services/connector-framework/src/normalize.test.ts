@@ -29,43 +29,39 @@ describe('normalize — column type mapping', () => {
   });
 
   it('infers boolean type from string booleans', () => {
-    const result = normalize(['col'], [['true'], ['false'], ['true'], ['false'], ['true'], ['false']]);
+    const result = normalize(
+      ['col'],
+      [['true'], ['false'], ['true'], ['false'], ['true'], ['false']],
+    );
     expect(result.columns[0]!.type).toBe('boolean');
   });
 
   it('infers date type from ISO date strings', () => {
-    const result = normalize(['col'], [
-      ['2024-01-15T10:30:00'],
-      ['2024-02-20T14:00:00'],
-      ['2024-03-10T08:15:00'],
-      ['2024-04-05T12:45:00'],
-      ['2024-05-01T09:00:00'],
-    ]);
+    const result = normalize(
+      ['col'],
+      [
+        ['2024-01-15T10:30:00'],
+        ['2024-02-20T14:00:00'],
+        ['2024-03-10T08:15:00'],
+        ['2024-04-05T12:45:00'],
+        ['2024-05-01T09:00:00'],
+      ],
+    );
     expect(result.columns[0]!.type).toBe('date');
     expect(result.columns[0]!.semantic_role).toBe('date');
   });
 
   it('infers currency type from dollar amounts', () => {
-    const result = normalize(['col'], [
-      ['$1,200'],
-      ['$3,400'],
-      ['$5,600'],
-      ['$7,800'],
-      ['$9,000'],
-      ['$11,200'],
-    ]);
+    const result = normalize(
+      ['col'],
+      [['$1,200'], ['$3,400'], ['$5,600'], ['$7,800'], ['$9,000'], ['$11,200']],
+    );
     expect(result.columns[0]!.type).toBe('currency');
     expect(result.columns[0]!.semantic_role).toBe('currency');
   });
 
   it('infers percent type from percentages', () => {
-    const result = normalize(['col'], [
-      ['75%'],
-      ['80%'],
-      ['90%'],
-      ['95%'],
-      ['60%'],
-    ]);
+    const result = normalize(['col'], [['75%'], ['80%'], ['90%'], ['95%'], ['60%']]);
     expect(result.columns[0]!.type).toBe('percent');
     expect(result.columns[0]!.semantic_role).toBe('percent');
   });
@@ -95,40 +91,34 @@ describe('normalize — semantic_role inference', () => {
   it('maps date/time/_at/_ts to date role', () => {
     const result = normalize(
       ['created_at'],
-      [['2024-01-01T00:00'], ['2024-02-01T00:00'], ['2024-03-01T00:00'], ['2024-04-01T00:00'], ['2024-05-01T00:00']],
+      [
+        ['2024-01-01T00:00'],
+        ['2024-02-01T00:00'],
+        ['2024-03-01T00:00'],
+        ['2024-04-01T00:00'],
+        ['2024-05-01T00:00'],
+      ],
     );
     expect(result.columns[0]!.semantic_role).toBe('date');
   });
 
   it('maps id / _id to id role', () => {
-    const result = normalize(
-      ['user_id'],
-      [[1], [2], [3]],
-    );
+    const result = normalize(['user_id'], [[1], [2], [3]]);
     expect(result.columns[0]!.semantic_role).toBe('id');
   });
 
   it('maps bare "id" to id role', () => {
-    const result = normalize(
-      ['id'],
-      [[1], [2], [3]],
-    );
+    const result = normalize(['id'], [[1], [2], [3]]);
     expect(result.columns[0]!.semantic_role).toBe('id');
   });
 
   it('numeric column without special name gets measure role', () => {
-    const result = normalize(
-      ['count'],
-      [[10], [20], [30]],
-    );
+    const result = normalize(['count'], [[10], [20], [30]]);
     expect(result.columns[0]!.semantic_role).toBe('measure');
   });
 
   it('string column without special name gets dimension role', () => {
-    const result = normalize(
-      ['label'],
-      [['a'], ['b'], ['c']],
-    );
+    const result = normalize(['label'], [['a'], ['b'], ['c']]);
     expect(result.columns[0]!.semantic_role).toBe('dimension');
   });
 });
@@ -139,8 +129,22 @@ describe('normalize — semantic_role inference', () => {
 
 describe('normalize — property round-trip (200 random schemas)', () => {
   it('column count preserved, no missing values, types from canonical set', () => {
-    const canonicalTypes: ColumnType[] = ['string', 'number', 'boolean', 'date', 'currency', 'percent'];
-    const canonicalRoles: SemanticRole[] = ['dimension', 'measure', 'date', 'currency', 'percent', 'id'];
+    const canonicalTypes: ColumnType[] = [
+      'string',
+      'number',
+      'boolean',
+      'date',
+      'currency',
+      'percent',
+    ];
+    const canonicalRoles: SemanticRole[] = [
+      'dimension',
+      'measure',
+      'date',
+      'currency',
+      'percent',
+      'id',
+    ];
 
     for (let i = 0; i < 200; i++) {
       const numCols = 1 + Math.floor(Math.random() * 6);
@@ -194,11 +198,7 @@ describe('normalize — property round-trip (200 random schemas)', () => {
 
 describe('normalize — hints override', () => {
   it('type hint overrides inferred type', () => {
-    const result = normalize(
-      ['col'],
-      [['42'], ['84'], ['126']],
-      [{ name: 'col', type: 'string' }],
-    );
+    const result = normalize(['col'], [['42'], ['84'], ['126']], [{ name: 'col', type: 'string' }]);
     expect(result.columns[0]!.type).toBe('string');
   });
 
@@ -230,10 +230,13 @@ describe('normalize — edge cases', () => {
   });
 
   it('mixed types default to string', () => {
-    const result = normalize(['col'], [
-      [1, 'hello', true, null],
-      ['world', 42, false, 'data'],
-    ]);
+    const result = normalize(
+      ['col'],
+      [
+        [1, 'hello', true, null],
+        ['world', 42, false, 'data'],
+      ],
+    );
     expect(result.columns[0]!.type).toBe('string');
   });
 });

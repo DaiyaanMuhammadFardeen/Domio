@@ -14,7 +14,14 @@
  * surface a friendly fallback so the presenter view stays usable.
  */
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactElement,
+} from 'react';
 
 export interface PiPBubbleProps {
   /** Disable camera entirely (e.g. when recording-only mode is on). */
@@ -105,7 +112,9 @@ export function PiPBubble({
         }
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(() => { /* autoplay restrictions */ });
+          await videoRef.current.play().catch(() => {
+            /* autoplay restrictions */
+          });
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Could not start camera');
@@ -118,20 +127,26 @@ export function PiPBubble({
   }, [disabled]);
 
   // Drag handling.
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    if (disabled) return;
-    e.preventDefault();
-    (e.target as Element).setPointerCapture(e.pointerId);
-    setDragging(true);
-  }, [disabled]);
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (disabled) return;
+      e.preventDefault();
+      (e.target as Element).setPointerCapture(e.pointerId);
+      setDragging(true);
+    },
+    [disabled],
+  );
 
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragging) return;
-    setPosition((prev) => ({
-      x: Math.max(0, prev.x + e.movementX),
-      y: Math.max(0, prev.y + e.movementY),
-    }));
-  }, [dragging]);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragging) return;
+      setPosition((prev) => ({
+        x: Math.max(0, prev.x + e.movementX),
+        y: Math.max(0, prev.y + e.movementY),
+      }));
+    },
+    [dragging],
+  );
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
     setDragging(false);

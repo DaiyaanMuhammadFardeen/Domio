@@ -63,9 +63,7 @@ export interface OtlpTransportResponse {
   body: string;
 }
 
-export type OtlpTransport = (
-  req: OtlpTransportRequest,
-) => Promise<OtlpTransportResponse>;
+export type OtlpTransport = (req: OtlpTransportRequest) => Promise<OtlpTransportResponse>;
 
 export class OtlpHttpExporter {
   private readonly endpoint: URL;

@@ -31,7 +31,11 @@ export interface ARHandoffProps {
   readonly dataTestId?: string;
 }
 
-export function ARHandoff({ layer, deckId, dataTestId = 'ar-handoff' }: ARHandoffProps): ReactElement {
+export function ARHandoff({
+  layer,
+  deckId,
+  dataTestId = 'ar-handoff',
+}: ARHandoffProps): ReactElement {
   const [support, setSupport] = useState<ArSupportSnapshot | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +101,10 @@ export function ARHandoff({ layer, deckId, dataTestId = 'ar-handoff' }: ARHandof
         >
           Open on mobile
         </a>
-        <div data-testid={`${dataTestId}-qr`} style={{ marginTop: 8, fontSize: 11, fontFamily: 'monospace' }}>
+        <div
+          data-testid={`${dataTestId}-qr`}
+          style={{ marginTop: 8, fontSize: 11, fontFamily: 'monospace' }}
+        >
           {handoffUrl}
         </div>
       </div>

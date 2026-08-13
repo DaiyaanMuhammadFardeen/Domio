@@ -12,9 +12,7 @@
 import type { SloEntry, StatusPageComponent } from './types.js';
 
 /** Generate a status-page component per service. */
-export function generateStatusPageComponents(
-  slos: readonly SloEntry[],
-): StatusPageComponent[] {
+export function generateStatusPageComponents(slos: readonly SloEntry[]): StatusPageComponent[] {
   const byService = new Map<string, SloEntry[]>();
   for (const slo of slos) {
     const arr = byService.get(slo.service) ?? [];

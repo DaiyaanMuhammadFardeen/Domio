@@ -8,12 +8,7 @@
 import type { PayoutMethodKind, OnboardingState } from './types.js';
 import { MarketplaceValidationError } from '../types.js';
 
-const VALID_KINDS: readonly PayoutMethodKind[] = [
-  'stripe_connect',
-  'bkash',
-  'nagad',
-  'bank',
-];
+const VALID_KINDS: readonly PayoutMethodKind[] = ['stripe_connect', 'bkash', 'nagad', 'bank'];
 
 /**
  * Validate payout method kind.

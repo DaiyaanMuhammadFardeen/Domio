@@ -44,7 +44,12 @@ export class HashChainedPollAuditEmitter implements PollAuditEmitter {
   private readonly agentSessionId: string;
   private readonly records: StoredAuditRecord[] = [];
 
-  constructor(args: { workspaceId: string; key: Uint8Array; keyId?: string; agentSessionId?: string }) {
+  constructor(args: {
+    workspaceId: string;
+    key: Uint8Array;
+    keyId?: string;
+    agentSessionId?: string;
+  }) {
     this.chain = new Chain();
     this.keyId = args.keyId ?? `poll-engine-${args.workspaceId}`;
     const keyHex = bytesToHex(args.key);

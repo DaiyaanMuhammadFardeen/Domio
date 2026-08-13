@@ -3,7 +3,12 @@
  */
 
 export * from './types.js';
-export { aggregate, buildExport, stitchBuckets, type AggregatorConfig } from './engine/aggregator.js';
+export {
+  aggregate,
+  buildExport,
+  stitchBuckets,
+  type AggregatorConfig,
+} from './engine/aggregator.js';
 export { encodeHeatmapPng } from './engine/png_export.js';
 export type { HeatmapClient, HeatmapStore } from './store/clickhouse.js';
 export { buildHeatmapStore } from './store/clickhouse.js';

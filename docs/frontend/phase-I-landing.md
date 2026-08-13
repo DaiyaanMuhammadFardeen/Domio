@@ -11,12 +11,12 @@ the editor, marketplace, viewer, and presenter apps.
 
 ## Routes to build
 
-| Route       | Renders                                          |
-| ----------- | ------------------------------------------------ |
-| `/`         | Marketing home: hero + features + CTA            |
-| `/features` | Detailed feature breakdown                       |
-| `/pricing`  | Tier comparison (free / pro / enterprise)        |
-| `/changelog`| Public changelog                                 |
+| Route        | Renders                                   |
+| ------------ | ----------------------------------------- |
+| `/`          | Marketing home: hero + features + CTA     |
+| `/features`  | Detailed feature breakdown                |
+| `/pricing`   | Tier comparison (free / pro / enterprise) |
+| `/changelog` | Public changelog                          |
 
 ## Files to change
 

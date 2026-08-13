@@ -19,24 +19,16 @@ describe('keyboard', () => {
   });
 
   it('chordString maps Cmd on Mac, Ctrl elsewhere', () => {
-    expect(
-      chordString(
-        { key: 'Z', meta: true, timestamp: 0 },
-        'mac',
-      ),
-    ).toBe('Cmd+Z');
-    expect(
-      chordString(
-        { key: 'Z', meta: true, ctrl: true, timestamp: 0 },
-        'win',
-      ),
-    ).toBe('Cmd+Ctrl+Z');
+    expect(chordString({ key: 'Z', meta: true, timestamp: 0 }, 'mac')).toBe('Cmd+Z');
+    expect(chordString({ key: 'Z', meta: true, ctrl: true, timestamp: 0 }, 'win')).toBe(
+      'Cmd+Ctrl+Z',
+    );
   });
 
   it('chordString adds Alt / Shift in order', () => {
-    expect(
-      chordString({ key: 'C', meta: true, alt: true, shift: true, timestamp: 0 }, 'mac'),
-    ).toBe('Cmd+Alt+Shift+C');
+    expect(chordString({ key: 'C', meta: true, alt: true, shift: true, timestamp: 0 }, 'mac')).toBe(
+      'Cmd+Alt+Shift+C',
+    );
   });
 
   it('shouldIgnoreInEditable ignores letters but allows navigation keys', () => {

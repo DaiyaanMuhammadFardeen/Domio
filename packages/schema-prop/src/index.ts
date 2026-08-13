@@ -20,11 +20,7 @@ export {
   type ValidateOptions,
 } from './validate.js';
 
-export {
-  resolveFragmentDefault,
-  resolveSchemaDefaults,
-  applyDefaults,
-} from './resolve.js';
+export { resolveFragmentDefault, resolveSchemaDefaults, applyDefaults } from './resolve.js';
 
 export {
   inferControl,

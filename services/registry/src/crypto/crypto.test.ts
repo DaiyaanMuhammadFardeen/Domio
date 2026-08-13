@@ -1,6 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { createHmac } from 'node:crypto';
-import { sha256Hex, canonicalHash, signJws, verifyJws, signUrl, verifySignedUrl, ulid, uuid } from './index.js';
+import {
+  sha256Hex,
+  canonicalHash,
+  signJws,
+  verifyJws,
+  signUrl,
+  verifySignedUrl,
+  ulid,
+  uuid,
+} from './index.js';
 
 describe('crypto', () => {
   describe('sha256Hex', () => {

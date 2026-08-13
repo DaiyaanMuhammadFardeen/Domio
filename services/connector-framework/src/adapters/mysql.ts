@@ -39,21 +39,27 @@ export class MysqlAdapter implements ConnectorAdapter {
 
   async ping(ctx: AdapterContext): Promise<{ ok: boolean; latency_ms: number }> {
     const t0 = Date.now();
-    await ctx.transport.request({ method: 'POST', url: 'http://sql-gateway:3000/ping', body: { engine: 'mysql' } });
+    await ctx.transport.request({
+      method: 'POST',
+      url: 'http://sql-gateway:3000/ping',
+      body: { engine: 'mysql' },
+    });
     return { ok: true, latency_ms: Date.now() - t0 };
   }
 
   async discover(_ctx: AdapterContext, _spec: DiscoverSpec): Promise<DiscoverResult> {
     return {
-      tables: [{
-        name: 'app.orders',
-        columns: [
-          { name: 'id', type: 'number', semantic_role: 'id' },
-          { name: 'customer_name', type: 'string', semantic_role: 'dimension' },
-          { name: 'total', type: 'currency', semantic_role: 'measure' },
-        ],
-        row_count_estimate: 500,
-      }],
+      tables: [
+        {
+          name: 'app.orders',
+          columns: [
+            { name: 'id', type: 'number', semantic_role: 'id' },
+            { name: 'customer_name', type: 'string', semantic_role: 'dimension' },
+            { name: 'total', type: 'currency', semantic_role: 'measure' },
+          ],
+          row_count_estimate: 500,
+        },
+      ],
     };
   }
 
@@ -64,7 +70,11 @@ export class MysqlAdapter implements ConnectorAdapter {
       url: 'http://sql-gateway:3000/query',
       body: { engine: 'mysql', sql: spec.sql, params: spec.params },
     });
-    const body = resp.body as { columns: Array<{ name: string; type: string }>; rows: unknown[][]; row_count: number };
+    const body = resp.body as {
+      columns: Array<{ name: string; type: string }>;
+      rows: unknown[][];
+      row_count: number;
+    };
     const colNames = body.columns.map((c) => c.name);
     const canonical = normalize(colNames, body.rows);
     return {

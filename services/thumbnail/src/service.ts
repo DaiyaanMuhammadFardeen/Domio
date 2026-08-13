@@ -16,16 +16,8 @@
  */
 
 import { createHash, createHmac, timingSafeEqual } from 'crypto';
-import type {
-  RenderInput,
-  ThumbnailRecord,
-  ThumbnailRef,
-  ThumbnailSize,
-} from './types.js';
-import {
-  THUMBNAIL_SIZES,
-  ThumbnailRenderError,
-} from './types.js';
+import type { RenderInput, ThumbnailRecord, ThumbnailRef, ThumbnailSize } from './types.js';
+import { THUMBNAIL_SIZES, ThumbnailRenderError } from './types.js';
 import type { ThumbnailCache } from './cache.js';
 import type { RenderProducer } from './render.js';
 
@@ -240,9 +232,7 @@ export class ThumbnailService {
       record.size,
       String(expires),
     ].join('\n');
-    return createHmac('sha256', Buffer.from(this.cdnSignKey))
-      .update(msg)
-      .digest('hex');
+    return createHmac('sha256', Buffer.from(this.cdnSignKey)).update(msg).digest('hex');
   }
 }
 
@@ -270,9 +260,7 @@ export function verifyCdnSignature(args: {
     args.size,
     String(args.expires),
   ].join('\n');
-  const expected = createHmac('sha256', Buffer.from(args.key))
-    .update(msg)
-    .digest('hex');
+  const expected = createHmac('sha256', Buffer.from(args.key)).update(msg).digest('hex');
   const a = Buffer.from(expected, 'hex');
   let b: Buffer;
   try {

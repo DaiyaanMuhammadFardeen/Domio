@@ -65,14 +65,26 @@ describe('applyStagger', () => {
 
   describe('random', () => {
     it('deterministic with seed', () => {
-      const tls = [makeTimeline('a'), makeTimeline('b'), makeTimeline('c'), makeTimeline('d'), makeTimeline('e')];
+      const tls = [
+        makeTimeline('a'),
+        makeTimeline('b'),
+        makeTimeline('c'),
+        makeTimeline('d'),
+        makeTimeline('e'),
+      ];
       const result1 = applyStagger(tls, { direction: 'random', intervalMs: 50, seed: 42 });
       const result2 = applyStagger(tls, { direction: 'random', intervalMs: 50, seed: 42 });
       expect(result1.map((r) => r.timeline.id)).toEqual(result2.map((r) => r.timeline.id));
     });
 
     it('different seeds produce different orders', () => {
-      const tls = [makeTimeline('a'), makeTimeline('b'), makeTimeline('c'), makeTimeline('d'), makeTimeline('e')];
+      const tls = [
+        makeTimeline('a'),
+        makeTimeline('b'),
+        makeTimeline('c'),
+        makeTimeline('d'),
+        makeTimeline('e'),
+      ];
       const result1 = applyStagger(tls, { direction: 'random', intervalMs: 50, seed: 42 });
       const result2 = applyStagger(tls, { direction: 'random', intervalMs: 50, seed: 99 });
       // Extremely unlikely to be the same

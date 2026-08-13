@@ -146,10 +146,20 @@ function decodeMessage(envelope: WireEnvelope): SyncMessage | null {
         kind: 'welcome',
         message: new Welcome({
           gatewayId: (d['gatewayId'] as string) ?? (d['gateway_id'] as string) ?? '',
-          serverHlc: d['serverHlc'] || d['server_hlc'] ? buildHlc(d['serverHlc'] as Record<string, unknown> ?? d['server_hlc'] as Record<string, unknown>) : undefined,
-          heartbeatIntervalMs: (d['heartbeatIntervalMs'] as number) ?? (d['heartbeat_interval_ms'] as number) ?? 5000,
-          presenceBroadcast: (d['presenceBroadcast'] as boolean) ?? (d['presence_broadcast'] as boolean) ?? true,
-          maxPayloadBytes: BigInt((d['maxPayloadBytes'] as number) ?? (d['max_payload_bytes'] as number) ?? 1_048_576),
+          serverHlc:
+            d['serverHlc'] || d['server_hlc']
+              ? buildHlc(
+                  (d['serverHlc'] as Record<string, unknown>) ??
+                    (d['server_hlc'] as Record<string, unknown>),
+                )
+              : undefined,
+          heartbeatIntervalMs:
+            (d['heartbeatIntervalMs'] as number) ?? (d['heartbeat_interval_ms'] as number) ?? 5000,
+          presenceBroadcast:
+            (d['presenceBroadcast'] as boolean) ?? (d['presence_broadcast'] as boolean) ?? true,
+          maxPayloadBytes: BigInt(
+            (d['maxPayloadBytes'] as number) ?? (d['max_payload_bytes'] as number) ?? 1_048_576,
+          ),
         }),
       };
     case 'Op':
@@ -162,8 +172,17 @@ function decodeMessage(envelope: WireEnvelope): SyncMessage | null {
           slideId: (d['slideId'] as string) ?? (d['slide_id'] as string) ?? '',
           authorId: (d['authorId'] as string) ?? (d['author_id'] as string) ?? '',
           hlc: d['hlc'] ? buildHlc(d['hlc'] as Record<string, unknown>) : undefined,
-          parentHlc: d['parentHlc'] || d['parent_hlc'] ? buildHlc(d['parentHlc'] as Record<string, unknown> ?? d['parent_hlc'] as Record<string, unknown>) : undefined,
-          payload: typeof d['payload'] === 'string' ? hexToBytes(d['payload'] as string) : new Uint8Array(0),
+          parentHlc:
+            d['parentHlc'] || d['parent_hlc']
+              ? buildHlc(
+                  (d['parentHlc'] as Record<string, unknown>) ??
+                    (d['parent_hlc'] as Record<string, unknown>),
+                )
+              : undefined,
+          payload:
+            typeof d['payload'] === 'string'
+              ? hexToBytes(d['payload'] as string)
+              : new Uint8Array(0),
           clientClock: BigInt((d['clientClock'] as number) ?? (d['client_clock'] as number) ?? 0),
           opType: (d['opType'] as OpType) ?? (d['op_type'] as OpType) ?? OpType.YJS_UPDATE,
         }),
@@ -175,7 +194,13 @@ function decodeMessage(envelope: WireEnvelope): SyncMessage | null {
           opId: (d['opId'] as string) ?? (d['op_id'] as string) ?? '',
           applied: (d['applied'] as boolean) ?? true,
           reason: (d['reason'] as string) ?? '',
-          serverHlc: d['serverHlc'] || d['server_hlc'] ? buildHlc(d['serverHlc'] as Record<string, unknown> ?? d['server_hlc'] as Record<string, unknown>) : undefined,
+          serverHlc:
+            d['serverHlc'] || d['server_hlc']
+              ? buildHlc(
+                  (d['serverHlc'] as Record<string, unknown>) ??
+                    (d['server_hlc'] as Record<string, unknown>),
+                )
+              : undefined,
         }),
       };
     case 'Presence':
@@ -275,10 +300,21 @@ function makeHlc(): HLC {
 function protoToJson(msg: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(msg)) {
-    if (k === 'toJson' || k === 'fromJson' || k === 'fromJsonString' || k === 'toBinary' || k === 'clone' || k === 'equals' || k === 'toObject') continue;
+    if (
+      k === 'toJson' ||
+      k === 'fromJson' ||
+      k === 'fromJsonString' ||
+      k === 'toBinary' ||
+      k === 'clone' ||
+      k === 'equals' ||
+      k === 'toObject'
+    )
+      continue;
     if (typeof v === 'function') continue;
     if (v instanceof Uint8Array) {
-      out[k] = Array.from(v).map((b) => b.toString(16).padStart(2, '0')).join('');
+      out[k] = Array.from(v)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
     } else if (typeof v === 'bigint') {
       out[k] = Number(v);
     } else if (v && typeof v === 'object' && 'physical' in v && 'logical' in v) {

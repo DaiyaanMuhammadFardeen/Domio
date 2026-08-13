@@ -12,16 +12,31 @@ import {
 describe('createViewerPhysicsRuntime', () => {
   it('creates dynamic and fixed bodies', () => {
     const rt = createViewerPhysicsRuntime();
-    const h1 = rt.createBody('dynamic', { x: 0, y: 5, z: 0 }, buildCollider({ type: 'sphere', radius: 0.5 }));
-    const h2 = rt.createBody('fixed', { x: 0, y: 0, z: 0 }, buildCollider({ type: 'cuboid', halfX: 1, halfY: 0.1, halfZ: 1 }));
+    const h1 = rt.createBody(
+      'dynamic',
+      { x: 0, y: 5, z: 0 },
+      buildCollider({ type: 'sphere', radius: 0.5 }),
+    );
+    const h2 = rt.createBody(
+      'fixed',
+      { x: 0, y: 0, z: 0 },
+      buildCollider({ type: 'cuboid', halfX: 1, halfY: 0.1, halfZ: 1 }),
+    );
     expect(rt.bodyCount()).toBe(2);
     expect(typeof h1).toBe('number');
     expect(typeof h2).toBe('number');
   });
 
   it('gravity pulls a dynamic body down over multiple steps', () => {
-    const rt = createViewerPhysicsRuntime({ gravity: { x: 0, y: -10, z: 0 }, fixedTimeStep: 1 / 60 });
-    const h = rt.createBody('dynamic', { x: 0, y: 5, z: 0 }, buildCollider({ type: 'sphere', radius: 0.5 }));
+    const rt = createViewerPhysicsRuntime({
+      gravity: { x: 0, y: -10, z: 0 },
+      fixedTimeStep: 1 / 60,
+    });
+    const h = rt.createBody(
+      'dynamic',
+      { x: 0, y: 5, z: 0 },
+      buildCollider({ type: 'sphere', radius: 0.5 }),
+    );
     const startY = rt.bodyState(h).position.y;
     rt.step(60); // 1 second
     const endY = rt.bodyState(h).position.y;
@@ -31,7 +46,11 @@ describe('createViewerPhysicsRuntime', () => {
 
   it('fixed bodies do not move', () => {
     const rt = createViewerPhysicsRuntime();
-    const h = rt.createBody('fixed', { x: 0, y: 5, z: 0 }, buildCollider({ type: 'cuboid', halfX: 1, halfY: 1, halfZ: 1 }));
+    const h = rt.createBody(
+      'fixed',
+      { x: 0, y: 5, z: 0 },
+      buildCollider({ type: 'cuboid', halfX: 1, halfY: 1, halfZ: 1 }),
+    );
     const before = rt.bodyState(h).position;
     rt.step(120);
     const after = rt.bodyState(h).position;
@@ -40,7 +59,11 @@ describe('createViewerPhysicsRuntime', () => {
 
   it('ground collision clamps y and reflects velocity', () => {
     const rt = createViewerPhysicsRuntime({ groundY: 0, restitution: 0.5 });
-    const h = rt.createBody('dynamic', { x: 0, y: 0.5, z: 0 }, buildCollider({ type: 'sphere', radius: 0.5 }));
+    const h = rt.createBody(
+      'dynamic',
+      { x: 0, y: 0.5, z: 0 },
+      buildCollider({ type: 'sphere', radius: 0.5 }),
+    );
     rt.step(60);
     const state = rt.bodyState(h);
     expect(state.position.y).toBeGreaterThanOrEqual(0);
@@ -48,7 +71,11 @@ describe('createViewerPhysicsRuntime', () => {
 
   it('binding freeze rejects re-bind of the same mesh', () => {
     const rt = createViewerPhysicsRuntime();
-    const body = rt.createBody('dynamic', { x: 0, y: 0, z: 0 }, buildCollider({ type: 'sphere', radius: 1 }));
+    const body = rt.createBody(
+      'dynamic',
+      { x: 0, y: 0, z: 0 },
+      buildCollider({ type: 'sphere', radius: 1 }),
+    );
     const first = rt.bind('cube-1', body);
     expect(first.ok).toBe(true);
     const second = rt.bind('cube-1', body);
@@ -62,7 +89,11 @@ describe('createViewerPhysicsRuntime', () => {
 
   it('isBound reports current state', () => {
     const rt = createViewerPhysicsRuntime();
-    const body = rt.createBody('dynamic', { x: 0, y: 0, z: 0 }, buildCollider({ type: 'sphere', radius: 1 }));
+    const body = rt.createBody(
+      'dynamic',
+      { x: 0, y: 0, z: 0 },
+      buildCollider({ type: 'sphere', radius: 1 }),
+    );
     expect(rt.isBound('cube-1')).toBe(false);
     rt.bind('cube-1', body);
     expect(rt.isBound('cube-1')).toBe(true);
@@ -72,7 +103,11 @@ describe('createViewerPhysicsRuntime', () => {
     const rt = createViewerPhysicsRuntime();
     // Create just past the threshold (to keep the test fast).
     for (let i = 0; i < BROADPHASE_WARNING_THRESHOLD + 1; i++) {
-      rt.createBody('dynamic', { x: 0, y: 0, z: 0 }, buildCollider({ type: 'sphere', radius: 0.1 }));
+      rt.createBody(
+        'dynamic',
+        { x: 0, y: 0, z: 0 },
+        buildCollider({ type: 'sphere', radius: 0.1 }),
+      );
     }
     const warning = rt.broadphaseWarning();
     expect(warning).not.toBeNull();
@@ -81,7 +116,11 @@ describe('createViewerPhysicsRuntime', () => {
 
   it('reset clears the body and binding state', () => {
     const rt = createViewerPhysicsRuntime();
-    const body = rt.createBody('dynamic', { x: 0, y: 0, z: 0 }, buildCollider({ type: 'sphere', radius: 1 }));
+    const body = rt.createBody(
+      'dynamic',
+      { x: 0, y: 0, z: 0 },
+      buildCollider({ type: 'sphere', radius: 1 }),
+    );
     rt.bind('cube-1', body);
     rt.reset();
     expect(rt.bodyCount()).toBe(0);
@@ -91,7 +130,11 @@ describe('createViewerPhysicsRuntime', () => {
 
   it('destroy clears state without throwing', () => {
     const rt = createViewerPhysicsRuntime();
-    const body = rt.createBody('dynamic', { x: 0, y: 0, z: 0 }, buildCollider({ type: 'sphere', radius: 1 }));
+    const body = rt.createBody(
+      'dynamic',
+      { x: 0, y: 0, z: 0 },
+      buildCollider({ type: 'sphere', radius: 1 }),
+    );
     rt.bind('cube-1', body);
     expect(() => rt.destroy()).not.toThrow();
     expect(rt.bodyCount()).toBe(0);

@@ -9,7 +9,9 @@ import { RuleEvaluator } from './rule-evaluator.js';
 import { VarStore } from './var-store.js';
 import type { ConditionalRule } from './types.js';
 
-function makeRule(over: Partial<ConditionalRule> & { id: string; priority: number; createdAt: number }): ConditionalRule {
+function makeRule(
+  over: Partial<ConditionalRule> & { id: string; priority: number; createdAt: number },
+): ConditionalRule {
   const conditionSource = over.conditionSource ?? '$x > 0';
   const ast: Expression = compileExpression(conditionSource).ast;
   return {
@@ -62,7 +64,9 @@ describe('RuleEvaluator', () => {
   });
 
   it('skips disabled rules', () => {
-    const rules = [makeRule({ id: 'a', priority: 0, createdAt: 0, conditionSource: '$x > 0', enabled: false })];
+    const rules = [
+      makeRule({ id: 'a', priority: 0, createdAt: 0, conditionSource: '$x > 0', enabled: false }),
+    ];
     const store = new VarStore();
     store.write('x', 5, { scope: 'deck' });
     const r = new RuleEvaluator().evaluate(rules, store);

@@ -3,20 +3,16 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import {
-  PayoutExecutorWorker,
-  InMemoryPayoutProvider,
-} from './index.js';
-import type {
-  EligibleRevenueShareEvent,
-  CreatorPayoutMethod,
-} from './index.js';
+import { PayoutExecutorWorker, InMemoryPayoutProvider } from './index.js';
+import type { EligibleRevenueShareEvent, CreatorPayoutMethod } from './index.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeEvent(overrides: Partial<EligibleRevenueShareEvent> & { event_id: string; creator_id: string }): EligibleRevenueShareEvent {
+function makeEvent(
+  overrides: Partial<EligibleRevenueShareEvent> & { event_id: string; creator_id: string },
+): EligibleRevenueShareEvent {
   return {
     gross_cents: 10000,
     fee_cents: 1000,
@@ -41,10 +37,10 @@ function makeMethod(overrides?: Partial<CreatorPayoutMethod>): CreatorPayoutMeth
 // ---------------------------------------------------------------------------
 
 describe('PayoutExecutorWorker', () => {
-
   it('constructor throws when provider is missing', () => {
-    expect(() => new PayoutExecutorWorker({ provider: undefined as never }))
-      .toThrow('provider is required');
+    expect(() => new PayoutExecutorWorker({ provider: undefined as never })).toThrow(
+      'provider is required',
+    );
   });
 
   it('runOnce returns zero counts when no eligible events', async () => {
@@ -61,9 +57,7 @@ describe('PayoutExecutorWorker', () => {
   });
 
   it('skips creator below min_payout_cents ($50 = 5000 cents)', async () => {
-    const events = [
-      makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 4000 }),
-    ];
+    const events = [makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 4000 })];
     const created = new Map([['c1', new Date('2025-01-01')]]);
     const methods = new Map([['c1', makeMethod()]]);
     const provider = new InMemoryPayoutProvider({
@@ -82,9 +76,7 @@ describe('PayoutExecutorWorker', () => {
   });
 
   it('skips creator when hold period not met', async () => {
-    const events = [
-      makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 10000 }),
-    ];
+    const events = [makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 10000 })];
     // Created 10 days ago, but hold is 30 days
     const created = new Map([['c1', new Date('2025-07-05')]]);
     const methods = new Map([['c1', makeMethod()]]);
@@ -104,9 +96,7 @@ describe('PayoutExecutorWorker', () => {
   });
 
   it('skips creator with no payout method', async () => {
-    const events = [
-      makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 10000 }),
-    ];
+    const events = [makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 10000 })];
     const created = new Map([['c1', new Date('2025-01-01')]]);
     const provider = new InMemoryPayoutProvider({
       events,
@@ -123,9 +113,7 @@ describe('PayoutExecutorWorker', () => {
   });
 
   it('skips creator with unverified payout method', async () => {
-    const events = [
-      makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 10000 }),
-    ];
+    const events = [makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 10000 })];
     const created = new Map([['c1', new Date('2025-01-01')]]);
     const methods = new Map([['c1', makeMethod({ verified: false })]]);
     const provider = new InMemoryPayoutProvider({
@@ -173,9 +161,7 @@ describe('PayoutExecutorWorker', () => {
   });
 
   it('idempotent re-run: same run_id → 0 new ledger entries', async () => {
-    const events = [
-      makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 10000 }),
-    ];
+    const events = [makeEvent({ event_id: 'e1', creator_id: 'c1', net_cents: 10000 })];
     const created = new Map([['c1', new Date('2025-01-01')]]);
     const methods = new Map([['c1', makeMethod()]]);
     const provider = new InMemoryPayoutProvider({

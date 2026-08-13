@@ -21,13 +21,13 @@ runbooks/chaos/
 
 ## When to run
 
-| Drill | Cadence | Required for | Defer to P22b? |
-|-------|---------|--------------|----------------|
-| `postgres_failover` | monthly game day | public-beta gate | no |
-| `nats_partition`    | monthly game day | public-beta gate | no |
-| `ai_provider_fail`  | monthly game day | public-beta gate | no |
-| `cdn_outage`        | monthly game day | public-beta gate | no |
-| `region_isolation`  | quarterly game day | public-beta gate | no |
+| Drill               | Cadence            | Required for     | Defer to P22b? |
+| ------------------- | ------------------ | ---------------- | -------------- |
+| `postgres_failover` | monthly game day   | public-beta gate | no             |
+| `nats_partition`    | monthly game day   | public-beta gate | no             |
+| `ai_provider_fail`  | monthly game day   | public-beta gate | no             |
+| `cdn_outage`        | monthly game day   | public-beta gate | no             |
+| `region_isolation`  | quarterly game day | public-beta gate | no             |
 
 Game day = scheduled event, on-call + SRE leadership + security on-call
 attend; rollback authority is pre-delegated.
@@ -49,6 +49,7 @@ scheduled game days; record results in the same directory.
 - Linked artifacts: drill runner log, CloudWatch metrics screenshot
 
 ## Action items
+
 - AI-1: ...
 ```
 

@@ -58,10 +58,51 @@ const REVENUE_SPEC: MockSpec = {
   seed: 42,
   n: 24,
   fields: [
-    { name: 'month', type: 'string', categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] },
-    { name: 'revenue', type: 'number', min: 12000, max: 85000, distribution: 'normal', mean: 48000, stddev: 18000 },
-    { name: 'expenses', type: 'number', min: 8000, max: 52000, distribution: 'normal', mean: 32000, stddev: 10000 },
-    { name: 'profit', type: 'number', min: -5000, max: 38000, distribution: 'normal', mean: 16000, stddev: 9000 },
+    {
+      name: 'month',
+      type: 'string',
+      categories: [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ],
+    },
+    {
+      name: 'revenue',
+      type: 'number',
+      min: 12000,
+      max: 85000,
+      distribution: 'normal',
+      mean: 48000,
+      stddev: 18000,
+    },
+    {
+      name: 'expenses',
+      type: 'number',
+      min: 8000,
+      max: 52000,
+      distribution: 'normal',
+      mean: 32000,
+      stddev: 10000,
+    },
+    {
+      name: 'profit',
+      type: 'number',
+      min: -5000,
+      max: 38000,
+      distribution: 'normal',
+      mean: 16000,
+      stddev: 9000,
+    },
     { name: 'category', type: 'string', categories: ['SaaS', 'Services', 'Hardware'] },
   ],
 };
@@ -70,9 +111,29 @@ const USER_SPEC: MockSpec = {
   seed: 137,
   n: 50,
   fields: [
-    { name: 'region', type: 'string', categories: ['North America', 'Europe', 'Asia Pacific', 'Latin America'] },
-    { name: 'users', type: 'number', min: 200, max: 15000, distribution: 'lognormal', mean: 5000, stddev: 3000 },
-    { name: 'sessions', type: 'number', min: 400, max: 40000, distribution: 'lognormal', mean: 12000, stddev: 8000 },
+    {
+      name: 'region',
+      type: 'string',
+      categories: ['North America', 'Europe', 'Asia Pacific', 'Latin America'],
+    },
+    {
+      name: 'users',
+      type: 'number',
+      min: 200,
+      max: 15000,
+      distribution: 'lognormal',
+      mean: 5000,
+      stddev: 3000,
+    },
+    {
+      name: 'sessions',
+      type: 'number',
+      min: 400,
+      max: 40000,
+      distribution: 'lognormal',
+      mean: 12000,
+      stddev: 8000,
+    },
     { name: 'conversion', type: 'number', min: 1.2, max: 12.8, distribution: 'uniform' },
   ],
 };
@@ -81,9 +142,21 @@ const PIPELINE_SPEC: MockSpec = {
   seed: 256,
   n: 30,
   fields: [
-    { name: 'stage', type: 'string', categories: ['Prospect', 'Qualified', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'] },
+    {
+      name: 'stage',
+      type: 'string',
+      categories: ['Prospect', 'Qualified', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'],
+    },
     { name: 'deals', type: 'number', min: 1, max: 45, distribution: 'poisson', lambda: 12 },
-    { name: 'value', type: 'number', min: 5000, max: 250000, distribution: 'lognormal', mean: 60000, stddev: 40000 },
+    {
+      name: 'value',
+      type: 'number',
+      min: 5000,
+      max: 250000,
+      distribution: 'lognormal',
+      mean: 60000,
+      stddev: 40000,
+    },
     { name: 'rep', type: 'string', categories: ['Alice', 'Bob', 'Carol', 'Dave', 'Eve'] },
   ],
 };
@@ -168,9 +241,21 @@ export function addMockDataset(name: string, seed: number, rowCount: number): Da
     seed,
     n: Math.min(rowCount, 500),
     fields: [
-      { name: 'label', type: 'string', categories: ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta'] },
+      {
+        name: 'label',
+        type: 'string',
+        categories: ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta'],
+      },
       { name: 'value', type: 'number', min: 10, max: 990, distribution: 'uniform' },
-      { name: 'metric', type: 'number', min: 0, max: 100, distribution: 'normal', mean: 50, stddev: 20 },
+      {
+        name: 'metric',
+        type: 'number',
+        min: 0,
+        max: 100,
+        distribution: 'normal',
+        mean: 50,
+        stddev: 20,
+      },
     ],
   };
   const { dataset, mock } = mockDataset(spec);
@@ -207,9 +292,7 @@ export function tickFreshness(): void {
 }
 
 export function refreshSource(id: string): void {
-  _sources = _sources.map((s) =>
-    s.id === id ? { ...s, freshness: 'loading' as const } : s,
-  );
+  _sources = _sources.map((s) => (s.id === id ? { ...s, freshness: 'loading' as const } : s));
   notify();
   // Simulate network delay
   setTimeout(() => {
@@ -268,7 +351,9 @@ export function getBindingSchema(chartType: ChartType): BindingSchema {
   };
 }
 
-export function getRequiredRoles(chartType: ChartType): Array<{ role: string; columnType: string }> {
+export function getRequiredRoles(
+  chartType: ChartType,
+): Array<{ role: string; columnType: string }> {
   return requiredBindings(chartType).map((r: { role: string; columnType: string }) => ({
     role: r.role,
     columnType: r.columnType,
@@ -289,9 +374,7 @@ export function subscribe(listener: () => void): () => void {
 /** Reset store for tests. */
 export function resetStore(): void {
   _sources = buildDataSources();
-  _scenarios = [
-    { id: 'scenario-base', name: 'Base', parentId: null, isBase: true, overrides: {} },
-  ];
+  _scenarios = [{ id: 'scenario-base', name: 'Base', parentId: null, isBase: true, overrides: {} }];
   _activeScenarioId = 'scenario-base';
   _listeners = [];
 }

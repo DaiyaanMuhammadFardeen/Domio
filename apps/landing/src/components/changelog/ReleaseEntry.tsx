@@ -36,9 +36,7 @@ export function ReleaseEntry({ entry }: ReleaseEntryProps): JSX.Element {
   const hasBreaking =
     Array.isArray(entry.breaking_changes) &&
     (entry.breaking_changes as ReadonlyArray<string>).length > 0;
-  const hasFixes =
-    Array.isArray(entry.fixes) &&
-    (entry.fixes as ReadonlyArray<string>).length > 0;
+  const hasFixes = Array.isArray(entry.fixes) && (entry.fixes as ReadonlyArray<string>).length > 0;
 
   const migrationHref =
     entry.migration_guide_href ??
@@ -46,19 +44,14 @@ export function ReleaseEntry({ entry }: ReleaseEntryProps): JSX.Element {
 
   return (
     <article
-      className={
-        'cl-release' + (hasBreaking ? ' cl-release--breaking' : '')
-      }
+      className={'cl-release' + (hasBreaking ? ' cl-release--breaking' : '')}
       data-testid="changelog-entry"
       data-version={entry.version}
     >
       <header className="cl-release__header">
         <div className="cl-release__heading">
           <h2 className="cl-release__version">{entry.version}</h2>
-          <time
-            className="cl-release__date"
-            dateTime={entry.date_iso}
-          >
+          <time className="cl-release__date" dateTime={entry.date_iso}>
             {formatDate(entry.date_iso)}
           </time>
         </div>
@@ -69,14 +62,8 @@ export function ReleaseEntry({ entry }: ReleaseEntryProps): JSX.Element {
         ) : null}
       </header>
 
-      <section
-        className="cl-release__section"
-        aria-labelledby={`cl-${entry.version}-highlights`}
-      >
-        <h3
-          id={`cl-${entry.version}-highlights`}
-          className="cl-release__section-heading"
-        >
+      <section className="cl-release__section" aria-labelledby={`cl-${entry.version}-highlights`}>
+        <h3 id={`cl-${entry.version}-highlights`} className="cl-release__section-heading">
           Highlights
         </h3>
         <ul className="cl-release__list cl-release__list--highlights">
@@ -94,10 +81,7 @@ export function ReleaseEntry({ entry }: ReleaseEntryProps): JSX.Element {
           aria-labelledby={`cl-${entry.version}-breaking`}
           data-testid="changelog-breaking"
         >
-          <h3
-            id={`cl-${entry.version}-breaking`}
-            className="cl-release__breaking-heading"
-          >
+          <h3 id={`cl-${entry.version}-breaking`} className="cl-release__breaking-heading">
             Breaking changes
           </h3>
           <ul className="cl-release__breaking-list">
@@ -114,14 +98,8 @@ export function ReleaseEntry({ entry }: ReleaseEntryProps): JSX.Element {
       ) : null}
 
       {hasFixes ? (
-        <section
-          className="cl-release__section"
-          aria-labelledby={`cl-${entry.version}-fixes`}
-        >
-          <h3
-            id={`cl-${entry.version}-fixes`}
-            className="cl-release__section-heading"
-          >
+        <section className="cl-release__section" aria-labelledby={`cl-${entry.version}-fixes`}>
+          <h3 id={`cl-${entry.version}-fixes`} className="cl-release__section-heading">
             Fixes
           </h3>
           <ul className="cl-release__list cl-release__list--fixes">

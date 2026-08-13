@@ -18,17 +18,17 @@ import {
   validateCreateComment,
 } from './logic.js';
 import type { Comment, CreateCommentInput } from './types.js';
-import {
-  InvalidAnchorError,
-  CollabValidationError,
-  FeatureDisabledError,
-} from '../types.js';
+import { InvalidAnchorError, CollabValidationError, FeatureDisabledError } from '../types.js';
 
 describe('Comment anchor validation', () => {
   it('accepts valid anchor with element in [0,1]', () => {
-    expect(() => validateAnchor({ element: { x: 0.5, y: 0.5 }, slide: { x: 100, y: 200 } })).not.toThrow();
+    expect(() =>
+      validateAnchor({ element: { x: 0.5, y: 0.5 }, slide: { x: 100, y: 200 } }),
+    ).not.toThrow();
     expect(() => validateAnchor({ element: { x: 0, y: 0 }, slide: { x: 0, y: 0 } })).not.toThrow();
-    expect(() => validateAnchor({ element: { x: 1, y: 1 }, slide: { x: -10, y: 50 } })).not.toThrow();
+    expect(() =>
+      validateAnchor({ element: { x: 1, y: 1 }, slide: { x: -10, y: 50 } }),
+    ).not.toThrow();
   });
 
   it('accepts anchor with null element (slide-only)', () => {
@@ -36,13 +36,21 @@ describe('Comment anchor validation', () => {
   });
 
   it('rejects element.x out of range', () => {
-    expect(() => validateAnchor({ element: { x: -0.1, y: 0.5 }, slide: { x: 0, y: 0 } })).toThrow(InvalidAnchorError);
-    expect(() => validateAnchor({ element: { x: 1.1, y: 0.5 }, slide: { x: 0, y: 0 } })).toThrow(InvalidAnchorError);
+    expect(() => validateAnchor({ element: { x: -0.1, y: 0.5 }, slide: { x: 0, y: 0 } })).toThrow(
+      InvalidAnchorError,
+    );
+    expect(() => validateAnchor({ element: { x: 1.1, y: 0.5 }, slide: { x: 0, y: 0 } })).toThrow(
+      InvalidAnchorError,
+    );
   });
 
   it('rejects element.y out of range', () => {
-    expect(() => validateAnchor({ element: { x: 0.5, y: -0.1 }, slide: { x: 0, y: 0 } })).toThrow(InvalidAnchorError);
-    expect(() => validateAnchor({ element: { x: 0.5, y: 1.1 }, slide: { x: 0, y: 0 } })).toThrow(InvalidAnchorError);
+    expect(() => validateAnchor({ element: { x: 0.5, y: -0.1 }, slide: { x: 0, y: 0 } })).toThrow(
+      InvalidAnchorError,
+    );
+    expect(() => validateAnchor({ element: { x: 0.5, y: 1.1 }, slide: { x: 0, y: 0 } })).toThrow(
+      InvalidAnchorError,
+    );
   });
 
   it('accepts slide offsets of any value (including negative)', () => {
@@ -56,7 +64,9 @@ describe('Mention parsing', () => {
   let idCounter = 0;
   const idGen = () => `mention_${++idCounter}`;
 
-  beforeEach(() => { idCounter = 0; });
+  beforeEach(() => {
+    idCounter = 0;
+  });
 
   it('parses user mentions', () => {
     const mentions = parseMentions('c1', 'ws1', 'Hello @alice and @bob!', now, idGen);

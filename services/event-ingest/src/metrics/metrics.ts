@@ -21,7 +21,12 @@
  */
 
 export interface Metrics {
-  recordEvent(eventName: string, privacyMode: string, sourceApp: string, status: 'ok' | 'rejected' | 'spooled'): void;
+  recordEvent(
+    eventName: string,
+    privacyMode: string,
+    sourceApp: string,
+    status: 'ok' | 'rejected' | 'spooled',
+  ): void;
   recordBatch(status: 'ok' | 'rejected' | 'partial'): void;
   observeKafkaPublish(seconds: number): void;
   setSpoolBytes(bytes: number): void;
@@ -131,7 +136,12 @@ export function buildMetrics(): Metrics {
 
   return {
     recordEvent(eventName, privacyMode, sourceApp, status) {
-      events.inc({ event_name: eventName, privacy_mode: privacyMode, source_app: sourceApp, status });
+      events.inc({
+        event_name: eventName,
+        privacy_mode: privacyMode,
+        source_app: sourceApp,
+        status,
+      });
     },
     recordBatch(status) {
       batches.inc({ status });
@@ -187,11 +197,10 @@ export function buildMetrics(): Metrics {
         `# HELP domio_ingest_pii_stripped_total Events where PII was redacted.\n# TYPE domio_ingest_pii_stripped_total counter\ndomio_ingest_pii_stripped_total ${piiStripped.value}\n`,
         `# HELP domio_ingest_signature_failures_total Requests rejected with invalid HMAC.\n# TYPE domio_ingest_signature_failures_total counter\ndomio_ingest_signature_failures_total ${signaturesFailed.value}\n`,
         `# HELP domio_ingest_replay_failures_total Requests rejected as replay.\n# TYPE domio_ingest_replay_failures_total counter\ndomio_ingest_replay_failures_total ${replaysFailed.value}\n`,
-        routes.render(
-          'domio_ingest_route_requests_total',
-          'Per-route request count.',
-          ['route', 'status'],
-        ),
+        routes.render('domio_ingest_route_requests_total', 'Per-route request count.', [
+          'route',
+          'status',
+        ]),
       ].join('\n');
     },
   };

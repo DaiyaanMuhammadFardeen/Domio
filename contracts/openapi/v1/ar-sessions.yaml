@@ -32,21 +32,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateArSessionRequest"
+              $ref: '#/components/schemas/CreateArSessionRequest'
       responses:
-        "201":
+        '201':
           description: Session created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ArSession"
-        "400":
+                $ref: '#/components/schemas/ArSession'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
   /v1/ar_sessions/{id}:
     get:
@@ -60,15 +60,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Session details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ArSession"
-        "401":
+                $ref: '#/components/schemas/ArSession'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Session not found.
     delete:
       tags: [ar-sessions]
@@ -84,11 +84,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Session invalidated.
-        "401":
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Session not found.
 components:
   securitySchemes:
@@ -116,7 +116,7 @@ components:
         audienceUrl:
           type: string
           format: uri
-          description: "Viewer URL, e.g. https://ar.domio.app/s/{session_id}"
+          description: 'Viewer URL, e.g. https://ar.domio.app/s/{session_id}'
         expiresAt:
           type: string
           format: date-time

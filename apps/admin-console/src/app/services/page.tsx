@@ -13,14 +13,10 @@
  */
 
 import type { ReactElement } from 'react';
-import {
-  USER_FACING_SERVICES,
-} from '../../../../landing/src/lib/services-registry';
+import { USER_FACING_SERVICES } from '../../../../landing/src/lib/services-registry';
 
 export default function ServicesPage(): ReactElement {
-  const sorted = [...USER_FACING_SERVICES].sort((a, b) =>
-    a.name.localeCompare(b.name),
-  );
+  const sorted = [...USER_FACING_SERVICES].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div>
@@ -28,11 +24,10 @@ export default function ServicesPage(): ReactElement {
         Service directory
       </h1>
       <p className="mb-6 text-sm text-slate-500">
-        Every user-facing service Domio ships: name, dev port, owning team,
-        and last production deploy. The list comes from{' '}
-        <code>services-registry.ts</code> — adding a service means adding one
-        entry there. Pure backend services and infrastructure (Postgres,
-        Redis, NATS) are intentionally excluded.
+        Every user-facing service Domio ships: name, dev port, owning team, and last production
+        deploy. The list comes from <code>services-registry.ts</code> — adding a service means
+        adding one entry there. Pure backend services and infrastructure (Postgres, Redis, NATS) are
+        intentionally excluded.
       </p>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">

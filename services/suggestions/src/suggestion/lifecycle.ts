@@ -84,7 +84,13 @@ export function acceptSuggestionBody(
   suggestion: Suggestion,
   acceptedBy: string,
   opts: DomainOpts,
-): { status: SuggestionStatus; resolved_at: Date; resolved_by: string; updated_at: Date; updated_by: string } {
+): {
+  status: SuggestionStatus;
+  resolved_at: Date;
+  resolved_by: string;
+  updated_at: Date;
+  updated_by: string;
+} {
   if (suggestion.status !== 'open') {
     throw new InvalidStatusTransitionError(suggestion.status, 'accepted');
   }
@@ -107,7 +113,13 @@ export function rejectSuggestionBody(
   rejectedBy: string,
   _reason: string | undefined,
   opts: DomainOpts,
-): { status: SuggestionStatus; resolved_at: Date; resolved_by: string; updated_at: Date; updated_by: string } {
+): {
+  status: SuggestionStatus;
+  resolved_at: Date;
+  resolved_by: string;
+  updated_at: Date;
+  updated_by: string;
+} {
   if (suggestion.status !== 'open') {
     throw new InvalidStatusTransitionError(suggestion.status, 'rejected');
   }

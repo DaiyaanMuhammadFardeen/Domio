@@ -61,10 +61,7 @@ function computeTotals(lines: ReadonlyArray<CartLine>): {
   total_cents: number;
   currency: string;
 } {
-  const subtotal = lines.reduce(
-    (acc, l) => acc + l.price_cents * l.quantity,
-    0,
-  );
+  const subtotal = lines.reduce((acc, l) => acc + l.price_cents * l.quantity, 0);
   const tax = roundCents(subtotal * TAX_RATE);
   const currency = lines[0]?.currency ?? 'USD';
   return {

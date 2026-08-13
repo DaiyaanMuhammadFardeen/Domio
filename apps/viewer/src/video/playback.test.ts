@@ -9,8 +9,8 @@ const CONFIG: ViewerVideoRuntimeConfig = {
   sourceDurationMs: 60_000,
   waveformBars: 16,
   segments: [
-    { id: 'intro', sourceStartSec: 0,  sourceEndSec: 20, title: 'Intro' },
-    { id: 'main',  sourceStartSec: 20, sourceEndSec: 50, title: 'Main',  segmentDurationMs: 8_000 },
+    { id: 'intro', sourceStartSec: 0, sourceEndSec: 20, title: 'Intro' },
+    { id: 'main', sourceStartSec: 20, sourceEndSec: 50, title: 'Main', segmentDurationMs: 8_000 },
     { id: 'outro', sourceStartSec: 50, sourceEndSec: 60, title: 'Outro' },
   ],
 };
@@ -79,36 +79,44 @@ describe('createViewerVideoRuntime', () => {
 
   it('canPlay returns true when transcoded or original is playable', () => {
     const rt = createViewerVideoRuntime(CONFIG);
-    expect(rt.readiness({
-      transcodeState: 'ready',
-      hasPlayableOriginal: false,
-      hlsUrl: 'https://example.com/m.m3u8',
-      dashUrl: null,
-    }).canPlay).toBe(true);
+    expect(
+      rt.readiness({
+        transcodeState: 'ready',
+        hasPlayableOriginal: false,
+        hlsUrl: 'https://example.com/m.m3u8',
+        dashUrl: null,
+      }).canPlay,
+    ).toBe(true);
 
-    expect(rt.readiness({
-      transcodeState: 'queued',
-      hasPlayableOriginal: true,
-      hlsUrl: null,
-      dashUrl: null,
-    }).canPlay).toBe(true);
+    expect(
+      rt.readiness({
+        transcodeState: 'queued',
+        hasPlayableOriginal: true,
+        hlsUrl: null,
+        dashUrl: null,
+      }).canPlay,
+    ).toBe(true);
   });
 
   it('canPlay blocks when transcoding and no original playable', () => {
     const rt = createViewerVideoRuntime(CONFIG);
-    expect(rt.readiness({
-      transcodeState: 'processing',
-      hasPlayableOriginal: false,
-      hlsUrl: null,
-      dashUrl: null,
-    })).toEqual({ canPlay: false, reason: 'Transcode pending' });
+    expect(
+      rt.readiness({
+        transcodeState: 'processing',
+        hasPlayableOriginal: false,
+        hlsUrl: null,
+        dashUrl: null,
+      }),
+    ).toEqual({ canPlay: false, reason: 'Transcode pending' });
 
-    expect(rt.readiness({
-      transcodeState: 'failed',
-      hasPlayableOriginal: false,
-      hlsUrl: null,
-      dashUrl: null,
-    })).toEqual({ canPlay: false, reason: 'Transcode failed' });
+    expect(
+      rt.readiness({
+        transcodeState: 'failed',
+        hasPlayableOriginal: false,
+        hlsUrl: null,
+        dashUrl: null,
+      }),
+    ).toEqual({ canPlay: false, reason: 'Transcode failed' });
   });
 
   it('reduces through the transcode state machine', () => {
@@ -141,7 +149,7 @@ describe('createViewerVideoRuntime', () => {
     const rt = createViewerVideoRuntime(CONFIG);
     const samples = new Float32Array(1600);
     for (let i = 0; i < samples.length; i++) {
-      samples[i] = (i % 2 === 0) ? 0.5 : -0.5;
+      samples[i] = i % 2 === 0 ? 0.5 : -0.5;
     }
     const wf = rt.waveform(samples);
     expect(wf.bars.length).toBe(CONFIG.waveformBars);

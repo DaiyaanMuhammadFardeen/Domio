@@ -36,7 +36,7 @@ export async function rootSpan<T>(
     return await fn(span);
   } catch (err) {
     span.recordException(err);
-    span.setStatus("error", (err as Error).message);
+    span.setStatus('error', (err as Error).message);
     throw err;
   } finally {
     span.end();

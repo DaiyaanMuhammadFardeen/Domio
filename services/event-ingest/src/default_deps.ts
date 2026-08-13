@@ -79,5 +79,18 @@ export async function defaultDeps(cfg: IngestConfig): Promise<IngestDeps> {
     });
   });
 
-  return { cfg, validator, pii, hmac, nonces, publisher, dlqPublisher, spool, nats, dlq, metrics, nextSeq };
+  return {
+    cfg,
+    validator,
+    pii,
+    hmac,
+    nonces,
+    publisher,
+    dlqPublisher,
+    spool,
+    nats,
+    dlq,
+    metrics,
+    nextSeq,
+  };
 }

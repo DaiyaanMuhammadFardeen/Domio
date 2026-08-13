@@ -12,7 +12,10 @@ import { useEffect, useState } from 'react';
 export interface FeedbackTabProps {
   readonly workspace_id: string;
   readonly session_id: string;
-  readonly fetcher?: (input: { workspace_id: string; session_id: string }) => Promise<RecapAggregationView>;
+  readonly fetcher?: (input: {
+    workspace_id: string;
+    session_id: string;
+  }) => Promise<RecapAggregationView>;
 }
 
 export interface RecapAggregationView {
@@ -46,7 +49,8 @@ export function FeedbackTab(props: FeedbackTabProps) {
 
   if (!data) return <p className="text-sm text-slate-500">Loading feedback…</p>;
   const total = data.nps_promoters + data.nps_passives + data.nps_detractors;
-  const nps = total === 0 ? 0 : Math.round(((data.nps_promoters - data.nps_detractors) / total) * 100);
+  const nps =
+    total === 0 ? 0 : Math.round(((data.nps_promoters - data.nps_detractors) / total) * 100);
 
   return (
     <section className="rounded border bg-white p-4" data-testid="recap-feedback-tab">
@@ -56,7 +60,8 @@ export function FeedbackTab(props: FeedbackTabProps) {
           <div className="text-xs text-slate-500">NPS</div>
           <div className="text-2xl font-semibold">{nps}</div>
           <div className="text-xs text-slate-500">
-            {data.nps_promoters} promoters · {data.nps_passives} passives · {data.nps_detractors} detractors
+            {data.nps_promoters} promoters · {data.nps_passives} passives · {data.nps_detractors}{' '}
+            detractors
           </div>
         </div>
         <div>

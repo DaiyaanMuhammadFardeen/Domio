@@ -17,7 +17,10 @@ export interface TriviaRunnerProps {
   readonly timeRemainingMs: number;
   readonly score: number;
   readonly streak: number;
-  readonly onSubmitAnswer: (answer: { readonly roundId: string; readonly optionIndex: number }) => void;
+  readonly onSubmitAnswer: (answer: {
+    readonly roundId: string;
+    readonly optionIndex: number;
+  }) => void;
   readonly onUsePowerUp?: (() => void) | undefined;
 }
 

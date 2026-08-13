@@ -31,12 +31,14 @@ JWT_SECRET=test-secret PORT=8080 \
 ## Scenarios
 
 ### `connect_storm`
+
 - **50 virtual users** connect to `/v1/sync/{deckId}` via WebSocket
 - Each connection sends a protobuf-encoded `Hello` frame
 - Connections held open for 30 seconds
 - Validates: HTTP 101 upgrade, connection stability, no disconnects
 
 ### `op_stream`
+
 - **20 virtual users** connect and submit `Op` frames at 1 per 500ms
 - Each `Op` contains: valid ULID `op_id`, HLC timestamp, deck/author IDs, Yjs payload
 - Measures: send success rate, connection stability under load
@@ -44,6 +46,7 @@ JWT_SECRET=test-secret PORT=8080 \
 ## Wire Protocol
 
 All WebSocket frames use **length-prefixed protobuf framing**:
+
 - 4-byte big-endian length prefix
 - Followed by protobuf-encoded message body
 
@@ -51,14 +54,14 @@ Message types: `Hello`, `Op`, `Welcome`, `OpAck`, `Presence`, `Error` (see `cont
 
 ## Metrics
 
-| Metric | Description |
-|--------|-------------|
-| `ws_errors` | WebSocket error count (target: < 1% rate) |
-| `connect_success` | Connection success rate (target: >= 95%) |
-| `op_round_trip_ms` | Op send latency (target: p95 < 500ms) |
-| `ws_connections` | Total successful connections |
-| `op_sent` | Total ops submitted |
-| `active_connections` | Concurrent active connections |
+| Metric               | Description                               |
+| -------------------- | ----------------------------------------- |
+| `ws_errors`          | WebSocket error count (target: < 1% rate) |
+| `connect_success`    | Connection success rate (target: >= 95%)  |
+| `op_round_trip_ms`   | Op send latency (target: p95 < 500ms)     |
+| `ws_connections`     | Total successful connections              |
+| `op_sent`            | Total ops submitted                       |
+| `active_connections` | Concurrent active connections             |
 
 ## JWT Authentication
 

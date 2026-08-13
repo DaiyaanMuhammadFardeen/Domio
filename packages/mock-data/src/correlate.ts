@@ -66,10 +66,7 @@ export interface CorrelatedSeriesOpts {
  * Generate multiple series sharing a trend with per-series offsets.
  * Each series follows a shared random walk + offset.
  */
-export function correlatedSeries(
-  keys: string[],
-  opts: CorrelatedSeriesOpts = {},
-): SeriesPoint[] {
+export function correlatedSeries(keys: string[], opts: CorrelatedSeriesOpts = {}): SeriesPoint[] {
   const { seed = 42, base = 50, volatility = 5, n = 12 } = opts;
   const rng = mulberry32(seed);
   const result: SeriesPoint[] = [];

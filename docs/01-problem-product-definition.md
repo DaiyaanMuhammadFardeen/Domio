@@ -1,19 +1,19 @@
 # 01 — Problem & Product Definition
 
-> **Status:** Authoritative for product thesis, personas, competitive framing, and success metrics. Source of truth for *what* and *why*; downstream docs (02-12) own the *how*. If a downstream doc contradicts 01, 01 wins unless the downstream doc cites 01 explicitly and supersedes it via an ADR.
+> **Status:** Authoritative for product thesis, personas, competitive framing, and success metrics. Source of truth for _what_ and _why_; downstream docs (02-12) own the _how_. If a downstream doc contradicts 01, 01 wins unless the downstream doc cites 01 explicitly and supersedes it via an ADR.
 > **Assumptions:**
+>
 > - Ten primary personas (P1-P10) and the named secondary audiences (BD market, regulated industries, OSS contributors) are stable for v1.
 > - The nine-axis differentiation table reflects 2026 market state; refresh quarterly.
 > - Success metrics are aspirational; they become real once baseline measurements exist post-launch.
-> **Owner:** Product director (with founder review).
-> **Last reviewed:** 2026-07-29.
+>   **Owner:** Product director (with founder review).
+>   **Last reviewed:** 2026-07-29.
 
 ---
 
 > **Codename:** Domio
-> **Tagline (working):** _The infinitely extensible presentation platform — Figma-grade canvas, Canva-scale ecosystem, live data, real-time presentation._
-> **Scope stance:** Full platform. No MVP cut. Staged delivery is a *sequencing* concern, never a *scope cut*. Every feature in `feature-list.md` (1–219, 221–240, plus extension ideas) is in scope for the product definition; features roll out in waves defined in `10-project-team-planning.md`.
-> **Audience for this document:** founders, exec leadership, finance, partnerships, and any reviewer who has not yet read the engineering plan. If a decision below contradicts a later doc, the later doc wins *only* after it cites this one.
+> **Tagline (working):** _The infinitely extensible presentation platform — Figma-grade canvas, Canva-scale ecosystem, live data, real-time presentation._ > **Scope stance:** Full platform. No MVP cut. Staged delivery is a _sequencing_ concern, never a _scope cut_. Every feature in `feature-list.md` (1–219, 221–240, plus extension ideas) is in scope for the product definition; features roll out in waves defined in `10-project-team-planning.md`.
+> **Audience for this document:** founders, exec leadership, finance, partnerships, and any reviewer who has not yet read the engineering plan. If a decision below contradicts a later doc, the later doc wins _only_ after it cites this one.
 
 ---
 
@@ -21,28 +21,28 @@
 
 This is a saturated category if you define it narrowly. It is an empty category if you define it honestly: **no product today combines a Figma-grade canvas with Canva-scale template ecosystems, live data-bound charts that re-render on stage, deck-as-website publishing, real-time presenter + audience infrastructure, AI copilot, agentic/MCP interfaces, and enterprise governance in one platform.** Each competitor below is excellent at one or two of these axes and structurally weak at the rest.
 
-| Vendor | Canvas power | Template/library scale | Live data on stage | Deck-as-website | Real-time presenting | AI generation | Enterprise governance | Agentic / MCP | Localization (Bangla) |
-|---|---|---|---|---|---|---|---|---|---|
-| **Microsoft PowerPoint** | Low (clip-art era model) | Medium (Microsoft Create) | OLE links only; no live web | None; export to PDF/video | Presenter view only; no audience join | Designer suggestions only | Strong (M365 governance) | None (VBA macros, COM) | Bangla UI strings exist; data-bound charts weak |
-| **Apple Keynote** | Medium (Magic Move) | Small (Apple-curated) | None | None | Apple-only continuity | None | iCloud-family only | None | Limited |
-| **Google Slides** | Low–Medium | Medium (templates gallery) | Linked Sheets, but static snapshots in presentation | "Publish to web" is a stale embed | Limited Q&A in Meet; not native | Gemini "Help me design" early | Workspace DLP + audit | Apps Script, not first-class | Bangla UI exists; chart binding shallow |
-| **Prezi** | High (zooming canvas) | Medium | None | Public link only | Limited | None | Weak | None | Limited |
-| **Beautiful.ai** | Medium (opinionated layouts) | Medium (curated) | Some chart live update | Web link; not customizable | None | "Smart slides" rule-based | SSO only | None | Weak |
-| **Gamma** | Medium (web-first blocks) | Medium (community) | Limited embed of live blocks | Yes, web-first design | None | Strong prompt-to-deck | Basic | None | Weak |
-| **Pitch** | Medium–High | Medium | Chart live refresh in editor; not on stage | Web link, brand-controlled | Lightweight video room | Light AI assist | Strong (workspace roles) | Public API only | Weak |
-| **Tome** | Medium (cards) | Small | Lightweight embeds | Yes, scrollytelling | None | Strong narrative AI | None | None | Weak |
-| **Miro** | Very High (canvas) | Medium (templates) | None (whiteboard only) | Board link; not a deck | Realtime collab yes; presenter mode weak | AI cluster/sort only | SSO + audit | Apps framework, not MCP-grade | Weak |
-| **Figma** | Highest in class | Massive (community + FigJam) | No native charts; only embeds | No deck model | No presenter mode | None for decks | Strong enterprise | Plugin runtime, but not deck-aware | Bangla UI; no deck semantics |
-| **Canva** | Medium (Magic Studio) | Largest in market | Charts in editor; not live on stage | "Present" URL; not full website | Limited live presentation | Magic Design strong | Brand kit + roles | Apps SDK, not deck engine | Bangla UI; live data limited |
-| **Looker / Tableau / Power BI / Grafana** | N/A (analytics UIs) | N/A | Yes (native) | Dashboard embed only | None for presenting decks | NLQ | Strong | APIs/MCP emerging | Strong |
-| **Domio (this product)** | Figma-grade infinite canvas | Canva-scale ecosystem + marketplace | First-class live data on stage, scenario switcher, what-if sliders | Deck-as-website, SEO-ready, custom domains | Phone-as-remote, audience join, presenter failover, parking lot | Full copilot: generate, redesign, rehearse, summarize, freshness | SSO/SCIM, DLP, audit, residency, governance | First-class MCP server, deck-as-code, agent audit trail | Bangla-first; BDT/payments; intermittent-connectivity-first |
+| Vendor                                    | Canvas power                 | Template/library scale              | Live data on stage                                                 | Deck-as-website                            | Real-time presenting                                            | AI generation                                                    | Enterprise governance                       | Agentic / MCP                                           | Localization (Bangla)                                       |
+| ----------------------------------------- | ---------------------------- | ----------------------------------- | ------------------------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------- |
+| **Microsoft PowerPoint**                  | Low (clip-art era model)     | Medium (Microsoft Create)           | OLE links only; no live web                                        | None; export to PDF/video                  | Presenter view only; no audience join                           | Designer suggestions only                                        | Strong (M365 governance)                    | None (VBA macros, COM)                                  | Bangla UI strings exist; data-bound charts weak             |
+| **Apple Keynote**                         | Medium (Magic Move)          | Small (Apple-curated)               | None                                                               | None                                       | Apple-only continuity                                           | None                                                             | iCloud-family only                          | None                                                    | Limited                                                     |
+| **Google Slides**                         | Low–Medium                   | Medium (templates gallery)          | Linked Sheets, but static snapshots in presentation                | "Publish to web" is a stale embed          | Limited Q&A in Meet; not native                                 | Gemini "Help me design" early                                    | Workspace DLP + audit                       | Apps Script, not first-class                            | Bangla UI exists; chart binding shallow                     |
+| **Prezi**                                 | High (zooming canvas)        | Medium                              | None                                                               | Public link only                           | Limited                                                         | None                                                             | Weak                                        | None                                                    | Limited                                                     |
+| **Beautiful.ai**                          | Medium (opinionated layouts) | Medium (curated)                    | Some chart live update                                             | Web link; not customizable                 | None                                                            | "Smart slides" rule-based                                        | SSO only                                    | None                                                    | Weak                                                        |
+| **Gamma**                                 | Medium (web-first blocks)    | Medium (community)                  | Limited embed of live blocks                                       | Yes, web-first design                      | None                                                            | Strong prompt-to-deck                                            | Basic                                       | None                                                    | Weak                                                        |
+| **Pitch**                                 | Medium–High                  | Medium                              | Chart live refresh in editor; not on stage                         | Web link, brand-controlled                 | Lightweight video room                                          | Light AI assist                                                  | Strong (workspace roles)                    | Public API only                                         | Weak                                                        |
+| **Tome**                                  | Medium (cards)               | Small                               | Lightweight embeds                                                 | Yes, scrollytelling                        | None                                                            | Strong narrative AI                                              | None                                        | None                                                    | Weak                                                        |
+| **Miro**                                  | Very High (canvas)           | Medium (templates)                  | None (whiteboard only)                                             | Board link; not a deck                     | Realtime collab yes; presenter mode weak                        | AI cluster/sort only                                             | SSO + audit                                 | Apps framework, not MCP-grade                           | Weak                                                        |
+| **Figma**                                 | Highest in class             | Massive (community + FigJam)        | No native charts; only embeds                                      | No deck model                              | No presenter mode                                               | None for decks                                                   | Strong enterprise                           | Plugin runtime, but not deck-aware                      | Bangla UI; no deck semantics                                |
+| **Canva**                                 | Medium (Magic Studio)        | Largest in market                   | Charts in editor; not live on stage                                | "Present" URL; not full website            | Limited live presentation                                       | Magic Design strong                                              | Brand kit + roles                           | Apps SDK, not deck engine                               | Bangla UI; live data limited                                |
+| **Looker / Tableau / Power BI / Grafana** | N/A (analytics UIs)          | N/A                                 | Yes (native)                                                       | Dashboard embed only                       | None for presenting decks                                       | NLQ                                                              | Strong                                      | APIs/MCP emerging                                       | Strong                                                      |
+| **Domio (this product)**                  | Figma-grade infinite canvas  | Canva-scale ecosystem + marketplace | First-class live data on stage, scenario switcher, what-if sliders | Deck-as-website, SEO-ready, custom domains | Phone-as-remote, audience join, presenter failover, parking lot | Full copilot: generate, redesign, rehearse, summarize, freshness | SSO/SCIM, DLP, audit, residency, governance | First-class MCP server, deck-as-code, agent audit trail | Bangla-first; BDT/payments; intermittent-connectivity-first |
 
 ### What Domio is genuinely differentiated on
 
 1. **Live-data charts that re-render during the presentation**, with scenario switching, what-if sliders, and audience filter drill-down. PowerPoint, Keynote, and Slides do not do this; BI tools do data but not presentation; Canva/Pitch do not re-render under presenter control mid-talk.
 2. **Deck-as-website with deck-as-code parity.** Every published deck has a URL, is SEO-indexable, can be embedded live in Notion/docs, and has a structured YAML/JSON source-of-truth that agents and humans both edit. No competitor treats the deck as both a visual artifact and a structured program.
 3. **Real-time presenter + audience infrastructure as a first-class subsystem.** QR-join audience, live polls/Q&A/quizzes/word clouds, two-way slides, parking lot, presenter failover from phone, sub-second synced audience views across continents.
-4. **First-class MCP server and agentic surface.** Not an API bolt-on; the deck engine *is* the MCP server. Granular tools, agent-scoped permissions, dry-run mode, agent audit trail distinct from human edits, tool-call transcript.
+4. **First-class MCP server and agentic surface.** Not an API bolt-on; the deck engine _is_ the MCP server. Granular tools, agent-scoped permissions, dry-run mode, agent audit trail distinct from human edits, tool-call transcript.
 5. **Local-first / offline-first posture** with a self-hostable engine (per feature #232). Critical for Bangladesh and any privacy-conscious enterprise.
 6. **Enterprise governance that does not punish design power** — brand-locked regions, auto-updating shared slides, content expiry, deck inheritance trees, content DLP — these exist in pieces elsewhere, not together.
 
@@ -50,7 +50,7 @@ This is a saturated category if you define it narrowly. It is an empty category 
 
 - Not a CRM, marketing automation suite, or pure BI tool. We embed data; we do not own the warehouse.
 - Not a video editor. We have screen-recording (#80), narrated auto-play (#162), and MP4 export (#163), but not multi-track timeline editing.
-- Not a doc-tool like Notion or Confluence. We can be embedded *into* them, not replace them.
+- Not a doc-tool like Notion or Confluence. We can be embedded _into_ them, not replace them.
 
 ---
 
@@ -66,18 +66,18 @@ This is a saturated category if you define it narrowly. It is an empty category 
 
 The product must serve nine distinct primary personas. Each gets its own UI surface and its own success metric; none is "primary" in a way that lets us neglect the others.
 
-| # | Persona | Skill | Device | Primary surface | Primary jobs-to-be-done | Friction today | Domio's answer |
-|---|---|---|---|---|---|---|---|
-| P1 | **Designer** (in-house or agency) | High design literacy | Desktop (Chromium/Safari) + drawing tablet | Editor canvas, design tokens, component library | Build a brand-perfect deck fast, hand it off to non-designers safely | Templates break under their own weight; brand consistency is manual | Components with smart props, brand-locked regions, token system, design linting |
-| P2 | **Executive / presenter** | Low design skill, high stakes | Laptop + phone | Presenter view, phone remote, rehearsal | Stand in front of a board and not embarrass themselves | Rehearsal is solo; phone-as-remote is fragile; failover doesn't work | Phone-as-remote + confidence monitor, AI rehearsal coach, presenter failover, presenter view on any screen |
-| P3 | **Presenter (broad)** — sales, trainer, teacher, keynote speaker | Variable | Laptop + phone, often on stage | Presenter + audience + embed-in-Zoom/Meet | Engage the room, answer questions, track time | Audience tools require a separate app; meeting tools don't integrate | Native audience join via QR, polls/Q&A/quizzes, deep meeting-tool integration |
-| P4 | **Analyst / data person** | High data skill | Desktop | Editor + data binding panel + scenario UI | Put live numbers into a deck without re-typing | Every quarter is a re-paste from a warehouse; scenarios are duplicated slides | Live data sources, scenario switcher, what-if sliders, formula engine, provenance chips |
-| P5 | **Educator / trainer** | Medium | Laptop, classroom projector, student phones | Editor + presenter + audience (quiz/poll) | Run a class with engagement capture and per-student handout | Engagement tools are a separate paid product; no LMS-grade analytics | Built-in quizzes/leaderboards, attendance + engagement capture, per-student personalized handouts |
-| P6 | **Marketer / content operator** | Medium | Desktop | Editor + share/publish + analytics | Send the right deck to the right audience and know what happened | No funnel view; no per-deck A/B; no CRM write-back | Per-link content control, analytics + CRM sync, A/B testing, funnel view |
-| P7 | **Reviewer / approver** (legal, brand, exec) | Variable | Desktop, mobile | Comment + suggestion mode + approval workflow | Sign off on a deck without breaking it | Comments are in email; version history is filename-based | Comments pinned to elements, suggestion mode, approval workflow, legal hold |
-| P8 | **Admin / workspace owner** | Medium | Desktop | Admin console + governance dashboards | Keep the org on-brand, licensed, audit-ready | Governance lives in a separate tool if at all | Brand governance dashboard, DLP, audit, retention, residency controls |
-| P9 | **Creator / marketplace seller** | Variable | Desktop | Component/theme/template editor + marketplace portal | Sell premium components and earn revenue | No marketplace anywhere in this category | Community marketplace, revenue share, previewable live demos, theme marketplace |
-| P10 | **Developer / agent builder** | High technical | Desktop + CLI | MCP server, public API, CLI, plugin SDK, deck-as-code YAML | Drive the deck engine programmatically; build agents and integrations | Most "AI in slides" is a black box with no real interface | First-class MCP server, granular tools, deck-as-code, CLI, agent-scoped permissions, agent audit trail |
+| #   | Persona                                                          | Skill                         | Device                                      | Primary surface                                            | Primary jobs-to-be-done                                               | Friction today                                                                | Domio's answer                                                                                             |
+| --- | ---------------------------------------------------------------- | ----------------------------- | ------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| P1  | **Designer** (in-house or agency)                                | High design literacy          | Desktop (Chromium/Safari) + drawing tablet  | Editor canvas, design tokens, component library            | Build a brand-perfect deck fast, hand it off to non-designers safely  | Templates break under their own weight; brand consistency is manual           | Components with smart props, brand-locked regions, token system, design linting                            |
+| P2  | **Executive / presenter**                                        | Low design skill, high stakes | Laptop + phone                              | Presenter view, phone remote, rehearsal                    | Stand in front of a board and not embarrass themselves                | Rehearsal is solo; phone-as-remote is fragile; failover doesn't work          | Phone-as-remote + confidence monitor, AI rehearsal coach, presenter failover, presenter view on any screen |
+| P3  | **Presenter (broad)** — sales, trainer, teacher, keynote speaker | Variable                      | Laptop + phone, often on stage              | Presenter + audience + embed-in-Zoom/Meet                  | Engage the room, answer questions, track time                         | Audience tools require a separate app; meeting tools don't integrate          | Native audience join via QR, polls/Q&A/quizzes, deep meeting-tool integration                              |
+| P4  | **Analyst / data person**                                        | High data skill               | Desktop                                     | Editor + data binding panel + scenario UI                  | Put live numbers into a deck without re-typing                        | Every quarter is a re-paste from a warehouse; scenarios are duplicated slides | Live data sources, scenario switcher, what-if sliders, formula engine, provenance chips                    |
+| P5  | **Educator / trainer**                                           | Medium                        | Laptop, classroom projector, student phones | Editor + presenter + audience (quiz/poll)                  | Run a class with engagement capture and per-student handout           | Engagement tools are a separate paid product; no LMS-grade analytics          | Built-in quizzes/leaderboards, attendance + engagement capture, per-student personalized handouts          |
+| P6  | **Marketer / content operator**                                  | Medium                        | Desktop                                     | Editor + share/publish + analytics                         | Send the right deck to the right audience and know what happened      | No funnel view; no per-deck A/B; no CRM write-back                            | Per-link content control, analytics + CRM sync, A/B testing, funnel view                                   |
+| P7  | **Reviewer / approver** (legal, brand, exec)                     | Variable                      | Desktop, mobile                             | Comment + suggestion mode + approval workflow              | Sign off on a deck without breaking it                                | Comments are in email; version history is filename-based                      | Comments pinned to elements, suggestion mode, approval workflow, legal hold                                |
+| P8  | **Admin / workspace owner**                                      | Medium                        | Desktop                                     | Admin console + governance dashboards                      | Keep the org on-brand, licensed, audit-ready                          | Governance lives in a separate tool if at all                                 | Brand governance dashboard, DLP, audit, retention, residency controls                                      |
+| P9  | **Creator / marketplace seller**                                 | Variable                      | Desktop                                     | Component/theme/template editor + marketplace portal       | Sell premium components and earn revenue                              | No marketplace anywhere in this category                                      | Community marketplace, revenue share, previewable live demos, theme marketplace                            |
+| P10 | **Developer / agent builder**                                    | High technical                | Desktop + CLI                               | MCP server, public API, CLI, plugin SDK, deck-as-code YAML | Drive the deck engine programmatically; build agents and integrations | Most "AI in slides" is a black box with no real interface                     | First-class MCP server, granular tools, deck-as-code, CLI, agent-scoped permissions, agent audit trail     |
 
 ### Secondary audiences
 
@@ -96,6 +96,7 @@ The persona→feature matrix is large; it lives in `02-requirements-engineering.
 A JTBD frame keeps the feature list honest. Each JTBD is a sentence in the customer's voice. The full feature list maps to one or more JTBD; if a feature maps to none, it is suspicious.
 
 **Functional jobs (the literal task):**
+
 1. When I have to present to a board, _help me build a deck where the numbers cannot be stale_.
 2. When I'm presenting, _help me adapt the deck in real time to the room_ (skip slides, reorder, change scenarios, drill into data).
 3. When my team produces decks, _help us keep them on-brand without slowing us down_.
@@ -107,14 +108,9 @@ A JTBD frame keeps the feature list honest. Each JTBD is a sentence in the custo
 9. When my legal team needs to sign off, _help them do it without leaving the deck_.
 10. When an AI agent needs to touch my deck, _help me audit exactly what it did_.
 
-**Emotional jobs:**
-11. _Help me not be embarrassed on stage._
-12. _Help me trust that the numbers I'm showing are correct._
-13. _Help me feel like my brand is professionally represented even when I'm not a designer._
+**Emotional jobs:** 11. _Help me not be embarrassed on stage._ 12. _Help me trust that the numbers I'm showing are correct._ 13. _Help me feel like my brand is professionally represented even when I'm not a designer._
 
-**Social jobs:**
-14. _Help my team look like a single, coherent org to the outside world._
-15. _Help me ship a deck that ranks on Google / gets shared publicly as a brand asset._
+**Social jobs:** 14. _Help my team look like a single, coherent org to the outside world._ 15. _Help me ship a deck that ranks on Google / gets shared publicly as a brand asset._
 
 ---
 
@@ -124,52 +120,52 @@ We define **North Star metrics**, **acquisition metrics**, **engagement metrics*
 
 ### 1.4.1 North Star
 
-| Metric | Definition | Target (post-launch +24 months) | Source |
-|---|---|---|---|
-| Weekly Active Decks (WAD) | Distinct decks with at least one edit, view, or share event in a 7-day window | 1M | event pipeline |
-| Weekly Active Presenters (WAP) | Distinct users with a presenter-mode session ≥ 60s in a 7-day window | 250k | presenter session service |
-| Deck-as-website monthly reach | Sum of unique viewers across all public/published decks | 100M | share/view pipeline |
+| Metric                         | Definition                                                                    | Target (post-launch +24 months) | Source                    |
+| ------------------------------ | ----------------------------------------------------------------------------- | ------------------------------- | ------------------------- |
+| Weekly Active Decks (WAD)      | Distinct decks with at least one edit, view, or share event in a 7-day window | 1M                              | event pipeline            |
+| Weekly Active Presenters (WAP) | Distinct users with a presenter-mode session ≥ 60s in a 7-day window          | 250k                            | presenter session service |
+| Deck-as-website monthly reach  | Sum of unique viewers across all public/published decks                       | 100M                            | share/view pipeline       |
 
 ### 1.4.2 Acquisition
 
-| Metric | Target | Source |
-|---|---|---|
-| Self-serve signups / month | 50k by M12, 200k by M24 | auth service |
-| Activation rate (signup → first deck created in 7d) | ≥ 60% | product analytics |
-| Marketplace creator signups / month | 1k by M18 | marketplace service |
+| Metric                                              | Target                  | Source              |
+| --------------------------------------------------- | ----------------------- | ------------------- |
+| Self-serve signups / month                          | 50k by M12, 200k by M24 | auth service        |
+| Activation rate (signup → first deck created in 7d) | ≥ 60%                   | product analytics   |
+| Marketplace creator signups / month                 | 1k by M18               | marketplace service |
 
 ### 1.4.3 Engagement (per active user per week)
 
-| Metric | Target | Source |
-|---|---|---|
-| Median decks edited per WAU | ≥ 3 | editor events |
-| Median presenter-mode minutes per WAP | ≥ 30 | presenter service |
-| Median audience join rate when presenter mode active | ≥ 35% of invited | audience service |
-| % of decks with at least one live data binding | ≥ 40% by M18 | data binding service |
-| % of decks with at least one AI assist action (gen/redesign/coach) | ≥ 50% by M12 | AI service |
+| Metric                                                             | Target           | Source               |
+| ------------------------------------------------------------------ | ---------------- | -------------------- |
+| Median decks edited per WAU                                        | ≥ 3              | editor events        |
+| Median presenter-mode minutes per WAP                              | ≥ 30             | presenter service    |
+| Median audience join rate when presenter mode active               | ≥ 35% of invited | audience service     |
+| % of decks with at least one live data binding                     | ≥ 40% by M18     | data binding service |
+| % of decks with at least one AI assist action (gen/redesign/coach) | ≥ 50% by M12     | AI service           |
 
 ### 1.4.4 Quality / NFR (rolling 30-day)
 
-| Metric | Target | Source |
-|---|---|---|
-| p50 editor keystroke-to-pixel latency | ≤ 50 ms | client RUM |
-| p95 editor keystroke-to-pixel latency | ≤ 150 ms | client RUM |
-| p95 CRDT sync round-trip (multiplayer cursor) | ≤ 120 ms | realtime RUM |
-| Presenter-mode cold-start to first slide rendered | ≤ 2 s on mid-tier laptop | client RUM |
-| 10k concurrent audience join success rate | ≥ 99% | audience load tests |
-| Availability (control plane) | 99.95% monthly | uptime monitor |
-| Availability (realtime presence) | 99.9% monthly | uptime monitor |
-| WCAG 2.2 AA conformance | 100% of P1 surfaces | axe + manual audit |
-| Incident MTTR (Sev1) | ≤ 30 min | incident system |
+| Metric                                            | Target                   | Source              |
+| ------------------------------------------------- | ------------------------ | ------------------- |
+| p50 editor keystroke-to-pixel latency             | ≤ 50 ms                  | client RUM          |
+| p95 editor keystroke-to-pixel latency             | ≤ 150 ms                 | client RUM          |
+| p95 CRDT sync round-trip (multiplayer cursor)     | ≤ 120 ms                 | realtime RUM        |
+| Presenter-mode cold-start to first slide rendered | ≤ 2 s on mid-tier laptop | client RUM          |
+| 10k concurrent audience join success rate         | ≥ 99%                    | audience load tests |
+| Availability (control plane)                      | 99.95% monthly           | uptime monitor      |
+| Availability (realtime presence)                  | 99.9% monthly            | uptime monitor      |
+| WCAG 2.2 AA conformance                           | 100% of P1 surfaces      | axe + manual audit  |
+| Incident MTTR (Sev1)                              | ≤ 30 min                 | incident system     |
 
 ### 1.4.5 Business
 
-| Metric | Target | Source |
-|---|---|---|
-| Paid conversion (free → paid seat) | ≥ 5% of activated orgs by M12 | billing |
-| Net revenue retention | ≥ 120% | billing |
-| Marketplace GMV / month | $500k by M18 | marketplace |
-| Self-host deployments | ≥ 25 enterprise customers by M24 | sales |
+| Metric                             | Target                           | Source      |
+| ---------------------------------- | -------------------------------- | ----------- |
+| Paid conversion (free → paid seat) | ≥ 5% of activated orgs by M12    | billing     |
+| Net revenue retention              | ≥ 120%                           | billing     |
+| Marketplace GMV / month            | $500k by M18                     | marketplace |
+| Self-host deployments              | ≥ 25 enterprise customers by M24 | sales       |
 
 ---
 
@@ -178,6 +174,7 @@ We define **North Star metrics**, **acquisition metrics**, **engagement metrics*
 ### 1.5.1 In scope (the entire `feature-list.md` plus extension ideas)
 
 All 16 feature domains, including:
+
 - **Editor & canvas** (#1–22) — see `docs/editor-canvas.md`
 - **Components & templates** (#23–36) — see `docs/components-templates.md`
 - **Theming & branding** (#37–47) — see `docs/theming-branding.md`
@@ -199,12 +196,12 @@ All 16 feature domains, including:
 
 ### 1.5.2 Explicit non-goals (out of product scope)
 
-These are *intentional* non-goals. They are not "later" — they are "no."
+These are _intentional_ non-goals. They are not "later" — they are "no."
 
-1. **Not a CRM, marketing automation platform, or sales engagement tool.** We sync *to* CRMs; we do not host contacts, accounts, or campaigns.
-2. **Not a full data warehouse / BI authoring tool.** We *consume* data sources and embed BI dashboards; we do not author dashboards or own the warehouse.
+1. **Not a CRM, marketing automation platform, or sales engagement tool.** We sync _to_ CRMs; we do not host contacts, accounts, or campaigns.
+2. **Not a full data warehouse / BI authoring tool.** We _consume_ data sources and embed BI dashboards; we do not author dashboards or own the warehouse.
 3. **Not a video editor.** Screen recording, narrated auto-play, and MP4 export are in scope; multi-track timeline editing, color grading, and effects compositor are out of scope.
-4. **Not a document collaboration tool** (Notion/Confluence/Google Docs competitor). We embed *into* them; we do not host long-form documents.
+4. **Not a document collaboration tool** (Notion/Confluence/Google Docs competitor). We embed _into_ them; we do not host long-form documents.
 5. **Not a code IDE.** Code blocks in decks run in a sandboxed iframe (#82) but we do not provide a full IDE experience.
 6. **Not a domain-specific vertical SaaS** (e.g., a pitch deck CRM, a sales training platform). Our marketplace can host vertical add-ons; the platform does not become one.
 7. **Not an LMS.** Audience participation includes engagement capture for training, but full LMS features (SCORM/xAPI, course catalogs, certification) are not in scope — partners can integrate.
@@ -214,13 +211,15 @@ These are *intentional* non-goals. They are not "later" — they are "no."
 ### 1.5.3 Deferred within scope (sequenced, not removed)
 
 Sequenced delivery — not scope reduction — for the full platform is documented in `10-project-team-planning.md`. Examples of items intentionally late in the sequence (but still in scope):
+
 - Cross-deck knowledge graph at scale (#219, §239–240) — late because it requires rich metadata accumulation.
 - AI meeting listener (#214) — late because of privacy review and opt-in UX complexity.
 - Haptic remote feedback (#217) — late because of hardware dependency uncertainty.
 
 ### 1.5.4 Doc-inventory cross-references
 
-This planning package assumes the following docs *under* `docs/` (treated as already present; the super docs reference them):
+This planning package assumes the following docs _under_ `docs/` (treated as already present; the super docs reference them):
+
 - `editor-canvas.md` ✓
 - `components-templates.md` ✓
 - `theming-branding.md` ✓
@@ -244,31 +243,31 @@ This planning package assumes the following docs *under* `docs/` (treated as alr
 
 ### 1.6.1 Constraints
 
-| # | Constraint | Implication |
-|---|---|---|
-| C1 | Must run in modern browsers (Chromium, Firefox, Safari) on desktop and mobile Safari/Chrome on Android. IE/Edge Legacy out of scope. | Canvas engine must use WebGL2 + WebGPU where available, fall back to Canvas2D. |
-| C2 | Offline editing required (#21). CRDT sync on reconnect. | Service worker, IndexedDB-backed local store, CRDT library chosen in `06-technology-stack.md`. |
-| C3 | WCAG 2.2 AA conformance on all P1 surfaces. | Accessibility is non-negotiable; verification strategy in `03-ux-interface-planning.md`. |
-| C4 | i18n with Bangla as a tier-1 locale. | Unicode, Bangla numerals, RTL-aware typography (RTL reserved for future Arabic/Hebrew; not active in v1 but data model supports it). |
-| C5 | Multi-tenant SaaS by default; self-host option (#232) required for regulated/policy-driven customers. | Two deployment shapes from one codebase; see `08-infrastructure-devops.md`. |
-| C6 | Bangladesh PDPA 2026 + Cyber Security Ordinance 2025 + sectoral overlays (Bangladesh Bank / BTRC). | Consent, DSR, breach response, residency, audit. See `11-legal-compliance-bangladesh.md`. |
-| C7 | Currency in BDT and USD; pricing denominated in USD for global, BDT-equivalent shown for BD. | Currency stored as integer minor units; display localized. |
-| C8 | 99.95% control-plane availability, 99.9% realtime. | Architecture must be HA from day one; see `08`. |
-| C9 | Support 10k concurrent audience per live session, scaled horizontally. | Realtime tier must be elastically scalable. |
-| C10 | Marketplace creators must be paid via approved Bangladesh Bank-licensed aggregator for BD-based creators, and Stripe Connect for non-BD. | Marketplace payout pipeline is BD-payment-aware. |
+| #   | Constraint                                                                                                                               | Implication                                                                                                                          |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| C1  | Must run in modern browsers (Chromium, Firefox, Safari) on desktop and mobile Safari/Chrome on Android. IE/Edge Legacy out of scope.     | Canvas engine must use WebGL2 + WebGPU where available, fall back to Canvas2D.                                                       |
+| C2  | Offline editing required (#21). CRDT sync on reconnect.                                                                                  | Service worker, IndexedDB-backed local store, CRDT library chosen in `06-technology-stack.md`.                                       |
+| C3  | WCAG 2.2 AA conformance on all P1 surfaces.                                                                                              | Accessibility is non-negotiable; verification strategy in `03-ux-interface-planning.md`.                                             |
+| C4  | i18n with Bangla as a tier-1 locale.                                                                                                     | Unicode, Bangla numerals, RTL-aware typography (RTL reserved for future Arabic/Hebrew; not active in v1 but data model supports it). |
+| C5  | Multi-tenant SaaS by default; self-host option (#232) required for regulated/policy-driven customers.                                    | Two deployment shapes from one codebase; see `08-infrastructure-devops.md`.                                                          |
+| C6  | Bangladesh PDPA 2026 + Cyber Security Ordinance 2025 + sectoral overlays (Bangladesh Bank / BTRC).                                       | Consent, DSR, breach response, residency, audit. See `11-legal-compliance-bangladesh.md`.                                            |
+| C7  | Currency in BDT and USD; pricing denominated in USD for global, BDT-equivalent shown for BD.                                             | Currency stored as integer minor units; display localized.                                                                           |
+| C8  | 99.95% control-plane availability, 99.9% realtime.                                                                                       | Architecture must be HA from day one; see `08`.                                                                                      |
+| C9  | Support 10k concurrent audience per live session, scaled horizontally.                                                                   | Realtime tier must be elastically scalable.                                                                                          |
+| C10 | Marketplace creators must be paid via approved Bangladesh Bank-licensed aggregator for BD-based creators, and Stripe Connect for non-BD. | Marketplace payout pipeline is BD-payment-aware.                                                                                     |
 
 ### 1.6.2 Assumptions
 
-| # | Assumption | Risk if wrong |
-|---|---|---|
-| A1 | Target market is global English-first, with tier-2 locales: Bangla, Spanish, Portuguese, French, Arabic (RTL), Japanese, Hindi. | If we must add many RTL/Devanagari locales early, schedule shifts. |
-| A2 | Self-host customers run Kubernetes or a single-node Docker compose. | If many need bare-metal, ops cost rises. |
-| A3 | A "scene graph + CRDT" data model can represent every deck domain (3D, charts, prototyping, animation). | If some domain resists, fallback is feature cut (avoided by proof-of-concept in milestone 1). |
-| A4 | AI model providers (OpenAI, Anthropic, open-weight) remain available with acceptable latency. | If latency/availability degrades, we route to local open-weight models (see `06`). |
-| A5 | CRDT (Yjs) scales to the document sizes we expect (10k-element decks, 50+ concurrent editors) without unacceptable memory. | Mitigation: sub-document CRDTs + scene graph sharding. |
-| A6 | Real-time audience scale achieved with managed realtime (e.g., LiveKit/Liveblocks/Ably) or self-hosted (NATS + custom). | See `06-technology-stack.md` §6.4. |
-| A7 | bKash/Nagad/Rocket APIs and aggregators (SSLCommerz, ShurjoPay) remain stable and Bangladesh Bank-approved. | Re-validate quarterly. |
-| A8 | PDPA 2026 enforcement is active May 2027; we treat this as a hard deadline. | If earlier, runway shorter. |
+| #   | Assumption                                                                                                                      | Risk if wrong                                                                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| A1  | Target market is global English-first, with tier-2 locales: Bangla, Spanish, Portuguese, French, Arabic (RTL), Japanese, Hindi. | If we must add many RTL/Devanagari locales early, schedule shifts.                            |
+| A2  | Self-host customers run Kubernetes or a single-node Docker compose.                                                             | If many need bare-metal, ops cost rises.                                                      |
+| A3  | A "scene graph + CRDT" data model can represent every deck domain (3D, charts, prototyping, animation).                         | If some domain resists, fallback is feature cut (avoided by proof-of-concept in milestone 1). |
+| A4  | AI model providers (OpenAI, Anthropic, open-weight) remain available with acceptable latency.                                   | If latency/availability degrades, we route to local open-weight models (see `06`).            |
+| A5  | CRDT (Yjs) scales to the document sizes we expect (10k-element decks, 50+ concurrent editors) without unacceptable memory.      | Mitigation: sub-document CRDTs + scene graph sharding.                                        |
+| A6  | Real-time audience scale achieved with managed realtime (e.g., LiveKit/Liveblocks/Ably) or self-hosted (NATS + custom).         | See `06-technology-stack.md` §6.4.                                                            |
+| A7  | bKash/Nagad/Rocket APIs and aggregators (SSLCommerz, ShurjoPay) remain stable and Bangladesh Bank-approved.                     | Re-validate quarterly.                                                                        |
+| A8  | PDPA 2026 enforcement is active May 2027; we treat this as a hard deadline.                                                     | If earlier, runway shorter.                                                                   |
 
 ---
 
@@ -291,46 +290,47 @@ These ten principles are the tie-breaker when two reasonable design choices conf
 
 ## 1.8 Risks and Mitigations
 
-| ID | Risk | Probability | Impact | Mitigation |
-|---|---|---|---|---|
-| R1 | CRDT memory blow-up for very large decks | M | H | Sub-document sharding, scene-graph paging, periodic GC of tombstones |
-| R2 | Live data source reliability on stage | M | H | Snapshot fallback, source health indicator (#63), pre-presentation warmup |
-| R3 | AI model cost overruns | M | M | Caching, prompt compression, model tiering per task |
-| R4 | PDPA enforcement begins earlier than expected | L | H | Compliance runway (consent, DSR, retention) built in milestone 1; see `11` |
-| R5 | Self-host customers run unsupported configurations | M | M | Documented reference architectures; "Enterprise Self-Host" support tier |
-| R6 | Marketplace quality collapse | M | M | Editorial curation, review process, takedown tooling, creator reputation |
-| R7 | WebGPU adoption lags on Safari | M | M | WebGL2 fallback path; progressive enhancement |
-| R8 | 10k audience scale doesn't hold under load | L | H | Quarterly load tests, chaos drills, autoscaling validated before public GA |
-| R9 | Brand governance over-applies and frustrates designers | M | M | Admin configurability, "soft" vs "hard" lock distinction |
-| R10 | AI hallucinations in generated decks | M | H | Citation requirement (#109), confidence surfacing (#238), approval gates for high-stakes templates |
-| R11 | Bangladesh Bank/bKash API changes | L | M | Aggregator abstraction layer; quarterly contract review |
-| R12 | Browser sandbox escapes (plugin/code block) | L | H | iframe sandbox + capability tokens + CSP; pen-test before each plugin SDK GA |
-| R13 | Gaze-tracking / webcam features cause privacy concerns | M | M | Opt-in, on-device processing where feasible, clear disclosure, no upload of biometric data |
-| R14 | Currency conversion / BDT volatility for paid plans | L | L | USD-denominated pricing with BDT display; hedging at finance layer |
-| R15 | Project team underestimates MCP surface maintenance | M | M | Treat MCP as a product with its own versioning, deprecation, and owner |
+| ID  | Risk                                                   | Probability | Impact | Mitigation                                                                                         |
+| --- | ------------------------------------------------------ | ----------- | ------ | -------------------------------------------------------------------------------------------------- |
+| R1  | CRDT memory blow-up for very large decks               | M           | H      | Sub-document sharding, scene-graph paging, periodic GC of tombstones                               |
+| R2  | Live data source reliability on stage                  | M           | H      | Snapshot fallback, source health indicator (#63), pre-presentation warmup                          |
+| R3  | AI model cost overruns                                 | M           | M      | Caching, prompt compression, model tiering per task                                                |
+| R4  | PDPA enforcement begins earlier than expected          | L           | H      | Compliance runway (consent, DSR, retention) built in milestone 1; see `11`                         |
+| R5  | Self-host customers run unsupported configurations     | M           | M      | Documented reference architectures; "Enterprise Self-Host" support tier                            |
+| R6  | Marketplace quality collapse                           | M           | M      | Editorial curation, review process, takedown tooling, creator reputation                           |
+| R7  | WebGPU adoption lags on Safari                         | M           | M      | WebGL2 fallback path; progressive enhancement                                                      |
+| R8  | 10k audience scale doesn't hold under load             | L           | H      | Quarterly load tests, chaos drills, autoscaling validated before public GA                         |
+| R9  | Brand governance over-applies and frustrates designers | M           | M      | Admin configurability, "soft" vs "hard" lock distinction                                           |
+| R10 | AI hallucinations in generated decks                   | M           | H      | Citation requirement (#109), confidence surfacing (#238), approval gates for high-stakes templates |
+| R11 | Bangladesh Bank/bKash API changes                      | L           | M      | Aggregator abstraction layer; quarterly contract review                                            |
+| R12 | Browser sandbox escapes (plugin/code block)            | L           | H      | iframe sandbox + capability tokens + CSP; pen-test before each plugin SDK GA                       |
+| R13 | Gaze-tracking / webcam features cause privacy concerns | M           | M      | Opt-in, on-device processing where feasible, clear disclosure, no upload of biometric data         |
+| R14 | Currency conversion / BDT volatility for paid plans    | L           | L      | USD-denominated pricing with BDT display; hedging at finance layer                                 |
+| R15 | Project team underestimates MCP surface maintenance    | M           | M      | Treat MCP as a product with its own versioning, deprecation, and owner                             |
 
 ---
 
 ## 1.9 Decisions Log (this document)
 
-| ID | Decision | Rationale | Alternative considered |
-|---|---|---|---|
-| D-PD-01 | Treat full feature list as in-scope; use staged delivery, not MVP cuts. | User explicit instruction; long-term scalable architecture > short-term hack. | "MVP cut" — rejected as misaligned with the brief. |
-| D-PD-02 | Modular monolith control plane + independent data-plane workers. | Faster to ship, easier to refactor, clear seam for later split. | Pure microservices — rejected as premature. Pure monolith — rejected for AI/renderer scale. See `04-system-architecture.md`. |
-| D-PD-03 | First-class MCP server as a product surface, not an API afterthought. | Differentiator and strategic positioning. | Bolt-on REST API only — rejected. Both — accepted; MCP is the primary, REST secondary. |
-| D-PD-04 | Self-host capability is required (not optional). | Enterprise sales, regulated industries, BD market, privacy-conscious users. | SaaS-only — rejected as too narrow. |
-| D-PD-05 | Bangla is tier-1, not tier-2. | BD is a stated market; mobile-first + intermittent-connectivity are explicit constraints. | English-only-then-localize — rejected. |
-| D-PD-06 | Real-time audience infrastructure is first-party, not a third-party embed. | Differentiator; integration depth required. | Embed Zoom/Meet — accepted for *cross-posting*, but native audience join is first-party. |
-| D-PD-07 | Live data on stage is non-negotiable. | Core differentiator; defining feature. | "Static charts only" — rejected. |
-| D-PD-08 | CRDT (Yjs) chosen over Automerge for default. | Performance, ecosystem, awareness. See `06`. | Automerge — kept as fallback option if Yjs hits memory limits. |
-| D-PD-09 | Two-currency pricing model (USD + BDT display). | Local purchasing power parity without operational complexity. | USD-only — rejected for BD conversion friction. |
-| D-PD-10 | Treat `collaboration-workflow.md` as a precondition doc — flag if absent at review time. | The super docs must reference it. | Write it inside this doc — rejected; must stay in its own domain doc. |
+| ID      | Decision                                                                                 | Rationale                                                                                 | Alternative considered                                                                                                       |
+| ------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| D-PD-01 | Treat full feature list as in-scope; use staged delivery, not MVP cuts.                  | User explicit instruction; long-term scalable architecture > short-term hack.             | "MVP cut" — rejected as misaligned with the brief.                                                                           |
+| D-PD-02 | Modular monolith control plane + independent data-plane workers.                         | Faster to ship, easier to refactor, clear seam for later split.                           | Pure microservices — rejected as premature. Pure monolith — rejected for AI/renderer scale. See `04-system-architecture.md`. |
+| D-PD-03 | First-class MCP server as a product surface, not an API afterthought.                    | Differentiator and strategic positioning.                                                 | Bolt-on REST API only — rejected. Both — accepted; MCP is the primary, REST secondary.                                       |
+| D-PD-04 | Self-host capability is required (not optional).                                         | Enterprise sales, regulated industries, BD market, privacy-conscious users.               | SaaS-only — rejected as too narrow.                                                                                          |
+| D-PD-05 | Bangla is tier-1, not tier-2.                                                            | BD is a stated market; mobile-first + intermittent-connectivity are explicit constraints. | English-only-then-localize — rejected.                                                                                       |
+| D-PD-06 | Real-time audience infrastructure is first-party, not a third-party embed.               | Differentiator; integration depth required.                                               | Embed Zoom/Meet — accepted for _cross-posting_, but native audience join is first-party.                                     |
+| D-PD-07 | Live data on stage is non-negotiable.                                                    | Core differentiator; defining feature.                                                    | "Static charts only" — rejected.                                                                                             |
+| D-PD-08 | CRDT (Yjs) chosen over Automerge for default.                                            | Performance, ecosystem, awareness. See `06`.                                              | Automerge — kept as fallback option if Yjs hits memory limits.                                                               |
+| D-PD-09 | Two-currency pricing model (USD + BDT display).                                          | Local purchasing power parity without operational complexity.                             | USD-only — rejected for BD conversion friction.                                                                              |
+| D-PD-10 | Treat `collaboration-workflow.md` as a precondition doc — flag if absent at review time. | The super docs must reference it.                                                         | Write it inside this doc — rejected; must stay in its own domain doc.                                                        |
 
 ---
 
 ## 1.10 Acceptance Criteria (this document)
 
 This doc is "done" when:
+
 - [x] Competitive landscape covered with a comparison table and explicit differentiation.
 - [x] Problem statement written in 2–3 sentences.
 - [x] All ten personas enumerated with skill/device/surface/JTBD.

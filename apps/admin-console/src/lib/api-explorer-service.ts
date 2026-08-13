@@ -203,9 +203,7 @@ function joinUrl(path: string, params: Record<string, string>): string {
     return v !== undefined && v !== '' ? encodeURIComponent(v) : `:${key}`;
   });
 
-  const remaining = Object.entries(params).filter(
-    ([k]) => !path.includes(`:${k}`),
-  );
+  const remaining = Object.entries(params).filter(([k]) => !path.includes(`:${k}`));
   const url = new URL(cleaned, API_BASE);
   for (const [k, v] of remaining) {
     if (v !== '') url.searchParams.set(k, v);
@@ -233,9 +231,7 @@ function mockResponse(opts: ExecuteRequestOptions): ApiExplorerResponse {
   // Prefer any id that was substituted into the path; otherwise fall
   // back to a generated short id.
   const provided = opts.params['id'];
-  const id = (provided && provided !== '')
-    ? provided
-    : Math.random().toString(36).slice(2, 8);
+  const id = provided && provided !== '' ? provided : Math.random().toString(36).slice(2, 8);
   const isWrite = opts.method !== 'GET' && opts.method !== 'DELETE';
 
   let body: Record<string, unknown> = {};
@@ -251,11 +247,19 @@ function mockResponse(opts: ExecuteRequestOptions): ApiExplorerResponse {
     };
   } else if (opts.path.includes('/v1/decks/') && opts.method === 'GET') {
     body = { id, title: 'Q3 launch', slides: 12, owner: 'u-alice' };
-  } else if (opts.path.includes('/v1/sessions') && opts.method === 'GET' && !opts.path.includes('/advance')) {
+  } else if (
+    opts.path.includes('/v1/sessions') &&
+    opts.method === 'GET' &&
+    !opts.path.includes('/advance')
+  ) {
     body = { id, status: 'live', attendees: 12, current_slide: 3 };
   } else if (opts.path.includes('/v1/analytics/')) {
     body = { id, views: 182, completion: 0.74, engagement: 0.62, range: '30d' };
-  } else if (opts.path.includes('/v1/marketplace/listings') && opts.method === 'GET' && !opts.path.match(/listings\/[^/]+$/)) {
+  } else if (
+    opts.path.includes('/v1/marketplace/listings') &&
+    opts.method === 'GET' &&
+    !opts.path.match(/listings\/[^/]+$/)
+  ) {
     body = {
       items: [
         { id: 'lst-42', title: 'Sales closing playbook', price_cents: 4900 },
@@ -304,9 +308,7 @@ function safeJsonParse(s: string | undefined): unknown {
   }
 }
 
-export async function executeRequest(
-  opts: ExecuteRequestOptions,
-): Promise<ApiExplorerResponse> {
+export async function executeRequest(opts: ExecuteRequestOptions): Promise<ApiExplorerResponse> {
   const url = joinUrl(opts.path, opts.params);
   const headers: Record<string, string> = {
     accept: 'application/json',
@@ -318,9 +320,7 @@ export async function executeRequest(
     method: opts.method,
     headers,
     cache: 'no-store',
-    ...(opts.body !== undefined && opts.body !== ''
-      ? { body: opts.body }
-      : {}),
+    ...(opts.body !== undefined && opts.body !== '' ? { body: opts.body } : {}),
   };
 
   const started = Date.now();
@@ -345,9 +345,7 @@ export async function executeRequest(
 
 const SNIPPET_STORE: SavedSnippet[] = [];
 
-export async function saveSnippet(
-  opts: SaveSnippetOptions,
-): Promise<{ id: string }> {
+export async function saveSnippet(opts: SaveSnippetOptions): Promise<{ id: string }> {
   const id = `snip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   const snippet: SavedSnippet = {
     id,

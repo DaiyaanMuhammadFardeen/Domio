@@ -101,9 +101,7 @@ export default function TakedownDetailPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Takedown {id}
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Takedown {id}</h1>
         <p className="mt-1 text-sm text-slate-500">
           Filing party, respondent, evidence, statement, and resolution history.
         </p>
@@ -132,15 +130,11 @@ export default function TakedownDetailPage() {
             <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Request ID
             </div>
-            <div className="mt-0.5 font-mono text-sm text-slate-900">
-              {request.request_id}
-            </div>
+            <div className="mt-0.5 font-mono text-sm text-slate-900">{request.request_id}</div>
             <div className="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">
               Listing
             </div>
-            <div className="mt-0.5 font-mono text-sm text-slate-900">
-              {request.listing_id}
-            </div>
+            <div className="mt-0.5 font-mono text-sm text-slate-900">{request.listing_id}</div>
           </header>
           <TakedownDetailPanel
             request={request}

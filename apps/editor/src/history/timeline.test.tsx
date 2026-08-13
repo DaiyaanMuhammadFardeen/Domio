@@ -3,8 +3,20 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Timeline, type TimelineEntry } from './timeline.js';
 
 const ENTRIES: TimelineEntry[] = [
-  { id: '1', kind: 'local', timestamp: '2026-08-01T10:00:00Z', author: { id: 'u1', name: 'Ada' }, label: 'Move logo' },
-  { id: '2', kind: 'checkpoint', timestamp: '2026-08-01T10:05:00Z', author: { id: 'u1', name: 'Ada' }, label: 'v1.0' },
+  {
+    id: '1',
+    kind: 'local',
+    timestamp: '2026-08-01T10:00:00Z',
+    author: { id: 'u1', name: 'Ada' },
+    label: 'Move logo',
+  },
+  {
+    id: '2',
+    kind: 'checkpoint',
+    timestamp: '2026-08-01T10:05:00Z',
+    author: { id: 'u1', name: 'Ada' },
+    label: 'v1.0',
+  },
 ];
 
 describe('Timeline', () => {

@@ -140,9 +140,7 @@ describe('change-feed-service — replayChangeFeed', () => {
     const start = end - 4 * 60_000; // 4-minute window inside the seed
     const ops = await replayChangeFeed('deck-1', start, end);
     expect(ops.length).toBeGreaterThan(0);
-    expect(ops.every((o) => o.timestamp_ms >= start && o.timestamp_ms < end)).toBe(
-      true,
-    );
+    expect(ops.every((o) => o.timestamp_ms >= start && o.timestamp_ms < end)).toBe(true);
   });
 
   it('returns an empty array when upstream returns an empty replay', async () => {
@@ -159,9 +157,7 @@ describe('change-feed-service — replayChangeFeed', () => {
     const start = seedWindowStartMs();
     const ops = await replayChangeFeed('deck-1', start, end);
     expect(ops.length).toBeGreaterThan(0);
-    expect(ops.every((o) => o.timestamp_ms >= start && o.timestamp_ms < end)).toBe(
-      true,
-    );
+    expect(ops.every((o) => o.timestamp_ms >= start && o.timestamp_ms < end)).toBe(true);
   });
 
   it('does not call fetch for an empty deckId', async () => {

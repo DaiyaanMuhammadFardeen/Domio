@@ -110,9 +110,7 @@ function emptyState(workspaceId: string): OnboardingState {
 }
 
 function advance(state: OnboardingState, step: OnboardingStep): OnboardingState {
-  const completed = state.completed.includes(step)
-    ? state.completed
-    : [...state.completed, step];
+  const completed = state.completed.includes(step) ? state.completed : [...state.completed, step];
   const idx = ONBOARDING_STEPS.indexOf(step);
   const nextIdx = idx + 1 < ONBOARDING_STEPS.length ? idx + 1 : idx;
   const current_step = ONBOARDING_STEPS[nextIdx] ?? state.current_step;
@@ -175,10 +173,7 @@ export async function submitIdentity(
   }
 
   const current = await getOnboarding(workspaceId);
-  const updated: OnboardingState = advance(
-    merged(current, { identity }),
-    'identity',
-  );
+  const updated: OnboardingState = advance(merged(current, { identity }), 'identity');
   STORE.set(workspaceId, updated);
   return updated;
 }
@@ -191,7 +186,8 @@ export async function submitPayout(
     const base: OnboardingPayout = { method: payload.method };
     if (payload.method === 'bank' && payload.last4) base.last4 = payload.last4;
     if (payload.method === 'stripe' && payload.stripe_id) base.stripe_id = payload.stripe_id;
-    if (payload.method === 'paypal' && payload.paypal_email) base.paypal_email = payload.paypal_email;
+    if (payload.method === 'paypal' && payload.paypal_email)
+      base.paypal_email = payload.paypal_email;
     return base;
   })();
 

@@ -70,7 +70,10 @@ export class StyleClipboardController {
   }
 }
 
-function mapTheme(mapping: Record<string, string>, destination: Record<string, string>): Record<string, string> {
+function mapTheme(
+  mapping: Record<string, string>,
+  destination: Record<string, string>,
+): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(mapping)) {
     const target = destination[key];
@@ -87,7 +90,11 @@ function findElement(doc: DeckDocument, id: string): Element | null {
   return null;
 }
 
-function mapDocument(doc: DeckDocument, targetId: string, nextStyle: Record<string, unknown>): DeckDocument {
+function mapDocument(
+  doc: DeckDocument,
+  targetId: string,
+  nextStyle: Record<string, unknown>,
+): DeckDocument {
   return {
     ...doc,
     slides: doc.slides.map((slide) => ({

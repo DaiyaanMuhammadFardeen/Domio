@@ -4,7 +4,15 @@
   "title": "CollabSuggestionCreated",
   "description": "Emitted when a new suggestion is created on a deck element.",
   "type": "object",
-  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "required": [
+    "event_id",
+    "event_type",
+    "ts_ms",
+    "workspace_id",
+    "actor_id",
+    "actor_type",
+    "payload"
+  ],
   "properties": {
     "event_id": {
       "type": "string",
@@ -33,7 +41,14 @@
     },
     "payload": {
       "type": "object",
-      "required": ["suggestion_id", "deck_id", "author_id", "target_type", "target_id", "operation"],
+      "required": [
+        "suggestion_id",
+        "deck_id",
+        "author_id",
+        "target_type",
+        "target_id",
+        "operation"
+      ],
       "properties": {
         "suggestion_id": {
           "type": "string"

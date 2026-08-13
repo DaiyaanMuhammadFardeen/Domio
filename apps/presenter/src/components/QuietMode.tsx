@@ -68,7 +68,10 @@ export interface QuietModeBadgeProps {
   readonly dataTestId?: string;
 }
 
-export function QuietModeBadge({ quiet, dataTestId = 'quiet-mode-badge' }: QuietModeBadgeProps): ReactElement | null {
+export function QuietModeBadge({
+  quiet,
+  dataTestId = 'quiet-mode-badge',
+}: QuietModeBadgeProps): ReactElement | null {
   if (!quiet) return null;
   return (
     <span

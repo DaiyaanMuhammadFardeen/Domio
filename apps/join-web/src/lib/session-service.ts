@@ -75,7 +75,9 @@ export async function fetchBundle(input: {
   fetch?: typeof fetch;
 }): Promise<AudienceJoinBundle> {
   const f = input.fetch ?? fetch;
-  const res = await f(`${input.apiBase}/v1/audience/sessions/${input.sessionId}/bundle?audience_session_id=${encodeURIComponent(input.audienceSessionId)}`);
+  const res = await f(
+    `${input.apiBase}/v1/audience/sessions/${input.sessionId}/bundle?audience_session_id=${encodeURIComponent(input.audienceSessionId)}`,
+  );
   if (!res.ok) throw new JoinError(res.status, 'BUNDLE_FAILED', `bundle: ${res.status}`);
   return (await res.json()) as AudienceJoinBundle;
 }

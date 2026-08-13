@@ -30,9 +30,7 @@
  */
 
 import type { TimelineService } from './service.js';
-import {
-  EasingValidationRejectedError,
-} from './service.js';
+import { EasingValidationRejectedError } from './service.js';
 import {
   TimelineNotFoundError,
   VersionConflictError,
@@ -106,7 +104,10 @@ function conflict(message: string, code: string, extra?: Record<string, unknown>
   return { status: 409, body: { error: message, code, ...(extra ?? {}) } };
 }
 function unprocessable(message: string, code: string, details?: unknown): HttpResponse {
-  return { status: 422, body: { error: message, code, ...(details !== undefined ? { details } : {}) } };
+  return {
+    status: 422,
+    body: { error: message, code, ...(details !== undefined ? { details } : {}) },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -134,7 +135,7 @@ export async function createTimelineHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
@@ -146,8 +147,19 @@ export async function createTimelineHandler(
     loop?: boolean;
     playCount?: number;
     startOffsetMs?: number;
-    tracks?: Array<{ property: string; keyframes: Array<{ timeMs: number; value: unknown; easing?: string }>; startOffsetMs?: number; easing: string }>;
-    triggers?: Array<{ kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer'; sourceId?: string; fieldPath?: string; offsetMs?: number; debounceMs?: number }>;
+    tracks?: Array<{
+      property: string;
+      keyframes: Array<{ timeMs: number; value: unknown; easing?: string }>;
+      startOffsetMs?: number;
+      easing: string;
+    }>;
+    triggers?: Array<{
+      kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer';
+      sourceId?: string;
+      fieldPath?: string;
+      offsetMs?: number;
+      debounceMs?: number;
+    }>;
   };
 
   const timeline = await ctx.service.createTimeline({
@@ -200,7 +212,7 @@ export async function patchTimelineHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
@@ -211,8 +223,19 @@ export async function patchTimelineHandler(
     playCount?: number;
     startOffsetMs?: number;
     version: number;
-    tracks?: Array<{ property: string; keyframes: Array<{ timeMs: number; value: unknown; easing?: string }>; startOffsetMs?: number; easing: string }>;
-    triggers?: Array<{ kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer'; sourceId?: string; fieldPath?: string; offsetMs?: number; debounceMs?: number }>;
+    tracks?: Array<{
+      property: string;
+      keyframes: Array<{ timeMs: number; value: unknown; easing?: string }>;
+      startOffsetMs?: number;
+      easing: string;
+    }>;
+    triggers?: Array<{
+      kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer';
+      sourceId?: string;
+      fieldPath?: string;
+      offsetMs?: number;
+      debounceMs?: number;
+    }>;
   };
 
   try {
@@ -231,11 +254,10 @@ export async function patchTimelineHandler(
       ctx.metrics?.recordVersionConflict();
       // Get current version for etag
       const current = await ctx.service.getTimeline(req.params.id, tenantId);
-      return conflict(
-        e.message,
-        e.code,
-        { etag: `W/"${current.version}"`, currentVersion: current.version },
-      );
+      return conflict(e.message, e.code, {
+        etag: `W/"${current.version}"`,
+        currentVersion: current.version,
+      });
     }
     throw e;
   }
@@ -274,12 +296,17 @@ export async function createTrackHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
 
-  const body = req.body as { property: string; keyframes: Array<{ timeMs: number; value: unknown; easing?: string }>; startOffsetMs?: number; easing: string };
+  const body = req.body as {
+    property: string;
+    keyframes: Array<{ timeMs: number; value: unknown; easing?: string }>;
+    startOffsetMs?: number;
+    easing: string;
+  };
 
   try {
     const track = await ctx.service.createTrack(req.params.id, tenantId, body);
@@ -306,7 +333,7 @@ export async function createKeyframeHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
@@ -338,12 +365,18 @@ export async function createTriggerHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
 
-  const body = req.body as { kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer'; sourceId?: string; fieldPath?: string; offsetMs?: number; debounceMs?: number };
+  const body = req.body as {
+    kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer';
+    sourceId?: string;
+    fieldPath?: string;
+    offsetMs?: number;
+    debounceMs?: number;
+  };
 
   try {
     const trigger = await ctx.service.createTrigger(req.params.id, tenantId, body);
@@ -378,12 +411,16 @@ export async function createEasingCurveHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
 
-  const body = req.body as { name: string; type: 'linear' | 'cubic_bezier' | 'spring' | 'physics' | 'step'; params: Record<string, unknown> };
+  const body = req.body as {
+    name: string;
+    type: 'linear' | 'cubic_bezier' | 'spring' | 'physics' | 'step';
+    params: Record<string, unknown>;
+  };
 
   try {
     const curve = await ctx.service.createEasingCurve(req.params.workspace_id, {
@@ -434,12 +471,16 @@ export async function patchEasingCurveHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
 
-  const body = req.body as { name?: string; type?: 'linear' | 'cubic_bezier' | 'spring' | 'physics' | 'step'; params?: Record<string, unknown> };
+  const body = req.body as {
+    name?: string;
+    type?: 'linear' | 'cubic_bezier' | 'spring' | 'physics' | 'step';
+    params?: Record<string, unknown>;
+  };
 
   try {
     const curve = await ctx.service.patchEasingCurve(req.params.id, workspaceId, {
@@ -492,7 +533,7 @@ export async function createAnimationPresetHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
@@ -508,7 +549,10 @@ export async function createAnimationPresetHandler(
         keyframes: Array<{ timeMs: number; value: unknown; easing?: string }>;
         easing: string;
       }>;
-      triggers?: Array<{ kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer'; offsetMs?: number }>;
+      triggers?: Array<{
+        kind: 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer';
+        offsetMs?: number;
+      }>;
       requiredProperties?: string[];
     };
   };
@@ -559,7 +603,7 @@ export async function createTransitionHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }
@@ -569,7 +613,11 @@ export async function createTransitionHandler(
     toSlideId: string;
     type: 'fade' | 'slide' | 'zoom' | 'dissolve' | 'push' | 'wipe' | 'morph';
     magicMoveEnabled?: boolean;
-    options?: { durationMs?: number; easing?: string; direction?: 'left' | 'right' | 'up' | 'down' };
+    options?: {
+      durationMs?: number;
+      easing?: string;
+      direction?: 'left' | 'right' | 'up' | 'down';
+    };
   };
 
   const transition = await ctx.service.createTransition(req.params.deck_id, body);
@@ -600,7 +648,7 @@ export async function putReducedMotionHandler(
   if (!validation.valid) {
     ctx.metrics?.recordValidationFailed();
     return badRequest(
-      `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
+      `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
       'VALIDATION_ERROR',
     );
   }

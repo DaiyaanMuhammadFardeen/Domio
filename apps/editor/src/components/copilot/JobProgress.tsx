@@ -15,12 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { Check, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import {
-  getJob,
-  type JobPhase,
-  type JobRecord,
-  type JobStatus,
-} from '../../lib/ai-service';
+import { getJob, type JobPhase, type JobRecord, type JobStatus } from '../../lib/ai-service';
 
 const PHASE_ORDER: readonly JobPhase[] = ['planning', 'outlining', 'designing', 'citing'];
 
@@ -106,7 +101,8 @@ export function JobProgress({
         {PHASE_ORDER.map((p, idx) => {
           const reached = PHASE_ORDER.indexOf(phase) >= idx;
           const isCurrent = p === phase && !isTerminal(status);
-          const isDone = (isTerminal(status) && reached) || (reached && PHASE_ORDER.indexOf(phase) > idx);
+          const isDone =
+            (isTerminal(status) && reached) || (reached && PHASE_ORDER.indexOf(phase) > idx);
           return (
             <li
               key={p}
@@ -154,7 +150,7 @@ function StatusPill({ status }: { status: JobStatus }): ReactElement {
       )}
       data-testid="job-progress-status"
     >
-      {(status === 'queued' || status === 'running') ? (
+      {status === 'queued' || status === 'running' ? (
         <Loader2 size={10} className="animate-spin" />
       ) : null}
       {status === 'succeeded' ? <Check size={10} /> : null}

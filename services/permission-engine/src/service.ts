@@ -173,7 +173,12 @@ export class PermissionService {
     resourceType: ResourceType,
     resourceId: string,
   ): Promise<void> {
-    const result = await this.checkPermission({ principalId, capability, resourceType, resourceId });
+    const result = await this.checkPermission({
+      principalId,
+      capability,
+      resourceType,
+      resourceId,
+    });
     if (!result.allowed) {
       throw new PermissionDeniedError(principalId, capability, resourceType, resourceId);
     }

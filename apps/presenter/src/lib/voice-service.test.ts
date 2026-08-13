@@ -49,11 +49,11 @@ describe('scoreMatch', () => {
   });
 
   it('is case-insensitive and ignores punctuation', () => {
-    expect(scoreMatch("Let's Look, at the Bear case!", "lets look at the bear case")).toBe(1);
+    expect(scoreMatch("Let's Look, at the Bear case!", 'lets look at the bear case')).toBe(1);
   });
 
   it('returns a fractional score when only some tokens match', () => {
-    const score = scoreMatch("look at the bear case", "let's look at the bear case");
+    const score = scoreMatch('look at the bear case', "let's look at the bear case");
     expect(score).toBeGreaterThan(0);
     expect(score).toBeLessThan(1);
   });
@@ -70,9 +70,30 @@ describe('scoreMatch', () => {
 
 describe('findBestMatch', () => {
   const phrases: VoicePhrase[] = [
-    { id: 'p1', phrase: 'bear case', action: 'scenario_toggle', target: 'bear', threshold: 0.5, enabled: true },
-    { id: 'p2', phrase: 'bull case', action: 'scenario_toggle', target: 'bull', threshold: 0.5, enabled: true },
-    { id: 'p3', phrase: 'disabled phrase', action: 'mute', target: '', threshold: 0.0, enabled: false },
+    {
+      id: 'p1',
+      phrase: 'bear case',
+      action: 'scenario_toggle',
+      target: 'bear',
+      threshold: 0.5,
+      enabled: true,
+    },
+    {
+      id: 'p2',
+      phrase: 'bull case',
+      action: 'scenario_toggle',
+      target: 'bull',
+      threshold: 0.5,
+      enabled: true,
+    },
+    {
+      id: 'p3',
+      phrase: 'disabled phrase',
+      action: 'mute',
+      target: '',
+      threshold: 0.0,
+      enabled: false,
+    },
   ];
 
   it('returns the highest-confidence enabled match', () => {
@@ -84,14 +105,28 @@ describe('findBestMatch', () => {
 
   it('skips disabled phrases', () => {
     const onlyDisabled: VoicePhrase[] = [
-      { id: 'pd', phrase: 'bear case', action: 'scenario_toggle', target: 'bear', threshold: 0.5, enabled: false },
+      {
+        id: 'pd',
+        phrase: 'bear case',
+        action: 'scenario_toggle',
+        target: 'bear',
+        threshold: 0.5,
+        enabled: false,
+      },
     ];
     expect(findBestMatch('bear case', onlyDisabled)).toBeNull();
   });
 
   it('returns null when nothing meets its threshold', () => {
     const strict: VoicePhrase[] = [
-      { id: 'ps', phrase: 'bear case', action: 'scenario_toggle', target: 'bear', threshold: 0.99, enabled: true },
+      {
+        id: 'ps',
+        phrase: 'bear case',
+        action: 'scenario_toggle',
+        target: 'bear',
+        threshold: 0.99,
+        enabled: true,
+      },
     ];
     expect(findBestMatch('something else', strict)).toBeNull();
   });
@@ -122,7 +157,14 @@ describe('savePhraseRegistry', () => {
   it('returns the canonical list with ids filled in', async () => {
     const draft: VoicePhrase[] = [
       { id: '', phrase: 'mute please', action: 'mute', target: '', threshold: 0.4, enabled: true },
-      { id: 'existing', phrase: 'next slide', action: 'slide_jump', target: 's5', threshold: 0.7, enabled: false },
+      {
+        id: 'existing',
+        phrase: 'next slide',
+        action: 'slide_jump',
+        target: 's5',
+        threshold: 0.7,
+        enabled: false,
+      },
     ];
     const saved = await savePhraseRegistry(draft, opts);
     expect(saved).toHaveLength(2);
@@ -143,7 +185,14 @@ describe('savePhraseRegistry', () => {
   it('persists so subsequent listVoicePhrases returns the saved set', async () => {
     const saved = await savePhraseRegistry(
       [
-        { id: 'custom1', phrase: 'go to q3', action: 'goto_section', target: 'q3', threshold: 0.5, enabled: true },
+        {
+          id: 'custom1',
+          phrase: 'go to q3',
+          action: 'goto_section',
+          target: 'q3',
+          threshold: 0.5,
+          enabled: true,
+        },
       ],
       opts,
     );
@@ -179,8 +228,20 @@ describe('recordVoiceMatch + listVoiceMatches', () => {
   });
 
   it('filters by sinceMs when provided', async () => {
-    const old = buildVoiceMatch({ phrase: 'old', confidence: 0.9, action: 'mute', target: '', timestamp_ms: 1000 });
-    const recent = buildVoiceMatch({ phrase: 'new', confidence: 0.9, action: 'mute', target: '', timestamp_ms: 2000 });
+    const old = buildVoiceMatch({
+      phrase: 'old',
+      confidence: 0.9,
+      action: 'mute',
+      target: '',
+      timestamp_ms: 1000,
+    });
+    const recent = buildVoiceMatch({
+      phrase: 'new',
+      confidence: 0.9,
+      action: 'mute',
+      target: '',
+      timestamp_ms: 2000,
+    });
     await recordVoiceMatch(old, opts);
     await recordVoiceMatch(recent, opts);
     const list = await listVoiceMatches('session-1', 1500, opts);
@@ -199,7 +260,9 @@ describe('updateVoiceMatchStatus', () => {
   });
 
   it('no-ops for unknown ids', async () => {
-    await expect(updateVoiceMatchStatus('does-not-exist', 'rejected', opts)).resolves.toBeUndefined();
+    await expect(
+      updateVoiceMatchStatus('does-not-exist', 'rejected', opts),
+    ).resolves.toBeUndefined();
   });
 });
 

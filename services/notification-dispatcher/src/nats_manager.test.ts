@@ -104,7 +104,11 @@ describe('NatsSubscriptionManager', () => {
     const callback = crmCall![1]?.callback ?? crmCall![1];
     if (typeof callback === 'function') {
       callback(null, msg);
-    } else if (callback && typeof callback === 'object' && typeof (callback as Record<string, unknown>).callback === 'function') {
+    } else if (
+      callback &&
+      typeof callback === 'object' &&
+      typeof (callback as Record<string, unknown>).callback === 'function'
+    ) {
       (callback as { callback: (err: unknown, msg: unknown) => void }).callback(null, msg);
     }
 
@@ -131,7 +135,11 @@ describe('NatsSubscriptionManager', () => {
     const callback = collabCall![1]?.callback ?? collabCall![1];
     if (typeof callback === 'function') {
       callback(null, msg);
-    } else if (callback && typeof callback === 'object' && typeof (callback as Record<string, unknown>).callback === 'function') {
+    } else if (
+      callback &&
+      typeof callback === 'object' &&
+      typeof (callback as Record<string, unknown>).callback === 'function'
+    ) {
       (callback as { callback: (err: unknown, msg: unknown) => void }).callback(null, msg);
     }
 
@@ -158,7 +166,11 @@ describe('NatsSubscriptionManager', () => {
     const callback = crmCall![1]?.callback ?? crmCall![1];
     if (typeof callback === 'function') {
       callback(null, msg);
-    } else if (callback && typeof callback === 'object' && typeof (callback as Record<string, unknown>).callback === 'function') {
+    } else if (
+      callback &&
+      typeof callback === 'object' &&
+      typeof (callback as Record<string, unknown>).callback === 'function'
+    ) {
       (callback as { callback: (err: unknown, msg: unknown) => void }).callback(null, msg);
     }
 
@@ -190,7 +202,11 @@ describe('NatsSubscriptionManager', () => {
     const invoke = () => {
       if (typeof callback === 'function') {
         callback(null, msg);
-      } else if (callback && typeof callback === 'object' && typeof (callback as Record<string, unknown>).callback === 'function') {
+      } else if (
+        callback &&
+        typeof callback === 'object' &&
+        typeof (callback as Record<string, unknown>).callback === 'function'
+      ) {
         (callback as { callback: (err: unknown, msg: unknown) => void }).callback(null, msg);
       }
     };

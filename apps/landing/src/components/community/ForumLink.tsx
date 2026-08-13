@@ -36,10 +36,7 @@ export function ForumLink({
       <dl className="community-forum__stats" data-testid="community-forum-stats">
         <div className="community-forum__stat">
           <dt className="community-forum__stat-label">Topics</dt>
-          <dd
-            className="community-forum__stat-value"
-            data-testid="community-forum-topics"
-          >
+          <dd className="community-forum__stat-value" data-testid="community-forum-topics">
             {topicCount.toLocaleString('en-US')}
           </dd>
         </div>

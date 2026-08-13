@@ -18,9 +18,7 @@ import {
   StatementNotFoundError,
   InvalidPeriodError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -71,7 +69,9 @@ function problemDetail(title: string, status: number, detail: string, type?: str
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------

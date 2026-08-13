@@ -30,9 +30,12 @@ export interface DeckLintPanelProps {
 
 function severityClass(sev: LintViolation['severity']): string {
   switch (sev) {
-    case 'high': return 'bg-red-500/15 text-red-400';
-    case 'medium': return 'bg-amber-500/15 text-amber-400';
-    default: return 'bg-slate-500/15 text-slate-400';
+    case 'high':
+      return 'bg-red-500/15 text-red-400';
+    case 'medium':
+      return 'bg-amber-500/15 text-amber-400';
+    default:
+      return 'bg-slate-500/15 text-slate-400';
   }
 }
 
@@ -65,18 +68,21 @@ export function DeckLintPanel({
     }
   }, [deckId, baseUrl]);
 
-  const fixOne = useCallback(async (violation: LintViolation) => {
-    setFixingId(violation.id);
-    setError(null);
-    try {
-      const res = await fixLintViolation(deckId, violation.id, baseUrl);
-      setPatch(res);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'fix failed');
-    } finally {
-      setFixingId(null);
-    }
-  }, [deckId, baseUrl]);
+  const fixOne = useCallback(
+    async (violation: LintViolation) => {
+      setFixingId(violation.id);
+      setError(null);
+      try {
+        const res = await fixLintViolation(deckId, violation.id, baseUrl);
+        setPatch(res);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'fix failed');
+      } finally {
+        setFixingId(null);
+      }
+    },
+    [deckId, baseUrl],
+  );
 
   const accept = useCallback(() => {
     if (!patch) return;
@@ -93,9 +99,7 @@ export function DeckLintPanel({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <ListChecks size={16} className="text-cyan-400" />
-          <h2 className="text-sm font-semibold text-slate-100">
-            Deck Lint
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-100">Deck Lint</h2>
         </div>
         <button
           type="button"
@@ -151,9 +155,7 @@ export function DeckLintPanel({
                 <p className="truncate text-xs font-medium text-slate-200">
                   {VIOLATION_LABEL[v.kind]}
                 </p>
-                <p className="truncate text-[11px] text-slate-500">
-                  {v.message}
-                </p>
+                <p className="truncate text-[11px] text-slate-500">{v.message}</p>
               </div>
               <button
                 type="button"
@@ -180,13 +182,19 @@ export function DeckLintPanel({
           <div className="mt-1.5 grid grid-cols-2 gap-2 text-[11px]">
             <div>
               <p className="text-[10px] uppercase text-slate-500">Before</p>
-              <p className="rounded bg-slate-800/60 p-1.5 text-slate-400" data-testid="deck-lint-patch-before">
+              <p
+                className="rounded bg-slate-800/60 p-1.5 text-slate-400"
+                data-testid="deck-lint-patch-before"
+              >
                 {patch.before}
               </p>
             </div>
             <div>
               <p className="text-[10px] uppercase text-slate-500">After</p>
-              <p className="rounded bg-slate-800/60 p-1.5 text-slate-200" data-testid="deck-lint-patch-after">
+              <p
+                className="rounded bg-slate-800/60 p-1.5 text-slate-200"
+                data-testid="deck-lint-patch-after"
+              >
                 {patch.after}
               </p>
             </div>

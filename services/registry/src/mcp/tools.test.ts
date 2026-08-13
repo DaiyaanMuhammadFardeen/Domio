@@ -17,7 +17,11 @@ function createTestDeps(): { deps: ServiceDeps; store: InMemoryStore } {
   return { deps, store };
 }
 
-async function seedPackage(store: InMemoryStore, catalogId = 'my.button', version = '1.0.0'): Promise<ComponentPackage> {
+async function seedPackage(
+  store: InMemoryStore,
+  catalogId = 'my.button',
+  version = '1.0.0',
+): Promise<ComponentPackage> {
   // Store a fake blob for each file
   const fileBytes = new TextEncoder().encode('fake-component-code');
   const fileHash = sha256Hex(fileBytes);
@@ -49,7 +53,10 @@ async function seedPackage(store: InMemoryStore, catalogId = 'my.button', versio
   return pkg;
 }
 
-async function seedListing(store: InMemoryStore, catalogId = 'my.button'): Promise<MarketplaceListing> {
+async function seedListing(
+  store: InMemoryStore,
+  catalogId = 'my.button',
+): Promise<MarketplaceListing> {
   const listing: MarketplaceListing = {
     id: uuid(),
     catalogId,
@@ -77,9 +84,7 @@ async function seedTemplate(store: InMemoryStore): Promise<Template> {
     deckJson: {
       slides: [
         {
-          elements: [
-            { type: 'text', props: { label: '__PLACEHOLDER__' } },
-          ],
+          elements: [{ type: 'text', props: { label: '__PLACEHOLDER__' } }],
         },
       ],
     },
@@ -190,7 +195,12 @@ describe('MCP tools', () => {
 
     it('returns specific version', async () => {
       await seedPackage(store, 'my.button', '2.0.0');
-      const result = await runTool(deps, 'component_describe', { catalogId: 'my.button', version: '2.0.0' }, ctx);
+      const result = await runTool(
+        deps,
+        'component_describe',
+        { catalogId: 'my.button', version: '2.0.0' },
+        ctx,
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect((result.data as { version: string }).version).toBe('2.0.0');
@@ -258,11 +268,16 @@ describe('MCP tools', () => {
       await seedPackage(store);
       await runTool(deps, 'component_install', { catalogId: 'my.button' }, ctx);
 
-      const result = await runTool(deps, 'component_pin', {
-        catalogId: 'my.button',
-        pinMode: 'pin-version',
-        pinValue: '1.0.0',
-      }, ctx);
+      const result = await runTool(
+        deps,
+        'component_pin',
+        {
+          catalogId: 'my.button',
+          pinMode: 'pin-version',
+          pinValue: '1.0.0',
+        },
+        ctx,
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
         const item = result.data as { pinMode: string; pinValue?: string };
@@ -274,7 +289,12 @@ describe('MCP tools', () => {
     it('writes audit for pin', async () => {
       await seedPackage(store);
       await runTool(deps, 'component_install', { catalogId: 'my.button' }, ctx);
-      await runTool(deps, 'component_pin', { catalogId: 'my.button', pinMode: 'track-latest' }, ctx);
+      await runTool(
+        deps,
+        'component_pin',
+        { catalogId: 'my.button', pinMode: 'track-latest' },
+        ctx,
+      );
 
       const rows = await store.listAudit('agent');
       const pinRows = rows.filter((r) => r.action === 'component.pin');
@@ -285,7 +305,12 @@ describe('MCP tools', () => {
   describe('component_get_props_schema', () => {
     it('returns props schema', async () => {
       await seedPackage(store);
-      const result = await runTool(deps, 'component_get_props_schema', { catalogId: 'my.button' }, ctx);
+      const result = await runTool(
+        deps,
+        'component_get_props_schema',
+        { catalogId: 'my.button' },
+        ctx,
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
         const schema = result.data as { type: string; properties: Record<string, unknown> };
@@ -298,10 +323,15 @@ describe('MCP tools', () => {
   describe('component_apply_props', () => {
     it('validates and applies defaults', async () => {
       await seedPackage(store);
-      const result = await runTool(deps, 'component_apply_props', {
-        catalogId: 'my.button',
-        props: {},
-      }, ctx);
+      const result = await runTool(
+        deps,
+        'component_apply_props',
+        {
+          catalogId: 'my.button',
+          props: {},
+        },
+        ctx,
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
         const data = result.data as { props: { label: string; color: string }; errors: unknown[] };
@@ -313,10 +343,15 @@ describe('MCP tools', () => {
 
     it('validates invalid props', async () => {
       await seedPackage(store);
-      const result = await runTool(deps, 'component_apply_props', {
-        catalogId: 'my.button',
-        props: { label: 123 }, // wrong type
-      }, ctx);
+      const result = await runTool(
+        deps,
+        'component_apply_props',
+        {
+          catalogId: 'my.button',
+          props: { label: 123 }, // wrong type
+        },
+        ctx,
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
         const data = result.data as { errors: unknown[] };
@@ -362,7 +397,12 @@ describe('MCP tools', () => {
     it('gets listing by catalogId', async () => {
       await seedPackage(store);
       await seedListing(store);
-      const result = await runTool(deps, 'marketplace_get_listing', { catalogId: 'my.button' }, ctx);
+      const result = await runTool(
+        deps,
+        'marketplace_get_listing',
+        { catalogId: 'my.button' },
+        ctx,
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect((result.data as { catalogId: string }).catalogId).toBe('my.button');
@@ -377,7 +417,11 @@ describe('MCP tools', () => {
       const result = await runTool(deps, 'marketplace_purchase', { listingId: listing.id }, ctx);
       expect(result.ok).toBe(true);
       if (result.ok) {
-        const data = result.data as { grant: unknown; token: string; verification: { valid: boolean } };
+        const data = result.data as {
+          grant: unknown;
+          token: string;
+          verification: { valid: boolean };
+        };
         expect(data.token).toBeTruthy();
         expect(data.verification.valid).toBe(true);
       }
@@ -397,13 +441,21 @@ describe('MCP tools', () => {
   describe('template_apply', () => {
     it('applies template with values', async () => {
       const template = await seedTemplate(store);
-      const result = await runTool(deps, 'template_apply', {
-        templateId: template.id,
-        values: { title: 'Welcome!' },
-      }, ctx);
+      const result = await runTool(
+        deps,
+        'template_apply',
+        {
+          templateId: template.id,
+          values: { title: 'Welcome!' },
+        },
+        ctx,
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
-        const data = result.data as { deck: { slides: Array<{ elements: Array<{ props: { label: string } }> }> }; manifest: unknown[] };
+        const data = result.data as {
+          deck: { slides: Array<{ elements: Array<{ props: { label: string } }> }> };
+          manifest: unknown[];
+        };
         expect(data.deck.slides[0]!.elements[0]!.props.label).toBe('Welcome!');
         expect(data.manifest.length).toBe(1);
       }
@@ -411,10 +463,15 @@ describe('MCP tools', () => {
 
     it('writes audit', async () => {
       const template = await seedTemplate(store);
-      await runTool(deps, 'template_apply', {
-        templateId: template.id,
-        values: { title: 'Test' },
-      }, ctx);
+      await runTool(
+        deps,
+        'template_apply',
+        {
+          templateId: template.id,
+          values: { title: 'Test' },
+        },
+        ctx,
+      );
 
       const rows = await store.listAudit('agent');
       const templateRows = rows.filter((r) => r.action === 'template.apply');
@@ -436,7 +493,12 @@ describe('MCP tools', () => {
 
     it('includes recolor payload when color specified', async () => {
       await seedIcon(store);
-      const result = await runTool(deps, 'media_search_icons', { query: 'home', color: '#ff0000' }, ctx);
+      const result = await runTool(
+        deps,
+        'media_search_icons',
+        { query: 'home', color: '#ff0000' },
+        ctx,
+      );
       expect(result.ok).toBe(true);
       if (result.ok) {
         const data = result.data as { recolorPayload: { props: { color: string } } }[];

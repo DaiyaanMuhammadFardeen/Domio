@@ -89,20 +89,24 @@ describe('ScrollLinked', () => {
 
   describe('setProgress', () => {
     it('interpolates values based on scroll progress', () => {
-      sl.add(makeBinding({
-        progressRange: [0, 1],
-        valueRange: [0, 100],
-      }));
+      sl.add(
+        makeBinding({
+          progressRange: [0, 1],
+          valueRange: [0, 100],
+        }),
+      );
 
       const results = sl.setProgress(0.5);
       expect(results.get('el-1:transform')).toBe(50);
     });
 
     it('maps partial progress range', () => {
-      sl.add(makeBinding({
-        progressRange: [0.2, 0.8],
-        valueRange: [0, 200],
-      }));
+      sl.add(
+        makeBinding({
+          progressRange: [0.2, 0.8],
+          valueRange: [0, 200],
+        }),
+      );
 
       // p=0.5 → normalized = (0.5 - 0.2) / (0.8 - 0.2) = 0.5
       const results = sl.setProgress(0.5);
@@ -110,10 +114,12 @@ describe('ScrollLinked', () => {
     });
 
     it('clamps progress to [0, 1]', () => {
-      sl.add(makeBinding({
-        progressRange: [0, 1],
-        valueRange: [0, 100],
-      }));
+      sl.add(
+        makeBinding({
+          progressRange: [0, 1],
+          valueRange: [0, 100],
+        }),
+      );
 
       const results1 = sl.setProgress(-0.5);
       expect(results1.get('el-1:transform')).toBe(0);
@@ -123,12 +129,14 @@ describe('ScrollLinked', () => {
     });
 
     it('interpolates string values', () => {
-      sl.add(makeBinding({
-        elementId: 'el-1',
-        property: 'translateX',
-        progressRange: [0, 1],
-        valueRange: ['translate(0px, 0px)', 'translate(100px, 0px)'],
-      }));
+      sl.add(
+        makeBinding({
+          elementId: 'el-1',
+          property: 'translateX',
+          progressRange: [0, 1],
+          valueRange: ['translate(0px, 0px)', 'translate(100px, 0px)'],
+        }),
+      );
 
       const results = sl.setProgress(0.5);
       expect(results.get('el-1:translateX')).toBe('translate(50px, 0px)');
@@ -148,8 +156,12 @@ describe('ScrollLinked', () => {
 
   describe('multiple bindings', () => {
     it('interpolates all bindings at once', () => {
-      sl.add(makeBinding({ id: 'b-1', elementId: 'el-1', property: 'opacity', valueRange: [0, 1] }));
-      sl.add(makeBinding({ id: 'b-2', elementId: 'el-2', property: 'opacity', valueRange: [0, 1] }));
+      sl.add(
+        makeBinding({ id: 'b-1', elementId: 'el-1', property: 'opacity', valueRange: [0, 1] }),
+      );
+      sl.add(
+        makeBinding({ id: 'b-2', elementId: 'el-2', property: 'opacity', valueRange: [0, 1] }),
+      );
 
       const results = sl.setProgress(0.75);
       expect(results.get('el-1:opacity')).toBe(0.75);

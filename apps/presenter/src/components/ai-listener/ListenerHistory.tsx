@@ -23,15 +23,15 @@ function formatTimestamp(ms: number): string {
   return `${hh}:${mm}:${ss}`;
 }
 
-export function ListenerHistory({
-  matches,
-  className,
-}: ListenerHistoryProps) {
+export function ListenerHistory({ matches, className }: ListenerHistoryProps) {
   if (matches.length === 0) {
     return (
       <div
         data-testid="listener-history-empty"
-        className={['rounded border border-dashed border-zinc-300 p-4 text-sm text-zinc-500', className ?? '']
+        className={[
+          'rounded border border-dashed border-zinc-300 p-4 text-sm text-zinc-500',
+          className ?? '',
+        ]
           .filter(Boolean)
           .join(' ')}
       >
@@ -64,8 +64,8 @@ export function ListenerHistory({
               m.status === 'accepted'
                 ? 'Accepted'
                 : m.status === 'dismissed'
-                ? 'Dismissed'
-                : 'Pending';
+                  ? 'Dismissed'
+                  : 'Pending';
             return (
               <tr key={m.id} data-testid="listener-history-row" data-match-id={m.id}>
                 <td className="px-3 py-2 font-mono text-zinc-600">
@@ -82,8 +82,8 @@ export function ListenerHistory({
                       m.status === 'accepted'
                         ? 'bg-emerald-100 text-emerald-700'
                         : m.status === 'dismissed'
-                        ? 'bg-zinc-200 text-zinc-700'
-                        : 'bg-amber-100 text-amber-700',
+                          ? 'bg-zinc-200 text-zinc-700'
+                          : 'bg-amber-100 text-amber-700',
                     ].join(' ')}
                   >
                     {statusLabel}

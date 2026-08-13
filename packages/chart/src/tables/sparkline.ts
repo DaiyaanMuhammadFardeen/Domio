@@ -39,23 +39,29 @@ export function sparkline(
   const elements: SvgElement[] = [];
 
   // Background
-  elements.push(rect(0, 0, w, h, `${semanticId}_bg`, {
-    fill: 'transparent',
-  }));
+  elements.push(
+    rect(0, 0, w, h, `${semanticId}_bg`, {
+      fill: 'transparent',
+    }),
+  );
 
   // Polyline
-  elements.push(polyline(points, semanticId, {
-    stroke: color,
-    strokeWidth: 1.5,
-  }));
+  elements.push(
+    polyline(points, semanticId, {
+      stroke: color,
+      strokeWidth: 1.5,
+    }),
+  );
 
   // Dots
   if (opts.showDots) {
     points.forEach((p, i) => {
-      elements.push(rect(p.x - 1.5, p.y - 1.5, 3, 3, `${semanticId}_dot_${i}`, {
-        fill: color,
-        rx: 1.5,
-      }));
+      elements.push(
+        rect(p.x - 1.5, p.y - 1.5, 3, 3, `${semanticId}_dot_${i}`, {
+          fill: color,
+          rx: 1.5,
+        }),
+      );
     });
   }
 

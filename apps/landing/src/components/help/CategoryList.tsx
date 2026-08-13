@@ -16,11 +16,7 @@ export interface CategoryListProps {
   readonly onSelect: (id: string | null) => void;
 }
 
-export function CategoryList({
-  categories,
-  activeId,
-  onSelect,
-}: CategoryListProps): JSX.Element {
+export function CategoryList({ categories, activeId, onSelect }: CategoryListProps): JSX.Element {
   const allActive = activeId === null;
   return (
     <nav className="help-categories" data-testid="help-categories" aria-label="Categories">
@@ -30,8 +26,7 @@ export function CategoryList({
           <button
             type="button"
             className={
-              'help-categories__button' +
-              (allActive ? ' help-categories__button--active' : '')
+              'help-categories__button' + (allActive ? ' help-categories__button--active' : '')
             }
             onClick={() => onSelect(null)}
             aria-pressed={allActive}
@@ -50,17 +45,14 @@ export function CategoryList({
               <button
                 type="button"
                 className={
-                  'help-categories__button' +
-                  (isActive ? ' help-categories__button--active' : '')
+                  'help-categories__button' + (isActive ? ' help-categories__button--active' : '')
                 }
                 onClick={() => onSelect(category.id)}
                 aria-pressed={isActive}
                 data-testid={`help-category-${category.id}`}
               >
                 <span className="help-categories__title">{category.title}</span>
-                <span className="help-categories__count">
-                  {category.article_slugs.length}
-                </span>
+                <span className="help-categories__count">{category.article_slugs.length}</span>
               </button>
             </li>
           );

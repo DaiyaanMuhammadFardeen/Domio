@@ -1,7 +1,7 @@
 # Phase 17 — Data flow
 
 This document describes the end-to-end data flow for the Phase 17
-analytics & engagement-intelligence stack.  It mirrors the style of
+analytics & engagement-intelligence stack. It mirrors the style of
 the existing event-flow doc (Phase 5 control-plane events).
 
 ## Goals
@@ -163,7 +163,7 @@ the existing event-flow doc (Phase 5 control-plane events).
   SSO).
 - Honours 4 privacy modes (strict / balanced / permissive / anonymous).
 - GDPR `DELETE /v1/viewers/{id}` issues ClickHouse `LIGHTWEIGHT
-  DELETE` + Postgres tombstone.
+DELETE` + Postgres tombstone.
 - GDPR `GET /v1/viewers/{id}/export` streams NDJSON.
 
 ### 7. Heatmap generator (W5)
@@ -220,20 +220,20 @@ the existing event-flow doc (Phase 5 control-plane events).
 - `apps/dashboard` — Next.js 15 + Yoga GraphQL gateway with
   persisted queries.
 - 7 routes: `/overview`, `/deck/[id]`, `/heatmap`, `/ab`,
-  `/crm`, `/team`, `/live`, `/benchmarks`.  Plus `/export` for
+  `/crm`, `/team`, `/live`, `/benchmarks`. Plus `/export` for
   CSV/Parquet streaming.
 
 ## Cross-cutting concerns
 
-| Concern | How it's enforced |
-|---------|-------------------|
-| **RLS** | `SET app.tenant_id = 'ws-X'` at the head of every Postgres session (see `tests/security/rls-isolation-phase17.test.ts`). |
-| **HMAC** | Single key in Vault (`secret/domio/analytics/hmac`); rotation procedure in `docs/analytics-runbook.md#hmac-key-rotation`. |
-| **PII** | Stripped on device (SDK) AND on edge (`services/event-ingest/src/pii/strip.ts`). |
-| **GDPR** | Right-to-erasure via ClickHouse `LIGHTWEIGHT DELETE` + Postgres tombstone; right-to-export via NDJSON streaming. |
-| **Kill switches** | `process.env.PHASE17_W{N}_DISABLED` checked at service boot (see `infrastructure/feature-flags/README.md`). |
-| **Replay determinism** | Lock-step sessionization consumer; SHA-256 fingerprint equality (see `tests/load/replay-corpora/`). |
-| **Observability** | Prometheus + OTel; Grafana dashboard `phase-17-analytics-prod`; PagerDuty rules in `infrastructure/observability/pagerduty/phase17.yaml`. |
+| Concern                | How it's enforced                                                                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **RLS**                | `SET app.tenant_id = 'ws-X'` at the head of every Postgres session (see `tests/security/rls-isolation-phase17.test.ts`).                  |
+| **HMAC**               | Single key in Vault (`secret/domio/analytics/hmac`); rotation procedure in `docs/analytics-runbook.md#hmac-key-rotation`.                 |
+| **PII**                | Stripped on device (SDK) AND on edge (`services/event-ingest/src/pii/strip.ts`).                                                          |
+| **GDPR**               | Right-to-erasure via ClickHouse `LIGHTWEIGHT DELETE` + Postgres tombstone; right-to-export via NDJSON streaming.                          |
+| **Kill switches**      | `process.env.PHASE17_W{N}_DISABLED` checked at service boot (see `infrastructure/feature-flags/README.md`).                               |
+| **Replay determinism** | Lock-step sessionization consumer; SHA-256 fingerprint equality (see `tests/load/replay-corpora/`).                                       |
+| **Observability**      | Prometheus + OTel; Grafana dashboard `phase-17-analytics-prod`; PagerDuty rules in `infrastructure/observability/pagerduty/phase17.yaml`. |
 
 ## Worked example: a single `view` event
 

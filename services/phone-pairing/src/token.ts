@@ -55,16 +55,15 @@ function canonicalize(value: unknown): string {
     return `[${value.map(canonicalize).join(',')}]`;
   }
   const keys = Object.keys(value as Record<string, unknown>).sort();
-  const inner = keys.map((k) => `${JSON.stringify(k)}:${canonicalize((value as Record<string, unknown>)[k])}`);
+  const inner = keys.map(
+    (k) => `${JSON.stringify(k)}:${canonicalize((value as Record<string, unknown>)[k])}`,
+  );
   return `{${inner.join(',')}}`;
 }
 
 function b64urlEncode(input: Buffer | string): string {
   const buf = typeof input === 'string' ? Buffer.from(input, 'utf8') : input;
-  return buf.toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 function b64urlDecode(input: string): Buffer {
@@ -75,9 +74,7 @@ function b64urlDecode(input: string): Buffer {
 }
 
 function sign(key: Uint8Array, message: string): string {
-  const sig = createHmac('sha256', Buffer.from(key))
-    .update(message)
-    .digest();
+  const sig = createHmac('sha256', Buffer.from(key)).update(message).digest();
   return b64urlEncode(sig);
 }
 
@@ -89,9 +86,7 @@ function verifySig(key: Uint8Array, message: string, signature: string): boolean
     return false;
   }
   if (decoded.length !== 32) return false;
-  const expected = createHmac('sha256', Buffer.from(key))
-    .update(message)
-    .digest();
+  const expected = createHmac('sha256', Buffer.from(key)).update(message).digest();
   // timingSafeEqual requires equal-length buffers.
   if (decoded.length !== expected.length) return false;
   return timingSafeEqual(decoded, expected);
@@ -143,20 +138,25 @@ export function mintPairingToken(
 // Verify
 // ---------------------------------------------------------------------------
 
-export function parsePairingToken(token: string): {
-  ok: true;
-  header: Record<string, unknown>;
-  payload: Record<string, unknown>;
-} | {
-  ok: false;
-  reason: string;
-} {
+export function parsePairingToken(token: string):
+  | {
+      ok: true;
+      header: Record<string, unknown>;
+      payload: Record<string, unknown>;
+    }
+  | {
+      ok: false;
+      reason: string;
+    } {
   const parts = token.split('.');
   if (parts.length !== 3) return { ok: false, reason: 'malformed token' };
   const [headerB64, payloadB64, sigB64] = parts as [string, string, string];
   try {
     const header = JSON.parse(b64urlDecode(headerB64).toString('utf8')) as Record<string, unknown>;
-    const payload = JSON.parse(b64urlDecode(payloadB64).toString('utf8')) as Record<string, unknown>;
+    const payload = JSON.parse(b64urlDecode(payloadB64).toString('utf8')) as Record<
+      string,
+      unknown
+    >;
     if (header.alg !== 'HS256' || header.typ !== 'pairing.v1') {
       return { ok: false, reason: 'unsupported algorithm or type' };
     }
@@ -207,7 +207,10 @@ export function verifyPairingTokenResult(
   if (!parsed.ok) {
     return { ok: false, reason: `signature invalid: ${parsed.reason}` };
   }
-  const { payload } = parsed as { header: Record<string, unknown>; payload: Record<string, unknown> };
+  const { payload } = parsed as {
+    header: Record<string, unknown>;
+    payload: Record<string, unknown>;
+  };
   const [headerB64, payloadB64, sigB64] = input.token.split('.') as [string, string, string];
   const message = `${headerB64}.${payloadB64}`;
   if (!verifySig(signer.key, message, sigB64)) {
@@ -220,7 +223,10 @@ export function verifyPairingTokenResult(
   }
   // Epoch — server must have a strictly-greater-or-equal epoch.
   if (typeof claims.epoch !== 'number' || claims.epoch < opts.serverEpoch) {
-    return { ok: false, reason: `replay: token epoch ${claims.epoch} < server ${opts.serverEpoch}` };
+    return {
+      ok: false,
+      reason: `replay: token epoch ${claims.epoch} < server ${opts.serverEpoch}`,
+    };
   }
   // Expiry.
   if (typeof claims.expires_at_ms !== 'number' || claims.expires_at_ms < opts.now_ms) {

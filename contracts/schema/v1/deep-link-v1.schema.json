@@ -5,8 +5,15 @@
   "description": "A short-link record returned by the deep-link service. Phase 10 M7.1.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "kid", "click_count",
-    "expires_at", "viewer_scope", "created_at", "payload"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "kid",
+    "click_count",
+    "expires_at",
+    "viewer_scope",
+    "created_at",
+    "payload"
   ],
   "additionalProperties": false,
   "properties": {

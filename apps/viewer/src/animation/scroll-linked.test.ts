@@ -128,9 +128,9 @@ describe('resolveScrollBinding', () => {
       const cache = createCache();
       const binding = makeBinding({ start: 0, end: 3200 });
       // 3200px range, bucket size ≈ 100px
-      resolveScrollBinding(binding, 0, cache);   // bucket 0
-      resolveScrollBinding(binding, 200, cache);  // bucket 2
-      resolveScrollBinding(binding, 400, cache);  // bucket 4
+      resolveScrollBinding(binding, 0, cache); // bucket 0
+      resolveScrollBinding(binding, 200, cache); // bucket 2
+      resolveScrollBinding(binding, 400, cache); // bucket 4
       expect(cache.size).toBe(3);
     });
   });

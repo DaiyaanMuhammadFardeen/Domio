@@ -25,12 +25,8 @@ export function EmptyState({ message }: EmptyStateProps = {}) {
           />
         </svg>
       </div>
-      <h3 className="font-display text-lg font-semibold text-fg">
-        {t('empty.title')}
-      </h3>
-      <p className="mt-2 max-w-sm text-sm text-muted">
-        {message ?? t('empty.subtitle')}
-      </p>
+      <h3 className="font-display text-lg font-semibold text-fg">{t('empty.title')}</h3>
+      <p className="mt-2 max-w-sm text-sm text-muted">{message ?? t('empty.subtitle')}</p>
     </div>
   );
 }
@@ -56,12 +52,8 @@ export function ErrorState({ onRetry }: { onRetry?: () => void }) {
           />
         </svg>
       </div>
-      <h3 className="font-display text-lg font-semibold text-fg">
-        {t('error.title')}
-      </h3>
-      <p className="mt-2 max-w-sm text-sm text-muted">
-        {t('error.subtitle')}
-      </p>
+      <h3 className="font-display text-lg font-semibold text-fg">{t('error.title')}</h3>
+      <p className="mt-2 max-w-sm text-sm text-muted">{t('error.subtitle')}</p>
       {onRetry && (
         <button
           type="button"
@@ -96,12 +88,8 @@ export function NotFoundState() {
           />
         </svg>
       </div>
-      <h3 className="font-display text-lg font-semibold text-fg">
-        {t('notfound.title')}
-      </h3>
-      <p className="mt-2 max-w-sm text-sm text-muted">
-        {t('notfound.subtitle')}
-      </p>
+      <h3 className="font-display text-lg font-semibold text-fg">{t('notfound.title')}</h3>
+      <p className="mt-2 max-w-sm text-sm text-muted">{t('notfound.subtitle')}</p>
     </div>
   );
 }

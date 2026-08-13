@@ -34,15 +34,21 @@ export class HandoffClient {
 
   async mint(sessionId: string, toPresenterId: string, ttlMs?: number): Promise<HandoffMintResult> {
     const fetchImpl = this.opts.fetchImpl ?? fetch;
-    const res = await fetchImpl(`${this.opts.baseUrl ?? ''}/v1/presenter/sessions/${sessionId}/handover/init`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-actor-id': 'presenter-self',
+    const res = await fetchImpl(
+      `${this.opts.baseUrl ?? ''}/v1/presenter/sessions/${sessionId}/handover/init`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-actor-id': 'presenter-self',
+        },
+        body: JSON.stringify({
+          to_presenter_id: toPresenterId,
+          ...(ttlMs !== undefined ? { ttl_ms: ttlMs } : {}),
+        }),
+        credentials: 'same-origin',
       },
-      body: JSON.stringify({ to_presenter_id: toPresenterId, ...(ttlMs !== undefined ? { ttl_ms: ttlMs } : {}) }),
-      credentials: 'same-origin',
-    });
+    );
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { message?: string };
       throw new HandoffClientError(res.status, body.message ?? `mint failed (HTTP ${res.status})`);
@@ -58,20 +64,23 @@ export class HandoffClient {
     etag: string;
   }): Promise<Record<string, unknown>> {
     const fetchImpl = this.opts.fetchImpl ?? fetch;
-    const res = await fetchImpl(`${this.opts.baseUrl ?? ''}/v1/presenter/sessions/${input.sessionId}/handover`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'if-match': input.etag,
-        'x-actor-id': input.toPresenterId,
+    const res = await fetchImpl(
+      `${this.opts.baseUrl ?? ''}/v1/presenter/sessions/${input.sessionId}/handover`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'if-match': input.etag,
+          'x-actor-id': input.toPresenterId,
+        },
+        body: JSON.stringify({
+          to_presenter_id: input.toPresenterId,
+          state_snapshot: input.state,
+          transfer_token: input.token,
+        }),
+        credentials: 'same-origin',
       },
-      body: JSON.stringify({
-        to_presenter_id: input.toPresenterId,
-        state_snapshot: input.state,
-        transfer_token: input.token,
-      }),
-      credentials: 'same-origin',
-    });
+    );
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { message?: string };
       throw new HandoffClientError(res.status, body.message ?? `apply failed (HTTP ${res.status})`);

@@ -106,22 +106,14 @@ describe('nav-sitemap', () => {
     expect(ALL_LANDING_NODES.length).toBeGreaterThan(NAV_SITEMAP.length);
     const features = listAllFeatures();
     for (const feature of features) {
-      expect(
-        ALL_LANDING_NODES.some((n) => n.id === `feature-${feature.slug}`),
-      ).toBe(true);
+      expect(ALL_LANDING_NODES.some((n) => n.id === `feature-${feature.slug}`)).toBe(true);
     }
   });
 
   it('footerColumns partitions the sitemap into 5 columns', () => {
     const columns = footerColumns();
     const headings = columns.map((c) => c.heading);
-    expect(headings).toEqual([
-      'Product',
-      'Resources',
-      'Company',
-      'Legal',
-      'Apps',
-    ]);
+    expect(headings).toEqual(['Product', 'Resources', 'Company', 'Legal', 'Apps']);
     for (const col of columns) {
       for (const link of col.links) {
         expect(link.label).toBeTruthy();

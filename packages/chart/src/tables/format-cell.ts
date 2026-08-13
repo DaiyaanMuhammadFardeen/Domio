@@ -2,7 +2,13 @@
  * Cell formatting using Intl built-ins.
  */
 
-import { formatCurrency, formatPercent, formatDate, formatBoolean, formatNumber } from '../render/formatter.js';
+import {
+  formatCurrency,
+  formatPercent,
+  formatDate,
+  formatBoolean,
+  formatNumber,
+} from '../render/formatter.js';
 import type { ColumnType } from '../types.js';
 
 /**

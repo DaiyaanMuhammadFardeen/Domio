@@ -41,9 +41,8 @@ export function ResidencyMap({ regions }: ResidencyMapProps): JSX.Element {
         Data residency
       </h2>
       <p className="trust-residency__lede">
-        Pin your workspace to a region. Customer content, metadata, and
-        backups stay inside that region&rsquo;s data path unless you
-        explicitly opt in to cross-region replication.
+        Pin your workspace to a region. Customer content, metadata, and backups stay inside that
+        region&rsquo;s data path unless you explicitly opt in to cross-region replication.
       </p>
 
       <div
@@ -84,18 +83,8 @@ export function ResidencyMap({ regions }: ResidencyMapProps): JSX.Element {
                 data-testid="trust-residency-region"
                 data-region-code={region.code}
               >
-                <circle
-                  cx={coords.x}
-                  cy={coords.y}
-                  r="18"
-                  fill="url(#trust-pin-glow)"
-                />
-                <circle
-                  cx={coords.x}
-                  cy={coords.y}
-                  r="6"
-                  className="trust-residency__pin-dot"
-                />
+                <circle cx={coords.x} cy={coords.y} r="18" fill="url(#trust-pin-glow)" />
+                <circle cx={coords.x} cy={coords.y} r="6" className="trust-residency__pin-dot" />
                 <text
                   x={coords.x}
                   y={coords.y - 14}

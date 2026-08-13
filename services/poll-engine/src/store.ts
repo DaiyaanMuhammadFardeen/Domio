@@ -34,7 +34,10 @@ export function notFoundError(id: string): PollStoreError {
 }
 
 export function conflictError(id: string, currentVersion: number): PollStoreError {
-  return makeStoreError('CONFLICT', `poll ${id} optimistic concurrency conflict (current ${currentVersion})`);
+  return makeStoreError(
+    'CONFLICT',
+    `poll ${id} optimistic concurrency conflict (current ${currentVersion})`,
+  );
 }
 
 export function closedError(id: string): PollStoreError {

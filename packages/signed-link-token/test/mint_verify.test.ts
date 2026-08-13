@@ -40,10 +40,7 @@ const NOW = new Date('2026-08-06T12:00:00Z');
 
 describe('mintLinkToken', () => {
   it('produces a 4-part base64url token', async () => {
-    const tok = await mintLinkToken(
-      { claims: CLAIMS, expiresAt: FAR_FUTURE },
-      KEY,
-    );
+    const tok = await mintLinkToken({ claims: CLAIMS, expiresAt: FAR_FUTURE }, KEY);
     expect(tok.split('.').length).toBe(4);
     expect(tok).toMatch(/^[A-Za-z0-9_-]+\.[0-9]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
   });
@@ -56,20 +53,14 @@ describe('mintLinkToken', () => {
 
   it('rejects nonces shorter than 8 bytes', async () => {
     await expect(
-      mintLinkToken(
-        { claims: CLAIMS, expiresAt: FAR_FUTURE, nonce: new Uint8Array(4) },
-        KEY,
-      ),
+      mintLinkToken({ claims: CLAIMS, expiresAt: FAR_FUTURE, nonce: new Uint8Array(4) }, KEY),
     ).rejects.toThrow(TokenMintError);
   });
 });
 
 describe('verifyLinkToken', () => {
   it('round-trips a freshly-minted token', async () => {
-    const tok = await mintLinkToken(
-      { claims: CLAIMS, expiresAt: FAR_FUTURE },
-      KEY,
-    );
+    const tok = await mintLinkToken({ claims: CLAIMS, expiresAt: FAR_FUTURE }, KEY);
     const result = await verifyLinkToken(tok, KEY, { clock: () => NOW.getTime() });
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -79,10 +70,7 @@ describe('verifyLinkToken', () => {
   });
 
   it('rejects a token signed under a different key', async () => {
-    const tok = await mintLinkToken(
-      { claims: CLAIMS, expiresAt: FAR_FUTURE },
-      KEY,
-    );
+    const tok = await mintLinkToken({ claims: CLAIMS, expiresAt: FAR_FUTURE }, KEY);
     const otherKey = new Uint8Array(32).fill(0x99);
     const result = await verifyLinkToken(tok, otherKey, { clock: () => NOW.getTime() });
     expect(result.ok).toBe(false);
@@ -90,10 +78,7 @@ describe('verifyLinkToken', () => {
   });
 
   it('rejects a tampered signature', async () => {
-    const tok = await mintLinkToken(
-      { claims: CLAIMS, expiresAt: FAR_FUTURE },
-      KEY,
-    );
+    const tok = await mintLinkToken({ claims: CLAIMS, expiresAt: FAR_FUTURE }, KEY);
     const parts = tok.split('.');
     const sig = parts[3]!;
     const flipped = sig.slice(0, -1) + (sig.endsWith('A') ? 'B' : 'A');
@@ -104,11 +89,9 @@ describe('verifyLinkToken', () => {
   });
 
   it('rejects a token whose expiry is in the past', async () => {
-    const tok = await mintLinkToken(
-      { claims: CLAIMS, expiresAt: NEAR_PAST },
-      KEY,
-      { clock: () => NOW.getTime() },
-    );
+    const tok = await mintLinkToken({ claims: CLAIMS, expiresAt: NEAR_PAST }, KEY, {
+      clock: () => NOW.getTime(),
+    });
     const result = await verifyLinkToken(tok, KEY, { clock: () => NOW.getTime() });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.code).toBe('EXPIRED');
@@ -121,17 +104,18 @@ describe('verifyLinkToken', () => {
   });
 
   it('rejects a payload field that is not valid JSON', async () => {
-    const tok = await mintLinkToken(
-      { claims: CLAIMS, expiresAt: FAR_FUTURE },
-      KEY,
-    );
+    const tok = await mintLinkToken({ claims: CLAIMS, expiresAt: FAR_FUTURE }, KEY);
     const parts = tok.split('.');
     const garbage = Buffer.from('not-json{').toString('base64url');
     const tampered = [garbage, ...parts.slice(1)].join('.');
     // Re-sign with the wrong payload under the right key, so the format
     // check accepts but JSON.parse fails.
     const reSigned = await mintLinkToken(
-      { claims: { workspace_id: 'x', link_id: 'y', short_id: 'z' }, expiresAt: FAR_FUTURE, nonce: new Uint8Array(8).fill(0) },
+      {
+        claims: { workspace_id: 'x', link_id: 'y', short_id: 'z' },
+        expiresAt: FAR_FUTURE,
+        nonce: new Uint8Array(8).fill(0),
+      },
       KEY,
     );
     const reSignedParts = reSigned.split('.');
@@ -150,10 +134,7 @@ describe('verifyLinkToken', () => {
   });
 
   it('enforces requireSubject when provided', async () => {
-    const tok = await mintLinkToken(
-      { claims: CLAIMS, expiresAt: FAR_FUTURE },
-      KEY,
-    );
+    const tok = await mintLinkToken({ claims: CLAIMS, expiresAt: FAR_FUTURE }, KEY);
     const match = await verifyLinkToken(tok, KEY, {
       clock: () => NOW.getTime(),
       requireSubject: 'u1',

@@ -12,7 +12,11 @@ const KIT_A: BrandKitDetail = {
   name: 'Alpha',
   primaryHex: '#111111',
   accentHex: '#222222',
-  colors: [], typography: [], spacing: [], radius: [], shadows: [],
+  colors: [],
+  typography: [],
+  spacing: [],
+  radius: [],
+  shadows: [],
 };
 
 const KIT_B: BrandKitDetail = {
@@ -20,7 +24,11 @@ const KIT_B: BrandKitDetail = {
   name: 'Bravo',
   primaryHex: '#333333',
   accentHex: '#444444',
-  colors: [], typography: [], spacing: [], radius: [], shadows: [],
+  colors: [],
+  typography: [],
+  spacing: [],
+  radius: [],
+  shadows: [],
 };
 
 describe('MultiBrandSwitcher', () => {
@@ -51,7 +59,9 @@ describe('MultiBrandSwitcher', () => {
         onUpdateKit={vi.fn()}
       />,
     );
-    fireEvent.change(screen.getByTestId('multi-brand-deck-select'), { target: { value: 'brand-b' } });
+    fireEvent.change(screen.getByTestId('multi-brand-deck-select'), {
+      target: { value: 'brand-b' },
+    });
     expect(onDeckKitChange).toHaveBeenCalledWith('brand-b');
   });
 
@@ -67,7 +77,9 @@ describe('MultiBrandSwitcher', () => {
         onUpdateKit={vi.fn()}
       />,
     );
-    fireEvent.change(screen.getByTestId('multi-brand-slide-select'), { target: { value: 'brand-b' } });
+    fireEvent.change(screen.getByTestId('multi-brand-slide-select'), {
+      target: { value: 'brand-b' },
+    });
     expect(onSlideKitChange).toHaveBeenCalledWith('brand-b');
   });
 
@@ -134,6 +146,9 @@ describe('MultiBrandSwitcher', () => {
     fireEvent.click(screen.getByTestId('multi-brand-edit'));
     fireEvent.change(screen.getByTestId('multi-brand-edit-name'), { target: { value: 'Alpha 2' } });
     fireEvent.click(screen.getByTestId('multi-brand-edit-save'));
-    expect(onUpdateKit).toHaveBeenCalledWith('brand-a', expect.objectContaining({ name: 'Alpha 2' }));
+    expect(onUpdateKit).toHaveBeenCalledWith(
+      'brand-a',
+      expect.objectContaining({ name: 'Alpha 2' }),
+    );
   });
 });

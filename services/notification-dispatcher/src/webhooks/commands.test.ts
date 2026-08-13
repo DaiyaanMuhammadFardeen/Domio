@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  parseSlashCommand,
-  dispatchCommand,
-  registerCommand,
-  getCommand,
-} from './commands.js';
+import { parseSlashCommand, dispatchCommand, registerCommand, getCommand } from './commands.js';
 
 describe('webhooks/commands', () => {
   describe('parseSlashCommand', () => {

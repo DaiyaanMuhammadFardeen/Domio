@@ -64,7 +64,12 @@ describe('encodePayload / decodePayload', () => {
   it('round-trips a fully populated payload', () => {
     const input = samplePayload();
     const token = encodePayload(input, { kid: KID, key: KEY });
-    const decoded = decodePayload(token, { kid: KID, key: KEY, audience: 'viewer', now: Date.now() });
+    const decoded = decodePayload(token, {
+      kid: KID,
+      key: KEY,
+      audience: 'viewer',
+      now: Date.now(),
+    });
     expect(decoded.v).toBe(DEEP_LINK_VERSION);
     expect(decoded.deck_id).toBe(input.deck_id);
     expect(decoded.slide_id).toBe(input.slide_id);
@@ -127,7 +132,10 @@ describe('encodePayload / decodePayload', () => {
   });
 
   it('encode-time rejects unsupported wire versions', () => {
-    const bad = { ...samplePayload(), v: 99 as unknown as typeof DEEP_LINK_VERSION } as unknown as Omit<DeepLinkPayload, 'sig'>;
+    const bad = {
+      ...samplePayload(),
+      v: 99 as unknown as typeof DEEP_LINK_VERSION,
+    } as unknown as Omit<DeepLinkPayload, 'sig'>;
     expect(() => encodePayload(bad, { kid: KID, key: KEY })).toThrow(DeepLinkVersionError);
   });
 
@@ -153,9 +161,7 @@ describe('encodePayload / decodePayload', () => {
 
   it('rejects tokens where sig is missing', () => {
     const input = samplePayload();
-    const tampered = Buffer.from(
-      JSON.stringify({ ...input }),
-    ).toString('base64url');
+    const tampered = Buffer.from(JSON.stringify({ ...input })).toString('base64url');
     expect(() =>
       decodePayload(tampered, { kid: KID, key: KEY, audience: 'viewer', now: Date.now() }),
     ).toThrow(DeepLinkMalformedError);
@@ -174,7 +180,12 @@ describe('encodePayload / decodePayload', () => {
     // intact so the malformed-token path is not triggered.
     const input = samplePayload();
     const token = encodePayload(input, { kid: KID, key: KEY });
-    const decoded = decodePayload(token, { kid: KID, key: KEY, audience: 'viewer', now: Date.now() });
+    const decoded = decodePayload(token, {
+      kid: KID,
+      key: KEY,
+      audience: 'viewer',
+      now: Date.now(),
+    });
     // Recompute sig with a different key, sign the payload with
     // that key, and verify with the original — expect sig error.
     const wrongSig = generateKey();
@@ -184,7 +195,10 @@ describe('encodePayload / decodePayload', () => {
     // Replace the sig value with a syntactically valid but
     // cryptographically wrong signature, leaving everything else
     // untouched.
-    const tampered: typeof decoded = { ...decoded, sig: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' };
+    const tampered: typeof decoded = {
+      ...decoded,
+      sig: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    };
     const tamperedToken = Buffer.from(JSON.stringify(tampered), 'utf8').toString('base64url');
     expect(() =>
       decodePayload(tamperedToken, { kid: KID, key: KEY, audience: 'viewer', now: Date.now() }),
@@ -215,7 +229,8 @@ describe('performance budget', () => {
     const input = samplePayload(120_000);
     const token = encodePayload(input, { kid: KID, key: KEY });
     // Warm the JIT
-    for (let i = 0; i < 50; i++) decodePayload(token, { kid: KID, key: KEY, audience: 'viewer', now: Date.now() });
+    for (let i = 0; i < 50; i++)
+      decodePayload(token, { kid: KID, key: KEY, audience: 'viewer', now: Date.now() });
     const samples: number[] = [];
     for (let i = 0; i < 200; i++) {
       const t0 = performance.now();

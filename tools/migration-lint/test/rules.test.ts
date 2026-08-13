@@ -9,7 +9,11 @@ import { parseStatements } from '../src/sqlparse.js';
 import { parseAnnotations } from '../src/loader.js';
 import type { LintMigration } from '../src/types.js';
 
-const buildMigration = (file: string, body: string, annotations: Record<string, string> = {}): LintMigration => {
+const buildMigration = (
+  file: string,
+  body: string,
+  annotations: Record<string, string> = {},
+): LintMigration => {
   const sequence = (file.match(/^(\d{4,})_/) ?? [])[1] ?? '';
   return {
     file,
@@ -34,7 +38,9 @@ describe('forward-only rule', () => {
 
   it('fails when paired down migration is missing', () => {
     const up = buildMigration('0001_health_check.up.sql', 'CREATE TABLE x (id int);');
-    expect(forwardOnlyRule.check(up, [up]).some((v) => /Missing paired down/.test(v.message))).toBe(true);
+    expect(forwardOnlyRule.check(up, [up]).some((v) => /Missing paired down/.test(v.message))).toBe(
+      true,
+    );
   });
 
   it('fails when migration uses consecutive empty SQL files', () => {
@@ -64,7 +70,8 @@ describe('drop-column rule', () => {
   });
 
   it('passes with explicit BANG-ALLOWED annotation', () => {
-    const body = '-- BANG-ALLOWED: drop-without-rename\nBEGIN; ALTER TABLE foo DROP COLUMN dropped; COMMIT;';
+    const body =
+      '-- BANG-ALLOWED: drop-without-rename\nBEGIN; ALTER TABLE foo DROP COLUMN dropped; COMMIT;';
     const m = buildMigration('0001_drop.up.sql', body, parseAnnotations(body));
     expect(dropColumnRule.check(m, [m])).toEqual([]);
   });
@@ -123,7 +130,10 @@ describe('require-if-exists rule', () => {
   });
 
   it('does not flag DROP COLUMN inside a CREATE INDEX', () => {
-    const m = buildMigration('0001_x.up.sql', 'BEGIN; CREATE INDEX IF NOT EXISTS foo ON bar(x); COMMIT;');
+    const m = buildMigration(
+      '0001_x.up.sql',
+      'BEGIN; CREATE INDEX IF NOT EXISTS foo ON bar(x); COMMIT;',
+    );
     expect(requireIfExistsRule.check(m, [m])).toEqual([]);
   });
 });

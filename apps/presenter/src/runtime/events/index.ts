@@ -2,10 +2,7 @@
  * apps/presenter — analytics events barrel.
  */
 
-export {
-  emitPresenterEvent,
-  presenterEmitHelpers,
-} from './presenter_event.js';
+export { emitPresenterEvent, presenterEmitHelpers } from './presenter_event.js';
 export {
   initializePresenterAnalytics,
   getPresenterAnalyticsClient,

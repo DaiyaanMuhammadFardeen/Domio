@@ -43,7 +43,8 @@ export function coerce(type: InputType, value: unknown): CoercionResult {
     case 'number':
     case 'range':
     case 'slider': {
-      if (typeof value === 'number') return Number.isFinite(value) ? ok(value) : { ok: false, error: 'TYPE_MISMATCH' };
+      if (typeof value === 'number')
+        return Number.isFinite(value) ? ok(value) : { ok: false, error: 'TYPE_MISMATCH' };
       if (typeof value === 'string') {
         const trimmed = value.trim();
         if (trimmed.length === 0) return ok(undefined);
@@ -82,7 +83,9 @@ export function coerce(type: InputType, value: unknown): CoercionResult {
   }
 }
 
-function ok(value: unknown): CoercionResult { return { ok: true, value }; }
+function ok(value: unknown): CoercionResult {
+  return { ok: true, value };
+}
 
 /** Resolve a default value for an input — author-provided or zero-value. */
 export function defaultValueFor(inp: InputDefinition): unknown {
@@ -172,7 +175,11 @@ export function runValidator(
 ): ValidatorResult {
   switch (validator.kind) {
     case 'required': {
-      const empty = value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0);
+      const empty =
+        value === undefined ||
+        value === null ||
+        value === '' ||
+        (Array.isArray(value) && value.length === 0);
       return { ok: !empty, code: 'REQUIRED' };
     }
     case 'min': {
@@ -207,15 +214,19 @@ export function runValidator(
     case 'crossField': {
       const other = allValues[validator.field];
       switch (validator.rule) {
-        case 'equals': return { ok: value === other, code: 'CROSS_FIELD' };
-        case 'notEquals': return { ok: value !== other, code: 'CROSS_FIELD' };
+        case 'equals':
+          return { ok: value === other, code: 'CROSS_FIELD' };
+        case 'notEquals':
+          return { ok: value !== other, code: 'CROSS_FIELD' };
         case 'greaterThan': {
-          const a = toNumber(value), b = toNumber(other);
+          const a = toNumber(value),
+            b = toNumber(other);
           if (a === null || b === null) return { ok: true, code: 'CROSS_FIELD' };
           return { ok: a > b, code: 'CROSS_FIELD' };
         }
         case 'lessThan': {
-          const a = toNumber(value), b = toNumber(other);
+          const a = toNumber(value),
+            b = toNumber(other);
           if (a === null || b === null) return { ok: true, code: 'CROSS_FIELD' };
           return { ok: a < b, code: 'CROSS_FIELD' };
         }
@@ -227,7 +238,8 @@ export function runValidator(
       return { ok: false, code: 'ASYNC_FAILED' };
     }
   }
-  void field; void coerced;
+  void field;
+  void coerced;
   return { ok: true, code: 'REQUIRED' };
 }
 

@@ -5,12 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  getKioskConfig,
-  setKioskConfig,
-  verifyAdminPin,
-  type KioskConfig,
-} from './kiosk-service';
+import { getKioskConfig, setKioskConfig, verifyAdminPin, type KioskConfig } from './kiosk-service';
 
 describe('kiosk-service', () => {
   it('getKioskConfig returns a deterministic config for a deckId', async () => {

@@ -101,10 +101,7 @@ export function SlideBidirectionalPanel({
     [loadSliders],
   );
 
-  const saveImpl = useMemo(
-    () => onSave ?? ((sid: string) => saveBidirToDeck(sid)),
-    [onSave],
-  );
+  const saveImpl = useMemo(() => onSave ?? ((sid: string) => saveBidirToDeck(sid)), [onSave]);
 
   // Reload sliders whenever the slide (or refresh key) changes.
   useEffect(() => {
@@ -173,8 +170,7 @@ export function SlideBidirectionalPanel({
         timestamp_ms: Date.now(),
         slider_id: slider.id,
         actor,
-        from_value:
-          target === 'presenter' ? slider.presenter_value : slider.audience_value,
+        from_value: target === 'presenter' ? slider.presenter_value : slider.audience_value,
         to_value: value,
         new_midpoint: updated.midpoint,
       };
@@ -203,7 +199,10 @@ export function SlideBidirectionalPanel({
       className="flex flex-col gap-4 rounded-md border border-slate-700/60 bg-slate-800/40 p-4"
     >
       <header className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-100" data-testid={`${dataTestId}-heading`}>
+        <h2
+          className="text-base font-semibold text-slate-100"
+          data-testid={`${dataTestId}-heading`}
+        >
           Two-way slides
         </h2>
         <div className="flex items-center gap-2">
@@ -217,10 +216,7 @@ export function SlideBidirectionalPanel({
             {saving ? 'Saving…' : 'Save to deck'}
           </button>
           {savedAtMs !== null ? (
-            <span
-              data-testid={`${dataTestId}-saved`}
-              className="text-[11px] text-emerald-400"
-            >
+            <span data-testid={`${dataTestId}-saved`} className="text-[11px] text-emerald-400">
               Saved to deck.
             </span>
           ) : null}
@@ -273,7 +269,10 @@ function BidirSliderRow({
   onReset,
   testIdPrefix,
 }: BidirSliderRowProps): ReactElement {
-  const [animatingFrom, setAnimatingFrom] = useState<{ presenter: number; audience: number } | null>(null);
+  const [animatingFrom, setAnimatingFrom] = useState<{
+    presenter: number;
+    audience: number;
+  } | null>(null);
   const presenterX = fractionToPx(slider.presenter_value, slider.min, slider.max, trackWidth);
   const audienceX = fractionToPx(slider.audience_value, slider.min, slider.max, trackWidth);
   const midpointX = fractionToPx(slider.midpoint, slider.min, slider.max, trackWidth);
@@ -309,7 +308,10 @@ function BidirSliderRow({
       data-converged={slider.converged}
     >
       <div className="flex items-baseline justify-between">
-        <span className="text-sm font-semibold text-slate-100" data-testid={`${testIdPrefix}-label`}>
+        <span
+          className="text-sm font-semibold text-slate-100"
+          data-testid={`${testIdPrefix}-label`}
+        >
           {slider.label}
         </span>
         <span
@@ -382,28 +384,19 @@ function BidirSliderRow({
             className="w-48 accent-sky-400"
             aria-label={`${slider.label} presenter value`}
           />
-          <span
-            className="tabular-nums"
-            data-testid={`${testIdPrefix}-presenter-display`}
-          >
+          <span className="tabular-nums" data-testid={`${testIdPrefix}-presenter-display`}>
             {presenterDisplay} {slider.unit}
           </span>
         </label>
         <div className="flex flex-col gap-1">
           <span className="text-[10px] uppercase tracking-wide text-slate-400">Their value</span>
-          <span
-            className="tabular-nums"
-            data-testid={`${testIdPrefix}-audience-display`}
-          >
+          <span className="tabular-nums" data-testid={`${testIdPrefix}-audience-display`}>
             {audienceDisplay} {slider.unit}
           </span>
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-[10px] uppercase tracking-wide text-slate-400">Midpoint</span>
-          <span
-            className="tabular-nums"
-            data-testid={`${testIdPrefix}-midpoint-display`}
-          >
+          <span className="tabular-nums" data-testid={`${testIdPrefix}-midpoint-display`}>
             {midpointDisplay} {slider.unit}
           </span>
         </div>

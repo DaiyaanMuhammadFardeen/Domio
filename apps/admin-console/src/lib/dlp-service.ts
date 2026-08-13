@@ -7,12 +7,7 @@
  * be swapped to a `fetcher` wrapper without churn.
  */
 
-import type {
-  DLPRule,
-  DLPRuleInput,
-  DLPRuleList,
-  DLPTestResult,
-} from './types';
+import type { DLPRule, DLPRuleInput, DLPRuleList, DLPTestResult } from './types';
 
 const NOW = Date.UTC(2026, 6, 1);
 const DAY_MS = 1000 * 60 * 60 * 24;
@@ -144,10 +139,7 @@ export async function createDLPRule(input: DLPRuleInput): Promise<DLPRule> {
   return clone(created);
 }
 
-export async function updateDLPRule(
-  id: string,
-  input: DLPRuleInput,
-): Promise<DLPRule> {
+export async function updateDLPRule(id: string, input: DLPRuleInput): Promise<DLPRule> {
   const idx = STORE.findIndex((r) => r.id === id);
   if (idx < 0) {
     throw new Error(`DLP rule ${id} not found`);
@@ -179,10 +171,7 @@ export async function deleteDLPRule(id: string): Promise<void> {
 }
 
 /** Toggle a rule's enabled flag without going through full update. */
-export async function toggleDLPRule(
-  id: string,
-  enabled: boolean,
-): Promise<DLPRule> {
+export async function toggleDLPRule(id: string, enabled: boolean): Promise<DLPRule> {
   const idx = STORE.findIndex((r) => r.id === id);
   if (idx < 0) {
     throw new Error(`DLP rule ${id} not found`);
@@ -202,10 +191,7 @@ interface Snippet {
   snippet: string;
 }
 
-function buildSnippets(
-  text: string,
-  re: RegExp,
-): { snippets: Snippet[]; matched: boolean } {
+function buildSnippets(text: string, re: RegExp): { snippets: Snippet[]; matched: boolean } {
   const snippets: Snippet[] = [];
   // Reset lastIndex defensively in case the caller reused the regex.
   re.lastIndex = 0;
@@ -261,10 +247,7 @@ function entityMatch(text: string, entity: string): { snippets: Snippet[]; match
  * scan over a finite input). The function returns synchronously
  * inside a Promise so the caller can await for uniform ergonomics.
  */
-export async function testDLPRule(
-  rule: DLPRule,
-  text: string,
-): Promise<DLPTestResult> {
+export async function testDLPRule(rule: DLPRule, text: string): Promise<DLPTestResult> {
   const started = performance.now();
   let result: { snippets: Snippet[]; matched: boolean };
   switch (rule.kind) {

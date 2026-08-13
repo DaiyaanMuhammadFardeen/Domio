@@ -69,8 +69,8 @@ export function DataSourcePanel({
         <div className="data-panel__section-title">Sources</div>
         {sources.length === 0 ? (
           <div className="data-panel__empty" data-testid="data-panel-empty-state">
-            No data sources connected. Open the Connectors panel to link a CSV,
-            webhook, or HTTP API.
+            No data sources connected. Open the Connectors panel to link a CSV, webhook, or HTTP
+            API.
           </div>
         ) : (
           sources.map((ds) => (
@@ -148,8 +148,16 @@ function DataSourceRow({
         role="button"
         tabIndex={0}
         title="Refresh"
-        onClick={(e) => { e.stopPropagation(); onRefresh(); }}
-        onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onRefresh(); } }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRefresh();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.stopPropagation();
+            onRefresh();
+          }
+        }}
         style={{ cursor: 'pointer', fontSize: 14, color: 'var(--muted)', padding: '2px 4px' }}
         data-testid={`p08-source-refresh-${ds.id}`}
       >
@@ -159,8 +167,16 @@ function DataSourceRow({
         role="button"
         tabIndex={0}
         title="Remove"
-        onClick={(e) => { e.stopPropagation(); onRemove(); }}
-        onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onRemove(); } }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.stopPropagation();
+            onRemove();
+          }
+        }}
         style={{ cursor: 'pointer', fontSize: 14, color: 'var(--muted)', padding: '2px 4px' }}
         data-testid={`p08-source-remove-${ds.id}`}
       >
@@ -271,7 +287,9 @@ function AddSourceForm({ onCancel, onRegistered }: AddSourceFormProps): ReactEle
               data-testid={`ds-cred-${f.key}`}
             >
               {f.options.map((o) => (
-                <option key={o} value={o}>{o}</option>
+                <option key={o} value={o}>
+                  {o}
+                </option>
               ))}
             </select>
           ) : (

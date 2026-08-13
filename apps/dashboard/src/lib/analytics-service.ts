@@ -16,10 +16,26 @@
 import { fetcher } from './fetcher';
 
 export interface OverviewKpis {
-  readonly sessions: { readonly value: number; readonly delta: number; readonly series: readonly number[] };
-  readonly viewers: { readonly value: number; readonly delta: number; readonly series: readonly number[] };
-  readonly avgDwellMs: { readonly value: number; readonly delta: number; readonly series: readonly number[] };
-  readonly completionRate: { readonly value: number; readonly delta: number; readonly series: readonly number[] };
+  readonly sessions: {
+    readonly value: number;
+    readonly delta: number;
+    readonly series: readonly number[];
+  };
+  readonly viewers: {
+    readonly value: number;
+    readonly delta: number;
+    readonly series: readonly number[];
+  };
+  readonly avgDwellMs: {
+    readonly value: number;
+    readonly delta: number;
+    readonly series: readonly number[];
+  };
+  readonly completionRate: {
+    readonly value: number;
+    readonly delta: number;
+    readonly series: readonly number[];
+  };
 }
 
 export interface DeckSummaryRow {
@@ -33,7 +49,8 @@ export interface DeckSummaryRow {
 }
 
 const DEFAULT_BASE: string =
-  (typeof process !== 'undefined' ? process.env['WAREHOUSE_URL'] : undefined) ?? 'http://localhost:8088';
+  (typeof process !== 'undefined' ? process.env['WAREHOUSE_URL'] : undefined) ??
+  'http://localhost:8088';
 
 const EMPTY_KPIS: OverviewKpis = {
   sessions: { value: 0, delta: 0, series: [0, 0, 0, 0, 0, 0, 0] },
@@ -86,12 +103,16 @@ export async function fetchOverviewKpis(
       avgDwellMs: {
         value: Number(json.avg_dwell_ms ?? 0),
         delta: Number(json.avg_dwell_delta ?? 0),
-        series: Array.isArray(json.avg_dwell_series) ? [...json.avg_dwell_series] : [...SEVEN_ZEROS],
+        series: Array.isArray(json.avg_dwell_series)
+          ? [...json.avg_dwell_series]
+          : [...SEVEN_ZEROS],
       },
       completionRate: {
         value: Number(json.completion_rate ?? 0),
         delta: Number(json.completion_delta ?? 0),
-        series: Array.isArray(json.completion_series) ? [...json.completion_series] : [...SEVEN_ZEROS],
+        series: Array.isArray(json.completion_series)
+          ? [...json.completion_series]
+          : [...SEVEN_ZEROS],
       },
     };
   } catch {

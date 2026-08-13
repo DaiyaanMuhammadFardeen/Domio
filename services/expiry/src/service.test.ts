@@ -25,15 +25,21 @@ function createService(opts?: {
   if (opts?.emitter !== undefined) serviceOpts.eventEmitter = opts.emitter;
   if (opts?.shareRevoker !== undefined) serviceOpts.shareRevoker = opts.shareRevoker;
   if (opts?.isLegalHold !== undefined) serviceOpts.isLegalHold = opts.isLegalHold;
-  if (opts?.getWorkspaceDefaults !== undefined) serviceOpts.getWorkspaceDefaults = opts.getWorkspaceDefaults;
+  if (opts?.getWorkspaceDefaults !== undefined)
+    serviceOpts.getWorkspaceDefaults = opts.getWorkspaceDefaults;
   if (opts?.now !== undefined) serviceOpts.now = opts.now;
   return {
-    service: new ExpiryService(serviceOpts as unknown as import('./service.js').ExpiryServiceOptions),
+    service: new ExpiryService(
+      serviceOpts as unknown as import('./service.js').ExpiryServiceOptions,
+    ),
     store,
   };
 }
 
-function createEvents(): { events: Array<{ subject: string; payload: Record<string, unknown> }>; emitter: ExpiryEventEmitter } {
+function createEvents(): {
+  events: Array<{ subject: string; payload: Record<string, unknown> }>;
+  emitter: ExpiryEventEmitter;
+} {
   const events: Array<{ subject: string; payload: Record<string, unknown> }> = [];
   const emitter: ExpiryEventEmitter = {
     async publish(subject, payload) {
@@ -179,9 +185,11 @@ describe('ExpiryService', () => {
     expect(flags[0]!.reason).toBe('policy_overdue');
 
     // Check event emitted
-    const flagEvent = events.find(e => e.subject === 'expiry.flag_applied');
+    const flagEvent = events.find((e) => e.subject === 'expiry.flag_applied');
     expect(flagEvent).toBeTruthy();
-    expect(flagEvent!.payload['payload']).toEqual(expect.objectContaining({ escalation: 'gentle' }));
+    expect(flagEvent!.payload['payload']).toEqual(
+      expect.objectContaining({ escalation: 'gentle' }),
+    );
   });
 
   // -------------------------------------------------------------------------
@@ -216,12 +224,18 @@ describe('ExpiryService', () => {
     expect(result.flagged).toBe(true);
     expect(result.revoked).toBe(true);
     expect(revokeShare).toHaveBeenCalledOnce();
-    expect(revokeShare).toHaveBeenCalledWith('deck', 'd1', expect.objectContaining({ escalation: 'strict' }));
+    expect(revokeShare).toHaveBeenCalledWith(
+      'deck',
+      'd1',
+      expect.objectContaining({ escalation: 'strict' }),
+    );
 
     // Check share_revoked event
-    const revokeEvent = events.find(e => e.subject === 'expiry.share_revoked');
+    const revokeEvent = events.find((e) => e.subject === 'expiry.share_revoked');
     expect(revokeEvent).toBeTruthy();
-    expect(revokeEvent!.payload['payload']).toEqual(expect.objectContaining({ share_link_id: 'sl1' }));
+    expect(revokeEvent!.payload['payload']).toEqual(
+      expect.objectContaining({ share_link_id: 'sl1' }),
+    );
   });
 
   // -------------------------------------------------------------------------
@@ -314,7 +328,7 @@ describe('ExpiryService', () => {
     expect(openFlags).toHaveLength(0);
 
     // Event emitted
-    const confirmEvent = events.find(e => e.subject === 'expiry.freshness_confirmed');
+    const confirmEvent = events.find((e) => e.subject === 'expiry.freshness_confirmed');
     expect(confirmEvent).toBeTruthy();
   });
 
@@ -350,8 +364,10 @@ describe('ExpiryService', () => {
     expect(revokeShare).not.toHaveBeenCalled();
 
     // Notification event emitted
-    const notifyEvent = events.find(e => e.subject === 'expiry.notification');
+    const notifyEvent = events.find((e) => e.subject === 'expiry.notification');
     expect(notifyEvent).toBeTruthy();
-    expect(notifyEvent!.payload['payload']).toEqual(expect.objectContaining({ escalation: 'moderate' }));
+    expect(notifyEvent!.payload['payload']).toEqual(
+      expect.objectContaining({ escalation: 'moderate' }),
+    );
   });
 });

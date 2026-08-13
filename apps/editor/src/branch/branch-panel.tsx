@@ -39,7 +39,9 @@ export function BranchPanel({
     }
   }, [client, deckId]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   async function createBranch(): Promise<void> {
     const name = newName.trim();
@@ -56,7 +58,8 @@ export function BranchPanel({
 
   async function checkout(branch: BranchSummary): Promise<void> {
     if (branch.id === activeBranchId) return;
-    if (hasUnsyncedOps && !window.confirm('You have unsynced changes. Switch branches anyway?')) return;
+    if (hasUnsyncedOps && !window.confirm('You have unsynced changes. Switch branches anyway?'))
+      return;
     try {
       const result = await client.checkout(deckId, branch.id);
       onCheckout?.(result.branch);
@@ -70,7 +73,7 @@ export function BranchPanel({
     if (!window.confirm(`Archive branch “${branch.name}”?`)) return;
     try {
       const updated = await client.archiveBranch(deckId, branch.id);
-      setBranches((current) => current.map((item) => item.id === updated.id ? updated : item));
+      setBranches((current) => current.map((item) => (item.id === updated.id ? updated : item)));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to archive branch.');
     }
@@ -78,23 +81,60 @@ export function BranchPanel({
 
   return (
     <section aria-label="Branches" className="branch-panel">
-      <header><h2>Branches</h2><button type="button" onClick={() => void refresh()}>Refresh</button></header>
-      <form onSubmit={(event) => { event.preventDefault(); void createBranch(); }}>
+      <header>
+        <h2>Branches</h2>
+        <button type="button" onClick={() => void refresh()}>
+          Refresh
+        </button>
+      </header>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void createBranch();
+        }}
+      >
         <label htmlFor="branch-name">New branch</label>
-        <input id="branch-name" value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="feature/name" />
-        <button type="submit" disabled={!newName.trim()}>Create</button>
+        <input
+          id="branch-name"
+          value={newName}
+          onChange={(event) => setNewName(event.target.value)}
+          placeholder="feature/name"
+        />
+        <button type="submit" disabled={!newName.trim()}>
+          Create
+        </button>
       </form>
       {loading && <p role="status">Loading branches…</p>}
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
-      {!loading && <ul>
-        {branches.map((branch) => <li key={branch.id}>
-          <button type="button" onClick={() => void checkout(branch)} disabled={branch.status === 'archived'} aria-current={branch.id === activeBranchId ? 'page' : undefined}>
-            {branch.name} <small>r{branch.headRevision} · {branch.status}</small>
-          </button>
-          {branch.id !== 'main' && branch.status === 'active' && <button type="button" onClick={() => void archive(branch)} aria-label={`Archive ${branch.name}`}>Archive</button>}
-        </li>)}
-      </ul>}
+      {!loading && (
+        <ul>
+          {branches.map((branch) => (
+            <li key={branch.id}>
+              <button
+                type="button"
+                onClick={() => void checkout(branch)}
+                disabled={branch.status === 'archived'}
+                aria-current={branch.id === activeBranchId ? 'page' : undefined}
+              >
+                {branch.name}{' '}
+                <small>
+                  r{branch.headRevision} · {branch.status}
+                </small>
+              </button>
+              {branch.id !== 'main' && branch.status === 'active' && (
+                <button
+                  type="button"
+                  onClick={() => void archive(branch)}
+                  aria-label={`Archive ${branch.name}`}
+                >
+                  Archive
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

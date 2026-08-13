@@ -30,12 +30,23 @@ export interface HandoffDialogProps {
   onHandover: (next: PresenterSessionState) => void;
 }
 
-export function HandoffDialog({ sessionId, state, etag, apiBaseUrl, onClose, onHandover }: HandoffDialogProps) {
+export function HandoffDialog({
+  sessionId,
+  state,
+  etag,
+  apiBaseUrl,
+  onClose,
+  onHandover,
+}: HandoffDialogProps) {
   const client = new HandoffClient({ baseUrl: apiBaseUrl ?? '' });
   const [recipient, setRecipient] = useState('');
   const [status, setStatus] = useState<{ kind: 'ok' | 'error'; message: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [minted, setMinted] = useState<{ token: string; expires_at_ms: number; expected_version: number } | null>(null);
+  const [minted, setMinted] = useState<{
+    token: string;
+    expires_at_ms: number;
+    expected_version: number;
+  } | null>(null);
 
   const onMint = useCallback(async () => {
     if (!recipient.trim()) {
@@ -88,7 +99,12 @@ export function HandoffDialog({ sessionId, state, etag, apiBaseUrl, onClose, onH
     <div className="handoff-dialog" role="dialog" aria-label="Hand off session">
       <header className="handoff-dialog__header">
         <h3>Hand off session</h3>
-        <button type="button" className="handoff-dialog__close" onClick={onClose} aria-label="Close handoff">
+        <button
+          type="button"
+          className="handoff-dialog__close"
+          onClick={onClose}
+          aria-label="Close handoff"
+        >
           ✕
         </button>
       </header>
@@ -114,10 +130,15 @@ export function HandoffDialog({ sessionId, state, etag, apiBaseUrl, onClose, onH
 
         {minted && (
           <div className="handoff-dialog__token">
-            <p>Token (share securely; expires at {new Date(minted.expires_at_ms).toLocaleTimeString()}):</p>
+            <p>
+              Token (share securely; expires at{' '}
+              {new Date(minted.expires_at_ms).toLocaleTimeString()}):
+            </p>
             <code className="handoff-dialog__code">{minted.token}</code>
             <div className="handoff-dialog__token-actions">
-              <button type="button" onClick={onCopy} className="handoff-dialog__btn">Copy</button>
+              <button type="button" onClick={onCopy} className="handoff-dialog__btn">
+                Copy
+              </button>
               <button
                 type="button"
                 onClick={onApply}
@@ -131,7 +152,11 @@ export function HandoffDialog({ sessionId, state, etag, apiBaseUrl, onClose, onH
         )}
 
         {status && (
-          <div className={`handoff-dialog__status handoff-dialog__status--${status.kind}`} role="status" aria-live="polite">
+          <div
+            className={`handoff-dialog__status handoff-dialog__status--${status.kind}`}
+            role="status"
+            aria-live="polite"
+          >
             {status.message}
           </div>
         )}

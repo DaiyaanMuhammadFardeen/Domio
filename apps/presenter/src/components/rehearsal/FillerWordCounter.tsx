@@ -48,18 +48,12 @@ export function FillerWordCounter({
   dataTestId = 'filler-counter',
 }: FillerWordCounterProps): ReactElement {
   const minutes = useMemo(() => minutesFromMs(elapsedMs), [elapsedMs]);
-  const total = useMemo(
-    () => counts.reduce((acc, c) => acc + c.count, 0),
-    [counts],
-  );
+  const total = useMemo(() => counts.reduce((acc, c) => acc + c.count, 0), [counts]);
   const rate = total / minutes;
 
   // Stable order: highest count first, ties broken by phrase alphabetically.
   const sorted = useMemo(
-    () =>
-      [...counts].sort(
-        (a, b) => b.count - a.count || a.phrase.localeCompare(b.phrase),
-      ),
+    () => [...counts].sort((a, b) => b.count - a.count || a.phrase.localeCompare(b.phrase)),
     [counts],
   );
 
@@ -79,10 +73,7 @@ export function FillerWordCounter({
           <span className="text-xs text-slate-400">fillers</span>
         </div>
         <div className="flex items-baseline gap-2">
-          <span
-            className="text-sm tabular-nums text-slate-200"
-            data-testid={`${dataTestId}-rate`}
-          >
+          <span className="text-sm tabular-nums text-slate-200" data-testid={`${dataTestId}-rate`}>
             {rate.toFixed(1)}
           </span>
           <span className="text-xs text-slate-400">/ min</span>
@@ -96,17 +87,11 @@ export function FillerWordCounter({
       </div>
 
       {sorted.length === 0 ? (
-        <p
-          className="text-xs text-slate-500"
-          data-testid={`${dataTestId}-empty`}
-        >
+        <p className="text-xs text-slate-500" data-testid={`${dataTestId}-empty`}>
           No filler words detected yet.
         </p>
       ) : (
-        <ul
-          className="flex flex-col gap-1"
-          data-testid={`${dataTestId}-list`}
-        >
+        <ul className="flex flex-col gap-1" data-testid={`${dataTestId}-list`}>
           {sorted.map((c) => (
             <li
               key={c.phrase}

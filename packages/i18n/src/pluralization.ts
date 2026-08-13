@@ -28,10 +28,7 @@ export type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
  * getPluralCategory('ja', 99) // 'other'
  * ```
  */
-export function getPluralCategory(
-  locale: LocaleId,
-  count: number,
-): PluralCategory {
+export function getPluralCategory(locale: LocaleId, count: number): PluralCategory {
   // Integer-ize to avoid floating-point edge cases.
   const n = Math.abs(Math.trunc(count));
 

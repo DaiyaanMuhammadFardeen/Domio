@@ -11,7 +11,7 @@
  * by computing the delta between old and new recommended bitrates.
  */
 
-export type BitrateTier = "low" | "med" | "high";
+export type BitrateTier = 'low' | 'med' | 'high';
 
 export interface BitrateParams {
   readonly width: number;
@@ -49,10 +49,7 @@ export function computeBitrate(params: BitrateParams): number {
  * Compute the recommended bitrate for a mid-recording resolution change.
  * Returns the delta (newKbps - oldKbps); negative means the bitrate should decrease.
  */
-export function bitrateDelta(
-  oldParams: BitrateParams,
-  newParams: BitrateParams,
-): number {
+export function bitrateDelta(oldParams: BitrateParams, newParams: BitrateParams): number {
   return computeBitrate(newParams) - computeBitrate(oldParams);
 }
 

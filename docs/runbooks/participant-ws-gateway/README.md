@@ -8,9 +8,9 @@ WebSocket gateway for audience participation (poll, qa, quiz, reactions, nav-vot
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-participant-ws` | availability | 99.9% | 30d |
+| SLO                    | Kind         | Target | Window |
+| ---------------------- | ------------ | ------ | ------ |
+| `avail-participant-ws` | availability | 99.9%  | 30d    |
 
 ## Triage
 

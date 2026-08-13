@@ -23,7 +23,11 @@ export function SyncIndicator({ facade }: SyncIndicatorProps): ReactElement {
   }, [facade]);
 
   return (
-    <div className={`sync-indicator sync-indicator--${state.status}`} role="status" aria-live="polite">
+    <div
+      className={`sync-indicator sync-indicator--${state.status}`}
+      role="status"
+      aria-live="polite"
+    >
       <span className="sync-indicator__dot" aria-hidden />
       <span className="sync-indicator__label">{labelFor(state)}</span>
     </div>

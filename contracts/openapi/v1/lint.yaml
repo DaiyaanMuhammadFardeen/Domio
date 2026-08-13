@@ -30,17 +30,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LintRunRequest"
+              $ref: '#/components/schemas/LintRunRequest'
       responses:
-        "200":
+        '200':
           description: Lint results.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LintRunResponse"
-        "401":
+                $ref: '#/components/schemas/LintRunResponse'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Deck or brand kit not found.
 components:
   securitySchemes:
@@ -66,7 +66,7 @@ components:
         findings:
           type: array
           items:
-            $ref: "#/components/schemas/LintFinding"
+            $ref: '#/components/schemas/LintFinding'
         blockCount:
           type: integer
         warnCount:
@@ -92,7 +92,7 @@ components:
         message:
           type: string
         fixProposal:
-          $ref: "#/components/schemas/LintFixProposal"
+          $ref: '#/components/schemas/LintFixProposal'
     LintFixProposal:
       type: object
       properties:

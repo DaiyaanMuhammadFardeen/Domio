@@ -32,7 +32,10 @@ export function RecapPage({ sessionId, apiBaseUrl, onClose }: RecapPageProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    client.fetch(sessionId).then(setSummary).catch((e) => setError((e as Error).message));
+    client
+      .fetch(sessionId)
+      .then(setSummary)
+      .catch((e) => setError((e as Error).message));
   }, [client, sessionId]);
 
   const topSlides = summary
@@ -45,7 +48,12 @@ export function RecapPage({ sessionId, apiBaseUrl, onClose }: RecapPageProps) {
     <section className="recap-page" aria-label="Session recap">
       <header className="recap-page__header">
         <h2>Session recap</h2>
-        <button type="button" className="recap-page__close" onClick={onClose} aria-label="Close recap">
+        <button
+          type="button"
+          className="recap-page__close"
+          onClick={onClose}
+          aria-label="Close recap"
+        >
           ✕
         </button>
       </header>
@@ -67,7 +75,9 @@ export function RecapPage({ sessionId, apiBaseUrl, onClose }: RecapPageProps) {
           </div>
           <div className="recap-card">
             <div className="recap-card__label">Parking lot</div>
-            <div className="recap-card__value">{summary.parking_lot_open.length + summary.parking_lot_pinned.length}</div>
+            <div className="recap-card__value">
+              {summary.parking_lot_open.length + summary.parking_lot_pinned.length}
+            </div>
           </div>
           <div className="recap-card recap-card--wide">
             <div className="recap-card__label">Slowest slides</div>
@@ -95,7 +105,10 @@ export function RecapPage({ sessionId, apiBaseUrl, onClose }: RecapPageProps) {
           )}
         </div>
       )}
-      <RecordingExportButton sessionId={sessionId} {...(apiBaseUrl !== undefined ? { apiBaseUrl } : {})} />
+      <RecordingExportButton
+        sessionId={sessionId}
+        {...(apiBaseUrl !== undefined ? { apiBaseUrl } : {})}
+      />
     </section>
   );
 }

@@ -100,7 +100,11 @@ export interface QueryRepository {
   findById(queryId: string, orgId: string): Promise<QueryRecord | null>;
   listByOrg(orgId: string): Promise<QueryRecord[]>;
   listByFreshnessType(type: FreshnessPolicyType): Promise<QueryRecord[]>;
-  update(queryId: string, orgId: string, patch: Partial<Pick<QueryRecord, 'sql' | 'connectorId' | 'params' | 'freshnessPolicy'>>): Promise<QueryRecord>;
+  update(
+    queryId: string,
+    orgId: string,
+    patch: Partial<Pick<QueryRecord, 'sql' | 'connectorId' | 'params' | 'freshnessPolicy'>>,
+  ): Promise<QueryRecord>;
   delete(queryId: string, orgId: string): Promise<void>;
 }
 
@@ -124,7 +128,11 @@ export interface ViewerTokenRepository {
 }
 
 export interface ACLRepository {
-  find(rule: { orgId: string; actorId: string; action: ACLRule['action'] }): Promise<ACLRule | null>;
+  find(rule: {
+    orgId: string;
+    actorId: string;
+    action: ACLRule['action'];
+  }): Promise<ACLRule | null>;
   insert(rule: ACLRule): Promise<void>;
 }
 
@@ -139,8 +147,12 @@ export interface WebhookDedupRepository {
 
 export class InMemoryQueryRepository implements QueryRepository {
   private store = new Map<string, QueryRecord>();
-  private k(r: QueryRecord): string { return `${r.orgId}::${r.queryId}`; }
-  async insert(r: QueryRecord): Promise<void> { this.store.set(this.k(r), r); }
+  private k(r: QueryRecord): string {
+    return `${r.orgId}::${r.queryId}`;
+  }
+  async insert(r: QueryRecord): Promise<void> {
+    this.store.set(this.k(r), r);
+  }
   async findById(queryId: string, orgId: string): Promise<QueryRecord | null> {
     return this.store.get(`${orgId}::${queryId}`) ?? null;
   }
@@ -158,7 +170,11 @@ export class InMemoryQueryRepository implements QueryRepository {
     }
     return out;
   }
-  async update(queryId: string, orgId: string, patch: Partial<Pick<QueryRecord, 'sql' | 'connectorId' | 'params' | 'freshnessPolicy'>>): Promise<QueryRecord> {
+  async update(
+    queryId: string,
+    orgId: string,
+    patch: Partial<Pick<QueryRecord, 'sql' | 'connectorId' | 'params' | 'freshnessPolicy'>>,
+  ): Promise<QueryRecord> {
     const existing = await this.findById(queryId, orgId);
     if (!existing) throw new Error(`Query ${queryId} not found for org ${orgId}`);
     const updated: QueryRecord = { ...existing, ...patch, updatedAt: new Date() };
@@ -172,7 +188,9 @@ export class InMemoryQueryRepository implements QueryRepository {
 
 export class InMemoryDatasetSnapshotRepository implements DatasetSnapshotRepository {
   private store = new Map<string, DatasetSnapshot>();
-  async insert(s: DatasetSnapshot): Promise<void> { this.store.set(s.snapshotId, s); }
+  async insert(s: DatasetSnapshot): Promise<void> {
+    this.store.set(s.snapshotId, s);
+  }
   async findById(snapshotId: string): Promise<DatasetSnapshot | null> {
     return this.store.get(snapshotId) ?? null;
   }
@@ -189,20 +207,24 @@ export class InMemoryDatasetSnapshotRepository implements DatasetSnapshotReposit
 
 export class InMemoryFreshnessRecordRepository implements FreshnessRecordRepository {
   private store: FreshnessRecord[] = [];
-  async insert(r: FreshnessRecord): Promise<void> { this.store.push(r); }
+  async insert(r: FreshnessRecord): Promise<void> {
+    this.store.push(r);
+  }
   async findLatestByQuery(queryId: string, orgId: string): Promise<FreshnessRecord | null> {
-    const matches = this.store.filter(r => r.queryId === queryId && r.orgId === orgId);
+    const matches = this.store.filter((r) => r.queryId === queryId && r.orgId === orgId);
     if (matches.length === 0) return null;
-    return matches.reduce((a, b) => a.createdAt > b.createdAt ? a : b);
+    return matches.reduce((a, b) => (a.createdAt > b.createdAt ? a : b));
   }
   async listByQuery(queryId: string, orgId: string, limit = 100): Promise<FreshnessRecord[]> {
-    return this.store.filter(r => r.queryId === queryId && r.orgId === orgId).slice(-limit);
+    return this.store.filter((r) => r.queryId === queryId && r.orgId === orgId).slice(-limit);
   }
 }
 
 export class InMemoryViewerTokenRepository implements ViewerTokenRepository {
   private store = new Map<string, ViewerToken>();
-  async insert(t: ViewerToken): Promise<void> { this.store.set(t.token, t); }
+  async insert(t: ViewerToken): Promise<void> {
+    this.store.set(t.token, t);
+  }
   async findByToken(token: string): Promise<ViewerToken | null> {
     return this.store.get(token) ?? null;
   }
@@ -221,16 +243,28 @@ export class InMemoryViewerTokenRepository implements ViewerTokenRepository {
 
 export class InMemoryACLRepository implements ACLRepository {
   private store: ACLRule[] = [];
-  async find(rule: { orgId: string; actorId: string; action: ACLRule['action'] }): Promise<ACLRule | null> {
-    return this.store.find(r =>
-      r.orgId === rule.orgId && r.actorId === rule.actorId && r.action === rule.action,
-    ) ?? null;
+  async find(rule: {
+    orgId: string;
+    actorId: string;
+    action: ACLRule['action'];
+  }): Promise<ACLRule | null> {
+    return (
+      this.store.find(
+        (r) => r.orgId === rule.orgId && r.actorId === rule.actorId && r.action === rule.action,
+      ) ?? null
+    );
   }
-  async insert(rule: ACLRule): Promise<void> { this.store.push(rule); }
+  async insert(rule: ACLRule): Promise<void> {
+    this.store.push(rule);
+  }
 }
 
 export class InMemoryWebhookDedupRepository implements WebhookDedupRepository {
   private seen = new Set<string>();
-  async exists(idempotencyKey: string): Promise<boolean> { return this.seen.has(idempotencyKey); }
-  async markSeen(idempotencyKey: string): Promise<void> { this.seen.add(idempotencyKey); }
+  async exists(idempotencyKey: string): Promise<boolean> {
+    return this.seen.has(idempotencyKey);
+  }
+  async markSeen(idempotencyKey: string): Promise<void> {
+    this.seen.add(idempotencyKey);
+  }
 }

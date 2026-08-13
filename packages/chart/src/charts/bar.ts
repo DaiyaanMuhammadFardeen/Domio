@@ -5,7 +5,16 @@
 import type { Dataset, RenderOptions, SvgElement, BindingSchema } from '../types.js';
 import { rect, text, line as svgLine } from '../render/element.js';
 
-const PALETTE = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#14B8A6', '#F97316'];
+const PALETTE = [
+  '#4F46E5',
+  '#0EA5E9',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#8B5CF6',
+  '#14B8A6',
+  '#F97316',
+];
 
 /** Render a bar chart from a dataset. */
 export function renderBar(
@@ -48,10 +57,12 @@ export function renderBar(
   // Gridlines
   for (let i = 0; i <= 4; i++) {
     const y = padT + (plotH / 4) * i;
-    elements.push(svgLine(padL, y, W - padR, y, `grid_${i}`, {
-      stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
-      strokeWidth: 1,
-    }));
+    elements.push(
+      svgLine(padL, y, W - padR, y, `grid_${i}`, {
+        stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
+        strokeWidth: 1,
+      }),
+    );
   }
 
   // Bars
@@ -62,23 +73,27 @@ export function renderBar(
     const color = PALETTE[i % PALETTE.length]!;
 
     elements.push(rect(cx - barW / 2, y, barW, h, `bar_${i}`, { fill: color }));
-    elements.push(text(cx - slot / 2, H - 30, label, `bar_label_${i}`, {
-      width: slot,
-      height: 18,
-      fontSize: opts.fontSize ?? 12,
-      fill: mutedColor,
-      textAnchor: 'middle',
-    }));
+    elements.push(
+      text(cx - slot / 2, H - 30, label, `bar_label_${i}`, {
+        width: slot,
+        height: 18,
+        fontSize: opts.fontSize ?? 12,
+        fill: mutedColor,
+        textAnchor: 'middle',
+      }),
+    );
 
     if (opts.showValues !== false && h > 20) {
-      elements.push(text(cx - 30, y - 5, String(Math.round(values[i]!)), `bar_value_${i}`, {
-        width: 60,
-        height: 16,
-        fontSize: (opts.fontSize ?? 12) - 1,
-        fill: textColor,
-        textAnchor: 'middle',
-        fontWeight: 600,
-      }));
+      elements.push(
+        text(cx - 30, y - 5, String(Math.round(values[i]!)), `bar_value_${i}`, {
+          width: 60,
+          height: 16,
+          fontSize: (opts.fontSize ?? 12) - 1,
+          fill: textColor,
+          textAnchor: 'middle',
+          fontWeight: 600,
+        }),
+      );
     }
   });
 

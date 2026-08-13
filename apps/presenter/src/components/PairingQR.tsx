@@ -47,7 +47,11 @@ function renderSyntheticModules(url: string): boolean[][] {
     out.push(row);
   }
   // Carve out the three finder squares (top-left, top-right, bottom-left).
-  for (const [ox, oy] of [[0, 0], [GRID - 7, 0], [0, GRID - 7]] as Array<[number, number]>) {
+  for (const [ox, oy] of [
+    [0, 0],
+    [GRID - 7, 0],
+    [0, GRID - 7],
+  ] as Array<[number, number]>) {
     for (let dy = 0; dy < 7; dy++) {
       for (let dx = 0; dx < 7; dx++) {
         const onEdge = dy === 0 || dy === 6 || dx === 0 || dx === 6;
@@ -64,7 +68,8 @@ function renderSyntheticModules(url: string): boolean[][] {
 function mulberry32(seed: number): () => number {
   let a = seed | 0;
   return function () {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
     let t = a;
     t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
@@ -117,7 +122,9 @@ export function PairingQR({ pairing, reducedMotion }: PairingQRProps) {
         <div className="pairing__expiry">
           Token rotates in {expires}s · epoch {pairing.epoch}
         </div>
-        <div className={`pairing__status pairing__status--${pairing.paired_devices > 0 ? 'active' : 'none'}`}>
+        <div
+          className={`pairing__status pairing__status--${pairing.paired_devices > 0 ? 'active' : 'none'}`}
+        >
           {pairing.paired_devices > 0
             ? `${pairing.paired_devices} phone${pairing.paired_devices === 1 ? '' : 's'} paired`
             : 'No phones paired — scan QR'}

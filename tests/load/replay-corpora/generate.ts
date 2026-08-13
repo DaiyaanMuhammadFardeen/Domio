@@ -55,8 +55,8 @@ export interface CorpusOptions {
 
 export function generateCorpus(opts: CorpusOptions = {}): CorpusEvent[] {
   const eventCount = opts.eventCount ?? DEFAULT_COUNT;
-  const startTsMs  = opts.startTsMs  ?? 1_700_000_000_000;
-  const rng        = makeRng(opts.seed ?? SEED);
+  const startTsMs = opts.startTsMs ?? 1_700_000_000_000;
+  const rng = makeRng(opts.seed ?? SEED);
 
   const half = Math.floor(eventCount / 2);
   const events: CorpusEvent[] = [];
@@ -105,10 +105,7 @@ export function generateCorpus(opts: CorpusOptions = {}): CorpusEvent[] {
     // boundary relative to the start.  For small corpora (e.g. 1 000
     // events) we also insert a gap at the midpoint so the test
     // fixture is guaranteed to produce >= 2 sessions per viewer.
-    if (
-      bTs % GAP_INTERVAL_MS < 1000 ||
-      i === Math.floor(half / 2)
-    ) {
+    if (bTs % GAP_INTERVAL_MS < 1000 || i === Math.floor(half / 2)) {
       bTs += GAP_MS;
     }
   }

@@ -42,9 +42,7 @@ class FakeTransport implements HttpLikeTransport {
   public posts: Array<{ url: string; body: unknown; headers?: Record<string, string> }> = [];
   public responses: Array<{ ok: boolean; status: number; body: unknown }> = [];
 
-  constructor(
-    private readonly getResponse: { ok: boolean; status: number; body: unknown },
-  ) {}
+  constructor(private readonly getResponse: { ok: boolean; status: number; body: unknown }) {}
 
   async get(_url: string): Promise<{ ok: boolean; status: number; body: unknown }> {
     return this.getResponse;
@@ -111,11 +109,7 @@ describe('HttpClientDocumentLoader', () => {
     const transport = new FakeTransport({ ok: true, status: 200, body: exampleDeck });
     transport.responses.push({ ok: false, status: 409, body: null });
     const keys = new StaticKeyProvider(['idem-1']);
-    const loader = new HttpClientDocumentLoader(
-      'https://api.domio.test',
-      transport,
-      keys,
-    );
+    const loader = new HttpClientDocumentLoader('https://api.domio.test', transport, keys);
     await expect(loader.saveDeck(exampleDeck, 1)).rejects.toMatchObject({
       code: 'REVISION_CONFLICT',
     });

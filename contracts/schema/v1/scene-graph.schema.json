@@ -129,14 +129,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "frame" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -166,14 +166,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "group" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -193,14 +193,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "autoLayout" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -221,14 +221,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "text" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -269,14 +269,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "image" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -299,14 +299,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "vector" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -340,14 +340,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "boolean" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -376,14 +376,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "component" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -404,14 +404,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "model3d" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -422,12 +422,27 @@
         "animation": { "$ref": "#/definitions/Animation" },
         "binding": { "$ref": "#/definitions/DataBinding" },
         "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
-        "modelAssetId": { "type": "string", "description": "Reference to a model_asset (GLB/GLTF/USDZ rendition, Phase 11)." },
-        "sceneId": { "type": "string", "description": "Optional reference to a 3D scene (lights/cameras/materials/environment)." },
-        "upAxis": { "type": "string", "enum": ["y-up", "z-up"], "default": "y-up", "description": "Coordinate-system hint; z-up assets auto-rotate to y-up unless overridden." },
+        "modelAssetId": {
+          "type": "string",
+          "description": "Reference to a model_asset (GLB/GLTF/USDZ rendition, Phase 11)."
+        },
+        "sceneId": {
+          "type": "string",
+          "description": "Optional reference to a 3D scene (lights/cameras/materials/environment)."
+        },
+        "upAxis": {
+          "type": "string",
+          "enum": ["y-up", "z-up"],
+          "default": "y-up",
+          "description": "Coordinate-system hint; z-up assets auto-rotate to y-up unless overridden."
+        },
         "autoRotate": { "type": "boolean", "default": false },
         "paused": { "type": "boolean", "default": false },
-        "physicsEnabled": { "type": "boolean", "default": false, "description": "Rigid-body physics (Phase 11 M4.2)." }
+        "physicsEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Rigid-body physics (Phase 11 M4.2)."
+        }
       }
     },
     "VideoLayer": {
@@ -437,14 +452,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "video" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -456,8 +471,17 @@
         "binding": { "$ref": "#/definitions/DataBinding" },
         "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
         "assetId": { "type": "string", "description": "Reference to a video_asset (Phase 11)." },
-        "trimInMs": { "type": "integer", "minimum": 0, "default": 0, "description": "Metadata-only trim in point; no re-encoding." },
-        "trimOutMs": { "type": "integer", "minimum": 0, "description": "Metadata-only trim out point; no re-encoding." },
+        "trimInMs": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0,
+          "description": "Metadata-only trim in point; no re-encoding."
+        },
+        "trimOutMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Metadata-only trim out point; no re-encoding."
+        },
         "speed": { "type": "number", "minimum": 0.25, "maximum": 4, "default": 1 },
         "muted": { "type": "boolean", "default": false },
         "loop": { "type": "boolean", "default": false },
@@ -485,14 +509,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "audio" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -519,14 +543,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "lottie" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -537,7 +561,10 @@
         "animation": { "$ref": "#/definitions/Animation" },
         "binding": { "$ref": "#/definitions/DataBinding" },
         "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
-        "assetId": { "type": "string", "description": "Reference to a lottie_asset (Lottie or Rive, Phase 11)." },
+        "assetId": {
+          "type": "string",
+          "description": "Reference to a lottie_asset (Lottie or Rive, Phase 11)."
+        },
         "autoplay": { "type": "boolean", "default": true },
         "loop": { "type": "boolean", "default": true },
         "speed": { "type": "number", "minimum": 0, "default": 1 },
@@ -555,14 +582,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "embed" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -573,9 +600,19 @@
         "animation": { "$ref": "#/definitions/Animation" },
         "binding": { "$ref": "#/definitions/DataBinding" },
         "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
-        "url": { "type": "string", "format": "uri", "description": "Live-app URL served through the embed proxy (Phase 11 M8.1)." },
-        "policyId": { "type": "string", "description": "Reference to an embed_policy governing origins/sandbox/JWT." },
-        "sandboxFlags": { "type": "string", "description": "Per-deck sandbox override (org-admin required)." },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Live-app URL served through the embed proxy (Phase 11 M8.1)."
+        },
+        "policyId": {
+          "type": "string",
+          "description": "Reference to an embed_policy governing origins/sandbox/JWT."
+        },
+        "sandboxFlags": {
+          "type": "string",
+          "description": "Per-deck sandbox override (org-admin required)."
+        },
         "title": { "type": "string", "maxLength": 256 }
       }
     },
@@ -586,14 +623,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "codeBlock" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -605,11 +642,23 @@
         "binding": { "$ref": "#/definitions/DataBinding" },
         "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
         "code": { "type": "string", "description": "Source text of the code block." },
-        "language": { "type": "string", "default": "javascript", "description": "Language id for syntax highlighting (Shiki)." },
-        "runnable": { "type": "boolean", "default": false, "description": "When true, code executes in the QuickJS sandbox (Phase 11 M8.2)." },
+        "language": {
+          "type": "string",
+          "default": "javascript",
+          "description": "Language id for syntax highlighting (Shiki)."
+        },
+        "runnable": {
+          "type": "boolean",
+          "default": false,
+          "description": "When true, code executes in the QuickJS sandbox (Phase 11 M8.2)."
+        },
         "policyId": { "type": "string", "description": "Reference to a code_sandbox_policy." },
         "showLineNumbers": { "type": "boolean", "default": true },
-        "stepReveal": { "type": "boolean", "default": false, "description": "Line-step reveal animates on click." }
+        "stepReveal": {
+          "type": "boolean",
+          "default": false,
+          "description": "Line-step reveal animates on click."
+        }
       }
     },
     "LatexLayer": {
@@ -619,14 +668,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "latex" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -637,9 +686,15 @@
         "animation": { "$ref": "#/definitions/Animation" },
         "binding": { "$ref": "#/definitions/DataBinding" },
         "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
-        "source": { "type": "string", "description": "LaTeX source ($...$ inline or $$...$$ block), edge-rendered via KaTeX (Phase 11 M8.3)." },
+        "source": {
+          "type": "string",
+          "description": "LaTeX source ($...$ inline or $$...$$ block), edge-rendered via KaTeX (Phase 11 M8.3)."
+        },
         "displayMode": { "type": "string", "enum": ["inline", "block"], "default": "inline" },
-        "themeHash": { "type": "string", "description": "Cache key suffix; re-render on theme change." }
+        "themeHash": {
+          "type": "string",
+          "description": "Cache key suffix; re-render on theme change."
+        }
       }
     },
     "MapLayer": {
@@ -649,14 +704,14 @@
       "properties": {
         "id": { "$ref": "common.schema.json#/definitions/ULID" },
         "semanticId": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_-]*$" },
-        "element_role": { "type": "string", "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements." },
+        "element_role": {
+          "type": "string",
+          "description": "Magic-move matching key (Phase 09). Optional role shared across slides so the diff engine can tween matched elements."
+        },
         "type": { "const": "map" },
         "name": { "type": "string", "maxLength": 256 },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "$ref": "common.schema.json#/definitions/ULID" }
-          ]
+          "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/definitions/ULID" }]
         },
         "locked": { "type": "boolean", "default": false },
         "hidden": { "type": "boolean", "default": false },
@@ -667,8 +722,14 @@
         "animation": { "$ref": "#/definitions/Animation" },
         "binding": { "$ref": "#/definitions/DataBinding" },
         "componentInstance": { "$ref": "#/definitions/ComponentInstance" },
-        "styleId": { "type": "string", "description": "Reference to a map_style (provider, style_url, defaults, Phase 11 M8.4)." },
-        "zoom": { "type": "number", "description": "Per-element zoom override; pan/zoom remembered per slide." },
+        "styleId": {
+          "type": "string",
+          "description": "Reference to a map_style (provider, style_url, defaults, Phase 11 M8.4)."
+        },
+        "zoom": {
+          "type": "number",
+          "description": "Per-element zoom override; pan/zoom remembered per slide."
+        },
         "center": {
           "type": "object",
           "required": ["lng", "lat"],
@@ -678,7 +739,11 @@
             "lat": { "type": "number" }
           }
         },
-        "choropleth": { "type": "boolean", "default": false, "description": "Join GeoJSON/TopoJSON regions to the bound data source." }
+        "choropleth": {
+          "type": "boolean",
+          "default": false,
+          "description": "Join GeoJSON/TopoJSON regions to the bound data source."
+        }
       }
     },
     "Element": {

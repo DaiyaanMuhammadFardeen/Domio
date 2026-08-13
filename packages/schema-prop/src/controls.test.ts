@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { inferControl, type DataBindingControlDescriptor, type ThresholdControlDescriptor } from './controls.js';
+import {
+  inferControl,
+  type DataBindingControlDescriptor,
+  type ThresholdControlDescriptor,
+} from './controls.js';
 import { validateProps } from './validate.js';
 import type { DomioPropsSchema, PropSchemaFragment } from './types.js';
 
@@ -105,7 +109,18 @@ describe('data-binding and thresholds pass prop validation round-trip', () => {
         },
       },
     };
-    const value = { rules: [{ id: 'r1', measure: 'cpu', comparator: 'gt', values: [90], severity: 'warn', styleOverride: {} }] };
+    const value = {
+      rules: [
+        {
+          id: 'r1',
+          measure: 'cpu',
+          comparator: 'gt',
+          values: [90],
+          severity: 'warn',
+          styleOverride: {},
+        },
+      ],
+    };
     const result = validateProps(schema, value);
     expect(result.valid).toBe(true);
     expect(result.value['rules']).toEqual(value.rules);
@@ -122,7 +137,11 @@ describe('data-binding and thresholds pass prop validation round-trip', () => {
     };
     const bindingDesc = inferControl('b', bindingFrag);
     const thresholdDesc = inferControl('t', thresholdFrag);
-    expect(['text', 'number', 'color', 'stepper', 'slider', 'toggle']).not.toContain(bindingDesc.kind);
-    expect(['text', 'number', 'color', 'stepper', 'slider', 'toggle']).not.toContain(thresholdDesc.kind);
+    expect(['text', 'number', 'color', 'stepper', 'slider', 'toggle']).not.toContain(
+      bindingDesc.kind,
+    );
+    expect(['text', 'number', 'color', 'stepper', 'slider', 'toggle']).not.toContain(
+      thresholdDesc.kind,
+    );
   });
 });

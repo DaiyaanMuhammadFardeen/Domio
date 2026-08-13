@@ -39,14 +39,38 @@ export interface VisibilityPickerProps {
 }
 
 const OPTIONS: readonly { kind: VisibilityKind; labelId: string; descriptionId: string }[] = [
-  { kind: 'public', labelId: 'editor.share.visibility.public.label', descriptionId: 'editor.share.visibility.public.description' },
-  { kind: 'password', labelId: 'editor.share.visibility.password.label', descriptionId: 'editor.share.visibility.password.description' },
-  { kind: 'domain', labelId: 'editor.share.visibility.domain.label', descriptionId: 'editor.share.visibility.domain.description' },
-  { kind: 'sso', labelId: 'editor.share.visibility.sso.label', descriptionId: 'editor.share.visibility.sso.description' },
-  { kind: 'email', labelId: 'editor.share.visibility.email.label', descriptionId: 'editor.share.visibility.email.description' },
+  {
+    kind: 'public',
+    labelId: 'editor.share.visibility.public.label',
+    descriptionId: 'editor.share.visibility.public.description',
+  },
+  {
+    kind: 'password',
+    labelId: 'editor.share.visibility.password.label',
+    descriptionId: 'editor.share.visibility.password.description',
+  },
+  {
+    kind: 'domain',
+    labelId: 'editor.share.visibility.domain.label',
+    descriptionId: 'editor.share.visibility.domain.description',
+  },
+  {
+    kind: 'sso',
+    labelId: 'editor.share.visibility.sso.label',
+    descriptionId: 'editor.share.visibility.sso.description',
+  },
+  {
+    kind: 'email',
+    labelId: 'editor.share.visibility.email.label',
+    descriptionId: 'editor.share.visibility.email.description',
+  },
 ];
 
-export function VisibilityPicker({ value, onChange, dataTestId = 'visibility-picker' }: VisibilityPickerProps): ReactElement {
+export function VisibilityPicker({
+  value,
+  onChange,
+  dataTestId = 'visibility-picker',
+}: VisibilityPickerProps): ReactElement {
   const onPick = useCallback(
     (kind: VisibilityKind) => {
       onChange({ ...value, kind });
@@ -100,7 +124,10 @@ export function VisibilityPicker({ value, onChange, dataTestId = 'visibility-pic
 
       {value.kind === 'password' ? (
         <div style={{ marginTop: 12 }}>
-          <label htmlFor="visibility-password" style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
+          <label
+            htmlFor="visibility-password"
+            style={{ display: 'block', fontSize: 12, marginBottom: 4 }}
+          >
             <FormattedMessage id="editor.share.visibility.password.field" />
           </label>
           <input
@@ -109,7 +136,12 @@ export function VisibilityPicker({ value, onChange, dataTestId = 'visibility-pic
             value={value.password ?? ''}
             onChange={(e) => onChange({ ...value, password: e.target.value })}
             data-testid={`${dataTestId}-password`}
-            style={{ width: '100%', padding: '6px 8px', border: '1px solid rgba(0,0,0,0.2)', borderRadius: 4 }}
+            style={{
+              width: '100%',
+              padding: '6px 8px',
+              border: '1px solid rgba(0,0,0,0.2)',
+              borderRadius: 4,
+            }}
           />
         </div>
       ) : null}

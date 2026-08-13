@@ -45,22 +45,28 @@ export function renderBullet(
     const w = (v / maxVal) * plotW;
 
     // Background range
-    elements.push(rect(padL, cy - barH / 2, plotW, barH, `bg_${i}`, {
-      fill: theme === 'dark' ? '#1e293b' : '#f1f5f9',
-    }));
+    elements.push(
+      rect(padL, cy - barH / 2, plotW, barH, `bg_${i}`, {
+        fill: theme === 'dark' ? '#1e293b' : '#f1f5f9',
+      }),
+    );
 
     // Value bar
-    elements.push(rect(padL, cy - barH / 2, w, barH, `bar_${i}`, {
-      fill: '#4F46E5',
-    }));
+    elements.push(
+      rect(padL, cy - barH / 2, w, barH, `bar_${i}`, {
+        fill: '#4F46E5',
+      }),
+    );
 
     // Label
-    elements.push(text(4, cy - 6, label, `label_${i}`, {
-      width: padL - 8,
-      height: 14,
-      fontSize: (opts.fontSize ?? 11) - 1,
-      fill: mutedColor,
-    }));
+    elements.push(
+      text(4, cy - 6, label, `label_${i}`, {
+        width: padL - 8,
+        height: 14,
+        fontSize: (opts.fontSize ?? 11) - 1,
+        fill: mutedColor,
+      }),
+    );
   });
 
   return elements;

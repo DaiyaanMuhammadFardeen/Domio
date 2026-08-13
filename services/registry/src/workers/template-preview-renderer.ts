@@ -54,10 +54,7 @@ const DEFAULT_FRAME_DURATION_MS = 5000;
  * an MP4 video is a separate downstream worker that consumes `frames` to
  * extract individual slide images and pipe them through ffmpeg (or similar).
  */
-export async function run(
-  deps: ServiceDeps,
-  input: WorkerInput,
-): Promise<WorkerResult> {
+export async function run(deps: ServiceDeps, input: WorkerInput): Promise<WorkerResult> {
   const template = await deps.store.getTemplate(input.templateId);
   if (!template) throw Errors.notFound(`template ${input.templateId}`);
 
@@ -109,7 +106,8 @@ export async function run(
 // ---------------------------------------------------------------------------
 
 function countTextElements(deckJson: Record<string, unknown>): number {
-  const slides = (deckJson as { slides?: Array<{ elements?: Array<{ type: string }> }> }).slides ?? [];
+  const slides =
+    (deckJson as { slides?: Array<{ elements?: Array<{ type: string }> }> }).slides ?? [];
   let count = 0;
   for (const slide of slides) {
     for (const el of slide.elements ?? []) {

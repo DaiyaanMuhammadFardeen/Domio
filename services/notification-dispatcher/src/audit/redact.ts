@@ -96,7 +96,10 @@ export function payloadHash(n: Notification): string {
   if (n.payload.link) h.update('\0').update(n.payload.link);
   if (n.payload.fields) {
     for (const k of Object.keys(n.payload.fields).sort()) {
-      h.update('\0').update(k).update('=').update(n.payload.fields[k] ?? '');
+      h.update('\0')
+        .update(k)
+        .update('=')
+        .update(n.payload.fields[k] ?? '');
     }
   }
   return h.digest('hex');
@@ -107,7 +110,11 @@ export function payloadHash(n: Notification): string {
  * attempt. The `redacted_fields` column carries the list of fields
  * that were stripped before sending.
  */
-export function buildAuditEntry(n: Notification, state: AuditEntry['state'], errorMessage?: string): AuditEntry {
+export function buildAuditEntry(
+  n: Notification,
+  state: AuditEntry['state'],
+  errorMessage?: string,
+): AuditEntry {
   const redacted = redactFields(n.payload);
   return {
     workspace_id: n.workspace_id,
@@ -121,7 +128,7 @@ export function buildAuditEntry(n: Notification, state: AuditEntry['state'], err
     // The redacted_fields list is encoded into the row via a parallel
     // channel (caller passes it to the writer). Exposed here for
     // tests.
-    ...{ redacted_fields: redacted.redactedFields } as Record<string, unknown>,
+    ...({ redacted_fields: redacted.redactedFields } as Record<string, unknown>),
   };
 }
 
@@ -164,5 +171,7 @@ export class MemoryAuditWriter implements AuditWriter {
 
 /** NoopAuditWriter discards entries (debug builds). */
 export class NoopAuditWriter implements AuditWriter {
-  async write(_entry: AuditEntryWithRedaction): Promise<void> { /* discard */ }
+  async write(_entry: AuditEntryWithRedaction): Promise<void> {
+    /* discard */
+  }
 }

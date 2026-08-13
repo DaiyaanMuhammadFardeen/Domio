@@ -45,7 +45,11 @@ export interface ProblemDetail {
 // ─── Command runner ─────────────────────────────────────────────
 
 export interface CommandRunner {
-  run(command: string, args: string, context: { trigger_id: string; user_id?: string | undefined }): Promise<CommandResult>;
+  run(
+    command: string,
+    args: string,
+    context: { trigger_id: string; user_id?: string | undefined },
+  ): Promise<CommandResult>;
 }
 
 /** NoopCommandRunner echoes the command back. */
@@ -92,16 +96,18 @@ function parseUrlEncoded(formBody: string): SlashCommand {
 function parseJsonBody(body: Record<string, unknown>): SlashCommand {
   // Teams may send the full command with / prefix.
   const rawText = typeof body.text === 'string' ? body.text : '';
-  const trigger_id = typeof body.triggerId === 'string'
-    ? body.triggerId
-    : typeof body.trigger_id === 'string'
-      ? body.trigger_id
-      : '';
-  const user_id = typeof body.userId === 'string'
-    ? body.userId
-    : typeof body.user_id === 'string'
-      ? body.user_id
-      : undefined;
+  const trigger_id =
+    typeof body.triggerId === 'string'
+      ? body.triggerId
+      : typeof body.trigger_id === 'string'
+        ? body.trigger_id
+        : '';
+  const user_id =
+    typeof body.userId === 'string'
+      ? body.userId
+      : typeof body.user_id === 'string'
+        ? body.user_id
+        : undefined;
 
   // Extract command from text: "/domio approve abc" → command="domio", text="approve abc"
   const parts = rawText.trim().split(/\s+/);
@@ -113,7 +119,10 @@ function parseJsonBody(body: Record<string, unknown>): SlashCommand {
 
 // ─── Command registry ───────────────────────────────────────────
 
-export type CommandHandler = (args: string, context: { trigger_id: string; user_id?: string | undefined }) => Promise<CommandResult>;
+export type CommandHandler = (
+  args: string,
+  context: { trigger_id: string; user_id?: string | undefined },
+) => Promise<CommandResult>;
 
 const COMMAND_REGISTRY = new Map<string, CommandHandler>();
 
@@ -144,7 +153,9 @@ const builtInApprove: CommandHandler = async (args: string) => {
   }
   return {
     status: 200,
-    body: { text: `Approval request \`${id}\` has been noted. The actual approval action will be processed by the collab service.` },
+    body: {
+      text: `Approval request \`${id}\` has been noted. The actual approval action will be processed by the collab service.`,
+    },
   };
 };
 
@@ -163,7 +174,9 @@ const builtInOpen: CommandHandler = async (args: string) => {
   }
   return {
     status: 200,
-    body: { text: `Opening deck \`${deckId}\` — [open in Domio](https://app.domio.dev/decks/${deckId})` },
+    body: {
+      text: `Opening deck \`${deckId}\` — [open in Domio](https://app.domio.dev/decks/${deckId})`,
+    },
   };
 };
 

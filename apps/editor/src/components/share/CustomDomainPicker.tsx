@@ -42,10 +42,7 @@ export function CustomDomainPicker({
   onChange,
   dataTestId = 'custom-domain-picker',
 }: CustomDomainPickerProps): ReactElement {
-  const verifiedOptions = useMemo(
-    () => options.filter((o) => o.verified),
-    [options],
-  );
+  const verifiedOptions = useMemo(() => options.filter((o) => o.verified), [options]);
 
   const onSelect = useCallback(
     (hostname: string | undefined) => {
@@ -56,10 +53,7 @@ export function CustomDomainPicker({
   );
 
   return (
-    <section
-      data-testid={dataTestId}
-      style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
-    >
+    <section data-testid={dataTestId} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <header>
         <strong>
           <FormattedMessage id="editor.share.customDomain.title" />
@@ -70,7 +64,14 @@ export function CustomDomainPicker({
       </p>
       <ul
         data-testid={`${dataTestId}-list`}
-        style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+        }}
       >
         <li>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -106,9 +107,7 @@ export function CustomDomainPicker({
                   />
                   <code style={{ fontSize: 12 }}>{opt.hostname}</code>
                   {opt.label ? (
-                    <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.5)' }}>
-                      · {opt.label}
-                    </span>
+                    <span style={{ fontSize: 11, color: 'rgba(0,0,0,0.5)' }}>· {opt.label}</span>
                   ) : null}
                 </label>
               </li>

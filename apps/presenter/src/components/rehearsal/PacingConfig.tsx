@@ -81,7 +81,14 @@ export function PacingConfig({
     <ul
       data-testid={dataTestId}
       role="list"
-      style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}
+      style={{
+        listStyle: 'none',
+        padding: 0,
+        margin: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+      }}
     >
       {slides.map((s) => {
         const current = targets.get(s.slide_id) ?? defaultTargetMs;

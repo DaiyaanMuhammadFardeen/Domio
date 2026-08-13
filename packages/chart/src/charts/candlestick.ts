@@ -60,17 +60,21 @@ export function renderCandlestick(
     const color = isUp ? '#10B981' : '#EF4444';
 
     // Wick
-    elements.push(svgLine(cx, highY, cx, lowY, `wick_${i}`, {
-      stroke: color,
-      strokeWidth: 1,
-    }));
+    elements.push(
+      svgLine(cx, highY, cx, lowY, `wick_${i}`, {
+        stroke: color,
+        strokeWidth: 1,
+      }),
+    );
 
     // Body
     const bodyTop = Math.min(openY, closeY);
     const bodyH = Math.max(Math.abs(closeY - openY), 1);
-    elements.push(rect(cx - candleW / 2, bodyTop, candleW, bodyH, `body_${i}`, {
-      fill: color,
-    }));
+    elements.push(
+      rect(cx - candleW / 2, bodyTop, candleW, bodyH, `body_${i}`, {
+        fill: color,
+      }),
+    );
   });
 
   return elements;

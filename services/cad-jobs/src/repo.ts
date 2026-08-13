@@ -9,11 +9,7 @@
  *   - An index by tenant_id for workspace-scoped list.
  */
 
-import type {
-  CadJob,
-  CadProgress,
-  CreateCadJobRequest,
-} from './types.js';
+import type { CadJob, CadProgress, CreateCadJobRequest } from './types.js';
 import {
   DEFAULT_TESSELLATION_CHORD_MM,
   DEFAULT_TESSELLATION_ANGLE_DEG,

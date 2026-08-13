@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  getLicenseSummary,
-  getSeatUsageHistory,
-  listUserActivity,
-} from './seat-service';
+import { getLicenseSummary, getSeatUsageHistory, listUserActivity } from './seat-service';
 
 describe('seat-service', () => {
   it('getLicenseSummary returns seats_used <= seats_total', async () => {

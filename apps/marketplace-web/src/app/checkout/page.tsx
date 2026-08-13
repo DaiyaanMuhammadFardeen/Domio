@@ -180,9 +180,7 @@ export default function CheckoutPage() {
             {t('market.checkout.cart')}
           </h2>
           <div className="rounded-2xl border border-border bg-panel p-4">
-            {draft?.lines.length === 0 && (
-              <p className="text-sm text-muted">Cart is empty.</p>
-            )}
+            {draft?.lines.length === 0 && <p className="text-sm text-muted">Cart is empty.</p>}
             {draft?.lines.map((line) => (
               <div
                 key={line.listing_id}
@@ -300,9 +298,7 @@ export default function CheckoutPage() {
             </div>
             <div className="mt-2 flex justify-between border-t border-border/40 pt-2 text-base font-semibold">
               <span>{t('market.checkout.total')}</span>
-              <span data-testid="checkout-total">
-                {formatPrice(total, currency, false)}
-              </span>
+              <span data-testid="checkout-total">{formatPrice(total, currency, false)}</span>
             </div>
           </div>
 
@@ -313,13 +309,11 @@ export default function CheckoutPage() {
             onClick={handlePay}
             className="w-full rounded-xl bg-accent py-3.5 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {processing ? (
-              t('market.checkout.processing')
-            ) : (
-              t('market.checkout.pay', {
-                amount: formatPrice(total, currency, false),
-              })
-            )}
+            {processing
+              ? t('market.checkout.processing')
+              : t('market.checkout.pay', {
+                  amount: formatPrice(total, currency, false),
+                })}
           </button>
         </section>
       </div>

@@ -17,8 +17,7 @@ import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Blog — Domio',
-  description:
-    'Engineering, product, customer, and company updates from the Domio team.',
+  description: 'Engineering, product, customer, and company updates from the Domio team.',
 };
 
 export default function BlogIndexPage(): JSX.Element {
@@ -34,15 +33,10 @@ export default function BlogIndexPage(): JSX.Element {
               Notes from the team building the presentation OS
             </h1>
             <p className="blog-hero__subtitle">
-              Engineering deep dives, product launches, customer stories, and
-              company updates.
+              Engineering deep dives, product launches, customer stories, and company updates.
             </p>
             <div className="blog-hero__meta">
-              <a
-                className="blog-hero__rss"
-                href={rssHref}
-                data-testid="blog-rss-link"
-              >
+              <a className="blog-hero__rss" href={rssHref} data-testid="blog-rss-link">
                 RSS feed
               </a>
               <a className="blog-hero__back" href={landing('home')}>

@@ -8,10 +8,7 @@
  * node by gating on `typeof window`).
  */
 
-import {
-  init as initObservability,
-  type DomioObservability,
-} from '@domio/observability';
+import { init as initObservability, type DomioObservability } from '@domio/observability';
 
 let cached: DomioObservability | null = null;
 

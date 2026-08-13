@@ -14,10 +14,7 @@
 import type { WarehouseConfig } from '../types.js';
 
 export interface ClickHouseClient {
-  query<T = Record<string, unknown>>(
-    sql: string,
-    params?: Record<string, unknown>,
-  ): Promise<T[]>;
+  query<T = Record<string, unknown>>(sql: string, params?: Record<string, unknown>): Promise<T[]>;
   /** Run a non-SELECT statement (DDL, INSERT, OPTIMIZE). */
   execute(sql: string, params?: Record<string, unknown>): Promise<void>;
   /** Raw fetch for streaming endpoints (NDJSON, CSV). */

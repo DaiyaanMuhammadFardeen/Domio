@@ -83,7 +83,10 @@ export class TokenReferencedError extends Error {
 
 export class InvalidTokenIdError extends Error {
   readonly code = 'INVALID_TOKEN_ID' as const;
-  constructor(public readonly tokenId: string, public readonly reason: string) {
+  constructor(
+    public readonly tokenId: string,
+    public readonly reason: string,
+  ) {
     super(`Invalid tokenId "${tokenId}": ${reason}`);
     this.name = 'InvalidTokenIdError';
   }
@@ -122,7 +125,14 @@ export interface ThemeServiceOptions {
   readonly clock?: () => Date;
 }
 
-const defaultId: () => ULID = () => asULID(`01H0000000000000000000000${Math.floor(Math.random() * 1e6).toString().padStart(6, '0')}`.slice(0, 26).padEnd(26, '0'));
+const defaultId: () => ULID = () =>
+  asULID(
+    `01H0000000000000000000000${Math.floor(Math.random() * 1e6)
+      .toString()
+      .padStart(6, '0')}`
+      .slice(0, 26)
+      .padEnd(26, '0'),
+  );
 const defaultClock = () => new Date();
 
 // ---------------------------------------------------------------------------
@@ -175,7 +185,12 @@ export interface ApplyThemeInput {
    * service can compute the op batch without re-reading the deck.
    * In production this comes from the editor's local state.
    */
-  readonly deckElements: readonly { slideId: string; elementId: string; tokenRef: string; currentResolved: TokenValue | null }[];
+  readonly deckElements: readonly {
+    slideId: string;
+    elementId: string;
+    tokenRef: string;
+    currentResolved: TokenValue | null;
+  }[];
 }
 
 export interface ApplyThemeResult {
@@ -300,7 +315,7 @@ export class ThemeService {
     const overrides = await this.overrides.listByOrg(orgId);
 
     const deckTheme = new Map<string, TokenValue>();
-    for (const t of (await this.tokens.listByOrg(orgId))) {
+    for (const t of await this.tokens.listByOrg(orgId)) {
       if (t.tokenId === tokenId) continue;
       deckTheme.set(t.tokenId, t.value);
     }
@@ -348,7 +363,10 @@ export class ThemeService {
     }
     // Cycle detection: walk the existing alias graph + the new edge.
     const existing = await this.aliases.listByOrg(input.orgId);
-    const candidateEdges = [...existing, { aliasTokenId: input.aliasTokenId, targetTokenId: input.targetTokenId, orgId: input.orgId }];
+    const candidateEdges = [
+      ...existing,
+      { aliasTokenId: input.aliasTokenId, targetTokenId: input.targetTokenId, orgId: input.orgId },
+    ];
     const cycle = findTokenAliasCycle(input.aliasTokenId, candidateEdges);
     if (cycle !== null) {
       throw new TokenAliasCycleError(cycle);
@@ -427,7 +445,8 @@ export class ThemeService {
       const newVal = version.tokensResolved.get(elem.tokenRef);
       if (newVal === undefined) continue;
       // Skip if already resolved to this value
-      if (elem.currentResolved && JSON.stringify(elem.currentResolved) === JSON.stringify(newVal)) continue;
+      if (elem.currentResolved && JSON.stringify(elem.currentResolved) === JSON.stringify(newVal))
+        continue;
       ops.push({
         slideId: elem.slideId,
         elementId: elem.elementId,
@@ -563,7 +582,14 @@ export class ThemeService {
     themeAId: string,
     themeBId: string,
     orgId: string,
-  ): Promise<readonly { tokenId: string; changed: boolean; valueA: TokenValue | null; valueB: TokenValue | null }[]> {
+  ): Promise<
+    readonly {
+      tokenId: string;
+      changed: boolean;
+      valueA: TokenValue | null;
+      valueB: TokenValue | null;
+    }[]
+  > {
     void orgId; // signatures are org-scoped in production; locally scoped by themeId.
     const a = await this.themeVersions.findLatest(themeAId);
     const b = await this.themeVersions.findLatest(themeBId);

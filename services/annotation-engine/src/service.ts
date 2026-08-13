@@ -21,11 +21,7 @@ import type {
   AnnotationPromoteInput,
   AnnotationRollbackInput,
 } from './types.js';
-import {
-  AnnotationConflictError,
-  AnnotationNotFoundError,
-  validateCommitInput,
-} from './types.js';
+import { AnnotationConflictError, AnnotationNotFoundError, validateCommitInput } from './types.js';
 import { type AnnotationStore, isStore } from './store/store.js';
 import type { AuditEmitter } from './audit/emit.js';
 import { describeAnnotationForAudit } from './audit/emit.js';
@@ -67,13 +63,18 @@ export class AnnotationService {
    * Append an annotation stroke. Returns the record and the post-bump
    * etag of the session row.
    */
-  async commit(input: AnnotationCommitInput, ctx: { actorId: string }): Promise<AnnotationCommitResult> {
+  async commit(
+    input: AnnotationCommitInput,
+    ctx: { actorId: string },
+  ): Promise<AnnotationCommitResult> {
     validateCommitInput(input);
 
     // Idempotency check (replay-safe).
     if (input.idempotency_key) {
       const prior = await this.idempotency.get(
-        input.idempotency_key, input.workspace_id, input.session_id,
+        input.idempotency_key,
+        input.workspace_id,
+        input.session_id,
       );
       if (prior?.response) return prior.response as AnnotationCommitResult;
       await this.idempotency.reserve({
@@ -171,7 +172,10 @@ export class AnnotationService {
   }
 
   /** Promote an ephemeral annotation to a saved overlay attached to the slide. */
-  async promote(input: AnnotationPromoteInput, ctx: { actorId: string }): Promise<AnnotationLayerRecord> {
+  async promote(
+    input: AnnotationPromoteInput,
+    ctx: { actorId: string },
+  ): Promise<AnnotationLayerRecord> {
     let promoted: AnnotationLayerRecord;
     try {
       promoted = await this.store.promote(input.annotation_id, input.workspace_id, ctx.actorId);

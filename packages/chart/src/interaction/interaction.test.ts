@@ -56,14 +56,23 @@ describe('hitTestPoint', () => {
 describe('drill', () => {
   it('filters rows by column value', () => {
     const ds: Dataset = {
-      columns: [{ name: 'cat', type: 'string' }, { name: 'val', type: 'number' }],
+      columns: [
+        { name: 'cat', type: 'string' },
+        { name: 'val', type: 'number' },
+      ],
       rows: [
         { cat: 'A', val: 10 },
         { cat: 'B', val: 20 },
         { cat: 'A', val: 30 },
       ],
     };
-    const b: BindingSchema = { type: 'bar', columns: [{ role: 'x', column: 'cat' }, { role: 'y', column: 'val' }] };
+    const b: BindingSchema = {
+      type: 'bar',
+      columns: [
+        { role: 'x', column: 'cat' },
+        { role: 'y', column: 'val' },
+      ],
+    };
     const result = drill(ds, b, 'cat', 'A');
     expect(result.dataset.rows.length).toBe(2);
     expect(result.dataset.rows.every((r) => r.cat === 'A')).toBe(true);
@@ -73,14 +82,24 @@ describe('drill', () => {
 describe('drillMultiple', () => {
   it('filters by multiple criteria', () => {
     const ds: Dataset = {
-      columns: [{ name: 'cat', type: 'string' }, { name: 'sub', type: 'string' }, { name: 'val', type: 'number' }],
+      columns: [
+        { name: 'cat', type: 'string' },
+        { name: 'sub', type: 'string' },
+        { name: 'val', type: 'number' },
+      ],
       rows: [
         { cat: 'A', sub: 'X', val: 10 },
         { cat: 'A', sub: 'Y', val: 20 },
         { cat: 'B', sub: 'X', val: 30 },
       ],
     };
-    const b: BindingSchema = { type: 'bar', columns: [{ role: 'x', column: 'cat' }, { role: 'y', column: 'val' }] };
+    const b: BindingSchema = {
+      type: 'bar',
+      columns: [
+        { role: 'x', column: 'cat' },
+        { role: 'y', column: 'val' },
+      ],
+    };
     const result = drillMultiple(ds, b, { cat: 'A', sub: 'X' });
     expect(result.dataset.rows.length).toBe(1);
     expect(result.dataset.rows[0]!.val).toBe(10);
@@ -89,7 +108,11 @@ describe('drillMultiple', () => {
 
 describe('toggleSeries', () => {
   it('toggles visibility of matching elements', () => {
-    const elements = [el('bar_0', 0, 0, 10, 10), el('bar_1', 0, 0, 10, 10), el('label_0', 0, 0, 10, 10)];
+    const elements = [
+      el('bar_0', 0, 0, 10, 10),
+      el('bar_1', 0, 0, 10, 10),
+      el('label_0', 0, 0, 10, 10),
+    ];
     const toggled = toggleSeries(elements, 'bar');
     expect(toggled[0]!.visible).toBe(false);
     expect(toggled[1]!.visible).toBe(false);
@@ -115,7 +138,10 @@ describe('toggleElement', () => {
 describe('brushZoom', () => {
   it('filters to range', () => {
     const ds: Dataset = {
-      columns: [{ name: 'label', type: 'string' }, { name: 'value', type: 'number' }],
+      columns: [
+        { name: 'label', type: 'string' },
+        { name: 'value', type: 'number' },
+      ],
       rows: [
         { label: 'A', value: 10 },
         { label: 'B', value: 20 },
@@ -123,7 +149,13 @@ describe('brushZoom', () => {
         { label: 'D', value: 40 },
       ],
     };
-    const b: BindingSchema = { type: 'bar', columns: [{ role: 'x', column: 'label' }, { role: 'y', column: 'value' }] };
+    const b: BindingSchema = {
+      type: 'bar',
+      columns: [
+        { role: 'x', column: 'label' },
+        { role: 'y', column: 'value' },
+      ],
+    };
     const result = brushZoom(ds, b, { start: 1, end: 2 });
     expect(result.rows.length).toBe(2);
     expect(result.rows[0]!.label).toBe('B');
@@ -134,14 +166,23 @@ describe('brushZoom', () => {
 describe('brushZoomByValue', () => {
   it('filters by numeric range', () => {
     const ds: Dataset = {
-      columns: [{ name: 'x', type: 'number' }, { name: 'y', type: 'number' }],
+      columns: [
+        { name: 'x', type: 'number' },
+        { name: 'y', type: 'number' },
+      ],
       rows: [
         { x: 1, y: 10 },
         { x: 5, y: 20 },
         { x: 10, y: 30 },
       ],
     };
-    const b: BindingSchema = { type: 'scatter', columns: [{ role: 'x', column: 'x' }, { role: 'y', column: 'y' }] };
+    const b: BindingSchema = {
+      type: 'scatter',
+      columns: [
+        { role: 'x', column: 'x' },
+        { role: 'y', column: 'y' },
+      ],
+    };
     const result = brushZoomByValue(ds, b, 'x', 3, 8);
     expect(result.rows.length).toBe(1);
     expect(result.rows[0]!.x).toBe(5);

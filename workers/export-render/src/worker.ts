@@ -109,12 +109,16 @@ export class ExportRenderWorker {
     this.stopping = false;
 
     // Run initial poll
-    void this.poll().then((count) => { this.onPoll?.(count); });
+    void this.poll().then((count) => {
+      this.onPoll?.(count);
+    });
 
     // Schedule periodic polls
     this.intervalHandle = setInterval(() => {
       if (this.stopping) return;
-      void this.poll().then((count) => { this.onPoll?.(count); });
+      void this.poll().then((count) => {
+        this.onPoll?.(count);
+      });
     }, this.pollIntervalMs);
 
     // Install signal handlers for graceful shutdown

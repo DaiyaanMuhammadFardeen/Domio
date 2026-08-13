@@ -41,9 +41,7 @@ export function ProviderConfig({ provider, onSave, onDelete }: ProviderConfigPro
   function updateRole(index: number, field: keyof SSORoleMapping, value: string) {
     setForm((prev) => ({
       ...prev,
-      role_mapping: prev.role_mapping.map((r, i) =>
-        i === index ? { ...r, [field]: value } : r,
-      ),
+      role_mapping: prev.role_mapping.map((r, i) => (i === index ? { ...r, [field]: value } : r)),
     }));
   }
 
@@ -71,9 +69,7 @@ export function ProviderConfig({ provider, onSave, onDelete }: ProviderConfigPro
         name: form.name.trim() || provider.name,
         protocol: form.protocol,
         metadata_url: form.metadata_url.trim() || null,
-        role_mapping: form.role_mapping.filter(
-          (r) => r.sso_role.trim() && r.domio_role.trim(),
-        ),
+        role_mapping: form.role_mapping.filter((r) => r.sso_role.trim() && r.domio_role.trim()),
       };
       await onSave(next);
     } catch (err) {
@@ -120,10 +116,7 @@ export function ProviderConfig({ provider, onSave, onDelete }: ProviderConfigPro
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label
-            htmlFor="provider-name"
-            className="block text-xs font-medium text-slate-600"
-          >
+          <label htmlFor="provider-name" className="block text-xs font-medium text-slate-600">
             Display name
           </label>
           <input
@@ -167,10 +160,7 @@ export function ProviderConfig({ provider, onSave, onDelete }: ProviderConfigPro
       </div>
 
       <div>
-        <label
-          htmlFor="provider-metadata-url"
-          className="block text-xs font-medium text-slate-600"
-        >
+        <label htmlFor="provider-metadata-url" className="block text-xs font-medium text-slate-600">
           Metadata URL <span className="text-slate-400">(optional)</span>
         </label>
         <input

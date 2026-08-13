@@ -40,12 +40,7 @@ describe('KnowledgeGraph', () => {
   });
 
   it('renders an empty state when no nodes are provided', () => {
-    render(
-      <KnowledgeGraph
-        workspaceId="ws-demo"
-        initial={{ nodes: [], edges: [], claims: [] }}
-      />,
-    );
+    render(<KnowledgeGraph workspaceId="ws-demo" initial={{ nodes: [], edges: [], claims: [] }} />);
     expect(screen.getByTestId('knowledge-graph-empty')).toBeInTheDocument();
   });
 
@@ -77,9 +72,8 @@ describe('KnowledgeGraph', () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
-    const calledArgs = (
-      mockFetch as unknown as { mock: { calls: [string, RequestInit][] } }
-    ).mock.calls[0];
+    const calledArgs = (mockFetch as unknown as { mock: { calls: [string, RequestInit][] } }).mock
+      .calls[0];
     expect(calledArgs?.[0]).toContain('/v1/analytics/graph');
     const headers = (calledArgs?.[1]?.headers ?? {}) as Record<string, string>;
     expect(headers['x-workspace-id']).toBe('ws-demo');

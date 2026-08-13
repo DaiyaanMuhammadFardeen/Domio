@@ -5,13 +5,7 @@
  */
 
 import { newToken } from '@domio/common';
-import type {
-  DeckDocument,
-  Element,
-  Slide,
-  Transform2D,
-  ULID,
-} from '@domio/schema';
+import type { DeckDocument, Element, Slide, Transform2D, ULID } from '@domio/schema';
 
 export type HistoryOpName =
   | 'MoveOp'
@@ -86,7 +80,11 @@ export interface MoveOpForward {
   moves: Array<{ id: ULID; from: Transform2D; to: Transform2D }>;
 }
 
-export function moveOp(moves: MoveOpForward['moves'], timestamp: number, authorId?: string): HistoryOp<MoveOpForward> {
+export function moveOp(
+  moves: MoveOpForward['moves'],
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<MoveOpForward> {
   return {
     id: newOpId(),
     name: 'MoveOp',
@@ -99,7 +97,11 @@ export function moveOp(moves: MoveOpForward['moves'], timestamp: number, authorI
   };
 }
 
-export function resizeOp(moves: MoveOpForward['moves'], timestamp: number, authorId?: string): HistoryOp<MoveOpForward> {
+export function resizeOp(
+  moves: MoveOpForward['moves'],
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<MoveOpForward> {
   return {
     id: newOpId(),
     name: 'ResizeOp',
@@ -110,7 +112,11 @@ export function resizeOp(moves: MoveOpForward['moves'], timestamp: number, autho
   };
 }
 
-export function rotateOp(moves: MoveOpForward['moves'], timestamp: number, authorId?: string): HistoryOp<MoveOpForward> {
+export function rotateOp(
+  moves: MoveOpForward['moves'],
+  timestamp: number,
+  authorId?: string,
+): HistoryOp<MoveOpForward> {
   return {
     id: newOpId(),
     name: 'RotateOp',
@@ -122,7 +128,13 @@ export function rotateOp(moves: MoveOpForward['moves'], timestamp: number, autho
 }
 
 export interface ReorderOpForward {
-  changes: Array<{ id: ULID; fromZ: number; toZ: number; fromParent: ULID | null; toParent: ULID | null }>;
+  changes: Array<{
+    id: ULID;
+    fromZ: number;
+    toZ: number;
+    fromParent: ULID | null;
+    toParent: ULID | null;
+  }>;
 }
 
 export function reorderOp(
@@ -308,7 +320,11 @@ export function dataBindingOp(
     name: 'DataBindingOp',
     timestamp,
     forward: { layerId, binding: deepClone(binding), previousBinding: deepClone(previousBinding) },
-    inverse: { layerId, binding: previousBinding as LiveDataBinding | null, previousBinding: binding },
+    inverse: {
+      layerId,
+      binding: previousBinding as LiveDataBinding | null,
+      previousBinding: binding,
+    },
     authorId,
   };
 }
@@ -421,8 +437,16 @@ export function timelineOp(
     id: newOpId(),
     name: 'TimelineOp',
     timestamp,
-    forward: { layerId, timeline: deepClone(timeline), previousTimeline: deepClone(previousTimeline) },
-    inverse: { layerId, timeline: previousTimeline as LayerTimeline | null, previousTimeline: timeline },
+    forward: {
+      layerId,
+      timeline: deepClone(timeline),
+      previousTimeline: deepClone(previousTimeline),
+    },
+    inverse: {
+      layerId,
+      timeline: previousTimeline as LayerTimeline | null,
+      previousTimeline: timeline,
+    },
     authorId,
   };
 }
@@ -438,8 +462,16 @@ export function transitionOp(
     id: newOpId(),
     name: 'TransitionOp',
     timestamp,
-    forward: { slideId, transition: deepClone(transition), previousTransition: deepClone(previousTransition) },
-    inverse: { slideId, transition: previousTransition as SlideTransition | null, previousTransition: transition },
+    forward: {
+      slideId,
+      transition: deepClone(transition),
+      previousTransition: deepClone(previousTransition),
+    },
+    inverse: {
+      slideId,
+      transition: previousTransition as SlideTransition | null,
+      previousTransition: transition,
+    },
     authorId,
   };
 }
@@ -483,7 +515,11 @@ export interface AddRemoveForward {
   slideId: ULID;
 }
 
-export function addElementOp(added: Element[], slideId: ULID, timestamp: number): HistoryOp<AddRemoveForward> {
+export function addElementOp(
+  added: Element[],
+  slideId: ULID,
+  timestamp: number,
+): HistoryOp<AddRemoveForward> {
   return {
     id: newOpId(),
     name: 'AddElementOp',
@@ -493,7 +529,11 @@ export function addElementOp(added: Element[], slideId: ULID, timestamp: number)
   };
 }
 
-export function removeElementOp(removed: Element[], slideId: ULID, timestamp: number): HistoryOp<AddRemoveForward> {
+export function removeElementOp(
+  removed: Element[],
+  slideId: ULID,
+  timestamp: number,
+): HistoryOp<AddRemoveForward> {
   return {
     id: newOpId(),
     name: 'RemoveElementOp',
@@ -523,8 +563,16 @@ export function hotspotOp(
     id: newOpId(),
     name: 'HotspotOp',
     timestamp,
-    forward: { slideId, hotspot: deepClone(hotspot), previous: previous ? deepClone(previous) : null },
-    inverse: { slideId, hotspot: previous ? deepClone(previous) : null, previous: deepClone(hotspot) },
+    forward: {
+      slideId,
+      hotspot: deepClone(hotspot),
+      previous: previous ? deepClone(previous) : null,
+    },
+    inverse: {
+      slideId,
+      hotspot: previous ? deepClone(previous) : null,
+      previous: deepClone(hotspot),
+    },
     authorId,
   };
 }
@@ -547,8 +595,16 @@ export function overlayOp(
     id: newOpId(),
     name: 'OverlayOp',
     timestamp,
-    forward: { slideId, overlay: deepClone(overlay), previous: previous ? deepClone(previous) : null },
-    inverse: { slideId, overlay: previous ? deepClone(previous) : null, previous: deepClone(overlay) },
+    forward: {
+      slideId,
+      overlay: deepClone(overlay),
+      previous: previous ? deepClone(previous) : null,
+    },
+    inverse: {
+      slideId,
+      overlay: previous ? deepClone(previous) : null,
+      previous: deepClone(overlay),
+    },
     authorId,
   };
 }
@@ -595,8 +651,16 @@ export function variableOp(
     id: newOpId(),
     name: 'VariableOp',
     timestamp,
-    forward: { slideId, variable: deepClone(variable), previous: previous ? deepClone(previous) : null },
-    inverse: { slideId, variable: previous ? deepClone(previous) : null, previous: deepClone(variable) },
+    forward: {
+      slideId,
+      variable: deepClone(variable),
+      previous: previous ? deepClone(previous) : null,
+    },
+    inverse: {
+      slideId,
+      variable: previous ? deepClone(previous) : null,
+      previous: deepClone(variable),
+    },
     authorId,
   };
 }
@@ -643,8 +707,16 @@ export function variableBindingOp(
     id: newOpId(),
     name: 'VariableBindingOp',
     timestamp,
-    forward: { layerId, binding: deepClone(binding), previous: previous ? deepClone(previous) : null },
-    inverse: { layerId, binding: previous ? deepClone(previous) : null, previous: deepClone(binding) },
+    forward: {
+      layerId,
+      binding: deepClone(binding),
+      previous: previous ? deepClone(previous) : null,
+    },
+    inverse: {
+      layerId,
+      binding: previous ? deepClone(previous) : null,
+      previous: deepClone(binding),
+    },
     authorId,
   };
 }
@@ -749,7 +821,10 @@ function applyStyle(doc: DeckDocument, payload: StyleOpForward): DeckDocument {
   return mapElements(doc, (element) => {
     const change = payload.changes.find((c) => c.id === element.id);
     if (!change) return element;
-    return { ...element, style: { ...(element.style ?? {}), ...(change.to as Record<string, unknown>) } };
+    return {
+      ...element,
+      style: { ...(element.style ?? {}), ...(change.to as Record<string, unknown>) },
+    };
   });
 }
 

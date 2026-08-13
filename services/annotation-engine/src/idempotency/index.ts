@@ -49,8 +49,12 @@ export class NullIdempotencyStore implements IdempotencyStore {
   async reserve(): Promise<IdempotencyReservation> {
     return { exists: false };
   }
-  async commit(): Promise<void> { /* no-op */ }
-  async get(): Promise<IdempotencyRecord | null> { return null; }
+  async commit(): Promise<void> {
+    /* no-op */
+  }
+  async get(): Promise<IdempotencyRecord | null> {
+    return null;
+  }
 }
 
 export class InMemoryIdempotencyStore implements IdempotencyStore {
@@ -74,7 +78,11 @@ export class InMemoryIdempotencyStore implements IdempotencyStore {
     setTimeout(() => this.map.delete(k), c.ttl_ms).unref?.();
   }
 
-  async get(key: string, workspace_id: string, session_id: string): Promise<IdempotencyRecord | null> {
+  async get(
+    key: string,
+    workspace_id: string,
+    session_id: string,
+  ): Promise<IdempotencyRecord | null> {
     return this.map.get(this.fqkey(key, workspace_id, session_id)) ?? null;
   }
 }

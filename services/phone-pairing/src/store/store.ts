@@ -23,8 +23,11 @@ export function makePairingStoreError(
 }
 
 export function isPairingStore(value: unknown): value is PairingStore {
-  return !!value && typeof (value as PairingStore).create === 'function'
-    && typeof (value as PairingStore).getBySessionDevice === 'function';
+  return (
+    !!value &&
+    typeof (value as PairingStore).create === 'function' &&
+    typeof (value as PairingStore).getBySessionDevice === 'function'
+  );
 }
 
 export interface PairingStore {

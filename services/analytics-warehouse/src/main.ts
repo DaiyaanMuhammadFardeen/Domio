@@ -12,10 +12,17 @@ import { buildAnalyticsDao } from './dao/queries.js';
 import { buildApp } from './server.js';
 import { startOrchestrator } from './rollup/orchestrator.js';
 
-declare const process: { env: Record<string, string | undefined>; exit: (code: number) => never; on: (sig: string, fn: () => void) => void; argv: string[] };
+declare const process: {
+  env: Record<string, string | undefined>;
+  exit: (code: number) => never;
+  on: (sig: string, fn: () => void) => void;
+  argv: string[];
+};
 declare const console: { log: (...args: unknown[]) => void; error: (...args: unknown[]) => void };
 
-export async function boot(cfg: WarehouseConfig = loadConfigFromEnv()): Promise<{ port: number; close: () => Promise<void> }> {
+export async function boot(
+  cfg: WarehouseConfig = loadConfigFromEnv(),
+): Promise<{ port: number; close: () => Promise<void> }> {
   const ch = buildClickHouseClient(cfg);
   const dao = buildAnalyticsDao(ch);
   const app = buildApp({ ch, dao });
@@ -34,7 +41,11 @@ export async function boot(cfg: WarehouseConfig = loadConfigFromEnv()): Promise<
       for await (const chunk of req) chunks.push(chunk as Buffer);
       body = Buffer.concat(chunks);
     }
-    const honoRes = await app.request(url, { method, headers, ...(body !== undefined ? { body } : {}) });
+    const honoRes = await app.request(url, {
+      method,
+      headers,
+      ...(body !== undefined ? { body } : {}),
+    });
     res.statusCode = honoRes.status;
     honoRes.headers.forEach((v, k) => {
       if (v) res.setHeader(k, v);

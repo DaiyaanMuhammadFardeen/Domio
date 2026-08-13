@@ -8,10 +8,10 @@ Authentication; inherited upstream (deferred for P22-beta).
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-auth` | availability | 99.9% | 30d |
-| `lat-auth-p95` | latency | < 300 ms | 30d |
+| SLO            | Kind         | Target   | Window |
+| -------------- | ------------ | -------- | ------ |
+| `avail-auth`   | availability | 99.9%    | 30d    |
+| `lat-auth-p95` | latency      | < 300 ms | 30d    |
 
 ## Triage
 

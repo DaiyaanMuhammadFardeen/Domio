@@ -35,16 +35,27 @@ export interface RegistryStore {
   putPackage(pkg: ComponentPackage): Promise<void>;
   getPackage(catalogId: string, version: string): Promise<ComponentPackage | undefined>;
   getPackageById(id: string): Promise<ComponentPackage | undefined>;
-  listPackages(opts?: { kind?: string; category?: string; limit?: number }): Promise<ComponentPackage[]>;
+  listPackages(opts?: {
+    kind?: string;
+    category?: string;
+    limit?: number;
+  }): Promise<ComponentPackage[]>;
   listVersions(catalogId: string): Promise<ComponentPackage[]>;
-  searchPackages(query: string, opts?: { kind?: string; limit?: number }): Promise<ComponentPackage[]>;
+  searchPackages(
+    query: string,
+    opts?: { kind?: string; limit?: number },
+  ): Promise<ComponentPackage[]>;
   deletePackage(catalogId: string, version: string): Promise<void>;
   putSmartProps(componentId: string, props: SmartProp[]): Promise<void>;
   getSmartProps(componentId: string): Promise<SmartProp[]>;
 
   // ---- user + team libraries ----
   putLibraryItem(item: UserLibraryItem): Promise<void>;
-  getLibraryItem(userId: string, workspaceId: string, catalogId: string): Promise<UserLibraryItem | undefined>;
+  getLibraryItem(
+    userId: string,
+    workspaceId: string,
+    catalogId: string,
+  ): Promise<UserLibraryItem | undefined>;
   listLibraryItems(userId: string, workspaceId: string): Promise<UserLibraryItem[]>;
   deleteLibraryItem(userId: string, workspaceId: string, catalogId: string): Promise<void>;
 
@@ -53,15 +64,26 @@ export interface RegistryStore {
   listTeamLibraries(workspaceId: string): Promise<TeamLibrary[]>;
 
   appendLibraryEvent(event: TeamLibraryEvent): Promise<void>;
-  listLibraryEvents(libraryId: string, afterSeq?: number, limit?: number): Promise<TeamLibraryEvent[]>;
+  listLibraryEvents(
+    libraryId: string,
+    afterSeq?: number,
+    limit?: number,
+  ): Promise<TeamLibraryEvent[]>;
   latestLibrarySeq(libraryId: string): Promise<number>;
 
   // ---- marketplace ----
   putListing(listing: MarketplaceListing): Promise<void>;
   getListing(id: string): Promise<MarketplaceListing | undefined>;
   getListingByCatalogId(catalogId: string): Promise<MarketplaceListing | undefined>;
-  listListings(opts?: { status?: string; sellerId?: string; limit?: number }): Promise<MarketplaceListing[]>;
-  searchListings(query: string, opts?: { status?: string; tags?: string[]; limit?: number }): Promise<MarketplaceListing[]>;
+  listListings(opts?: {
+    status?: string;
+    sellerId?: string;
+    limit?: number;
+  }): Promise<MarketplaceListing[]>;
+  searchListings(
+    query: string,
+    opts?: { status?: string; tags?: string[]; limit?: number },
+  ): Promise<MarketplaceListing[]>;
 
   putReview(review: Review): Promise<void>;
   getReview(id: string): Promise<Review | undefined>;

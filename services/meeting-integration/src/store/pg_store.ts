@@ -28,12 +28,17 @@ export class PgMeetingStore implements MeetingStore {
 
   async getIntegration(_workspaceId: string, _vendor: string): Promise<MeetingIntegration | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getIntegration');
-    throw new StoreNotImplementedError('getIntegration', { workspaceId: _workspaceId, vendor: _vendor });
+    throw new StoreNotImplementedError('getIntegration', {
+      workspaceId: _workspaceId,
+      vendor: _vendor,
+    });
   }
 
   async listIntegrationsByWorkspace(_workspaceId: string): Promise<MeetingIntegration[]> {
     if (!this.pool) throw new StoreNotConfiguredError('listIntegrationsByWorkspace');
-    throw new StoreNotImplementedError('listIntegrationsByWorkspace', { workspaceId: _workspaceId });
+    throw new StoreNotImplementedError('listIntegrationsByWorkspace', {
+      workspaceId: _workspaceId,
+    });
   }
 
   async updateIntegrationStatus(_id: string, _status: string, _updatedAt: Date): Promise<void> {
@@ -80,7 +85,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

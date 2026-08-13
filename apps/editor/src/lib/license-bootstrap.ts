@@ -77,6 +77,8 @@ export const BOOTSTRAP_GRANTS: ReadonlyArray<LicenseGrantSeed> = [
  * edit. Today this returns the seeded grants; the real client will
  * fetch them from the service.
  */
-export async function loadGrantsForWorkspace(_workspaceId: string): Promise<ReadonlyArray<LicenseGrantSeed>> {
+export async function loadGrantsForWorkspace(
+  _workspaceId: string,
+): Promise<ReadonlyArray<LicenseGrantSeed>> {
   return BOOTSTRAP_GRANTS;
 }

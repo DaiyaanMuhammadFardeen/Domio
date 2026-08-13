@@ -38,9 +38,7 @@ describe('CohortMatrix', () => {
 
   it('renders W1 cell with 100% for the first cohort', () => {
     render(<CohortMatrix matrix={SAMPLE_MATRIX} />);
-    const cell = document.querySelector(
-      '[data-cohort="2025-W14"][data-week="1"]',
-    );
+    const cell = document.querySelector('[data-cohort="2025-W14"][data-week="1"]');
     expect(cell).not.toBeNull();
     expect(cell?.getAttribute('data-value')).toBe('1');
     expect(cell?.textContent).toBe('100%');
@@ -49,9 +47,7 @@ describe('CohortMatrix', () => {
   it('renders fallback for cells where retention data is missing', () => {
     render(<CohortMatrix matrix={SAMPLE_MATRIX} />);
     // W4 of W15 has a 0 value (data trimmed in this cohort).
-    const cell = document.querySelector(
-      '[data-cohort="2025-W15"][data-week="4"]',
-    );
+    const cell = document.querySelector('[data-cohort="2025-W15"][data-week="4"]');
     expect(cell?.getAttribute('data-value')).toBe('0');
     expect(cell?.textContent).toBe('0%');
   });

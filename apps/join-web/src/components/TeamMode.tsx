@@ -72,11 +72,7 @@ export function TeamMode(props: TeamModeProps) {
         )}
       </div>
 
-      <ul
-        className="grid grid-cols-2 gap-2"
-        data-testid="team-list"
-        aria-label="Available teams"
-      >
+      <ul className="grid grid-cols-2 gap-2" data-testid="team-list" aria-label="Available teams">
         {props.teams.map((team) => {
           const isMine = team.id === props.myTeamId;
           return (

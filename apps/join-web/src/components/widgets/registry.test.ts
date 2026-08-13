@@ -3,11 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  REGISTERED_WIDGET_KINDS,
-  WIDGET_REGISTRY,
-  getWidget,
-} from '@/components/widgets/registry';
+import { REGISTERED_WIDGET_KINDS, WIDGET_REGISTRY, getWidget } from '@/components/widgets/registry';
 
 describe('widget registry', () => {
   it('has exactly 8 widget kinds registered', () => {

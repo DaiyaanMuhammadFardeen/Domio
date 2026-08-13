@@ -32,7 +32,11 @@ export interface ShaderRepository {
   insert(record: Shader): Promise<void>;
   findById(id: string, workspaceId: string): Promise<Shader | null>;
   listByWorkspace(workspaceId: string, kind?: ShaderKind): Promise<Shader[]>;
-  update(id: string, workspaceId: string, patch: Partial<Pick<Shader, 'name' | 'sourceWgsl' | 'sourceGlsl' | 'inputs' | 'published'>>): Promise<Shader>;
+  update(
+    id: string,
+    workspaceId: string,
+    patch: Partial<Pick<Shader, 'name' | 'sourceWgsl' | 'sourceGlsl' | 'inputs' | 'published'>>,
+  ): Promise<Shader>;
   delete(id: string, workspaceId: string): Promise<boolean>;
 }
 
@@ -42,7 +46,9 @@ export interface ShaderRepository {
 
 export class InMemoryShaderRepository implements ShaderRepository {
   private store = new Map<string, Shader>();
-  private k(id: string, ws: string): string { return `${ws}::${id}`; }
+  private k(id: string, ws: string): string {
+    return `${ws}::${id}`;
+  }
 
   async insert(record: Shader): Promise<void> {
     this.store.set(this.k(record.id, record.workspaceId), record);

@@ -40,12 +40,12 @@ paths:
             maximum: 100
             default: 20
       responses:
-        "200":
+        '200':
           description: List of jobs.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/JobListResponse"
+                $ref: '#/components/schemas/JobListResponse'
     post:
       tags: [jobs]
       operationId: createJob
@@ -55,15 +55,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateJobRequest"
+              $ref: '#/components/schemas/CreateJobRequest'
       responses:
-        "201":
+        '201':
           description: Job created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MagicMoveJob"
-        "400":
+                $ref: '#/components/schemas/MagicMoveJob'
+        '400':
           description: Validation error.
   /v1/magic-move/jobs/{id}:
     get:
@@ -82,13 +82,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Job details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MagicMoveJob"
-        "404":
+                $ref: '#/components/schemas/MagicMoveJob'
+        '404':
           description: Job not found.
     delete:
       tags: [jobs]
@@ -106,11 +106,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Job cancelled.
-        "404":
+        '404':
           description: Job not found.
-        "409":
+        '409':
           description: Job already completed or failed.
 components:
   schemas:
@@ -140,7 +140,7 @@ components:
           type: string
           enum: [pending, computing, done, failed]
         result:
-          $ref: "#/components/schemas/MagicMoveResult"
+          $ref: '#/components/schemas/MagicMoveResult'
         error:
           type: string
         createdAt:
@@ -155,7 +155,7 @@ components:
         elementMappings:
           type: array
           items:
-            $ref: "#/components/schemas/ElementMapping"
+            $ref: '#/components/schemas/ElementMapping'
         matchedCount:
           type: integer
         unmatchedFromCount:
@@ -213,4 +213,4 @@ components:
         jobs:
           type: array
           items:
-            $ref: "#/components/schemas/MagicMoveJob"
+            $ref: '#/components/schemas/MagicMoveJob'

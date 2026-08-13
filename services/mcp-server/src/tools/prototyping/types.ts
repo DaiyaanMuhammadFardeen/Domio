@@ -1,13 +1,7 @@
 /**
  * Shared MCP tool types + utilities for the prototyping surface.
  */
-import type {
-  AuditEntry,
-  Capability,
-  McpContext,
-  McpError,
-  McpTool,
-} from '@domio/agent-schema';
+import type { AuditEntry, Capability, McpContext, McpError, McpTool } from '@domio/agent-schema';
 
 export type { AuditEntry, Capability, McpContext, McpError, McpTool };
 
@@ -70,7 +64,11 @@ export function validateString(input: unknown, field: string, issues: string[]):
   return input;
 }
 
-export function validateObject(input: unknown, field: string, issues: string[]): Record<string, unknown> | null {
+export function validateObject(
+  input: unknown,
+  field: string,
+  issues: string[],
+): Record<string, unknown> | null {
   if (input === null || typeof input !== 'object' || Array.isArray(input)) {
     issues.push(`${field} must be an object`);
     return null;

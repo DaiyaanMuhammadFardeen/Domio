@@ -80,7 +80,14 @@
     },
     "TokenTypography": {
       "type": "object",
-      "required": ["fontFamily", "fontSize", "fontWeight", "lineHeight", "letterSpacing", "fallbackChain"],
+      "required": [
+        "fontFamily",
+        "fontSize",
+        "fontWeight",
+        "lineHeight",
+        "letterSpacing",
+        "fallbackChain"
+      ],
       "additionalProperties": false,
       "properties": {
         "fontFamily": { "type": "string", "minLength": 1 },

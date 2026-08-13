@@ -5,7 +5,13 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { fetchViewerDeck, fetchViewerSlide, computeDeepLinks, canonicalDeckUrl, scrollModeUrl } from './deck-service';
+import {
+  fetchViewerDeck,
+  fetchViewerSlide,
+  computeDeepLinks,
+  canonicalDeckUrl,
+  scrollModeUrl,
+} from './deck-service';
 
 describe('deck-service', () => {
   it('fetchViewerDeck returns a deck resolution with bootstrap=true', async () => {

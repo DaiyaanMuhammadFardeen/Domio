@@ -86,7 +86,9 @@ export function elementToCommand(element: Element): RenderCommand | null {
     case 'component': {
       // Component layers expand (deterministically) into their scene-graph
       // children via the shared @domio/components pack, then normalize each.
-      const children = expandComponent(element).map(elementToCommand).filter((c): c is RenderCommand => c !== null);
+      const children = expandComponent(element)
+        .map(elementToCommand)
+        .filter((c): c is RenderCommand => c !== null);
       return {
         kind: 'drawGroup',
         id: element.id,
@@ -129,7 +131,9 @@ function rectFor(
     cmd.fill = { colorSpace: 'srgb', value: opts.fillColor };
   }
   const strokeWidth =
-    element.type === 'frame' && element.stroke?.width != null ? element.stroke.width : opts.strokeWidth;
+    element.type === 'frame' && element.stroke?.width != null
+      ? element.stroke.width
+      : opts.strokeWidth;
   if (strokeWidth) {
     const strokeColor =
       element.type === 'frame' && element.stroke?.color
@@ -208,13 +212,14 @@ function rgbaToColor(c: { r: number; g: number; b: number; a: number }): Color {
   };
 }
 
-function readColor(styleValue: unknown): { colorSpace: 'srgb' | 'display-p3'; value: string } | undefined {
+function readColor(
+  styleValue: unknown,
+): { colorSpace: 'srgb' | 'display-p3'; value: string } | undefined {
   if (!styleValue || typeof styleValue !== 'object') return undefined;
   const candidate = styleValue as { color?: { colorSpace?: string; value?: string } };
   if (candidate.color?.value) {
     return {
-      colorSpace:
-        candidate.color.colorSpace === 'display-p3' ? 'display-p3' : 'srgb',
+      colorSpace: candidate.color.colorSpace === 'display-p3' ? 'display-p3' : 'srgb',
       value: candidate.color.value,
     };
   }

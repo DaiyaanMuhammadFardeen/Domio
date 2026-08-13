@@ -19,9 +19,24 @@ interface MediaSlot {
 }
 
 const SLOTS: ReadonlyArray<MediaSlot> = [
-  { kind: 'cover', testid: 'wizard-asset-cover', labelKey: 'creator.wizard.media.cover', accept: 'image/*' },
-  { kind: 'gallery', testid: 'wizard-asset-gallery', labelKey: 'creator.wizard.media.gallery', accept: 'image/*' },
-  { kind: 'video', testid: 'wizard-asset-video', labelKey: 'creator.wizard.media.video', accept: 'video/*' },
+  {
+    kind: 'cover',
+    testid: 'wizard-asset-cover',
+    labelKey: 'creator.wizard.media.cover',
+    accept: 'image/*',
+  },
+  {
+    kind: 'gallery',
+    testid: 'wizard-asset-gallery',
+    labelKey: 'creator.wizard.media.gallery',
+    accept: 'image/*',
+  },
+  {
+    kind: 'video',
+    testid: 'wizard-asset-video',
+    labelKey: 'creator.wizard.media.video',
+    accept: 'video/*',
+  },
 ];
 
 export function MediaStep({ assets, onAdd, onRemove }: MediaStepProps) {

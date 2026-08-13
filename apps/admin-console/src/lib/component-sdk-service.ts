@@ -17,10 +17,7 @@
  * the pattern used by custom-domain-service / scim-service.
  */
 
-import type {
-  SDKPackageInfo,
-  ComponentTemplate,
-} from './types';
+import type { SDKPackageInfo, ComponentTemplate } from './types';
 
 const SEED_PACKAGES: readonly SDKPackageInfo[] = [
   {
@@ -157,7 +154,9 @@ export async function publishComponentToOrg(
   return { id, status: 'published' };
 }
 
-export const SDK_STATUS_TONES: Readonly<Record<SDKPackageInfo['status'], 'green' | 'amber' | 'grey'>> = {
+export const SDK_STATUS_TONES: Readonly<
+  Record<SDKPackageInfo['status'], 'green' | 'amber' | 'grey'>
+> = {
   stable: 'green',
   beta: 'amber',
   deprecated: 'grey',

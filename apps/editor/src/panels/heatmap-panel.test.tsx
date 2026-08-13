@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  HeatmapPanel,
-  type HeatmapBucketView,
-} from './heatmap-panel';
+import { HeatmapPanel, type HeatmapBucketView } from './heatmap-panel';
 
 const BUCKET: HeatmapBucketView = {
   width: 4,
@@ -15,7 +12,9 @@ const BUCKET: HeatmapBucketView = {
   ],
 };
 
-function defaultProps(overrides: Partial<React.ComponentProps<typeof HeatmapPanel>> = {}): React.ComponentProps<typeof HeatmapPanel> {
+function defaultProps(
+  overrides: Partial<React.ComponentProps<typeof HeatmapPanel>> = {},
+): React.ComponentProps<typeof HeatmapPanel> {
   return {
     bucket: BUCKET,
     onReset: vi.fn(),

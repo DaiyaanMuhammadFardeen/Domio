@@ -3,7 +3,12 @@
  */
 import { describe, expect, it, beforeEach } from 'vitest';
 import { buildApp } from '../server.js';
-import { buildHmacVerifier, HMAC_HEADER_NAME, TIMESTAMP_HEADER_NAME, NONCE_HEADER_NAME } from '../hmac.js';
+import {
+  buildHmacVerifier,
+  HMAC_HEADER_NAME,
+  TIMESTAMP_HEADER_NAME,
+  NONCE_HEADER_NAME,
+} from '../hmac.js';
 import { buildMemoryNonceCache } from '../nonce.js';
 import { buildPiiStripper } from '../pii.js';
 import { buildInMemoryKafkaPublisher, buildFailingKafkaPublisher } from '../kafka.js';

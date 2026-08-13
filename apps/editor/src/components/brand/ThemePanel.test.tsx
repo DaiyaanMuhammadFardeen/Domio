@@ -21,24 +21,42 @@ const KIT: BrandKitDetail = {
     },
   ],
   typography: [
-    { id: 'type.heading', label: 'Heading', fontFamily: 'Inter', fontSizePx: 32, lineHeight: 1.2, fontWeight: 700, letterSpacingEm: -0.01 },
-    { id: 'type.body', label: 'Body', fontFamily: 'Inter', fontSizePx: 16, lineHeight: 1.5, fontWeight: 400, letterSpacingEm: 0 },
+    {
+      id: 'type.heading',
+      label: 'Heading',
+      fontFamily: 'Inter',
+      fontSizePx: 32,
+      lineHeight: 1.2,
+      fontWeight: 700,
+      letterSpacingEm: -0.01,
+    },
+    {
+      id: 'type.body',
+      label: 'Body',
+      fontFamily: 'Inter',
+      fontSizePx: 16,
+      lineHeight: 1.5,
+      fontWeight: 400,
+      letterSpacingEm: 0,
+    },
   ],
   spacing: [
-    { id: 'space', label: 'Spacing', stops: [
-      { id: '1', label: '1×', value: '4px' },
-      { id: '4', label: '4×', value: '16px' },
-    ] },
+    {
+      id: 'space',
+      label: 'Spacing',
+      stops: [
+        { id: '1', label: '1×', value: '4px' },
+        { id: '4', label: '4×', value: '16px' },
+      ],
+    },
   ],
-  radius: [
-    { id: 'radius', label: 'Radius', stops: [
-      { id: 'md', label: 'MD', value: '8px' },
-    ] },
-  ],
+  radius: [{ id: 'radius', label: 'Radius', stops: [{ id: 'md', label: 'MD', value: '8px' }] }],
   shadows: [
-    { id: 'shadow', label: 'Shadow', stops: [
-      { id: 'md', label: 'MD', value: '0 4px 8px rgba(0,0,0,0.15)' },
-    ] },
+    {
+      id: 'shadow',
+      label: 'Shadow',
+      stops: [{ id: 'md', label: 'MD', value: '0 4px 8px rgba(0,0,0,0.15)' }],
+    },
   ],
 };
 
@@ -121,16 +139,27 @@ describe('ThemePanel', () => {
 
   it('forwards theme selection', () => {
     const onThemeChange = vi.fn();
-    render(<ThemePanel {...baseProps({ themes: [
-      { id: 'theme-a', name: 'A', scheme: 'light' },
-      { id: 'theme-b', name: 'B', scheme: 'dark' },
-    ], onThemeChange })} />);
-    fireEvent.change(screen.getByTestId('theme-panel-theme-select'), { target: { value: 'theme-b' } });
+    render(
+      <ThemePanel
+        {...baseProps({
+          themes: [
+            { id: 'theme-a', name: 'A', scheme: 'light' },
+            { id: 'theme-b', name: 'B', scheme: 'dark' },
+          ],
+          onThemeChange,
+        })}
+      />,
+    );
+    fireEvent.change(screen.getByTestId('theme-panel-theme-select'), {
+      target: { value: 'theme-b' },
+    });
     expect(onThemeChange).toHaveBeenCalledWith('theme-b');
   });
 
   it('shows the override note when an override exists', () => {
-    render(<ThemePanel {...baseProps({ override: { tokenId: 'color.brand.primary', hex: '#f00' } })} />);
+    render(
+      <ThemePanel {...baseProps({ override: { tokenId: 'color.brand.primary', hex: '#f00' } })} />,
+    );
     expect(screen.getByTestId('theme-panel-override-note')).toBeInTheDocument();
   });
 });

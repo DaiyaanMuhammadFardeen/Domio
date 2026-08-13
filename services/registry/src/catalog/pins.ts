@@ -50,11 +50,16 @@ export async function resolvePinTarget(
       return { version: target, mode: 'pin-range', reason: 'range' };
     }
     case 'workspace-managed': {
-      if (!opts?.workspaceTarget) throw Errors.validation('workspace-managed requires a workspace target');
+      if (!opts?.workspaceTarget)
+        throw Errors.validation('workspace-managed requires a workspace target');
       if (!availableVersions.includes(opts.workspaceTarget)) {
         throw Errors.pinUnavailable(`Workspace target ${opts.workspaceTarget} is not published`);
       }
-      return { version: opts.workspaceTarget, mode: 'workspace-managed', reason: 'workspace-policy' };
+      return {
+        version: opts.workspaceTarget,
+        mode: 'workspace-managed',
+        reason: 'workspace-policy',
+      };
     }
     default:
       throw Errors.validation(`Unknown pin mode ${item.pinMode}`);
@@ -62,7 +67,11 @@ export async function resolvePinTarget(
 }
 
 /** Deprecation only blocks track-latest/pin-range; explicit pins still resolve. */
-function isDeprecatedVersion(deps: ServiceDeps, item: Pick<UserLibraryItem, 'pinMode'>, version: string): boolean {
+function isDeprecatedVersion(
+  deps: ServiceDeps,
+  item: Pick<UserLibraryItem, 'pinMode'>,
+  version: string,
+): boolean {
   void deps;
   void item;
   void version;

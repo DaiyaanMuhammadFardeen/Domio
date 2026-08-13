@@ -9,10 +9,18 @@ import type { ClickHouseClient } from '../client/clickhouse.js';
 
 class FakeCh implements ClickHouseClient {
   executed: string[] = [];
-  async query<T>(): Promise<T[]> { return []; }
-  async execute(sql: string): Promise<void> { this.executed.push(sql); }
-  async raw(): Promise<Response> { return new Response('', { status: 200 }); }
-  async ping(): Promise<boolean> { return true; }
+  async query<T>(): Promise<T[]> {
+    return [];
+  }
+  async execute(sql: string): Promise<void> {
+    this.executed.push(sql);
+  }
+  async raw(): Promise<Response> {
+    return new Response('', { status: 200 });
+  }
+  async ping(): Promise<boolean> {
+    return true;
+  }
 }
 
 describe('rollup orchestrator', () => {
@@ -38,15 +46,24 @@ describe('rollup orchestrator', () => {
   it('continues past a failing hourly table', async () => {
     const ch = new FakeCh();
     const failing: ClickHouseClient = {
-      async query<T>(): Promise<T[]> { return []; },
+      async query<T>(): Promise<T[]> {
+        return [];
+      },
       async execute(sql: string) {
         if (sql.includes('events')) throw new Error('boom');
         await ch.execute(sql);
       },
-      async raw(): Promise<Response> { return new Response('', { status: 200 }); },
-      async ping(): Promise<boolean> { return true; },
+      async raw(): Promise<Response> {
+        return new Response('', { status: 200 });
+      },
+      async ping(): Promise<boolean> {
+        return true;
+      },
     };
-    const orch = buildOrchestrator(failing, defaultRollupConfig(), { info: () => {}, warn: () => {} });
+    const orch = buildOrchestrator(failing, defaultRollupConfig(), {
+      info: () => {},
+      warn: () => {},
+    });
     const { optimized } = await orch.runHourly();
     expect(optimized).toEqual(['session_agg', 'slide_metric_5m']);
   });

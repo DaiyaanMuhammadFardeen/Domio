@@ -9,7 +9,10 @@ import type { AudienceWidgetDescriptor } from '@domio/audience-service';
 import { WidgetRenderer } from './WidgetRenderer';
 import { _resetWidgetBusForTests } from '@/runtime/widgets/WidgetEngineConnector';
 
-function makeDescriptor(type: AudienceWidgetDescriptor['type'], payload: Record<string, unknown> = {}): AudienceWidgetDescriptor {
+function makeDescriptor(
+  type: AudienceWidgetDescriptor['type'],
+  payload: Record<string, unknown> = {},
+): AudienceWidgetDescriptor {
   return {
     widget_id: `w-${type}`,
     type,

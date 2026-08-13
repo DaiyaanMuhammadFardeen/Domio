@@ -12,7 +12,11 @@ export type { SuggestionsServiceOptions } from './service.js';
 export { handlers } from './handlers.js';
 export type { HttpRequest, HttpResponse, SuggestionsHandlerContext } from './handlers.js';
 export { InMemorySuggestionsStore } from './store/mem_store.js';
-export { PgSuggestionsStore, StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
+export {
+  PgSuggestionsStore,
+  StoreNotConfiguredError,
+  StoreNotImplementedError,
+} from './store/pg_store.js';
 export type { SuggestionsStore } from './store/store.js';
 export { FEATURE_FLAGS, checkFeature } from './feature_flags.js';
 export type { FeatureFlag } from './feature_flags.js';

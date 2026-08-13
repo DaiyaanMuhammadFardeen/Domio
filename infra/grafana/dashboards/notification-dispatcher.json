@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "notification-dispatcher"
-  ],
+  "tags": ["tier-2", "domio", "notification-dispatcher"],
   "panels": [
     {
       "id": 1,

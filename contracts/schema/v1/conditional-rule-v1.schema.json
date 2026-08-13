@@ -5,9 +5,17 @@
   "description": "A prioritized predicate that, when true, dispatches an action. Phase 10 M2.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "name", "priority",
-    "condition", "condition_source", "scope_slide_id",
-    "action", "enabled", "version"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "name",
+    "priority",
+    "condition",
+    "condition_source",
+    "scope_slide_id",
+    "action",
+    "enabled",
+    "version"
   ],
   "additionalProperties": false,
   "properties": {
@@ -44,9 +52,16 @@
       "properties": {
         "kind": {
           "enum": [
-            "show", "hide", "enable", "disable",
-            "set_variable", "navigate_to", "play_animation",
-            "submit_form", "open_overlay", "close_overlay"
+            "show",
+            "hide",
+            "enable",
+            "disable",
+            "set_variable",
+            "navigate_to",
+            "play_animation",
+            "submit_form",
+            "open_overlay",
+            "close_overlay"
           ]
         },
         "params": { "type": "object" }

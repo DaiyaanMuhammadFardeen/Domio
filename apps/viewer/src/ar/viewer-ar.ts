@@ -11,13 +11,7 @@
  * pure and unit-testable.
  */
 
-import {
-  buildAudienceUrl,
-  buildQrPayload,
-  verifyToken,
-  type ArSession,
-} from '@domio/ar-sessions';
-
+import { buildAudienceUrl, buildQrPayload, verifyToken, type ArSession } from '@domio/ar-sessions';
 
 // ─── Public types ────────────────────────────────────────────────────
 

@@ -44,9 +44,18 @@ const SYSTEM_DEFAULT_COLOR: TokenValue = {
 
 const SYSTEM_ALIAS_MAP: Record<string, TokenValue> = {
   'color.system.canvas': { type: 'color', value: { space: 'srgb', channels: [1, 1, 1], alpha: 1 } },
-  'color.system.canvasText': { type: 'color', value: { space: 'srgb', channels: [0, 0, 0], alpha: 1 } },
-  'color.system.linkText': { type: 'color', value: { space: 'srgb', channels: [0, 0, 1], alpha: 1 } },
-  'color.system.buttonText': { type: 'color', value: { space: 'srgb', channels: [0, 0, 0], alpha: 1 } },
+  'color.system.canvasText': {
+    type: 'color',
+    value: { space: 'srgb', channels: [0, 0, 0], alpha: 1 },
+  },
+  'color.system.linkText': {
+    type: 'color',
+    value: { space: 'srgb', channels: [0, 0, 1], alpha: 1 },
+  },
+  'color.system.buttonText': {
+    type: 'color',
+    value: { space: 'srgb', channels: [0, 0, 0], alpha: 1 },
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -158,7 +167,11 @@ function resolveFallback(
 
   // 3. System-default literal (#888888 for colors, per §3.3)
   if (tokenRef.startsWith('color.')) {
-    return { value: SYSTEM_DEFAULT_COLOR, source: 'system-default-literal', warn: 'WARN_TOKEN_FALLBACK' };
+    return {
+      value: SYSTEM_DEFAULT_COLOR,
+      source: 'system-default-literal',
+      warn: 'WARN_TOKEN_FALLBACK',
+    };
   }
 
   return null;
@@ -171,7 +184,11 @@ function resolveFallback(
 function isAliasOverride(
   v: TokenValue | (TokenAlias & { conditionExpr?: ConditionExpr }),
 ): v is TokenAlias & { conditionExpr?: ConditionExpr } {
-  return 'aliasTokenId' in v && 'targetTokenId' in v && typeof (v as TokenAlias).aliasTokenId === 'string';
+  return (
+    'aliasTokenId' in v &&
+    'targetTokenId' in v &&
+    typeof (v as TokenAlias).aliasTokenId === 'string'
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -228,7 +245,12 @@ export function resolve(
             if (resolved !== null) {
               return { tokenId: tokenRef, value: resolved, source: 'override', warn: undefined };
             }
-            return { tokenId: tokenRef, value: null, source: 'override', warn: 'WARN_TOKEN_UNRESOLVED' };
+            return {
+              tokenId: tokenRef,
+              value: null,
+              source: 'override',
+              warn: 'WARN_TOKEN_UNRESOLVED',
+            };
           }
           // Condition false — fall through
         } else if (isAliasOverride(override)) {
@@ -244,9 +266,19 @@ export function resolve(
           if (resolved !== null) {
             return { tokenId: tokenRef, value: resolved, source: 'override', warn: undefined };
           }
-          return { tokenId: tokenRef, value: null, source: 'override', warn: 'WARN_TOKEN_UNRESOLVED' };
+          return {
+            tokenId: tokenRef,
+            value: null,
+            source: 'override',
+            warn: 'WARN_TOKEN_UNRESOLVED',
+          };
         } else {
-          return { tokenId: tokenRef, value: override as TokenValue, source: 'override', warn: undefined };
+          return {
+            tokenId: tokenRef,
+            value: override as TokenValue,
+            source: 'override',
+            warn: undefined,
+          };
         }
       }
     }
@@ -273,9 +305,19 @@ export function resolve(
           if (resolved !== null) {
             return { tokenId: tokenRef, value: resolved, source: 'override', warn: undefined };
           }
-          return { tokenId: tokenRef, value: null, source: 'override', warn: 'WARN_TOKEN_UNRESOLVED' };
+          return {
+            tokenId: tokenRef,
+            value: null,
+            source: 'override',
+            warn: 'WARN_TOKEN_UNRESOLVED',
+          };
         } else {
-          return { tokenId: tokenRef, value: override as TokenValue, source: 'override', warn: undefined };
+          return {
+            tokenId: tokenRef,
+            value: override as TokenValue,
+            source: 'override',
+            warn: undefined,
+          };
         }
       }
     }
@@ -358,7 +400,12 @@ export function resolve(
   // -----------------------------------------------------------------------
   const fallback = resolveFallback(tokenRef, deckState);
   if (fallback !== null) {
-    return { tokenId: tokenRef, value: fallback.value, source: fallback.source, warn: fallback.warn };
+    return {
+      tokenId: tokenRef,
+      value: fallback.value,
+      source: fallback.source,
+      warn: fallback.warn,
+    };
   }
 
   // -----------------------------------------------------------------------

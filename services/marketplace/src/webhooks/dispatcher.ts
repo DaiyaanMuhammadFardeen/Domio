@@ -19,11 +19,7 @@ export class RateLimiter {
   private readonly refillIntervalMs: number;
   private readonly refillAmount: number;
 
-  constructor(opts: {
-    maxTokens: number;
-    refillIntervalMs: number;
-    refillAmount: number;
-  }) {
+  constructor(opts: { maxTokens: number; refillIntervalMs: number; refillAmount: number }) {
     this.maxTokens = opts.maxTokens;
     this.refillIntervalMs = opts.refillIntervalMs;
     this.refillAmount = opts.refillAmount;
@@ -79,11 +75,13 @@ export class WebhookDispatcher {
 
   constructor(opts: WebhookDispatcherOptions) {
     this.store = opts.store;
-    this.rateLimiter = opts.rateLimiter ?? new RateLimiter({
-      maxTokens: 100,
-      refillIntervalMs: 1000,
-      refillAmount: 10,
-    });
+    this.rateLimiter =
+      opts.rateLimiter ??
+      new RateLimiter({
+        maxTokens: 100,
+        refillIntervalMs: 1000,
+        refillAmount: 10,
+      });
     this.maxRetries = opts.maxRetries ?? 3;
     this.baseRetryDelayMs = opts.baseRetryDelayMs ?? 1000;
     this.hmacSecret = opts.hmacSecret ?? 'marketplace-webhook-hmac-secret';
@@ -123,9 +121,10 @@ export class WebhookDispatcher {
         deliveredAt: new Date(),
       });
     } else {
-      const nextRetry = delivery.attempts + 1 < this.maxRetries
-        ? new Date(Date.now() + this.baseRetryDelayMs * Math.pow(2, delivery.attempts))
-        : null;
+      const nextRetry =
+        delivery.attempts + 1 < this.maxRetries
+          ? new Date(Date.now() + this.baseRetryDelayMs * Math.pow(2, delivery.attempts))
+          : null;
       await this.store.updateWebhookDeliveryStatus(delivery.id, 'failed', {
         attempts: delivery.attempts + 1,
         lastError: 'Delivery failed (scaffold)',

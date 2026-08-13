@@ -10,9 +10,7 @@
 
 import { Hono } from 'hono';
 import type { AssetService } from '../service.js';
-import {
-  validatePatchModel,
-} from '../schemas.js';
+import { validatePatchModel } from '../schemas.js';
 import { ModelNotFoundError } from '../dal.js';
 
 export function modelRoutes(service: AssetService): Hono {
@@ -31,7 +29,10 @@ export function modelRoutes(service: AssetService): Hono {
         return c.json({ error: 'Missing required field: file', code: 'VALIDATION_ERROR' }, 400);
       }
       if (!workspaceId || typeof workspaceId !== 'string') {
-        return c.json({ error: 'Missing required field: workspaceId', code: 'VALIDATION_ERROR' }, 400);
+        return c.json(
+          { error: 'Missing required field: workspaceId', code: 'VALIDATION_ERROR' },
+          400,
+        );
       }
 
       // Detect format from filename
@@ -39,7 +40,13 @@ export function modelRoutes(service: AssetService): Hono {
       const ext = fileName.split('.').pop()?.toLowerCase() ?? 'bin';
       const validFormats = ['glb', 'gltf', 'usdz', 'step', 'stp', 'iges', 'igs', 'fbx', 'obj'];
       if (!validFormats.includes(ext)) {
-        return c.json({ error: `Unsupported format: ${ext}. Supported: ${validFormats.join(', ')}`, code: 'INVALID_FORMAT' }, 400);
+        return c.json(
+          {
+            error: `Unsupported format: ${ext}. Supported: ${validFormats.join(', ')}`,
+            code: 'INVALID_FORMAT',
+          },
+          400,
+        );
       }
 
       const buffer = await file.arrayBuffer();
@@ -52,18 +59,24 @@ export function modelRoutes(service: AssetService): Hono {
       });
 
       if (result.rejected) {
-        return c.json({ error: result.rejectionReason ?? 'Upload rejected', code: 'UPLOAD_REJECTED' }, 413);
+        return c.json(
+          { error: result.rejectionReason ?? 'Upload rejected', code: 'UPLOAD_REJECTED' },
+          413,
+        );
       }
 
-      return c.json({
-        modelAssetId: result.modelAssetId,
-        statusUrl: `/v1/models/${result.modelAssetId}/status`,
-        formatDetected: result.formatDetected,
-        polyCount: result.polyCount,
-        textureCount: result.textureCount,
-        hasAnimations: result.hasAnimations,
-        warnings: result.warnings,
-      }, 202);
+      return c.json(
+        {
+          modelAssetId: result.modelAssetId,
+          statusUrl: `/v1/models/${result.modelAssetId}/status`,
+          formatDetected: result.formatDetected,
+          polyCount: result.polyCount,
+          textureCount: result.textureCount,
+          hasAnimations: result.hasAnimations,
+          warnings: result.warnings,
+        },
+        202,
+      );
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Upload failed';
       return c.json({ error: msg, code: 'UPLOAD_ERROR' }, 400);
@@ -74,7 +87,10 @@ export function modelRoutes(service: AssetService): Hono {
   app.get('/v1/models', async (c) => {
     const workspaceId = c.req.query('workspace_id');
     if (!workspaceId) {
-      return c.json({ error: 'Missing required query param: workspace_id', code: 'VALIDATION_ERROR' }, 400);
+      return c.json(
+        { error: 'Missing required query param: workspace_id', code: 'VALIDATION_ERROR' },
+        400,
+      );
     }
     const models = await service.listModels(workspaceId);
     return c.json({ items: models, total: models.length });
@@ -86,7 +102,8 @@ export function modelRoutes(service: AssetService): Hono {
       const model = await service.getModel(c.req.param('id'));
       return c.json(model);
     } catch (e) {
-      if (e instanceof ModelNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof ModelNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -96,17 +113,21 @@ export function modelRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validatePatchModel(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
     try {
       const model = await service.patchModel(c.req.param('id'), body);
       return c.json(model);
     } catch (e) {
-      if (e instanceof ModelNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof ModelNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -117,7 +138,8 @@ export function modelRoutes(service: AssetService): Hono {
       await service.deleteModel(c.req.param('id'));
       return c.body(null, 204);
     } catch (e) {
-      if (e instanceof ModelNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof ModelNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });

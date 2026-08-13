@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "mcp-server"
-  ],
+  "tags": ["tier-2", "domio", "mcp-server"],
   "panels": [
     {
       "id": 1,

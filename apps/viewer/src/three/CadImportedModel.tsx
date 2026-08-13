@@ -30,7 +30,11 @@ export function CadImportedModel({
   const cadJobId = (layer as Model3DLayer & { cadJobId?: string }).cadJobId;
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <Model3DViewer layer={layer} reducedMotion={reducedMotion} dataTestId={`${dataTestId}-inner`} />
+      <Model3DViewer
+        layer={layer}
+        reducedMotion={reducedMotion}
+        dataTestId={`${dataTestId}-inner`}
+      />
       {cadJobId ? (
         <div
           data-testid={`${dataTestId}-badge`}

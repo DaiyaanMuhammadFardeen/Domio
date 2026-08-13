@@ -33,16 +33,10 @@ const SEED: readonly SCIMToken[] = [
   },
 ];
 
-export async function listSCIMTokens(
-  tenantId?: string,
-): Promise<ReadonlyArray<SCIMToken>> {
+export async function listSCIMTokens(tenantId?: string): Promise<ReadonlyArray<SCIMToken>> {
   try {
-    const params = tenantId
-      ? `?tenant_id=${encodeURIComponent(tenantId)}`
-      : '';
-    const json = await fetcher<{ items?: SCIMToken[] }>(
-      `/v1/admin/scim/tokens${params}`,
-    );
+    const params = tenantId ? `?tenant_id=${encodeURIComponent(tenantId)}` : '';
+    const json = await fetcher<{ items?: SCIMToken[] }>(`/v1/admin/scim/tokens${params}`);
     const items = json.items ?? [];
     if (items.length > 0) return items;
   } catch {
@@ -67,9 +61,7 @@ function generateSecret(prefix: string): string {
   return `${prefix}_${suffix}`;
 }
 
-export async function createSCIMToken(
-  input: CreateSCIMTokenInput,
-): Promise<SCIMTokenCreateResult> {
+export async function createSCIMToken(input: CreateSCIMTokenInput): Promise<SCIMTokenCreateResult> {
   const prefix = `dm${input.tenant_id.slice(0, 4)}o_`;
   const secret = generateSecret(prefix);
   const id = `scim-${input.tenant_id}-${Math.random().toString(36).slice(2, 6)}`;

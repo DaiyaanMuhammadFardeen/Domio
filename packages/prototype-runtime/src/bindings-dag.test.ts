@@ -24,7 +24,9 @@ function makeVar(name: string, scope: Variable['scope'] = 'deck'): Variable {
   };
 }
 
-function makeBinding(over: Partial<VariableBinding> & { id: string; variableId: string }): VariableBinding {
+function makeBinding(
+  over: Partial<VariableBinding> & { id: string; variableId: string },
+): VariableBinding {
   const base = {
     tenantId: 't1',
     deckId: 'd1',
@@ -123,7 +125,10 @@ describe('BindingsDAG', () => {
       right: {
         kind: 'call' as const,
         name: 'IF',
-        args: [{ kind: 'variable' as const, name: 'B' }, { kind: 'variable' as const, name: 'A' }],
+        args: [
+          { kind: 'variable' as const, name: 'B' },
+          { kind: 'variable' as const, name: 'A' },
+        ],
       },
     };
     const names = writtenVariables(ast);

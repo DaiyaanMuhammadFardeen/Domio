@@ -14,19 +14,20 @@
  *   - clearEphemeral — wipe on session end.
  */
 export function makeStoreError(code, message) {
-    const e = new Error(message);
-    e.code = code;
-    return e;
+  const e = new Error(message);
+  e.code = code;
+  return e;
 }
 export function isStore(x) {
-    if (!x || typeof x !== 'object')
-        return false;
-    const o = x;
-    return (typeof o.create === 'function' &&
-        typeof o.getById === 'function' &&
-        typeof o.listForSession === 'function' &&
-        typeof o.rollback === 'function' &&
-        typeof o.promote === 'function' &&
-        typeof o.clearEphemeral === 'function');
+  if (!x || typeof x !== 'object') return false;
+  const o = x;
+  return (
+    typeof o.create === 'function' &&
+    typeof o.getById === 'function' &&
+    typeof o.listForSession === 'function' &&
+    typeof o.rollback === 'function' &&
+    typeof o.promote === 'function' &&
+    typeof o.clearEphemeral === 'function'
+  );
 }
 //# sourceMappingURL=store.js.map

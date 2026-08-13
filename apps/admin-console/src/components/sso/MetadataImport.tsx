@@ -20,9 +20,7 @@ interface ParsedMetadata {
  */
 function parseMetadata(xml: string): ParsedMetadata | null {
   const entityMatch = xml.match(/entityID\s*=\s*"([^"]+)"/i);
-  const acsMatch = xml.match(
-    /<[\w:]*AssertionConsumerService[^>]*Location\s*=\s*"([^"]+)"/i,
-  );
+  const acsMatch = xml.match(/<[\w:]*AssertionConsumerService[^>]*Location\s*=\s*"([^"]+)"/i);
   if (!entityMatch || !acsMatch) return null;
   return {
     entity_id: entityMatch[1] ?? '',
@@ -69,8 +67,8 @@ export function MetadataImport({ onImport }: MetadataImportProps) {
         <div>
           <h3 className="text-sm font-semibold text-slate-900">Import SAML metadata</h3>
           <p className="text-xs text-slate-500">
-            Upload the IdP&apos;s <code className="text-[11px]">metadata.xml</code> to
-            populate entityID and ACS URL.
+            Upload the IdP&apos;s <code className="text-[11px]">metadata.xml</code> to populate
+            entityID and ACS URL.
           </p>
         </div>
       </div>

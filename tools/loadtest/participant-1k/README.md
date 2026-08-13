@@ -21,7 +21,7 @@ TARGET_URL=http://localhost:8090 \
 
 ## SLO assertions
 
-* `audience_ws_open_ms` — p95 < 2500 ms (join handshake)
-* `audience_hello_ms` — p95 < 500 ms (hello → welcome)
-* `audience_poll_vote_ms` — p95 < 1000 ms (vote round-trip)
-* `audience_send_errors` — rate < 0.5% of sends
+- `audience_ws_open_ms` — p95 < 2500 ms (join handshake)
+- `audience_hello_ms` — p95 < 500 ms (hello → welcome)
+- `audience_poll_vote_ms` — p95 < 1000 ms (vote round-trip)
+- `audience_send_errors` — rate < 0.5% of sends

@@ -23,9 +23,17 @@ export type PrototypingTab = 'triggers' | 'logic' | 'forms';
 
 export interface PrototypingPanelProps {
   readonly initialGestures?: readonly GestureKind[];
-  readonly initialTrigger?: { label?: string; phrases?: readonly { phrase: string; wakeWord: boolean }[] };
+  readonly initialTrigger?: {
+    label?: string;
+    phrases?: readonly { phrase: string; wakeWord: boolean }[];
+  };
   readonly onChangeGestures?: (gestures: readonly GestureKind[]) => void;
-  readonly onChangeTrigger?: (config: { label: string; phrases: { id: string; phrase: string; wakeWord: boolean }[]; locale: string; confidence: number }) => void;
+  readonly onChangeTrigger?: (config: {
+    label: string;
+    phrases: { id: string; phrase: string; wakeWord: boolean }[];
+    locale: string;
+    confidence: number;
+  }) => void;
   readonly onChangeLogic?: (group: CondGroup) => void;
   readonly onInsertFormInput?: (type: string) => void;
 }
@@ -76,21 +84,36 @@ export function PrototypingPanel(props: PrototypingPanelProps): ReactElement {
         <div style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <VoiceTriggerEditor
             initial={{
-              ...(props.initialTrigger?.label !== undefined ? { label: props.initialTrigger.label } : {}),
+              ...(props.initialTrigger?.label !== undefined
+                ? { label: props.initialTrigger.label }
+                : {}),
               ...(props.initialTrigger?.phrases
-                ? { phrases: props.initialTrigger.phrases.map((p) => ({ id: '', phrase: p.phrase, wakeWord: p.wakeWord })) }
+                ? {
+                    phrases: props.initialTrigger.phrases.map((p) => ({
+                      id: '',
+                      phrase: p.phrase,
+                      wakeWord: p.wakeWord,
+                    })),
+                  }
                 : {}),
             }}
             onChange={(config) =>
               props.onChangeTrigger?.({
                 label: config.label,
-                phrases: config.phrases.map((p) => ({ id: p.id, phrase: p.phrase, wakeWord: p.wakeWord })),
+                phrases: config.phrases.map((p) => ({
+                  id: p.id,
+                  phrase: p.phrase,
+                  wakeWord: p.wakeWord,
+                })),
                 locale: config.locale,
                 confidence: config.confidence,
               })
             }
           />
-          <GesturePicker value={props.initialGestures ?? []} onChange={(g) => props.onChangeGestures?.(g)} />
+          <GesturePicker
+            value={props.initialGestures ?? []}
+            onChange={(g) => props.onChangeGestures?.(g)}
+          />
         </div>
       )}
 

@@ -50,8 +50,8 @@ export default function CommunityPage(): JSX.Element {
         <section className="community-page__help-cta" aria-label="Need help instead?">
           <h2 className="community-page__help-heading">Prefer the docs?</h2>
           <p className="community-page__help-body">
-            The Help center covers the same ground in a searchable, deterministic form — perfect when
-            you need a written reference at 2am.
+            The Help center covers the same ground in a searchable, deterministic form — perfect
+            when you need a written reference at 2am.
           </p>
           <a
             className="community-page__help-link"

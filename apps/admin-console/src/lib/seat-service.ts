@@ -184,14 +184,10 @@ export async function getLicenseSummary(): Promise<LicenseSummary> {
   return LICENSE_SEED;
 }
 
-export async function getSeatUsageHistory(
-  days: number,
-): Promise<ReadonlyArray<SeatUsagePoint>> {
+export async function getSeatUsageHistory(days: number): Promise<ReadonlyArray<SeatUsagePoint>> {
   const safe = Math.max(1, Math.min(365, Math.floor(days)));
   try {
-    const json = await fetcher<{ items?: SeatUsagePoint[] }>(
-      `/v1/admin/seats/usage?days=${safe}`,
-    );
+    const json = await fetcher<{ items?: SeatUsagePoint[] }>(`/v1/admin/seats/usage?days=${safe}`);
     if (json.items && Array.isArray(json.items) && json.items.length > 0) {
       return json.items;
     }
@@ -203,9 +199,7 @@ export async function getSeatUsageHistory(
 
 export async function listUserActivity(): Promise<ReadonlyArray<UserActivity>> {
   try {
-    const json = await fetcher<{ items?: UserActivity[] }>(
-      '/v1/admin/seats/users',
-    );
+    const json = await fetcher<{ items?: UserActivity[] }>('/v1/admin/seats/users');
     if (json.items && Array.isArray(json.items) && json.items.length > 0) {
       return json.items;
     }

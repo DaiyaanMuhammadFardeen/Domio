@@ -13,9 +13,7 @@ import type { ReactElement } from 'react';
 import type { CrossFilter } from '@domio/canvas';
 
 // All known dimension columns across demo datasets
-const KNOWN_DIMENSIONS = [
-  'month', 'category', 'region', 'stage', 'rep',
-] as const;
+const KNOWN_DIMENSIONS = ['month', 'category', 'region', 'stage', 'rep'] as const;
 
 interface FiltersPanelProps {
   filters: CrossFilter[];
@@ -24,7 +22,11 @@ interface FiltersPanelProps {
   onApplyAllSlides?: ((filter: CrossFilter) => void) | undefined;
 }
 
-export function FiltersPanel({ filters, onChange, onApplyAllSlides }: FiltersPanelProps): ReactElement {
+export function FiltersPanel({
+  filters,
+  onChange,
+  onApplyAllSlides,
+}: FiltersPanelProps): ReactElement {
   const [newDimension, setNewDimension] = useState<string>(KNOWN_DIMENSIONS[0]);
   const [newValue, setNewValue] = useState('');
 
@@ -63,11 +65,7 @@ export function FiltersPanel({ filters, onChange, onApplyAllSlides }: FiltersPan
           <div className="data-panel__empty">No active filters</div>
         ) : (
           filters.map((f) => (
-            <div
-              key={f.id}
-              className="data-source-row"
-              data-testid={`p08-filter-row-${f.id}`}
-            >
+            <div key={f.id} className="data-source-row" data-testid={`p08-filter-row-${f.id}`}>
               <span className="data-source-row__info">
                 <span className="data-source-row__name">
                   <span className="data-source-row__badge data-source-row__badge--mock">
@@ -82,8 +80,15 @@ export function FiltersPanel({ filters, onChange, onApplyAllSlides }: FiltersPan
                 tabIndex={0}
                 title="Apply to all slides on this deck"
                 onClick={() => onApplyAllSlides?.(f)}
-                onKeyDown={(e) => { if (e.key === 'Enter') onApplyAllSlides?.(f); }}
-                style={{ cursor: 'pointer', fontSize: 14, color: 'var(--muted)', padding: '2px 4px' }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onApplyAllSlides?.(f);
+                }}
+                style={{
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  color: 'var(--muted)',
+                  padding: '2px 4px',
+                }}
                 data-testid={`p08-filter-apply-all-${f.id}`}
               >
                 ⤢
@@ -93,8 +98,15 @@ export function FiltersPanel({ filters, onChange, onApplyAllSlides }: FiltersPan
                 tabIndex={0}
                 title="Remove filter"
                 onClick={() => handleRemove(f.id)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleRemove(f.id); }}
-                style={{ cursor: 'pointer', fontSize: 14, color: 'var(--muted)', padding: '2px 4px' }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleRemove(f.id);
+                }}
+                style={{
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  color: 'var(--muted)',
+                  padding: '2px 4px',
+                }}
               >
                 ×
               </span>
@@ -116,7 +128,9 @@ export function FiltersPanel({ filters, onChange, onApplyAllSlides }: FiltersPan
               data-testid="p08-filter-dimension"
             >
               {KNOWN_DIMENSIONS.map((d) => (
-                <option key={d} value={d}>{d}</option>
+                <option key={d} value={d}>
+                  {d}
+                </option>
               ))}
             </select>
           </div>

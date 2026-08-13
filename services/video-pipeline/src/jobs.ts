@@ -8,12 +8,7 @@
  * FIFO-with-priority queue (high > normal > low).
  */
 
-import type {
-  CreateVideoJobInput,
-  Rendition,
-  VideoJob,
-  VideoJobStatus,
-} from './types.js';
+import type { CreateVideoJobInput, Rendition, VideoJob, VideoJobStatus } from './types.js';
 import {
   InvalidJobTransitionError,
   JobNotFoundError,
@@ -29,10 +24,7 @@ import {
  * Attempt a status transition.  Returns the new status or throws
  * `InvalidJobTransitionError` if the transition is illegal.
  */
-export function reduceTransition(
-  current: VideoJobStatus,
-  target: VideoJobStatus,
-): VideoJobStatus {
+export function reduceTransition(current: VideoJobStatus, target: VideoJobStatus): VideoJobStatus {
   if (!isValidTransition(current, target)) {
     throw new InvalidJobTransitionError(current, target);
   }
@@ -72,9 +64,7 @@ export class InMemoryJobStore implements VideoJobStore {
   }
 
   listByWorkspace(workspaceId: string): VideoJob[] {
-    return [...this.jobs.values()]
-      .filter((s) => s.workspaceId === workspaceId)
-      .map((s) => s.job);
+    return [...this.jobs.values()].filter((s) => s.workspaceId === workspaceId).map((s) => s.job);
   }
 
   update(id: string, patch: Partial<VideoJob>): VideoJob {

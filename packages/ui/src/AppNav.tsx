@@ -123,7 +123,9 @@ export function AppNav({
     <header className={headerCls} data-testid="app-nav">
       <div className={innerCls}>
         <a href={brandHref} className={brandCls} aria-label={`${brandLabel} home`}>
-          <span className={brandMarkCls} aria-hidden="true">D</span>
+          <span className={brandMarkCls} aria-hidden="true">
+            D
+          </span>
           <span className={brandWordmarkCls}>{brandLabel}</span>
         </a>
 
@@ -132,7 +134,9 @@ export function AppNav({
             {primary.map((node) => (
               <li key={node.id} className={itemCls}>
                 <a
-                  className={node.id === activePrimaryId ? `${linkCls}${linkActiveSuffix}` : linkCls}
+                  className={
+                    node.id === activePrimaryId ? `${linkCls}${linkActiveSuffix}` : linkCls
+                  }
                   href={node.href}
                   aria-current={node.id === activePrimaryId ? 'page' : undefined}
                   data-testid={`app-nav-link-${node.id}`}
@@ -165,11 +169,7 @@ export function AppNav({
         ) : null}
 
         <div className={ctaCls}>
-          <a
-            className={signinCls}
-            href={signInHref}
-            data-testid="app-nav-signin"
-          >
+          <a className={signinCls} href={signInHref} data-testid="app-nav-signin">
             {signInLabel}
           </a>
         </div>
@@ -178,10 +178,7 @@ export function AppNav({
   );
 }
 
-function findActivePrimary(
-  primary: ReadonlyArray<NavNode>,
-  currentPath: string,
-): string | null {
+function findActivePrimary(primary: ReadonlyArray<NavNode>, currentPath: string): string | null {
   if (primary.length === 0) return null;
   // Exact match wins; otherwise longest prefix match.
   let bestId: string | null = null;

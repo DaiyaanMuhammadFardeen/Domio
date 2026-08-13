@@ -82,9 +82,7 @@ export const BUILTIN_PATTERNS: ReadonlyArray<VibrationPattern> = [
   LONG_PATTERN,
 ];
 
-export const PRESET_PATTERN_IDS: ReadonlyArray<string> = BUILTIN_PATTERNS.map(
-  (p) => p.id,
-);
+export const PRESET_PATTERN_IDS: ReadonlyArray<string> = BUILTIN_PATTERNS.map((p) => p.id);
 
 /* ------------------------------- in-memory store ---------------------------- */
 
@@ -241,9 +239,7 @@ export async function savePacingCheckpoints(
 
 /** Flatten a VibrationPattern into the array shape `navigator.vibrate`
  *  expects. Each pulse becomes [vibrate_ms, pause_ms] in sequence. */
-export function patternToVibrateSequence(
-  pattern: Readonly<VibrationPattern>,
-): number[] {
+export function patternToVibrateSequence(pattern: Readonly<VibrationPattern>): number[] {
   const seq: number[] = [];
   for (const pulse of pattern.pulses) {
     seq.push(Math.max(0, pulse.vibrate_ms));
@@ -289,10 +285,7 @@ export function blankPattern(name = 'New pattern'): VibrationPattern {
 }
 
 /** Build a blank pacing checkpoint for a slide. */
-export function blankCheckpoint(
-  deckId: string,
-  slideId: string,
-): PacingCheckpoint {
+export function blankCheckpoint(deckId: string, slideId: string): PacingCheckpoint {
   return {
     id: nextId('pc'),
     deck_id: deckId,

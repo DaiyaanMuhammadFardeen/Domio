@@ -31,7 +31,11 @@ function deterministicIds(): () => ULID {
 
 describe('BranchService', () => {
   it('creates a branch under main', async () => {
-    const svc = new BranchService(undefined, deterministicIds(), () => new Date('2026-04-01T00:00:00Z'));
+    const svc = new BranchService(
+      undefined,
+      deterministicIds(),
+      () => new Date('2026-04-01T00:00:00Z'),
+    );
     const branch = await svc.create({
       deckId: DECK_ID,
       name: 'experiment/header-v2',
@@ -118,11 +122,7 @@ describe('BranchService', () => {
       parentBranchId: child.id,
     });
     const lineage = await computeLineage(repo, DECK_ID, grandchild.id);
-    expect(lineage.ancestors.map((b) => b.name)).toEqual([
-      'grandchild',
-      'child',
-      'main-fork-1',
-    ]);
+    expect(lineage.ancestors.map((b) => b.name)).toEqual(['grandchild', 'child', 'main-fork-1']);
   });
 
   it('throws when branch id is missing', async () => {
@@ -138,15 +138,15 @@ describe('BranchService', () => {
       name: 'rev-test',
       createdBy: 'user-1',
     });
-    await expect(
-      svc.advanceHead(DECK_ID, branch.id, -1, 1),
-    ).rejects.toBeInstanceOf(InvalidRevisionError);
-    await expect(
-      svc.advanceHead(DECK_ID, branch.id, 0, 0),
-    ).rejects.toBeInstanceOf(InvalidRevisionError);
+    await expect(svc.advanceHead(DECK_ID, branch.id, -1, 1)).rejects.toBeInstanceOf(
+      InvalidRevisionError,
+    );
+    await expect(svc.advanceHead(DECK_ID, branch.id, 0, 0)).rejects.toBeInstanceOf(
+      InvalidRevisionError,
+    );
     // Head conflicts surface as BranchHeadConflictError.
-    await expect(
-      svc.advanceHead(DECK_ID, branch.id, 99, 100),
-    ).rejects.toBeInstanceOf(BranchHeadConflictError);
+    await expect(svc.advanceHead(DECK_ID, branch.id, 99, 100)).rejects.toBeInstanceOf(
+      BranchHeadConflictError,
+    );
   });
 });

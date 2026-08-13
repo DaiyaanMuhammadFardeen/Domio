@@ -45,12 +45,17 @@ export async function generateMetadata({ params }: SlidePageProps): Promise<Meta
   };
 }
 
-export default async function SlidePage({ params, searchParams }: SlidePageProps): Promise<ReactElement> {
+export default async function SlidePage({
+  params,
+  searchParams,
+}: SlidePageProps): Promise<ReactElement> {
   const { deckId, slideIdx: slideIdxStr } = await params;
   const { mode: modeParam, share } = await searchParams;
   const { deck } = await fetchViewerDeck(deckId);
   const requestedIdx = Number(slideIdxStr);
-  const validIdx = Number.isFinite(requestedIdx) ? Math.max(0, Math.min(requestedIdx, deck.slides.length - 1)) : 0;
+  const validIdx = Number.isFinite(requestedIdx)
+    ? Math.max(0, Math.min(requestedIdx, deck.slides.length - 1))
+    : 0;
   const initialMode = modeParam === 'scroll' ? 'scroll' : 'stage';
   return (
     <>

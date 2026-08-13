@@ -5,9 +5,18 @@
   "description": "A clickable region on a slide that dispatches navigation/overlay/action at runtime. Phase 10 M1.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "slide_id", "name",
-    "geometry", "gesture_mask", "z_index", "target_type",
-    "target_ref", "status", "version"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "slide_id",
+    "name",
+    "geometry",
+    "gesture_mask",
+    "z_index",
+    "target_type",
+    "target_ref",
+    "status",
+    "version"
   ],
   "additionalProperties": false,
   "properties": {

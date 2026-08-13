@@ -47,9 +47,21 @@ describe('InMemorySessionStore', () => {
 
   it('recentOpen filters by workspace and state', async () => {
     const store = buildInMemoryStore();
-    await store.upsertSession(session({ session_id: 'open-1', workspace_id: 'ws-1', viewer_id_key: 'vk-1' }));
-    await store.upsertSession(session({ session_id: 'closed-1', workspace_id: 'ws-1', viewer_id_key: 'vk-1', state: 'closed', ended_at_ms: 5_000 }));
-    await store.upsertSession(session({ session_id: 'other-ws', workspace_id: 'ws-2', viewer_id_key: 'vk-1' }));
+    await store.upsertSession(
+      session({ session_id: 'open-1', workspace_id: 'ws-1', viewer_id_key: 'vk-1' }),
+    );
+    await store.upsertSession(
+      session({
+        session_id: 'closed-1',
+        workspace_id: 'ws-1',
+        viewer_id_key: 'vk-1',
+        state: 'closed',
+        ended_at_ms: 5_000,
+      }),
+    );
+    await store.upsertSession(
+      session({ session_id: 'other-ws', workspace_id: 'ws-2', viewer_id_key: 'vk-1' }),
+    );
     const open = await store.recentOpen('ws-1', 'vk-1');
     expect(open.map((s) => s.session_id)).toEqual(['open-1']);
   });

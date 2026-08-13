@@ -101,7 +101,9 @@ export function buildValidator(): EventValidator {
       }
       const fn = validatorFor(name as EventName);
       if (!fn(rec)) {
-        const errors = (fn.errors ?? []).map((e) => `${e.instancePath} ${e.message ?? ''}`).join('; ');
+        const errors = (fn.errors ?? [])
+          .map((e) => `${e.instancePath} ${e.message ?? ''}`)
+          .join('; ');
         return `schema mismatch: ${errors}`;
       }
       return null;

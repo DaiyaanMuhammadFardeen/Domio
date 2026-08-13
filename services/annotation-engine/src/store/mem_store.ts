@@ -43,7 +43,8 @@ export class InMemoryAnnotationStore implements AnnotationStore {
     if (r.workspace_id !== workspace_id) {
       throw makeStoreError('NOT_FOUND', `annotation ${id} not in workspace`);
     }
-    if (!r.ephemeral) throw makeStoreError('IMMUTABLE', `saved overlay ${id} cannot be rolled back`);
+    if (!r.ephemeral)
+      throw makeStoreError('IMMUTABLE', `saved overlay ${id} cannot be rolled back`);
     this.rows.delete(id);
   }
 
@@ -75,5 +76,7 @@ export class InMemoryAnnotationStore implements AnnotationStore {
 
 function cryptoId(): string {
   const c = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
-  return c?.randomUUID?.() ?? `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}`;
+  return (
+    c?.randomUUID?.() ?? `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}`
+  );
 }

@@ -7,7 +7,9 @@ import { describe, it, expect } from 'vitest';
 import { buildCspHeader, buildFocusTrapHeader } from './csp.js';
 import { DEFAULT_POLICY, type EmbedPolicy } from './policies.js';
 
-function makePolicy(overrides: Partial<Pick<EmbedPolicy, 'allowedOrigins' | 'trapFocus'>> = {}): EmbedPolicy {
+function makePolicy(
+  overrides: Partial<Pick<EmbedPolicy, 'allowedOrigins' | 'trapFocus'>> = {},
+): EmbedPolicy {
   return {
     ...DEFAULT_POLICY,
     allowedOrigins: overrides.allowedOrigins ?? [],

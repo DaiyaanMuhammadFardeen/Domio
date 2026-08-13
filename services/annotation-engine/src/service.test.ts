@@ -3,7 +3,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { AnnotationService, InMemoryAnnotationStore, InMemoryIdempotencyStore, HashChainedAuditEmitter } from './index.js';
+import {
+  AnnotationService,
+  InMemoryAnnotationStore,
+  InMemoryIdempotencyStore,
+  HashChainedAuditEmitter,
+} from './index.js';
 import type { AnnotationCommitInput, PenGeometry } from './types.js';
 
 function penGeometry(strokeCount = 1, pointsPerStroke = 3): PenGeometry {
@@ -57,10 +62,18 @@ describe('AnnotationService', () => {
       })(),
     });
     const geom = penGeometry(2, 5);
-    await service.commit({
-      session_id: 's1', workspace_id: 'w1', slide_id: 'slide-1',
-      kind: 'pen', geometry: geom, drawn_by: 'u1', expected_version: 1,
-    }, { actorId: 'u1' });
+    await service.commit(
+      {
+        session_id: 's1',
+        workspace_id: 'w1',
+        slide_id: 'slide-1',
+        kind: 'pen',
+        geometry: geom,
+        drawn_by: 'u1',
+        expected_version: 1,
+      },
+      { actorId: 'u1' },
+    );
     const all = await service.listForSession('s1', true);
     expect(all).toHaveLength(1);
     const stored = all[0]!.geometry as PenGeometry;
@@ -107,13 +120,27 @@ describe('AnnotationService', () => {
       audit: new HashChainedAuditEmitter({ rootKey: 'test-root-key' }),
       idempotency: new InMemoryIdempotencyStore(),
     });
-    const c = await service.commit({
-      session_id: 's1', workspace_id: 'w1', slide_id: 'slide-1',
-      kind: 'pen', geometry: penGeometry(), drawn_by: 'u1', expected_version: 1,
-    }, { actorId: 'u1' });
-    await service.rollback({
-      session_id: 's1', workspace_id: 'w1', annotation_id: c.annotation.id, expected_version: 2,
-    }, { actorId: 'u1' });
+    const c = await service.commit(
+      {
+        session_id: 's1',
+        workspace_id: 'w1',
+        slide_id: 'slide-1',
+        kind: 'pen',
+        geometry: penGeometry(),
+        drawn_by: 'u1',
+        expected_version: 1,
+      },
+      { actorId: 'u1' },
+    );
+    await service.rollback(
+      {
+        session_id: 's1',
+        workspace_id: 'w1',
+        annotation_id: c.annotation.id,
+        expected_version: 2,
+      },
+      { actorId: 'u1' },
+    );
     const all = await service.listForSession('s1', true);
     expect(all).toHaveLength(0);
   });
@@ -124,13 +151,27 @@ describe('AnnotationService', () => {
       audit: new HashChainedAuditEmitter({ rootKey: 'test-root-key' }),
       idempotency: new InMemoryIdempotencyStore(),
     });
-    const c = await service.commit({
-      session_id: 's1', workspace_id: 'w1', slide_id: 'slide-1',
-      kind: 'pen', geometry: penGeometry(), drawn_by: 'u1', expected_version: 1,
-    }, { actorId: 'u1' });
-    const promoted = await service.promote({
-      session_id: 's1', workspace_id: 'w1', annotation_id: c.annotation.id, expected_version: 2,
-    }, { actorId: 'u1' });
+    const c = await service.commit(
+      {
+        session_id: 's1',
+        workspace_id: 'w1',
+        slide_id: 'slide-1',
+        kind: 'pen',
+        geometry: penGeometry(),
+        drawn_by: 'u1',
+        expected_version: 1,
+      },
+      { actorId: 'u1' },
+    );
+    const promoted = await service.promote(
+      {
+        session_id: 's1',
+        workspace_id: 'w1',
+        annotation_id: c.annotation.id,
+        expected_version: 2,
+      },
+      { actorId: 'u1' },
+    );
     expect(promoted.ephemeral).toBe(false);
     expect(promoted.saved_overlay_id).toBeTruthy();
     const ephemeral = await service.listForSession('s1', true);
@@ -145,14 +186,31 @@ describe('AnnotationService', () => {
       audit: new HashChainedAuditEmitter({ rootKey: 'test-root-key' }),
       idempotency: new InMemoryIdempotencyStore(),
     });
-    await service.commit({
-      session_id: 's1', workspace_id: 'w1', slide_id: 'slide-1',
-      kind: 'pen', geometry: penGeometry(), drawn_by: 'u1', expected_version: 1, ephemeral: false,
-    }, { actorId: 'u1' });
-    await service.commit({
-      session_id: 's1', workspace_id: 'w1', slide_id: 'slide-2',
-      kind: 'pen', geometry: penGeometry(), drawn_by: 'u1', expected_version: 2,
-    }, { actorId: 'u1' });
+    await service.commit(
+      {
+        session_id: 's1',
+        workspace_id: 'w1',
+        slide_id: 'slide-1',
+        kind: 'pen',
+        geometry: penGeometry(),
+        drawn_by: 'u1',
+        expected_version: 1,
+        ephemeral: false,
+      },
+      { actorId: 'u1' },
+    );
+    await service.commit(
+      {
+        session_id: 's1',
+        workspace_id: 'w1',
+        slide_id: 'slide-2',
+        kind: 'pen',
+        geometry: penGeometry(),
+        drawn_by: 'u1',
+        expected_version: 2,
+      },
+      { actorId: 'u1' },
+    );
     await service.onSessionEnded('s1', 'w1');
     expect(await service.listForSession('s1', true)).toHaveLength(0);
     expect(await service.listSavedForSlide('slide-1')).toHaveLength(1);
@@ -165,12 +223,18 @@ describe('AnnotationService', () => {
       idempotency: new InMemoryIdempotencyStore(),
     });
     await expect(
-      service.commit({
-        session_id: 's1', workspace_id: 'w1', slide_id: 'slide-1',
-        kind: 'pen',
-        geometry: { strokes: [[{ x: 1.5, y: 0, pressure: 0.5, t: 0 }]] },
-        drawn_by: 'u1', expected_version: 1,
-      }, { actorId: 'u1' }),
+      service.commit(
+        {
+          session_id: 's1',
+          workspace_id: 'w1',
+          slide_id: 'slide-1',
+          kind: 'pen',
+          geometry: { strokes: [[{ x: 1.5, y: 0, pressure: 0.5, t: 0 }]] },
+          drawn_by: 'u1',
+          expected_version: 1,
+        },
+        { actorId: 'u1' },
+      ),
     ).rejects.toThrow(/x\/y/);
   });
 
@@ -181,12 +245,25 @@ describe('AnnotationService', () => {
       idempotency: new InMemoryIdempotencyStore(),
     });
     await expect(
-      service.commit({
-        session_id: 's1', workspace_id: 'w1', slide_id: 'slide-1',
-        kind: 'pen',
-        geometry: { strokes: [[{ x: 0, y: 0, pressure: 0.5, t: 100 }, { x: 0.5, y: 0, pressure: 0.5, t: 50 }]] },
-        drawn_by: 'u1', expected_version: 1,
-      }, { actorId: 'u1' }),
+      service.commit(
+        {
+          session_id: 's1',
+          workspace_id: 'w1',
+          slide_id: 'slide-1',
+          kind: 'pen',
+          geometry: {
+            strokes: [
+              [
+                { x: 0, y: 0, pressure: 0.5, t: 100 },
+                { x: 0.5, y: 0, pressure: 0.5, t: 50 },
+              ],
+            ],
+          },
+          drawn_by: 'u1',
+          expected_version: 1,
+        },
+        { actorId: 'u1' },
+      ),
     ).rejects.toThrow(/monotonically/);
   });
 });

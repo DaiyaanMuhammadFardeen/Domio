@@ -90,21 +90,39 @@ export interface BranchClient {
   listBranches(deckId: string): Promise<BranchSummary[]>;
   createBranch(deckId: string, name: string, baseCheckpointId?: string): Promise<BranchSummary>;
   archiveBranch(deckId: string, branchId: string): Promise<BranchSummary>;
-  checkout(deckId: string, branchId: string): Promise<{ branch: BranchSummary; resumeHlc: { physical: number; logical: number } }>;
+  checkout(
+    deckId: string,
+    branchId: string,
+  ): Promise<{ branch: BranchSummary; resumeHlc: { physical: number; logical: number } }>;
   getLineage(deckId: string, branchId: string): Promise<BranchLineage>;
   listMergeRequests(deckId: string): Promise<MergeRequestSummary[]>;
-  createMergeRequest(deckId: string, sourceBranchId: string, targetBranchId: string): Promise<MergeRequestSummary>;
+  createMergeRequest(
+    deckId: string,
+    sourceBranchId: string,
+    targetBranchId: string,
+  ): Promise<MergeRequestSummary>;
   resolveMergeRequest(
     deckId: string,
     mrId: string,
     strategy: 'theirs' | 'ours' | 'manual',
     resolutions?: Record<string, unknown>,
   ): Promise<MergeRequestSummary>;
-  commitMergeRequest(deckId: string, mrId: string, resolvedDeck: unknown): Promise<{ mergeRequest: MergeRequestSummary; newRevision: number }>;
+  commitMergeRequest(
+    deckId: string,
+    mrId: string,
+    resolvedDeck: unknown,
+  ): Promise<{ mergeRequest: MergeRequestSummary; newRevision: number }>;
   listCheckpoints(deckId: string, branchId?: string): Promise<CheckpointSummary[]>;
   createCheckpoint(deckId: string, name: string, branchId?: string): Promise<CheckpointSummary>;
-  renameCheckpoint(deckId: string, checkpointId: string, newName: string): Promise<CheckpointSummary>;
-  restoreCheckpoint(deckId: string, checkpointId: string): Promise<{ newRevision: number; branchId: string }>;
+  renameCheckpoint(
+    deckId: string,
+    checkpointId: string,
+    newName: string,
+  ): Promise<CheckpointSummary>;
+  restoreCheckpoint(
+    deckId: string,
+    checkpointId: string,
+  ): Promise<{ newRevision: number; branchId: string }>;
 }
 
 export class InMemoryBranchClient implements BranchClient {
@@ -131,7 +149,11 @@ export class InMemoryBranchClient implements BranchClient {
   async listBranches(): Promise<BranchSummary[]> {
     return Array.from(this.branches.values());
   }
-  async createBranch(deckId: string, name: string, baseCheckpointId?: string): Promise<BranchSummary> {
+  async createBranch(
+    deckId: string,
+    name: string,
+    baseCheckpointId?: string,
+  ): Promise<BranchSummary> {
     const id = `${name.replace(/[^a-z0-9]/gi, '_')}_${Math.random().toString(36).slice(2, 9)}`;
     const now = new Date().toISOString();
     const summary: BranchSummary = {
@@ -153,11 +175,18 @@ export class InMemoryBranchClient implements BranchClient {
     const branch = this.branches.get(branchId);
     if (!branch) throw new Error(`Branch ${branchId} not found.`);
     if (branchId === 'main') throw new Error('Cannot archive main.');
-    const next: BranchSummary = { ...branch, status: 'archived', updatedAt: new Date().toISOString() };
+    const next: BranchSummary = {
+      ...branch,
+      status: 'archived',
+      updatedAt: new Date().toISOString(),
+    };
     this.branches.set(branchId, next);
     return next;
   }
-  async checkout(_deckId: string, branchId: string): Promise<{ branch: BranchSummary; resumeHlc: { physical: number; logical: number } }> {
+  async checkout(
+    _deckId: string,
+    branchId: string,
+  ): Promise<{ branch: BranchSummary; resumeHlc: { physical: number; logical: number } }> {
     const branch = this.branches.get(branchId);
     if (!branch) throw new Error(`Branch ${branchId} not found.`);
     return { branch, resumeHlc: { physical: 0, logical: 0 } };
@@ -224,7 +253,10 @@ export class InMemoryBranchClient implements BranchClient {
     this.mergeRequests.set(mrId, next);
     return next;
   }
-  async commitMergeRequest(_deckId: string, mrId: string): Promise<{ mergeRequest: MergeRequestSummary; newRevision: number }> {
+  async commitMergeRequest(
+    _deckId: string,
+    mrId: string,
+  ): Promise<{ mergeRequest: MergeRequestSummary; newRevision: number }> {
     const mr = this.mergeRequests.get(mrId);
     if (!mr) throw new Error(`MR ${mrId} not found.`);
     const target = this.branches.get(mr.targetBranchId);
@@ -239,7 +271,11 @@ export class InMemoryBranchClient implements BranchClient {
     const all = Array.from(this.checkpoints.values());
     return branchId ? all.filter((c) => c.branchId === branchId) : all;
   }
-  async createCheckpoint(deckId: string, name: string, branchId = 'main'): Promise<CheckpointSummary> {
+  async createCheckpoint(
+    deckId: string,
+    name: string,
+    branchId = 'main',
+  ): Promise<CheckpointSummary> {
     const id = `cp_${Math.random().toString(36).slice(2, 9)}`;
     const summary: CheckpointSummary = {
       id,
@@ -255,14 +291,21 @@ export class InMemoryBranchClient implements BranchClient {
     this.checkpoints.set(id, summary);
     return summary;
   }
-  async renameCheckpoint(_deckId: string, checkpointId: string, newName: string): Promise<CheckpointSummary> {
+  async renameCheckpoint(
+    _deckId: string,
+    checkpointId: string,
+    newName: string,
+  ): Promise<CheckpointSummary> {
     const cp = this.checkpoints.get(checkpointId);
     if (!cp) throw new Error(`Checkpoint ${checkpointId} not found.`);
     const updated: CheckpointSummary = { ...cp, name: newName };
     this.checkpoints.set(checkpointId, updated);
     return updated;
   }
-  async restoreCheckpoint(_deckId: string, checkpointId: string): Promise<{ newRevision: number; branchId: string }> {
+  async restoreCheckpoint(
+    _deckId: string,
+    checkpointId: string,
+  ): Promise<{ newRevision: number; branchId: string }> {
     const cp = this.checkpoints.get(checkpointId);
     if (!cp) throw new Error(`Checkpoint ${checkpointId} not found.`);
     this.revision += 1;

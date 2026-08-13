@@ -47,12 +47,7 @@ export interface PermissionEditorProps {
   busy?: boolean;
 }
 
-export function PermissionEditor({
-  agent,
-  onSave,
-  onCancel,
-  busy = false,
-}: PermissionEditorProps) {
+export function PermissionEditor({ agent, onSave, onCancel, busy = false }: PermissionEditorProps) {
   const [scopes, setScopes] = useState<string[]>(agent.scopes.slice());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,9 +111,7 @@ export function PermissionEditor({
               />
               <span className="flex flex-col">
                 <span className="font-medium text-slate-800">{scope.label}</span>
-                <span className="text-[11px] leading-snug text-slate-500">
-                  {scope.description}
-                </span>
+                <span className="text-[11px] leading-snug text-slate-500">{scope.description}</span>
               </span>
             </label>
           );

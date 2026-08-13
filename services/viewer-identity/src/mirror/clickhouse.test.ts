@@ -64,17 +64,19 @@ describe('buildIdentityMirror', () => {
 
   it('NullIdentityMirror is a drop-in no-op', async () => {
     const mirror = new NullIdentityMirror();
-    await expect(mirror.writeViewer({
-      viewer_id: '',
-      workspace_id: '',
-      viewer_id_key: '',
-      privacy_mode: 'pseudonymous',
-      region_pinned: null,
-      created_at: 0,
-      last_seen_at: 0,
-      canonical_id: null,
-      metadata: {},
-    })).resolves.toBeUndefined();
+    await expect(
+      mirror.writeViewer({
+        viewer_id: '',
+        workspace_id: '',
+        viewer_id_key: '',
+        privacy_mode: 'pseudonymous',
+        region_pinned: null,
+        created_at: 0,
+        last_seen_at: 0,
+        canonical_id: null,
+        metadata: {},
+      }),
+    ).resolves.toBeUndefined();
     await expect(mirror.eraseViewer('a', 'b')).resolves.toBeUndefined();
   });
 });

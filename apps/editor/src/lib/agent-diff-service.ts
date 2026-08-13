@@ -209,10 +209,7 @@ interface AgentFetchOptions {
   readonly signal?: AbortSignal;
 }
 
-async function agentFetch<TResponse>(
-  path: string,
-  opts: AgentFetchOptions,
-): Promise<TResponse> {
+async function agentFetch<TResponse>(path: string, opts: AgentFetchOptions): Promise<TResponse> {
   const init: RequestInit = { method: opts.method };
   if (opts.body !== undefined) {
     init.body = JSON.stringify(opts.body);
@@ -223,9 +220,7 @@ async function agentFetch<TResponse>(
   }
   const res = await fetch(`${opts.baseUrl}${path}`, init);
   if (!res.ok) {
-    throw new Error(
-      `Agent diff API ${res.status} ${res.statusText} (${opts.method} ${path})`,
-    );
+    throw new Error(`Agent diff API ${res.status} ${res.statusText} (${opts.method} ${path})`);
   }
   return (await res.json()) as TResponse;
 }
@@ -253,13 +248,8 @@ export async function getProposedDiff(
 ): Promise<AgentDiff | null> {
   try {
     const opts: AgentFetchOptions =
-      signal !== undefined
-        ? { method: 'GET', baseUrl, signal }
-        : { method: 'GET', baseUrl };
-    return await agentFetch<AgentDiff>(
-      `/v1/agent/diffs/${encodeURIComponent(diffId)}`,
-      opts,
-    );
+      signal !== undefined ? { method: 'GET', baseUrl, signal } : { method: 'GET', baseUrl };
+    return await agentFetch<AgentDiff>(`/v1/agent/diffs/${encodeURIComponent(diffId)}`, opts);
   } catch {
     return lookupSeed(diffId);
   }
@@ -276,9 +266,7 @@ export async function approveDiff(
   signal?: AbortSignal,
 ): Promise<{ applied_at_ms: number }> {
   const opts: AgentFetchOptions =
-    signal !== undefined
-      ? { method: 'POST', baseUrl, signal }
-      : { method: 'POST', baseUrl };
+    signal !== undefined ? { method: 'POST', baseUrl, signal } : { method: 'POST', baseUrl };
   return agentFetch<{ applied_at_ms: number }>(
     `/v1/agent/diffs/${encodeURIComponent(diffId)}/approve`,
     opts,
@@ -295,13 +283,8 @@ export async function rejectDiff(
   signal?: AbortSignal,
 ): Promise<void> {
   const opts: AgentFetchOptions =
-    signal !== undefined
-      ? { method: 'POST', baseUrl, signal }
-      : { method: 'POST', baseUrl };
-  await agentFetch<void>(
-    `/v1/agent/diffs/${encodeURIComponent(diffId)}/reject`,
-    opts,
-  );
+    signal !== undefined ? { method: 'POST', baseUrl, signal } : { method: 'POST', baseUrl };
+  await agentFetch<void>(`/v1/agent/diffs/${encodeURIComponent(diffId)}/reject`, opts);
 }
 
 /** Exposed for tests so they can reason about the fallback catalogue. */

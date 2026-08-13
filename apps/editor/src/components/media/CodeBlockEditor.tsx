@@ -78,7 +78,9 @@ export function CodeBlockEditor({
               {result.stderr}
             </pre>
           )}
-          <small>exit {result.exitCode} · {result.durationMs}ms</small>
+          <small>
+            exit {result.exitCode} · {result.durationMs}ms
+          </small>
         </div>
       )}
     </div>

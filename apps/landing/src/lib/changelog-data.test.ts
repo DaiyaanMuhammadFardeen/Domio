@@ -47,30 +47,21 @@ describe('changelog-data', () => {
     expect(hasBreaking).toBe(true);
   });
 
-  it.each(CHANGELOG.map((e) => e.version))(
-    'entry %s has a valid semver version',
-    (version) => {
-      expect(SEMVER_RE.test(version)).toBe(true);
-    },
-  );
+  it.each(CHANGELOG.map((e) => e.version))('entry %s has a valid semver version', (version) => {
+    expect(SEMVER_RE.test(version)).toBe(true);
+  });
 
-  it.each(CHANGELOG.map((e) => e.version))(
-    'entry %s has at least one highlight',
-    (version) => {
-      const entry = CHANGELOG.find((e) => e.version === version);
-      expect(entry, `entry ${version} should exist`).toBeDefined();
-      expect(entry!.highlights.length).toBeGreaterThanOrEqual(3);
-    },
-  );
+  it.each(CHANGELOG.map((e) => e.version))('entry %s has at least one highlight', (version) => {
+    const entry = CHANGELOG.find((e) => e.version === version);
+    expect(entry, `entry ${version} should exist`).toBeDefined();
+    expect(entry!.highlights.length).toBeGreaterThanOrEqual(3);
+  });
 
-  it.each(CHANGELOG.map((e) => e.version))(
-    'entry %s has a non-empty ISO date',
-    (version) => {
-      const entry = CHANGELOG.find((e) => e.version === version);
-      expect(entry).toBeDefined();
-      expect(entry!.date_iso).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    },
-  );
+  it.each(CHANGELOG.map((e) => e.version))('entry %s has a non-empty ISO date', (version) => {
+    const entry = CHANGELOG.find((e) => e.version === version);
+    expect(entry).toBeDefined();
+    expect(entry!.date_iso).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
 
   it('migration_guide_href values point at the docs route when present', () => {
     for (const entry of CHANGELOG) {

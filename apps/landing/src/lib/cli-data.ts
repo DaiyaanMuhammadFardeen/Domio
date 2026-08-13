@@ -98,8 +98,14 @@ export const COMMANDS: ReadonlyArray<CliCommand> = [
     description:
       'Apply a single JSON Patch document to one slide. The patch shape mirrors the deck-CRDT op format used by the editor.',
     flags: [
-      { flag: '--dry-run', description: 'Validate the patch and print the resulting slide without writing.' },
-      { flag: '--from-stdin', description: 'Read the patch document from stdin instead of an argument.' },
+      {
+        flag: '--dry-run',
+        description: 'Validate the patch and print the resulting slide without writing.',
+      },
+      {
+        flag: '--from-stdin',
+        description: 'Read the patch document from stdin instead of an argument.',
+      },
     ],
   },
   {
@@ -115,10 +121,12 @@ export const COMMANDS: ReadonlyArray<CliCommand> = [
   {
     name: 'logout',
     synopsis: 'deckctl logout [--profile <name>]',
-    description:
-      'Clear the locally cached credentials for the active profile (or a named one).',
+    description: 'Clear the locally cached credentials for the active profile (or a named one).',
     flags: [
-      { flag: '--profile <name>', description: 'Clear a specific named profile instead of the active one.' },
+      {
+        flag: '--profile <name>',
+        description: 'Clear a specific named profile instead of the active one.',
+      },
       { flag: '--all', description: 'Clear every profile stored on this machine.' },
     ],
   },
@@ -136,7 +144,8 @@ export const INSTALLS: ReadonlyArray<InstallSnippet> = [
   {
     os: 'linux',
     manager: 'apt',
-    command: 'curl -fsSL https://pkg.domio.app/apt/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/domio.gpg && echo "deb [signed-by=/usr/share/keyrings/domio.gpg] https://pkg.domio.app/apt stable main" | sudo tee /etc/apt/sources.list.d/domio.list && sudo apt update && sudo apt install -y deckctl',
+    command:
+      'curl -fsSL https://pkg.domio.app/apt/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/domio.gpg && echo "deb [signed-by=/usr/share/keyrings/domio.gpg] https://pkg.domio.app/apt stable main" | sudo tee /etc/apt/sources.list.d/domio.list && sudo apt update && sudo apt install -y deckctl',
   },
   {
     os: 'linux',
@@ -146,7 +155,8 @@ export const INSTALLS: ReadonlyArray<InstallSnippet> = [
   {
     os: 'windows',
     manager: 'scoop',
-    command: 'scoop bucket add domio https://github.com/domio/scoop-bucket && scoop install deckctl',
+    command:
+      'scoop bucket add domio https://github.com/domio/scoop-bucket && scoop install deckctl',
   },
   {
     os: 'windows',
@@ -175,7 +185,7 @@ export const EXAMPLES: ReadonlyArray<CliExample> = [
     title: 'Diff local vs remote',
     description:
       'Render a structured diff as JSON. Useful for agents that want to reason about the change set.',
-    command: 'deckctl diff --format json | jq \'.slides[].ops[]\'',
+    command: "deckctl diff --format json | jq '.slides[].ops[]'",
   },
   {
     title: 'Export to PDF',

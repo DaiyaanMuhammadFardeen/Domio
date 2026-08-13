@@ -4,7 +4,13 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { formatNumber, formatCurrency, formatPercent, formatDate, compareLocale } from './format.js';
+import {
+  formatNumber,
+  formatCurrency,
+  formatPercent,
+  formatDate,
+  compareLocale,
+} from './format.js';
 
 describe('formatNumber', () => {
   it('formats decimal in en-US with commas', () => {

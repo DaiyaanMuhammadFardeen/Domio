@@ -44,13 +44,7 @@ function radius(referenceCount: number): number {
   return Math.max(10, Math.min(34, r));
 }
 
-export function EntityNode({
-  entity,
-  x,
-  y,
-  selected,
-  onSelect,
-}: EntityNodeProps) {
+export function EntityNode({ entity, x, y, selected, onSelect }: EntityNodeProps) {
   const r = radius(entity.reference_count);
   const fill = TYPE_FILL[entity.type];
   const stroke = TYPE_STROKE[entity.type];

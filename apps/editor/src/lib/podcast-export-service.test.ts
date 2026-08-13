@@ -52,9 +52,7 @@ describe('podcast-export-service', () => {
     const mutated: PodcastDraft = {
       ...draft,
       title: 'Updated title',
-      segments: draft.segments.map((s, idx) =>
-        idx === 0 ? { ...s, text: 'Custom intro' } : s,
-      ),
+      segments: draft.segments.map((s, idx) => (idx === 0 ? { ...s, text: 'Custom intro' } : s)),
     };
     const saved = await saveDraft(mutated);
     expect(saved.title).toBe('Updated title');

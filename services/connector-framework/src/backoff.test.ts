@@ -238,7 +238,9 @@ describe('withRetry', () => {
 
     await expect(
       withRetry(
-        async () => { throw new Error('always fail'); },
+        async () => {
+          throw new Error('always fail');
+        },
         cb,
         { baseMs: 1, maxMs: 10, maxAttempts: 3, jitterFactor: 0 },
       ),

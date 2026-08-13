@@ -40,10 +40,17 @@ export class ParkingLotClient {
   private nextOrder = 0;
 
   list(_sessionId: string): ParkingLotItem[] {
-    return [...this.items.values()].sort((a, b) => a.pin_order - b.pin_order || a.created_at.localeCompare(b.created_at));
+    return [...this.items.values()].sort(
+      (a, b) => a.pin_order - b.pin_order || a.created_at.localeCompare(b.created_at),
+    );
   }
 
-  add(input: { sessionId: string; workspaceId: string; text: string; source?: ParkingLotItem['source'] }): ParkingLotItem {
+  add(input: {
+    sessionId: string;
+    workspaceId: string;
+    text: string;
+    source?: ParkingLotItem['source'];
+  }): ParkingLotItem {
     const id = cryptoId();
     const item: ParkingLotItem = {
       id,
@@ -94,5 +101,7 @@ export class ParkingLotClient {
 
 function cryptoId(): string {
   const c = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
-  return c?.randomUUID?.() ?? `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}`;
+  return (
+    c?.randomUUID?.() ?? `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}`
+  );
 }

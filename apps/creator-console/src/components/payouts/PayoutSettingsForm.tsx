@@ -30,18 +30,10 @@ const SCHEDULE_OPTIONS: ReadonlyArray<{ value: PayoutSchedule; label: string }> 
 export function PayoutSettingsForm({ settings, onSave }: PayoutSettingsFormProps) {
   const [method, setMethod] = useState<PayoutMethod>(settings.method);
   const [schedule, setSchedule] = useState<PayoutSchedule>(settings.schedule);
-  const [minPayoutCents, setMinPayoutCents] = useState<number>(
-    settings.min_payout_cents,
-  );
-  const [bankLast4, setBankLast4] = useState<string>(
-    settings.bank_account_last4 ?? '',
-  );
-  const [stripeConnectId, setStripeConnectId] = useState<string>(
-    settings.stripe_connect_id ?? '',
-  );
-  const [paypalEmail, setPaypalEmail] = useState<string>(
-    settings.paypal_email ?? '',
-  );
+  const [minPayoutCents, setMinPayoutCents] = useState<number>(settings.min_payout_cents);
+  const [bankLast4, setBankLast4] = useState<string>(settings.bank_account_last4 ?? '');
+  const [stripeConnectId, setStripeConnectId] = useState<string>(settings.stripe_connect_id ?? '');
+  const [paypalEmail, setPaypalEmail] = useState<string>(settings.paypal_email ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,9 +74,7 @@ export function PayoutSettingsForm({ settings, onSave }: PayoutSettingsFormProps
       )}
 
       <fieldset>
-        <legend className="block text-sm font-medium text-slate-700">
-          Method
-        </legend>
+        <legend className="block text-sm font-medium text-slate-700">Method</legend>
         <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
           {METHOD_OPTIONS.map((m) => (
             <label
@@ -113,10 +103,7 @@ export function PayoutSettingsForm({ settings, onSave }: PayoutSettingsFormProps
 
       {method === 'bank-transfer' && (
         <div>
-          <label
-            htmlFor="payout-bank-last4"
-            className="block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="payout-bank-last4" className="block text-sm font-medium text-slate-700">
             Bank account last 4
           </label>
           <input
@@ -154,10 +141,7 @@ export function PayoutSettingsForm({ settings, onSave }: PayoutSettingsFormProps
 
       {method === 'paypal' && (
         <div>
-          <label
-            htmlFor="payout-paypal-email"
-            className="block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="payout-paypal-email" className="block text-sm font-medium text-slate-700">
             PayPal email
           </label>
           <input
@@ -173,9 +157,7 @@ export function PayoutSettingsForm({ settings, onSave }: PayoutSettingsFormProps
       )}
 
       <fieldset>
-        <legend className="block text-sm font-medium text-slate-700">
-          Schedule
-        </legend>
+        <legend className="block text-sm font-medium text-slate-700">Schedule</legend>
         <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
           {SCHEDULE_OPTIONS.map((s) => (
             <label
@@ -203,10 +185,7 @@ export function PayoutSettingsForm({ settings, onSave }: PayoutSettingsFormProps
       </fieldset>
 
       <div>
-        <label
-          htmlFor="payout-min-amount"
-          className="block text-sm font-medium text-slate-700"
-        >
+        <label htmlFor="payout-min-amount" className="block text-sm font-medium text-slate-700">
           Minimum payout (cents)
         </label>
         <input

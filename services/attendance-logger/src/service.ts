@@ -32,7 +32,12 @@ export class AttendanceLogger {
     this.now_ms = opts.now_ms ?? (() => Date.now());
   }
 
-  async recordJoin(input: { workspace_id: string; session_id: string; participant_id: string; joined_at_ms?: number }): Promise<AttendanceRecord> {
+  async recordJoin(input: {
+    workspace_id: string;
+    session_id: string;
+    participant_id: string;
+    joined_at_ms?: number;
+  }): Promise<AttendanceRecord> {
     const joined = input.joined_at_ms ?? this.now_ms();
     const record = await this.store.append({
       workspace_id: input.workspace_id,
@@ -45,12 +50,21 @@ export class AttendanceLogger {
     await this.bus.publish({
       session_id: input.session_id,
       topic: 'lifecycle',
-      payload: encode({ kind: 'attendance_joined', participant_id: input.participant_id, at_ms: joined }),
+      payload: encode({
+        kind: 'attendance_joined',
+        participant_id: input.participant_id,
+        at_ms: joined,
+      }),
     });
     return record;
   }
 
-  async recordLeave(input: { workspace_id: string; session_id: string; participant_id: string; left_at_ms?: number }): Promise<AttendanceRecord> {
+  async recordLeave(input: {
+    workspace_id: string;
+    session_id: string;
+    participant_id: string;
+    left_at_ms?: number;
+  }): Promise<AttendanceRecord> {
     const left = input.left_at_ms ?? this.now_ms();
     const existing = await this.store.has({
       workspace_id: input.workspace_id,
@@ -69,7 +83,10 @@ export class AttendanceLogger {
         id_factory: this.id_factory,
       });
     }
-    const list = await this.store.list({ workspace_id: input.workspace_id, session_id: input.session_id });
+    const list = await this.store.list({
+      workspace_id: input.workspace_id,
+      session_id: input.session_id,
+    });
     const prior = list.find((r) => r.participant_id === input.participant_id);
     const append: AppendInput = {
       workspace_id: input.workspace_id,
@@ -84,12 +101,19 @@ export class AttendanceLogger {
     await this.bus.publish({
       session_id: input.session_id,
       topic: 'lifecycle',
-      payload: encode({ kind: 'attendance_left', participant_id: input.participant_id, at_ms: left }),
+      payload: encode({
+        kind: 'attendance_left',
+        participant_id: input.participant_id,
+        at_ms: left,
+      }),
     });
     return record;
   }
 
-  async verify(input: { workspace_id: string; session_id: string }): Promise<{ intact: boolean; broken_at_seq: number | null }> {
+  async verify(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<{ intact: boolean; broken_at_seq: number | null }> {
     const list = await this.store.list(input);
     return verifyChain(list);
   }

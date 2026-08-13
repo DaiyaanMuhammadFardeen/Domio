@@ -29,20 +29,20 @@
 
 ### 2.1 In scope (features)
 
-| Feature | Title | Notes |
-|---:|---|---|
-| #193 | SSO (SAML/OIDC), SCIM provisioning, role hierarchies | Both protocols first-class; SCIM authoritative on conflict |
-| #194 | Brand governance dashboard | On-brand score, violations, threshold webhooks |
-| #195 | Content DLP rules | Server-side; resolves data bindings; gates share + export |
-| #196 | Audit logs (view, edit, share, export) | Append-only, hash-chained, queryable, exportable |
-| #197 | Data residency + SOC 2 / GDPR tooling | Zone-pinned tenants; `bd-dhaka` zone with local mirror |
-| #198 | Legal hold and retention policies | Per content class; dry-run; quorum on destructive |
-| #199 | Usage-based seat analytics | Active/inactive/dormant; cost center; export-burst alerts |
-| #200 | Public API + SDK | REST + GraphQL; OAuth 2.1; idempotency; rate limits |
-| #201 | Webhooks | HMAC-signed; signed deliveries; dead-letter |
-| #202 | Plugin architecture | Iframe + Worker sandbox; capability broker; signed manifests |
-| #203 | Custom component development kit | Typed SDK; JSON Schema props; semver; signed `.dcomp` |
-| #204 | Headless rendering service | Image/PDF/MP4; origin allowlist; MCP-backed |
+| Feature | Title                                                | Notes                                                        |
+| ------: | ---------------------------------------------------- | ------------------------------------------------------------ |
+|    #193 | SSO (SAML/OIDC), SCIM provisioning, role hierarchies | Both protocols first-class; SCIM authoritative on conflict   |
+|    #194 | Brand governance dashboard                           | On-brand score, violations, threshold webhooks               |
+|    #195 | Content DLP rules                                    | Server-side; resolves data bindings; gates share + export    |
+|    #196 | Audit logs (view, edit, share, export)               | Append-only, hash-chained, queryable, exportable             |
+|    #197 | Data residency + SOC 2 / GDPR tooling                | Zone-pinned tenants; `bd-dhaka` zone with local mirror       |
+|    #198 | Legal hold and retention policies                    | Per content class; dry-run; quorum on destructive            |
+|    #199 | Usage-based seat analytics                           | Active/inactive/dormant; cost center; export-burst alerts    |
+|    #200 | Public API + SDK                                     | REST + GraphQL; OAuth 2.1; idempotency; rate limits          |
+|    #201 | Webhooks                                             | HMAC-signed; signed deliveries; dead-letter                  |
+|    #202 | Plugin architecture                                  | Iframe + Worker sandbox; capability broker; signed manifests |
+|    #203 | Custom component development kit                     | Typed SDK; JSON Schema props; semver; signed `.dcomp`        |
+|    #204 | Headless rendering service                           | Image/PDF/MP4; origin allowlist; MCP-backed                  |
 
 ### 2.2 Out of scope (explicit)
 
@@ -53,7 +53,7 @@
 - **Novel / frontier features (#205–#219).** P21.
 - **Voice / gaze / biometric features (#207, #214).** P20 only enforces the policy envelope (consent, on-device default, retention) — the implementation lives in P12 / P21.
 - **Local-first SDK (#232).** Owned by P13; P20 only enables the API keys, OAuth scopes, and webhook triggers used by the SDK.
-- **Full PDPA fine-grained compliance certification work.** P20 ships the *tooling*; the actual certification cycle (SOC 2 Type II, ISO 27001) is a parallel program tracked outside the codebase in `docs/11-legal-compliance-bangladesh.md` §11.16.
+- **Full PDPA fine-grained compliance certification work.** P20 ships the _tooling_; the actual certification cycle (SOC 2 Type II, ISO 27001) is a parallel program tracked outside the codebase in `docs/11-legal-compliance-bangladesh.md` §11.16.
 
 ---
 
@@ -579,12 +579,12 @@ Because this phase is continuous, every other phase must pass the **P20 security
 
 The team progresses through four rungs as later phases land. Each rung must be **internal-demo passed** (per the README status legend) before the next rung begins.
 
-| Rung | Required workstreams | Gate demo | Unblocks |
-|---|---|---|---|
-| **Bronze** | X1 (SSO/SCIM) **[required]** + X2 (audit log) **[required]** | Single IdP (Okta) wired end-to-end; audit log emits from one editor flow; query returns 1 row | First enterprise pilot discussions |
-| **Silver** | Bronze + **X3 (DLP)** + **X5 (RBAC+ABAC partial)** | DLP blocks a share; policy engine blocks a brand-lock edit; audit log records all | Enterprise pilot with non-PII data |
-| **Gold** | Silver + **X4 (residency + retention + legal hold)** + **X6 (brand gov)** + **X9 (seat analytics)** | Two-zone (e.g., `eu-west` + `bd-dhaka`) deployment; legal hold blocks a delete; brand score dashboard live | Enterprise customers with regulated data |
-| **Enterprise-ready** | Gold + **X7 (API/SDK)** + **X8 (webhooks)** + **X10 (plugin runtime + SDK)** + **X11 (headless renderer)** | SAML + SCIM + DLP + residency + audit + API + webhooks + plugins + renderer all live; pen test passed; `deckctl` working | GA and design-partner rollout |
+| Rung                 | Required workstreams                                                                                       | Gate demo                                                                                                                | Unblocks                                 |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| **Bronze**           | X1 (SSO/SCIM) **[required]** + X2 (audit log) **[required]**                                               | Single IdP (Okta) wired end-to-end; audit log emits from one editor flow; query returns 1 row                            | First enterprise pilot discussions       |
+| **Silver**           | Bronze + **X3 (DLP)** + **X5 (RBAC+ABAC partial)**                                                         | DLP blocks a share; policy engine blocks a brand-lock edit; audit log records all                                        | Enterprise pilot with non-PII data       |
+| **Gold**             | Silver + **X4 (residency + retention + legal hold)** + **X6 (brand gov)** + **X9 (seat analytics)**        | Two-zone (e.g., `eu-west` + `bd-dhaka`) deployment; legal hold blocks a delete; brand score dashboard live               | Enterprise customers with regulated data |
+| **Enterprise-ready** | Gold + **X7 (API/SDK)** + **X8 (webhooks)** + **X10 (plugin runtime + SDK)** + **X11 (headless renderer)** | SAML + SCIM + DLP + residency + audit + API + webhooks + plugins + renderer all live; pen test passed; `deckctl` working | GA and design-partner rollout            |
 
 Each rung's Demo (Section 9) is a superset of the prior rung's.
 
@@ -594,46 +594,46 @@ Each rung's Demo (Section 9) is a superset of the prior rung's.
 
 ### 5.1 Services introduced or modified
 
-| Service | Path | Stack | Purpose |
-|---|---|---|---|
-| `identity-svc` | `/services/identity-svc/` | Rust (axum) | SAML SP, OIDC RP, SCIM 2.0, sessions, JIT |
-| `audit-svc` | `/services/audit-svc/` | Rust ingest + ClickHouse | Append-only, hash-chained audit log |
-| `dlp-svc` | `/services/dlp-svc/` | Rust workers + Go classifier adapter | DLP scanning on share/export/edit |
-| `residency-svc` | `/services/residency-svc/` | Rust sidecar | Zone-pinned routing, cross-zone ack |
-| `retention-svc` | `/services/retention-svc/` | Python + Rust hot path | Retention + legal hold + DSR |
-| `gov-svc` | `/services/gov-svc/` | Node + GraphQL UI + Python scoring | Brand governance dashboard |
-| `api-gw` | `/services/api-gw/` | Rust gateway + Node GraphQL federation | Public REST + GraphQL + async |
-| `webhook-svc` | `/services/webhook-svc/` | Rust dispatcher | Signed, retried webhook delivery |
-| `usage-svc` | `/services/usage-svc/` | Python ingestion + Node admin API | Seat analytics, anomaly detection |
-| `plugin-rt` | `/apps/canvas-plugin-runtime/` | TypeScript | Iframe + Worker sandbox, capability broker |
-| `render-svc` | `/services/render-svc/` | Rust orchestrator + TS/WebGL workers | Headless rendering |
-| `policy-engine` | `/packages/policy-engine/` | TypeScript (WASM-compiled CEL) | ABAC evaluation ≤ 5 ms |
-| `audit-outbox` | `/packages/audit-outbox/` | TypeScript + Rust | Outbox-pattern event emission |
-| `residency-client` | `/packages/residency-client/` | TypeScript + Rust | Thin client consulted by every write |
+| Service            | Path                           | Stack                                  | Purpose                                    |
+| ------------------ | ------------------------------ | -------------------------------------- | ------------------------------------------ |
+| `identity-svc`     | `/services/identity-svc/`      | Rust (axum)                            | SAML SP, OIDC RP, SCIM 2.0, sessions, JIT  |
+| `audit-svc`        | `/services/audit-svc/`         | Rust ingest + ClickHouse               | Append-only, hash-chained audit log        |
+| `dlp-svc`          | `/services/dlp-svc/`           | Rust workers + Go classifier adapter   | DLP scanning on share/export/edit          |
+| `residency-svc`    | `/services/residency-svc/`     | Rust sidecar                           | Zone-pinned routing, cross-zone ack        |
+| `retention-svc`    | `/services/retention-svc/`     | Python + Rust hot path                 | Retention + legal hold + DSR               |
+| `gov-svc`          | `/services/gov-svc/`           | Node + GraphQL UI + Python scoring     | Brand governance dashboard                 |
+| `api-gw`           | `/services/api-gw/`            | Rust gateway + Node GraphQL federation | Public REST + GraphQL + async              |
+| `webhook-svc`      | `/services/webhook-svc/`       | Rust dispatcher                        | Signed, retried webhook delivery           |
+| `usage-svc`        | `/services/usage-svc/`         | Python ingestion + Node admin API      | Seat analytics, anomaly detection          |
+| `plugin-rt`        | `/apps/canvas-plugin-runtime/` | TypeScript                             | Iframe + Worker sandbox, capability broker |
+| `render-svc`       | `/services/render-svc/`        | Rust orchestrator + TS/WebGL workers   | Headless rendering                         |
+| `policy-engine`    | `/packages/policy-engine/`     | TypeScript (WASM-compiled CEL)         | ABAC evaluation ≤ 5 ms                     |
+| `audit-outbox`     | `/packages/audit-outbox/`      | TypeScript + Rust                      | Outbox-pattern event emission              |
+| `residency-client` | `/packages/residency-client/`  | TypeScript + Rust                      | Thin client consulted by every write       |
 
 ### 5.2 New tables (DDL summary — full DDL in `/packages/migrations/0020_*.sql`)
 
-| Table | Purpose | Key columns |
-|---|---|---|
-| `tenant` (extended) | Tenant + residency config | `primary_zone_id`, `dr_zone_id`, `residency_locked_until`, `sso_required`, `scim_enabled` |
-| `sso_config` | Per-tenant SSO config | `protocol`, `metadata_url`, `discovery_url`, `client_secret_enc`, `pkce_required`, `jit_enabled` |
-| `scim_config` | SCIM bearer token (hash) + base URL | `bearer_token_hash`, `base_url`, `last_used_at` |
-| `scim_group_role_map` | IdP group → Domio role | `idp_group`, `domio_role_id` |
-| `role` / `permission` (extended) | RBAC with hierarchy | `parent_id`, `is_builtin` |
-| `policy` | ABAC policy | `effect`, `expr` (JSONB), `targets`, `priority` |
-| `dlp_rule` | DLP rules | `severity`, `matcher` (JSONB), `scope` (JSONB), `pack_id` |
-| `dlp_scan_result` | DLP findings | `deck_id`, `rule_id`, `match_count`, `snippet_redacted`, `status` |
-| `audit_event` | Append-only audit log | `seq`, `tenant_id`, `actor_id`, `action`, `payload`, `prev_hash`, `entry_hash` |
-| `residency_zone` | Zone metadata | `code`, `region`, `storage_bucket`, `feature_availability` |
-| `retention_policy` | Per-class retention rules | `content_class`, `rule` (JSONB), `enabled` |
-| `legal_hold` | Hold on deck/folder/user | `target_kind`, `target_id`, `custodian_id`, `matter_ref`, `placed_by`, `released_by` |
-| `seat_assignment` | Seat per user | `role_id`, `cost_center`, `department`, `last_active_at`, `disabled_at` |
-| `api_consumer` / `oauth_scope` | Public API consumers | `client_id`, `client_secret_hash`, `rate_limit_tier`, `residency_zone` |
-| `webhook_subscription` | Webhook config | `target_url`, `target_kind`, `event_filter`, `secret_enc`, `batch_mode` |
-| `webhook_delivery` | Per-attempt delivery state | `event_id`, `attempt_count`, `status`, `next_attempt_at` |
-| `plugin` / `plugin_install` | Plugin registry + per-tenant installs | `manifest`, `tier`, `pinned`, `status` |
-| `custom_component_package` | Custom components | `version`, `min_sdk_version`, `props_schema`, `bundle_signature`, `status` |
-| `render_job` | Render jobs | `deck_id`, `format`, `options`, `status`, `output_url`, `residency_zone` |
+| Table                            | Purpose                               | Key columns                                                                                      |
+| -------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `tenant` (extended)              | Tenant + residency config             | `primary_zone_id`, `dr_zone_id`, `residency_locked_until`, `sso_required`, `scim_enabled`        |
+| `sso_config`                     | Per-tenant SSO config                 | `protocol`, `metadata_url`, `discovery_url`, `client_secret_enc`, `pkce_required`, `jit_enabled` |
+| `scim_config`                    | SCIM bearer token (hash) + base URL   | `bearer_token_hash`, `base_url`, `last_used_at`                                                  |
+| `scim_group_role_map`            | IdP group → Domio role                | `idp_group`, `domio_role_id`                                                                     |
+| `role` / `permission` (extended) | RBAC with hierarchy                   | `parent_id`, `is_builtin`                                                                        |
+| `policy`                         | ABAC policy                           | `effect`, `expr` (JSONB), `targets`, `priority`                                                  |
+| `dlp_rule`                       | DLP rules                             | `severity`, `matcher` (JSONB), `scope` (JSONB), `pack_id`                                        |
+| `dlp_scan_result`                | DLP findings                          | `deck_id`, `rule_id`, `match_count`, `snippet_redacted`, `status`                                |
+| `audit_event`                    | Append-only audit log                 | `seq`, `tenant_id`, `actor_id`, `action`, `payload`, `prev_hash`, `entry_hash`                   |
+| `residency_zone`                 | Zone metadata                         | `code`, `region`, `storage_bucket`, `feature_availability`                                       |
+| `retention_policy`               | Per-class retention rules             | `content_class`, `rule` (JSONB), `enabled`                                                       |
+| `legal_hold`                     | Hold on deck/folder/user              | `target_kind`, `target_id`, `custodian_id`, `matter_ref`, `placed_by`, `released_by`             |
+| `seat_assignment`                | Seat per user                         | `role_id`, `cost_center`, `department`, `last_active_at`, `disabled_at`                          |
+| `api_consumer` / `oauth_scope`   | Public API consumers                  | `client_id`, `client_secret_hash`, `rate_limit_tier`, `residency_zone`                           |
+| `webhook_subscription`           | Webhook config                        | `target_url`, `target_kind`, `event_filter`, `secret_enc`, `batch_mode`                          |
+| `webhook_delivery`               | Per-attempt delivery state            | `event_id`, `attempt_count`, `status`, `next_attempt_at`                                         |
+| `plugin` / `plugin_install`      | Plugin registry + per-tenant installs | `manifest`, `tier`, `pinned`, `status`                                                           |
+| `custom_component_package`       | Custom components                     | `version`, `min_sdk_version`, `props_schema`, `bundle_signature`, `status`                       |
+| `render_job`                     | Render jobs                           | `deck_id`, `format`, `options`, `status`, `output_url`, `residency_zone`                         |
 
 ### 5.3 New contracts
 
@@ -663,59 +663,59 @@ The 0020 migrations are written as idempotent Postgres migrations and split per 
 
 ### 6.1 Feature → test → expected result → owner
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #193 SSO SAML | Configure with Okta sandbox; sign in via SP-initiated | 200 OK; session created; audit `auth.login` | Identity squad |
-| #193 SSO OIDC | Configure with Entra ID; sign in via code+PKCE | 200 OK; PKCE enforced; `iss`/`aud`/`exp` validated | Identity squad |
-| #193 SCIM | `POST /scim/v2/Users` with `externalId` | 201 Created; idempotent on replay | Identity squad |
-| #193 SCIM conflict | JIT + SCIM for same user | SCIM wins; no duplicate | Identity squad |
-| #193 Domain capture | DNS TXT verified; new SSO login matching domain | Auto-join tenant | Identity squad |
-| #193 IdP failure | IdP unreachable | "IdP unavailable" UX; SCIM queued | Identity squad |
-| #194 Brand score | 1 K-deck tenant with 2 brand kits | Score recomputes within 60 s | Governance squad |
-| #194 Threshold webhook | Lower score below threshold | Webhook fires to subscription | Governance squad |
-| #194 Ignore-list | Add folder to ignore-list | Violations exempt | Governance squad |
-| #195 DLP block | Bangladesh NID regex against deck text | External share returns hard error + email | DLP squad |
-| #195 DLP rescan | Edit a single element | Only that element rescanned (≤ 200 ms) | DLP squad |
-| #195 DLP audit | Match found | `dlp.blocked` event with masked snippet + rule id | DLP squad |
-| #195 DLP hash-mode | Tenant opts into hash-only | Only hashed content sent; document false-negative tradeoff | DLP squad |
-| #196 Audit append | Source action commits | Audit event visible within 500 ms | Platform squad |
-| #196 Audit chain | Tamper with one entry | `deckctl audit verify` reports break | Platform squad |
-| #196 Audit query | 30-day window, 5 filters, 100 M events | p95 ≤ 3 s | Platform squad |
-| #196 Audit export | Export as signed NDJSON | Signature verifies with public key | Platform squad |
-| #196 Audit privacy | Deck with privacy override | `payload` strips content; structural metadata preserved | Platform squad |
-| #197 Residency lock | Tenant creation | `residency_locked_until = now() + 90d` | Platform squad |
-| #197 Cross-zone | Write to forbidden zone | 403 + `residency.bypass_attempt` audit | Platform squad |
-| #197 `bd-dhaka` mirror | Write restricted data | Local mirror sync'd; verified by counsel | Platform squad + DPO |
-| #197 DSR access | Synthetic user | Export within 30 days; audit recorded | DPO |
-| #197 DSR erasure | Synthetic user | Data removed from prod, backups, object stores within window | DPO |
-| #197 Breach notification | Sev1 trigger | Notification within 72 h | Security + DPO |
-| #198 Legal hold | Place hold on a deck | Delete attempt blocked; release requires different admin | Compliance squad |
-| #198 Retention dry-run | Policy preview | Accurate report with no destructive action | Compliance squad |
-| #198 Destructive quorum | Purge > 1 K items | Requires second approval | Compliance squad |
-| #199 Seat analytics | 10 K seats | Dashboard p95 ≤ 1 s; export p95 ≤ 10 s | Platform squad |
-| #199 Anomaly | 10 exports in 5 min from one seat | `seat.alert` webhook + P2 alert | Platform squad |
-| #199 Service-account pool | MCP session + API key | Distinct pool visible | Platform squad |
-| #200 API CRUD | `POST /v1/decks` with `Idempotency-Key` | 201 Created; replay returns same | Platform squad |
-| #200 API rate limit | 6 001st request in a minute | 429 + `Retry-After` | Platform squad |
-| #200 SDK round-trip | OpenAPI → TS / Python / Go SDKs | Generated SDKs pass contract tests | Platform squad |
-| #200 Dry-run | `PATCH /v1/decks/{id}?dryRun=true` | Returns structured diff; no write | Platform squad |
-| #200 OAuth refresh | Reuse refresh token | Entire chain invalidated | Platform squad |
-| #201 Webhook delivery | Configure subscription + secret | HMAC signature verifies | Platform squad |
-| #201 Webhook retry | Receiver returns 5xx | 5 attempts then dead-letter | Platform squad |
-| #201 Webhook filter | `action_in=['deck.shared']` | Only shares delivered | Platform squad |
-| #201 Agent trigger | Webhook → MCP session | MCP tool invoked | Platform squad |
-| #202 Plugin sandbox | Plugin tries `parent.document` | Blocked by cross-origin policy | Plugin squad |
-| #202 Plugin budget | CPU > quota | 4xx + audit | Plugin squad |
-| #202 Plugin tier | `privileged` plugin install | Requires tenant admin approval | Plugin squad |
-| #203 Component publish | `deckctl component publish` | 201 Created; status `draft` → `published` | SDK squad |
-| #203 Deprecation | Component uses SDK 2 minor behind | Deprecation warning + webhook | SDK squad |
-| #203 Uninstall safety | Uninstall a plugin | Existing slides render placeholder | SDK squad |
-| #204 Render PDF | 20-slide deck | p50 ≤ 20 s; p95 ≤ 20 s | Render squad |
-| #204 Render MP4 | 30 s animation | p95 ≤ 90 s | Render squad |
-| #204 Determinism | Same input two runs | Byte-identical PNG/PDF | Render squad |
-| #204 Origin allowlist | Non-allowlisted host | Request rejected | Render squad |
-| #204 Concurrency | 6th concurrent render | 6th queued, not rejected | Render squad |
-| #204 Pre-flight | `POST /v1/renders:estimate` | Estimate within 10 % of actual | Render squad |
+| Feature                   | Test                                                  | Expected result                                              | Owner                |
+| ------------------------- | ----------------------------------------------------- | ------------------------------------------------------------ | -------------------- |
+| #193 SSO SAML             | Configure with Okta sandbox; sign in via SP-initiated | 200 OK; session created; audit `auth.login`                  | Identity squad       |
+| #193 SSO OIDC             | Configure with Entra ID; sign in via code+PKCE        | 200 OK; PKCE enforced; `iss`/`aud`/`exp` validated           | Identity squad       |
+| #193 SCIM                 | `POST /scim/v2/Users` with `externalId`               | 201 Created; idempotent on replay                            | Identity squad       |
+| #193 SCIM conflict        | JIT + SCIM for same user                              | SCIM wins; no duplicate                                      | Identity squad       |
+| #193 Domain capture       | DNS TXT verified; new SSO login matching domain       | Auto-join tenant                                             | Identity squad       |
+| #193 IdP failure          | IdP unreachable                                       | "IdP unavailable" UX; SCIM queued                            | Identity squad       |
+| #194 Brand score          | 1 K-deck tenant with 2 brand kits                     | Score recomputes within 60 s                                 | Governance squad     |
+| #194 Threshold webhook    | Lower score below threshold                           | Webhook fires to subscription                                | Governance squad     |
+| #194 Ignore-list          | Add folder to ignore-list                             | Violations exempt                                            | Governance squad     |
+| #195 DLP block            | Bangladesh NID regex against deck text                | External share returns hard error + email                    | DLP squad            |
+| #195 DLP rescan           | Edit a single element                                 | Only that element rescanned (≤ 200 ms)                       | DLP squad            |
+| #195 DLP audit            | Match found                                           | `dlp.blocked` event with masked snippet + rule id            | DLP squad            |
+| #195 DLP hash-mode        | Tenant opts into hash-only                            | Only hashed content sent; document false-negative tradeoff   | DLP squad            |
+| #196 Audit append         | Source action commits                                 | Audit event visible within 500 ms                            | Platform squad       |
+| #196 Audit chain          | Tamper with one entry                                 | `deckctl audit verify` reports break                         | Platform squad       |
+| #196 Audit query          | 30-day window, 5 filters, 100 M events                | p95 ≤ 3 s                                                    | Platform squad       |
+| #196 Audit export         | Export as signed NDJSON                               | Signature verifies with public key                           | Platform squad       |
+| #196 Audit privacy        | Deck with privacy override                            | `payload` strips content; structural metadata preserved      | Platform squad       |
+| #197 Residency lock       | Tenant creation                                       | `residency_locked_until = now() + 90d`                       | Platform squad       |
+| #197 Cross-zone           | Write to forbidden zone                               | 403 + `residency.bypass_attempt` audit                       | Platform squad       |
+| #197 `bd-dhaka` mirror    | Write restricted data                                 | Local mirror sync'd; verified by counsel                     | Platform squad + DPO |
+| #197 DSR access           | Synthetic user                                        | Export within 30 days; audit recorded                        | DPO                  |
+| #197 DSR erasure          | Synthetic user                                        | Data removed from prod, backups, object stores within window | DPO                  |
+| #197 Breach notification  | Sev1 trigger                                          | Notification within 72 h                                     | Security + DPO       |
+| #198 Legal hold           | Place hold on a deck                                  | Delete attempt blocked; release requires different admin     | Compliance squad     |
+| #198 Retention dry-run    | Policy preview                                        | Accurate report with no destructive action                   | Compliance squad     |
+| #198 Destructive quorum   | Purge > 1 K items                                     | Requires second approval                                     | Compliance squad     |
+| #199 Seat analytics       | 10 K seats                                            | Dashboard p95 ≤ 1 s; export p95 ≤ 10 s                       | Platform squad       |
+| #199 Anomaly              | 10 exports in 5 min from one seat                     | `seat.alert` webhook + P2 alert                              | Platform squad       |
+| #199 Service-account pool | MCP session + API key                                 | Distinct pool visible                                        | Platform squad       |
+| #200 API CRUD             | `POST /v1/decks` with `Idempotency-Key`               | 201 Created; replay returns same                             | Platform squad       |
+| #200 API rate limit       | 6 001st request in a minute                           | 429 + `Retry-After`                                          | Platform squad       |
+| #200 SDK round-trip       | OpenAPI → TS / Python / Go SDKs                       | Generated SDKs pass contract tests                           | Platform squad       |
+| #200 Dry-run              | `PATCH /v1/decks/{id}?dryRun=true`                    | Returns structured diff; no write                            | Platform squad       |
+| #200 OAuth refresh        | Reuse refresh token                                   | Entire chain invalidated                                     | Platform squad       |
+| #201 Webhook delivery     | Configure subscription + secret                       | HMAC signature verifies                                      | Platform squad       |
+| #201 Webhook retry        | Receiver returns 5xx                                  | 5 attempts then dead-letter                                  | Platform squad       |
+| #201 Webhook filter       | `action_in=['deck.shared']`                           | Only shares delivered                                        | Platform squad       |
+| #201 Agent trigger        | Webhook → MCP session                                 | MCP tool invoked                                             | Platform squad       |
+| #202 Plugin sandbox       | Plugin tries `parent.document`                        | Blocked by cross-origin policy                               | Plugin squad         |
+| #202 Plugin budget        | CPU > quota                                           | 4xx + audit                                                  | Plugin squad         |
+| #202 Plugin tier          | `privileged` plugin install                           | Requires tenant admin approval                               | Plugin squad         |
+| #203 Component publish    | `deckctl component publish`                           | 201 Created; status `draft` → `published`                    | SDK squad            |
+| #203 Deprecation          | Component uses SDK 2 minor behind                     | Deprecation warning + webhook                                | SDK squad            |
+| #203 Uninstall safety     | Uninstall a plugin                                    | Existing slides render placeholder                           | SDK squad            |
+| #204 Render PDF           | 20-slide deck                                         | p50 ≤ 20 s; p95 ≤ 20 s                                       | Render squad         |
+| #204 Render MP4           | 30 s animation                                        | p95 ≤ 90 s                                                   | Render squad         |
+| #204 Determinism          | Same input two runs                                   | Byte-identical PNG/PDF                                       | Render squad         |
+| #204 Origin allowlist     | Non-allowlisted host                                  | Request rejected                                             | Render squad         |
+| #204 Concurrency          | 6th concurrent render                                 | 6th queued, not rejected                                     | Render squad         |
+| #204 Pre-flight           | `POST /v1/renders:estimate`                           | Estimate within 10 % of actual                               | Render squad         |
 
 ### 6.2 Compliance drill checklist (run before each rung promotion)
 
@@ -742,25 +742,25 @@ Every other phase's `Verification` matrix must add three rows for this phase:
 
 ## 7. Risks & open decisions
 
-| ID | Risk / decision | Mitigation | Owner |
-|---|---|---|---|
-| R-SEC-20-01 | **Bangladesh PDPA changing.** Localization rules shifted in February 2026 and further amendments are likely. | Re-verify against official BTRC / Ministry of Law / Bangladesh Bank publications **and Bangladeshi counsel** before `bd-dhaka` accepts production traffic, before each major release, and per `docs/11-legal-compliance-bangladesh.md` §11.19. Hold `bd-dhaka` writes behind a feature flag until counsel signs off. | DPO + Founders |
-| R-SEC-20-02 | **AGPL license exposure.** A plugin runtime ecosystem can pull in AGPL dependencies. | CI license check (deny AGPL by default; runtime isolation if approved by legal). Per planning guide §11.7. | Legal + Security |
-| R-SEC-20-03 | **Hash chain integrity vs. scale.** 100 M-event tenants strain the canonical-JSON recompute. | Use ClickHouse sorted by `(tenant_id, created_at)`; pre-compute the chain head in Postgres; verify client-side via CLI (#231). | Platform squad |
-| R-SEC-20-04 | **SCIM token leak.** A token copied into a chat will trigger SCIM operations. | Hash at rest; rate-limit per token; per-IP allowlist option; require dual-control for the second token. | Identity squad |
-| R-SEC-20-05 | **Plugin supply chain.** A signed plugin can still ship malicious code. | Static scan + dependency audit + sand-boxed review; `privileged` tier requires admin approval per install; revocation removes capability tokens and quarantines installs. | Security + Plugin squad |
-| R-SEC-20-06 | **Headless renderer SSRF.** A deck schema can declare arbitrary URLs. | Origin allowlist enforced; renderer container has no outbound network by default; `eval`/`Function`/`importScripts` of remote URLs blocked. | Render squad |
-| R-SEC-20-07 | **Discretionary relocation.** Authority can order relocation within 60 days. | `residency.relocate` endpoint exists with 2-of-3 admin quorum; portable data formats; tested migration runbooks. | DPO + Platform |
-| R-SEC-20-08 | **Cross-border transfer guardrails.** A US-only feature on an `eu-west` tenant risks SCC violation. | ABAC policy that requires admin-signed SCC; transfer notice surfaced in UI. | Legal + Platform |
-| R-SEC-20-09 | **Audit storage cost.** 7-year retention at 100 M events/tenant is non-trivial. | Tiered storage (hot ClickHouse → cold object store with WORM); compression on payload; sampling for non-critical events. | Platform squad |
-| R-SEC-20-10 | **MCP convergence drift.** The REST/GraphQL and MCP surfaces can drift if not generated from a single source. | OpenAPI source of truth; CI fails if MCP tool schemas don't match REST/GraphQL. | Platform squad |
-| OD-SEC-20-01 | **Default-on MFA for non-enterprise users.** (Inherited from `07-security-planning.md` OD-SEC-01.) | Resolve with Security + Product in P03. | Security + Product |
-| OD-SEC-20-02 | **BI dashboard SSO passthrough vs. signed URLs.** (Inherited OD-SEC-02.) | Resolve in P17. | Enterprise squad |
-| OD-SEC-20-03 | **Tenant DEK re-key cadence.** (Inherited OD-SEC-03; default 1 year.) | Resolve in P04. | Security |
-| OD-SEC-20-04 | **Gaze / eye-tracking on-device default.** (Inherited OD-SEC-04.) | Resolve in P21. | Privacy + AI |
-| OD-LEG-20-01 | **Engagement of Bangladeshi counsel.** (Inherited OD-LEG-01.) | Resolve before `bd-dhaka` production. | Founders |
-| OD-LEG-20-02 | **Local BD entity for commercial launch.** (Inherited OD-LEG-02.) | Resolve before any enterprise BD sale. | Finance + Legal |
-| OD-LEG-20-05 | **Residency policy defaults per tenant tier.** (Inherited OD-LEG-05.) | Resolve in P05. | Product + DPO |
+| ID           | Risk / decision                                                                                               | Mitigation                                                                                                                                                                                                                                                                                                           | Owner                   |
+| ------------ | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| R-SEC-20-01  | **Bangladesh PDPA changing.** Localization rules shifted in February 2026 and further amendments are likely.  | Re-verify against official BTRC / Ministry of Law / Bangladesh Bank publications **and Bangladeshi counsel** before `bd-dhaka` accepts production traffic, before each major release, and per `docs/11-legal-compliance-bangladesh.md` §11.19. Hold `bd-dhaka` writes behind a feature flag until counsel signs off. | DPO + Founders          |
+| R-SEC-20-02  | **AGPL license exposure.** A plugin runtime ecosystem can pull in AGPL dependencies.                          | CI license check (deny AGPL by default; runtime isolation if approved by legal). Per planning guide §11.7.                                                                                                                                                                                                           | Legal + Security        |
+| R-SEC-20-03  | **Hash chain integrity vs. scale.** 100 M-event tenants strain the canonical-JSON recompute.                  | Use ClickHouse sorted by `(tenant_id, created_at)`; pre-compute the chain head in Postgres; verify client-side via CLI (#231).                                                                                                                                                                                       | Platform squad          |
+| R-SEC-20-04  | **SCIM token leak.** A token copied into a chat will trigger SCIM operations.                                 | Hash at rest; rate-limit per token; per-IP allowlist option; require dual-control for the second token.                                                                                                                                                                                                              | Identity squad          |
+| R-SEC-20-05  | **Plugin supply chain.** A signed plugin can still ship malicious code.                                       | Static scan + dependency audit + sand-boxed review; `privileged` tier requires admin approval per install; revocation removes capability tokens and quarantines installs.                                                                                                                                            | Security + Plugin squad |
+| R-SEC-20-06  | **Headless renderer SSRF.** A deck schema can declare arbitrary URLs.                                         | Origin allowlist enforced; renderer container has no outbound network by default; `eval`/`Function`/`importScripts` of remote URLs blocked.                                                                                                                                                                          | Render squad            |
+| R-SEC-20-07  | **Discretionary relocation.** Authority can order relocation within 60 days.                                  | `residency.relocate` endpoint exists with 2-of-3 admin quorum; portable data formats; tested migration runbooks.                                                                                                                                                                                                     | DPO + Platform          |
+| R-SEC-20-08  | **Cross-border transfer guardrails.** A US-only feature on an `eu-west` tenant risks SCC violation.           | ABAC policy that requires admin-signed SCC; transfer notice surfaced in UI.                                                                                                                                                                                                                                          | Legal + Platform        |
+| R-SEC-20-09  | **Audit storage cost.** 7-year retention at 100 M events/tenant is non-trivial.                               | Tiered storage (hot ClickHouse → cold object store with WORM); compression on payload; sampling for non-critical events.                                                                                                                                                                                             | Platform squad          |
+| R-SEC-20-10  | **MCP convergence drift.** The REST/GraphQL and MCP surfaces can drift if not generated from a single source. | OpenAPI source of truth; CI fails if MCP tool schemas don't match REST/GraphQL.                                                                                                                                                                                                                                      | Platform squad          |
+| OD-SEC-20-01 | **Default-on MFA for non-enterprise users.** (Inherited from `07-security-planning.md` OD-SEC-01.)            | Resolve with Security + Product in P03.                                                                                                                                                                                                                                                                              | Security + Product      |
+| OD-SEC-20-02 | **BI dashboard SSO passthrough vs. signed URLs.** (Inherited OD-SEC-02.)                                      | Resolve in P17.                                                                                                                                                                                                                                                                                                      | Enterprise squad        |
+| OD-SEC-20-03 | **Tenant DEK re-key cadence.** (Inherited OD-SEC-03; default 1 year.)                                         | Resolve in P04.                                                                                                                                                                                                                                                                                                      | Security                |
+| OD-SEC-20-04 | **Gaze / eye-tracking on-device default.** (Inherited OD-SEC-04.)                                             | Resolve in P21.                                                                                                                                                                                                                                                                                                      | Privacy + AI            |
+| OD-LEG-20-01 | **Engagement of Bangladeshi counsel.** (Inherited OD-LEG-01.)                                                 | Resolve before `bd-dhaka` production.                                                                                                                                                                                                                                                                                | Founders                |
+| OD-LEG-20-02 | **Local BD entity for commercial launch.** (Inherited OD-LEG-02.)                                             | Resolve before any enterprise BD sale.                                                                                                                                                                                                                                                                               | Finance + Legal         |
+| OD-LEG-20-05 | **Residency policy defaults per tenant tier.** (Inherited OD-LEG-05.)                                         | Resolve in P05.                                                                                                                                                                                                                                                                                                      | Product + DPO           |
 
 ---
 

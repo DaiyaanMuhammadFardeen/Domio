@@ -5,9 +5,7 @@ import { DeckDiffPanel } from './deck-diff-panel.js';
 describe('DeckDiffPanel', () => {
   it('renders two inputs and a Compare button', () => {
     render(
-      <DeckDiffPanel
-        onCompare={vi.fn(async () => ({ added: [], removed: [], changed: [] }))}
-      />,
+      <DeckDiffPanel onCompare={vi.fn(async () => ({ added: [], removed: [], changed: [] }))} />,
     );
     expect(screen.getByTestId('m8-diff-input-a')).toBeInTheDocument();
     expect(screen.getByTestId('m8-diff-input-b')).toBeInTheDocument();
@@ -16,9 +14,7 @@ describe('DeckDiffPanel', () => {
 
   it('disables Compare when one input is empty', () => {
     render(
-      <DeckDiffPanel
-        onCompare={vi.fn(async () => ({ added: [], removed: [], changed: [] }))}
-      />,
+      <DeckDiffPanel onCompare={vi.fn(async () => ({ added: [], removed: [], changed: [] }))} />,
     );
     fireEvent.change(screen.getByTestId('m8-diff-input-a'), {
       target: { value: 'a' },

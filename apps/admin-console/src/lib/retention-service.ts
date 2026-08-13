@@ -77,9 +77,7 @@ export async function listRetentionPolicies(): Promise<ReadonlyArray<RetentionPo
   return STORE.map(clone);
 }
 
-export async function getRetentionPolicy(
-  id: string,
-): Promise<RetentionPolicy | null> {
+export async function getRetentionPolicy(id: string): Promise<RetentionPolicy | null> {
   const found = STORE.find((p) => p.id === id);
   return found ? clone(found) : null;
 }
@@ -119,9 +117,7 @@ const DECK_TITLES: ReadonlyArray<string> = [
   'Q3 Earnings Call',
 ];
 
-export async function upsertRetentionPolicy(
-  input: RetentionPolicyInput,
-): Promise<RetentionPolicy> {
+export async function upsertRetentionPolicy(input: RetentionPolicyInput): Promise<RetentionPolicy> {
   const idx = STORE.findIndex((p) => p.content_type === input.content_type);
   const next: RetentionPolicy = {
     id: idx >= 0 ? STORE[idx]!.id : `ret-${input.content_type}`,
@@ -145,9 +141,7 @@ export async function upsertRetentionPolicy(
  * still surface a deck-shaped projection so the UI has a consistent
  * table to render.
  */
-export async function previewRetention(
-  policyId: string,
-): Promise<RetentionPreview> {
+export async function previewRetention(policyId: string): Promise<RetentionPreview> {
   const policy = STORE.find((p) => p.id === policyId);
   if (!policy) {
     return { policy_id: policyId, affected_decks: [], total_affected: 0 };

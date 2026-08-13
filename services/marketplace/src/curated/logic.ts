@@ -70,7 +70,7 @@ export function assertNotDenied(
   marketplaceListingId: string,
 ): void {
   const lock = locks.find(
-    l =>
+    (l) =>
       l.workspaceId === workspaceId &&
       l.brandKitId === brandKitId &&
       l.marketplaceListingId === marketplaceListingId,
@@ -89,12 +89,8 @@ export function assertNotDenied(
  * marketplace listing IDs are visible. 'allow' and 'override' pass through;
  * 'deny' filters out.
  */
-export function resolveVisibleListingIds(
-  locks: readonly BrandLockedListing[],
-): string[] {
-  return locks
-    .filter(l => l.state !== 'deny')
-    .map(l => l.marketplaceListingId);
+export function resolveVisibleListingIds(locks: readonly BrandLockedListing[]): string[] {
+  return locks.filter((l) => l.state !== 'deny').map((l) => l.marketplaceListingId);
 }
 
 /**
@@ -106,7 +102,7 @@ export function getOverridePrice(
   marketplaceListingId: string,
 ): number | null {
   const lock = locks.find(
-    l => l.marketplaceListingId === marketplaceListingId && l.state === 'override',
+    (l) => l.marketplaceListingId === marketplaceListingId && l.state === 'override',
   );
   return lock?.overridePriceCents ?? null;
 }

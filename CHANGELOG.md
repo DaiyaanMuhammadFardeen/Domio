@@ -14,7 +14,7 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`share_link`, `link_policy`, `link_visibility_rule`,
   `watermark_profile`, `embed_config`, `seo_metadata`) with RLS keyed
   to `workspace_id`, `UNIQUE (workspace_id, short_id)`, `UNIQUE
-  (workspace_id, slug)`, and indexes on `token_hash`. The
+(workspace_id, slug)`, and indexes on `token_hash`. The
   watermark/embed/SEO tables are created now but unused at the W1
   API surface — W3/W4/W9 will read them.
 - **`packages/signed-link-token`.** TypeScript package exporting:
@@ -25,7 +25,7 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     HMAC compare, expiry check, and nonce-replay rejection;
   - `NonceStore` interface with `InMemoryNonceStore` (TTL-aware,
     Map-backed) and `NullNonceStore` (dev convenience).
-  **29 tests.**
+    **29 tests.**
 - **`packages/audit-ts`.** TypeScript port of the P13 hash-chained
   audit log: `Chain` class with `loadKey`, `rotateKey`, `build`,
   `commit`, `verifyChain`, 7-day rotation overlap and 90-day key
@@ -44,14 +44,14 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `GET    /v1/shares/{link_id}/policy` (200/404);
   - `PUT    /v1/shares/{link_id}/policy` (200/400/404/409);
   - `POST   /mcp/share-introspect` — verify a signed token without
-    a session (the token *is* the credential).
-  Every privileged action emits a hash-chained audit event via
-  `@domio/audit-ts` (`share.created` / `share.updated` /
-  `share.policy_changed` / `share.token_rotated` /
-  `share.expiry_extended` / `share.deleted`). The pgx-backed
-  `PgShareStore` ships with nil-guards; full DML lands in M2 once
-  the migration is applied against a live Postgres. **36 tests**
-  (lifecycle, concurrency, handlers, store).
+    a session (the token _is_ the credential).
+    Every privileged action emits a hash-chained audit event via
+    `@domio/audit-ts` (`share.created` / `share.updated` /
+    `share.policy_changed` / `share.token_rotated` /
+    `share.expiry_extended` / `share.deleted`). The pgx-backed
+    `PgShareStore` ships with nil-guards; full DML lands in M2 once
+    the migration is applied against a live Postgres. **36 tests**
+    (lifecycle, concurrency, handlers, store).
 - **`contracts/openapi/v1/shares.yaml`.** OpenAPI 3.1 contract for
   all 9 endpoints with request/response schemas, problem-detail
   error bodies, and capability-scope expectations.
@@ -65,7 +65,7 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **AI orchestrator (`services/ai-orchestrator`, Go).** Job lifecycle
   (`POST /v1/ai/jobs` with `Idempotency-Key` conflict handling, `GET
-  /v1/ai/jobs/{id}`, SSE job stream, `GET /v1/prompts/{template_id}`),
+/v1/ai/jobs/{id}`, SSE job stream, `GET /v1/prompts/{template_id}`),
   pgx-backed `ai_job`/`ai_run` persistence, policy router (per-job cost
   cap, per-workspace cap, circuit breaker, moderation gate), generic
   planner with outline builder, executor with retries and provider
@@ -378,8 +378,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - RuleEvaluator — priority + short-circuit ordering, returning
     `{ ruleId, action }` for the first matching `ConditionalRule`.
   - ActionExecutor — `show | hide | enable | disable | set_variable |
-    navigate_to | play_animation | open_overlay | close_overlay |
-    submit_form` dispatched through a single `dispatch(action, ctx)`.
+navigate_to | play_animation | open_overlay | close_overlay |
+submit_form` dispatched through a single `dispatch(action, ctx)`.
   - BranchingGraph — adjacency list, Tarjan SCC cycle detection,
     bounded DFS with `DEFAULT_MAX_HOPS = 100`, returns
     `{ hasCycle, cycles, unreachable, islands, multiStart }`.
@@ -525,8 +525,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   last-slide `on_enter`→`on_click` conversion), transition CRUD, reduced-
   motion get/put (default `follow_os`). **33 tests.**
 - **Magic-move (`services/magic-move` + `workers/magic-move`).** Job CRUD
-  + worker-facing claim/complete/fail; compute worker with poll loop and
-  graceful shutdown. **19 tests.**
+  - worker-facing claim/complete/fail; compute worker with poll loop and
+    graceful shutdown. **19 tests.**
 - **Export pipeline (`services/export-pipeline` + `workers/export-render`).**
   Job lifecycle (queued→rendering→encoding→ready) with budget enforcement
   (GIF ≤ 12 s, video ≤ 30 s); GIF encoder via gifenc with a minimal
@@ -554,11 +554,11 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   layer types (contract-first: schema → generated types → validator test).
 - **Contracts + migrations.** 7 JSON schemas (timeline, easing-curve,
   animation-preset, reduced-motion, magic-move, transition, animation-export)
-  + 5 OpenAPI yamls (animation, magic-move, export-pipeline); migrations
-  `0023_phase09_animation` (10 tables + RLS) and
-  `0024_phase09_animation_indexes_seed` (indexes + easing curves + 24
-  presets), verified against live Postgres via the docker-gated harness
-  (7/7).
+  - 5 OpenAPI yamls (animation, magic-move, export-pipeline); migrations
+    `0023_phase09_animation` (10 tables + RLS) and
+    `0024_phase09_animation_indexes_seed` (indexes + easing curves + 24
+    presets), verified against live Postgres via the docker-gated harness
+    (7/7).
 
 ### Phase 8 — Live data & interactive charts
 
@@ -720,7 +720,6 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   for `.js`→`.ts` workspace imports; split `loadContracts` into `@domio/schema/contracts`
   subpath so the schema barrel is client-bundle safe.
 
-
 #### Fixed
 
 - Editor `HistoryEngine` was recreated per deck state via
@@ -874,8 +873,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     partial index `llm_review_queue_status_idx`) + tenant-isolation
     RLS on every table.
   - `0033_phase10_sequences.{up,down}.sql` — `presentation_sequence`
-    + deck index + tenant-isolation RLS, with enum CHECK on
-    `interruption_policy` (`ignore | queue | abort`).
+    - deck index + tenant-isolation RLS, with enum CHECK on
+      `interruption_policy` (`ignore | queue | abort`).
   - Migration harness extended with `P10-M6.1` + `P10-M6.2` blocks
     (`tools/infra-test/src/postgres/migrations.spec.ts`).
 - **Contracts**:
@@ -947,7 +946,7 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Contracts:**
   - `contracts/schema/v1/deep-link-payload-v1.schema.json` (wire
     payload with const `v: 1`, ULID patterns, `additionalProperties:
-    false`).
+false`).
   - `contracts/schema/v1/deep-link-v1.schema.json` (full record
     incl. `click_count`, `viewer_scope` enum, `single_use`).
   - `contracts/openapi/v1/deep-links.yaml` — 6 paths, 9 schemas,
@@ -992,8 +991,8 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - Audit-trail appended through the shared `globalAuditTrail`.
   - Routes through `services/prototype-runtime` over HTTP using
     `PROTOTYPE_RUNTIME_URL`.
-  **52 service tests** (plus 6 router tests); service suite
-  **67/67 passing**.
+    **52 service tests** (plus 6 router tests); service suite
+    **67/67 passing**.
 - **NL Patch API.** `nlPatch(ctx, deckId, prompt)` decomposes
   natural-language prompts into ordered tool calls and exposes
   `apply()` / `rollback()` snapshots; rollback restores inverse
@@ -1011,7 +1010,7 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     inline diff preview, and Apply/Rollback controls. **6 tests.**
   - `m8-deck-diff-tab` — `DeckDiffPanel` with two deck inputs and a
     three-list diff view. **5 tests.**
-  Editor suite remains **253/253 green** after M8 wiring.
+    Editor suite remains **253/253 green** after M8 wiring.
 - **Contracts.**
   - `contracts/openapi/v1/mcp-prototyping.yaml` — OpenAPI 3.1.0
     covering all 48 tools + the 3 meta-tools, with Bearer auth.
@@ -1054,7 +1053,7 @@ the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   object — `Number({value: '6'}) === NaN`). `formatCurrency` builtin
   was case-sensitive (BUILTINS key was `formatCurrency` but parser
   did `tk.toLowerCase()`) — renamed to lowercase. `evaluateOutput`
-  re-ordered so format-specific handling runs *before* precision
+  re-ordered so format-specific handling runs _before_ precision
   rounding. New `[ ]` tokenizer + parser support for `npv` array
   literals. `round` builtin switched to `half-down` mode so
   `round(1.55, 1) === 1.5`.

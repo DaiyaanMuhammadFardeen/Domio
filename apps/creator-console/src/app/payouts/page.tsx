@@ -3,10 +3,7 @@
 import { useEffect, useState } from 'react';
 import { PayoutSettingsForm } from '../../components/payouts/PayoutSettingsForm';
 import { useI18n } from '../../lib/i18n';
-import {
-  getPayoutSettings,
-  updatePayoutSettings,
-} from '../../lib/payout-service';
+import { getPayoutSettings, updatePayoutSettings } from '../../lib/payout-service';
 import type { PayoutSettings } from '../../lib/types';
 
 const CREATOR_ID = 'creator-demo';
@@ -43,12 +40,8 @@ export default function PayoutsPage() {
   return (
     <div data-testid="payouts-page" className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t('creator.payouts.heading')}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {t('creator.payouts.subheading')}
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('creator.payouts.heading')}</h1>
+        <p className="mt-1 text-sm text-slate-500">{t('creator.payouts.subheading')}</p>
       </header>
 
       <PayoutSettingsForm

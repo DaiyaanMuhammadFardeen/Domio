@@ -11,7 +11,9 @@ describe('edge-pubsub', () => {
       received.push({ seq: msg.seq, payload: decode(msg.payload) });
     };
     const res = await bus.publish({
-      session_id: 's1', topic: 'poll', payload: encode({ option: 'yes' }),
+      session_id: 's1',
+      topic: 'poll',
+      payload: encode({ option: 'yes' }),
     });
     expect(res.seq).toBe(1);
     expect(received).toHaveLength(1);
@@ -26,8 +28,12 @@ describe('edge-pubsub', () => {
     const b: number[] = [];
     const ha = await bus.subscribe({ topic, consumer: 'a' });
     const hb = await bus.subscribe({ topic, consumer: 'b' });
-    ha.handler = async () => { a.push(1); };
-    hb.handler = async () => { b.push(1); };
+    ha.handler = async () => {
+      a.push(1);
+    };
+    hb.handler = async () => {
+      b.push(1);
+    };
     await bus.publish({ session_id: 's1', topic: 'qa', payload: encode({}) });
     expect(a).toEqual([1]);
     expect(b).toEqual([1]);
@@ -39,7 +45,9 @@ describe('edge-pubsub', () => {
     const topic = topicFor({ session_id: 's1', topic: 'reaction' });
     const seen: number[] = [];
     const handle = await bus.subscribe({ topic, consumer: 'c1' });
-    handle.handler = async (msg) => { seen.push(msg.seq); };
+    handle.handler = async (msg) => {
+      seen.push(msg.seq);
+    };
     await bus.publish({ session_id: 's1', topic: 'reaction', payload: encode({}) });
     await handle.unsubscribe();
     await bus.publish({ session_id: 's1', topic: 'reaction', payload: encode({}) });
@@ -52,7 +60,9 @@ describe('edge-pubsub', () => {
     const seqs: number[] = [];
     const topic = topicFor({ session_id: 's1', topic: 'lifecycle' });
     const handle = await bus.subscribe({ topic, consumer: 'c1' });
-    handle.handler = async (msg) => { seqs.push(msg.seq); };
+    handle.handler = async (msg) => {
+      seqs.push(msg.seq);
+    };
     for (let i = 0; i < 5; i++) {
       await bus.publish({ session_id: 's1', topic: 'lifecycle', payload: encode({}) });
     }
@@ -65,7 +75,9 @@ describe('edge-pubsub', () => {
     const tShard0 = topicFor({ session_id: 's1', topic: 'poll', shard_index: 0 });
     const seen: string[] = [];
     const handle = await bus.subscribe({ topic: tShard0, consumer: 'c1' });
-    handle.handler = async (msg) => { seen.push(msg.topic); };
+    handle.handler = async (msg) => {
+      seen.push(msg.topic);
+    };
     await bus.publish({ session_id: 's1', topic: 'poll', shard_index: 0, payload: encode({}) });
     await bus.publish({ session_id: 's1', topic: 'poll', shard_index: 1, payload: encode({}) });
     expect(seen).toEqual([tShard0]);
@@ -79,7 +91,9 @@ describe('edge-pubsub', () => {
     await bus.publish({ session_id: 's1', topic: 'poll', payload: encode({}) });
     const seen: number[] = [];
     const handle = await bus.subscribe({ topic, consumer: 'late', start_seq: 2 });
-    handle.handler = async (msg) => { seen.push(msg.seq); };
+    handle.handler = async (msg) => {
+      seen.push(msg.seq);
+    };
     await bus.publish({ session_id: 's1', topic: 'poll', payload: encode({}) });
     expect(seen).toEqual([3]);
     await bus.close();
@@ -88,8 +102,9 @@ describe('edge-pubsub', () => {
   it('rejects publish after close', async () => {
     const bus = new InMemoryEdgeBus();
     await bus.close();
-    await expect(bus.publish({ session_id: 's1', topic: 'poll', payload: encode({}) }))
-      .rejects.toThrow(/closed/);
+    await expect(
+      bus.publish({ session_id: 's1', topic: 'poll', payload: encode({}) }),
+    ).rejects.toThrow(/closed/);
   });
 
   it('round-trips encode/decode', () => {
@@ -102,7 +117,9 @@ describe('edge-pubsub', () => {
     const topicA = topicFor({ session_id: 'sA', topic: 'poll' });
     const seen: string[] = [];
     const handle = await bus.subscribe({ topic: topicA, consumer: 'c1' });
-    handle.handler = async (msg) => { seen.push(msg.topic); };
+    handle.handler = async (msg) => {
+      seen.push(msg.topic);
+    };
     await bus.publish({ session_id: 'sB', topic: 'poll', payload: encode({}) });
     expect(seen).toEqual([]);
     await bus.close();

@@ -12,11 +12,7 @@
 
 import type { ULID } from '@domio/schema';
 
-import {
-  type BranchRecord,
-  type BranchRepository,
-  MAIN_BRANCH,
-} from './dal.js';
+import { type BranchRecord, type BranchRepository, MAIN_BRANCH } from './dal.js';
 
 export interface BranchLineage {
   /** The branch the lineage was computed from. */

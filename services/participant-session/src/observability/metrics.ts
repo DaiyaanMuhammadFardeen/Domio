@@ -20,7 +20,10 @@ export interface UpDownCounterLike {
 
 export interface MeterLike {
   createHistogram(name: string, opts?: { description?: string; unit?: string }): HistogramLike;
-  createUpDownCounter(name: string, opts?: { description?: string; unit?: string }): UpDownCounterLike;
+  createUpDownCounter(
+    name: string,
+    opts?: { description?: string; unit?: string },
+  ): UpDownCounterLike;
   flush(): Promise<void>;
   shutdown(): Promise<void>;
 }
@@ -39,9 +42,15 @@ class NullParticipantMetrics implements ParticipantMetrics {
   readonly joinMs: HistogramLike = NullParticipantMetrics.noopHist();
   readonly heartbeatMs: HistogramLike = NullParticipantMetrics.noopHist();
   readonly leaveMs: HistogramLike = NullParticipantMetrics.noopHist();
-  activeGaugeAdd(): void { /* noop */ }
-  async flush(): Promise<void> { /* noop */ }
-  async shutdown(): Promise<void> { /* noop */ }
+  activeGaugeAdd(): void {
+    /* noop */
+  }
+  async flush(): Promise<void> {
+    /* noop */
+  }
+  async shutdown(): Promise<void> {
+    /* noop */
+  }
 }
 
 const NULL: ParticipantMetrics = new NullParticipantMetrics();
@@ -61,10 +70,21 @@ export function bindParticipantMetrics(opts: BindOptions): ParticipantMetrics {
     unit: '1',
   });
   return {
-    joinMs: meter.createHistogram('audience_join_ms', { description: 'Join round-trip', unit: 'ms' }),
-    heartbeatMs: meter.createHistogram('audience_heartbeat_ms', { description: 'Heartbeat round-trip', unit: 'ms' }),
-    leaveMs: meter.createHistogram('audience_leave_ms', { description: 'Leave round-trip', unit: 'ms' }),
-    activeGaugeAdd(value, attrs) { gauge.add(value, attrs); },
+    joinMs: meter.createHistogram('audience_join_ms', {
+      description: 'Join round-trip',
+      unit: 'ms',
+    }),
+    heartbeatMs: meter.createHistogram('audience_heartbeat_ms', {
+      description: 'Heartbeat round-trip',
+      unit: 'ms',
+    }),
+    leaveMs: meter.createHistogram('audience_leave_ms', {
+      description: 'Leave round-trip',
+      unit: 'ms',
+    }),
+    activeGaugeAdd(value, attrs) {
+      gauge.add(value, attrs);
+    },
     flush: () => meter.flush(),
     shutdown: () => meter.shutdown(),
   };

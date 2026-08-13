@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "merge-request"
-  ],
+  "tags": ["tier-2", "domio", "merge-request"],
   "panels": [
     {
       "id": 1,

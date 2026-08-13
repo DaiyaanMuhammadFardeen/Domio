@@ -19,9 +19,16 @@ import type { TrackKind } from '@domio/object-store';
  * Minimal BlobEvent shim. The recorder only uses .data (a Blob).
  */
 class FakeBlob {
-  constructor(public readonly data: Uint8Array, public readonly size: number, public readonly type: string) {}
+  constructor(
+    public readonly data: Uint8Array,
+    public readonly size: number,
+    public readonly type: string,
+  ) {}
   async arrayBuffer(): Promise<ArrayBuffer> {
-    return this.data.buffer.slice(this.data.byteOffset, this.data.byteOffset + this.data.byteLength);
+    return this.data.buffer.slice(
+      this.data.byteOffset,
+      this.data.byteOffset + this.data.byteLength,
+    );
   }
 }
 
@@ -80,7 +87,9 @@ function makeFakeMediaRecorderCtor(intervalMs = 50, chunksPerTrack = 3): typeof 
       const period = timesliceMs ?? intervalMs;
       this.timer = setInterval(() => {
         const body = new Uint8Array([this.emitted & 0xff, (this.emitted >> 8) & 0xff]);
-        this.ondataavailable?.(new FakeBlobEvent(new FakeBlob(body, body.byteLength, 'video/webm')));
+        this.ondataavailable?.(
+          new FakeBlobEvent(new FakeBlob(body, body.byteLength, 'video/webm')),
+        );
         this.emitted++;
         if (this.emitted >= chunksPerTrack) this.stop();
       }, period);
@@ -126,7 +135,8 @@ async function setup(opts: { chunks?: number; tracks?: readonly TrackKind[] } = 
     recording_session_id: 'sess-test',
     tracks: opts.tracks ?? ['microphone'],
     chunk_ms: 20,
-    on_chunk: (e) => chunkEvents.push({ track: e.track_kind, sequence: e.sequence, byte_size: e.byte_size }),
+    on_chunk: (e) =>
+      chunkEvents.push({ track: e.track_kind, sequence: e.sequence, byte_size: e.byte_size }),
     on_track_state: (e) => stateEvents.push({ track: e.track_kind, state: e.state }),
   };
   const recorderOpts: MultiTrackRecorderOptions = {
@@ -159,7 +169,10 @@ describe('MultiTrackRecorder', () => {
   });
 
   it('records 4 tracks in parallel', async () => {
-    const { handle, uploader } = await setup({ chunks: 2, tracks: ['screen', 'camera', 'microphone', 'system_audio'] });
+    const { handle, uploader } = await setup({
+      chunks: 2,
+      tracks: ['screen', 'camera', 'microphone', 'system_audio'],
+    });
     await new Promise((r) => setTimeout(r, 150));
     const summary = await handle.stop();
     expect(summary.tracks.length).toBe(4);

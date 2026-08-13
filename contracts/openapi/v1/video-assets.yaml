@@ -35,13 +35,13 @@ paths:
             type: string
             enum: [pending, processing, ready, failed]
       responses:
-        "200":
+        '200':
           description: List of video assets.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/VideoAssetList"
-        "401":
+                $ref: '#/components/schemas/VideoAssetList'
+        '401':
           description: Unauthenticated.
     post:
       tags: [video-assets]
@@ -67,19 +67,19 @@ paths:
                   type: string
                   format: uuid
       responses:
-        "201":
+        '201':
           description: Video asset created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/VideoAsset"
-        "400":
+                $ref: '#/components/schemas/VideoAsset'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
   /v1/video_assets/{id}:
     get:
@@ -93,15 +93,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Video asset details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/VideoAsset"
-        "401":
+                $ref: '#/components/schemas/VideoAsset'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Video asset not found.
     patch:
       tags: [video-assets]
@@ -118,23 +118,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchVideoAssetRequest"
+              $ref: '#/components/schemas/PatchVideoAssetRequest'
       responses:
-        "200":
+        '200':
           description: Video asset updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/VideoAsset"
-        "400":
+                $ref: '#/components/schemas/VideoAsset'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Video asset not found.
     delete:
       tags: [video-assets]
@@ -147,11 +147,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Video asset deleted.
-        "401":
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Video asset not found.
 components:
   securitySchemes:
@@ -162,7 +162,19 @@ components:
   schemas:
     VideoAsset:
       type: object
-      required: [id, workspaceId, uploaderId, name, sourceUrl, durationMs, width, height, hasAudio, transcodeState]
+      required:
+        [
+          id,
+          workspaceId,
+          uploaderId,
+          name,
+          sourceUrl,
+          durationMs,
+          width,
+          height,
+          hasAudio,
+          transcodeState,
+        ]
       properties:
         id:
           type: string
@@ -223,7 +235,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/VideoAsset"
+            $ref: '#/components/schemas/VideoAsset'
     PatchVideoAssetRequest:
       type: object
       properties:

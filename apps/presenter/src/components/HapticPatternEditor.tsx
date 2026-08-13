@@ -55,16 +55,13 @@ export function HapticPatternEditor({
   const [draft, setDraft] = useState<VibrationPattern>(() =>
     toDraft(initial ?? { ...SHORT_PATTERN, id: '', name: 'New pattern' }),
   );
-  const [status, setStatus] = useState<
-    { kind: 'idle' | 'saved' | 'error'; message?: string }
-  >({ kind: 'idle' });
+  const [status, setStatus] = useState<{ kind: 'idle' | 'saved' | 'error'; message?: string }>({
+    kind: 'idle',
+  });
 
   const totalDurationMs = useMemo(
     () =>
-      draft.pulses.reduce(
-        (sum, p) => sum + Math.max(0, p.vibrate_ms) + Math.max(0, p.pause_ms),
-        0,
-      ),
+      draft.pulses.reduce((sum, p) => sum + Math.max(0, p.vibrate_ms) + Math.max(0, p.pause_ms), 0),
     [draft.pulses],
   );
 
@@ -73,26 +70,23 @@ export function HapticPatternEditor({
     setStatus({ kind: 'idle' });
   }, []);
 
-  const updatePulse = useCallback(
-    (index: number, patch: Partial<VibrationPulse>) => {
-      setDraft((current) => ({
-        ...current,
-        pulses: current.pulses.map((p, i) => {
-          if (i !== index) return p;
-          const next = { ...p, ...patch };
-          // Coerce to non-negative integers; fall back to 0 on garbage.
-          const v = Number(next.vibrate_ms);
-          const w = Number(next.pause_ms);
-          return {
-            vibrate_ms: Number.isFinite(v) && v >= 0 ? Math.round(v) : 0,
-            pause_ms: Number.isFinite(w) && w >= 0 ? Math.round(w) : 0,
-          };
-        }),
-      }));
-      setStatus({ kind: 'idle' });
-    },
-    [],
-  );
+  const updatePulse = useCallback((index: number, patch: Partial<VibrationPulse>) => {
+    setDraft((current) => ({
+      ...current,
+      pulses: current.pulses.map((p, i) => {
+        if (i !== index) return p;
+        const next = { ...p, ...patch };
+        // Coerce to non-negative integers; fall back to 0 on garbage.
+        const v = Number(next.vibrate_ms);
+        const w = Number(next.pause_ms);
+        return {
+          vibrate_ms: Number.isFinite(v) && v >= 0 ? Math.round(v) : 0,
+          pause_ms: Number.isFinite(w) && w >= 0 ? Math.round(w) : 0,
+        };
+      }),
+    }));
+    setStatus({ kind: 'idle' });
+  }, []);
 
   const addPulse = useCallback(() => {
     setDraft((current) => ({
@@ -155,9 +149,7 @@ export function HapticPatternEditor({
         </span>
       </header>
 
-      <label
-        style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}
-      >
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
         <FormattedMessage id="presenter.haptics.patterns.name" />
         <input
           type="text"
@@ -185,10 +177,7 @@ export function HapticPatternEditor({
         style={{ display: 'flex', flexDirection: 'column', gap: 4 }}
       >
         {draft.pulses.length === 0 && (
-          <div
-            role="listitem"
-            style={{ fontSize: 11, opacity: 0.7, fontStyle: 'italic' }}
-          >
+          <div role="listitem" style={{ fontSize: 11, opacity: 0.7, fontStyle: 'italic' }}>
             No pulses — add one below.
           </div>
         )}
@@ -216,9 +205,7 @@ export function HapticPatternEditor({
                 min={0}
                 step={5}
                 value={pulse.vibrate_ms}
-                onChange={(e) =>
-                  updatePulse(index, { vibrate_ms: Number(e.target.value) })
-                }
+                onChange={(e) => updatePulse(index, { vibrate_ms: Number(e.target.value) })}
                 data-testid={`${dataTestId}-pulse-${index}-vibrate`}
                 style={{ width: 64, padding: '2px 4px', fontSize: 11 }}
               />
@@ -233,9 +220,7 @@ export function HapticPatternEditor({
                 min={0}
                 step={5}
                 value={pulse.pause_ms}
-                onChange={(e) =>
-                  updatePulse(index, { pause_ms: Number(e.target.value) })
-                }
+                onChange={(e) => updatePulse(index, { pause_ms: Number(e.target.value) })}
                 data-testid={`${dataTestId}-pulse-${index}-pause`}
                 style={{ width: 64, padding: '2px 4px', fontSize: 11 }}
               />

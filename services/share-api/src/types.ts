@@ -125,7 +125,10 @@ export class ShareValidationError extends Error {
 
 export class ShareConflictError extends Error {
   readonly code = 'SHARE_CONFLICT' as const;
-  constructor(message: string, public readonly detail?: string) {
+  constructor(
+    message: string,
+    public readonly detail?: string,
+  ) {
     super(message);
     this.name = 'ShareConflictError';
   }
@@ -185,7 +188,9 @@ export class ShareApprovalRequiredError extends Error {
     public readonly deckId: string,
     detail?: string,
   ) {
-    super(detail ?? `External share requires approval for deck ${deckId} in workspace ${workspaceId}`);
+    super(
+      detail ?? `External share requires approval for deck ${deckId} in workspace ${workspaceId}`,
+    );
     this.name = 'ShareApprovalRequiredError';
   }
 }
@@ -195,7 +200,10 @@ export class ShareApprovalRequiredError extends Error {
 // ---------------------------------------------------------------------------
 
 const VALID_VISIBILITIES: readonly LinkVisibility[] = [
-  'public', 'link_only', 'allowlist', 'domain_restricted',
+  'public',
+  'link_only',
+  'allowlist',
+  'domain_restricted',
 ];
 
 export function validateCreateInput(input: CreateShareInput): void {

@@ -115,10 +115,7 @@ describe('handlers — getGuest', () => {
     );
     const ctx = { service };
 
-    const res = await handlers.getGuest(
-      makeReq({ params: { id: guest.guest_access_id } }),
-      ctx,
-    );
+    const res = await handlers.getGuest(makeReq({ params: { id: guest.guest_access_id } }), ctx);
 
     expect(res.status).toBe(200);
     const body = res.body as Record<string, unknown>;
@@ -130,10 +127,7 @@ describe('handlers — getGuest', () => {
     const service = new GuestService({ store, eventEmitter: makeEmitter() });
     const ctx = { service };
 
-    const res = await handlers.getGuest(
-      makeReq({ params: { id: 'nonexistent' } }),
-      ctx,
-    );
+    const res = await handlers.getGuest(makeReq({ params: { id: 'nonexistent' } }), ctx);
 
     expect(res.status).toBe(404);
     const body = res.body as Record<string, unknown>;
@@ -292,10 +286,7 @@ describe('handlers — consumeGuestMagicLink', () => {
     const ctx = { service };
 
     // First consume
-    await handlers.consumeGuestMagicLink(
-      makeReq({ body: { token: magic_link_token } }),
-      ctx,
-    );
+    await handlers.consumeGuestMagicLink(makeReq({ body: { token: magic_link_token } }), ctx);
 
     // Second consume
     const res = await handlers.consumeGuestMagicLink(

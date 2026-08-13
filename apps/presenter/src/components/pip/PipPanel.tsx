@@ -82,7 +82,12 @@ function formatElapsed(ms: number): string {
   return `${m}:${String(remS).padStart(2, '0')}`;
 }
 
-function renderMirror(active: SlideSnapshot | null, next: SlideSnapshot | null, startedAt: number, budgetMs: number): string {
+function renderMirror(
+  active: SlideSnapshot | null,
+  next: SlideSnapshot | null,
+  startedAt: number,
+  budgetMs: number,
+): string {
   const elapsed = formatElapsed(Date.now() - startedAt);
   const remaining = formatElapsed(Math.max(0, budgetMs - (Date.now() - startedAt)));
   return `

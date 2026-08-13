@@ -15,10 +15,7 @@ export function RelatedListings({ listings }: RelatedListingsProps) {
 
   return (
     <section aria-labelledby="related-heading">
-      <h3
-        id="related-heading"
-        className="mb-6 font-display text-base font-semibold text-fg"
-      >
+      <h3 id="related-heading" className="mb-6 font-display text-base font-semibold text-fg">
         {t('detail.related')}
       </h3>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

@@ -8,10 +8,10 @@ Presenter control-plane session: deck pointer, broadcast, slide transitions.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-presenter-session` | availability | 99.9% | 30d |
-| `lat-presenter-action-p95` | latency | < 150 ms | 30d |
+| SLO                        | Kind         | Target   | Window |
+| -------------------------- | ------------ | -------- | ------ |
+| `avail-presenter-session`  | availability | 99.9%    | 30d    |
+| `lat-presenter-action-p95` | latency      | < 150 ms | 30d    |
 
 ## Triage
 

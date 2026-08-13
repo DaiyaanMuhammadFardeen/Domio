@@ -78,14 +78,16 @@ export function unsplashProvider(opts: { apiKey: string; http?: typeof fetch }):
           },
         });
       } catch (err) {
-        throw Errors.validation(`Unsplash request failed: ${err instanceof Error ? err.message : String(err)}`);
+        throw Errors.validation(
+          `Unsplash request failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
 
       if (!resp.ok) {
         throw Errors.validation(`Unsplash API returned ${resp.status}`);
       }
 
-      const data: UnsplashSearchResponse = await resp.json() as UnsplashSearchResponse;
+      const data: UnsplashSearchResponse = (await resp.json()) as UnsplashSearchResponse;
 
       return data.results.map((photo) => ({
         id: photo.id,
@@ -110,14 +112,16 @@ export function unsplashProvider(opts: { apiKey: string; http?: typeof fetch }):
           },
         });
       } catch (err) {
-        throw Errors.validation(`Unsplash request failed: ${err instanceof Error ? err.message : String(err)}`);
+        throw Errors.validation(
+          `Unsplash request failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
 
       if (!resp.ok) {
         throw Errors.validation(`Unsplash API returned ${resp.status}`);
       }
 
-      const photo: UnsplashPhoto = await resp.json() as UnsplashPhoto;
+      const photo: UnsplashPhoto = (await resp.json()) as UnsplashPhoto;
       return {
         url: photo.urls.raw ?? '',
         attribution: `Photo by ${photo.user.name} on Unsplash`,
@@ -163,14 +167,16 @@ export function pexelsProvider(opts: { apiKey: string; http?: typeof fetch }): S
           },
         });
       } catch (err) {
-        throw Errors.validation(`Pexels request failed: ${err instanceof Error ? err.message : String(err)}`);
+        throw Errors.validation(
+          `Pexels request failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
 
       if (!resp.ok) {
         throw Errors.validation(`Pexels API returned ${resp.status}`);
       }
 
-      const data: PexelsSearchResponse = await resp.json() as PexelsSearchResponse;
+      const data: PexelsSearchResponse = (await resp.json()) as PexelsSearchResponse;
 
       return data.photos.map((photo) => ({
         id: String(photo.id),
@@ -195,14 +201,16 @@ export function pexelsProvider(opts: { apiKey: string; http?: typeof fetch }): S
           },
         });
       } catch (err) {
-        throw Errors.validation(`Pexels request failed: ${err instanceof Error ? err.message : String(err)}`);
+        throw Errors.validation(
+          `Pexels request failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
 
       if (!resp.ok) {
         throw Errors.validation(`Pexels API returned ${resp.status}`);
       }
 
-      const photo: PexelsPhoto = await resp.json() as PexelsPhoto;
+      const photo: PexelsPhoto = (await resp.json()) as PexelsPhoto;
       return {
         url: photo.src.large ?? '',
         attribution: `Photo by ${photo.photographer} on Pexels`,

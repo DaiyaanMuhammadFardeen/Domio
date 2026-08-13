@@ -173,23 +173,23 @@ into master: Wave 5 (W9 team + W10 live analytics)`).
 
 ## Per-package tally
 
-| Service                  | Wave | Commits | Tests (TS) | Tests (Go) |
-|--------------------------|------|--------:|-----------:|-----------:|
-| `event-ingest`           | 1    | 2       | 45         | —          |
-| `clickhouse-loader`      | 1    | 1       | —          | (Go loader) |
-| `analytics-warehouse`    | 1    | 1       | 12         | —          |
-| `viewer-identity`        | 2    | 2       | 59         | —          |
-| `sessionization`         | 2    | 1       | 26         | —          |
-| `heatmap-generator`      | 3    | 1       | 23         | —          |
-| `ab-assignment`          | 3    | 3       | —          | 25         |
-| `ab-measurement`         | 3    | 1       | —          | 16         |
-| `ab-statistics`          | 3    | 1       | —          | 12         |
-| `crm-sync`               | 3,4  | 9       | —          | 68         |
-| `team-analytics`         | 4    | 5       | 21         | —          |
-| `live-analytics`         | 5    | 4       | 24         | —          |
-| `notification-dispatcher`| 5    | 5       | 48         | —          |
-| (infra, contracts, SDK)  | 0    | 11      | —          | —          |
-| (db, clickhouse)         | 1,4  | 3       | —          | —          |
-| (tests, doc, ci)         | 0,3,6| 9       | —          | —          |
-| (merges)                 | 5    | 1       | —          | —          |
-| **TOTAL**                |      | **65+2**| **258**    | **121**    |
+| Service                   | Wave  |  Commits | Tests (TS) |  Tests (Go) |
+| ------------------------- | ----- | -------: | ---------: | ----------: |
+| `event-ingest`            | 1     |        2 |         45 |           — |
+| `clickhouse-loader`       | 1     |        1 |          — | (Go loader) |
+| `analytics-warehouse`     | 1     |        1 |         12 |           — |
+| `viewer-identity`         | 2     |        2 |         59 |           — |
+| `sessionization`          | 2     |        1 |         26 |           — |
+| `heatmap-generator`       | 3     |        1 |         23 |           — |
+| `ab-assignment`           | 3     |        3 |          — |          25 |
+| `ab-measurement`          | 3     |        1 |          — |          16 |
+| `ab-statistics`           | 3     |        1 |          — |          12 |
+| `crm-sync`                | 3,4   |        9 |          — |          68 |
+| `team-analytics`          | 4     |        5 |         21 |           — |
+| `live-analytics`          | 5     |        4 |         24 |           — |
+| `notification-dispatcher` | 5     |        5 |         48 |           — |
+| (infra, contracts, SDK)   | 0     |       11 |          — |           — |
+| (db, clickhouse)          | 1,4   |        3 |          — |           — |
+| (tests, doc, ci)          | 0,3,6 |        9 |          — |           — |
+| (merges)                  | 5     |        1 |          — |           — |
+| **TOTAL**                 |       | **65+2** |    **258** |     **121** |

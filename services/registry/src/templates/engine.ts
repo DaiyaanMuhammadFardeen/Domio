@@ -48,23 +48,28 @@ function setByBinding(root: unknown, binding: string, value: unknown): void {
     if (seg.key) {
       current = (current as Record<string, unknown>)[seg.key];
       if (current === undefined || current === null) {
-        throw Errors.validation(`Cannot resolve binding "${binding}" — segment "${seg.key}" is ${String(current)}`);
+        throw Errors.validation(
+          `Cannot resolve binding "${binding}" — segment "${seg.key}" is ${String(current)}`,
+        );
       }
     }
     if (seg.index !== undefined) {
       const arr = current as unknown[];
       current = arr[seg.index];
       if (current === undefined || current === null) {
-        throw Errors.validation(`Cannot resolve binding "${binding}" — index [${seg.index}] is ${String(current)}`);
+        throw Errors.validation(
+          `Cannot resolve binding "${binding}" — index [${seg.index}] is ${String(current)}`,
+        );
       }
     }
   }
 
   const last = segments[segments.length - 1]!;
   if (last.key) {
-    const target = last.index !== undefined
-      ? (current as Record<string, unknown>)[last.key] as unknown[]
-      : current as Record<string, unknown>;
+    const target =
+      last.index !== undefined
+        ? ((current as Record<string, unknown>)[last.key] as unknown[])
+        : (current as Record<string, unknown>);
     if (last.index !== undefined) {
       (target as unknown[])[last.index] = value;
     } else {
@@ -155,10 +160,7 @@ export async function installTemplate(
  * Resolves the effective value for a placeholder: caller-supplied value wins,
  * then the placeholder's declared default, then `undefined` (for validation).
  */
-function resolveValue(
-  ph: TemplatePlaceholder,
-  values: Record<string, unknown>,
-): unknown {
+function resolveValue(ph: TemplatePlaceholder, values: Record<string, unknown>): unknown {
   if (Object.prototype.hasOwnProperty.call(values, ph.key)) {
     return values[ph.key];
   }

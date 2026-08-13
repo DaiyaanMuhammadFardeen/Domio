@@ -27,12 +27,15 @@ export function licenseRoutes(deps: ServiceDeps): Hono {
       seats: body.seats ?? 1,
     });
 
-    return c.json({
-      grantId: grant.id,
-      token: grant.signedToken,
-      expiresAt: grant.expiresAt,
-      grant,
-    }, 201);
+    return c.json(
+      {
+        grantId: grant.id,
+        token: grant.signedToken,
+        expiresAt: grant.expiresAt,
+        grant,
+      },
+      201,
+    );
   });
 
   // ---- POST /v1/license/verify — verify a license token ----

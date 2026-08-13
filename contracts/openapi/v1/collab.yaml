@@ -2306,11 +2306,11 @@ components:
           type: string
           format: uri
           description: URI reference identifying the problem type.
-          example: "https://domio.example/problems/not-found"
+          example: 'https://domio.example/problems/not-found'
         title:
           type: string
           description: Short human-readable summary.
-          example: "Resource not found"
+          example: 'Resource not found'
         status:
           type: integer
           description: HTTP status code.
@@ -2323,7 +2323,7 @@ components:
           type: string
           format: uri
           description: URI reference identifying the specific occurrence.
-          example: "https://api.domio.example.com/v1/decks/abc-123/comments"
+          example: 'https://api.domio.example.com/v1/decks/abc-123/comments'
     CommentInput:
       type: object
       required: [body_md, target_type, target_id]
@@ -2360,7 +2360,20 @@ components:
           description: Optional array of attachment objects.
     Comment:
       type: object
-      required: [id, workspace_id, deck_id, thread_id, author_id, author_type, body_md, target_type, target_id, status, created_at]
+      required:
+        [
+          id,
+          workspace_id,
+          deck_id,
+          thread_id,
+          author_id,
+          author_type,
+          body_md,
+          target_type,
+          target_id,
+          status,
+          created_at,
+        ]
       properties:
         id: { type: string }
         workspace_id: { type: string }
@@ -2394,7 +2407,7 @@ components:
           type: string
           enum: [open, resolved]
         is_orphaned: { type: boolean }
-        emoji_reactions: { type: object, description: "JSONB map of emoji → user_id[]" }
+        emoji_reactions: { type: object, description: 'JSONB map of emoji → user_id[]' }
         attachments: { type: array, items: { type: object } }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
@@ -2405,7 +2418,8 @@ components:
       required: [deck_id, version_id, policy]
       properties:
         deck_id: { type: string }
-        version_id: { type: string, description: Immutable snapshot/version of the deck under review. }
+        version_id:
+          { type: string, description: Immutable snapshot/version of the deck under review. }
         policy:
           type: object
           required: [lanes]
@@ -2419,7 +2433,7 @@ components:
                 properties:
                   lane:
                     type: string
-                    description: "Lane identifier (e.g. design, content, executive)."
+                    description: 'Lane identifier (e.g. design, content, executive).'
                   role:
                     type: string
                     description: Required workspace role for approvers in this lane.
@@ -2434,7 +2448,18 @@ components:
           description: If true, submit immediately (draft → pending).
     ApprovalRequest:
       type: object
-      required: [id, workspace_id, deck_id, version_id, requested_by, requested_at, policy, status, created_at]
+      required:
+        [
+          id,
+          workspace_id,
+          deck_id,
+          version_id,
+          requested_by,
+          requested_at,
+          policy,
+          status,
+          created_at,
+        ]
       properties:
         id: { type: string }
         workspace_id: { type: string }
@@ -2527,7 +2552,8 @@ components:
         blocked_reason: { type: string, nullable: true }
         due_at: { type: string, format: date-time, nullable: true }
         completed_at: { type: string, format: date-time, nullable: true }
-        task_link_id: { type: string, nullable: true, description: Optional FK to external task tracker. }
+        task_link_id:
+          { type: string, nullable: true, description: Optional FK to external task tracker. }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
     GrantInput:
@@ -2538,13 +2564,39 @@ components:
         resource_id: { type: string }
         principal_id: { type: string }
         principal_type: { type: string, enum: [user, group] }
-        capabilities: { type: array, items: { type: string }, description: Array of granular capabilities. }
-        is_deny: { type: boolean, default: false, description: When true, this is a deny grant (deny-first evaluation). }
-        effective_from: { type: string, format: date-time, description: Start of the grant's temporal window. }
-        effective_to: { type: string, format: date-time, nullable: true, description: End of the grant's temporal window; null = indefinite. }
+        capabilities:
+          { type: array, items: { type: string }, description: Array of granular capabilities. }
+        is_deny:
+          {
+            type: boolean,
+            default: false,
+            description: When true,
+            this is a deny grant (deny-first evaluation).,
+          }
+        effective_from:
+          { type: string, format: date-time, description: Start of the grant's temporal window. }
+        effective_to:
+          {
+            type: string,
+            format: date-time,
+            nullable: true,
+            description: End of the grant's temporal window; null = indefinite.,
+          }
     PermissionGrant:
       type: object
-      required: [id, workspace_id, resource_type, resource_id, principal_id, principal_type, capabilities, is_deny, effective_from, created_at]
+      required:
+        [
+          id,
+          workspace_id,
+          resource_type,
+          resource_id,
+          principal_id,
+          principal_type,
+          capabilities,
+          is_deny,
+          effective_from,
+          created_at,
+        ]
       properties:
         id: { type: string }
         workspace_id: { type: string }
@@ -2577,7 +2629,12 @@ components:
       required: [allowed]
       properties:
         allowed: { type: boolean }
-        reason: { type: string, nullable: true, description: Human-readable reason for the evaluation result. }
+        reason:
+          {
+            type: string,
+            nullable: true,
+            description: Human-readable reason for the evaluation result.,
+          }
 
     # ──────────────────────────────────────────────────────────────────────
     # Library
@@ -2619,7 +2676,8 @@ components:
               default: false
     LibraryEntry:
       type: object
-      required: [id, workspace_id, scope, title, owner_id, status, version_id, created_at, updated_at]
+      required:
+        [id, workspace_id, scope, title, owner_id, status, version_id, created_at, updated_at]
       properties:
         id: { type: string }
         workspace_id: { type: string }
@@ -2658,7 +2716,17 @@ components:
           default: false
     LibraryVersion:
       type: object
-      required: [id, entry_id, version_num, slide_snapshot, data_bindings, brand_locked, created_by, created_at]
+      required:
+        [
+          id,
+          entry_id,
+          version_num,
+          slide_snapshot,
+          data_bindings,
+          brand_locked,
+          created_by,
+          created_at,
+        ]
       properties:
         id: { type: string }
         entry_id: { type: string }
@@ -2679,7 +2747,8 @@ components:
         consumer_deck_id: { type: string }
         consumer_slide_id: { type: string }
         library_entry_id: { type: string }
-        pinned_version_id: { type: string, nullable: true, description: Pin to a specific version; null = latest. }
+        pinned_version_id:
+          { type: string, nullable: true, description: Pin to a specific version; null = latest. }
         mode:
           type: string
           enum: [immediate, scheduled, manual, frozen]
@@ -2694,7 +2763,17 @@ components:
           description: If true, consumer cannot override the binding.
     AutoUpdateBinding:
       type: object
-      required: [id, consumer_deck_id, consumer_slide_id, library_entry_id, mode, is_mandatory, created_at, updated_at]
+      required:
+        [
+          id,
+          consumer_deck_id,
+          consumer_slide_id,
+          library_entry_id,
+          mode,
+          is_mandatory,
+          created_at,
+          updated_at,
+        ]
       properties:
         id: { type: string }
         consumer_deck_id: { type: string }
@@ -2718,10 +2797,17 @@ components:
       type: object
       required: [resource_type, resource_id, interval_days]
       properties:
-        resource_type: { type: string, description: Polymorphic resource type (e.g. deck, slide, library_entry). }
+        resource_type:
+          {
+            type: string,
+            description: Polymorphic resource type (e.g. deck,
+            slide,
+            library_entry).,
+          }
         resource_id: { type: string, description: UUID of the resource being governed. }
         interval_days: { type: integer, description: Review interval in days (must be > 0). }
-        responsible_id: { type: string, nullable: true, description: UUID of the responsible reviewer. }
+        responsible_id:
+          { type: string, nullable: true, description: UUID of the responsible reviewer. }
         escalation:
           type: string
           enum: [gentle, moderate, strict]
@@ -2732,7 +2818,8 @@ components:
           description: If true, revoke share links when policy expires.
     ExpiryPolicy:
       type: object
-      required: [id, resource_type, resource_id, interval_days, escalation, auto_revoke_share, created_at]
+      required:
+        [id, resource_type, resource_id, interval_days, escalation, auto_revoke_share, created_at]
       properties:
         id: { type: string }
         resource_type: { type: string }
@@ -2781,7 +2868,18 @@ components:
           description: Optional thread ID for discussion.
     Suggestion:
       type: object
-      required: [suggestion_id, deck_id, session_id, author_id, target_type, target_id, operation, status, created_at]
+      required:
+        [
+          suggestion_id,
+          deck_id,
+          session_id,
+          author_id,
+          target_type,
+          target_id,
+          operation,
+          status,
+          created_at,
+        ]
       properties:
         suggestion_id: { type: string }
         deck_id: { type: string }
@@ -2845,7 +2943,16 @@ components:
         merge_commit_id: { type: string, nullable: true }
     SlideDiff:
       type: object
-      required: [mr_id, base_version_id, target_version_id, source_version_id, slide_diffs, binding_diffs, computed_at]
+      required:
+        [
+          mr_id,
+          base_version_id,
+          target_version_id,
+          source_version_id,
+          slide_diffs,
+          binding_diffs,
+          computed_at,
+        ]
       properties:
         mr_id: { type: string }
         base_version_id: { type: string }
@@ -2878,7 +2985,8 @@ components:
           description: Meeting vendor to connect.
     MeetingIntegration:
       type: object
-      required: [id, workspace_id, vendor, status, connected_by, connected_at, created_at, updated_at]
+      required:
+        [id, workspace_id, vendor, status, connected_by, connected_at, created_at, updated_at]
       properties:
         id: { type: string }
         workspace_id: { type: string }
@@ -2968,7 +3076,20 @@ components:
           description: Recurrence identifier for recurring events.
     CalendarLink:
       type: object
-      required: [id, workspace_id, deck_id, user_id, vendor, event_id, event_start_at, is_recurring, last_synced_at, created_at, updated_at]
+      required:
+        [
+          id,
+          workspace_id,
+          deck_id,
+          user_id,
+          vendor,
+          event_id,
+          event_start_at,
+          is_recurring,
+          last_synced_at,
+          created_at,
+          updated_at,
+        ]
       properties:
         id: { type: string }
         workspace_id: { type: string }
@@ -3016,7 +3137,19 @@ components:
           description: Conflict resolution strategy for bidirectional sync.
     TaskLink:
       type: object
-      required: [id, workspace_id, assignment_id, vendor, external_task_id, external_project_id, field_map, sync_mode, created_at, updated_at]
+      required:
+        [
+          id,
+          workspace_id,
+          assignment_id,
+          vendor,
+          external_task_id,
+          external_project_id,
+          field_map,
+          sync_mode,
+          created_at,
+          updated_at,
+        ]
       properties:
         id: { type: string }
         workspace_id: { type: string }
@@ -3069,10 +3202,21 @@ components:
           description: UUID of the workspace member creating the invitation.
     Guest:
       type: object
-      required: [guest_access_id, inviter_id, guest_email, scope_type, scope_id, capabilities, expires_at, created_at]
+      required:
+        [
+          guest_access_id,
+          inviter_id,
+          guest_email,
+          scope_type,
+          scope_id,
+          capabilities,
+          expires_at,
+          created_at,
+        ]
       properties:
         guest_access_id: { type: string }
-        inviter_id: { type: string, description: UUID of the workspace member who sent the invitation. }
+        inviter_id:
+          { type: string, description: UUID of the workspace member who sent the invitation. }
         guest_email: { type: string, format: email }
         guest_user_id: { type: string, nullable: true, description: Populated on first sign-in. }
         scope_type: { type: string, enum: [folder, project, deck] }

@@ -180,9 +180,7 @@ describe('SLO burn-rate rules', () => {
       burnFast++;
       expect(a, `${nameM[1]} must declare severity: page`).toMatch(/severity:\s*page/);
       expect(a, `${nameM[1]} must declare for:`).toMatch(/for:\s*\S/);
-      expect(a, `${nameM[1]} must declare summary annotation`).toMatch(
-        /summary:\s*"[^"]+"/,
-      );
+      expect(a, `${nameM[1]} must declare summary annotation`).toMatch(/summary:\s*"[^"]+"/);
       expect(a, `${nameM[1]} must declare slo label`).toMatch(/slo:\s*[a-zA-Z0-9-]+/);
     }
     expect(burnFast).toBeGreaterThanOrEqual(4);
@@ -190,18 +188,14 @@ describe('SLO burn-rate rules', () => {
 
   it('every alert name is unique', () => {
     const raw = readFileSync(join(ROOT, 'rules/budget-burn.yaml'), 'utf8');
-    const names = Array.from(raw.matchAll(/-\s*alert:\s*([A-Za-z0-9]+)/g)).map(
-      (m) => m[1] ?? '',
-    );
+    const names = Array.from(raw.matchAll(/-\s*alert:\s*([A-Za-z0-9]+)/g)).map((m) => m[1] ?? '');
     expect(names.length).toBeGreaterThan(0);
     expect(new Set(names).size).toBe(names.length);
   });
 
   it('every alert maps to a known component', () => {
     const raw = readFileSync(join(ROOT, 'rules/budget-burn.yaml'), 'utf8');
-    const labels = Array.from(raw.matchAll(/\bcomponent:\s*([a-z-]+)/g)).map(
-      (m) => m[1] ?? '',
-    );
+    const labels = Array.from(raw.matchAll(/\bcomponent:\s*([a-z-]+)/g)).map((m) => m[1] ?? '');
     const allowed = ['api-gateway', 'realtime-gateway', 'editor', 'postgres'];
     expect(labels.length).toBeGreaterThan(0);
     for (const l of labels) {

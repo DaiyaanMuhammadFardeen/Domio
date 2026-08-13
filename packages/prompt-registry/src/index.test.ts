@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  TEMPLATES,
-  getTemplate,
-  listTemplates,
-  TemplateNotFoundError,
-} from './index.js';
+import { TEMPLATES, getTemplate, listTemplates, TemplateNotFoundError } from './index.js';
 
 // ---------------------------------------------------------------------------
 // All 14 templates present with unique IDs

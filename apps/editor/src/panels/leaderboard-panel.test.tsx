@@ -52,7 +52,9 @@ describe('LeaderboardPanel', () => {
     render(<LeaderboardPanel items={makeEntries()} onUpdate={vi.fn()} />);
     expect(screen.getByTestId('m6-leaderboard-row-lr1')).toBeTruthy();
     expect(screen.getByTestId('m6-leaderboard-conf-lr1').textContent).toMatch(/0\.40/);
-    expect(screen.getByTestId('m6-leaderboard-answer-lr1').textContent).toBe('Plants eat sunlight.');
+    expect(screen.getByTestId('m6-leaderboard-answer-lr1').textContent).toBe(
+      'Plants eat sunlight.',
+    );
   });
 
   it('approve calls onUpdate with status=approved', () => {

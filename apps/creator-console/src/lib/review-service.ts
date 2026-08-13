@@ -50,10 +50,7 @@ export interface CreatorReviewsResponse {
  * Mirrors marketplace-web replyToReview — the console calls it directly
  * with the buyer's session token to enable creator-side replies.
  */
-export async function replyToReview(
-  reviewId: string,
-  payload: { body: string },
-): Promise<Reply> {
+export async function replyToReview(reviewId: string, payload: { body: string }): Promise<Reply> {
   return fetcher<Reply>(
     API_BASE,
     `/v1/marketplace/reviews/${encodeURIComponent(reviewId)}/replies`,

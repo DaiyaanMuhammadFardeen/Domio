@@ -12,8 +12,8 @@
  */
 
 export interface DynamicPlan {
-  order: string[];          // slide ids in presenter-visible order
-  hidden: string[];         // slide ids hidden from audience
+  order: string[]; // slide ids in presenter-visible order
+  hidden: string[]; // slide ids hidden from audience
   updated_by: string;
   updated_at_ms: number;
 }

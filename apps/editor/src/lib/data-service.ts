@@ -17,6 +17,8 @@ export interface DatasetDescriptor {
 
 export const BOOTSTRAP_DATASETS: ReadonlyArray<DatasetDescriptor> = [];
 
-export async function listDatasets(_workspaceId: string): Promise<ReadonlyArray<DatasetDescriptor>> {
+export async function listDatasets(
+  _workspaceId: string,
+): Promise<ReadonlyArray<DatasetDescriptor>> {
   return BOOTSTRAP_DATASETS;
 }

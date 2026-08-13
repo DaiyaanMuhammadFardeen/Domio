@@ -35,7 +35,7 @@ paths:
         Resolves the session code to a presenter session, mints a
         participant session, and returns the widget bundle.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: query
           name: workspace_id
           required: true
@@ -58,30 +58,30 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AudienceJoinRequest"
+              $ref: '#/components/schemas/AudienceJoinRequest'
       responses:
-        "200":
+        '200':
           description: Bundle returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AudienceJoinBundle"
-        "400":
-          $ref: "common.yaml#/components/responses/BadRequest"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
-        "410":
+                $ref: '#/components/schemas/AudienceJoinBundle'
+        '400':
+          $ref: 'common.yaml#/components/responses/BadRequest'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
+        '410':
           description: Session has ended.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "429":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '429':
           description: Rate-limited.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RateLimitedError"
+                $ref: '#/components/schemas/RateLimitedError'
 
   /v1/audience/sessions/{audienceSessionId}/status:
     get:
@@ -100,16 +100,16 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Session status.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AudienceSessionStatus"
-        "401":
-          $ref: "common.yaml#/components/responses/Unauthorized"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
+                $ref: '#/components/schemas/AudienceSessionStatus'
+        '401':
+          $ref: 'common.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
 
   /v1/audience/sessions/{audienceSessionId}/leave:
     post:
@@ -128,12 +128,12 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Left.
-        "401":
-          $ref: "common.yaml#/components/responses/Unauthorized"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
+        '401':
+          $ref: 'common.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
 
 components:
   schemas:
@@ -160,18 +160,26 @@ components:
 
     AudienceJoinBundle:
       type: object
-      required: [audience_session_id, participant_id, session_metadata, widgets, server_ts_ms, reconnect_token]
+      required:
+        [
+          audience_session_id,
+          participant_id,
+          session_metadata,
+          widgets,
+          server_ts_ms,
+          reconnect_token,
+        ]
       properties:
         audience_session_id:
           type: string
         participant_id:
           type: string
         session_metadata:
-          $ref: "#/components/schemas/AudienceSessionMetadata"
+          $ref: '#/components/schemas/AudienceSessionMetadata'
         widgets:
           type: array
           items:
-            $ref: "#/components/schemas/AudienceWidgetDescriptor"
+            $ref: '#/components/schemas/AudienceWidgetDescriptor'
         server_ts_ms:
           type: integer
           format: int64
@@ -199,7 +207,16 @@ components:
 
     AudienceSessionMetadata:
       type: object
-      required: [session_id, workspace_id, title, started_at, presenter_display_name, locale, reduced_motion]
+      required:
+        [
+          session_id,
+          workspace_id,
+          title,
+          started_at,
+          presenter_display_name,
+          locale,
+          reduced_motion,
+        ]
       properties:
         session_id:
           type: string

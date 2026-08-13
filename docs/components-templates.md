@@ -10,22 +10,26 @@
 ### Feature 23 — 10,000+ pre-built components
 
 **Acceptance criteria**
+
 - A canonical catalog of ≥10,000 components is discoverable from the editor's "Insert → Components" panel and the public marketplace.
 - Each component has a unique stable ID, category (Card, Stat, Timeline, Org chart, Quote, Agenda, Comparison table, Roadmap, etc.), thumbnail, preview animation, locale-aware description, tags, and one or more variants.
 - Insertion into a slide produces a live, layout-correct instance that respects the slide's theme and auto-layout container (feature 7).
 - New components can be added server-side without requiring a client release (catalog versioned).
 
 **Behavioral details**
+
 - A component is a JSON document (the "component document") plus a bundle of static assets (raster, SVG, Lottie, fonts) referenced by hash. See §4.
 - Catalog hydration is paged, cached in IndexedDB, and lazy-rendered; only the first 200 components of any category load eagerly, the rest are paged on scroll.
 - Components obey the active slide's design tokens (feature 37). If a token is unresolved, the component falls back to its authored default and renders a "theme-degraded" badge in the layers panel.
 
 **Edge cases**
+
 - A component authored for a 16:9 slide inserted into a 4:3 or 9:16 frame — handled via per-component `responsive_overrides` (a list of per-ratio prop remaps), not by auto-scaling text to unreadable sizes.
 - A component removed from the marketplace must remain installed in users' decks with a "deprecated — no longer receiving updates" badge; the package must still resolve for offline rendering.
 - Bundles referencing external fonts that are later removed from the icon/font subsystem — the component must ship its own fallback in its bundle (no runtime font fetch).
 
 **Dependencies**
+
 - Icon library (feature 32), stock media (feature 33), animation library (feature 34), sticker packs (feature 35), design tokens (feature 37), auto-layout (feature 7), constraints (feature 8), multiplayer presence (feature 17).
 
 ---
@@ -33,20 +37,24 @@
 ### Feature 24 — Component variants (light/dark, sizes, states)
 
 **Acceptance criteria**
+
 - Each catalog component ships with a defined `variant_set` (e.g., `theme ∈ {light, dark, brand-light, brand-dark}`, `size ∈ {sm, md, lg}`, `state ∈ {default, hover, pressed, disabled}`).
 - Switching a variant on a single instance updates its render within 100 ms p95 (local), 250 ms p95 (multiplayer-broadcast) without disturbing other instances in the same deck.
 - Variants are first-class in the prop panel: a "Variant" section with segmented controls replaces the user toggling individual colors/sizes.
 
 **Behavioral details**
+
 - Variants are encoded in the component document as a small matrix of prop remaps (not as separate document graphs). The renderer computes the resolved prop set from `base_props × variant_overrides`.
 - Variant switching emits a single `component.variant_changed` CRDT op, which the multiplayer layer (feature 17) broadcasts via the existing CRDT channel — no new protocol.
 
 **Edge cases**
+
 - A user creates a custom variant (feature 26). Custom variants are namespaced to the user's library; they never replace a marketplace variant.
 - Variant remap refers to a prop that has since been removed (the prop panel version is older than the component version): the renderer ignores the remap and surfaces a "prop missing" warning.
 - Variant overrides that conflict with brand-locked regions (feature 36) — brand locks win silently; the variant switch is logged in audit (feature 196).
 
 **Dependencies**
+
 - Feature 25 (props engine), feature 27 (team library sync), feature 37 (design tokens drive `theme` variant availability), feature 36 (brand lock precedence).
 
 ---
@@ -54,22 +62,26 @@
 ### Feature 25 — Smart components with editable props panel
 
 **Acceptance criteria**
+
 - A smart component exposes a typed prop schema (JSON Schema, see §4) describing its editable properties.
 - Selecting a smart component instance opens a "Props" tab in the right panel with one form field per prop, fully keyboard-navigable, with inline validation.
 - Editing a prop updates the canvas live, never breaks layout (auto-layout + constraints handle the reflow), and propagates to all sync'd views within the multiplayer latency budget.
 - Schema is published as part of the component package and is consumable by MCP tool calls (feature 233) and the agentic patch API (feature 234).
 
 **Behavioral details**
+
 - Prop editors are auto-generated from JSON Schema: `string → text/number input`, `number → stepper`, `boolean → toggle`, `enum → segmented control`, `array → repeatable row`, `object → nested panel`, `oneOf/anyOf → discriminated union control`.
 - Form fields render in a deterministic order: required props first, then alphabetical by key, with the canonical `title` from the schema as the label.
 - The prop panel has a render budget of 50 ms p95; schemas with >40 props are paginated into a "Show advanced" section.
 
 **Edge cases**
+
 - A prop references a data source (feature 48) — the field shows a binding chip ("Bound to: Q3 Sheet → `revenue`"). Editing it requires "unbinding" first to prevent silent data decoupling.
 - A prop's value fails schema validation on blur — the canvas retains the last valid value, the field is marked red, and a tooltip explains the rule.
 - Two users edit the same prop simultaneously — last-writer-wins is recorded in CRDT history; both see a "X also changed this" toast for 3 seconds.
 
 **Dependencies**
+
 - Feature 26 (user components become smart when they have a schema), feature 48 (data-bound props), feature 233 (function-calling-ready props), feature 234 (natural-language patch), feature 237 (agent lint).
 
 ---
@@ -77,21 +89,25 @@
 ### Feature 26 — User-created components (create-component flow)
 
 **Acceptance criteria**
+
 - A user can select any subtree (one or more elements + nested groups) and promote it to a component via right-click → "Create component" or the keyboard shortcut.
 - The new component gets an auto-generated name, an editable description, an auto-inferred prop schema (see below), and is added to "My library" (feature 27).
 - Subsequent inserts from "My library" create instances that share the component's source; editing the source (master) propagates to all instances unless they have overrides.
 
 **Behavioral details**
+
 - **Prop inference.** When the user creates a component from a selection, the engine inspects each text node, image, color, and number in the selection and proposes a prop for each unique-ish value: text → `string` with `default = current value`; image → `asset` prop pointing at the current asset; color → `color` prop; number → `number`. The user is shown an "Inferred props" dialog to confirm/rename/reorder before saving.
 - **Master/instance model.** A master stores the canonical element tree; instances store a list of `prop_overrides` keyed by prop name. Overrides are version-stamped so they survive component updates.
 - **Detach.** Right-click an instance → "Detach from component" converts it back into a free subtree with no link to the master.
 
 **Edge cases**
+
 - Selection contains a bound data widget (feature 48): the user is asked "Keep data binding on the instance, or move binding to a prop?". The latter becomes a `dataBinding` prop; the former is preserved verbatim.
 - Selection crosses a brand-locked region (feature 36): promotion is blocked with an explanation; the user can create the component from the non-locked subset only.
 - Instance has overrides that are invalid under a new component version — the instance keeps its old (deprecated) prop values; a per-instance "Update available" badge appears.
 
 **Dependencies**
+
 - Feature 25 (prop inference), feature 27 (My library), feature 36 (lock interaction), feature 48 (data binding preservation).
 
 ---
@@ -99,22 +115,26 @@
 ### Feature 27 — Shared team component libraries (publish/subscribe)
 
 **Acceptance criteria**
+
 - A team workspace has one or more "Team libraries" (one default, plus optional additional scoped libraries per project/brand).
 - Team members with the "Publisher" role can publish a component or a versioned update; team members with the "Subscriber" role receive update notifications in-app and via the team activity feed.
 - Subscribers can pin a component to a specific version (see feature pin in §3), opt into "track latest," or be on a managed-default that the workspace admin controls.
 - Publishing emits a webhook (feature 201) and a row in the activity log.
 
 **Behavioral details**
+
 - **Sync protocol.** A Team Library is a CRDT-like append-only log of `library_event` rows: `publish`, `update`, `deprecate`, `unpublish`. Subscribers sync the log incrementally and apply events in order. Conflicts (two publishers bump the same component to incompatible versions) are resolved by the workspace's "library policy" (default: latest semver wins; admins can pin).
 - **Update notifications.** When a subscribed component is updated, every deck containing an instance of it shows a small "Update available" badge on the component in the layers panel; bulk "Update all" and "Update none" actions exist.
 - **Forking.** A subscriber can "fork" a team library into their personal library if they need a customized variant — forking is the supported escape hatch from "managed by team."
 
 **Edge cases**
+
 - Offline editor (feature 21): team-library updates are deferred and applied on reconnect with conflict resolution; the offline badge surfaces a "pending library sync."
 - A publisher unpublishes a component still in use: instances keep rendering the last-fetched bundle; the layers panel shows "Component removed from library — read-only."
 - A team library exceeds the workspace storage budget — publishers see a soft warning; admins see a hard block at upload time.
 
 **Dependencies**
+
 - Feature 21 (offline + CRDT), feature 17 (multiplayer), feature 196 (audit), feature 201 (webhooks).
 
 ---
@@ -122,22 +142,26 @@
 ### Feature 28 — Community marketplace (sell/share with revenue share)
 
 **Acceptance criteria**
+
 - A creator can publish a marketplace listing containing one or more components, templates (full/section), themes (feature 45), sticker packs (feature 35), and icon packs.
 - Listings have a price (free, one-time, or subscription), a license (single-seat, team, enterprise), a public landing page, ratings and reviews, and a changelog.
 - Purchase/install grants a license record for the buyer's account/workspace; revenue is split per the configured payout policy.
 - Marketplace is browsable from inside the editor (Insert → Marketplace) and on the public web.
 
 **Behavioral details**
+
 - **Payout policy.** Default 70% creator / 30% platform, configurable per creator (Pro tier: up to 85% creator). Payouts are computed monthly from `revenue_share_event` rows; minimum payout threshold $50; supported payout methods: bank transfer, PayPal, bKash (Bangladesh market), Stripe Connect.
 - **License enforcement.** On install, the client receives a signed license token. Each subsequent load verifies the token against the marketplace service (online) and a cached grace period (offline, see §7).
 - **Refunds.** Buyer can request a refund within 14 days if usage is below 5 inserts (anti-fraud). Refund decrements the creator's pending payout.
 
 **Edge cases**
+
 - Creator deletes a listing still installed in user decks — listings can be "deprecated" (still installed, no new purchases) or "removed" (uninstalled from opt-in user decks on next sync, hard-deleted after 30 days).
 - Chargeback — the marketplace marks the listing as "frozen pending review" until the dispute resolves; the creator's payout for that transaction is held.
 - Cross-border tax (Bangladesh context, §11 of the planning guide): for sales into Bangladesh, VAT is computed per the prevailing rate and remitted; the marketplace handles BDT/USD conversion at the invoice timestamp's mid-rate.
 
 **Dependencies**
+
 - Features 29/30/31/35 (listing payloads), feature 45 (theme marketplace reuses infra), section 14 governance (DLP, audit), §11 of planning guide (payment, tax).
 
 ---
@@ -145,19 +169,23 @@
 ### Feature 29 — Template gallery by use case
 
 **Acceptance criteria**
+
 - The marketplace and editor expose a gallery filtered by use case: Pitch decks, Board reports, QBRs, All-hands, Classroom, Conference keynotes, Product demos (extensible).
 - Each template has a live preview, a "what's included" manifest (slide count, component count, data bindings, fonts), and an estimated size.
 - One-click "Use this template" copies it into the user's workspace as a new deck.
 
 **Behavioral details**
+
 - Templates are server-rendered previews (Playwright/headless engine) and stored as MP4/WebM loops; the first frame is a static poster for low-bandwidth contexts.
 - The gallery supports faceted search: use case, style (minimal/playful/corporate/academic), color mood, font family, number of slides, "works with offline mode," "free only," "compatible with my team's brand kit."
 
 **Edge cases**
+
 - Template includes fonts not licensed for the user's plan — blocked at install with an upsell or a "use bundled substitute" option.
 - Template's brand-locked regions (feature 36) — those locks transfer to the copy; the user is told up-front which regions they'll inherit as locked.
 
 **Dependencies**
+
 - Feature 30 (full deck templates), feature 31 (section templates), feature 36 (lock transfer), section 3 brand kit (auto-application on install).
 
 ---
@@ -165,20 +193,24 @@
 ### Feature 30 — Full deck templates with placeholder logic
 
 **Acceptance criteria**
+
 - A full deck template installs as a complete deck with placeholder markers ("replace with your logo", "add your Q3 numbers here") in lieu of real content.
 - A "Guided fill-in" mode walks the user through placeholders in narrative order, with each placeholder highlighted on the relevant slide.
 - Completing a placeholder either replaces it with the typed content or binds it to a data source (feature 48).
 
 **Behavioral details**
+
 - Placeholders are first-class elements in the deck schema: `{ kind: "placeholder", id, label, type, default_value, hint, slide_id }`. The schema knows the order placeholders should be presented.
 - Each placeholder has an inferred smart-component prop schema; binding a placeholder to a data source creates a `dataBinding` prop on the underlying component.
 
 **Edge cases**
+
 - Placeholder references an asset that fails to load (broken CDN URL) — the placeholder falls back to a generic gray box with the label "Asset unavailable" and an upload CTA.
 - User deletes a placeholder slide — the guided-fill queue updates; the next/previous buttons reflect the new order.
 - Multi-locale deck: placeholders carry translation keys; the guided fill respects the deck's locale.
 
 **Dependencies**
+
 - Feature 25 (props), feature 31 (section templates — a full deck is composed of section templates), feature 48 (data binding), feature 113 (copy/translate).
 
 ---
@@ -186,19 +218,23 @@
 ### Feature 31 — Section templates
 
 **Acceptance criteria**
+
 - A "section template" is a reusable multi-slide block (e.g., "Team slide", "Financials section", "Appendix block") insertable into any deck.
 - Insertion preserves the section's internal auto-layout, brand bindings, and any locked regions (feature 36).
 - Sections can be parameterized (a "Team" section takes a list of team members with name/role/photo) via the smart-component prop pattern.
 
 **Behavioral details**
+
 - Internally a section is a `template` row with `kind = "section"` and a `slides[]` array of slide IDs in order. Insertion creates a deep-copy CRDT subtree rooted at a new `section` element on the target deck.
 - Sections support "spread" insertion: a section template marked `spreadable: true` can be inserted multiple times in one deck (e.g., a per-region financials section).
 
 **Edge cases**
+
 - Insertion into a deck with conflicting theme — the section ships with explicit overrides that win; user is shown the diff and can accept/reset.
 - Section references components the user doesn't have access to (e.g., from a team library they've been removed from) — the section still installs with a "Missing components — partial render" warning; missing components render as labeled placeholders.
 
 **Dependencies**
+
 - Feature 30 (full decks are composed of sections), feature 27 (team libraries), feature 36 (lock transfer).
 
 ---
@@ -206,19 +242,23 @@
 ### Feature 32 — Icon library (100k+ icons, multiple styles, recolorable)
 
 **Acceptance criteria**
+
 - The icon library ships ≥100,000 icons across at least four styles (outline, filled, duotone, glyph), each recolorable, each resizable without quality loss.
 - Icons are searchable by name, synonyms, and shape; AI-powered "find an icon that looks like…" works on uploaded sketches (feature 8 cross-tie).
 - Icons are SVG, stored as compact path data in the component catalog and bundled for offline use.
 
 **Behavioral details**
+
 - Icons are treated as a special component subtype: `kind: "icon"`. They have a single `color` prop (token-bound) and a `size` prop. No text prop.
 - Search uses a trigram index in Postgres for name synonyms + a perceptual hash for visual similarity; the visual-similarity index is built from a CLIP-style embedding model, retrained nightly on user-curated "looks similar" feedback.
 
 **Edge cases**
+
 - An icon style is deprecated — old icons keep rendering; new inserts default to the active style.
 - An icon's license doesn't permit commercial use — those icons are gated behind "commercial plan required" and excluded from default search for free-tier users.
 
 **Dependencies**
+
 - Feature 37 (design tokens drive `color`), feature 42 (custom font/upload license patterns inform icon licensing UI).
 
 ---
@@ -226,19 +266,23 @@
 ### Feature 33 — Stock photo/video/illustration integrations (Unsplash, Pexels, etc.)
 
 **Acceptance criteria**
+
 - The Insert → Media panel searches multiple stock providers in parallel and presents unified results with consistent metadata (author, license, dimensions).
 - Selecting an asset inserts it as a media element with the correct attribution, license metadata, and provider tracking ID.
 - Each integration is a plugin (feature 202) implementing a common `StockProvider` interface.
 
 **Behavioral details**
+
 - Asset CDN layout (see §5): each marketplace-installable asset is mirrored to the Domio CDN at install time so that offline editing and stable URLs are guaranteed.
 - Attribution is rendered automatically when the asset's license requires it (a small caption in the layers panel and a mandatory `credits[]` entry on the deck's metadata).
 
 **Edge cases**
+
 - Provider API rate-limit hit — search falls back to cached results with a "Results may be stale" banner.
 - Provider removes an asset (DMCA, takedown) — the asset is replaced by a "Removed by source — please replace" placeholder in any deck that uses it; the deck owner is notified.
 
 **Dependencies**
+
 - Feature 202 (plugin system), feature 196 (audit log for media swaps), feature 33 internal: §7 security (anti-piracy for downloaded assets).
 
 ---
@@ -246,19 +290,23 @@
 ### Feature 34 — GIF and Lottie animation library
 
 **Acceptance criteria**
+
 - The Insert → Animations panel provides a curated library of GIFs and Lottie animations, all free of charge and licensed for commercial use.
 - Lottie files can be recolored at runtime via design-token binding; GIFs cannot.
 - Animation insertion respects auto-layout (feature 7) and reduced-motion preferences (feature 93).
 
 **Behavioral details**
+
 - Lottie files are validated server-side on upload: each must declare its license, its author, and must pass a malware/script-content scan (Lottie's JSON can technically carry embedded JS — we forbid it at the renderer level regardless).
 - GIFs are transcoded to MP4/WebM on upload for size and battery reasons, but the original GIF is preserved for fallback export.
 
 **Edge cases**
+
 - A Lottie references a font the user doesn't have — the renderer downloads it from the CDN or shows a "Font missing — text shown as boxes" warning.
 - Animation exceeds the deck's bundle-size budget (see §8) — the user is warned at insert time and given a lower-fps or shorter-duration option.
 
 **Dependencies**
+
 - Feature 7 (auto-layout), feature 79 (Rive/Lottie runtime), feature 93 (reduced motion), feature 202 (third-party Lottie sources via plugins).
 
 ---
@@ -266,17 +314,21 @@
 ### Feature 35 — Sticker/annotation packs for informal decks
 
 **Acceptance criteria**
+
 - Sticker packs are grouped, themed bundles of decorative vector elements (arrows, badges, hand-drawn shapes, celebratory stickers).
 - Each pack has a marketplace listing (feature 28) with a preview, license, and a clear "for informal decks" label that surfaces brand-compliance warnings for corporate workspaces.
 - Stickers insert as standard components with a single recolorable fill and are repositionable/scalable like any element.
 
 **Behavioral details**
+
 - Packs have a `default_color` prop that respects design tokens (feature 37); a sticker set with multiple sub-stickers ships each as a separate component so they can be mixed across packs.
 
 **Edge cases**
+
 - A pack marked "informal only" is installed in a workspace with strict brand governance (feature 194): a soft warning is shown and brand lint (feature 46) flags every sticker insertion as off-brand unless explicitly whitelisted.
 
 **Dependencies**
+
 - Feature 28 (marketplace), feature 46 (brand lint), feature 194 (brand governance).
 
 ---
@@ -284,20 +336,24 @@
 ### Feature 36 — Brand-locked templates
 
 **Acceptance criteria**
+
 - A template or section can mark a region (a slide, a layer subtree, an element) as "brand-locked" — meaning non-admin users cannot edit, move, delete, or restyle elements within the region.
 - Locked regions are visually indicated with a diagonal-stripe overlay and a lock glyph.
 - Locked regions are enforced client-side and server-side; attempts to violate the lock are blocked with a clear explanation, not silently ignored.
 
 **Behavioral details**
+
 - A `brand_lock_region` is a row in the catalog/deck schema: `{ id, scope: "slide" | "element" | "region", selectors: [...], lock_strictness, allowed_overrides[], owner_admin_id }`. Allowed overrides can permit, for example, "color only" but not "text."
 - Admins can promote a user to "lock-bypass" for a specific region (e.g., a designer rebuilding the master template).
 
 **Edge cases**
+
 - A locked region references a component whose master is later updated — the lock applies to the post-update shape; if the update reshapes the locked zone, an admin must re-confirm the lock.
 - An MCP agent (section 16) tries to edit a locked region — blocked per feature 225 ("cannot touch brand-locked regions") with an explanatory error code returned to the agent.
 - Brand lock on a region containing a data-bound widget — bindings are inherited and read-only; users can rebind (admin only).
 
 **Dependencies**
+
 - Feature 26 (create-component), feature 30/31 (templates), feature 194 (brand governance), feature 225 (agent permissions), feature 46 (brand lint).
 
 ---
@@ -363,37 +419,37 @@
 
 ### 3.1 Functional Requirements
 
-| # | Requirement | Source feature(s) |
-|---|---|---|
-| F-COM-1 | The system shall version every component package using semver, with immutable version IDs. | 27, 28 |
-| F-COM-2 | The system shall resolve and install the correct transitive dependency closure for any component (component A may depend on theme T and icon pack I). | 23, 27, 28 |
-| F-COM-3 | The system shall validate prop values against the component's published JSON Schema before persisting to the deck CRDT. | 25, 26 |
-| F-COM-4 | The system shall render the prop form within 50 ms p95 for schemas of up to 40 props. | 25 |
-| F-COM-5 | The system shall support pinning an instance to a specific component version, independent of the workspace's default. | 24, 27 |
-| F-COM-6 | The system shall allow component packages to declare their license and enforce that license on every install and load. | 28, 36 |
-| F-COM-7 | The system shall provide an MCP tool surface for component install, list, search, and schema retrieval. | 28, 222, 233 |
-| F-COM-8 | The system shall store a complete audit trail of every component install, update, and uninstall, including the agent/human originator. | 27, 196, 227 |
-| F-COM-9 | The system shall allow an admin to mark a workspace region as brand-locked and enforce that lock on canvas edits, agent edits, and import flows. | 36, 225 |
-| F-COM-10 | The system shall detect and block off-brand insertions (component from a non-approved pack in a strict-governance workspace). | 35, 46, 194 |
+| #        | Requirement                                                                                                                                           | Source feature(s) |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| F-COM-1  | The system shall version every component package using semver, with immutable version IDs.                                                            | 27, 28            |
+| F-COM-2  | The system shall resolve and install the correct transitive dependency closure for any component (component A may depend on theme T and icon pack I). | 23, 27, 28        |
+| F-COM-3  | The system shall validate prop values against the component's published JSON Schema before persisting to the deck CRDT.                               | 25, 26            |
+| F-COM-4  | The system shall render the prop form within 50 ms p95 for schemas of up to 40 props.                                                                 | 25                |
+| F-COM-5  | The system shall support pinning an instance to a specific component version, independent of the workspace's default.                                 | 24, 27            |
+| F-COM-6  | The system shall allow component packages to declare their license and enforce that license on every install and load.                                | 28, 36            |
+| F-COM-7  | The system shall provide an MCP tool surface for component install, list, search, and schema retrieval.                                               | 28, 222, 233      |
+| F-COM-8  | The system shall store a complete audit trail of every component install, update, and uninstall, including the agent/human originator.                | 27, 196, 227      |
+| F-COM-9  | The system shall allow an admin to mark a workspace region as brand-locked and enforce that lock on canvas edits, agent edits, and import flows.      | 36, 225           |
+| F-COM-10 | The system shall detect and block off-brand insertions (component from a non-approved pack in a strict-governance workspace).                         | 35, 46, 194       |
 
 ### 3.2 Non-Functional Requirements
 
-| # | Requirement | Target | Source |
-|---|---|---|---|
-| NFR-COM-1 | Marketplace search latency p95 | ≤ 400 ms (warm), ≤ 1.2 s (cold) | 28 |
-| NFR-COM-2 | Marketplace search indexing lag (new listing visible) | ≤ 60 s after publish | 28 |
-| NFR-COM-3 | Component install time p95 (catalog bundle) | ≤ 1.5 s for ≤ 5 MB; ≤ 4 s for ≤ 50 MB | 23, 28 |
-| NFR-COM-4 | Prop panel render budget | 50 ms p95 / 100 ms p99 | 25 |
-| NFR-COM-5 | Variant switch render time | 100 ms p95 | 24 |
-| NFR-COM-6 | Bundle size for a single component (code + assets) | ≤ 250 KB gzipped by default; up to 5 MB with explicit "heavy" flag | 23, 34 |
-| NFR-COM-7 | Marketplace indexing throughput | ≥ 200 listings/sec sustained | 28 |
-| NFR-COM-8 | Reviews/ratings moderation queue latency (automated) | ≤ 30 s for auto-flag; ≤ 24 h for human review | 28 |
-| NFR-COM-9 | Concurrent installs per workspace | ≥ 100 simultaneous without degradation | 27 |
-| NFR-COM-10 | Marketplace availability | 99.9% rolling 30-day | 28 |
-| NFR-COM-11 | Component bundle offline-availability | 100% of installed components must render offline for ≥ 30 days | 21, 27 |
-| NFR-COM-12 | Schema validation determinism | Identical input → identical accept/reject across clients | 25, 26 |
-| NFR-COM-13 | Localization | All marketplace surfaces and prop panel labels available in en, bn, es, fr, de, ja, zh-CN at v1; extensible | 12.4 of planning guide |
-| NFR-COM-14 | Accessibility | Prop panel meets WCAG 2.2 AA; full keyboard navigation; screen-reader labels for every prop | 3.5 of planning guide |
+| #          | Requirement                                           | Target                                                                                                      | Source                 |
+| ---------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------- |
+| NFR-COM-1  | Marketplace search latency p95                        | ≤ 400 ms (warm), ≤ 1.2 s (cold)                                                                             | 28                     |
+| NFR-COM-2  | Marketplace search indexing lag (new listing visible) | ≤ 60 s after publish                                                                                        | 28                     |
+| NFR-COM-3  | Component install time p95 (catalog bundle)           | ≤ 1.5 s for ≤ 5 MB; ≤ 4 s for ≤ 50 MB                                                                       | 23, 28                 |
+| NFR-COM-4  | Prop panel render budget                              | 50 ms p95 / 100 ms p99                                                                                      | 25                     |
+| NFR-COM-5  | Variant switch render time                            | 100 ms p95                                                                                                  | 24                     |
+| NFR-COM-6  | Bundle size for a single component (code + assets)    | ≤ 250 KB gzipped by default; up to 5 MB with explicit "heavy" flag                                          | 23, 34                 |
+| NFR-COM-7  | Marketplace indexing throughput                       | ≥ 200 listings/sec sustained                                                                                | 28                     |
+| NFR-COM-8  | Reviews/ratings moderation queue latency (automated)  | ≤ 30 s for auto-flag; ≤ 24 h for human review                                                               | 28                     |
+| NFR-COM-9  | Concurrent installs per workspace                     | ≥ 100 simultaneous without degradation                                                                      | 27                     |
+| NFR-COM-10 | Marketplace availability                              | 99.9% rolling 30-day                                                                                        | 28                     |
+| NFR-COM-11 | Component bundle offline-availability                 | 100% of installed components must render offline for ≥ 30 days                                              | 21, 27                 |
+| NFR-COM-12 | Schema validation determinism                         | Identical input → identical accept/reject across clients                                                    | 25, 26                 |
+| NFR-COM-13 | Localization                                          | All marketplace surfaces and prop panel labels available in en, bn, es, fr, de, ja, zh-CN at v1; extensible | 12.4 of planning guide |
+| NFR-COM-14 | Accessibility                                         | Prop panel meets WCAG 2.2 AA; full keyboard navigation; screen-reader labels for every prop                 | 3.5 of planning guide  |
 
 ### 3.3 Component dependency resolution
 
@@ -520,7 +576,7 @@ We use JSON Schema (draft 2020-12) as the canonical prop schema language, with t
       "x-domio-prop": { "category": "Behavior" },
       "properties": {
         "source": { "type": "string" },
-        "field":  { "type": "string" }
+        "field": { "type": "string" }
       }
     }
   },
@@ -1012,14 +1068,14 @@ Components render inside an iframe-style sandbox with a strict CSP:
 
 ### 8.1 Bundle size limits
 
-| Component type | Default limit | Hard cap (with explicit "heavy" flag) |
-|---|---|---|
-| Standard component | 250 KB gzipped | 1 MB gzipped |
-| Icon | 8 KB per icon | 32 KB per icon |
-| Sticker pack | 1 MB gzipped total | 5 MB gzipped total |
-| Animation (Lottie) | 250 KB gzipped | 1 MB gzipped |
-| Template (full deck) | 5 MB gzipped | 25 MB gzipped |
-| Section template | 1 MB gzipped | 5 MB gzipped |
+| Component type       | Default limit      | Hard cap (with explicit "heavy" flag) |
+| -------------------- | ------------------ | ------------------------------------- |
+| Standard component   | 250 KB gzipped     | 1 MB gzipped                          |
+| Icon                 | 8 KB per icon      | 32 KB per icon                        |
+| Sticker pack         | 1 MB gzipped total | 5 MB gzipped total                    |
+| Animation (Lottie)   | 250 KB gzipped     | 1 MB gzipped                          |
+| Template (full deck) | 5 MB gzipped       | 25 MB gzipped                         |
+| Section template     | 1 MB gzipped       | 5 MB gzipped                          |
 
 A bundle over its default limit shows a warning at insert time; over its hard cap, the bundle is rejected at publish time.
 

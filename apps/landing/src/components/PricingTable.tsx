@@ -35,11 +35,7 @@ export function PricingTable({ tiers }: PricingTableProps): JSX.Element {
 
   return (
     <div className="pricing-table" data-testid="pricing-table" data-billing={mode}>
-      <div
-        className="pricing-table__toggle"
-        role="tablist"
-        aria-label="Billing period"
-      >
+      <div className="pricing-table__toggle" role="tablist" aria-label="Billing period">
         <button
           type="button"
           role="tab"
@@ -89,9 +85,7 @@ export function PricingTable({ tiers }: PricingTableProps): JSX.Element {
                   {tier.name}
                 </h3>
                 <p className="pricing-card__price">
-                  <span className="pricing-card__amount">
-                    {formatPrice(tier, mode)}
-                  </span>
+                  <span className="pricing-card__amount">{formatPrice(tier, mode)}</span>
                   {!isCustom && tier.price_monthly_usd !== 0 ? (
                     <span className="pricing-card__unit">
                       {mode === 'monthly' ? 'per workspace / month' : 'per workspace / year'}

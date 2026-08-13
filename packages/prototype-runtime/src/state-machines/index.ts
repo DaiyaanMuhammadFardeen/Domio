@@ -8,11 +8,7 @@ export {
   type InteractionEvent,
   type InteractionEventKind,
 } from './transition-evaluator.js';
-export {
-  EventBus,
-  type StateTransitionEvent,
-  type StateTransitionHandler,
-} from './event-bus.js';
+export { EventBus, type StateTransitionEvent, type StateTransitionHandler } from './event-bus.js';
 export {
   StateMachine,
   type StateDef,

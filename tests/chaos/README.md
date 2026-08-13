@@ -13,6 +13,7 @@ k6 → gateway → Toxiproxy NATS proxy → NATS (localhost:4222)
 ```
 
 Toxiproxy sits between the gateway and real services, allowing us to inject:
+
 - **Latency** (artificial delay on packets)
 - **Timeouts** (connection drops)
 - **Bandwidth limits** (slow transfer)
@@ -40,10 +41,12 @@ tests/chaos/run.sh
 ## Scenarios
 
 ### 1. Baseline Connectivity
+
 Verify that the gateway works correctly when traffic flows through Toxiproxy
 proxies (no toxics active). Confirms the proxy layer introduces no issues.
 
 ### 2. NATS Partition (Timeout Toxic)
+
 **Injection**: Timeout toxic on NATS proxy (`timeout=1ms, timeout_duration=0s`)
 
 **Expected behavior**: Gateway HTTP endpoints (`/healthz`, `/readyz`) remain
@@ -54,6 +57,7 @@ sync operations, the partition has no visible effect on HTTP health checks.
 HTTP server is decoupled and stays up.
 
 ### 3. Redis Latency (2000ms Toxic)
+
 **Injection**: Latency toxic on Redis proxy (`latency=2000ms`)
 
 **Expected behavior**: Gateway HTTP endpoints remain responsive. Redis latency
@@ -61,25 +65,28 @@ affects presence updates and session storage, but health checks pass since they
 don't hit Redis synchronously.
 
 ### 4. Recovery After Toxic Removal
+
 Remove all toxics and verify the gateway returns to full health (`/readyz` → 200).
 
 ## Expected Resilience Behavior
 
-| Scenario | Gateway HTTP | WebSocket | Notes |
-|----------|-------------|-----------|-------|
-| NATS partition | ✓ Up | ✓ Connected | Gateway doesn't block on NATS for health |
-| Redis 2000ms latency | ✓ Up | ✓ Connected | Health checks don't wait on Redis |
-| Toxic removal | ✓ Recovered | ✓ Full service | No stale state to clean up |
+| Scenario             | Gateway HTTP | WebSocket      | Notes                                    |
+| -------------------- | ------------ | -------------- | ---------------------------------------- |
+| NATS partition       | ✓ Up         | ✓ Connected    | Gateway doesn't block on NATS for health |
+| Redis 2000ms latency | ✓ Up         | ✓ Connected    | Health checks don't wait on Redis        |
+| Toxic removal        | ✓ Recovered  | ✓ Full service | No stale state to clean up               |
 
 ## Known Limitations
 
 The current gateway is a **connection-only** skeleton:
+
 - `handleSyncWS` starts a `WritePump` but no `ReadPump`
 - No NATS pub/sub for op fan-out
 - No Redis persistence for session state
 
 This means toxics don't exercise the gateway's actual I/O paths. Full chaos
 testing requires:
+
 1. Gateway with active NATS subscription for op broadcast
 2. Gateway with Redis-backed session/presence store
 3. k6 tests that send ops and verify fan-out through NATS
@@ -106,5 +113,6 @@ curl -X POST http://localhost:8474/proxies/nats/toxics/reset
 ## Docker Compose
 
 The `toxiproxy-realtime.yaml` file defines:
+
 - `toxiproxy`: The proxy server (API on :8474, NATS proxy on :14222, Redis proxy on :16379)
 - `gateway-chaos`: Gateway pointed at toxiproxy addresses (optional, for Docker-only testing)

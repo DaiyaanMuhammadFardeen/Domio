@@ -105,12 +105,20 @@ describe('stickers', () => {
     it('returns all packs when no theme filter', async () => {
       const deps = makeDeps();
       await seedPack(deps, {
-        id: 'pack-1', name: 'A', theme: 'fun', informalOnly: false,
-        stickerComponentIds: ['s1'], createdAt: Date.now(),
+        id: 'pack-1',
+        name: 'A',
+        theme: 'fun',
+        informalOnly: false,
+        stickerComponentIds: ['s1'],
+        createdAt: Date.now(),
       });
       await seedPack(deps, {
-        id: 'pack-2', name: 'B', theme: 'business', informalOnly: true,
-        stickerComponentIds: ['s2'], createdAt: Date.now(),
+        id: 'pack-2',
+        name: 'B',
+        theme: 'business',
+        informalOnly: true,
+        stickerComponentIds: ['s2'],
+        createdAt: Date.now(),
       });
 
       const result = await listAvailableStickerPacks(deps);
@@ -120,12 +128,20 @@ describe('stickers', () => {
     it('filters by theme', async () => {
       const deps = makeDeps();
       await seedPack(deps, {
-        id: 'pack-fun', name: 'Fun', theme: 'fun', informalOnly: false,
-        stickerComponentIds: ['s1'], createdAt: Date.now(),
+        id: 'pack-fun',
+        name: 'Fun',
+        theme: 'fun',
+        informalOnly: false,
+        stickerComponentIds: ['s1'],
+        createdAt: Date.now(),
       });
       await seedPack(deps, {
-        id: 'pack-biz', name: 'Biz', theme: 'business', informalOnly: false,
-        stickerComponentIds: ['s2'], createdAt: Date.now(),
+        id: 'pack-biz',
+        name: 'Biz',
+        theme: 'business',
+        informalOnly: false,
+        stickerComponentIds: ['s2'],
+        createdAt: Date.now(),
       });
 
       const result = await listAvailableStickerPacks(deps, { theme: 'fun' });
@@ -136,8 +152,12 @@ describe('stickers', () => {
     it('returns empty for non-matching theme', async () => {
       const deps = makeDeps();
       await seedPack(deps, {
-        id: 'pack-1', name: 'A', theme: 'fun', informalOnly: false,
-        stickerComponentIds: ['s1'], createdAt: Date.now(),
+        id: 'pack-1',
+        name: 'A',
+        theme: 'fun',
+        informalOnly: false,
+        stickerComponentIds: ['s1'],
+        createdAt: Date.now(),
       });
 
       const result = await listAvailableStickerPacks(deps, { theme: 'nope' });

@@ -23,7 +23,7 @@ export class ConsentPolicyFetchError extends Error {
 }
 
 const DEFAULT_BASE: string =
-  (typeof process !== 'undefined' ? process.env['JOIN_WEB_API_BASE_URL'] ?? '' : '');
+  typeof process !== 'undefined' ? (process.env['JOIN_WEB_API_BASE_URL'] ?? '') : '';
 
 /**
  * Returns the current policy version. Throws on non-2xx responses.

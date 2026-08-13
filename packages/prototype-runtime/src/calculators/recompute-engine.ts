@@ -34,7 +34,10 @@ export class CalculatorCycleError extends Error {
 
 export class CalculatorEvalError extends Error {
   readonly code = 'CALCULATOR_EVAL_ERROR' as const;
-  constructor(public readonly nodeId: string, message: string) {
+  constructor(
+    public readonly nodeId: string,
+    message: string,
+  ) {
     super(`Calculator node ${nodeId} failed: ${message}`);
     this.name = 'CalculatorEvalError';
   }
@@ -57,7 +60,11 @@ export const calculator = {
     precision?: number;
     currency?: string;
     locale?: string;
-    inputs: ReadonlyArray<Omit<import('./calculator-def.js').CalculatorInput, 'defaultValue'> & { defaultValue?: number }>;
+    inputs: ReadonlyArray<
+      Omit<import('./calculator-def.js').CalculatorInput, 'defaultValue'> & {
+        defaultValue?: number;
+      }
+    >;
     outputs: ReadonlyArray<import('./calculator-def.js').CalculatorOutput>;
   }): import('./calculator-def.js').CalculatorDef {
     return {
@@ -75,7 +82,11 @@ export const calculator = {
     id: string;
     name?: string;
     precision?: number;
-    nodes: ReadonlyArray<Omit<import('./calculator-def.js').CalculatorNode, 'dependsOn'> & { dependsOn?: readonly string[] }>;
+    nodes: ReadonlyArray<
+      Omit<import('./calculator-def.js').CalculatorNode, 'dependsOn'> & {
+        dependsOn?: readonly string[];
+      }
+    >;
   }): import('./calculator-def.js').CalculatorDef {
     return {
       id: spec.id,
@@ -106,7 +117,13 @@ export function recompute(
   validateCalculatorDef(def);
   const now = (opts.now ?? DEFAULT_NOW)();
   if (def.mode === 'form') {
-    return recomputeForm(def, def.inputs!, def.outputs!, { ...inputs, ...(opts.inputsOverride ?? {}) }, now);
+    return recomputeForm(
+      def,
+      def.inputs!,
+      def.outputs!,
+      { ...inputs, ...(opts.inputsOverride ?? {}) },
+      now,
+    );
   }
   return recomputeGraph(def, def.nodes!, { ...inputs, ...(opts.inputsOverride ?? {}) }, now);
 }
@@ -120,9 +137,10 @@ function recomputeForm(
 ): CalculatorState {
   const normalized: Record<string, number> = {};
   for (const inp of inputs) {
-    normalized[inp.id] = typeof values[inp.id] === 'number' && Number.isFinite(values[inp.id]!)
-      ? values[inp.id]!
-      : (inp.defaultValue ?? 0);
+    normalized[inp.id] =
+      typeof values[inp.id] === 'number' && Number.isFinite(values[inp.id]!)
+        ? values[inp.id]!
+        : (inp.defaultValue ?? 0);
   }
   const ctx: RecomputeContext = {
     inputs: normalized,
@@ -187,12 +205,16 @@ function recomputeGraph(
     }
     try {
       const args = Object.fromEntries(
-        node.dependsOn.map((d) => [d, ctx.nodes[d] !== undefined ? ctx.nodes[d]! : values[d] ?? 0]),
+        node.dependsOn.map((d) => [
+          d,
+          ctx.nodes[d] !== undefined ? ctx.nodes[d]! : (values[d] ?? 0),
+        ]),
       );
       const result = evalFormula(node.formula, { ...args, ...values, ctx });
-      const rounded = (node.precision ?? def.precision) > 0
-        ? Number(decRound(Number(result), node.precision ?? def.precision).value)
-        : Number(result);
+      const rounded =
+        (node.precision ?? def.precision) > 0
+          ? Number(decRound(Number(result), node.precision ?? def.precision).value)
+          : Number(result);
       ctx.nodes[id] = rounded;
       outputValues[id] = rounded;
     } catch (e) {
@@ -254,45 +276,72 @@ function evaluateOutput(out: CalculatorOutput, ctx: RecomputeContext): number | 
 // BUILTINS is keyed by lowercase identifier; the parser calls
 // `tk.toLowerCase()` to look up. This keeps the public formula DSL
 // case-insensitive without surprising users about camelCase vs all-lowercase.
-const BUILTINS: Readonly<Record<string, { arity: number | 'min'; fn: (args: ReadonlyArray<number | string | readonly number[]>, ctx: RecomputeContext) => number | string }>> = {
+const BUILTINS: Readonly<
+  Record<
+    string,
+    {
+      arity: number | 'min';
+      fn: (
+        args: ReadonlyArray<number | string | readonly number[]>,
+        ctx: RecomputeContext,
+      ) => number | string;
+    }
+  >
+> = {
   sum: { arity: 'min', fn: (a) => a.reduce((s, x) => Number(decAdd(s, x).value), 0) },
-  average: { arity: 'min', fn: (a) => {
-    if (a.length === 0) return 0;
-    const total = a.reduce((s, x) => Number(decAdd(s, x).value), 0);
-    return Number(div(total, a.length));
-  }},
+  average: {
+    arity: 'min',
+    fn: (a) => {
+      if (a.length === 0) return 0;
+      const total = a.reduce((s, x) => Number(decAdd(s, x).value), 0);
+      return Number(div(total, a.length));
+    },
+  },
   min: { arity: 'min', fn: (a) => a.reduce((m, x) => Math.min(m, x), Number.POSITIVE_INFINITY) },
   max: { arity: 'min', fn: (a) => a.reduce((m, x) => Math.max(m, x), Number.NEGATIVE_INFINITY) },
   if: { arity: 3, fn: ([cond, a, b]) => (cond !== 0 ? a : b) },
-  coalesce: { arity: 'min', fn: (a) => {
-    for (const x of a) if (x !== 0 && Number.isFinite(x)) return x;
-    return 0;
-  }},
+  coalesce: {
+    arity: 'min',
+    fn: (a) => {
+      for (const x of a) if (x !== 0 && Number.isFinite(x)) return x;
+      return 0;
+    },
+  },
   clamp: { arity: 3, fn: ([v, lo, hi]) => Math.min(hi, Math.max(lo, v)) },
   // Use 'half-down' so 1.55 rounds to 1.5 (matches the most
   // user-friendly intuition; 0.5 always rounds toward zero).
   // decimal128's default is banker's rounding (1.55 → 1.6).
   round: { arity: 'min', fn: (a) => Number(decRound(a[0]!, a[1] ?? 0, 'half-down').value) },
-  formatcurrency: { arity: 'min', fn: (a, ctx) => decFormatCurrency(a[0]!, ctx.currency, ctx.locale) },
+  formatcurrency: {
+    arity: 'min',
+    fn: (a, ctx) => decFormatCurrency(a[0]!, ctx.currency, ctx.locale),
+  },
   // Finance
   irr: { arity: 1, fn: (a) => irr(a[0] as readonly number[]).value },
-  npv: { arity: 2, fn: ([rate, cashflows]) => {
-    const cfArr = cashflows as readonly number[];
-    let total = 0;
-    for (let i = 0; i < cfArr.length; i++) {
-      const cf = cfArr[i] ?? 0;
-      total = Number(decAdd(total, Number(div(cf, Math.pow(1 + Number(rate), i)))).value);
-    }
-    return total;
-  }},
+  npv: {
+    arity: 2,
+    fn: ([rate, cashflows]) => {
+      const cfArr = cashflows as readonly number[];
+      let total = 0;
+      for (let i = 0; i < cfArr.length; i++) {
+        const cf = cfArr[i] ?? 0;
+        total = Number(decAdd(total, Number(div(cf, Math.pow(1 + Number(rate), i)))).value);
+      }
+      return total;
+    },
+  },
 };
 
-function evalFormula(src: string, ctx: RecomputeContext | RecomputeContextWithSelf): number | string {
+function evalFormula(
+  src: string,
+  ctx: RecomputeContext | RecomputeContextWithSelf,
+): number | string {
   const tokens = tokenize(src);
   let i = 0;
   const peek = (): string | undefined => tokens[i];
   const consume = (): string | undefined => tokens[i++];
-  const ctxFinal: RecomputeContext = 'ctx' in (ctx as RecomputeContextWithSelf) ? (ctx as RecomputeContextWithSelf).ctx : ctx;
+  const ctxFinal: RecomputeContext =
+    'ctx' in (ctx as RecomputeContextWithSelf) ? (ctx as RecomputeContextWithSelf).ctx : ctx;
 
   const parseExpr = (): number | string | readonly number[] => parseAddSub();
 
@@ -301,7 +350,10 @@ function evalFormula(src: string, ctx: RecomputeContext | RecomputeContextWithSe
     while (peek() === '+' || peek() === '-') {
       const op = consume();
       const right: number | string | readonly number[] = parseMulDiv();
-      left = op === '+' ? Number(decAdd(Number(left), Number(right)).value) : Number(decSub(Number(left), Number(right)).value);
+      left =
+        op === '+'
+          ? Number(decAdd(Number(left), Number(right)).value)
+          : Number(decSub(Number(left), Number(right)).value);
     }
     return left;
   };
@@ -311,14 +363,23 @@ function evalFormula(src: string, ctx: RecomputeContext | RecomputeContextWithSe
     while (peek() === '*' || peek() === '/') {
       const op = consume();
       const right: number | string | readonly number[] = parseUnary();
-      left = op === '*' ? Number(decMul(Number(left), Number(right)).value) : Number(div(Number(left), Number(right)));
+      left =
+        op === '*'
+          ? Number(decMul(Number(left), Number(right)).value)
+          : Number(div(Number(left), Number(right)));
     }
     return left;
   };
 
   const parseUnary = (): number | string | readonly number[] => {
-    if (peek() === '-') { consume(); return -Number(parseUnary()); }
-    if (peek() === '+') { consume(); return Number(parseUnary()); }
+    if (peek() === '-') {
+      consume();
+      return -Number(parseUnary());
+    }
+    if (peek() === '+') {
+      consume();
+      return Number(parseUnary());
+    }
     return parsePrimary();
   };
 
@@ -389,20 +450,39 @@ function tokenize(src: string): string[] {
   let i = 0;
   while (i < src.length) {
     const c = src.charAt(i);
-    if (c === ' ' || c === '\t' || c === '\n') { i++; continue; }
-    if (c === ',' || c === '(' || c === ')' || c === '[' || c === ']' || c === '+' || c === '-' || c === '*' || c === '/') {
-      out.push(c); i++; continue;
+    if (c === ' ' || c === '\t' || c === '\n') {
+      i++;
+      continue;
+    }
+    if (
+      c === ',' ||
+      c === '(' ||
+      c === ')' ||
+      c === '[' ||
+      c === ']' ||
+      c === '+' ||
+      c === '-' ||
+      c === '*' ||
+      c === '/'
+    ) {
+      out.push(c);
+      i++;
+      continue;
     }
     if (/[0-9.]/.test(c)) {
       let j = i;
       while (j < src.length && /[0-9.]/.test(src.charAt(j))) j++;
-      out.push(src.slice(i, j)); i = j; continue;
+      out.push(src.slice(i, j));
+      i = j;
+      continue;
     }
     if (c === '$' || /[A-Za-z_]/.test(c)) {
       let j = i;
       // Identifier may include `$` (for `$inputName`).
       while (j < src.length && /[A-Za-z0-9_$]/.test(src.charAt(j))) j++;
-      out.push(src.slice(i, j)); i = j; continue;
+      out.push(src.slice(i, j));
+      i = j;
+      continue;
     }
     throw new CalculatorEvalError(`<tokenize>`, `unexpected character '${c}'`);
   }
@@ -439,14 +519,22 @@ export function irr(cashflows: readonly number[], guess = 0.1): IRRResult {
     if (rate < -0.999999) rate = -0.999999;
   }
   // Negative-IRR path: bisection over [-0.9999, 1.0].
-  let lo = -0.9999, hi = 1.0;
-  let flo = npvAndDeriv(lo, cashflows).npv, fhi = npvAndDeriv(hi, cashflows).npv;
+  let lo = -0.9999,
+    hi = 1.0;
+  let flo = npvAndDeriv(lo, cashflows).npv,
+    fhi = npvAndDeriv(hi, cashflows).npv;
   if (flo * fhi > 0) return { value: NaN, converged: false, iterations: iter };
   for (let k = 0; k < 200; k++) {
     const mid = (lo + hi) / 2;
     const fm = npvAndDeriv(mid, cashflows).npv;
     if (Math.abs(fm) < eps) return { value: mid, converged: true, iterations: iter + k };
-    if (flo * fm < 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+    if (flo * fm < 0) {
+      hi = mid;
+      fhi = fm;
+    } else {
+      lo = mid;
+      flo = fm;
+    }
   }
   return { value: rate, converged: false, iterations: iter };
 }
@@ -458,7 +546,7 @@ function npvAndDeriv(rate: number, cashflows: readonly number[]): { npv: number;
     const cf = cashflows[i] ?? 0;
     const disc = Math.pow(1 + rate, i);
     npv += cf / disc;
-    if (i > 0) dnpv += -i * cf / Math.pow(1 + rate, i + 1);
+    if (i > 0) dnpv += (-i * cf) / Math.pow(1 + rate, i + 1);
   }
   return { npv, dnpv };
 }

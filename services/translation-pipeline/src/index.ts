@@ -49,7 +49,12 @@ export class TranslationPipeline {
     this.tts = opts.tts;
   }
 
-  async transcribe(input: { workspace_id: string; audio: Uint8Array; source_lang: string; sample_rate_hz: number }): Promise<{ text: string; language: string; duration_ms: number }> {
+  async transcribe(input: {
+    workspace_id: string;
+    audio: Uint8Array;
+    source_lang: string;
+    sample_rate_hz: number;
+  }): Promise<{ text: string; language: string; duration_ms: number }> {
     const r = await this.stt.transcribe({
       workspace_id: input.workspace_id,
       session_id: 'inline',
@@ -70,7 +75,11 @@ export class TranslationPipeline {
     return { text: r.text, provider: r.provider };
   }
 
-  async synthesize(input: { workspace_id: string; text: string; language: string }): Promise<{ audio: Uint8Array; duration_ms: number; provider: string }> {
+  async synthesize(input: {
+    workspace_id: string;
+    text: string;
+    language: string;
+  }): Promise<{ audio: Uint8Array; duration_ms: number; provider: string }> {
     const r = await this.tts.synthesize({
       workspace_id: input.workspace_id,
       text: input.text,

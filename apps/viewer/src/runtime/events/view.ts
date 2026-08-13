@@ -44,10 +44,7 @@ export interface ViewerEmitContext {
  * after CRDT apply completes so the slide_id is the stable scene-graph
  * node id (not a transient index).
  */
-export function emitView(
-  ctx: ViewerEmitContext,
-  overrides: Partial<ViewEvent> = {},
-): void {
+export function emitView(ctx: ViewerEmitContext, overrides: Partial<ViewEvent> = {}): void {
   const client = ctx.client;
   if (!client) return;
   // Build the event without undefined fields so exactOptionalPropertyTypes
@@ -179,7 +176,8 @@ export function emitScrollProgress(
   if (ctx.share_link_id !== undefined) event.share_link_id = ctx.share_link_id;
   if (ctx.experiment_id !== undefined) event.experiment_id = ctx.experiment_id;
   if (ctx.variant_id !== undefined) event.variant_id = ctx.variant_id;
-  if (args.scroll_velocity_px_per_s !== undefined) event.scroll_velocity_px_per_s = args.scroll_velocity_px_per_s;
+  if (args.scroll_velocity_px_per_s !== undefined)
+    event.scroll_velocity_px_per_s = args.scroll_velocity_px_per_s;
   return client.emitScrollProgress(event as Parameters<AnalyticsClient['emitScrollProgress']>[0]);
 }
 

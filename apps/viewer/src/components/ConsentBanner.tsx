@@ -104,7 +104,11 @@ export function ConsentBanner({
         {(['opt_in', 'opt_out', 'anonymous'] as ConsentTier[]).map((t) => {
           const c = TIER_COPY[t];
           return (
-            <label key={t} className={`consent-banner__option${tier === t ? ' is-active' : ''}`} data-testid={`consent-option-${t}`}>
+            <label
+              key={t}
+              className={`consent-banner__option${tier === t ? ' is-active' : ''}`}
+              data-testid={`consent-option-${t}`}
+            >
               <input
                 type="radio"
                 name="consent"
@@ -120,18 +124,10 @@ export function ConsentBanner({
         })}
       </fieldset>
       <div className="consent-banner__actions">
-        <button
-          type="button"
-          data-testid="consent-confirm"
-          onClick={() => handlePick(tier)}
-        >
+        <button type="button" data-testid="consent-confirm" onClick={() => handlePick(tier)}>
           {`Confirm (${tier})`}
         </button>
-        <button
-          type="button"
-          data-testid="consent-dismiss"
-          onClick={handleDismiss}
-        >
+        <button type="button" data-testid="consent-dismiss" onClick={handleDismiss}>
           Dismiss
         </button>
       </div>

@@ -87,28 +87,17 @@ export function CommandPalette(props: CommandPaletteProps): ReactElement | null 
               role="option"
               aria-selected={i === cursor}
             >
-              <button
-                type="button"
-                onClick={() => onInvoke(s)}
-                onMouseEnter={() => setCursor(i)}
-              >
+              <button type="button" onClick={() => onInvoke(s)} onMouseEnter={() => setCursor(i)}>
                 <span className="palette__label">{s.label}</span>
                 {s.category ? <span className="palette__cat">{s.category}</span> : null}
                 <span className="palette__chord">{s.chord}</span>
               </button>
             </li>
           ))}
-          {matches.length === 0 ? (
-            <li className="palette__empty">No matches</li>
-          ) : null}
+          {matches.length === 0 ? <li className="palette__empty">No matches</li> : null}
         </ul>
       </div>
-      <button
-        type="button"
-        aria-label="Close"
-        className="palette__scrim"
-        onClick={onClose}
-      />
+      <button type="button" aria-label="Close" className="palette__scrim" onClick={onClose} />
     </div>
   );
 }

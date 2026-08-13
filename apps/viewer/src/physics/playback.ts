@@ -50,11 +50,7 @@ export interface ViewerBodyState {
 
 export interface ViewerPhysicsRuntime {
   /** Create a rigid body. Returns the handle. */
-  createBody(
-    type: 'dynamic' | 'fixed',
-    position: Vec3,
-    collider: ColliderDesc,
-  ): RigidBodyHandle;
+  createBody(type: 'dynamic' | 'fixed', position: Vec3, collider: ColliderDesc): RigidBodyHandle;
   /** Bind a mesh to a body. First bind wins. */
   bind(meshId: string, handle: RigidBodyHandle): BindResult;
   /** Check whether a mesh is already bound. */

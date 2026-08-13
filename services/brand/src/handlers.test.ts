@@ -55,12 +55,14 @@ function req<P, B, Q = Record<string, string | undefined>>(
   return { method, path, params, body, query, headers: {} };
 }
 
-function fixtureKit(overrides: Partial<{
-  orgId: string;
-  name: string;
-  scope: 'org' | 'workspace' | 'team';
-  createdBy?: string;
-}> = {}) {
+function fixtureKit(
+  overrides: Partial<{
+    orgId: string;
+    name: string;
+    scope: 'org' | 'workspace' | 'team';
+    createdBy?: string;
+  }> = {},
+) {
   return {
     orgId: ORG,
     name: 'Acme',
@@ -117,8 +119,14 @@ describe('brand-service handlers — brand kits', () => {
 
   it('GET /v1/brands lists kits for an org', async () => {
     const { ctx } = makeCtx();
-    await handlers.createBrandKit(req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'A' })), ctx);
-    await handlers.createBrandKit(req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'B' })), ctx);
+    await handlers.createBrandKit(
+      req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'A' })),
+      ctx,
+    );
+    await handlers.createBrandKit(
+      req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'B' })),
+      ctx,
+    );
     const res = await handlers.listBrandKits(
       req('GET', '/v1/brands', { orgId: ORG }, undefined, {}),
       ctx,
@@ -130,7 +138,12 @@ describe('brand-service handlers — brand kits', () => {
   it('GET /v1/brands/:kitId 404s when missing', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.getBrandKit(
-      req('GET', '/v1/brands/:kitId', { orgId: ORG, kitId: '01H0000000000000000000000AB' }, undefined),
+      req(
+        'GET',
+        '/v1/brands/:kitId',
+        { orgId: ORG, kitId: '01H0000000000000000000000AB' },
+        undefined,
+      ),
       ctx,
     );
     expect(res.status).toBe(404);
@@ -144,12 +157,20 @@ describe('brand-service handlers — brand kits', () => {
     );
     const kitId = (create.body as { kitId: string }).kitId;
     const pub = await handlers.publishBrandKit(
-      req('POST', '/v1/brands/:kitId/publish', { orgId: ORG, kitId }, undefined, { actorId: ACTOR }),
+      req('POST', '/v1/brands/:kitId/publish', { orgId: ORG, kitId }, undefined, {
+        actorId: ACTOR,
+      }),
       ctx,
     );
     expect(pub.status).toBe(200);
     const arc = await handlers.archiveBrandKit(
-      req('POST', '/v1/brands/:kitId/archive', { orgId: ORG, kitId }, { reason: 'replaced' }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/brands/:kitId/archive',
+        { orgId: ORG, kitId },
+        { reason: 'replaced' },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(arc.status).toBe(200);
@@ -164,7 +185,9 @@ describe('brand-service handlers — brand kits', () => {
     );
     const kitId = (create.body as { kitId: string }).kitId;
     await handlers.publishBrandKit(
-      req('POST', '/v1/brands/:kitId/publish', { orgId: ORG, kitId }, undefined, { actorId: ACTOR }),
+      req('POST', '/v1/brands/:kitId/publish', { orgId: ORG, kitId }, undefined, {
+        actorId: ACTOR,
+      }),
       ctx,
     );
     const res = await handlers.updateBrandKit(
@@ -179,16 +202,34 @@ describe('brand-service handlers — brand kits', () => {
 describe('brand-service handlers — sub-brand', () => {
   it('POST /v1/brands/sub-brands 409s on cycle', async () => {
     const { ctx, metrics } = makeCtx();
-    const a = await handlers.createBrandKit(req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'A' })), ctx);
-    const b = await handlers.createBrandKit(req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'B' })), ctx);
+    const a = await handlers.createBrandKit(
+      req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'A' })),
+      ctx,
+    );
+    const b = await handlers.createBrandKit(
+      req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'B' })),
+      ctx,
+    );
     const aId = (a.body as { kitId: string }).kitId;
     const bId = (b.body as { kitId: string }).kitId;
     await handlers.addSubBrand(
-      req('POST', '/v1/brands/sub-brands', { orgId: ORG }, { parentKitId: aId, childKitId: bId, inheritanceType: 'extend' }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/brands/sub-brands',
+        { orgId: ORG },
+        { parentKitId: aId, childKitId: bId, inheritanceType: 'extend' },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     const res = await handlers.addSubBrand(
-      req('POST', '/v1/brands/sub-brands', { orgId: ORG }, { parentKitId: bId, childKitId: aId, inheritanceType: 'extend' }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/brands/sub-brands',
+        { orgId: ORG },
+        { parentKitId: bId, childKitId: aId, inheritanceType: 'extend' },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(409);
@@ -198,12 +239,24 @@ describe('brand-service handlers — sub-brand', () => {
 
   it('GET /v1/brands/:kitId/relations lists children + parents', async () => {
     const { ctx } = makeCtx();
-    const a = await handlers.createBrandKit(req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'A' })), ctx);
-    const b = await handlers.createBrandKit(req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'B' })), ctx);
+    const a = await handlers.createBrandKit(
+      req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'A' })),
+      ctx,
+    );
+    const b = await handlers.createBrandKit(
+      req('POST', '/v1/brands', { orgId: ORG }, fixtureKit({ name: 'B' })),
+      ctx,
+    );
     const aId = (a.body as { kitId: string }).kitId;
     const bId = (b.body as { kitId: string }).kitId;
     await handlers.addSubBrand(
-      req('POST', '/v1/brands/sub-brands', { orgId: ORG }, { parentKitId: aId, childKitId: bId, inheritanceType: 'extend' }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/brands/sub-brands',
+        { orgId: ORG },
+        { parentKitId: aId, childKitId: bId, inheritanceType: 'extend' },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     const res = await handlers.listSubBrands(
@@ -233,7 +286,10 @@ describe('brand-service handlers — brand contexts', () => {
 
   it('POST /v1/brands/contexts/:id/active sets active kit', async () => {
     const { ctx, metrics } = makeCtx();
-    const kit = await handlers.createBrandKit(req('POST', '/v1/brands', { orgId: ORG }, fixtureKit()), ctx);
+    const kit = await handlers.createBrandKit(
+      req('POST', '/v1/brands', { orgId: ORG }, fixtureKit()),
+      ctx,
+    );
     const ctxCreate = await handlers.createBrandContext(
       req('POST', '/v1/brands/contexts', { orgId: ORG }, { name: 'Workspace', createdBy: ACTOR }),
       ctx,
@@ -241,7 +297,13 @@ describe('brand-service handlers — brand contexts', () => {
     const kitId = (kit.body as { kitId: string }).kitId;
     const contextId = (ctxCreate.body as { contextId: string }).contextId;
     const res = await handlers.setActiveBrandKit(
-      req('POST', '/v1/brands/contexts/:id/active', { orgId: ORG, contextId }, { kitId }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/brands/contexts/:id/active',
+        { orgId: ORG, contextId },
+        { kitId },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -253,7 +315,12 @@ describe('brand-service handlers — extraction', () => {
   it('POST /v1/brands/extraction returns 202 + a job id', async () => {
     const { ctx, metrics } = makeCtx();
     const res = await handlers.startExtraction(
-      req('POST', '/v1/brands/extraction', { orgId: ORG }, { url: 'https://example.com', createdBy: ACTOR }),
+      req(
+        'POST',
+        '/v1/brands/extraction',
+        { orgId: ORG },
+        { url: 'https://example.com', createdBy: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(202);
@@ -264,12 +331,22 @@ describe('brand-service handlers — extraction', () => {
   it('PATCH /v1/brands/extraction/:id updates progress', async () => {
     const { ctx, metrics } = makeCtx();
     const started = await handlers.startExtraction(
-      req('POST', '/v1/brands/extraction', { orgId: ORG }, { url: 'https://example.com', createdBy: ACTOR }),
+      req(
+        'POST',
+        '/v1/brands/extraction',
+        { orgId: ORG },
+        { url: 'https://example.com', createdBy: ACTOR },
+      ),
       ctx,
     );
     const jobId = (started.body as { jobId: string }).jobId;
     const patch = await handlers.updateExtraction(
-      req('PATCH', '/v1/brands/extraction/:id', { orgId: ORG, jobId }, { status: 'completed', stages: ['colors'], confidenceScores: { colors: 0.9 } }),
+      req(
+        'PATCH',
+        '/v1/brands/extraction/:id',
+        { orgId: ORG, jobId },
+        { status: 'completed', stages: ['colors'], confidenceScores: { colors: 0.9 } },
+      ),
       ctx,
     );
     expect(patch.status).toBe(200);

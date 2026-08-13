@@ -141,9 +141,7 @@ export function SignupForm(): JSX.Element {
           value={state.password}
           onChange={(e) => update('password', e.target.value)}
           aria-invalid={errors['password'] !== undefined}
-          aria-describedby={
-            errors['password'] !== undefined ? `${passwordId}-err` : undefined
-          }
+          aria-describedby={errors['password'] !== undefined ? `${passwordId}-err` : undefined}
         />
         {errors['password'] !== undefined ? (
           <p id={`${passwordId}-err`} className="auth-form__error">
@@ -166,10 +164,7 @@ export function SignupForm(): JSX.Element {
               <label
                 key={plan.id}
                 htmlFor={radioId}
-                className={
-                  'auth-form__plan' +
-                  (checked ? ' auth-form__plan--checked' : '')
-                }
+                className={'auth-form__plan' + (checked ? ' auth-form__plan--checked' : '')}
               >
                 <input
                   id={radioId}
@@ -186,9 +181,7 @@ export function SignupForm(): JSX.Element {
             );
           })}
         </div>
-        {errors['plan'] !== undefined ? (
-          <p className="auth-form__error">{errors['plan']}</p>
-        ) : null}
+        {errors['plan'] !== undefined ? <p className="auth-form__error">{errors['plan']}</p> : null}
       </fieldset>
 
       <label className="auth-form__optin" htmlFor={optInId}>

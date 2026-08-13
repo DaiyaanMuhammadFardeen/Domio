@@ -9,9 +9,7 @@ const SELECTED: SelectedSlide = {
   blocks: ['Strong Q3 growth', 'APAC outperformed', 'New SKU: Pro+'],
 };
 
-function renderPanel(
-  props: Partial<React.ComponentProps<typeof RedesignPanel>> = {},
-) {
+function renderPanel(props: Partial<React.ComponentProps<typeof RedesignPanel>> = {}) {
   return render(
     <LocaleProvider locale="en">
       <RedesignPanel selectedSlide={SELECTED} {...props} />

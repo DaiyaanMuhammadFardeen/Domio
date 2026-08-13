@@ -24,9 +24,7 @@ vi.mock('@domio/ui', async () => {
   const React = await import('react');
   return {
     ...actual,
-    FormattedMessage: function MockFormattedMessage(props: {
-      id: string;
-    }): React.ReactElement {
+    FormattedMessage: function MockFormattedMessage(props: { id: string }): React.ReactElement {
       const catalogue = React.useContext(FormattedMessageContext);
       const resolved = catalogue[props.id] ?? props.id;
       return <span>{resolved}</span>;
@@ -36,25 +34,39 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
 describe('SocialPreviewCard', () => {
   it('renders the deck title by default', () => {
-    render(withLocale(<SocialPreviewCard platform="twitter" deckTitle="Demo" previewImageUrl={undefined} />));
+    render(
+      withLocale(
+        <SocialPreviewCard platform="twitter" deckTitle="Demo" previewImageUrl={undefined} />,
+      ),
+    );
     expect(screen.getByTestId('social-preview-twitter-title').textContent).toBe('Demo');
   });
 
   it('shows the placeholder when no image URL is provided', () => {
-    render(withLocale(<SocialPreviewCard platform="twitter" deckTitle="Demo" previewImageUrl={undefined} />));
+    render(
+      withLocale(
+        <SocialPreviewCard platform="twitter" deckTitle="Demo" previewImageUrl={undefined} />,
+      ),
+    );
     expect(screen.getByTestId('social-preview-twitter-placeholder')).toBeInTheDocument();
   });
 
   it('shows the image when previewImageUrl is given', () => {
-    render(withLocale(<SocialPreviewCard platform="linkedin" deckTitle="Demo" previewImageUrl="https://cdn.example/x.png" />));
+    render(
+      withLocale(
+        <SocialPreviewCard
+          platform="linkedin"
+          deckTitle="Demo"
+          previewImageUrl="https://cdn.example/x.png"
+        />,
+      ),
+    );
     const img = screen.getByTestId('social-preview-linkedin-image') as HTMLImageElement;
     expect(img.src).toContain('cdn.example/x.png');
   });
@@ -89,14 +101,14 @@ describe('SocialPreviewCard', () => {
     fireEvent.change(screen.getByTestId('social-preview-twitter-override-title'), {
       target: { value: 'New title' },
     });
-    expect(onOverride).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'New title' }),
-    );
+    expect(onOverride).toHaveBeenCalledWith(expect.objectContaining({ title: 'New title' }));
   });
 
   it('renders override inputs only when onOverride is provided', () => {
     const { rerender } = render(
-      withLocale(<SocialPreviewCard platform="twitter" deckTitle="Demo" previewImageUrl={undefined} />),
+      withLocale(
+        <SocialPreviewCard platform="twitter" deckTitle="Demo" previewImageUrl={undefined} />,
+      ),
     );
     expect(screen.queryByTestId('social-preview-twitter-override-title')).toBeNull();
     rerender(

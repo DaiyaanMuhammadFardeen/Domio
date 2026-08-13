@@ -54,9 +54,7 @@ export function QAInner(props: WidgetProps<QAPayload>) {
 
   const upvote = (id: string): void => {
     if (props.disabled) return;
-    setOwnQuestions((qs) =>
-      qs.map((q) => (q.id === id ? { ...q, upvotes: q.upvotes + 1 } : q)),
-    );
+    setOwnQuestions((qs) => qs.map((q) => (q.id === id ? { ...q, upvotes: q.upvotes + 1 } : q)));
     props.onSubmit?.({ upvote: id });
   };
 
@@ -106,10 +104,7 @@ export function QAInner(props: WidgetProps<QAPayload>) {
               <span className="flex-1 text-sm text-slate-800">
                 {q.text}
                 {q.mine ? (
-                  <span
-                    className="ml-2 text-xs text-blue-600"
-                    data-testid={`qa-mine-${q.id}`}
-                  >
+                  <span className="ml-2 text-xs text-blue-600" data-testid={`qa-mine-${q.id}`}>
                     (you)
                   </span>
                 ) : null}

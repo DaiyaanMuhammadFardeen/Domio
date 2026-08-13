@@ -35,15 +35,7 @@ interface BarProps {
  * against a stacked backdrop of p25→median→p75 from the peer cohort,
  * with the percentile + a plain-English suggestion.
  */
-function PeerBar({
-  label,
-  value,
-  peerP25,
-  peerMedian,
-  peerP75,
-  percentile,
-  isRate,
-}: BarProps) {
+function PeerBar({ label, value, peerP25, peerMedian, peerP75, percentile, isRate }: BarProps) {
   const max = Math.max(peerP75, value, 0.0001) * 1.1;
   const valuePct = Math.max(0, Math.min(100, (value / max) * 100));
   const p25Pct = Math.max(0, Math.min(100, (peerP25 / max) * 100));
@@ -130,8 +122,8 @@ export function BenchmarkChart({
         role="status"
         data-testid="benchmark-empty"
       >
-        No peer benchmarks yet. Once the benchmark service publishes
-        your segment, comparison will appear here.
+        No peer benchmarks yet. Once the benchmark service publishes your segment, comparison will
+        appear here.
       </div>
     );
   }
@@ -146,10 +138,7 @@ export function BenchmarkChart({
       </header>
       <div className="space-y-4">
         {rows.map((row) => (
-          <div
-            key={row.segment}
-            className="rounded-xl border border-slate-200 bg-white p-4"
-          >
+          <div key={row.segment} className="rounded-xl border border-slate-200 bg-white p-4">
             <PeerBar
               label={row.segment}
               value={row.workspaceValue}
@@ -159,10 +148,7 @@ export function BenchmarkChart({
               percentile={row.percentile}
               isRate={isRate}
             />
-            <p
-              className="mt-2 text-xs text-slate-500"
-              data-testid="benchmark-suggestion"
-            >
+            <p className="mt-2 text-xs text-slate-500" data-testid="benchmark-suggestion">
               {row.suggestion}
             </p>
           </div>

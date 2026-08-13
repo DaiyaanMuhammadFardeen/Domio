@@ -4,7 +4,17 @@
   "title": "Domio Embed Policy V1",
   "description": "Live-app iframe embedding policy for Phase 11. Defines allowed origins, sandbox flags, JWT requirements, and focus-trap settings.",
   "type": "object",
-  "required": ["schemaVersion", "id", "workspaceId", "name", "allowedOrigins", "sandboxFlags", "jwtRequired", "trapFocus", "createdAt"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "workspaceId",
+    "name",
+    "allowedOrigins",
+    "sandboxFlags",
+    "jwtRequired",
+    "trapFocus",
+    "createdAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -41,10 +51,7 @@
       "description": "Whether a signed JWT must be appended to the embed URL."
     },
     "jwtAudience": {
-      "oneOf": [
-        { "type": "string", "minLength": 1, "maxLength": 256 },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "minLength": 1, "maxLength": 256 }, { "type": "null" }],
       "description": "Expected JWT audience claim for verification."
     },
     "trapFocus": {

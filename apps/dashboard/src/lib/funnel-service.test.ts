@@ -81,10 +81,7 @@ describe('funnel-service', () => {
         json: async () => ({
           slide_id: 's-1',
           summary: 'Slide 1 has high bounce because…',
-          hypotheses: [
-            'Cover slide too dense',
-            'Low-contrast CTA',
-          ],
+          hypotheses: ['Cover slide too dense', 'Low-contrast CTA'],
         }),
       };
     });

@@ -1,9 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  StateMachine,
-  TransitionEvaluator,
-  type StateMachineDef,
-} from './index.js';
+import { StateMachine, TransitionEvaluator, type StateMachineDef } from './index.js';
 
 const def: StateMachineDef = {
   states: {
@@ -76,7 +72,11 @@ describe('StateMachine', () => {
     const m = new StateMachine('inst-1', def, { onTransition: handler });
     m.getCurrentState();
     expect(handler).toHaveBeenCalledOnce();
-    expect(handler.mock.calls[0]?.[0]).toMatchObject({ current: 'idle', previous: '', event: 'default' });
+    expect(handler.mock.calls[0]?.[0]).toMatchObject({
+      current: 'idle',
+      previous: '',
+      event: 'default',
+    });
   });
 
   it('emits onTransition after every change', () => {
@@ -157,32 +157,36 @@ describe('StateMachine', () => {
   });
 
   it('validate rejects an empty states map', () => {
-    expect(() => new StateMachine('i', { states: {}, initial: 'a', transitions: [] })).toThrow(/at least one state/);
+    expect(() => new StateMachine('i', { states: {}, initial: 'a', transitions: [] })).toThrow(
+      /at least one state/,
+    );
   });
 
   it('validate rejects an unknown initial state', () => {
-    expect(() =>
-      new StateMachine('i', { states: { a: {} }, initial: 'b', transitions: [] }),
+    expect(
+      () => new StateMachine('i', { states: { a: {} }, initial: 'b', transitions: [] }),
     ).toThrow(/initial state .* not in states/);
   });
 
   it('validate rejects a transition with unknown from', () => {
-    expect(() =>
-      new StateMachine('i', {
-        states: { a: {} },
-        initial: 'a',
-        transitions: [{ from: 'missing', to: 'a', event: 'click' }],
-      }),
+    expect(
+      () =>
+        new StateMachine('i', {
+          states: { a: {} },
+          initial: 'a',
+          transitions: [{ from: 'missing', to: 'a', event: 'click' }],
+        }),
     ).toThrow(/unknown state/);
   });
 
   it('validate rejects a transition with empty event', () => {
-    expect(() =>
-      new StateMachine('i', {
-        states: { a: {} },
-        initial: 'a',
-        transitions: [{ from: 'a', to: 'a', event: '' }],
-      }),
+    expect(
+      () =>
+        new StateMachine('i', {
+          states: { a: {} },
+          initial: 'a',
+          transitions: [{ from: 'a', to: 'a', event: '' }],
+        }),
     ).toThrow(/event.*non-empty/);
   });
 

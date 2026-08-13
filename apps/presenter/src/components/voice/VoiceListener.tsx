@@ -12,14 +12,7 @@
  * the presenter must explicitly opt in to microphone capture.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import {
   acknowledgePrivacy,
   buildVoiceMatch,
@@ -148,30 +141,27 @@ export function VoiceListener({
     setSupported(getSpeechRecognitionCtor() !== null);
   }, []);
 
-  const handleRecognitionResult = useCallback(
-    (event: SpeechRecognitionEventLike) => {
-      const lastResult = event.results[event.results.length - 1];
-      if (!lastResult || !lastResult.isFinal) return;
-      const utterance = lastResult[0].transcript;
-      const sttConfidence = lastResult[0].confidence || 1;
-      const match = findBestMatch(utterance, phrasesRef.current);
-      if (!match) return;
-      const recorded = buildVoiceMatch({
-        phrase: match.phrase.phrase,
-        confidence: Math.min(1, sttConfidence),
-        action: match.phrase.action,
-        target: match.phrase.target,
-      });
-      onMatchRef.current?.(match.phrase, recorded.confidence);
-      setPendingMatch(recorded);
-      void recordVoiceMatch(recorded).then(() => {
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new CustomEvent('domio:voice-match-recorded'));
-        }
-      });
-    },
-    [],
-  );
+  const handleRecognitionResult = useCallback((event: SpeechRecognitionEventLike) => {
+    const lastResult = event.results[event.results.length - 1];
+    if (!lastResult || !lastResult.isFinal) return;
+    const utterance = lastResult[0].transcript;
+    const sttConfidence = lastResult[0].confidence || 1;
+    const match = findBestMatch(utterance, phrasesRef.current);
+    if (!match) return;
+    const recorded = buildVoiceMatch({
+      phrase: match.phrase.phrase,
+      confidence: Math.min(1, sttConfidence),
+      action: match.phrase.action,
+      target: match.phrase.target,
+    });
+    onMatchRef.current?.(match.phrase, recorded.confidence);
+    setPendingMatch(recorded);
+    void recordVoiceMatch(recorded).then(() => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('domio:voice-match-recorded'));
+      }
+    });
+  }, []);
 
   const startRecognition = useCallback(() => {
     const Ctor = getSpeechRecognitionCtor();
@@ -335,16 +325,18 @@ export function VoiceListener({
         </button>
       </header>
 
-      <div
-        data-testid={`${dataTestId}-status`}
-        style={{ fontSize: 11, opacity: 0.75 }}
-      >
+      <div data-testid={`${dataTestId}-status`} style={{ fontSize: 11, opacity: 0.75 }}>
         {supported === false && 'Voice recognition is not supported in this browser.'}
-        {supported === true && phraseCount > 0 && `Tracking ${phraseCount} phrase${phraseCount === 1 ? '' : 's'}.`}
+        {supported === true &&
+          phraseCount > 0 &&
+          `Tracking ${phraseCount} phrase${phraseCount === 1 ? '' : 's'}.`}
         {supported === true && phraseCount === 0 && 'No phrases registered.'}
         {supported === null && 'Detecting speech recognition support…'}
         {error && (
-          <span data-testid={`${dataTestId}-error`} style={{ color: 'var(--danger)', marginLeft: 8 }}>
+          <span
+            data-testid={`${dataTestId}-error`}
+            style={{ color: 'var(--danger)', marginLeft: 8 }}
+          >
             {error}
           </span>
         )}

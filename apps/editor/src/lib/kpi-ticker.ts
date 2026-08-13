@@ -140,7 +140,9 @@ export function writeKpiTicker(
   return { ...(props ?? {}), [KEY]: config };
 }
 
-export function clearKpiTicker(props: Record<string, unknown> | undefined): Record<string, unknown> {
+export function clearKpiTicker(
+  props: Record<string, unknown> | undefined,
+): Record<string, unknown> {
   if (!props) return {};
   const next = { ...props };
   delete next[KEY];

@@ -1,8 +1,7 @@
 # Runbook: audience-service
 
 > **Owner:** realtime-platform
-> **On-call:** `@realtime-platform-oncall`
-> **Tier:** 1
+> **On-call:** `@realtime-platform-oncall` > **Tier:** 1
 > **Last reviewed:** 2026-08-09
 
 ## At a glance
@@ -19,20 +18,20 @@ sessions. It serves presence, reactions, polls, and Q&A. Read-heavy.
 
 ## Health checks
 
-| Signal | Where | Threshold |
-|--------|-------|-----------|
-| Read p95 | `histogram_quantile(0.95, ...)` | < 100ms |
-| 5xx rate | `rate(http_requests_total{status=~"5.."}[1m])` | < 0.1% |
-| Cache hit rate | `rate(audience_cache_hits_total[5m]) / rate(audience_cache_requests_total[5m])` | > 90% |
+| Signal         | Where                                                                           | Threshold |
+| -------------- | ------------------------------------------------------------------------------- | --------- |
+| Read p95       | `histogram_quantile(0.95, ...)`                                                 | < 100ms   |
+| 5xx rate       | `rate(http_requests_total{status=~"5.."}[1m])`                                  | < 0.1%    |
+| Cache hit rate | `rate(audience_cache_hits_total[5m]) / rate(audience_cache_requests_total[5m])` | > 90%     |
 
 ## Common failure modes
 
 1. **Cache miss storm.** Likely after a Redis flush. Symptom: p95
    spikes, downstream DB load grows.
-   *Mitigation:* pre-warm cache via canary deploy, or temporarily raise
+   _Mitigation:_ pre-warm cache via canary deploy, or temporarily raise
    pod count to handle the extra load.
 2. **DB connection pool exhaustion.** Symptom: 5xx with `ECONNREFUSED`
-   to Postgres. *Mitigation:* scale audience-service pods, alert
+   to Postgres. _Mitigation:_ scale audience-service pods, alert
    `pg_stat_activity` to find slow queries.
 3. **Slow downstream (realtime-gateway).** Audience reads depend on
    realtime for presence; see realtime-gateway runbook.

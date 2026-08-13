@@ -35,13 +35,13 @@ paths:
             type: string
             enum: [background, particle, material, post]
       responses:
-        "200":
+        '200':
           description: List of shaders.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ShaderList"
-        "401":
+                $ref: '#/components/schemas/ShaderList'
+        '401':
           description: Unauthenticated.
     post:
       tags: [shaders]
@@ -52,21 +52,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateShaderRequest"
+              $ref: '#/components/schemas/CreateShaderRequest'
       responses:
-        "201":
+        '201':
           description: Shader created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Shader"
-        "400":
+                $ref: '#/components/schemas/Shader'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
   /v1/shaders/{id}:
     get:
@@ -80,15 +80,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Shader details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Shader"
-        "401":
+                $ref: '#/components/schemas/Shader'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Shader not found.
     put:
       tags: [shaders]
@@ -105,23 +105,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateShaderRequest"
+              $ref: '#/components/schemas/UpdateShaderRequest'
       responses:
-        "200":
+        '200':
           description: Shader updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Shader"
-        "400":
+                $ref: '#/components/schemas/Shader'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Shader not found.
     delete:
       tags: [shaders]
@@ -134,11 +134,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Shader deleted.
-        "401":
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Shader not found.
   /v1/shaders/{id}/publish:
     post:
@@ -153,15 +153,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Shader published.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Shader"
-        "401":
+                $ref: '#/components/schemas/Shader'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Shader not found.
 components:
   securitySchemes:
@@ -211,7 +211,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/Shader"
+            $ref: '#/components/schemas/Shader'
     CreateShaderRequest:
       type: object
       required: [name, kind, sourceWgsl, sourceGlsl]

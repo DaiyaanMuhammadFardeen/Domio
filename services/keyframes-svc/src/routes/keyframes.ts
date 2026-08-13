@@ -20,10 +20,7 @@ import {
   validateEasingMonotonicity,
 } from '../schemas.js';
 
-export function createKeyframeRoutes(
-  repo: CameraKeyframeRepository,
-  idGen: () => string,
-): Hono {
+export function createKeyframeRoutes(repo: CameraKeyframeRepository, idGen: () => string): Hono {
   const app = new Hono();
 
   // -----------------------------------------------------------------------
@@ -151,7 +148,11 @@ export function createKeyframeRoutes(
 
     // Business-rule: easing monotonicity (if both p1x and p2x present)
     const easingPatch = patch.easing as { p1x?: number; p2x?: number } | undefined;
-    if (easingPatch !== undefined && easingPatch.p1x !== undefined && easingPatch.p2x !== undefined) {
+    if (
+      easingPatch !== undefined &&
+      easingPatch.p1x !== undefined &&
+      easingPatch.p2x !== undefined
+    ) {
       const easingErrors = validateEasingMonotonicity({
         p1x: easingPatch.p1x,
         p2x: easingPatch.p2x,
@@ -168,7 +169,10 @@ export function createKeyframeRoutes(
     }
 
     try {
-      const updated = await repo.update(id, patch as Parameters<CameraKeyframeRepository['update']>[1]);
+      const updated = await repo.update(
+        id,
+        patch as Parameters<CameraKeyframeRepository['update']>[1],
+      );
       return c.json(updated);
     } catch (e) {
       if (e instanceof KeyframeNotFoundError) {

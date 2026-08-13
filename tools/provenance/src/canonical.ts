@@ -26,7 +26,9 @@ function stringify(v: unknown): string {
   if (Array.isArray(v)) return '[' + v.map(stringify).join(',') + ']';
   if (t === 'object') {
     const obj = v as Record<string, unknown>;
-    const keys = Object.keys(obj).filter((k) => obj[k] !== undefined).sort();
+    const keys = Object.keys(obj)
+      .filter((k) => obj[k] !== undefined)
+      .sort();
     return '{' + keys.map((k) => canonicalString(k) + ':' + stringify(obj[k])).join(',') + '}';
   }
   // bigint, symbol, function, undefined -> JSON doesn't allow; treat as null

@@ -10,11 +10,7 @@
 
 import type { ULID } from '@domio/schema';
 
-export type MergeRequestStatus =
-  | 'open'
-  | 'resolved'
-  | 'merged'
-  | 'closed';
+export type MergeRequestStatus = 'open' | 'resolved' | 'merged' | 'closed';
 
 export type ResolutionStrategy = 'theirs' | 'ours' | 'manual';
 
@@ -39,14 +35,14 @@ export interface MergeRequestRepository {
   insert(record: MergeRequestRecord): Promise<void>;
   update(record: MergeRequestRecord): Promise<void>;
   findById(deckId: ULID, mrId: ULID): Promise<MergeRequestRecord | null>;
-  listByDeck(
-    deckId: ULID,
-    filter?: { status?: MergeRequestStatus },
-  ): Promise<MergeRequestRecord[]>;
+  listByDeck(deckId: ULID, filter?: { status?: MergeRequestStatus }): Promise<MergeRequestRecord[]>;
 }
 
 export class MergeRequestNotFoundError extends Error {
-  constructor(public readonly deckId: ULID, public readonly mrId: ULID) {
+  constructor(
+    public readonly deckId: ULID,
+    public readonly mrId: ULID,
+  ) {
     super(`Merge request ${mrId} not found on deck ${deckId}.`);
     this.name = 'MergeRequestNotFoundError';
   }

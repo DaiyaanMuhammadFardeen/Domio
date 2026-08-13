@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Domio MCP 3D Tools
-  version: "1.0.0"
+  version: '1.0.0'
   description: |
     MCP HTTP transport for 3D tools introduced in Phase 11.
     Bearer token authentication; every tool accepts a JSON object `{ deckId, ... }`
@@ -64,7 +64,7 @@ paths:
                 deckId: { type: string }
                 page: { type: integer }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -72,11 +72,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/get_model:
     post:
       operationId: mcp_get_model
@@ -94,16 +94,16 @@ paths:
                 deckId: { type: string }
                 modelId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/upload_model:
     post:
       operationId: mcp_upload_model
@@ -119,21 +119,21 @@ paths:
               required: [deckId, file, name]
               properties:
                 deckId: { type: string }
-                file: { type: string, description: "Base64-encoded file data" }
+                file: { type: string, description: 'Base64-encoded file data' }
                 name: { type: string }
                 format: { type: string, enum: [glb, gltf, usdz, step, stp, iges, igs, fbx, obj] }
                 licenseId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_model:
     post:
       operationId: mcp_delete_model
@@ -151,13 +151,13 @@ paths:
                 deckId: { type: string }
                 modelId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/create_scene:
     post:
       operationId: mcp_create_scene
@@ -175,16 +175,16 @@ paths:
                 deckId: { type: string }
                 modelAssetId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/update_scene:
     post:
       operationId: mcp_update_scene
@@ -203,16 +203,16 @@ paths:
                 sceneId: { type: string }
                 patch: { type: object }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_scene:
     post:
       operationId: mcp_delete_scene
@@ -230,13 +230,13 @@ paths:
                 deckId: { type: string }
                 sceneId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/list_scenes:
     post:
       operationId: mcp_list_scenes
@@ -253,7 +253,7 @@ paths:
               properties:
                 deckId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -261,11 +261,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/create_camera_keyframe:
     post:
       operationId: mcp_create_camera_keyframe
@@ -283,24 +283,32 @@ paths:
                 deckId: { type: string }
                 slideId: { type: string }
                 sceneId: { type: string }
-                position: { type: object, properties: { x: { type: number }, y: { type: number }, z: { type: number } } }
-                target: { type: object, properties: { x: { type: number }, y: { type: number }, z: { type: number } } }
+                position:
+                  {
+                    type: object,
+                    properties: { x: { type: number }, y: { type: number }, z: { type: number } },
+                  }
+                target:
+                  {
+                    type: object,
+                    properties: { x: { type: number }, y: { type: number }, z: { type: number } },
+                  }
                 fov: { type: number }
                 roll: { type: number }
                 easing: { type: object }
                 durationMs: { type: integer }
                 trigger: { type: string, enum: [auto, click, scroll, data] }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/update_camera_keyframe:
     post:
       operationId: mcp_update_camera_keyframe
@@ -319,16 +327,16 @@ paths:
                 keyframeId: { type: string }
                 patch: { type: object }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_camera_keyframe:
     post:
       operationId: mcp_delete_camera_keyframe
@@ -346,13 +354,13 @@ paths:
                 deckId: { type: string }
                 keyframeId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/list_camera_keyframes:
     post:
       operationId: mcp_list_camera_keyframes
@@ -370,7 +378,7 @@ paths:
                 deckId: { type: string }
                 slideId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -378,11 +386,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/create_shader:
     post:
       operationId: mcp_create_shader
@@ -404,16 +412,16 @@ paths:
                 sourceGlsl: { type: string }
                 inputs: { type: object }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/update_shader:
     post:
       operationId: mcp_update_shader
@@ -432,16 +440,16 @@ paths:
                 shaderId: { type: string }
                 patch: { type: object }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_shader:
     post:
       operationId: mcp_delete_shader
@@ -459,13 +467,13 @@ paths:
                 deckId: { type: string }
                 shaderId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/list_shaders:
     post:
       operationId: mcp_list_shaders
@@ -483,7 +491,7 @@ paths:
                 deckId: { type: string }
                 kind: { type: string, enum: [background, particle, material, post] }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -491,11 +499,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/publish_shader:
     post:
       operationId: mcp_publish_shader
@@ -513,13 +521,13 @@ paths:
                 deckId: { type: string }
                 shaderId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }

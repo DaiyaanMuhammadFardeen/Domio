@@ -10,12 +10,12 @@ reachable from `/`.
 
 ## Routes to build
 
-| Route                  | Renders                                            |
-| ---------------------- | -------------------------------------------------- |
-| `/`                    | Session-code entry → redirects to `/v/[token]`     |
-| `/v/[token]`           | Read-only deck view (shared link)                  |
-| `/embed/[token]`       | Same as `/v/[token]` but stripped chrome for iframes|
-| `/demo`                | Already exists; leave as-is                        |
+| Route            | Renders                                              |
+| ---------------- | ---------------------------------------------------- |
+| `/`              | Session-code entry → redirects to `/v/[token]`       |
+| `/v/[token]`     | Read-only deck view (shared link)                    |
+| `/embed/[token]` | Same as `/v/[token]` but stripped chrome for iframes |
+| `/demo`          | Already exists; leave as-is                          |
 
 ## Files to change
 
@@ -29,7 +29,10 @@ export default function ViewerHomePage() {
       <header className="boot__header">
         <h1>Open a shared deck</h1>
       </header>
-      <CodeEntryForm action="/v" placeholder="Paste a share link or session code" />
+      <CodeEntryForm
+        action="/v"
+        placeholder="Paste a share link or session code"
+      />
     </main>
   );
 }

@@ -24,9 +24,7 @@ vi.mock('@domio/ui', async () => {
   const React = await import('react');
   return {
     ...actual,
-    FormattedMessage: function MockFormattedMessage(props: {
-      id: string;
-    }): React.ReactElement {
+    FormattedMessage: function MockFormattedMessage(props: { id: string }): React.ReactElement {
       const catalogue = React.useContext(FormattedMessageContext);
       const resolved = catalogue[props.id] ?? props.id;
       return <span>{resolved}</span>;
@@ -36,57 +34,117 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
 describe('SEOTab', () => {
   it('falls back to the deck title when value.title is empty', () => {
-    render(withLocale(<SEOTab value={undefined} deckTitle="My deck" deckId="d1" previewImageUrl={undefined} onChange={vi.fn()} />));
+    render(
+      withLocale(
+        <SEOTab
+          value={undefined}
+          deckTitle="My deck"
+          deckId="d1"
+          previewImageUrl={undefined}
+          onChange={vi.fn()}
+        />,
+      ),
+    );
     const title = screen.getByTestId('seo-tab-title') as HTMLInputElement;
     expect(title.value).toBe('My deck');
   });
 
   it('emits onChange when description is typed', () => {
     const onChange = vi.fn();
-    render(withLocale(<SEOTab value={DEFAULT_SEO} deckTitle="Deck" deckId="d1" previewImageUrl={undefined} onChange={onChange} />));
+    render(
+      withLocale(
+        <SEOTab
+          value={DEFAULT_SEO}
+          deckTitle="Deck"
+          deckId="d1"
+          previewImageUrl={undefined}
+          onChange={onChange}
+        />,
+      ),
+    );
     fireEvent.change(screen.getByTestId('seo-tab-description'), {
       target: { value: 'A new description' },
     });
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ description: 'A new description' }));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'A new description' }),
+    );
   });
 
   it('emits onChange when canonical URL changes', () => {
     const onChange = vi.fn();
-    render(withLocale(<SEOTab value={DEFAULT_SEO} deckTitle="Deck" deckId="d1" previewImageUrl={undefined} onChange={onChange} />));
+    render(
+      withLocale(
+        <SEOTab
+          value={DEFAULT_SEO}
+          deckTitle="Deck"
+          deckId="d1"
+          previewImageUrl={undefined}
+          onChange={onChange}
+        />,
+      ),
+    );
     fireEvent.change(screen.getByTestId('seo-tab-canonical'), {
       target: { value: 'https://example.com/d1' },
     });
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ canonicalUrl: 'https://example.com/d1' }));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ canonicalUrl: 'https://example.com/d1' }),
+    );
   });
 
   it('emits onChange when robots dropdown changes', () => {
     const onChange = vi.fn();
-    render(withLocale(<SEOTab value={DEFAULT_SEO} deckTitle="Deck" deckId="d1" previewImageUrl={undefined} onChange={onChange} />));
+    render(
+      withLocale(
+        <SEOTab
+          value={DEFAULT_SEO}
+          deckTitle="Deck"
+          deckId="d1"
+          previewImageUrl={undefined}
+          onChange={onChange}
+        />,
+      ),
+    );
     fireEvent.change(screen.getByTestId('seo-tab-robots'), {
       target: { value: 'noindex,nofollow' },
     });
-    expect(onChange).toHaveBeenCalledWith(
-      expect.objectContaining({ robots: 'noindex,nofollow' }),
-    );
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ robots: 'noindex,nofollow' }));
   });
 
   it('shows two social previews (twitter + linkedin)', () => {
-    render(withLocale(<SEOTab value={DEFAULT_SEO} deckTitle="Deck" deckId="d1" previewImageUrl="https://cdn.example/x.png" onChange={vi.fn()} />));
+    render(
+      withLocale(
+        <SEOTab
+          value={DEFAULT_SEO}
+          deckTitle="Deck"
+          deckId="d1"
+          previewImageUrl="https://cdn.example/x.png"
+          onChange={vi.fn()}
+        />,
+      ),
+    );
     expect(screen.getByTestId('seo-tab-twitter')).toBeInTheDocument();
     expect(screen.getByTestId('seo-tab-linkedin')).toBeInTheDocument();
   });
 
   it('emits social overrides when twitter override title is typed', () => {
     const onChange = vi.fn();
-    render(withLocale(<SEOTab value={DEFAULT_SEO} deckTitle="Deck" deckId="d1" previewImageUrl={undefined} onChange={onChange} />));
+    render(
+      withLocale(
+        <SEOTab
+          value={DEFAULT_SEO}
+          deckTitle="Deck"
+          deckId="d1"
+          previewImageUrl={undefined}
+          onChange={onChange}
+        />,
+      ),
+    );
     fireEvent.change(screen.getByTestId('seo-tab-twitter-override-title'), {
       target: { value: 'Tw title' },
     });

@@ -9,7 +9,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
-      { find: /^@domio\/ui\/routing$/, replacement: resolve(here, '../../packages/ui/src/routing.ts') },
+      {
+        find: /^@domio\/ui\/routing$/,
+        replacement: resolve(here, '../../packages/ui/src/routing.ts'),
+      },
       { find: '@domio/ui', replacement: resolve(here, '../../packages/ui/src/index.ts') },
       { find: '@', replacement: resolve(here, './src') },
     ],

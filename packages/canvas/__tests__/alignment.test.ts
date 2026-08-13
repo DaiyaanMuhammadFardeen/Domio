@@ -103,7 +103,9 @@ describe('alignment guides', () => {
     });
     // Locked candidate inside bounds would normally emit one alignment
     // guide; ensure no guides reference it directly.
-    expect(guides.every((g) => !g.targets.includes(asULID('01H00000000000000000000020')))).toBe(true);
+    expect(guides.every((g) => !g.targets.includes(asULID('01H00000000000000000000020')))).toBe(
+      true,
+    );
   });
 
   it('findSpacingHints returns hints for adjacent siblings', () => {

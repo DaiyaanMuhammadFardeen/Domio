@@ -31,10 +31,12 @@ function getSecret(explicit?: string): string {
     cachedSecret = DEFAULT_DEV_SECRET;
     if (!warned) {
       warned = true;
-      console.log(JSON.stringify({
-        msg: 'notification-dispatcher: webhook_secret_using_default',
-        warning: 'NOTIFICATION_WEBHOOK_SECRET not set — using default dev secret',
-      }));
+      console.log(
+        JSON.stringify({
+          msg: 'notification-dispatcher: webhook_secret_using_default',
+          warning: 'NOTIFICATION_WEBHOOK_SECRET not set — using default dev secret',
+        }),
+      );
     }
   }
   return cachedSecret;
@@ -68,10 +70,7 @@ export function verifySignature(
   if (expected.length !== signatureHeader.length) return false;
 
   try {
-    return timingSafeEqual(
-      Buffer.from(expected, 'hex'),
-      Buffer.from(signatureHeader, 'hex'),
-    );
+    return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signatureHeader, 'hex'));
   } catch {
     return false;
   }

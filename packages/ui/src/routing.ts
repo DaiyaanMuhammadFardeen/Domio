@@ -91,8 +91,7 @@ export function viewer(deckId: string, opts: ViewerRouteOptions = {}): string {
   if (opts.mode && opts.mode !== 'stage') params.set('mode', opts.mode);
   if (opts.token) params.set('token', opts.token);
   const qs = params.toString();
-  const slideSegment =
-    typeof opts.slide === 'number' ? `/${opts.slide}` : '';
+  const slideSegment = typeof opts.slide === 'number' ? `/${opts.slide}` : '';
   const base = `/${encodeURIComponent(deckId)}${slideSegment}`;
   return qs.length > 0 ? `${base}?${qs}` : base;
 }
@@ -128,10 +127,7 @@ export type DashboardRoute =
   | 'alerts'
   | 'graph';
 
-export function dashboard(
-  route: DashboardRoute,
-  params: Record<string, string> = {},
-): string {
+export function dashboard(route: DashboardRoute, params: Record<string, string> = {}): string {
   switch (route) {
     case 'overview':
       return '/overview';
@@ -223,10 +219,7 @@ export type AdminRoute =
   | 'rate-limits'
   | 'custom-domains';
 
-export function adminConsole(
-  route: AdminRoute,
-  params: Record<string, string> = {},
-): string {
+export function adminConsole(route: AdminRoute, params: Record<string, string> = {}): string {
   switch (route) {
     case 'home':
       return '/';
@@ -394,10 +387,7 @@ export type LandingRoute =
   | 'cli'
   | 'plugins-sdk';
 
-export function landing(
-  route: LandingRoute,
-  params: Record<string, string> = {},
-): string {
+export function landing(route: LandingRoute, params: Record<string, string> = {}): string {
   switch (route) {
     case 'home':
       return '/';
@@ -414,10 +404,7 @@ export function landing(
     case 'forgot-password':
       return '/forgot-password';
     case 'docs':
-      return `/docs/${(params['slug'] ?? '').replace(/^\/+/, '')}`.replace(
-        /\/$/,
-        '',
-      );
+      return `/docs/${(params['slug'] ?? '').replace(/^\/+/, '')}`.replace(/\/$/, '');
     case 'changelog':
       return '/changelog';
     case 'demos':

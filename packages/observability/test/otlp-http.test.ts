@@ -41,7 +41,11 @@ describe('OtlpHttpExporter — positive coverage', () => {
   });
 
   it('sends POST to the right URL with Content-Type: application/json', async () => {
-    const { transport, calls } = fakeTransport(async () => ({ status: 200, statusText: 'OK', body: '' }));
+    const { transport, calls } = fakeTransport(async () => ({
+      status: 200,
+      statusText: 'OK',
+      body: '',
+    }));
     const e = new OtlpHttpExporter({ endpoint: 'http://collector:4318', transport });
     await e.exportJson('traces', { foo: 'bar' });
     expect(calls).toHaveLength(1);
@@ -53,7 +57,11 @@ describe('OtlpHttpExporter — positive coverage', () => {
   });
 
   it('attaches custom headers', async () => {
-    const { transport, calls } = fakeTransport(async () => ({ status: 200, statusText: 'OK', body: '' }));
+    const { transport, calls } = fakeTransport(async () => ({
+      status: 200,
+      statusText: 'OK',
+      body: '',
+    }));
     const e = new OtlpHttpExporter({
       endpoint: 'http://collector',
       headers: { Authorization: 'Bearer xyz', 'x-tenant': 'org_1' },

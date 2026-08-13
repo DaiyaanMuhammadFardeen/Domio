@@ -19,7 +19,9 @@ export interface DisplayDescriptor {
  * the standard only surfaces "is there a 2nd screen" but we surface
  * it as a single non-primary display with a generic label.
  */
-export function formatPresentations(avail: PresentationAvailability | undefined): readonly DisplayDescriptor[] {
+export function formatPresentations(
+  avail: PresentationAvailability | undefined,
+): readonly DisplayDescriptor[] {
   if (!avail) return [];
   if (avail.value) {
     return [

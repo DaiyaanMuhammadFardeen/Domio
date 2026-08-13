@@ -14,15 +14,8 @@
  */
 
 import { createHash, createHmac, randomBytes } from 'node:crypto';
-import type {
-  PrototypeEvent,
-  IntegrityKey,
-} from './types.js';
-import {
-  HmacKeyGenerationError,
-  HmacVerificationError,
-  ReorderDetectedError,
-} from './dal.js';
+import type { PrototypeEvent, IntegrityKey } from './types.js';
+import { HmacKeyGenerationError, HmacVerificationError, ReorderDetectedError } from './dal.js';
 
 /** 32 bytes = 256-bit HMAC key. */
 export const HMAC_KEY_BYTES = 32;

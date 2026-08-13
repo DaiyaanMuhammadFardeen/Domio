@@ -126,13 +126,7 @@ describe('Branch handlers', () => {
     const ctx = makeCtx();
     const DECK_ID = asULID('01H00000000000000000000000');
     const created = await createBranch(ctx, DECK_ID, { name: 'arc', createdBy: 'u' });
-    const out = await archiveBranch(
-      ctx,
-      DECK_ID,
-      created.branch.id,
-      { actorId: 'u' },
-      'trace-2',
-    );
+    const out = await archiveBranch(ctx, DECK_ID, created.branch.id, { actorId: 'u' }, 'trace-2');
     expect(out.branch.status).toBe('archived');
   });
 });
@@ -166,7 +160,9 @@ describe('Merge handlers', () => {
     // The diff may not contain a conflict if both sides changed the
     // same property to different values; pick the first element path.
     const path =
-      diff.conflicts[0]?.path ?? diff.elements[0]?.path ?? `elements[01H0000000000000000000000B].transform.x`;
+      diff.conflicts[0]?.path ??
+      diff.elements[0]?.path ??
+      `elements[01H0000000000000000000000B].transform.x`;
     const resolved = await resolveMergeRequest(
       ctx,
       DECK_ID,

@@ -34,7 +34,12 @@ function baseDoc(): DeckDocument {
             name: 'stat1',
             parentId: null,
             transform: { x: 0, y: 0, w: 320, h: 160, rotation: 0 },
-            component: { catalogId: 'domio.stat-card', version: '1.0.0', variant: 'light', props: { value: 42, label: 'Revenue' } },
+            component: {
+              catalogId: 'domio.stat-card',
+              version: '1.0.0',
+              variant: 'light',
+              props: { value: 42, label: 'Revenue' },
+            },
           } as Element,
         ],
       },

@@ -11,12 +11,20 @@ describe('session-archiver', () => {
     await archiver.registerSession('s1');
 
     const started: LifecycleEvent = {
-      workspace_id: 'w1', session_id: 's1', phase: 'started',
-      ts_ms: 1_000, active_count: 5, idle_count: 0,
+      workspace_id: 'w1',
+      session_id: 's1',
+      phase: 'started',
+      ts_ms: 1_000,
+      active_count: 5,
+      idle_count: 0,
     };
     const ended: LifecycleEvent = {
-      workspace_id: 'w1', session_id: 's1', phase: 'ended',
-      ts_ms: 6_000, active_count: 3, idle_count: 1,
+      workspace_id: 'w1',
+      session_id: 's1',
+      phase: 'ended',
+      ts_ms: 6_000,
+      active_count: 3,
+      idle_count: 1,
     };
 
     await bus.publish({
@@ -44,7 +52,12 @@ describe('session-archiver', () => {
     const bus = new InMemoryEdgeBus();
     const store = new InMemoryArchiveStore();
     const archiver = new SessionArchiver({ bus, store });
-    archiver.incrementEngagement({ workspace_id: 'w1', session_id: 's1', kind: 'poll_votes', by: 3 });
+    archiver.incrementEngagement({
+      workspace_id: 'w1',
+      session_id: 's1',
+      kind: 'poll_votes',
+      by: 3,
+    });
     archiver.incrementEngagement({ workspace_id: 'w1', session_id: 's1', kind: 'reactions' });
     expect(archiver.size()).toBe(1);
     // Doesn't error and is idempotent on shape

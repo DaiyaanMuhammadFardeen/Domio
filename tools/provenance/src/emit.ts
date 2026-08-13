@@ -113,7 +113,11 @@ export function buildStatement(
   };
 }
 
-function toResourceDescriptor(s: { uri?: string; digest: Record<string, string>; name?: string }): ResourceDescriptor {
+function toResourceDescriptor(s: {
+  uri?: string;
+  digest: Record<string, string>;
+  name?: string;
+}): ResourceDescriptor {
   if (!s.digest || Object.keys(s.digest).length === 0) {
     throw new TypeError('subject/dependency must declare at least one digest');
   }

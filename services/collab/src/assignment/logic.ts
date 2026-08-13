@@ -12,11 +12,7 @@ import type {
   CreateAssignmentInput,
   UpdateAssignmentInput,
 } from './types.js';
-import {
-  InvalidSlideRangeError,
-  InvalidTransitionError,
-  CollabValidationError,
-} from '../types.js';
+import { InvalidSlideRangeError, InvalidTransitionError, CollabValidationError } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Slide range validation
@@ -43,13 +39,14 @@ const VALID_TRANSITIONS: Record<AssignmentStatus, readonly AssignmentStatus[]> =
   done: [],
 };
 
-export function validateAssignmentTransition(
-  from: AssignmentStatus,
-  to: AssignmentStatus,
-): void {
+export function validateAssignmentTransition(from: AssignmentStatus, to: AssignmentStatus): void {
   const allowed = VALID_TRANSITIONS[from];
   if (!allowed || !allowed.includes(to)) {
-    throw new InvalidTransitionError(from, to, `Assignment transition ${from} → ${to} is not allowed`);
+    throw new InvalidTransitionError(
+      from,
+      to,
+      `Assignment transition ${from} → ${to} is not allowed`,
+    );
   }
 }
 

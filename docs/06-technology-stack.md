@@ -2,6 +2,7 @@
 
 > **Status:** Authoritative for technology selections. Stack changes require an ADR. Vendor evaluations live in `10-project-team-planning.md` §10.10 and are referenced from here.
 > **Assumptions — backend is intentionally polyglot:**
+>
 > - **Frontend:** Next.js + React (TypeScript) on WebGL2 + WebGPU (with Canvas2D fallback).
 > - **State/collab:** Yjs CRDT (sub-documents per slide/theme/binding) over Automerge.
 > - **Control plane (HTTP/gRPC API + workflow orchestrators):** TypeScript on Node 22 + Hono.
@@ -16,8 +17,8 @@
 > - **Contract rule:** every polyglot boundary speaks gRPC (internal) or REST+OpenAPI (external). JSON Schema, Protobuf, and AsyncAPI are committed sources of truth. No service imports another service's source code. Generated clients are committed.
 > - **Lock-in controls:** object storage abstraction over S3-compatible; AI adapter pattern; search adapter pattern; realtime adapter pattern; event-bus adapter pattern; **realtime gateway language** can be re-implemented in Rust without API changes.
 > - **Self-host parity:** Docker Compose profile (single-node) and Helm chart (K8s) ship with first release; npm/pnpm, Go module proxy, and container-image mirrors for BD bandwidth.
-> **Owner:** Principal architect.
-> **Last reviewed:** 2026-07-29.
+>   **Owner:** Principal architect.
+>   **Last reviewed:** 2026-07-29.
 
 ---
 
@@ -29,37 +30,37 @@
 
 ## 6.0 Stack Overview
 
-| Layer | Choice | Backup / alternative |
-|---|---|---|
-| Frontend framework | Next.js + React (TypeScript) | Remix |
-| Canvas / render engine | Custom engine on WebGL2 + WebGPU; Canvas2D fallback | Three.js for 3D helpers; Pixi for 2D |
-| State / collaboration | Yjs CRDT, sub-documents per slide/theme/binding | Automerge |
-| Layout engine | Yoga (flex) for auto-layout + custom constraint solver | Cassowary |
-| Local store | IndexedDB + OPFS for media | SQLite via Wasm |
-| Service worker | Workbox | none |
-| **Backend — control plane** | TypeScript (Node 22 + Hono) | Go, Java/Spring |
-| **Backend — realtime gateway** | Go (gorilla/websocket, NATS-backed) | Elixir/Phoenix, Rust (axum+tokio-tungstenite) |
-| **Backend — CPU workers** | Go primary; Rust for hot paths | Rust everywhere, C++ |
-| **Backend — AI/data workers** | TypeScript primary; Python for ML/eval | Python everywhere |
-| API styles | REST external; GraphQL first-party reads; gRPC internal; MCP agent surface | none |
-| Database | Postgres 16 | none (locked-in is fine; community/vendor both available) |
-| Object storage | S3-compatible (AWS S3 / MinIO / R2) | any S3 API |
-| Cache | Redis / Valkey | Memcached |
-| Event bus | NATS JetStream (primary); Redpanda optional | Kafka, RabbitMQ |
-| Search | OpenSearch | Meilisearch |
-| Analytics OLAP | ClickHouse | DuckDB / Parquet |
-| Graph projection | Postgres recursive CTEs for v1; dedicated graph store later | Neo4j (only if scale demands) |
-| Workflow / jobs | Temporal | BullMQ (simpler) |
-| Realtime | Self-hosted WebSocket gateway (NATS-backed) with managed fallback (Liveblocks/Ably) | LiveKit for low-latency stage |
-| Auth | OIDC + SAML (SSO); SCIM; passkeys | Auth0 / WorkOS as drop-in identity for hosted tier |
-| AI models | OpenAI, Anthropic, Google; open-weight local adapters | any provider behind adapter |
-| Media tools | ffmpeg, gltf-transform, OpenDroneMap-lite | none |
-| Sandboxing | iframe sandbox + capability tokens + CSP; gVisor for code blocks; Firecracker for plugins | nsjail |
-| Observability | OpenTelemetry → Prometheus + Grafana Tempo + Loki | Honeycomb, Datadog (managed) |
-| CI/CD | GitHub Actions + ArgoCD (self-host K8s) | none |
-| IaC | Terraform + Helm; Pulumi for apps | none |
-| Container runtime | containerd | Docker Engine |
-| Monorepo | pnpm workspaces + Turborepo | Nx |
+| Layer                          | Choice                                                                                    | Backup / alternative                                      |
+| ------------------------------ | ----------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Frontend framework             | Next.js + React (TypeScript)                                                              | Remix                                                     |
+| Canvas / render engine         | Custom engine on WebGL2 + WebGPU; Canvas2D fallback                                       | Three.js for 3D helpers; Pixi for 2D                      |
+| State / collaboration          | Yjs CRDT, sub-documents per slide/theme/binding                                           | Automerge                                                 |
+| Layout engine                  | Yoga (flex) for auto-layout + custom constraint solver                                    | Cassowary                                                 |
+| Local store                    | IndexedDB + OPFS for media                                                                | SQLite via Wasm                                           |
+| Service worker                 | Workbox                                                                                   | none                                                      |
+| **Backend — control plane**    | TypeScript (Node 22 + Hono)                                                               | Go, Java/Spring                                           |
+| **Backend — realtime gateway** | Go (gorilla/websocket, NATS-backed)                                                       | Elixir/Phoenix, Rust (axum+tokio-tungstenite)             |
+| **Backend — CPU workers**      | Go primary; Rust for hot paths                                                            | Rust everywhere, C++                                      |
+| **Backend — AI/data workers**  | TypeScript primary; Python for ML/eval                                                    | Python everywhere                                         |
+| API styles                     | REST external; GraphQL first-party reads; gRPC internal; MCP agent surface                | none                                                      |
+| Database                       | Postgres 16                                                                               | none (locked-in is fine; community/vendor both available) |
+| Object storage                 | S3-compatible (AWS S3 / MinIO / R2)                                                       | any S3 API                                                |
+| Cache                          | Redis / Valkey                                                                            | Memcached                                                 |
+| Event bus                      | NATS JetStream (primary); Redpanda optional                                               | Kafka, RabbitMQ                                           |
+| Search                         | OpenSearch                                                                                | Meilisearch                                               |
+| Analytics OLAP                 | ClickHouse                                                                                | DuckDB / Parquet                                          |
+| Graph projection               | Postgres recursive CTEs for v1; dedicated graph store later                               | Neo4j (only if scale demands)                             |
+| Workflow / jobs                | Temporal                                                                                  | BullMQ (simpler)                                          |
+| Realtime                       | Self-hosted WebSocket gateway (NATS-backed) with managed fallback (Liveblocks/Ably)       | LiveKit for low-latency stage                             |
+| Auth                           | OIDC + SAML (SSO); SCIM; passkeys                                                         | Auth0 / WorkOS as drop-in identity for hosted tier        |
+| AI models                      | OpenAI, Anthropic, Google; open-weight local adapters                                     | any provider behind adapter                               |
+| Media tools                    | ffmpeg, gltf-transform, OpenDroneMap-lite                                                 | none                                                      |
+| Sandboxing                     | iframe sandbox + capability tokens + CSP; gVisor for code blocks; Firecracker for plugins | nsjail                                                    |
+| Observability                  | OpenTelemetry → Prometheus + Grafana Tempo + Loki                                         | Honeycomb, Datadog (managed)                              |
+| CI/CD                          | GitHub Actions + ArgoCD (self-host K8s)                                                   | none                                                      |
+| IaC                            | Terraform + Helm; Pulumi for apps                                                         | none                                                      |
+| Container runtime              | containerd                                                                                | Docker Engine                                             |
+| Monorepo                       | pnpm workspaces + Turborepo                                                               | Nx                                                        |
 
 ---
 
@@ -368,22 +369,22 @@ The contract rule (§6.2.0) means every cross-tier boundary is described by a co
 
 ## 6.13 Lock-in Controls Summary
 
-| Choice | Lock-in risk | Control |
-|---|---|---|
-| Postgres | low | reversible migrations + portable SQL |
-| S3 API | low | abstraction layer |
-| OpenSearch | medium | vector fallback to pgvector |
-| ClickHouse | medium | column store, export to Parquet/DuckDB |
-| NATS | low | Kafka API alternative (Redpanda) |
-| Yjs | medium | exportable CRDT log + reconstructed schema |
-| OpenAI/Anthropic | medium | adapter pattern; local open-weight option |
-| Next.js | medium | editor split out; viewer pages can move to any Node SSR |
-| Temporal | medium | BullMQ option for simple flows |
-| WorkOS/Auth0 (managed) | medium | drop-in behind internal adapter |
-| **TypeScript control plane** | medium | gRPC + OpenAPI contracts; control plane logic re-implementable in Go/Java without API change |
-| **Go realtime gateway** | low | gRPC contract; re-implementable in Rust/Elixir without API change |
-| **Go CPU workers** | low | gRPC contract; re-implementable in Rust without API change |
-| **Rust hot-path workers (if added)** | medium | ADR required; bounded scope |
+| Choice                               | Lock-in risk | Control                                                                                      |
+| ------------------------------------ | ------------ | -------------------------------------------------------------------------------------------- |
+| Postgres                             | low          | reversible migrations + portable SQL                                                         |
+| S3 API                               | low          | abstraction layer                                                                            |
+| OpenSearch                           | medium       | vector fallback to pgvector                                                                  |
+| ClickHouse                           | medium       | column store, export to Parquet/DuckDB                                                       |
+| NATS                                 | low          | Kafka API alternative (Redpanda)                                                             |
+| Yjs                                  | medium       | exportable CRDT log + reconstructed schema                                                   |
+| OpenAI/Anthropic                     | medium       | adapter pattern; local open-weight option                                                    |
+| Next.js                              | medium       | editor split out; viewer pages can move to any Node SSR                                      |
+| Temporal                             | medium       | BullMQ option for simple flows                                                               |
+| WorkOS/Auth0 (managed)               | medium       | drop-in behind internal adapter                                                              |
+| **TypeScript control plane**         | medium       | gRPC + OpenAPI contracts; control plane logic re-implementable in Go/Java without API change |
+| **Go realtime gateway**              | low          | gRPC contract; re-implementable in Rust/Elixir without API change                            |
+| **Go CPU workers**                   | low          | gRPC contract; re-implementable in Rust without API change                                   |
+| **Rust hot-path workers (if added)** | medium       | ADR required; bounded scope                                                                  |
 
 ---
 
@@ -401,36 +402,36 @@ The contract rule (§6.2.0) means every cross-tier boundary is described by a co
 
 ## 6.15 Decisions Log
 
-| ID | Decision | Rationale | Alternative considered |
-|---|---|---|---|
+| ID       | Decision                                                                                                                                                                                                                | Rationale                                                                                                                                   | Alternative considered                                                                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D-STK-01 | **Polyglot backend** with TS control plane, Go realtime gateway, Go/Rust CPU workers, TS/Python AI workers. Hard contract rule: gRPC + OpenAPI + committed generated clients; no service imports another's source code. | Each tier uses the language best suited to its workload; type sharing preserved via Protobuf/JSON Schema; escape hatches preserved per tier | Monolithic TS backend — rejected because of memory/perf cost in realtime and CPU workers; pure-Go backend — rejected because of type-sharing cost with editor and MCP |
-| D-STK-02 | Yjs over Automerge | Performance today | Automerge — benchmark fallback |
-| D-STK-03 | Postgres | Standard, strong | MySQL — weaker JSONB |
-| D-STK-04 | NATS JetStream as primary bus | Lightweight, self-host friendly | Kafka — heavier ops |
-| D-STK-05 | ClickHouse for analytics | Best perf/cost | Druid — heavier |
-| D-STK-06 | OpenSearch for search + vector | One engine | Meilisearch + pgvector — split |
-| D-STK-07 | Temporal for long workflows | Mature, durable | BullMQ — used for short jobs |
-| D-STK-08 | Self-host realtime gateway in Go | Cost, control, low memory per connection | Managed-only — risk and cost; Node realtime — rejected for memory/perf at scale |
-| D-STK-09 | Custom canvas engine | Required feature breadth | Three.js + DOM — insufficient |
-| D-STK-10 | Multi-provider AI adapters | Vendor resilience | Single provider — fragile |
-| D-STK-11 | TypeScript on Node 22 + Hono for control plane | Type sharing with editor/MCP/CLI/SDK; iteration speed; BD hiring pool | Go, Java/Spring, .NET, Elixir, Rust, Python — see §6.2.1 |
-| D-STK-12 | Go for realtime gateway | ~10× lower memory per WebSocket; canonical Go workload | Elixir, Rust — kept as escape hatches |
-| D-STK-13 | Go primary, Rust escape hatch, for CPU workers | Go keeps systems-language toolchain count to one; Rust reserved for raw throughput/memory determinism via ADR | Rust everywhere — too slow to iterate; Node — too slow for CPU loops |
+| D-STK-02 | Yjs over Automerge                                                                                                                                                                                                      | Performance today                                                                                                                           | Automerge — benchmark fallback                                                                                                                                        |
+| D-STK-03 | Postgres                                                                                                                                                                                                                | Standard, strong                                                                                                                            | MySQL — weaker JSONB                                                                                                                                                  |
+| D-STK-04 | NATS JetStream as primary bus                                                                                                                                                                                           | Lightweight, self-host friendly                                                                                                             | Kafka — heavier ops                                                                                                                                                   |
+| D-STK-05 | ClickHouse for analytics                                                                                                                                                                                                | Best perf/cost                                                                                                                              | Druid — heavier                                                                                                                                                       |
+| D-STK-06 | OpenSearch for search + vector                                                                                                                                                                                          | One engine                                                                                                                                  | Meilisearch + pgvector — split                                                                                                                                        |
+| D-STK-07 | Temporal for long workflows                                                                                                                                                                                             | Mature, durable                                                                                                                             | BullMQ — used for short jobs                                                                                                                                          |
+| D-STK-08 | Self-host realtime gateway in Go                                                                                                                                                                                        | Cost, control, low memory per connection                                                                                                    | Managed-only — risk and cost; Node realtime — rejected for memory/perf at scale                                                                                       |
+| D-STK-09 | Custom canvas engine                                                                                                                                                                                                    | Required feature breadth                                                                                                                    | Three.js + DOM — insufficient                                                                                                                                         |
+| D-STK-10 | Multi-provider AI adapters                                                                                                                                                                                              | Vendor resilience                                                                                                                           | Single provider — fragile                                                                                                                                             |
+| D-STK-11 | TypeScript on Node 22 + Hono for control plane                                                                                                                                                                          | Type sharing with editor/MCP/CLI/SDK; iteration speed; BD hiring pool                                                                       | Go, Java/Spring, .NET, Elixir, Rust, Python — see §6.2.1                                                                                                              |
+| D-STK-12 | Go for realtime gateway                                                                                                                                                                                                 | ~10× lower memory per WebSocket; canonical Go workload                                                                                      | Elixir, Rust — kept as escape hatches                                                                                                                                 |
+| D-STK-13 | Go primary, Rust escape hatch, for CPU workers                                                                                                                                                                          | Go keeps systems-language toolchain count to one; Rust reserved for raw throughput/memory determinism via ADR                               | Rust everywhere — too slow to iterate; Node — too slow for CPU loops                                                                                                  |
 
 ---
 
 ## 6.16 Open Decisions
 
-| ID | Decision | Owner |
-|---|---|---|
-| OD-STK-01 | WebGPU-only when available vs parallel WebGL2 always. | Editor lead |
-| OD-STK-02 | Managed realtime (Liveblocks/Ably) vs self-hosted Go gateway at first public beta. | SRE |
-| OD-STK-03 | Passkey default-on vs opt-in. | Security |
-| OD-STK-04 | Yjs vs Automerge final benchmark threshold. | Editor lead |
-| OD-STK-05 | Self-host single-node default user/role: admin or self-service? | Self-host lead |
-| OD-STK-06 | ORM for the control plane: Prisma vs Drizzle vs raw SQL/pg. | Control-plane lead |
-| OD-STK-07 | When to introduce the first Rust CPU worker (deferred until profile data justifies). | Platform lead |
-| OD-STK-08 | When to add Python as the default AI worker language for ML workflows. | AI lead |
+| ID        | Decision                                                                             | Owner              |
+| --------- | ------------------------------------------------------------------------------------ | ------------------ |
+| OD-STK-01 | WebGPU-only when available vs parallel WebGL2 always.                                | Editor lead        |
+| OD-STK-02 | Managed realtime (Liveblocks/Ably) vs self-hosted Go gateway at first public beta.   | SRE                |
+| OD-STK-03 | Passkey default-on vs opt-in.                                                        | Security           |
+| OD-STK-04 | Yjs vs Automerge final benchmark threshold.                                          | Editor lead        |
+| OD-STK-05 | Self-host single-node default user/role: admin or self-service?                      | Self-host lead     |
+| OD-STK-06 | ORM for the control plane: Prisma vs Drizzle vs raw SQL/pg.                          | Control-plane lead |
+| OD-STK-07 | When to introduce the first Rust CPU worker (deferred until profile data justifies). | Platform lead      |
+| OD-STK-08 | When to add Python as the default AI worker language for ML workflows.               | AI lead            |
 
 ---
 

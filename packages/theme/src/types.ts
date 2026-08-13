@@ -81,7 +81,10 @@ export interface SlideElementRef {
 
 export interface DeckTokenState {
   /** Per-slide partial token overrides (may include conditionExpr for state-conditional). */
-  readonly perSlideOverrides: ReadonlyMap<string, ReadonlyMap<TokenRef, TokenValue | TokenAlias & { conditionExpr?: ConditionExpr }>>;
+  readonly perSlideOverrides: ReadonlyMap<
+    string,
+    ReadonlyMap<TokenRef, TokenValue | (TokenAlias & { conditionExpr?: ConditionExpr })>
+  >;
 
   /** Per-section partial token overrides. */
   readonly sectionOverrides: ReadonlyMap<string, ReadonlyMap<TokenRef, TokenValue | TokenAlias>>;
@@ -135,10 +138,7 @@ export type ResolvedTokenSource =
   | 'system-alias'
   | 'system-default-literal';
 
-export type ResolvedTokenWarn =
-  | 'WARN_TOKEN_UNRESOLVED'
-  | 'WARN_TOKEN_FALLBACK'
-  | undefined;
+export type ResolvedTokenWarn = 'WARN_TOKEN_UNRESOLVED' | 'WARN_TOKEN_FALLBACK' | undefined;
 
 export interface ResolvedToken {
   readonly tokenId: TokenRef;

@@ -83,12 +83,7 @@ function statusAccent(status: AgentNodeStatus): string {
   }
 }
 
-export function PipelineGraph({
-  nodes,
-  edges,
-  selectedNodeId,
-  onSelectNode,
-}: PipelineGraphProps) {
+export function PipelineGraph({ nodes, edges, selectedNodeId, onSelectNode }: PipelineGraphProps) {
   const positions = useMemo(() => {
     const map = new Map<string, { x: number; y: number }>();
     if (nodes.length === 0) return map;

@@ -5,7 +5,16 @@
 import type { Dataset, RenderOptions, SvgElement, BindingSchema } from '../types.js';
 import { rect, text } from '../render/element.js';
 
-const PALETTE = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#14B8A6', '#F97316'];
+const PALETTE = [
+  '#4F46E5',
+  '#0EA5E9',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#8B5CF6',
+  '#14B8A6',
+  '#F97316',
+];
 
 /** Render a treemap from a dataset. */
 export function renderTreemap(
@@ -47,20 +56,24 @@ export function renderTreemap(
     if (x + w > W - pad) {
       x = pad;
       y += rowH;
-      rowH = (H - pad * 2 - (y - pad)) || 20;
+      rowH = H - pad * 2 - (y - pad) || 20;
     }
 
-    elements.push(rect(x, y, Math.min(w, W - pad - x), h, `tile_${i}`, {
-      fill: PALETTE[i % PALETTE.length],
-      stroke: theme === 'dark' ? '#1e293b' : '#ffffff',
-      strokeWidth: 2,
-    }));
-    elements.push(text(x + 4, y + h / 2 - 6, label, `tile_label_${i}`, {
-      width: Math.min(w - 8, W - pad - x - 8),
-      height: 14,
-      fontSize: Math.min(opts.fontSize ?? 12, 14),
-      fill: '#ffffff',
-    }));
+    elements.push(
+      rect(x, y, Math.min(w, W - pad - x), h, `tile_${i}`, {
+        fill: PALETTE[i % PALETTE.length],
+        stroke: theme === 'dark' ? '#1e293b' : '#ffffff',
+        strokeWidth: 2,
+      }),
+    );
+    elements.push(
+      text(x + 4, y + h / 2 - 6, label, `tile_label_${i}`, {
+        width: Math.min(w - 8, W - pad - x - 8),
+        height: 14,
+        fontSize: Math.min(opts.fontSize ?? 12, 14),
+        fill: '#ffffff',
+      }),
+    );
 
     x += w;
   });

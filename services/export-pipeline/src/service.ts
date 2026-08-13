@@ -57,7 +57,11 @@ export interface ExportServiceOptions {
   /** Caller-provided clock (deterministic in tests). */
   readonly clock?: () => Date;
   /** Artifact storage callback — save encoded bytes and return a URI. */
-  readonly saveArtifact?: (jobId: string, data: Uint8Array, format: ExportFormat) => Promise<string>;
+  readonly saveArtifact?: (
+    jobId: string,
+    data: Uint8Array,
+    format: ExportFormat,
+  ) => Promise<string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -72,7 +76,11 @@ export class ExportService {
   private readonly audit: ExportAuditRecorder | undefined;
   private readonly idGen: () => ULID;
   private readonly clock: () => Date;
-  private readonly saveArtifact: (jobId: string, data: Uint8Array, format: ExportFormat) => Promise<string>;
+  private readonly saveArtifact: (
+    jobId: string,
+    data: Uint8Array,
+    format: ExportFormat,
+  ) => Promise<string>;
 
   constructor(opts: ExportServiceOptions) {
     this.jobs = opts.jobs;
@@ -252,7 +260,9 @@ export class ExportService {
       throw new ValidationError(`Invalid scale: ${input.scale}`);
     }
     if (input.range.start < 0 || input.range.end < input.range.start) {
-      throw new ValidationError(`Invalid range: start=${input.range.start}, end=${input.range.end}`);
+      throw new ValidationError(
+        `Invalid range: start=${input.range.start}, end=${input.range.end}`,
+      );
     }
   }
 
@@ -284,11 +294,17 @@ export class ExportService {
 // ---------------------------------------------------------------------------
 
 const defaultId: () => ULID = () =>
-  `01H000000000000000000000${Math.floor(Math.random() * 1e6).toString().padStart(6, '0')}` as ULID;
+  `01H000000000000000000000${Math.floor(Math.random() * 1e6)
+    .toString()
+    .padStart(6, '0')}` as ULID;
 
 const defaultClock = () => new Date();
 
-async function defaultSaveArtifact(_jobId: string, _data: Uint8Array, format: ExportFormat): Promise<string> {
+async function defaultSaveArtifact(
+  _jobId: string,
+  _data: Uint8Array,
+  format: ExportFormat,
+): Promise<string> {
   // Stub: return a fake artifact URI
   return `artifact://exports/${_jobId}.${format}`;
 }

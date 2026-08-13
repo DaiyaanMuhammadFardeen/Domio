@@ -52,9 +52,9 @@ describe('marketplace-service', () => {
       json: async () => ({}),
     })) as unknown as typeof fetch;
 
-    await expect(
-      fetchCuratedListings('brand-acme', 40, 0, 'http://api.test'),
-    ).rejects.toThrow(/503/);
+    await expect(fetchCuratedListings('brand-acme', 40, 0, 'http://api.test')).rejects.toThrow(
+      /503/,
+    );
   });
 
   it('forwards brand_kit_id, limit, offset as query params', async () => {
@@ -67,7 +67,8 @@ describe('marketplace-service', () => {
     globalThis.fetch = mock;
 
     await fetchCuratedListings('brand-x', 10, 20, 'http://api.test');
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
     expect(calledUrl).toContain('brand_kit_id=brand-x');
     expect(calledUrl).toContain('limit=10');
     expect(calledUrl).toContain('offset=20');

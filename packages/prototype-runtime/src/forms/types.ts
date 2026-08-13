@@ -43,8 +43,17 @@ export type Validator =
   | { readonly kind: 'minLength'; readonly value: number }
   | { readonly kind: 'maxLength'; readonly value: number }
   | { readonly kind: 'pattern'; readonly value: string; readonly flags?: string }
-  | { readonly kind: 'crossField'; readonly field: string; readonly rule: 'equals' | 'notEquals' | 'greaterThan' | 'lessThan' }
-  | { readonly kind: 'async'; readonly debounceMs?: number; readonly check: 'unique-email' | 'unique-handle' | 'custom'; readonly endpoint?: string };
+  | {
+      readonly kind: 'crossField';
+      readonly field: string;
+      readonly rule: 'equals' | 'notEquals' | 'greaterThan' | 'lessThan';
+    }
+  | {
+      readonly kind: 'async';
+      readonly debounceMs?: number;
+      readonly check: 'unique-email' | 'unique-handle' | 'custom';
+      readonly endpoint?: string;
+    };
 
 /** Definition for a single input on a form. */
 export interface InputDefinition {
@@ -136,7 +145,9 @@ export type CoercionResult =
   | { readonly ok: false; readonly error: ErrorCode };
 
 /** Signature pad payload (data URL or stroke-list). */
-export type SignaturePayload = string | readonly { readonly x: number; readonly y: number; readonly t: number }[];
+export type SignaturePayload =
+  | string
+  | readonly { readonly x: number; readonly y: number; readonly t: number }[];
 
 /** File upload value. */
 export interface FileValue {

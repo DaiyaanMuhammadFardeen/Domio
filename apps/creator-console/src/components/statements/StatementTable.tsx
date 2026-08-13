@@ -96,10 +96,7 @@ export function StatementTable({ statements, onSelect }: StatementTableProps) {
         <tbody className="divide-y divide-slate-100">
           {statements.length === 0 ? (
             <tr>
-              <td
-                colSpan={7}
-                className="px-4 py-6 text-center text-sm text-slate-500"
-              >
+              <td colSpan={7} className="px-4 py-6 text-center text-sm text-slate-500">
                 No statements yet.
               </td>
             </tr>
@@ -115,9 +112,7 @@ export function StatementTable({ statements, onSelect }: StatementTableProps) {
                   {statement.period_month}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3">
-                  <Badge tone={toneForStatus(statement.status)}>
-                    {statement.status}
-                  </Badge>
+                  <Badge tone={toneForStatus(statement.status)}>{statement.status}</Badge>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-right tabular-nums text-slate-800">
                   {formatCurrency(statement.gross_cents, statement.currency)}

@@ -23,7 +23,9 @@ export function detectLocale(): LocaleId {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored && isLocaleId(stored)) return stored;
-  } catch { /* SSR guard */ }
+  } catch {
+    /* SSR guard */
+  }
   return 'en';
 }
 
@@ -31,7 +33,9 @@ export function setLocale(locale: LocaleId): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STORAGE_KEY, locale);
-  } catch { /* no-op */ }
+  } catch {
+    /* no-op */
+  }
 }
 
 /* ── Translation dictionaries ───────────────────────────────────────── */
@@ -112,7 +116,7 @@ const en: Dict = {
   'footer.madeBy': 'Built for the Domio creator economy',
 
   // Misc
-  'loading': 'Loading...',
+  loading: 'Loading...',
   'sort.newest': 'Newest',
   'sort.popular': 'Most popular',
   'sort.priceLow': 'Price: low to high',
@@ -126,7 +130,8 @@ const bn: Dict = {
   'nav.creators': 'নির্মাতারা',
   'nav.library': 'লাইব্রেরি',
   'hero.title': 'সঠিক বিল্ডিং ব্লক খুঁজুন',
-  'hero.subtitle': 'কম্পোনেন্ট, টেমপ্লেট, থিম, এবং আরও — আপনার পরবর্তী প্রজেক্টে ব্যবহারের জন্য প্রস্তুত।',
+  'hero.subtitle':
+    'কম্পোনেন্ট, টেমপ্লেট, থিম, এবং আরও — আপনার পরবর্তী প্রজেক্টে ব্যবহারের জন্য প্রস্তুত।',
   'hero.searchPlaceholder': 'মার্কেটপ্লেস অনুসন্ধান...',
   'sidebar.kind': 'ধরন',
   'sidebar.kind.all': 'সব ধরন',
@@ -175,7 +180,7 @@ const bn: Dict = {
   'notfound.title': 'লিস্টিং পাওয়া যায়নি',
   'notfound.subtitle': 'এই লিস্টিং সরিয়ে নেওয়া হতে পারে বা বিদ্যমান নাও থাকতে পারে।',
   'footer.madeBy': 'ডোমিও ক্রিয়েটর ইকোনমির জন্য তৈরি',
-  'loading': 'লোড হচ্ছে...',
+  loading: 'লোড হচ্ছে...',
   'sort.newest': 'নতুন',
   'sort.popular': 'সবচেয়ে জনপ্রিয়',
   'sort.priceLow': 'মূল্য: কম থেকে বেশি',
@@ -238,7 +243,7 @@ const es: Dict = {
   'notfound.title': 'Listado no encontrado',
   'notfound.subtitle': 'Este listado puede haber sido eliminado o no existe.',
   'footer.madeBy': 'Creado para la economía de creadores de Domio',
-  'loading': 'Cargando...',
+  loading: 'Cargando...',
   'sort.newest': 'Más reciente',
   'sort.popular': 'Más popular',
   'sort.priceLow': 'Precio: menor a mayor',
@@ -252,15 +257,16 @@ const fr: Dict = {
   'nav.creators': 'Créateurs',
   'nav.library': 'Bibliothèque',
   'hero.title': 'Trouvez les bons éléments constitutifs',
-  'hero.subtitle': 'Composants, modèles, thèmes et plus, prêts à utiliser dans votre prochain projet.',
+  'hero.subtitle':
+    'Composants, modèles, thèmes et plus, prêts à utiliser dans votre prochain projet.',
   'hero.searchPlaceholder': 'Rechercher sur le marketplace...',
   'sidebar.kind': 'Type',
   'sidebar.kind.all': 'Tous les types',
   'sidebar.kind.component': 'Composants',
   'sidebar.kind.template': 'Modèles',
   'sidebar.kind.theme': 'Thèmes',
-  'sidebar.kind.sticker_pack': 'Packs d\'autocollants',
-  'sidebar.kind.icon_pack': 'Packs d\'icônes',
+  'sidebar.kind.sticker_pack': "Packs d'autocollants",
+  'sidebar.kind.icon_pack': "Packs d'icônes",
   'sidebar.price': 'Prix',
   'sidebar.price.all': 'Tous les prix',
   'sidebar.price.free': 'Gratuit',
@@ -290,18 +296,18 @@ const fr: Dict = {
   'checkout.redirecting': 'Redirection vers le fournisseur de paiement...',
   'checkout.pending': 'Votre achat est en cours de traitement.',
   'checkout.success': 'Paiement réussi! Votre article est prêt à être utilisé.',
-  'checkout.failed': 'Le paiement n\'a pas abouti. Vous n\'avez pas été facturé.',
-  'checkout.expired': 'Ce lien d\'achat a expiré. Veuillez réessayer.',
-  'checkout.backToItem': 'Retour à l\'article',
+  'checkout.failed': "Le paiement n'a pas abouti. Vous n'avez pas été facturé.",
+  'checkout.expired': "Ce lien d'achat a expiré. Veuillez réessayer.",
+  'checkout.backToItem': "Retour à l'article",
   'empty.title': 'Aucune annonce trouvée',
-  'empty.subtitle': 'Essayez d\'ajuster votre recherche ou vos filtres.',
-  'error.title': 'Une erreur s\'est produite',
-  'error.subtitle': 'Nous n\'avons pas pu charger les données du marketplace. Veuillez réessayer.',
+  'empty.subtitle': "Essayez d'ajuster votre recherche ou vos filtres.",
+  'error.title': "Une erreur s'est produite",
+  'error.subtitle': "Nous n'avons pas pu charger les données du marketplace. Veuillez réessayer.",
   'error.retry': 'Réessayer',
   'notfound.title': 'Annonce non trouvée',
-  'notfound.subtitle': 'Cette annonce a peut-être été supprimée ou n\'existe pas.',
-  'footer.madeBy': 'Créé pour l\'économie des créateurs Domio',
-  'loading': 'Chargement...',
+  'notfound.subtitle': "Cette annonce a peut-être été supprimée ou n'existe pas.",
+  'footer.madeBy': "Créé pour l'économie des créateurs Domio",
+  loading: 'Chargement...',
   'sort.newest': 'Plus récent',
   'sort.popular': 'Plus populaire',
   'sort.priceLow': 'Prix : croissant',
@@ -315,7 +321,8 @@ const de: Dict = {
   'nav.creators': 'Ersteller',
   'nav.library': 'Bibliothek',
   'hero.title': 'Finden Sie die richtigen Bausteine',
-  'hero.subtitle': 'Komponenten, Vorlagen, Themen und mehr — bereit zur Verwendung in Ihrem nächsten Projekt.',
+  'hero.subtitle':
+    'Komponenten, Vorlagen, Themen und mehr — bereit zur Verwendung in Ihrem nächsten Projekt.',
   'hero.searchPlaceholder': 'Marketplace durchsuchen...',
   'sidebar.kind': 'Typ',
   'sidebar.kind.all': 'Alle Typen',
@@ -364,7 +371,7 @@ const de: Dict = {
   'notfound.title': 'Eintrag nicht gefunden',
   'notfound.subtitle': 'Dieser Eintrag wurde möglicherweise entfernt oder existiert nicht.',
   'footer.madeBy': 'Erstellt für die Domio-Ersteller-Ökonomie',
-  'loading': 'Wird geladen...',
+  loading: 'Wird geladen...',
   'sort.newest': 'Neueste',
   'sort.popular': 'Beliebteste',
   'sort.priceLow': 'Preis: aufsteigend',
@@ -427,7 +434,7 @@ const ja: Dict = {
   'notfound.title': 'リスティングが見つかりません',
   'notfound.subtitle': 'このリスティングは削除されたか、存在しない可能性があります。',
   'footer.madeBy': 'Domio クリエイターエコノミーのために作成',
-  'loading': '読み込み中...',
+  loading: '読み込み中...',
   'sort.newest': '新しい順',
   'sort.popular': '人気順',
   'sort.priceLow': '価格: 安い順',
@@ -490,7 +497,7 @@ const zhCN: Dict = {
   'notfound.title': '未找到列表',
   'notfound.subtitle': '此列表可能已被删除或不存在。',
   'footer.madeBy': '为 Domio 创作者经济而建',
-  'loading': '加载中...',
+  loading: '加载中...',
   'sort.newest': '最新',
   'sort.popular': '最受欢迎',
   'sort.priceLow': '价格：从低到高',
@@ -499,7 +506,13 @@ const zhCN: Dict = {
 };
 
 const dictionaries: Record<LocaleId, Dict> = {
-  en, bn, es, fr, de, ja, 'zh-CN': zhCN,
+  en,
+  bn,
+  es,
+  fr,
+  de,
+  ja,
+  'zh-CN': zhCN,
   ar: en,
   ur: en,
 };
@@ -513,19 +526,13 @@ const dictionaries: Record<LocaleId, Dict> = {
  * t('card.downloads', 'bn', { count: '১,২৫০' })
  * // → '১,২৫০ ডাউনলোড'
  */
-export function t(
-  key: string,
-  locale: LocaleId,
-  params?: Record<string, string | number>,
-): string {
+export function t(key: string, locale: LocaleId, params?: Record<string, string | number>): string {
   const allDicts = dictionaries as Record<string, Dict | undefined>;
   const dict = allDicts[locale] ?? allDicts.en ?? {};
   const fallback = allDicts.en ?? {};
   let out = dict[key] ?? fallback[key] ?? key;
   if (params) {
-    out = out.replace(/\{(\w+)\}/g, (_, k: string) =>
-      k in params ? String(params[k]) : `{${k}}`,
-    );
+    out = out.replace(/\{(\w+)\}/g, (_, k: string) => (k in params ? String(params[k]) : `{${k}}`));
   }
   return out;
 }

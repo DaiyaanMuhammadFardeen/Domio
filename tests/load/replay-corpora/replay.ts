@@ -72,10 +72,7 @@ export interface ReplayResult {
   allEqual: boolean;
 }
 
-export async function runReplay(
-  events: CorpusEvent[],
-  runs: number,
-): Promise<ReplayResult> {
+export async function runReplay(events: CorpusEvent[], runs: number): Promise<ReplayResult> {
   const fingerprints: string[] = [];
   for (let i = 0; i < runs; i++) {
     const assignments = assignSessions(events);
@@ -91,15 +88,13 @@ async function main() {
   const runsIdx = argv.indexOf('--runs');
   const runs = runsIdx >= 0 ? Number(argv[runsIdx + 1]) : 5;
 
-  const events = corpusPath
-    ? await readNdjson(corpusPath)
-    : generateCorpus({ eventCount: 1000 });
+  const events = corpusPath ? await readNdjson(corpusPath) : generateCorpus({ eventCount: 1000 });
 
   const result = await runReplay(events, runs);
 
   console.log(
     `replay: runs=${result.runs} fingerprints=${result.fingerprints.length} ` +
-    `allEqual=${result.allEqual}`,
+      `allEqual=${result.allEqual}`,
   );
   if (!result.allEqual) {
     console.error('FINGERPRINTS DIVERGE:');

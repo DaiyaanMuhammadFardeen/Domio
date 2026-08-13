@@ -16,12 +16,7 @@ export interface ListenerStatusProps {
   className?: string;
 }
 
-export function ListenerStatus({
-  enabled,
-  matchCount,
-  onToggle,
-  className,
-}: ListenerStatusProps) {
+export function ListenerStatus({ enabled, matchCount, onToggle, className }: ListenerStatusProps) {
   const handleClick = useCallback(() => {
     onToggle();
   }, [onToggle]);

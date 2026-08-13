@@ -12,10 +12,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PermissionService } from './service.js';
 import type { PermissionServiceOptions } from './service.js';
-import {
-  ValidationError,
-  PermissionDeniedError,
-} from './types.js';
+import { ValidationError, PermissionDeniedError } from './types.js';
 import type { ResourceType } from './types.js';
 import {
   InMemoryPermissionGrantStore,
@@ -46,7 +43,9 @@ async function makeService(opts: { auditEnabled?: boolean } = {}) {
   const idGen = (): string => `perm-${(counter++).toString().padStart(4, '0')}`;
   let now = new Date('2026-06-01T12:00:00Z');
   const clock = (): Date => now;
-  const advanceTime = (ms: number): void => { now = new Date(now.getTime() + ms); };
+  const advanceTime = (ms: number): void => {
+    now = new Date(now.getTime() + ms);
+  };
 
   const grants = new InMemoryPermissionGrantStore();
   const workspaceMembers = new InMemoryWorkspaceMemberStore();
@@ -71,7 +70,17 @@ async function makeService(opts: { auditEnabled?: boolean } = {}) {
     clock,
   });
 
-  return { svc, grants, workspaceMembers, groupMemberships, resourceHierarchy, audit, idGen, clock, advanceTime };
+  return {
+    svc,
+    grants,
+    workspaceMembers,
+    groupMemberships,
+    resourceHierarchy,
+    audit,
+    idGen,
+    clock,
+    advanceTime,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -81,50 +90,58 @@ async function makeService(opts: { auditEnabled?: boolean } = {}) {
 describe('PermissionService — createGrant validation', () => {
   it('throws ValidationError for missing resourceId', async () => {
     const { svc } = await makeService();
-    await expect(svc.createGrant({
-      resourceType: 'deck',
-      resourceId: '',
-      principalId: U,
-      principalType: 'user',
-      capabilities: ['edit'],
-      createdBy: ACTOR,
-    })).rejects.toThrow(ValidationError);
+    await expect(
+      svc.createGrant({
+        resourceType: 'deck',
+        resourceId: '',
+        principalId: U,
+        principalType: 'user',
+        capabilities: ['edit'],
+        createdBy: ACTOR,
+      }),
+    ).rejects.toThrow(ValidationError);
   });
 
   it('throws ValidationError for missing principalId', async () => {
     const { svc } = await makeService();
-    await expect(svc.createGrant({
-      resourceType: 'deck',
-      resourceId: D,
-      principalId: '',
-      principalType: 'user',
-      capabilities: ['edit'],
-      createdBy: ACTOR,
-    })).rejects.toThrow(ValidationError);
+    await expect(
+      svc.createGrant({
+        resourceType: 'deck',
+        resourceId: D,
+        principalId: '',
+        principalType: 'user',
+        capabilities: ['edit'],
+        createdBy: ACTOR,
+      }),
+    ).rejects.toThrow(ValidationError);
   });
 
   it('throws ValidationError for empty capabilities', async () => {
     const { svc } = await makeService();
-    await expect(svc.createGrant({
-      resourceType: 'deck',
-      resourceId: D,
-      principalId: U,
-      principalType: 'user',
-      capabilities: [],
-      createdBy: ACTOR,
-    })).rejects.toThrow(ValidationError);
+    await expect(
+      svc.createGrant({
+        resourceType: 'deck',
+        resourceId: D,
+        principalId: U,
+        principalType: 'user',
+        capabilities: [],
+        createdBy: ACTOR,
+      }),
+    ).rejects.toThrow(ValidationError);
   });
 
   it('throws ValidationError for missing createdBy', async () => {
     const { svc } = await makeService();
-    await expect(svc.createGrant({
-      resourceType: 'deck',
-      resourceId: D,
-      principalId: U,
-      principalType: 'user',
-      capabilities: ['edit'],
-      createdBy: '',
-    })).rejects.toThrow(ValidationError);
+    await expect(
+      svc.createGrant({
+        resourceType: 'deck',
+        resourceId: D,
+        principalId: U,
+        principalType: 'user',
+        capabilities: ['edit'],
+        createdBy: '',
+      }),
+    ).rejects.toThrow(ValidationError);
   });
 
   it('creates a valid grant', async () => {
@@ -269,22 +286,26 @@ describe('PermissionService — checkPermission', () => {
 
   it('throws ValidationError for missing principalId', async () => {
     const { svc } = await makeService();
-    await expect(svc.checkPermission({
-      principalId: '',
-      resourceType: 'deck',
-      resourceId: D,
-      capability: 'edit',
-    })).rejects.toThrow(ValidationError);
+    await expect(
+      svc.checkPermission({
+        principalId: '',
+        resourceType: 'deck',
+        resourceId: D,
+        capability: 'edit',
+      }),
+    ).rejects.toThrow(ValidationError);
   });
 
   it('throws ValidationError for missing capability', async () => {
     const { svc } = await makeService();
-    await expect(svc.checkPermission({
-      principalId: U,
-      resourceType: 'deck',
-      resourceId: D,
-      capability: '',
-    })).rejects.toThrow(ValidationError);
+    await expect(
+      svc.checkPermission({
+        principalId: U,
+        resourceType: 'deck',
+        resourceId: D,
+        capability: '',
+      }),
+    ).rejects.toThrow(ValidationError);
   });
 });
 

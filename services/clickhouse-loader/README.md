@@ -25,28 +25,28 @@ services/clickhouse-loader/
 
 ## Configuration
 
-| Env var | Default | Notes |
-|---|---|---|
-| `KAFKA_BROKERS` | `localhost:9092` | comma-separated host:port |
-| `KAFKA_TOPIC` | `events.ingest.raw` | source topic |
-| `KAFKA_GROUP_ID` | `clickhouse-loader` | consumer group |
-| `KAFKA_DLQ_TOPIC` | `events.ingest.dlq` | DLQ for bad JSON |
-| `CLICKHOUSE_ADDR` | `localhost:9000` | native protocol port |
-| `CLICKHOUSE_DB` | `domio_analytics` | database |
-| `CLICKHOUSE_USER` | `default` | auth |
-| `CLICKHOUSE_PASSWORD` | `` | auth |
-| `BATCH_MAX_ROWS` | `5000` | flush trigger |
-| `BATCH_MAX_MS` | `1000` | flush trigger |
-| `CONCURRENCY` | `4` | partition consumers |
-| `HEALTH_PORT` | `8080` | exposed for `/healthz`, `/readyz`, `/metrics` |
+| Env var               | Default             | Notes                                         |
+| --------------------- | ------------------- | --------------------------------------------- |
+| `KAFKA_BROKERS`       | `localhost:9092`    | comma-separated host:port                     |
+| `KAFKA_TOPIC`         | `events.ingest.raw` | source topic                                  |
+| `KAFKA_GROUP_ID`      | `clickhouse-loader` | consumer group                                |
+| `KAFKA_DLQ_TOPIC`     | `events.ingest.dlq` | DLQ for bad JSON                              |
+| `CLICKHOUSE_ADDR`     | `localhost:9000`    | native protocol port                          |
+| `CLICKHOUSE_DB`       | `domio_analytics`   | database                                      |
+| `CLICKHOUSE_USER`     | `default`           | auth                                          |
+| `CLICKHOUSE_PASSWORD` | ``                  | auth                                          |
+| `BATCH_MAX_ROWS`      | `5000`              | flush trigger                                 |
+| `BATCH_MAX_MS`        | `1000`              | flush trigger                                 |
+| `CONCURRENCY`         | `4`                 | partition consumers                           |
+| `HEALTH_PORT`         | `8080`              | exposed for `/healthz`, `/readyz`, `/metrics` |
 
 ## Health
 
-| Endpoint | Notes |
-|---|---|
-| `GET /healthz` | process up |
-| `GET /readyz` | 200 once the consumer is running, 503 otherwise |
-| `GET /metrics` | Prometheus text format |
+| Endpoint       | Notes                                           |
+| -------------- | ----------------------------------------------- |
+| `GET /healthz` | process up                                      |
+| `GET /readyz`  | 200 once the consumer is running, 503 otherwise |
+| `GET /metrics` | Prometheus text format                          |
 
 ## Metrics
 

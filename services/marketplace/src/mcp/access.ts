@@ -26,11 +26,17 @@ export function checkMcpCapability(
  * Validate MCP tool input.
  * Returns errors array (empty = valid).
  */
-export function validateMcpToolInput(input: McpToolInput): Array<{ level: 'error' | 'warning'; code: string; message: string }> {
+export function validateMcpToolInput(
+  input: McpToolInput,
+): Array<{ level: 'error' | 'warning'; code: string; message: string }> {
   const errors: Array<{ level: 'error' | 'warning'; code: string; message: string }> = [];
 
   if (!input.workspaceId) {
-    errors.push({ level: 'error', code: 'MISSING_WORKSPACE_ID', message: 'workspaceId is required' });
+    errors.push({
+      level: 'error',
+      code: 'MISSING_WORKSPACE_ID',
+      message: 'workspaceId is required',
+    });
   }
   if (!input.actorId) {
     errors.push({ level: 'error', code: 'MISSING_ACTOR_ID', message: 'actorId is required' });

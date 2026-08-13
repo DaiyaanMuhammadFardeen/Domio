@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  asULID,
-  type DeckDocument,
-  type Element,
-  type Slide,
-} from '@domio/schema';
+import { asULID, type DeckDocument, type Element, type Slide } from '@domio/schema';
 import { computeDiff } from './diff.js';
 import { resolveConflicts } from './resolver.js';
 

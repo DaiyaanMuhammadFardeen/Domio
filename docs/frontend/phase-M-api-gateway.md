@@ -7,6 +7,7 @@ It has ~50 route files under `apps/api/src/routes/` including
 `p18/collab.ts`, `p18/permissions.ts`, `p18/suggestions.ts`, etc.
 
 But many `/v1/...` endpoints the consoles call likely 404 because:
+
 - The route file exists but isn't mounted in `apps/api/src/server.ts`.
 - The route exists but proxies to a service that Phase L just brought up.
 - The route is a stub that returns 501.

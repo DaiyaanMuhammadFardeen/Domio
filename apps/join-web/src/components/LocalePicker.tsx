@@ -11,11 +11,7 @@
 
 import { useEffect, useId } from 'react';
 import type { ReactElement } from 'react';
-import {
-  LIST_LOCALES,
-  saveLocale,
-  type LocaleDescriptor,
-} from '@/lib/locale-prefs';
+import { LIST_LOCALES, saveLocale, type LocaleDescriptor } from '@/lib/locale-prefs';
 
 export interface LocalePickerProps {
   readonly value: string;

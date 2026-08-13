@@ -174,7 +174,12 @@ describe('timeline-service', () => {
     expect(events.length).toBeGreaterThan(2);
     const first = events[0]!;
     const last = events[events.length - 1]!;
-    const result = await diffEvents('session-deck-investor-brief', first.id, last.id, 'http://tl.test');
+    const result = await diffEvents(
+      'session-deck-investor-brief',
+      first.id,
+      last.id,
+      'http://tl.test',
+    );
     expect(Array.isArray(result.changes)).toBe(true);
   });
 

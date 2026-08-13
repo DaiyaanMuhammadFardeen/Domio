@@ -32,11 +32,7 @@ export interface UptimeBarProps {
 
 export function UptimeBar({ history }: UptimeBarProps): JSX.Element {
   return (
-    <div
-      className="status-uptime"
-      role="img"
-      aria-label={`Uptime history, ${history.length} days`}
-    >
+    <div className="status-uptime" role="img" aria-label={`Uptime history, ${history.length} days`}>
       {history.map((day, i) => (
         <span
           key={i}

@@ -11,21 +11,18 @@
  */
 
 import type { PrototypeSession } from './types.js';
-import {
-  NotFoundError,
-  ValidationError,
-} from './dal.js';
-import type {
-  HttpRequest,
-  HttpResponse,
-  PrototypeRecorderContext,
-} from './handlers.js';
+import { NotFoundError, ValidationError } from './dal.js';
+import type { HttpRequest, HttpResponse, PrototypeRecorderContext } from './handlers.js';
 
 // Same response helpers are inlined to keep this module free of
 // cross-imports (handlers re-uses the helpers, but ts-build is fine
 // with redeclaration under distinct symbols).
-function ok<T>(body: T): HttpResponse { return { status: 200, body }; }
-function noContent(): HttpResponse { return { status: 204, body: null }; }
+function ok<T>(body: T): HttpResponse {
+  return { status: 200, body };
+}
+function noContent(): HttpResponse {
+  return { status: 204, body: null };
+}
 function badRequest(message: string, code: string): HttpResponse {
   return { status: 400, body: { error: message, code } };
 }

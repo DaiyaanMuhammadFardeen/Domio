@@ -120,9 +120,7 @@ export async function getDataSnapshots(
     if (!res.ok) return seedSnapshots(deckId);
     const body = (await res.json()) as { sources?: unknown };
     const sources = Array.isArray(body?.sources) ? body.sources : [];
-    const coerced = sources
-      .filter(isDataSourceSnapshot)
-      .map(normalizeSnapshot);
+    const coerced = sources.filter(isDataSourceSnapshot).map(normalizeSnapshot);
     return coerced.length > 0 ? coerced : seedSnapshots(deckId);
   } catch {
     return seedSnapshots(deckId);
@@ -322,9 +320,7 @@ function isTickerItem(value: unknown): value is TickerItem {
   const v = value as Record<string, unknown>;
   return (
     typeof v['id'] === 'string' &&
-    (v['kind'] === 'highlight' ||
-      v['kind'] === 'announcement' ||
-      v['kind'] === 'milestone') &&
+    (v['kind'] === 'highlight' || v['kind'] === 'announcement' || v['kind'] === 'milestone') &&
     typeof v['text'] === 'string' &&
     Number.isFinite(v['timestamp_ms'])
   );

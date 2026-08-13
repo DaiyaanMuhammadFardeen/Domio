@@ -28,9 +28,7 @@ export function SessionHeader(props: SessionHeaderProps) {
     >
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-xs uppercase tracking-wide text-slate-500">
-            Joined as
-          </span>
+          <span className="text-xs uppercase tracking-wide text-slate-500">Joined as</span>
           <span
             className="text-base font-medium text-slate-900"
             data-testid="session-header-display-name"
@@ -52,10 +50,7 @@ export function SessionHeader(props: SessionHeaderProps) {
         Slide preview
       </div>
       <div className="flex items-baseline justify-between">
-        <h2
-          className="text-lg font-semibold truncate"
-          data-testid="session-header-slide-title"
-        >
+        <h2 className="text-lg font-semibold truncate" data-testid="session-header-slide-title">
           {props.slideTitle}
         </h2>
         <span

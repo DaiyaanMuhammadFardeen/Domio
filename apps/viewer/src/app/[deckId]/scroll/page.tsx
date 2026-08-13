@@ -30,7 +30,10 @@ export async function generateMetadata({ params }: ScrollPageProps): Promise<Met
   };
 }
 
-export default async function ScrollDeckPage({ params, searchParams }: ScrollPageProps): Promise<ReactElement> {
+export default async function ScrollDeckPage({
+  params,
+  searchParams,
+}: ScrollPageProps): Promise<ReactElement> {
   const { deckId } = await params;
   const { start } = await searchParams;
   const { deck } = await fetchViewerDeck(deckId);

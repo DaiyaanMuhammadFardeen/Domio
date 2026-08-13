@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import {
-  submitRehearsalFeedback,
-  type RehearsalFeedbackRequest,
-} from './rehearsal-service';
+import { submitRehearsalFeedback, type RehearsalFeedbackRequest } from './rehearsal-service';
 
 const originalFetch = globalThis.fetch;
 
@@ -26,8 +23,26 @@ const SAMPLE_REQ: RehearsalFeedbackRequest = {
   ],
   eye_contact_pct: 60,
   per_slide: [
-    { slide_id: 's1', title: 'Intro', dwell_ms: 60_000, target_ms: 60_000, pace_wpm: 140, fillers: [], eye_contact_pct: 60, stumbled: false },
-    { slide_id: 's2', title: 'Body', dwell_ms: 90_000, target_ms: 60_000, pace_wpm: 100, fillers: [{ phrase: 'um', count: 4 }], eye_contact_pct: 60, stumbled: true },
+    {
+      slide_id: 's1',
+      title: 'Intro',
+      dwell_ms: 60_000,
+      target_ms: 60_000,
+      pace_wpm: 140,
+      fillers: [],
+      eye_contact_pct: 60,
+      stumbled: false,
+    },
+    {
+      slide_id: 's2',
+      title: 'Body',
+      dwell_ms: 90_000,
+      target_ms: 60_000,
+      pace_wpm: 100,
+      fillers: [{ phrase: 'um', count: 4 }],
+      eye_contact_pct: 60,
+      stumbled: true,
+    },
   ],
 };
 

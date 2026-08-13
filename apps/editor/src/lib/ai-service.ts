@@ -94,10 +94,7 @@ export interface AiFetchOptions {
   readonly signal?: AbortSignal;
 }
 
-async function aiFetch<TResponse>(
-  path: string,
-  opts: AiFetchOptions,
-): Promise<TResponse> {
+async function aiFetch<TResponse>(path: string, opts: AiFetchOptions): Promise<TResponse> {
   const { method, body, baseUrl = DEFAULT_API_BASE, signal } = opts;
   const init: RequestInit = { method };
   if (body !== undefined) {
@@ -133,9 +130,10 @@ export async function createPlannerJob(
   baseUrl: string = DEFAULT_API_BASE,
   signal?: AbortSignal,
 ): Promise<JobRecord> {
-  const opts: AiFetchOptions = signal !== undefined
-    ? { method: 'POST', body: req, baseUrl, signal }
-    : { method: 'POST', body: req, baseUrl };
+  const opts: AiFetchOptions =
+    signal !== undefined
+      ? { method: 'POST', body: req, baseUrl, signal }
+      : { method: 'POST', body: req, baseUrl };
   return aiFetch<JobRecord>('/v1/ai/jobs', opts);
 }
 
@@ -144,9 +142,8 @@ export async function getJob(
   baseUrl: string = DEFAULT_API_BASE,
   signal?: AbortSignal,
 ): Promise<JobRecord> {
-  const opts: AiFetchOptions = signal !== undefined
-    ? { method: 'GET', baseUrl, signal }
-    : { method: 'GET', baseUrl };
+  const opts: AiFetchOptions =
+    signal !== undefined ? { method: 'GET', baseUrl, signal } : { method: 'GET', baseUrl };
   return aiFetch<JobRecord>(`/v1/ai/jobs/${encodeURIComponent(id)}`, opts);
 }
 
@@ -185,9 +182,10 @@ export async function ingestFile(
   baseUrl: string = DEFAULT_API_BASE,
   signal?: AbortSignal,
 ): Promise<IngestResponse> {
-  const opts: AiFetchOptions = signal !== undefined
-    ? { method: 'POST', body: req, baseUrl, signal }
-    : { method: 'POST', body: req, baseUrl };
+  const opts: AiFetchOptions =
+    signal !== undefined
+      ? { method: 'POST', body: req, baseUrl, signal }
+      : { method: 'POST', body: req, baseUrl };
   return aiFetch<IngestResponse>('/v1/ai/ingest', opts);
 }
 
@@ -260,10 +258,10 @@ export async function openCitation(
   citationId: string,
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<AiCitation> {
-  return aiFetch<AiCitation>(
-    `/v1/ai/cite/${encodeURIComponent(citationId)}/open`,
-    { method: 'POST', baseUrl },
-  );
+  return aiFetch<AiCitation>(`/v1/ai/cite/${encodeURIComponent(citationId)}/open`, {
+    method: 'POST',
+    baseUrl,
+  });
 }
 
 // ---------------------------------------------------------------------------

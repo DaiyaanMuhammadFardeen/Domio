@@ -92,7 +92,9 @@ function mapAssignmentCreated(env: CollabEventEnvelope): Notification[] {
   const recipients = new Set<string>([p.primary_id, ...p.watchers]);
   const notifications: Notification[] = [];
   for (const recipientId of recipients) {
-    notifications.push(...buildDualChannel(env.workspace_id, 'collab-assignment.created', recipientId, payload));
+    notifications.push(
+      ...buildDualChannel(env.workspace_id, 'collab-assignment.created', recipientId, payload),
+    );
   }
   return notifications;
 }
@@ -138,9 +140,9 @@ function buildDualChannel(
 function sanitizeBody(md: string, maxLen: number): string {
   // Strip common markdown: links, bold, italic, images, code.
   const plain = md
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')       // images
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')    // links → anchor text
-    .replace(/[*_~`>#]/g, '')                     // bold/italic/code/heading markers
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '') // images
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links → anchor text
+    .replace(/[*_~`>#]/g, '') // bold/italic/code/heading markers
     .trim();
   if (plain.length <= maxLen) return plain;
   return plain.slice(0, maxLen) + '…';

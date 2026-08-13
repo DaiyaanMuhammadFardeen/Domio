@@ -20,13 +20,13 @@ import { OnboardingTransitionError } from './types.js';
  * Paid listings require payout_ready or active.
  */
 export const ONBOARDING_TRANSITIONS: Record<OnboardingState, readonly OnboardingState[]> = {
-  pending:          ['profile_complete'],
+  pending: ['profile_complete'],
   profile_complete: ['kyc_required', 'active'],
-  kyc_required:     ['kyc_submitted'],
-  kyc_submitted:    ['kyc_approved', 'kyc_required'],
-  kyc_approved:     ['payout_ready'],
-  payout_ready:     ['active'],
-  active:           [],
+  kyc_required: ['kyc_submitted'],
+  kyc_submitted: ['kyc_approved', 'kyc_required'],
+  kyc_approved: ['payout_ready'],
+  payout_ready: ['active'],
+  active: [],
 };
 
 /**

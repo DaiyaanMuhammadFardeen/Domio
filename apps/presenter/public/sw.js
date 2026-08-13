@@ -23,9 +23,7 @@ const SESSIONS_CACHE = `presenter-sessions-${CACHE_VERSION}`;
 const MAX_SLIDES = 50;
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(SHELL_CACHE).then((cache) => cache.addAll(['/', '/s/'])),
-  );
+  event.waitUntil(caches.open(SHELL_CACHE).then((cache) => cache.addAll(['/', '/s/'])));
   self.skipWaiting();
 });
 
@@ -44,7 +42,10 @@ self.addEventListener('activate', (event) => {
 });
 
 function isThumbnail(url) {
-  return /\/thumbnails?\//.test(url.pathname) || /slide[-_]?\d+\.(png|webp|jpg|jpeg)$/i.test(url.pathname);
+  return (
+    /\/thumbnails?\//.test(url.pathname) ||
+    /slide[-_]?\d+\.(png|webp|jpg|jpeg)$/i.test(url.pathname)
+  );
 }
 
 function isSessionGet(url) {

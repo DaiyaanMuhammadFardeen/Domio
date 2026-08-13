@@ -103,16 +103,19 @@ export function TouchGestureOverlay({
     [clearLongPress, longPressMs, onLongPress],
   );
 
-  const onPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>): void => {
-    const a = activeRef.current;
-    if (!a || a.pointerId !== e.pointerId) return;
-    const dx = e.clientX - a.startX;
-    const dy = e.clientY - a.startY;
-    if (Math.hypot(dx, dy) > MOVE_THRESHOLD_PX) {
-      a.moved = true;
-      clearLongPress();
-    }
-  }, [clearLongPress]);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>): void => {
+      const a = activeRef.current;
+      if (!a || a.pointerId !== e.pointerId) return;
+      const dx = e.clientX - a.startX;
+      const dy = e.clientY - a.startY;
+      if (Math.hypot(dx, dy) > MOVE_THRESHOLD_PX) {
+        a.moved = true;
+        clearLongPress();
+      }
+    },
+    [clearLongPress],
+  );
 
   const onPointerUp = useCallback(
     (e: React.PointerEvent<HTMLDivElement>): void => {

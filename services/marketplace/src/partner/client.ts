@@ -8,7 +8,11 @@
 
 import type { PartnerClient } from '../types.js';
 import type { MarketplaceStore } from '../store/store.js';
-import { PartnerClientNotFoundError, InvalidClientSecretError, InsufficientScopeError } from '../types.js';
+import {
+  PartnerClientNotFoundError,
+  InvalidClientSecretError,
+  InsufficientScopeError,
+} from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Partner Client Service

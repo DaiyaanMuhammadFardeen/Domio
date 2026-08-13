@@ -11,12 +11,7 @@
  * @param y2 - y-coordinate of second control point (may overshoot)
  * @returns A function `(t: number) => number` with output clamped to `[-0.25, 1.25]`
  */
-export function cubicBezier(
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-): (t: number) => number {
+export function cubicBezier(x1: number, y1: number, x2: number, y2: number): (t: number) => number {
   // Degenerate: both x-controls at 0 → linear from (0,0) to (0,1) — output = y-axis
   const isLinearX = x1 === x2;
   if (isLinearX && x1 === 0) {

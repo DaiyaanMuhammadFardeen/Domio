@@ -25,14 +25,7 @@
  * exercised in development and tests.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
 
 import {
@@ -275,7 +268,9 @@ export function GestureDetector({
 
   const toggleLabel = useMemo(
     () =>
-      lifecycle === 'off' || lifecycle === 'error' ? 'presenter.gesture.toggle.enable' : 'presenter.gesture.toggle.disable',
+      lifecycle === 'off' || lifecycle === 'error'
+        ? 'presenter.gesture.toggle.enable'
+        : 'presenter.gesture.toggle.disable',
     [lifecycle],
   );
 

@@ -59,8 +59,7 @@ function validateCreate(input: unknown): ValidationResult<VariableCreateInput> {
   if (!deckId || !name || issues.length > 0) return { ok: false, code: 'INVALID_INPUT', issues };
   const type = typeRaw as VariableCreateInput['type'];
   const defaultVal = o['default'] as VariableCreateInput['default'];
-  const scope =
-    o['scope'] === 'slide' || o['scope'] === 'deck' ? o['scope'] : undefined;
+  const scope = o['scope'] === 'slide' || o['scope'] === 'deck' ? o['scope'] : undefined;
   const value: VariableCreateInput = scope
     ? { deckId, name, type, default: defaultVal, scope }
     : { deckId, name, type, default: defaultVal };
@@ -123,10 +122,7 @@ function validateSet(input: unknown): ValidationResult<VariableSetInput> {
   return { ok: true, value: { deckId, name, value: valueRaw as VariableSetInput['value'] } };
 }
 
-function gate(
-  ctx: McpContext,
-  cap: 'variables:read' | 'variables:write',
-) {
+function gate(ctx: McpContext, cap: 'variables:read' | 'variables:write') {
   const r = claimCapability(ctx.agentId, cap);
   if (!r.granted) throw new MCPError('PERMISSION_DENIED', r.reason ?? 'permission denied');
 }
@@ -160,9 +156,12 @@ export const update_variable: McpTool<VariableUpdateInput, Variable> = {
     const v = validateUpdate(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'update_variable', v.value, () =>
-      callPrototypeRuntime(ctx, 'PATCH', `/decks/${v.value.deckId}/variables/${v.value.name}`, v.value.patch).then(
-        (r) => r as Variable,
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'PATCH',
+        `/decks/${v.value.deckId}/variables/${v.value.name}`,
+        v.value.patch,
+      ).then((r) => r as Variable),
     );
   },
 };
@@ -178,9 +177,11 @@ export const delete_variable: McpTool<VariableDeleteInput, { deleted: boolean }>
     const v = validateDelete(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'delete_variable', v.value, () =>
-      callPrototypeRuntime(ctx, 'DELETE', `/decks/${v.value.deckId}/variables/${v.value.name}`).then(
-        () => ({ deleted: true }),
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'DELETE',
+        `/decks/${v.value.deckId}/variables/${v.value.name}`,
+      ).then(() => ({ deleted: true })),
     );
   },
 };
@@ -196,8 +197,8 @@ export const list_variables: McpTool<VariableListInput, readonly Variable[]> = {
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_variables', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/variables`).then(
-        (r) => (r as Variable[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/variables`).then((r) =>
+        (r as Variable[]).slice(),
       ),
     );
   },

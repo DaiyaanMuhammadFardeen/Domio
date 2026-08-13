@@ -20,12 +20,8 @@ export default async function GraphPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Cross-deck knowledge graph
-        </h1>
-        <p className="text-sm text-slate-500">
-          Discover connections across every deck.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">Cross-deck knowledge graph</h1>
+        <p className="text-sm text-slate-500">Discover connections across every deck.</p>
       </header>
 
       <GraphExperience initial={initial} />

@@ -116,9 +116,8 @@ export function HandoffTokenInput({
         </header>
 
         <p style={{ fontSize: 12, marginTop: 8, color: 'var(--content-secondary)' }}>
-          Paste the handoff token from the current presenter. State (slide,
-          scenario, variables) will transfer atomically; the audience
-          display stays on the current slide during the swap.
+          Paste the handoff token from the current presenter. State (slide, scenario, variables)
+          will transfer atomically; the audience display stays on the current slide during the swap.
         </p>
 
         <input

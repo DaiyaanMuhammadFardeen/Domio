@@ -8,7 +8,13 @@ describe('EventBus', () => {
     const b = vi.fn();
     bus.onTransition(a);
     bus.onTransition(b);
-    bus.handler({ instanceId: 'inst-1', previous: 'idle', current: 'active', event: 'click', at: 100 });
+    bus.handler({
+      instanceId: 'inst-1',
+      previous: 'idle',
+      current: 'active',
+      event: 'click',
+      at: 100,
+    });
     expect(a).toHaveBeenCalledOnce();
     expect(b).toHaveBeenCalledOnce();
     expect(a.mock.calls[0]?.[0]).toMatchObject({ instanceId: 'inst-1' });
@@ -43,7 +49,9 @@ describe('EventBus', () => {
     const b = vi.fn();
     bus.onTransition(a);
     bus.onTransition(b);
-    expect(() => bus.handler({ instanceId: 'i', previous: 'a', current: 'b', event: 'click', at: 1 })).not.toThrow();
+    expect(() =>
+      bus.handler({ instanceId: 'i', previous: 'a', current: 'b', event: 'click', at: 1 }),
+    ).not.toThrow();
     expect(a).toHaveBeenCalledOnce();
     expect(b).toHaveBeenCalledOnce();
   });

@@ -12,7 +12,14 @@ import {
 } from './transitions.js';
 
 const ALL_KINDS: TransitionKind[] = [
-  'fade', 'slide', 'wipe', 'zoom', 'flip', 'bubble', 'cube', 'shutter',
+  'fade',
+  'slide',
+  'wipe',
+  'zoom',
+  'flip',
+  'bubble',
+  'cube',
+  'shutter',
 ];
 
 // ─── transitionDuration ─────────────────────────────────────────

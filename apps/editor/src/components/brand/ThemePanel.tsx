@@ -24,7 +24,12 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
-import type { ThemeOption, BrandKitOption, PaletteOverride, ColorScheme } from '../../panels/theme-brand-panel';
+import type {
+  ThemeOption,
+  BrandKitOption,
+  PaletteOverride,
+  ColorScheme,
+} from '../../panels/theme-brand-panel';
 import { BrandExtractDialog } from './BrandExtractDialog';
 import { DarkModeGenerator } from './DarkModeGenerator';
 import { MultiBrandSwitcher } from './MultiBrandSwitcher';
@@ -96,7 +101,9 @@ export function ThemePanel(props: ThemePanelProps): ReactElement {
           data-testid="theme-panel-theme-select"
         >
           {props.themes.map((t) => (
-            <option key={t.id} value={t.id}>{t.name}</option>
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
           ))}
         </select>
       </header>
@@ -126,7 +133,11 @@ export function ThemePanel(props: ThemePanelProps): ReactElement {
 
       <div className="theme-panel__body" data-testid={`theme-panel-body-${tab}`}>
         {tab === 'tokens' && (
-          <TokenEditor kit={props.activeKitDetail} onChange={props.onKitDetailChange} readOnly={props.readOnly} />
+          <TokenEditor
+            kit={props.activeKitDetail}
+            onChange={props.onKitDetailChange}
+            readOnly={props.readOnly}
+          />
         )}
         {tab === 'kits' && (
           <div className="theme-panel__kits">

@@ -38,7 +38,10 @@ export class InMemorySessionCoordinatorStore implements SessionCoordinatorStore 
     );
   }
 
-  async summarize(input: { workspace_id: string; session_id: string }): Promise<SessionSummary | null> {
+  async summarize(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<SessionSummary | null> {
     const rows = this.rowsFor(input);
     if (rows.length === 0) return null;
     const active = rows.filter((r) => r.state === 'active' || r.state === 'idle');
@@ -67,11 +70,14 @@ export class InMemorySessionCoordinatorStore implements SessionCoordinatorStore 
     rows.sort((a, b) => a.last_seen_at.localeCompare(b.last_seen_at));
     const limit = input.limit ?? 100;
     const page = rows.slice(0, limit);
-    const next = rows.length > limit ? page[page.length - 1]?.last_seen_at ?? null : null;
+    const next = rows.length > limit ? (page[page.length - 1]?.last_seen_at ?? null) : null;
     return { items: page, next_cursor: next };
   }
 
-  async fanoutPlan(input: { workspace_id: string; session_id: string }): Promise<ShardFanoutPlan | null> {
+  async fanoutPlan(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ShardFanoutPlan | null> {
     const rows = this.rowsFor(input);
     if (rows.length === 0) return null;
     const active = rows.filter((r) => r.state === 'active' || r.state === 'idle');
@@ -84,7 +90,10 @@ export class InMemorySessionCoordinatorStore implements SessionCoordinatorStore 
     };
   }
 
-  async exportMembership(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<MembershipRow>> {
+  async exportMembership(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<MembershipRow>> {
     return [...this.rowsFor(input)];
   }
 }

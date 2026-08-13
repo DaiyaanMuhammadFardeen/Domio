@@ -69,12 +69,7 @@ describe('agent-handoff-service', () => {
     expect(canonical).toBeDefined();
     if (!canonical) return;
     const ids = canonical.nodes.map((n) => n.id);
-    expect(ids).toEqual([
-      'research',
-      'deck-builder',
-      'brand-compliance',
-      'rehearsal-coach',
-    ]);
+    expect(ids).toEqual(['research', 'deck-builder', 'brand-compliance', 'rehearsal-coach']);
     expect(canonical.edges).toEqual([
       { from: 'research', to: 'deck-builder', label: 'facts' },
       { from: 'deck-builder', to: 'brand-compliance', label: 'outline' },

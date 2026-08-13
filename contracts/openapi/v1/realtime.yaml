@@ -38,7 +38,7 @@ paths:
         and the active branch list. Useful for UI indicators and
         monitoring.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -57,24 +57,24 @@ paths:
             default: main
           description: Filter status to a specific branch.
       responses:
-        "200":
+        '200':
           description: Sync status returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SyncStatusResponse"
-        "401":
+                $ref: '#/components/schemas/SyncStatusResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/realtime/decks/{deckId}/presence/status:
     get:
       tags: [realtime]
@@ -86,7 +86,7 @@ paths:
         display name, cursor color, branch), and the session detail
         for each connected peer.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -105,24 +105,24 @@ paths:
             default: main
           description: Filter presence to a specific branch.
       responses:
-        "200":
+        '200':
           description: Presence status returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PresenceStatusResponse"
-        "401":
+                $ref: '#/components/schemas/PresenceStatusResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
 
 # ---------------------------------------------------------------------------
 # WebSocket operations (informational — not served by the REST gateway)
@@ -175,11 +175,11 @@ components:
         physical:
           type: integer
           minimum: 0
-          description: "Physical component: unix nanoseconds."
+          description: 'Physical component: unix nanoseconds.'
         logical:
           type: integer
           minimum: 0
-          description: "Logical counter: monotonic tie-breaker."
+          description: 'Logical counter: monotonic tie-breaker.'
     SyncStatusResponse:
       type: object
       required: [deckId, connectionCount, headHlc, branches]
@@ -195,11 +195,11 @@ components:
         headHlc:
           description: Current head HLC across all branches.
           allOf:
-            - $ref: "#/components/schemas/HLC"
+            - $ref: '#/components/schemas/HLC'
         branches:
           type: array
           items:
-            $ref: "#/components/schemas/BranchInfo"
+            $ref: '#/components/schemas/BranchInfo'
           description: List of active branches with their head HLC.
         traceId:
           type: string
@@ -212,7 +212,7 @@ components:
           minLength: 1
           maxLength: 128
         headHlc:
-          $ref: "#/components/schemas/HLC"
+          $ref: '#/components/schemas/HLC'
         activeSessions:
           type: integer
           minimum: 0
@@ -231,7 +231,7 @@ components:
         avatars:
           type: array
           items:
-            $ref: "#/components/schemas/AvatarInfo"
+            $ref: '#/components/schemas/AvatarInfo'
           description: List of connected peer avatars.
         traceId:
           type: string
@@ -254,7 +254,7 @@ components:
         color:
           type: string
           description: Deterministic cursor color derived from actor_id hash.
-          pattern: "^#[0-9a-fA-F]{6}$"
+          pattern: '^#[0-9a-fA-F]{6}$'
         branchId:
           type: string
           minLength: 1

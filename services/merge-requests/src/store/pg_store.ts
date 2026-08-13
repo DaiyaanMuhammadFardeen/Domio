@@ -16,7 +16,13 @@
  */
 
 import type { Pool as PgPool, PoolClient } from 'pg';
-import type { MergeRequest, SlideDiff, MergeRequestStatus, SlideDiffEntry, BindingDiffEntry } from '../types.js';
+import type {
+  MergeRequest,
+  SlideDiff,
+  MergeRequestStatus,
+  SlideDiffEntry,
+  BindingDiffEntry,
+} from '../types.js';
 import type { MergeRequestStore } from './store.js';
 
 // ---------------------------------------------------------------------------
@@ -141,10 +147,7 @@ export class PgMergeRequestStore implements MergeRequestStore {
 
   async getMergeRequest(id: string): Promise<MergeRequest | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getMergeRequest');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM merge_request WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM merge_request WHERE id = $1', [id]);
     if (rows.length === 0) return null;
     return mergeRequestRowToDomain(rows[0]!);
   }
@@ -196,20 +199,14 @@ export class PgMergeRequestStore implements MergeRequestStore {
 
   async getSlideDiff(id: string): Promise<SlideDiff | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getSlideDiff');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM slide_diff WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM slide_diff WHERE id = $1', [id]);
     if (rows.length === 0) return null;
     return slideDiffRowToDomain(rows[0]!);
   }
 
   async getSlideDiffByMrId(mrId: string): Promise<SlideDiff | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getSlideDiffByMrId');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM slide_diff WHERE mr_id = $1',
-      [mrId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM slide_diff WHERE mr_id = $1', [mrId]);
     if (rows.length === 0) return null;
     return slideDiffRowToDomain(rows[0]!);
   }
@@ -225,11 +222,7 @@ export class PgMergeRequestStore implements MergeRequestStore {
         binding_diffs = $2::jsonb,
         computed_at = now()
       WHERE id = $3`,
-      [
-        JSON.stringify(patch.slide_diffs),
-        JSON.stringify(patch.binding_diffs),
-        id,
-      ],
+      [JSON.stringify(patch.slide_diffs), JSON.stringify(patch.binding_diffs), id],
     );
   }
 }
@@ -307,7 +300,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

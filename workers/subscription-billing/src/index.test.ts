@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import {
-  SubscriptionBillingWorker,
-  InMemorySubscriptionProvider,
-} from './index.js';
+import { SubscriptionBillingWorker, InMemorySubscriptionProvider } from './index.js';
 import type { SubscriptionRecord } from './index.js';
 
 // ---------------------------------------------------------------------------
@@ -36,10 +33,10 @@ function makeSub(overrides: Partial<SubscriptionRecord> & { id: string }): Subsc
 // ---------------------------------------------------------------------------
 
 describe('SubscriptionBillingWorker', () => {
-
   it('constructor throws when provider is missing', () => {
-    expect(() => new SubscriptionBillingWorker({ provider: undefined as never }))
-      .toThrow('provider is required');
+    expect(() => new SubscriptionBillingWorker({ provider: undefined as never })).toThrow(
+      'provider is required',
+    );
   });
 
   it('runOnce returns 0 counts when no subscriptions', async () => {

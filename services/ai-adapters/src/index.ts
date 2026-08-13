@@ -12,14 +12,8 @@ import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
-import {
-  createAdapter,
-  type ModelAdapter,
-  type GenerateTextRequest,
-} from '@domio/model-adapter';
-import {
-  getTemplate,
-} from '@domio/prompt-registry';
+import { createAdapter, type ModelAdapter, type GenerateTextRequest } from '@domio/model-adapter';
+import { getTemplate } from '@domio/prompt-registry';
 
 // ---------------------------------------------------------------------------
 // Types — local types matching the proto contract
@@ -108,9 +102,7 @@ interface GetPromptResponsePayload {
  * Handle a GetCapabilities call — returns the model class and capabilities
  * for the given model string.
  */
-export function handleGetCapabilities(
-  model: string,
-): GetCapabilitiesResponsePayload {
+export function handleGetCapabilities(model: string): GetCapabilitiesResponsePayload {
   const adapter = createAdapter(model);
   return {
     model_class: model,
@@ -121,15 +113,10 @@ export function handleGetCapabilities(
 /**
  * Handle a GetPrompt call — looks up the prompt template by ID and version.
  */
-export function handleGetPrompt(
-  templateId: string,
-  version?: number,
-): GetPromptResponsePayload {
+export function handleGetPrompt(templateId: string, version?: number): GetPromptResponsePayload {
   const template = getTemplate(templateId, version);
   if (!template) {
-    throw new Error(
-      `Template "${templateId}" (version ${version ?? 'latest'}) not found.`,
-    );
+    throw new Error(`Template "${templateId}" (version ${version ?? 'latest'}) not found.`);
   }
   return {
     id: template.id,
@@ -152,12 +139,13 @@ export async function* collectTextDeltas(
   req: GenerateTextRequest,
   signal?: AbortSignal,
 ): AsyncIterable<GenerateTextDeltaPayload> {
-  for await (const delta of adapter.generateText(req, signal !== undefined ? { signal } : undefined)) {
+  for await (const delta of adapter.generateText(
+    req,
+    signal !== undefined ? { signal } : undefined,
+  )) {
     yield {
       text: delta.text,
-      ...(delta.finishReason !== undefined
-        ? { finish_reason: delta.finishReason }
-        : {}),
+      ...(delta.finishReason !== undefined ? { finish_reason: delta.finishReason } : {}),
       ...(delta.usage !== undefined
         ? {
             input_tokens: delta.usage.inputTokens,
@@ -256,7 +244,9 @@ function loadProtoAndBind(
   // The ai.proto package is `domio.ai.v1`. proto-loader represents
   // dots as nested objects.
   const domioAi = proto['domio']?.['ai']?.['v1'] as Record<string, unknown> | undefined;
-  const AdapterService = domioAi?.['AdapterService'] as { service: grpc.ServiceDefinition<grpc.UntypedHandleCall> } | undefined;
+  const AdapterService = domioAi?.['AdapterService'] as
+    | { service: grpc.ServiceDefinition<grpc.UntypedHandleCall> }
+    | undefined;
 
   if (!AdapterService) {
     log.info('AdapterService not found in proto — using built-in definition');
@@ -286,7 +276,8 @@ function bindServiceDefinition(
       requestSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
       requestDeserialize: (value: Buffer) => JSON.parse(value.toString()) as GenerateTextPayload,
       responseSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
-      responseDeserialize: (value: Buffer) => JSON.parse(value.toString()) as GenerateTextDeltaPayload,
+      responseDeserialize: (value: Buffer) =>
+        JSON.parse(value.toString()) as GenerateTextDeltaPayload,
     },
     GenerateImage: {
       path: '/domio.v1.AdapterService/GenerateImage',
@@ -295,7 +286,8 @@ function bindServiceDefinition(
       requestSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
       requestDeserialize: (value: Buffer) => JSON.parse(value.toString()) as GenerateImagePayload,
       responseSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
-      responseDeserialize: (value: Buffer) => JSON.parse(value.toString()) as GenerateImageResponsePayload,
+      responseDeserialize: (value: Buffer) =>
+        JSON.parse(value.toString()) as GenerateImageResponsePayload,
     },
     Embed: {
       path: '/domio.v1.AdapterService/Embed',
@@ -313,7 +305,8 @@ function bindServiceDefinition(
       requestSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
       requestDeserialize: (value: Buffer) => JSON.parse(value.toString()) as { model: string },
       responseSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
-      responseDeserialize: (value: Buffer) => JSON.parse(value.toString()) as GetCapabilitiesResponsePayload,
+      responseDeserialize: (value: Buffer) =>
+        JSON.parse(value.toString()) as GetCapabilitiesResponsePayload,
     },
     GetPrompt: {
       path: '/domio.v1.AdapterService/GetPrompt',
@@ -322,7 +315,8 @@ function bindServiceDefinition(
       requestSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
       requestDeserialize: (value: Buffer) => JSON.parse(value.toString()) as GetPromptPayload,
       responseSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
-      responseDeserialize: (value: Buffer) => JSON.parse(value.toString()) as GetPromptResponsePayload,
+      responseDeserialize: (value: Buffer) =>
+        JSON.parse(value.toString()) as GetPromptResponsePayload,
     },
   };
 
@@ -339,9 +333,10 @@ function bindServiceDefinition(
 // Handler factories
 // ---------------------------------------------------------------------------
 
-function makeGenerateTextHandler(
-  log: { info: (...args: unknown[]) => void; error: (...args: unknown[]) => void },
-) {
+function makeGenerateTextHandler(log: {
+  info: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+}) {
   return async function* GenerateText(
     call: grpc.ServerUnaryCall<GenerateTextPayload, GenerateTextDeltaPayload>,
   ): AsyncGenerator<GenerateTextDeltaPayload> {
@@ -370,9 +365,10 @@ function makeGenerateTextHandler(
   };
 }
 
-function makeGenerateImageHandler(
-  log: { info: (...args: unknown[]) => void; error: (...args: unknown[]) => void },
-) {
+function makeGenerateImageHandler(log: {
+  info: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+}) {
   return async function GenerateImage(
     call: grpc.ServerUnaryCall<GenerateImagePayload, GenerateImageResponsePayload>,
     callback: grpc.sendUnaryData<GenerateImageResponsePayload>,
@@ -404,9 +400,10 @@ function makeGenerateImageHandler(
   };
 }
 
-function makeEmbedHandler(
-  log: { info: (...args: unknown[]) => void; error: (...args: unknown[]) => void },
-) {
+function makeEmbedHandler(log: {
+  info: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+}) {
   return async function Embed(
     call: grpc.ServerUnaryCall<EmbedPayload, EmbedResponsePayload>,
     callback: grpc.sendUnaryData<EmbedResponsePayload>,
@@ -430,9 +427,10 @@ function makeEmbedHandler(
   };
 }
 
-function makeGetCapabilitiesHandler(
-  log: { info: (...args: unknown[]) => void; error: (...args: unknown[]) => void },
-) {
+function makeGetCapabilitiesHandler(log: {
+  info: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+}) {
   return function GetCapabilities(
     call: grpc.ServerUnaryCall<{ model: string }, GetCapabilitiesResponsePayload>,
     callback: grpc.sendUnaryData<GetCapabilitiesResponsePayload>,
@@ -450,9 +448,10 @@ function makeGetCapabilitiesHandler(
   };
 }
 
-function makeGetPromptHandler(
-  log: { info: (...args: unknown[]) => void; error: (...args: unknown[]) => void },
-) {
+function makeGetPromptHandler(log: {
+  info: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+}) {
   return function GetPrompt(
     call: grpc.ServerUnaryCall<GetPromptPayload, GetPromptResponsePayload>,
     callback: grpc.sendUnaryData<GetPromptResponsePayload>,
@@ -483,7 +482,8 @@ function bindHealthService(server: grpc.Server): void {
       requestSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
       requestDeserialize: (value: Buffer) => JSON.parse(value.toString()) as { service: string },
       responseSerialize: (value: unknown) => Buffer.from(JSON.stringify(value)),
-      responseDeserialize: (value: Buffer) => JSON.parse(value.toString()) as { status: string; service: string },
+      responseDeserialize: (value: Buffer) =>
+        JSON.parse(value.toString()) as { status: string; service: string },
     },
   };
 

@@ -21,10 +21,7 @@
 
 import { asULID, type ULID, type DeckDocument } from '@domio/schema';
 
-import {
-  BranchService,
-  BranchNotFoundError,
-} from './service.js';
+import { BranchService, BranchNotFoundError } from './service.js';
 import {
   type MergeRequestRecord,
   type MergeRequestRepository,
@@ -33,16 +30,8 @@ import {
   InMemoryMergeRequestRepository,
   MergeRequestNotFoundError,
 } from './merge_request_dal.js';
-import {
-  type DiffSnapshot,
-  type DiffSummary,
-  computeDiff,
-} from './diff.js';
-import {
-  type ResolveRequest,
-  type ResolveResult,
-  resolveConflicts,
-} from './resolver.js';
+import { type DiffSnapshot, type DiffSummary, computeDiff } from './diff.js';
+import { type ResolveRequest, type ResolveResult, resolveConflicts } from './resolver.js';
 import type { RevisionService } from '../deck/revisions.js';
 
 export interface CreateMergeRequestArgs {
@@ -112,8 +101,7 @@ export class MergeService {
     private readonly branches: BranchService,
     private readonly mrRepo: MergeRequestRepository = new InMemoryMergeRequestRepository(),
     private readonly revisions: RevisionService | null = null,
-    private readonly idGenerator: () => ULID = () =>
-      asULID('01H00000000000000000000000') as ULID,
+    private readonly idGenerator: () => ULID = () => asULID('01H00000000000000000000000') as ULID,
     private readonly clock: () => Date = () => new Date(),
   ) {}
 
@@ -172,10 +160,7 @@ export class MergeService {
     return record;
   }
 
-  async getMergeRequest(
-    deckId: ULID,
-    mrId: ULID,
-  ): Promise<MergeRequestRecord> {
+  async getMergeRequest(deckId: ULID, mrId: ULID): Promise<MergeRequestRecord> {
     const record = await this.mrRepo.findById(deckId, mrId);
     if (!record) throw new MergeRequestNotFoundError(deckId, mrId);
     return record;
@@ -221,8 +206,7 @@ export class MergeService {
       // Idempotent re-merge: return the existing record and head.
       return {
         record,
-        newRevision: (await this.branches.get(args.deckId, record.targetBranchId))
-          .headRevision,
+        newRevision: (await this.branches.get(args.deckId, record.targetBranchId)).headRevision,
       };
     }
     if (record.status !== 'resolved') {
@@ -241,12 +225,7 @@ export class MergeService {
       });
       newRevision = Number(next.revision);
     } else {
-      await this.branches.advanceHead(
-        args.deckId,
-        target.id,
-        target.headRevision,
-        newRevision,
-      );
+      await this.branches.advanceHead(args.deckId, target.id, target.headRevision, newRevision);
     }
 
     const merged: MergeRequestRecord = {
@@ -258,11 +237,7 @@ export class MergeService {
   }
 }
 
-function snapshot(
-  branchId: string,
-  revision: number,
-  deck: DeckDocument,
-): DiffSnapshot {
+function snapshot(branchId: string, revision: number, deck: DeckDocument): DiffSnapshot {
   return { branchId, revision, deck };
 }
 
@@ -277,8 +252,4 @@ function isEmptySummary(summary: DiffSummary): boolean {
   );
 }
 
-export type {
-  MergeRequestRecord,
-  MergeRequestStatus,
-  ResolutionStrategy,
-};
+export type { MergeRequestRecord, MergeRequestStatus, ResolutionStrategy };

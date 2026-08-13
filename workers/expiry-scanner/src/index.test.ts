@@ -9,7 +9,6 @@ import type { ExpiryScannerWorkerOptions } from './index.js';
 type MockExpiryService = ExpiryScannerWorkerOptions['service'];
 
 describe('ExpiryScannerWorker', () => {
-
   it('runOnce invokes scan when resources exist', async () => {
     const scanWorkspace = vi.fn().mockResolvedValue({ scanned: 2, flagged: 1, revoked: 0 });
     const mockService = { scanWorkspace } as unknown as MockExpiryService;
@@ -58,9 +57,7 @@ describe('ExpiryScannerWorker', () => {
       service: mockService,
       tickMs: 1000,
       resourceProvider: {
-        getResources: async () => [
-          { workspaceId: 'ws1', type: 'deck', id: 'd1' },
-        ],
+        getResources: async () => [{ workspaceId: 'ws1', type: 'deck', id: 'd1' }],
       },
     });
 

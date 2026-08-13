@@ -7,18 +7,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  Shortener,
-  newShortId,
-  type ShortLinkStore,
-} from './server.js';
-import {
-  type DeepLink,
-} from './index.js';
-import {
-  DEEP_LINK_VERSION,
-  type DeepLinkPayload,
-} from './types.js';
+import { Shortener, newShortId, type ShortLinkStore } from './server.js';
+import { type DeepLink } from './index.js';
+import { DEEP_LINK_VERSION, type DeepLinkPayload } from './types.js';
 import { DeepLinkReplayError } from './errors.js';
 
 /** In-memory store mirroring the production DAL shape. */
@@ -147,11 +138,25 @@ describe('Shortener', () => {
     const store = new InMemoryShortLinkStore();
     const shortener = new Shortener(store);
     await shortener.shorten(
-      { tenant_id: 't1', deck_id: 'd1', kid: 'k', audience: 'viewer', expires_at: Date.now() + 1000, viewer_scope: 'public' },
+      {
+        tenant_id: 't1',
+        deck_id: 'd1',
+        kid: 'k',
+        audience: 'viewer',
+        expires_at: Date.now() + 1000,
+        viewer_scope: 'public',
+      },
       payload(),
     );
     await shortener.shorten(
-      { tenant_id: 't1', deck_id: 'd2', kid: 'k', audience: 'viewer', expires_at: Date.now() + 1000, viewer_scope: 'public' },
+      {
+        tenant_id: 't1',
+        deck_id: 'd2',
+        kid: 'k',
+        audience: 'viewer',
+        expires_at: Date.now() + 1000,
+        viewer_scope: 'public',
+      },
       payload({ deck_id: 'd2' }),
     );
     const list = await shortener.listForDeck('t1', 'd1');
@@ -163,7 +168,14 @@ describe('Shortener', () => {
     const store = new InMemoryShortLinkStore();
     const shortener = new Shortener(store);
     const record = await shortener.shorten(
-      { tenant_id: 't1', deck_id: 'd1', kid: 'k', audience: 'viewer', expires_at: Date.now() + 1000, viewer_scope: 'public' },
+      {
+        tenant_id: 't1',
+        deck_id: 'd1',
+        kid: 'k',
+        audience: 'viewer',
+        expires_at: Date.now() + 1000,
+        viewer_scope: 'public',
+      },
       payload(),
     );
     expect(await shortener.delete(record.id, 't2')).toBe(false);

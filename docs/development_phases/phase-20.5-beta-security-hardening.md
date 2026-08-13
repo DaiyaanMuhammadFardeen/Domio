@@ -24,16 +24,16 @@
 
 ### 2.1 In scope (features)
 
-| Feature | Source | Title | Notes |
-|---:|---|---|---|
-| #193a | P20.X1 | Email/password + Google/GitHub OAuth | Full P20 WS-X1 deferred; this is the minimum identity surface beta needs |
-| #193b | P20.X1 | RBAC role hierarchy + ABAC for two cases | P20 WS-X5, scoped down |
-| #193c | P20.X1 | Default-on MFA for `admin`/`owner` | Optional for other roles; TOTP via authenticator app |
-| #196a | P20.X2 | Lightweight audit log (Postgres + admin UI) | Subset of P20 WS-X2 |
-| #195a | P20.X3 | Soft DLP warnings on share/export | Subset of P20 WS-X3 — warning-only, no block |
-| New | P20.5 | Rate limiting on auth/share/export | New: not in original P20 doc, added for beta |
-| New | P20.5 | Self-pen-test gate | New: must pass before beta opens |
-| #7 | P01 | Secrets management posture verification | Inherited from P00–P01; verify, don't introduce |
+| Feature | Source | Title                                       | Notes                                                                    |
+| ------: | ------ | ------------------------------------------- | ------------------------------------------------------------------------ |
+|   #193a | P20.X1 | Email/password + Google/GitHub OAuth        | Full P20 WS-X1 deferred; this is the minimum identity surface beta needs |
+|   #193b | P20.X1 | RBAC role hierarchy + ABAC for two cases    | P20 WS-X5, scoped down                                                   |
+|   #193c | P20.X1 | Default-on MFA for `admin`/`owner`          | Optional for other roles; TOTP via authenticator app                     |
+|   #196a | P20.X2 | Lightweight audit log (Postgres + admin UI) | Subset of P20 WS-X2                                                      |
+|   #195a | P20.X3 | Soft DLP warnings on share/export           | Subset of P20 WS-X3 — warning-only, no block                             |
+|     New | P20.5  | Rate limiting on auth/share/export          | New: not in original P20 doc, added for beta                             |
+|     New | P20.5  | Self-pen-test gate                          | New: must pass before beta opens                                         |
+|      #7 | P01    | Secrets management posture verification     | Inherited from P00–P01; verify, don't introduce                          |
 
 ### 2.2 Out of scope (explicit — deferred to full P20 or never)
 
@@ -79,11 +79,11 @@
 
 P20.5 is **not on the critical path between P05 and P22**, but it **is** a launch gate for the public beta. Beta signups cannot open until the DoD in §9 is green. The team progresses through three rungs:
 
-| Rung | Required workstreams | Gate |
-|---|---|---|
-| **Locked** | G1 (policy engine) **[required]** + G5 (secrets posture) **[required]** | Internal users only; no external signup; rate limit on `/signup` enforces invite codes |
-| **Beta-ready** | Locked + G2 (audit log) + G3 (DLP warnings) + G4 (rate limits) | Open beta to first 100 invited users; all four workstreams green in CI |
-| **Public beta** | Beta-ready + G6 (self-pen-test pass) | Open signup; full public launch gating behind P06–P14 readiness |
+| Rung            | Required workstreams                                                    | Gate                                                                                   |
+| --------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Locked**      | G1 (policy engine) **[required]** + G5 (secrets posture) **[required]** | Internal users only; no external signup; rate limit on `/signup` enforces invite codes |
+| **Beta-ready**  | Locked + G2 (audit log) + G3 (DLP warnings) + G4 (rate limits)          | Open beta to first 100 invited users; all four workstreams green in CI                 |
+| **Public beta** | Beta-ready + G6 (self-pen-test pass)                                    | Open signup; full public launch gating behind P06–P14 readiness                        |
 
 ---
 
@@ -330,11 +330,11 @@ P20.5 is **not on the critical path between P05 and P22**, but it **is** a launc
 
 ### 4.7 Rung summary
 
-| Rung | Required workstreams | Unblocks |
-|---|---|---|
-| **Locked** | B1 (policy engine) + B5 (secrets posture) **[required]** | Internal users with invite codes; no external signup |
-| **Beta-ready** | Locked + B2 (audit log) + B3 (DLP warnings) + B4 (rate limits) | Open beta to first 100 invited users |
-| **Public beta** | Beta-ready + B6 (self-pen-test pass) | Open public signup |
+| Rung            | Required workstreams                                           | Unblocks                                             |
+| --------------- | -------------------------------------------------------------- | ---------------------------------------------------- |
+| **Locked**      | B1 (policy engine) + B5 (secrets posture) **[required]**       | Internal users with invite codes; no external signup |
+| **Beta-ready**  | Locked + B2 (audit log) + B3 (DLP warnings) + B4 (rate limits) | Open beta to first 100 invited users                 |
+| **Public beta** | Beta-ready + B6 (self-pen-test pass)                           | Open public signup                                   |
 
 Each rung's verification (§6) is a superset of the prior rung's.
 
@@ -344,27 +344,27 @@ Each rung's verification (§6) is a superset of the prior rung's.
 
 ### 5.1 Services & packages introduced or modified
 
-| Service / Package | Path | Stack | Purpose |
-|---|---|---|---|
-| `policy-engine` | `/packages/policy-engine/` | TypeScript | RBAC + scoped ABAC evaluation, ≤ 5 ms p95 |
-| `audit-outbox` | `/packages/audit-outbox/` | TypeScript + Postgres | Synchronous audit emission in source tx |
-| `dlp-warn` | `/packages/dlp-warn/` | TypeScript | Regex-based warning-only DLP |
-| `rate-limit` | `/packages/rate-limit/` | Rust (backend) + TypeScript (BFF) | Sliding-window rate limiting |
-| `api-gw` (minimal) | `/services/api-gw/` | Rust | Rate-limit middleware host; full version is P20 WS-X7 |
-| `auth-svc` | `/services/auth-svc/` | (inherited) | MFA, hashing, session, CSRF |
-| `sharing-svc` | `/services/sharing-svc/` | (inherited) | DLP warning hook on share |
-| `export-pipeline` | `/services/export-pipeline/` | (inherited) | DLP warning hook on export |
-| `admin-web` | `/apps/admin-web/` | (inherited) | Roles, audit, DLP summary, rate-limit status pages |
+| Service / Package  | Path                         | Stack                             | Purpose                                               |
+| ------------------ | ---------------------------- | --------------------------------- | ----------------------------------------------------- |
+| `policy-engine`    | `/packages/policy-engine/`   | TypeScript                        | RBAC + scoped ABAC evaluation, ≤ 5 ms p95             |
+| `audit-outbox`     | `/packages/audit-outbox/`    | TypeScript + Postgres             | Synchronous audit emission in source tx               |
+| `dlp-warn`         | `/packages/dlp-warn/`        | TypeScript                        | Regex-based warning-only DLP                          |
+| `rate-limit`       | `/packages/rate-limit/`      | Rust (backend) + TypeScript (BFF) | Sliding-window rate limiting                          |
+| `api-gw` (minimal) | `/services/api-gw/`          | Rust                              | Rate-limit middleware host; full version is P20 WS-X7 |
+| `auth-svc`         | `/services/auth-svc/`        | (inherited)                       | MFA, hashing, session, CSRF                           |
+| `sharing-svc`      | `/services/sharing-svc/`     | (inherited)                       | DLP warning hook on share                             |
+| `export-pipeline`  | `/services/export-pipeline/` | (inherited)                       | DLP warning hook on export                            |
+| `admin-web`        | `/apps/admin-web/`           | (inherited)                       | Roles, audit, DLP summary, rate-limit status pages    |
 
 ### 5.2 New tables (DDL summary — full DDL in `/packages/migrations/0025_*.sql`)
 
-| Table | Purpose | Key columns |
-|---|---|---|
-| `role` (extended) | RBAC role hierarchy | `parent_id`, `is_builtin` |
-| `user` (extended) | MFA state | `mfa_enrolled_at`, `mfa_secret_enc` |
-| `audit_event` | Lightweight audit log | `id`, `tenant_id`, `actor_id`, `actor_kind`, `action`, `target_kind`, `target_id`, `metadata`, `ip`, `user_agent`, `created_at` |
-| `audit_retention_run` | Retention job ledger | `run_at`, `rows_deleted`, `tenant_id` |
-| `rate_limit_event` | Rate-limit audit | `key`, `route`, `occurred_at`, `count` |
+| Table                 | Purpose               | Key columns                                                                                                                     |
+| --------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `role` (extended)     | RBAC role hierarchy   | `parent_id`, `is_builtin`                                                                                                       |
+| `user` (extended)     | MFA state             | `mfa_enrolled_at`, `mfa_secret_enc`                                                                                             |
+| `audit_event`         | Lightweight audit log | `id`, `tenant_id`, `actor_id`, `actor_kind`, `action`, `target_kind`, `target_id`, `metadata`, `ip`, `user_agent`, `created_at` |
+| `audit_retention_run` | Retention job ledger  | `run_at`, `rows_deleted`, `tenant_id`                                                                                           |
+| `rate_limit_event`    | Rate-limit audit      | `key`, `route`, `occurred_at`, `count`                                                                                          |
 
 ### 5.3 New contracts
 
@@ -393,37 +393,37 @@ The 0025 migrations are forward-only Postgres migrations, split per concern (`00
 
 ### 6.1 Feature → test → expected result → owner
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #193b RBAC | `editor` tries `DELETE /v1/decks/{id}` | 403 + `policy.denied` audit | Platform squad |
-| #193b Hierarchy | `admin` can do all `editor` actions | Verified via test matrix | Platform squad |
-| #193b ABAC brand-lock | `editor` edits element in locked region | Blocked; admin allowed | Platform squad |
-| #193b ABAC public share | `editor` tries public share on restricted deck | `200` with `requiresAdminApproval: true` | Platform squad |
-| #193b Latency | 10 K synthetic `policy.evaluate` calls | p95 ≤ 5 ms | Platform squad |
-| #193c MFA | `admin` first login | Forced TOTP enrollment | Auth squad |
-| #193c MFA bypass attempt | `admin` calls protected endpoint without MFA | 403 + audit | Auth squad |
-| #196a Emit | `POST /v1/decks` succeeds | `audit_event` row visible in same tx | Platform squad |
-| #196a Query | `GET /v1/admin/audit?action=deck.shared` | Returns matching rows | Platform squad |
-| #196a Retention | 91-day-old rows | Deleted by nightly job | Platform squad |
-| #196a Sensitive | Login event metadata | No password hash or MFA secret | Security + Platform |
-| #195a CC regex | Deck with `4111-1111-1111-1111` | Share shows warning banner | DLP squad |
-| #195a CC Luhn | Deck with `4111-1111-1111-1112` | No warning | DLP squad |
-| #195a Email | Deck with `test@example.com` | Share shows warning | DLP squad |
-| #195a SSN | Deck with `123-45-6789` | Share shows warning | DLP squad |
-| #195a Bypass | User clicks "Share anyway" | `dlp.bypass_acknowledged` audit | DLP squad |
-| #195a Export | Export with email-shaped text | Warning banner | DLP squad |
-| New rate limit | 11th login in 1 min | 429 + `Retry-After` | Platform squad |
-| New rate limit | 6th signup in 1 hour | 429 | Platform squad |
-| New CAPTCHA | Signup without CAPTCHA | Blocked | Platform squad |
-| New anomaly | Single IP, 10× burst in 60 s | P2 alert + audit | Platform squad |
-| New circuit breaker | Tenant hits 50 % 5xx for 5 min | Throttled to 10 %; alert | Platform squad |
-| #7 gitleaks | Commit with fake AWS key | CI fails | Platform squad |
-| #7 Cookies | `Set-Cookie` without `Secure` | Rejected by integration test | Platform squad |
-| #7 CSRF | State-changing request without token | 403 | Platform squad |
-| #7 CSP | Response missing `Content-Security-Policy` | Rejected | Platform squad |
-| #7 Hashing | Argon2id cost | ≥ 19 MiB verified | Auth squad |
-| #7 Session | Reused refresh token | Entire chain invalidated | Auth squad |
-| New pen-test | SAST + SCA + DAST + manual | 0 P0/P1 | Security lead |
+| Feature                  | Test                                           | Expected result                          | Owner               |
+| ------------------------ | ---------------------------------------------- | ---------------------------------------- | ------------------- |
+| #193b RBAC               | `editor` tries `DELETE /v1/decks/{id}`         | 403 + `policy.denied` audit              | Platform squad      |
+| #193b Hierarchy          | `admin` can do all `editor` actions            | Verified via test matrix                 | Platform squad      |
+| #193b ABAC brand-lock    | `editor` edits element in locked region        | Blocked; admin allowed                   | Platform squad      |
+| #193b ABAC public share  | `editor` tries public share on restricted deck | `200` with `requiresAdminApproval: true` | Platform squad      |
+| #193b Latency            | 10 K synthetic `policy.evaluate` calls         | p95 ≤ 5 ms                               | Platform squad      |
+| #193c MFA                | `admin` first login                            | Forced TOTP enrollment                   | Auth squad          |
+| #193c MFA bypass attempt | `admin` calls protected endpoint without MFA   | 403 + audit                              | Auth squad          |
+| #196a Emit               | `POST /v1/decks` succeeds                      | `audit_event` row visible in same tx     | Platform squad      |
+| #196a Query              | `GET /v1/admin/audit?action=deck.shared`       | Returns matching rows                    | Platform squad      |
+| #196a Retention          | 91-day-old rows                                | Deleted by nightly job                   | Platform squad      |
+| #196a Sensitive          | Login event metadata                           | No password hash or MFA secret           | Security + Platform |
+| #195a CC regex           | Deck with `4111-1111-1111-1111`                | Share shows warning banner               | DLP squad           |
+| #195a CC Luhn            | Deck with `4111-1111-1111-1112`                | No warning                               | DLP squad           |
+| #195a Email              | Deck with `test@example.com`                   | Share shows warning                      | DLP squad           |
+| #195a SSN                | Deck with `123-45-6789`                        | Share shows warning                      | DLP squad           |
+| #195a Bypass             | User clicks "Share anyway"                     | `dlp.bypass_acknowledged` audit          | DLP squad           |
+| #195a Export             | Export with email-shaped text                  | Warning banner                           | DLP squad           |
+| New rate limit           | 11th login in 1 min                            | 429 + `Retry-After`                      | Platform squad      |
+| New rate limit           | 6th signup in 1 hour                           | 429                                      | Platform squad      |
+| New CAPTCHA              | Signup without CAPTCHA                         | Blocked                                  | Platform squad      |
+| New anomaly              | Single IP, 10× burst in 60 s                   | P2 alert + audit                         | Platform squad      |
+| New circuit breaker      | Tenant hits 50 % 5xx for 5 min                 | Throttled to 10 %; alert                 | Platform squad      |
+| #7 gitleaks              | Commit with fake AWS key                       | CI fails                                 | Platform squad      |
+| #7 Cookies               | `Set-Cookie` without `Secure`                  | Rejected by integration test             | Platform squad      |
+| #7 CSRF                  | State-changing request without token           | 403                                      | Platform squad      |
+| #7 CSP                   | Response missing `Content-Security-Policy`     | Rejected                                 | Platform squad      |
+| #7 Hashing               | Argon2id cost                                  | ≥ 19 MiB verified                        | Auth squad          |
+| #7 Session               | Reused refresh token                           | Entire chain invalidated                 | Auth squad          |
+| New pen-test             | SAST + SCA + DAST + manual                     | 0 P0/P1                                  | Security lead       |
 
 ### 6.2 Compliance posture (P20.5 level)
 
@@ -452,19 +452,19 @@ Residency and DLP-blocking are **not** applicable to P20.5 — they land in full
 
 ## 7. Risks & open decisions
 
-| ID | Risk / decision | Mitigation | Owner |
-|---|---|---|---|
-| R-SEC-20.5-01 | **Audit log fill at beta scale.** If beta goes viral, `audit_event` table grows fast. | 90-day default retention is configurable per tenant; add partitioning by month if row count > 50 M. Migration script tested. | Platform squad |
-| R-SEC-20.5-02 | **DLP false positives annoy users.** Email regex catches everything that looks like an email; users click "Share anyway" reflexively. | Track `dlp.bypass_acknowledged` rate; if > 30 % of shares bypass, refine the rule before adding more. Soft warnings only — never blocks. | DLP squad |
-| R-SEC-20.5-03 | **Rate-limit false positives.** Aggressive limits on `/signup` may block legitimate users behind NAT or corporate proxies. | Per-IP + per-subnet limits; CAPTCHA fallback before 429; manual review queue for blocked signups. | Platform squad |
-| R-SEC-20.5-04 | **MFA enrollment friction.** Forcing MFA on `admin`/`owner` may surprise new users in beta. | Clear onboarding flow; recovery codes; 7-day grace period for invited users before enforcement. | Auth + Product |
-| R-SEC-20.5-05 | **Argon2id migration risk.** If legacy hashes exist, the migration script must not lock users out. | Dual-hash verification: next login re-hashes with Argon2id if legacy; if migration fails, fall back to legacy and audit. | Auth squad |
-| R-SEC-20.5-06 | **Self-pen-test scope.** Internal SAST/SCA/DAST may miss business-logic flaws. | Supplement with manual review of the top-10 OWASP categories; supplement later with external pen-test in full P20. | Security lead |
-| R-SEC-20.5-07 | **Policy engine bypass.** A new endpoint added without middleware is a hole. | Forbidden-bypass detection logs every request to a protected endpoint; CI test enumerates all routes and verifies each is wrapped. | Platform squad |
-| R-SEC-20.5-08 | **Beta vs. enterprise framing.** Beta users may assume enterprise features (SSO, audit export) and be disappointed. | Public beta landing page and `/admin` docs explicitly describe what is and isn't included. | Product + Marketing |
-| OD-SEC-20.5-01 | **Argon2id cost parameter.** Default 19 MiB is conservative; higher is more secure but slower. | Resolve in P20.5 with Security lead; document the choice. | Security lead |
-| OD-SEC-20.5-02 | **Audit retention default 90 days.** Beta may want longer or shorter. | Default 90; configurable per tenant; doc the override. | Product + Security |
-| OD-SEC-20.5-03 | **Rate-limit numbers.** Defaults chosen for safety; may need tuning per beta cohort. | All limits env-configurable; ship safe defaults; tune per telemetry after 1 week. | Platform squad |
+| ID             | Risk / decision                                                                                                                       | Mitigation                                                                                                                               | Owner               |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| R-SEC-20.5-01  | **Audit log fill at beta scale.** If beta goes viral, `audit_event` table grows fast.                                                 | 90-day default retention is configurable per tenant; add partitioning by month if row count > 50 M. Migration script tested.             | Platform squad      |
+| R-SEC-20.5-02  | **DLP false positives annoy users.** Email regex catches everything that looks like an email; users click "Share anyway" reflexively. | Track `dlp.bypass_acknowledged` rate; if > 30 % of shares bypass, refine the rule before adding more. Soft warnings only — never blocks. | DLP squad           |
+| R-SEC-20.5-03  | **Rate-limit false positives.** Aggressive limits on `/signup` may block legitimate users behind NAT or corporate proxies.            | Per-IP + per-subnet limits; CAPTCHA fallback before 429; manual review queue for blocked signups.                                        | Platform squad      |
+| R-SEC-20.5-04  | **MFA enrollment friction.** Forcing MFA on `admin`/`owner` may surprise new users in beta.                                           | Clear onboarding flow; recovery codes; 7-day grace period for invited users before enforcement.                                          | Auth + Product      |
+| R-SEC-20.5-05  | **Argon2id migration risk.** If legacy hashes exist, the migration script must not lock users out.                                    | Dual-hash verification: next login re-hashes with Argon2id if legacy; if migration fails, fall back to legacy and audit.                 | Auth squad          |
+| R-SEC-20.5-06  | **Self-pen-test scope.** Internal SAST/SCA/DAST may miss business-logic flaws.                                                        | Supplement with manual review of the top-10 OWASP categories; supplement later with external pen-test in full P20.                       | Security lead       |
+| R-SEC-20.5-07  | **Policy engine bypass.** A new endpoint added without middleware is a hole.                                                          | Forbidden-bypass detection logs every request to a protected endpoint; CI test enumerates all routes and verifies each is wrapped.       | Platform squad      |
+| R-SEC-20.5-08  | **Beta vs. enterprise framing.** Beta users may assume enterprise features (SSO, audit export) and be disappointed.                   | Public beta landing page and `/admin` docs explicitly describe what is and isn't included.                                               | Product + Marketing |
+| OD-SEC-20.5-01 | **Argon2id cost parameter.** Default 19 MiB is conservative; higher is more secure but slower.                                        | Resolve in P20.5 with Security lead; document the choice.                                                                                | Security lead       |
+| OD-SEC-20.5-02 | **Audit retention default 90 days.** Beta may want longer or shorter.                                                                 | Default 90; configurable per tenant; doc the override.                                                                                   | Product + Security  |
+| OD-SEC-20.5-03 | **Rate-limit numbers.** Defaults chosen for safety; may need tuning per beta cohort.                                                  | All limits env-configurable; ship safe defaults; tune per telemetry after 1 week.                                                        | Platform squad      |
 
 ---
 
@@ -539,21 +539,21 @@ A single 30-minute internal demo that proves the three rungs are met. Run in sta
 
 P20.5 is the **beta-only cut** of P20. When the team is ready to start enterprise pilots (target: post-PMF), the following mapping kicks in:
 
-| P20.5 workstream | Full P20 replacement |
-|---|---|
-| B1 (policy engine, RBAC + scoped ABAC) | P20 WS-X5 (full RBAC + ABAC + policy engine with WASM CEL) |
-| B2 (lightweight audit log) | P20 WS-X2 (hash-chained audit, ClickHouse, WORM bucket, 7-year retention) |
-| B3 (soft DLP warnings) | P20 WS-X3 (full DLP engine, rule packs, ML classifier, hard `block` severity) |
-| B4 (rate limiting) | P20 WS-X7 (ti­ered rate limits, OAuth 2.1, idempotency keys) |
-| B5 (secrets posture) | Absorbed into P20 (no replacement — already scoped) |
-| B6 (self-pen-test) | P20 §6.2 (full compliance drill + external pen-test) |
-| (none in P20.5) | P20 WS-X1 (SSO/SCIM) — added in full P20 |
-| (none in P20.5) | P20 WS-X4 (residency, retention, legal hold, `bd-dhaka`) — added in full P20 |
-| (none in P20.5) | P20 WS-X6 (brand governance) — added in full P20 |
-| (none in P20.5) | P20 WS-X8 (webhooks) — added in full P20 |
-| (none in P20.5) | P20 WS-X9 (seat analytics) — added in full P20 |
-| (none in P20.5) | P20 WS-X10 (plugin runtime + component SDK) — added in full P20 |
-| (none in P20.5) | P20 WS-X11 (headless renderer) — added in full P20 |
+| P20.5 workstream                       | Full P20 replacement                                                          |
+| -------------------------------------- | ----------------------------------------------------------------------------- |
+| B1 (policy engine, RBAC + scoped ABAC) | P20 WS-X5 (full RBAC + ABAC + policy engine with WASM CEL)                    |
+| B2 (lightweight audit log)             | P20 WS-X2 (hash-chained audit, ClickHouse, WORM bucket, 7-year retention)     |
+| B3 (soft DLP warnings)                 | P20 WS-X3 (full DLP engine, rule packs, ML classifier, hard `block` severity) |
+| B4 (rate limiting)                     | P20 WS-X7 (ti­ered rate limits, OAuth 2.1, idempotency keys)                  |
+| B5 (secrets posture)                   | Absorbed into P20 (no replacement — already scoped)                           |
+| B6 (self-pen-test)                     | P20 §6.2 (full compliance drill + external pen-test)                          |
+| (none in P20.5)                        | P20 WS-X1 (SSO/SCIM) — added in full P20                                      |
+| (none in P20.5)                        | P20 WS-X4 (residency, retention, legal hold, `bd-dhaka`) — added in full P20  |
+| (none in P20.5)                        | P20 WS-X6 (brand governance) — added in full P20                              |
+| (none in P20.5)                        | P20 WS-X8 (webhooks) — added in full P20                                      |
+| (none in P20.5)                        | P20 WS-X9 (seat analytics) — added in full P20                                |
+| (none in P20.5)                        | P20 WS-X10 (plugin runtime + component SDK) — added in full P20               |
+| (none in P20.5)                        | P20 WS-X11 (headless renderer) — added in full P20                            |
 
 P20.5 has **no non-engineering blockers**. None of B1–B6 require Bangladeshi counsel, sub-processor DPAs, SCC adoption, AGPL stance, or code-signing CAs. All of those are kicked to full P20 and are explicitly out of scope for beta.
 

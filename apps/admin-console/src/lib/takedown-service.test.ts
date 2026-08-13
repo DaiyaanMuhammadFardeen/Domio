@@ -78,9 +78,19 @@ describe('takedown-service — getTakedown', () => {
 describe('takedown-service — listTakedownEvents', () => {
   it('returns events sorted by ascending timestamp_ms', async () => {
     const events = [
-      { id: 'e3', action: 'resolved' as const, actor: 'admin@domio.app', timestamp_ms: 1_700_000_300_000 },
+      {
+        id: 'e3',
+        action: 'resolved' as const,
+        actor: 'admin@domio.app',
+        timestamp_ms: 1_700_000_300_000,
+      },
       { id: 'e1', action: 'submitted' as const, actor: 'u-1', timestamp_ms: 1_700_000_100_000 },
-      { id: 'e2', action: 'review_started' as const, actor: 'admin@domio.app', timestamp_ms: 1_700_000_200_000 },
+      {
+        id: 'e2',
+        action: 'review_started' as const,
+        actor: 'admin@domio.app',
+        timestamp_ms: 1_700_000_200_000,
+      },
     ];
     mockFetchOnce({ events });
     const out = await listTakedownEvents('tk-1');

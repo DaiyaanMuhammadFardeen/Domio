@@ -52,7 +52,7 @@ describe('haptics-service', () => {
       expect(ids).toContain(LONG_PATTERN.id);
     });
 
-    it('returns deep copies so callers can\'t mutate the store', async () => {
+    it("returns deep copies so callers can't mutate the store", async () => {
       const list = await listPatterns();
       const first = list[0];
       if (!first) throw new Error('expected at least one pattern');

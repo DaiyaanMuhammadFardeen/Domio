@@ -39,16 +39,9 @@ export interface BranchRepository {
   /** Return a branch by name (case-sensitive), or null when not found. */
   findByName(deckId: ULID, name: string): Promise<BranchRecord | null>;
   /** Enumerate branches for a deck, optionally filtered by status. */
-  listByDeck(
-    deckId: ULID,
-    filter?: { status?: BranchStatus },
-  ): Promise<BranchRecord[]>;
+  listByDeck(deckId: ULID, filter?: { status?: BranchStatus }): Promise<BranchRecord[]>;
   /** Update the status field of an existing branch. */
-  updateStatus(
-    deckId: ULID,
-    branchId: ULID,
-    status: BranchStatus,
-  ): Promise<BranchRecord>;
+  updateStatus(deckId: ULID, branchId: ULID, status: BranchStatus): Promise<BranchRecord>;
   /**
    * Advance the stored `head_revision` for a branch.  Throws
    * {@link BranchHeadConflictError} on optimistic-lock mismatch.
@@ -62,14 +55,20 @@ export interface BranchRepository {
 }
 
 export class BranchNotFoundError extends Error {
-  constructor(public readonly deckId: ULID, public readonly branchId: ULID) {
+  constructor(
+    public readonly deckId: ULID,
+    public readonly branchId: ULID,
+  ) {
     super(`Branch ${branchId} not found on deck ${deckId}.`);
     this.name = 'BranchNotFoundError';
   }
 }
 
 export class BranchAlreadyExistsError extends Error {
-  constructor(public readonly deckId: ULID, public readonly name: string) {
+  constructor(
+    public readonly deckId: ULID,
+    public readonly name: string,
+  ) {
     super(`Branch "${name}" already exists on deck ${deckId}.`);
     this.name = 'BranchAlreadyExistsError';
   }
@@ -82,9 +81,7 @@ export class BranchHeadConflictError extends Error {
     public readonly expected: number,
     public readonly actual: number,
   ) {
-    super(
-      `Branch "${branchId}" head expected ${expected} but found ${actual}.`,
-    );
+    super(`Branch "${branchId}" head expected ${expected} but found ${actual}.`);
     this.name = 'BranchHeadConflictError';
   }
 }
@@ -110,10 +107,7 @@ export class InMemoryBranchRepository implements BranchRepository {
     return id ? (this.bucket(deckId).get(id) ?? null) : null;
   }
 
-  async listByDeck(
-    deckId: ULID,
-    filter?: { status?: BranchStatus },
-  ): Promise<BranchRecord[]> {
+  async listByDeck(deckId: ULID, filter?: { status?: BranchStatus }): Promise<BranchRecord[]> {
     const out: BranchRecord[] = [];
     for (const rec of this.bucket(deckId).values()) {
       if (filter?.status && rec.status !== filter.status) continue;
@@ -122,11 +116,7 @@ export class InMemoryBranchRepository implements BranchRepository {
     return out.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 
-  async updateStatus(
-    deckId: ULID,
-    branchId: ULID,
-    status: BranchStatus,
-  ): Promise<BranchRecord> {
+  async updateStatus(deckId: ULID, branchId: ULID, status: BranchStatus): Promise<BranchRecord> {
     const current = this.bucket(deckId).get(branchId);
     if (!current) throw new BranchNotFoundError(deckId, branchId);
     const next: BranchRecord = {
@@ -147,12 +137,7 @@ export class InMemoryBranchRepository implements BranchRepository {
     const current = this.bucket(deckId).get(branchId);
     if (!current) throw new BranchNotFoundError(deckId, branchId);
     if (current.headRevision !== expectedRevision) {
-      throw new BranchHeadConflictError(
-        deckId,
-        branchId,
-        expectedRevision,
-        current.headRevision,
-      );
+      throw new BranchHeadConflictError(deckId, branchId, expectedRevision, current.headRevision);
     }
     const advanced: BranchRecord = {
       ...current,

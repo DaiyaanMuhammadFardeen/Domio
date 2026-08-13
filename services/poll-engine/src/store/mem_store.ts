@@ -75,7 +75,10 @@ export class InMemoryPollStore implements PollStore {
     return { poll_id, counts, total, computed_at_ms: Date.now() };
   }
 
-  async listBySession(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<Poll>> {
+  async listBySession(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<Poll>> {
     const out: Poll[] = [];
     for (const p of this.polls.values()) {
       if (p.workspace_id === input.workspace_id && p.session_id === input.session_id) out.push(p);

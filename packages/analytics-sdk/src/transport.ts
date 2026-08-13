@@ -9,11 +9,7 @@
  *     vitest suites and the integration test in tests/integration/event-ingest.
  */
 
-import type {
-  AnalyticsContext,
-  AnalyticsEvent,
-  AnalyticsTransport,
-} from './types.js';
+import type { AnalyticsContext, AnalyticsEvent, AnalyticsTransport } from './types.js';
 import { AnalyticsTransportError } from './types.js';
 import { signEvents } from './hmac.js';
 

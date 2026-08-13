@@ -85,10 +85,7 @@ describe('editor-shortcuts · buildEditorShortcutLayout', () => {
       chord: 'Cmd+Z',
       category: 'Edit' as const,
     };
-    const layout = buildEditorShortcutLayout([
-      ...DEFAULT_EDITOR_SHORTCUTS,
-      alias,
-    ]);
+    const layout = buildEditorShortcutLayout([...DEFAULT_EDITOR_SHORTCUTS, alias]);
     const seen = new Set<string>();
     for (const s of layout.shortcuts) {
       expect(seen.has(s.chord), `${s.chord} duplicated`).toBe(false);

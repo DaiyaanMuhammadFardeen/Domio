@@ -57,5 +57,7 @@ export function formatViolations(violations: LintViolation[]): string {
 
 export function migrationsFromDir(dir: string): string[] {
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).filter((f) => f.endsWith('.sql')).map((f) => join(dir, f));
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.sql'))
+    .map((f) => join(dir, f));
 }

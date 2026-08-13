@@ -212,7 +212,7 @@ export function serializeSlide(doc: Y.Doc): Slide | null {
       id: elId as ULID,
       semanticId: (props.get('semanticId') as string) ?? '',
       name: (props.get('name') as string) ?? '',
-      parentId: (props.get('parentId') as string | null) as ULID | null,
+      parentId: props.get('parentId') as string | null as ULID | null,
       z: i, // zOrder position becomes the z value
     };
 

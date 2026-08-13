@@ -19,7 +19,10 @@ describe('calculator form mode', () => {
   it('evaluates a single multiply formula', () => {
     const def = calculator.form({
       id: 'subtotal',
-      inputs: [{ id: 'price', label: 'Price' }, { id: 'qty', label: 'Qty' }],
+      inputs: [
+        { id: 'price', label: 'Price' },
+        { id: 'qty', label: 'Qty' },
+      ],
       outputs: [{ id: 'total', formula: '$price * $qty' }],
     });
     const state = recompute(def, { price: 10, qty: 3 });
@@ -151,7 +154,11 @@ describe('calculator builtins', () => {
     name: 'b',
     mode: 'form',
     precision: 2,
-    inputs: [{ id: 'a', label: 'A' }, { id: 'b', label: 'B' }, { id: 'c', label: 'C' }],
+    inputs: [
+      { id: 'a', label: 'A' },
+      { id: 'b', label: 'B' },
+      { id: 'c', label: 'C' },
+    ],
     outputs: [{ id: 'out', formula: 'sum($a, $b, $c)' }],
   };
 

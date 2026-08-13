@@ -10,7 +10,9 @@ import { FeatureDisabledError } from './types.js';
 
 const fixedDate = new Date('2026-01-15T10:00:00Z');
 
-function makeEventEmitter(): LibraryEventEmitter & { events: Array<{ subject: string; payload: Record<string, unknown> }> } {
+function makeEventEmitter(): LibraryEventEmitter & {
+  events: Array<{ subject: string; payload: Record<string, unknown> }>;
+} {
   const events: Array<{ subject: string; payload: Record<string, unknown> }> = [];
   return {
     events,

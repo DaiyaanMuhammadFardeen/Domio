@@ -13,7 +13,9 @@ export default function HandoutPage() {
       {token ? (
         <HandoutResolver token={token} />
       ) : (
-        <p className="text-red-700" role="alert">handout link is missing its token</p>
+        <p className="text-red-700" role="alert">
+          handout link is missing its token
+        </p>
       )}
     </MobileShell>
   );

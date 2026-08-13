@@ -12,17 +12,21 @@ import { McpPermissionDeniedError } from '../types.js';
 describe('MCP Access', () => {
   describe('checkMcpCapability', () => {
     it('does not throw when capability is granted', () => {
-      expect(() => checkMcpCapability('ws-1', 'marketplace:read', ['marketplace:read'])).not.toThrow();
+      expect(() =>
+        checkMcpCapability('ws-1', 'marketplace:read', ['marketplace:read']),
+      ).not.toThrow();
     });
 
     it('throws McpPermissionDeniedError when capability is not granted', () => {
-      expect(() => checkMcpCapability('ws-1', 'marketplace:purchase', ['marketplace:read']))
-        .toThrow(McpPermissionDeniedError);
+      expect(() =>
+        checkMcpCapability('ws-1', 'marketplace:purchase', ['marketplace:read']),
+      ).toThrow(McpPermissionDeniedError);
     });
 
     it('throws McpPermissionDeniedError for empty granted list', () => {
-      expect(() => checkMcpCapability('ws-1', 'marketplace:read', []))
-        .toThrow(McpPermissionDeniedError);
+      expect(() => checkMcpCapability('ws-1', 'marketplace:read', [])).toThrow(
+        McpPermissionDeniedError,
+      );
     });
   });
 
@@ -103,37 +107,46 @@ describe('MCP Tools', () => {
     });
 
     it('returns error for missing tool', async () => {
-      const result = await executeMcpTool({
-        workspaceId: 'ws-1',
-        actorId: 'user-1',
-        tool: '' as never,
-        params: {},
-        grantedCapabilities: [],
-      }, service);
+      const result = await executeMcpTool(
+        {
+          workspaceId: 'ws-1',
+          actorId: 'user-1',
+          tool: '' as never,
+          params: {},
+          grantedCapabilities: [],
+        },
+        service,
+      );
       expect(result.ok).toBe(false);
       expect(result.errors).toHaveLength(1);
     });
 
     it('returns error for unknown tool', async () => {
-      const result = await executeMcpTool({
-        workspaceId: 'ws-1',
-        actorId: 'user-1',
-        tool: 'unknown_tool' as never,
-        params: {},
-        grantedCapabilities: [],
-      }, service);
+      const result = await executeMcpTool(
+        {
+          workspaceId: 'ws-1',
+          actorId: 'user-1',
+          tool: 'unknown_tool' as never,
+          params: {},
+          grantedCapabilities: [],
+        },
+        service,
+      );
       expect(result.ok).toBe(false);
       expect(result.errors![0]!.code).toBe('UNKNOWN_TOOL');
     });
 
     it('returns error when capability not granted', async () => {
-      const result = await executeMcpTool({
-        workspaceId: 'ws-1',
-        actorId: 'user-1',
-        tool: 'purchase_marketplace',
-        params: { listing_id: 'l1' },
-        grantedCapabilities: ['marketplace:read'],
-      }, service);
+      const result = await executeMcpTool(
+        {
+          workspaceId: 'ws-1',
+          actorId: 'user-1',
+          tool: 'purchase_marketplace',
+          params: { listing_id: 'l1' },
+          grantedCapabilities: ['marketplace:read'],
+        },
+        service,
+      );
       expect(result.ok).toBe(false);
       expect(result.errors![0]!.code).toBe('ERR_PERMISSION_DENIED');
     });
@@ -148,13 +161,16 @@ describe('MCP Tools', () => {
       const listings = await service.listListings();
       const listingId = listings[0]!.id;
 
-      const result = await executeMcpTool({
-        workspaceId: 'ws-1',
-        actorId: 'user-1',
-        tool: 'get_listing',
-        params: { listing_id: listingId },
-        grantedCapabilities: ['marketplace:read'],
-      }, service);
+      const result = await executeMcpTool(
+        {
+          workspaceId: 'ws-1',
+          actorId: 'user-1',
+          tool: 'get_listing',
+          params: { listing_id: listingId },
+          grantedCapabilities: ['marketplace:read'],
+        },
+        service,
+      );
 
       expect(result.ok).toBe(true);
       expect(result.data).toBeTruthy();
@@ -167,51 +183,63 @@ describe('MCP Tools', () => {
         title: 'Test Component',
       });
 
-      const result = await executeMcpTool({
-        workspaceId: 'ws-1',
-        actorId: 'user-1',
-        tool: 'search_listings',
-        params: {},
-        grantedCapabilities: ['marketplace:read'],
-      }, service);
+      const result = await executeMcpTool(
+        {
+          workspaceId: 'ws-1',
+          actorId: 'user-1',
+          tool: 'search_listings',
+          params: {},
+          grantedCapabilities: ['marketplace:read'],
+        },
+        service,
+      );
 
       expect(result.ok).toBe(true);
       expect((result.data as { items: unknown[] }).items).toHaveLength(1);
     });
 
     it('executes get_reviews tool', async () => {
-      const result = await executeMcpTool({
-        workspaceId: 'ws-1',
-        actorId: 'user-1',
-        tool: 'get_reviews',
-        params: { listing_id: 'nonexistent' },
-        grantedCapabilities: ['marketplace:read'],
-      }, service);
+      const result = await executeMcpTool(
+        {
+          workspaceId: 'ws-1',
+          actorId: 'user-1',
+          tool: 'get_reviews',
+          params: { listing_id: 'nonexistent' },
+          grantedCapabilities: ['marketplace:read'],
+        },
+        service,
+      );
 
       expect(result.ok).toBe(true);
     });
 
     it('executes install_listing tool (scaffold)', async () => {
-      const result = await executeMcpTool({
-        workspaceId: 'ws-1',
-        actorId: 'user-1',
-        tool: 'install_listing',
-        params: { listing_id: 'l1' },
-        grantedCapabilities: ['marketplace:install'],
-      }, service);
+      const result = await executeMcpTool(
+        {
+          workspaceId: 'ws-1',
+          actorId: 'user-1',
+          tool: 'install_listing',
+          params: { listing_id: 'l1' },
+          grantedCapabilities: ['marketplace:install'],
+        },
+        service,
+      );
 
       expect(result.ok).toBe(true);
       expect((result.data as { status: string }).status).toBe('installing');
     });
 
     it('executes purchase_marketplace tool (scaffold)', async () => {
-      const result = await executeMcpTool({
-        workspaceId: 'ws-1',
-        actorId: 'user-1',
-        tool: 'purchase_marketplace',
-        params: { listing_id: 'l1' },
-        grantedCapabilities: ['marketplace:purchase'],
-      }, service);
+      const result = await executeMcpTool(
+        {
+          workspaceId: 'ws-1',
+          actorId: 'user-1',
+          tool: 'purchase_marketplace',
+          params: { listing_id: 'l1' },
+          grantedCapabilities: ['marketplace:purchase'],
+        },
+        service,
+      );
 
       expect(result.ok).toBe(true);
       expect((result.data as { status: string }).status).toBe('pending');

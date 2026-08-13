@@ -37,11 +37,20 @@ let idCounter = 0;
 
 beforeAll(() => {
   idCounter = 0;
-  const ids = [FIXED_ID, FIXED_ID_2, FIXED_ID_3, FIXED_ID_4, FIXED_ID_5,
-    '01J0TESTID00000000000006F', '01J0TESTID00000000000007G',
-    '01J0TESTID00000000000008H', '01J0TESTID00000000000009J',
-    '01J0TESTID0000000000000AK', '01J0TESTID0000000000000BL',
-    '01J0TESTID0000000000000CM'];
+  const ids = [
+    FIXED_ID,
+    FIXED_ID_2,
+    FIXED_ID_3,
+    FIXED_ID_4,
+    FIXED_ID_5,
+    '01J0TESTID00000000000006F',
+    '01J0TESTID00000000000007G',
+    '01J0TESTID00000000000008H',
+    '01J0TESTID00000000000009J',
+    '01J0TESTID0000000000000AK',
+    '01J0TESTID0000000000000BL',
+    '01J0TESTID0000000000000CM',
+  ];
   app = createApp({
     idGenerator: () => ids[idCounter++ % ids.length]!,
     clock: () => new Date('2025-06-01T00:00:00Z'),
@@ -49,7 +58,12 @@ beforeAll(() => {
   });
 });
 
-async function req(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<Response> {
+async function req(
+  method: string,
+  path: string,
+  body?: unknown,
+  headers?: Record<string, string>,
+): Promise<Response> {
   const init: RequestInit = {
     method,
     headers: {
@@ -80,13 +94,13 @@ function makeValidGlb(): ArrayBuffer {
   const view = new DataView(buffer);
 
   // GLB header
-  view.setUint32(0, 0x46546C67, true); // magic: glTF
-  view.setUint32(4, 2, true);           // version: 2
+  view.setUint32(0, 0x46546c67, true); // magic: glTF
+  view.setUint32(4, 2, true); // version: 2
   view.setUint32(8, totalLength, true); // total length
 
   // JSON chunk
   view.setUint32(12, paddedLength, true); // chunk length
-  view.setUint32(16, 0x4E4F534A, true);  // chunk type: JSON
+  view.setUint32(16, 0x4e4f534a, true); // chunk type: JSON
   const out = new Uint8Array(buffer);
   out.set(jsonBytes, 20);
 
@@ -106,11 +120,11 @@ function makeGlbWithScript(): ArrayBuffer {
   const totalLength = 12 + 8 + paddedLength;
   const buffer = new ArrayBuffer(totalLength);
   const view = new DataView(buffer);
-  view.setUint32(0, 0x46546C67, true);
+  view.setUint32(0, 0x46546c67, true);
   view.setUint32(4, 2, true);
   view.setUint32(8, totalLength, true);
   view.setUint32(12, paddedLength, true);
-  view.setUint32(16, 0x4E4F534A, true);
+  view.setUint32(16, 0x4e4f534a, true);
   new Uint8Array(buffer).set(jsonBytes, 20);
   return buffer;
 }
@@ -128,11 +142,11 @@ function makeGlbWithKhrXmp(): ArrayBuffer {
   const totalLength = 12 + 8 + paddedLength;
   const buffer = new ArrayBuffer(totalLength);
   const view = new DataView(buffer);
-  view.setUint32(0, 0x46546C67, true);
+  view.setUint32(0, 0x46546c67, true);
   view.setUint32(4, 2, true);
   view.setUint32(8, totalLength, true);
   view.setUint32(12, paddedLength, true);
-  view.setUint32(16, 0x4E4F534A, true);
+  view.setUint32(16, 0x4e4f534a, true);
   new Uint8Array(buffer).set(jsonBytes, 20);
   return buffer;
 }
@@ -149,7 +163,7 @@ describe('Model routes — CRUD', () => {
   it('GET /v1/models lists models for workspace', async () => {
     const res = await req('GET', '/v1/models?workspace_id=ws-test');
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(body.items).toEqual([]);
   });
 
@@ -190,7 +204,7 @@ describe('Model routes — upload', () => {
       body: form,
     });
     expect(res.status).toBe(202);
-    const body = await res.json() as {
+    const body = (await res.json()) as {
       modelAssetId: string;
       formatDetected: string;
       polyCount: number;
@@ -226,14 +240,18 @@ describe('Model routes — upload', () => {
 
   it('POST /v1/models/upload returns 400 for unsupported format', async () => {
     const form = new FormData();
-    form.append('file', new Blob([new ArrayBuffer(10)], { type: 'application/octet-stream' }), 'test.exe');
+    form.append(
+      'file',
+      new Blob([new ArrayBuffer(10)], { type: 'application/octet-stream' }),
+      'test.exe',
+    );
     form.append('workspaceId', 'ws-test');
     const res = await app.request('/v1/models/upload', {
       method: 'POST',
       body: form,
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('INVALID_FORMAT');
   });
 
@@ -248,8 +266,8 @@ describe('Model routes — upload', () => {
       body: form,
     });
     expect(res.status).toBe(202);
-    const body = await res.json() as { warnings: string[] };
-    expect(body.warnings.some(w => w.includes('script') || w.includes('Stripped'))).toBe(true);
+    const body = (await res.json()) as { warnings: string[] };
+    expect(body.warnings.some((w) => w.includes('script') || w.includes('Stripped'))).toBe(true);
   });
 
   it('POST /v1/models/upload rejects GLB with KHR_xmp external ref', async () => {
@@ -263,8 +281,8 @@ describe('Model routes — upload', () => {
       body: form,
     });
     expect(res.status).toBe(202);
-    const body = await res.json() as { warnings: string[] };
-    expect(body.warnings.some(w => w.includes('KHR_xmp'))).toBe(true);
+    const body = (await res.json()) as { warnings: string[] };
+    expect(body.warnings.some((w) => w.includes('KHR_xmp'))).toBe(true);
   });
 
   it('POST /v1/models/upload returns 413 for >500MB file', async () => {
@@ -275,7 +293,11 @@ describe('Model routes — upload', () => {
     });
 
     const form = new FormData();
-    form.append('file', new Blob([makeHugeBuffer(2048)], { type: 'model/gltf-binary' }), 'huge.glb');
+    form.append(
+      'file',
+      new Blob([makeHugeBuffer(2048)], { type: 'model/gltf-binary' }),
+      'huge.glb',
+    );
     form.append('workspaceId', 'ws-test');
 
     const res = await app2.request('/v1/models/upload', {
@@ -297,11 +319,13 @@ describe('Scene routes — CRUD', () => {
       modelAssetId: 'model-1',
       environment: { exposure: 1.5 },
       lights: [{ kind: 'directional', color: '#ffffff', intensity: 1 }],
-      cameras: [{ name: 'main', position: { x: 0, y: 0, z: 5 }, target: { x: 0, y: 0, z: 0 }, fov: 60 }],
+      cameras: [
+        { name: 'main', position: { x: 0, y: 0, z: 5 }, target: { x: 0, y: 0, z: 0 }, fov: 60 },
+      ],
       materials: {},
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { id: string; modelAssetId: string; lights: unknown[] };
+    const body = (await res.json()) as { id: string; modelAssetId: string; lights: unknown[] };
     expect(body.modelAssetId).toBe('model-1');
     expect(body.lights).toHaveLength(1);
   });
@@ -310,14 +334,14 @@ describe('Scene routes — CRUD', () => {
     idCounter = 0;
     const res = await req('POST', '/v1/scenes', {});
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('VALIDATION_ERROR');
   });
 
   it('GET /v1/scenes lists scenes for workspace', async () => {
     const res = await req('GET', '/v1/scenes?workspace_id=ws-test');
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(Array.isArray(body.items)).toBe(true);
   });
 
@@ -353,9 +377,9 @@ describe('Scene routes — CRUD', () => {
       lights,
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { _warnings?: string[] };
+    const body = (await res.json()) as { _warnings?: string[] };
     expect(body._warnings).toBeDefined();
-    expect(body._warnings!.some(w => w.includes('9 lights'))).toBe(true);
+    expect(body._warnings!.some((w) => w.includes('9 lights'))).toBe(true);
   });
 
   it('POST /v1/scenes with 8 lights has no warning', async () => {
@@ -370,7 +394,7 @@ describe('Scene routes — CRUD', () => {
       lights,
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { _warnings?: string[] };
+    const body = (await res.json()) as { _warnings?: string[] };
     expect(body._warnings).toBeUndefined();
   });
 });
@@ -391,7 +415,7 @@ describe('Camera Keyframe routes — CRUD', () => {
       trigger: 'scroll',
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { id: string; slideId: string; position: { x: number } };
+    const body = (await res.json()) as { id: string; slideId: string; position: { x: number } };
     expect(body.slideId).toBe('slide-1');
     expect(body.position.x).toBe(0);
   });
@@ -413,14 +437,14 @@ describe('Camera Keyframe routes — CRUD', () => {
       easing: { p1x: 0.8, p1y: 0, p2x: 0.2, p2y: 1 }, // p1x > p2x
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('EASING_VALIDATION_REJECTED');
   });
 
   it('GET /v1/slides/:slideId/camera_keyframes lists keyframes', async () => {
     const res = await req('GET', '/v1/slides/slide-1/camera_keyframes');
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(Array.isArray(body.items)).toBe(true);
   });
 
@@ -452,11 +476,12 @@ describe('Shader routes — CRUD', () => {
       authorId: 'user-1',
       name: 'Gradient Background',
       kind: 'background',
-      sourceWgsl: '@group(0) @binding(0) var<uniform> time: f32; @fragment fn main() -> @location(0) vec4<f32> { return vec4<f32>(1.0); }',
+      sourceWgsl:
+        '@group(0) @binding(0) var<uniform> time: f32; @fragment fn main() -> @location(0) vec4<f32> { return vec4<f32>(1.0); }',
       sourceGlsl: '#version 300 es\nvoid main() { gl_FragColor = vec4(1.0); }',
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { id: string; name: string; published: boolean };
+    const body = (await res.json()) as { id: string; name: string; published: boolean };
     expect(body.name).toBe('Gradient Background');
     expect(body.published).toBe(false);
   });
@@ -478,7 +503,7 @@ describe('Shader routes — CRUD', () => {
       sourceGlsl: 'void main() {}',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('WGSL_REQUIRED');
   });
 
@@ -493,7 +518,7 @@ describe('Shader routes — CRUD', () => {
       sourceGlsl: 'void main() {}',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('WGSL_INVALID');
   });
 
@@ -508,7 +533,7 @@ describe('Shader routes — CRUD', () => {
       sourceGlsl: 'void main() {}',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('HOST_ACCESS_REJECTED');
   });
 
@@ -523,14 +548,14 @@ describe('Shader routes — CRUD', () => {
       sourceGlsl: 'void main() { navigator.userAgent; }',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('HOST_ACCESS_REJECTED');
   });
 
   it('GET /v1/shaders lists shaders', async () => {
     const res = await req('GET', '/v1/shaders?workspace_id=ws-test');
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(Array.isArray(body.items)).toBe(true);
   });
 
@@ -568,11 +593,11 @@ describe('License routes — CRUD', () => {
   it('GET /v1/licenses lists licenses', async () => {
     const res = await req('GET', '/v1/licenses?workspace_id=ws-test');
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: Array<{ source: string }> };
+    const body = (await res.json()) as { items: Array<{ source: string }> };
     expect(body.items).toHaveLength(3);
-    expect(body.items.map(i => i.source)).toContain('user-upload');
-    expect(body.items.map(i => i.source)).toContain('unsplash');
-    expect(body.items.map(i => i.source)).toContain('pexels');
+    expect(body.items.map((i) => i.source)).toContain('user-upload');
+    expect(body.items.map((i) => i.source)).toContain('unsplash');
+    expect(body.items.map((i) => i.source)).toContain('pexels');
   });
 
   it('GET /v1/licenses returns 400 without workspace_id', async () => {
@@ -595,7 +620,7 @@ describe('License routes — CRUD', () => {
       seats: 5,
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { name: string; source: string; seats: number };
+    const body = (await res.json()) as { name: string; source: string; seats: number };
     expect(body.name).toBe('Custom License');
     expect(body.seats).toBe(5);
   });
@@ -634,7 +659,7 @@ describe('License routes — reference check', () => {
     // Try to delete the referenced license
     const res = await req('DELETE', '/v1/licenses/01J0DEFAULT0000LICENSE01');
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('LICENSE_REFERENCED');
   });
 });
@@ -702,7 +727,7 @@ describe('GLB parsing', () => {
 
   it('returns warnings for too-small buffer', () => {
     const result = parseGlbMetadata(new ArrayBuffer(4));
-    expect(result.warnings.some(w => w.includes('too small'))).toBe(true);
+    expect(result.warnings.some((w) => w.includes('too small'))).toBe(true);
   });
 });
 
@@ -718,7 +743,7 @@ describe('GLB sanitization', () => {
       },
     };
     const result = sanitizeGlbJson(json);
-    expect(result.warnings.some(w => w.includes('script'))).toBe(true);
+    expect(result.warnings.some((w) => w.includes('script'))).toBe(true);
     expect(result.cleanedJson.extensions).not.toHaveProperty('evil');
   });
 
@@ -729,7 +754,7 @@ describe('GLB sanitization', () => {
       },
     };
     const result = sanitizeGlbJson(json);
-    expect(result.warnings.some(w => w.includes('KHR_xmp'))).toBe(true);
+    expect(result.warnings.some((w) => w.includes('KHR_xmp'))).toBe(true);
   });
 
   it('passes through clean JSON', () => {
@@ -766,7 +791,9 @@ describe('Host-access detection', () => {
   });
 
   it('returns empty for clean shader code', () => {
-    expect(detectHostAccess('@fragment fn main() -> vec4<f32> { return vec4<f32>(1.0); }')).toHaveLength(0);
+    expect(
+      detectHostAccess('@fragment fn main() -> vec4<f32> { return vec4<f32>(1.0); }'),
+    ).toHaveLength(0);
   });
 });
 
@@ -783,7 +810,7 @@ describe('Audio routes — CRUD', () => {
   it('GET /v1/audio returns empty list initially', async () => {
     const res = await req('GET', '/v1/audio?workspace_id=ws-test');
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(Array.isArray(body.items)).toBe(true);
   });
 
@@ -801,7 +828,12 @@ describe('Audio routes — CRUD', () => {
       bitrateKbps: 192,
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { id: string; name: string; format: string; durationMs: number };
+    const body = (await res.json()) as {
+      id: string;
+      name: string;
+      format: string;
+      durationMs: number;
+    };
     expect(body.name).toBe('Background Music');
     expect(body.format).toBe('mp3');
     expect(body.durationMs).toBe(120_000);
@@ -838,7 +870,11 @@ describe('Audio routes — CRUD', () => {
       name: 'uploaded.mp3',
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { audioAssetId: string; formatDetected: string; rejected: boolean };
+    const body = (await res.json()) as {
+      audioAssetId: string;
+      formatDetected: string;
+      rejected: boolean;
+    };
     expect(body.audioAssetId).toBeTruthy();
     expect(body.formatDetected).toBe('mp3');
     expect(body.rejected).toBe(false);
@@ -876,7 +912,7 @@ describe('Video routes — CRUD', () => {
   it('GET /v1/video returns empty list initially', async () => {
     const res = await req('GET', '/v1/video?workspace_id=ws-test');
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(Array.isArray(body.items)).toBe(true);
   });
 
@@ -893,15 +929,23 @@ describe('Video routes — CRUD', () => {
       height: 1080,
       fps: 30,
       hasAudio: true,
-      chapters: [
-        { id: 'ch1', title: 'Opening', startMs: 0, endMs: 5_000 },
-      ],
+      chapters: [{ id: 'ch1', title: 'Opening', startMs: 0, endMs: 5_000 }],
       captions: [
-        { id: 'cap1', language: 'en', label: 'English', vttUrl: 'https://cdn.domio.app/video/intro.vtt' },
+        {
+          id: 'cap1',
+          language: 'en',
+          label: 'English',
+          vttUrl: 'https://cdn.domio.app/video/intro.vtt',
+        },
       ],
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { id: string; name: string; chapters: Array<{ id: string }>; captions: Array<{ id: string }> };
+    const body = (await res.json()) as {
+      id: string;
+      name: string;
+      chapters: Array<{ id: string }>;
+      captions: Array<{ id: string }>;
+    };
     expect(body.name).toBe('Intro Video');
     expect(body.chapters).toHaveLength(1);
     expect(body.captions).toHaveLength(1);
@@ -938,7 +982,13 @@ describe('Video routes — CRUD', () => {
       name: 'uploaded.mp4',
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { videoAssetId: string; width: number; height: number; fps: number; rejected: boolean };
+    const body = (await res.json()) as {
+      videoAssetId: string;
+      width: number;
+      height: number;
+      fps: number;
+      rejected: boolean;
+    };
     expect(body.videoAssetId).toBeTruthy();
     expect(body.width).toBe(1920);
     expect(body.height).toBe(1080);
@@ -968,7 +1018,7 @@ describe('Lottie routes — CRUD', () => {
   it('GET /v1/lottie returns empty list initially', async () => {
     const res = await req('GET', '/v1/lottie?workspace_id=ws-test');
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(Array.isArray(body.items)).toBe(true);
   });
 
@@ -992,7 +1042,12 @@ describe('Lottie routes — CRUD', () => {
       sanitized: true,
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { id: string; name: string; layerCount: number; sanitized: boolean };
+    const body = (await res.json()) as {
+      id: string;
+      name: string;
+      layerCount: number;
+      sanitized: boolean;
+    };
     expect(body.name).toBe('Loader Animation');
     expect(body.layerCount).toBe(3);
     expect(body.sanitized).toBe(true);
@@ -1027,9 +1082,7 @@ describe('Lottie routes — CRUD', () => {
       op: 60,
       w: 512,
       h: 512,
-      layers: [
-        { nm: 'layer1', ty: 4, ks: { o: { a: 0, k: 100 } } },
-      ],
+      layers: [{ nm: 'layer1', ty: 4, ks: { o: { a: 0, k: 100 } } }],
     });
     const res = await req('POST', '/v1/lottie/upload', {
       workspaceId: 'ws-test',
@@ -1038,7 +1091,15 @@ describe('Lottie routes — CRUD', () => {
       name: 'uploaded.json',
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { lottieAssetId: string; durationMs: number; width: number; height: number; layerCount: number; sanitized: boolean; rejected: boolean };
+    const body = (await res.json()) as {
+      lottieAssetId: string;
+      durationMs: number;
+      width: number;
+      height: number;
+      layerCount: number;
+      sanitized: boolean;
+      rejected: boolean;
+    };
     expect(body.lottieAssetId).toBeTruthy();
     expect(body.durationMs).toBe(2_000);
     expect(body.width).toBe(512);
@@ -1055,7 +1116,7 @@ describe('Lottie routes — CRUD', () => {
       buffer: btoa('not valid json'),
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { warnings: string[]; rejected: boolean };
+    const body = (await res.json()) as { warnings: string[]; rejected: boolean };
     expect(body.rejected).toBe(false);
     expect(body.warnings.length).toBeGreaterThan(0);
   });

@@ -12,10 +12,10 @@ describe('gqlRequest (persisted queries)', () => {
   beforeEach(() => {
     process.env['NEXT_PUBLIC_DASHBOARD_URL'] = 'http://example.test';
     globalThis.fetch = vi.fn(async () => {
-      return new Response(
-        JSON.stringify({ data: { ok: true } }),
-        { status: 200, headers: { 'content-type': 'application/json' } },
-      );
+      return new Response(JSON.stringify({ data: { ok: true } }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
     }) as unknown as typeof fetch;
   });
 

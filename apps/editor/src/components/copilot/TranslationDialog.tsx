@@ -122,10 +122,7 @@ export function TranslationDialog({
         <div className="space-y-4 px-4 py-4">
           {/* Language picker */}
           <div>
-            <label
-              htmlFor="translation-target"
-              className="text-xs font-medium text-slate-400"
-            >
+            <label htmlFor="translation-target" className="text-xs font-medium text-slate-400">
               {t('s64.translation.targetLabel')}
             </label>
             <select
@@ -143,10 +140,7 @@ export function TranslationDialog({
               ))}
             </select>
             {isRtl && (
-              <div
-                className="mt-1 text-[11px] text-amber-400"
-                data-testid="translation-rtl-hint"
-              >
+              <div className="mt-1 text-[11px] text-amber-400" data-testid="translation-rtl-hint">
                 {t('s64.translation.rtlHint')}
               </div>
             )}

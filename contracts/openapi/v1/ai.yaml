@@ -70,38 +70,38 @@ paths:
         job_id and a stream_url for SSE events. The same idempotency_key
         with the same request body returns the cached response within 24h.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateAiJobRequest"
+              $ref: '#/components/schemas/CreateAiJobRequest'
       responses:
-        "202":
+        '202':
           description: Job accepted and queued.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
-        "400":
+                $ref: '#/components/schemas/AiJobAccepted'
+        '400':
           description: Invalid request.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "401":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "409":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '409':
           description: Idempotency key conflict (different body).
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/ai/jobs/{job_id}:
     get:
       tags: [jobs]
@@ -116,18 +116,18 @@ paths:
             minLength: 1
             maxLength: 128
       responses:
-        "200":
+        '200':
           description: Job details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobResponse"
-        "404":
+                $ref: '#/components/schemas/AiJobResponse'
+        '404':
           description: Job not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/ai/jobs/{job_id}/stream:
     get:
       tags: [jobs]
@@ -152,13 +152,13 @@ paths:
             type: string
           description: Resume from this event ID after reconnect.
       responses:
-        "200":
+        '200':
           description: SSE event stream.
           content:
             text/event-stream:
               schema:
                 type: string
-        "404":
+        '404':
           description: Job not found.
   # ── Sources ───────────────────────────────────────────────────────────
   /v1/sources:
@@ -171,14 +171,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateSourceRequest"
+              $ref: '#/components/schemas/CreateSourceRequest'
       responses:
-        "201":
+        '201':
           description: Source created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Source"
+                $ref: '#/components/schemas/Source'
     get:
       tags: [sources]
       operationId: listSources
@@ -190,12 +190,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Source list.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListSourcesResponse"
+                $ref: '#/components/schemas/ListSourcesResponse'
   /v1/sources/{source_id}:
     get:
       tags: [sources]
@@ -208,13 +208,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Source details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Source"
-        "404":
+                $ref: '#/components/schemas/Source'
+        '404':
           description: Source not found.
   /v1/sources/{source_id}/ingest:
     post:
@@ -235,14 +235,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/IngestSourceRequest"
+              $ref: '#/components/schemas/IngestSourceRequest'
       responses:
-        "202":
+        '202':
           description: Ingestion job started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
+                $ref: '#/components/schemas/AiJobAccepted'
   # ── Citations ─────────────────────────────────────────────────────────
   /v1/citations/{citation_id}:
     get:
@@ -256,13 +256,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Citation details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Citation"
-        "404":
+                $ref: '#/components/schemas/Citation'
+        '404':
           description: Citation not found.
     patch:
       tags: [citations]
@@ -279,14 +279,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateCitationRequest"
+              $ref: '#/components/schemas/UpdateCitationRequest'
       responses:
-        "200":
+        '200':
           description: Citation updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Citation"
+                $ref: '#/components/schemas/Citation'
   /v1/slides/{slide_id}/citations:
     get:
       tags: [citations]
@@ -299,12 +299,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Citation list.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListSlideCitationsResponse"
+                $ref: '#/components/schemas/ListSlideCitationsResponse'
   # ── Image Generation ──────────────────────────────────────────────────
   /v1/ai/image:
     post:
@@ -316,14 +316,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GenerateImageRequest"
+              $ref: '#/components/schemas/GenerateImageRequest'
       responses:
-        "202":
+        '202':
           description: Image generation started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ImageGenerationResponse"
+                $ref: '#/components/schemas/ImageGenerationResponse'
   /v1/ai/image/{request_id}/remove-background:
     post:
       tags: [image]
@@ -336,12 +336,12 @@ paths:
           schema:
             type: string
       responses:
-        "202":
+        '202':
           description: Background removal started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ImageGenerationResponse"
+                $ref: '#/components/schemas/ImageGenerationResponse'
   # ── Voice ─────────────────────────────────────────────────────────────
   /v1/ai/voice/transcribe:
     post:
@@ -364,12 +364,12 @@ paths:
                   type: string
                   description: Optional language hint (e.g. "en").
       responses:
-        "202":
+        '202':
           description: Transcription started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TranscriptionAccepted"
+                $ref: '#/components/schemas/TranscriptionAccepted'
   # ── Speaker Notes ─────────────────────────────────────────────────────
   /v1/ai/notes:
     post:
@@ -381,14 +381,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GenerateNotesRequest"
+              $ref: '#/components/schemas/GenerateNotesRequest'
       responses:
-        "202":
+        '202':
           description: Notes generation started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
+                $ref: '#/components/schemas/AiJobAccepted'
   # ── Q&A ───────────────────────────────────────────────────────────────
   /v1/ai/qa:
     post:
@@ -400,14 +400,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GenerateQaRequest"
+              $ref: '#/components/schemas/GenerateQaRequest'
       responses:
-        "202":
+        '202':
           description: Q&A generation started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
+                $ref: '#/components/schemas/AiJobAccepted'
   # ── Summary ───────────────────────────────────────────────────────────
   /v1/ai/summary:
     post:
@@ -419,14 +419,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GenerateSummaryRequest"
+              $ref: '#/components/schemas/GenerateSummaryRequest'
       responses:
-        "202":
+        '202':
           description: Summary generation started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
+                $ref: '#/components/schemas/AiJobAccepted'
   # ── Audience Variants ─────────────────────────────────────────────────
   /v1/ai/variants:
     post:
@@ -438,14 +438,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GenerateVariantRequest"
+              $ref: '#/components/schemas/GenerateVariantRequest'
       responses:
-        "202":
+        '202':
           description: Variant generation started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
+                $ref: '#/components/schemas/AiJobAccepted'
   # ── Rehearsal ─────────────────────────────────────────────────────────
   /v1/ai/rehearsal/sessions:
     post:
@@ -457,14 +457,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateRehearsalSessionRequest"
+              $ref: '#/components/schemas/CreateRehearsalSessionRequest'
       responses:
-        "201":
+        '201':
           description: Session created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RehearsalSession"
+                $ref: '#/components/schemas/RehearsalSession'
   /v1/ai/rehearsal/sessions/{session_id}:
     get:
       tags: [rehearsal]
@@ -477,13 +477,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Session details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RehearsalSession"
-        "404":
+                $ref: '#/components/schemas/RehearsalSession'
+        '404':
           description: Session not found.
     patch:
       tags: [rehearsal]
@@ -500,14 +500,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateRehearsalSessionRequest"
+              $ref: '#/components/schemas/UpdateRehearsalSessionRequest'
       responses:
-        "200":
+        '200':
           description: Session updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RehearsalSession"
+                $ref: '#/components/schemas/RehearsalSession'
     delete:
       tags: [rehearsal]
       operationId: deleteRehearsalSession
@@ -519,7 +519,7 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Session deleted.
   /v1/ai/rehearsal/sessions/{session_id}/metrics:
     post:
@@ -537,9 +537,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RehearsalMetrics"
+              $ref: '#/components/schemas/RehearsalMetrics'
       responses:
-        "200":
+        '200':
           description: Metrics saved.
   # ── Layout Repair ─────────────────────────────────────────────────────
   /v1/ai/lint/layout:
@@ -552,14 +552,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LintLayoutRequest"
+              $ref: '#/components/schemas/LintLayoutRequest'
       responses:
-        "202":
+        '202':
           description: Layout lint started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
+                $ref: '#/components/schemas/AiJobAccepted'
   # ── Accessibility ─────────────────────────────────────────────────────
   /v1/ai/accessibility/audit:
     post:
@@ -571,14 +571,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AccessibilityAuditRequest"
+              $ref: '#/components/schemas/AccessibilityAuditRequest'
       responses:
-        "202":
+        '202':
           description: Audit started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
+                $ref: '#/components/schemas/AiJobAccepted'
   # ── Chart Selection ───────────────────────────────────────────────────
   /v1/ai/chart/recommend:
     post:
@@ -590,14 +590,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ChartRecommendRequest"
+              $ref: '#/components/schemas/ChartRecommendRequest'
       responses:
-        "200":
+        '200':
           description: Chart recommendation.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ChartRecommendation"
+                $ref: '#/components/schemas/ChartRecommendation'
   # ── Semantic Search ───────────────────────────────────────────────────
   /v1/ai/search:
     get:
@@ -629,12 +629,12 @@ paths:
             default: 20
             maximum: 100
       responses:
-        "200":
+        '200':
           description: Search results.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SearchResults"
+                $ref: '#/components/schemas/SearchResults'
   # ── Freshness ─────────────────────────────────────────────────────────
   /v1/ai/freshness/check:
     post:
@@ -646,14 +646,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/FreshnessCheckRequest"
+              $ref: '#/components/schemas/FreshnessCheckRequest'
       responses:
-        "202":
+        '202':
           description: Freshness check started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AiJobAccepted"
+                $ref: '#/components/schemas/AiJobAccepted'
   # ── Prompts ───────────────────────────────────────────────────────────
   /v1/prompts/{template_id}:
     get:
@@ -667,13 +667,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Prompt template.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PromptTemplate"
-        "404":
+                $ref: '#/components/schemas/PromptTemplate'
+        '404':
           description: Template not found.
 components:
   securitySchemes:
@@ -774,7 +774,7 @@ components:
       required: [job]
       properties:
         job:
-          $ref: "#/components/schemas/AiJob"
+          $ref: '#/components/schemas/AiJob'
         trace_id:
           type: string
     # ── Source schemas ────────────────────────────────────────────────
@@ -828,7 +828,7 @@ components:
         sources:
           type: array
           items:
-            $ref: "#/components/schemas/Source"
+            $ref: '#/components/schemas/Source'
         trace_id:
           type: string
     # ── Citation schemas ──────────────────────────────────────────────
@@ -845,7 +845,7 @@ components:
         location:
           type: object
           additionalProperties: true
-          description: "Chunk index, page, section, row_range."
+          description: 'Chunk index, page, section, row_range.'
         snippet:
           type: string
           maxLength: 280
@@ -882,7 +882,7 @@ components:
         citations:
           type: array
           items:
-            $ref: "#/components/schemas/SlideCitationEntry"
+            $ref: '#/components/schemas/SlideCitationEntry'
         trace_id:
           type: string
     SlideCitationEntry:
@@ -897,7 +897,7 @@ components:
           type: string
           enum: [primary, supporting, background]
         citation:
-          $ref: "#/components/schemas/Citation"
+          $ref: '#/components/schemas/Citation'
     # ── Image Generation schemas ──────────────────────────────────────
     GenerateImageRequest:
       type: object
@@ -1098,7 +1098,7 @@ components:
           type: string
         intent:
           type: string
-          description: "e.g. \"show change over time\""
+          description: 'e.g. "show change over time"'
     ChartRecommendation:
       type: object
       required: [chart_type, rationale]

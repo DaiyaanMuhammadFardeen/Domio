@@ -42,7 +42,9 @@ export default function FeedbackPage() {
           e.preventDefault();
           if (stars === 0 || nps === null) return;
           submitFeedback(params?.session_id ?? '', { stars, nps, note })
-            .catch(() => { /* best-effort; the form closes either way */ })
+            .catch(() => {
+              /* best-effort; the form closes either way */
+            })
             .finally(() => setSubmitted(true));
         }}
         className="flex flex-col gap-4 max-w-md mx-auto"
@@ -67,7 +69,10 @@ export default function FeedbackPage() {
             <PerSlideRating
               ratings={perSlide}
               onChange={onPerSlideChange}
-              slides={DEFAULT_SLIDE_IDS.map((id) => ({ id, title: `Slide ${id.replace('slide-', '')}` }))}
+              slides={DEFAULT_SLIDE_IDS.map((id) => ({
+                id,
+                title: `Slide ${id.replace('slide-', '')}`,
+              }))}
             />
           </div>
         </div>

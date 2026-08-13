@@ -25,7 +25,10 @@ export interface SearchBarProps {
   readonly maxResults?: number;
 }
 
-export function SearchBar({ placeholder = 'Search docs…', maxResults = 8 }: SearchBarProps): JSX.Element {
+export function SearchBar({
+  placeholder = 'Search docs…',
+  maxResults = 8,
+}: SearchBarProps): JSX.Element {
   const [query, setQuery] = useState('');
 
   const hits = useMemo(() => {

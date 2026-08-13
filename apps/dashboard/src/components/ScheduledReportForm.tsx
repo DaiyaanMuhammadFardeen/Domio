@@ -199,10 +199,7 @@ export function ScheduledReportForm({ workspaceId, onCreate }: ScheduledReportFo
           {submitting ? 'Saving…' : 'Save schedule'}
         </button>
         {submittedAt ? (
-          <span
-            data-testid="schedule-saved"
-            className="text-xs font-medium text-emerald-700"
-          >
+          <span data-testid="schedule-saved" className="text-xs font-medium text-emerald-700">
             Scheduled at {new Date(submittedAt).toLocaleTimeString()}
           </span>
         ) : null}

@@ -22,10 +22,7 @@
 
 import type { HistoryEngine, HistoryOp } from '@domio/canvas';
 import type { DeckDocument } from '@domio/schema/generated/scene-graph';
-import {
-  createAutosaveFacade,
-  type AutosaveFacade,
-} from '../lib/autosave';
+import { createAutosaveFacade, type AutosaveFacade } from '../lib/autosave';
 import { useEditorStore } from './editor-store';
 
 let engineRef: HistoryEngine | null = null;
@@ -120,9 +117,7 @@ export function snapshotHistory(): {
 }
 
 /** Subscribe to engine events (history changes). Cleans up on unmount. */
-export function onEngineEvent(
-  listener: () => void,
-): () => void {
+export function onEngineEvent(listener: () => void): () => void {
   if (!engineRef) {
     return () => {};
   }

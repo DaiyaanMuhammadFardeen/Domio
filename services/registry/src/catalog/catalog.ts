@@ -28,21 +28,34 @@ export interface PublishPackageInput {
 
 function validateCatalogId(catalogId: string): void {
   if (!CATALOG_ID_PATTERN.test(catalogId)) {
-    throw Errors.validation(`Invalid catalogId "${catalogId}" (expected namespaced lowercase slug)`);
+    throw Errors.validation(
+      `Invalid catalogId "${catalogId}" (expected namespaced lowercase slug)`,
+    );
   }
 }
 
 /** Validate the props schema and return the smart-prop denormalization. */
-export function validatePropsSchema(schema: Record<string, unknown> | undefined, maxProps: number): {
+export function validatePropsSchema(
+  schema: Record<string, unknown> | undefined,
+  maxProps: number,
+): {
   schema: Record<string, unknown>;
-  props: { propKey: string; propSchema: Record<string, unknown>; controlHint?: string; required: boolean; default?: unknown }[];
+  props: {
+    propKey: string;
+    propSchema: Record<string, unknown>;
+    controlHint?: string;
+    required: boolean;
+    default?: unknown;
+  }[];
 } {
-  if (!schema || typeof schema !== 'object') return { schema: { type: 'object', properties: {} }, props: [] };
+  if (!schema || typeof schema !== 'object')
+    return { schema: { type: 'object', properties: {} }, props: [] };
   const { valid, errors } = validateProps(schema as never, {});
   if (!valid) {
     throw Errors.validation('props_schema failed structural validation', errors.slice(0, 3));
   }
-  const properties = (schema.properties as Record<string, Record<string, unknown>> | undefined) ?? {};
+  const properties =
+    (schema.properties as Record<string, Record<string, unknown>> | undefined) ?? {};
   const keys = Object.keys(properties);
   if (keys.length > maxProps) {
     throw Errors.validation(`props_schema exceeds ${maxProps} properties`);
@@ -74,7 +87,10 @@ export interface PublishResult {
  *    sha256 (content-addressed integrity)
  *  - the declared packageHash matches the canonical body (tamper detection)
  */
-export async function publishPackage(deps: ServiceDeps, input: PublishPackageInput): Promise<PublishResult> {
+export async function publishPackage(
+  deps: ServiceDeps,
+  input: PublishPackageInput,
+): Promise<PublishResult> {
   const store = deps.store;
   validateCatalogId(input.catalogId);
   if (!isSemver(input.version)) {
@@ -156,7 +172,10 @@ export async function getPackageOrNull(
   return deps.store.getPackage(catalogId, version);
 }
 
-export async function listVersions(deps: ServiceDeps, catalogId: string): Promise<ComponentPackage[]> {
+export async function listVersions(
+  deps: ServiceDeps,
+  catalogId: string,
+): Promise<ComponentPackage[]> {
   return deps.store.listVersions(catalogId);
 }
 
@@ -178,7 +197,10 @@ export interface DeprecateInput {
   replaceWith?: string;
 }
 
-export async function deprecatePackage(deps: ServiceDeps, input: DeprecateInput): Promise<ComponentPackage> {
+export async function deprecatePackage(
+  deps: ServiceDeps,
+  input: DeprecateInput,
+): Promise<ComponentPackage> {
   const versions = await deps.store.listVersions(input.catalogId);
   if (!versions.length) throw Errors.notFound(`component ${input.catalogId}`);
   const targets = input.version ? versions.filter((v) => v.version === input.version) : versions;

@@ -30,19 +30,33 @@ export interface IdempotencyStore {
 }
 
 export class NullIdempotencyStore implements IdempotencyStore {
-  async get(): Promise<IdempotencyEntry | null> { return null; }
-  async reserve(): Promise<IdempotencyReservation> { return { exists: false }; }
-  async commit(): Promise<void> { /* noop */ }
-  async prune(): Promise<number> { return 0; }
+  async get(): Promise<IdempotencyEntry | null> {
+    return null;
+  }
+  async reserve(): Promise<IdempotencyReservation> {
+    return { exists: false };
+  }
+  async commit(): Promise<void> {
+    /* noop */
+  }
+  async prune(): Promise<number> {
+    return 0;
+  }
 }
 
 export class InMemoryIdempotencyStore implements IdempotencyStore {
   private readonly entries = new Map<string, IdempotencyEntry>();
   constructor(private readonly defaultTtlMs = 24 * 60 * 60 * 1000) {}
 
-  private keyOf(k: string, w: string, s: string): string { return `${w}|${s}|${k}`; }
+  private keyOf(k: string, w: string, s: string): string {
+    return `${w}|${s}|${k}`;
+  }
 
-  async get(key: string, workspace_id: string, session_id: string): Promise<IdempotencyEntry | null> {
+  async get(
+    key: string,
+    workspace_id: string,
+    session_id: string,
+  ): Promise<IdempotencyEntry | null> {
     const k = this.keyOf(key, workspace_id, session_id);
     const e = this.entries.get(k);
     if (!e) return null;

@@ -67,7 +67,17 @@ describe('inheritance-service — offline fallback', () => {
       status: 200,
       statusText: 'OK',
       json: async () => ({
-        nodes: [{ id: 'm', title: 'm', version: '1', parent_id: null, last_synced_at_ms: 0, sync_status: 'in_sync', slide_count: 1 }],
+        nodes: [
+          {
+            id: 'm',
+            title: 'm',
+            version: '1',
+            parent_id: null,
+            last_synced_at_ms: 0,
+            sync_status: 'in_sync',
+            slide_count: 1,
+          },
+        ],
         edges: [],
       }),
     })) as unknown as typeof fetch;
@@ -121,8 +131,11 @@ describe('inheritance-service — push mutation', () => {
     globalThis.fetch = mock;
 
     await pushSlides('deck-master', ['s1', 's2'], 'http://api.test');
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
-    const calledInit = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[1] as RequestInit | undefined;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
+    const calledInit = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[1] as
+      | RequestInit
+      | undefined;
     expect(calledUrl).toContain('/v1/inheritance/trees/deck-master/push');
     expect(calledInit?.method).toBe('POST');
     expect(JSON.parse(String(calledInit?.body))).toEqual({ slide_ids: ['s1', 's2'] });
@@ -172,9 +185,27 @@ describe('inheritance-service — conflict resolution', () => {
 describe('inheritance-service — pure helpers', () => {
   it('groupChildrenByParent buckets edges correctly', () => {
     const edges = [
-      { parent_id: 'a', child_id: 'x', inherited_slide_ids: [], diverged_slide_ids: [], last_pushed_at_ms: null },
-      { parent_id: 'a', child_id: 'y', inherited_slide_ids: [], diverged_slide_ids: [], last_pushed_at_ms: null },
-      { parent_id: 'b', child_id: 'z', inherited_slide_ids: [], diverged_slide_ids: [], last_pushed_at_ms: null },
+      {
+        parent_id: 'a',
+        child_id: 'x',
+        inherited_slide_ids: [],
+        diverged_slide_ids: [],
+        last_pushed_at_ms: null,
+      },
+      {
+        parent_id: 'a',
+        child_id: 'y',
+        inherited_slide_ids: [],
+        diverged_slide_ids: [],
+        last_pushed_at_ms: null,
+      },
+      {
+        parent_id: 'b',
+        child_id: 'z',
+        inherited_slide_ids: [],
+        diverged_slide_ids: [],
+        last_pushed_at_ms: null,
+      },
     ];
     const grouped = groupChildrenByParent(edges);
     expect(grouped.get('a')?.length).toBe(2);
@@ -184,8 +215,24 @@ describe('inheritance-service — pure helpers', () => {
 
   it('findMaster returns the node with parent_id === null', () => {
     const nodes = [
-      { id: 'a', title: 'a', version: '1', parent_id: 'm', last_synced_at_ms: 0, sync_status: 'in_sync' as const, slide_count: 1 },
-      { id: 'm', title: 'm', version: '1', parent_id: null, last_synced_at_ms: 0, sync_status: 'in_sync' as const, slide_count: 1 },
+      {
+        id: 'a',
+        title: 'a',
+        version: '1',
+        parent_id: 'm',
+        last_synced_at_ms: 0,
+        sync_status: 'in_sync' as const,
+        slide_count: 1,
+      },
+      {
+        id: 'm',
+        title: 'm',
+        version: '1',
+        parent_id: null,
+        last_synced_at_ms: 0,
+        sync_status: 'in_sync' as const,
+        slide_count: 1,
+      },
     ];
     expect(findMaster(nodes)?.id).toBe('m');
     expect(findMaster([])).toBeNull();

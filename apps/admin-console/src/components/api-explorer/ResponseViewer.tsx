@@ -65,9 +65,7 @@ export function ResponseViewer({ response }: ResponseViewerProps) {
             ? CATALOGUE['admin.apiExplorer.status.ok']
             : CATALOGUE['admin.apiExplorer.status.error']}
         </span>
-        <span className="text-xs text-slate-500">
-          {response.latency_ms} ms
-        </span>
+        <span className="text-xs text-slate-500">{response.latency_ms} ms</span>
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
@@ -140,7 +138,8 @@ interface JsonNodeProps {
 
 function JsonNode({ value, depth, keyName }: JsonNodeProps) {
   const indent = '  '.repeat(depth);
-  const label = keyName === '' ? '' : <span className="text-sky-300">{JSON.stringify(keyName)}</span>;
+  const label =
+    keyName === '' ? '' : <span className="text-sky-300">{JSON.stringify(keyName)}</span>;
   const sep = keyName === '' ? '' : ': ';
 
   if (value === null) {
@@ -174,7 +173,9 @@ function JsonNode({ value, depth, keyName }: JsonNodeProps) {
     return <JsonArray value={value} depth={depth} label={label} sep={sep} />;
   }
   if (typeof value === 'object') {
-    return <JsonObject value={value as Record<string, unknown>} depth={depth} label={label} sep={sep} />;
+    return (
+      <JsonObject value={value as Record<string, unknown>} depth={depth} label={label} sep={sep} />
+    );
   }
   return (
     <div style={{ paddingLeft: `${depth * 12}px` }}>
@@ -203,7 +204,10 @@ function JsonContainer({ depth, label, sep, isArray, length, children }: Contain
       <div style={{ paddingLeft: `${depth * 12}px` }}>
         {label}
         {sep}
-        <span className="text-slate-400">{bracketOpen}{bracketClose}</span>
+        <span className="text-slate-400">
+          {bracketOpen}
+          {bracketClose}
+        </span>
       </div>
     );
   }
@@ -251,13 +255,7 @@ interface JsonObjectProps {
 function JsonObject({ value, depth, label, sep }: JsonObjectProps) {
   const entries = Object.entries(value);
   return (
-    <JsonContainer
-      depth={depth}
-      label={label}
-      sep={sep}
-      isArray={false}
-      length={entries.length}
-    >
+    <JsonContainer depth={depth} label={label} sep={sep} isArray={false} length={entries.length}>
       {entries.map(([k, v]) => (
         <JsonNode key={k} value={v} depth={depth + 1} keyName={k} />
       ))}
@@ -274,13 +272,7 @@ interface JsonArrayProps {
 
 function JsonArray({ value, depth, label, sep }: JsonArrayProps) {
   return (
-    <JsonContainer
-      depth={depth}
-      label={label}
-      sep={sep}
-      isArray={true}
-      length={value.length}
-    >
+    <JsonContainer depth={depth} label={label} sep={sep} isArray={true} length={value.length}>
       {value.map((v, i) => (
         <JsonNode key={i} value={v} depth={depth + 1} keyName={String(i)} />
       ))}

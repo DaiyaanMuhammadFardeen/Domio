@@ -16,7 +16,12 @@ export interface UseViewportResult {
   setZoom: (z: number) => void;
   setPan: (p: { x: number; y: number }) => void;
   reset: () => void;
-  fitToSlide: (slideWidth: number, slideHeight: number, viewportWidth: number, viewportHeight: number) => void;
+  fitToSlide: (
+    slideWidth: number,
+    slideHeight: number,
+    viewportWidth: number,
+    viewportHeight: number,
+  ) => void;
   zoomIn: (step?: number) => void;
   zoomOut: (step?: number) => void;
 }
@@ -37,10 +42,7 @@ export function useViewport(): UseViewportResult {
   const reset = useEditorStore((s) => s.resetViewport);
 
   const setZoom = useCallback((z: number) => setZoomRaw(clampZoom(z)), [setZoomRaw]);
-  const setPan = useCallback(
-    (p: { x: number; y: number }) => setPanRaw(p),
-    [setPanRaw],
-  );
+  const setPan = useCallback((p: { x: number; y: number }) => setPanRaw(p), [setPanRaw]);
 
   const fitToSlide = useCallback(
     (sw: number, sh: number, vw: number, vh: number) => {
@@ -54,7 +56,10 @@ export function useViewport(): UseViewportResult {
     [setZoomRaw, setPanRaw],
   );
 
-  const zoomIn = useCallback((step = 0.1) => setZoomRaw(clampZoom(zoom + step)), [zoom, setZoomRaw]);
+  const zoomIn = useCallback(
+    (step = 0.1) => setZoomRaw(clampZoom(zoom + step)),
+    [zoom, setZoomRaw],
+  );
   const zoomOut = useCallback(
     (step = 0.1) => setZoomRaw(clampZoom(zoom - step)),
     [zoom, setZoomRaw],

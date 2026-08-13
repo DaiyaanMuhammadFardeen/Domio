@@ -26,20 +26,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/FormatRequest"
+              $ref: '#/components/schemas/FormatRequest'
       responses:
-        "200":
+        '200':
           description: Formatted result.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FormatResponse"
-        "400":
+                $ref: '#/components/schemas/FormatResponse'
+        '400':
           description: Invalid locale or currency.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/localization/rates:
     post:
       tags: [localization]
@@ -50,15 +50,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RatesRequest"
+              $ref: '#/components/schemas/RatesRequest'
       responses:
-        "200":
+        '200':
           description: Rates ingested.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RatesResponse"
-        "401":
+                $ref: '#/components/schemas/RatesResponse'
+        '401':
           description: Unauthenticated.
   /v1/localization/convert:
     post:
@@ -70,15 +70,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConvertRequest"
+              $ref: '#/components/schemas/ConvertRequest'
       responses:
-        "200":
+        '200':
           description: Conversion result.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConvertResponse"
-        "404":
+                $ref: '#/components/schemas/ConvertResponse'
+        '404':
           description: Exchange rate not found.
 components:
   securitySchemes:
@@ -113,7 +113,7 @@ components:
         pairs:
           type: array
           items:
-            $ref: "#/components/schemas/RateSnapshot"
+            $ref: '#/components/schemas/RateSnapshot'
     RatesResponse:
       type: object
       properties:

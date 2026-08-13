@@ -19,11 +19,7 @@ import type {
   ShareLink,
   UpdateShareInput,
 } from '../types.js';
-import {
-  validateCreateInput,
-  validateExtendExpiry,
-  validateUpdateInput,
-} from '../types.js';
+import { validateCreateInput, validateExtendExpiry, validateUpdateInput } from '../types.js';
 import type { ShareLinkSnapshot, ShareStore } from './store.js';
 
 /**
@@ -134,7 +130,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented (M2); args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

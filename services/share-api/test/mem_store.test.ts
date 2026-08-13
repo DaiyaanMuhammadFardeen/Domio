@@ -117,7 +117,11 @@ describe('InMemoryShareStore — read/write round-trip', () => {
     const s = makeStore();
     await s.insert(makeInput(), makeLink(), makePolicy());
     await expect(
-      s.insert(makeInput({ deckId: 'd2' }), makeLink({ id: 'lnk_000002', deckId: 'd2' }), makePolicy({ id: 'pol_000002', shareLinkId: 'lnk_000002' })),
+      s.insert(
+        makeInput({ deckId: 'd2' }),
+        makeLink({ id: 'lnk_000002', deckId: 'd2' }),
+        makePolicy({ id: 'pol_000002', shareLinkId: 'lnk_000002' }),
+      ),
     ).rejects.toBeInstanceOf(ShortIdCollisionError);
   });
 
@@ -163,16 +167,16 @@ describe('InMemoryShareStore — update', () => {
   it('update with wrong expectedSeq throws ConcurrentModificationError', async () => {
     const s = makeStore();
     await s.insert(makeInput(), makeLink(), makePolicy());
-    await expect(
-      s.update('w1', 'lnk_000001', { actorId: 'u2' }, 99),
-    ).rejects.toBeInstanceOf(ConcurrentModificationError);
+    await expect(s.update('w1', 'lnk_000001', { actorId: 'u2' }, 99)).rejects.toBeInstanceOf(
+      ConcurrentModificationError,
+    );
   });
 
   it('update on a missing row throws ShareNotFoundError', async () => {
     const s = makeStore();
-    await expect(
-      s.update('w1', 'nonexistent', { actorId: 'u2' }, 1),
-    ).rejects.toBeInstanceOf(ShareNotFoundError);
+    await expect(s.update('w1', 'nonexistent', { actorId: 'u2' }, 1)).rejects.toBeInstanceOf(
+      ShareNotFoundError,
+    );
   });
 });
 
@@ -187,9 +191,9 @@ describe('InMemoryShareStore — rotateToken', () => {
   it('rejects concurrent rotation with the wrong seq', async () => {
     const s = makeStore();
     await s.insert(makeInput(), makeLink(), makePolicy());
-    await expect(
-      s.rotateToken('w1', 'lnk_000001', 'newhash', 'u2', 99),
-    ).rejects.toBeInstanceOf(ConcurrentModificationError);
+    await expect(s.rotateToken('w1', 'lnk_000001', 'newhash', 'u2', 99)).rejects.toBeInstanceOf(
+      ConcurrentModificationError,
+    );
   });
 });
 
@@ -224,7 +228,12 @@ describe('InMemoryShareStore — extendExpiry', () => {
     const s = makeStore();
     await s.insert(makeInput(), makeLink(), makePolicy());
     await expect(
-      s.extendExpiry('w1', 'lnk_000001', { actorId: 'u2', expiresAt: new Date('2020-01-01T00:00:00Z') }, 1),
+      s.extendExpiry(
+        'w1',
+        'lnk_000001',
+        { actorId: 'u2', expiresAt: new Date('2020-01-01T00:00:00Z') },
+        1,
+      ),
     ).rejects.toBeInstanceOf(ShareValidationError);
   });
 });
@@ -233,8 +242,14 @@ describe('PgShareStore — nil guard', () => {
   it('returns StoreNotConfiguredError when pool is null', async () => {
     const pg = new PgShareStore(null);
     await expect(pg.findById('w1', 'lnk_000001')).rejects.toBeInstanceOf(StoreNotConfiguredError);
-    await expect(pg.findByShortId('w1', 'ABCD1234')).rejects.toBeInstanceOf(StoreNotConfiguredError);
-    await expect(pg.insert(makeInput(), makeLink(), makePolicy())).rejects.toBeInstanceOf(StoreNotConfiguredError);
-    await expect(pg.update('w1', 'lnk_000001', { actorId: 'u2' }, 1)).rejects.toBeInstanceOf(StoreNotConfiguredError);
+    await expect(pg.findByShortId('w1', 'ABCD1234')).rejects.toBeInstanceOf(
+      StoreNotConfiguredError,
+    );
+    await expect(pg.insert(makeInput(), makeLink(), makePolicy())).rejects.toBeInstanceOf(
+      StoreNotConfiguredError,
+    );
+    await expect(pg.update('w1', 'lnk_000001', { actorId: 'u2' }, 1)).rejects.toBeInstanceOf(
+      StoreNotConfiguredError,
+    );
   });
 });

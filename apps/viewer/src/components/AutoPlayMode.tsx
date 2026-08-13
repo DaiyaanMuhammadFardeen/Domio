@@ -62,7 +62,10 @@ export function AutoPlayMode({
     let hi = markers.length - 1;
     while (lo < hi) {
       const mid = Math.floor((lo + hi + 1) / 2);
-      if (markers[mid]!.timeMs <= slideIdx * (voiceoverDurationMs / Math.max(1, deck.slides.length))) {
+      if (
+        markers[mid]!.timeMs <=
+        slideIdx * (voiceoverDurationMs / Math.max(1, deck.slides.length))
+      ) {
         lo = mid;
       } else {
         hi = mid - 1;
@@ -177,7 +180,9 @@ export function AutoPlayMode({
       <main style={{ paddingBottom: 96 }}>
         {slide ? (
           <div data-testid={`${dataTestId}-slide`}>
-            <h2 style={{ marginTop: 0, color: 'rgba(255,255,255,0.9)' }}>{slide.title ?? `Slide ${slideIdx + 1}`}</h2>
+            <h2 style={{ marginTop: 0, color: 'rgba(255,255,255,0.9)' }}>
+              {slide.title ?? `Slide ${slideIdx + 1}`}
+            </h2>
             <p style={{ color: 'rgba(255,255,255,0.6)' }}>
               {markers[currentMarkerIndex]?.timeMs
                 ? `Speaking at ${Math.round(markers[currentMarkerIndex]!.timeMs / 1000)}s`

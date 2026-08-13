@@ -8,9 +8,9 @@ Marketplace listing + listing search.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-marketplace` | availability | 99.9% | 30d |
+| SLO                 | Kind         | Target | Window |
+| ------------------- | ------------ | ------ | ------ |
+| `avail-marketplace` | availability | 99.9%  | 30d    |
 
 ## Triage
 

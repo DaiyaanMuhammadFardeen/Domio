@@ -2,7 +2,7 @@
 
 This fixture exercises the **sessionization determinism** invariant: given
 the same input events, the sessionization consumer must produce the same
-`session_id` sequences on every replay.  Without this guarantee, downstream
+`session_id` sequences on every replay. Without this guarantee, downstream
 features (heatmap attribution, A/B exposure join, CRM scoring) cannot
 trust session-bound events.
 
@@ -20,11 +20,11 @@ tests/load/replay-corpora/
 ## Determinism
 
 `generate.ts` builds the corpus deterministically using a tiny LCG
-seeded by `0xDEADBEEF`.  The event distribution is:
+seeded by `0xDEADBEEF`. The event distribution is:
 
-| Viewer | Events | Pattern |
-|--------|--------|---------|
-| `viewer-A` | 500 000 | Uniform 1 event/sec |
+| Viewer     | Events  | Pattern                                                                                     |
+| ---------- | ------- | ------------------------------------------------------------------------------------------- |
+| `viewer-A` | 500 000 | Uniform 1 event/sec                                                                         |
 | `viewer-B` | 500 000 | Uniform 1 event/sec with a 31-min idle gap every 4 h, plus a midpoint gap for small corpora |
 
 The 31-min gap is the canonical Phase-17 sessionization boundary
@@ -37,14 +37,14 @@ exactly **N+1 sessions per viewer** where N is the number of gaps.
 ## Replay determinism
 
 `replay.ts` reads `corpus-1m.ndjson` and feeds it through
-`services/sessionization`'s partition consumer 5 times.  After each
+`services/sessionization`'s partition consumer 5 times. After each
 run, it computes a SHA-256 fingerprint of the `session_id` sequence
-per viewer.  All 5 fingerprints must be identical.  Any divergence
+per viewer. All 5 fingerprints must be identical. Any divergence
 indicates a sessionization regression (e.g. clock drift, non-stable
 sort, hash instability).
 
 The full 1M-event replay is gated by nightly CI (it takes ~6 min
-on a single core).  The vitest unit test in `replay.test.ts` runs
+on a single core). The vitest unit test in `replay.test.ts` runs
 against a 1 000-event subset which completes in <2 s on every PR.
 
 ## Usage

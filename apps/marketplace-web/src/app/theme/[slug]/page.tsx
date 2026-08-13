@@ -63,10 +63,7 @@ export default function ThemePreviewPage({ params }: ThemePageProps) {
 
   if (loading) {
     return (
-      <div
-        className="mx-auto max-w-5xl px-4 py-16"
-        data-testid="theme-loading"
-      >
+      <div className="mx-auto max-w-5xl px-4 py-16" data-testid="theme-loading">
         <p className="text-sm text-muted">{t('market.theme.loadingPreview')}</p>
       </div>
     );
@@ -75,14 +72,9 @@ export default function ThemePreviewPage({ params }: ThemePageProps) {
   if (notFound || !theme) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-16" data-testid="theme-not-found">
-        <h1 className="font-display text-2xl font-bold text-fg">
-          {t('market.theme.notFound')}
-        </h1>
+        <h1 className="font-display text-2xl font-bold text-fg">{t('market.theme.notFound')}</h1>
         <p className="mt-2 text-sm text-muted">
-          <Link
-            href={marketplaceWeb('home')}
-            className="text-accent hover:underline"
-          >
+          <Link href={marketplaceWeb('home')} className="text-accent hover:underline">
             {t('detail.backToBrowse')}
           </Link>
         </p>
@@ -93,10 +85,7 @@ export default function ThemePreviewPage({ params }: ThemePageProps) {
   const priceText = formatPrice(theme.price_cents, theme.currency, theme.is_free);
 
   return (
-    <div
-      className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
-      data-testid="theme-preview-page"
-    >
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8" data-testid="theme-preview-page">
       <nav className="mb-8" aria-label="Breadcrumb">
         <Link
           href={marketplaceWeb('home')}
@@ -110,11 +99,7 @@ export default function ThemePreviewPage({ params }: ThemePageProps) {
             strokeWidth={2}
             aria-hidden="true"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 19l-7-7 7-7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
           {t('detail.backToBrowse')}
         </Link>
@@ -203,10 +188,7 @@ export default function ThemePreviewPage({ params }: ThemePageProps) {
       </div>
 
       {/* Below the fold: included + related */}
-      <section
-        className="mt-16 border-t border-border pt-12"
-        data-testid="theme-included"
-      >
+      <section className="mt-16 border-t border-border pt-12" data-testid="theme-included">
         <h2 className="mb-4 font-display text-xl font-bold text-fg">
           {t('market.theme.included')}
         </h2>
@@ -233,10 +215,7 @@ export default function ThemePreviewPage({ params }: ThemePageProps) {
       </section>
 
       {related.length > 0 && (
-        <section
-          className="mt-16 border-t border-border pt-12"
-          data-testid="theme-related"
-        >
+        <section className="mt-16 border-t border-border pt-12" data-testid="theme-related">
           <h2 className="mb-4 font-display text-xl font-bold text-fg">
             {t('market.theme.relatedThemes')}
           </h2>

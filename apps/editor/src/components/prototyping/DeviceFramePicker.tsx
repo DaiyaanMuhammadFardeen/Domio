@@ -41,8 +41,13 @@ export function DeviceFramePicker({
 
   if (display === 'grid') {
     return (
-      <div className="prototyping-device-frame-picker" data-testid="prototyping-device-frame-picker">
-        <div style={{ fontSize: 11, color: 'var(--muted, #888)', marginBottom: 4 }}>Device frame</div>
+      <div
+        className="prototyping-device-frame-picker"
+        data-testid="prototyping-device-frame-picker"
+      >
+        <div style={{ fontSize: 11, color: 'var(--muted, #888)', marginBottom: 4 }}>
+          Device frame
+        </div>
         <div
           style={{
             display: 'grid',
@@ -83,7 +88,9 @@ export function DeviceFramePicker({
                   }}
                   data-testid={`device-frame-preview-${f.id}`}
                 />
-                <span style={{ fontSize: 10, color: 'var(--fg, #eee)', textAlign: 'center' }}>{f.label}</span>
+                <span style={{ fontSize: 10, color: 'var(--fg, #eee)', textAlign: 'center' }}>
+                  {f.label}
+                </span>
                 <span style={{ fontSize: 9, color: 'var(--muted, #888)' }}>
                   {f.width}×{f.height}
                 </span>

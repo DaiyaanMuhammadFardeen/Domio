@@ -64,9 +64,14 @@ describe('generateDashboard', () => {
       service: '@domio/audience-service',
       displayName: 'Audience Service',
       tier: 'tier-1',
-      slos: [sloFixture(), sloFixture({ slo: 'lat-audience-p95', kind: 'latency', latencyThresholdMs: 250 })],
+      slos: [
+        sloFixture(),
+        sloFixture({ slo: 'lat-audience-p95', kind: 'latency', latencyThresholdMs: 250 }),
+      ],
     });
-    const sloPanels = dash.panels.filter((p) => p.title.includes('avail-audience') || p.title.includes('lat-audience-p95'));
+    const sloPanels = dash.panels.filter(
+      (p) => p.title.includes('avail-audience') || p.title.includes('lat-audience-p95'),
+    );
     expect(sloPanels).toHaveLength(2);
   });
 

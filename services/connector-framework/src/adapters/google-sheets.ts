@@ -56,20 +56,25 @@ export class GoogleSheetsAdapter implements ConnectorAdapter {
 
   async ping(ctx: AdapterContext): Promise<{ ok: boolean; latency_ms: number }> {
     const t0 = Date.now();
-    await ctx.transport.request({ method: 'GET', url: 'https://sheets.googleapis.com/v4/spreadsheets/sheet-1' });
+    await ctx.transport.request({
+      method: 'GET',
+      url: 'https://sheets.googleapis.com/v4/spreadsheets/sheet-1',
+    });
     return { ok: true, latency_ms: Date.now() - t0 };
   }
 
   async discover(_ctx: AdapterContext, _spec: DiscoverSpec): Promise<DiscoverResult> {
     return {
-      tables: [{
-        name: 'Sheet1',
-        columns: [
-          { name: 'Name', type: 'string', semantic_role: 'dimension' },
-          { name: 'Revenue', type: 'currency', semantic_role: 'measure' },
-        ],
-        row_count_estimate: 100,
-      }],
+      tables: [
+        {
+          name: 'Sheet1',
+          columns: [
+            { name: 'Name', type: 'string', semantic_role: 'dimension' },
+            { name: 'Revenue', type: 'currency', semantic_role: 'measure' },
+          ],
+          row_count_estimate: 100,
+        },
+      ],
     };
   }
 

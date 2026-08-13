@@ -4,11 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  DEFAULT_DEVICE_FRAMES,
-  DeviceFrameRegistry,
-  findDefaultFrame,
-} from './index.js';
+import { DEFAULT_DEVICE_FRAMES, DeviceFrameRegistry, findDefaultFrame } from './index.js';
 
 describe('DeviceFrameRegistry', () => {
   it('exposes a sensible default set', () => {

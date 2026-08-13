@@ -67,9 +67,7 @@ describe('handleGetPrompt', () => {
   });
 
   it('throws for non-existent template', () => {
-    expect(() => handleGetPrompt('nonexistent.template')).toThrow(
-      'not found',
-    );
+    expect(() => handleGetPrompt('nonexistent.template')).toThrow('not found');
   });
 
   it('returns prompt template by specific version', () => {
@@ -79,9 +77,7 @@ describe('handleGetPrompt', () => {
   });
 
   it('throws for non-existent version', () => {
-    expect(() => handleGetPrompt('outline.from_prompt', 999)).toThrow(
-      'not found',
-    );
+    expect(() => handleGetPrompt('outline.from_prompt', 999)).toThrow('not found');
   });
 
   it('all 14 templates are retrievable', () => {

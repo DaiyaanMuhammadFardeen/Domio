@@ -13,7 +13,10 @@ test('P06 smoke: insert, prop-edit, variant-switch, promote', async ({ page }) =
   await page.getByRole('tab', { name: 'Insert' }).click();
   await expect(page.getByTestId('insert-panel')).toBeVisible();
 
-  const insertButton = page.locator('[data-testid="insert-grid"] button').filter({ hasText: 'Stat Card' }).first();
+  const insertButton = page
+    .locator('[data-testid="insert-grid"] button')
+    .filter({ hasText: 'Stat Card' })
+    .first();
   await expect(insertButton).toBeVisible();
   await insertButton.click();
 
@@ -32,8 +35,16 @@ test('P06 smoke: insert, prop-edit, variant-switch, promote', async ({ page }) =
   await expect(darkButton).toHaveClass(/is-active/);
 
   // 5. Promote: select a non-component layer, then open the promote dialog.
-  await page.getByRole('listbox', { name: 'Layer list' }).getByRole('button').filter({ hasText: 'frame' }).first().click();
-  await page.getByRole('button', { name: /Promote/i }).first().click();
+  await page
+    .getByRole('listbox', { name: 'Layer list' })
+    .getByRole('button')
+    .filter({ hasText: 'frame' })
+    .first()
+    .click();
+  await page
+    .getByRole('button', { name: /Promote/i })
+    .first()
+    .click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await dialog.getByLabel('Name').fill('Hero Stat');

@@ -7,10 +7,23 @@
   "required": ["id", "deck_id", "name", "overlays"],
   "additionalProperties": false,
   "properties": {
-    "id": { "type": "string", "format": "uuid", "description": "Stable scenario id; survives connector renames." },
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Stable scenario id; survives connector renames."
+    },
     "deck_id": { "type": "string", "format": "uuid" },
-    "parent_id": { "type": ["string", "null"], "format": "uuid", "description": "Scenario DAG parent; null for the default/Base scenario." },
-    "name": { "type": "string", "minLength": 1, "maxLength": 128, "description": "'Base', 'Bull', 'Bear', ..." },
+    "parent_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Scenario DAG parent; null for the default/Base scenario."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "'Base', 'Bull', 'Bear', ..."
+    },
     "description": { "type": "string", "default": "" },
     "overlays": {
       "type": "object",

@@ -6,7 +6,20 @@
 import type { Element } from '@domio/schema';
 import type { PropSchemaFragment } from '@domio/schema-prop';
 import type { DomioComponentDef } from '../types.js';
-import { rect, text, line, polyline, fitText, asNumber, asString, asBoolean, asArray, accentOf, clamp, round } from '../helpers.js';
+import {
+  rect,
+  text,
+  line,
+  polyline,
+  fitText,
+  asNumber,
+  asString,
+  asBoolean,
+  asArray,
+  accentOf,
+  clamp,
+  round,
+} from '../helpers.js';
 import { tokensFor } from '../tokens.js';
 
 const LIGHT_DARK = [
@@ -22,10 +35,25 @@ const accentSchema: PropSchemaFragment = {
   'x-domio-prop': { category: 'Style', control: 'color' },
 };
 
-const PALETTE = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#14B8A6', '#F97316'];
+const PALETTE = [
+  '#4F46E5',
+  '#0EA5E9',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#8B5CF6',
+  '#14B8A6',
+  '#F97316',
+];
 
-function datumList(value: unknown, fallback: Array<{ label: string; value: number }>): Array<{ label: string; value: number; color?: string }> {
-  return asArray<Record<string, unknown>>(value, fallback as unknown as Record<string, unknown>[]).map((d) => ({
+function datumList(
+  value: unknown,
+  fallback: Array<{ label: string; value: number }>,
+): Array<{ label: string; value: number; color?: string }> {
+  return asArray<Record<string, unknown>>(
+    value,
+    fallback as unknown as Record<string, unknown>[],
+  ).map((d) => ({
     label: typeof d.label === 'string' ? d.label : '',
     value: typeof d.value === 'number' ? d.value : 0,
     ...(typeof d.color === 'string' ? { color: d.color } : {}),
@@ -72,9 +100,25 @@ export const BAR_CHART: DomioComponentDef = {
     properties: {
       data: dataProp,
       accent: { ...accentSchema },
-      showValues: { type: 'boolean', title: 'Show values', default: true, 'x-domio-prop': { category: 'Behavior', control: 'toggle' } },
-      showGridlines: { type: 'boolean', title: 'Gridlines', default: true, 'x-domio-prop': { category: 'Behavior', control: 'toggle' } },
-      maxValue: { type: 'number', title: 'Max value', default: 100, minimum: 1, 'x-domio-prop': { category: 'Layout', control: 'number' } },
+      showValues: {
+        type: 'boolean',
+        title: 'Show values',
+        default: true,
+        'x-domio-prop': { category: 'Behavior', control: 'toggle' },
+      },
+      showGridlines: {
+        type: 'boolean',
+        title: 'Gridlines',
+        default: true,
+        'x-domio-prop': { category: 'Behavior', control: 'toggle' },
+      },
+      maxValue: {
+        type: 'number',
+        title: 'Max value',
+        default: 100,
+        minimum: 1,
+        'x-domio-prop': { category: 'Layout', control: 'number' },
+      },
     },
   },
   build: (props, ctx) => {
@@ -107,7 +151,18 @@ export const BAR_CHART: DomioComponentDef = {
     if (showGridlines) {
       for (let i = 0; i <= 4; i += 1) {
         const y = padT + (plotH / 4) * i;
-        out.push(line(ctx, { x1: padL, y1: y, x2: W - padR, y2: y, stroke: tokens.border, strokeWidth: 1, semanticId: `grid_${i}`, dash: i === 0 ? undefined : '4 4' }));
+        out.push(
+          line(ctx, {
+            x1: padL,
+            y1: y,
+            x2: W - padR,
+            y2: y,
+            stroke: tokens.border,
+            strokeWidth: 1,
+            semanticId: `grid_${i}`,
+            dash: i === 0 ? undefined : '4 4',
+          }),
+        );
       }
     }
 
@@ -116,10 +171,45 @@ export const BAR_CHART: DomioComponentDef = {
       const h = clamp((Math.abs(d.value) / maxValue) * plotH, 0, plotH);
       const y = padT + (plotH - h);
       const color = d.color ?? accent;
-      out.push(rect(ctx, { x: cx - barW / 2, y, w: barW, h: h, radius: 4, fill: color, semanticId: `bar_${i}` }));
-      out.push(text(ctx, { x: cx - slot / 2, y: H - 30, w: slot, h: 18, content: fitText(d.label, slot - 4, 13), fontSize: 13, color: tokens.muted, align: 'middle', semanticId: `bar_label_${i}` }));
+      out.push(
+        rect(ctx, {
+          x: cx - barW / 2,
+          y,
+          w: barW,
+          h: h,
+          radius: 4,
+          fill: color,
+          semanticId: `bar_${i}`,
+        }),
+      );
+      out.push(
+        text(ctx, {
+          x: cx - slot / 2,
+          y: H - 30,
+          w: slot,
+          h: 18,
+          content: fitText(d.label, slot - 4, 13),
+          fontSize: 13,
+          color: tokens.muted,
+          align: 'middle',
+          semanticId: `bar_label_${i}`,
+        }),
+      );
       if (showValues && h > 26) {
-        out.push(text(ctx, { x: cx - 60, y: y - 22, w: 120, h: 16, content: String(round(d.value, 0)), fontSize: 13, color: tokens.text, align: 'middle', fontWeight: 600, semanticId: `bar_value_${i}` }));
+        out.push(
+          text(ctx, {
+            x: cx - 60,
+            y: y - 22,
+            w: 120,
+            h: 16,
+            content: String(round(d.value, 0)),
+            fontSize: 13,
+            color: tokens.text,
+            align: 'middle',
+            fontWeight: 600,
+            semanticId: `bar_value_${i}`,
+          }),
+        );
       }
     });
 
@@ -143,10 +233,31 @@ export const LINE_CHART: DomioComponentDef = {
     properties: {
       data: dataProp,
       accent: { ...accentSchema },
-      fillArea: { type: 'boolean', title: 'Fill area', default: true, 'x-domio-prop': { category: 'Behavior', control: 'toggle' } },
-      showPoints: { type: 'boolean', title: 'Show points', default: true, 'x-domio-prop': { category: 'Behavior', control: 'toggle' } },
-      showGridlines: { type: 'boolean', title: 'Gridlines', default: true, 'x-domio-prop': { category: 'Behavior', control: 'toggle' } },
-      maxValue: { type: 'number', title: 'Max value', default: 100, minimum: 1, 'x-domio-prop': { category: 'Layout', control: 'number' } },
+      fillArea: {
+        type: 'boolean',
+        title: 'Fill area',
+        default: true,
+        'x-domio-prop': { category: 'Behavior', control: 'toggle' },
+      },
+      showPoints: {
+        type: 'boolean',
+        title: 'Show points',
+        default: true,
+        'x-domio-prop': { category: 'Behavior', control: 'toggle' },
+      },
+      showGridlines: {
+        type: 'boolean',
+        title: 'Gridlines',
+        default: true,
+        'x-domio-prop': { category: 'Behavior', control: 'toggle' },
+      },
+      maxValue: {
+        type: 'number',
+        title: 'Max value',
+        default: 100,
+        minimum: 1,
+        'x-domio-prop': { category: 'Layout', control: 'number' },
+      },
     },
   },
   build: (props, ctx) => {
@@ -179,7 +290,18 @@ export const LINE_CHART: DomioComponentDef = {
     if (showGridlines) {
       for (let i = 0; i <= 4; i += 1) {
         const y = padT + (plotH / 4) * i;
-        out.push(line(ctx, { x1: padL, y1: y, x2: W - padR, y2: y, stroke: tokens.border, strokeWidth: 1, semanticId: `grid_${i}`, dash: i === 0 ? undefined : '4 4' }));
+        out.push(
+          line(ctx, {
+            x1: padL,
+            y1: y,
+            x2: W - padR,
+            y2: y,
+            stroke: tokens.border,
+            strokeWidth: 1,
+            semanticId: `grid_${i}`,
+            dash: i === 0 ? undefined : '4 4',
+          }),
+        );
       }
     }
 
@@ -195,17 +317,48 @@ export const LINE_CHART: DomioComponentDef = {
           { x: points[points.length - 1]!.x, y: padT + plotH },
         ];
         const fill = `rgba(${hexToRgb(accent).join(',')},0.15)`;
-        out.push(polyline(ctx, { points: fillPoints, stroke: accent, strokeWidth: 0, fill, semanticId: 'area', closed: true }));
+        out.push(
+          polyline(ctx, {
+            points: fillPoints,
+            stroke: accent,
+            strokeWidth: 0,
+            fill,
+            semanticId: 'area',
+            closed: true,
+          }),
+        );
       }
       out.push(polyline(ctx, { points, stroke: accent, strokeWidth: 3, semanticId: 'line' }));
       if (showPoints) {
         points.forEach((p, i) => {
-          out.push(rect(ctx, { x: p.x - 4, y: p.y - 4, w: 8, h: 8, radius: 4, fill: accent, semanticId: `point_${i}` }));
+          out.push(
+            rect(ctx, {
+              x: p.x - 4,
+              y: p.y - 4,
+              w: 8,
+              h: 8,
+              radius: 4,
+              fill: accent,
+              semanticId: `point_${i}`,
+            }),
+          );
         });
       }
       data.forEach((d, i) => {
         const x = padL + (plotW / (n - 1)) * i;
-        out.push(text(ctx, { x: Math.min(W - 80, Math.max(0, x - 40)), y: H - 30, w: 80, h: 18, content: fitText(d.label, 80, 13), fontSize: 13, color: tokens.muted, align: 'middle', semanticId: `label_${i}` }));
+        out.push(
+          text(ctx, {
+            x: Math.min(W - 80, Math.max(0, x - 40)),
+            y: H - 30,
+            w: 80,
+            h: 18,
+            content: fitText(d.label, 80, 13),
+            fontSize: 13,
+            color: tokens.muted,
+            align: 'middle',
+            semanticId: `label_${i}`,
+          }),
+        );
       });
     }
 
@@ -250,9 +403,26 @@ export const DONUT_CHART: DomioComponentDef = {
         ],
         'x-domio-prop': { category: 'Content', control: 'repeatable' },
       },
-      centerLabel: { type: 'string', title: 'Center label', default: 'Total', 'x-domio-prop': { category: 'Content' } },
-      showLegend: { type: 'boolean', title: 'Show legend', default: true, 'x-domio-prop': { category: 'Behavior', control: 'toggle' } },
-      ringThickness: { type: 'number', title: 'Ring thickness', default: 44, minimum: 12, maximum: 90, 'x-domio-prop': { category: 'Layout', control: 'slider', step: 2 } },
+      centerLabel: {
+        type: 'string',
+        title: 'Center label',
+        default: 'Total',
+        'x-domio-prop': { category: 'Content' },
+      },
+      showLegend: {
+        type: 'boolean',
+        title: 'Show legend',
+        default: true,
+        'x-domio-prop': { category: 'Behavior', control: 'toggle' },
+      },
+      ringThickness: {
+        type: 'number',
+        title: 'Ring thickness',
+        default: 44,
+        minimum: 12,
+        maximum: 90,
+        'x-domio-prop': { category: 'Layout', control: 'slider', step: 2 },
+      },
     },
   },
   build: (props, ctx) => {
@@ -261,7 +431,7 @@ export const DONUT_CHART: DomioComponentDef = {
     const segments = raw.slice(0, 8).map((s, i) => ({
       label: typeof s.label === 'string' ? s.label : 'Segment',
       value: Math.max(0, typeof s.value === 'number' ? s.value : 1),
-      color: typeof s.color === 'string' ? s.color : PALETTE[i % PALETTE.length] ?? '#94A3B8',
+      color: typeof s.color === 'string' ? s.color : (PALETTE[i % PALETTE.length] ?? '#94A3B8'),
     }));
     const centerLabel = asString(props.centerLabel, 'Total');
     const showLegend = asBoolean(props.showLegend, true);
@@ -302,16 +472,75 @@ export const DONUT_CHART: DomioComponentDef = {
       angle += sweep;
     });
 
-    out.push(text(ctx, { x: cx - 60, y: cy - 22, w: 120, h: 30, content: fitText(String(round(total, 0)), 120, 28), fontSize: 28, color: tokens.text, align: 'middle', fontWeight: 700, semanticId: 'total' }));
-    out.push(text(ctx, { x: cx - 60, y: cy + 8, w: 120, h: 18, content: fitText(centerLabel, 120, 13), fontSize: 13, color: tokens.muted, align: 'middle', semanticId: 'center_label' }));
+    out.push(
+      text(ctx, {
+        x: cx - 60,
+        y: cy - 22,
+        w: 120,
+        h: 30,
+        content: fitText(String(round(total, 0)), 120, 28),
+        fontSize: 28,
+        color: tokens.text,
+        align: 'middle',
+        fontWeight: 700,
+        semanticId: 'total',
+      }),
+    );
+    out.push(
+      text(ctx, {
+        x: cx - 60,
+        y: cy + 8,
+        w: 120,
+        h: 18,
+        content: fitText(centerLabel, 120, 13),
+        fontSize: 13,
+        color: tokens.muted,
+        align: 'middle',
+        semanticId: 'center_label',
+      }),
+    );
 
     if (showLegend) {
       const legendX = 380;
       segments.forEach((s, i) => {
         const y = 84 + i * 44;
-        out.push(rect(ctx, { x: legendX, y, w: 14, h: 14, radius: 4, fill: s.color, semanticId: `legend_swatch_${i}` }));
-        out.push(text(ctx, { x: legendX + 24, y, w: 180, h: 16, content: fitText(s.label, 180, 14), fontSize: 14, color: tokens.text, fontWeight: 500, semanticId: `legend_label_${i}` }));
-        out.push(text(ctx, { x: legendX + 190, y, w: 50, h: 16, content: `${round((s.value / total) * 100, 0)}%`, fontSize: 14, color: tokens.muted, align: 'end', semanticId: `legend_pct_${i}` }));
+        out.push(
+          rect(ctx, {
+            x: legendX,
+            y,
+            w: 14,
+            h: 14,
+            radius: 4,
+            fill: s.color,
+            semanticId: `legend_swatch_${i}`,
+          }),
+        );
+        out.push(
+          text(ctx, {
+            x: legendX + 24,
+            y,
+            w: 180,
+            h: 16,
+            content: fitText(s.label, 180, 14),
+            fontSize: 14,
+            color: tokens.text,
+            fontWeight: 500,
+            semanticId: `legend_label_${i}`,
+          }),
+        );
+        out.push(
+          text(ctx, {
+            x: legendX + 190,
+            y,
+            w: 50,
+            h: 16,
+            content: `${round((s.value / total) * 100, 0)}%`,
+            fontSize: 14,
+            color: tokens.muted,
+            align: 'end',
+            semanticId: `legend_pct_${i}`,
+          }),
+        );
       });
     }
 
@@ -333,8 +562,18 @@ export const QUADRANT_CHART: DomioComponentDef = {
     type: 'object',
     additionalProperties: false,
     properties: {
-      xAxis: { type: 'string', title: 'X axis', default: 'Effort →', 'x-domio-prop': { category: 'Content' } },
-      yAxis: { type: 'string', title: 'Y axis', default: 'Impact ↑', 'x-domio-prop': { category: 'Content' } },
+      xAxis: {
+        type: 'string',
+        title: 'X axis',
+        default: 'Effort →',
+        'x-domio-prop': { category: 'Content' },
+      },
+      yAxis: {
+        type: 'string',
+        title: 'Y axis',
+        default: 'Impact ↑',
+        'x-domio-prop': { category: 'Content' },
+      },
       quadrants: {
         type: 'array',
         title: 'Quadrants',
@@ -366,7 +605,8 @@ export const QUADRANT_CHART: DomioComponentDef = {
       .map((q, i) => ({
         title: typeof q.title === 'string' ? q.title : 'Quadrant',
         description: typeof q.description === 'string' ? q.description : '',
-        accent: typeof q.accent === 'string' ? q.accent : PALETTE[i % PALETTE.length] ?? '#4F46E5',
+        accent:
+          typeof q.accent === 'string' ? q.accent : (PALETTE[i % PALETTE.length] ?? '#4F46E5'),
       }));
     const W = 640;
     const H = 420;
@@ -381,18 +621,97 @@ export const QUADRANT_CHART: DomioComponentDef = {
     ];
     const out: Element[] = [];
 
-    out.push(rect(ctx, { x: 0, y: 0, w: W, h: H, radius: 16, fill: tokens.background, stroke: tokens.border, strokeWidth: 1, semanticId: 'card' }));
+    out.push(
+      rect(ctx, {
+        x: 0,
+        y: 0,
+        w: W,
+        h: H,
+        radius: 16,
+        fill: tokens.background,
+        stroke: tokens.border,
+        strokeWidth: 1,
+        semanticId: 'card',
+      }),
+    );
 
     quadrants.forEach((q, i) => {
       const p = positions[i]!;
-      out.push(rect(ctx, { x: p.x, y: p.y, w: innerW, h: innerH, radius: 12, fill: tokens.surface, semanticId: `quad_bg_${i}` }));
-      out.push(rect(ctx, { x: p.x, y: p.y, w: 5, h: innerH, radius: 3, fill: q.accent, semanticId: `quad_stripe_${i}` }));
-      out.push(text(ctx, { x: p.x + 22, y: p.y + 20, w: innerW - 40, h: 24, content: fitText(q.title, innerW - 40, 18), fontSize: 18, color: tokens.text, fontWeight: 600, semanticId: `quad_title_${i}` }));
-      out.push(text(ctx, { x: p.x + 22, y: p.y + 50, w: innerW - 40, h: 20, content: fitText(q.description, innerW - 40, 14), fontSize: 14, color: tokens.muted, semanticId: `quad_desc_${i}` }));
+      out.push(
+        rect(ctx, {
+          x: p.x,
+          y: p.y,
+          w: innerW,
+          h: innerH,
+          radius: 12,
+          fill: tokens.surface,
+          semanticId: `quad_bg_${i}`,
+        }),
+      );
+      out.push(
+        rect(ctx, {
+          x: p.x,
+          y: p.y,
+          w: 5,
+          h: innerH,
+          radius: 3,
+          fill: q.accent,
+          semanticId: `quad_stripe_${i}`,
+        }),
+      );
+      out.push(
+        text(ctx, {
+          x: p.x + 22,
+          y: p.y + 20,
+          w: innerW - 40,
+          h: 24,
+          content: fitText(q.title, innerW - 40, 18),
+          fontSize: 18,
+          color: tokens.text,
+          fontWeight: 600,
+          semanticId: `quad_title_${i}`,
+        }),
+      );
+      out.push(
+        text(ctx, {
+          x: p.x + 22,
+          y: p.y + 50,
+          w: innerW - 40,
+          h: 20,
+          content: fitText(q.description, innerW - 40, 14),
+          fontSize: 14,
+          color: tokens.muted,
+          semanticId: `quad_desc_${i}`,
+        }),
+      );
     });
 
-    out.push(text(ctx, { x: pad, y: H - 20, w: W - pad * 2, h: 16, content: asString(props.xAxis, 'Effort →'), fontSize: 13, color: tokens.muted, align: 'middle', semanticId: 'x_axis' }));
-    out.push(text(ctx, { x: 4, y: pad - 10, w: W - 8, h: 18, content: asString(props.yAxis, 'Impact ↑'), fontSize: 13, color: tokens.muted, align: 'middle', semanticId: 'y_axis' }));
+    out.push(
+      text(ctx, {
+        x: pad,
+        y: H - 20,
+        w: W - pad * 2,
+        h: 16,
+        content: asString(props.xAxis, 'Effort →'),
+        fontSize: 13,
+        color: tokens.muted,
+        align: 'middle',
+        semanticId: 'x_axis',
+      }),
+    );
+    out.push(
+      text(ctx, {
+        x: 4,
+        y: pad - 10,
+        w: W - 8,
+        h: 18,
+        content: asString(props.yAxis, 'Impact ↑'),
+        fontSize: 13,
+        color: tokens.muted,
+        align: 'middle',
+        semanticId: 'y_axis',
+      }),
+    );
 
     return out;
   },
@@ -401,7 +720,10 @@ export const QUADRANT_CHART: DomioComponentDef = {
 function hexToRgba(hex: string): { r: number; g: number; b: number; a: number } {
   let value = hex.replace('#', '');
   if (value.length === 3) {
-    value = value.split('').map((c) => c + c).join('');
+    value = value
+      .split('')
+      .map((c) => c + c)
+      .join('');
   }
   const n = parseInt(value, 16);
   if (value.length === 8) {

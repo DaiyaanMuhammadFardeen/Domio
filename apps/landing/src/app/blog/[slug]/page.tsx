@@ -22,9 +22,7 @@ export function generateStaticParams(): Array<{ slug: string }> {
   return BLOG_POSTS.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: BlogPostParams): Promise<Metadata> {
+export async function generateMetadata({ params }: BlogPostParams): Promise<Metadata> {
   const { slug } = await params;
   const post = BLOG_POSTS.find((p) => p.slug === slug);
   if (!post) {
@@ -36,9 +34,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogPostPage({
-  params,
-}: BlogPostParams): Promise<JSX.Element> {
+export default async function BlogPostPage({ params }: BlogPostParams): Promise<JSX.Element> {
   const { slug } = await params;
   const post = BLOG_POSTS.find((p) => p.slug === slug);
   if (!post) {
@@ -63,9 +59,7 @@ export default async function BlogPostPage({
               ← All posts
             </a>
             <span aria-hidden="true"> · </span>
-            <span className="blog-post__category">
-              {BLOG_CATEGORY_LABELS[post.category]}
-            </span>
+            <span className="blog-post__category">{BLOG_CATEGORY_LABELS[post.category]}</span>
           </p>
           <h1 className="blog-post__title">{post.title}</h1>
           <p className="blog-post__excerpt">{post.excerpt}</p>
@@ -74,18 +68,13 @@ export default async function BlogPostPage({
             <span className="blog-post__meta-sep" aria-hidden="true">
               ·
             </span>
-            <time
-              className="blog-post__date"
-              dateTime={post.published_at_iso}
-            >
+            <time className="blog-post__date" dateTime={post.published_at_iso}>
               {dateLabel}
             </time>
             <span className="blog-post__meta-sep" aria-hidden="true">
               ·
             </span>
-            <span className="blog-post__reading">
-              {post.reading_minutes} min read
-            </span>
+            <span className="blog-post__reading">{post.reading_minutes} min read</span>
           </div>
           <ul className="blog-post__tags" aria-label="Tags">
             {post.tags.map((tag) => (

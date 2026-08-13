@@ -380,14 +380,14 @@ Domio is intentional about being model-agnostic. The orchestrator maintains a ro
 
 Routing table (illustrative):
 
-| Capability | Primary class | Fallback class | Local fallback |
-|---|---|---|---|
-| Text reasoning (outline, summary) | High-reasoning text | Mid-tier text | On-device LLM (draft) |
-| Vision (alt-text, image analysis) | Vision model | Captioning model | None |
-| Speech-to-text (voice-to-deck, rehearsal) | Streaming ASR | Batch ASR | Whisper-tiny on-device |
-| Text-to-speech (caption preview, notes narration) | High-quality TTS | Standard TTS | Browser TTS |
-| Image generation | High-quality image | Standard image | None |
-| Embeddings (semantic search) | Embedding model | N/A | Local |
+| Capability                                        | Primary class       | Fallback class   | Local fallback         |
+| ------------------------------------------------- | ------------------- | ---------------- | ---------------------- |
+| Text reasoning (outline, summary)                 | High-reasoning text | Mid-tier text    | On-device LLM (draft)  |
+| Vision (alt-text, image analysis)                 | Vision model        | Captioning model | None                   |
+| Speech-to-text (voice-to-deck, rehearsal)         | Streaming ASR       | Batch ASR        | Whisper-tiny on-device |
+| Text-to-speech (caption preview, notes narration) | High-quality TTS    | Standard TTS     | Browser TTS            |
+| Image generation                                  | High-quality image  | Standard image   | None                   |
+| Embeddings (semantic search)                      | Embedding model     | N/A              | Local                  |
 
 Providers are abstracted behind a `ModelAdapter` interface (see §4) so the router can swap providers without downstream code changes.
 
@@ -483,18 +483,18 @@ Each issue has a `severity`, `auto_fixable` flag, and a `confidence` for the fix
 
 ### 3.11 Non-Functional Targets (NFRs)
 
-| Metric | Target |
-|---|---|
-| First-token latency (text) | ≤ 1.5 s p95 |
-| Slide generation latency | ≤ 8 s p95 for text-only; ≤ 30 s p95 for data-bound |
-| Voice-to-deck (3 min audio) | ≤ 60 s for outline |
-| Rehearsal metric freshness | ≤ 1 s after each slide |
-| Semantic search latency | ≤ 1 s p95 for workspaces up to 10K slides |
-| Availability | 99.5% for outline generation; 99.9% for read APIs |
-| Concurrent generations per user | 5 |
-| Cost ceiling per generated deck | $1.00 (soft cap; configurable per workspace) |
-| Browser support | Latest 2 versions of Chrome, Edge, Safari, Firefox |
-| Accessibility | WCAG 2.2 AA on the AI Copilot UI itself |
+| Metric                          | Target                                             |
+| ------------------------------- | -------------------------------------------------- |
+| First-token latency (text)      | ≤ 1.5 s p95                                        |
+| Slide generation latency        | ≤ 8 s p95 for text-only; ≤ 30 s p95 for data-bound |
+| Voice-to-deck (3 min audio)     | ≤ 60 s for outline                                 |
+| Rehearsal metric freshness      | ≤ 1 s after each slide                             |
+| Semantic search latency         | ≤ 1 s p95 for workspaces up to 10K slides          |
+| Availability                    | 99.5% for outline generation; 99.9% for read APIs  |
+| Concurrent generations per user | 5                                                  |
+| Cost ceiling per generated deck | $1.00 (soft cap; configurable per workspace)       |
+| Browser support                 | Latest 2 versions of Chrome, Edge, Safari, Firefox |
+| Accessibility                   | WCAG 2.2 AA on the AI Copilot UI itself            |
 
 ---
 
@@ -547,7 +547,7 @@ A pluggable adapter interface:
 
 ```ts
 interface ModelAdapter {
-  id: string;                 // "openai-gpt-4o-class", "internal-text-high", etc.
+  id: string; // "openai-gpt-4o-class", "internal-text-high", etc.
   capabilities: Capability[]; // ["text", "vision", "json-mode", "tools"]
   generateText(req: TextRequest, ctx: RunContext): AsyncIterable<Delta>;
   generateVision(req: VisionRequest, ctx: RunContext): Promise<VisionResult>;
@@ -1153,15 +1153,15 @@ Especially important because Doc-to-Deck (#109) and Data-to-Story (#110) ingest 
 
 ### 7.7 Threat Model (Top Risks)
 
-| Threat | Mitigation |
-|---|---|
-| Prompt injection via uploaded doc | Sanitization + channel separation + citation-only output |
-| Data exfiltration via cloud provider | Per-tenant key isolation + zero-retention option |
-| Rehearsal biometric leakage | On-device processing; metrics only |
-| Off-brand / harmful image generation | Two-layer moderation + brand-safety scoring |
-| Cost overrun | Per-job + per-workspace caps; circuit breaker |
-| SSRF via data connector | Allowlist of hosts; data connection runs in a sandbox |
-| Insider misuse | Audit log; anomaly detection on access patterns |
+| Threat                               | Mitigation                                               |
+| ------------------------------------ | -------------------------------------------------------- |
+| Prompt injection via uploaded doc    | Sanitization + channel separation + citation-only output |
+| Data exfiltration via cloud provider | Per-tenant key isolation + zero-retention option         |
+| Rehearsal biometric leakage          | On-device processing; metrics only                       |
+| Off-brand / harmful image generation | Two-layer moderation + brand-safety scoring              |
+| Cost overrun                         | Per-job + per-workspace caps; circuit breaker            |
+| SSRF via data connector              | Allowlist of hosts; data connection runs in a sandbox    |
+| Insider misuse                       | Audit log; anomaly detection on access patterns          |
 
 ### 7.8 Compliance Hooks
 
@@ -1253,16 +1253,16 @@ A dedicated eval pipeline that runs on every prompt template / model class chang
 
 Per-feature eval criteria:
 
-| Feature | Eval metric |
-|---|---|
-| 108 (deck gen) | Outline completeness, content faithfulness, design coherence |
-| 109 (doc-to-deck) | Citation coverage, citation accuracy, claim grounding |
-| 110 (data-to-story) | Finding significance, narrative coherence, chart appropriateness |
-| 113 (translate) | Back-translation similarity, layout preservation |
-| 117 (rehearsal) | Pace accuracy vs. ground truth, filler-word detection accuracy |
-| 122 (accessibility) | Alt-text quality (1–5), caption WER, contrast check coverage |
-| 124 (semantic search) | NDCG@10 vs. held-out queries |
-| 125 (freshness) | Precision/recall of stale detection |
+| Feature               | Eval metric                                                      |
+| --------------------- | ---------------------------------------------------------------- |
+| 108 (deck gen)        | Outline completeness, content faithfulness, design coherence     |
+| 109 (doc-to-deck)     | Citation coverage, citation accuracy, claim grounding            |
+| 110 (data-to-story)   | Finding significance, narrative coherence, chart appropriateness |
+| 113 (translate)       | Back-translation similarity, layout preservation                 |
+| 117 (rehearsal)       | Pace accuracy vs. ground truth, filler-word detection accuracy   |
+| 122 (accessibility)   | Alt-text quality (1–5), caption WER, contrast check coverage     |
+| 124 (semantic search) | NDCG@10 vs. held-out queries                                     |
+| 125 (freshness)       | Precision/recall of stale detection                              |
 
 ### 9.6 Testing Strategy
 

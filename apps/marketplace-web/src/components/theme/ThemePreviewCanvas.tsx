@@ -99,16 +99,8 @@ export function ThemePreviewCanvas({ tokens, initialSlide = 0 }: ThemePreviewCan
 
           {/* Placeholder shapes */}
           <div className="mt-auto flex items-end gap-3 p-8">
-            <div
-              className="h-16 w-1/3 rounded-md"
-              style={surfaceStyle}
-              aria-hidden="true"
-            />
-            <div
-              className="h-12 w-1/4 rounded-md"
-              style={primaryStyle}
-              aria-hidden="true"
-            />
+            <div className="h-16 w-1/3 rounded-md" style={surfaceStyle} aria-hidden="true" />
+            <div className="h-12 w-1/4 rounded-md" style={primaryStyle} aria-hidden="true" />
             {/* Placeholder image */}
             <div
               className="ml-auto flex h-20 w-20 items-center justify-center rounded-md border border-current/20 text-[10px] uppercase tracking-widest opacity-60"

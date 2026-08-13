@@ -21,12 +21,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import {
-  type ChordMatcher,
-  isChord,
-  platformChord,
-  type Shortcut,
-} from '@domio/canvas';
+import { type ChordMatcher, isChord, platformChord, type Shortcut } from '@domio/canvas';
 import {
   DEFAULT_EDITOR_SHORTCUTS,
   detectEditorPlatform,

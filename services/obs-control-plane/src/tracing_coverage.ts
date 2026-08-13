@@ -38,7 +38,10 @@ export interface TracingCoverageReport {
 
 interface ServiceTree {
   readonly rootDir: string;
-  readonly packageJson: { dependencies?: Record<string, string>; devDependencies?: Record<string, string> };
+  readonly packageJson: {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  };
 }
 
 const OBSERVABILITY_PKG = '@domio/observability';
@@ -53,11 +56,7 @@ const ROOT_SPAN = /\b(?:tracer\.startSpan|\bstartSpan|\bstartTracer)\s*\(/;
  * directory and therefore cannot ship their own tracer. Downgraded
  * from `issues` (which fails CI) to `warn` (advisory).
  */
-const KNOWN_DEFERRED_TIER1 = new Set<string>([
-  '@domio/auth',
-  '@domio/billing',
-  '@domio/component',
-]);
+const KNOWN_DEFERRED_TIER1 = new Set<string>(['@domio/auth', '@domio/billing', '@domio/component']);
 
 /** Run the tracing-coverage check on a monorepo root directory. */
 export function checkTracingCoverage(
@@ -113,7 +112,11 @@ export function checkTracingCoverage(
       // referenced (otel.Tracer / StartSpan / tracerProvider).
       const goSrcFiles = hasGoMod ? collectSourceFiles(serviceDir, /\.go$/) : goFiles;
       const allGo = goSrcFiles.map((f) => readFileSync(f, 'utf8')).join('\n');
-      if (!/\b(?:otel\.Tracer|otelhttp\.New|otel\.GetTracerProvider|tracer\.Start|StartSpan)\b/.test(allGo)) {
+      if (
+        !/\b(?:otel\.Tracer|otelhttp\.New|otel\.GetTracerProvider|tracer\.Start|StartSpan)\b/.test(
+          allGo,
+        )
+      ) {
         issues.push({
           service,
           kind: 'no-tracer-instantiation',
@@ -221,7 +224,13 @@ function collectSourceFiles(rootDir: string, filePattern: RegExp = /\.(ts|js|mjs
         continue;
       }
       if (st.isDirectory()) {
-        if (entry === 'node_modules' || entry === 'dist' || entry === '.turbo' || entry === 'coverage') continue;
+        if (
+          entry === 'node_modules' ||
+          entry === 'dist' ||
+          entry === '.turbo' ||
+          entry === 'coverage'
+        )
+          continue;
         stack.push(full);
         continue;
       }

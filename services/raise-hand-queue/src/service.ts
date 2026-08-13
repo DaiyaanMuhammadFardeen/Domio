@@ -55,12 +55,20 @@ export class RaiseHandService {
     await this.bus.publish({
       session_id: input.session_id,
       topic: 'raise_hand',
-      payload: encode({ kind: 'raise_hand', participant_id: input.participant_id, position: updated?.position ?? 0 }),
+      payload: encode({
+        kind: 'raise_hand',
+        participant_id: input.participant_id,
+        position: updated?.position ?? 0,
+      }),
     });
     return updated ?? hand;
   }
 
-  async call(session_id: string, participant_id: string, actor_id: string): Promise<RaiseHand | null> {
+  async call(
+    session_id: string,
+    participant_id: string,
+    actor_id: string,
+  ): Promise<RaiseHand | null> {
     const ts = this.now_ms();
     const called = this.queue.call(participant_id, ts);
     if (called) {
@@ -73,7 +81,11 @@ export class RaiseHandService {
     return called;
   }
 
-  async dismiss(session_id: string, participant_id: string, actor_id: string): Promise<RaiseHand | null> {
+  async dismiss(
+    session_id: string,
+    participant_id: string,
+    actor_id: string,
+  ): Promise<RaiseHand | null> {
     const ts = this.now_ms();
     const dismissed = this.queue.dismiss(participant_id, ts);
     if (dismissed) {

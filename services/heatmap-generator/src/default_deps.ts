@@ -13,7 +13,10 @@ export function defaultDeps(cfg: HeatmapConfig): HeatmapDeps {
   const store = buildHeatmapStore(ch);
   return {
     cfg,
-    grid: { gridWidth: cfg.gridWidth ?? HEATMAP_GRID_WIDTH, gridHeight: cfg.gridHeight ?? HEATMAP_GRID_HEIGHT },
+    grid: {
+      gridWidth: cfg.gridWidth ?? HEATMAP_GRID_WIDTH,
+      gridHeight: cfg.gridHeight ?? HEATMAP_GRID_HEIGHT,
+    },
     ch,
     store,
   };

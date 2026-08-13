@@ -44,7 +44,10 @@ export interface LicenseServiceError {
 export interface LicenseServiceClient {
   fetchGrants(workspaceId: string): Promise<readonly LicenseGrantDTO[]>;
   revokeGrant(workspaceId: string, grantId: string): Promise<void>;
-  finalizeRecording(workspaceId: string, request: RecordingFinalizeRequest): Promise<RecordingFinalizeResult>;
+  finalizeRecording(
+    workspaceId: string,
+    request: RecordingFinalizeRequest,
+  ): Promise<RecordingFinalizeResult>;
 }
 
 export class HttpLicenseServiceClient implements LicenseServiceClient {
@@ -58,7 +61,7 @@ export class HttpLicenseServiceClient implements LicenseServiceClient {
       `${this.baseUrl}/v1/workspaces/${encodeURIComponent(workspaceId)}/grants`,
     );
     if (!res.ok) throw this.toError(res);
-    return ((res.body as { grants: LicenseGrantDTO[] }).grants) ?? [];
+    return (res.body as { grants: LicenseGrantDTO[] }).grants ?? [];
   }
 
   async revokeGrant(workspaceId: string, grantId: string): Promise<void> {

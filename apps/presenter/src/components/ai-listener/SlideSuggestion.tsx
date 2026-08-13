@@ -18,12 +18,7 @@ export interface SlideSuggestionProps {
   onDismiss: (match: MatchedQuestion) => void;
 }
 
-export function SlideSuggestion({
-  match,
-  thumbnailUrl,
-  onJump,
-  onDismiss,
-}: SlideSuggestionProps) {
+export function SlideSuggestion({ match, thumbnailUrl, onJump, onDismiss }: SlideSuggestionProps) {
   const handleJump = useCallback(() => {
     onJump(match);
   }, [match, onJump]);
@@ -45,10 +40,7 @@ export function SlideSuggestion({
       <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
         Did someone ask…
       </div>
-      <div
-        className="mb-3 text-sm text-zinc-700"
-        data-testid="slide-suggestion-question"
-      >
+      <div className="mb-3 text-sm text-zinc-700" data-testid="slide-suggestion-question">
         Heard: &ldquo;{match.question}&rdquo;
       </div>
       <div className="mb-3 flex items-start gap-3">
@@ -76,10 +68,7 @@ export function SlideSuggestion({
           >
             Suggested slide: {match.slide_title}
           </div>
-          <div
-            className="mt-1 text-xs text-zinc-500"
-            data-testid="slide-suggestion-relevance"
-          >
+          <div className="mt-1 text-xs text-zinc-500" data-testid="slide-suggestion-relevance">
             Relevance: {relevancePct}%
           </div>
         </div>

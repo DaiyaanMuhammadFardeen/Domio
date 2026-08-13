@@ -16,13 +16,13 @@ paths:
       operationId: listOverlays
       summary: List overlays for a deck
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
         - in: query
           name: slide_id
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: Overlays in deterministic creation order.
           content:
             application/json:
@@ -32,71 +32,71 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/Overlay" }
+                    items: { $ref: '#/components/schemas/Overlay' }
     post:
       tags: [overlays]
       operationId: createOverlay
       summary: Create an overlay
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreateOverlayRequest" }
+            schema: { $ref: '#/components/schemas/CreateOverlayRequest' }
       responses:
-        "201":
+        '201':
           description: Overlay created.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Overlay" }
-        "422": { description: Overlay validation failed. }
+              schema: { $ref: '#/components/schemas/Overlay' }
+        '422': { description: Overlay validation failed. }
   /v1/overlays/{id}:
     get:
       tags: [overlays]
       operationId: getOverlay
       summary: Get an overlay
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Overlay details.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Overlay" }
-        "404": { description: Overlay not found. }
+              schema: { $ref: '#/components/schemas/Overlay' }
+        '404': { description: Overlay not found. }
     patch:
       tags: [overlays]
       operationId: patchOverlay
       summary: Update an overlay
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PatchOverlayRequest" }
+            schema: { $ref: '#/components/schemas/PatchOverlayRequest' }
       responses:
-        "200":
+        '200':
           description: Overlay updated.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Overlay" }
-        "404": { description: Overlay not found. }
-        "409": { description: Version conflict. }
+              schema: { $ref: '#/components/schemas/Overlay' }
+        '404': { description: Overlay not found. }
+        '409': { description: Version conflict. }
     delete:
       tags: [overlays]
       operationId: deleteOverlay
       summary: Delete an overlay
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "204": { description: Overlay deleted. }
-        "404": { description: Overlay not found. }
+        '204': { description: Overlay deleted. }
+        '404': { description: Overlay not found. }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer }
@@ -120,7 +120,24 @@ components:
     Overlay:
       type: object
       additionalProperties: false
-      required: [id, tenantId, deckId, slideId, name, type, sizeStrategy, anchor, openTrigger, closeTrigger, persistent, schema, version, createdAt, updatedAt]
+      required:
+        [
+          id,
+          tenantId,
+          deckId,
+          slideId,
+          name,
+          type,
+          sizeStrategy,
+          anchor,
+          openTrigger,
+          closeTrigger,
+          persistent,
+          schema,
+          version,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id: { type: string }
         tenantId: { type: string }
@@ -129,9 +146,9 @@ components:
         name: { type: string }
         type: { enum: [modal, tooltip, drawer, popover, sheet] }
         sizeStrategy: { enum: [small, medium, large, fullscreen, auto] }
-        anchor: { type: [object, "null"] }
-        openTrigger: { type: [object, "null"] }
-        closeTrigger: { type: [object, "null"] }
+        anchor: { type: [object, 'null'] }
+        openTrigger: { type: [object, 'null'] }
+        closeTrigger: { type: [object, 'null'] }
         persistent: { type: boolean }
         schema: { type: object }
         version: { type: integer }
@@ -146,9 +163,9 @@ components:
         name: { type: string, minLength: 1 }
         type: { enum: [modal, tooltip, drawer, popover, sheet] }
         sizeStrategy: { enum: [small, medium, large, fullscreen, auto] }
-        anchor: { type: [object, "null"] }
-        openTrigger: { type: [object, "null"] }
-        closeTrigger: { type: [object, "null"] }
+        anchor: { type: [object, 'null'] }
+        openTrigger: { type: [object, 'null'] }
+        closeTrigger: { type: [object, 'null'] }
         persistent: { type: boolean, default: false }
         schema: { type: object }
     PatchOverlayRequest:
@@ -160,8 +177,8 @@ components:
         name: { type: string }
         type: { enum: [modal, tooltip, drawer, popover, sheet] }
         sizeStrategy: { enum: [small, medium, large, fullscreen, auto] }
-        anchor: { type: [object, "null"] }
-        openTrigger: { type: [object, "null"] }
-        closeTrigger: { type: [object, "null"] }
+        anchor: { type: [object, 'null'] }
+        openTrigger: { type: [object, 'null'] }
+        closeTrigger: { type: [object, 'null'] }
         persistent: { type: boolean }
         schema: { type: object }

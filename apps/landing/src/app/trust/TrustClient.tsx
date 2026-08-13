@@ -13,12 +13,7 @@
 'use client';
 
 import { useState, useEffect, type JSX } from 'react';
-import {
-  ComplianceBadge,
-  ResidencyMap,
-  SecurityContact,
-  ReportList,
-} from '../../components/trust';
+import { ComplianceBadge, ResidencyMap, SecurityContact, ReportList } from '../../components/trust';
 import type {
   ComplianceBadge as ComplianceBadgeData,
   ResidencyRegion,
@@ -78,8 +73,8 @@ export function TrustClient({
           Compliance posture
         </h2>
         <p className="trust-badges__lede">
-          Independent attestations and active programmes. Customers can
-          request the underlying reports via the form below.
+          Independent attestations and active programmes. Customers can request the underlying
+          reports via the form below.
         </p>
         <ul className="trust-badges__list" data-testid="trust-badges-list">
           {badges.map((badge) => (

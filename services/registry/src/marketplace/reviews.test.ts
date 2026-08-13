@@ -12,8 +12,16 @@ import type { MarketplaceListing } from '../store/types.js';
 
 async function seedListing(store: InMemoryStore, id: string): Promise<void> {
   const listing: MarketplaceListing = {
-    id, catalogId: 'comp.btn', sellerId: 's-1', title: 'Btn', description: '',
-    status: 'published', isFree: true, tags: [], createdAt: Date.now(), updatedAt: Date.now(),
+    id,
+    catalogId: 'comp.btn',
+    sellerId: 's-1',
+    title: 'Btn',
+    description: '',
+    status: 'published',
+    isFree: true,
+    tags: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
   };
   await store.putListing(listing);
 }
@@ -35,7 +43,9 @@ describe('reviews', () => {
     });
     it('profanity triggers auto_flagged (not rejected by trust)', () => {
       // Need enough positive text so trust doesn't drop below 0.25
-      const score = scoreReview('This component is really great and has a scam word in it but overall works fine');
+      const score = scoreReview(
+        'This component is really great and has a scam word in it but overall works fine',
+      );
       expect(score.profanityHits).toContain('scam');
       // trust might still be >= 0.25, so verdict should be auto_flagged or approved (override)
       expect(score.profanityHits.length).toBeGreaterThan(0);
@@ -51,7 +61,9 @@ describe('reviews', () => {
       expect(score.capsRatio).toBeGreaterThan(0.6);
     });
     it('high link density triggers auto_flagged', () => {
-      const score = scoreReview('https://a.com https://b.com https://c.com https://d.com https://e.com');
+      const score = scoreReview(
+        'https://a.com https://b.com https://c.com https://d.com https://e.com',
+      );
       expect(score.linkDensity).toBeGreaterThan(0.4);
     });
     it('verified buyer gets higher base trust', () => {
@@ -76,49 +88,89 @@ describe('reviews', () => {
   });
 
   describe('verdictToStatus', () => {
-    it('maps approved to accepted', () => { expect(verdictToStatus('approved')).toBe('accepted'); });
-    it('maps auto_flagged', () => { expect(verdictToStatus('auto_flagged')).toBe('auto_flagged'); });
-    it('maps rejected to removed', () => { expect(verdictToStatus('rejected')).toBe('removed'); });
+    it('maps approved to accepted', () => {
+      expect(verdictToStatus('approved')).toBe('accepted');
+    });
+    it('maps auto_flagged', () => {
+      expect(verdictToStatus('auto_flagged')).toBe('auto_flagged');
+    });
+    it('maps rejected to removed', () => {
+      expect(verdictToStatus('rejected')).toBe('removed');
+    });
   });
 
   describe('submitReview', () => {
     it('submits an approved review', async () => {
       await seedListing(store, 'l1');
       const review = await submitReview(deps, {
-        listingId: 'l1', reviewerId: 'r1', rating: 5, body: 'Great component!',
+        listingId: 'l1',
+        reviewerId: 'r1',
+        rating: 5,
+        body: 'Great component!',
       });
       expect(review.status).toBe('accepted');
       expect(review.rating).toBe(5);
     });
     it('throws for missing listing', async () => {
-      await expect(submitReview(deps, {
-        listingId: 'missing', reviewerId: 'r1', rating: 5, body: 'x',
-      })).rejects.toThrow('not found');
+      await expect(
+        submitReview(deps, {
+          listingId: 'missing',
+          reviewerId: 'r1',
+          rating: 5,
+          body: 'x',
+        }),
+      ).rejects.toThrow('not found');
     });
     it('throws for invalid rating', async () => {
       await seedListing(store, 'l1');
-      await expect(submitReview(deps, {
-        listingId: 'l1', reviewerId: 'r1', rating: 0, body: 'x',
-      })).rejects.toThrow('integer 1-5');
-      await expect(submitReview(deps, {
-        listingId: 'l1', reviewerId: 'r1', rating: 6, body: 'x',
-      })).rejects.toThrow('integer 1-5');
-      await expect(submitReview(deps, {
-        listingId: 'l1', reviewerId: 'r1', rating: 3.5, body: 'x',
-      })).rejects.toThrow('integer 1-5');
+      await expect(
+        submitReview(deps, {
+          listingId: 'l1',
+          reviewerId: 'r1',
+          rating: 0,
+          body: 'x',
+        }),
+      ).rejects.toThrow('integer 1-5');
+      await expect(
+        submitReview(deps, {
+          listingId: 'l1',
+          reviewerId: 'r1',
+          rating: 6,
+          body: 'x',
+        }),
+      ).rejects.toThrow('integer 1-5');
+      await expect(
+        submitReview(deps, {
+          listingId: 'l1',
+          reviewerId: 'r1',
+          rating: 3.5,
+          body: 'x',
+        }),
+      ).rejects.toThrow('integer 1-5');
     });
     it('throws moderationQueued for auto_flagged', async () => {
       await seedListing(store, 'l1');
       // verified + profanity → base 0.8, minus 0.3 = 0.5 trust → auto_flagged (not rejected)
-      const body = 'This component is really great and has a scam word in it but overall works fine';
-      await expect(submitReview(deps, {
-        listingId: 'l1', reviewerId: 'r1', rating: 4, body, verifiedBuyer: true,
-      })).rejects.toThrow('moderation');
+      const body =
+        'This component is really great and has a scam word in it but overall works fine';
+      await expect(
+        submitReview(deps, {
+          listingId: 'l1',
+          reviewerId: 'r1',
+          rating: 4,
+          body,
+          verifiedBuyer: true,
+        }),
+      ).rejects.toThrow('moderation');
     });
     it('sets verifiedBuyer flag', async () => {
       await seedListing(store, 'l1');
       const review = await submitReview(deps, {
-        listingId: 'l1', reviewerId: 'r1', rating: 5, body: 'Nice', verifiedBuyer: true,
+        listingId: 'l1',
+        reviewerId: 'r1',
+        rating: 5,
+        body: 'Nice',
+        verifiedBuyer: true,
       });
       expect(review.verifiedBuyer).toBe(true);
     });
@@ -132,8 +184,18 @@ describe('reviews', () => {
     });
     it('returns average rating for accepted reviews', async () => {
       await seedListing(store, 'l1');
-      await submitReview(deps, { listingId: 'l1', reviewerId: 'r1', rating: 4, body: 'Good product' });
-      await submitReview(deps, { listingId: 'l1', reviewerId: 'r2', rating: 5, body: 'Excellent quality' });
+      await submitReview(deps, {
+        listingId: 'l1',
+        reviewerId: 'r1',
+        rating: 4,
+        body: 'Good product',
+      });
+      await submitReview(deps, {
+        listingId: 'l1',
+        reviewerId: 'r2',
+        rating: 5,
+        body: 'Excellent quality',
+      });
       const stats = await listingReviewStats(deps, 'l1');
       expect(stats.count).toBe(2);
       expect(stats.rating).toBe(4.5);
@@ -148,12 +210,19 @@ describe('reviews', () => {
     it('approves auto-flagged that are not rejected', async () => {
       await seedListing(store, 'l1');
       // Submit a flagged review with enough positive content to stay auto_flagged
-      const body = 'This component is really great and has a scam word in it but overall works fine';
+      const body =
+        'This component is really great and has a scam word in it but overall works fine';
       try {
         await submitReview(deps, {
-          listingId: 'l1', reviewerId: 'r1', rating: 4, body, verifiedBuyer: true,
+          listingId: 'l1',
+          reviewerId: 'r1',
+          rating: 4,
+          body,
+          verifiedBuyer: true,
         });
-      } catch { /* auto_flagged */ }
+      } catch {
+        /* auto_flagged */
+      }
       const count = await runModerationQueue(deps);
       expect(count).toBe(1);
       const reviews = await store.listReviews('l1');

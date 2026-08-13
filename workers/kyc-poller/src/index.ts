@@ -2,11 +2,7 @@
  * @domio/kyc-poller-worker — barrel export.
  */
 
-export {
-  KycPollerWorker,
-  InMemoryKycSessionProvider,
-  SandboxKycClient,
-} from './poller.js';
+export { KycPollerWorker, InMemoryKycSessionProvider, SandboxKycClient } from './poller.js';
 
 export type {
   KycSessionRecord,

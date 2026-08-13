@@ -9,7 +9,18 @@
     "PayoutLedgerEntry": {
       "type": "object",
       "description": "Per-event payout line item. One row per revenue_share_event that has been paid/held/failed.",
-      "required": ["id", "workspace_id", "creator_id", "period_month", "event_id", "gross_cents", "fee_cents", "net_cents", "currency", "status"],
+      "required": [
+        "id",
+        "workspace_id",
+        "creator_id",
+        "period_month",
+        "event_id",
+        "gross_cents",
+        "fee_cents",
+        "net_cents",
+        "currency",
+        "status"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -81,7 +92,16 @@
     "PayoutRun": {
       "type": "object",
       "description": "One batch execution of the monthly payout executor.",
-      "required": ["id", "workspace_id", "period_month", "executed_at_ms", "total_creators", "total_payout_cents", "currency", "status"],
+      "required": [
+        "id",
+        "workspace_id",
+        "period_month",
+        "executed_at_ms",
+        "total_creators",
+        "total_payout_cents",
+        "currency",
+        "status"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -127,7 +147,12 @@
     "PayoutPolicy": {
       "type": "object",
       "description": "Singleton platform-wide payout configuration.",
-      "required": ["split_creator_bps", "split_platform_bps", "min_payout_cents", "first_payout_hold_days"],
+      "required": [
+        "split_creator_bps",
+        "split_platform_bps",
+        "min_payout_cents",
+        "first_payout_hold_days"
+      ],
       "properties": {
         "split_creator_bps": {
           "type": "integer",

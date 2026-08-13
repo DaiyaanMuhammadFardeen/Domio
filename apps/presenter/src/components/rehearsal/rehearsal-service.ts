@@ -125,10 +125,7 @@ export async function submitRehearsalFeedback(
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<RehearsalFeedback> {
   try {
-    return await postJson<RehearsalFeedback>(
-      `${baseUrl}/v1/ai/rehearsal-feedback`,
-      req,
-    );
+    return await postJson<RehearsalFeedback>(`${baseUrl}/v1/ai/rehearsal-feedback`, req);
   } catch {
     return bootstrapRehearsalFeedback(req);
   }
@@ -151,18 +148,24 @@ function bootstrapRehearsalFeedback(req: RehearsalFeedbackRequest): RehearsalFee
   const totalFillers = req.fillers.reduce((acc, f) => acc + f.count, 0);
   const minutes = Math.max(1, req.total_ms / 60_000);
   const fillersPerMin = totalFillers / minutes;
-  const paceScore = clampScore(
-    100 - Math.max(0, Math.abs(req.overall_wpm - 150) - 30) * 1.5,
-  );
+  const paceScore = clampScore(100 - Math.max(0, Math.abs(req.overall_wpm - 150) - 30) * 1.5);
   const fillersScore = clampScore(100 - fillersPerMin * 8);
   const eyeScore = clampScore(req.eye_contact_pct);
 
   const stumbled_slides: RehearsalFeedbackHighlight[] = req.per_slide
-    .filter((s) => s.stumbled || (s.fillers.length > 0 && s.fillers.reduce((a, f) => a + f.count, 0) >= 4))
-    .map((s) => ({ slide_id: s.slide_id, reason: s.stumbled ? 'Presenter-flagged stumble' : 'High filler density' }));
+    .filter(
+      (s) =>
+        s.stumbled || (s.fillers.length > 0 && s.fillers.reduce((a, f) => a + f.count, 0) >= 4),
+    )
+    .map((s) => ({
+      slide_id: s.slide_id,
+      reason: s.stumbled ? 'Presenter-flagged stumble' : 'High filler density',
+    }));
 
   const pace_heatmap: RehearsalFeedbackHighlight[] = req.per_slide
-    .filter((s) => s.target_ms !== undefined && Math.abs(s.dwell_ms - s.target_ms) > s.target_ms * 0.2)
+    .filter(
+      (s) => s.target_ms !== undefined && Math.abs(s.dwell_ms - s.target_ms) > s.target_ms * 0.2,
+    )
     .map((s) => ({
       slide_id: s.slide_id,
       reason: s.dwell_ms > (s.target_ms ?? 0) ? 'Over target dwell' : 'Under target dwell',
@@ -171,18 +174,28 @@ function bootstrapRehearsalFeedback(req: RehearsalFeedbackRequest): RehearsalFee
   return {
     id: `rehearsal-${Date.now()}`,
     scores: [
-      { key: 'pace', score: paceScore, summary: `${Math.round(req.overall_wpm)} wpm (${scoreBand(paceScore)})` },
-      { key: 'fillers', score: fillersScore, summary: `${totalFillers} fillers / ${Math.round(minutes)} min` },
-      { key: 'eye_contact', score: eyeScore, summary: `${Math.round(req.eye_contact_pct)}% camera-facing` },
+      {
+        key: 'pace',
+        score: paceScore,
+        summary: `${Math.round(req.overall_wpm)} wpm (${scoreBand(paceScore)})`,
+      },
+      {
+        key: 'fillers',
+        score: fillersScore,
+        summary: `${totalFillers} fillers / ${Math.round(minutes)} min`,
+      },
+      {
+        key: 'eye_contact',
+        score: eyeScore,
+        summary: `${Math.round(req.eye_contact_pct)}% camera-facing`,
+      },
     ],
     top_fillers: topFillers(req.fillers),
     stumbled_slides,
     pace_heatmap,
     recommendations: [
       `Aim for 130–170 wpm; current pace is ${Math.round(req.overall_wpm)}.`,
-      fillersPerMin > 3
-        ? 'Pause instead of using filler words.'
-        : 'Good filler-word hygiene.',
+      fillersPerMin > 3 ? 'Pause instead of using filler words.' : 'Good filler-word hygiene.',
       eyeScore < 60
         ? 'Look at the webcam more often — eye contact builds trust.'
         : 'Eye contact is solid.',

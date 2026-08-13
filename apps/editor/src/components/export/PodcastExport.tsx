@@ -18,14 +18,7 @@
  * + `getRenderStatus` in a later wave.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
 import {
   generateScript,
@@ -175,16 +168,13 @@ export function PodcastExport({
     };
   }, [state, stopPolling]);
 
-  const onSegmentChange = useCallback(
-    (idx: number, next: ScriptSegment) => {
-      setDraft((prev) => {
-        if (!prev) return prev;
-        const segments = prev.segments.map((s, i) => (i === idx ? next : s));
-        return { ...prev, segments, updated_at_ms: Date.now() };
-      });
-    },
-    [],
-  );
+  const onSegmentChange = useCallback((idx: number, next: ScriptSegment) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      const segments = prev.segments.map((s, i) => (i === idx ? next : s));
+      return { ...prev, segments, updated_at_ms: Date.now() };
+    });
+  }, []);
 
   const onSegmentRemove = useCallback((idx: number) => {
     setDraft((prev) => {
@@ -365,7 +355,9 @@ export function PodcastExport({
             style={{ fontSize: 11, color: 'rgba(0,0,0,0.6)' }}
           >
             <FormattedMessage
-              id={isRendering ? 'editor.podcast.actions.rendering' : 'editor.podcast.actions.progress'}
+              id={
+                isRendering ? 'editor.podcast.actions.rendering' : 'editor.podcast.actions.progress'
+              }
               values={{ pct: progressPct }}
             />
           </span>
@@ -373,10 +365,7 @@ export function PodcastExport({
       ) : null}
 
       {state.kind === 'saved' ? (
-        <div
-          data-testid={`${dataTestId}-saved`}
-          style={{ fontSize: 12, color: '#059669' }}
-        >
+        <div data-testid={`${dataTestId}-saved`} style={{ fontSize: 12, color: '#059669' }}>
           <FormattedMessage id="editor.podcast.actions.saved" />
         </div>
       ) : null}

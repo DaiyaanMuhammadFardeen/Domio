@@ -4,7 +4,9 @@ import { argv, exit } from 'node:process';
 import { emit } from './emit.js';
 
 function help(): never {
-  console.log('Usage: provenance-emit --subject URI --digest ALG=HEX [--dep URI --digest ...] [--out PATH] [--signing-key-id ID --signing-key ENV]');
+  console.log(
+    'Usage: provenance-emit --subject URI --digest ALG=HEX [--dep URI --digest ...] [--out PATH] [--signing-key-id ID --signing-key ENV]',
+  );
   exit(0);
 }
 
@@ -86,8 +88,12 @@ function main(): void {
     console.error(`signing key ${spec.signingKeyEnv} is not set`);
     exit(1);
   }
-  const subjects = spec.slots.filter((s) => s.kind === 'subject').map((s) => ({ uri: s.uri, digest: s.digests }));
-  const deps = spec.slots.filter((s) => s.kind === 'dep').map((s) => ({ uri: s.uri, digest: s.digests }));
+  const subjects = spec.slots
+    .filter((s) => s.kind === 'subject')
+    .map((s) => ({ uri: s.uri, digest: s.digests }));
+  const deps = spec.slots
+    .filter((s) => s.kind === 'dep')
+    .map((s) => ({ uri: s.uri, digest: s.digests }));
   const env = emit(subjects, deps, {
     signingKey: key,
     keyId: spec.signingKeyId,

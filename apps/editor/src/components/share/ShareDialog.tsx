@@ -29,11 +29,7 @@ import {
 } from './CustomDomainPicker';
 import { EmbedPlayground, type EmbedConfig } from './EmbedPlayground';
 import { SEOTab, type SEOConfig } from './SEOTab';
-import {
-  VersionPinSelector,
-  type DeckVersion,
-  type PinVersionValue,
-} from './VersionPinSelector';
+import { VersionPinSelector, type DeckVersion, type PinVersionValue } from './VersionPinSelector';
 
 export type ShareTab = 'link' | 'embed' | 'visibility' | 'audience' | 'versions';
 
@@ -186,7 +182,8 @@ export function ShareDialog({
       >
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0 }}>
-            <FormattedMessage id="editor.share.title" /> · <span style={{ fontWeight: 400 }}>{deckTitle}</span>
+            <FormattedMessage id="editor.share.title" /> ·{' '}
+            <span style={{ fontWeight: 400 }}>{deckTitle}</span>
           </h2>
           <button
             type="button"
@@ -263,18 +260,27 @@ export function ShareDialog({
               </button>
             </div>
             <label style={{ display: 'block', marginTop: 16, fontSize: 13 }}>
-              <input type="checkbox" checked={state.perViewerWatermark} onChange={onToggleWatermark} data-testid={`${dataTestId}-watermark`} />
-              {' '}
+              <input
+                type="checkbox"
+                checked={state.perViewerWatermark}
+                onChange={onToggleWatermark}
+                data-testid={`${dataTestId}-watermark`}
+              />{' '}
               <FormattedMessage id="editor.share.link.watermark" />
             </label>
             <div style={{ marginTop: 12 }}>
-              <label htmlFor="share-expiry" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+              <label
+                htmlFor="share-expiry"
+                style={{ fontSize: 12, display: 'block', marginBottom: 4 }}
+              >
                 <FormattedMessage id="editor.share.link.expiresAt" />
               </label>
               <input
                 id="share-expiry"
                 type="datetime-local"
-                value={state.expiresAtMs ? new Date(state.expiresAtMs).toISOString().slice(0, 16) : ''}
+                value={
+                  state.expiresAtMs ? new Date(state.expiresAtMs).toISOString().slice(0, 16) : ''
+                }
                 onChange={(e) => {
                   const v = e.target.value;
                   onChangeExpiry(v ? new Date(v).getTime() : undefined);
@@ -298,7 +304,11 @@ export function ShareDialog({
 
         {tab === 'visibility' ? (
           <section data-testid={`${dataTestId}-section-visibility`}>
-            <VisibilityPicker value={state.visibility} onChange={onChangeVisibility} dataTestId={`${dataTestId}-visibility`} />
+            <VisibilityPicker
+              value={state.visibility}
+              onChange={onChangeVisibility}
+              dataTestId={`${dataTestId}-visibility`}
+            />
             {state.visibility.kind === 'domain' ? (
               <div style={{ marginTop: 12 }}>
                 <DomainAllowlist
@@ -311,11 +321,7 @@ export function ShareDialog({
             ) : null}
             {state.visibility.kind === 'sso' ? (
               <div style={{ marginTop: 12 }}>
-                <SSOConfig
-                  tenants={ssoTenants}
-                  value={state.sso}
-                  onChange={onChangeSSO}
-                />
+                <SSOConfig tenants={ssoTenants} value={state.sso} onChange={onChangeSSO} />
               </div>
             ) : null}
           </section>
@@ -347,7 +353,11 @@ export function ShareDialog({
             {deck ? (
               <ContentControlTab
                 deck={deck}
-                value={state.visibleSlideIds.length > 0 ? state.visibleSlideIds : deck.slides.map((s) => s.id)}
+                value={
+                  state.visibleSlideIds.length > 0
+                    ? state.visibleSlideIds
+                    : deck.slides.map((s) => s.id)
+                }
                 onChange={onChangeVisibleSlides}
               />
             ) : (
@@ -386,7 +396,13 @@ export function ShareDialog({
             type="button"
             onClick={onClose}
             data-testid={`${dataTestId}-cancel`}
-            style={{ padding: '6px 12px', border: '1px solid rgba(0,0,0,0.2)', borderRadius: 4, background: 'transparent', cursor: 'pointer' }}
+            style={{
+              padding: '6px 12px',
+              border: '1px solid rgba(0,0,0,0.2)',
+              borderRadius: 4,
+              background: 'transparent',
+              cursor: 'pointer',
+            }}
           >
             <FormattedMessage id="editor.share.cancel" />
           </button>
@@ -394,7 +410,14 @@ export function ShareDialog({
             type="button"
             onClick={onSaveInternal}
             data-testid={`${dataTestId}-save`}
-            style={{ padding: '6px 12px', border: 'none', borderRadius: 4, background: '#3b82f6', color: '#fff', cursor: 'pointer' }}
+            style={{
+              padding: '6px 12px',
+              border: 'none',
+              borderRadius: 4,
+              background: '#3b82f6',
+              color: '#fff',
+              cursor: 'pointer',
+            }}
           >
             <FormattedMessage id="editor.share.save" />
           </button>

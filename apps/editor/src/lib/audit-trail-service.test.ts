@@ -104,7 +104,8 @@ describe('audit-trail-service', () => {
       'http://api.test',
     );
 
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
     expect(calledUrl).toContain('agent_id=agent-x');
     expect(calledUrl).toContain('tool=create_slide');
     expect(calledUrl).toContain('since_ms=1700000000000');
@@ -122,7 +123,8 @@ describe('audit-trail-service', () => {
     globalThis.fetch = mock;
 
     await listAuditEntriesWithSource({}, 'http://api.test');
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
     expect(calledUrl).toBe('http://api.test/v1/agents/audit');
   });
 
@@ -136,7 +138,8 @@ describe('audit-trail-service', () => {
     globalThis.fetch = mock;
 
     await listAuditEntriesWithSource({ kind: 'all' }, 'http://api.test');
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
     expect(calledUrl).not.toContain('kind=');
   });
 
@@ -144,7 +147,10 @@ describe('audit-trail-service', () => {
     globalThis.fetch = vi.fn(async () => {
       throw new Error('down');
     }) as unknown as typeof fetch;
-    const result = await listAuditEntriesWithSource({ agentId: 'agent-slide-builder' }, 'http://api.test');
+    const result = await listAuditEntriesWithSource(
+      { agentId: 'agent-slide-builder' },
+      'http://api.test',
+    );
     expect(result.entries.every((e) => e.agent_id === 'agent-slide-builder')).toBe(true);
     expect(result.entries.length).toBeGreaterThan(0);
   });

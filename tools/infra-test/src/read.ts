@@ -1,11 +1,11 @@
-import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { join, extname } from "node:path";
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { join, extname } from 'node:path';
 
 export function readText(path: string): string {
   if (!existsSync(path)) {
     throw new Error(`File not found: ${path}`);
   }
-  return readFileSync(path, "utf8");
+  return readFileSync(path, 'utf8');
 }
 
 export function readJson<T = unknown>(path: string): T {
@@ -37,26 +37,22 @@ export function listFiles(dir: string, ext?: string): string[] {
   return out.sort();
 }
 
-export function assertContains(haystack: string, needle: string, label = ""): void {
+export function assertContains(haystack: string, needle: string, label = ''): void {
   if (!haystack.includes(needle)) {
-    throw new Error(
-      `Expected ${label || "content"} to include: ${JSON.stringify(needle)}`
-    );
+    throw new Error(`Expected ${label || 'content'} to include: ${JSON.stringify(needle)}`);
   }
 }
 
-export function assertNotContains(haystack: string, needle: string, label = ""): void {
+export function assertNotContains(haystack: string, needle: string, label = ''): void {
   if (haystack.includes(needle)) {
-    throw new Error(
-      `Did not expect ${label || "content"} to include: ${JSON.stringify(needle)}`
-    );
+    throw new Error(`Did not expect ${label || 'content'} to include: ${JSON.stringify(needle)}`);
   }
 }
 
-export function assertMatch(haystack: string, regex: RegExp, label = ""): void {
+export function assertMatch(haystack: string, regex: RegExp, label = ''): void {
   if (!regex.test(haystack)) {
     throw new Error(
-      `Expected ${label || "content"} to match ${regex} — first 240 chars: ${haystack.slice(0, 240)}`
+      `Expected ${label || 'content'} to match ${regex} — first 240 chars: ${haystack.slice(0, 240)}`,
     );
   }
 }

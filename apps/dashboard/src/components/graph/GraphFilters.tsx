@@ -29,12 +29,7 @@ export interface GraphFiltersState {
   readonly entityTypes: ReadonlyArray<EntityTypeValue>;
 }
 
-export type EntityTypeValue =
-  | 'person'
-  | 'product'
-  | 'kpi'
-  | 'company'
-  | 'metric';
+export type EntityTypeValue = 'person' | 'product' | 'kpi' | 'company' | 'metric';
 
 export interface EntityTypeCount {
   readonly type: EntityTypeValue;
@@ -61,12 +56,7 @@ const TIME_RANGES: ReadonlyArray<{ value: TimeRange; label: string }> = [
   { value: 'all', label: 'All' },
 ];
 
-export function GraphFilters({
-  teams,
-  typeCounts,
-  state,
-  onChange,
-}: GraphFiltersProps) {
+export function GraphFilters({ teams, typeCounts, state, onChange }: GraphFiltersProps) {
   function setTeam(team: string) {
     onChange({ ...state, team });
   }
@@ -159,7 +149,10 @@ export function GraphFilters({
                   />
                   {entityTypeLabel(row.type)}
                 </label>
-                <span className="text-xs text-slate-500" data-testid={`graph-filter-type-count-${row.type}`}>
+                <span
+                  className="text-xs text-slate-500"
+                  data-testid={`graph-filter-type-count-${row.type}`}
+                >
                   {row.count}
                 </span>
               </li>

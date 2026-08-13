@@ -11,11 +11,7 @@
 import type { ServiceHealth } from './status-types';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  __testing,
-  buildSeedSnapshot,
-  fetchStatus,
-} from './status-service';
+import { __testing, buildSeedSnapshot, fetchStatus } from './status-service';
 
 const ORIGINAL_FETCH = globalThis.fetch;
 

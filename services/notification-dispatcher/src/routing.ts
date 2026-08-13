@@ -116,15 +116,20 @@ export function routeBySubscription(
         });
         const signature = opts.signer.sign(body);
         // Attach signature as a field so the sender can include it.
-        n.payload = { ...n.payload, fields: { ...n.payload.fields, 'x-domio-signature': signature } };
+        n.payload = {
+          ...n.payload,
+          fields: { ...n.payload.fields, 'x-domio-signature': signature },
+        };
       }
 
       // Check quiet hours.
       let deferred = false;
       if (sub.quiet_hours && sub.digest_mode) {
-        deferred = isQuietHour(sub.quiet_hours, now, opts?.offsetMinutes
-          ? { offsetMinutes: opts.offsetMinutes }
-          : undefined);
+        deferred = isQuietHour(
+          sub.quiet_hours,
+          now,
+          opts?.offsetMinutes ? { offsetMinutes: opts.offsetMinutes } : undefined,
+        );
       }
 
       deliveries.push({ notification: n, deferred });

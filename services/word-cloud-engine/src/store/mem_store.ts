@@ -72,7 +72,10 @@ export class InMemoryWordCloudStore implements WordCloudStore {
     return { cloud_id, counts, total, computed_at_ms: Date.now() };
   }
 
-  async listBySession(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<WordCloud>> {
+  async listBySession(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<WordCloud>> {
     const out: WordCloud[] = [];
     for (const c of this.clouds.values()) {
       if (c.workspace_id === input.workspace_id && c.session_id === input.session_id) out.push(c);

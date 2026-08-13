@@ -46,10 +46,14 @@ export class ReplayEngine {
   }
 
   /** Total events. */
-  total(): number { return this.events.length; }
+  total(): number {
+    return this.events.length;
+  }
 
   /** Current cursor (event index). */
-  position(): number { return this.cursor; }
+  position(): number {
+    return this.cursor;
+  }
 
   /** Start or resume playback. */
   play(speed: ReplaySpeed = 1): void {

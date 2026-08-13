@@ -152,10 +152,10 @@ function parseEvent(raw: WireEvent): LiveEvent | null {
         typeof d['participation_rate'] === 'number'
           ? Number(d['participation_rate'])
           : typeof d['participationRate'] === 'number'
-          ? Number(d['participationRate'])
-          : participants > 0
-          ? votes / participants
-          : 0;
+            ? Number(d['participationRate'])
+            : participants > 0
+              ? votes / participants
+              : 0;
       return {
         type: 'poll',
         data: {
@@ -173,9 +173,7 @@ function parseEvent(raw: WireEvent): LiveEvent | null {
         data: {
           openQuestions: Number(d['open_questions'] ?? d['openQuestions'] ?? 0),
           answered: Number(d['answered'] ?? 0),
-          questionsPerMinute: Number(
-            d['questions_per_minute'] ?? d['questionsPerMinute'] ?? 0,
-          ),
+          questionsPerMinute: Number(d['questions_per_minute'] ?? d['questionsPerMinute'] ?? 0),
         },
       };
     }
@@ -189,14 +187,14 @@ function parseEvent(raw: WireEvent): LiveEvent | null {
             typeof d['slide_index'] === 'number'
               ? Number(d['slide_index'])
               : typeof d['slideIndex'] === 'number'
-              ? Number(d['slideIndex'])
-              : null,
+                ? Number(d['slideIndex'])
+                : null,
           totalSlides:
             typeof d['total_slides'] === 'number'
               ? Number(d['total_slides'])
               : typeof d['totalSlides'] === 'number'
-              ? Number(d['totalSlides'])
-              : null,
+                ? Number(d['totalSlides'])
+                : null,
           timeInSlideMs: Number(d['time_in_slide_ms'] ?? d['timeInSlideMs'] ?? 0),
           attentionScore: Number(d['attention_score'] ?? d['attentionScore'] ?? 0),
         },

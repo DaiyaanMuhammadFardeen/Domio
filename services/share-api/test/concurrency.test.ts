@@ -36,7 +36,9 @@ describe('share-api concurrency', () => {
   it('fires N concurrent rotate-token requests; exactly one wins', async () => {
     const service = makeService();
     const { snapshot } = await service.createShare({
-      workspaceId: 'w1', deckId: 'd1', actorId: 'alice',
+      workspaceId: 'w1',
+      deckId: 'd1',
+      actorId: 'alice',
     });
     const linkId = snapshot.link.id;
 
@@ -44,18 +46,23 @@ describe('share-api concurrency', () => {
     // Whichever lands first bumps it to 3; the rest fail.
     const N = 16;
     const results = await Promise.allSettled(
-      Array.from({ length: N }, () =>
-        service.rotateShareToken('w1', linkId, 'alice', 2),
-      ),
+      Array.from({ length: N }, () => service.rotateShareToken('w1', linkId, 'alice', 2)),
     );
     const winners = results.filter((r) => r.status === 'fulfilled');
     const losers = results.filter(
-      (r) => r.status === 'rejected' && (r as PromiseRejectedResult).reason instanceof ConcurrentModificationError,
+      (r) =>
+        r.status === 'rejected' &&
+        (r as PromiseRejectedResult).reason instanceof ConcurrentModificationError,
     );
     expect(winners.length).toBe(1);
     expect(losers.length).toBe(N - 1);
     // The winning token must be a valid 4-part token.
-    const w = (winners[0] as PromiseFulfilledResult<{ snapshot: { link: { tokenHash: string | null } }; token: string }>).value;
+    const w = (
+      winners[0] as PromiseFulfilledResult<{
+        snapshot: { link: { tokenHash: string | null } };
+        token: string;
+      }>
+    ).value;
     expect(w.token.split('.')).toHaveLength(4);
     expect(w.snapshot.link.tokenHash).not.toBeNull();
   });
@@ -63,23 +70,23 @@ describe('share-api concurrency', () => {
   it('fires N concurrent update requests; exactly one wins', async () => {
     const service = makeService();
     const { snapshot } = await service.createShare({
-      workspaceId: 'w1', deckId: 'd1', actorId: 'alice',
+      workspaceId: 'w1',
+      deckId: 'd1',
+      actorId: 'alice',
     });
     const linkId = snapshot.link.id;
 
     const N = 8;
     const results = await Promise.allSettled(
       Array.from({ length: N }, (_, i) =>
-        service.updateShare(
-          'w1', linkId,
-          { actorId: 'alice', slug: `concurrent-${i}` },
-          2,
-        ),
+        service.updateShare('w1', linkId, { actorId: 'alice', slug: `concurrent-${i}` }, 2),
       ),
     );
     const winners = results.filter((r) => r.status === 'fulfilled');
     const losers = results.filter(
-      (r) => r.status === 'rejected' && (r as PromiseRejectedResult).reason instanceof ConcurrentModificationError,
+      (r) =>
+        r.status === 'rejected' &&
+        (r as PromiseRejectedResult).reason instanceof ConcurrentModificationError,
     );
     expect(winners.length).toBe(1);
     expect(losers.length).toBe(N - 1);

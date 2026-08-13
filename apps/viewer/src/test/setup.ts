@@ -10,12 +10,24 @@ import '@testing-library/jest-dom/vitest';
 
 class LocalStorageMock {
   private readonly store = new Map<string, string>();
-  getItem(key: string): string | null { return this.store.get(key) ?? null; }
-  setItem(key: string, value: string): void { this.store.set(key, value); }
-  removeItem(key: string): void { this.store.delete(key); }
-  clear(): void { this.store.clear(); }
-  key(i: number): string | null { return Array.from(this.store.keys())[i] ?? null; }
-  get length(): number { return this.store.size; }
+  getItem(key: string): string | null {
+    return this.store.get(key) ?? null;
+  }
+  setItem(key: string, value: string): void {
+    this.store.set(key, value);
+  }
+  removeItem(key: string): void {
+    this.store.delete(key);
+  }
+  clear(): void {
+    this.store.clear();
+  }
+  key(i: number): string | null {
+    return Array.from(this.store.keys())[i] ?? null;
+  }
+  get length(): number {
+    return this.store.size;
+  }
 }
 
 if (typeof window !== 'undefined' && typeof window.localStorage === 'undefined') {

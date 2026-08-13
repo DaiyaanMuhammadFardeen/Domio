@@ -210,9 +210,7 @@ export function ProvenanceDrawer({
           {record ? (
             <dl className="space-y-4">
               <Row label={t('editor.provenance.drawer.source')} testId="provenance-drawer-source">
-                <span data-testid="provenance-drawer-source-value">
-                  {record.source_system}
-                </span>
+                <span data-testid="provenance-drawer-source-value">{record.source_system}</span>
               </Row>
 
               <Row label={t('editor.provenance.drawer.query')} testId="provenance-drawer-query">
@@ -228,7 +226,10 @@ export function ProvenanceDrawer({
                 <span data-testid="provenance-drawer-owner-value">{record.owner}</span>
               </Row>
 
-              <Row label={t('editor.provenance.drawer.lastVerified')} testId="provenance-drawer-last-verified">
+              <Row
+                label={t('editor.provenance.drawer.lastVerified')}
+                testId="provenance-drawer-last-verified"
+              >
                 <span className="flex flex-col gap-0.5">
                   <time
                     dateTime={new Date(record.last_verified_at_ms).toISOString()}
@@ -245,7 +246,10 @@ export function ProvenanceDrawer({
                 </span>
               </Row>
 
-              <Row label={t('editor.provenance.drawer.freshness')} testId="provenance-drawer-freshness">
+              <Row
+                label={t('editor.provenance.drawer.freshness')}
+                testId="provenance-drawer-freshness"
+              >
                 <span
                   className={cn(
                     'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1',
@@ -258,7 +262,10 @@ export function ProvenanceDrawer({
                 </span>
               </Row>
 
-              <Row label={t('editor.provenance.drawer.agentEndpoint')} testId="provenance-drawer-agent-endpoint">
+              <Row
+                label={t('editor.provenance.drawer.agentEndpoint')}
+                testId="provenance-drawer-agent-endpoint"
+              >
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
@@ -291,10 +298,7 @@ export function ProvenanceDrawer({
           ) : null}
 
           {status !== 'loading' && !record && !error ? (
-            <p
-              className="text-sm text-slate-400"
-              data-testid="provenance-drawer-empty"
-            >
+            <p className="text-sm text-slate-400" data-testid="provenance-drawer-empty">
               {t('editor.provenance.drawer.empty')}
             </p>
           ) : null}

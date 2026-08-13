@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { StyleClipboardController } from '../src/styles/copy-paste.js';
 import { FormatPainter } from '../src/styles/format-painter.js';
-import { snapshotStyle, migrateSnapshot, STYLE_FORMAT_VERSION } from '../src/styles/style-snapshot.js';
+import {
+  snapshotStyle,
+  migrateSnapshot,
+  STYLE_FORMAT_VERSION,
+} from '../src/styles/style-snapshot.js';
 import { asULID, type DeckDocument, type Element } from '@domio/schema';
 
 const DECK_ID = asULID('01H00000000000000000000000');

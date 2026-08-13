@@ -45,7 +45,11 @@ export function createIdFactory(seedBase: string): () => ULID {
 }
 
 /** Stable seed for a component instance expansion. */
-export function seedFor(instanceId: string, variantId: string, props: Record<string, unknown>): string {
+export function seedFor(
+  instanceId: string,
+  variantId: string,
+  props: Record<string, unknown>,
+): string {
   return `${instanceId}::${variantId}::${stableStringify(props)}`;
 }
 

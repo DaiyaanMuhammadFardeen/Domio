@@ -14,11 +14,7 @@
 
 import { useMemo, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
-import type {
-  DeckNode,
-  InheritanceEdge,
-  SyncStatus,
-} from '../../lib/inheritance-service';
+import type { DeckNode, InheritanceEdge, SyncStatus } from '../../lib/inheritance-service';
 import { findMaster, groupChildrenByParent } from '../../lib/inheritance-service';
 
 export interface InheritanceTreeProps {
@@ -70,8 +66,8 @@ function StatusBadge({ status }: { status: SyncStatus }): ReactElement {
     status === 'in_sync'
       ? 'editor.inheritance.tree.status.inSync'
       : status === 'diverged'
-      ? 'editor.inheritance.tree.status.diverged'
-      : 'editor.inheritance.tree.status.pending';
+        ? 'editor.inheritance.tree.status.diverged'
+        : 'editor.inheritance.tree.status.pending';
   return (
     <span
       data-testid={`inheritance-tree-badge-${status}`}
@@ -134,15 +130,27 @@ function NodeRow({
         color: 'inherit',
       }}
     >
-      <span aria-hidden="true" style={{ fontSize: 14, opacity: 0.6, width: 14, textAlign: 'center' }}>
+      <span
+        aria-hidden="true"
+        style={{ fontSize: 14, opacity: 0.6, width: 14, textAlign: 'center' }}
+      >
         {isMaster ? '★' : depth === 1 ? '└' : '·'}
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ display: 'block', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span
+          style={{
+            display: 'block',
+            fontWeight: 600,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {node.title}
         </span>
         <span style={{ display: 'block', fontSize: 11, opacity: 0.65 }}>
-          <FormattedMessage id="editor.inheritance.tree.lastSynced" /> {formatRelative(node.last_synced_at_ms)} · {node.version}
+          <FormattedMessage id="editor.inheritance.tree.lastSynced" />{' '}
+          {formatRelative(node.last_synced_at_ms)} · {node.version}
         </span>
       </span>
       <span aria-hidden="true" style={{ fontSize: 11, opacity: 0.6 }}>

@@ -11,16 +11,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Badge, toneForSSOProviderStatus } from '../../components/Badge';
-import {
-  listSSOProviders,
-  createSSOProvider,
-  deleteSSOProvider,
-} from '../../lib/sso-service';
-import type {
-  SSOProvider,
-  SSOProtocol,
-  SSOTestLoginResult,
-} from '../../lib/types';
+import { listSSOProviders, createSSOProvider, deleteSSOProvider } from '../../lib/sso-service';
+import type { SSOProvider, SSOProtocol, SSOTestLoginResult } from '../../lib/types';
 import { ProviderConfig } from '../../components/sso/ProviderConfig';
 import { TestLogin } from '../../components/sso/TestLogin';
 import { MetadataImport } from '../../components/sso/MetadataImport';
@@ -109,11 +101,7 @@ export default function SSOPage() {
     setDraft(EMPTY_NEW_PROVIDER);
   }
 
-  function handleMetadataImport(parsed: {
-    entity_id: string;
-    acs_url: string;
-    raw_xml: string;
-  }) {
+  function handleMetadataImport(parsed: { entity_id: string; acs_url: string; raw_xml: string }) {
     // Auto-fill the new-provider form with the parsed entity_id (the
     // tenant_id is left to the admin).
     setDraft((prev) => ({
@@ -128,9 +116,7 @@ export default function SSOPage() {
     <div data-testid="sso-page">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Single Sign-On
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Single Sign-On</h1>
           <p className="mt-1 text-sm text-slate-500">
             Configure SAML and OIDC identity providers for this workspace.
           </p>
@@ -268,9 +254,7 @@ export default function SSOPage() {
                     type="button"
                     onClick={() => setSelectedId(p.id)}
                     className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition ${
-                      active
-                        ? 'bg-brand-50 text-brand-800'
-                        : 'text-slate-700 hover:bg-slate-100'
+                      active ? 'bg-brand-50 text-brand-800' : 'text-slate-700 hover:bg-slate-100'
                     }`}
                   >
                     <div>
@@ -291,32 +275,22 @@ export default function SSOPage() {
           {selected ? (
             <div className="space-y-4">
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                <Badge tone={toneForSSOProviderStatus(selected.status)}>
-                  {selected.status}
-                </Badge>
+                <Badge tone={toneForSSOProviderStatus(selected.status)}>{selected.status}</Badge>
                 <span>Last sync: {formatRelTime(selected.last_sync_at_ms)}</span>
                 <span>Errors (24h): {selected.error_count_24h}</span>
-                <span className="font-mono text-[11px] text-slate-400">
-                  {selected.entity_id}
-                </span>
+                <span className="font-mono text-[11px] text-slate-400">{selected.entity_id}</span>
               </div>
-              <ProviderConfig
-                provider={selected}
-                onSave={handleSave}
-                onDelete={handleDelete}
-              />
+              <ProviderConfig provider={selected} onSave={handleSave} onDelete={handleDelete} />
               <TestLogin provider={selected} onResult={setLastTest} />
               {lastTest && (
                 <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-                  Last test login: {lastTest.ok ? 'OK' : 'FAILED'} at{' '}
-                  {lastTest.latency_ms} ms
+                  Last test login: {lastTest.ok ? 'OK' : 'FAILED'} at {lastTest.latency_ms} ms
                 </div>
               )}
             </div>
           ) : (
             <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-              Select a provider on the left to edit, or click{' '}
-              <strong>New Provider</strong> above.
+              Select a provider on the left to edit, or click <strong>New Provider</strong> above.
             </div>
           )}
         </div>

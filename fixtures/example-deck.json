@@ -16,9 +16,7 @@
     "snapToGrid": true,
     "showRulers": true
   },
-  "variables": [
-    { "name": "audience", "type": "string", "default": "executive" }
-  ],
+  "variables": [{ "name": "audience", "type": "string", "default": "executive" }],
   "slides": [
     {
       "id": "01H00000000000000000000005",
@@ -168,10 +166,7 @@
           "z": 5,
           "transform": { "x": 60, "y": 1180, "w": 720, "h": 120, "rotation": 0, "scale": 1 },
           "operation": "union",
-          "operands": [
-            "01H00000000000000000000014",
-            "01H00000000000000000000015"
-          ]
+          "operands": ["01H00000000000000000000014", "01H00000000000000000000015"]
         }
       ]
     }

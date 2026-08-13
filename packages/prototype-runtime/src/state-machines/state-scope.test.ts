@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  StateMachine,
-  StateScope,
-  type StateMachineDef,
-} from './index.js';
+import { StateMachine, StateScope, type StateMachineDef } from './index.js';
 
 const def: StateMachineDef = {
   states: { idle: {}, active: {} },

@@ -38,7 +38,9 @@ const PLATFORM_LABEL_IDS: Readonly<Record<SocialPlatform, string>> = {
   slack: 'editor.share.seo.platform.slack',
 };
 
-const PLATFORM_THEMES: Readonly<Record<SocialPlatform, { bg: string; text: string; accent: string }>> = {
+const PLATFORM_THEMES: Readonly<
+  Record<SocialPlatform, { bg: string; text: string; accent: string }>
+> = {
   twitter: { bg: '#15202b', text: '#ffffff', accent: '#1d9bf0' },
   linkedin: { bg: '#1d2226', text: '#f3f2ef', accent: '#0a66c2' },
   slack: { bg: '#1a1d21', text: '#d1d2d3', accent: '#ecb22e' },
@@ -54,8 +56,7 @@ export function SocialPreviewCard({
 }: SocialPreviewCardProps): ReactElement {
   const theme = PLATFORM_THEMES[platform];
   const title = override?.title || deckTitle;
-  const description =
-    override?.description || `${deckTitle} — open in Domio viewer`;
+  const description = override?.description || `${deckTitle} — open in Domio viewer`;
   const imageUrl = override?.imageUrl ?? previewImageUrl;
   const testId = dataTestId ?? `social-preview-${platform}`;
 
@@ -138,7 +139,8 @@ export function SocialPreviewCard({
               justifyContent: 'center',
               fontSize: 10,
               color: 'rgba(255,255,255,0.5)',
-              background: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 8px, transparent 8px 16px)',
+              background:
+                'repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 8px, transparent 8px 16px)',
             }}
           >
             <FormattedMessage id="editor.share.seo.imageAuto" />
@@ -177,7 +179,13 @@ export function SocialPreviewCard({
             placeholder={`Override title for ${platform}`}
             onChange={(e) => onPatchTitle(e.target.value)}
             data-testid={`${testId}-override-title`}
-            style={{ width: '100%', padding: 4, fontSize: 11, borderRadius: 3, border: '1px solid rgba(255,255,255,0.2)' }}
+            style={{
+              width: '100%',
+              padding: 4,
+              fontSize: 11,
+              borderRadius: 3,
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}
           />
           <textarea
             value={override?.description ?? ''}

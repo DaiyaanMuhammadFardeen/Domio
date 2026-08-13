@@ -1,6 +1,6 @@
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
-import { existsSync } from "node:fs";
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
 
 // Resolve REPO_ROOT robustly. Try by walking up from the source file first
 // (which works regardless of where vitest is invoked), then by walking up
@@ -13,7 +13,7 @@ function findRepoRoot(start: string): string {
     if (existsSync(`${cur}/infrastructure/terraform/modules/network/main.tf`)) {
       return cur;
     }
-    const parent = resolve(cur, "..");
+    const parent = resolve(cur, '..');
     if (parent === cur) break;
     cur = parent;
   }
@@ -22,7 +22,7 @@ function findRepoRoot(start: string): string {
 
 const here = dirname(fileURLToPath(import.meta.url));
 // src/repo-root.ts -> src -> infra-test -> tools -> worktrees -> repo
-const bySource = findRepoRoot(resolve(here, "..", "..", "..", ".."));
+const bySource = findRepoRoot(resolve(here, '..', '..', '..', '..'));
 const byCwd = findRepoRoot(process.cwd());
 
 // Prefer the one that contains the modules dir directly.

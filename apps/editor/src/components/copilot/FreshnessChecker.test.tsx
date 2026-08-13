@@ -168,9 +168,13 @@ describe('FreshnessChecker', () => {
     await waitFor(() => {
       expect(screen.getByTestId('freshness-update')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('freshness-update-replacement')).toHaveTextContent('Q4 revenue grew 24%');
+    expect(screen.getByTestId('freshness-update-replacement')).toHaveTextContent(
+      'Q4 revenue grew 24%',
+    );
     expect(screen.getByTestId('freshness-update-rationale')).toHaveTextContent('Q4 2025 figure');
-    expect(screen.getByTestId('freshness-update-source')).toHaveTextContent('finance.reporting/q4-2025');
+    expect(screen.getByTestId('freshness-update-source')).toHaveTextContent(
+      'finance.reporting/q4-2025',
+    );
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/v1/ai/check-freshness/update'),
       expect.objectContaining({ method: 'POST' }),

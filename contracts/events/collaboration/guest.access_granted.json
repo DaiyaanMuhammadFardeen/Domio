@@ -4,7 +4,15 @@
   "title": "CollabGuestAccessGranted",
   "description": "Emitted when a workspace member grants a guest scoped access and mints the first magic link.",
   "type": "object",
-  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "required": [
+    "event_id",
+    "event_type",
+    "ts_ms",
+    "workspace_id",
+    "actor_id",
+    "actor_type",
+    "payload"
+  ],
   "properties": {
     "event_id": {
       "type": "string",
@@ -30,7 +38,15 @@
     },
     "payload": {
       "type": "object",
-      "required": ["guest_access_id", "inviter_id", "guest_email", "scope_type", "scope_id", "capabilities", "expires_at"],
+      "required": [
+        "guest_access_id",
+        "inviter_id",
+        "guest_email",
+        "scope_type",
+        "scope_id",
+        "capabilities",
+        "expires_at"
+      ],
       "properties": {
         "guest_access_id": {
           "type": "string"

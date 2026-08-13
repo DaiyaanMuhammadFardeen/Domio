@@ -63,9 +63,7 @@ export function RequestBuilder({
   onNotice,
 }: RequestBuilderProps) {
   const [params, setParams] = useState<Kv[]>([]);
-  const [headers, setHeaders] = useState<Kv[]>([
-    { key: 'accept', value: 'application/json' },
-  ]);
+  const [headers, setHeaders] = useState<Kv[]>([{ key: 'accept', value: 'application/json' }]);
   const [body, setBody] = useState<string>('');
   const [sending, setSending] = useState(false);
   const [snippetName, setSnippetName] = useState('');
@@ -76,9 +74,7 @@ export function RequestBuilder({
     if (!endpoint) return;
     setParams(kvFromRecord(endpoint.sample_params));
     setHeaders([{ key: 'accept', value: 'application/json' }]);
-    setBody(
-      endpoint.sample_body ? JSON.stringify(endpoint.sample_body, null, 2) : '',
-    );
+    setBody(endpoint.sample_body ? JSON.stringify(endpoint.sample_body, null, 2) : '');
     setShowSnippetInput(false);
     setSnippetName('');
     onResponse(null);
@@ -109,11 +105,7 @@ export function RequestBuilder({
     );
   }
 
-  function setRow<K extends 'params' | 'headers'>(
-    kind: K,
-    idx: number,
-    patch: Partial<Kv>,
-  ) {
+  function setRow<K extends 'params' | 'headers'>(kind: K, idx: number, patch: Partial<Kv>) {
     const list = kind === 'params' ? params : headers;
     const setter = kind === 'params' ? setParams : setHeaders;
     const next = list.map((r, i) => (i === idx ? { ...r, ...patch } : r));
@@ -291,7 +283,11 @@ export function RequestBuilder({
           className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Send className="h-4 w-4" aria-hidden />
-          {sending ? 'Sending…' : <FormattedMessage id="admin.apiExplorer.send" catalogue={CATALOGUE} />}
+          {sending ? (
+            'Sending…'
+          ) : (
+            <FormattedMessage id="admin.apiExplorer.send" catalogue={CATALOGUE} />
+          )}
         </button>
         <div className="flex flex-wrap gap-2">
           <button

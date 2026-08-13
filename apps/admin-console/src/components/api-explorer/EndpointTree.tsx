@@ -42,9 +42,7 @@ export function EndpointTree({ endpoints, selectedKey, onSelect }: EndpointTreeP
     return Array.from(out.entries());
   }, [endpoints]);
 
-  const [openGroups, setOpenGroups] = useState<Set<string>>(
-    () => new Set(grouped.map(([g]) => g)),
-  );
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => new Set(grouped.map(([g]) => g)));
 
   function toggleGroup(group: string) {
     setOpenGroups((prev) => {
@@ -60,9 +58,7 @@ export function EndpointTree({ endpoints, selectedKey, onSelect }: EndpointTreeP
 
   if (grouped.length === 0) {
     return (
-      <div className="px-3 py-6 text-center text-xs text-slate-500">
-        No endpoints available.
-      </div>
+      <div className="px-3 py-6 text-center text-xs text-slate-500">No endpoints available.</div>
     );
   }
 
@@ -84,9 +80,7 @@ export function EndpointTree({ endpoints, selectedKey, onSelect }: EndpointTreeP
                 <ChevronRight className="h-3.5 w-3.5" aria-hidden />
               )}
               <span>{group}</span>
-              <span className="ml-auto text-[10px] font-normal text-slate-400">
-                {eps.length}
-              </span>
+              <span className="ml-auto text-[10px] font-normal text-slate-400">{eps.length}</span>
             </button>
             {open && (
               <ul role="list" className="mb-1">

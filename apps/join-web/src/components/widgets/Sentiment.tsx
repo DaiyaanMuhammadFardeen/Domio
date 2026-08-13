@@ -21,7 +21,12 @@ interface SentimentState {
   readonly tally?: Record<SentimentValue, number>;
 }
 
-const BUTTONS: ReadonlyArray<{ value: SentimentValue; label: string; emoji: string; tone: string }> = [
+const BUTTONS: ReadonlyArray<{
+  value: SentimentValue;
+  label: string;
+  emoji: string;
+  tone: string;
+}> = [
   { value: 'positive', label: 'Positive', emoji: '😀', tone: 'bg-green-100 hover:bg-green-200' },
   { value: 'neutral', label: 'Neutral', emoji: '�', tone: 'bg-slate-100 hover:bg-slate-200' },
   { value: 'negative', label: 'Negative', emoji: '😟', tone: 'bg-red-100 hover:bg-red-200' },

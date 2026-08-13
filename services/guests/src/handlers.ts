@@ -24,9 +24,7 @@ import {
   InvalidCapabilityError,
   FeatureDisabledError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -84,7 +82,9 @@ function serviceUnavailable(message: string, code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -116,7 +116,10 @@ export async function createGuestHandler(
 ): Promise<HttpResponse> {
   try {
     const actorId = getActorId(req);
-    const { guest, magic_link_token, magic_link_expires_at } = await ctx.service.createGuest(req.body, actorId);
+    const { guest, magic_link_token, magic_link_expires_at } = await ctx.service.createGuest(
+      req.body,
+      actorId,
+    );
     return created({ guest, magic_link_token, magic_link_expires_at });
   } catch (e) {
     return mapError(e);
@@ -166,7 +169,10 @@ export async function resendGuestMagicLinkHandler(
 ): Promise<HttpResponse> {
   try {
     const actorId = getActorId(req);
-    const { magic_link_token, magic_link_expires_at } = await ctx.service.resendMagicLink(req.params.id, actorId);
+    const { magic_link_token, magic_link_expires_at } = await ctx.service.resendMagicLink(
+      req.params.id,
+      actorId,
+    );
     return ok({ magic_link_token, magic_link_expires_at });
   } catch (e) {
     return mapError(e);
@@ -183,11 +189,7 @@ export async function consumeGuestMagicLinkHandler(
 ): Promise<HttpResponse> {
   try {
     const now = new Date();
-    const result = await ctx.service.consumeMagicLink(
-      req.body.token,
-      now,
-      req.body.guest_user_id,
-    );
+    const result = await ctx.service.consumeMagicLink(req.body.token, now, req.body.guest_user_id);
     return ok(result);
   } catch (e) {
     return mapError(e);

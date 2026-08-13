@@ -22,7 +22,10 @@ test('P08 smoke: live data, charts, binding, thresholds, scenario', async ({ pag
   // Search for "Live Bar"
   const searchInput = page.getByRole('searchbox');
   await searchInput.fill('Live Bar');
-  const liveBarBtn = page.locator('[data-testid="insert-grid"] button').filter({ hasText: 'Live Bar Chart' }).first();
+  const liveBarBtn = page
+    .locator('[data-testid="insert-grid"] button')
+    .filter({ hasText: 'Live Bar Chart' })
+    .first();
   await expect(liveBarBtn).toBeVisible();
   await liveBarBtn.click();
 

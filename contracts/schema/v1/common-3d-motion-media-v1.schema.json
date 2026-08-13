@@ -61,10 +61,7 @@
           "default": 0
         },
         "normalMapUrl": {
-          "oneOf": [
-            { "type": "string", "format": "uri" },
-            { "type": "null" }
-          ]
+          "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }]
         },
         "emissiveColor": {
           "type": "string",

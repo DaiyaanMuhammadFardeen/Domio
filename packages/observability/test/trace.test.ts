@@ -84,7 +84,9 @@ describe('createTracer — positive coverage', () => {
     const t = createTracer({ resource: TEST_RESOURCE, exporter });
     const parent = t.startSpan('parent');
     parent.end();
-    const child = t.startSpan('child', { parent: { traceId: parent.traceId, spanId: parent.spanId } });
+    const child = t.startSpan('child', {
+      parent: { traceId: parent.traceId, spanId: parent.spanId },
+    });
     child.end();
     await t.flush();
     const body = JSON.parse(new TextDecoder().decode(calls[0]!.body));

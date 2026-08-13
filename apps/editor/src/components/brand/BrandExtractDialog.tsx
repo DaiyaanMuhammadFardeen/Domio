@@ -76,16 +76,12 @@ export function BrandExtractDialog(props: BrandExtractDialogProps): ReactElement
         {
           id: 'color.brand.primary',
           label: 'Primary',
-          stops: [
-            { id: '500', label: '500', value: result.primaryHex },
-          ],
+          stops: [{ id: '500', label: '500', value: result.primaryHex }],
         },
         {
           id: 'color.brand.accent',
           label: 'Accent',
-          stops: [
-            { id: '500', label: '500', value: result.accentHex },
-          ],
+          stops: [{ id: '500', label: '500', value: result.accentHex }],
         },
       ],
       typography: result.fontFamilies.slice(0, 3).map((family, i) => ({
@@ -123,9 +119,7 @@ export function BrandExtractDialog(props: BrandExtractDialogProps): ReactElement
         {
           id: 'shadow',
           label: 'Shadow',
-          stops: [
-            { id: 'md', label: 'MD', value: '0 4px 8px rgba(0,0,0,0.15)' },
-          ],
+          stops: [{ id: 'md', label: 'MD', value: '0 4px 8px rgba(0,0,0,0.15)' }],
         },
       ],
     };
@@ -135,7 +129,12 @@ export function BrandExtractDialog(props: BrandExtractDialogProps): ReactElement
   if (!open) return null;
 
   return (
-    <div className="brand-extract-dialog" role="dialog" aria-modal="true" data-testid={id ?? 'brand-extract-dialog'}>
+    <div
+      className="brand-extract-dialog"
+      role="dialog"
+      aria-modal="true"
+      data-testid={id ?? 'brand-extract-dialog'}
+    >
       <div className="brand-extract-dialog__backdrop" onClick={onClose} />
       <div className="brand-extract-dialog__panel">
         <header className="brand-extract-dialog__head">
@@ -151,7 +150,8 @@ export function BrandExtractDialog(props: BrandExtractDialogProps): ReactElement
         </header>
 
         <p className="brand-extract-dialog__hint">
-          Paste a homepage URL and we'll scrape primary + accent colors, font choices, and propose a kit name.
+          Paste a homepage URL and we'll scrape primary + accent colors, font choices, and propose a
+          kit name.
         </p>
 
         <div className="brand-extract-dialog__input-row">

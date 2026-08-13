@@ -32,7 +32,10 @@ export async function listPublishedDecks(
  * being wired. The `publishedAtMs` is anchored to the deck's title length
  * for determinism.
  */
-export async function bootstrapPublishForDeck(deckId: string, title: string): Promise<PublishDescriptor> {
+export async function bootstrapPublishForDeck(
+  deckId: string,
+  title: string,
+): Promise<PublishDescriptor> {
   return {
     deckId,
     publicUrl: `https://deck.domio.app/${deckId}`,

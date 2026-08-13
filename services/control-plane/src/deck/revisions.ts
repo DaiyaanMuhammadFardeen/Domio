@@ -46,7 +46,10 @@ export interface RevisionRepository {
 }
 
 export class RevisionConflictError extends Error {
-  constructor(public readonly expected: number, public readonly actual: number) {
+  constructor(
+    public readonly expected: number,
+    public readonly actual: number,
+  ) {
     super(`Revision conflict: expected ${expected} but found ${actual}.`);
     this.name = 'RevisionConflictError';
   }

@@ -10,10 +10,7 @@ import { Hono } from 'hono';
 import { createConnectorHandlers } from './handlers.js';
 import { ConnectorService } from './service.js';
 import { AdapterRegistry } from './registry.js';
-import {
-  InMemoryConnectionRepository,
-  InMemoryAuthStateStore,
-} from './dal.js';
+import { InMemoryConnectionRepository, InMemoryAuthStateStore } from './dal.js';
 import { ConnectorMetrics } from './metrics.js';
 import { InMemoryConnectorAuditRecorder } from './audit.js';
 import type {
@@ -47,7 +44,11 @@ function stubAdapter(
     version,
     auth_kind,
     async authStart() {
-      return { redirect_url: 'https://auth.example.com/start', state: 'test-state-123', scope: 'read write' };
+      return {
+        redirect_url: 'https://auth.example.com/start',
+        state: 'test-state-123',
+        scope: 'read write',
+      };
     },
     async authCallback() {
       return { credential_ref: { vault: 'test', path: 'test/creds' } };
@@ -68,7 +69,10 @@ function stubAdapter(
     },
     async query() {
       return {
-        rows: [[1, 'Alice'], [2, 'Bob']],
+        rows: [
+          [1, 'Alice'],
+          [2, 'Bob'],
+        ],
         columns: [
           { name: 'id', type: 'number', semantic_role: 'id' },
           { name: 'name', type: 'string', semantic_role: 'dimension' },
@@ -90,7 +94,10 @@ function buildApp(connectorId: ConnectorId = 'google_sheets', version: string = 
   const authStates = new InMemoryAuthStateStore();
   const transport = new StubTransport();
   const metrics = new ConnectorMetrics();
-  const audit = new InMemoryConnectorAuditRecorder(() => 'audit-1', () => new Date());
+  const audit = new InMemoryConnectorAuditRecorder(
+    () => 'audit-1',
+    () => new Date(),
+  );
 
   // Seed a connection
   const conn: Connection & { credential_ref: { vault: string; path: string } } = {
@@ -212,7 +219,11 @@ describe('ConnectorService HTTP handlers', () => {
       const res = await app.request('/v1/connectors/google_sheets/ping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ version: '1.0.0', connection_id: 'nonexistent', tenant_id: 'tenant-1' }),
+        body: JSON.stringify({
+          version: '1.0.0',
+          connection_id: 'nonexistent',
+          tenant_id: 'tenant-1',
+        }),
       });
 
       expect(res.status).toBe(404);
@@ -242,7 +253,11 @@ describe('ConnectorService HTTP handlers', () => {
       const res = await app.request('/v1/connectors/google_sheets/discover', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ version: '1.0.0', connection_id: 'nonexistent', tenant_id: 'tenant-1' }),
+        body: JSON.stringify({
+          version: '1.0.0',
+          connection_id: 'nonexistent',
+          tenant_id: 'tenant-1',
+        }),
       });
 
       expect(res.status).toBe(404);

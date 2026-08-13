@@ -92,7 +92,9 @@ export function formatPreviewSync(req: FormatPreviewRequest): FormatPreviewResul
     const opts: Intl.NumberFormatOptions = {
       style: req.style ?? 'decimal',
       ...(req.style === 'currency' && req.currency ? { currency: req.currency } : {}),
-      ...(req.decimals !== undefined ? { maximumFractionDigits: req.decimals, minimumFractionDigits: req.decimals } : {}),
+      ...(req.decimals !== undefined
+        ? { maximumFractionDigits: req.decimals, minimumFractionDigits: req.decimals }
+        : {}),
     };
     const formatter = new Intl.NumberFormat(requested, opts);
     return {

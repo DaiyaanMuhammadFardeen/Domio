@@ -96,10 +96,22 @@ function detectEqualSpacing(
 ): void {
   // For each axis, sort candidate edges; if our bounds sit symmetrically
   // between two candidates (gap1 ≈ gap2), emit an equal-spacing guide.
-  const xEdges = candidates.map((c) => c.bounds.x).filter((v) => v < bounds.x).sort((a, b) => a - b);
-  const xEdgesRight = candidates.map((c) => c.bounds.x + c.bounds.w).filter((v) => v > bounds.x + bounds.w).sort((a, b) => a - b);
-  const yEdges = candidates.map((c) => c.bounds.y).filter((v) => v < bounds.y).sort((a, b) => a - b);
-  const yEdgesBottom = candidates.map((c) => c.bounds.y + c.bounds.h).filter((v) => v > bounds.y + bounds.h).sort((a, b) => a - b);
+  const xEdges = candidates
+    .map((c) => c.bounds.x)
+    .filter((v) => v < bounds.x)
+    .sort((a, b) => a - b);
+  const xEdgesRight = candidates
+    .map((c) => c.bounds.x + c.bounds.w)
+    .filter((v) => v > bounds.x + bounds.w)
+    .sort((a, b) => a - b);
+  const yEdges = candidates
+    .map((c) => c.bounds.y)
+    .filter((v) => v < bounds.y)
+    .sort((a, b) => a - b);
+  const yEdgesBottom = candidates
+    .map((c) => c.bounds.y + c.bounds.h)
+    .filter((v) => v > bounds.y + bounds.h)
+    .sort((a, b) => a - b);
 
   if (xEdges.length > 0 && xEdgesRight.length > 0) {
     const left = xEdges[xEdges.length - 1]!;
@@ -107,7 +119,12 @@ function detectEqualSpacing(
     const gap1 = bounds.x - left;
     const gap2 = right - (bounds.x + bounds.w);
     if (Math.abs(gap1 - gap2) <= tolerance && gap1 > 0 && gap2 > 0) {
-      guides.push({ type: 'equal-spacing', axis: 'x', position: bounds.x + bounds.w / 2, targets: [] });
+      guides.push({
+        type: 'equal-spacing',
+        axis: 'x',
+        position: bounds.x + bounds.w / 2,
+        targets: [],
+      });
     }
   }
   if (yEdges.length > 0 && yEdgesBottom.length > 0) {
@@ -116,7 +133,12 @@ function detectEqualSpacing(
     const gap1 = bounds.y - top;
     const gap2 = bottom - (bounds.y + bounds.h);
     if (Math.abs(gap1 - gap2) <= tolerance && gap1 > 0 && gap2 > 0) {
-      guides.push({ type: 'equal-spacing', axis: 'y', position: bounds.y + bounds.h / 2, targets: [] });
+      guides.push({
+        type: 'equal-spacing',
+        axis: 'y',
+        position: bounds.y + bounds.h / 2,
+        targets: [],
+      });
     }
   }
 }

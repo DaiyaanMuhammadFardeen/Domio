@@ -11,20 +11,20 @@ The goal: **every feature in `feature-list.md` (240 features across 16 sections)
 
 ## Wave index
 
-| Wave | Doc | Streams unlocked | Status |
-|---|---|---|---|
-| 1 | [`01-wave-productionization.md`](./01-wave-productionization.md) | Foundational abstractions; kills every existing mock | **Complete** (baseline Lighthouse + bundle deferred to Wave 2; see `wave-1-completion.md`) |
-| 2 | [`02-wave-editor-surface.md`](./02-wave-editor-surface.md) | Editor panels + canvas chrome for §1, §2, §3, §4, §5, §6, §7 | Pending |
-| 3 | [`03-wave-viewer-publishing.md`](./03-wave-viewer-publishing.md) | Production viewer + share / embed / publish UX | Pending |
-| 4 | [`04-wave-presenter-live.md`](./04-wave-presenter-live.md) | Live presenter console + recording export + phone remote | Pending |
-| 5 | [`05-wave-audience-participation.md`](./05-wave-audience-participation.md) | Audience widgets + kiosk + translations + consent | Pending |
-| 6 | [`06-wave-ai-copilot-ui.md`](./06-wave-ai-copilot-ui.md) | Every AI orchestrator endpoint → UI surface | Pending |
-| 7 | [`07-wave-analytics-insights.md`](./07-wave-analytics-insights.md) | Dashboard completeness; real data, no zero-state fallbacks | Pending |
-| 8 | [`08-wave-enterprise-governance.md`](./08-wave-enterprise-governance.md) | SSO/SCIM, DLP, audit, residency, legal hold, plugins | Pending |
-| 9 | [`09-wave-marketplace-creator.md`](./09-wave-marketplace-creator.md) | Marketplace storefront + creator console | Pending |
-| 10 | [`10-wave-agentic-programmable.md`](./10-wave-agentic-programmable.md) | MCP config, webhook tester, API explorer, CLI download | Pending |
-| 11 | [`11-wave-novel-frontier.md`](./11-wave-novel-frontier.md) | Knowledge graph, gaze, voice-state, podcast, kiosk, two-way | Pending |
-| 12 | [`12-wave-marketing-docs.md`](./12-wave-marketing-docs.md) | Production marketing site + docs + demo gallery | Pending |
+| Wave | Doc                                                                        | Streams unlocked                                             | Status                                                                                     |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| 1    | [`01-wave-productionization.md`](./01-wave-productionization.md)           | Foundational abstractions; kills every existing mock         | **Complete** (baseline Lighthouse + bundle deferred to Wave 2; see `wave-1-completion.md`) |
+| 2    | [`02-wave-editor-surface.md`](./02-wave-editor-surface.md)                 | Editor panels + canvas chrome for §1, §2, §3, §4, §5, §6, §7 | Pending                                                                                    |
+| 3    | [`03-wave-viewer-publishing.md`](./03-wave-viewer-publishing.md)           | Production viewer + share / embed / publish UX               | Pending                                                                                    |
+| 4    | [`04-wave-presenter-live.md`](./04-wave-presenter-live.md)                 | Live presenter console + recording export + phone remote     | Pending                                                                                    |
+| 5    | [`05-wave-audience-participation.md`](./05-wave-audience-participation.md) | Audience widgets + kiosk + translations + consent            | Pending                                                                                    |
+| 6    | [`06-wave-ai-copilot-ui.md`](./06-wave-ai-copilot-ui.md)                   | Every AI orchestrator endpoint → UI surface                  | Pending                                                                                    |
+| 7    | [`07-wave-analytics-insights.md`](./07-wave-analytics-insights.md)         | Dashboard completeness; real data, no zero-state fallbacks   | Pending                                                                                    |
+| 8    | [`08-wave-enterprise-governance.md`](./08-wave-enterprise-governance.md)   | SSO/SCIM, DLP, audit, residency, legal hold, plugins         | Pending                                                                                    |
+| 9    | [`09-wave-marketplace-creator.md`](./09-wave-marketplace-creator.md)       | Marketplace storefront + creator console                     | Pending                                                                                    |
+| 10   | [`10-wave-agentic-programmable.md`](./10-wave-agentic-programmable.md)     | MCP config, webhook tester, API explorer, CLI download       | Pending                                                                                    |
+| 11   | [`11-wave-novel-frontier.md`](./11-wave-novel-frontier.md)                 | Knowledge graph, gaze, voice-state, podcast, kiosk, two-way  | Pending                                                                                    |
+| 12   | [`12-wave-marketing-docs.md`](./12-wave-marketing-docs.md)                 | Production marketing site + docs + demo gallery              | Pending                                                                                    |
 
 ## Execution rules
 

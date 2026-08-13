@@ -42,7 +42,10 @@ function makePolicyService() {
   return { repo, svc };
 }
 
-async function createTestPolicy(svc: SandboxPolicyService, overrides: Partial<SandboxPolicy> = {}): Promise<SandboxPolicy> {
+async function createTestPolicy(
+  svc: SandboxPolicyService,
+  overrides: Partial<SandboxPolicy> = {},
+): Promise<SandboxPolicy> {
   const result = await svc.createPolicy({
     workspaceId: WORKSPACE,
     name: 'Test Policy',
@@ -194,12 +197,22 @@ describe('policy CRUD', () => {
 describe('code execution — stdout', () => {
   it('captures console.log output', async () => {
     const policy = {
-      id: 'P1', schemaVersion: '1.0.0', workspaceId: 'ws', name: 'Test',
-      maxCpuMs: 8000, maxMemoryMb: 64,
-      allowNetwork: false, allowDom: false, allowConsole: true, allowImport: false,
-      moduleAllowlist: [] as readonly string[], createdAt: new Date().toISOString(),
+      id: 'P1',
+      schemaVersion: '1.0.0',
+      workspaceId: 'ws',
+      name: 'Test',
+      maxCpuMs: 8000,
+      maxMemoryMb: 64,
+      allowNetwork: false,
+      allowDom: false,
+      allowConsole: true,
+      allowImport: false,
+      moduleAllowlist: [] as readonly string[],
+      createdAt: new Date().toISOString(),
     };
-    const result = await runSandboxCode('console.log("hello world")', policy, { clock: makeNumberClock() });
+    const result = await runSandboxCode('console.log("hello world")', policy, {
+      clock: makeNumberClock(),
+    });
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('hello world');
     expect(result.killed).toBe(false);
@@ -207,12 +220,24 @@ describe('code execution — stdout', () => {
 
   it('captures multiple console.log outputs', async () => {
     const policy = {
-      id: 'P1', schemaVersion: '1.0.0', workspaceId: 'ws', name: 'Test',
-      maxCpuMs: 8000, maxMemoryMb: 64,
-      allowNetwork: false, allowDom: false, allowConsole: true, allowImport: false,
-      moduleAllowlist: [] as readonly string[], createdAt: new Date().toISOString(),
+      id: 'P1',
+      schemaVersion: '1.0.0',
+      workspaceId: 'ws',
+      name: 'Test',
+      maxCpuMs: 8000,
+      maxMemoryMb: 64,
+      allowNetwork: false,
+      allowDom: false,
+      allowConsole: true,
+      allowImport: false,
+      moduleAllowlist: [] as readonly string[],
+      createdAt: new Date().toISOString(),
     };
-    const result = await runSandboxCode('console.log("a"); console.log("b"); console.log("c")', policy, { clock: makeNumberClock() });
+    const result = await runSandboxCode(
+      'console.log("a"); console.log("b"); console.log("c")',
+      policy,
+      { clock: makeNumberClock() },
+    );
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('a');
     expect(result.stdout).toContain('b');
@@ -221,12 +246,22 @@ describe('code execution — stdout', () => {
 
   it('handles arithmetic correctly', async () => {
     const policy = {
-      id: 'P1', schemaVersion: '1.0.0', workspaceId: 'ws', name: 'Test',
-      maxCpuMs: 8000, maxMemoryMb: 64,
-      allowNetwork: false, allowDom: false, allowConsole: true, allowImport: false,
-      moduleAllowlist: [] as readonly string[], createdAt: new Date().toISOString(),
+      id: 'P1',
+      schemaVersion: '1.0.0',
+      workspaceId: 'ws',
+      name: 'Test',
+      maxCpuMs: 8000,
+      maxMemoryMb: 64,
+      allowNetwork: false,
+      allowDom: false,
+      allowConsole: true,
+      allowImport: false,
+      moduleAllowlist: [] as readonly string[],
+      createdAt: new Date().toISOString(),
     };
-    const result = await runSandboxCode('console.log(2 + 3 * 4)', policy, { clock: makeNumberClock() });
+    const result = await runSandboxCode('console.log(2 + 3 * 4)', policy, {
+      clock: makeNumberClock(),
+    });
     expect(result.exitCode).toBe(0);
     expect(result.stdout.trim()).toBe('14');
   });
@@ -239,10 +274,18 @@ describe('code execution — stdout', () => {
 describe('code execution — syntax errors', () => {
   it('returns exitCode 1 with stderr on syntax error', async () => {
     const policy = {
-      id: 'P1', schemaVersion: '1.0.0', workspaceId: 'ws', name: 'Test',
-      maxCpuMs: 8000, maxMemoryMb: 64,
-      allowNetwork: false, allowDom: false, allowConsole: true, allowImport: false,
-      moduleAllowlist: [] as readonly string[], createdAt: new Date().toISOString(),
+      id: 'P1',
+      schemaVersion: '1.0.0',
+      workspaceId: 'ws',
+      name: 'Test',
+      maxCpuMs: 8000,
+      maxMemoryMb: 64,
+      allowNetwork: false,
+      allowDom: false,
+      allowConsole: true,
+      allowImport: false,
+      moduleAllowlist: [] as readonly string[],
+      createdAt: new Date().toISOString(),
     };
     const result = await runSandboxCode('function {', policy, { clock: makeNumberClock() });
     expect(result.exitCode).toBe(1);
@@ -257,13 +300,23 @@ describe('code execution — syntax errors', () => {
 describe('code execution — network capability', () => {
   it('fetch is not available in sandbox by default', async () => {
     const policy = {
-      id: 'P1', schemaVersion: '1.0.0', workspaceId: 'ws', name: 'Test',
-      maxCpuMs: 8000, maxMemoryMb: 64,
-      allowNetwork: false, allowDom: false, allowConsole: true, allowImport: false,
-      moduleAllowlist: [] as readonly string[], createdAt: new Date().toISOString(),
+      id: 'P1',
+      schemaVersion: '1.0.0',
+      workspaceId: 'ws',
+      name: 'Test',
+      maxCpuMs: 8000,
+      maxMemoryMb: 64,
+      allowNetwork: false,
+      allowDom: false,
+      allowConsole: true,
+      allowImport: false,
+      moduleAllowlist: [] as readonly string[],
+      createdAt: new Date().toISOString(),
     };
     // fetch is not defined in QuickJS sandbox — calling it directly throws
-    const result = await runSandboxCode('fetch("http://example.com")', policy, { clock: makeNumberClock() });
+    const result = await runSandboxCode('fetch("http://example.com")', policy, {
+      clock: makeNumberClock(),
+    });
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toMatch(/ReferenceError|TypeError|not defined/i);
   });
@@ -276,13 +329,23 @@ describe('code execution — network capability', () => {
 describe('code execution — DOM capability', () => {
   it('document is not available by default', async () => {
     const policy = {
-      id: 'P1', schemaVersion: '1.0.0', workspaceId: 'ws', name: 'Test',
-      maxCpuMs: 8000, maxMemoryMb: 64,
-      allowNetwork: false, allowDom: false, allowConsole: true, allowImport: false,
-      moduleAllowlist: [] as readonly string[], createdAt: new Date().toISOString(),
+      id: 'P1',
+      schemaVersion: '1.0.0',
+      workspaceId: 'ws',
+      name: 'Test',
+      maxCpuMs: 8000,
+      maxMemoryMb: 64,
+      allowNetwork: false,
+      allowDom: false,
+      allowConsole: true,
+      allowImport: false,
+      moduleAllowlist: [] as readonly string[],
+      createdAt: new Date().toISOString(),
     };
     // document is not defined in QuickJS sandbox by default
-    const result = await runSandboxCode('document.createElement("div")', policy, { clock: makeNumberClock() });
+    const result = await runSandboxCode('document.createElement("div")', policy, {
+      clock: makeNumberClock(),
+    });
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toMatch(/ReferenceError|TypeError|not defined/i);
   });
@@ -295,10 +358,18 @@ describe('code execution — DOM capability', () => {
 describe('code execution — CPU cap', () => {
   it('kills infinite loop with CPU budget', async () => {
     const policy = {
-      id: 'P1', schemaVersion: '1.0.0', workspaceId: 'ws', name: 'Test',
-      maxCpuMs: 100, maxMemoryMb: 64,
-      allowNetwork: false, allowDom: false, allowConsole: true, allowImport: false,
-      moduleAllowlist: [] as readonly string[], createdAt: new Date().toISOString(),
+      id: 'P1',
+      schemaVersion: '1.0.0',
+      workspaceId: 'ws',
+      name: 'Test',
+      maxCpuMs: 100,
+      maxMemoryMb: 64,
+      allowNetwork: false,
+      allowDom: false,
+      allowConsole: true,
+      allowImport: false,
+      moduleAllowlist: [] as readonly string[],
+      createdAt: new Date().toISOString(),
     };
     // Use a clock that advances in real time so the interrupt handler fires
     const result = await runSandboxCode('while(true) {}', policy, { clock: () => Date.now() });
@@ -315,10 +386,18 @@ describe('code execution — CPU cap', () => {
 describe('code execution — stdout cap', () => {
   it('truncates stdout at 1MB', async () => {
     const policy = {
-      id: 'P1', schemaVersion: '1.0.0', workspaceId: 'ws', name: 'Test',
-      maxCpuMs: 30000, maxMemoryMb: 64,
-      allowNetwork: false, allowDom: false, allowConsole: true, allowImport: false,
-      moduleAllowlist: [] as readonly string[], createdAt: new Date().toISOString(),
+      id: 'P1',
+      schemaVersion: '1.0.0',
+      workspaceId: 'ws',
+      name: 'Test',
+      maxCpuMs: 30000,
+      maxMemoryMb: 64,
+      allowNetwork: false,
+      allowDom: false,
+      allowConsole: true,
+      allowImport: false,
+      moduleAllowlist: [] as readonly string[],
+      createdAt: new Date().toISOString(),
     };
     // Generate ~2MB of output
     const code = 'for(let i=0; i<200000; i++) console.log("x".repeat(10))';
@@ -351,7 +430,7 @@ describe('route integration', () => {
       body: JSON.stringify({ workspaceId: WORKSPACE, name: 'Route Policy' }),
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.name).toBe('Route Policy');
     expect(body.id).toBeDefined();
   });
@@ -369,7 +448,7 @@ describe('route integration', () => {
     await createTestPolicy(svc, { name: 'List Test' });
     const res = await app.request(`/v1/sandbox_policies?workspace_id=${WORKSPACE}`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(body.items.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -382,7 +461,7 @@ describe('route integration', () => {
     const p = await createTestPolicy(svc, { name: 'Get Test' });
     const res = await app.request(`/v1/sandbox_policies/${p.id}`);
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.id).toBe(p.id);
   });
 
@@ -399,7 +478,7 @@ describe('route integration', () => {
       body: JSON.stringify({ name: 'Updated Name' }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.name).toBe('Updated Name');
   });
 
@@ -424,7 +503,7 @@ describe('route integration', () => {
       body: JSON.stringify({ policyId: p.id, code: 'console.log(42)' }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.exitCode).toBe(0);
     expect(body.stdout).toContain('42');
     expect(body.killed).toBe(false);
@@ -456,7 +535,7 @@ describe('route integration', () => {
       body: JSON.stringify({ policyId: p.id, code: 'function {' }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.exitCode).toBe(1);
     expect((body.stderr as string).length).toBeGreaterThan(0);
   });

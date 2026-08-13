@@ -136,7 +136,11 @@ export class InMemoryBrandKitRepository implements BrandKitRepository {
   async insert(record: BrandKitRecord): Promise<void> {
     this.store.set(this.k(record.kitId, record.orgId), record);
   }
-  async update(kitId: string, orgId: string, patch: Partial<BrandKitRecord>): Promise<BrandKitRecord> {
+  async update(
+    kitId: string,
+    orgId: string,
+    patch: Partial<BrandKitRecord>,
+  ): Promise<BrandKitRecord> {
     const existing = await this.findById(kitId, orgId);
     if (!existing) throw new Error(`Brand kit ${kitId} not found for org ${orgId}`);
     const updated: BrandKitRecord = { ...existing, ...patch, updatedAt: new Date() };

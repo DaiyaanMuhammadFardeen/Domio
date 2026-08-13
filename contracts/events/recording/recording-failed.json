@@ -4,7 +4,14 @@
   "title": "RecordingFailed",
   "description": "Emitted by the recording-orchestrator when a recording is marked as failed. The `reason` is a short, human-readable description of the failure (e.g. 'presenter lost connection', 'chunk lease expired'); full diagnostics are in the audit log.",
   "type": "object",
-  "required": ["event_id", "ts_ms", "workspace_id", "recording_session_id", "reason", "from_status"],
+  "required": [
+    "event_id",
+    "ts_ms",
+    "workspace_id",
+    "recording_session_id",
+    "reason",
+    "from_status"
+  ],
   "properties": {
     "event_id": { "type": "string" },
     "ts_ms": { "type": "integer", "format": "int64" },

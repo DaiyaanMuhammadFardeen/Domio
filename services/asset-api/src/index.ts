@@ -75,12 +75,14 @@ function createDefaultLicenses(workspaceId: string, clock: () => Date): License[
 // App factory
 // ---------------------------------------------------------------------------
 
-export function createApp(deps?: Partial<{
-  idGenerator: () => string;
-  clock: () => Date;
-  maxUploadBytes: number;
-  defaultWorkspaceId: string;
-}>): Hono {
+export function createApp(
+  deps?: Partial<{
+    idGenerator: () => string;
+    clock: () => Date;
+    maxUploadBytes: number;
+    defaultWorkspaceId: string;
+  }>,
+): Hono {
   const idGenerator = deps?.idGenerator;
   const clock = deps?.clock ?? (() => new Date());
   const defaultWorkspaceId = deps?.defaultWorkspaceId ?? 'default-workspace';

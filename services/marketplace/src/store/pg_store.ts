@@ -42,7 +42,12 @@ import type {
 } from '../creator/types.js';
 import type { BrandLockedListing } from '../curated/types.js';
 import { BrandLockNotFoundError } from '../curated/types.js';
-import type { TakedownRequest, TrustScore, TakedownStatus, TakedownKind } from '../takedown/types.js';
+import type {
+  TakedownRequest,
+  TrustScore,
+  TakedownStatus,
+  TakedownKind,
+} from '../takedown/types.js';
 import { TakedownNotFoundError } from '../takedown/types.js';
 import type { MarketplaceStore } from './store.js';
 
@@ -121,10 +126,9 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getListing(listingId: string): Promise<MarketplaceListing | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getListing');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM marketplace_listing WHERE id = $1',
-      [listingId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM marketplace_listing WHERE id = $1', [
+      listingId,
+    ]);
     if (rows.length === 0) return null;
     return listingRowToDomain(rows[0]!);
   }
@@ -139,9 +143,11 @@ export class PgMarketplaceStore implements MarketplaceStore {
     return listingRowToDomain(rows[0]!);
   }
 
-  async listListings(
-    opts?: { status?: string; sellerId?: string; limit?: number },
-  ): Promise<MarketplaceListing[]> {
+  async listListings(opts?: {
+    status?: string;
+    sellerId?: string;
+    limit?: number;
+  }): Promise<MarketplaceListing[]> {
     if (!this.pool) throw new StoreNotConfiguredError('listListings');
     const conditions: string[] = [];
     const params: unknown[] = [];
@@ -169,10 +175,22 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async updateListing(
     listingId: string,
-    patch: Partial<Pick<MarketplaceListing,
-      'title' | 'description' | 'status' | 'isFree' | 'priceCents' | 'currency' |
-      'tags' | 'preview' | 'publishedAtMs' | 'deprecatedAtMs' | 'updatedAt'
-    >>,
+    patch: Partial<
+      Pick<
+        MarketplaceListing,
+        | 'title'
+        | 'description'
+        | 'status'
+        | 'isFree'
+        | 'priceCents'
+        | 'currency'
+        | 'tags'
+        | 'preview'
+        | 'publishedAtMs'
+        | 'deprecatedAtMs'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<MarketplaceListing> {
     if (!this.pool) throw new StoreNotConfiguredError('updateListing');
 
@@ -297,10 +315,9 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getReview(reviewId: string): Promise<MarketplaceReview | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getReview');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM marketplace_review WHERE id = $1',
-      [reviewId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM marketplace_review WHERE id = $1', [
+      reviewId,
+    ]);
     if (rows.length === 0) return null;
     return reviewRowToDomain(rows[0]!, this.replyStore.get(reviewId) ?? null);
   }
@@ -311,7 +328,9 @@ export class PgMarketplaceStore implements MarketplaceStore {
       'SELECT * FROM marketplace_review WHERE listing_id = $1 ORDER BY created_at ASC',
       [listingId],
     );
-    return rows.map((r: Record<string, unknown>) => reviewRowToDomain(r, this.replyStore.get(r.id as string) ?? null));
+    return rows.map((r: Record<string, unknown>) =>
+      reviewRowToDomain(r, this.replyStore.get(r.id as string) ?? null),
+    );
   }
 
   async updateReview(
@@ -375,9 +394,7 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getPayoutPolicy(): Promise<PayoutPolicy> {
     if (!this.pool) throw new StoreNotConfiguredError('getPayoutPolicy');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM payout_policy LIMIT 1',
-    );
+    const { rows } = await this.pool.query('SELECT * FROM payout_policy LIMIT 1');
     if (rows.length === 0) {
       // Fallback defaults (should never happen — 0086 seeds a row)
       return {
@@ -509,15 +526,16 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getPaymentIntentByPurchaseId(purchaseId: string): Promise<PaymentIntent | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getPaymentIntentByPurchaseId');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM payment_intent WHERE purchase_id = $1',
-      [purchaseId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM payment_intent WHERE purchase_id = $1', [
+      purchaseId,
+    ]);
     if (rows.length === 0) return null;
     return paymentIntentRowToDomain(rows[0]!);
   }
 
-  async getPaymentIntentByProviderIntentId(providerIntentId: string): Promise<PaymentIntent | null> {
+  async getPaymentIntentByProviderIntentId(
+    providerIntentId: string,
+  ): Promise<PaymentIntent | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getPaymentIntentByProviderIntentId');
     const { rows } = await this.pool.query(
       'SELECT * FROM payment_intent WHERE provider_intent_id = $1',
@@ -527,7 +545,10 @@ export class PgMarketplaceStore implements MarketplaceStore {
     return paymentIntentRowToDomain(rows[0]!);
   }
 
-  async getPaymentIntentByIdempotencyKey(workspaceId: string, idempotencyKey: string): Promise<PaymentIntent | null> {
+  async getPaymentIntentByIdempotencyKey(
+    workspaceId: string,
+    idempotencyKey: string,
+  ): Promise<PaymentIntent | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getPaymentIntentByIdempotencyKey');
     const { rows } = await this.pool.query(
       'SELECT * FROM payment_intent WHERE workspace_id = $1 AND idempotency_key = $2',
@@ -540,7 +561,12 @@ export class PgMarketplaceStore implements MarketplaceStore {
   async updatePaymentIntentStatus(
     purchaseId: string,
     status: PaymentIntent['status'],
-    patch?: Partial<Pick<PaymentIntent, 'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'>>,
+    patch?: Partial<
+      Pick<
+        PaymentIntent,
+        'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'
+      >
+    >,
   ): Promise<PaymentIntent> {
     if (!this.pool) throw new StoreNotConfiguredError('updatePaymentIntentStatus');
 
@@ -606,7 +632,10 @@ export class PgMarketplaceStore implements MarketplaceStore {
     );
   }
 
-  async getLicenseGrantByListingAndBuyer(listingId: string, buyerId: string): Promise<LicenseGrant | null> {
+  async getLicenseGrantByListingAndBuyer(
+    listingId: string,
+    buyerId: string,
+  ): Promise<LicenseGrant | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getLicenseGrantByListingAndBuyer');
     const { rows } = await this.pool.query(
       'SELECT * FROM license_grant WHERE listing_id = $1 AND buyer_id = $2 LIMIT 1',
@@ -754,20 +783,31 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getCreatorProfile(userId: string): Promise<CreatorProfile | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getCreatorProfile');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM creator_profile WHERE user_id = $1',
-      [userId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM creator_profile WHERE user_id = $1', [
+      userId,
+    ]);
     if (rows.length === 0) return null;
     return creatorProfileRowToDomain(rows[0]!);
   }
 
   async updateCreatorProfile(
     userId: string,
-    patch: Partial<Pick<CreatorProfile,
-      'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod' |
-      'payoutReady' | 'kycStatus' | 'onboardingState' | 'balanceCents' | 'currency' | 'updatedAt'
-    >>,
+    patch: Partial<
+      Pick<
+        CreatorProfile,
+        | 'displayName'
+        | 'slug'
+        | 'bio'
+        | 'countryCode'
+        | 'payoutMethod'
+        | 'payoutReady'
+        | 'kycStatus'
+        | 'onboardingState'
+        | 'balanceCents'
+        | 'currency'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<CreatorProfile> {
     if (!this.pool) throw new StoreNotConfiguredError('updateCreatorProfile');
 
@@ -977,7 +1017,11 @@ export class PgMarketplaceStore implements MarketplaceStore {
     );
   }
 
-  async getBrandLock(workspaceId: string, brandKitId: string, marketplaceListingId: string): Promise<BrandLockedListing | null> {
+  async getBrandLock(
+    workspaceId: string,
+    brandKitId: string,
+    marketplaceListingId: string,
+  ): Promise<BrandLockedListing | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getBrandLock');
     const { rows } = await this.pool.query(
       `SELECT * FROM brand_locked_listing
@@ -988,7 +1032,10 @@ export class PgMarketplaceStore implements MarketplaceStore {
     return brandLockRowToDomain(rows[0]!);
   }
 
-  async listBrandLocksByBrand(workspaceId: string, brandKitId: string): Promise<BrandLockedListing[]> {
+  async listBrandLocksByBrand(
+    workspaceId: string,
+    brandKitId: string,
+  ): Promise<BrandLockedListing[]> {
     if (!this.pool) throw new StoreNotConfiguredError('listBrandLocksByBrand');
     const { rows } = await this.pool.query(
       `SELECT * FROM brand_locked_listing
@@ -1012,7 +1059,12 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async updateBrandLock(
     lockId: string,
-    patch: Partial<Pick<BrandLockedListing, 'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'>>,
+    patch: Partial<
+      Pick<
+        BrandLockedListing,
+        'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'
+      >
+    >,
   ): Promise<BrandLockedListing> {
     if (!this.pool) throw new StoreNotConfiguredError('updateBrandLock');
 
@@ -1043,9 +1095,23 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
     if (setClauses.length === 0) {
       const existing = await this.getBrandLock(
-        (await this.pool.query('SELECT workspace_id, brand_kit_id, marketplace_listing_id FROM brand_locked_listing WHERE id = $1', [lockId])).rows[0]?.workspace_id ?? '',
-        (await this.pool.query('SELECT brand_kit_id FROM brand_locked_listing WHERE id = $1', [lockId])).rows[0]?.brand_kit_id ?? '',
-        (await this.pool.query('SELECT marketplace_listing_id FROM brand_locked_listing WHERE id = $1', [lockId])).rows[0]?.marketplace_listing_id ?? '',
+        (
+          await this.pool.query(
+            'SELECT workspace_id, brand_kit_id, marketplace_listing_id FROM brand_locked_listing WHERE id = $1',
+            [lockId],
+          )
+        ).rows[0]?.workspace_id ?? '',
+        (
+          await this.pool.query('SELECT brand_kit_id FROM brand_locked_listing WHERE id = $1', [
+            lockId,
+          ])
+        ).rows[0]?.brand_kit_id ?? '',
+        (
+          await this.pool.query(
+            'SELECT marketplace_listing_id FROM brand_locked_listing WHERE id = $1',
+            [lockId],
+          )
+        ).rows[0]?.marketplace_listing_id ?? '',
       );
       if (!existing) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
       return existing;
@@ -1063,10 +1129,9 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async deleteBrandLock(lockId: string): Promise<void> {
     if (!this.pool) throw new StoreNotConfiguredError('deleteBrandLock');
-    const { rowCount } = await this.pool.query(
-      'DELETE FROM brand_locked_listing WHERE id = $1',
-      [lockId],
-    );
+    const { rowCount } = await this.pool.query('DELETE FROM brand_locked_listing WHERE id = $1', [
+      lockId,
+    ]);
     if (rowCount === 0) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
   }
 
@@ -1110,10 +1175,9 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getTakedownRequest(takedownId: string): Promise<TakedownRequest | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getTakedownRequest');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM takedown_request WHERE id = $1',
-      [takedownId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM takedown_request WHERE id = $1', [
+      takedownId,
+    ]);
     if (rows.length === 0) return null;
     return takedownRequestRowToDomain(rows[0]!);
   }
@@ -1129,7 +1193,10 @@ export class PgMarketplaceStore implements MarketplaceStore {
     return rows.map(takedownRequestRowToDomain);
   }
 
-  async listTakedownRequests(opts?: { status?: TakedownStatus; kind?: TakedownKind }): Promise<TakedownRequest[]> {
+  async listTakedownRequests(opts?: {
+    status?: TakedownStatus;
+    kind?: TakedownKind;
+  }): Promise<TakedownRequest[]> {
     if (!this.pool) throw new StoreNotConfiguredError('listTakedownRequests');
     const conditions: string[] = [];
     const params: unknown[] = [];
@@ -1180,7 +1247,8 @@ export class PgMarketplaceStore implements MarketplaceStore {
     params.push(takedownId);
     const sql = `UPDATE takedown_request SET ${setClauses.join(', ')} WHERE id = $${idx} RETURNING *`;
     const { rows } = await this.pool.query(sql, params);
-    if (rows.length === 0) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
+    if (rows.length === 0)
+      throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
     return takedownRequestRowToDomain(rows[0]!);
   }
 
@@ -1197,22 +1265,15 @@ export class PgMarketplaceStore implements MarketplaceStore {
          score = EXCLUDED.score,
          signals = EXCLUDED.signals,
          computed_at = EXCLUDED.computed_at`,
-      [
-        score.id,
-        score.listingId,
-        score.score,
-        JSON.stringify(score.signals),
-        score.computedAt,
-      ],
+      [score.id, score.listingId, score.score, JSON.stringify(score.signals), score.computedAt],
     );
   }
 
   async getTrustScoreByListing(listingId: string): Promise<TrustScore | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getTrustScoreByListing');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM trust_score WHERE listing_id = $1',
-      [listingId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM trust_score WHERE listing_id = $1', [
+      listingId,
+    ]);
     if (rows.length === 0) return null;
     return trustScoreRowToDomain(rows[0]!);
   }
@@ -1257,10 +1318,7 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getPayoutRun(runId: string): Promise<PayoutRun | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getPayoutRun');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM payout_run WHERE id = $1',
-      [runId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM payout_run WHERE id = $1', [runId]);
     if (rows.length === 0) return null;
     return payoutRunRowToDomain(rows[0]!);
   }
@@ -1301,10 +1359,9 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getWebhookDelivery(deliveryId: string): Promise<WebhookDelivery | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getWebhookDelivery');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM webhook_delivery WHERE id = $1',
-      [deliveryId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM webhook_delivery WHERE id = $1', [
+      deliveryId,
+    ]);
     if (rows.length === 0) return null;
     return webhookDeliveryRowToDomain(rows[0]!);
   }
@@ -1312,7 +1369,9 @@ export class PgMarketplaceStore implements MarketplaceStore {
   async updateWebhookDeliveryStatus(
     deliveryId: string,
     status: WebhookDelivery['status'],
-    patch?: Partial<Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>>,
+    patch?: Partial<
+      Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>
+    >,
   ): Promise<WebhookDelivery> {
     if (!this.pool) throw new StoreNotConfiguredError('updateWebhookDeliveryStatus');
 
@@ -1362,10 +1421,9 @@ export class PgMarketplaceStore implements MarketplaceStore {
 
   async getPartnerClientByClientId(clientId: string): Promise<PartnerClient | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getPartnerClientByClientId');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM partner_client WHERE client_id = $1',
-      [clientId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM partner_client WHERE client_id = $1', [
+      clientId,
+    ]);
     if (rows.length === 0) return null;
     return partnerClientRowToDomain(rows[0]!);
   }
@@ -1386,8 +1444,8 @@ function listingRowToDomain(row: Record<string, unknown>): MarketplaceListing {
     isFree: row.is_free as boolean,
     priceCents: row.price_cents as number | null,
     currency: row.currency as string | null,
-    tags: row.tags != null ? parseJsonb(row.tags) as readonly string[] : [],
-    preview: row.preview != null ? parseJsonb(row.preview) as Record<string, unknown> : null,
+    tags: row.tags != null ? (parseJsonb(row.tags) as readonly string[]) : [],
+    preview: row.preview != null ? (parseJsonb(row.preview) as Record<string, unknown>) : null,
     publishedAtMs: row.published_at_ms != null ? Number(row.published_at_ms) : null,
     deprecatedAtMs: row.deprecated_at_ms != null ? Number(row.deprecated_at_ms) : null,
     createdAt: toDate(row.created_at),
@@ -1446,7 +1504,7 @@ function licenseGrantRowToDomain(row: Record<string, unknown>): LicenseGrant {
     listingId: row.listing_id as string,
     buyerId: row.buyer_id as string,
     version: row.version as string,
-    scopes: row.scopes != null ? parseJsonb(row.scopes) as readonly string[] : [],
+    scopes: row.scopes != null ? (parseJsonb(row.scopes) as readonly string[]) : [],
     seats: row.seats as number,
     signedToken: row.signed_token as string,
     createdAt: toDate(row.created_at),
@@ -1497,7 +1555,7 @@ function kycSessionRowToDomain(row: Record<string, unknown>): KycSession {
     vendorSessionId: row.vendor_session_id as string | null,
     status: row.status as KycStatus,
     lastPolledAt: row.last_polled_at != null ? toDate(row.last_polled_at) : null,
-    raw: row.raw != null ? parseJsonb(row.raw) as Record<string, unknown> : null,
+    raw: row.raw != null ? (parseJsonb(row.raw) as Record<string, unknown>) : null,
     createdAt: toDate(row.created_at),
   };
 }
@@ -1509,7 +1567,7 @@ function creatorPayoutMethodRowToDomain(row: Record<string, unknown>): CreatorPa
     kind: row.kind as CreatorPayoutMethod['kind'],
     externalAccountId: row.external_account_id as string,
     verified: row.verified as boolean,
-    metadata: row.metadata != null ? parseJsonb(row.metadata) as Record<string, unknown> : null,
+    metadata: row.metadata != null ? (parseJsonb(row.metadata) as Record<string, unknown>) : null,
     createdAt: toDate(row.created_at),
     updatedAt: toDate(row.updated_at),
   };
@@ -1557,7 +1615,7 @@ function trustScoreRowToDomain(row: Record<string, unknown>): TrustScore {
     id: row.id as string,
     listingId: row.listing_id as string,
     score: Number(row.score),
-    signals: row.signals != null ? parseJsonb(row.signals) as Record<string, unknown> : {},
+    signals: row.signals != null ? (parseJsonb(row.signals) as Record<string, unknown>) : {},
     computedAt: toDate(row.computed_at),
   };
 }
@@ -1593,7 +1651,7 @@ function webhookDeliveryRowToDomain(row: Record<string, unknown>): WebhookDelive
     workspaceId: row.workspace_id as string,
     eventType: row.event_type as string,
     eventId: row.event_id as string,
-    payload: row.payload != null ? parseJsonb(row.payload) as Record<string, unknown> : {},
+    payload: row.payload != null ? (parseJsonb(row.payload) as Record<string, unknown>) : {},
     signature: row.signature as string,
     targetUrl: row.target_url as string,
     status: row.status as WebhookDelivery['status'],
@@ -1650,7 +1708,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

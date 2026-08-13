@@ -5,9 +5,19 @@
   "description": "A modal, tooltip, drawer, popover, or sheet rendered above a prototype slide. Phase 10 M1.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "slide_id", "name", "type",
-    "size_strategy", "anchor", "open_trigger", "close_trigger",
-    "persistent", "schema", "version"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "slide_id",
+    "name",
+    "type",
+    "size_strategy",
+    "anchor",
+    "open_trigger",
+    "close_trigger",
+    "persistent",
+    "schema",
+    "version"
   ],
   "additionalProperties": false,
   "properties": {

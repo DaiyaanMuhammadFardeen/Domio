@@ -35,10 +35,7 @@ export interface ServiceRowProps {
 
 export function ServiceRow({ service }: ServiceRowProps): JSX.Element {
   return (
-    <li
-      className="status-service"
-      data-testid={`status-service-${service.id}`}
-    >
+    <li className="status-service" data-testid={`status-service-${service.id}`}>
       <div className="status-service__head">
         <div className="status-service__title">
           <h3 className="status-service__name">{service.name}</h3>

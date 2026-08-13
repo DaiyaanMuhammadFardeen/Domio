@@ -62,12 +62,10 @@ export function ResumeFromPhone({
         textAlign: 'center',
       }}
     >
-      <div style={{ fontSize: 14, fontWeight: 600 }}>
-        📱 Present from this phone?
-      </div>
+      <div style={{ fontSize: 14, fontWeight: 600 }}>📱 Present from this phone?</div>
       <p style={{ fontSize: 12, color: 'var(--content-secondary)', margin: 0 }}>
-        Your laptop disconnected. Tap below to continue the session from
-        this phone at slide {slideIndex + 1}.
+        Your laptop disconnected. Tap below to continue the session from this phone at slide{' '}
+        {slideIndex + 1}.
       </p>
       <button
         type="button"

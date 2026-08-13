@@ -116,7 +116,9 @@ describe('InMemoryMarketplaceStore', () => {
     });
 
     it('updateListing throws for unknown listing', async () => {
-      await expect(store.updateListing('nonexistent', { title: 'X' })).rejects.toThrow(ListingNotFoundError);
+      await expect(store.updateListing('nonexistent', { title: 'X' })).rejects.toThrow(
+        ListingNotFoundError,
+      );
     });
   });
 
@@ -162,7 +164,9 @@ describe('InMemoryMarketplaceStore', () => {
     });
 
     it('updateReview throws for unknown review', async () => {
-      await expect(store.updateReview('nonexistent', { status: 'accepted' })).rejects.toThrow(ReviewNotFoundError);
+      await expect(store.updateReview('nonexistent', { status: 'accepted' })).rejects.toThrow(
+        ReviewNotFoundError,
+      );
     });
 
     it('hasVerifiedPurchase returns false by default', async () => {
@@ -190,10 +194,18 @@ describe('InMemoryMarketplaceStore', () => {
   describe('audit', () => {
     it('insertAuditEvent stores event', async () => {
       const event = {
-        id: 'e1', workspaceId: 'ws1', actorId: 'u1',
-        actorType: 'user' as const, actorKind: 'human' as const,
-        eventKind: 'purchase' as const, eventType: 'purchase',
-        payload: {}, seq: 1, prevHash: '', hash: 'h1', kid: 'mk1',
+        id: 'e1',
+        workspaceId: 'ws1',
+        actorId: 'u1',
+        actorType: 'user' as const,
+        actorKind: 'human' as const,
+        eventKind: 'purchase' as const,
+        eventType: 'purchase',
+        payload: {},
+        seq: 1,
+        prevHash: '',
+        hash: 'h1',
+        kid: 'mk1',
         recordedAt: new Date(),
       };
       await store.insertAuditEvent(event);
@@ -206,10 +218,18 @@ describe('InMemoryMarketplaceStore', () => {
 
     it('getNextAuditSeq increments', async () => {
       const event = {
-        id: 'e1', workspaceId: 'ws1', actorId: 'u1',
-        actorType: 'user' as const, actorKind: 'human' as const,
-        eventKind: 'purchase' as const, eventType: 'purchase',
-        payload: {}, seq: 1, prevHash: '', hash: 'h1', kid: 'mk1',
+        id: 'e1',
+        workspaceId: 'ws1',
+        actorId: 'u1',
+        actorType: 'user' as const,
+        actorKind: 'human' as const,
+        eventKind: 'purchase' as const,
+        eventType: 'purchase',
+        payload: {},
+        seq: 1,
+        prevHash: '',
+        hash: 'h1',
+        kid: 'mk1',
         recordedAt: new Date(),
       };
       await store.insertAuditEvent(event);
@@ -224,10 +244,18 @@ describe('InMemoryMarketplaceStore', () => {
 
     it('getLastAuditHash returns latest hash', async () => {
       const event = {
-        id: 'e1', workspaceId: 'ws1', actorId: 'u1',
-        actorType: 'user' as const, actorKind: 'human' as const,
-        eventKind: 'purchase' as const, eventType: 'purchase',
-        payload: {}, seq: 1, prevHash: '', hash: 'hash-abc', kid: 'mk1',
+        id: 'e1',
+        workspaceId: 'ws1',
+        actorId: 'u1',
+        actorType: 'user' as const,
+        actorKind: 'human' as const,
+        eventKind: 'purchase' as const,
+        eventType: 'purchase',
+        payload: {},
+        seq: 1,
+        prevHash: '',
+        hash: 'hash-abc',
+        kid: 'mk1',
         recordedAt: new Date(),
       };
       await store.insertAuditEvent(event);
@@ -555,7 +583,9 @@ describe('InMemoryMarketplaceStore', () => {
     });
 
     it('updateCreatorProfile throws for unknown user', async () => {
-      await expect(store.updateCreatorProfile('nonexistent', { displayName: 'X' })).rejects.toThrow(ListingNotFoundError);
+      await expect(store.updateCreatorProfile('nonexistent', { displayName: 'X' })).rejects.toThrow(
+        ListingNotFoundError,
+      );
     });
   });
 
@@ -599,7 +629,9 @@ describe('InMemoryMarketplaceStore', () => {
     });
 
     it('updateKycSessionStatus throws for unknown session', async () => {
-      await expect(store.updateKycSessionStatus('nonexistent', 'approved')).rejects.toThrow(ListingNotFoundError);
+      await expect(store.updateKycSessionStatus('nonexistent', 'approved')).rejects.toThrow(
+        ListingNotFoundError,
+      );
     });
   });
 
@@ -642,7 +674,9 @@ describe('InMemoryMarketplaceStore', () => {
     });
 
     it('updatePayoutMethodVerified throws for unknown method', async () => {
-      await expect(store.updatePayoutMethodVerified('nonexistent', true)).rejects.toThrow(ListingNotFoundError);
+      await expect(store.updatePayoutMethodVerified('nonexistent', true)).rejects.toThrow(
+        ListingNotFoundError,
+      );
     });
   });
 });

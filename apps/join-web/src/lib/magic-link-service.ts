@@ -39,7 +39,7 @@ export class MagicLinkConsumeError extends Error {
 }
 
 const DEFAULT_BASE: string =
-  (typeof process !== 'undefined' ? process.env['NEXT_PUBLIC_API_BASE'] ?? '' : '');
+  typeof process !== 'undefined' ? (process.env['NEXT_PUBLIC_API_BASE'] ?? '') : '';
 
 /**
  * Consume a magic-link token. Returns the redirect target + signed-in

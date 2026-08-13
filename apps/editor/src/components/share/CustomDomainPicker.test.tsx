@@ -28,9 +28,7 @@ vi.mock('@domio/ui', async () => {
   const React = await import('react');
   return {
     ...actual,
-    FormattedMessage: function MockFormattedMessage(props: {
-      id: string;
-    }): React.ReactElement {
+    FormattedMessage: function MockFormattedMessage(props: { id: string }): React.ReactElement {
       const catalogue = React.useContext(FormattedMessageContext);
       const resolved = catalogue[props.id] ?? props.id;
       return <span>{resolved}</span>;
@@ -40,9 +38,7 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
@@ -54,34 +50,50 @@ const OPTIONS: readonly CustomDomainOption[] = [
 
 describe('CustomDomainPicker', () => {
   it('renders the default option', () => {
-    render(withLocale(<CustomDomainPicker options={OPTIONS} value={undefined} onChange={vi.fn()} />));
+    render(
+      withLocale(<CustomDomainPicker options={OPTIONS} value={undefined} onChange={vi.fn()} />),
+    );
     expect(screen.getByTestId('custom-domain-picker-default')).toBeInTheDocument();
     expect(screen.getByTestId('custom-domain-picker-default')).toBeChecked();
   });
 
   it('only lists verified domains', () => {
-    render(withLocale(<CustomDomainPicker options={OPTIONS} value={undefined} onChange={vi.fn()} />));
+    render(
+      withLocale(<CustomDomainPicker options={OPTIONS} value={undefined} onChange={vi.fn()} />),
+    );
     expect(screen.getByTestId('custom-domain-picker-option-decks.acme.com')).toBeInTheDocument();
     expect(screen.getByTestId('custom-domain-picker-option-share.initech.io')).toBeInTheDocument();
     expect(screen.queryByTestId('custom-domain-picker-option-pitch.acme.com')).toBeNull();
   });
 
   it('checks the matching domain when one is selected', () => {
-    render(withLocale(<CustomDomainPicker options={OPTIONS} value="decks.acme.com" onChange={vi.fn()} />));
-    const radio = screen.getByTestId('custom-domain-picker-check-decks.acme.com') as HTMLInputElement;
+    render(
+      withLocale(
+        <CustomDomainPicker options={OPTIONS} value="decks.acme.com" onChange={vi.fn()} />,
+      ),
+    );
+    const radio = screen.getByTestId(
+      'custom-domain-picker-check-decks.acme.com',
+    ) as HTMLInputElement;
     expect(radio.checked).toBe(true);
   });
 
   it('emits onChange with the hostname when a domain is selected', () => {
     const onChange = vi.fn();
-    render(withLocale(<CustomDomainPicker options={OPTIONS} value={undefined} onChange={onChange} />));
+    render(
+      withLocale(<CustomDomainPicker options={OPTIONS} value={undefined} onChange={onChange} />),
+    );
     fireEvent.click(screen.getByTestId('custom-domain-picker-check-decks.acme.com'));
     expect(onChange).toHaveBeenCalledWith('decks.acme.com');
   });
 
   it('emits undefined when default is re-selected', () => {
     const onChange = vi.fn();
-    render(withLocale(<CustomDomainPicker options={OPTIONS} value="decks.acme.com" onChange={onChange} />));
+    render(
+      withLocale(
+        <CustomDomainPicker options={OPTIONS} value="decks.acme.com" onChange={onChange} />,
+      ),
+    );
     fireEvent.click(screen.getByTestId('custom-domain-picker-default'));
     expect(onChange).toHaveBeenCalledWith(undefined);
   });
@@ -92,7 +104,9 @@ describe('CustomDomainPicker', () => {
   });
 
   it('shows unverified-hint when some options are unverified', () => {
-    render(withLocale(<CustomDomainPicker options={OPTIONS} value={undefined} onChange={vi.fn()} />));
+    render(
+      withLocale(<CustomDomainPicker options={OPTIONS} value={undefined} onChange={vi.fn()} />),
+    );
     expect(screen.getByText(/Unverified domains are hidden/i)).toBeInTheDocument();
   });
 

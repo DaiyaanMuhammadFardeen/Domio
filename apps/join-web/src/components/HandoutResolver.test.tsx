@@ -58,13 +58,7 @@ describe('HandoutResolver', () => {
   it('invokes onDownloadPdf when the PDF button is clicked', async () => {
     const fetchSpy = vi.fn().mockResolvedValue(SAMPLE);
     const onDownload = vi.fn();
-    render(
-      <HandoutResolver
-        token="tok-1"
-        fetchFn={fetchSpy}
-        onDownloadPdf={onDownload}
-      />,
-    );
+    render(<HandoutResolver token="tok-1" fetchFn={fetchSpy} onDownloadPdf={onDownload} />);
     await waitFor(() => {
       expect(screen.getByTestId('handout-download-pdf')).toBeInTheDocument();
     });

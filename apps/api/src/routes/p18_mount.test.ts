@@ -29,9 +29,7 @@ describe('P18 mount smoke', () => {
   app.route('/', guestsRoutes(p18.guests));
 
   it('returns 200 for GET /v1/permissions/grants with query params', async () => {
-    const res = await app.request(
-      '/v1/permissions/grants?resource_type=deck&resource_id=123',
-    );
+    const res = await app.request('/v1/permissions/grants?resource_type=deck&resource_id=123');
     // Should return 200 with an empty grants array (in-memory store)
     expect(res.status).toBe(200);
   });

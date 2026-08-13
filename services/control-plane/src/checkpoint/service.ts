@@ -58,11 +58,7 @@ export class CheckpointService {
     if (!CHECKPOINT_NAME_PATTERN.test(name)) {
       throw new InvalidCheckpointNameError(args.name);
     }
-    const existing = await this.repository.findByName(
-      args.deckId,
-      args.branchId,
-      name,
-    );
+    const existing = await this.repository.findByName(args.deckId, args.branchId, name);
     if (existing) {
       throw new CheckpointAlreadyExistsError(args.deckId, args.branchId, name);
     }
@@ -95,21 +91,13 @@ export class CheckpointService {
     return this.repository.listByDeck(deckId, filter);
   }
 
-  async rename(
-    deckId: ULID,
-    checkpointId: ULID,
-    newName: string,
-  ): Promise<CheckpointRecord> {
+  async rename(deckId: ULID, checkpointId: ULID, newName: string): Promise<CheckpointRecord> {
     const trimmed = newName.trim();
     if (!CHECKPOINT_NAME_PATTERN.test(trimmed)) {
       throw new InvalidCheckpointNameError(newName);
     }
     const current = await this.get(deckId, checkpointId);
-    const collision = await this.repository.findByName(
-      deckId,
-      current.branchId,
-      trimmed,
-    );
+    const collision = await this.repository.findByName(deckId, current.branchId, trimmed);
     if (collision && collision.id !== checkpointId) {
       throw new CheckpointAlreadyExistsError(deckId, current.branchId, trimmed);
     }
@@ -155,4 +143,8 @@ export class CheckpointService {
 }
 
 export type { CheckpointRepository, CheckpointRecord, CheckpointKind } from './dal.js';
-export { CheckpointAlreadyExistsError, CheckpointNotFoundError, InMemoryCheckpointRepository } from './dal.js';
+export {
+  CheckpointAlreadyExistsError,
+  CheckpointNotFoundError,
+  InMemoryCheckpointRepository,
+} from './dal.js';

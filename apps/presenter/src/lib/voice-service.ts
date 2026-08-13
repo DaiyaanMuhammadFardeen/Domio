@@ -134,9 +134,7 @@ const inMemoryMatches: VoiceMatch[] = [];
 function loadPhrases(storageKey: string): VoicePhrase[] {
   const stored = safeReadArray(storageKey);
   if (!stored) return inMemoryPhrases.slice();
-  return stored
-    .filter((item): item is VoicePhrase => isValidPhrase(item))
-    .map((p) => ({ ...p }));
+  return stored.filter((item): item is VoicePhrase => isValidPhrase(item)).map((p) => ({ ...p }));
 }
 
 function persistPhrases(storageKey: string, phrases: VoicePhrase[]): void {
@@ -146,9 +144,7 @@ function persistPhrases(storageKey: string, phrases: VoicePhrase[]): void {
 function loadMatches(storageKey: string): VoiceMatch[] {
   const stored = safeReadArray(storageKey);
   if (!stored) return inMemoryMatches.slice();
-  return stored
-    .filter((item): item is VoiceMatch => isValidMatch(item))
-    .map((m) => ({ ...m }));
+  return stored.filter((item): item is VoiceMatch => isValidMatch(item)).map((m) => ({ ...m }));
 }
 
 function persistMatches(storageKey: string, matches: VoiceMatch[]): void {
@@ -240,9 +236,7 @@ export function findBestMatch(
  * Fetch the registered phrases. On a fresh device the default phrases
  * are returned and persisted.
  */
-export async function listVoicePhrases(
-  opts: VoiceServiceOptions = {},
-): Promise<VoicePhrase[]> {
+export async function listVoicePhrases(opts: VoiceServiceOptions = {}): Promise<VoicePhrase[]> {
   const key = opts.storageKey ?? DEFAULT_PHRASE_STORAGE_KEY;
   const phrases = loadPhrases(key);
   if (phrases.length === 0) {
@@ -336,9 +330,7 @@ function clamp01(value: number): number {
  */
 const inMemoryPrivacy: Set<string> = new Set();
 
-export async function hasAcknowledgedPrivacy(
-  opts: VoiceServiceOptions = {},
-): Promise<boolean> {
+export async function hasAcknowledgedPrivacy(opts: VoiceServiceOptions = {}): Promise<boolean> {
   const key = opts.privacyStorageKey ?? DEFAULT_PRIVACY_KEY;
   if (inMemoryPrivacy.has(key)) return true;
   if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
@@ -351,9 +343,7 @@ export async function hasAcknowledgedPrivacy(
   }
 }
 
-export async function acknowledgePrivacy(
-  opts: VoiceServiceOptions = {},
-): Promise<void> {
+export async function acknowledgePrivacy(opts: VoiceServiceOptions = {}): Promise<void> {
   const key = opts.privacyStorageKey ?? DEFAULT_PRIVACY_KEY;
   inMemoryPrivacy.add(key);
   if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {

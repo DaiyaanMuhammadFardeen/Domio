@@ -4,7 +4,20 @@
   "title": "Domio Camera Keyframe V1",
   "description": "Camera keyframe for Phase 11 3D storytelling. Each keyframe defines a camera pose (7-DOF: position + target + FOV) with cubic-bezier easing and a trigger mode.",
   "type": "object",
-  "required": ["schemaVersion", "id", "slideId", "orderIndex", "position", "target", "fov", "roll", "easing", "durationMs", "trigger", "createdAt"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "slideId",
+    "orderIndex",
+    "position",
+    "target",
+    "fov",
+    "roll",
+    "easing",
+    "durationMs",
+    "trigger",
+    "createdAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -20,10 +33,7 @@
       "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
     },
     "sceneId": {
-      "oneOf": [
-        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" }, { "type": "null" }],
       "description": "Optional scene reference for 3D continuity."
     },
     "orderIndex": {

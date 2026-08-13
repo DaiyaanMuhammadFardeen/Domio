@@ -36,7 +36,9 @@ describe('AutoPlayMode', () => {
         reducedMotion={false}
       />,
     );
-    expect(screen.getByTestId('autoplay-mode-counter').textContent).toContain(`1 / ${deck.slides.length}`);
+    expect(screen.getByTestId('autoplay-mode-counter').textContent).toContain(
+      `1 / ${deck.slides.length}`,
+    );
   });
 
   it('toggles play state when play button is clicked', () => {

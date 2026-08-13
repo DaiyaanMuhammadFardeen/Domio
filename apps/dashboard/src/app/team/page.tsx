@@ -62,8 +62,22 @@ export default async function TeamPage() {
         {hasAny ? (
           <div className="space-y-6">
             <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-              <Ranking title="Top templates" rows={data.templates.map((t) => ({ id: t.templateId, name: t.name, value: t.totalViews }))} />
-              <Ranking title="Top components" rows={data.components.map((c) => ({ id: c.componentId, name: c.name, value: c.usage }))} />
+              <Ranking
+                title="Top templates"
+                rows={data.templates.map((t) => ({
+                  id: t.templateId,
+                  name: t.name,
+                  value: t.totalViews,
+                }))}
+              />
+              <Ranking
+                title="Top components"
+                rows={data.components.map((c) => ({
+                  id: c.componentId,
+                  name: c.name,
+                  value: c.usage,
+                }))}
+              />
               <Ranking
                 title="Brand health"
                 rows={data.brands.map((b) => ({
@@ -92,9 +106,15 @@ export default async function TeamPage() {
                     {data.retention.map((r) => (
                       <tr key={r.cohort}>
                         <td className="px-4 py-2 font-medium">{r.cohort}</td>
-                        <td className="px-4 py-2 text-right tabular-nums">{(r.d7 * 100).toFixed(1)}%</td>
-                        <td className="px-4 py-2 text-right tabular-nums">{(r.d30 * 100).toFixed(1)}%</td>
-                        <td className="px-4 py-2 text-right tabular-nums">{(r.d90 * 100).toFixed(1)}%</td>
+                        <td className="px-4 py-2 text-right tabular-nums">
+                          {(r.d7 * 100).toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-2 text-right tabular-nums">
+                          {(r.d30 * 100).toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-2 text-right tabular-nums">
+                          {(r.d90 * 100).toFixed(1)}%
+                        </td>
                       </tr>
                     ))}
                   </tbody>

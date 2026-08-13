@@ -18,9 +18,11 @@ export interface MobileShellProps {
 
 export function MobileShell(props: MobileShellProps) {
   const dotColor =
-    props.connectionStatus === 'open' ? 'bg-green-500' :
-    props.connectionStatus === 'connecting' ? 'bg-yellow-500' :
-    'bg-red-500';
+    props.connectionStatus === 'open'
+      ? 'bg-green-500'
+      : props.connectionStatus === 'connecting'
+        ? 'bg-yellow-500'
+        : 'bg-red-500';
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-10 bg-white shadow-sm p-4 flex items-center justify-between">

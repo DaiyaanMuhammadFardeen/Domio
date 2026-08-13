@@ -32,21 +32,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LatexRenderRequest"
+              $ref: '#/components/schemas/LatexRenderRequest'
       responses:
-        "200":
+        '200':
           description: Rendered output.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LatexRenderResponse"
-        "400":
+                $ref: '#/components/schemas/LatexRenderResponse'
+        '400':
           description: Invalid LaTeX source.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
 components:
   securitySchemes:

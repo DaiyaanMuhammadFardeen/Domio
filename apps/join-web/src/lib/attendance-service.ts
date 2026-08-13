@@ -23,7 +23,7 @@ export class DsarDeleteError extends Error {
 }
 
 const DEFAULT_BASE: string =
-  (typeof process !== 'undefined' ? process.env['JOIN_WEB_API_BASE_URL'] ?? '' : '');
+  typeof process !== 'undefined' ? (process.env['JOIN_WEB_API_BASE_URL'] ?? '') : '';
 
 /**
  * POST to /v1/audience/{participant_id}/delete-data. Throws

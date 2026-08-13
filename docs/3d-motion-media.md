@@ -13,6 +13,7 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F65 — Native 3D model embedding (glTF/GLB/USDZ)
 
 **Acceptance criteria**
+
 - User drags a `.glb`, `.gltf`, or `.usdz` file onto a slide; an embedded 3D viewport appears at the drop position with the model centered and oriented.
 - Viewport supports orbit (left-drag), pan (right-drag / two-finger drag), zoom (wheel / pinch).
 - "Annotate on stage" tool lets the presenter draw callouts pinned to 3D coordinates (see §2.6), and the annotations follow the model as the camera moves.
@@ -20,18 +21,21 @@ This document is the engineering and product plan for the "impossible in PowerPo
 - Model persists as a `model_asset` row with a CDN URL and a normalized scene serialization.
 
 **Behavioral details**
+
 - Default render is WebGL 2 (broad support). WebGPU is used opportunistically when available (see §3.1).
 - IBL (image-based lighting) inferred from environment map metadata; falls back to default neutral envmap embedded in the asset bundle.
 - Hot cache: model is downloaded once per `model_asset.id` and reused across all slides referencing it.
 - Color management: linear-space lighting, sRGB output, with `lossless` toggle for product-color-accurate decks.
 
 **Edge cases**
+
 - Invalid GLB → render placeholder card with "Could not load 3D model" and fail-soft (don't crash slide).
 - Geometry > polygon budget → auto-decimation with a confirmation toast ("Reduced from 4.2M to 1.5M tris for performance — restore original").
 - Missing textures → show checkerboard so the missing asset is obvious; log a console warning.
 - Coordinate-system mismatch (Y-up vs Z-up in some CAD outputs) → autorotate using the model's `up_axis` hint, or fall back to a config flag.
 
 **Dependencies**
+
 - Asset upload pipeline (§4.5).
 - 3D engine module (§4.1).
 - `model_asset` table (§5.1).
@@ -42,6 +46,7 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F66 — 3D scene editor (lighting, camera paths, materials, environment maps)
 
 **Acceptance criteria**
+
 - Double-click a 3D viewport to enter the scene editor; a side panel surfaces lights, camera, materials, and environment.
 - Editor can add/remove directional, point, and spot lights; drag gizmos update from/to positions in real time.
 - Materials editor exposes PBR (base color, roughness, metallic, normal, emissive, occlusion) per mesh/mesh-group.
@@ -49,17 +54,20 @@ This document is the engineering and product plan for the "impossible in PowerPo
 - Camera path is a sequence of `camera_keyframe` records (see §5.3).
 
 **Behavioral details**
+
 - The scene editor is a non-modal overlay; slide-level controls (theme, layout) remain accessible.
 - Edits write into the same `scene` JSON document used at runtime, so what you see in the editor is what is rendered during playback.
 - 8-bit color values in the UI; linearized internally.
 - "Preserve aspect" toggle prevents accidental non-uniform scaling.
 
 **Edge cases**
+
 - Two materials on the same mesh (multi-material) → expose a per-submesh selector.
 - Light count > 8 → warn ("Scene lights add GPU cost; consider baking").
 - Negative scales → allowed for mirrors but flagged in lint (mirrors confuse naive camera paths).
 
 **Dependencies**
+
 - Scene document schema (§5.2).
 - Material / shader registry (§4.4, §6.2).
 
@@ -68,23 +76,27 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F67 — Camera keyframes between slides
 
 **Acceptance criteria**
+
 - A user can mark a "matched" 3D model across two consecutive slides; the transition between slides interpolates the camera through a keyframe path (not a slide crossfade).
 - Timeline panel shows the keyframe curve; each keyframe is editable (position, target, FOV, roll).
 - During presenter mode, the transition plays smoothly at the configured easing (defaults to ease-in-out cubic).
 - A "magic move" non-3D fallback exists for users who don't have a 3D model — see also F86 (§6).
 
 **Behavioral details**
+
 - Camera state is a 7-DOF vector: `position(3), target(3), fov(1)`.
 - Easing is a bezier (cubic) curve; default `0.42, 0, 0.58, 1`.
 - Duration override per-slide, default 0.9s.
 - The keyframe timeline is conceptually part of the slide-transition system (§6), but lives on the `scene` document for 3D continuity.
 
 **Edge cases**
+
 - Model changes between slides → fall back to crossfade (no camera move possible).
 - If the same model is used but transformed in either slide, the path is computed in the model's local frame to avoid drift.
 - VR / AR preview mode (F74) requires the keyframe path to be re-baked per device (see §3.10).
 
 **Dependencies**
+
 - `camera_keyframe` (§5.3).
 - Slide transition runtime (§6).
 
@@ -93,6 +105,7 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F68 — 3D data visualizations (globe plots, 3D bar terrains, point clouds, network graphs)
 
 **Acceptance criteria**
+
 - A "data → 3D viz" action converts a tabular data source (post-F48) into one of: globe plot, 3D bar terrain, point cloud, network graph.
 - Globe plot supports lat/lon points with optional size/heat; arcs between points animate on enter.
 - 3D bar terrain uses category X/Y axes and a value Z.
@@ -100,16 +113,19 @@ This document is the engineering and product plan for the "impossible in PowerPo
 - Network graphs use force-directed or fixed layouts; nodes can be tagged with PBR colors.
 
 **Behavioral details**
+
 - Implemented as a specialized scene archetype within the 3D engine, not a generic chart.
 - LOD strategies: instanced billboards for distant points, mesh decimation for high-poly terrains.
 - Camera path is autorotating by default; user can override.
 - Live data refresh (per F51/F63) re-issues the geometry diff without reloading the model.
 
 **Edge cases**
+
 - 1M points at 5 fps → drop to 2D fallback with a banner.
 - Data with > 50 unique categories → auto-aggregation (top 50 + "other").
 
 **Dependencies**
+
 - Data source binding (F48, §4 of §4).
 - 3D engine.
 
@@ -118,21 +134,25 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F69 — Exploded-view animations
 
 **Acceptance criteria**
+
 - A 3D model with a multi-part hierarchy exposes an "explode" tool that animates each part outward along its centroid axis.
 - Per-part override supported so users can adjust the explode distance.
 - Animations can be triggered on click (F88) or on slide enter.
 - Works with CAD-imported models (F70) and authored GLB models.
 
 **Behavioral details**
+
 - Implementation: pre-compute the centroid of each part, then translate along `(centroid - origin) × scale` in a keyframe clip.
 - 0.6s default duration, ease-out cubic.
 - Clipping-aware: parts can pass through each other; we do not solve a packing problem (out of scope).
 
 **Edge cases**
+
 - Non-convex part geometries where the centroid is outside the mesh → use the bounding-box center and flag it.
 - User-supplied explode axes override centroid logic.
 
 **Dependencies**
+
 - 3D engine, animation timeline (§6).
 
 ---
@@ -140,25 +160,29 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F70 — CAD file import pipeline (STEP/FBX → optimized web 3D)
 
 **Acceptance criteria**
+
 - User uploads a `.step`, `.stp`, `.iges`, `.igs`, or `.fbx` file.
 - Server-side conversion turns it into a glTF 2.0 binary (`.glb`) with tessellated meshes, baked-in PBR materials, and decimation applied to honor the user's polygon budget.
 - Job is queued; UI shows progress (parsing → tessellating → decimating → compressing → uploading).
 - Converted asset is attached to the deck as a `model_asset` row.
 
 **Behavioral details**
+
 - Pipeline runs in a dedicated worker pool (CAD conversion is CPU-heavy).
 - Tessellation: user-configurable chord height (default 0.1 mm) and angular tolerance (default 15°).
 - Decimation: target 1.5M tris for product-viz, 250k for thumbnail.
-- Materials: STEP colors are preserved as base color; roughness/metallic inferred from part name heuristics (e.g., "*chrome*" → metallic 1.0).
+- Materials: STEP colors are preserved as base color; roughness/metallic inferred from part name heuristics (e.g., "_chrome_" → metallic 1.0).
 - Format: server stores the original CAD file as `cad_source_url` (for traceability) plus the converted `.glb`.
 
 **Edge cases**
+
 - STEP AP203 vs AP214 vs AP242 — all supported; filename scheme detection after import.
 - Extremely large assemblies (> 100 parts) → auto-suggest "import as a single mesh" mode.
 - Meshes with no texture coords → fallback to flat color, no warning (common in CAD).
 - Conversion failure → keep the original file available, surface error clearly.
 
 **Dependencies**
+
 - CAD conversion server (§4.5).
 - Worker queue, ffmpeg-equivalent CAD tools (Open CASCADE + Assimp).
 
@@ -167,20 +191,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F71 — Physics-enabled elements (falling, bouncing, colliding)
 
 **Acceptance criteria**
+
 - A 3D or 2D element can be marked "physics-enabled"; the editor runtime simulates gravity, friction, and collision.
 - Physics is powered by a rapier (preferred) or ammo (fallback) engine integrated into the editor and presenter mode.
 - Trigger surface: hit a region of the slide; settle happens automatically; user can pin/freeze elements.
 
 **Behavioral details**
+
 - Rigid-body simulation; soft-body deferred to a later version.
 - Fixed timestep 1/60s; deterministic-ish up to the integration tolerance.
 - Particle doodads (F72) can drive physics emitters.
 
 **Edge cases**
+
 - Physics on a slide with a complex data binding → either disable physics or freeze the binding.
 - High object counts (> 200) → automatic spatial-hash broadphase; warn user.
 
 **Dependencies**
+
 - Physics engine module (§4.5).
 - Animation timeline (§6).
 
@@ -189,20 +217,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F72 — Particle systems and shader backgrounds
 
 **Acceptance criteria**
+
 - Library of preset particle systems (snow, confetti, dust, sparks, brand-tinted "aurora") with brand color slots.
 - Custom shader editor for shader backgrounds: drag a fragment shader; live preview; compile errors surfaced inline.
 - Shader registry holds user-authored shaders; org admins can publish them to a shared library.
 
 **Behavioral details**
+
 - Particles run on GPU (compute or vertex shader); up to 1M particles per scene budget.
 - Shader backgrounds compile to WGSL (WebGPU) and GLSL (WebGL fallback).
 - Brand-tinted shaders automatically pull from the deck's theme tokens (F37).
 
 **Edge cases**
+
 - Shader compile failure → falls back to safe-default shader; user sees error.
 - Shader uses unsupported extension → banner: "This shader requires `EXT_foo`, not available here."
 
 **Dependencies**
+
 - Shader registry (§6.2).
 - GPU shader build chain.
 
@@ -211,18 +243,22 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F73 — Scroll/click-driven 3D storytelling sequences
 
 **Acceptance criteria**
+
 - A single 3D scene with multiple camera keyframes can be triggered by either click (next keyframe) or scroll (proportional scrubbing).
 - Author sets keyframes to "click points" or "scroll points"; the playback runtime picks the right driver.
 - Used for F156 scroll-mode web-share (deck rendered as scrollytelling).
 
 **Behavioral details**
+
 - Conceptually a hybrid of F67 (keyframe interpolation) and F88 (per-element triggers).
 - Scroll progress is mapped to a normalized keyframe timeline `[0,1]`.
 
 **Edge cases**
+
 - Scroll past last keyframe → halt at end; click past → wrap or stop (author choice).
 
 **Dependencies**
+
 - §6 animation system, §11 scroll mode.
 
 ---
@@ -230,20 +266,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F74 — AR handoff (QR viewer)
 
 **Acceptance criteria**
+
 - During a presentation, the presenter can enable "AR handoff" on a slide containing a 3D model.
 - A QR code appears in the audience view; viewers scan it on their phone and see the model in their own room via WebXR (Android) or Quick Look (iOS).
 - The session is single-use and expires after 5 minutes of inactivity or 30 minutes total.
 
 **Behavioral details**
+
 - The QR encodes a signed URL like `https://ar.domio.app/s/{session_id}` with a short-lived token.
 - The AR viewer fetches the model asset + scene descriptor from CDN, then hands off to WebXR Session (immersive-ar) or `rel="ar"` (iOS).
 - Lighting estimate from the device helps the model sit in the room convincingly.
 
 **Edge cases**
+
 - Phone doesn't support AR → fall back to a 3D viewer in the browser.
 - Network loss mid-session → AR session gracefully degrades; model stays in place.
 
 **Dependencies**
+
 - `ar_session` table (§5.11).
 - AR viewer (§4.12).
 
@@ -252,20 +292,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F75 — Video with in-editor trimming, cropping, speed, captions, chaptering
 
 **Acceptance criteria**
+
 - A video element on a slide has a timeline editor with trim handles, crop handles, speed slider (0.25×–4×), and a captions editor (auto-generated from speech-to-text, then editable).
 - Chapter markers can be added; each chapter is a clickable scrub point.
 
 **Behavioral details**
+
 - Source is a `video_asset` (H.264/h.265/MP4, or VP9/WebM) on CDN.
 - Trims are stored as metadata (in/out points) so they don't require re-encoding; cropping is also metadata (texture UV manipulation).
 - Speed changes ⇒ retime audio or drop audio as appropriate.
 - Captions: WebVTT stored alongside the asset; revision history per the deck's CRDT model.
 
 **Edge cases**
+
 - Source video is HEVC and the browser doesn't support it → transcode to H.264 on upload (F77/F76 pipeline).
 - Trim spans negative time → clamp.
 
 **Dependencies**
+
 - Video pipeline (§4.6).
 - Caption editing accessibility (F122).
 
@@ -274,17 +318,21 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F76 — Video that plays segments per click
 
 **Acceptance criteria**
+
 - A video element can be split into named segments; clicking advances to the next segment rather than playing the whole video.
 - Each segment can have its own in/out points and a per-segment trigger (e.g., show a callout).
 
 **Behavioral details**
+
 - Segments are first-class on the timeline; segment transitions respect the slide's animation triggers (F88).
 - "Play next 8 seconds" is a built-in shortcut.
 
 **Edge cases**
+
 - User clicks during a segment → configurable: continue, skip, or pause.
 
 **Dependencies**
+
 - Animation triggers (§6).
 
 ---
@@ -292,17 +340,21 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F77 — Background video with smart text-contrast protection
 
 **Acceptance criteria**
+
 - A video placed as a slide background automatically generates a "contrast map" per region.
 - Text overlaid on the video is auto-styled (text-shadow, color shift, or applied scrim) so that it remains WCAG AA-contrast against the current frame.
 
 **Behavioral details**
+
 - Contrast map is computed every N frames (default 5) on the client; cheap enough to do in a Web Worker.
 - User can override the auto-style and lock the chosen style.
 
 **Edge cases**
+
 - Text on a fast-changing scene → toggle "use the worst-case frame" mode.
 
 **Dependencies**
+
 - Editor canvas (§1), accessibility F122.
 
 ---
@@ -310,18 +362,22 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F78 — Audio tracks, voiceover recording per slide, ambient soundscapes
 
 **Acceptance criteria**
+
 - A slide can host: a voiceover recording (made in-editor, per F80), a background music track, and an ambient soundscape (mix of multiple short loops).
 - Audio mixer panel: per-track volume, pan, fade-in/out, mute, solo.
 - Voiceover is auto-aligned to slide enter (F88) by default.
 
 **Behavioral details**
+
 - Mixing is done client-side via Web Audio API; the output is also encoded into a stereo bus for export.
 - Live captioning of voiceover (F122) runs on a web worker.
 
 **Edge cases**
+
 - Audio drift across slides (F78 + sync issue) → see §3.8 for the drift budget.
 
 **Dependencies**
+
 - Audio engine (§4.7).
 
 ---
@@ -329,20 +385,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F79 — Lottie/Rive interactive vector animations with state machines
 
 **Acceptance criteria**
+
 - A Lottie (JSON) or Rive (`.riv`) file is droppable onto a slide and plays inline.
 - Rive files expose a state machine; the editor shows a "Send trigger" panel so users can transition states from a click, hover, or data change.
 - Lottie animations can be wired to a variable (e.g., `progress: 0.5` → scrub to 50%).
 
 **Behavioral details**
+
 - Lottie runtime: lottie-web (or lottie-react).
 - Rive runtime: @rive-app/canvas, with state machine controls.
 - Both expose a poster frame for non-playing contexts.
 
 **Edge cases**
+
 - Animation with embedded raster textures → those textures are uploaded as separate `model_asset`-style assets.
 - Heavy Rive file (> 5MB) → S3-stored, with a CDN url.
 
 **Dependencies**
+
 - `lottie_asset` table (§5.7).
 
 ---
@@ -350,20 +410,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F80 — Screen-recording capture built in
 
 **Acceptance criteria**
+
 - From a slide, "Record screen" enters a capture mode that records the user's chosen screen/window/tab plus optional microphone audio.
 - Recording produces a `video_asset` (WebM/VP9 or MP4/H.264) plus a separate audio track.
 - Recording can be paused, resumed, and trimmed before insertion.
 
 **Behavioral details**
+
 - Uses `navigator.mediaDevices.getDisplayMedia` plus optionally `getUserMedia` for mic.
 - Encoder falls back between hardware and software paths; quality target ~8 Mbps for 1080p.
 - Recording is client-side; the file is uploaded to video pipeline after the user clicks "Save."
 
 **Edge cases**
+
 - Permission denied → user is shown how to allow screen capture in their browser.
 - Recording interrupted → file is saved as a draft; user can resume.
 
 **Dependencies**
+
 - MediaRecorder API; video pipeline (§4.6).
 
 ---
@@ -371,20 +435,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F81 — Live app embedding (iframe sandbox)
 
 **Acceptance criteria**
+
 - A slide can contain an iframe that points to a permitted internal app (e.g., the company's own product).
 - Viewer can click through the iframe live inside the slide (e.g., click a button in the embedded product).
 - Embed policy is per-deck, set by the deck author or an org admin.
 
 **Behavioral details**
+
 - iframe is served with `sandbox="allow-scripts allow-same-origin allow-forms allow-popups"` (configurable; the org policy may tighten).
 - Auth passthrough: a signed JWT is appended to the embed URL; the embedded app verifies it.
 - Communication: `postMessage` between the embedding deck and the embedded app, with origin allowlists enforced on both sides.
 
 **Edge cases**
+
 - Embedded app triggers a navigation → captured by the iframe sandbox; can be allowed per-org policy.
 - Embedded app steals focus → configurable "trap focus" mode for kiosk use (F218).
 
 **Dependencies**
+
 - Live app embed proxy (§4.8).
 - `embed_policy` (§5.9).
 
@@ -393,20 +461,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F82 — Code blocks with syntax highlighting, line-step reveal, and runnable JS snippets
 
 **Acceptance criteria**
+
 - A slide can host a code block with syntax highlighting (read-only) and a separate "runnable" mode that executes JS in a sandboxed worker.
 - Line-step reveal: animate code lines one at a time on click.
 - Runnable snippets have a configurable sandbox policy (e.g., "no network," "no DOM," "console-only").
 
 **Behavioral details**
+
 - Highlight: Shiki (or Monaco editor's highlighter) on the client; no server round-trip needed.
 - Sandboxed JS: Web Worker + QuickJS (preferred) or a V8 isolate (Cloudflare-style) for stricter isolation.
 - Output is captured via `console.log` interception; an artifact stream is shown in the slide.
 
 **Edge cases**
+
 - User code exceeds the memory/time budget → terminate with a "Killed (8s timeout)" notice.
 - Code spawns infinite loops → no impact on the main thread (worker isolation).
 
 **Dependencies**
+
 - `code_sandbox_policy` table (§5.8).
 - Code sandbox service (§4.9).
 
@@ -415,17 +487,21 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F83 — Math/LaTeX rendering for scientific decks
 
 **Acceptance criteria**
+
 - A slide can host a LaTeX block (`$...$` inline, `$$...$$` block).
 - Rendering is high-fidelity, fast, and reliable across browsers.
 
 **Behavioral details**
+
 - Render path: server-side MathJax (KaTeX-compatible output) on the edge, returning SVG/HTML. Client-side KaTeX for inline editing.
 - Caching: every computed LaTeX expression is cached on the CDN keyed by the LaTeX source + theme tokens.
 
 **Edge cases**
+
 - Untrusted LaTeX (from untrusted users) → characters restricted to safe math subset (no `\input`, no `\href{}`).
 
 **Dependencies**
+
 - LaTeX render service (§4.10).
 - `latex_doc` table (§5.9).
 
@@ -434,20 +510,24 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ### F84 — Maps: interactive (zoom/pan/markers/choropleths) with live location data
 
 **Acceptance criteria**
+
 - A slide can host a map showing markers, polygons, choropleths, and live data.
 - Map provider is configurable (Mapbox, Google Maps, OpenStreetMap-based providers like MapLibre).
 - Live data: maps subscribe to a data source (F48) and refresh markers/polygons when data changes.
 
 **Behavioral details**
+
 - Map style is a deck-level choice (`map_style` row), with org-level overrides.
 - Choropleths use a TopoJSON/GeoJSON source uploaded by the user, joined to the data source.
 - Pan/zoom are remembered per-slide so re-entering the slide restores the view.
 
 **Edge cases**
+
 - Provider quota reached → fallback to a degraded style with a banner.
 - Map provider key invalid → fall back to the OSM-based default.
 
 **Dependencies**
+
 - Map provider adapter (§4.11).
 - `map_style` table (§5.10).
 
@@ -478,12 +558,14 @@ This document is the engineering and product plan for the "impossible in PowerPo
 ```
 
 Key moments:
-- The viewport appears *before* the upload finishes, with a placeholder mesh (a wireframe bbox) so the user can position immediately.
+
+- The viewport appears _before_ the upload finishes, with a placeholder mesh (a wireframe bbox) so the user can position immediately.
 - The viewport reads a `model_asset.thumbnail` once available.
 
 ### 2.2 Scene editing
 
 The scene editor is a side panel + a manipulated 3D viewport. The user can:
+
 1. Add a directional light (drag gizmo for position; rotate ring for direction).
 2. Select a mesh and open Materials.
 3. Adjust roughness/metallic via sliders, with a live update.
@@ -563,23 +645,23 @@ The user sees a progress toast with three states: Parsing, Meshing, Optimizing. 
 
 ### 3.2 Model formats and budgets
 
-| Format | Read | Write | Notes |
-|---|---|---|---|
-| GLB (binary glTF 2.0) | ✓ | ✓ | Primary format. |
-| glTF (JSON + buffers) | ✓ | – | Same as GLB, uncompressed. |
-| USDZ | ✓ (iOS) | – | For AR fallback. |
-| STEP / STP / IGES | ✓ (via CAD pipeline) | – | Converted to GLB. |
-| FBX | ✓ (via CAD pipeline) | – | Converted to GLB. |
-| OBJ | ✓ (legacy) | – | Converted to GLB. |
+| Format                | Read                 | Write | Notes                      |
+| --------------------- | -------------------- | ----- | -------------------------- |
+| GLB (binary glTF 2.0) | ✓                    | ✓     | Primary format.            |
+| glTF (JSON + buffers) | ✓                    | –     | Same as GLB, uncompressed. |
+| USDZ                  | ✓ (iOS)              | –     | For AR fallback.           |
+| STEP / STP / IGES     | ✓ (via CAD pipeline) | –     | Converted to GLB.          |
+| FBX                   | ✓ (via CAD pipeline) | –     | Converted to GLB.          |
+| OBJ                   | ✓ (legacy)           | –     | Converted to GLB.          |
 
 Polygon and texture budgets (per asset, per slide):
 
-| Tier | Triangles | Textures | Total texture memory |
-|---|---|---|---|
-| Hero (single 3D model on a slide) | 1.5M | 8 | 256 MB |
-| Standard | 250k | 4 | 64 MB |
-| Background | 50k | 2 | 16 MB |
-| Multi-model slide | 500k total | 4 | 128 MB |
+| Tier                              | Triangles  | Textures | Total texture memory |
+| --------------------------------- | ---------- | -------- | -------------------- |
+| Hero (single 3D model on a slide) | 1.5M       | 8        | 256 MB               |
+| Standard                          | 250k       | 4        | 64 MB                |
+| Background                        | 50k        | 2        | 16 MB                |
+| Multi-model slide                 | 500k total | 4        | 128 MB               |
 
 Above budget → auto-decimation on upload (configurable per-org).
 
@@ -626,12 +708,12 @@ Above budget → auto-decimation on upload (configurable per-org).
 
 ### 3.9 Map provider options & quotas
 
-| Provider | Quota (default) | Cost | Notes |
-|---|---|---|---|
-| Mapbox | 50k loads/mo | $$ | Default for prebuilt styles. |
-| Google Maps | $200/mo credit | $$ | For customers already in Google ecosystem. |
-| MapLibre + OSM | unlimited self-host | free | For orgs that want full control. |
-| Custom tile server | per-org | $ | Enterprise. |
+| Provider           | Quota (default)     | Cost | Notes                                      |
+| ------------------ | ------------------- | ---- | ------------------------------------------ |
+| Mapbox             | 50k loads/mo        | $$   | Default for prebuilt styles.               |
+| Google Maps        | $200/mo credit      | $$   | For customers already in Google ecosystem. |
+| MapLibre + OSM     | unlimited self-host | free | For orgs that want full control.           |
+| Custom tile server | per-org             | $    | Enterprise.                                |
 
 - Quota reaching the limit → fallback to a simpler style (no satellite, no 3D buildings).
 
@@ -653,6 +735,7 @@ Above budget → auto-decimation on upload (configurable per-org).
 **Choice:** Three.js as the primary renderer, with a thin abstraction so we can swap to Babylon.js or a custom WebGPU renderer later.
 
 Three.js reasons:
+
 - Largest ecosystem, broad format coverage (GLTFLoader, FBXLoader, OBJLoader, USDZLoader).
 - Mature performance characteristics.
 - Easy to integrate with custom shaders.
@@ -662,6 +745,7 @@ Babylon.js is the fallback if Three.js chokes on a specific scene (e.g., heavy G
 ### 4.2 Scene editor
 
 A purpose-built in-editor UI:
+
 - Side panel: lights, cameras, materials, environment maps.
 - Inline gizmos (transform, rotate, scale) via Three.js `TransformControls`.
 - A scene-graph tree (mirrors the GLTF node hierarchy).

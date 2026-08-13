@@ -92,7 +92,9 @@ export interface LibraryEventEmitter {
 }
 
 export const noopEmitter: LibraryEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------

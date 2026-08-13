@@ -13,7 +13,8 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** A presenter in presenter mode generates a session-scoped QR code; any audience member points their phone camera, lands on a mobile-optimized web view, and is participating in seconds with zero app installation.
 
 **Acceptance criteria.**
-- A single QR is valid for the entire live session; participants who join mid-session land on the *current* slide's interactive surface, not a stale snapshot.
+
+- A single QR is valid for the entire live session; participants who join mid-session land on the _current_ slide's interactive surface, not a stale snapshot.
 - Join is viable on stock mobile Safari, mobile Chrome, and Samsung Internet; supports iOS Safari 15+ and Android Chrome 100+ as the floor.
 - First interaction (handshake + join + first render) completes in under 2.5 seconds on a 4G connection.
 - No app store redirect, no forced account creation, no install prompt at any point.
@@ -22,12 +23,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Works on flaky networks: the join page itself is cached for offline rendering on subsequent visits during the same session.
 
 **Behavioral details.**
+
 - QR encodes a deep link of the form `https://<host>/j/<session_code>` where `session_code` is a 7-character base32 short-code (Crockford alphabet, checksum suffix) opaque to the user but resolvable by the join service.
 - On landing, the participant web client (PWA, installable) opens a WebSocket to the participant session service (see §4), receives the current session state snapshot, then subscribes to deltas.
 - The participant view has three modes that switch automatically based on the current slide: **viewer**, **respondent** (when an active widget exists on the current slide), and **inactive** (between active slides). Switching happens via server-pushed `slide_changed` events.
 - The QR is rendered in presenter view, in a "share to room" modal, and on a printable slide export.
 
 **Edge cases.**
+
 - **QR scanned before session starts:** page shows a friendly "waiting for the session to begin" screen; once the presenter goes live, the page transitions automatically without a manual refresh.
 - **QR scanned after session ends:** page shows the recap/handout flow if handouts are configured (F151), otherwise a "this session has ended" message.
 - **Phone locked mid-session:** on unlock, the client re-subscribes and replays missed events from the cursor (server retains last 60 s of broadcast buffer per session).
@@ -42,6 +45,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** The presenter drops a poll widget on a slide (multiple-choice, multi-select, or rating), participants respond from their phones, and the slide's chart updates in front of the audience as results arrive.
 
 **Acceptance criteria.**
+
 - A poll widget is editable like any other element on the canvas (F1–F22): drag, resize, theme-bind, snap to grid.
 - A poll can be set to start on slide-enter, on a presenter click, or on a timer (e.g., 30 s countdown).
 - Results render on the presenter's slide within 1.5 s p95 of any vote being cast.
@@ -50,6 +54,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - The same poll widget supports live re-polling (same question, new results) and comparison overlays (show "before vs after" for two polls on the same slide).
 
 **Behavioral details.**
+
 - Polls are defined in the deck schema as `widget_type: "poll"` with options array, prompt text, response shape, and presenter-only display options.
 - When a poll goes live, the widget publishes a `poll_opened` event on the session channel with the poll id and the list of allowed options.
 - Participant clients render the poll UI in respondent mode (see F142); on submit, they POST to the poll engine (see §4) and receive a confirmation.
@@ -57,6 +62,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Closing a poll publishes `poll_closed`; the presenter can then optionally "reveal" results with a build animation.
 
 **Edge cases.**
+
 - **Vote before poll opens / after poll closes:** rejected with `poll_not_open`; UI shows "the poll hasn't started yet" / "the poll has closed".
 - **Network drop mid-submit:** client retries with idempotency key; duplicate submits dedupe server-side (see §3 one-person-one-vote).
 - **Tie at threshold:** if a poll is configured with a "winner advances" action and results are tied within tolerance, the presenter is prompted to extend or break the tie manually.
@@ -71,6 +77,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** A free-text input on a slide; each submitted word (or short phrase) becomes a tile in a continuously redrawn word cloud sized by frequency, with profanity moderation happening before display.
 
 **Acceptance criteria.**
+
 - Submission is single-tap on the participant phone: tap the input, type up to N characters (configurable, default 40), submit.
 - Words are normalized (lowercase, strip punctuation, collapse whitespace, optional stop-word removal per locale) before counting.
 - The cloud re-lays out at most every 1.5 s on the presenter view (debounced) and within 3 s p95 of any submission.
@@ -79,12 +86,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Per-slide word cloud cap is configurable (default 500 distinct words) with FIFO eviction once exceeded.
 
 **Behavioral details.**
+
 - The word cloud engine (see §4) maintains an in-memory `word → count` map per slide; backpressure to persistent storage happens on a 30 s cadence so a long session doesn't OOM the engine.
 - The presenter view renders the cloud with a deterministic layout algorithm (e.g., Archimedean spiral placement with collision detection) seeded by a hash of the slide id, so consecutive updates don't jitter the entire layout.
 - Word pairs / n-grams are supported as an option ("bigram mode"); the layout distinguishes single tokens from bigrams by weight class.
 - The cloud is theme-aware: tile color follows the deck's design tokens (F37) with optional overrides; font sizing follows frequency.
 
 **Edge cases.**
+
 - **Burst submissions:** if submissions arrive faster than the layout can keep up, the engine coalesces updates into batches of up to 100 words or 1.5 s, whichever first.
 - **Same word from same participant:** deduplicated within the active window (e.g., once per minute per participant per word) so a single participant can't dominate a cloud.
 - **Very long submissions:** server splits on whitespace and counts each token independently; tokens exceeding a max length (default 24) are dropped.
@@ -99,6 +108,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** A persistent Q&A panel accessible throughout the session; participants submit questions and upvote others' questions; the presenter sees a ranked queue and can mark questions as answered, deferred, or dismissed.
 
 **Acceptance criteria.**
+
 - Submissions are capped at 280 characters by default; configurable per session.
 - Each participant can submit up to N questions per session (default 10) and upvote any other question up to 3 times total.
 - The Q&A panel on the presenter's screen always shows top-ranked items first; rank = upvotes − downvotes + recency tiebreaker.
@@ -107,12 +117,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - "Live parking lot" integration (F133): questions marked `deferred` are pinned to the wrap-up slide auto-assembly.
 
 **Behavioral details.**
+
 - The Q&A engine (see §4) maintains an ordered structure keyed by `session_id + slide_id_or_session` (questions can be slide-scoped or session-wide; default session-wide).
 - Upvotes are stored as separate `qa_upvote` records (one per participant per question) so dedup and revoke are simple.
 - The presenter panel supports bulk actions: "mark top 5 as answered", "defer all unanswered", "show only flagged".
 - An optional moderation step (configurable per session) holds new submissions in a queue until the presenter approves them.
 
 **Edge cases.**
+
 - **Vote brigading:** if a single participant attempts to upvote the same question multiple times, only the first counts; subsequent calls return `already_voted` (idempotent).
 - **Mass submission:** rate-limited per F147-style rate limiting pattern (default 1 submission per 10 s per participant).
 - **Display-name collisions:** display names are suffixed with a discriminator only in presenter view; participants see their own name as entered.
@@ -126,6 +138,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** Multi-question quiz mode with timer, scoring, and a live leaderboard that updates after each question; rendered on the slide and on participant phones.
 
 **Acceptance criteria.**
+
 - Quiz widget supports multiple-choice, true/false, and type-the-answer (with fuzzy-match grading).
 - Each question has a configurable countdown timer (default 20 s; can be off).
 - Scoring formula: base points (default 1000) + time bonus (`max(0, remaining_seconds) × bonus_per_second`, default 50/s).
@@ -135,12 +148,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Anti-cheat: question content is delivered at reveal time, not on join; participant clients cannot cache the question pool in advance.
 
 **Behavioral details.**
+
 - The quiz engine (see §4) is a state machine: `idle → countdown → accepting_answers → revealing → leaderboard → next` (loop) → `finished`.
 - A question's content is gated by a `question_unlocked` event; the participant client renders an idle placeholder until that event arrives.
 - The leaderboard displays the top N (default 10) plus the participant's own rank; full ranking is available on the participant's phone under a "see full standings" affordance.
 - Quiz results are written to `quiz_attempt` records per (session, participant, question) with timing data, enabling per-question analytics and replay.
 
 **Edge cases.**
+
 - **Late answer:** answers submitted after the timer fires are rejected; server time is the source of truth, not client clock.
 - **Tie at final leaderboard:** ties are broken by cumulative response time, then by first correct submission.
 - **Network drop mid-question:** on reconnect, the participant receives the current question state and any unanswered prior questions are auto-marked `timeout`.
@@ -157,6 +172,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** A reaction surface (always-on tray on participant phones) that sends short emoji taps that float across the presentation as small animated icons, like reactions in a live-stream chat.
 
 **Acceptance criteria.**
+
 - Reactions render as DOM/SVG elements overlaid on the presenter view (and on the audience broadcast if enabled).
 - Per-participant rate limit (default 1 reaction per 1.5 s, configurable).
 - Reactions are ephemeral: they animate in, peak, and fade out within 4–8 s depending on density.
@@ -165,11 +181,13 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - A density heatmap view (presenter-only) shows reaction concentration across slide time, useful for finding emotional peaks.
 
 **Behavioral details.**
+
 - The reaction broadcaster (see §4) receives a `reaction` event per tap; it broadcasts an aggregate `{emoji, count, delta_ts}` to all subscribers every 250 ms.
 - The overlay renderer composites emoji onto a transparent canvas/SVG layer on the presenter view; layout uses a deterministic seeded spawn position per emoji so heavy bursts don't all cluster in one corner.
 - An optional "burst" mode is enabled for big moments (e.g., a "celebrate" button on the slide) that bypasses rate limits and plays a one-shot animation.
 
 **Edge cases.**
+
 - **Custom emoji (org-specific):** if the deck theme includes custom emoji, those are rendered as image sprites rather than unicode emoji to preserve brand consistency.
 - **Disabling reactions mid-session:** any in-flight reactions finish their animation; new ones are rejected with `reactions_disabled`.
 - **Skin-tone modifiers:** supported; rendered as unicode where possible, as paired-codepoint fallback otherwise.
@@ -182,6 +200,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** The presenter offers a binary or N-ary choice between deck branches (F97); the audience votes and the winning branch is auto-advanced to (or the presenter is nudged).
 
 **Acceptance criteria.**
+
 - A navigation vote is a special-case poll with deck-state side effects: winning option triggers a slide transition (F91) or a branch (F97).
 - Default quorum rule: vote closes when either (a) configured duration elapses, (b) `>= N%` of active participants have voted, or (c) presenter manually closes.
 - When the quorum is met, the deck auto-advances to the winning option's target slide; presenter can override at any time.
@@ -189,12 +208,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - The presenter can pre-configure quorum defaults per deck and override per vote.
 
 **Behavioral details.**
+
 - Navigation votes are recorded as a special `nav_vote` event type so analytics (F175) can distinguish them from regular polls.
 - The quorum is computed over **currently-connected participants** (not lifetime participants), so late joiners or early leavers don't distort the denominator.
 - The transition itself runs through the same animation engine as F91 so it inherits the presenter's transition choices for the source slide.
 - A vote in progress is itself an interactive widget: the presenter can choose to display running tallies or hide them until close.
 
 **Edge cases.**
+
 - **Tie at quorum:** the vote enters `tie` state; the presenter is nudged to choose manually.
 - **Quorum never met:** vote auto-closes at configured duration with the leading option as the result; if no option leads by a configured margin (default 5%), the presenter is nudged.
 - **Vote referenced a deleted slide:** if the winning option's target slide is deleted/hidden between vote-open and vote-close, the vote is invalidated and the presenter is notified.
@@ -208,6 +229,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** A continuous slider (numeric 1–N, default 1–10) on a slide; participants drag to a value; the slide's display aggregates into mean / median / distribution live.
 
 **Acceptance criteria.**
+
 - Slider responds to drag on touch devices (no jitter, no dead zones); tap-to-position also supported.
 - Aggregation is server-authoritative: participants see their own slider value; the audience sees the aggregate (mean by default; switchable to median, mode, distribution histogram, or all of the above).
 - Mean and median update within 1.5 s p95 of any value change.
@@ -216,11 +238,13 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Aggregations can be saved as data variables (F100) and trigger downstream effects (e.g., low mean sentiment auto-opens a Q&A prompt).
 
 **Behavioral details.**
+
 - The sentiment collector (see §4) maintains per-slide `slider_id → value` state plus running aggregates (count, sum, sum-of-squares, sorted reservoir for median).
 - For median computation at scale, a P²-quantile estimator or t-digest is used; recomputation is O(log N) per insert.
 - Aggregation is broadcast to subscribers on a debounced cadence (default 500 ms) with the latest snapshot, so rapid updates don't flood the channel.
 
 **Edge cases.**
+
 - **All participants at the same value:** distribution histogram collapses to a single bar; rendering should not break.
 - **Out-of-range values:** server clamps to `[min, max]`; out-of-range submits return `value_out_of_range` and the client UI snaps to nearest valid.
 - **Single participant:** mean = median = their value; UI handles N=1 cleanly.
@@ -233,6 +257,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** A persistent "raise hand" affordance on the participant phone; a queue on the presenter's screen shows raised hands in order; the presenter can lower hands, reorder, and "call on" the next participant.
 
 **Acceptance criteria.**
+
 - Tapping "raise hand" toggles the participant's hand state (raised ↔ lowered).
 - The presenter queue is ordered by raise time (FIFO) by default; presenter can pin, reorder, or merge identical-namer hands.
 - The presenter can "call on" the next hand, which triggers a notification on that participant's phone and (optionally) promotes them to speaker in the meeting-tool integration (F188).
@@ -241,11 +266,13 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Optional: a per-participant hand counter shown to the presenter ("this person has raised their hand 3 times this session").
 
 **Behavioral details.**
+
 - The raise hand queue (see §4) is backed by a sorted set keyed by raise timestamp; promotion ("call on next") atomically pops the head and notifies the participant.
 - The presenter panel shows the queue with avatar (if identified), display name, raise time, and per-hand dwell time.
 - On a Zoom/Meet/Teams integration, "call on" triggers the provider's "promote to panelist" API; failure falls back to a UI-only promotion (notification only).
 
 **Edge cases.**
+
 - **Identical-name collisions:** display names are disambiguated with last-2-of-join-id suffix in the presenter view.
 - **Race on "call on next":** if two presenter tabs (co-presenter) both click "next", the server enforces atomicity; only one promotion succeeds; the other gets a "already promoted" response.
 - **Re-raise after auto-lower:** allowed; raises are re-counted; the participant's counter increments.
@@ -258,6 +285,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** When the session ends, each participant receives a unique URL to a personalized handout: their Q&A submissions, the slides they lingered on, polls they answered, and a copy of any resources the presenter attached.
 
 **Acceptance criteria.**
+
 - Handouts are generated within 60 s of session end and dispatched to each participant.
 - Each handout URL is single-use (per recipient), with optional expiration (default 30 days post-session).
 - Handout content includes: deck PDF (or web-archive export), personalized annotations (the participant's own Q&A, votes, slider values), and any presenter-attached resources.
@@ -266,12 +294,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Handout generation can be disabled per session or per participant.
 
 **Behavioral details.**
+
 - The handout generator (see §4) reads from the session's data lake (see §5) at session end and builds per-participant artifacts.
 - Personalization is opt-out-able: a participant can choose "send me a generic handout" instead.
 - Resources are deduplicated across participants — the same PDF is generated once and served from object storage; only the personalized metadata wrapper is per-recipient.
 - Handout URLs are signed and short-lived; revocation is supported (presenter can void all handouts for a session).
 
 **Edge cases.**
+
 - **Email bounces:** the participant is shown the handout URL in their app next time they open the participant view, if still in TTL.
 - **Identified-mode consent revoked before handout:** the handout is generated in anonymous mode for that participant; their identity is not bound.
 - **Handout for a participant who joined but never voted:** still generated; shows their join/leave times and a "you joined this session" stamp.
@@ -285,6 +315,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** Per-session and per-participant records of join/leave times, slide dwell, interactions (votes, questions, raises), and reactions — designed to satisfy training and compliance use cases (FCA, HIPAA-adjacent training logs, regulated-industry CEU tracking, etc.).
 
 **Acceptance criteria.**
+
 - Attendance is captured automatically from join/leave events; manual check-in is supported as a backup.
 - Engagement record is tamper-evident: append-only, hash-chained, and timestamped by a trusted clock.
 - Per-slide dwell time is recorded with start/end timestamps; gaps > N seconds (configurable, default 30 s) are flagged as potential disengagement.
@@ -293,12 +324,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Records are access-controlled: only authorized roles (admin, compliance officer) can read them; presenter cannot edit after session end.
 
 **Behavioral details.**
+
 - The attendance logger (see §4) writes append-only records to a compliance log store; hash chaining is per-session (each record references the previous record's hash).
 - Engagement score (a derived metric) combines dwell, interactions, and reaction density; the formula is documented and version-pinned (so changing the formula doesn't invalidate prior records).
 - SCORM packages are generated per session and include the deck content, the attendance/engagement XML, and a launch URL that the LMS can deep-link to.
 - Audit log entries are emitted for every read of attendance records.
 
 **Edge cases.**
+
 - **Clock skew on participant devices:** server clock is authoritative for join/leave; client-reported times are stored as `client_reported_at` for diagnostics but not used for compliance.
 - **Mid-session identity switch:** a participant changing display name or anonymity status mid-session is recorded as a `participant_state_changed` event; old and new identities are linked by stable `participant_id`.
 - **SCORM package version:** the generator can emit both SCORM 1.2 and SCORM 2004 (4th Ed); package selection is per-session.
@@ -312,6 +345,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** As the presenter speaks, each participant's phone shows real-time captions in their selected language — STT in the source language, MT to the target, then TTS optional playback.
 
 **Acceptance criteria.**
+
 - Latency target: end-to-end caption appears on participant phone within 4 s p95 of presenter utterance.
 - Source language auto-detected (default English); supported target languages at launch: 12 (English, Bangla, Hindi, Arabic, Spanish, French, Mandarin, Portuguese, Russian, Japanese, Korean, German).
 - Caption text renders on the participant phone only by default; an opt-in toggle displays captions on the broadcast view as well (one language at a time, set by presenter).
@@ -320,12 +354,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - The translation pipeline degrades gracefully on errors: if MT is unavailable for a language pair, falls back to the source captions in the original language.
 
 **Behavioral details.**
+
 - The translation pipeline (see §4) has three stages: STT (presenter's audio captured from the meeting-tool integration or in-app mic), MT, and (optional) TTS.
 - Audio chunks are ~2 s; the pipeline is streaming; partial captions appear word-by-word.
 - The participant client buffers up to 30 s of captions to handle momentary network drops; captions don't disappear during drops.
 - Per-participant language preference is stored on the participant record and applied on subsequent sessions with the same presenter (with consent).
 
 **Edge cases.**
+
 - **Multiple speakers:** if the meeting-tool integration feeds a multi-channel audio stream, STT runs on the active speaker channel (the presenter); cross-talk is filtered where possible.
 - **Profanity / brand-sensitive terms:** STT output is passed through the same moderation pipeline as word-cloud input (see F144, §3) before translation, to prevent brand damage.
 - **Low-confidence STT:** low-confidence regions are marked with a "…" indicator on the caption; the participant can tap to see the raw STT result.
@@ -340,6 +376,7 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 **Definition.** After the session ends, each participant sees a feedback form (overall NPS-style score + per-slide 1–5 ratings + free-text comments) prefilled where possible from their engagement.
 
 **Acceptance criteria.**
+
 - Feedback form is short by default (NPS + top 3 moments + free-text); expanded form available on opt-in.
 - Per-slide rating is shown as a quick-tap row of stars (1–5) for each slide the participant viewed.
 - Free-text comments are passed through profanity moderation (see F144, §3) before storage.
@@ -348,12 +385,14 @@ The fundamental design tension in this section: **public, anonymous, mobile-firs
 - Aggregated feedback (without individual identifiers) is shown to the presenter on the session recap.
 
 **Behavioral details.**
+
 - The feedback collector (see §4) renders the form on session end; participants who leave early see it the next time they open the participant app within the configured window (default 7 days).
 - Per-slide ratings are prefilled with engagement-based heuristics (e.g., a slide where the participant reacted heavily defaults to 5★; they can override).
 - Free-text feedback is aggregated with simple keyword extraction; raw text is shown only to authorized roles.
 - Feedback is bound to the session id; per-participant binding is opt-in (default anonymous = no binding).
 
 **Edge cases.**
+
 - **No active participant at session end:** no feedback form is sent; the presenter sees a "no participants joined" empty state in recap.
 - **Form already submitted:** re-opening the form shows a "you've already given feedback — thank you" state.
 - **Form abandoned mid-way:** partial submissions are saved as drafts; the participant can resume.
@@ -396,6 +435,7 @@ The dominant audience entry point. Designed for low-friction, high-trust.
 ```
 
 Key UX rules:
+
 - Zero state on the participant phone is **never empty**: even before the presenter starts, the participant sees a "joining..." then "you're in — stand by" frame, never a blank white page.
 - The QR itself carries a session code only (no PII, no deck id, no presenter id); the deep link resolves at the join service.
 - A short, friendly onboarding overlay explains "you're about to join a live session" with two buttons: **Join** and **Join anonymously**. The latter is the default; the former appears when the presenter has identified-mode enabled.
@@ -790,6 +830,7 @@ Subsystems (horizontal services, scale independently):
 The per-shard stateful service that holds the live session state for one shard of participants.
 
 **Responsibilities.**
+
 - Maintain session state (current slide, active widgets, participant roster).
 - Authenticate WebSocket connections (via session code + participant token).
 - Forward events from the pub/sub layer to connected participants.
@@ -804,6 +845,7 @@ The per-shard stateful service that holds the live session state for one shard o
 The transport layer. Each participant subscribes to the session's channel; the channel is fanned out via edge workers to all subscribed participants.
 
 **Per-event flow.**
+
 1. Presenter (or participant) emits an event (e.g., `vote_cast`).
 2. The originating service publishes to the session's pub/sub topic.
 3. Edge workers receive the event and forward it to all WebSocket connections on the topic.
@@ -816,6 +858,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.4 Poll engine
 
 **Responsibilities.**
+
 - Accept `vote_cast` events, enforce one-person-one-vote.
 - Broadcast `vote_aggregate` snapshots on debounce.
 - Support poll lifecycle: `draft → open → closed → revealed`.
@@ -827,6 +870,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.5 Word cloud engine (with moderation)
 
 **Responsibilities.**
+
 - Tokenize, normalize, and count submissions.
 - Apply moderation (blocklist + ML).
 - Compute word frequency map and broadcast cloud snapshots.
@@ -839,6 +883,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.6 Q&A engine
 
 **Responsibilities.**
+
 - Manage question CRUD with state transitions.
 - Compute rank scores (upvotes − downvotes + recency).
 - Handle moderation (auto-flag at report threshold; presenter approval queue).
@@ -849,6 +894,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.7 Quiz engine with scoring
 
 **Responsibilities.**
+
 - Drive state machine: `idle → countdown → accepting_answers → revealing → leaderboard → next → finished`.
 - Score attempts (base + time bonus).
 - Generate leaderboard snapshots.
@@ -859,6 +905,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.8 Reaction broadcaster
 
 **Responsibilities.**
+
 - Rate-limit per participant and per emoji.
 - Aggregate bursts when global rate exceeds threshold.
 - Broadcast `{emoji, count}` snapshots every 250 ms.
@@ -868,6 +915,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.9 Navigation vote collector
 
 **Responsibilities.**
+
 - Special-case poll engine with deck-state side effects.
 - Compute quorum (rolling 30 s connected average).
 - Trigger deck auto-advance on quorum met (or presenter override).
@@ -877,6 +925,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.10 Sentiment collector
 
 **Responsibilities.**
+
 - Maintain per-slider state and aggregate statistics.
 - Compute mean / median (P² quantile) / distribution histogram.
 - Broadcast snapshot every 500 ms.
@@ -886,6 +935,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.11 Raise hand queue
 
 **Responsibilities.**
+
 - Sorted set keyed by raise timestamp.
 - Atomic "call on next" (single-writer enforces atomicity across co-presenters).
 - Auto-lower on idle timeout (default 5 min).
@@ -896,6 +946,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.12 Handout generator
 
 **Responsibilities.**
+
 - On session end, generate per-participant handouts.
 - Personalize with participant's interactions and attached resources.
 - Sign URLs with TTL.
@@ -906,6 +957,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.13 Attendance logger
 
 **Responsibilities.**
+
 - Append-only, hash-chained records.
 - Emit SCORM packages for LMS ingestion.
 - Retention enforcement; legal hold integration.
@@ -915,6 +967,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.14 Translation pipeline
 
 **Responsibilities.**
+
 - Capture presenter audio (from meeting-tool integration or in-app mic).
 - STT in source language (auto-detected).
 - MT to participant's target language.
@@ -927,6 +980,7 @@ The transport layer. Each participant subscribes to the session's channel; the c
 ### 4.15 Feedback collector
 
 **Responsibilities.**
+
 - Render feedback form per session.
 - Aggregate per-slide ratings, NPS, free-text.
 - Moderate free-text (blocklist + ML).
@@ -1455,12 +1509,14 @@ WebSocket errors use the same envelope on a `error` event.
 ### 7.2 Anonymous vs identified mode
 
 **Anonymous mode (default).**
+
 - No PII collected beyond session-derived ephemeral participant_id.
 - No display name shown to other participants; presenter sees display name (alias) only.
 - No bound identity; participant re-joins as a new identity.
 - PII handling: minimal; what little is collected (IP hash, device meta) is hashed and retained only for the session.
 
 **Identified mode (opt-in per session).**
+
 - Email or SSO verification required.
 - Display name bound to identity; presenter sees real name.
 - Vote/response attribution is auditable.
@@ -1472,6 +1528,7 @@ WebSocket errors use the same envelope on a `error` event.
 ### 7.3 PII handling for handouts
 
 **Personalization scope.** A handout contains:
+
 - The participant's own interactions (their votes, questions, slider values, hand raises).
 - Attached resources the presenter chose to include.
 - The deck export (PDF or web-archive) — same content as everyone receives.
@@ -1527,6 +1584,7 @@ WebSocket errors use the same envelope on a `error` event.
 ### 8.2 Aggregation update latency
 
 **Targets.**
+
 - Poll aggregate broadcast: < 1.5 s p95 from vote cast.
 - Word cloud snapshot: < 3 s p95 from submission.
 - Slider aggregate: < 1.5 s p95 from value change.
@@ -1539,6 +1597,7 @@ WebSocket errors use the same envelope on a `error` event.
 **Target.** End-to-end caption within 4 s p95.
 
 **Stages.**
+
 - Audio capture → STT chunk: < 1 s p95.
 - STT → MT: < 2 s p95.
 - MT → broadcast: < 500 ms p95.
@@ -1555,6 +1614,7 @@ WebSocket errors use the same envelope on a `error` event.
 ### 9.1 Observability
 
 **Metrics (per session, per service).**
+
 - `audience.participants.connected` (gauge)
 - `audience.events.published` (counter)
 - `audience.events.delivered` (counter)
@@ -1572,6 +1632,7 @@ WebSocket errors use the same envelope on a `error` event.
 **Traces.** Distributed tracing via OpenTelemetry; trace ID propagated from participant click through engine to broadcast.
 
 **Alerts.**
+
 - Fan-out delivery rate < 99% over 5 min → alert.
 - Aggregation latency p95 > 5 s over 5 min → alert.
 - Translation latency p95 > 6 s over 5 min → alert.
@@ -1584,6 +1645,7 @@ WebSocket errors use the same envelope on a `error` event.
 **Integration tests.** End-to-end flows in a test environment (join → vote → aggregate → handout).
 
 **Load tests (k6 / Locust).**
+
 - 10,000 concurrent participants sustained for 60 min — must hit latency targets.
 - 25,000 concurrent participants (the ceiling) — must degrade gracefully.
 - Burst tests: 5,000 simultaneous votes within 1 s.
@@ -1591,11 +1653,13 @@ WebSocket errors use the same envelope on a `error` event.
 - Quiz stress: 10,000 concurrent quiz attempts within the same question window.
 
 **Fairness tests.**
+
 - Leaderboard reproducibility: reconnecting a participant mid-quiz must produce the same final score as a never-disconnected participant who answered identically.
 - Quorum correctness: simulated churn (participants joining/leaving during a nav vote) must not cause the quorum to swing wildly.
 - Tiebreaker: synthetic tied scores must always break the same way (by cumulative response time, then first-correct submission).
 
 **Security tests.**
+
 - Bot-resistance: a scripted bot attempting 1,000 votes/sec must be throttled within the first second.
 - Honeypot: bot submissions to the honeypot field must be silently rejected.
 - Identified mode bypass attempts: forged participant tokens must be rejected.
@@ -1603,6 +1667,7 @@ WebSocket errors use the same envelope on a `error` event.
 - Handout token replay: an expired/revoked token must return 401/410.
 
 **Accessibility tests.**
+
 - Automated: axe-core / Pa11y on every participant web app screen.
 - Manual: keyboard-only and screen-reader (VoiceOver, TalkBack, NVDA) passes per major flow.
 
@@ -1633,7 +1698,7 @@ Form inputs inside slides (F101) feed variables; sliders in F101 and sentiment s
 
 ### 10.4 Analytics (section 12, F169–F178)
 
-- **Per-viewer, per-slide analytics (F169)** naturally extends with participation: per-participant, per-slide, with the additional dimension of *what they did* (vote, question, slider value).
+- **Per-viewer, per-slide analytics (F169)** naturally extends with participation: per-participant, per-slide, with the additional dimension of _what they did_ (vote, question, slider value).
 - **Interactive element analytics (F170)** includes all participation widgets as interactive elements.
 - **Presentation delivery analytics (F175)** is largely about live session participation: attendance, poll participation rate, question volume, quiz engagement.
 - **Funnel view (F177)** for sales decks now includes "did they answer the qualification poll" as a funnel step.

@@ -4,7 +4,15 @@
   "title": "CollabCommentMentioned",
   "description": "Emitted when a user is mentioned in a comment. Carries the mention details for notification dispatch.",
   "type": "object",
-  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "required": [
+    "event_id",
+    "event_type",
+    "ts_ms",
+    "workspace_id",
+    "actor_id",
+    "actor_type",
+    "payload"
+  ],
   "properties": {
     "event_id": {
       "type": "string",

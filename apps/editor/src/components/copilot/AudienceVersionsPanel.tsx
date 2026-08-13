@@ -168,10 +168,7 @@ export function AudienceVersionsPanel({
             </span>
           </div>
 
-          <ul
-            className="flex flex-col gap-1"
-            data-testid={`${dataTestId}-slides`}
-          >
+          <ul className="flex flex-col gap-1" data-testid={`${dataTestId}-slides`}>
             {version.slides.map((s) => (
               <li
                 key={s.slide_id}
@@ -179,9 +176,7 @@ export function AudienceVersionsPanel({
                 data-testid={`${dataTestId}-slide-${s.slide_id}`}
               >
                 <p className="text-xs font-medium text-slate-100">{s.title}</p>
-                {s.body && (
-                  <p className="text-[11px] text-slate-400">{s.body}</p>
-                )}
+                {s.body && <p className="text-[11px] text-slate-400">{s.body}</p>}
               </li>
             ))}
           </ul>

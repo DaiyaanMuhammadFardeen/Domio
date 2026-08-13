@@ -99,7 +99,10 @@ describe('CreatorAnalyticsService', () => {
       store.seedRevenueEvent(makeRevenueEvent({ net_cents: 1400, id: 'rev-2' }));
       store.seedLicenseGrant(makeLicenseGrant());
 
-      const result = await service.getCreatorAnalytics({ creator_id: 'creator-1', period: '2025-06' });
+      const result = await service.getCreatorAnalytics({
+        creator_id: 'creator-1',
+        period: '2025-06',
+      });
 
       expect(result.creator_id).toBe('creator-1');
       expect(result.period).toBe('2025-06');
@@ -176,9 +179,9 @@ describe('CreatorAnalyticsService', () => {
 
   describe('getCreatorStatement', () => {
     it('throws StatementNotFoundError for non-existent statement', async () => {
-      await expect(
-        service.getCreatorStatement('stmt-nonexistent'),
-      ).rejects.toThrow(StatementNotFoundError);
+      await expect(service.getCreatorStatement('stmt-nonexistent')).rejects.toThrow(
+        StatementNotFoundError,
+      );
     });
 
     it('returns existing statement', async () => {
@@ -225,10 +228,16 @@ describe('CreatorAnalyticsService', () => {
         period_month: '2025-06',
       });
 
-      const monthly = await service.listCreatorStatements({ creator_id: 'creator-1', kind: 'monthly' });
+      const monthly = await service.listCreatorStatements({
+        creator_id: 'creator-1',
+        kind: 'monthly',
+      });
       expect(monthly).toHaveLength(1);
 
-      const yearly = await service.listCreatorStatements({ creator_id: 'creator-1', kind: 'yearly_1099k' });
+      const yearly = await service.listCreatorStatements({
+        creator_id: 'creator-1',
+        kind: 'yearly_1099k',
+      });
       expect(yearly).toHaveLength(0);
     });
   });

@@ -45,7 +45,12 @@ export function useTouchNav({
         const t = e.touches[0]!;
         start.current = { x: t.clientX, y: t.clientY, t: Date.now(), pinchDist: 0 };
       } else if (e.touches.length === 2) {
-        start.current = { x: 0, y: 0, t: Date.now(), pinchDist: distance(e.touches[0]!, e.touches[1]!) };
+        start.current = {
+          x: 0,
+          y: 0,
+          t: Date.now(),
+          pinchDist: distance(e.touches[0]!, e.touches[1]!),
+        };
       }
     };
 

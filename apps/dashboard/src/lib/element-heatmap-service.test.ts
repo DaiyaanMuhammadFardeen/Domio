@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import {
-  fetchElementHeatmap,
-  fetchElementTimeSeries,
-} from './element-heatmap-service.js';
+import { fetchElementHeatmap, fetchElementTimeSeries } from './element-heatmap-service.js';
 
 const originalFetch = globalThis.fetch;
 

@@ -63,7 +63,8 @@ describe('ab-service', () => {
     globalThis.fetch = mock;
 
     await fetchExperiments('ws-xyz', 'http://ab.test');
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
     expect(calledUrl).toContain('workspace_id=ws-xyz');
   });
 });

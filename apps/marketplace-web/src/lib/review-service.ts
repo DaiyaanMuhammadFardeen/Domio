@@ -100,25 +100,18 @@ export async function submitReview(
  * POST /v1/marketplace/reviews/:id/replies — creator posts a single reply.
  * Server enforces one-reply-per-review; a second call returns 409.
  */
-export async function replyToReview(
-  reviewId: string,
-  payload: ReplyInput,
-): Promise<Reply> {
-  return apiFetch<Reply>(
-    `/v1/marketplace/reviews/${encodeURIComponent(reviewId)}/replies`,
-    {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    },
-  );
+export async function replyToReview(reviewId: string, payload: ReplyInput): Promise<Reply> {
+  return apiFetch<Reply>(`/v1/marketplace/reviews/${encodeURIComponent(reviewId)}/replies`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }
 
 /**
  * POST /v1/marketplace/reviews/:id/helpful — toggle / increment helpful count.
  */
 export async function markHelpful(reviewId: string): Promise<void> {
-  await apiFetch<void>(
-    `/v1/marketplace/reviews/${encodeURIComponent(reviewId)}/helpful`,
-    { method: 'POST' },
-  );
+  await apiFetch<void>(`/v1/marketplace/reviews/${encodeURIComponent(reviewId)}/helpful`, {
+    method: 'POST',
+  });
 }

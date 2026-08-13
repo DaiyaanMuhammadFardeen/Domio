@@ -75,7 +75,9 @@ export class InMemoryIdempotencyStore implements IdempotencyStore {
     return { exists: false };
   }
 
-  async commit(record: Omit<IdempotencyRecord, 'expires_at_ms'> & { ttl_ms: number }): Promise<void> {
+  async commit(
+    record: Omit<IdempotencyRecord, 'expires_at_ms'> & { ttl_ms: number },
+  ): Promise<void> {
     const k = this.tripleKey(record.key, record.workspace_id, record.session_id);
     this.records.set(k, {
       key: record.key,
@@ -87,7 +89,11 @@ export class InMemoryIdempotencyStore implements IdempotencyStore {
     });
   }
 
-  async get(key: string, workspace_id: string, session_id: string): Promise<IdempotencyRecord | null> {
+  async get(
+    key: string,
+    workspace_id: string,
+    session_id: string,
+  ): Promise<IdempotencyRecord | null> {
     const k = this.tripleKey(key, workspace_id, session_id);
     const r = this.records.get(k);
     if (!r) return null;

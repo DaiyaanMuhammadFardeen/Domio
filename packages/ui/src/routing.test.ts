@@ -46,9 +46,7 @@ describe('routing — presenter', () => {
     expect(presenter('sess-1')).toBe('/session/sess-1');
   });
   it('with token adds query', () => {
-    expect(presenterWithToken('sess-1', 'tok')).toBe(
-      '/session/sess-1?token=tok',
-    );
+    expect(presenterWithToken('sess-1', 'tok')).toBe('/session/sess-1?token=tok');
   });
 });
 
@@ -97,9 +95,7 @@ describe('routing — marketplace-web', () => {
     expect(marketplaceWeb('listing', { slug: 's/1' })).toBe('/listing/s%2F1');
   });
   it('builds search with query', () => {
-    expect(marketplaceWeb('search', { q: 'hello world' })).toBe(
-      '/search?q=hello%20world',
-    );
+    expect(marketplaceWeb('search', { q: 'hello world' })).toBe('/search?q=hello%20world');
   });
 });
 

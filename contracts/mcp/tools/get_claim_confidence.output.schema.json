@@ -7,13 +7,13 @@
   "required": ["claim_id", "score", "evidence_ids", "disputed", "tool_version"],
   "additionalProperties": false,
   "properties": {
-    "claim_id":     { "type": "string" },
-    "deck_id":      { "type": "string" },
-    "score":        { "type": "number", "minimum": 0, "maximum": 1 },
+    "claim_id": { "type": "string" },
+    "deck_id": { "type": "string" },
+    "score": { "type": "number", "minimum": 0, "maximum": 1 },
     "evidence_ids": { "type": "array", "items": { "type": "string" } },
-    "disputed":     { "type": "boolean" },
-    "verified_at":  { "type": "string", "format": "date-time" },
-    "reason":       { "type": "string" },
+    "disputed": { "type": "boolean" },
+    "verified_at": { "type": "string", "format": "date-time" },
+    "reason": { "type": "string" },
     "tool_version": { "type": "string" }
   }
 }

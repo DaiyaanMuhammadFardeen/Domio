@@ -1,11 +1,11 @@
 packages:
-  - "apps/*"
-  - "services/*"
-  - "workers/*"
-  - "packages/*"
-  - "tools/*"
-  - "tests/integration/*"
-  - "tests/a11y"
-  - "tests/e2e"
-  - "tests/security"
-  - "tests/load/replay-corpora"
+  - 'apps/*'
+  - 'services/*'
+  - 'workers/*'
+  - 'packages/*'
+  - 'tools/*'
+  - 'tests/integration/*'
+  - 'tests/a11y'
+  - 'tests/e2e'
+  - 'tests/security'
+  - 'tests/load/replay-corpora'

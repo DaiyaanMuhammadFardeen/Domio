@@ -5,8 +5,7 @@ import { useI18n } from '../../lib/i18n';
 import { listCreatorReviews, type ReviewWithListing, type Reply } from '../../lib/review-service';
 import { CreatorReviewRow } from '../../components/reviews/CreatorReviewRow';
 
-const WORKSPACE_ID =
-  process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
+const WORKSPACE_ID = process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
 
 export default function CreatorReviewsPage() {
   const { t } = useI18n();
@@ -48,12 +47,8 @@ export default function CreatorReviewsPage() {
   return (
     <div data-testid="creator-reviews-page" className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t('reviews.heading')}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {t('reviews.subheading')}
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('reviews.heading')}</h1>
+        <p className="mt-1 text-sm text-slate-500">{t('reviews.subheading')}</p>
       </header>
 
       {loading ? (
@@ -94,11 +89,7 @@ export default function CreatorReviewsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {reviews.map((r) => (
-                <CreatorReviewRow
-                  key={r.id}
-                  review={r}
-                  onReplied={handleReplied}
-                />
+                <CreatorReviewRow key={r.id} review={r} onReplied={handleReplied} />
               ))}
             </tbody>
           </table>

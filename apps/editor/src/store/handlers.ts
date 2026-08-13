@@ -57,14 +57,8 @@ import type {
   ConnectionsPanelHotspot,
   ConnectionsPanelOverlay,
 } from '../panels/connections-panel';
-import type {
-  VariablesPanelRule,
-  VariablesPanelVariable,
-} from '../panels/variables-panel';
-import type {
-  StateInspectorMachine,
-  StateMachineEventKind,
-} from '../panels/state-inspector-panel';
+import type { VariablesPanelRule, VariablesPanelVariable } from '../panels/variables-panel';
+import type { StateInspectorMachine, StateMachineEventKind } from '../panels/state-inspector-panel';
 import type { DeepLinkRecord } from '../panels/deep-links-panel';
 import type { QuizRecord } from '../panels/quiz-panel';
 import type { LeaderboardEntry } from '../panels/leaderboard-panel';
@@ -140,10 +134,7 @@ function getSingleSelectedComponent(): Extract<Element, { type: 'component' }> |
 // Selection / slide
 // ---------------------------------------------------------------------------
 
-export function handleSelect(
-  id: ULID,
-  modifiers: { shift: boolean; alt: boolean },
-): void {
+export function handleSelect(id: ULID, modifiers: { shift: boolean; alt: boolean }): void {
   useEditorStore.getState().toggleSelected(id, modifiers);
 }
 
@@ -177,16 +168,10 @@ export function handleToggleFlag(id: ULID, flag: 'locked' | 'hidden'): void {
 // Reorder / insert / remove
 // ---------------------------------------------------------------------------
 
-export function handleReorder(
-  sourceId: ULID,
-  targetId: ULID,
-  place: 'before' | 'after',
-): void {
+export function handleReorder(sourceId: ULID, targetId: ULID, place: 'before' | 'after'): void {
   const ctx = getActiveSlide();
   if (!ctx) return;
-  const slide = useEditorStore.getState().deck?.slides.find(
-    (s) => s.id === ctx.slideId,
-  );
+  const slide = useEditorStore.getState().deck?.slides.find((s) => s.id === ctx.slideId);
   if (!slide) return;
   const targetEl = slide.elements.find((el) => el.id === targetId);
   const sourceEl = slide.elements.find((el) => el.id === sourceId);
@@ -351,14 +336,11 @@ export function handleVariantChange(from: string, to: string): void {
 }
 
 export function handleFilterChange(newFilters: CrossFilter[]): void {
-  const prev =
-    useEditorStore.getState().crossFilters as unknown as CrossFilter[];
+  const prev = useEditorStore.getState().crossFilters as unknown as CrossFilter[];
   useEditorStore.getState().setCrossFilters(newFilters);
   const ctx = getActiveSlide();
   if (!ctx) return;
-  const slide = useEditorStore.getState().deck?.slides.find(
-    (s) => s.id === ctx.slideId,
-  );
+  const slide = useEditorStore.getState().deck?.slides.find((s) => s.id === ctx.slideId);
   if (!slide) return;
   const ops: HistoryOp[] = [];
   for (const el of slide.elements) {
@@ -388,9 +370,7 @@ export function handleBrandKitChange(brandKitId: string): void {
 
 export function handleSchemeToggle(next: ColorScheme): void {
   useEditorStore.getState().setColorScheme(next);
-  const matching = BOOTSTRAP_THEMES.find(
-    (t) => t.scheme === next && t.id.includes('acme'),
-  );
+  const matching = BOOTSTRAP_THEMES.find((t) => t.scheme === next && t.id.includes('acme'));
   if (matching) useEditorStore.getState().setActiveThemeId(matching.id);
 }
 
@@ -502,10 +482,7 @@ function applyLintFix(element: Element, issue: LintIssue): Element {
 export function handleTimelineChange(timeline: LayerTimeline | null): void {
   const el = getSingleSelectedComponent();
   if (!el) return;
-  const prev = (el.component.props ?? {})['x-domio:timeline'] as
-    | LayerTimeline
-    | null
-    | undefined;
+  const prev = (el.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null | undefined;
   const op = timelineOp(el.id, timeline, prev ?? null, nowOp());
   applyOp(op);
   useEditorStore.getState().setTimeline(timeline);
@@ -554,9 +531,7 @@ export function handleReducedMotionChange(policy: ReducedMotionPolicy | null): v
 export function handleCopyAnimation(): void {
   const el = getSingleSelectedComponent();
   if (!el) return;
-  const timeline = (el.component.props ?? {})['x-domio:timeline'] as
-    | LayerTimeline
-    | null;
+  const timeline = (el.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null;
   useEditorStore.getState().setCopiedAnimation(timeline ? { ...timeline } : null);
 }
 
@@ -565,10 +540,7 @@ export function handlePasteAnimation(): void {
   if (!el) return;
   const copied = useEditorStore.getState().copiedAnimation;
   if (!copied) return;
-  const prev = (el.component.props ?? {})['x-domio:timeline'] as
-    | LayerTimeline
-    | null
-    | undefined;
+  const prev = (el.component.props ?? {})['x-domio:timeline'] as LayerTimeline | null | undefined;
   const pasted = { ...copied, id: `tl-${nowOp()}` };
   const op = timelineOp(el.id, pasted, prev ?? null, nowOp());
   applyOp(op);
@@ -676,19 +648,14 @@ export function handleRemoveStateMachine(id: string): void {
   useEditorStore.getState().removeStateMachine(id);
 }
 
-export function handleAdvanceStateMachine(
-  id: string,
-  event: StateMachineEventKind,
-): void {
+export function handleAdvanceStateMachine(id: string, event: StateMachineEventKind): void {
   const machine = useEditorStore.getState().stateMachines.find((m) => m.id === id);
   if (!machine) return;
   const match = machine.stateMachine.transitions.find(
     (t) => t.from === machine.currentState && t.event === event,
   );
   if (!match) return;
-  useEditorStore
-    .getState()
-    .updateStateMachine(id, { currentState: match.to });
+  useEditorStore.getState().updateStateMachine(id, { currentState: match.to });
 }
 
 export function handleTogglePersistInstanceState(id: string, value: boolean): void {
@@ -732,9 +699,9 @@ export function handleLeaderboardUpdate(
     overrideScore?: number | null;
   },
 ): void {
-  const items = useEditorStore.getState().leaderboardItems.map((i) =>
-    i.id === id ? { ...i, ...update } : i,
-  );
+  const items = useEditorStore
+    .getState()
+    .leaderboardItems.map((i) => (i.id === id ? { ...i, ...update } : i));
   useEditorStore.getState().setLeaderboardItems(items);
 }
 
@@ -808,9 +775,7 @@ export function handleAuditDiff(_entry: AuditEntryView): void {
   void _entry;
 }
 
-export async function handleNlParse(
-  prompt: string,
-): Promise<readonly NlToolCallSummary[]> {
+export async function handleNlParse(prompt: string): Promise<readonly NlToolCallSummary[]> {
   // Wired to the brand-aware MCP NL parser in Task #12. Until then
   // the editor returns an empty plan and the operator must wire the
   // prompt manually — no fake tool calls are emitted.
@@ -823,9 +788,7 @@ export function pushAuditEntry(entry: AuditEntryView): void {
   useEditorStore.getState().setAuditEntries([entry, ...current]);
 }
 
-export async function handleNlApply(
-  _calls: readonly NlToolCallSummary[],
-): Promise<void> {
+export async function handleNlApply(_calls: readonly NlToolCallSummary[]): Promise<void> {
   pushAuditEntry({
     id: `apply-${nowOp()}`,
     agentId: 'agent-1',
@@ -837,9 +800,7 @@ export async function handleNlApply(
   });
 }
 
-export async function handleNlRollback(
-  _calls: readonly NlToolCallSummary[],
-): Promise<void> {
+export async function handleNlRollback(_calls: readonly NlToolCallSummary[]): Promise<void> {
   pushAuditEntry({
     id: `rollback-${nowOp()}`,
     agentId: 'agent-1',
@@ -862,7 +823,8 @@ export async function handleDeckDiffCompare(
   // Wired to the deck-version-svc diff endpoint in Task #12. Until then
   // the editor returns an empty diff — no fake entries.
   return { added: [], removed: [], changed: [] };
-  void _a; void _b;
+  void _a;
+  void _b;
 }
 
 // ---------------------------------------------------------------------------

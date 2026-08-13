@@ -62,24 +62,24 @@ export function buildCsp(options: WebSecurityOptions = {}): string {
   scriptSrc.push(...(options.allowlist?.script ?? []));
 
   const directives: Record<string, string[]> = {
-    "default-src": ["'self'"],
-    "script-src": scriptSrc,
-    "style-src": ["'self'", "'unsafe-inline'", ...(options.allowlist?.style ?? [])],
-    "img-src": ["'self'", "data:", "blob:", ...(options.allowlist?.img ?? [])],
-    "font-src": ["'self'", "data:", ...(options.allowlist?.font ?? [])],
-    "connect-src": ["'self'", ...(options.allowlist?.connect ?? [])],
-    "media-src": ["'self'", ...(options.allowlist?.media ?? [])],
-    "frame-src": ["'self'", ...(options.allowlist?.frame ?? [])],
-    "frame-ancestors": ["'none'"],
-    "object-src": ["'none'"],
-    "base-uri": ["'self'"],
-    "form-action": ["'self'"],
-    "manifest-src": ["'self'"],
+    'default-src': ["'self'"],
+    'script-src': scriptSrc,
+    'style-src': ["'self'", "'unsafe-inline'", ...(options.allowlist?.style ?? [])],
+    'img-src': ["'self'", 'data:', 'blob:', ...(options.allowlist?.img ?? [])],
+    'font-src': ["'self'", 'data:', ...(options.allowlist?.font ?? [])],
+    'connect-src': ["'self'", ...(options.allowlist?.connect ?? [])],
+    'media-src': ["'self'", ...(options.allowlist?.media ?? [])],
+    'frame-src': ["'self'", ...(options.allowlist?.frame ?? [])],
+    'frame-ancestors': ["'none'"],
+    'object-src': ["'none'"],
+    'base-uri': ["'self'"],
+    'form-action': ["'self'"],
+    'manifest-src': ["'self'"],
   };
 
   return Object.entries(directives)
-    .map(([k, v]) => `${k} ${v.join(" ")}`)
-    .join("; ");
+    .map(([k, v]) => `${k} ${v.join(' ')}`)
+    .join('; ');
 }
 
 /**
@@ -90,7 +90,10 @@ export function buildCsp(options: WebSecurityOptions = {}): string {
  */
 export class InsecureCookieError extends Error {
   readonly code = 'INSECURE_COOKIE' as const;
-  constructor(public readonly cookieName: string, public readonly reason: string) {
+  constructor(
+    public readonly cookieName: string,
+    public readonly reason: string,
+  ) {
     super(`insecure cookie ${cookieName}: ${reason}`);
     this.name = 'InsecureCookieError';
   }

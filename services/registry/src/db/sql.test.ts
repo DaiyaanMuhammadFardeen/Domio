@@ -19,7 +19,21 @@ import {
   tsToMs,
   bigintToNum,
 } from './sql.js';
-import type { ComponentPackage, SmartProp, UserLibraryItem, TeamLibrary, TeamLibraryEvent, MarketplaceListing, Review, LicenseGrant, Template, SectionTemplate, StickerPack, BrandLockRegion, IconRecord } from '../store/types.js';
+import type {
+  ComponentPackage,
+  SmartProp,
+  UserLibraryItem,
+  TeamLibrary,
+  TeamLibraryEvent,
+  MarketplaceListing,
+  Review,
+  LicenseGrant,
+  Template,
+  SectionTemplate,
+  StickerPack,
+  BrandLockRegion,
+  IconRecord,
+} from '../store/types.js';
 import type { AuditRow } from '../store/interface.js';
 
 // ---------------------------------------------------------------------------

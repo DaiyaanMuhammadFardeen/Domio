@@ -59,10 +59,7 @@ export function HistoryPanel(props: HistoryPanelProps): ReactElement {
           const absolute = i;
           const isActive = scrubIndex === absolute;
           return (
-            <li
-              key={entry.op.id}
-              className={`history__entry${isActive ? ' is-active' : ''}`}
-            >
+            <li key={entry.op.id} className={`history__entry${isActive ? ' is-active' : ''}`}>
               <button
                 type="button"
                 onMouseEnter={() => setScrubIndex(absolute)}
@@ -75,7 +72,9 @@ export function HistoryPanel(props: HistoryPanelProps): ReactElement {
                   <img src={entry.op.thumbnail} alt="" className="history__thumb" />
                 ) : null}
                 <span className="history__name">{describeOp(entry.op)}</span>
-                <span className="history__index">{index}/{total}</span>
+                <span className="history__index">
+                  {index}/{total}
+                </span>
               </button>
             </li>
           );
@@ -83,7 +82,9 @@ export function HistoryPanel(props: HistoryPanelProps): ReactElement {
         {future.map((entry, i) => (
           <li key={entry.op.id} className="history__entry history__entry--future">
             <span className="history__name">{describeOp(entry.op)}</span>
-            <span className="history__index">{redoCount - i}/{total}</span>
+            <span className="history__index">
+              {redoCount - i}/{total}
+            </span>
           </li>
         ))}
       </ol>
@@ -92,5 +93,8 @@ export function HistoryPanel(props: HistoryPanelProps): ReactElement {
 }
 
 function describeOp(op: HistoryOp): string {
-  return op.name.replace(/Op$/, '').replace(/([A-Z])/g, ' $1').trim();
+  return op.name
+    .replace(/Op$/, '')
+    .replace(/([A-Z])/g, ' $1')
+    .trim();
 }

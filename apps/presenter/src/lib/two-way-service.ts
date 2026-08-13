@@ -129,7 +129,10 @@ function buildSeedSliders(slideId: string): BidirSlider[] {
 }
 
 // Module-local in-memory state. Tests can reset via __resetBidirServiceState.
-let store: Map<string, { sliders: BidirSlider[]; adjustments: BidirAdjustment[]; savedAtMs: number | null }> = new Map();
+let store: Map<
+  string,
+  { sliders: BidirSlider[]; adjustments: BidirAdjustment[]; savedAtMs: number | null }
+> = new Map();
 
 function ensureSlide(slideId: string): {
   sliders: BidirSlider[];
@@ -191,13 +194,10 @@ export async function adjustBidirSlider(
   }
   const existing = entry.sliders[idx]!;
   const rounded = roundToStep(clamp(value, existing.min, existing.max), existing.step);
-  const fromValue =
-    actor.type === 'presenter' ? existing.presenter_value : existing.audience_value;
+  const fromValue = actor.type === 'presenter' ? existing.presenter_value : existing.audience_value;
   const updated: BidirSlider = recompute({
     ...existing,
-    ...(actor.type === 'presenter'
-      ? { presenter_value: rounded }
-      : { audience_value: rounded }),
+    ...(actor.type === 'presenter' ? { presenter_value: rounded } : { audience_value: rounded }),
   });
   entry.sliders[idx] = updated;
 

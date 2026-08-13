@@ -58,7 +58,7 @@ describe('clickhouse client url builder', () => {
         port: 3030,
         readOnly: false,
       });
-      await client.query("SELECT {s:String}", { s: "o'malley" });
+      await client.query('SELECT {s:String}', { s: "o'malley" });
       const u = new URL(capturedUrl as string);
       // ClickHouse URL params are parsed natively (typed by the SQL
       // placeholder), so we must NOT add surrounding quotes — only
@@ -95,7 +95,8 @@ describe('clickhouse client url builder', () => {
   });
 
   it('propagates non-200 responses as ClickHouseError', async () => {
-    const fakeFetch = (async () => new Response('table not found', { status: 404 })) as unknown as typeof fetch;
+    const fakeFetch = (async () =>
+      new Response('table not found', { status: 404 })) as unknown as typeof fetch;
     const oldFetch = (globalThis as { fetch?: unknown }).fetch;
     (globalThis as { fetch: typeof fetch }).fetch = fakeFetch;
     try {

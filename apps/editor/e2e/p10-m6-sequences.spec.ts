@@ -36,9 +36,13 @@ test.describe('P10-M6.2 — Presentation sequences', () => {
 
   test('Move-down reorders slides', async ({ page }) => {
     await page.click('[data-testid="m6-sequence-tab"]');
-    const firstId = await page.locator('[data-testid="m6-sequence-slide-0"] .sequence-row__id').innerText();
+    const firstId = await page
+      .locator('[data-testid="m6-sequence-slide-0"] .sequence-row__id')
+      .innerText();
     await page.click('[data-testid="m6-sequence-down-0"]');
-    const newFirstId = await page.locator('[data-testid="m6-sequence-slide-0"] .sequence-row__id').innerText();
+    const newFirstId = await page
+      .locator('[data-testid="m6-sequence-slide-0"] .sequence-row__id')
+      .innerText();
     expect(newFirstId).not.toBe(firstId);
   });
 });

@@ -30,7 +30,8 @@ export interface SandboxPolicyServiceOptions {
 const DEFAULT_CHARS = '0123456789ABCDEFGHJKMNP-TV-Z';
 const defaultId = (): string => {
   let out = '';
-  for (let i = 0; i < 26; i++) out += DEFAULT_CHARS[Math.floor(Math.random() * DEFAULT_CHARS.length)]!;
+  for (let i = 0; i < 26; i++)
+    out += DEFAULT_CHARS[Math.floor(Math.random() * DEFAULT_CHARS.length)]!;
   return out;
 };
 
@@ -47,7 +48,9 @@ export class SandboxPolicyService {
     this.clock = opts.clock ?? defaultClock;
   }
 
-  async createPolicy(input: SandboxPolicyInput): Promise<{ policy: SandboxPolicy; validation: ValidationResult }> {
+  async createPolicy(
+    input: SandboxPolicyInput,
+  ): Promise<{ policy: SandboxPolicy; validation: ValidationResult }> {
     const validation = validateCreatePolicy(input);
     if (!validation.valid) {
       return { policy: null as unknown as SandboxPolicy, validation };
@@ -83,7 +86,10 @@ export class SandboxPolicyService {
     return this.repo.listByWorkspace(workspaceId);
   }
 
-  async updatePolicy(id: string, patch: SandboxPolicyPatch): Promise<{ policy: SandboxPolicy; validation: ValidationResult }> {
+  async updatePolicy(
+    id: string,
+    patch: SandboxPolicyPatch,
+  ): Promise<{ policy: SandboxPolicy; validation: ValidationResult }> {
     const validation = validateUpdatePolicy(patch);
     if (!validation.valid) {
       return { policy: null as unknown as SandboxPolicy, validation };

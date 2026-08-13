@@ -63,11 +63,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-domio}
       POSTGRES_DB: ${POSTGRES_DB:-domio}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-domio}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-domio}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -80,11 +80,11 @@ services:
     container_name: domio-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -96,14 +96,14 @@ services:
     image: nats:2.10.22-alpine
     container_name: domio-nats
     restart: unless-stopped
-    command: ["nats-server", "-js", "-sd", "/data", "-m", "8222"]
+    command: ['nats-server', '-js', '-sd', '/data', '-m', '8222']
     ports:
-      - "4222:4222"
-      - "8222:8222"
+      - '4222:4222'
+      - '8222:8222'
     volumes:
       - nats-data:/data
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8222/healthz']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -115,17 +115,17 @@ services:
     image: minio/minio:RELEASE.2024-10-13T13-34-11Z
     container_name: domio-minio
     restart: unless-stopped
-    command: ["server", "/data", "--console-address", ":9001"]
+    command: ['server', '/data', '--console-address', ':9001']
     environment:
       MINIO_ROOT_USER: ${S3_ACCESS_KEY:-domio}
       MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-domio-dev-only}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - '9000:9000'
+      - '9001:9001'
     volumes:
       - minio-data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -143,12 +143,22 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-domio}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     ports:
-      - "8123:8123"
-      - "9002:9000"
+      - '8123:8123'
+      - '9002:9000'
     volumes:
       - clickhouse-data:/var/lib/clickhouse
     healthcheck:
-      test: ["CMD", "clickhouse-client", "--user", "domio", "--password", "domio", "--query", "SELECT 1"]
+      test:
+        [
+          'CMD',
+          'clickhouse-client',
+          '--user',
+          'domio',
+          '--password',
+          'domio',
+          '--query',
+          'SELECT 1',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -163,16 +173,16 @@ services:
     environment:
       cluster.name: domio-dev
       discovery.type: single-node
-      bootstrap.memory_lock: "true"
-      "OPENSEARCH_JAVA_OPTS": "-Xms512m -Xmx512m"
-      "DISABLE_SECURITY_PLUGIN": "true"
-      "DISABLE_INSTALL_DEMO_CONFIG": "true"
+      bootstrap.memory_lock: 'true'
+      'OPENSEARCH_JAVA_OPTS': '-Xms512m -Xmx512m'
+      'DISABLE_SECURITY_PLUGIN': 'true'
+      'DISABLE_INSTALL_DEMO_CONFIG': 'true'
     ulimits:
       memlock:
         soft: -1
         hard: -1
     ports:
-      - "9200:9200"
+      - '9200:9200'
     volumes:
       - opensearch-data:/usr/share/opensearch/data
     networks:
@@ -184,8 +194,8 @@ services:
     container_name: domio-mailhog
     restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - '1025:1025'
+      - '8025:8025'
     networks:
       - domio-dev
 
@@ -197,8 +207,8 @@ services:
     volumes:
       - ./infrastructure/local/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     ports:
-      - "4317:4317"
-      - "4318:4318"
+      - '4317:4317'
+      - '4318:4318'
     networks:
       - domio-dev
 
@@ -208,14 +218,14 @@ services:
     container_name: domio-prometheus
     restart: unless-stopped
     command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--web.enable-lifecycle"
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
     volumes:
       - ./infrastructure/local/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
     networks:
       - domio-dev
 
@@ -227,12 +237,12 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_USERS_ALLOW_SIGN_UP: 'false'
     volumes:
       - grafana-data:/var/lib/grafana
       - ./infrastructure/local/grafana/provisioning:/etc/grafana/provisioning:ro
     ports:
-      - "3001:3000"
+      - '3001:3000'
     networks:
       - domio-dev
 
@@ -242,10 +252,10 @@ services:
     container_name: domio-jaeger
     restart: unless-stopped
     environment:
-      COLLECTOR_OTLP_ENABLED: "true"
+      COLLECTOR_OTLP_ENABLED: 'true'
     ports:
-      - "16686:16686"
-      - "14268:14268"
+      - '16686:16686'
+      - '14268:14268'
     networks:
       - domio-dev
 
@@ -277,7 +287,7 @@ services:
       nats:
         condition: service_started
     ports:
-      - "3020:3020"
+      - '3020:3020'
     networks:
       - domio-dev
 
@@ -304,7 +314,7 @@ services:
       clickhouse:
         condition: service_healthy
     ports:
-      - "3040:8080"
+      - '3040:8080'
     networks:
       - domio-dev
 
@@ -322,14 +332,14 @@ services:
       CLICKHOUSE_DB: domio_analytics
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
-      READ_ONLY: "true"
+      READ_ONLY: 'true'
       DATABASE_URL: postgres://${POSTGRES_USER:-domio}:${POSTGRES_PASSWORD:-domio}@postgres:5432/${POSTGRES_DB:-domio}
       <<: *observability-env
     depends_on:
       clickhouse:
         condition: service_healthy
     ports:
-      - "3030:3030"
+      - '3030:3030'
     networks:
       - domio-dev
 
@@ -354,7 +364,7 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "3010:3010"
+      - '3010:3010'
     networks:
       - domio-dev
 
@@ -382,7 +392,7 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "3100:3100"
+      - '3100:3100'
     networks:
       - domio-dev
 
@@ -422,7 +432,7 @@ services:
       clickhouse:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - '3000:3000'
     networks:
       - domio-dev
 

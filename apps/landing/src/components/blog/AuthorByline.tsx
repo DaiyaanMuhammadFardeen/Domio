@@ -13,10 +13,7 @@ export interface AuthorBylineProps {
   readonly compact?: boolean;
 }
 
-export function AuthorByline({
-  author,
-  compact = false,
-}: AuthorBylineProps): JSX.Element {
+export function AuthorByline({ author, compact = false }: AuthorBylineProps): JSX.Element {
   return (
     <div className="blog-byline" data-testid="blog-author">
       <span className="blog-byline__avatar" aria-hidden="true">

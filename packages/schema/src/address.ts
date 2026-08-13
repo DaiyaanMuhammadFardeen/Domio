@@ -14,10 +14,7 @@ export interface AddressResolver {
     | null;
 
   /** Returns the fully-qualified address for a given element. */
-  addressOf(
-    doc: DeckDocument,
-    target: { slideIndex: number; elementIndex?: number },
-  ): string;
+  addressOf(doc: DeckDocument, target: { slideIndex: number; elementIndex?: number }): string;
 }
 
 export interface AddressSegment {
@@ -25,7 +22,8 @@ export interface AddressSegment {
   name: string;
 }
 
-const ADDRESS_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*\[[a-zA-Z0-9_-]+\](?:\.[a-zA-Z_][a-zA-Z0-9_]*\[[a-zA-Z0-9_-]+\])*$/;
+const ADDRESS_REGEX =
+  /^[a-zA-Z_][a-zA-Z0-9_]*\[[a-zA-Z0-9_-]+\](?:\.[a-zA-Z_][a-zA-Z0-9_]*\[[a-zA-Z0-9_-]+\])*$/;
 
 export class DefaultAddressResolver implements AddressResolver {
   parse(address: SemanticAddress): AddressSegment[] {
@@ -76,9 +74,7 @@ export class DefaultAddressResolver implements AddressResolver {
     for (let i = 0; i < tail.length - 1; i++) {
       const seg = tail[i];
       if (!seg) return null;
-      const child = slide.elements.find(
-        (el) => el.semanticId === seg.name && el.type === 'group',
-      );
+      const child = slide.elements.find((el) => el.semanticId === seg.name && el.type === 'group');
       if (!child) return null;
     }
     const lastSeg = tail[tail.length - 1];
@@ -88,10 +84,7 @@ export class DefaultAddressResolver implements AddressResolver {
     return { kind: 'element', slideIndex, elementIndex, address };
   }
 
-  addressOf(
-    doc: DeckDocument,
-    target: { slideIndex: number; elementIndex?: number },
-  ): string {
+  addressOf(doc: DeckDocument, target: { slideIndex: number; elementIndex?: number }): string {
     const slide = doc.slides[target.slideIndex];
     if (!slide) {
       throw new Error(`slideIndex ${target.slideIndex} out of range.`);
@@ -107,7 +100,10 @@ export class DefaultAddressResolver implements AddressResolver {
       );
     }
     const chain = collectAncestorChain(slide, target.elementIndex);
-    const parts = [head, ...chain.slice(0, -1).map((el) => `${headOfElement(el)}[${el.semanticId}]`)];
+    const parts = [
+      head,
+      ...chain.slice(0, -1).map((el) => `${headOfElement(el)}[${el.semanticId}]`),
+    ];
     const lastEl = chain[chain.length - 1];
     if (!lastEl) {
       throw new Error(`Empty element chain.`);
@@ -136,14 +132,12 @@ function collectAncestorChain(
   return chain;
 }
 
-function headOfElement(
-  element: DeckDocument['slides'][number]['elements'][number],
-): string {
+function headOfElement(element: DeckDocument['slides'][number]['elements'][number]): string {
   return element.type === 'group'
     ? 'group'
     : element.type === 'autoLayout'
-    ? 'autoLayout'
-    : element.type;
+      ? 'autoLayout'
+      : element.type;
 }
 
 export function isValidSemanticAddress(value: string): boolean {

@@ -34,9 +34,9 @@
     }
   },
   "postCreateCommand": "./bin/bootstrap",
-  "forwardPorts": [3000, 3001, 3002, 3003, 5432, 6379, 4222, 8222, 8080, 8081, 9000, 9001, 9090, 3001, 16686],
+  "forwardPorts": [
+    3000, 3001, 3002, 3003, 5432, 6379, 4222, 8222, 8080, 8081, 9000, 9001, 9090, 3001, 16686
+  ],
   "remoteUser": "vscode",
-  "mounts": [
-    "source=domio-data,target=/home/vscode/domio/data,type=volume"
-  ]
+  "mounts": ["source=domio-data,target=/home/vscode/domio/data,type=volume"]
 }

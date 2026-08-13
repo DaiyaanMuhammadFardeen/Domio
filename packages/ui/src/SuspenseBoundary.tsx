@@ -44,9 +44,7 @@ interface SuspenseBoundaryContextValue {
   setEmpty(props: EmptyStateProps | null): void;
 }
 
-const SuspenseBoundaryContext = createContext<SuspenseBoundaryContextValue | null>(
-  null,
-);
+const SuspenseBoundaryContext = createContext<SuspenseBoundaryContextValue | null>(null);
 
 export interface SuspenseBoundaryProps {
   children: ReactNode;
@@ -75,16 +73,11 @@ export function SuspenseBoundary(props: SuspenseBoundaryProps): ReactElement {
 
   return (
     <SuspenseBoundaryContext.Provider value={ctx}>
-      <BoundaryErrorLayer
-        fallback={errorFallback}
-        resetKey={empty?.title ?? ''}
-      >
+      <BoundaryErrorLayer fallback={errorFallback} resetKey={empty?.title ?? ''}>
         {empty ? (
           <EmptyState {...empty} />
         ) : (
-          <Suspense fallback={fallback ?? <Skeleton.Block rows={4} />}>
-            {children}
-          </Suspense>
+          <Suspense fallback={fallback ?? <Skeleton.Block rows={4} />}>{children}</Suspense>
         )}
       </BoundaryErrorLayer>
     </SuspenseBoundaryContext.Provider>
@@ -139,10 +132,7 @@ class BoundaryErrorLayer extends Component<BoundaryErrorLayerProps> {
  *
  * Passing `null` props clears the empty state and resumes normal rendering.
  */
-export function useEmpty(
-  isEmpty: boolean,
-  props: EmptyStateProps | null = null,
-): void {
+export function useEmpty(isEmpty: boolean, props: EmptyStateProps | null = null): void {
   const ctx = useContext(SuspenseBoundaryContext);
   useEffect(() => {
     if (!ctx) return;

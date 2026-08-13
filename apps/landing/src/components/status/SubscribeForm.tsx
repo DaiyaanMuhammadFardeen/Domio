@@ -63,14 +63,10 @@ export function SubscribeForm({
       {savedEmail ? (
         <div className="status-subscribe__success" data-testid="status-subscribe-success">
           <p>
-            Subscribed as <strong>{savedEmail}</strong>. You&rsquo;ll get an
-            email when incidents open or resolve.
+            Subscribed as <strong>{savedEmail}</strong>. You&rsquo;ll get an email when incidents
+            open or resolve.
           </p>
-          <button
-            type="button"
-            className="status-subscribe__link"
-            onClick={onUnsubscribe}
-          >
+          <button type="button" className="status-subscribe__link" onClick={onUnsubscribe}>
             Unsubscribe
           </button>
         </div>

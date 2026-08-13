@@ -43,19 +43,37 @@ describe('kpi-ticker', () => {
   });
 
   it('sampleKpiTicker applies ease-out (value >= linear at the midpoint)', () => {
-    const cfg = config({ startValue: 0, targetValue: 100, durationMs: 1000, delayMs: 0, easing: 'ease-out' });
+    const cfg = config({
+      startValue: 0,
+      targetValue: 100,
+      durationMs: 1000,
+      delayMs: 0,
+      easing: 'ease-out',
+    });
     const sample = sampleKpiTicker(cfg, 500);
     expect(sample.value).toBeGreaterThan(50);
   });
 
   it('sampleKpiTicker applies ease-in (value <= linear at the midpoint)', () => {
-    const cfg = config({ startValue: 0, targetValue: 100, durationMs: 1000, delayMs: 0, easing: 'ease-in' });
+    const cfg = config({
+      startValue: 0,
+      targetValue: 100,
+      durationMs: 1000,
+      delayMs: 0,
+      easing: 'ease-in',
+    });
     const sample = sampleKpiTicker(cfg, 500);
     expect(sample.value).toBeLessThan(50);
   });
 
   it('sampleKpiTicker restarts when loop is enabled', () => {
-    const cfg = config({ startValue: 0, targetValue: 100, durationMs: 1000, delayMs: 0, loop: true });
+    const cfg = config({
+      startValue: 0,
+      targetValue: 100,
+      durationMs: 1000,
+      delayMs: 0,
+      loop: true,
+    });
     // Cycle = 1000ms duration + 250ms pause = 1250ms. At t=1300ms we should be in the second cycle, near t=0.
     const sample = sampleKpiTicker(cfg, 1300);
     expect(sample.value).toBeLessThan(50);

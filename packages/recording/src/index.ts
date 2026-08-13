@@ -11,14 +11,9 @@ export {
   type EncoderChoice,
   type EncoderResult,
   type Unsupported,
-} from "./encoder.js";
+} from './encoder.js';
 
-export {
-  computeBitrate,
-  bitrateDelta,
-  type BitrateTier,
-  type BitrateParams,
-} from "./bitrate.js";
+export { computeBitrate, bitrateDelta, type BitrateTier, type BitrateParams } from './bitrate.js';
 
 export {
   createDraft,
@@ -33,7 +28,7 @@ export {
   type DraftMachine,
   type RecordingChunk,
   type FinalizedDraft,
-} from "./drafts.js";
+} from './drafts.js';
 
 export {
   checkElapsed,
@@ -45,4 +40,4 @@ export {
   type ElapsedResult,
   type StoppedResult,
   type MinGuardResult,
-} from "./timing.js";
+} from './timing.js';

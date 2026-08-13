@@ -3,12 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  listSSOProviders,
-  getSSOProvider,
-  createSSOProvider,
-  testSSOLogin,
-} from './sso-service';
+import { listSSOProviders, getSSOProvider, createSSOProvider, testSSOLogin } from './sso-service';
 
 describe('sso-service', () => {
   it('lists 4+ providers from seed', async () => {

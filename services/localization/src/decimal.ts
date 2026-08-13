@@ -77,11 +77,11 @@ function roundHalfEven(mantissa: bigint, divisor: bigint): bigint {
 function applyRounding(mantissa: bigint, divisor: bigint, rounding: string): bigint {
   switch (rounding) {
     case 'half-up':
-      return mantissa / divisor + ((mantissa % divisor) > 0n ? 1n : 0n);
+      return mantissa / divisor + (mantissa % divisor > 0n ? 1n : 0n);
     case 'half-down':
-      return mantissa / divisor + ((mantissa % divisor) >= 0n ? 0n : 0n);
+      return mantissa / divisor + (mantissa % divisor >= 0n ? 0n : 0n);
     case 'ceil':
-      return mantissa / divisor + ((mantissa % divisor) > 0n ? 1n : 0n);
+      return mantissa / divisor + (mantissa % divisor > 0n ? 1n : 0n);
     case 'floor':
       return mantissa / divisor;
     default:
@@ -113,15 +113,19 @@ export class Decimal {
 
   add(other: Decimal): Decimal {
     const scale = Math.max(this.scale, other.scale);
-    const a = this.scale < scale ? this.mantissa * BigInt(10 ** (scale - this.scale)) : this.mantissa;
-    const b = other.scale < scale ? other.mantissa * BigInt(10 ** (scale - other.scale)) : other.mantissa;
+    const a =
+      this.scale < scale ? this.mantissa * BigInt(10 ** (scale - this.scale)) : this.mantissa;
+    const b =
+      other.scale < scale ? other.mantissa * BigInt(10 ** (scale - other.scale)) : other.mantissa;
     return new Decimal(a + b, scale, this.rounding);
   }
 
   sub(other: Decimal): Decimal {
     const scale = Math.max(this.scale, other.scale);
-    const a = this.scale < scale ? this.mantissa * BigInt(10 ** (scale - this.scale)) : this.mantissa;
-    const b = other.scale < scale ? other.mantissa * BigInt(10 ** (scale - other.scale)) : other.mantissa;
+    const a =
+      this.scale < scale ? this.mantissa * BigInt(10 ** (scale - this.scale)) : this.mantissa;
+    const b =
+      other.scale < scale ? other.mantissa * BigInt(10 ** (scale - other.scale)) : other.mantissa;
     return new Decimal(a - b, scale, this.rounding);
   }
 
@@ -156,8 +160,10 @@ export class Decimal {
 
   equals(other: Decimal): boolean {
     const scale = Math.max(this.scale, other.scale);
-    const a = this.scale < scale ? this.mantissa * BigInt(10 ** (scale - this.scale)) : this.mantissa;
-    const b = other.scale < scale ? other.mantissa * BigInt(10 ** (scale - other.scale)) : other.mantissa;
+    const a =
+      this.scale < scale ? this.mantissa * BigInt(10 ** (scale - this.scale)) : this.mantissa;
+    const b =
+      other.scale < scale ? other.mantissa * BigInt(10 ** (scale - other.scale)) : other.mantissa;
     return a === b;
   }
 }

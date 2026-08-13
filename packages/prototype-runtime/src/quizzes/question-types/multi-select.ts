@@ -20,8 +20,7 @@ export function validateMultiSelect(
   if (chosen.size === 0 && correct.size === 0) {
     return { correct: true, confidence: 1, score: 1 };
   }
-  const equals =
-    chosen.size === correct.size && [...chosen].every((c) => correct.has(c));
+  const equals = chosen.size === correct.size && [...chosen].every((c) => correct.has(c));
   if (equals) return { correct: true, confidence: 1, score: 1 };
   const intersect = [...chosen].filter((c) => correct.has(c)).length;
   if (intersect > 0) {

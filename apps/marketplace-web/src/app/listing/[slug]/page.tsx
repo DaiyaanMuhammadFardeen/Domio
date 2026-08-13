@@ -4,7 +4,11 @@ import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale } from '@/hooks/useLocale';
-import { getMarketplaceListing, listMarketplaceReviews, getMarketplaceListingChangelog } from '@/lib/api';
+import {
+  getMarketplaceListing,
+  listMarketplaceReviews,
+  getMarketplaceListingChangelog,
+} from '@/lib/api';
 import { marketplaceWeb } from '@domio/ui/routing';
 import { getRelatedListings } from '@/lib/search-service';
 import type {
@@ -105,8 +109,14 @@ export default function ListingPage({ params }: ListingPageProps) {
 
   const priceText = formatPrice(listing.price_cents, listing.currency, listing.is_free);
   const kind: ListingKind =
-    (listing.tags?.find((tag) => tag === 'component' || tag === 'template' || tag === 'theme' || tag === 'sticker_pack' || tag === 'icon_pack') as ListingKind) ??
-    'component';
+    (listing.tags?.find(
+      (tag) =>
+        tag === 'component' ||
+        tag === 'template' ||
+        tag === 'theme' ||
+        tag === 'sticker_pack' ||
+        tag === 'icon_pack',
+    ) as ListingKind) ?? 'component';
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8" data-testid="listing-page">
@@ -115,7 +125,14 @@ export default function ListingPage({ params }: ListingPageProps) {
           href={marketplaceWeb('home')}
           className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-fg"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
           {t('detail.backToBrowse')}
@@ -240,9 +257,7 @@ export default function ListingPage({ params }: ListingPageProps) {
               <button
                 type="button"
                 data-testid="listing-cta"
-                onClick={() =>
-                  router.push(marketplaceWeb('checkout', { listing: listing.id }))
-                }
+                onClick={() => router.push(marketplaceWeb('checkout', { listing: listing.id }))}
                 className="w-full rounded-xl bg-accent py-3.5 text-sm font-semibold text-white transition-all hover:opacity-90"
               >
                 {t('market.listing.buyNow')}
@@ -257,10 +272,7 @@ export default function ListingPage({ params }: ListingPageProps) {
       </div>
 
       {related.length > 0 && (
-        <section
-          className="mt-16 border-t border-border pt-12"
-          data-testid="listing-related"
-        >
+        <section className="mt-16 border-t border-border pt-12" data-testid="listing-related">
           <h2 className="mb-6 font-display text-2xl font-bold text-fg">
             {t('market.listing.related')}
           </h2>

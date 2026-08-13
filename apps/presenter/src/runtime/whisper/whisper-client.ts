@@ -40,13 +40,19 @@ export class WhisperClient {
     if (this.ring.length > this.capacity) this.ring.shift();
     this.gc();
     for (const l of this.listeners) {
-      try { l(msg); } catch { /* ignore */ }
+      try {
+        l(msg);
+      } catch {
+        /* ignore */
+      }
     }
   }
 
   subscribe(listener: WhisperListener): () => void {
     this.listeners.add(listener);
-    return () => { this.listeners.delete(listener); };
+    return () => {
+      this.listeners.delete(listener);
+    };
   }
 
   /** Snapshot of recent messages (already purged of expired ones). */

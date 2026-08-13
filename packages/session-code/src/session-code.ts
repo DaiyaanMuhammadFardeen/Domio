@@ -17,8 +17,8 @@
  * persisted form (only display).
  */
 
-const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
-const CROCKFORD_LC = "0123456789abcdefghjkmnpqrstvwxyz";
+const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const CROCKFORD_LC = '0123456789abcdefghjkmnpqrstvwxyz';
 
 const REVERSE: Record<string, number> = {};
 for (let i = 0; i < CROCKFORD.length; i++) {
@@ -92,7 +92,7 @@ function checksumNibble(value: number, bodyLength: number): number {
     const bit = (value >>> (i * 4 + 4)) & 0x0f;
     x ^= bit;
   }
-  x ^= (bodyLength & 0x0f);
+  x ^= bodyLength & 0x0f;
   return x & 0x0f;
 }
 

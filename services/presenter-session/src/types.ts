@@ -46,7 +46,7 @@ export interface AgendaTimer {
   id: string;
   label: string;
   timer_kind: 'agenda' | 'hard_stop' | 'soft_stop';
-  starts_at: string;       // ISO
+  starts_at: string; // ISO
   duration_ms: number;
   remaining_ms: number;
   paused_ms: number;
@@ -243,13 +243,13 @@ export function validateCreateSessionInput(input: CreateSessionInput): void {
   if (!input.initial_slide_id) {
     throw new PresenterSessionValidationError('initial_slide_id is required');
   }
-  if (
-    !Number.isInteger(input.initial_slide_index) ||
-    input.initial_slide_index < 0
-  ) {
+  if (!Number.isInteger(input.initial_slide_index) || input.initial_slide_index < 0) {
     throw new PresenterSessionValidationError('initial_slide_index must be >= 0');
   }
-  if (input.mode && !['live', 'rehearsal', 'offline', 'multi_presenter', 'failover'].includes(input.mode)) {
+  if (
+    input.mode &&
+    !['live', 'rehearsal', 'offline', 'multi_presenter', 'failover'].includes(input.mode)
+  ) {
     throw new PresenterSessionValidationError(`invalid mode: ${input.mode}`);
   }
 }

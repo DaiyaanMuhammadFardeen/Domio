@@ -53,10 +53,7 @@ export function Captions({
     >
       <div className="flex flex-col min-w-0">
         {showCaptions ? (
-          <p
-            data-testid={`${dataTestId}-text`}
-            className="text-sm truncate"
-          >
+          <p data-testid={`${dataTestId}-text`} className="text-sm truncate">
             {composed || 'waiting for captions…'}
           </p>
         ) : (
@@ -65,10 +62,7 @@ export function Captions({
           </p>
         )}
         {interimText && !isFinal && showCaptions ? (
-          <span
-            data-testid={`${dataTestId}-interim`}
-            className="text-xs text-slate-400 italic"
-          >
+          <span data-testid={`${dataTestId}-interim`} className="text-xs text-slate-400 italic">
             {interimText}
           </span>
         ) : null}

@@ -43,9 +43,7 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
@@ -64,13 +62,7 @@ describe('ExportDialog', () => {
   it('does not render when closed', () => {
     render(
       withLocale(
-        <ExportDialog
-          deckId="d1"
-          deckTitle="Demo"
-          slideCount={5}
-          open={false}
-          onClose={vi.fn()}
-        />,
+        <ExportDialog deckId="d1" deckTitle="Demo" slideCount={5} open={false} onClose={vi.fn()} />,
       ),
     );
     expect(screen.queryByTestId('export-dialog')).toBeNull();
@@ -79,13 +71,7 @@ describe('ExportDialog', () => {
   it('renders format + quality + range when open', () => {
     render(
       withLocale(
-        <ExportDialog
-          deckId="d1"
-          deckTitle="Demo"
-          slideCount={5}
-          open
-          onClose={vi.fn()}
-        />,
+        <ExportDialog deckId="d1" deckTitle="Demo" slideCount={5} open onClose={vi.fn()} />,
       ),
     );
     expect(screen.getByTestId('export-dialog-format-pdf')).toBeInTheDocument();
@@ -97,7 +83,11 @@ describe('ExportDialog', () => {
   });
 
   it('queues an export with the selected options', async () => {
-    const onQueue = vi.fn().mockResolvedValue(makeJob({ id: 'export-x', status: 'running', percent: 10, remainingSlides: 4 }));
+    const onQueue = vi
+      .fn()
+      .mockResolvedValue(
+        makeJob({ id: 'export-x', status: 'running', percent: 10, remainingSlides: 4 }),
+      );
     render(
       withLocale(
         <ExportDialog
@@ -113,14 +103,19 @@ describe('ExportDialog', () => {
     fireEvent.click(screen.getByTestId('export-dialog-format-pptx'));
     fireEvent.submit(screen.getByTestId('export-dialog-queue').closest('form')!);
     await waitFor(() => expect(onQueue).toHaveBeenCalled());
-    const arg = onQueue.mock.calls[0]?.[0] as { format: string; range: { fromIdx: number; toIdx: number } };
+    const arg = onQueue.mock.calls[0]?.[0] as {
+      format: string;
+      range: { fromIdx: number; toIdx: number };
+    };
     expect(arg.format).toBe('pptx');
     expect(arg.range.fromIdx).toBe(0);
     expect(arg.range.toIdx).toBe(4);
   });
 
   it('switches to the progress view after queue', async () => {
-    const onQueue = vi.fn().mockResolvedValue(makeJob({ status: 'running', percent: 25, remainingSlides: 3 }));
+    const onQueue = vi
+      .fn()
+      .mockResolvedValue(makeJob({ status: 'running', percent: 25, remainingSlides: 3 }));
     render(
       withLocale(
         <ExportDialog
@@ -163,13 +158,7 @@ describe('ExportDialog', () => {
     const onClose = vi.fn();
     render(
       withLocale(
-        <ExportDialog
-          deckId="d1"
-          deckTitle="Demo"
-          slideCount={5}
-          open
-          onClose={onClose}
-        />,
+        <ExportDialog deckId="d1" deckTitle="Demo" slideCount={5} open onClose={onClose} />,
       ),
     );
     fireEvent.click(screen.getByTestId('export-dialog-close'));
@@ -179,13 +168,7 @@ describe('ExportDialog', () => {
   it('clamps the range fields when the user enters out-of-bounds values', () => {
     render(
       withLocale(
-        <ExportDialog
-          deckId="d1"
-          deckTitle="Demo"
-          slideCount={5}
-          open
-          onClose={vi.fn()}
-        />,
+        <ExportDialog deckId="d1" deckTitle="Demo" slideCount={5} open onClose={vi.fn()} />,
       ),
     );
     const toInput = screen.getByTestId('export-dialog-to') as HTMLInputElement;

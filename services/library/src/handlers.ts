@@ -28,10 +28,7 @@ import {
   FeatureDisabledError,
   BindingNotFoundError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-  StoreNotImplementedError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -86,7 +83,9 @@ function serviceUnavailable(message: string, code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -112,17 +111,20 @@ function mapError(e: unknown): HttpResponse {
 // ---------------------------------------------------------------------------
 
 export async function createEntryHandler(
-  req: HttpRequest<Record<string, never>, {
-    workspace_id: string;
-    scope: string;
-    team_id?: string;
-    title: string;
-    description?: string;
-    tags?: readonly string[];
-    owner_id: string;
-    approval_chain?: Record<string, unknown>;
-    snapshot: LibrarySnapshotInput;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      workspace_id: string;
+      scope: string;
+      team_id?: string;
+      title: string;
+      description?: string;
+      tags?: readonly string[];
+      owner_id: string;
+      approval_chain?: Record<string, unknown>;
+      snapshot: LibrarySnapshotInput;
+    }
+  >,
   ctx: LibraryHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -223,12 +225,15 @@ export async function retireEntryHandler(
 // ---------------------------------------------------------------------------
 
 export async function insertFromLibraryHandler(
-  req: HttpRequest<{ deck_id: string }, {
-    entry_id: string;
-    mode: 'reference' | 'copy';
-    slide_id: string;
-    workspace_id: string;
-  }>,
+  req: HttpRequest<
+    { deck_id: string },
+    {
+      entry_id: string;
+      mode: 'reference' | 'copy';
+      slide_id: string;
+      workspace_id: string;
+    }
+  >,
   ctx: LibraryHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -252,16 +257,19 @@ export async function insertFromLibraryHandler(
 // ---------------------------------------------------------------------------
 
 export async function createBindingHandler(
-  req: HttpRequest<Record<string, never>, {
-    workspace_id: string;
-    consumer_deck_id: string;
-    consumer_slide_id: string;
-    library_entry_id: string;
-    pinned_version_id?: string;
-    mode: AutoUpdateMode;
-    schedule?: Record<string, unknown>;
-    is_mandatory?: boolean;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      workspace_id: string;
+      consumer_deck_id: string;
+      consumer_slide_id: string;
+      library_entry_id: string;
+      pinned_version_id?: string;
+      mode: AutoUpdateMode;
+      schedule?: Record<string, unknown>;
+      is_mandatory?: boolean;
+    }
+  >,
   ctx: LibraryHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -295,12 +303,15 @@ export async function listBindingsHandler(
 // ---------------------------------------------------------------------------
 
 export async function updateBindingHandler(
-  req: HttpRequest<{ id: string }, {
-    pinned_version_id?: string;
-    mode?: AutoUpdateMode;
-    schedule?: Record<string, unknown>;
-    is_mandatory?: boolean;
-  }>,
+  req: HttpRequest<
+    { id: string },
+    {
+      pinned_version_id?: string;
+      mode?: AutoUpdateMode;
+      schedule?: Record<string, unknown>;
+      is_mandatory?: boolean;
+    }
+  >,
   ctx: LibraryHandlerContext,
 ): Promise<HttpResponse> {
   try {

@@ -162,9 +162,23 @@ describe('validateContent', () => {
 
 describe('validateTokenValue (discriminated union)', () => {
   it('routes by type', () => {
-    expect(validateTokenValue({ type: 'color', value: { space: 'srgb', channels: [0, 0, 0], alpha: 1 } }).valid).toBe(true);
-    expect(validateTokenValue({ type: 'dimension', value: { value: 8, unit: 'px' } }).valid).toBe(true);
-    expect(validateTokenValue({ type: 'motion', value: { duration: { value: 100, unit: 'ms' }, delay: { value: 0, unit: 'ms' }, easing: 'linear' } }).valid).toBe(true);
+    expect(
+      validateTokenValue({ type: 'color', value: { space: 'srgb', channels: [0, 0, 0], alpha: 1 } })
+        .valid,
+    ).toBe(true);
+    expect(validateTokenValue({ type: 'dimension', value: { value: 8, unit: 'px' } }).valid).toBe(
+      true,
+    );
+    expect(
+      validateTokenValue({
+        type: 'motion',
+        value: {
+          duration: { value: 100, unit: 'ms' },
+          delay: { value: 0, unit: 'ms' },
+          easing: 'linear',
+        },
+      }).valid,
+    ).toBe(true);
   });
 
   it('rejects unknown type', () => {
@@ -190,7 +204,9 @@ describe('validateTokenDefinition', () => {
   });
 
   it('rejects missing tokenId', () => {
-    const result = validateTokenDefinition({ value: { type: 'color', value: { space: 'srgb', channels: [0, 0, 0], alpha: 1 } } });
+    const result = validateTokenDefinition({
+      value: { type: 'color', value: { space: 'srgb', channels: [0, 0, 0], alpha: 1 } },
+    });
     expect(result.valid).toBe(false);
   });
 });

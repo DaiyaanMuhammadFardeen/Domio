@@ -106,8 +106,9 @@ export function RecordingPanel({
   // useReducer only sees (state, action) and we pass `Date.now()` as the
   // wall-clock source for `startedAt`.
   const reducer = useMemo(
-    () => (state: DraftMachine, action: DraftAction): DraftMachine =>
-      draftReducer(state, action, Date.now()),
+    () =>
+      (state: DraftMachine, action: DraftAction): DraftMachine =>
+        draftReducer(state, action, Date.now()),
     [],
   );
   const [machine, dispatch] = useReducer(reducer, initialMachine);
@@ -135,11 +136,7 @@ export function RecordingPanel({
         : 0;
   // checkElapsed(startMs, nowMs, config?) returns TimingCheck { stopped, elapsedMs }.
   // We use stopped (true when elapsed >= maxDurationMs) instead of `exceeded`.
-  const elapsedCheck = checkElapsed(
-    machine.startedAt ?? now,
-    now,
-    timingConfig,
-  );
+  const elapsedCheck = checkElapsed(machine.startedAt ?? now, now, timingConfig);
   // checkMinDuration(durationMs) returns MinGuardResult { discarded, warning }.
   const minCheck = checkMinDuration(elapsed);
 
@@ -174,9 +171,7 @@ export function RecordingPanel({
     <section data-testid="recording-panel" className="recording-panel">
       <header className="recording-panel__header">
         <h2>Recording</h2>
-        <p data-testid="recording-panel-encoder">
-          Encoder: {describeEncoder(encoderChoice)}
-        </p>
+        <p data-testid="recording-panel-encoder">Encoder: {describeEncoder(encoderChoice)}</p>
         <p data-testid="recording-panel-bitrate">
           Bitrate: {bitrateKbps.toFixed(0)} kbps · {viewportWidth}×{viewportHeight}@{fps}fps
         </p>
@@ -186,9 +181,7 @@ export function RecordingPanel({
         <span data-testid="recording-panel-status" data-state={machine.state}>
           {STATE_LABELS[machine.state]}
         </span>
-        <span data-testid="recording-panel-elapsed">
-          Elapsed: {Math.floor(elapsed / 1000)}s
-        </span>
+        <span data-testid="recording-panel-elapsed">Elapsed: {Math.floor(elapsed / 1000)}s</span>
         <span data-testid="recording-panel-remaining">
           Remaining: {Math.floor(remaining / 1000)}s
         </span>
@@ -202,10 +195,7 @@ export function RecordingPanel({
         aria-valuemax={100}
         data-testid="recording-panel-progress"
       >
-        <div
-          className="recording-panel__progress-bar"
-          style={{ width: `${progress * 100}%` }}
-        />
+        <div className="recording-panel__progress-bar" style={{ width: `${progress * 100}%` }} />
       </div>
 
       <div className="recording-panel__controls">
@@ -253,13 +243,22 @@ export function RecordingPanel({
       ) : null}
 
       {elapsedCheck.stopped ? (
-        <p data-testid="recording-panel-warning-max" role="alert" className="recording-panel__warning">
-          Recording exceeded max duration ({DEFAULT_MAX_DURATION_MS / 1000}s). Auto-stop recommended.
+        <p
+          data-testid="recording-panel-warning-max"
+          role="alert"
+          className="recording-panel__warning"
+        >
+          Recording exceeded max duration ({DEFAULT_MAX_DURATION_MS / 1000}s). Auto-stop
+          recommended.
         </p>
       ) : null}
 
       {minCheck.discarded && machine.state === 'finalized' ? (
-        <p data-testid="recording-panel-warning-min" role="alert" className="recording-panel__warning">
+        <p
+          data-testid="recording-panel-warning-min"
+          role="alert"
+          className="recording-panel__warning"
+        >
           Recording shorter than the minimum ({MIN_DURATION_MS / 1000}s) and cannot be saved.
         </p>
       ) : null}

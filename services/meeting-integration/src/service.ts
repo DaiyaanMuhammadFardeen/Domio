@@ -18,10 +18,7 @@ import type {
   MeetingMarker,
   Vendor,
 } from './types.js';
-import {
-  IntegrationNotFoundError,
-  noopEmitter,
-} from './types.js';
+import { IntegrationNotFoundError, noopEmitter } from './types.js';
 import type { MeetingStore } from './store/store.js';
 import { issueMeetingToken, verifyMeetingToken } from './tokens.js';
 import { recordMarkerBody } from './markers.js';
@@ -69,10 +66,7 @@ export class MeetingIntegrationService {
   // Connect — store integration and set status to connected
   // -------------------------------------------------------------------------
 
-  async connect(
-    input: MeetingIntegrationInput,
-    deckId?: string,
-  ): Promise<MeetingIntegration> {
+  async connect(input: MeetingIntegrationInput, deckId?: string): Promise<MeetingIntegration> {
     checkFeature(FEATURE_FLAGS.integrations);
 
     const now = this.now();
@@ -176,9 +170,9 @@ export class MeetingIntegrationService {
 
     const integrations = await this.store.listIntegrationsByWorkspace(workspaceId);
     const vendors: Vendor[] = ['zoom', 'meet', 'teams'];
-    const byVendor = new Map(integrations.map(i => [i.vendor, i]));
+    const byVendor = new Map(integrations.map((i) => [i.vendor, i]));
 
-    return vendors.map(v => ({
+    return vendors.map((v) => ({
       vendor: v,
       status: byVendor.get(v)?.status ?? 'disconnected',
       integration: byVendor.get(v) ?? null,
@@ -193,7 +187,7 @@ export class MeetingIntegrationService {
     checkFeature(FEATURE_FLAGS.integrations);
 
     const all = await this.store.listIntegrationsByWorkspace(workspaceId);
-    return all.filter(i => i.status === 'connected');
+    return all.filter((i) => i.status === 'connected');
   }
 
   // -------------------------------------------------------------------------
@@ -215,13 +209,16 @@ export class MeetingIntegrationService {
       throw new IntegrationNotFoundError(vendor, workspaceId);
     }
 
-    return issueMeetingToken({
-      integration,
-      meeting_id: meetingId,
-      presenter_id: presenterId,
-      deck_id: deckId,
-      meeting_end_at: meetingEndAt,
-    }, { now: () => this.now() });
+    return issueMeetingToken(
+      {
+        integration,
+        meeting_id: meetingId,
+        presenter_id: presenterId,
+        deck_id: deckId,
+        meeting_end_at: meetingEndAt,
+      },
+      { now: () => this.now() },
+    );
   }
 
   // -------------------------------------------------------------------------

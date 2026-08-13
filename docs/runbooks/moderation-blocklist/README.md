@@ -8,9 +8,9 @@ Real-time moderation blocklist; blocks take effect in < 1 s.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-moderation-blocklist` | availability | 99.9% | 30d |
+| SLO                          | Kind         | Target | Window |
+| ---------------------------- | ------------ | ------ | ------ |
+| `avail-moderation-blocklist` | availability | 99.9%  | 30d    |
 
 ## Triage
 

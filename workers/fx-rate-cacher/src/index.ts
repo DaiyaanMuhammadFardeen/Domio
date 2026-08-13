@@ -2,10 +2,7 @@
  * @domio/fx-rate-cacher-worker — barrel export.
  */
 
-export {
-  FxRateCacherWorker,
-  InMemoryFxRateProvider,
-} from './fx.js';
+export { FxRateCacherWorker, InMemoryFxRateProvider } from './fx.js';
 
 export type {
   FxRateRecord,

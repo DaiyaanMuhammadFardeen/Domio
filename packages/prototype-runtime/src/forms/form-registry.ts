@@ -83,13 +83,33 @@ function validateShape(def: FormDefinition): void {
       throw new Error(`Unknown input type: ${inp.type}`);
     }
   }
-  if (def.submitLabel !== undefined && (def.submitLabel.length < 1 || def.submitLabel.length > 64)) {
+  if (
+    def.submitLabel !== undefined &&
+    (def.submitLabel.length < 1 || def.submitLabel.length > 64)
+  ) {
     throw new Error('submitLabel must be 1..64 chars when provided');
   }
 }
 
 const ALLOWED_TYPES: ReadonlySet<InputType> = new Set<InputType>([
-  'text', 'number', 'email', 'url', 'tel', 'password', 'textarea',
-  'select', 'multiselect', 'checkbox', 'radio', 'date', 'time',
-  'datetime', 'range', 'slider', 'file', 'signature', 'richtext', 'color',
+  'text',
+  'number',
+  'email',
+  'url',
+  'tel',
+  'password',
+  'textarea',
+  'select',
+  'multiselect',
+  'checkbox',
+  'radio',
+  'date',
+  'time',
+  'datetime',
+  'range',
+  'slider',
+  'file',
+  'signature',
+  'richtext',
+  'color',
 ] satisfies InputType[]);

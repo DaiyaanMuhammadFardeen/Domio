@@ -176,7 +176,9 @@ export function createExportBus(
     // Expose for test setup — allows injecting sample data.
     _capturedSamples: {
       get: () => capturedSamples,
-      set: (s: Float32Array) => { capturedSamples = s; },
+      set: (s: Float32Array) => {
+        capturedSamples = s;
+      },
     },
   };
 }

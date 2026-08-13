@@ -16,11 +16,7 @@ import type {
   Region,
   EventType,
 } from './types.js';
-import {
-  NotFoundError,
-  ValidationError,
-  RegionMismatchError,
-} from './dal.js';
+import { NotFoundError, ValidationError, RegionMismatchError } from './dal.js';
 import type {
   PrototypeSessionRepository,
   PrototypeEventRepository,
@@ -93,7 +89,10 @@ export class PrototypeRecorderService {
   /** Hydrate state on each `reloadChain` — seeded from the events repo. */
   private chainHydrated = false;
   /** Last known chain snapshot to preserve across `reloadChain` rebuilds. */
-  private chainState: { lastSeqBySession: Record<string, number>; lastHashBySession: Record<string, number> } | null = null;
+  private chainState: {
+    lastSeqBySession: Record<string, number>;
+    lastHashBySession: Record<string, number>;
+  } | null = null;
 
   constructor(opts: PrototypeRecorderServiceOptions) {
     this.sessions = opts.sessions;
@@ -208,7 +207,8 @@ export class PrototypeRecorderService {
 
     if (session.regionPinned && input.payload['region'] !== undefined) {
       // Region on the wire mismatches the pinned one — refuse.
-      const wireRegion = typeof input.payload['region'] === 'string' ? input.payload['region'] : 'unknown';
+      const wireRegion =
+        typeof input.payload['region'] === 'string' ? input.payload['region'] : 'unknown';
       if (session.region !== wireRegion) {
         throw new RegionMismatchError(session.region, wireRegion);
       }
@@ -296,7 +296,10 @@ export class PrototypeRecorderService {
   }
 
   /** Delete every session whose `expiresAt < before`, plus its events. */
-  async deleteSessionsBefore(tenantId: string, before: number): Promise<{ deletedSessions: number; deletedEvents: number }> {
+  async deleteSessionsBefore(
+    tenantId: string,
+    before: number,
+  ): Promise<{ deletedSessions: number; deletedEvents: number }> {
     const all = await this.sessions.listByTenant(tenantId);
     let deletedSessions = 0;
     let deletedEvents = 0;
@@ -319,7 +322,9 @@ export class PrototypeRecorderService {
    * Run the retention cron. Returns counts; safe to call repeatedly.
    * Hard-deletes sessions whose `expiresAt` is in the past.
    */
-  async runRetention(now: number = this.clock()): Promise<{ deletedSessions: number; deletedEvents: number }> {
+  async runRetention(
+    now: number = this.clock(),
+  ): Promise<{ deletedSessions: number; deletedEvents: number }> {
     return this.sessions.deleteExpired(now);
   }
 
@@ -349,12 +354,18 @@ export class PrototypeRecorderService {
   }
 
   /** Snapshot the in-memory chain state — the caller can persist it. */
-  snapshotChain(): { lastSeqBySession: Record<string, number>; lastHashBySession: Record<string, string> } {
+  snapshotChain(): {
+    lastSeqBySession: Record<string, number>;
+    lastHashBySession: Record<string, string>;
+  } {
     return this.chain.snapshot() as never;
   }
 
   /** Restore chain state from a previous snapshot. */
-  hydrateChain(state: { lastSeqBySession: Record<string, number>; lastHashBySession: Record<string, string> }): void {
+  hydrateChain(state: {
+    lastSeqBySession: Record<string, number>;
+    lastHashBySession: Record<string, string>;
+  }): void {
     this.chainState = state as never;
   }
 }

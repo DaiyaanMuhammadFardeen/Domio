@@ -90,16 +90,9 @@ describe('ElementHeatmap', () => {
   });
 
   it('renders the empty state when there are no elements', () => {
-    render(
-      <ElementHeatmap
-        workspaceId="ws-demo"
-        data={{ ...SAMPLE_DATA, elements: [] }}
-      />,
-    );
+    render(<ElementHeatmap workspaceId="ws-demo" data={{ ...SAMPLE_DATA, elements: [] }} />);
     expect(screen.queryAllByTestId('slide-element')).toHaveLength(0);
-    expect(
-      screen.getByText(/No element attention data/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/No element attention data/i)).toBeInTheDocument();
   });
 
   it('renders the drill-in placeholder before any element is clicked', () => {

@@ -5,11 +5,7 @@ import {
   NoopDeckRepository,
   type DeckRepository,
 } from './loader.js';
-import {
-  DECK_SCHEMA_VERSION,
-  type DeckDocument,
-  asULID,
-} from '@domio/schema';
+import { DECK_SCHEMA_VERSION, type DeckDocument, asULID } from '@domio/schema';
 
 const DECK_ID = asULID('01H00000000000000000000000');
 const WORKSPACE_ID = asULID('01H00000000000000000000001');
@@ -98,9 +94,7 @@ describe('DocumentLoader', () => {
     const loader = new DocumentLoader('tenant-1', { repository: repo });
     const broken: DeckDocument = {
       ...baseDeck(),
-      slides: [
-        { ...baseDeck().slides[0]!, id: asULID('not-a-ulid') },
-      ],
+      slides: [{ ...baseDeck().slides[0]!, id: asULID('not-a-ulid') }],
     };
     await expect(loader.save(DECK_ID, broken, -1)).rejects.toMatchObject({
       code: 'INVALID_SCHEMA',

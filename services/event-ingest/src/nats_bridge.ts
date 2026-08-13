@@ -84,14 +84,16 @@ export async function buildNatsBridge(url: string): Promise<NatsBridge> {
               await handler(event);
               counter.forwarded += 1;
             } catch {
-                // bad message: drop. (DLQ emission lives at the route layer.)
+              // bad message: drop. (DLQ emission lives at the route layer.)
             }
           }
         } catch (err) {
           // Iterator errors (NATS disconnect, protocol error, etc.)
           // must not crash the process — log and let the rest of the
           // service keep running.
-          process.stderr.write(`event-ingest: nats iterator ended: ${err instanceof Error ? err.message : String(err)}\n`);
+          process.stderr.write(
+            `event-ingest: nats iterator ended: ${err instanceof Error ? err.message : String(err)}\n`,
+          );
         }
       })();
     },
@@ -153,7 +155,10 @@ export function normalizeNatsEvent(raw: unknown, subject: string): AnalyticsEven
     viewer_id_key: typeof viewer_id_key === 'string' ? viewer_id_key : 'unknown',
     privacy_mode: 'pseudonymous',
     device_class: 'bot',
-    source_app: typeof r['source_app'] === 'string' ? (r['source_app'] as AnalyticsEvent['source_app']) : 'rtgw',
+    source_app:
+      typeof r['source_app'] === 'string'
+        ? (r['source_app'] as AnalyticsEvent['source_app'])
+        : 'rtgw',
     ingest_topic: 'events.ingest.raw',
     forward_compat: true,
     live_event_kind: typeof live_event_kind === 'string' ? live_event_kind : 'unknown',
@@ -170,7 +175,9 @@ function synthesizeEventId(subject: string, ts: number): string {
   // We preserve dots (NATS subjects use them as separators) and only
   // collapse whitespace / punctuation that is not legal in an event_id.
   const safe = subject.replace(/\s+/g, '-');
-  const rand = Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+  const rand = Math.floor(Math.random() * 0xffffff)
+    .toString(16)
+    .padStart(6, '0');
   return `nat-${safe}-${ts}-${rand}`;
 }
 

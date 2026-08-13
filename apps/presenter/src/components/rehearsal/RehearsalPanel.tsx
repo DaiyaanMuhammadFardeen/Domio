@@ -68,13 +68,19 @@ export function RehearsalPanel({ sessionId, state, targets, disabled }: Rehearsa
 
   const onPauseToggle = useCallback(() => {
     if (!engineRef.current) return;
-    if (paused) { engineRef.current.resume(); setPaused(false); }
-    else { engineRef.current.pause(); setPaused(true); }
+    if (paused) {
+      engineRef.current.resume();
+      setPaused(false);
+    } else {
+      engineRef.current.pause();
+      setPaused(true);
+    }
   }, [paused]);
 
   const onAdvance = useCallback(() => {
     if (!engineRef.current) return;
-    const list = state.plan.order.length > 0 ? state.plan.order : state.slides.map((s) => s.slide_id);
+    const list =
+      state.plan.order.length > 0 ? state.plan.order : state.slides.map((s) => s.slide_id);
     const cur = list.indexOf(state.state.slide_id);
     const next = list[cur + 1];
     if (next) engineRef.current.advance(next);
@@ -105,9 +111,8 @@ export function RehearsalPanel({ sessionId, state, targets, disabled }: Rehearsa
 
   // Live drift read-out next to the timer.
   const drift = tick?.drift_ms ?? 0;
-  const driftLabel = tick?.target_ms === null || tick?.target_ms === undefined
-    ? '—'
-    : formatMs(Math.abs(drift));
+  const driftLabel =
+    tick?.target_ms === null || tick?.target_ms === undefined ? '—' : formatMs(Math.abs(drift));
   const driftSign = drift > 0 ? '+' : drift < 0 ? '−' : '';
   const pace = tick?.pace ?? null;
 
@@ -116,13 +121,20 @@ export function RehearsalPanel({ sessionId, state, targets, disabled }: Rehearsa
       <header className="rehearsal-panel__header">
         <h3 className="rehearsal-panel__title">Rehearsal</h3>
         {running && (
-          <span className={`rehearsal-panel__badge ${paused ? 'rehearsal-panel__badge--paused' : ''}`}>
+          <span
+            className={`rehearsal-panel__badge ${paused ? 'rehearsal-panel__badge--paused' : ''}`}
+          >
             {paused ? 'paused' : 'live'}
           </span>
         )}
       </header>
       {!running && !summary && (
-        <button type="button" className="rehearsal-panel__start" onClick={onStart} disabled={disabled}>
+        <button
+          type="button"
+          className="rehearsal-panel__start"
+          onClick={onStart}
+          disabled={disabled}
+        >
           ▶ Start rehearsal
         </button>
       )}
@@ -131,7 +143,8 @@ export function RehearsalPanel({ sessionId, state, targets, disabled }: Rehearsa
           <div className="rehearsal-panel__metric">
             <span className="rehearsal-panel__metric-label">Drift</span>
             <span className="rehearsal-panel__metric-value">
-              {driftSign}{driftLabel}
+              {driftSign}
+              {driftLabel}
             </span>
           </div>
           <div className="rehearsal-panel__controls">
@@ -141,7 +154,12 @@ export function RehearsalPanel({ sessionId, state, targets, disabled }: Rehearsa
             <button type="button" onClick={onAdvance} disabled={disabled}>
               ⏭ Next slide
             </button>
-            <button type="button" className="rehearsal-panel__end" onClick={onEnd} disabled={disabled}>
+            <button
+              type="button"
+              className="rehearsal-panel__end"
+              onClick={onEnd}
+              disabled={disabled}
+            >
               ⏹ End
             </button>
           </div>
@@ -151,16 +169,20 @@ export function RehearsalPanel({ sessionId, state, targets, disabled }: Rehearsa
         <>
           <div className="rehearsal-panel__summary">
             <div className="rehearsal-panel__row">
-              <span>Total</span><strong>{formatMs(summary.total_ms)}</strong>
+              <span>Total</span>
+              <strong>{formatMs(summary.total_ms)}</strong>
             </div>
             <div className="rehearsal-panel__row">
-              <span>Paused</span><strong>{formatMs(summary.paused_ms)}</strong>
+              <span>Paused</span>
+              <strong>{formatMs(summary.paused_ms)}</strong>
             </div>
             <div className="rehearsal-panel__row">
-              <span>Slides</span><strong>{Object.keys(summary.per_slide_ms).length}</strong>
+              <span>Slides</span>
+              <strong>{Object.keys(summary.per_slide_ms).length}</strong>
             </div>
             <div className="rehearsal-panel__row">
-              <span>Completed</span><strong>{summary.completed ? 'yes' : 'no'}</strong>
+              <span>Completed</span>
+              <strong>{summary.completed ? 'yes' : 'no'}</strong>
             </div>
             <details className="rehearsal-panel__detail">
               <summary>Per-slide dwell</summary>
@@ -175,7 +197,8 @@ export function RehearsalPanel({ sessionId, state, targets, disabled }: Rehearsa
                       <span>{formatMs(ms)}</span>
                       {target !== undefined && (
                         <span className="rehearsal-panel__drift">
-                          {ms > target ? '+' : ms < target ? '−' : ''}{formatMs(Math.abs(ms - target))}
+                          {ms > target ? '+' : ms < target ? '−' : ''}
+                          {formatMs(Math.abs(ms - target))}
                         </span>
                       )}
                     </li>
@@ -187,7 +210,12 @@ export function RehearsalPanel({ sessionId, state, targets, disabled }: Rehearsa
           <button type="button" onClick={onExport}>
             ⬇ Export .drmio {exported ? '(downloaded)' : ''}
           </button>
-          <button type="button" className="rehearsal-panel__start" onClick={onStart} disabled={disabled}>
+          <button
+            type="button"
+            className="rehearsal-panel__start"
+            onClick={onStart}
+            disabled={disabled}
+          >
             ▶ New run
           </button>
         </>

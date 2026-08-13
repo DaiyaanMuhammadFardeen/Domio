@@ -36,12 +36,37 @@ export type ElementRenderer = (ctx: ElementRenderContext) => React.ReactElement 
  * renderer. Renderers that don't need extra args (workspace/deck)
  * just ignore those fields via a destructure.
  */
-export function createElementRendererRegistry(): Readonly<Record<Element['type'], ElementRenderer>> {
+export function createElementRendererRegistry(): Readonly<
+  Record<Element['type'], ElementRenderer>
+> {
   return {
-    model3d: (ctx) => <Model3DViewer layer={ctx.element as Extract<Element, { type: 'model3d' }>} reducedMotion={ctx.reducedMotion} dataTestId={ctx.dataTestId} />,
-    video: (ctx) => <VideoPlayer layer={ctx.element as Extract<Element, { type: 'video' }>} reducedMotion={ctx.reducedMotion} dataTestId={ctx.dataTestId} />,
-    audio: (ctx) => <AudioTrack layer={ctx.element as Extract<Element, { type: 'audio' }>} dataTestId={ctx.dataTestId} />,
-    lottie: (ctx) => <LottiePlayer layer={ctx.element as Extract<Element, { type: 'lottie' }>} reducedMotion={ctx.reducedMotion} dataTestId={ctx.dataTestId} />,
+    model3d: (ctx) => (
+      <Model3DViewer
+        layer={ctx.element as Extract<Element, { type: 'model3d' }>}
+        reducedMotion={ctx.reducedMotion}
+        dataTestId={ctx.dataTestId}
+      />
+    ),
+    video: (ctx) => (
+      <VideoPlayer
+        layer={ctx.element as Extract<Element, { type: 'video' }>}
+        reducedMotion={ctx.reducedMotion}
+        dataTestId={ctx.dataTestId}
+      />
+    ),
+    audio: (ctx) => (
+      <AudioTrack
+        layer={ctx.element as Extract<Element, { type: 'audio' }>}
+        dataTestId={ctx.dataTestId}
+      />
+    ),
+    lottie: (ctx) => (
+      <LottiePlayer
+        layer={ctx.element as Extract<Element, { type: 'lottie' }>}
+        reducedMotion={ctx.reducedMotion}
+        dataTestId={ctx.dataTestId}
+      />
+    ),
     embed: (ctx) => (
       <LiveAppEmbed
         layer={ctx.element as Extract<Element, { type: 'embed' }>}
@@ -49,9 +74,21 @@ export function createElementRendererRegistry(): Readonly<Record<Element['type']
         dataTestId={ctx.dataTestId}
       />
     ),
-    codeBlock: (ctx) => <CodeBlock layer={ctx.element as Extract<Element, { type: 'codeBlock' }>} dataTestId={ctx.dataTestId} />,
-    latex: (ctx) => <LatexBlock layer={ctx.element as Extract<Element, { type: 'latex' }>} dataTestId={ctx.dataTestId} />,
-    map: (ctx) => <Map layer={ctx.element as Extract<Element, { type: 'map' }>} dataTestId={ctx.dataTestId} />,
+    codeBlock: (ctx) => (
+      <CodeBlock
+        layer={ctx.element as Extract<Element, { type: 'codeBlock' }>}
+        dataTestId={ctx.dataTestId}
+      />
+    ),
+    latex: (ctx) => (
+      <LatexBlock
+        layer={ctx.element as Extract<Element, { type: 'latex' }>}
+        dataTestId={ctx.dataTestId}
+      />
+    ),
+    map: (ctx) => (
+      <Map layer={ctx.element as Extract<Element, { type: 'map' }>} dataTestId={ctx.dataTestId} />
+    ),
     // Other kinds are handled in SlideStage with their own logic;
     // we only register the specialized viewers here.
     frame: () => null,

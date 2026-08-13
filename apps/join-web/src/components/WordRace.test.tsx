@@ -42,9 +42,7 @@ describe('WordRace', () => {
 
   it('calls onSubmit with the submitted word', () => {
     const onSubmit = vi.fn();
-    render(
-      <WordRace prompt="Words" winnerSlots={2} submissions={[]} onSubmit={onSubmit} />,
-    );
+    render(<WordRace prompt="Words" winnerSlots={2} submissions={[]} onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByTestId('word-race-input'), { target: { value: 'go' } });
     fireEvent.click(screen.getByTestId('word-race-submit'));
@@ -55,9 +53,7 @@ describe('WordRace', () => {
 
   it('does not submit when the word is empty', () => {
     const onSubmit = vi.fn();
-    render(
-      <WordRace prompt="Words" winnerSlots={2} submissions={[]} onSubmit={onSubmit} />,
-    );
+    render(<WordRace prompt="Words" winnerSlots={2} submissions={[]} onSubmit={onSubmit} />);
     fireEvent.click(screen.getByTestId('word-race-submit'));
     expect(onSubmit).not.toHaveBeenCalled();
   });

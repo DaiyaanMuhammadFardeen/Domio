@@ -28,9 +28,9 @@ export function levenshtein(a: string, b: string): number {
     for (let j = 1; j <= b.length; j++) {
       const cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
       curr[j] = Math.min(
-        (prev[j] ?? 0) + 1,        // deletion
-        (curr[j - 1] ?? 0) + 1,    // insertion
-        (prev[j - 1] ?? 0) + cost,  // substitution
+        (prev[j] ?? 0) + 1, // deletion
+        (curr[j - 1] ?? 0) + 1, // insertion
+        (prev[j - 1] ?? 0) + cost, // substitution
       );
     }
     [prev, curr] = [curr, prev];

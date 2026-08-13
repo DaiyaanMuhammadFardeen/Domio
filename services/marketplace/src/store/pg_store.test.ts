@@ -60,13 +60,23 @@ describe('PgMarketplaceStore', () => {
     });
 
     it('insertAuditEvent throws StoreNotConfiguredError', async () => {
-      await expect(store.insertAuditEvent({
-        id: 'e1', workspaceId: 'ws1', actorId: 'u1',
-        actorType: 'user', actorKind: 'human',
-        eventKind: 'purchase', eventType: 'purchase',
-        payload: {}, seq: 1, prevHash: '', hash: 'h', kid: 'mk1',
-        recordedAt: new Date(),
-      })).rejects.toThrow(StoreNotConfiguredError);
+      await expect(
+        store.insertAuditEvent({
+          id: 'e1',
+          workspaceId: 'ws1',
+          actorId: 'u1',
+          actorType: 'user',
+          actorKind: 'human',
+          eventKind: 'purchase',
+          eventType: 'purchase',
+          payload: {},
+          seq: 1,
+          prevHash: '',
+          hash: 'h',
+          kid: 'mk1',
+          recordedAt: new Date(),
+        }),
+      ).rejects.toThrow(StoreNotConfiguredError);
     });
 
     it('withTransaction throws StoreNotConfiguredError', async () => {
@@ -74,9 +84,15 @@ describe('PgMarketplaceStore', () => {
     });
 
     it('insertListingVersion throws StoreNotConfiguredError (no table)', async () => {
-      await expect(store.insertListingVersion({
-        id: 'v1', listingId: 'l1', catalogId: 'c1', version: '1.0', createdAt: new Date(),
-      })).rejects.toThrow(StoreNotConfiguredError);
+      await expect(
+        store.insertListingVersion({
+          id: 'v1',
+          listingId: 'l1',
+          catalogId: 'c1',
+          version: '1.0',
+          createdAt: new Date(),
+        }),
+      ).rejects.toThrow(StoreNotConfiguredError);
     });
 
     it('listListingVersions throws StoreNotConfiguredError (no table)', async () => {
@@ -124,16 +140,31 @@ describe('PgMarketplaceStore', () => {
       pool.query.mockResolvedValueOnce({ rows: [] });
       await store.listListings({ status: 'published' });
       const [sql, params] = pool.query.mock.calls[0]!;
-      expect(sql).toContain("status = $1");
+      expect(sql).toContain('status = $1');
       expect(params).toContain('published');
     });
 
     it('updateListing builds dynamic SET clause', async () => {
       pool.query.mockResolvedValueOnce({
-        rows: [{ id: 'listing-1', catalog_id: 'c1', seller_id: 's1', title: 'Updated',
-          description: '', status: 'draft', is_free: true, price_cents: null,
-          currency: null, tags: '[]', preview: null, published_at_ms: null,
-          deprecated_at_ms: null, created_at: new Date(), updated_at: new Date() }],
+        rows: [
+          {
+            id: 'listing-1',
+            catalog_id: 'c1',
+            seller_id: 's1',
+            title: 'Updated',
+            description: '',
+            status: 'draft',
+            is_free: true,
+            price_cents: null,
+            currency: null,
+            tags: '[]',
+            preview: null,
+            published_at_ms: null,
+            deprecated_at_ms: null,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        ],
       });
       await store.updateListing('listing-1', { title: 'Updated' });
       const [sql] = pool.query.mock.calls[0]!;
@@ -150,11 +181,17 @@ describe('PgMarketplaceStore', () => {
 
     it('getPayoutPolicy maps row to domain', async () => {
       pool.query.mockResolvedValueOnce({
-        rows: [{
-          id: 'pp1', split_creator_bps: 8000, split_platform_bps: 2000,
-          min_payout_cents: 10000, first_payout_hold_days: 60,
-          updated_at: new Date(), updated_by: null,
-        }],
+        rows: [
+          {
+            id: 'pp1',
+            split_creator_bps: 8000,
+            split_platform_bps: 2000,
+            min_payout_cents: 10000,
+            first_payout_hold_days: 60,
+            updated_at: new Date(),
+            updated_by: null,
+          },
+        ],
       });
       const policy = await store.getPayoutPolicy();
       expect(policy.splitCreatorBps).toBe(8000);
@@ -224,10 +261,24 @@ describe('PgMarketplaceStore', () => {
 
     it('updateCreatorProfile builds dynamic SET clause', async () => {
       pool.query.mockResolvedValueOnce({
-        rows: [{ id: 'cp-1', user_id: 'u1', display_name: 'Updated', slug: 'test',
-          bio: null, country_code: 'US', payout_method: null, payout_ready: false,
-          kyc_status: 'pending', onboarding_state: 'pending', balance_cents: 0,
-          currency: 'USD', created_at: new Date(), updated_at: new Date() }],
+        rows: [
+          {
+            id: 'cp-1',
+            user_id: 'u1',
+            display_name: 'Updated',
+            slug: 'test',
+            bio: null,
+            country_code: 'US',
+            payout_method: null,
+            payout_ready: false,
+            kyc_status: 'pending',
+            onboarding_state: 'pending',
+            balance_cents: 0,
+            currency: 'USD',
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        ],
       });
       await store.updateCreatorProfile('u1', { displayName: 'Updated' });
       const [sql] = pool.query.mock.calls[0]!;
@@ -289,9 +340,18 @@ describe('PgMarketplaceStore', () => {
 
     it('updatePayoutMethodVerified calls pool.query with UPDATE SQL', async () => {
       pool.query.mockResolvedValueOnce({
-        rows: [{ id: 'pm-1', creator_id: 'c1', kind: 'stripe_connect',
-          external_account_id: 'acct_123', verified: true, metadata: null,
-          created_at: new Date(), updated_at: new Date() }],
+        rows: [
+          {
+            id: 'pm-1',
+            creator_id: 'c1',
+            kind: 'stripe_connect',
+            external_account_id: 'acct_123',
+            verified: true,
+            metadata: null,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        ],
       });
       await store.updatePayoutMethodVerified('pm-1', true);
       expect(pool.query).toHaveBeenCalledTimes(1);

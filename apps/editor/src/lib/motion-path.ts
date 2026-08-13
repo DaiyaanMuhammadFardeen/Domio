@@ -121,7 +121,15 @@ export function sampleMotionPath(path: MotionPath, timeMs: number): MotionPathSa
     if (timeMs >= seg.fromMs && timeMs <= seg.toMs) {
       const localT = (timeMs - seg.fromMs) / Math.max(1, seg.toMs - seg.fromMs);
       const eased = applyEasing(localT, seg.easing);
-      const { x, y } = cubicBezierPoint(seg.fromX, seg.fromY, seg.c1x, seg.c1y, seg.toX, seg.toY, eased);
+      const { x, y } = cubicBezierPoint(
+        seg.fromX,
+        seg.fromY,
+        seg.c1x,
+        seg.c1y,
+        seg.toX,
+        seg.toY,
+        eased,
+      );
       return { x: path.origin.x + x, y: path.origin.y + y, segment: i, t: eased };
     }
   }
@@ -213,7 +221,10 @@ export function applyEasing(t: number, easing: string): number {
   if (value === 'ease-in-out') return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   if (value === 'spring') return 1 - (1 - t) * (1 - t);
   if (value === 'bounce') return 1 - (1 - t) * (1 - t);
-  const match = /^cubic-bezier\(\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*\)$/.exec(value);
+  const match =
+    /^cubic-bezier\(\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*\)$/.exec(
+      value,
+    );
   if (match) {
     const p1x = Number(match[1]);
     const p1y = Number(match[2]);
@@ -259,12 +270,17 @@ export function readMotionPath(props: Record<string, unknown> | undefined): Moti
 }
 
 /** Write a motion path to a copy of the element's component props. */
-export function writeMotionPath(props: Record<string, unknown> | undefined, path: MotionPath): Record<string, unknown> {
+export function writeMotionPath(
+  props: Record<string, unknown> | undefined,
+  path: MotionPath,
+): Record<string, unknown> {
   return { ...(props ?? {}), [KEY]: path };
 }
 
 /** Remove a motion path from a copy of the element's component props. */
-export function clearMotionPath(props: Record<string, unknown> | undefined): Record<string, unknown> {
+export function clearMotionPath(
+  props: Record<string, unknown> | undefined,
+): Record<string, unknown> {
   if (!props) return {};
   const next = { ...props };
   delete next[KEY];

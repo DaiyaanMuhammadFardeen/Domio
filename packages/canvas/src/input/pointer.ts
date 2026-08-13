@@ -34,8 +34,20 @@ export interface PointerModifiers {
 }
 
 export type Intent =
-  | { kind: 'beginDrag'; targetId: string | null; x: number; y: number; modifiers: PointerModifiers }
-  | { kind: 'updateDrag'; x: number; y: number; delta: { dx: number; dy: number }; modifiers: PointerModifiers }
+  | {
+      kind: 'beginDrag';
+      targetId: string | null;
+      x: number;
+      y: number;
+      modifiers: PointerModifiers;
+    }
+  | {
+      kind: 'updateDrag';
+      x: number;
+      y: number;
+      delta: { dx: number; dy: number };
+      modifiers: PointerModifiers;
+    }
   | { kind: 'endDrag'; x: number; y: number }
   | { kind: 'beginMarquee'; x: number; y: number; modifiers: PointerModifiers }
   | { kind: 'updateMarquee'; x: number; y: number }
@@ -95,10 +107,14 @@ export class PointerRouter {
   feed(event: NormalizedPointerEvent): Intent[] {
     if (event.kind === 'pinch') {
       if (this.state.mode === 'pinch') {
-        return [{ kind: 'updatePinch', scale: event.pinchScale ?? 1, center: { x: event.x, y: event.y } }];
+        return [
+          { kind: 'updatePinch', scale: event.pinchScale ?? 1, center: { x: event.x, y: event.y } },
+        ];
       }
       this.state.mode = 'pinch';
-      return [{ kind: 'beginPinch', scale: event.pinchScale ?? 1, center: { x: event.x, y: event.y } }];
+      return [
+        { kind: 'beginPinch', scale: event.pinchScale ?? 1, center: { x: event.x, y: event.y } },
+      ];
     }
     if (event.kind === 'down') {
       return this.onDown(event);
@@ -148,7 +164,9 @@ export class PointerRouter {
         if (this.state.targetId) {
           this.state.mode = 'drag';
           this.state.dragStartTime = event.timestamp;
-          return [{ kind: 'beginDrag', targetId: this.state.targetId, x: event.x, y: event.y, modifiers }];
+          return [
+            { kind: 'beginDrag', targetId: this.state.targetId, x: event.x, y: event.y, modifiers },
+          ];
         }
         this.state.mode = 'marquee';
         return [{ kind: 'beginMarquee', x: event.x, y: event.y, modifiers }];
@@ -156,13 +174,15 @@ export class PointerRouter {
       return [];
     }
     if (this.state.mode === 'drag') {
-      return [{
-        kind: 'updateDrag',
-        x: event.x,
-        y: event.y,
-        delta: { dx, dy },
-        modifiers: event.modifiers ?? {},
-      }];
+      return [
+        {
+          kind: 'updateDrag',
+          x: event.x,
+          y: event.y,
+          delta: { dx, dy },
+          modifiers: event.modifiers ?? {},
+        },
+      ];
     }
     if (this.state.mode === 'marquee') {
       return [{ kind: 'updateMarquee', x: event.x, y: event.y }];
@@ -195,13 +215,15 @@ export class PointerRouter {
     // Wheel events are escalated to the camera module via a separate path;
     // the router translates them to "beginDrag" with no target so the editor
     // can pan via Shift+Wheel without a hit.
-    return [{
-      kind: 'beginDrag',
-      targetId: null,
-      x: event.x,
-      y: event.y,
-      modifiers: { ...(event.modifiers ?? {}), shift: event.modifiers?.shift ?? true },
-    }];
+    return [
+      {
+        kind: 'beginDrag',
+        targetId: null,
+        x: event.x,
+        y: event.y,
+        modifiers: { ...(event.modifiers ?? {}), shift: event.modifiers?.shift ?? true },
+      },
+    ];
   }
 }
 
@@ -209,9 +231,6 @@ export class PointerRouter {
  * Pointer-down to first frame budget. Pure helper so tests can verify the
  * router's *intent emission latency* (when running with a stub `feed`).
  */
-export function measureFirstFrameLatency(
-  start: () => number,
-  end: () => number,
-): number {
+export function measureFirstFrameLatency(start: () => number, end: () => number): number {
   return end() - start();
 }

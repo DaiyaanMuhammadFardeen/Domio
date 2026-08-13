@@ -16,10 +16,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, Pause, Play } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Badge, type BadgeTone } from '../Badge';
-import {
-  type ChangeFeedOp,
-  type ChangeFeedOpKind,
-} from '../../lib/change-feed-service';
+import { type ChangeFeedOp, type ChangeFeedOpKind } from '../../lib/change-feed-service';
 import { OpDetail } from './OpDetail';
 
 export interface OpStreamProps {
@@ -156,11 +153,7 @@ export function OpStream({
             const isOpen = expanded.has(op.id);
             const label = labelOf ? labelOf(op.kind) : op.kind;
             return (
-              <li
-                key={op.id}
-                data-testid={`op-row-${op.id}`}
-                className="bg-white"
-              >
+              <li key={op.id} data-testid={`op-row-${op.id}`} className="bg-white">
                 <button
                   type="button"
                   onClick={() => toggle(op.id)}
@@ -178,9 +171,7 @@ export function OpStream({
                     {formatTime(op.timestamp_ms)}
                   </span>
                   <Badge tone={toneForKind(op.kind)}>{label}</Badge>
-                  <span className="ml-1 flex-1 truncate text-sm text-slate-700">
-                    {op.summary}
-                  </span>
+                  <span className="ml-1 flex-1 truncate text-sm text-slate-700">{op.summary}</span>
                   <span
                     className={clsx(
                       'flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',

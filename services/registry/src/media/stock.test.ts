@@ -24,9 +24,7 @@ function makeMockFetch(responseBody: unknown, status = 200): typeof fetch {
 describe('stock', () => {
   describe('unsplashProvider', () => {
     it('throws if apiKey is missing', () => {
-      expect(() => unsplashProvider({ apiKey: '' })).toThrow(
-        'Unsplash API key is required',
-      );
+      expect(() => unsplashProvider({ apiKey: '' })).toThrow('Unsplash API key is required');
     });
 
     it('search sends correct URL and params', async () => {
@@ -75,23 +73,22 @@ describe('stock', () => {
     it('throws on HTTP failure', async () => {
       const http = makeMockFetch({ error: 'unauthorized' }, 401);
       const provider = unsplashProvider({ apiKey: 'bad-key', http });
-      await expect(provider.search('test', {})).rejects.toThrow(
-        'Unsplash API returned 401',
-      );
+      await expect(provider.search('test', {})).rejects.toThrow('Unsplash API returned 401');
     });
 
     it('throws on network error', async () => {
       const http = vi.fn().mockRejectedValue(new Error('ECONNREFUSED'));
       const provider = unsplashProvider({ apiKey: 'test', http });
-      await expect(provider.search('test', {})).rejects.toThrow(
-        'Unsplash request failed',
-      );
+      await expect(provider.search('test', {})).rejects.toThrow('Unsplash request failed');
     });
 
     it('fetch retrieves a single photo', async () => {
       const mockPhoto = {
         id: 'photo-42',
-        urls: { raw: 'https://images.unsplash.com/photo-42?raw', thumb: 'https://images.unsplash.com/photo-42?thumb' },
+        urls: {
+          raw: 'https://images.unsplash.com/photo-42?raw',
+          thumb: 'https://images.unsplash.com/photo-42?thumb',
+        },
         user: { name: 'Carol' },
         width: 800,
         height: 600,
@@ -118,13 +115,15 @@ describe('stock', () => {
 
     it('search fallbacks for missing URLs', async () => {
       const mockResponse = {
-        results: [{
-          id: 'p1',
-          urls: { thumb: 'https://thumb' },
-          user: { name: 'X' },
-          width: 100,
-          height: 100,
-        }],
+        results: [
+          {
+            id: 'p1',
+            urls: { thumb: 'https://thumb' },
+            user: { name: 'X' },
+            width: 100,
+            height: 100,
+          },
+        ],
       };
       const http = makeMockFetch(mockResponse);
       const provider = unsplashProvider({ apiKey: 'k', http });
@@ -135,9 +134,7 @@ describe('stock', () => {
 
   describe('pexelsProvider', () => {
     it('throws if apiKey is missing', () => {
-      expect(() => pexelsProvider({ apiKey: '' })).toThrow(
-        'Pexels API key is required',
-      );
+      expect(() => pexelsProvider({ apiKey: '' })).toThrow('Pexels API key is required');
     });
 
     it('search sends correct URL and params', async () => {
@@ -181,17 +178,13 @@ describe('stock', () => {
     it('throws on HTTP failure', async () => {
       const http = makeMockFetch({ error: 'forbidden' }, 403);
       const provider = pexelsProvider({ apiKey: 'bad', http });
-      await expect(provider.search('test', {})).rejects.toThrow(
-        'Pexels API returned 403',
-      );
+      await expect(provider.search('test', {})).rejects.toThrow('Pexels API returned 403');
     });
 
     it('throws on network error', async () => {
       const http = vi.fn().mockRejectedValue(new Error('timeout'));
       const provider = pexelsProvider({ apiKey: 'key', http });
-      await expect(provider.search('test', {})).rejects.toThrow(
-        'Pexels request failed',
-      );
+      await expect(provider.search('test', {})).rejects.toThrow('Pexels request failed');
     });
 
     it('fetch retrieves a single photo', async () => {
@@ -225,14 +218,16 @@ describe('stock', () => {
 
     it('search fallbacks for missing URLs', async () => {
       const mockResponse = {
-        photos: [{
-          id: 1,
-          src: { tiny: 'https://tiny.jpg' },
-          photographer: 'Eve',
-          width: 50,
-          height: 50,
-          photographer_url: 'https://pexels.com/eve',
-        }],
+        photos: [
+          {
+            id: 1,
+            src: { tiny: 'https://tiny.jpg' },
+            photographer: 'Eve',
+            width: 50,
+            height: 50,
+            photographer_url: 'https://pexels.com/eve',
+          },
+        ],
       };
       const http = makeMockFetch(mockResponse);
       const provider = pexelsProvider({ apiKey: 'k', http });
@@ -262,9 +257,9 @@ describe('stock', () => {
 
     it('throws for unknown provider', async () => {
       const deps = makeDeps();
-      await expect(
-        searchStock(deps, { providerId: 'nonexistent', q: 'test' }),
-      ).rejects.toThrow('not found');
+      await expect(searchStock(deps, { providerId: 'nonexistent', q: 'test' })).rejects.toThrow(
+        'not found',
+      );
     });
   });
 

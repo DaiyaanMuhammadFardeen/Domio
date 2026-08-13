@@ -46,13 +46,7 @@ describe('AlertFeed', () => {
       json: async () => ({ events: [wire] }),
     })) as unknown as typeof fetch;
 
-    render(
-      <AlertFeed
-        workspaceId="ws-demo"
-        pollIntervalMs={1_000_000}
-        initialEvents={[]}
-      />,
-    );
+    render(<AlertFeed workspaceId="ws-demo" pollIntervalMs={1_000_000} initialEvents={[]} />);
 
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
@@ -80,13 +74,7 @@ describe('AlertFeed', () => {
       summary: 'CRM DLQ exceeded threshold',
     };
 
-    render(
-      <AlertFeed
-        workspaceId="ws-demo"
-        pollIntervalMs={1_000_000}
-        initialEvents={[seed]}
-      />,
-    );
+    render(<AlertFeed workspaceId="ws-demo" pollIntervalMs={1_000_000} initialEvents={[seed]} />);
 
     expect(screen.getByText(/DLQ depth = 7/)).toBeInTheDocument();
   });

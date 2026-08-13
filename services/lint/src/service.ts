@@ -20,11 +20,7 @@
  * editor can offer a one-click "apply recommended token" action.
  */
 
-import {
-  validateTokenId,
-  wcagContrast,
-  type TokenValue,
-} from '@domio/tokens';
+import { validateTokenId, wcagContrast, type TokenValue } from '@domio/tokens';
 import type { ULID } from '@domio/schema';
 import { asULID } from '@domio/schema';
 
@@ -111,7 +107,9 @@ export interface LintServiceOptions {
 
 const defaultId: () => ULID = () =>
   asULID(
-    `01H0000000000000000000000${Math.floor(Math.random() * 1e6).toString().padStart(6, '0')}`
+    `01H0000000000000000000000${Math.floor(Math.random() * 1e6)
+      .toString()
+      .padStart(6, '0')}`
       .slice(0, 26)
       .padEnd(26, '0'),
   );
@@ -288,7 +286,9 @@ export class LintService {
 
   async runLint(req: LintRunRequest): Promise<LintRunResult> {
     if (req.elements.length === 0) {
-      throw new LintValidationError([{ path: 'elements', message: 'At least one element is required' }]);
+      throw new LintValidationError([
+        { path: 'elements', message: 'At least one element is required' },
+      ]);
     }
     const startedAt = this.clock();
     const runId = this.idGen();
@@ -327,7 +327,15 @@ export class LintService {
       completedAt,
     };
     await this.runs.insert(record);
-    return { runId, findings, blockCount, warnCount, infoCount, elementsScanned: req.elements.length, latencyMs };
+    return {
+      runId,
+      findings,
+      blockCount,
+      warnCount,
+      infoCount,
+      elementsScanned: req.elements.length,
+      latencyMs,
+    };
   }
 
   async getRun(runId: string, orgId: string): Promise<LintRunRecord | null> {

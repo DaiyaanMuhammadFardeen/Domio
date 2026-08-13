@@ -74,7 +74,10 @@ export interface AlertmanagerRoute {
 
 /** Error thrown when a malformed catalogue row is parsed. */
 export class SloParseError extends Error {
-  constructor(message: string, public readonly line?: number) {
+  constructor(
+    message: string,
+    public readonly line?: number,
+  ) {
     super(line !== undefined ? `[line ${line}] ${message}` : message);
     this.name = 'SloParseError';
   }

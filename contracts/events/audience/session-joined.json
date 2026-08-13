@@ -4,7 +4,17 @@
   "title": "AudienceSessionJoined",
   "description": "Emitted by the audience service when a participant joins a session. The audience_session_id is the gateway-assigned participant handle; session_id is the presenter session. The pair is used by the WS gateway to index state.",
   "type": "object",
-  "required": ["event_id", "ts_ms", "workspace_id", "session_id", "audience_session_id", "participant_id", "session_code", "shard_index", "locale"],
+  "required": [
+    "event_id",
+    "ts_ms",
+    "workspace_id",
+    "session_id",
+    "audience_session_id",
+    "participant_id",
+    "session_code",
+    "shard_index",
+    "locale"
+  ],
   "properties": {
     "event_id": {
       "type": "string",

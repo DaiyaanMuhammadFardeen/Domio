@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  generateAlertsForSlo,
-  generateAllAlerts,
-  renderPrometheusRules,
-} from './prometheus.js';
+import { generateAlertsForSlo, generateAllAlerts, renderPrometheusRules } from './prometheus.js';
 import type { SloEntry } from './types.js';
 
 function fixtureSlo(overrides: Partial<SloEntry> = {}): SloEntry {
@@ -61,7 +57,10 @@ describe('generateAlertsForSlo', () => {
 
 describe('generateAllAlerts', () => {
   it('flattens alerts across multiple SLOs', () => {
-    const slos = [fixtureSlo(), fixtureSlo({ slo: 'lat-audience-render-p95', kind: 'latency', latencyThresholdMs: 250 })];
+    const slos = [
+      fixtureSlo(),
+      fixtureSlo({ slo: 'lat-audience-render-p95', kind: 'latency', latencyThresholdMs: 250 }),
+    ];
     const alerts = generateAllAlerts(slos);
     expect(alerts).toHaveLength(8);
   });
@@ -88,7 +87,9 @@ describe('renderPrometheusRules', () => {
 
   it('uses the http_request_duration_seconds metric for latency SLOs', () => {
     const body = renderPrometheusRules(
-      generateAllAlerts([fixtureSlo({ slo: 'lat-audience-render-p95', kind: 'latency', latencyThresholdMs: 250 })]),
+      generateAllAlerts([
+        fixtureSlo({ slo: 'lat-audience-render-p95', kind: 'latency', latencyThresholdMs: 250 }),
+      ]),
     );
     expect(body).toContain('http_request_duration_seconds_bucket');
   });

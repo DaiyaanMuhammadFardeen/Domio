@@ -32,8 +32,8 @@ export const options = {
   },
   thresholds: {
     'http_req_duration{name:ingest}': ['p(95)<50'],
-    'ingest_errors':                 ['rate<0.01'],
-    'checks':                        ['rate>0.99'],
+    ingest_errors: ['rate<0.01'],
+    checks: ['rate>0.99'],
   },
 };
 

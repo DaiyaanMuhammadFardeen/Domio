@@ -45,16 +45,17 @@ function actionTone(action: AuditEvent['action']): 'brand' | 'grey' | 'amber' | 
   return 'grey';
 }
 
-export function LogTable({ events, onSelect, emptyMessage = 'No events match these filters.' }: LogTableProps) {
+export function LogTable({
+  events,
+  onSelect,
+  emptyMessage = 'No events match these filters.',
+}: LogTableProps) {
   const [page, setPage] = useState(0);
 
   const totalPages = Math.max(1, Math.ceil(events.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages - 1);
   const start = safePage * PAGE_SIZE;
-  const pageItems = useMemo(
-    () => events.slice(start, start + PAGE_SIZE),
-    [events, start],
-  );
+  const pageItems = useMemo(() => events.slice(start, start + PAGE_SIZE), [events, start]);
 
   // Reset to first page when the result set shrinks past current page.
   if (page !== 0 && safePage !== page) {
@@ -73,7 +74,10 @@ export function LogTable({ events, onSelect, emptyMessage = 'No events match the
   }
 
   return (
-    <div data-testid="audit-log-table" className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div
+      data-testid="audit-log-table"
+      className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+    >
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50">
@@ -112,7 +116,10 @@ export function LogTable({ events, onSelect, emptyMessage = 'No events match the
                 aria-label={`View detail for event ${event.id}`}
                 className="cursor-pointer transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
               >
-                <td className="whitespace-nowrap px-4 py-2.5 text-slate-600" title={new Date(event.timestamp_ms).toISOString()}>
+                <td
+                  className="whitespace-nowrap px-4 py-2.5 text-slate-600"
+                  title={new Date(event.timestamp_ms).toISOString()}
+                >
                   {formatRelTime(event.timestamp_ms)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-2.5 text-slate-800">
@@ -144,10 +151,15 @@ export function LogTable({ events, onSelect, emptyMessage = 'No events match the
                   </span>
                 </td>
                 <td className="whitespace-nowrap px-4 py-2.5 text-slate-700">
-                  <span className="text-xs uppercase tracking-wide text-slate-400">{event.target_type}</span>
+                  <span className="text-xs uppercase tracking-wide text-slate-400">
+                    {event.target_type}
+                  </span>
                   <span className="ml-2 font-mono text-xs text-slate-700">{event.target_id}</span>
                 </td>
-                <td className="max-w-[180px] truncate whitespace-nowrap px-4 py-2.5 font-mono text-[11px] text-slate-500" title={event.trace_id}>
+                <td
+                  className="max-w-[180px] truncate whitespace-nowrap px-4 py-2.5 font-mono text-[11px] text-slate-500"
+                  title={event.trace_id}
+                >
                   {event.trace_id}
                 </td>
               </tr>
@@ -158,7 +170,11 @@ export function LogTable({ events, onSelect, emptyMessage = 'No events match the
 
       <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-500">
         <span>
-          Showing <span className="font-semibold text-slate-700">{start + 1}</span>–<span className="font-semibold text-slate-700">{Math.min(start + PAGE_SIZE, events.length)}</span> of <span className="font-semibold text-slate-700">{events.length}</span>
+          Showing <span className="font-semibold text-slate-700">{start + 1}</span>–
+          <span className="font-semibold text-slate-700">
+            {Math.min(start + PAGE_SIZE, events.length)}
+          </span>{' '}
+          of <span className="font-semibold text-slate-700">{events.length}</span>
         </span>
         <div className="flex items-center gap-2">
           <button
@@ -171,7 +187,8 @@ export function LogTable({ events, onSelect, emptyMessage = 'No events match the
             Previous
           </button>
           <span>
-            Page <span className="font-semibold text-slate-700">{safePage + 1}</span> / <span className="font-semibold text-slate-700">{totalPages}</span>
+            Page <span className="font-semibold text-slate-700">{safePage + 1}</span> /{' '}
+            <span className="font-semibold text-slate-700">{totalPages}</span>
           </span>
           <button
             type="button"

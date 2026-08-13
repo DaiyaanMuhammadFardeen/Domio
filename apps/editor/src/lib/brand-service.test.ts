@@ -40,7 +40,19 @@ describe('brand-service', () => {
   });
 
   it('fetchBrandKits returns the backend payload when reachable', async () => {
-    const remote = [{ id: 'remote-1', name: 'Remote', primaryHex: '#000', accentHex: '#fff', colors: [], typography: [], spacing: [], radius: [], shadows: [] }];
+    const remote = [
+      {
+        id: 'remote-1',
+        name: 'Remote',
+        primaryHex: '#000',
+        accentHex: '#fff',
+        colors: [],
+        typography: [],
+        spacing: [],
+        radius: [],
+        shadows: [],
+      },
+    ];
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => remote,
@@ -135,10 +147,14 @@ describe('brand-service', () => {
 
   it('lintStyle flags elements with off-brand fill', async () => {
     globalThis.fetch = vi.fn().mockRejectedValue(new Error('offline')) as unknown as typeof fetch;
-    const report = await lintStyle('brand-acme', [
-      { id: 'el-1', name: 'Shape', fill: '#ff0000' },
-      { id: 'el-2', name: 'Logo', fill: '#33180c' },
-    ], 'http://localhost:0');
+    const report = await lintStyle(
+      'brand-acme',
+      [
+        { id: 'el-1', name: 'Shape', fill: '#ff0000' },
+        { id: 'el-2', name: 'Logo', fill: '#33180c' },
+      ],
+      'http://localhost:0',
+    );
     expect(report.issues.length).toBe(1);
     expect(report.issues[0]?.elementId).toBe('el-1');
     expect(report.issues[0]?.tokenId).toBe('color.brand.primary');
@@ -166,7 +182,11 @@ describe('brand-service', () => {
       ok: true,
       json: async () => remote,
     }) as unknown as typeof fetch;
-    const report = await lintStyle('brand-acme', [{ id: 'el-1', name: 'Shape' }], 'http://localhost:0');
+    const report = await lintStyle(
+      'brand-acme',
+      [{ id: 'el-1', name: 'Shape' }],
+      'http://localhost:0',
+    );
     expect(report.issues.length).toBe(1);
     expect(report.issues[0]?.severity).toBe('error');
   });

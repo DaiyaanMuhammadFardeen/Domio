@@ -69,7 +69,8 @@ const SEED: readonly CustomDomain[] = [
     state: 'failed',
     cname_target: 'cname.domio.app.',
     last_checked_at_ms: NOW - 1000 * 60 * 60 * 6,
-    last_check_note: 'CNAME found but resolves to 0.0.0.0; check whether registrar stripped the trailing dot.',
+    last_check_note:
+      'CNAME found but resolves to 0.0.0.0; check whether registrar stripped the trailing dot.',
     verified_at_ms: null,
     label: 'Internal only',
     created_at_ms: NOW - 1000 * 60 * 60 * 24 * 3,
@@ -78,9 +79,7 @@ const SEED: readonly CustomDomain[] = [
 ];
 
 export async function listCustomDomains(tenantId?: string): Promise<CustomDomainList> {
-  const items = tenantId
-    ? SEED.filter((d) => d.tenant_id === tenantId)
-    : SEED.slice();
+  const items = tenantId ? SEED.filter((d) => d.tenant_id === tenantId) : SEED.slice();
   return { items, total: items.length };
 }
 
@@ -136,7 +135,9 @@ export async function revokeCustomDomain(id: string): Promise<CustomDomain> {
   };
 }
 
-export const CUSTOM_DOMAIN_STATE_TONES: Readonly<Record<CustomDomainState, 'success' | 'warning' | 'danger' | 'muted'>> = {
+export const CUSTOM_DOMAIN_STATE_TONES: Readonly<
+  Record<CustomDomainState, 'success' | 'warning' | 'danger' | 'muted'>
+> = {
   pending_dns: 'warning',
   verifying: 'warning',
   verified: 'success',

@@ -83,7 +83,7 @@ describe('design-tokens', () => {
     expect(resolveToken(clone(), 'color.does.not.exist' as never)).toBeNull();
   });
 
-  it('missingTokens returns the paths that aren\'t in the kit', () => {
+  it("missingTokens returns the paths that aren't in the kit", () => {
     const kit = clone();
     const missing = missingTokens(kit, ['color.brand.primary.500' as const, 'never.here' as never]);
     expect(missing).toContain('never.here');

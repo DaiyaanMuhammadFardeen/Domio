@@ -4,15 +4,25 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { EasingBezierEditor, formatBezierTuple, parseBezierTuple, EASING_BEZIER_PRESETS } from './EasingBezierEditor';
+import {
+  EasingBezierEditor,
+  formatBezierTuple,
+  parseBezierTuple,
+  EASING_BEZIER_PRESETS,
+} from './EasingBezierEditor';
 
 /**
  * Fire a synthetic pointer event with explicit clientX/clientY.
  * jsdom's PointerEvent constructor doesn't honour init props on RTL's
  * `fireEvent.pointerMove`, so we craft the event manually.
  */
-function firePointerEvent(target: Element, type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel', init: { clientX: number; clientY: number; pointerId?: number }): void {
-  const EventCtor = (typeof window !== 'undefined' && (window.PointerEvent || window.MouseEvent)) as typeof MouseEvent;
+function firePointerEvent(
+  target: Element,
+  type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel',
+  init: { clientX: number; clientY: number; pointerId?: number },
+): void {
+  const EventCtor = (typeof window !== 'undefined' &&
+    (window.PointerEvent || window.MouseEvent)) as typeof MouseEvent;
   const event = new EventCtor(type, { bubbles: true, cancelable: true, composed: true });
   // Override coordinates which jsdom doesn't initialise from the ctor.
   Object.defineProperty(event, 'clientX', { value: init.clientX, configurable: true });
@@ -32,7 +42,9 @@ describe('EasingBezierEditor', () => {
 
   it('renders the formatted readout', () => {
     render(<EasingBezierEditor value={[0.25, 0.1, 0.25, 1]} onChange={vi.fn()} />);
-    expect(screen.getByTestId('easing-bezier-readout').textContent).toContain('cubic-bezier(0.25, 0.1, 0.25, 1)');
+    expect(screen.getByTestId('easing-bezier-readout').textContent).toContain(
+      'cubic-bezier(0.25, 0.1, 0.25, 1)',
+    );
   });
 
   it('renders fixed anchors at (0, size) and (size, 0)', () => {
@@ -60,7 +72,10 @@ describe('EasingBezierEditor', () => {
         return this;
       },
     });
-    firePointerEvent(screen.getByTestId('easing-bezier-handle-0'), 'pointerdown', { clientX: 0, clientY: 0 });
+    firePointerEvent(screen.getByTestId('easing-bezier-handle-0'), 'pointerdown', {
+      clientX: 0,
+      clientY: 0,
+    });
     firePointerEvent(svg, 'pointermove', { clientX: 50, clientY: 50 });
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -86,7 +101,10 @@ describe('EasingBezierEditor', () => {
         return this;
       },
     });
-    firePointerEvent(screen.getByTestId('easing-bezier-handle-0'), 'pointerdown', { clientX: 0, clientY: 0 });
+    firePointerEvent(screen.getByTestId('easing-bezier-handle-0'), 'pointerdown', {
+      clientX: 0,
+      clientY: 0,
+    });
     firePointerEvent(svg, 'pointermove', { clientX: 80, clientY: 80 });
     firePointerEvent(svg, 'pointerup', { clientX: 80, clientY: 80 });
     expect(onChange).toHaveBeenCalledTimes(1);
@@ -114,7 +132,10 @@ describe('EasingBezierEditor', () => {
         return this;
       },
     });
-    firePointerEvent(screen.getByTestId('easing-bezier-handle-0'), 'pointerdown', { clientX: 0, clientY: 0 });
+    firePointerEvent(screen.getByTestId('easing-bezier-handle-0'), 'pointerdown', {
+      clientX: 0,
+      clientY: 0,
+    });
     firePointerEvent(svg, 'pointermove', { clientX: 90, clientY: 50 });
     firePointerEvent(svg, 'pointerup', { clientX: 90, clientY: 50 });
     expect(onChange).not.toHaveBeenCalled();

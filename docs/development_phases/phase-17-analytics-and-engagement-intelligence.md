@@ -29,18 +29,18 @@
 
 ### In scope (feature numbers)
 
-| Feature | Description |
-|---|---|
-| #169 | Per-viewer, per-slide analytics — dwell, drop-off, click, device, referer |
-| #170 | Interactive element analytics — scenario toggles, ROI calc, hotspots, branching, form fields |
-| #171 | Attention heatmaps for scroll-mode decks |
-| #172 | Sales-mode notifications (real-time, multi-channel, rate-limited) |
-| #173 | A/B testing two (or N) deck variants with statistical significance |
-| #174 | Team analytics — template / component / brand engagement rankings |
-| #175 | Presentation delivery analytics (live sessions + post-session recap) |
-| #176 | CRM sync (Salesforce, HubSpot, Pipedrive, Dynamics) |
-| #177 | Funnel view for sales decks |
-| #178 | Engagement benchmarks (cohort percentiles, percentile rank) |
+| Feature | Description                                                                                  |
+| ------- | -------------------------------------------------------------------------------------------- |
+| #169    | Per-viewer, per-slide analytics — dwell, drop-off, click, device, referer                    |
+| #170    | Interactive element analytics — scenario toggles, ROI calc, hotspots, branching, form fields |
+| #171    | Attention heatmaps for scroll-mode decks                                                     |
+| #172    | Sales-mode notifications (real-time, multi-channel, rate-limited)                            |
+| #173    | A/B testing two (or N) deck variants with statistical significance                           |
+| #174    | Team analytics — template / component / brand engagement rankings                            |
+| #175    | Presentation delivery analytics (live sessions + post-session recap)                         |
+| #176    | CRM sync (Salesforce, HubSpot, Pipedrive, Dynamics)                                          |
+| #177    | Funnel view for sales decks                                                                  |
+| #178    | Engagement benchmarks (cohort percentiles, percentile rank)                                  |
 
 ### Out of scope (deferred to later phases)
 
@@ -92,6 +92,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Receive viewer-runtime and presenter-HUD events from edge POPs with HMAC validation, PII stripping, schema enforcement, and backpressure-aware buffering.
 
 **Tasks.**
+
 1. Build `services/event-ingest` — the regional ingestion gateway (Go) terminating TLS at edge POPs, validating HMAC-SHA256 signatures against `deck_secret`, and forwarding to Kafka via Kafka Streams.
 2. Implement the edge validator: per `event_name` JSON schema enforced, unknown event types logged with `forward_compat=true` and accepted, PII fields stripped when `consent_state` lacks the matching category.
 3. Implement per-IP and per-deck rate limiting (token bucket); bots filtered by UA allow/block list.
@@ -101,6 +102,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 7. Wire OTel traces from edge POP through Kafka to consumers with `event_id` as trace ID.
 
 **Files / packages touched.**
+
 - `/services/event-ingest/` (new)
 - `/services/event-ingest/cmd/pop-router/main.go` (new)
 - `/services/event-ingest/internal/validate/pii_stripper.go` (new)
@@ -110,6 +112,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 - `/packages/observability/log-sanitizer.ts` (extend; reuse from P16)
 
 **Contracts added.**
+
 - `POST /v1/events` REST endpoint with `X-Domio-Signature`, `X-Domio-Deck-Id`, `X-Domio-Session-Id`, `X-Domio-Ts-Ms` headers.
 - JSON schemas in `contracts/events/ingest/{view,interaction,scroll_progress,scroll_pause,presenter_event,live_session_event}.json`.
 - Kafka topic `events.ingest.raw` with partition key `deck_id`.
@@ -117,12 +120,14 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Contracts consumed.** P14 share-link identity, P15 presenter session events, P16 participation events.
 
 **Tests written.**
+
 - Unit: HMAC verifier (negative cases), PII stripper regex suite, schema validator.
 - Integration: end-to-end ingestion from a synthetic client into Kafka + Postgres `event_index`.
 - Load: 200k events/sec sustained per region for 10 min; 1M events/sec burst for 60 s.
 - Property: any event accepted in v1 remains accepted in v2 (forward compat).
 
 **Definition of Done.**
+
 - 200k events/sec sustained per region with p95 ingest-to-Kafka latency < 100 ms.
 - PII stripper unit tests cover email, phone, IP, name patterns.
 - All contracts merged with semver bump.
@@ -135,6 +140,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Land raw events into ClickHouse (or DuckDB for self-host, #232) with materialized rollups and the analytic query surface the dashboard consumes.
 
 **Tasks.**
+
 1. Build `services/analytics-warehouse` — ClickHouse cluster with `events` table partitioned by `toYYYYMM(ts)` and sorted by `(deck_id, ts)`.
 2. Build `workers/columnar-loader` — Kafka Streams job that consumes `events.ingest.raw`, applies sessionization, writes to `events`, and updates `session_agg_mv`, `slide_metric_5m`, `deck_metric_5m`, `funnel_step_hourly`, `heatmap_tile` materialized views.
 3. Implement materialized views: `session_agg_mv`, `deck_metric_5m`, `slide_metric_5m`, `funnel_step_hourly`, `heatmap_tile` (per `/docs/analytics.md` §5.2).
@@ -144,6 +150,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 7. Wire `domio-analytics-loadgen` (a replay harness) that replays archived event corpora at 5× production rate.
 
 **Files / packages touched.**
+
 - `/services/analytics-warehouse/` (new)
 - `/workers/columnar-loader/` (new)
 - `/db/clickhouse/migrations/<ts>_events.sql` (new)
@@ -154,18 +161,21 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 - `/tools/loadgen/domio-analytics-loadgen/` (new)
 
 **Contracts added.**
+
 - `domio_analytics_warehouse.proto` — gRPC interface for OLAP query dispatch (used by W11 dashboard).
 - `events.ingest.normalized` Kafka topic (post-sessionization).
 
 **Contracts consumed.** W1 `events.ingest.raw`.
 
 **Tests written.**
+
 - Unit: materialized view SQL compiles; projection column physical layout verified.
 - Integration: 1M-event corpora replayed end-to-end through loader; aggregates match a Python reference implementation within 0.5% delta.
 - Replay accuracy: golden-file test against 50 hand-curated sessions.
 - Property: every `session_id` produces exactly one `session_agg_mv` row regardless of input order.
 
 **Definition of Done.**
+
 - 1B events ingested in staging with all rollups populated.
 - p95 per-deck query < 500 ms over 10M events.
 - 50-golden-file replay passes within 0.5% delta on every PR.
@@ -179,6 +189,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Construct the viewer identity graph across email, CRM ID, share-link token, and SSO sub, while honoring the four privacy modes.
 
 **Tasks.**
+
 1. Build `services/viewer-identity` — identity graph service owning `viewer`, `identity_link`, `consent_state`.
 2. Implement the four identification modes (`identified`, `pseudonymous`, `anon_consent`, `anon_no_track`) per workspace + per-deck + per-share-link override hierarchy.
 3. Implement the identity merge rules (default: exact email normalization match); workspace admins can configure rules.
@@ -188,6 +199,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 7. Implement anonymization pipeline triggered by erasure / account deletion / privacy mode change: 24 h scrub of `email_plain`, `email_hash`, `display_name`, `company`; tombstone retained.
 
 **Files / packages touched.**
+
 - `/services/viewer-identity/` (new)
 - `/services/viewer-identity/internal/graph/merger.go` (new)
 - `/services/viewer-identity/internal/consent/banner.go` (new)
@@ -196,6 +208,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 - `/apps/viewer-runtime/consent-banner/` (new — non-blocking banner component)
 
 **Contracts added.**
+
 - `POST /v1/viewers/{id}/export` (data subject access).
 - `POST /v1/viewers/{id}/erase` (right-to-erasure).
 - `POST /v1/viewers/{id}/object` (right-to-object).
@@ -204,12 +217,14 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Contracts consumed.** P05 `viewer_id_key` resolver; P14 share-link identity.
 
 **Tests written.**
+
 - Unit: identity graph merge rules (collision handling, pseudonymous boundary).
 - Integration: erasure pipeline scrubs within 24 h; tombstone survives.
 - Privacy: pseudonymous IDs never merge across privacy modes.
 - Compliance: GDPR access / erasure / object endpoints pass privacy review.
 
 **Definition of Done.**
+
 - Erasure pipeline verified on a synthetic 10k-viewer workload within 24 h.
 - All four privacy modes honored end-to-end.
 - PII stripper + consent gate integrated with W1 ingestion.
@@ -222,6 +237,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Convert raw event streams into coherent sessions with deterministic 30-min inactivity timeout.
 
 **Tasks.**
+
 1. Build `services/sessionization` — Kafka Streams app consuming `events.ingest.raw`.
 2. Implement 30-min inactivity timeout (configurable per workspace) keyed on `(viewer_id_key, deck_id)`.
 3. Persist `session` rows in Postgres (`session` table per `/docs/analytics.md` §5.1) on session start; emit `session.ended` on close with aggregate payload.
@@ -230,21 +246,25 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 6. Tag bots (`is_bot=true`) by UA matching; bot sessions excluded from human metrics.
 
 **Files / packages touched.**
+
 - `/services/sessionization/` (new)
 - `/services/sessionization/internal/window/inactivity.go` (new)
 - `/db/postgres/migrations/<ts>_session.sql` (new)
 
 **Contracts added.**
+
 - `session.started`, `session.ended`, `session.heartbeat` events on Kafka.
 
 **Contracts consumed.** W1 `events.ingest.raw`; W2 `session_agg_mv`.
 
 **Tests written.**
+
 - Unit: inactivity window math; concurrent-tab detection.
 - Integration: 1k-session replay, every session produces exactly one `session.ended`.
 - Replay: deterministic output on shuffled input.
 
 **Definition of Done.**
+
 - Session boundaries deterministic and replayable.
 - Bot tag rate < 0.5% false positive on synthetic human corpus.
 - Heartbeat drift correction verified.
@@ -257,6 +277,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Generate per-deck attention heatmaps for scroll-mode decks (#156) within 60 s of a session ending.
 
 **Tasks.**
+
 1. Build `services/heatmap-generator` — scheduled + on-demand worker.
 2. Implement tile grid generation: 64×N default (128×N for decks >50 slides); buckets normalized per row by viewport height.
 3. Aggregate `scroll_progress` and `scroll_pause` events from sessionization into `heatmap_tile` rollups.
@@ -266,19 +287,23 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 7. Implement 5-min batched job + on-demand trigger on session end.
 
 **Files / packages touched.**
+
 - `/services/heatmap-generator/` (new)
 - `/apps/dashboard/heatmap-renderer/` (new — renders tile grid client-side)
 
 **Contracts added.**
+
 - `heatmap.refreshed` event.
 - `GET /v1/decks/{id}/heatmap?segmentation=...` GraphQL.
 
 **Tests written.**
+
 - Unit: tile bucketing math; viewport normalization.
 - Integration: end-to-end from a 1k-session scroll corpus to PNG.
 - Privacy: tiles with <5 impressions suppressed.
 
 **Definition of Done.**
+
 - Heatmap refreshed within 60 s of session end.
 - Tile cache hit rate > 90% on dashboard reads.
 - Privacy floor verified.
@@ -291,6 +316,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Deterministic variant assignment + measurement plane with frequentist and Bayesian inference.
 
 **Tasks.**
+
 1. Build `services/ab-assignment` — synchronous OLTP variant resolver; deterministic hash of `viewer_id_key + experiment_id` → variant.
 2. Build `services/ab-measurement` — Kafka consumer ingesting events tagged `experiment_id`; per-variant aggregation.
 3. Build `services/ab-statistics` — frequentist z-test/t-test and Bayesian Beta-Binomial inference engine.
@@ -300,6 +326,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 7. Implement mid-test peeking flag ("exploratory" until configured horizon is reached).
 
 **Files / packages touched.**
+
 - `/services/ab-assignment/` (new)
 - `/services/ab-measurement/` (new)
 - `/services/ab-statistics/` (new)
@@ -307,16 +334,19 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 - `/apps/dashboard/ab/` (new)
 
 **Contracts added.**
+
 - `GET /v1/ab/assign?experiment_id=...&viewer_key=...` REST.
 - `POST /v1/ab/conclude` REST.
 - `experiment.concluded` Kafka event.
 
 **Tests written.**
+
 - Unit: deterministic hash, statistical math (Bayesian Beta-Binomial, z-test), tie handling.
 - Integration: end-to-end A/B test on 10k synthetic viewers; winner declared at threshold.
 - Property: same `viewer_id_key` always returns the same variant.
 
 **Definition of Done.**
+
 - Assignment lookup p95 < 5 ms.
 - Statistical confidence threshold enforced server-side; UI cannot bypass.
 - Cross-variant contamination protection (first-assignment-wins) verified.
@@ -329,6 +359,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Push viewer engagement events to Salesforce, HubSpot, Pipedrive, Dynamics timelines; pull contact tier back.
 
 **Tasks.**
+
 1. Build `services/crm-sync` — common framework with per-provider adapters.
 2. Implement `SalesforceAdapter` (OAuth 2.0 + REST API), `HubSpotAdapter` (private app token), `PipedriveAdapter` (API key), `DynamicsAdapter` (Azure AD + Web API).
 3. Implement event-mapping table (`crm_sync_field_map`) controlling which Domio event types map to which CRM activity types (e.g., `view` → `Email opened`, `pricing_slide_revisit` → `Web activity`).
@@ -340,6 +371,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 9. Implement 24-h retry queue; beyond 24 h, archive and surface reconciliation job.
 
 **Files / packages touched.**
+
 - `/services/crm-sync/` (new)
 - `/services/crm-sync/adapters/salesforce.go` (new)
 - `/services/crm-sync/adapters/hubspot.go` (new)
@@ -350,16 +382,19 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 - `/apps/admin/crm-health/` (new)
 
 **Contracts added.**
+
 - `POST /v1/webhooks/crm/{provider}` inbound.
 - `crm.sync.queued`, `crm.sync.sent`, `crm.sync.failed` events on Kafka.
 
 **Tests written.**
+
 - Unit: adapter per-provider with sandboxed vendor test instances.
 - Integration: end-to-end sync with Salesforce / HubSpot sandboxes.
 - Failure: rate-limit handling, exponential backoff, queue persistence.
 - Compliance: GDPR erasure cascades to CRM-side contact delete.
 
 **Definition of Done.**
+
 - 5-min debounced flush verified; high-signal immediate flush verified.
 - Failure rate < 1% in staging for 24 h sustained run.
 - Webhook signing enforced on inbound.
@@ -372,6 +407,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Fire real-time notifications on high-intent viewer behavior, rate-limited and channel-routed.
 
 **Tasks.**
+
 1. Build `services/notification-dispatcher` — consumes `notification.triggered` from a CEP rules engine over the event stream.
 2. Implement the CEP rule engine on Kafka Streams: conditions like `viewer.tier IN [hot, strategic] AND slide.section = "pricing" AND revisit_count >= 3 within 7 days`.
 3. Implement channel adapters: email (SMTP/SES), Slack (incoming webhook), Teams (incoming webhook), mobile push (FCM/APNs), generic webhook.
@@ -382,21 +418,25 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 8. Implement anonymous-viewer handling — no identity fields in the notification payload.
 
 **Files / packages touched.**
+
 - `/services/notification-dispatcher/` (new)
 - `/services/notification-dispatcher/internal/cep/rule_engine.go` (new)
 - `/services/notification-dispatcher/adapters/{email,slack,teams,push,webhook}.go` (new)
 - `/db/postgres/migrations/<ts>_notification_rule.sql` (new)
 
 **Contracts added.**
+
 - `notification.triggered`, `notification.sent`, `notification.failed` events on Kafka.
 - `POST /v1/notifications/test` (synthetic event preview).
 
 **Tests written.**
+
 - Unit: rule evaluation, rate-limit math, DND check, template rendering with anonymization.
 - Integration: end-to-end trigger → delivery to Slack/Teams/email sandbox.
 - Property: rate limit cannot be bypassed by rapid triggers.
 
 **Definition of Done.**
+
 - Trigger fired within 10 s p95 of qualifying event.
 - Rate limit enforced; no over-quota notifications sent.
 - Anonymous-viewer notifications contain no PII.
@@ -409,6 +449,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Workspace-level template / component / brand engagement rankings.
 
 **Tasks.**
+
 1. Build `services/team-analytics` — nightly rollup worker.
 2. Compute composite engagement score = weighted sum of (uses, views generated, completion %, conversion events) per `template_id` and `component_id`.
 3. Compute brand-kit engagement breakdown for #194 brand governance dashboard.
@@ -419,20 +460,24 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 8. Implement drill-down per template showing which decks use it and their median metrics vs. workspace average.
 
 **Files / packages touched.**
+
 - `/services/team-analytics/` (new)
 - `/services/team-analytics/internal/scoring/composite.go` (new)
 - `/db/clickhouse/migrations/<ts>_team_metric_mv.sql` (new)
 - `/apps/dashboard/team-analytics/` (new)
 
 **Contracts added.**
+
 - `team_analytics.refreshed` Kafka event.
 
 **Tests written.**
+
 - Unit: composite scoring math; trending badge threshold.
 - Integration: nightly job on synthetic 1k-template workspace.
 - Edge: cold-start templates routed to "incubating" correctly.
 
 **Definition of Done.**
+
 - Nightly job completes within 30 min for 10k-template workspace.
 - "Trending" badge awarded only when growth >2× median over 30 days.
 
@@ -444,6 +489,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Real-time attendance / poll / Q&A / reaction metrics to the presenter HUD plus post-session summary.
 
 **Tasks.**
+
 1. Build `services/live-analytics` — WebSocket fan-out to presenter HUD + post-session summary worker.
 2. Reuse P16 participation events (`poll_vote`, `qa_item`, `reaction`, etc.) tagged `realtime=true`.
 3. Aggregate attendance every 5 s for the presenter HUD; every 30 s for the public dashboard.
@@ -454,6 +500,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 8. Implement hybrid attendance (in-room + remote) merge when QR check-in or presenter mark is present.
 
 **Files / packages touched.**
+
 - `/services/live-analytics/` (new)
 - `/services/live-analytics/internal/hud/pusher.go` (new — WebSocket fan-out)
 - `/services/live-analytics/internal/summary/builder.go` (new)
@@ -461,15 +508,18 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 - `/apps/presenter-view/hud/live-metrics/` (new)
 
 **Contracts added.**
+
 - `live_session.attendance`, `live_session.poll_aggregate`, `live_session.qa_volume` WebSocket events.
 - `live_session_summary.generated` Kafka event.
 
 **Tests written.**
+
 - Unit: dedup math (live + replay viewers); hybrid attendance merge.
 - Integration: end-to-end 1k-participant session with live metrics surfaced within 1 s.
 - Edge: drop-off during Q&A not counted as negative engagement unless low live dwell.
 
 **Definition of Done.**
+
 - Live metric update within 1 s p95 to presenter HUD.
 - Post-session summary generated within 5 min of session end.
 - Dedup math matches a hand-curated 100-session reference corpus.
@@ -482,6 +532,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 **Goal:** Anonymized cohort benchmarks plus the dashboard GraphQL surface that surfaces everything else.
 
 **Tasks.**
+
 1. Build `services/benchmark` — nightly percentile distribution compute per cohort (`category × audience_tier × slide_count_bucket × duration_bucket`).
 2. Implement t-digest / HDR histogram for memory-efficient percentiles.
 3. Implement cohort eligibility: deck must have ≥10 sessions in the last 30 days to contribute; cohort only published if n≥30.
@@ -493,6 +544,7 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 9. Implement CSV/JSON export for per-viewer analytics; export is itself audited.
 
 **Files / packages touched.**
+
 - `/services/benchmark/` (new)
 - `/services/benchmark/internal/percentile/tdigest.go` (new)
 - `/apps/dashboard/` (new)
@@ -500,16 +552,19 @@ The phase is split into eleven ordered workstreams. W1–W3 are foundational (in
 - `/db/clickhouse/migrations/<ts>_benchmark_snapshot.sql` (new)
 
 **Contracts added.**
+
 - `contracts/graphql/v1/analytics.graphql` — the full dashboard schema.
 - `benchmark.refreshed` Kafka event.
 
 **Tests written.**
+
 - Unit: t-digest vs. reference implementation within 1% on 1M samples.
 - Integration: cohort eligibility, outlier exclusion, percentile compute.
 - Dashboard: end-to-end rendering tests with synthetic corpora.
 - Privacy: benchmark never exposes a deck's individual contribution unless opted in.
 
 **Definition of Done.**
+
 - Nightly benchmark job completes within 30 min for 100k-deck fleet.
 - Cold-start categories display "insufficient data" correctly.
 - GraphQL dashboard p95 < 300 ms for all standard queries.
@@ -522,43 +577,44 @@ This phase introduces eleven new services, four new worker packages, one new das
 
 ### New services
 
-| Service | Responsibility | Owns |
-|---|---|---|
-| `services/event-ingest` | Edge ingestion + validation | edge POP, `events.ingest.raw` |
-| `services/analytics-warehouse` | ClickHouse cluster | `events`, `session_agg_mv`, `deck_metric_5m`, `slide_metric_5m`, `funnel_step_hourly`, `heatmap_tile`, `benchmark_snapshot` |
-| `services/viewer-identity` | Identity graph + consent | `viewer`, `identity_link`, `consent_event` |
-| `services/sessionization` | 30-min inactivity sessionization | `session` |
-| `services/heatmap-generator` | Tile rollup | `heatmap_tile` |
-| `services/ab-assignment` | Synchronous variant assignment | `ab_assignment` |
-| `services/ab-measurement` | Asynchronous variant aggregation | per-variant counts |
-| `services/ab-statistics` | Inference engine | winner calls |
-| `services/crm-sync` | Per-provider adapters + framework | `crm_connection`, `crm_sync_record`, `crm_sync_field_map` |
-| `services/notification-dispatcher` | Multi-channel routing | `notification_rule` |
-| `services/team-analytics` | Nightly template/component rollups | `team_metric_mv` |
-| `services/live-analytics` | Live HUD + post-session summary | `live_session_summary` |
-| `services/benchmark` | Cohort percentile compute | `benchmark_snapshot` |
+| Service                            | Responsibility                     | Owns                                                                                                                        |
+| ---------------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `services/event-ingest`            | Edge ingestion + validation        | edge POP, `events.ingest.raw`                                                                                               |
+| `services/analytics-warehouse`     | ClickHouse cluster                 | `events`, `session_agg_mv`, `deck_metric_5m`, `slide_metric_5m`, `funnel_step_hourly`, `heatmap_tile`, `benchmark_snapshot` |
+| `services/viewer-identity`         | Identity graph + consent           | `viewer`, `identity_link`, `consent_event`                                                                                  |
+| `services/sessionization`          | 30-min inactivity sessionization   | `session`                                                                                                                   |
+| `services/heatmap-generator`       | Tile rollup                        | `heatmap_tile`                                                                                                              |
+| `services/ab-assignment`           | Synchronous variant assignment     | `ab_assignment`                                                                                                             |
+| `services/ab-measurement`          | Asynchronous variant aggregation   | per-variant counts                                                                                                          |
+| `services/ab-statistics`           | Inference engine                   | winner calls                                                                                                                |
+| `services/crm-sync`                | Per-provider adapters + framework  | `crm_connection`, `crm_sync_record`, `crm_sync_field_map`                                                                   |
+| `services/notification-dispatcher` | Multi-channel routing              | `notification_rule`                                                                                                         |
+| `services/team-analytics`          | Nightly template/component rollups | `team_metric_mv`                                                                                                            |
+| `services/live-analytics`          | Live HUD + post-session summary    | `live_session_summary`                                                                                                      |
+| `services/benchmark`               | Cohort percentile compute          | `benchmark_snapshot`                                                                                                        |
 
 ### New workers
 
-| Worker | Trigger | Purpose |
-|---|---|---|
-| `workers/columnar-loader` | Kafka stream | raw → ClickHouse + materialized views |
-| `workers/session-archiver` | `session.ended` | flush in-memory aggregates to cold storage |
-| `workers/team-analytics-rollup` | nightly | template/component engagement |
-| `workers/benchmark-rollup` | nightly (02:00 UTC) | cohort percentiles |
-| `workers/crm-reconciler` | 1 h loop | unmatched events + retry queue |
+| Worker                          | Trigger             | Purpose                                    |
+| ------------------------------- | ------------------- | ------------------------------------------ |
+| `workers/columnar-loader`       | Kafka stream        | raw → ClickHouse + materialized views      |
+| `workers/session-archiver`      | `session.ended`     | flush in-memory aggregates to cold storage |
+| `workers/team-analytics-rollup` | nightly             | template/component engagement              |
+| `workers/benchmark-rollup`      | nightly (02:00 UTC) | cohort percentiles                         |
+| `workers/crm-reconciler`        | 1 h loop            | unmatched events + retry queue             |
 
 ### New apps
 
-| App | Type | Purpose |
-|---|---|---|
-| `apps/dashboard` | Web (React + ECharts) | deck analytics, viewer detail, funnel, heatmap, A/B, team, benchmarks |
-| `apps/viewer-runtime` | Embedded JS | event capture in viewer / presenter / scroll-mode runtimes |
-| `apps/admin/crm-health` | Web (React) | CRM sync health dashboard |
+| App                     | Type                  | Purpose                                                               |
+| ----------------------- | --------------------- | --------------------------------------------------------------------- |
+| `apps/dashboard`        | Web (React + ECharts) | deck analytics, viewer detail, funnel, heatmap, A/B, team, benchmarks |
+| `apps/viewer-runtime`   | Embedded JS           | event capture in viewer / presenter / scroll-mode runtimes            |
+| `apps/admin/crm-health` | Web (React)           | CRM sync health dashboard                                             |
 
 ### New tables (Postgres OLTP control plane)
 
 Per `/docs/analytics.md` §5.1, the following tables are added in a single migration `<ts>_analytics_control_plane.sql`:
+
 - `viewer`, `identity_link`, `consent_event` (W3)
 - `event_index` (W1)
 - `session` (W4)
@@ -571,6 +627,7 @@ Per `/docs/analytics.md` §5.1, the following tables are added in a single migra
 ### New tables (ClickHouse OLAP analytics plane)
 
 Per `/docs/analytics.md` §5.2, added in four migration files:
+
 - `<ts>_events.sql` — `events` table with `MergeTree` engine, partitioned by `toYYYYMM(ts)`, sorted by `(deck_id, ts)`, TTL 13 months.
 - `<ts>_session_agg.sql` — `session_agg_mv` materialized view with `SummingMergeTree`.
 - `<ts>_heatmap.sql` — `heatmap_tile` table with `SummingMergeTree`.
@@ -597,56 +654,56 @@ Per `/docs/analytics.md` §5.2, added in four migration files:
 
 ## 6. Verification matrix
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #169 per-viewer | 1k sessions on one deck with mixed devices | Per-slide dwell accurate ±250 ms; drop-off computed | Ingestion lead |
-| #169 per-viewer | Viewer toggles privacy mode mid-session | Old events retained; new events aggregated only | Identity lead |
-| #170 interactive | ROI calculator usage by 500 viewers | `calculator_started`/`calculator_completed` paired; inputs bucketed | Ingestion lead |
-| #170 interactive | Spam click flood (>20 clicks/10s on one element) | Events coalesced + `coalesced=true` | Ingestion lead |
-| #171 heatmap | 1k-viewer scroll session on 50-slide deck | Heatmap refreshed within 60 s; tiles with <5 impressions suppressed | Heatmap lead |
-| #171 heatmap | Fast scroller (median >5k px/s) | Excluded from heatmap generation | Heatmap lead |
-| #172 notifications | Hot-tier viewer reopens pricing slide 3× in 7 days | Notification fires within 10 s; routed to configured channels | Notifications lead |
-| #172 notifications | Same trigger fires 11 times in one day | First 10 sent; 11th rate-limited | Notifications lead |
-| #172 notifications | Anonymous viewer triggers | Notification sent with no identity fields | Notifications lead |
-| #173 A/B | A/B test on 10k viewers, 50/50 split | Same `viewer_id_key` always returns same variant | A/B lead |
-| #173 A/B | Winner crosses 95% confidence | `experiment.concluded` emitted with declared winner | A/B lead |
-| #173 A/B | Stopped early before horizon | Result marked "inconclusive" not "winner" | A/B lead |
-| #174 team analytics | Nightly run on 1k-template workspace | Composite scores computed; trending badge for >2× growth | Team lead |
-| #174 team analytics | New template <14 days old | Routed to "incubating" section | Team lead |
-| #175 live delivery | 1k-participant live session with polls + Q&A | Attendance within 1 s p95 to presenter HUD | Live lead |
-| #175 live delivery | Same viewer present in live + replay | Counted once in post-session summary | Live lead |
-| #176 CRM sync | Salesforce sandbox: 1k events pushed | All events visible on `Contact` timeline within 5 min | CRM lead |
-| #176 CRM sync | Salesforce rate limit hit | Events queued; flush resumes on rate-limit reset | CRM lead |
-| #176 CRM sync | GDPR erasure request | Domio anonymizes + Salesforce contact deleted | CRM lead |
-| #177 funnel | Sales deck with 100 sent, 80 opened, 40 completed, 5 replied | Funnel shows 80% open, 50% completion, 12.5% reply | Funnel lead |
-| #177 funnel | Anonymous viewer opens + completes | Counted in opened/completed, not in replied | Funnel lead |
-| #178 benchmarks | Cohort with 1k eligible decks | p25/p50/p75/p95 published; rank computed | Benchmark lead |
-| #178 benchmarks | Cohort with <30 eligible decks | "Insufficient data" displayed | Benchmark lead |
-| Cross-cutting | 1M-event corpus replayed through pipeline | Aggregates match reference impl within 0.5% | SRE lead |
-| Cross-cutting | ClickHouse p95 per-deck query over 10M events | < 500 ms | SRE lead |
-| Cross-cutting | Right-to-erasure request on 10k-viewer workload | All PII scrubbed within 24 h; tombstone retained | Compliance lead |
-| Cross-cutting | axe-core scan of dashboard routes | 0 critical violations | a11y reviewer |
-| Cross-cutting | Manual screen-reader (VoiceOver, NVDA) pass on dashboard | All flows keyboard-operable | a11y reviewer |
-| Security | Forge `X-Domio-Signature` | All forged requests rejected | Security reviewer |
-| Compliance | PDPA right-to-access request | JSON bundle returned within 30 days | Compliance reviewer |
-| Scale | **10k concurrent session internal load test** — 1 region, mixed widgets, 60 min | All latency targets met; no consumer OOM | SRE lead |
+| Feature             | Test                                                                            | Expected result                                                     | Owner               |
+| ------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------- |
+| #169 per-viewer     | 1k sessions on one deck with mixed devices                                      | Per-slide dwell accurate ±250 ms; drop-off computed                 | Ingestion lead      |
+| #169 per-viewer     | Viewer toggles privacy mode mid-session                                         | Old events retained; new events aggregated only                     | Identity lead       |
+| #170 interactive    | ROI calculator usage by 500 viewers                                             | `calculator_started`/`calculator_completed` paired; inputs bucketed | Ingestion lead      |
+| #170 interactive    | Spam click flood (>20 clicks/10s on one element)                                | Events coalesced + `coalesced=true`                                 | Ingestion lead      |
+| #171 heatmap        | 1k-viewer scroll session on 50-slide deck                                       | Heatmap refreshed within 60 s; tiles with <5 impressions suppressed | Heatmap lead        |
+| #171 heatmap        | Fast scroller (median >5k px/s)                                                 | Excluded from heatmap generation                                    | Heatmap lead        |
+| #172 notifications  | Hot-tier viewer reopens pricing slide 3× in 7 days                              | Notification fires within 10 s; routed to configured channels       | Notifications lead  |
+| #172 notifications  | Same trigger fires 11 times in one day                                          | First 10 sent; 11th rate-limited                                    | Notifications lead  |
+| #172 notifications  | Anonymous viewer triggers                                                       | Notification sent with no identity fields                           | Notifications lead  |
+| #173 A/B            | A/B test on 10k viewers, 50/50 split                                            | Same `viewer_id_key` always returns same variant                    | A/B lead            |
+| #173 A/B            | Winner crosses 95% confidence                                                   | `experiment.concluded` emitted with declared winner                 | A/B lead            |
+| #173 A/B            | Stopped early before horizon                                                    | Result marked "inconclusive" not "winner"                           | A/B lead            |
+| #174 team analytics | Nightly run on 1k-template workspace                                            | Composite scores computed; trending badge for >2× growth            | Team lead           |
+| #174 team analytics | New template <14 days old                                                       | Routed to "incubating" section                                      | Team lead           |
+| #175 live delivery  | 1k-participant live session with polls + Q&A                                    | Attendance within 1 s p95 to presenter HUD                          | Live lead           |
+| #175 live delivery  | Same viewer present in live + replay                                            | Counted once in post-session summary                                | Live lead           |
+| #176 CRM sync       | Salesforce sandbox: 1k events pushed                                            | All events visible on `Contact` timeline within 5 min               | CRM lead            |
+| #176 CRM sync       | Salesforce rate limit hit                                                       | Events queued; flush resumes on rate-limit reset                    | CRM lead            |
+| #176 CRM sync       | GDPR erasure request                                                            | Domio anonymizes + Salesforce contact deleted                       | CRM lead            |
+| #177 funnel         | Sales deck with 100 sent, 80 opened, 40 completed, 5 replied                    | Funnel shows 80% open, 50% completion, 12.5% reply                  | Funnel lead         |
+| #177 funnel         | Anonymous viewer opens + completes                                              | Counted in opened/completed, not in replied                         | Funnel lead         |
+| #178 benchmarks     | Cohort with 1k eligible decks                                                   | p25/p50/p75/p95 published; rank computed                            | Benchmark lead      |
+| #178 benchmarks     | Cohort with <30 eligible decks                                                  | "Insufficient data" displayed                                       | Benchmark lead      |
+| Cross-cutting       | 1M-event corpus replayed through pipeline                                       | Aggregates match reference impl within 0.5%                         | SRE lead            |
+| Cross-cutting       | ClickHouse p95 per-deck query over 10M events                                   | < 500 ms                                                            | SRE lead            |
+| Cross-cutting       | Right-to-erasure request on 10k-viewer workload                                 | All PII scrubbed within 24 h; tombstone retained                    | Compliance lead     |
+| Cross-cutting       | axe-core scan of dashboard routes                                               | 0 critical violations                                               | a11y reviewer       |
+| Cross-cutting       | Manual screen-reader (VoiceOver, NVDA) pass on dashboard                        | All flows keyboard-operable                                         | a11y reviewer       |
+| Security            | Forge `X-Domio-Signature`                                                       | All forged requests rejected                                        | Security reviewer   |
+| Compliance          | PDPA right-to-access request                                                    | JSON bundle returned within 30 days                                 | Compliance reviewer |
+| Scale               | **10k concurrent session internal load test** — 1 region, mixed widgets, 60 min | All latency targets met; no consumer OOM                            | SRE lead            |
 
 ---
 
 ## 7. Risks & open decisions
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| ClickHouse scaling at 1B+ events with per-deck p95 < 500 ms | Med | High | Spikes in W2; pick projection column layout early; pre-aggregate `deck_metric_5m` aggressively |
-| Sessionization determinism broken by Kafka reordering | Med | High | Partition by `deck_id`; replay harness enforces determinism; idempotency on `op_id` |
-| CRM rate-limit handling at burst moments (e.g., 10k events/min during big reveal) | Med | Med | Token bucket per provider; degraded-mode flag with UI surface; 24-h retry queue |
-| A/B test contamination across workspaces (a viewer in two workspaces sees different variants) | Low | Med | `viewer_id_key` includes `workspace_id`; documented in stats engine; cross-workspace test forbidden in UI |
-| Heatmap privacy floor (<5 impressions) prevents useful signal on small decks | Low | Low | Adjustable threshold per workspace; default conservative |
-| Funnel stage definitions drift across workspaces (what counts as "completed"?) | Med | Med | Configurable per deck (default 80% slides viewed OR final slide); surfaced in funnel header |
-| Bangladesh residency for ClickHouse shards | Med | Med | Region-pinned shards; cross-region replication disabled for residency-locked viewers |
-| PII stripper regex misses new PII patterns | Med | Med | ML-based PII detector added in P20; conservative over-strip in MVP |
-| Live + replay viewer dedup math on cross-device viewers | Med | Med | Identity graph (W3) primary; fallback on `viewer_id_key` device-class match |
-| Notification spam during A/B tests (every variant's first session triggers a notification) | Med | Low | Exclude test-assigned viewers from `viewer.tier` evaluation; configurable |
+| Risk                                                                                          | Likelihood | Impact | Mitigation                                                                                                |
+| --------------------------------------------------------------------------------------------- | ---------- | ------ | --------------------------------------------------------------------------------------------------------- |
+| ClickHouse scaling at 1B+ events with per-deck p95 < 500 ms                                   | Med        | High   | Spikes in W2; pick projection column layout early; pre-aggregate `deck_metric_5m` aggressively            |
+| Sessionization determinism broken by Kafka reordering                                         | Med        | High   | Partition by `deck_id`; replay harness enforces determinism; idempotency on `op_id`                       |
+| CRM rate-limit handling at burst moments (e.g., 10k events/min during big reveal)             | Med        | Med    | Token bucket per provider; degraded-mode flag with UI surface; 24-h retry queue                           |
+| A/B test contamination across workspaces (a viewer in two workspaces sees different variants) | Low        | Med    | `viewer_id_key` includes `workspace_id`; documented in stats engine; cross-workspace test forbidden in UI |
+| Heatmap privacy floor (<5 impressions) prevents useful signal on small decks                  | Low        | Low    | Adjustable threshold per workspace; default conservative                                                  |
+| Funnel stage definitions drift across workspaces (what counts as "completed"?)                | Med        | Med    | Configurable per deck (default 80% slides viewed OR final slide); surfaced in funnel header               |
+| Bangladesh residency for ClickHouse shards                                                    | Med        | Med    | Region-pinned shards; cross-region replication disabled for residency-locked viewers                      |
+| PII stripper regex misses new PII patterns                                                    | Med        | Med    | ML-based PII detector added in P20; conservative over-strip in MVP                                        |
+| Live + replay viewer dedup math on cross-device viewers                                       | Med        | Med    | Identity graph (W3) primary; fallback on `viewer_id_key` device-class match                               |
+| Notification spam during A/B tests (every variant's first session triggers a notification)    | Med        | Low    | Exclude test-assigned viewers from `viewer.tier` evaluation; configurable                                 |
 
 Open decisions (with proposed default):
 
@@ -662,6 +719,7 @@ Open decisions (with proposed default):
 The internal demo proves all ten features end-to-end on a synthetic 10k-session / 1k-viewer workload plus one live session. Demo script:
 
 **Pre-demo (T-30 min).**
+
 1. Reset staging; deploy `phase-17-internal` tag to all services in `apac`, `eu`, `us` regions.
 2. Seed three decks:
    - **"Investor Pitch A"** (12 slides, ROI calculator on slide 6, branching choice on slide 8, A/B variant "Investor Pitch B" with revised pricing slide).
@@ -674,24 +732,25 @@ The internal demo proves all ten features end-to-end on a synthetic 10k-session 
 
 **Live demo script (T-0).**
 
-| T+ | Action | What we watch |
-|---|---|---|
-| 0:00 | Viewer A opens Investor Pitch A → scrolls to slide 6 (ROI calc) → inputs values | `view` + `interaction` events flow; per-slide dwell accurate |
-| 0:30 | Same viewer toggles between Base/Bull/Bear scenarios 5× | `scenario_switched` events captured with `{from, to, slide_index}` |
-| 1:00 | Viewer B (identified via share-link token, email matched to Salesforce Contact) opens deck | CRM contact matched; `viewer` row created |
-| 1:30 | Viewer B reaches pricing slide (slide 9) → exits → returns 5 min later | First session captured; "reopened" qualifies |
-| 2:00 | Viewer C (hot-tier per CRM) opens Sales Deck → pricing slide revisit ×3 in 10 min | Sales notification fires within 10 s to Slack; rate-limit set to 5/day |
-| 2:30 | Owner dashboard refreshes | Per-viewer detail page shows all three viewers; Sales Deck funnel visible |
-| 3:00 | A/B test on Investor Pitch A/B starts → 1k viewers assigned deterministically | Variant split 50/50; same viewer always sees same variant |
-| 5:00 | Live presenter session starts (Investor Pitch, 200 participants) | Attendance HUD updates every 5 s; poll at slide 5 returns within 1 s p95 |
-| 7:00 | Live session ends | `live_session_summary` generated within 5 min; merged with per-viewer analytics |
-| 8:00 | Owner opens dashboard "Heatmap" tab for Training Deck | Tile grid rendered from scroll events; tiles with <5 impressions suppressed |
-| 9:00 | Owner opens "Benchmarks" tab for Investor Pitch | Cohort "pitch.investor.10_20_slides" shows p25/p50/p75/p95; rank computed |
-| 10:00 | Owner opens "Team Analytics" | Templates ranked by composite engagement; "trending" badge awarded |
-| 11:00 | Compliance test: erasure request for Viewer B | All PII scrubbed within 24 h (verified at T+12 h); CRM contact deletion propagated to Salesforce |
-| 12:00 | Replay accuracy: load archived 1M-event corpus through pipeline | Aggregates match reference implementation within 0.5% |
+| T+    | Action                                                                                     | What we watch                                                                                    |
+| ----- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| 0:00  | Viewer A opens Investor Pitch A → scrolls to slide 6 (ROI calc) → inputs values            | `view` + `interaction` events flow; per-slide dwell accurate                                     |
+| 0:30  | Same viewer toggles between Base/Bull/Bear scenarios 5×                                    | `scenario_switched` events captured with `{from, to, slide_index}`                               |
+| 1:00  | Viewer B (identified via share-link token, email matched to Salesforce Contact) opens deck | CRM contact matched; `viewer` row created                                                        |
+| 1:30  | Viewer B reaches pricing slide (slide 9) → exits → returns 5 min later                     | First session captured; "reopened" qualifies                                                     |
+| 2:00  | Viewer C (hot-tier per CRM) opens Sales Deck → pricing slide revisit ×3 in 10 min          | Sales notification fires within 10 s to Slack; rate-limit set to 5/day                           |
+| 2:30  | Owner dashboard refreshes                                                                  | Per-viewer detail page shows all three viewers; Sales Deck funnel visible                        |
+| 3:00  | A/B test on Investor Pitch A/B starts → 1k viewers assigned deterministically              | Variant split 50/50; same viewer always sees same variant                                        |
+| 5:00  | Live presenter session starts (Investor Pitch, 200 participants)                           | Attendance HUD updates every 5 s; poll at slide 5 returns within 1 s p95                         |
+| 7:00  | Live session ends                                                                          | `live_session_summary` generated within 5 min; merged with per-viewer analytics                  |
+| 8:00  | Owner opens dashboard "Heatmap" tab for Training Deck                                      | Tile grid rendered from scroll events; tiles with <5 impressions suppressed                      |
+| 9:00  | Owner opens "Benchmarks" tab for Investor Pitch                                            | Cohort "pitch.investor.10_20_slides" shows p25/p50/p75/p95; rank computed                        |
+| 10:00 | Owner opens "Team Analytics"                                                               | Templates ranked by composite engagement; "trending" badge awarded                               |
+| 11:00 | Compliance test: erasure request for Viewer B                                              | All PII scrubbed within 24 h (verified at T+12 h); CRM contact deletion propagated to Salesforce |
+| 12:00 | Replay accuracy: load archived 1M-event corpus through pipeline                            | Aggregates match reference implementation within 0.5%                                            |
 
 **Pass criteria for "internal demo passed":**
+
 - All 11 timing targets met (see Verification matrix).
 - 1M-event replay accuracy within 0.5% delta.
 - All security / privacy / compliance tests pass.

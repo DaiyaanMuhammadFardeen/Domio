@@ -34,7 +34,9 @@ export function OptOutToggle(props: OptOutToggleProps) {
   const { optOut, onChange, cookieMaxAgeDays = 365 } = props;
   const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => { setHydrated(true); }, []);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const handleClick = useCallback(() => {
     const next = !optOut;

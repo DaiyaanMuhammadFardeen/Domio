@@ -12,12 +12,7 @@
  */
 
 /** Input events the prototype runtime understands. */
-export type InteractionEventKind =
-  | 'focus'
-  | 'press'
-  | 'click'
-  | 'hover'
-  | 'default';
+export type InteractionEventKind = 'focus' | 'press' | 'click' | 'hover' | 'default';
 
 export interface InteractionEvent {
   readonly kind: InteractionEventKind;

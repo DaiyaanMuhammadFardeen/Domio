@@ -82,13 +82,17 @@ export class InMemoryRescreenProvider implements RescreenProvider {
 
   async listApprovedCreators(): Promise<readonly CreatorRecord[]> {
     // Only return creators with kyc_status 'approved' (exclude frozen/rejected)
-    return this.creators.filter(c => c.kyc_status === 'approved');
+    return this.creators.filter((c) => c.kyc_status === 'approved');
   }
 
   async checkIdentity(creator: CreatorRecord): Promise<IdentityCheckResult> {
     const name = creator.display_name.toLowerCase();
     if (name.includes('sanc')) {
-      return { hit: true, kind: 'sanctions', matched_entity: `sanctions-list-${creator.creator_id}` };
+      return {
+        hit: true,
+        kind: 'sanctions',
+        matched_entity: `sanctions-list-${creator.creator_id}`,
+      };
     }
     if (name.includes('pep')) {
       return { hit: true, kind: 'pep', matched_entity: `pep-list-${creator.creator_id}` };
@@ -102,7 +106,7 @@ export class InMemoryRescreenProvider implements RescreenProvider {
 
   async freezeCreator(creator_id: string): Promise<void> {
     this.frozenIds.push(creator_id);
-    const creator = this.creators.find(c => c.creator_id === creator_id);
+    const creator = this.creators.find((c) => c.creator_id === creator_id);
     if (creator) {
       // Mutate to reflect frozen status so listApprovedCreators excludes it
       (creator as { kyc_status: string }).kyc_status = 'frozen';
@@ -130,9 +134,15 @@ export class KycRescreenWorker {
     this.provider = opts.provider;
     this.tickMs = opts.tickMs ?? Number(process.env['WORKER_TICK_MS'] ?? '60000');
     this.logger = opts.logger ?? {
-      info: () => { /* noop */ },
-      error: () => { /* noop */ },
-      warn: () => { /* noop */ },
+      info: () => {
+        /* noop */
+      },
+      error: () => {
+        /* noop */
+      },
+      warn: () => {
+        /* noop */
+      },
     };
   }
 

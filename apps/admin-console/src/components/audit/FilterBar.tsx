@@ -9,15 +9,8 @@
  */
 
 import type { ChangeEvent } from 'react';
-import {
-  ALL_AUDIT_ACTIONS,
-  ALL_AUDIT_TARGET_TYPES,
-} from '../../lib/audit-service';
-import type {
-  AuditAction,
-  AuditEvent,
-  AuditFilter,
-} from '../../lib/types';
+import { ALL_AUDIT_ACTIONS, ALL_AUDIT_TARGET_TYPES } from '../../lib/audit-service';
+import type { AuditAction, AuditEvent, AuditFilter } from '../../lib/types';
 
 export interface FilterBarProps {
   filter: AuditFilter;
@@ -127,7 +120,10 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
       className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-3"
     >
       <div className="flex flex-col">
-        <label htmlFor="audit-filter-actor" className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <label
+          htmlFor="audit-filter-actor"
+          className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
+        >
           Actor
         </label>
         <input
@@ -142,7 +138,10 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="audit-filter-action" className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <label
+          htmlFor="audit-filter-action"
+          className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
+        >
           Action
         </label>
         <select
@@ -162,7 +161,10 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="audit-filter-target-type" className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <label
+          htmlFor="audit-filter-target-type"
+          className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
+        >
           Target type
         </label>
         <select
@@ -182,7 +184,10 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="audit-filter-from" className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <label
+          htmlFor="audit-filter-from"
+          className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
+        >
           From
         </label>
         <input
@@ -196,7 +201,10 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="audit-filter-to" className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <label
+          htmlFor="audit-filter-to"
+          className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
+        >
           To
         </label>
         <input

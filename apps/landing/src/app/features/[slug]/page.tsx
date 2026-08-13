@@ -73,17 +73,16 @@ export default async function FeaturePage({ params }: FeaturePageProps): Promise
   const body = (
     <>
       <Hero feature={feature} />
-      <GifDemo
-        slug={feature.slug}
-        title={feature.title}
-        description={feature.tagline}
-      />
+      <GifDemo slug={feature.slug} title={feature.title} description={feature.tagline} />
       <TutorialSteps feature={feature} />
-      <RelatedLinks items={related} title="Related features" className="fp-related" testId="fp-related" />
+      <RelatedLinks
+        items={related}
+        title="Related features"
+        className="fp-related"
+        testId="fp-related"
+      />
       <section className="fp-bottom-cta" aria-label="Get started" data-testid="fp-bottom-cta">
-        <h2 className="fp-bottom-cta__heading">
-          Ready to try {feature.title}?
-        </h2>
+        <h2 className="fp-bottom-cta__heading">Ready to try {feature.title}?</h2>
         <p className="fp-bottom-cta__sub">{feature.tagline}</p>
         <a
           className="fp-bottom-cta__button"
@@ -99,9 +98,7 @@ export default async function FeaturePage({ params }: FeaturePageProps): Promise
   return (
     <main className="fp-main" data-testid="fp-page" data-slug={feature.slug}>
       <BreadcrumbsShell currentId={nodeId}>
-        <FeaturePageClient feature={feature}>
-          {body}
-        </FeaturePageClient>
+        <FeaturePageClient feature={feature}>{body}</FeaturePageClient>
       </BreadcrumbsShell>
     </main>
   );

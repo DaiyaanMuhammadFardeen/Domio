@@ -52,7 +52,8 @@ describe('heatmap-service', () => {
     globalThis.fetch = mock;
 
     await fetchHeatmap('ws-demo', 'deck/with/slash', 'slide-1', { baseUrl: 'http://wh.test' });
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
     expect(calledUrl).toContain('deck%2Fwith%2Fslash');
     expect(calledUrl).toContain('/slides/slide-1/heatmap');
   });

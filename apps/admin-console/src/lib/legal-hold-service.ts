@@ -7,11 +7,7 @@
  * calls without re-importing.
  */
 
-import type {
-  LegalHold,
-  LegalHoldInput,
-  LegalHoldTargetKind,
-} from './types';
+import type { LegalHold, LegalHoldInput, LegalHoldTargetKind } from './types';
 
 /** Thrown when a hold cannot be transitioned (already released, etc.). */
 export class LegalHoldError extends Error {
@@ -117,20 +113,12 @@ export async function getLegalHold(id: string): Promise<LegalHold | null> {
   return found ? clone(found) : null;
 }
 
-export async function applyLegalHold(
-  input: LegalHoldInput,
-): Promise<LegalHold> {
+export async function applyLegalHold(input: LegalHoldInput): Promise<LegalHold> {
   if (!input.reason || input.reason.trim().length < 5) {
-    throw new LegalHoldError(
-      'invalid_reason',
-      'Reason must be at least 5 characters.',
-    );
+    throw new LegalHoldError('invalid_reason', 'Reason must be at least 5 characters.');
   }
   if (!input.target_id || input.target_id.trim().length === 0) {
-    throw new LegalHoldError(
-      'invalid_target',
-      'Target ID is required.',
-    );
+    throw new LegalHoldError('invalid_target', 'Target ID is required.');
   }
   const targetLabel = inferLabel(input.target_kind, input.target_id);
   const created: LegalHold = {
@@ -151,10 +139,7 @@ export async function applyLegalHold(
   return clone(created);
 }
 
-export async function releaseLegalHold(
-  id: string,
-  notes: string,
-): Promise<LegalHold> {
+export async function releaseLegalHold(id: string, notes: string): Promise<LegalHold> {
   if (!notes || notes.trim().length < 5) {
     throw new LegalHoldError(
       'invalid_release_notes',
@@ -172,9 +157,7 @@ export async function releaseLegalHold(
   if (prev.status === 'released') {
     throw new LegalHoldError(
       'already_released',
-      `Hold ${id} was already released at ${new Date(
-        prev.released_at_ms ?? 0,
-      ).toISOString()}.`,
+      `Hold ${id} was already released at ${new Date(prev.released_at_ms ?? 0).toISOString()}.`,
     );
   }
   const next: LegalHold = {
@@ -193,9 +176,7 @@ export async function releaseLegalHold(
  * their constituent decks; users include decks they authored plus any
  * uploaded assets. Returns a stable, deterministic shape for the UI.
  */
-export async function getAffectedItems(
-  id: string,
-): Promise<ReadonlyArray<AffectedItem>> {
+export async function getAffectedItems(id: string): Promise<ReadonlyArray<AffectedItem>> {
   const hold = STORE.find((h) => h.id === id);
   if (!hold) return [];
   switch (hold.target_kind) {

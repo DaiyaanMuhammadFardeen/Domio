@@ -20,10 +20,7 @@ import type {
   WebhookDelivery,
   PartnerClient,
 } from '../types.js';
-import {
-  ListingNotFoundError,
-  ReviewNotFoundError,
-} from '../types.js';
+import { ListingNotFoundError, ReviewNotFoundError } from '../types.js';
 import type {
   CreatorProfile,
   KycSession,
@@ -32,7 +29,12 @@ import type {
 } from '../creator/types.js';
 import type { BrandLockedListing } from '../curated/types.js';
 import { BrandLockNotFoundError } from '../curated/types.js';
-import type { TakedownRequest, TrustScore, TakedownStatus, TakedownKind } from '../takedown/types.js';
+import type {
+  TakedownRequest,
+  TrustScore,
+  TakedownStatus,
+  TakedownKind,
+} from '../takedown/types.js';
 import { TakedownNotFoundError } from '../takedown/types.js';
 import type { MarketplaceStore } from './store.js';
 
@@ -77,9 +79,11 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
     return null;
   }
 
-  async listListings(
-    opts?: { status?: string; sellerId?: string; limit?: number },
-  ): Promise<MarketplaceListing[]> {
+  async listListings(opts?: {
+    status?: string;
+    sellerId?: string;
+    limit?: number;
+  }): Promise<MarketplaceListing[]> {
     const results: MarketplaceListing[] = [];
     for (const l of this.listings.values()) {
       if (opts?.status && l.status !== opts.status) continue;
@@ -92,10 +96,22 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
 
   async updateListing(
     listingId: string,
-    patch: Partial<Pick<MarketplaceListing,
-      'title' | 'description' | 'status' | 'isFree' | 'priceCents' | 'currency' |
-      'tags' | 'preview' | 'publishedAtMs' | 'deprecatedAtMs' | 'updatedAt'
-    >>,
+    patch: Partial<
+      Pick<
+        MarketplaceListing,
+        | 'title'
+        | 'description'
+        | 'status'
+        | 'isFree'
+        | 'priceCents'
+        | 'currency'
+        | 'tags'
+        | 'preview'
+        | 'publishedAtMs'
+        | 'deprecatedAtMs'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<MarketplaceListing> {
     const existing = this.listings.get(listingId);
     if (!existing) throw new ListingNotFoundError(listingId);
@@ -113,7 +129,7 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   }
 
   async listListingVersions(catalogId: string): Promise<ListingVersion[]> {
-    return this.versions.filter(v => v.catalogId === catalogId);
+    return this.versions.filter((v) => v.catalogId === catalogId);
   }
 
   // -------------------------------------------------------------------------
@@ -215,14 +231,19 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
     return this.paymentIntents.get(purchaseId) ?? null;
   }
 
-  async getPaymentIntentByProviderIntentId(providerIntentId: string): Promise<PaymentIntent | null> {
+  async getPaymentIntentByProviderIntentId(
+    providerIntentId: string,
+  ): Promise<PaymentIntent | null> {
     for (const intent of this.paymentIntents.values()) {
       if (intent.providerIntentId === providerIntentId) return intent;
     }
     return null;
   }
 
-  async getPaymentIntentByIdempotencyKey(workspaceId: string, idempotencyKey: string): Promise<PaymentIntent | null> {
+  async getPaymentIntentByIdempotencyKey(
+    workspaceId: string,
+    idempotencyKey: string,
+  ): Promise<PaymentIntent | null> {
     for (const intent of this.paymentIntents.values()) {
       if (intent.workspaceId === workspaceId && intent.idempotencyKey === idempotencyKey) {
         return intent;
@@ -234,7 +255,12 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   async updatePaymentIntentStatus(
     purchaseId: string,
     status: PaymentIntent['status'],
-    patch?: Partial<Pick<PaymentIntent, 'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'>>,
+    patch?: Partial<
+      Pick<
+        PaymentIntent,
+        'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'
+      >
+    >,
   ): Promise<PaymentIntent> {
     const existing = this.paymentIntents.get(purchaseId);
     if (!existing) throw new ListingNotFoundError(purchaseId);
@@ -256,7 +282,10 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
     this.licenseGrants.push(grant);
   }
 
-  async getLicenseGrantByListingAndBuyer(listingId: string, buyerId: string): Promise<LicenseGrant | null> {
+  async getLicenseGrantByListingAndBuyer(
+    listingId: string,
+    buyerId: string,
+  ): Promise<LicenseGrant | null> {
     for (const grant of this.licenseGrants) {
       if (grant.listingId === listingId && grant.buyerId === buyerId) return grant;
     }
@@ -285,7 +314,11 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   async clearListingFrozen(listingId: string): Promise<void> {
     const existing = this.listings.get(listingId);
     if (!existing) throw new ListingNotFoundError(listingId);
-    const updated = { ...existing, frozenFor: null, frozenAt: null } as unknown as MarketplaceListing;
+    const updated = {
+      ...existing,
+      frozenFor: null,
+      frozenAt: null,
+    } as unknown as MarketplaceListing;
     this.listings.set(listingId, updated);
   }
 
@@ -298,7 +331,9 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   }
 
   async listEligiblePayoutEvents(periodMonth: string): Promise<RevenueShareEvent[]> {
-    return this.revenueShareEvents.filter(e => e.periodMonth === periodMonth && e.payoutStatus === 'eligible');
+    return this.revenueShareEvents.filter(
+      (e) => e.periodMonth === periodMonth && e.payoutStatus === 'eligible',
+    );
   }
 
   // -------------------------------------------------------------------------
@@ -315,10 +350,22 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
 
   async updateCreatorProfile(
     userId: string,
-    patch: Partial<Pick<CreatorProfile,
-      'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod' |
-      'payoutReady' | 'kycStatus' | 'onboardingState' | 'balanceCents' | 'currency' | 'updatedAt'
-    >>,
+    patch: Partial<
+      Pick<
+        CreatorProfile,
+        | 'displayName'
+        | 'slug'
+        | 'bio'
+        | 'countryCode'
+        | 'payoutMethod'
+        | 'payoutReady'
+        | 'kycStatus'
+        | 'onboardingState'
+        | 'balanceCents'
+        | 'currency'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<CreatorProfile> {
     const existing = this.creatorProfiles.get(userId);
     if (!existing) throw new ListingNotFoundError(userId);
@@ -380,7 +427,11 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   ): Promise<CreatorPayoutMethod> {
     const existing = this.payoutMethods.get(methodId);
     if (!existing) throw new ListingNotFoundError(methodId);
-    const updated: CreatorPayoutMethod = { ...existing, verified, updatedAt: new Date() } as CreatorPayoutMethod;
+    const updated: CreatorPayoutMethod = {
+      ...existing,
+      verified,
+      updatedAt: new Date(),
+    } as CreatorPayoutMethod;
     this.payoutMethods.set(methodId, updated);
     return updated;
   }
@@ -395,16 +446,27 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
     this.brandLocks.set(lock.id, lock);
   }
 
-  async getBrandLock(workspaceId: string, brandKitId: string, marketplaceListingId: string): Promise<BrandLockedListing | null> {
+  async getBrandLock(
+    workspaceId: string,
+    brandKitId: string,
+    marketplaceListingId: string,
+  ): Promise<BrandLockedListing | null> {
     for (const lock of this.brandLocks.values()) {
-      if (lock.workspaceId === workspaceId && lock.brandKitId === brandKitId && lock.marketplaceListingId === marketplaceListingId) {
+      if (
+        lock.workspaceId === workspaceId &&
+        lock.brandKitId === brandKitId &&
+        lock.marketplaceListingId === marketplaceListingId
+      ) {
         return lock;
       }
     }
     return null;
   }
 
-  async listBrandLocksByBrand(workspaceId: string, brandKitId: string): Promise<BrandLockedListing[]> {
+  async listBrandLocksByBrand(
+    workspaceId: string,
+    brandKitId: string,
+  ): Promise<BrandLockedListing[]> {
     const results: BrandLockedListing[] = [];
     for (const lock of this.brandLocks.values()) {
       if (lock.workspaceId === workspaceId && lock.brandKitId === brandKitId) {
@@ -426,17 +488,27 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
 
   async updateBrandLock(
     lockId: string,
-    patch: Partial<Pick<BrandLockedListing, 'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'>>,
+    patch: Partial<
+      Pick<
+        BrandLockedListing,
+        'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'
+      >
+    >,
   ): Promise<BrandLockedListing> {
     const existing = this.brandLocks.get(lockId);
     if (!existing) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
-    const updated: BrandLockedListing = { ...existing, ...patch, updatedAt: new Date() } as BrandLockedListing;
+    const updated: BrandLockedListing = {
+      ...existing,
+      ...patch,
+      updatedAt: new Date(),
+    } as BrandLockedListing;
     this.brandLocks.set(lockId, updated);
     return updated;
   }
 
   async deleteBrandLock(lockId: string): Promise<void> {
-    if (!this.brandLocks.has(lockId)) throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
+    if (!this.brandLocks.has(lockId))
+      throw new BrandLockNotFoundError(`Brand lock not found: ${lockId}`);
     this.brandLocks.delete(lockId);
   }
 
@@ -462,7 +534,10 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
     return results;
   }
 
-  async listTakedownRequests(opts?: { status?: TakedownStatus; kind?: TakedownKind }): Promise<TakedownRequest[]> {
+  async listTakedownRequests(opts?: {
+    status?: TakedownStatus;
+    kind?: TakedownKind;
+  }): Promise<TakedownRequest[]> {
     const results: TakedownRequest[] = [];
     for (const req of this.takedownRequests.values()) {
       if (opts?.status && req.status !== opts.status) continue;
@@ -479,7 +554,12 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   ): Promise<TakedownRequest> {
     const existing = this.takedownRequests.get(takedownId);
     if (!existing) throw new TakedownNotFoundError(`Takedown request not found: ${takedownId}`);
-    const updated: TakedownRequest = { ...existing, status, ...patch, updatedAt: new Date() } as TakedownRequest;
+    const updated: TakedownRequest = {
+      ...existing,
+      status,
+      ...patch,
+      updatedAt: new Date(),
+    } as TakedownRequest;
     this.takedownRequests.set(takedownId, updated);
     return updated;
   }
@@ -550,7 +630,9 @@ export class InMemoryMarketplaceStore implements MarketplaceStore {
   async updateWebhookDeliveryStatus(
     deliveryId: string,
     status: WebhookDelivery['status'],
-    patch?: Partial<Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>>,
+    patch?: Partial<
+      Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>
+    >,
   ): Promise<WebhookDelivery> {
     const existing = this.webhookDeliveries.get(deliveryId);
     if (!existing) throw new ListingNotFoundError(deliveryId);

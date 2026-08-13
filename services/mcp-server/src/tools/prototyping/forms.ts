@@ -82,7 +82,10 @@ function validateSubmit(input: unknown): ValidationResult<FormSubmitInput> {
   const formId = validateString(o['formId'], 'formId', issues);
   const values = validateObject(o['values'], 'values', issues);
   if (!deckId || !formId || !values) return { ok: false, code: 'INVALID_INPUT', issues };
-  return { ok: true, value: { deckId, formId, values: values as Record<string, string | number | boolean> } };
+  return {
+    ok: true,
+    value: { deckId, formId, values: values as Record<string, string | number | boolean> },
+  };
 }
 
 function validateList(input: unknown): ValidationResult<FormListInput> {
@@ -111,7 +114,9 @@ export const create_form: McpTool<FormCreateInput, Form> = {
     const v = validateCreate(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'create_form', v.value, () =>
-      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/forms`, v.value).then((r) => r as Form),
+      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/forms`, v.value).then(
+        (r) => r as Form,
+      ),
     );
   },
 };
@@ -127,9 +132,12 @@ export const update_form: McpTool<FormUpdateInput, Form> = {
     const v = validateUpdate(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'update_form', v.value, () =>
-      callPrototypeRuntime(ctx, 'PATCH', `/decks/${v.value.deckId}/forms/${v.value.formId}`, v.value.patch).then(
-        (r) => r as Form,
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'PATCH',
+        `/decks/${v.value.deckId}/forms/${v.value.formId}`,
+        v.value.patch,
+      ).then((r) => r as Form),
     );
   },
 };
@@ -163,7 +171,9 @@ export const list_forms: McpTool<FormListInput, readonly Form[]> = {
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_forms', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/forms`).then((r) => (r as Form[]).slice()),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/forms`).then((r) =>
+        (r as Form[]).slice(),
+      ),
     );
   },
 };

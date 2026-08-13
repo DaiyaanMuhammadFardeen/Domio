@@ -13,11 +13,7 @@ import type {
   StoreError,
   UpdateParticipantInput,
 } from './store.js';
-import type {
-  ListActiveInput,
-  ListActiveResult,
-  ParticipantSession,
-} from '../types.js';
+import type { ListActiveInput, ListActiveResult, ParticipantSession } from '../types.js';
 
 class StoreConflictError extends Error {
   readonly kind: 'conflict' = 'conflict';
@@ -75,7 +71,10 @@ export class InMemoryParticipantSessionStore implements ParticipantSessionStore 
     return input.next;
   }
 
-  async transition(input: { expected_version: number; next: ParticipantSession }): Promise<ParticipantSession> {
+  async transition(input: {
+    expected_version: number;
+    next: ParticipantSession;
+  }): Promise<ParticipantSession> {
     const current = this.rows.get(input.next.id);
     if (!current) throw new StoreNotFoundError(input.next.id);
     if (current.version !== input.expected_version) {
@@ -100,7 +99,7 @@ export class InMemoryParticipantSessionStore implements ParticipantSessionStore 
     }
     items.sort((a, b) => a.joined_at.localeCompare(b.joined_at));
     const sliced = items.slice(0, limit);
-    const nextCursor = items.length > limit ? sliced[sliced.length - 1]?.id ?? null : null;
+    const nextCursor = items.length > limit ? (sliced[sliced.length - 1]?.id ?? null) : null;
     return { items: sliced, next_cursor: nextCursor };
   }
 }

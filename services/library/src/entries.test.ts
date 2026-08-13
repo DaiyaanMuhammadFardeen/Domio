@@ -12,11 +12,7 @@ import {
   computeLatestVersionNum,
 } from './entries.js';
 import type { SlideLibraryEntry, LibraryVersion } from './types.js';
-import {
-  LibraryValidationError,
-  RetiredEntryError,
-  SupersedeChainError,
-} from './types.js';
+import { LibraryValidationError, RetiredEntryError, SupersedeChainError } from './types.js';
 
 const fixedDate = new Date('2026-01-15T10:00:00Z');
 let idCounter = 0;
@@ -167,28 +163,28 @@ describe('createEntryBody', () => {
 describe('addVersionBody', () => {
   it('increments version_num', () => {
     const entry = makeEntry();
-    const version = addVersionBody(
-      entry,
-      { slide_snapshot: { v: 2 } },
-      3,
-      'user-1',
-      opts,
-    );
+    const version = addVersionBody(entry, { slide_snapshot: { v: 2 } }, 3, 'user-1', opts);
     expect(version.version_num).toBe(4);
     expect(version.slide_snapshot).toEqual({ v: 2 });
   });
 
   it('rejects retired entries', () => {
     const entry = makeEntry({ status: 'retired' });
-    expect(() =>
-      addVersionBody(entry, { slide_snapshot: {} }, 1, 'user-1', opts),
-    ).toThrow(RetiredEntryError);
+    expect(() => addVersionBody(entry, { slide_snapshot: {} }, 1, 'user-1', opts)).toThrow(
+      RetiredEntryError,
+    );
   });
 
   it('throws when slide_snapshot is missing', () => {
     const entry = makeEntry();
     expect(() =>
-      addVersionBody(entry, { slide_snapshot: undefined as unknown as Record<string, unknown> }, 1, 'user-1', opts),
+      addVersionBody(
+        entry,
+        { slide_snapshot: undefined as unknown as Record<string, unknown> },
+        1,
+        'user-1',
+        opts,
+      ),
     ).toThrow(LibraryValidationError);
   });
 });
@@ -245,19 +241,25 @@ describe('retireEntryBody', () => {
   it('rejects superseded_by with non-existent id', () => {
     const entry = makeEntry({ status: 'approved' });
     const allEntries = [entry];
-    expect(() => retireEntryBody(entry, 'nonexistent', allEntries, opts)).toThrow(SupersedeChainError);
+    expect(() => retireEntryBody(entry, 'nonexistent', allEntries, opts)).toThrow(
+      SupersedeChainError,
+    );
   });
 
   it('rejects retiring the only active entry', () => {
     const entry = makeEntry({ status: 'draft' });
     const allEntries = [entry];
-    expect(() => retireEntryBody(entry, undefined, allEntries, opts)).toThrow(LibraryValidationError);
+    expect(() => retireEntryBody(entry, undefined, allEntries, opts)).toThrow(
+      LibraryValidationError,
+    );
   });
 
   it('rejects retiring an already-retired entry', () => {
     const entry = makeEntry({ status: 'retired' });
     const allEntries = [entry];
-    expect(() => retireEntryBody(entry, undefined, allEntries, opts)).toThrow(LibraryValidationError);
+    expect(() => retireEntryBody(entry, undefined, allEntries, opts)).toThrow(
+      LibraryValidationError,
+    );
   });
 });
 
@@ -279,7 +281,9 @@ describe('insertFromLibraryBody', () => {
   it('rejects retired entries', () => {
     const entry = makeEntry({ status: 'retired' });
     const version = makeVersion();
-    expect(() => insertFromLibraryBody(entry, version, 'reference')).toThrow(LibraryValidationError);
+    expect(() => insertFromLibraryBody(entry, version, 'reference')).toThrow(
+      LibraryValidationError,
+    );
   });
 });
 

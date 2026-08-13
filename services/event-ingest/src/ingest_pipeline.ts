@@ -28,9 +28,10 @@ export interface PipelineDeps {
 async function publishDlq(deps: PipelineDeps, record: DlqRecord): Promise<void> {
   if (!deps.dlqPublisher) return;
   try {
-    const key = typeof record.raw === 'object' && record.raw !== null
-      ? String((record.raw as { event_id?: unknown }).event_id ?? 'unknown')
-      : 'unknown';
+    const key =
+      typeof record.raw === 'object' && record.raw !== null
+        ? String((record.raw as { event_id?: unknown }).event_id ?? 'unknown')
+        : 'unknown';
     await deps.dlqPublisher.publishRaw(
       KAFKA_TOPIC_DLQ,
       key,
@@ -56,7 +57,9 @@ export async function handleNatsEvent(event: AnalyticsEvent, deps: PipelineDeps)
     deps.metrics.recordDlq('schema');
     return;
   }
-  const { event: strippedRaw, stripped: didStrip } = deps.pii.stripWithReport(event as unknown as Record<string, unknown>);
+  const { event: strippedRaw, stripped: didStrip } = deps.pii.stripWithReport(
+    event as unknown as Record<string, unknown>,
+  );
   if (didStrip) deps.metrics.recordPiiStripped(1);
   const stripped = strippedRaw as unknown as AnalyticsEvent;
   const kafkaStart = Date.now();
@@ -66,7 +69,12 @@ export async function handleNatsEvent(event: AnalyticsEvent, deps: PipelineDeps)
     deps.metrics.recordEvent(stripped.event_name, stripped.privacy_mode, stripped.source_app, 'ok');
   } catch {
     await deps.spool.write(stripped);
-    deps.metrics.recordEvent(stripped.event_name, stripped.privacy_mode, stripped.source_app, 'spooled');
+    deps.metrics.recordEvent(
+      stripped.event_name,
+      stripped.privacy_mode,
+      stripped.source_app,
+      'spooled',
+    );
     deps.metrics.setSpoolBytes(await deps.spool.size());
     deps.metrics.setSpoolFiles((await deps.spool.list()).length);
   }

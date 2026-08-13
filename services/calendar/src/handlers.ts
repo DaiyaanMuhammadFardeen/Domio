@@ -19,9 +19,7 @@ import {
   CalendarValidationError,
   FeatureDisabledError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -59,16 +57,52 @@ function noContent(): HttpResponse {
   return { status: 204, body: undefined };
 }
 function badRequest(message: string, _code: string): HttpResponse {
-  return { status: 400, body: { type: 'https://domio.example/problems/validation', title: 'Validation error', status: 400, detail: message, instance: '' } };
+  return {
+    status: 400,
+    body: {
+      type: 'https://domio.example/problems/validation',
+      title: 'Validation error',
+      status: 400,
+      detail: message,
+      instance: '',
+    },
+  };
 }
 function notFound(message: string): HttpResponse {
-  return { status: 404, body: { type: 'https://domio.example/problems/not-found', title: 'Not found', status: 404, detail: message, instance: '' } };
+  return {
+    status: 404,
+    body: {
+      type: 'https://domio.example/problems/not-found',
+      title: 'Not found',
+      status: 404,
+      detail: message,
+      instance: '',
+    },
+  };
 }
 function conflict(message: string, _code: string): HttpResponse {
-  return { status: 409, body: { type: 'https://domio.example/problems/conflict', title: 'Conflict', status: 409, detail: message, instance: '' } };
+  return {
+    status: 409,
+    body: {
+      type: 'https://domio.example/problems/conflict',
+      title: 'Conflict',
+      status: 409,
+      detail: message,
+      instance: '',
+    },
+  };
 }
 function serviceUnavailable(message: string, _code: string): HttpResponse {
-  return { status: 503, body: { type: 'https://domio.example/problems/service-unavailable', title: 'Service unavailable', status: 503, detail: message, instance: '' } };
+  return {
+    status: 503,
+    body: {
+      type: 'https://domio.example/problems/service-unavailable',
+      title: 'Service unavailable',
+      status: 503,
+      detail: message,
+      instance: '',
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -76,7 +110,9 @@ function serviceUnavailable(message: string, _code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -104,7 +140,9 @@ export async function createCalendarLinkHandler(
   try {
     const actorId = getActorId(req);
     const deckId = req.params.deck_id;
-    const workspaceId = (req.headers['x-workspace-id'] ?? (req.query as Record<string, string | undefined>).workspaceId ?? '') as string;
+    const workspaceId = (req.headers['x-workspace-id'] ??
+      (req.query as Record<string, string | undefined>).workspaceId ??
+      '') as string;
 
     const link = await ctx.service.createLink(
       { ...req.body, deck_id: deckId },

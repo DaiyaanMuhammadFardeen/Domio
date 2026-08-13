@@ -81,12 +81,14 @@ export default function () {
     socket.setInterval(() => {
       if (pendingOps > 50) return; // simple client-side backpressure
       const sentAt = Date.now();
-      socket.send(JSON.stringify({
-        type: 'Op',
-        op_id: `${__VU}-${sentAt}-${Math.random().toString(36).slice(2, 10)}`,
-        sentAt,
-        payload: { kind: 'insert', pos: __VU, text: 'x' },
-      }));
+      socket.send(
+        JSON.stringify({
+          type: 'Op',
+          op_id: `${__VU}-${sentAt}-${Math.random().toString(36).slice(2, 10)}`,
+          sentAt,
+          payload: { kind: 'insert', pos: __VU, text: 'x' },
+        }),
+      );
       opsSent.add(1);
       pendingOps += 1;
     }, 200);

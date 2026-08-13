@@ -6,7 +6,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RecordingExportButton } from './RecordingExportButton';
 
-function mockFetchSequence(responses: Array<{ status: number; body?: unknown }>): ReturnType<typeof vi.fn> {
+function mockFetchSequence(
+  responses: Array<{ status: number; body?: unknown }>,
+): ReturnType<typeof vi.fn> {
   const fn = vi.fn(async (_url: string, _init?: RequestInit) => {
     const next = responses.shift() ?? { status: 200, body: {} };
     return new Response(JSON.stringify(next.body ?? {}), { status: next.status });
@@ -35,7 +37,9 @@ describe('RecordingExportButton', () => {
     render(<RecordingExportButton sessionId="sess-2" />);
     fireEvent.click(screen.getByTestId('recording-export-button-start'));
     await waitFor(() => {
-      expect(screen.getByTestId('recording-export-button-error')).toHaveTextContent(/not available/i);
+      expect(screen.getByTestId('recording-export-button-error')).toHaveTextContent(
+        /not available/i,
+      );
     });
     expect(screen.getByTestId('recording-export-button')).toHaveAttribute('data-state', 'failed');
     vi.unstubAllGlobals();
@@ -43,9 +47,46 @@ describe('RecordingExportButton', () => {
 
   it('shows a download link once the export job reports ready', async () => {
     const fetchMock = mockFetchSequence([
-      { status: 200, body: { job: { id: 'job-1', sessionId: 'sess-3', format: 'mp4', watermark: true, status: 'queued', progressPct: 0 } } },
-      { status: 200, body: { job: { id: 'job-1', sessionId: 'sess-3', format: 'mp4', watermark: true, status: 'processing', progressPct: 35 } } },
-      { status: 200, body: { job: { id: 'job-1', sessionId: 'sess-3', format: 'mp4', watermark: true, status: 'ready', progressPct: 100, downloadUrl: 'https://cdn.example/sess-3.mp4' } } },
+      {
+        status: 200,
+        body: {
+          job: {
+            id: 'job-1',
+            sessionId: 'sess-3',
+            format: 'mp4',
+            watermark: true,
+            status: 'queued',
+            progressPct: 0,
+          },
+        },
+      },
+      {
+        status: 200,
+        body: {
+          job: {
+            id: 'job-1',
+            sessionId: 'sess-3',
+            format: 'mp4',
+            watermark: true,
+            status: 'processing',
+            progressPct: 35,
+          },
+        },
+      },
+      {
+        status: 200,
+        body: {
+          job: {
+            id: 'job-1',
+            sessionId: 'sess-3',
+            format: 'mp4',
+            watermark: true,
+            status: 'ready',
+            progressPct: 100,
+            downloadUrl: 'https://cdn.example/sess-3.mp4',
+          },
+        },
+      },
     ]);
     vi.stubGlobal('fetch', fetchMock);
     const onReady = vi.fn();
@@ -53,7 +94,10 @@ describe('RecordingExportButton', () => {
     fireEvent.click(screen.getByTestId('recording-export-button-start'));
     await waitFor(
       () => {
-        expect(screen.getByTestId('recording-export-button')).toHaveAttribute('data-state', 'ready');
+        expect(screen.getByTestId('recording-export-button')).toHaveAttribute(
+          'data-state',
+          'ready',
+        );
       },
       { timeout: 8000, interval: 200 },
     );

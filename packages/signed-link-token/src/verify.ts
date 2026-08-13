@@ -24,7 +24,12 @@ import { ViewerClaims } from './mint.js';
 // ---------------------------------------------------------------------------
 
 export type VerifyResult =
-  | { readonly ok: true; readonly claims: ViewerClaims; readonly expiresAtSec: number; readonly nonceB64: string }
+  | {
+      readonly ok: true;
+      readonly claims: ViewerClaims;
+      readonly expiresAtSec: number;
+      readonly nonceB64: string;
+    }
   | { readonly ok: false; readonly code: VerifyErrorCode; readonly message: string };
 
 export type VerifyErrorCode =

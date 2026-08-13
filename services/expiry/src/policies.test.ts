@@ -3,12 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  effectivePolicy,
-  isOverdue,
-  tierAction,
-  validatePolicyInput,
-} from './policies.js';
+import { effectivePolicy, isOverdue, tierAction, validatePolicyInput } from './policies.js';
 import type { ExpiryPolicy, WorkspaceDefaults } from './types.js';
 import { DEFAULT_WORKSPACE_DEFAULTS } from './types.js';
 
@@ -25,7 +20,11 @@ describe('effectivePolicy', () => {
   });
 
   it('override wins per-field', () => {
-    const defaults: WorkspaceDefaults = { interval_days: 90, escalation: 'gentle', auto_revoke_share: false };
+    const defaults: WorkspaceDefaults = {
+      interval_days: 90,
+      escalation: 'gentle',
+      auto_revoke_share: false,
+    };
     const result = effectivePolicy(defaults, {
       workspace_id: 'ws1',
       resource_type: 'deck',
@@ -40,7 +39,11 @@ describe('effectivePolicy', () => {
   });
 
   it('partial override merges correctly', () => {
-    const defaults: WorkspaceDefaults = { interval_days: 90, escalation: 'gentle', auto_revoke_share: false };
+    const defaults: WorkspaceDefaults = {
+      interval_days: 90,
+      escalation: 'gentle',
+      auto_revoke_share: false,
+    };
     const result = effectivePolicy(defaults, {
       workspace_id: 'ws1',
       resource_type: 'deck',

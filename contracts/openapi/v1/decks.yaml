@@ -47,24 +47,24 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Deck summary.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetDeckResponse"
-        "401":
+                $ref: '#/components/schemas/GetDeckResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
 components:
   schemas:
     DeckStatus:
@@ -75,13 +75,13 @@ components:
       required: [id, title, status, slide_count, owner_user_id, schema_version]
       properties:
         id:
-          $ref: "common.yaml#/components/schemas/ResourceId"
+          $ref: 'common.yaml#/components/schemas/ResourceId'
         title:
           type: string
           minLength: 1
           maxLength: 256
         status:
-          $ref: "#/components/schemas/DeckStatus"
+          $ref: '#/components/schemas/DeckStatus'
         slide_count:
           type: integer
           minimum: 0
@@ -101,7 +101,7 @@ components:
       required: [summary]
       properties:
         summary:
-          $ref: "#/components/schemas/DeckSummary"
+          $ref: '#/components/schemas/DeckSummary'
         tenant_id:
           type: string
         trace_id:

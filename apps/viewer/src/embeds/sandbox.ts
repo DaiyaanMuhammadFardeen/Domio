@@ -51,11 +51,7 @@ export interface ViewerEmbedRuntime {
   /** Resolve the policy for a given workspace + deck path. */
   resolvePolicy(deckPath: string): EmbedPolicy;
   /** Mount an iframe with the policy's sandbox + allow attributes. */
-  mount(
-    target: HTMLElement,
-    src: string,
-    deckPath: string,
-  ): ViewerEmbedMount;
+  mount(target: HTMLElement, src: string, deckPath: string): ViewerEmbedMount;
   /** Tear down a mounted iframe. */
   unmount(mount: ViewerEmbedMount): void;
   /** Destroy runtime state. */
@@ -64,9 +60,7 @@ export interface ViewerEmbedRuntime {
 
 // ─── Factory ─────────────────────────────────────────────────────────
 
-export function createViewerEmbedRuntime(
-  config: ViewerEmbedRuntimeConfig,
-): ViewerEmbedRuntime {
+export function createViewerEmbedRuntime(config: ViewerEmbedRuntimeConfig): ViewerEmbedRuntime {
   const { policyService, viewerOrigin } = config;
 
   return {
@@ -85,11 +79,7 @@ export function createViewerEmbedRuntime(
       return policyService.resolveForPath(config.workspaceId, deckPath) ?? DEFAULT_POLICY;
     },
 
-    mount(
-      target: HTMLElement,
-      src: string,
-      deckPath: string,
-    ): ViewerEmbedMount {
+    mount(target: HTMLElement, src: string, deckPath: string): ViewerEmbedMount {
       const policy = this.resolvePolicy(deckPath);
       const iframe = document.createElement('iframe');
       iframe.src = src;

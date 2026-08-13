@@ -57,7 +57,9 @@ export function marketplaceRoutes(deps: ServiceDeps): Hono {
     const sellerId = c.req.query('sellerId');
     const limit = c.req.query('limit');
     const listings = await listListings(deps, {
-      ...(status ? { status: status as 'draft' | 'in_review' | 'published' | 'deprecated' | 'removed' } : {}),
+      ...(status
+        ? { status: status as 'draft' | 'in_review' | 'published' | 'deprecated' | 'removed' }
+        : {}),
       ...(sellerId ? { sellerId } : {}),
       ...(limit ? { limit: Number(limit) } : {}),
     });
@@ -77,7 +79,9 @@ export function marketplaceRoutes(deps: ServiceDeps): Hono {
     const listingId = c.req.param('listingId');
     const userId = c.req.header('x-user-id') ?? 'anonymous';
     // Transition through in_review if currently in draft
-    let listing = await getPublicListing(deps, listingId).catch(() => deps.store.getListing(listingId));
+    let listing = await getPublicListing(deps, listingId).catch(() =>
+      deps.store.getListing(listingId),
+    );
     if (listing && listing.status === 'draft') {
       listing = await transitionListing(deps, listingId, 'in_review', userId);
     }

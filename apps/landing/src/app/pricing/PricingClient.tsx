@@ -41,10 +41,7 @@ function cycleSuffix(cycle: BillingCycle): string {
   return cycle === 'monthly' ? '/mo' : '/mo, billed yearly';
 }
 
-export function PricingClient({
-  tiers,
-  signupHref,
-}: PricingClientProps): JSX.Element {
+export function PricingClient({ tiers, signupHref }: PricingClientProps): JSX.Element {
   const [cycle, setCycle] = useState<BillingCycle>('monthly');
 
   return (
@@ -57,11 +54,7 @@ export function PricingClient({
         <h2 id="pricing-table-heading" className="pricing-table__heading">
           Plans
         </h2>
-        <div
-          className="pricing-table__toggle"
-          role="group"
-          aria-label="Billing cycle"
-        >
+        <div className="pricing-table__toggle" role="group" aria-label="Billing cycle">
           <button
             type="button"
             className={
@@ -96,10 +89,7 @@ export function PricingClient({
           return (
             <article
               key={tier.id}
-              className={
-                'pricing-card' +
-                (tier.highlighted ? ' pricing-card--highlighted' : '')
-              }
+              className={'pricing-card' + (tier.highlighted ? ' pricing-card--highlighted' : '')}
               data-testid={`pricing-card-${tier.id}`}
             >
               <header className="pricing-card__header">
@@ -107,9 +97,7 @@ export function PricingClient({
                 <p className="pricing-card__tagline">{tier.tagline}</p>
               </header>
               <p className="pricing-card__price" data-testid={`pricing-price-${tier.id}`}>
-                <span className="pricing-card__price-amount">
-                  {formatPrice(price)}
-                </span>
+                <span className="pricing-card__price-amount">{formatPrice(price)}</span>
                 {price !== 'custom' && price > 0 ? (
                   <span className="pricing-card__price-suffix">{cycleSuffix(cycle)}</span>
                 ) : null}
@@ -123,8 +111,7 @@ export function PricingClient({
               </ul>
               <a
                 className={
-                  'pricing-card__cta' +
-                  (tier.highlighted ? ' pricing-card__cta--primary' : '')
+                  'pricing-card__cta' + (tier.highlighted ? ' pricing-card__cta--primary' : '')
                 }
                 href={ctaHref}
               >

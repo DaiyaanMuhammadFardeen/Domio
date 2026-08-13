@@ -81,7 +81,9 @@ describe('GDPR integration — erase', () => {
       occurred_at: Date.now(),
     });
 
-    const res = await app.request(`/v1/viewers/${v.viewer_id}?workspace_id=ws-1`, { method: 'DELETE' });
+    const res = await app.request(`/v1/viewers/${v.viewer_id}?workspace_id=ws-1`, {
+      method: 'DELETE',
+    });
     expect(res.status).toBe(200);
     const body = (await res.json()) as { run: { run_id: string; rows_removed: number } };
     expect(body.run.rows_removed).toBeGreaterThanOrEqual(3);
@@ -89,7 +91,9 @@ describe('GDPR integration — erase', () => {
   });
 
   it('erase returns 404 when viewer does not exist', async () => {
-    const res = await app.request('/v1/viewers/does-not-exist?workspace_id=ws-1', { method: 'DELETE' });
+    const res = await app.request('/v1/viewers/does-not-exist?workspace_id=ws-1', {
+      method: 'DELETE',
+    });
     expect(res.status).toBe(404);
   });
 
@@ -105,7 +109,9 @@ describe('GDPR integration — erase', () => {
       canonical_id: null,
       metadata: {},
     });
-    const res = await app.request(`/v1/viewers/${v.viewer_id}?workspace_id=ws-other`, { method: 'DELETE' });
+    const res = await app.request(`/v1/viewers/${v.viewer_id}?workspace_id=ws-other`, {
+      method: 'DELETE',
+    });
     expect(res.status).toBe(404);
   });
 });
@@ -208,7 +214,11 @@ describe('GDPR integration — verify (object → anon_no_track)', () => {
       canonical_id: null,
       metadata: {},
     });
-    const res = await postJSON(app, `/v1/viewers/${v.viewer_id}/object?workspace_id=ws-1&source=gdpr`, {});
+    const res = await postJSON(
+      app,
+      `/v1/viewers/${v.viewer_id}/object?workspace_id=ws-1&source=gdpr`,
+      {},
+    );
     expect(res.status).toBe(200);
     const after = await store.getViewerById(v.viewer_id);
     expect(after?.privacy_mode).toBe('anon_no_track');
@@ -275,7 +285,9 @@ describe('GDPR integration — full lifecycle', () => {
     expect(exportText).toMatch(/"kind":"consent"/);
 
     // 4. Erase.
-    const eraseRes = await app.request(`/v1/viewers/${viewer.viewer_id}?workspace_id=ws-1`, { method: 'DELETE' });
+    const eraseRes = await app.request(`/v1/viewers/${viewer.viewer_id}?workspace_id=ws-1`, {
+      method: 'DELETE',
+    });
     expect(eraseRes.status).toBe(200);
     const eraseBody = (await eraseRes.json()) as { run: { rows_removed: number } };
     expect(eraseBody.run.rows_removed).toBeGreaterThanOrEqual(2);

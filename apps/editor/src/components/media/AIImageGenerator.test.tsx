@@ -20,7 +20,10 @@ function renderGenerator(overrides?: { onInsert?: ReturnType<typeof vi.fn>; apiB
     onInsert,
     ...render(
       <LocaleProvider locale="en">
-        <AIImageGenerator onInsert={onInsert} {...(overrides?.apiBaseUrl ? { apiBaseUrl: overrides.apiBaseUrl } : {})} />
+        <AIImageGenerator
+          onInsert={onInsert}
+          {...(overrides?.apiBaseUrl ? { apiBaseUrl: overrides.apiBaseUrl } : {})}
+        />
       </LocaleProvider>,
     ),
   };
@@ -51,7 +54,9 @@ describe('AIImageGenerator', () => {
 
   it('renders 4 candidates after clicking Generate (offline fallback)', async () => {
     renderGenerator();
-    fireEvent.change(screen.getByTestId('p6-ai-image-prompt'), { target: { value: 'A robot on a beach' } });
+    fireEvent.change(screen.getByTestId('p6-ai-image-prompt'), {
+      target: { value: 'A robot on a beach' },
+    });
     fireEvent.click(screen.getByTestId('p6-ai-image-generate'));
 
     await waitFor(() => {
@@ -75,7 +80,10 @@ describe('AIImageGenerator', () => {
     });
 
     fireEvent.click(screen.getByTestId('p6-ai-image-candidate-0').querySelector('button')!);
-    expect(onInsert).toHaveBeenCalledWith('image', expect.objectContaining({ aiImageId: expect.any(String) }));
+    expect(onInsert).toHaveBeenCalledWith(
+      'image',
+      expect.objectContaining({ aiImageId: expect.any(String) }),
+    );
   });
 
   it('renders 4 candidates from a real fetch response', async () => {
@@ -85,10 +93,30 @@ describe('AIImageGenerator', () => {
         prompt: 'hello',
         style: 'photorealistic',
         candidates: [
-          { id: 'a', url: 'data:,', style: 'photorealistic', provenance: { model: 'm', seed: 1, generatedAtMs: 1 } },
-          { id: 'b', url: 'data:,', style: 'photorealistic', provenance: { model: 'm', seed: 2, generatedAtMs: 2 } },
-          { id: 'c', url: 'data:,', style: 'photorealistic', provenance: { model: 'm', seed: 3, generatedAtMs: 3 } },
-          { id: 'd', url: 'data:,', style: 'photorealistic', provenance: { model: 'm', seed: 4, generatedAtMs: 4 } },
+          {
+            id: 'a',
+            url: 'data:,',
+            style: 'photorealistic',
+            provenance: { model: 'm', seed: 1, generatedAtMs: 1 },
+          },
+          {
+            id: 'b',
+            url: 'data:,',
+            style: 'photorealistic',
+            provenance: { model: 'm', seed: 2, generatedAtMs: 2 },
+          },
+          {
+            id: 'c',
+            url: 'data:,',
+            style: 'photorealistic',
+            provenance: { model: 'm', seed: 3, generatedAtMs: 3 },
+          },
+          {
+            id: 'd',
+            url: 'data:,',
+            style: 'photorealistic',
+            provenance: { model: 'm', seed: 4, generatedAtMs: 4 },
+          },
         ],
       }),
     }) as unknown as typeof fetch;
@@ -106,8 +134,14 @@ describe('AIImageGenerator', () => {
   it('changing style updates selected style', () => {
     renderGenerator();
     fireEvent.click(screen.getByTestId('p6-ai-image-style-illustration'));
-    expect(screen.getByTestId('p6-ai-image-style-illustration')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('p6-ai-image-style-photorealistic')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('p6-ai-image-style-illustration')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    expect(screen.getByTestId('p6-ai-image-style-photorealistic')).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
   });
 
   it('renders background removal buttons for each candidate', async () => {
@@ -136,7 +170,10 @@ describe('AIImageGenerator', () => {
     fireEvent.click(screen.getByTestId('p6-ai-image-candidate-0-remove-bg'));
 
     await waitFor(() => {
-      expect(onInsert).toHaveBeenCalledWith('image', expect.objectContaining({ backgroundRemoved: true }));
+      expect(onInsert).toHaveBeenCalledWith(
+        'image',
+        expect.objectContaining({ backgroundRemoved: true }),
+      );
     });
   });
 });

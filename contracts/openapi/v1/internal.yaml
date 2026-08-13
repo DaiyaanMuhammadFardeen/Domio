@@ -41,38 +41,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReplayRequest"
+              $ref: '#/components/schemas/ReplayRequest'
       responses:
-        "202":
+        '202':
           description: Replay accepted and in progress.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReplayResponse"
-        "400":
+                $ref: '#/components/schemas/ReplayResponse'
+        '400':
           description: Invalid request (missing fields, bad HLC).
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "401":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '401':
           description: Missing or invalid API key.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "429":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '429':
           description: Rate limited.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
 components:
   securitySchemes:
     apiKeyAuth:
@@ -93,11 +93,11 @@ components:
         physical:
           type: integer
           minimum: 0
-          description: "Physical component: unix nanoseconds."
+          description: 'Physical component: unix nanoseconds.'
         logical:
           type: integer
           minimum: 0
-          description: "Logical counter: monotonic tie-breaker."
+          description: 'Logical counter: monotonic tie-breaker.'
     ReplayRequest:
       type: object
       required: [deckId, branchId, fromHlc]
@@ -115,7 +115,7 @@ components:
           default: main
           description: Branch to replay on; defaults to "main".
         fromHlc:
-          $ref: "#/components/schemas/HLC"
+          $ref: '#/components/schemas/HLC'
           description: Start replay from this HLC (exclusive). All ops with hlc > fromHlc are replayed.
         limit:
           type: integer
@@ -140,7 +140,7 @@ components:
           minLength: 1
           maxLength: 128
         fromHlc:
-          $ref: "#/components/schemas/HLC"
+          $ref: '#/components/schemas/HLC'
         opsReplayed:
           type: integer
           minimum: 0

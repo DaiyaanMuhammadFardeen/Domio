@@ -26,7 +26,10 @@ import {
 
 const ORG = 'org-1';
 
-function logo(variant: 'light' | 'dark' | 'mono' = 'light', size: 'sm' | 'md' | 'lg' | 'xl' = 'lg'): BrandKitLogoRecord {
+function logo(
+  variant: 'light' | 'dark' | 'mono' = 'light',
+  size: 'sm' | 'md' | 'lg' | 'xl' = 'lg',
+): BrandKitLogoRecord {
   return {
     logoId: `logo-${variant}-${size}`,
     kitId: 'unused-in-fixture',
@@ -39,7 +42,10 @@ function logo(variant: 'light' | 'dark' | 'mono' = 'light', size: 'sm' | 'md' | 
   };
 }
 
-function palette(tokenIds: string[], opts: { cvSafe?: boolean; hueSpacingDeg?: number } = {}): BrandKitPaletteRecord {
+function palette(
+  tokenIds: string[],
+  opts: { cvSafe?: boolean; hueSpacingDeg?: number } = {},
+): BrandKitPaletteRecord {
   return {
     paletteId: `palette-${tokenIds.join('-')}`,
     kitId: 'unused-in-fixture',
@@ -97,16 +103,16 @@ describe('BrandService — brand-kit CRUD', () => {
 
   it('rejects a kit with no logos', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.createBrandKit(baseCreateInput({ logos: [] })),
-    ).rejects.toBeInstanceOf(BrandKitValidationError);
+    await expect(svc.createBrandKit(baseCreateInput({ logos: [] }))).rejects.toBeInstanceOf(
+      BrandKitValidationError,
+    );
   });
 
   it('rejects a kit with no palettes', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.createBrandKit(baseCreateInput({ palettes: [] })),
-    ).rejects.toBeInstanceOf(BrandKitValidationError);
+    await expect(svc.createBrandKit(baseCreateInput({ palettes: [] }))).rejects.toBeInstanceOf(
+      BrandKitValidationError,
+    );
   });
 
   it('rejects invalid token IDs in palettes', async () => {
@@ -182,7 +188,10 @@ describe('BrandService — publish/unpublish/archive', () => {
     const kit = await svc.createBrandKit(baseCreateInput());
     await svc.publishBrandKit(kit.kitId, ORG, 'alice');
     await svc.unpublishBrandKit(kit.kitId, ORG, 'alice');
-    const updated = await svc.updateBrandKit(kit.kitId, ORG, { name: 'Renamed', updatedBy: 'alice' });
+    const updated = await svc.updateBrandKit(kit.kitId, ORG, {
+      name: 'Renamed',
+      updatedBy: 'alice',
+    });
     expect(updated.name).toBe('Renamed');
   });
 
@@ -225,9 +234,19 @@ describe('BrandService — sub-brand DAG', () => {
     const { svc } = makeService();
     const a = await svc.createBrandKit(baseCreateInput({ name: 'A' }));
     const b = await svc.createBrandKit(baseCreateInput({ name: 'B' }));
-    await svc.addSubBrand({ orgId: ORG, parentKitId: a.kitId, childKitId: b.kitId, inheritanceType: 'extend' });
+    await svc.addSubBrand({
+      orgId: ORG,
+      parentKitId: a.kitId,
+      childKitId: b.kitId,
+      inheritanceType: 'extend',
+    });
     await expect(
-      svc.addSubBrand({ orgId: ORG, parentKitId: b.kitId, childKitId: a.kitId, inheritanceType: 'extend' }),
+      svc.addSubBrand({
+        orgId: ORG,
+        parentKitId: b.kitId,
+        childKitId: a.kitId,
+        inheritanceType: 'extend',
+      }),
     ).rejects.toBeInstanceOf(SubBrandCycleError);
   });
 
@@ -236,10 +255,25 @@ describe('BrandService — sub-brand DAG', () => {
     const a = await svc.createBrandKit(baseCreateInput({ name: 'A' }));
     const b = await svc.createBrandKit(baseCreateInput({ name: 'B' }));
     const c = await svc.createBrandKit(baseCreateInput({ name: 'C' }));
-    await svc.addSubBrand({ orgId: ORG, parentKitId: a.kitId, childKitId: b.kitId, inheritanceType: 'extend' });
-    await svc.addSubBrand({ orgId: ORG, parentKitId: b.kitId, childKitId: c.kitId, inheritanceType: 'extend' });
+    await svc.addSubBrand({
+      orgId: ORG,
+      parentKitId: a.kitId,
+      childKitId: b.kitId,
+      inheritanceType: 'extend',
+    });
+    await svc.addSubBrand({
+      orgId: ORG,
+      parentKitId: b.kitId,
+      childKitId: c.kitId,
+      inheritanceType: 'extend',
+    });
     await expect(
-      svc.addSubBrand({ orgId: ORG, parentKitId: c.kitId, childKitId: a.kitId, inheritanceType: 'extend' }),
+      svc.addSubBrand({
+        orgId: ORG,
+        parentKitId: c.kitId,
+        childKitId: a.kitId,
+        inheritanceType: 'extend',
+      }),
     ).rejects.toBeInstanceOf(SubBrandCycleError);
   });
 
@@ -247,9 +281,19 @@ describe('BrandService — sub-brand DAG', () => {
     const { svc } = makeService();
     const a = await svc.createBrandKit(baseCreateInput({ name: 'A' }));
     const b = await svc.createBrandKit(baseCreateInput({ name: 'B' }));
-    await svc.addSubBrand({ orgId: ORG, parentKitId: a.kitId, childKitId: b.kitId, inheritanceType: 'extend' });
+    await svc.addSubBrand({
+      orgId: ORG,
+      parentKitId: a.kitId,
+      childKitId: b.kitId,
+      inheritanceType: 'extend',
+    });
     await expect(
-      svc.addSubBrand({ orgId: ORG, parentKitId: a.kitId, childKitId: b.kitId, inheritanceType: 'extend' }),
+      svc.addSubBrand({
+        orgId: ORG,
+        parentKitId: a.kitId,
+        childKitId: b.kitId,
+        inheritanceType: 'extend',
+      }),
     ).rejects.toBeInstanceOf(SubBrandDuplicateError);
   });
 
@@ -258,8 +302,18 @@ describe('BrandService — sub-brand DAG', () => {
     const a = await svc.createBrandKit(baseCreateInput({ name: 'A' }));
     const b = await svc.createBrandKit(baseCreateInput({ name: 'B' }));
     const c = await svc.createBrandKit(baseCreateInput({ name: 'C' }));
-    await svc.addSubBrand({ orgId: ORG, parentKitId: a.kitId, childKitId: b.kitId, inheritanceType: 'extend' });
-    await svc.addSubBrand({ orgId: ORG, parentKitId: a.kitId, childKitId: c.kitId, inheritanceType: 'override' });
+    await svc.addSubBrand({
+      orgId: ORG,
+      parentKitId: a.kitId,
+      childKitId: b.kitId,
+      inheritanceType: 'extend',
+    });
+    await svc.addSubBrand({
+      orgId: ORG,
+      parentKitId: a.kitId,
+      childKitId: c.kitId,
+      inheritanceType: 'override',
+    });
     const relations = await svc.listSubBrands(a.kitId, ORG);
     expect(relations.children).toHaveLength(2);
     expect(relations.parents).toHaveLength(0);

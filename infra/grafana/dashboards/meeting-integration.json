@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "meeting-integration"
-  ],
+  "tags": ["tier-2", "domio", "meeting-integration"],
   "panels": [
     {
       "id": 1,

@@ -35,9 +35,7 @@ export async function run(
   for (const item of source.slice(0, limit)) {
     // Check if an icon with this exact name already exists
     const existing = await searchIcons(deps, { q: item.name, limit: 10 });
-    const nameMatch = existing.find(
-      (icon) => icon.name.toLowerCase() === item.name.toLowerCase(),
-    );
+    const nameMatch = existing.find((icon) => icon.name.toLowerCase() === item.name.toLowerCase());
 
     if (nameMatch) {
       skipped++;

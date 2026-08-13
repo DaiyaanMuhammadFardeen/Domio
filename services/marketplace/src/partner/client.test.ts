@@ -5,7 +5,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PartnerClientService } from './client.js';
 import { InMemoryMarketplaceStore } from '../store/mem_store.js';
-import { PartnerClientNotFoundError, InvalidClientSecretError, InsufficientScopeError } from '../types.js';
+import {
+  PartnerClientNotFoundError,
+  InvalidClientSecretError,
+  InsufficientScopeError,
+} from '../types.js';
 import type { PartnerClient } from '../types.js';
 import { hasScope, getRateLimit, validatePartnerAccess } from './access.js';
 
@@ -27,9 +31,9 @@ describe('PartnerClientService', () => {
 
   describe('verifyClient', () => {
     it('throws PartnerClientNotFoundError for non-existent client', async () => {
-      await expect(
-        service.verifyClient('nonexistent', 'secret'),
-      ).rejects.toThrow(PartnerClientNotFoundError);
+      await expect(service.verifyClient('nonexistent', 'secret')).rejects.toThrow(
+        PartnerClientNotFoundError,
+      );
     });
 
     it('throws InvalidClientSecretError for empty secret', async () => {
@@ -48,9 +52,7 @@ describe('PartnerClientService', () => {
       };
       await (store as any).partnerClients.set('partner-1', client);
 
-      await expect(
-        service.verifyClient('partner-1', ''),
-      ).rejects.toThrow(InvalidClientSecretError);
+      await expect(service.verifyClient('partner-1', '')).rejects.toThrow(InvalidClientSecretError);
     });
 
     it('returns client for valid credentials', async () => {
@@ -105,8 +107,9 @@ describe('PartnerClientService', () => {
         updatedAt: new Date(),
       };
 
-      expect(() => service.checkScope(client, 'marketplace:purchase'))
-        .toThrow(InsufficientScopeError);
+      expect(() => service.checkScope(client, 'marketplace:purchase')).toThrow(
+        InsufficientScopeError,
+      );
     });
   });
 });

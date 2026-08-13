@@ -28,13 +28,8 @@ function intensityTone(intensity: number): string {
  * Each row is a template; columns are categories. Cell color is the
  * engagement intensity (0–100). Filters by category at the top.
  */
-export function TemplateUsageHeatmap({
-  workspaceId,
-  initialCells,
-}: TemplateUsageHeatmapProps) {
-  const [cells, setCells] = useState<ReadonlyArray<TemplateUsageCell>>(
-    initialCells ?? [],
-  );
+export function TemplateUsageHeatmap({ workspaceId, initialCells }: TemplateUsageHeatmapProps) {
+  const [cells, setCells] = useState<ReadonlyArray<TemplateUsageCell>>(initialCells ?? []);
   const [category, setCategory] = useState<string>('all');
 
   useEffect(() => {
@@ -69,14 +64,10 @@ export function TemplateUsageHeatmap({
     return Array.from(seen).sort();
   }, [cells]);
 
-  const cols =
-    categoriesInUse.length > 0 ? categoriesInUse : TEAM_ANALYTICS_CATEGORIES;
+  const cols = categoriesInUse.length > 0 ? categoriesInUse : TEAM_ANALYTICS_CATEGORIES;
 
   return (
-    <section
-      className="rounded-xl border border-slate-200 bg-white"
-      data-testid="template-heatmap"
-    >
+    <section className="rounded-xl border border-slate-200 bg-white" data-testid="template-heatmap">
       <header className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
           Template × category engagement

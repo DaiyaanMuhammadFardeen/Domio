@@ -9,11 +9,7 @@
 'use client';
 
 import type { JSX } from 'react';
-import {
-  BLOG_CATEGORIES,
-  BLOG_CATEGORY_LABELS,
-  type BlogCategory,
-} from '../../lib/blog-data';
+import { BLOG_CATEGORIES, BLOG_CATEGORY_LABELS, type BlogCategory } from '../../lib/blog-data';
 
 export interface CategoryFilterProps {
   readonly selected: BlogCategory | 'all';
@@ -30,16 +26,9 @@ const CHIPS: ReadonlyArray<ChipSpec> = [
   ...BLOG_CATEGORIES.map((c) => ({ value: c, label: BLOG_CATEGORY_LABELS[c] })),
 ];
 
-export function CategoryFilter({
-  selected,
-  onSelect,
-}: CategoryFilterProps): JSX.Element {
+export function CategoryFilter({ selected, onSelect }: CategoryFilterProps): JSX.Element {
   return (
-    <div
-      className="blog-filter"
-      role="tablist"
-      aria-label="Filter posts by category"
-    >
+    <div className="blog-filter" role="tablist" aria-label="Filter posts by category">
       {CHIPS.map((chip) => {
         const active = chip.value === selected;
         return (

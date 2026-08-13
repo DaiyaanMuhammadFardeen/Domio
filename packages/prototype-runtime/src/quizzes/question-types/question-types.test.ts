@@ -11,10 +11,7 @@ import {
   pointInRect,
 } from './hotspot-quiz.js';
 import { validateFlashCard } from './flash-card.js';
-import {
-  validateShortAnswerLlm,
-  DEFAULT_LLM_FALLBACK_THRESHOLD,
-} from './short-answer-llm.js';
+import { validateShortAnswerLlm, DEFAULT_LLM_FALLBACK_THRESHOLD } from './short-answer-llm.js';
 
 describe('validateMultipleChoice', () => {
   it('rejects non-string answers', () => {
@@ -83,18 +80,33 @@ describe('validateDragToMatch', () => {
 
 describe('validateHotspotQuiz — helpers', () => {
   it('centroid of a rectangle', () => {
-    expect(hotspotCentroid({ kind: 'rect', x: 0, y: 0, w: 1, h: 0.5 })).toEqual({ x: 0.5, y: 0.25 });
+    expect(hotspotCentroid({ kind: 'rect', x: 0, y: 0, w: 1, h: 0.5 })).toEqual({
+      x: 0.5,
+      y: 0.25,
+    });
   });
 
   it('centroid of a polygon = mean of vertices', () => {
-    expect(hotspotCentroid({
-      kind: 'polygon',
-      points: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }],
-    })).toEqual({ x: 0.5, y: 0.5 });
+    expect(
+      hotspotCentroid({
+        kind: 'polygon',
+        points: [
+          { x: 0, y: 0 },
+          { x: 1, y: 0 },
+          { x: 1, y: 1 },
+          { x: 0, y: 1 },
+        ],
+      }),
+    ).toEqual({ x: 0.5, y: 0.5 });
   });
 
   it('pointInPolygon returns true for inside, false for outside', () => {
-    const square = [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }];
+    const square = [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+    ];
     expect(pointInPolygon(0.5, 0.5, square)).toBe(true);
     expect(pointInPolygon(1.5, 0.5, square)).toBe(false);
   });
@@ -139,7 +151,9 @@ describe('validateHotspotQuiz — partial credit', () => {
   });
 
   it('rejects malformed answers', async () => {
-    const r = await validateHotspotQuiz(null, { geometry: { kind: 'rect', x: 0, y: 0, w: 1, h: 1 } });
+    const r = await validateHotspotQuiz(null, {
+      geometry: { kind: 'rect', x: 0, y: 0, w: 1, h: 1 },
+    });
     expect(r.correct).toBe(false);
   });
 
@@ -164,7 +178,11 @@ describe('validateFlashCard', () => {
 
 describe('validateShortAnswerLlm', () => {
   it('rejects non-string answers', async () => {
-    const r = await validateShortAnswerLlm(123, { referenceAnswer: 'x' }, () => ({ score: 1, confidence: 1, reason: '' }));
+    const r = await validateShortAnswerLlm(123, { referenceAnswer: 'x' }, () => ({
+      score: 1,
+      confidence: 1,
+      reason: '',
+    }));
     expect(r.correct).toBe(false);
     expect(r.needsHumanReview).toBe(false);
   });

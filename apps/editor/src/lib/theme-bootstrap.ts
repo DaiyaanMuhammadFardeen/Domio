@@ -81,6 +81,8 @@ export async function loadActiveTheme(_deckId: string): Promise<ReadonlyArray<Th
 /**
  * Loader hook for the active brand kit. Mirrors `loadActiveTheme`.
  */
-export async function loadActiveBrandKit(_deckId: string): Promise<ReadonlyArray<BrandKitBootstrap>> {
+export async function loadActiveBrandKit(
+  _deckId: string,
+): Promise<ReadonlyArray<BrandKitBootstrap>> {
   return BOOTSTRAP_BRAND_KITS;
 }

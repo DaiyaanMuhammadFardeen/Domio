@@ -40,7 +40,11 @@ import { calculatePrice, normalizeCurrency } from './pricing.js';
 import { InMemoryAuditRecorder, type AuditRecorder } from './audit.js';
 import type { MarketplaceStore } from './store/store.js';
 import type { PaymentProvider, CreateCheckoutInput } from './payments/types.js';
-import { StripeSandboxProvider, BkashSandboxProvider, NagadSandboxProvider } from './payments/providers.js';
+import {
+  StripeSandboxProvider,
+  BkashSandboxProvider,
+  NagadSandboxProvider,
+} from './payments/providers.js';
 import type { LicenseSigner } from './license.js';
 import { SandboxLicenseSigner } from './license.js';
 import type {
@@ -52,31 +56,16 @@ import type {
   PayoutConnectProvider,
   PayoutMethodKind,
 } from './creator/types.js';
-import {
-  OnboardingTransitionError,
-  KycInProgressError,
-} from './creator/types.js';
+import { OnboardingTransitionError, KycInProgressError } from './creator/types.js';
 import { SandboxKycProvider, SandboxPayoutConnectProvider } from './creator/providers.js';
 import { validateTransition } from './creator/onboarding.js';
 import { startKycSessionBody } from './creator/kyc.js';
 import { createPayoutMethodBody, connectLinkBody } from './creator/payout.js';
-import type {
-  BrandLockedListing,
-  BrandLockState,
-} from './curated/types.js';
-import {
-  InvalidBrandLockError,
-  BrandLockNotFoundError,
-} from './curated/types.js';
+import type { BrandLockedListing, BrandLockState } from './curated/types.js';
+import { InvalidBrandLockError, BrandLockNotFoundError } from './curated/types.js';
 import { validateBrandLockInput, assertNotDenied } from './curated/logic.js';
-import type {
-  TakedownRequest,
-  TakedownKind,
-  TrustScore,
-} from './takedown/types.js';
-import {
-  TakedownNotFoundError,
-} from './takedown/types.js';
+import type { TakedownRequest, TakedownKind, TrustScore } from './takedown/types.js';
+import { TakedownNotFoundError } from './takedown/types.js';
 import {
   validateTakedownInput,
   validateTakedownTransition,
@@ -211,9 +200,12 @@ export class MarketplaceService {
 
   async updateListing(
     listingId: string,
-    patch: Partial<Pick<MarketplaceListing,
-      'title' | 'description' | 'priceCents' | 'currency' | 'tags' | 'preview'
-    >>,
+    patch: Partial<
+      Pick<
+        MarketplaceListing,
+        'title' | 'description' | 'priceCents' | 'currency' | 'tags' | 'preview'
+      >
+    >,
   ): Promise<MarketplaceListing> {
     checkFeature(FEATURE_FLAGS.creator);
     const existing = await this.store.getListing(listingId);
@@ -283,7 +275,10 @@ export class MarketplaceService {
       patch.deprecatedAtMs = nowMs;
     }
 
-    const updated = await this.store.updateListing(listing.id, patch as Parameters<MarketplaceStore['updateListing']>[1]);
+    const updated = await this.store.updateListing(
+      listing.id,
+      patch as Parameters<MarketplaceStore['updateListing']>[1],
+    );
 
     // Emit domain event (NOT audit table — event_kind doesn't fit listing lifecycle)
     await this.emitter.publish(`listing.${to}`, {
@@ -463,7 +458,10 @@ export class MarketplaceService {
     checkFeature(FEATURE_FLAGS.pricing);
 
     // Idempotency check
-    const existing = await this.store.getPaymentIntentByIdempotencyKey(workspaceId, input.idempotency_key);
+    const existing = await this.store.getPaymentIntentByIdempotencyKey(
+      workspaceId,
+      input.idempotency_key,
+    );
     if (existing) {
       return {
         purchase_id: existing.purchaseId,
@@ -482,7 +480,10 @@ export class MarketplaceService {
     const listing = await this.store.getListing(input.listing_id);
     if (!listing) throw new ListingNotFoundError(input.listing_id);
     if (listing.status !== 'published') {
-      throw new MarketplaceValidationError('Listing must be published to purchase', 'LISTING_NOT_PUBLISHED');
+      throw new MarketplaceValidationError(
+        'Listing must be published to purchase',
+        'LISTING_NOT_PUBLISHED',
+      );
     }
 
     // Check listing is not frozen
@@ -497,12 +498,20 @@ export class MarketplaceService {
     const quantity = input.quantity ?? 1;
     const priceCents = (listing.priceCents ?? 0) * quantity;
     const policy = await this.store.getPayoutPolicy();
-    const breakdown = calculatePrice(priceCents, currency, listing.isFree ? 'free' : 'one_time', policy);
+    const breakdown = calculatePrice(
+      priceCents,
+      currency,
+      listing.isFree ? 'free' : 'one_time',
+      policy,
+    );
 
     // Get payment provider
     const provider = this.paymentProviders[input.provider];
     if (!provider) {
-      throw new MarketplaceValidationError(`Unknown payment provider: ${input.provider}`, 'UNKNOWN_PROVIDER');
+      throw new MarketplaceValidationError(
+        `Unknown payment provider: ${input.provider}`,
+        'UNKNOWN_PROVIDER',
+      );
     }
 
     // Create checkout
@@ -535,7 +544,12 @@ export class MarketplaceService {
       netCents: breakdown.creatorShareCents,
       fxRate: 1,
       fxTimestamp: now,
-      status: checkoutResult.status === 'pending' ? 'pending' : checkoutResult.status === 'succeeded' ? 'succeeded' : 'failed',
+      status:
+        checkoutResult.status === 'pending'
+          ? 'pending'
+          : checkoutResult.status === 'succeeded'
+            ? 'succeeded'
+            : 'failed',
       idempotencyKey: input.idempotency_key,
       disputeStatus: 'none',
       refundStatus: 'none',
@@ -571,12 +585,18 @@ export class MarketplaceService {
     // Verify webhook signature
     const paymentProvider = this.paymentProviders[_provider];
     if (!paymentProvider) {
-      throw new MarketplaceValidationError(`Unknown payment provider: ${_provider}`, 'UNKNOWN_PROVIDER');
+      throw new MarketplaceValidationError(
+        `Unknown payment provider: ${_provider}`,
+        'UNKNOWN_PROVIDER',
+      );
     }
 
     const isValid = paymentProvider.verifyWebhook(rawBody, signature);
     if (!isValid) {
-      throw new MarketplaceValidationError('Invalid webhook signature', 'INVALID_WEBHOOK_SIGNATURE');
+      throw new MarketplaceValidationError(
+        'Invalid webhook signature',
+        'INVALID_WEBHOOK_SIGNATURE',
+      );
     }
 
     // Determine success/failure based on event type
@@ -598,7 +618,10 @@ export class MarketplaceService {
 
     const providerIntentId = this.extractProviderIntentId(_provider, payload);
     if (!providerIntentId) {
-      throw new MarketplaceValidationError('Missing provider_intent_id in webhook', 'MISSING_PROVIDER_INTENT_ID');
+      throw new MarketplaceValidationError(
+        'Missing provider_intent_id in webhook',
+        'MISSING_PROVIDER_INTENT_ID',
+      );
     }
 
     const intent = await this.store.getPaymentIntentByProviderIntentId(providerIntentId);
@@ -691,14 +714,21 @@ export class MarketplaceService {
 
     // Must be paid and not already refunded
     if (intent.status !== 'succeeded') {
-      throw new MarketplaceValidationError('Payment must be succeeded to request refund', 'PAYMENT_NOT_SUCCEEDED');
+      throw new MarketplaceValidationError(
+        'Payment must be succeeded to request refund',
+        'PAYMENT_NOT_SUCCEEDED',
+      );
     }
     if (intent.refundStatus !== 'none') {
-      throw new MarketplaceValidationError('Refund already requested or processed', 'REFUND_ALREADY_REQUESTED');
+      throw new MarketplaceValidationError(
+        'Refund already requested or processed',
+        'REFUND_ALREADY_REQUESTED',
+      );
     }
 
     // Check eligibility: purchased within 14 days AND usage < 5 inserts
-    const daysSincePurchase = (this.now().getTime() - intent.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    const daysSincePurchase =
+      (this.now().getTime() - intent.createdAt.getTime()) / (1000 * 60 * 60 * 24);
     const insertCount = await this.usageProvider.countInserts(intent.listingId, intent.buyerId);
     const isEligible = daysSincePurchase <= 14 && insertCount < 5;
 
@@ -797,10 +827,15 @@ export class MarketplaceService {
           note: 'Listing frozen due to dispute',
         },
       });
-    } else if (eventType === 'dispute.won' || eventType === 'dispute.lost' || eventType === 'dispute.resolved') {
+    } else if (
+      eventType === 'dispute.won' ||
+      eventType === 'dispute.lost' ||
+      eventType === 'dispute.resolved'
+    ) {
       // Unfreeze listing
       await this.store.clearListingFrozen(intent.listingId);
-      const disputeStatus = eventType === 'dispute.won' ? 'won' : eventType === 'dispute.lost' ? 'lost' : 'resolved';
+      const disputeStatus =
+        eventType === 'dispute.won' ? 'won' : eventType === 'dispute.lost' ? 'lost' : 'resolved';
       await this.store.updatePaymentIntentStatus(purchaseId, 'disputed', {
         disputeStatus,
       });
@@ -840,7 +875,10 @@ export class MarketplaceService {
     return false;
   }
 
-  private extractProviderIntentId(provider: string, payload: Record<string, unknown>): string | null {
+  private extractProviderIntentId(
+    provider: string,
+    payload: Record<string, unknown>,
+  ): string | null {
     if (provider === 'stripe') {
       return (payload.session_id as string) ?? (payload.provider_intent_id as string) ?? null;
     }
@@ -887,9 +925,9 @@ export class MarketplaceService {
 
   async updateCreatorProfile(
     userId: string,
-    patch: Partial<Pick<CreatorProfile,
-      'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod'
-    >>,
+    patch: Partial<
+      Pick<CreatorProfile, 'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod'>
+    >,
   ): Promise<CreatorProfile> {
     checkFeature(FEATURE_FLAGS.kyc);
 
@@ -1001,7 +1039,9 @@ export class MarketplaceService {
     return session;
   }
 
-  async getKycStatus(userId: string): Promise<{ session: KycSession | null; profile: CreatorProfile }> {
+  async getKycStatus(
+    userId: string,
+  ): Promise<{ session: KycSession | null; profile: CreatorProfile }> {
     checkFeature(FEATURE_FLAGS.kyc);
 
     const profile = await this.getCreatorProfile(userId);
@@ -1056,7 +1096,10 @@ export class MarketplaceService {
     return this.store.listPayoutMethodsByCreator(profile.id);
   }
 
-  async getPayoutConnectLink(userId: string, kind: PayoutMethodKind): Promise<{ connect_url: string; expires_at: Date }> {
+  async getPayoutConnectLink(
+    userId: string,
+    kind: PayoutMethodKind,
+  ): Promise<{ connect_url: string; expires_at: Date }> {
     checkFeature(FEATURE_FLAGS.payout);
 
     const profile = await this.getCreatorProfile(userId);
@@ -1152,9 +1195,10 @@ export class MarketplaceService {
   ): Promise<BrandLockedListing> {
     checkFeature(FEATURE_FLAGS.curated);
     const lock = await this.store.getBrandLock(workspaceId, brandKitId, marketplaceListingId);
-    if (!lock) throw new BrandLockNotFoundError(
-      `Brand lock not found for listing ${marketplaceListingId} in brand ${brandKitId}`,
-    );
+    if (!lock)
+      throw new BrandLockNotFoundError(
+        `Brand lock not found for listing ${marketplaceListingId} in brand ${brandKitId}`,
+      );
     return lock;
   }
 
@@ -1165,7 +1209,12 @@ export class MarketplaceService {
 
   async updateBrandLock(
     lockId: string,
-    patch: Partial<Pick<BrandLockedListing, 'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'>>,
+    patch: Partial<
+      Pick<
+        BrandLockedListing,
+        'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'
+      >
+    >,
   ): Promise<BrandLockedListing> {
     checkFeature(FEATURE_FLAGS.curated);
 
@@ -1290,7 +1339,10 @@ export class MarketplaceService {
     return this.store.listTakedownRequestsByListing(listingId);
   }
 
-  async listTakedownRequests(opts?: { status?: TakedownRequest['status']; kind?: TakedownKind }): Promise<TakedownRequest[]> {
+  async listTakedownRequests(opts?: {
+    status?: TakedownRequest['status'];
+    kind?: TakedownKind;
+  }): Promise<TakedownRequest[]> {
     checkFeature(FEATURE_FLAGS.takedown);
     return this.store.listTakedownRequests(opts);
   }
@@ -1448,16 +1500,25 @@ export class MarketplaceService {
   // FX Rates (Phase 19 Wave 5 — WS-MKT-7)
   // -------------------------------------------------------------------------
 
-  async getFxRate(base: string, quote: string): Promise<{ base: string; quote: string; rate: number; fetched_at: Date; source: string }> {
+  async getFxRate(
+    base: string,
+    quote: string,
+  ): Promise<{ base: string; quote: string; rate: number; fetched_at: Date; source: string }> {
     checkFeature(FEATURE_FLAGS.payout);
 
     if (!base || !quote) {
-      throw new MarketplaceValidationError('base and quote currencies are required', 'INVALID_CURRENCY_PAIR');
+      throw new MarketplaceValidationError(
+        'base and quote currencies are required',
+        'INVALID_CURRENCY_PAIR',
+      );
     }
 
     const rate = await this.store.getLatestFxRate(base, quote);
     if (!rate) {
-      throw new MarketplaceValidationError(`No FX rate found for ${base}/${quote}`, 'FX_RATE_NOT_FOUND');
+      throw new MarketplaceValidationError(
+        `No FX rate found for ${base}/${quote}`,
+        'FX_RATE_NOT_FOUND',
+      );
     }
 
     return {
@@ -1482,7 +1543,10 @@ export class MarketplaceService {
     checkFeature(FEATURE_FLAGS.payout);
     const run = await this.store.getPayoutRun(runId);
     if (!run) {
-      throw new MarketplaceValidationError(`Payout run not found: ${runId}`, 'PAYOUT_RUN_NOT_FOUND');
+      throw new MarketplaceValidationError(
+        `Payout run not found: ${runId}`,
+        'PAYOUT_RUN_NOT_FOUND',
+      );
     }
     return run;
   }

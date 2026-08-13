@@ -207,10 +207,15 @@ describe('approval gate', () => {
     });
 
     const { service: denyService } = makeService(DenyAllApprovalGate, sharedStore);
-    const updated = await denyService.updateShare('w1', snapshot.link.id, {
-      actorId: 'alice',
-      slug: 'new-slug',
-    }, 2);
+    const updated = await denyService.updateShare(
+      'w1',
+      snapshot.link.id,
+      {
+        actorId: 'alice',
+        slug: 'new-slug',
+      },
+      2,
+    );
     expect(updated.link.slug).toBe('new-slug');
   });
 
@@ -241,16 +246,10 @@ describe('approval gate', () => {
     const gate = denyDeck('blocked-deck');
     const { ctx } = makeService(gate);
 
-    const allowed = await handlers.createShare(
-      createShareReq({ deckId: 'allowed-deck' }),
-      ctx,
-    );
+    const allowed = await handlers.createShare(createShareReq({ deckId: 'allowed-deck' }), ctx);
     expect(allowed.status).toBe(201);
 
-    const denied = await handlers.createShare(
-      createShareReq({ deckId: 'blocked-deck' }),
-      ctx,
-    );
+    const denied = await handlers.createShare(createShareReq({ deckId: 'blocked-deck' }), ctx);
     expect(denied.status).toBe(403);
   });
 

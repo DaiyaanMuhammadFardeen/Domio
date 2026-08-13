@@ -11,10 +11,7 @@ export interface EventDetailProps {
   payloadLabel: string;
 }
 
-function labelForType(
-  type: SessionEvent['type'],
-  labels: SessionTimelineLabels,
-): string {
+function labelForType(type: SessionEvent['type'], labels: SessionTimelineLabels): string {
   switch (type) {
     case 'slide_advance':
       return labels.slideAdvance;
@@ -51,12 +48,7 @@ function prettyJson(value: unknown): string {
  * so operators can see both what happened and what the dashboard looked
  * like at that exact point in time.
  */
-export function EventDetail({
-  event,
-  labels,
-  snapshotLabel,
-  payloadLabel,
-}: EventDetailProps) {
+export function EventDetail({ event, labels, snapshotLabel, payloadLabel }: EventDetailProps) {
   if (!event) {
     return (
       <div
@@ -72,13 +64,8 @@ export function EventDetail({
     <div data-testid="event-detail" className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <EventTypeBadge
-            type={event.type}
-            label={labelForType(event.type, labels)}
-          />
-          <h2 className="mt-2 text-base font-semibold text-slate-900">
-            {event.summary}
-          </h2>
+          <EventTypeBadge type={event.type} label={labelForType(event.type, labels)} />
+          <h2 className="mt-2 text-base font-semibold text-slate-900">{event.summary}</h2>
           <p className="mt-1 text-xs text-slate-500">
             {event.actor.name} · {new Date(event.timestamp_ms).toISOString()}
           </p>

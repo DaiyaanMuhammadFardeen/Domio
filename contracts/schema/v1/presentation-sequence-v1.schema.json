@@ -5,10 +5,21 @@
   "description": "An auto-advance timeline of slides with pause/resume, interruption policies, visibility-aware clock handling, and reduced-motion default-off. Phase 10 M6.2.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "name", "slides", "interval_ms",
-    "pause_on_event", "loop", "count", "interruption_policy",
-    "reduced_motion_default_off", "pause_warn_at_ms",
-    "version", "created_at", "updated_at"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "name",
+    "slides",
+    "interval_ms",
+    "pause_on_event",
+    "loop",
+    "count",
+    "interruption_policy",
+    "reduced_motion_default_off",
+    "pause_warn_at_ms",
+    "version",
+    "created_at",
+    "updated_at"
   ],
   "additionalProperties": false,
   "properties": {
@@ -23,7 +34,8 @@
     },
     "interval_ms": {
       "type": "integer",
-      "minimum": 50, "maximum": 86400000,
+      "minimum": 50,
+      "maximum": 86400000,
       "description": "Default 1000ms."
     },
     "pause_on_event": {
@@ -35,7 +47,10 @@
       "description": "Loop the slide list when finished. Bounded by `count`."
     },
     "count": {
-      "type": "integer", "minimum": 1, "maximum": 1024, "default": 1,
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1024,
+      "default": 1,
       "description": "Number of complete plays before stopping."
     },
     "interruption_policy": {
@@ -43,12 +58,15 @@
       "default": "queue"
     },
     "reduced_motion_default_off": {
-      "type": "boolean", "default": true,
+      "type": "boolean",
+      "default": true,
       "description": "When prefers-reduced-motion:reduce is set, default to NOT starting the sequence."
     },
     "pause_warn_at_ms": {
       "type": "integer",
-      "minimum": 1000, "maximum": 7200000, "default": 1800000,
+      "minimum": 1000,
+      "maximum": 7200000,
+      "default": 1800000,
       "description": "Millis of continuous pause before firing a warning callback. Default 30 min."
     },
     "version": { "type": "integer", "minimum": 0 },

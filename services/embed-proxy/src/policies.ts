@@ -91,9 +91,11 @@ export function validateCreateInput(input: CreatePolicyInput): void {
   if (!input.name) throw new PolicyValidationError('name is required');
   if (input.sandboxFlags !== undefined) validateSandboxFlags(input.sandboxFlags);
   if (input.allowedOrigins !== undefined) {
-    if (!Array.isArray(input.allowedOrigins)) throw new PolicyValidationError('allowedOrigins must be an array');
+    if (!Array.isArray(input.allowedOrigins))
+      throw new PolicyValidationError('allowedOrigins must be an array');
     for (const origin of input.allowedOrigins) {
-      if (typeof origin !== 'string') throw new PolicyValidationError('allowedOrigins entries must be strings');
+      if (typeof origin !== 'string')
+        throw new PolicyValidationError('allowedOrigins entries must be strings');
     }
   }
 }
@@ -101,9 +103,11 @@ export function validateCreateInput(input: CreatePolicyInput): void {
 export function validateUpdateInput(input: UpdatePolicyInput): void {
   if (input.sandboxFlags !== undefined) validateSandboxFlags(input.sandboxFlags);
   if (input.allowedOrigins !== undefined) {
-    if (!Array.isArray(input.allowedOrigins)) throw new PolicyValidationError('allowedOrigins must be an array');
+    if (!Array.isArray(input.allowedOrigins))
+      throw new PolicyValidationError('allowedOrigins must be an array');
     for (const origin of input.allowedOrigins) {
-      if (typeof origin !== 'string') throw new PolicyValidationError('allowedOrigins entries must be strings');
+      if (typeof origin !== 'string')
+        throw new PolicyValidationError('allowedOrigins entries must be strings');
     }
   }
 }

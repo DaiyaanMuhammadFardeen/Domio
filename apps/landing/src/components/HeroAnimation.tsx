@@ -182,16 +182,10 @@ export function HeroAnimation(): JSX.Element {
 
   return (
     <div className="hero-animation" data-testid="hero-animation">
-      <canvas
-        ref={canvasRef}
-        className="hero-animation__canvas"
-        aria-hidden="true"
-      />
+      <canvas ref={canvasRef} className="hero-animation__canvas" aria-hidden="true" />
       <div className="hero-animation__caption" aria-hidden="true">
         <span className="hero-animation__chip">editor</span>
-        <span className="hero-animation__chip hero-animation__chip--muted">
-          live preview
-        </span>
+        <span className="hero-animation__chip hero-animation__chip--muted">live preview</span>
       </div>
     </div>
   );

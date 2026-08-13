@@ -31,10 +31,7 @@ describe('GroupTransformHandle', () => {
   });
 
   it('renders the bounding rect and resize handles for 2 elements', () => {
-    const elements = [
-      makeElement('a', 100, 100, 200, 80),
-      makeElement('b', 400, 200, 80, 80),
-    ];
+    const elements = [makeElement('a', 100, 100, 200, 80), makeElement('b', 400, 200, 80, 80)];
     const { container } = render(
       <GroupTransformHandle elements={elements} slideWidth={1600} slideHeight={900} />,
     );

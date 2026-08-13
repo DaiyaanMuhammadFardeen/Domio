@@ -57,9 +57,7 @@ export class TemplateNotFoundError extends Error {
   public readonly availableIds: string[];
 
   constructor(id: string, availableIds: string[]) {
-    super(
-      `Template "${id}" not found. Available templates: ${availableIds.join(', ')}`,
-    );
+    super(`Template "${id}" not found. Available templates: ${availableIds.join(', ')}`);
     this.name = 'TemplateNotFoundError';
     this.availableIds = availableIds;
   }
@@ -92,10 +90,19 @@ export const TEMPLATES: PromptTemplate[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        prompt: { type: 'string', description: 'User&apos;s free-text description of the desired presentation.' },
-        audience: { type: 'string', description: 'Target audience (e.g. "board", "technical", "sales").' },
+        prompt: {
+          type: 'string',
+          description: 'User&apos;s free-text description of the desired presentation.',
+        },
+        audience: {
+          type: 'string',
+          description: 'Target audience (e.g. "board", "technical", "sales").',
+        },
         slideCount: { type: 'number', description: 'Desired number of slides.' },
-        tone: { type: 'string', description: 'Desired tone (e.g. "formal", "playful", "optimistic").' },
+        tone: {
+          type: 'string',
+          description: 'Desired tone (e.g. "formal", "playful", "optimistic").',
+        },
         brandContext: { type: 'string', description: 'Optional brand guidelines or context.' },
       },
       required: ['prompt'],
@@ -265,7 +272,10 @@ export const TEMPLATES: PromptTemplate[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        slideDescription: { type: 'string', description: 'Description of what the slide should convey.' },
+        slideDescription: {
+          type: 'string',
+          description: 'Description of what the slide should convey.',
+        },
         layoutHint: { type: 'string', description: 'Suggested layout type.' },
         brandTokens: { type: 'string', description: 'Brand color palette, fonts, and style.' },
         referenceImageUrl: { type: 'string', description: 'Optional reference image URL.' },
@@ -317,7 +327,10 @@ export const TEMPLATES: PromptTemplate[] = [
       type: 'object',
       properties: {
         slideContent: { type: 'string', description: 'Current slide content to redesign.' },
-        mode: { type: 'string', description: 'Redesign mode: "light" (spacing/alignment) or "full" (structure change).' },
+        mode: {
+          type: 'string',
+          description: 'Redesign mode: "light" (spacing/alignment) or "full" (structure change).',
+        },
         brandTokens: { type: 'string', description: 'Brand guidelines.' },
       },
       required: ['slideContent', 'mode'],
@@ -367,7 +380,10 @@ export const TEMPLATES: PromptTemplate[] = [
       properties: {
         slideTitle: { type: 'string', description: 'Title of the slide.' },
         slideContent: { type: 'string', description: 'Full content of the slide.' },
-        variant: { type: 'string', description: 'Notes variant: "terse", "detailed", or "executive".' },
+        variant: {
+          type: 'string',
+          description: 'Notes variant: "terse", "detailed", or "executive".',
+        },
         dataBindings: { type: 'string', description: 'Optional data bindings for the slide.' },
       },
       required: ['slideTitle', 'slideContent', 'variant'],
@@ -410,7 +426,10 @@ export const TEMPLATES: PromptTemplate[] = [
         slideTitle: { type: 'string', description: 'Title of the slide.' },
         slideContent: { type: 'string', description: 'Content of the slide.' },
         speakerNotes: { type: 'string', description: 'Speaker notes for the slide.' },
-        audienceProfile: { type: 'string', description: 'Audience type: "board", "technical", "customer", "general".' },
+        audienceProfile: {
+          type: 'string',
+          description: 'Audience type: "board", "technical", "customer", "general".',
+        },
       },
       required: ['slideTitle', 'slideContent', 'audienceProfile'],
     },
@@ -537,8 +556,14 @@ export const TEMPLATES: PromptTemplate[] = [
       type: 'object',
       properties: {
         text: { type: 'string', description: 'Text to translate.' },
-        targetLanguage: { type: 'string', description: 'Target language code (e.g. "es", "ja", "ar").' },
-        sourceLanguage: { type: 'string', description: 'Source language code (auto-detect if omitted).' },
+        targetLanguage: {
+          type: 'string',
+          description: 'Target language code (e.g. "es", "ja", "ar").',
+        },
+        sourceLanguage: {
+          type: 'string',
+          description: 'Source language code (auto-detect if omitted).',
+        },
         glossary: { type: 'string', description: 'Workspace glossary overrides for brand terms.' },
         maxCharacters: { type: 'number', description: 'Maximum character count to fit in layout.' },
       },
@@ -584,8 +609,14 @@ export const TEMPLATES: PromptTemplate[] = [
       type: 'object',
       properties: {
         imageUrl: { type: 'string', description: 'URL or reference of the image.' },
-        imageDescription: { type: 'string', description: 'Optional textual description of the image for context.' },
-        slideContext: { type: 'string', description: 'Context of where the image appears in the slide.' },
+        imageDescription: {
+          type: 'string',
+          description: 'Optional textual description of the image for context.',
+        },
+        slideContext: {
+          type: 'string',
+          description: 'Context of where the image appears in the slide.',
+        },
       },
       required: ['imageUrl'],
     },
@@ -628,7 +659,10 @@ export const TEMPLATES: PromptTemplate[] = [
       properties: {
         transcript: { type: 'string', description: 'Raw transcript from ASR.' },
         language: { type: 'string', description: 'Language code for the transcript.' },
-        slideTimestamps: { type: 'string', description: 'Optional timestamps for slide boundaries.' },
+        slideTimestamps: {
+          type: 'string',
+          description: 'Optional timestamps for slide boundaries.',
+        },
       },
       required: ['transcript'],
     },
@@ -677,7 +711,10 @@ export const TEMPLATES: PromptTemplate[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        citations: { type: 'string', description: 'List of citations with timestamps and source info.' },
+        citations: {
+          type: 'string',
+          description: 'List of citations with timestamps and source info.',
+        },
         thresholdDays: { type: 'number', description: 'Freshness threshold in days.' },
         currentDate: { type: 'string', description: 'Current date (ISO format).' },
       },
@@ -728,7 +765,10 @@ export const TEMPLATES: PromptTemplate[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        slideLayout: { type: 'string', description: 'Description or JSON of the slide layout to lint.' },
+        slideLayout: {
+          type: 'string',
+          description: 'Description or JSON of the slide layout to lint.',
+        },
         brandTokens: { type: 'string', description: 'Brand guidelines for validation.' },
         wcagLevel: { type: 'string', description: 'WCAG conformance level (default: "AA").' },
       },
@@ -791,10 +831,7 @@ export const TEMPLATES: PromptTemplate[] = [
  * the latest (version omitted). Old versions are retained for backward
  * compatibility.
  */
-export function getTemplate(
-  id: string,
-  version?: number,
-): PromptTemplate | undefined {
+export function getTemplate(id: string, version?: number): PromptTemplate | undefined {
   const allIds = [...new Set(TEMPLATES.map((t) => t.id))];
 
   // Check if the template ID exists at all

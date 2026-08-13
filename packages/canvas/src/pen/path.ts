@@ -64,6 +64,9 @@ export function pathToSvg(path: VectorPath): string {
   return d;
 }
 
-export function fillRuleFromPath(_path: VectorPath, defaultRule: 'evenodd' | 'nonzero' = 'nonzero'): 'evenodd' | 'nonzero' {
+export function fillRuleFromPath(
+  _path: VectorPath,
+  defaultRule: 'evenodd' | 'nonzero' = 'nonzero',
+): 'evenodd' | 'nonzero' {
   return defaultRule;
 }

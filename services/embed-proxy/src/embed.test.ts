@@ -51,7 +51,10 @@ describe('embed handlers — createToken', () => {
   it('POST /v1/embed/tokens — 200 creates token', async () => {
     const ctx = makeCtx();
     const response = await embedHandlers.createToken(
-      req('POST', '/v1/embed/tokens', undefined, { bindingId: 'valid-binding', url: 'https://api.example.com/data' }),
+      req('POST', '/v1/embed/tokens', undefined, {
+        bindingId: 'valid-binding',
+        url: 'https://api.example.com/data',
+      }),
       ctx,
     );
     expect(response.status).toBe(200);
@@ -126,7 +129,11 @@ describe('embed handlers — validateToken', () => {
 describe('embed handlers — proxy', () => {
   it('POST /v1/embed/:bindingId/proxy — 200 for valid binding', async () => {
     const ctx = makeCtx({
-      fetchFn: async () => new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'content-type': 'application/json' } }),
+      fetchFn: async () =>
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
     });
     const response = await embedHandlers.proxy(
       req('POST', '/v1/embed/:bindingId/proxy', { bindingId: 'valid-binding' }, undefined),
@@ -220,7 +227,10 @@ describe('policy handlers — create', () => {
   it('POST /v1/embed_policies — 400 on missing workspaceId', async () => {
     const ctx = makePolicyCtx();
     const response = await policyHandlers.create(
-      req('POST', '/v1/embed_policies', undefined, { name: 'Test' } as unknown as { workspaceId: string; name: string }),
+      req('POST', '/v1/embed_policies', undefined, { name: 'Test' } as unknown as {
+        workspaceId: string;
+        name: string;
+      }),
       ctx,
     );
     expect(response.status).toBe(400);

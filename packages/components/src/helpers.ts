@@ -169,7 +169,10 @@ export function toRGBA(hex: string): { r: number; g: number; b: number; a: numbe
   return { r: (n >> 16) & 0xff, g: (n >> 8) & 0xff, b: n & 0xff, a: 1 };
 }
 
-function toStyleFill(fill: FillSpec): { type: 'solid'; color: { r: number; g: number; b: number; a: number } } {
+function toStyleFill(fill: FillSpec): {
+  type: 'solid';
+  color: { r: number; g: number; b: number; a: number };
+} {
   if (typeof fill === 'string') return { type: 'solid', color: toRGBA(fill) };
   return { type: 'solid', color: fill };
 }

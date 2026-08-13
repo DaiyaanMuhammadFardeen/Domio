@@ -87,7 +87,12 @@ export interface AccessibilityFixResponse {
 }
 
 export type LayoutPatchOp =
-  | { readonly op: 'resize'; readonly elementId: string; readonly width: number; readonly height: number }
+  | {
+      readonly op: 'resize';
+      readonly elementId: string;
+      readonly width: number;
+      readonly height: number;
+    }
   | { readonly op: 'move'; readonly elementId: string; readonly x: number; readonly y: number }
   | { readonly op: 'remove'; readonly elementId: string }
   | { readonly op: 'set-font-size'; readonly elementId: string; readonly fontSize: number };
@@ -147,10 +152,10 @@ export function fixLayoutIssue(
   req: FixRequest,
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<LayoutFixResponse> {
-  return postJson<LayoutFixResponse>(
-    `${baseUrl}/v1/ai/lint-layout/fix`,
-    { deck_id: deckId, ...req },
-  );
+  return postJson<LayoutFixResponse>(`${baseUrl}/v1/ai/lint-layout/fix`, {
+    deck_id: deckId,
+    ...req,
+  });
 }
 
 /**
@@ -160,10 +165,9 @@ export function auditAccessibility(
   deckId: string,
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<AccessibilityAuditResponse> {
-  return postJson<AccessibilityAuditResponse>(
-    `${baseUrl}/v1/ai/accessibility-audit`,
-    { deck_id: deckId },
-  );
+  return postJson<AccessibilityAuditResponse>(`${baseUrl}/v1/ai/accessibility-audit`, {
+    deck_id: deckId,
+  });
 }
 
 /**
@@ -176,8 +180,8 @@ export function fixAccessibilityIssue(
   req: FixRequest,
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<AccessibilityFixResponse> {
-  return postJson<AccessibilityFixResponse>(
-    `${baseUrl}/v1/ai/accessibility-audit/fix`,
-    { deck_id: deckId, ...req },
-  );
+  return postJson<AccessibilityFixResponse>(`${baseUrl}/v1/ai/accessibility-audit/fix`, {
+    deck_id: deckId,
+    ...req,
+  });
 }

@@ -43,9 +43,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): MigratorConfig
     }
   });
   if (!initDir) {
-    throw new Error(
-      `[clickhouse-migrator] could not locate init/ dir; set CLICKHOUSE_INIT_DIR`,
-    );
+    throw new Error(`[clickhouse-migrator] could not locate init/ dir; set CLICKHOUSE_INIT_DIR`);
   }
 
   return {

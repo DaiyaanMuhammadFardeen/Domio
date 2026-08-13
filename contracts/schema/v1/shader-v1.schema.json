@@ -4,7 +4,19 @@
   "title": "Domio Shader V1",
   "description": "User-authored GPU shader for Phase 11 particle systems and shader backgrounds. Stores WGSL (WebGPU) and GLSL (WebGL fallback) source, input bindings, and publish state.",
   "type": "object",
-  "required": ["schemaVersion", "id", "workspaceId", "authorId", "name", "kind", "sourceWgsl", "sourceGlsl", "inputs", "published", "createdAt"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "workspaceId",
+    "authorId",
+    "name",
+    "kind",
+    "sourceWgsl",
+    "sourceGlsl",
+    "inputs",
+    "published",
+    "createdAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {

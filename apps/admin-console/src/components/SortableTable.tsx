@@ -89,15 +89,11 @@ export function SortableTable<T extends Record<string, unknown>>({
                       )}
                     >
                       {c.header}
-                      {active && sort?.dir === 'asc' && (
-                        <ArrowUp className="h-3 w-3" aria-hidden />
-                      )}
+                      {active && sort?.dir === 'asc' && <ArrowUp className="h-3 w-3" aria-hidden />}
                       {active && sort?.dir === 'desc' && (
                         <ArrowDown className="h-3 w-3" aria-hidden />
                       )}
-                      {!active && (
-                        <ArrowUpDown className="h-3 w-3 opacity-30" aria-hidden />
-                      )}
+                      {!active && <ArrowUpDown className="h-3 w-3 opacity-30" aria-hidden />}
                     </button>
                   </th>
                 );
@@ -119,9 +115,7 @@ export function SortableTable<T extends Record<string, unknown>>({
                 <tr key={i} className="hover:bg-slate-50 transition-colors">
                   {columns.map((c) => {
                     const raw = row[c.key] as unknown;
-                    const display = c.format
-                      ? c.format(raw as never, row)
-                      : String(raw ?? '');
+                    const display = c.format ? c.format(raw as never, row) : String(raw ?? '');
                     return (
                       <td
                         key={c.key}

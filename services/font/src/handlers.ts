@@ -43,9 +43,15 @@ export interface FontHandlerContext {
   authorize?: (args: { actorId: string | undefined; action: 'read' | 'write' }) => void;
 }
 
-function ok<T>(b: T): HttpResponse { return { status: 200, body: b }; }
-function created<T>(b: T): HttpResponse { return { status: 201, body: b }; }
-function noContent(): HttpResponse { return { status: 204, body: null }; }
+function ok<T>(b: T): HttpResponse {
+  return { status: 200, body: b };
+}
+function created<T>(b: T): HttpResponse {
+  return { status: 201, body: b };
+}
+function noContent(): HttpResponse {
+  return { status: 204, body: null };
+}
 function badRequest(message: string, code: string, extra?: Record<string, unknown>): HttpResponse {
   return { status: 400, body: { error: message, code, ...(extra ?? {}) } };
 }
@@ -60,7 +66,10 @@ function conflict(message: string, code: string): HttpResponse {
 }
 
 export async function uploadFontHandler(
-  req: HttpRequest<{ orgId: string }, Omit<UploadFontInput, 'orgId' | 'createdBy'> & { createdBy?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    Omit<UploadFontInput, 'orgId' | 'createdBy'> & { createdBy?: string }
+  >,
   ctx: FontHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.createdBy ?? ctx.resolveActorId?.(req);
@@ -69,7 +78,11 @@ export async function uploadFontHandler(
   const { createdBy: _ignored, ...rest } = req.body;
   void _ignored;
   try {
-    const record = await ctx.service.uploadFont({ ...rest, orgId: req.params.orgId, createdBy: actorId });
+    const record = await ctx.service.uploadFont({
+      ...rest,
+      orgId: req.params.orgId,
+      createdBy: actorId,
+    });
     ctx.metrics?.recordUpload();
     ctx.audit?.record({
       orgId: req.params.orgId,
@@ -80,7 +93,8 @@ export async function uploadFontHandler(
     });
     return created(record);
   } catch (e) {
-    if (e instanceof FontValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof FontValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     if (e instanceof FontLicenseBlockedError) {
       ctx.metrics?.recordLicenseBlock();
       return conflict(e.message, e.code);
@@ -117,7 +131,11 @@ export async function getFontHandler(
 }
 
 export async function updateLicenseHandler(
-  req: HttpRequest<{ orgId: string; fontId: string }, { licenseStatus?: FontLicenseStatus; licenseUrl?: string; licenseExpiresAt?: string | null }, { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string; fontId: string },
+    { licenseStatus?: FontLicenseStatus; licenseUrl?: string; licenseExpiresAt?: string | null },
+    { actorId?: string }
+  >,
   ctx: FontHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -128,7 +146,11 @@ export async function updateLicenseHandler(
       ...(req.body.licenseStatus !== undefined ? { licenseStatus: req.body.licenseStatus } : {}),
       ...(req.body.licenseUrl !== undefined ? { licenseUrl: req.body.licenseUrl } : {}),
       ...(req.body.licenseExpiresAt !== undefined
-        ? { licenseExpiresAt: req.body.licenseExpiresAt ? new Date(req.body.licenseExpiresAt) : null }
+        ? {
+            licenseExpiresAt: req.body.licenseExpiresAt
+              ? new Date(req.body.licenseExpiresAt)
+              : null,
+          }
         : {}),
     });
     ctx.audit?.record({

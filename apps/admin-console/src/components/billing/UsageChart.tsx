@@ -18,10 +18,22 @@ export interface UsageChartProps {
 }
 
 const METRIC_COLORS: Readonly<Record<UsageMetric, { stroke: string; fill: string }>> = {
-  api_calls: { stroke: 'var(--accent-2)', fill: 'color-mix(in srgb, var(--accent-2) 18%, transparent)' },
-  ai_tokens: { stroke: 'var(--accent-9)', fill: 'color-mix(in srgb, var(--accent-9) 18%, transparent)' },
-  render_minutes: { stroke: 'var(--success)', fill: 'color-mix(in srgb, var(--success) 18%, transparent)' },
-  export_minutes: { stroke: 'var(--warning)', fill: 'color-mix(in srgb, var(--warning) 18%, transparent)' },
+  api_calls: {
+    stroke: 'var(--accent-2)',
+    fill: 'color-mix(in srgb, var(--accent-2) 18%, transparent)',
+  },
+  ai_tokens: {
+    stroke: 'var(--accent-9)',
+    fill: 'color-mix(in srgb, var(--accent-9) 18%, transparent)',
+  },
+  render_minutes: {
+    stroke: 'var(--success)',
+    fill: 'color-mix(in srgb, var(--success) 18%, transparent)',
+  },
+  export_minutes: {
+    stroke: 'var(--warning)',
+    fill: 'color-mix(in srgb, var(--warning) 18%, transparent)',
+  },
 };
 
 const METRIC_LABEL: Readonly<Record<UsageMetric, string>> = {
@@ -31,12 +43,7 @@ const METRIC_LABEL: Readonly<Record<UsageMetric, string>> = {
   export_minutes: 'Export minutes per day',
 };
 
-export function UsageChart({
-  metric,
-  series,
-  width = 720,
-  height = 220,
-}: UsageChartProps) {
+export function UsageChart({ metric, series, width = 720, height = 220 }: UsageChartProps) {
   const padX = 12;
   const padY = 16;
   const innerW = Math.max(0, width - padX * 2);
@@ -120,9 +127,7 @@ export function UsageChart({
         strokeWidth={1}
         strokeDasharray="2 4"
       />
-      {areaPath ? (
-        <path d={areaPath} fill={colors.fill} stroke="none" />
-      ) : null}
+      {areaPath ? <path d={areaPath} fill={colors.fill} stroke="none" /> : null}
       <path
         d={linePath}
         fill="none"

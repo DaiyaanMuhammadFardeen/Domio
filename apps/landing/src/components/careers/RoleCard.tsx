@@ -55,9 +55,7 @@ export function RoleCard({ role }: RoleCardProps): JSX.Element {
       <header className="careers-role-card__head">
         <h3 className="careers-role-card__title">{role.title}</h3>
         <ul className="careers-role-card__meta" aria-label="Role metadata">
-          <li className="careers-role-card__badge">
-            {DEPARTMENT_LABEL[role.department]}
-          </li>
+          <li className="careers-role-card__badge">{DEPARTMENT_LABEL[role.department]}</li>
           <li className="careers-role-card__badge careers-role-card__badge--muted">
             {LOCATION_LABEL[role.location]}
           </li>
@@ -81,10 +79,7 @@ export function RoleCard({ role }: RoleCardProps): JSX.Element {
         >
           Apply on Greenhouse →
         </a>
-        <time
-          className="careers-role-card__posted"
-          dateTime={role.posted_at_iso}
-        >
+        <time className="careers-role-card__posted" dateTime={role.posted_at_iso}>
           Posted{' '}
           {new Date(role.posted_at_iso).toLocaleDateString('en-US', {
             month: 'short',

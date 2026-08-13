@@ -77,7 +77,10 @@ export class SubBrandCycleError extends Error {
 
 export class SubBrandDuplicateError extends Error {
   readonly code = 'SUB_BRAND_DUPLICATE' as const;
-  constructor(public readonly parentKitId: string, public readonly childKitId: string) {
+  constructor(
+    public readonly parentKitId: string,
+    public readonly childKitId: string,
+  ) {
     super(`Sub-brand ${childKitId} → ${parentKitId} already exists`);
     this.name = 'SubBrandDuplicateError';
   }
@@ -113,7 +116,9 @@ export interface BrandServiceOptions {
 
 const defaultId: () => ULID = () =>
   asULID(
-    `01H0000000000000000000000${Math.floor(Math.random() * 1e6).toString().padStart(6, '0')}`
+    `01H0000000000000000000000${Math.floor(Math.random() * 1e6)
+      .toString()
+      .padStart(6, '0')}`
       .slice(0, 26)
       .padEnd(26, '0'),
   );
@@ -351,7 +356,10 @@ export class BrandService {
     }
   }
 
-  async listSubBrands(kitId: string, orgId: string): Promise<{
+  async listSubBrands(
+    kitId: string,
+    orgId: string,
+  ): Promise<{
     readonly children: readonly BrandKitSubBrandRecord[];
     readonly parents: readonly BrandKitSubBrandRecord[];
   }> {
@@ -443,7 +451,9 @@ export class BrandService {
       ...job,
       status: update.status,
       ...(update.stages !== undefined ? { stages: update.stages } : {}),
-      ...(update.confidenceScores !== undefined ? { confidenceScores: update.confidenceScores } : {}),
+      ...(update.confidenceScores !== undefined
+        ? { confidenceScores: update.confidenceScores }
+        : {}),
       ...(update.resultKitId !== undefined ? { resultKitId: update.resultKitId } : {}),
       ...(update.errorCode !== undefined ? { errorCode: update.errorCode } : {}),
       updatedAt: this.clock(),
@@ -452,11 +462,7 @@ export class BrandService {
     return next;
   }
 
-  async attestExtraction(
-    kitId: string,
-    orgId: string,
-    actorId: string,
-  ): Promise<BrandKitRecord> {
+  async attestExtraction(kitId: string, orgId: string, actorId: string): Promise<BrandKitRecord> {
     const existing = await this.kits.findById(kitId, orgId);
     if (!existing) throw new BrandKitNotFoundError(kitId);
     const attestationId = this.idGen();
@@ -485,8 +491,17 @@ export class BrandService {
       name: input.name,
       scope: input.scope,
       ownerOrgId: input.ownerOrgId,
-      logos: input.logos.map((l) => ({ variant: l.variant, size: l.size, format: l.format, hash: l.contentHash })),
-      palettes: input.palettes.map((p) => ({ tokenIds: [...p.tokenIds].sort(), cvSafe: p.cvSafe, hueSpacingDeg: p.hueSpacingDeg })),
+      logos: input.logos.map((l) => ({
+        variant: l.variant,
+        size: l.size,
+        format: l.format,
+        hash: l.contentHash,
+      })),
+      palettes: input.palettes.map((p) => ({
+        tokenIds: [...p.tokenIds].sort(),
+        cvSafe: p.cvSafe,
+        hueSpacingDeg: p.hueSpacingDeg,
+      })),
     });
     let h = 0x811c9dc5;
     for (let i = 0; i < json.length; i++) {

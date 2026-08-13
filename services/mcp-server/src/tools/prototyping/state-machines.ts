@@ -99,9 +99,12 @@ export const set_state_machine: McpTool<StateMachineSpec, StateMachine> = {
     const v = validateSetStateMachine(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'set_state_machine', v.value, () =>
-      callPrototypeRuntime(ctx, 'PUT', `/decks/${v.value.deckId}/state-machines/${v.value.id}`, v.value).then(
-        (r) => r as StateMachine,
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'PUT',
+        `/decks/${v.value.deckId}/state-machines/${v.value.id}`,
+        v.value,
+      ).then((r) => r as StateMachine),
     );
   },
 };
@@ -138,11 +141,15 @@ export const list_state_machines: McpTool<ListStateMachinesInput, readonly State
     const v = validateListStateMachines(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_state_machines', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/state-machines`).then(
-        (r) => (r as StateMachine[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/state-machines`).then((r) =>
+        (r as StateMachine[]).slice(),
       ),
     );
   },
 };
 
-export const stateMachineTools = [set_state_machine, transition_state, list_state_machines] as const;
+export const stateMachineTools = [
+  set_state_machine,
+  transition_state,
+  list_state_machines,
+] as const;

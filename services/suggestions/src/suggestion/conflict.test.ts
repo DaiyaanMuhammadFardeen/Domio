@@ -83,9 +83,7 @@ describe('markConflictingObsolete', () => {
 
   it('returns empty array when no conflicts', () => {
     const accepted = makeOp({ type: 'move', after_state: { x: 10 } });
-    const others = [
-      { id: 's1', operation: makeOp({ type: 'move', after_state: { y: 30 } }) },
-    ];
+    const others = [{ id: 's1', operation: makeOp({ type: 'move', after_state: { y: 30 } }) }];
     const ids = markConflictingObsolete(accepted, others);
     expect(ids).toHaveLength(0);
   });

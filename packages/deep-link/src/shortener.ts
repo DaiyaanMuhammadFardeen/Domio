@@ -14,11 +14,7 @@
  */
 
 import { randomBytes } from 'node:crypto';
-import {
-  type DeepLink,
-  type DeepLinkPayload,
-  type DeepLinkViewerScope,
-} from './types.js';
+import { type DeepLink, type DeepLinkPayload, type DeepLinkViewerScope } from './types.js';
 import { DeepLinkReplayError } from './errors.js';
 
 export interface ShortenInput {
@@ -81,10 +77,7 @@ export class Shortener {
    * so the record is replay-safe even if the persisted DB row is
    * leaked without HMAC verification.
    */
-  async shorten(
-    input: ShortenInput,
-    payload: DeepLinkPayload,
-  ): Promise<DeepLink> {
+  async shorten(input: ShortenInput, payload: DeepLinkPayload): Promise<DeepLink> {
     const id = newShortId();
     const now = Date.now();
     const record: DeepLink = {
@@ -123,7 +116,7 @@ export class Shortener {
     // Single-use enforcement: a link minted as single-use must be
     // refused after the first successful resolve. We compare
     // pre- and post-increment counts.
-    if (after.click_count > 1 && (before.click_count >= 1)) {
+    if (after.click_count > 1 && before.click_count >= 1) {
       throw new DeepLinkReplayError(`Deep link ${id} has already been consumed`);
     }
     return after;

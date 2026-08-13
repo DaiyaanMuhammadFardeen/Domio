@@ -144,9 +144,7 @@ export function RateLimitRuleDrawer({
                 type="text"
                 required
                 value={input.subject}
-                onChange={(e) =>
-                  setInput((prev) => ({ ...prev, subject: e.target.value }))
-                }
+                onChange={(e) => setInput((prev) => ({ ...prev, subject: e.target.value }))}
                 placeholder={
                   input.scope === 'per_ip'
                     ? '203.0.113.42'
@@ -232,9 +230,7 @@ export function RateLimitRuleDrawer({
                 disabled={saving}
                 className={clsx(
                   'rounded-md px-3 py-1.5 text-sm font-medium text-white shadow-sm',
-                  saving
-                    ? 'cursor-wait bg-brand-400'
-                    : 'bg-brand-600 hover:bg-brand-700',
+                  saving ? 'cursor-wait bg-brand-400' : 'bg-brand-600 hover:bg-brand-700',
                 )}
               >
                 {labels.save}

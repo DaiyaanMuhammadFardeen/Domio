@@ -30,7 +30,7 @@ export function Map({ layer, dataTestId = 'map-block' }: MapProps): ReactElement
   // projection so the placeholder doesn't look weird near the poles.
   const x = (centerLng + 180) / 360;
   const latRad = (centerLat * Math.PI) / 180;
-  const y = 0.5 - (Math.log(Math.tan(Math.PI / 4 + latRad / 2)) / (2 * Math.PI));
+  const y = 0.5 - Math.log(Math.tan(Math.PI / 4 + latRad / 2)) / (2 * Math.PI);
 
   const grid = useMemo(() => {
     const out: { x: number; y: number }[] = [];
@@ -42,10 +42,7 @@ export function Map({ layer, dataTestId = 'map-block' }: MapProps): ReactElement
   }, []);
 
   return (
-    <div
-      data-testid={dataTestId}
-      style={{ position: 'absolute', inset: 0, background: '#0f172a' }}
-    >
+    <div data-testid={dataTestId} style={{ position: 'absolute', inset: 0, background: '#0f172a' }}>
       <svg
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
@@ -55,7 +52,12 @@ export function Map({ layer, dataTestId = 'map-block' }: MapProps): ReactElement
       >
         <defs>
           <pattern id="map-grid" width="10" height="10" patternUnits="userSpaceOnUse">
-            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(148,163,184,0.18)" strokeWidth="0.3" />
+            <path
+              d="M 10 0 L 0 0 0 10"
+              fill="none"
+              stroke="rgba(148,163,184,0.18)"
+              strokeWidth="0.3"
+            />
           </pattern>
         </defs>
         <rect width="100" height="100" fill="url(#map-grid)" />
@@ -70,9 +72,24 @@ export function Map({ layer, dataTestId = 'map-block' }: MapProps): ReactElement
             strokeWidth="0.2"
           />
         ))}
-        <circle cx={x * 100} cy={y * 100} r={Math.max(1, 6 - safeZoom * 0.3)} fill="#38bdf8" stroke="#0ea5e9" strokeWidth="0.5" />
+        <circle
+          cx={x * 100}
+          cy={y * 100}
+          r={Math.max(1, 6 - safeZoom * 0.3)}
+          fill="#38bdf8"
+          stroke="#0ea5e9"
+          strokeWidth="0.5"
+        />
         {choropleth ? (
-          <rect x="40" y="40" width="20" height="20" fill="rgba(56,189,248,0.3)" stroke="#38bdf8" strokeWidth="0.3" />
+          <rect
+            x="40"
+            y="40"
+            width="20"
+            height="20"
+            fill="rgba(56,189,248,0.3)"
+            stroke="#38bdf8"
+            strokeWidth="0.3"
+          />
         ) : null}
       </svg>
       <div

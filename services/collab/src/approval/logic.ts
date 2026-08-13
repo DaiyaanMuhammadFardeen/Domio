@@ -35,7 +35,11 @@ const VALID_TRANSITIONS: Record<ApprovalRequestStatus, readonly ApprovalRequestS
 export function validateTransition(from: ApprovalRequestStatus, to: ApprovalRequestStatus): void {
   const allowed = VALID_TRANSITIONS[from];
   if (!allowed || !allowed.includes(to)) {
-    throw new InvalidTransitionError(from, to, `Approval transition ${from} → ${to} is not allowed`);
+    throw new InvalidTransitionError(
+      from,
+      to,
+      `Approval transition ${from} → ${to} is not allowed`,
+    );
   }
 }
 
@@ -152,9 +156,7 @@ export function recordApprovalDecisionBody(
  * Note: Full parallel lane logic requires ALL decisions; this is a single-decision
  * shorthand. The service layer calls recomputeStatus with all decisions.
  */
-export function computeStatus(
-  _singleDecision: DecisionValue,
-): ApprovalRequestStatus {
+export function computeStatus(_singleDecision: DecisionValue): ApprovalRequestStatus {
   // This is a placeholder; the service re-computes from all decisions.
   return 'pending';
 }
@@ -186,9 +188,7 @@ export function recomputeStatus(
   // Check if ALL required lanes have approved
   const requiredLanes = request.policy.lanes.filter((l) => l.required);
   if (requiredLanes.length > 0) {
-    const allApproved = requiredLanes.every(
-      (lane) => byLane.get(lane.lane) === 'approved',
-    );
+    const allApproved = requiredLanes.every((lane) => byLane.get(lane.lane) === 'approved');
     if (allApproved) return 'approved';
   }
 
@@ -218,10 +218,7 @@ export function backToDraftBody(
 // SLA escalation
 // ---------------------------------------------------------------------------
 
-export function overdueLanes(
-  request: ApprovalRequest,
-  now: Date,
-): OverdueLane[] {
+export function overdueLanes(request: ApprovalRequest, now: Date): OverdueLane[] {
   if (request.status !== 'pending' || !request.requestedAt) return [];
 
   const overdue: OverdueLane[] = [];
@@ -237,9 +234,8 @@ export function overdueLanes(
       const overdueByMs = nowMs - deadline;
       const overdueByHours = Math.round((overdueByMs / (60 * 60 * 1000)) * 10) / 10;
       // Fallback is next lane's role, or null if last
-      const fallbackRole = i < request.policy.lanes.length - 1
-        ? request.policy.lanes[i + 1]!.role
-        : null;
+      const fallbackRole =
+        i < request.policy.lanes.length - 1 ? request.policy.lanes[i + 1]!.role : null;
 
       overdue.push({
         lane: lane.lane,

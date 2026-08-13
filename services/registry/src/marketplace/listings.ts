@@ -25,7 +25,10 @@ export interface ListingInput {
   preview?: Record<string, unknown>;
 }
 
-export async function createListing(deps: ServiceDeps, input: ListingInput): Promise<MarketplaceListing> {
+export async function createListing(
+  deps: ServiceDeps,
+  input: ListingInput,
+): Promise<MarketplaceListing> {
   const versions = await deps.store.listVersions(input.catalogId);
   if (!versions.length) throw Errors.notFound(`component ${input.catalogId}`);
   const existing = await deps.store.getListingByCatalogId(input.catalogId);
@@ -71,7 +74,8 @@ export async function transitionListing(
   if (to === 'published') {
     const versions = await deps.store.listVersions(listing.catalogId);
     const pkg = versions[versions.length - 1];
-    if (!pkg || pkg.deprecation) throw Errors.validation('Cannot publish: component package is missing or deprecated');
+    if (!pkg || pkg.deprecation)
+      throw Errors.validation('Cannot publish: component package is missing or deprecated');
   }
   const now = nowMs(deps);
   const next: MarketplaceListing = {
@@ -100,7 +104,10 @@ export async function listListings(
   deps: ServiceDeps,
   opts: { status?: ListingStatus; sellerId?: string; limit?: number } = {},
 ): Promise<MarketplaceListing[]> {
-  const listings = await deps.store.listListings({ ...(opts.status ? { status: opts.status } : {}), ...(opts.sellerId ? { sellerId: opts.sellerId } : {}) });
+  const listings = await deps.store.listListings({
+    ...(opts.status ? { status: opts.status } : {}),
+    ...(opts.sellerId ? { sellerId: opts.sellerId } : {}),
+  });
   return listings
     .filter((l) => (opts.status ? l.status === opts.status : l.status !== 'removed'))
     .sort((a, b) => (b.publishedAt ?? b.createdAt) - (a.publishedAt ?? a.createdAt))
@@ -108,7 +115,10 @@ export async function listListings(
 }
 
 /** A removed listing must keep its component installed/renderable (no cascade delete). */
-export async function getPublicListing(deps: ServiceDeps, listingId: string): Promise<MarketplaceListing> {
+export async function getPublicListing(
+  deps: ServiceDeps,
+  listingId: string,
+): Promise<MarketplaceListing> {
   const listing = await deps.store.getListing(listingId);
   if (!listing) throw Errors.notFound(`listing ${listingId}`);
   if (listing.status === 'removed') {

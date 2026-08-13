@@ -11,10 +11,7 @@ import { encode, topicFor } from '@domio/edge-pubsub';
 import { type Poll, PollEngineError, type PollVote, type PollAggregate } from './types.js';
 import { type PollStore, isPollStore, closedError, notFoundError } from './store.js';
 import { type IdempotencyStore, InMemoryIdempotencyStore } from './idempotency/index.js';
-import {
-  type PollAuditEmitter,
-  type PollAuditEvent,
-} from './audit/emit.js';
+import { type PollAuditEmitter, type PollAuditEvent } from './audit/emit.js';
 import { type PollEngineMetrics, NullPollEngineMetrics } from './observability/metrics.js';
 import type { JsonObject } from '@domio/audit-ts';
 
@@ -111,7 +108,12 @@ export class PollEngine {
     if (!current) throw notFoundError(poll_id);
     if (current.status !== 'draft') throw closedError(poll_id);
     const ts = this.now_ms();
-    const next: Poll = { ...current, status: 'open', updated_at_ms: ts, version: current.version + 1 };
+    const next: Poll = {
+      ...current,
+      status: 'open',
+      updated_at_ms: ts,
+      version: current.version + 1,
+    };
     const updated = await this.store.update({ poll_id, expected_version, next });
     await this.emitAudit({
       actor_id,
@@ -137,7 +139,12 @@ export class PollEngine {
     if (!current) throw notFoundError(poll_id);
     if (current.status !== 'open') throw closedError(poll_id);
     const ts = this.now_ms();
-    const next: Poll = { ...current, status: 'closed', updated_at_ms: ts, version: current.version + 1 };
+    const next: Poll = {
+      ...current,
+      status: 'closed',
+      updated_at_ms: ts,
+      version: current.version + 1,
+    };
     const updated = await this.store.update({ poll_id, expected_version, next });
     await this.emitAudit({
       actor_id,
@@ -204,11 +211,17 @@ export class PollEngine {
       after: { option_index: vote.option_index, participant_id: vote.participant_id },
     });
     this.metrics.votes_cast.inc(1, { workspace_id: poll.workspace_id });
-    this.metrics.cast_latency_ms.observe(this.now_ms() - start, { workspace_id: poll.workspace_id });
+    this.metrics.cast_latency_ms.observe(this.now_ms() - start, {
+      workspace_id: poll.workspace_id,
+    });
     await this.bus.publish({
       session_id: poll.session_id,
       topic: 'poll',
-      payload: encode({ kind: 'vote_cast', poll_id: input.poll_id, option_index: vote.option_index }),
+      payload: encode({
+        kind: 'vote_cast',
+        poll_id: input.poll_id,
+        option_index: vote.option_index,
+      }),
     });
     return stored;
   }

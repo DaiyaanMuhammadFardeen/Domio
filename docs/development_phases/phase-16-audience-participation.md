@@ -25,21 +25,21 @@
 
 ### In scope (feature numbers)
 
-| Feature | Description |
-|---|---|
-| #142 | Audience joins via QR on their phones (no app, instant) |
-| #143 | Live polls with real-time result charts on the slide |
-| #144 | Word clouds built live from audience input (two-layer moderation) |
-| #145 | Q&A with upvoting and anonymous submission |
-| #146 | Live quizzes with leaderboards (fair scoring, replay resistance) |
-| #147 | Emoji reactions floating over the presentation in real time |
-| #148 | Audience-driven navigation votes ("what should we cover next?") |
-| #149 | Slider sentiment inputs ("how confident are you in this plan, 1–10?") |
-| #150 | Raise-hand queue for hybrid/remote meetings |
-| #151 | Per-audience-member personalized handout links |
-| #152 | Attendance and engagement capture (hash-chained audit trail) |
-| #153 | Live translation captions of the presenter's voice on audience devices |
-| #154 | Post-session feedback forms with per-slide ratings |
+| Feature | Description                                                            |
+| ------- | ---------------------------------------------------------------------- |
+| #142    | Audience joins via QR on their phones (no app, instant)                |
+| #143    | Live polls with real-time result charts on the slide                   |
+| #144    | Word clouds built live from audience input (two-layer moderation)      |
+| #145    | Q&A with upvoting and anonymous submission                             |
+| #146    | Live quizzes with leaderboards (fair scoring, replay resistance)       |
+| #147    | Emoji reactions floating over the presentation in real time            |
+| #148    | Audience-driven navigation votes ("what should we cover next?")        |
+| #149    | Slider sentiment inputs ("how confident are you in this plan, 1–10?")  |
+| #150    | Raise-hand queue for hybrid/remote meetings                            |
+| #151    | Per-audience-member personalized handout links                         |
+| #152    | Attendance and engagement capture (hash-chained audit trail)           |
+| #153    | Live translation captions of the presenter's voice on audience devices |
+| #154    | Post-session feedback forms with per-slide ratings                     |
 
 ### Out of scope (deferred to later phases)
 
@@ -89,6 +89,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Goal:** Deliver the QR join path and the per-shard participant session service that all other workstreams build on.
 
 **Tasks.**
+
 1. Build `apps/join-web` — the mobile-optimized PWA that boots from `/j/<session_code>`.
 2. Build `services/participant-session` — per-shard stateful service holding session snapshot, participant roster, and active widget state.
 3. Build `services/session-coordinator` — cross-shard queries (session-wide leaderboard, total attendance).
@@ -99,6 +100,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 8. Implement cross-shard fan-out for >5,000 participants per session.
 
 **Files / packages touched.**
+
 - `/apps/join-web/` (new PWA)
 - `/apps/presenter-view/` (consumer; render live widget results on slide)
 - `/services/participant-session/` (new)
@@ -110,19 +112,23 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 - `/packages/ui-kit/` (avatar, toast, presence components reused from P04)
 
 **Contracts added.**
+
 - `contracts/openapi/v1/audience-join.yaml` — `POST /sessions/:code/join`, `POST /sessions/:code/leave`, `GET /sessions/:code/state`.
 - `contracts/proto/domio/v1/audience.proto` — session snapshot, slide changed, widget opened/closed, participant roster delta.
 - `contracts/events/audience/*.json` — JSON schemas for every server→client audience event.
 
 **Contracts consumed.**
+
 - `contracts/proto/domio/v1/session.proto` (P15), `contracts/proto/domio/v1/slide.proto` (P02), `contracts/schema/deck.schema.json` (P02).
 
 **Tests written.**
+
 - Unit: session-code checksum verifier, join-token signer/verifier, re-join dedup, sharding assignment.
 - Integration: join→snapshot→leave lifecycle in `tests/integration/audience/join.test.ts`.
 - Load: 10k concurrent WebSocket join test (k6) sustaining 60 min.
 
 **Definition of Done.**
+
 - A scanned QR produces the participant phone view within 2.5 s p95 on a 4G emulator.
 - Re-scanning the same QR mid-session re-uses the existing `participant_id`.
 - Edge pub/sub sustains 10k connections on one region with sub-3-s p95 fan-out.
@@ -136,27 +142,32 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Goal:** Provide the lifecycle events (session start, end, idle-timeout, presenter-leave) that downstream workstreams hook into for handout, attendance, and feedback flows.
 
 **Tasks.**
+
 1. Add `session_ended` broadcast in `services/participant-session` (triggered by presenter, idle timeout, or coordinator force-end).
 2. Add `session_started` and `session_idle_warning` events.
 3. Implement the session archival job in `workers/session-archiver` — flushes in-memory aggregates to cold storage on session end.
 4. Implement presenter-leave and failover handling — P15 handoff extends to participation state.
 
 **Files / packages touched.**
+
 - `/services/participant-session/lifecycle.ts` (new)
 - `/workers/session-archiver/` (new)
 - `/services/presenter-session/` (P15, consumer)
 - `/contracts/events/session-lifecycle/*.json` (new)
 
 **Contracts added.**
+
 - `session_started`, `session_idle_warning`, `session_ended` events on the session channel.
 
 **Contracts consumed.** P15 presenter session events.
 
 **Tests written.**
+
 - Unit: end-hook idempotency (multiple `session_ended` events → single archival).
 - Integration: session end triggers `handout_ready`, `attendance_finalized`, `feedback_prompt`.
 
 **Definition of Done.**
+
 - Session-end event reliably delivered within 5 s of presenter "End" click.
 - Archival job runs to completion (idempotent on retry).
 - Tests pass.
@@ -169,12 +180,14 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Goal:** Make poll, word cloud, Q&A, quiz, reaction, nav vote, sentiment slider, and raise-hand available as canvas elements that obey the standard WYSIWYG rules.
 
 **Tasks.**
+
 1. Extend `deck.schema.json` with eight `widget_type` entries (`poll`, `word_cloud`, `qa`, `quiz`, `reaction`, `nav_vote`, `sentiment_slider`, `raise_hand`) per `/docs/audience-participation.md` §5.
 2. Add the "Participation" category in the editor widget palette (apps/editor/canvas/widget-palette).
 3. Reuse the existing canvas tooling (drag, snap, theme-bind, auto-layout, constraints, layers panel).
 4. Wire each widget to a runtime config — when dropped, the widget has config defaults (e.g., poll `allow_change: true`, quiz `timer_seconds: 20`).
 
 **Files / packages touched.**
+
 - `/packages/schema/deck.schema.json` (extend)
 - `/apps/editor/canvas/widgets/participation/` (new)
 - `/apps/editor/canvas/widget-palette/` (extend)
@@ -185,11 +198,13 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Contracts consumed.** P02 deck schema, P03 canvas contracts, P07 design-token bindings.
 
 **Tests written.**
+
 - Unit: schema validation for each widget type.
 - Integration: place each widget on a slide, save, reopen, verify shape preserved.
 - Visual regression: widget palette screenshot diff.
 
 **Definition of Done.**
+
 - All eight widget types drop, configure, persist, and re-open cleanly.
 - Schema migration backfills existing decks (zero rows changed for decks without participation widgets).
 
@@ -201,6 +216,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Goal:** Live polls that render on the presenter's slide within 1.5 s p95 of vote cast with strict one-person-one-vote enforcement.
 
 **Tasks.**
+
 1. Build `services/poll-engine` with state machine `draft → open → closed → revealed`.
 2. Implement `poll_vote` write path with `(poll_id, participant_id)` unique constraint and idempotency keys.
 3. Implement aggregate broadcast on a 500 ms debounce (count, percent, per-option breakdown).
@@ -210,6 +226,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 7. Add presenter-side chart renderer in `apps/presenter-view/widgets/poll`.
 
 **Files / packages touched.**
+
 - `/services/poll-engine/` (new)
 - `/apps/presenter-view/widgets/poll/` (new)
 - `/apps/join-web/widgets/poll/` (new)
@@ -217,16 +234,19 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 - `/db/migrations/<ts>_poll_vote.sql` (new)
 
 **Contracts added.**
+
 - `POST /polls/:id/vote`, `POST /polls/:id/retract` (REST).
 - `poll_opened`, `poll_vote_aggregate`, `poll_closed` WebSocket events.
 
 **Tests written.**
+
 - Unit: aggregate math, vote dedup, idempotency, tie handling.
 - Integration: 10k simultaneous votes, aggregate broadcast within 1.5 s.
 - Security: bot flood test (1k votes/s) throttled within 1 s.
 - Fairness: reconnecting participant's prior vote preserved.
 
 **Definition of Done.**
+
 - 1.5 s p95 vote-to-render latency at 10k participants.
 - One-person-one-vote uniqueness holds under concurrency.
 - Bot resistance verified by security test.
@@ -239,6 +259,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Goal:** Two-layer moderation (synchronous blocklist + async ML flag) with a cloud that redraws at most every 1.5 s.
 
 **Tasks.**
+
 1. Build `services/word-cloud-engine` — tokenization, normalization (lowercase, strip punctuation, collapse whitespace), per-slide `word → count` map.
 2. Implement deterministic layout algorithm (Archimedean spiral seeded by `hash(slide_id)`) to prevent jitter.
 3. Implement synchronous blocklist moderation (org-level + deck-level + session-level blocklists; lookup against `services/moderation-blocklist`).
@@ -248,6 +269,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 7. Implement moderator override (presenter hides a word manually).
 
 **Files / packages touched.**
+
 - `/services/word-cloud-engine/` (new)
 - `/services/moderation-blocklist/` (new)
 - `/services/moderation-ml/` (new)
@@ -257,17 +279,20 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 - `/db/migrations/<ts>_word.sql` (new)
 
 **Contracts added.**
+
 - `POST /wordclouds/:id/words` (REST).
 - `word_cloud_opened`, `word_cloud_snapshot` WebSocket events.
 - `moderation.flagged` internal event consumed by presenter.
 
 **Tests written.**
+
 - Unit: tokenization (Unicode/RTL), stop-word removal, layout determinism (same seed → same layout).
 - Integration: 100 submissions/s sustained for 5 min; layout completes within 3 s p95.
 - Security: curated profanity corpus 100% blocked at blocklist layer.
 - Moderation UX: participant sees "thanks — your word is in the cloud" regardless of moderation outcome.
 
 **Definition of Done.**
+
 - 1.5 s p95 re-layout latency at 500 distinct words.
 - Blocklist + ML moderation both verified end-to-end.
 - Per-participant dominance prevented (rate limit + dedup).
@@ -280,6 +305,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Goal:** Persistent Q&A with rank score (upvotes − downvotes + recency), 3-upvote-per-participant cap, and presenter bulk actions.
 
 **Tasks.**
+
 1. Build `services/qa-engine` — CRUD on `qa_item`, `qa_upvote`, state transitions.
 2. Implement rank score formula and ordering (rank index).
 3. Implement per-participant upvote cap (default 3 total).
@@ -290,21 +316,25 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 8. Implement optional pre-moderation queue (configurable per session).
 
 **Files / packages touched.**
+
 - `/services/qa-engine/` (new)
 - `/apps/presenter-view/widgets/qa/` (new)
 - `/apps/join-web/widgets/qa/` (new)
 - `/db/migrations/<ts>_qa.sql` (new)
 
 **Contracts added.**
+
 - `POST /qa/:session_id/questions`, `POST /qa/:question_id/upvote` (REST).
 - `qa_snapshot` WebSocket event.
 
 **Tests written.**
+
 - Unit: rank math, tiebreaker, state transitions.
 - Integration: 1k upvotes/s, ranking recomputed within 200 ms.
 - Security: brigading simulation, cap enforcement.
 
 **Definition of Done.**
+
 - Q&A panel reorders correctly under live voting.
 - Parking-lot auto-population works end-to-end with P15 presenter view.
 - Soft-delete preserves audit trail.
@@ -317,6 +347,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Goal:** Kahoot-grade quiz with reproducible server-authoritative scoring and replay resistance.
 
 **Tasks.**
+
 1. Build `services/quiz-engine` with state machine `idle → countdown → accepting_answers → revealing → leaderboard → next → finished`.
 2. Implement server-clock authoritative scoring: base + time bonus (`max(0, remaining_seconds) × bonus_per_sec`), `response_ms` measured from `question_unlocked`.
 3. Implement anti-cheat: question content gated behind `question_unlocked` event (no client caching), join-time token signs answers.
@@ -326,22 +357,26 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 7. Implement presenter-side leaderboard renderer (top N + participant's own rank).
 
 **Files / packages touched.**
+
 - `/services/quiz-engine/` (new)
 - `/apps/presenter-view/widgets/quiz/` (new)
 - `/apps/join-web/widgets/quiz/` (new)
 - `/db/migrations/<ts>_quiz.sql` (new)
 
 **Contracts added.**
+
 - `POST /quizzes/:id/attempts` (REST, idempotent).
 - `quiz_countdown`, `quiz_question_unlocked`, `quiz_reveal`, `quiz_leaderboard` WebSocket events.
 
 **Tests written.**
+
 - Unit: scoring formula, tiebreaker, late-answer rejection, server-clock authority.
 - Integration: 10k concurrent quiz attempts within a single question window.
 - Fairness: reconnecting participant's final score matches a never-disconnected peer.
 - Anti-cheat: client cannot pre-fetch question content.
 
 **Definition of Done.**
+
 - Leaderboard updates within 1 s p95 of question close.
 - Replay-resistance verified (mid-quiz disconnect → reconnect → identical final score).
 - Quiz scoring is reproducible end-to-end.
@@ -353,12 +388,14 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Sub-owner:** Reactions+Nav+Sentiment+Hand lead (combined — each engine is small and shares the participation platform)
 
 **Tasks.**
+
 1. **Reactions (#147)** — `services/reaction-broadcaster` with per-participant rate limit (1 per 1.5 s), per-emoji buckets, aggregate mode at >500 reactions/s.
 2. **Nav votes (#148)** — `services/nav-vote-collector` (special-case poll engine with deck-state side effects, rolling 30 s connected-average quorum, auto-advance on quorum met, tie nudge, invalidated-when-target-deleted handling).
 3. **Sentiment sliders (#149)** — `services/sentiment-collector` with P²-quantile median, mean, distribution histogram, 500 ms debounced broadcast, rate limit 1 change per 2 s.
 4. **Raise hand (#150)** — `services/raise-hand-queue` with sorted-set keyed by raise timestamp, atomic single-writer "call on next", 5 min auto-lower, F188 meeting-tool promotion hook.
 
 **Files / packages touched.**
+
 - `/services/reaction-broadcaster/` (new)
 - `/services/nav-vote-collector/` (new)
 - `/services/sentiment-collector/` (new)
@@ -368,16 +405,19 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 - `/db/migrations/<ts>_reaction_nav_sentiment_raise.sql` (new)
 
 **Contracts added.**
+
 - `POST /reactions`, `POST /nav_votes/:id/cast`, `POST /sliders/:id/value`, `POST /hands` (REST).
 - `reaction_aggregate`, `nav_vote_opened`, `nav_vote_aggregate`, `nav_vote_resolved`, `slider_aggregate`, `hand_queue_update`, `hand_called` WebSocket events.
 
 **Tests written.**
+
 - Unit: rate-limit math, P²-quantile correctness against t-digest on synthetic data, FIFO ordering, atomic "call on next" (two presenters → one succeeds).
 - Integration: reaction flood 500/s for 10 min, nav vote churn simulation.
 - Fairness: quorum denominator smoothing under 30 %/min churn.
 - Accessibility: aria-live polite on participant phone only.
 
 **Definition of Done.**
+
 - All four engines under target latencies (reaction broadcast 250 ms, slider 1.5 s p95, raise-hand queue update < 200 ms, nav-vote resolution on quorum).
 - P²-quantile matches t-digest within 1 % error on 10⁵ samples.
 - Atomic raise-hand verified by concurrent-presenter test.
@@ -390,12 +430,14 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Goal:** Session-end personalization, compliance-grade audit, live translation, and post-session feedback.
 
 **Tasks.**
+
 1. **Handouts (#151)** — `workers/handout-generator` reads from session data lake on `session_ended`, builds per-participant artifacts (deck PDF + personalized annotations + attached resources), signs URLs with HMAC (TTL default 30 days), dispatches via email + in-app + share-link; supports revocation (`revoked_at` set) and legal-hold suspension.
 2. **Attendance logger (#152)** — `services/attendance-logger` writes append-only, hash-chained records (`record_hash` references `prev_hash`), emits SCORM 2004 (4th Ed) packages, enforces retention (default 7 years, configurable down to 30 days), honors legal hold.
 3. **Translation pipeline (#153)** — `services/translation-pipeline` with streaming STT (~2 s audio chunks, partial captions word-by-word), MT to participant's target language, optional TTS playback, moderation hook (blocklist + PII masking), graceful degradation to source-language captions. 12 launch languages (en, bn, hi, ar, es, fr, zh, pt, ru, ja, ko, de).
 4. **Feedback collector (#154)** — `services/feedback-collector` renders NPS + per-slide 1–5 stars + free-text; prefilled by engagement heuristics; moderated through the W5 pipeline; aggregated to presenter recap; defaults to anonymous binding.
 
 **Files / packages touched.**
+
 - `/workers/handout-generator/` (new)
 - `/services/attendance-logger/` (new)
 - `/services/translation-pipeline/` (new — stages: STT → moderation → MT → optional TTS)
@@ -409,6 +451,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 - `/db/migrations/<ts>_handout_attendance_translation_feedback.sql` (new)
 
 **Contracts added.**
+
 - `GET /handouts/:signed_token` (REST).
 - `POST /feedback/:session_id` (REST).
 - `translation_caption`, `session_ended`, `handout_ready` WebSocket events.
@@ -416,6 +459,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 **Contracts consumed.** All participation event emitters; P14 publish pipeline for handout URL signing.
 
 **Tests written.**
+
 - Unit: HMAC handout signing, hash-chain verification (any tampered record invalidates the chain), SCORM package structure (imsmanifest.xml, imsxml.xml, ADL CP/SCORM conformance), PII masking regex, NPS aggregation, free-text moderation.
 - Integration: end-to-end handout generation within 60 s of session end for 1k participants.
 - Performance: translation end-to-end p95 < 4 s on a 2 s audio chunk.
@@ -423,6 +467,7 @@ The phase is split into nine ordered workstreams. Each has a sub-owner, files/pa
 - Fairness: legal-hold suspension test (no handout link emitted).
 
 **Definition of Done.**
+
 - Handout generated within 60 s of session end for 10k participants.
 - Hash chain verified on synthetic tampering.
 - Translation reaches participant phone in < 4 s p95 with all 12 launch languages.
@@ -437,42 +482,42 @@ This phase introduces twelve new services, two new worker packages, two new mobi
 
 ### New services
 
-| Service | Responsibility | Owns |
-|---|---|---|
-| `services/participant-session` | Per-shard stateful session host | in-memory roster + active widgets |
-| `services/session-coordinator` | Cross-shard queries | session-wide leaderboard, totals |
-| `services/edge-pubsub` | Edge fan-out | WebSocket subscribers |
-| `services/participant-ws-gateway` | WebSocket edge | per-connection backpressure |
-| `services/poll-engine` | Poll state + aggregates | `poll`, `poll_vote` |
-| `services/word-cloud-engine` | Cloud + moderation orchestration | `word` |
-| `services/moderation-blocklist` | Sync blocklist lookup | blocklist cache |
-| `services/moderation-ml` | Async ML text classification | flagged-words queue |
-| `services/qa-engine` | Q&A CRUD + ranking | `qa_item`, `qa_upvote` |
-| `services/quiz-engine` | Quiz state machine + scoring | `quiz_question`, `quiz_attempt` |
-| `services/reaction-broadcaster` | Reaction rate-limit + aggregate | `reaction` |
-| `services/nav-vote-collector` | Quorum + auto-advance | `nav_vote` |
-| `services/sentiment-collector` | P²-quantile aggregation | `sentiment_input` |
-| `services/raise-hand-queue` | FIFO queue | `raise_hand` |
-| `services/attendance-logger` | Hash-chained audit | `attendance_record` |
-| `services/translation-pipeline` | STT → MT → TTS | `translation_request` |
-| `services/feedback-collector` | NPS + per-slide + free-text | `feedback_response` |
+| Service                           | Responsibility                   | Owns                              |
+| --------------------------------- | -------------------------------- | --------------------------------- |
+| `services/participant-session`    | Per-shard stateful session host  | in-memory roster + active widgets |
+| `services/session-coordinator`    | Cross-shard queries              | session-wide leaderboard, totals  |
+| `services/edge-pubsub`            | Edge fan-out                     | WebSocket subscribers             |
+| `services/participant-ws-gateway` | WebSocket edge                   | per-connection backpressure       |
+| `services/poll-engine`            | Poll state + aggregates          | `poll`, `poll_vote`               |
+| `services/word-cloud-engine`      | Cloud + moderation orchestration | `word`                            |
+| `services/moderation-blocklist`   | Sync blocklist lookup            | blocklist cache                   |
+| `services/moderation-ml`          | Async ML text classification     | flagged-words queue               |
+| `services/qa-engine`              | Q&A CRUD + ranking               | `qa_item`, `qa_upvote`            |
+| `services/quiz-engine`            | Quiz state machine + scoring     | `quiz_question`, `quiz_attempt`   |
+| `services/reaction-broadcaster`   | Reaction rate-limit + aggregate  | `reaction`                        |
+| `services/nav-vote-collector`     | Quorum + auto-advance            | `nav_vote`                        |
+| `services/sentiment-collector`    | P²-quantile aggregation          | `sentiment_input`                 |
+| `services/raise-hand-queue`       | FIFO queue                       | `raise_hand`                      |
+| `services/attendance-logger`      | Hash-chained audit               | `attendance_record`               |
+| `services/translation-pipeline`   | STT → MT → TTS                   | `translation_request`             |
+| `services/feedback-collector`     | NPS + per-slide + free-text      | `feedback_response`               |
 
 ### New workers
 
-| Worker | Triggered by | Purpose |
-|---|---|---|
-| `workers/session-archiver` | `session_ended` | flush in-memory aggregates → cold store |
-| `workers/handout-generator` | `session_ended` | build per-participant artifacts, sign URLs |
-| `workers/scorm-packager` | `session_ended` | emit SCORM 2004 (4th Ed) packages |
-| `workers/moderation-flagger` | 5 s loop | async ML scan of pending words / feedback |
+| Worker                       | Triggered by    | Purpose                                    |
+| ---------------------------- | --------------- | ------------------------------------------ |
+| `workers/session-archiver`   | `session_ended` | flush in-memory aggregates → cold store    |
+| `workers/handout-generator`  | `session_ended` | build per-participant artifacts, sign URLs |
+| `workers/scorm-packager`     | `session_ended` | emit SCORM 2004 (4th Ed) packages          |
+| `workers/moderation-flagger` | 5 s loop        | async ML scan of pending words / feedback  |
 
 ### New apps
 
-| App | Type | Purpose |
-|---|---|---|
-| `apps/join-web` | Mobile-first PWA | participant surface (boot from `/j/<code>`) |
-| `apps/join-web/handout-viewer` | Sub-route of `apps/join-web` | renders `/h/<signed_token>` |
-| `apps/join-web/feedback-form` | Sub-route of `apps/join-web` | renders post-session feedback |
+| App                            | Type                         | Purpose                                     |
+| ------------------------------ | ---------------------------- | ------------------------------------------- |
+| `apps/join-web`                | Mobile-first PWA             | participant surface (boot from `/j/<code>`) |
+| `apps/join-web/handout-viewer` | Sub-route of `apps/join-web` | renders `/h/<signed_token>`                 |
+| `apps/join-web/feedback-form`  | Sub-route of `apps/join-web` | renders post-session feedback               |
 
 ### New tables (Postgres, consolidated into three migration files)
 
@@ -481,6 +526,7 @@ This phase introduces twelve new services, two new worker packages, two new mobi
 - **`<ts>_participation_closeout.sql`**: `handout_link`, `attendance_record`, `translation_request`, `feedback_response`.
 
 Detailed DDL is in `/docs/audience-participation.md` §5 (verbatim — `participant`, `session_membership`, `poll`, `poll_vote`, `word`, `qa_item`, `qa_upvote`, `quiz_question`, `quiz_attempt`, `reaction`, `nav_vote`, `sentiment_input`, `raise_hand`, `handout_link`, `attendance_record`, `translation_request`, `feedback_response`). Key columns to call out:
+
 - `participant.join_token` — HMAC over `session_id + participant_id + TTL`; used for re-join dedup.
 - `poll_vote.idempotency_key` — UNIQUE (`poll_id`, `idempotency_key`) for safe retries.
 - `quiz_attempt.response_ms` — measured from `question_unlocked` server time; the source of truth for scoring.
@@ -513,61 +559,61 @@ Detailed DDL is in `/docs/audience-participation.md` §5 (verbatim — `particip
 
 ## 6. Verification matrix
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #142 join | 1k phones scan QR concurrently from 4G emulator | Median first-render 1.8 s, p95 < 2.5 s | Join lead |
-| #142 join | Same QR re-scanned mid-session | Same `participant_id` returned; no new row | Join lead |
-| #142 join | 10k sustained WebSocket connections, 60 min | No disconnects beyond 0.5 % over 60 min | Join lead |
-| #143 poll | 10k simultaneous votes on one poll | Aggregate broadcast within 1.5 s p95 | Polls lead |
-| #143 poll | Same participant votes twice (allow_change=false) | Second rejected with 409 `already_voted` | Polls lead |
-| #143 poll | Bot fires 1k votes/s from one IP | Throttled within 1 s; CAPTCHA enforced | Polls lead |
-| #144 word cloud | 100 submissions/s sustained for 5 min | Layout completes within 1.5 s; cloud never blocks | WC lead |
-| #144 word cloud | Curated profanity corpus submitted | 100 % blocked at blocklist layer; UI shows "thanks" | WC lead |
-| #144 word cloud | Same participant submits same word 10× in 1 min | Only first counts; subsequent deduped | WC lead |
-| #145 Q&A | 1k upvotes/s on a single session | Re-ranking within 200 ms | Q&A lead |
-| #145 Q&A | Single participant exceeds 3 upvotes | Cap enforced; 403 returned | Q&A lead |
-| #146 quiz | 10k participants answer same question in 20 s window | All attempts recorded; late answers rejected; no duplicate scoring | Quiz lead |
-| #146 quiz | Participant disconnects mid-quiz, reconnects 10 s later | Resumes at current question; prior answers preserved; final score = never-disconnected peer | Quiz lead |
-| #147 reactions | 500 reactions/s sustained for 10 min | Aggregate broadcast every 250 ms; no per-event fan-out beyond capacity | Reactions lead |
-| #147 reactions | Single participant fires 10 reactions in 1 s | Rate-limited; only 1 (per 1.5 s) accepted | Reactions lead |
-| #148 nav vote | 30 %/min churn during an open nav vote | Quorum denominator smoothed; no wild swing | Nav lead |
-| #148 nav vote | Winning option's target slide deleted mid-vote | Vote `invalidated`; presenter notified | Nav lead |
-| #149 slider | 10k participants drag sliders concurrently | Aggregate broadcast within 1.5 s p95 | Sentiment lead |
-| #149 slider | Median computed at 10⁵ samples vs t-digest baseline | Error < 1 % | Sentiment lead |
-| #150 hand | Two co-presenter tabs click "call on next" simultaneously | Only one succeeds; other gets `already_promoted` | Hand lead |
-| #150 hand | Hand idle 5 min | Auto-lowered; reason logged | Hand lead |
-| #151 handout | 10k-participant session ends | All handouts generated within 60 s; URLs signed; email dispatched | Closeout lead |
-| #151 handout | Presenter revokes all handouts | All `handout_link.revoked_at` set; `GET /handouts/:token` returns 410 | Closeout lead |
-| #152 attendance | Synthetic tampering of one `attendance_record` row | Chain verification fails; alert raised | Closeout lead |
-| #152 attendance | 10k-participant session exported as SCORM 2004 (4th Ed) | Package passes ADL conformance test | Closeout lead |
-| #153 translation | 10-min live presentation in English with 1k participants split across 12 languages | End-to-end caption < 4 s p95 per language | Translation lead |
-| #153 translation | MT provider down for `bn-BD` | Falls back to source-language caption with clear notice | Translation lead |
-| #154 feedback | NPS from 10k participants post-session | Aggregated NPS computed; per-slide mean computed | Feedback lead |
-| #154 feedback | Free-text with PII submitted | PII masked before presenter sees aggregate | Feedback lead |
-| Cross-cutting | axe-core scan of every `apps/join-web` route | 0 critical violations | a11y reviewer |
-| Cross-cutting | Manual screen-reader (VoiceOver, TalkBack) pass on join, poll, Q&A, quiz, hand | All flows keyboard-operable, ARIA-live where expected | a11y reviewer |
-| Security | Penetration test: forge participant_token | All forged tokens rejected | Security reviewer |
-| Compliance | PDPA right-to-erasure request | `participant` and `handout_link` soft-deleted; audit log preserved per retention | Compliance reviewer |
-| Scale | **1,000-participant internal load test** — single session, 60 min, all 13 features active, mixed region latency | All latency targets met; no engine OOMs; reaction/nav/quiz/poll/handout all OK | SRE lead |
+| Feature          | Test                                                                                                            | Expected result                                                                             | Owner               |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------- |
+| #142 join        | 1k phones scan QR concurrently from 4G emulator                                                                 | Median first-render 1.8 s, p95 < 2.5 s                                                      | Join lead           |
+| #142 join        | Same QR re-scanned mid-session                                                                                  | Same `participant_id` returned; no new row                                                  | Join lead           |
+| #142 join        | 10k sustained WebSocket connections, 60 min                                                                     | No disconnects beyond 0.5 % over 60 min                                                     | Join lead           |
+| #143 poll        | 10k simultaneous votes on one poll                                                                              | Aggregate broadcast within 1.5 s p95                                                        | Polls lead          |
+| #143 poll        | Same participant votes twice (allow_change=false)                                                               | Second rejected with 409 `already_voted`                                                    | Polls lead          |
+| #143 poll        | Bot fires 1k votes/s from one IP                                                                                | Throttled within 1 s; CAPTCHA enforced                                                      | Polls lead          |
+| #144 word cloud  | 100 submissions/s sustained for 5 min                                                                           | Layout completes within 1.5 s; cloud never blocks                                           | WC lead             |
+| #144 word cloud  | Curated profanity corpus submitted                                                                              | 100 % blocked at blocklist layer; UI shows "thanks"                                         | WC lead             |
+| #144 word cloud  | Same participant submits same word 10× in 1 min                                                                 | Only first counts; subsequent deduped                                                       | WC lead             |
+| #145 Q&A         | 1k upvotes/s on a single session                                                                                | Re-ranking within 200 ms                                                                    | Q&A lead            |
+| #145 Q&A         | Single participant exceeds 3 upvotes                                                                            | Cap enforced; 403 returned                                                                  | Q&A lead            |
+| #146 quiz        | 10k participants answer same question in 20 s window                                                            | All attempts recorded; late answers rejected; no duplicate scoring                          | Quiz lead           |
+| #146 quiz        | Participant disconnects mid-quiz, reconnects 10 s later                                                         | Resumes at current question; prior answers preserved; final score = never-disconnected peer | Quiz lead           |
+| #147 reactions   | 500 reactions/s sustained for 10 min                                                                            | Aggregate broadcast every 250 ms; no per-event fan-out beyond capacity                      | Reactions lead      |
+| #147 reactions   | Single participant fires 10 reactions in 1 s                                                                    | Rate-limited; only 1 (per 1.5 s) accepted                                                   | Reactions lead      |
+| #148 nav vote    | 30 %/min churn during an open nav vote                                                                          | Quorum denominator smoothed; no wild swing                                                  | Nav lead            |
+| #148 nav vote    | Winning option's target slide deleted mid-vote                                                                  | Vote `invalidated`; presenter notified                                                      | Nav lead            |
+| #149 slider      | 10k participants drag sliders concurrently                                                                      | Aggregate broadcast within 1.5 s p95                                                        | Sentiment lead      |
+| #149 slider      | Median computed at 10⁵ samples vs t-digest baseline                                                             | Error < 1 %                                                                                 | Sentiment lead      |
+| #150 hand        | Two co-presenter tabs click "call on next" simultaneously                                                       | Only one succeeds; other gets `already_promoted`                                            | Hand lead           |
+| #150 hand        | Hand idle 5 min                                                                                                 | Auto-lowered; reason logged                                                                 | Hand lead           |
+| #151 handout     | 10k-participant session ends                                                                                    | All handouts generated within 60 s; URLs signed; email dispatched                           | Closeout lead       |
+| #151 handout     | Presenter revokes all handouts                                                                                  | All `handout_link.revoked_at` set; `GET /handouts/:token` returns 410                       | Closeout lead       |
+| #152 attendance  | Synthetic tampering of one `attendance_record` row                                                              | Chain verification fails; alert raised                                                      | Closeout lead       |
+| #152 attendance  | 10k-participant session exported as SCORM 2004 (4th Ed)                                                         | Package passes ADL conformance test                                                         | Closeout lead       |
+| #153 translation | 10-min live presentation in English with 1k participants split across 12 languages                              | End-to-end caption < 4 s p95 per language                                                   | Translation lead    |
+| #153 translation | MT provider down for `bn-BD`                                                                                    | Falls back to source-language caption with clear notice                                     | Translation lead    |
+| #154 feedback    | NPS from 10k participants post-session                                                                          | Aggregated NPS computed; per-slide mean computed                                            | Feedback lead       |
+| #154 feedback    | Free-text with PII submitted                                                                                    | PII masked before presenter sees aggregate                                                  | Feedback lead       |
+| Cross-cutting    | axe-core scan of every `apps/join-web` route                                                                    | 0 critical violations                                                                       | a11y reviewer       |
+| Cross-cutting    | Manual screen-reader (VoiceOver, TalkBack) pass on join, poll, Q&A, quiz, hand                                  | All flows keyboard-operable, ARIA-live where expected                                       | a11y reviewer       |
+| Security         | Penetration test: forge participant_token                                                                       | All forged tokens rejected                                                                  | Security reviewer   |
+| Compliance       | PDPA right-to-erasure request                                                                                   | `participant` and `handout_link` soft-deleted; audit log preserved per retention            | Compliance reviewer |
+| Scale            | **1,000-participant internal load test** — single session, 60 min, all 13 features active, mixed region latency | All latency targets met; no engine OOMs; reaction/nav/quiz/poll/handout all OK              | SRE lead            |
 
 ---
 
 ## 7. Risks & open decisions
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Edge pub/sub provider choice (managed vs NATS+edge) is hard to reverse | Med | High | Spikes in W1 to evaluate both on 10k sustained; pick before W2 lands. Decision owner: Tech lead. |
-| Hash-chain audit may become a bottleneck at 10k participants / session | Low | High | Hash-chain computed in a worker (not on the request path); batched per session shard. Profile in W9. |
-| 4-s p95 translation latency is tight; STT+MT providers have variable p95 | Med | Med | Per-language-pair SLA test against provider; fall back to source-language captions if MT provider fails the SLO. |
-| Bot-resistance CAPTCHAs may add 800 ms+ to first vote on weak networks | Med | Med | Use Turnstile invisible challenge (not visible); cache the challenge token for the session; provide "code entry" fallback for CAPTCHA-denied users. |
-| Anonymous vs identified mode boundary is fuzzy if a participant toggles mid-session | Med | Med | Identity switch recorded as `participant_state_changed`; old/new linked by stable `participant_id`; handout auto-switches to anonymous for that participant. |
-| Personalized handout email dispatch at 10k participants may hit SES rate limits | Med | Med | Bucket dispatch across providers (SES + SendGrid fallback); exponential backoff; bounce handling per `/docs/audience-participation.md` §7.3. |
-| PDPA 2026 enforcement activates mid-development | Med | Med | Anonymous-by-default is already aligned; identified-mode opt-in path is explicit; right-to-erasure endpoint shipped in W9. Re-verify compliance at every minor release. |
-| PII in STT output (emails, phones) — masking regex is brittle | Med | Med | Blocklist + a small NER model on the moderation path; presenter sees masked; raw accessible only to authorized roles. |
-| 5,000-shard-split boundary may cause cross-shard race in leaderboard | Low | High | Session coordinator is the single writer for cross-shard aggregates; shard-local aggregates remain authoritative. |
-| SCORM 2004 4th Ed compliance drift — ADL updates the spec | Low | Med | Pin ADL SCORM 2004 (4th Ed) version in `contracts/scorm/2004-4ed/`; re-test on ADL conformance suite at every package update. |
-| Co-presenter "call on next" atomicity under split-brain | Low | High | Single-writer rule on the session primary; co-presenters route through the coordinator; if two writers both succeed, the participant is told they're already promoted. |
-| Word cloud layout determinism under cross-platform font metrics | Med | Low | Seed layout with `hash(slide_id)`; renderer re-derives positions locally; first frame after layout may show empty tiles briefly, then animate in. |
+| Risk                                                                                | Likelihood | Impact | Mitigation                                                                                                                                                              |
+| ----------------------------------------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Edge pub/sub provider choice (managed vs NATS+edge) is hard to reverse              | Med        | High   | Spikes in W1 to evaluate both on 10k sustained; pick before W2 lands. Decision owner: Tech lead.                                                                        |
+| Hash-chain audit may become a bottleneck at 10k participants / session              | Low        | High   | Hash-chain computed in a worker (not on the request path); batched per session shard. Profile in W9.                                                                    |
+| 4-s p95 translation latency is tight; STT+MT providers have variable p95            | Med        | Med    | Per-language-pair SLA test against provider; fall back to source-language captions if MT provider fails the SLO.                                                        |
+| Bot-resistance CAPTCHAs may add 800 ms+ to first vote on weak networks              | Med        | Med    | Use Turnstile invisible challenge (not visible); cache the challenge token for the session; provide "code entry" fallback for CAPTCHA-denied users.                     |
+| Anonymous vs identified mode boundary is fuzzy if a participant toggles mid-session | Med        | Med    | Identity switch recorded as `participant_state_changed`; old/new linked by stable `participant_id`; handout auto-switches to anonymous for that participant.            |
+| Personalized handout email dispatch at 10k participants may hit SES rate limits     | Med        | Med    | Bucket dispatch across providers (SES + SendGrid fallback); exponential backoff; bounce handling per `/docs/audience-participation.md` §7.3.                            |
+| PDPA 2026 enforcement activates mid-development                                     | Med        | Med    | Anonymous-by-default is already aligned; identified-mode opt-in path is explicit; right-to-erasure endpoint shipped in W9. Re-verify compliance at every minor release. |
+| PII in STT output (emails, phones) — masking regex is brittle                       | Med        | Med    | Blocklist + a small NER model on the moderation path; presenter sees masked; raw accessible only to authorized roles.                                                   |
+| 5,000-shard-split boundary may cause cross-shard race in leaderboard                | Low        | High   | Session coordinator is the single writer for cross-shard aggregates; shard-local aggregates remain authoritative.                                                       |
+| SCORM 2004 4th Ed compliance drift — ADL updates the spec                           | Low        | Med    | Pin ADL SCORM 2004 (4th Ed) version in `contracts/scorm/2004-4ed/`; re-test on ADL conformance suite at every package update.                                           |
+| Co-presenter "call on next" atomicity under split-brain                             | Low        | High   | Single-writer rule on the session primary; co-presenters route through the coordinator; if two writers both succeed, the participant is told they're already promoted.  |
+| Word cloud layout determinism under cross-platform font metrics                     | Med        | Low    | Seed layout with `hash(slide_id)`; renderer re-derives positions locally; first frame after layout may show empty tiles briefly, then animate in.                       |
 
 Open decisions (with proposed default):
 
@@ -583,6 +629,7 @@ Open decisions (with proposed default):
 The internal demo proves all thirteen features end-to-end on a single 1000-participant load test. Demo script:
 
 **Pre-demo (T-30 min).**
+
 1. Reset staging; deploy `phase-16-internal` tag to all services in `apac`, `eu`, `us` regions.
 2. Seed three decks:
    - "All-hands" (12 slides, all 8 widget types placed, English source language).
@@ -594,23 +641,23 @@ The internal demo proves all thirteen features end-to-end on a single 1000-parti
 
 **Live demo script (T-0).**
 
-| T+ | Action | What we watch |
-|---|---|---|
-| 0:00 | Alice clicks "Start session" on All-hands deck | 1000 participants join: median 1.8 s, p95 2.3 s |
-| 0:30 | Alice advances to slide 3 (live poll: "Which region are you in?") | Vote aggregate bar renders in 1.2 s on Alice's slide |
-| 1:00 | Slide 4 (word cloud: "one word for Q3") | Cloud re-lays every 1.3 s; profanity masked in presenter view |
-| 2:00 | Slide 5 (quiz, 3 questions, 20 s timer) | Leaderboard updates within 800 ms of each question close; final scores reproducible across two reconnect tests |
-| 4:00 | Slide 6 (raise-hand demo); Bob also clicks "call on next" simultaneously | Atomic — only one promotion succeeds; the other participant notified "already promoted" |
-| 5:00 | Slide 7 (sentiment slider: "Confidence in plan, 1–10") | Mean / median / histogram update every 500 ms; P²-quantile matches t-digest within 0.6 % |
-| 6:00 | Slide 8 (emoji reactions + reactions burst) | Per-participant rate limit honored; aggregate mode kicks in at 500/s |
-| 7:00 | Slide 9 (nav vote: "Deep-dive on EMEA or APAC?") | Quorum met at 32 % of 30-s rolling connected; auto-advances to APAC deep-dive |
-| 8:00 | Slide 11 (Q&A: live Q&A panel + upvotes) | Top question ranks correctly under burst upvoting |
-| 9:00 | Translation demo: 30 participants switch language each round | Captions appear in their chosen language within 3.5 s p95 |
-| 10:00 | Alice ends the session | `session_ended` event within 1 s; handouts generated for all 1000 within 55 s; emails dispatched; feedback prompts appear in join-web |
-| 11:00 | Trainer session: verify SCORM 2004 (4th Ed) package generation | ADL test suite passes |
-| 12:00 | Open presenter recap | Attendance + engagement + poll/quiz/sentiment aggregates visible; identified-mode participation bound to verified identity |
-| 13:00 | Compliance check: presenter attempts to mutate a `attendance_record` row | Blocked at role level; chain verification holds |
-| 14:00 | Handout revocation: Alice revokes all handouts | All `handout_link.revoked_at` set; `GET /handouts/:token` returns 410 |
+| T+    | Action                                                                   | What we watch                                                                                                                         |
+| ----- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 0:00  | Alice clicks "Start session" on All-hands deck                           | 1000 participants join: median 1.8 s, p95 2.3 s                                                                                       |
+| 0:30  | Alice advances to slide 3 (live poll: "Which region are you in?")        | Vote aggregate bar renders in 1.2 s on Alice's slide                                                                                  |
+| 1:00  | Slide 4 (word cloud: "one word for Q3")                                  | Cloud re-lays every 1.3 s; profanity masked in presenter view                                                                         |
+| 2:00  | Slide 5 (quiz, 3 questions, 20 s timer)                                  | Leaderboard updates within 800 ms of each question close; final scores reproducible across two reconnect tests                        |
+| 4:00  | Slide 6 (raise-hand demo); Bob also clicks "call on next" simultaneously | Atomic — only one promotion succeeds; the other participant notified "already promoted"                                               |
+| 5:00  | Slide 7 (sentiment slider: "Confidence in plan, 1–10")                   | Mean / median / histogram update every 500 ms; P²-quantile matches t-digest within 0.6 %                                              |
+| 6:00  | Slide 8 (emoji reactions + reactions burst)                              | Per-participant rate limit honored; aggregate mode kicks in at 500/s                                                                  |
+| 7:00  | Slide 9 (nav vote: "Deep-dive on EMEA or APAC?")                         | Quorum met at 32 % of 30-s rolling connected; auto-advances to APAC deep-dive                                                         |
+| 8:00  | Slide 11 (Q&A: live Q&A panel + upvotes)                                 | Top question ranks correctly under burst upvoting                                                                                     |
+| 9:00  | Translation demo: 30 participants switch language each round             | Captions appear in their chosen language within 3.5 s p95                                                                             |
+| 10:00 | Alice ends the session                                                   | `session_ended` event within 1 s; handouts generated for all 1000 within 55 s; emails dispatched; feedback prompts appear in join-web |
+| 11:00 | Trainer session: verify SCORM 2004 (4th Ed) package generation           | ADL test suite passes                                                                                                                 |
+| 12:00 | Open presenter recap                                                     | Attendance + engagement + poll/quiz/sentiment aggregates visible; identified-mode participation bound to verified identity            |
+| 13:00 | Compliance check: presenter attempts to mutate a `attendance_record` row | Blocked at role level; chain verification holds                                                                                       |
+| 14:00 | Handout revocation: Alice revokes all handouts                           | All `handout_link.revoked_at` set; `GET /handouts/:token` returns 410                                                                 |
 
 **Pass criteria for "internal demo passed":**
 
@@ -649,37 +696,37 @@ of Phase 16 work, end-to-end across every milestone.
 
 ### 10.1 Migrations
 
-| # | File                                                  | Tables                                                                                       |
-|---|-------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| 0055 | `0055_participation_session.{up,down}.sql`            | `participant`, `session_membership`                                                          |
-| 0056 | `0056_participation_widgets.{up,down}.sql`            | 11 widget tables + `widget_engagement_counter`                                               |
-| 0057 | `0057_participation_closeout.{up,down}.sql`           | `handout_link`, `attendance_record` (+ chain trigger), `translation_request`, `feedback_response`, `recap_feedback_aggregation` |
+| #    | File                                        | Tables                                                                                                                          |
+| ---- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 0055 | `0055_participation_session.{up,down}.sql`  | `participant`, `session_membership`                                                                                             |
+| 0056 | `0056_participation_widgets.{up,down}.sql`  | 11 widget tables + `widget_engagement_counter`                                                                                  |
+| 0057 | `0057_participation_closeout.{up,down}.sql` | `handout_link`, `attendance_record` (+ chain trigger), `translation_request`, `feedback_response`, `recap_feedback_aggregation` |
 
 Every table carries a `{table}_workspace_isolation` RLS policy keyed on
 `current_setting('app.workspace_id', true)::uuid`.
 
 ### 10.2 Services & workers
 
-| Package                                              | Kind     | Tests |
-|------------------------------------------------------|----------|-------|
-| `@domio/poll-engine`                                 | service  | 6/6   |
-| `@domio/word-cloud-engine`                           | service  | 6/6   |
-| `@domio/qa-engine`                                   | service  | 6/6   |
-| `@domio/quiz-engine`                                 | service  | 6/6   |
-| `@domio/reaction-broadcaster`                        | service  | 4/4   |
-| `@domio/nav-vote-collector`                          | service  | 2/2   |
-| `@domio/sentiment-collector`                         | service  | 2/2   |
-| `@domio/raise-hand-queue`                            | service  | 5/5   |
-| `@domio/moderation-blocklist`                        | service  | 5/5   |
-| `@domio/moderation-ml`                               | service  | 4/4   |
-| `@domio/attendance-logger`                           | service  | 5/5   |
-| `@domio/translation-pipeline`                        | service  | 2/2   |
-| `@domio/stt-provider` / `mt-provider` / `tts-provider` | service  | 1/1 each |
-| `@domio/feedback-collector`                          | service  | 3/3   |
-| `@domio/session-archiver`                            | worker   | —     |
-| `@domio/handout-generator`                           | worker   | 4/4   |
-| `@domio/scorm-packager`                              | worker   | 2/2   |
-| `@domio/moderation-flagger`                          | worker   | 2/2   |
+| Package                                                | Kind    | Tests    |
+| ------------------------------------------------------ | ------- | -------- |
+| `@domio/poll-engine`                                   | service | 6/6      |
+| `@domio/word-cloud-engine`                             | service | 6/6      |
+| `@domio/qa-engine`                                     | service | 6/6      |
+| `@domio/quiz-engine`                                   | service | 6/6      |
+| `@domio/reaction-broadcaster`                          | service | 4/4      |
+| `@domio/nav-vote-collector`                            | service | 2/2      |
+| `@domio/sentiment-collector`                           | service | 2/2      |
+| `@domio/raise-hand-queue`                              | service | 5/5      |
+| `@domio/moderation-blocklist`                          | service | 5/5      |
+| `@domio/moderation-ml`                                 | service | 4/4      |
+| `@domio/attendance-logger`                             | service | 5/5      |
+| `@domio/translation-pipeline`                          | service | 2/2      |
+| `@domio/stt-provider` / `mt-provider` / `tts-provider` | service | 1/1 each |
+| `@domio/feedback-collector`                            | service | 3/3      |
+| `@domio/session-archiver`                              | worker  | —        |
+| `@domio/handout-generator`                             | worker  | 4/4      |
+| `@domio/scorm-packager`                                | worker  | 2/2      |
+| `@domio/moderation-flagger`                            | worker  | 2/2      |
 
 All services follow the canonical TS skeleton (`types`, `service`,
 `handlers`, `store/{store,mem_store,pg_store}`, `audit/{emit,key}`,

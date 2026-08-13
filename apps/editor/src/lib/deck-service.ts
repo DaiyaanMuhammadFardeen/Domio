@@ -67,11 +67,8 @@ export interface FetchDeckListResult {
   readonly live: boolean;
 }
 
-export async function fetchDeckList(
-  workspaceId: string,
-): Promise<FetchDeckListResult> {
-  const apiBase =
-    process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:8080';
+export async function fetchDeckList(workspaceId: string): Promise<FetchDeckListResult> {
+  const apiBase = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:8080';
   const url = new URL('/v1/decks', apiBase);
   url.searchParams.set('workspace_id', workspaceId);
 
@@ -89,10 +86,7 @@ export async function fetchDeckList(
         id: String(r['id'] ?? ''),
         title: String(r['title'] ?? 'Untitled deck'),
         thumbnail: r['thumbnail'] ? String(r['thumbnail']) : null,
-        updatedAt:
-          typeof r['updated_at'] === 'number'
-            ? (r['updated_at'] as number)
-            : null,
+        updatedAt: typeof r['updated_at'] === 'number' ? (r['updated_at'] as number) : null,
       }))
       .filter((d) => d.id.length > 0);
     if (!decks.some((d) => d.id === DEMO_DECK.id)) {

@@ -90,15 +90,11 @@ describe('validateSignup', () => {
   });
 
   it('rejects unknown SSO providers', () => {
-    expect(
-      validateSignup({ ...valid, sso_provider: 'twitter' as never }).ok,
-    ).toBe(false);
+    expect(validateSignup({ ...valid, sso_provider: 'twitter' as never }).ok).toBe(false);
   });
 
   it('accepts known SSO providers', () => {
-    expect(
-      validateSignup({ ...valid, sso_provider: 'google' }).ok,
-    ).toBe(true);
+    expect(validateSignup({ ...valid, sso_provider: 'google' }).ok).toBe(true);
   });
 
   it('flags non-boolean marketing_opt_in', () => {
@@ -129,9 +125,7 @@ describe('validateLogin', () => {
   });
 
   it('accepts an email + SSO provider', () => {
-    expect(validateLogin({ email: 'jane@example.com', sso_provider: 'github' }).ok).toBe(
-      true,
-    );
+    expect(validateLogin({ email: 'jane@example.com', sso_provider: 'github' }).ok).toBe(true);
   });
 
   it('rejects when both password and SSO are missing', () => {

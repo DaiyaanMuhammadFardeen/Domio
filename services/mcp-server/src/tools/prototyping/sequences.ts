@@ -109,9 +109,11 @@ export const start_sequence: McpTool<SequenceStartInput, { started: boolean }> =
     const v = validateStart(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'start_sequence', v.value, () =>
-      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/sequences/${v.value.sequenceId}/start`).then(
-        () => ({ started: true }),
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'POST',
+        `/decks/${v.value.deckId}/sequences/${v.value.sequenceId}/start`,
+      ).then(() => ({ started: true })),
     );
   },
 };
@@ -127,9 +129,11 @@ export const pause_sequence: McpTool<SequencePauseInput, { paused: boolean }> = 
     const v = validateStart(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'pause_sequence', v.value, () =>
-      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/sequences/${v.value.sequenceId}/pause`).then(
-        () => ({ paused: true }),
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'POST',
+        `/decks/${v.value.deckId}/sequences/${v.value.sequenceId}/pause`,
+      ).then(() => ({ paused: true })),
     );
   },
 };
@@ -145,11 +149,16 @@ export const list_sequences: McpTool<SequenceListInput, readonly Sequence[]> = {
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_sequences', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/sequences`).then(
-        (r) => (r as Sequence[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/sequences`).then((r) =>
+        (r as Sequence[]).slice(),
       ),
     );
   },
 };
 
-export const sequenceTools = [create_sequence, start_sequence, pause_sequence, list_sequences] as const;
+export const sequenceTools = [
+  create_sequence,
+  start_sequence,
+  pause_sequence,
+  list_sequences,
+] as const;

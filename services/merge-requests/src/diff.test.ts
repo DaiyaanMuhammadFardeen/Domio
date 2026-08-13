@@ -13,13 +13,22 @@ import type { DeckSnapshot, DiffSnapshot } from './types.js';
 // Fixtures
 // ---------------------------------------------------------------------------
 
-function makeSlide(id: string, title: string, elements: Array<{ id: string; type: string; style?: Record<string, unknown>; binding?: Record<string, unknown> | null }> = []) {
+function makeSlide(
+  id: string,
+  title: string,
+  elements: Array<{
+    id: string;
+    type: string;
+    style?: Record<string, unknown>;
+    binding?: Record<string, unknown> | null;
+  }> = [],
+) {
   return {
     id,
     semantic_id: id,
     title,
     notes: '',
-    elements: elements.map(e => ({
+    elements: elements.map((e) => ({
       id: e.id,
       type: e.type,
       binding: e.binding ?? null,
@@ -143,15 +152,13 @@ describe('computeDiff — element level', () => {
   });
 
   it('detects element modified with conflict', () => {
-    const base = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', style: { x: 0 } },
-    ])]);
-    const source = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', style: { x: 10 } },
-    ])]);
-    const target = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', style: { x: 20 } },
-    ])]);
+    const base = makeDeck([makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', style: { x: 0 } }])]);
+    const source = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', style: { x: 10 } }]),
+    ]);
+    const target = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', style: { x: 20 } }]),
+    ]);
     const result = computeDiff({
       base: snapshot('v1', base),
       source: snapshot('v2', source),
@@ -163,15 +170,11 @@ describe('computeDiff — element level', () => {
   });
 
   it('detects non-conflicting element change', () => {
-    const base = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', style: { x: 0 } },
-    ])]);
-    const source = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', style: { x: 10 } },
-    ])]);
-    const target = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', style: { x: 0 } },
-    ])]);
+    const base = makeDeck([makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', style: { x: 0 } }])]);
+    const source = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', style: { x: 10 } }]),
+    ]);
+    const target = makeDeck([makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', style: { x: 0 } }])]);
     const result = computeDiff({
       base: snapshot('v1', base),
       source: snapshot('v2', source),
@@ -189,15 +192,11 @@ describe('computeDiff — element level', () => {
 
 describe('computeDiff — data_binding level', () => {
   it('detects binding added in source', () => {
-    const base = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: null },
-    ])]);
-    const source = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: { field: 'revenue' } },
-    ])]);
-    const target = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: null },
-    ])]);
+    const base = makeDeck([makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: null }])]);
+    const source = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: { field: 'revenue' } }]),
+    ]);
+    const target = makeDeck([makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: null }])]);
     const result = computeDiff({
       base: snapshot('v1', base),
       source: snapshot('v2', source),
@@ -209,15 +208,15 @@ describe('computeDiff — data_binding level', () => {
   });
 
   it('detects binding modified', () => {
-    const base = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: { field: 'revenue' } },
-    ])]);
-    const source = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: { field: 'profit' } },
-    ])]);
-    const target = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: { field: 'revenue' } },
-    ])]);
+    const base = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: { field: 'revenue' } }]),
+    ]);
+    const source = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: { field: 'profit' } }]),
+    ]);
+    const target = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: { field: 'revenue' } }]),
+    ]);
     const result = computeDiff({
       base: snapshot('v1', base),
       source: snapshot('v2', source),
@@ -229,15 +228,15 @@ describe('computeDiff — data_binding level', () => {
   });
 
   it('no binding diffs when bindings unchanged', () => {
-    const base = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: { field: 'revenue' } },
-    ])]);
-    const source = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: { field: 'revenue' } },
-    ])]);
-    const target = makeDeck([makeSlide('s1', 'S1', [
-      { id: 'e1', type: 'text', binding: { field: 'revenue' } },
-    ])]);
+    const base = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: { field: 'revenue' } }]),
+    ]);
+    const source = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: { field: 'revenue' } }]),
+    ]);
+    const target = makeDeck([
+      makeSlide('s1', 'S1', [{ id: 'e1', type: 'text', binding: { field: 'revenue' } }]),
+    ]);
     const result = computeDiff({
       base: snapshot('v1', base),
       source: snapshot('v2', source),
@@ -255,28 +254,22 @@ describe('computeDiff — data_binding level', () => {
 describe('isFastForward', () => {
   it('returns true when base equals target and differs from source', () => {
     const deck = makeDeck([makeSlide('s1', 'S1')]);
-    expect(isFastForward(
-      snapshot('v1', deck),
-      snapshot('v2', deck),
-      snapshot('v1', deck),
-    )).toBe(true);
+    expect(isFastForward(snapshot('v1', deck), snapshot('v2', deck), snapshot('v1', deck))).toBe(
+      true,
+    );
   });
 
   it('returns false when base differs from target', () => {
     const deck = makeDeck([makeSlide('s1', 'S1')]);
-    expect(isFastForward(
-      snapshot('v1', deck),
-      snapshot('v2', deck),
-      snapshot('v3', deck),
-    )).toBe(false);
+    expect(isFastForward(snapshot('v1', deck), snapshot('v2', deck), snapshot('v3', deck))).toBe(
+      false,
+    );
   });
 
   it('returns false when base equals source', () => {
     const deck = makeDeck([makeSlide('s1', 'S1')]);
-    expect(isFastForward(
-      snapshot('v1', deck),
-      snapshot('v1', deck),
-      snapshot('v1', deck),
-    )).toBe(false);
+    expect(isFastForward(snapshot('v1', deck), snapshot('v1', deck), snapshot('v1', deck))).toBe(
+      false,
+    );
   });
 });

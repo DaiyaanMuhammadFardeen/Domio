@@ -27,8 +27,20 @@ describe('ObjectStoreUploader', () => {
   it('uses track-specific default extensions', async () => {
     const store = new MemoryObjectStore({ OBJECT_STORE_BUCKET: 'b' });
     const uploader = new ObjectStoreUploader({ store });
-    const r1 = await uploader.upload({ workspace_id: 'w', recording_session_id: 's', track_kind: 'microphone', sequence: 0, body: new Uint8Array([0]) });
-    const r2 = await uploader.upload({ workspace_id: 'w', recording_session_id: 's', track_kind: 'annotations', sequence: 0, body: new Uint8Array([0]) });
+    const r1 = await uploader.upload({
+      workspace_id: 'w',
+      recording_session_id: 's',
+      track_kind: 'microphone',
+      sequence: 0,
+      body: new Uint8Array([0]),
+    });
+    const r2 = await uploader.upload({
+      workspace_id: 'w',
+      recording_session_id: 's',
+      track_kind: 'annotations',
+      sequence: 0,
+      body: new Uint8Array([0]),
+    });
     expect(r1.storage_key.endsWith('.webm')).toBe(true);
     expect(r2.storage_key.endsWith('.json')).toBe(true);
   });
@@ -37,8 +49,20 @@ describe('ObjectStoreUploader', () => {
 describe('InMemoryUploader', () => {
   it('records uploads for assertions', async () => {
     const uploader = new InMemoryUploader();
-    await uploader.upload({ workspace_id: 'w', recording_session_id: 's', track_kind: 'screen', sequence: 0, body: new Uint8Array([1, 2]) });
-    await uploader.upload({ workspace_id: 'w', recording_session_id: 's', track_kind: 'screen', sequence: 1, body: new Uint8Array([3, 4]) });
+    await uploader.upload({
+      workspace_id: 'w',
+      recording_session_id: 's',
+      track_kind: 'screen',
+      sequence: 0,
+      body: new Uint8Array([1, 2]),
+    });
+    await uploader.upload({
+      workspace_id: 'w',
+      recording_session_id: 's',
+      track_kind: 'screen',
+      sequence: 1,
+      body: new Uint8Array([3, 4]),
+    });
     expect(uploader.uploads.length).toBe(2);
     expect(uploader.uploads[0]?.sequence).toBe(0);
     expect(uploader.uploads[1]?.sequence).toBe(1);

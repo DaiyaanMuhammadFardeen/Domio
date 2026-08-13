@@ -13,11 +13,7 @@ import type {
   MentionedType,
   UpdateCommentInput,
 } from './types.js';
-import {
-  InvalidAnchorError,
-  CommentNotFoundError,
-  CollabValidationError,
-} from '../types.js';
+import { InvalidAnchorError, CommentNotFoundError, CollabValidationError } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Anchor validation
@@ -168,11 +164,7 @@ export function parseMentions(
 // Update comment
 // ---------------------------------------------------------------------------
 
-export function updateCommentBody(
-  comment: Comment,
-  patch: UpdateCommentInput,
-  now: Date,
-): Comment {
+export function updateCommentBody(comment: Comment, patch: UpdateCommentInput, now: Date): Comment {
   if (patch.bodyMd !== undefined && patch.bodyMd.trim().length === 0) {
     throw new CollabValidationError('body_md must be non-empty');
   }
@@ -188,11 +180,7 @@ export function updateCommentBody(
 // Resolve comment
 // ---------------------------------------------------------------------------
 
-export function resolveCommentBody(
-  comment: Comment,
-  resolvedBy: string,
-  now: Date,
-): Comment {
+export function resolveCommentBody(comment: Comment, resolvedBy: string, now: Date): Comment {
   return {
     ...comment,
     status: 'resolved',
@@ -206,11 +194,7 @@ export function resolveCommentBody(
 // Reactions
 // ---------------------------------------------------------------------------
 
-export function addReaction(
-  comment: Comment,
-  emoji: string,
-  userId: string,
-): Comment {
+export function addReaction(comment: Comment, emoji: string, userId: string): Comment {
   const reactions = { ...comment.emojiReactions };
   const users = new Set(reactions[emoji] ?? []);
   users.add(userId);
@@ -218,11 +202,7 @@ export function addReaction(
   return { ...comment, emojiReactions: reactions, updatedAt: new Date() };
 }
 
-export function removeReaction(
-  comment: Comment,
-  emoji: string,
-  userId: string,
-): Comment {
+export function removeReaction(comment: Comment, emoji: string, userId: string): Comment {
   const reactions = { ...comment.emojiReactions };
   const users = new Set(reactions[emoji] ?? []);
   users.delete(userId);
@@ -238,11 +218,7 @@ export function removeReaction(
 // Orphan promotion (rewrite target to slide)
 // ---------------------------------------------------------------------------
 
-export function promoteOrphan(
-  comment: Comment,
-  slideTargetId: string,
-  now: Date,
-): Comment {
+export function promoteOrphan(comment: Comment, slideTargetId: string, now: Date): Comment {
   return {
     ...comment,
     targetType: 'slide',

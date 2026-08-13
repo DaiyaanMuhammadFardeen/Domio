@@ -17,7 +17,9 @@ function formatCents(cents: number): string {
 function formatDate(ms: number | null): string {
   if (!ms) return '—';
   return new Date(ms).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
@@ -98,18 +100,20 @@ export default function PayoutsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Payout Policy
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Payout Policy</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Read-only view of the platform payout policy, split configuration, and historical payout runs.
+          Read-only view of the platform payout policy, split configuration, and historical payout
+          runs.
         </p>
       </div>
 
       {loading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-busy>
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div
+              key={i}
+              className="animate-pulse rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            >
               <div className="h-3 w-20 rounded bg-slate-200" />
               <div className="mt-2 h-7 w-16 rounded bg-slate-200" />
             </div>
@@ -118,7 +122,10 @@ export default function PayoutsPage() {
       )}
 
       {error && (
-        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700" role="alert">
+        <div
+          className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+          role="alert"
+        >
           <strong className="font-semibold">Error.</strong> {error}
         </div>
       )}
@@ -158,28 +165,36 @@ export default function PayoutsPage() {
                   <TrendingUp className="h-3.5 w-3.5" aria-hidden />
                   Creator share (basis points)
                 </dt>
-                <dd className="font-mono text-sm font-semibold text-slate-900">{policy.split_creator_bps}</dd>
+                <dd className="font-mono text-sm font-semibold text-slate-900">
+                  {policy.split_creator_bps}
+                </dd>
               </div>
               <div className="flex items-center gap-3">
                 <dt className="flex items-center gap-1.5 text-xs text-slate-500">
                   <DollarSign className="h-3.5 w-3.5" aria-hidden />
                   Platform share (basis points)
                 </dt>
-                <dd className="font-mono text-sm font-semibold text-slate-900">{policy.split_platform_bps}</dd>
+                <dd className="font-mono text-sm font-semibold text-slate-900">
+                  {policy.split_platform_bps}
+                </dd>
               </div>
               <div className="flex items-center gap-3">
                 <dt className="flex items-center gap-1.5 text-xs text-slate-500">
                   <DollarSign className="h-3.5 w-3.5" aria-hidden />
                   Minimum payout (cents)
                 </dt>
-                <dd className="font-mono text-sm font-semibold text-slate-900">{policy.min_payout_cents}</dd>
+                <dd className="font-mono text-sm font-semibold text-slate-900">
+                  {policy.min_payout_cents}
+                </dd>
               </div>
               <div className="flex items-center gap-3">
                 <dt className="flex items-center gap-1.5 text-xs text-slate-500">
                   <Clock className="h-3.5 w-3.5" aria-hidden />
                   First payout hold (days)
                 </dt>
-                <dd className="font-mono text-sm font-semibold text-slate-900">{policy.first_payout_hold_days}</dd>
+                <dd className="font-mono text-sm font-semibold text-slate-900">
+                  {policy.first_payout_hold_days}
+                </dd>
               </div>
             </dl>
           </div>

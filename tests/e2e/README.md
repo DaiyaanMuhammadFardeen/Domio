@@ -5,13 +5,13 @@ Full-stack integration tests for the realtime collaboration pipeline:
 
 ## Prerequisites
 
-| Service | Endpoint | Notes |
-|---------|----------|-------|
-| NATS | `localhost:4222` | JetStream enabled, no auth |
-| Redis | `localhost:6379` | No auth |
-| Postgres | `localhost:5432` | Database `domio`, user/pass `domio/domio`, migrations 0001-0005 applied |
-| Go toolchain | `/tmp/opencode/go-sdk/go/bin` | GOTOOLCHAIN=local |
-| k6 | `/tmp/opencode/k6` | v0.54.0 |
+| Service      | Endpoint                      | Notes                                                                   |
+| ------------ | ----------------------------- | ----------------------------------------------------------------------- |
+| NATS         | `localhost:4222`              | JetStream enabled, no auth                                              |
+| Redis        | `localhost:6379`              | No auth                                                                 |
+| Postgres     | `localhost:5432`              | Database `domio`, user/pass `domio/domio`, migrations 0001-0005 applied |
+| Go toolchain | `/tmp/opencode/go-sdk/go/bin` | GOTOOLCHAIN=local                                                       |
+| k6           | `/tmp/opencode/k6`            | v0.54.0                                                                 |
 
 ## Quick Start
 
@@ -28,7 +28,7 @@ All clients minting tokens for the realtime gateway must produce HMAC-SHA256 (HS
 ### Header
 
 ```json
-{"alg": "HS256", "typ": "JWT"}
+{ "alg": "HS256", "typ": "JWT" }
 ```
 
 The gateway **pins algorithm to HS256** — tokens with `alg: none`, `alg: RS256`, or any other algorithm are rejected.
@@ -46,14 +46,14 @@ The gateway **pins algorithm to HS256** — tokens with `alg: none`, `alg: RS256
 }
 ```
 
-| Claim | Type | Required | Description |
-|-------|------|----------|-------------|
-| `sub` | string | yes | Subject — typically the actor's ULID |
-| `actor_id` | string | yes | Actor identifier (ULID). Must match `sub`. |
-| `deck_id` | string | yes | Deck identifier (ULID). Must match the URL path deck ID. |
-| `session_kind` | string | yes | `"interactive"` (browser) or `"service"` (backend). |
-| `exp` | int64 | yes | Expiration time (Unix epoch seconds). |
-| `iat` | int64 | yes | Issued-at time (Unix epoch seconds). |
+| Claim          | Type   | Required | Description                                              |
+| -------------- | ------ | -------- | -------------------------------------------------------- |
+| `sub`          | string | yes      | Subject — typically the actor's ULID                     |
+| `actor_id`     | string | yes      | Actor identifier (ULID). Must match `sub`.               |
+| `deck_id`      | string | yes      | Deck identifier (ULID). Must match the URL path deck ID. |
+| `session_kind` | string | yes      | `"interactive"` (browser) or `"service"` (backend).      |
+| `exp`          | int64  | yes      | Expiration time (Unix epoch seconds).                    |
+| `iat`          | int64  | yes      | Issued-at time (Unix epoch seconds).                     |
 
 ### Signature
 
@@ -91,15 +91,22 @@ function generateJWT(deckId, actorId, secret) {
   var header = JSON.stringify({ alg: 'HS256', typ: 'JWT' });
   var now = Math.floor(Date.now() / 1000);
   var payload = JSON.stringify({
-    sub: actorId, actor_id: actorId, deck_id: deckId,
-    session_kind: 'interactive', exp: now + 3600, iat: now,
+    sub: actorId,
+    actor_id: actorId,
+    deck_id: deckId,
+    session_kind: 'interactive',
+    exp: now + 3600,
+    iat: now,
   });
   var headerB64 = encoding.b64encode(header, 'rawurl');
   var payloadB64 = encoding.b64encode(payload, 'rawurl');
   var signingInput = headerB64 + '.' + payloadB64;
   // IMPORTANT: use binary then rawurl to avoid padding
   var sigBytes = crypto.hmac('sha256', secret, signingInput, 'binary');
-  var signature = encoding.b64encode(String.fromCharCode.apply(null, sigBytes), 'rawurl');
+  var signature = encoding.b64encode(
+    String.fromCharCode.apply(null, sigBytes),
+    'rawurl',
+  );
   return signingInput + '.' + signature;
 }
 ```
@@ -126,16 +133,16 @@ WebSocket binary frames with 4-byte big-endian length prefix followed by raw pro
 
 ### Go E2E Test (`e2e_test.go`)
 
-| Phase | Description | Client | Status |
-|-------|-------------|--------|--------|
-| 00_Setup | Create test tenant + workspace + deck in Postgres (FK compliance) | — | ✅ PASS |
-| 01_SyncHandshake_SDK | Connect via SDK → send Hello → receive Welcome | Go SDK | ✅ PASS |
-| 02_SendOps_SDK | Send 50 Ops via SDK → receive OpAck for each | Go SDK | ⚠️ Known bug BUG-001 |
-| 03_DuplicateOp_SDK | Send same op_id twice → assert idempotent handling | Go SDK | ⏭️ Skipped (blocked by BUG-001) |
-| 04_PostgresPersistence | Verify ops landed in crdt_logs table | — | ⏭️ Skipped (blocked by BUG-001) |
-| 05_SecondClient_SDK | Open second SDK client for same deck → assert Welcome received | Go SDK | ✅ PASS |
-| 06_Presence | Two actors connect presence → assert cursor update fan-out | Raw WS | ✅ PASS |
-| 99_Summary | Print results table with known bugs | — | ✅ PASS |
+| Phase                  | Description                                                       | Client | Status                          |
+| ---------------------- | ----------------------------------------------------------------- | ------ | ------------------------------- |
+| 00_Setup               | Create test tenant + workspace + deck in Postgres (FK compliance) | —      | ✅ PASS                         |
+| 01_SyncHandshake_SDK   | Connect via SDK → send Hello → receive Welcome                    | Go SDK | ✅ PASS                         |
+| 02_SendOps_SDK         | Send 50 Ops via SDK → receive OpAck for each                      | Go SDK | ⚠️ Known bug BUG-001            |
+| 03_DuplicateOp_SDK     | Send same op_id twice → assert idempotent handling                | Go SDK | ⏭️ Skipped (blocked by BUG-001) |
+| 04_PostgresPersistence | Verify ops landed in crdt_logs table                              | —      | ⏭️ Skipped (blocked by BUG-001) |
+| 05_SecondClient_SDK    | Open second SDK client for same deck → assert Welcome received    | Go SDK | ✅ PASS                         |
+| 06_Presence            | Two actors connect presence → assert cursor update fan-out        | Raw WS | ✅ PASS                         |
+| 99_Summary             | Print results table with known bugs                               | —      | ✅ PASS                         |
 
 ### k6 Load Test
 
@@ -163,6 +170,7 @@ unable to encode int32 into text format for text (OID 25)
 ```
 
 This causes ALL Op inserts to fail, returning `REALTIME_ERROR_CODE_INVALID_OP` to the client. It blocks:
+
 - Op persistence in crdt_logs
 - NATS fan-out to second clients
 - Sync worker processing

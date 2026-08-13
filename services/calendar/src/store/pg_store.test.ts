@@ -80,8 +80,7 @@ describe('PgCalendarStore', () => {
   describe('StoreNotConfiguredError', () => {
     it('throws when pool is null', async () => {
       const store = new PgCalendarStore(null);
-      await expect(store.saveLink(makeCalendarLink()))
-        .rejects.toThrow(StoreNotConfiguredError);
+      await expect(store.saveLink(makeCalendarLink())).rejects.toThrow(StoreNotConfiguredError);
     });
   });
 
@@ -209,7 +208,8 @@ describe('PgCalendarStore', () => {
   describe('withTransaction', () => {
     it('calls BEGIN, COMMIT on success', async () => {
       const client = {
-        query: vi.fn()
+        query: vi
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({}), // COMMIT
         release: vi.fn(),
@@ -231,7 +231,8 @@ describe('PgCalendarStore', () => {
 
     it('calls ROLLBACK on error', async () => {
       const client = {
-        query: vi.fn()
+        query: vi
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({}), // ROLLBACK (succeeds)
         release: vi.fn(),

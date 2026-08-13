@@ -65,11 +65,7 @@ export function displayP3ToSrgb(p3: DisplayP3): Rgb {
 export function deltaE(a: Rgb, b: Rgb): number {
   const labA = rgbToLab(a);
   const labB = rgbToLab(b);
-  return Math.sqrt(
-    (labA.L - labB.L) ** 2 +
-    (labA.a - labB.a) ** 2 +
-    (labA.b - labB.b) ** 2,
-  );
+  return Math.sqrt((labA.L - labB.L) ** 2 + (labA.a - labB.a) ** 2 + (labA.b - labB.b) ** 2);
 }
 
 interface Lab {

@@ -76,10 +76,7 @@ export async function fetchElementHeatmap(
   url.searchParams.set('workspace_id', workspaceId);
   url.searchParams.set('deck_id', deckId);
   url.searchParams.set('slide_id', slideId);
-  url.searchParams.set(
-    'from_ms',
-    String(opts.fromMs ?? Date.now() - 7 * 24 * 60 * 60 * 1000),
-  );
+  url.searchParams.set('from_ms', String(opts.fromMs ?? Date.now() - 7 * 24 * 60 * 60 * 1000));
   url.searchParams.set('to_ms', String(opts.toMs ?? Date.now()));
   try {
     const res = await fetch(url.toString(), { cache: 'no-store' });
@@ -128,10 +125,7 @@ export async function fetchElementTimeSeries(
   const url = new URL('/v1/analytics/heatmap/elements/timeseries', baseUrl);
   url.searchParams.set('workspace_id', workspaceId);
   url.searchParams.set('element_id', elementId);
-  url.searchParams.set(
-    'from_ms',
-    String(opts.fromMs ?? Date.now() - 14 * 24 * 60 * 60 * 1000),
-  );
+  url.searchParams.set('from_ms', String(opts.fromMs ?? Date.now() - 14 * 24 * 60 * 60 * 1000));
   url.searchParams.set('to_ms', String(opts.toMs ?? Date.now()));
   try {
     const res = await fetch(url.toString(), { cache: 'no-store' });

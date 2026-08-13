@@ -78,8 +78,7 @@ export async function createCheckpoint(
   traceId?: string,
 ): Promise<CheckpointResponse> {
   const branchId = body.branchId ?? 'main';
-  const revision =
-    (await ctx.fetchDeckHead({ deckId, branchId })) ?? 0;
+  const revision = (await ctx.fetchDeckHead({ deckId, branchId })) ?? 0;
   try {
     const checkpoint = await ctx.checkpoints.create({
       deckId,
@@ -114,11 +113,7 @@ export async function renameCheckpoint(
   traceId?: string,
 ): Promise<CheckpointResponse> {
   try {
-    const checkpoint = await ctx.checkpoints.rename(
-      deckId,
-      checkpointId,
-      body.newName,
-    );
+    const checkpoint = await ctx.checkpoints.rename(deckId, checkpointId, body.newName);
     return { checkpoint, ...(traceId ? { traceId } : {}) };
   } catch (err) {
     throw mapCheckpointError(err);
@@ -136,7 +131,8 @@ export async function restoreCheckpoint(
     return {
       newRevision: result.newRevision,
       branchId: result.branchId,
-      ...(traceId ? { traceId } : {}),    };
+      ...(traceId ? { traceId } : {}),
+    };
   } catch (err) {
     throw mapCheckpointError(err);
   }

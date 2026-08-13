@@ -42,7 +42,10 @@ describe('auto-layout', () => {
   it('lays out children horizontally with gap and padding', () => {
     const parent = makeParent('horizontal');
     const children = [
-      { element: makeChild('01H00000000000000000000010', 100, 50), intrinsicSize: { w: 100, h: 50 } },
+      {
+        element: makeChild('01H00000000000000000000010', 100, 50),
+        intrinsicSize: { w: 100, h: 50 },
+      },
       { element: makeChild('01H00000000000000000000011', 80, 50), intrinsicSize: { w: 80, h: 50 } },
     ];
     const result = autoLayout({ parent, children });
@@ -55,8 +58,14 @@ describe('auto-layout', () => {
   it('lays out children vertically', () => {
     const parent = makeParent('vertical');
     const children = [
-      { element: makeChild('01H00000000000000000000020', 100, 50), intrinsicSize: { w: 100, h: 50 } },
-      { element: makeChild('01H00000000000000000000021', 100, 30), intrinsicSize: { w: 100, h: 30 } },
+      {
+        element: makeChild('01H00000000000000000000020', 100, 50),
+        intrinsicSize: { w: 100, h: 50 },
+      },
+      {
+        element: makeChild('01H00000000000000000000021', 100, 30),
+        intrinsicSize: { w: 100, h: 30 },
+      },
     ];
     const result = autoLayout({ parent, children });
     const a = result.transforms.get(children[0]!.element.id)!;

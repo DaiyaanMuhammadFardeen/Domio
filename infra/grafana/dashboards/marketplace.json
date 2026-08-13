@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-1",
-    "domio",
-    "marketplace"
-  ],
+  "tags": ["tier-1", "domio", "marketplace"],
   "panels": [
     {
       "id": 1,

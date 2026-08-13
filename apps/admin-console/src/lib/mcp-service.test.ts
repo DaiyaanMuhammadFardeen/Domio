@@ -184,9 +184,7 @@ describe('mcp-service — listMCPAudit', () => {
     const upperBound = newest.timestamp_ms + 60_000; // 1m slack
     for (const e of out) {
       expect(e.timestamp_ms).toBeLessThanOrEqual(upperBound);
-      expect(newest.timestamp_ms - e.timestamp_ms).toBeLessThanOrEqual(
-        24 * 60 * 60 * 1000,
-      );
+      expect(newest.timestamp_ms - e.timestamp_ms).toBeLessThanOrEqual(24 * 60 * 60 * 1000);
       expect(e.trace_id.length).toBe(32);
     }
   });

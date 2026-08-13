@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  createBranchMetrics,
-  InMemoryMetricsSink,
-  noopBranchMetrics,
-} from './metrics.js';
+import { createBranchMetrics, InMemoryMetricsSink, noopBranchMetrics } from './metrics.js';
 
 describe('BranchMetrics', () => {
   it('records branch creation counter and diff span duration', () => {

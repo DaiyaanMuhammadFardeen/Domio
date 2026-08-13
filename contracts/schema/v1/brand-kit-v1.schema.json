@@ -47,10 +47,7 @@
     },
     "governance": { "$ref": "#/definitions/Governance" },
     "extractionAttestation": {
-      "oneOf": [
-        { "$ref": "#/definitions/ExtractionAttestation" },
-        { "type": "null" }
-      ]
+      "oneOf": [{ "$ref": "#/definitions/ExtractionAttestation" }, { "type": "null" }]
     },
     "metadata": {
       "type": "object",

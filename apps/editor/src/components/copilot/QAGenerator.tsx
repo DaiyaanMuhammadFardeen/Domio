@@ -85,11 +85,9 @@ export function QAGenerator({
       )}
 
       {!response && !error && (
-        <p
-          className="text-xs text-slate-500"
-          data-testid={`${dataTestId}-empty`}
-        >
-          Click <strong className="text-slate-300">Generate</strong> to anticipate likely tough questions for each slide.
+        <p className="text-xs text-slate-500" data-testid={`${dataTestId}-empty`}>
+          Click <strong className="text-slate-300">Generate</strong> to anticipate likely tough
+          questions for each slide.
         </p>
       )}
 
@@ -100,7 +98,8 @@ export function QAGenerator({
               className="rounded-md border border-amber-700/60 bg-amber-900/15 p-2 text-[11px] text-amber-200"
               data-testid={`${dataTestId}-offline`}
             >
-              Offline mode — using heuristic questions. Connect the orchestrator for tailored answers.
+              Offline mode — using heuristic questions. Connect the orchestrator for tailored
+              answers.
             </p>
           )}
           <ul className="flex flex-col gap-2" data-testid={`${dataTestId}-list`}>

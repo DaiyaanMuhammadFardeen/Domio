@@ -8,9 +8,7 @@ import { IdleScreen } from './IdleScreen';
 
 describe('IdleScreen', () => {
   it('renders nothing when visible=false', () => {
-    const { container } = render(
-      <IdleScreen visible={false} onWake={() => {}} />,
-    );
+    const { container } = render(<IdleScreen visible={false} onWake={() => {}} />);
     expect(container.firstChild).toBeNull();
   });
 

@@ -8,16 +8,8 @@
  *   POST /v1/localization/convert   — convert
  */
 
-import {
-  InvalidLocaleError,
-  InvalidCurrencyError,
-  MissingRateError,
-} from './service.js';
-import type {
-  LocalizationService,
-  FormatInput,
-  ConvertInput,
-} from './service.js';
+import { InvalidLocaleError, InvalidCurrencyError, MissingRateError } from './service.js';
+import type { LocalizationService, FormatInput, ConvertInput } from './service.js';
 import type { LocalizationMetrics } from './metrics.js';
 import type { AuditRecorder } from './audit.js';
 import type { RateSnapshot } from './rates.js';

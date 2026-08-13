@@ -41,7 +41,7 @@ describe('SiteHeader (Wave 13)', () => {
     expect(active.getAttribute('aria-current')).toBe('page');
   });
 
-it('renders the cross-app switcher in the header chrome', () => {
+  it('renders the cross-app switcher in the header chrome', () => {
     render(<SiteHeader />);
     const switcher = screen.getByRole('navigation', { name: 'Switch surface' });
     expect(switcher).toBeTruthy();
@@ -83,7 +83,15 @@ describe('SiteFooter (Wave 13)', () => {
   it('lists every cross-app surface under the Apps nav', () => {
     render(<SiteFooter />);
     const nav = screen.getByRole('navigation', { name: 'Apps' });
-    for (const label of ['Editor', 'Viewer', 'Presenter', 'Dashboard', 'Marketplace', 'Creator', 'Admin']) {
+    for (const label of [
+      'Editor',
+      'Viewer',
+      'Presenter',
+      'Dashboard',
+      'Marketplace',
+      'Creator',
+      'Admin',
+    ]) {
       expect(within(nav).getByRole('link', { name: label })).toBeTruthy();
     }
   });

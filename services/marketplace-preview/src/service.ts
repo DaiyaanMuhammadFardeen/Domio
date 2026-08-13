@@ -188,10 +188,7 @@ export class MarketplacePreviewService {
     return this.repo.listListings(status);
   }
 
-  async updateListing(
-    listingId: string,
-    patch: UpdateListingInput,
-  ): Promise<ThemeListingRecord> {
+  async updateListing(listingId: string, patch: UpdateListingInput): Promise<ThemeListingRecord> {
     const existing = await this.getListing(listingId);
     const name = patch.name ?? existing.name;
     const description = patch.description ?? existing.description;

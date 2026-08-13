@@ -82,7 +82,10 @@ export function ExportDialog({
 }: ExportDialogProps): ReactElement | null {
   const [format, setFormat] = useState<ExportFormat>('pdf');
   const [quality, setQuality] = useState<ExportQuality>(FORMAT_DEFAULTS.pdf);
-  const [range, setRange] = useState<ExportRange>({ fromIdx: 0, toIdx: Math.max(0, slideCount - 1) });
+  const [range, setRange] = useState<ExportRange>({
+    fromIdx: 0,
+    toIdx: Math.max(0, slideCount - 1),
+  });
   const [job, setJob] = useState<ExportJob | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -103,9 +106,15 @@ export function ExportDialog({
   const onChangeFrom = useCallback((value: number) => {
     setRange((prev) => ({ ...prev, fromIdx: Math.max(0, Math.min(value, prev.toIdx)) }));
   }, []);
-  const onChangeTo = useCallback((value: number) => {
-    setRange((prev) => ({ ...prev, toIdx: Math.min(slideCount - 1, Math.max(value, prev.fromIdx)) }));
-  }, [slideCount]);
+  const onChangeTo = useCallback(
+    (value: number) => {
+      setRange((prev) => ({
+        ...prev,
+        toIdx: Math.min(slideCount - 1, Math.max(value, prev.fromIdx)),
+      }));
+    },
+    [slideCount],
+  );
 
   const onSubmit = useCallback(async () => {
     if (!onQueue) return;
@@ -125,10 +134,7 @@ export function ExportDialog({
     setJob((prev) => (prev ? { ...prev, ...event.job } : prev));
   }, []);
 
-  const formatOptions = useMemo<readonly ExportFormat[]>(
-    () => ['pdf', 'pptx', 'mp4', 'html'],
-    [],
-  );
+  const formatOptions = useMemo<readonly ExportFormat[]>(() => ['pdf', 'pptx', 'mp4', 'html'], []);
   const qualityOptions = useMemo<readonly ExportQuality[]>(
     () => ['draft', 'standard', 'high', 'lossless'],
     [],
@@ -166,7 +172,8 @@ export function ExportDialog({
       >
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0 }}>
-            <FormattedMessage id="editor.share.export.title" /> · <span style={{ fontWeight: 400 }}>{deckTitle}</span>
+            <FormattedMessage id="editor.share.export.title" /> ·{' '}
+            <span style={{ fontWeight: 400 }}>{deckTitle}</span>
           </h2>
           <button
             type="button"
@@ -285,7 +292,13 @@ export function ExportDialog({
                 type="button"
                 onClick={onClose}
                 data-testid={`${dataTestId}-cancel`}
-                style={{ padding: '6px 12px', border: '1px solid rgba(0,0,0,0.2)', borderRadius: 4, background: 'transparent', cursor: 'pointer' }}
+                style={{
+                  padding: '6px 12px',
+                  border: '1px solid rgba(0,0,0,0.2)',
+                  borderRadius: 4,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                }}
               >
                 <FormattedMessage id="editor.share.cancel" />
               </button>
@@ -321,7 +334,13 @@ export function ExportDialog({
                 type="button"
                 onClick={onClose}
                 data-testid={`${dataTestId}-close-after`}
-                style={{ padding: '6px 12px', border: '1px solid rgba(0,0,0,0.2)', borderRadius: 4, background: 'transparent', cursor: 'pointer' }}
+                style={{
+                  padding: '6px 12px',
+                  border: '1px solid rgba(0,0,0,0.2)',
+                  borderRadius: 4,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                }}
               >
                 <FormattedMessage id="editor.share.cancel" />
               </button>

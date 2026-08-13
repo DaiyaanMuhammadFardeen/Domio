@@ -84,7 +84,11 @@ function tooManyRequests(retryAfterMs: number): HttpResponse {
  * Execute a live-data query. Returns the dataset snapshot and freshness record.
  */
 export async function executeQueryHandler(
-  req: HttpRequest<{ orgId: string }, { queryId: string; forceRefresh?: boolean }, { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    { queryId: string; forceRefresh?: boolean },
+    { actorId?: string }
+  >,
   ctx: QueryGatewayHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -102,7 +106,11 @@ export async function executeQueryHandler(
       orgId: req.params.orgId,
       actorId,
       action: 'query.execute',
-      payload: { queryId: req.body.queryId, fromCache: result.fromCache, cacheTier: result.cacheTier },
+      payload: {
+        queryId: req.body.queryId,
+        fromCache: result.fromCache,
+        cacheTier: result.cacheTier,
+      },
     });
     return ok({
       snapshot: result.snapshot,
@@ -201,7 +209,11 @@ export async function invalidateQueryHandler(
  * Issue a viewer token for accessing query data.
  */
 export async function issueViewerTokenHandler(
-  req: HttpRequest<{ orgId: string }, { queryId: string; scopes?: string[]; ttlMs?: number }, { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    { queryId: string; scopes?: string[]; ttlMs?: number },
+    { actorId?: string }
+  >,
   ctx: QueryGatewayHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);

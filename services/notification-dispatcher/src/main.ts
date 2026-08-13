@@ -50,7 +50,9 @@ async function main() {
     send: async () => ({ ok: true }),
   };
   const nats: NatsPublisher = {
-    publish: async () => { /* NATS publisher is set up below */ },
+    publish: async () => {
+      /* NATS publisher is set up below */
+    },
   };
   const router = new Router([
     new SlackSender(),
@@ -73,13 +75,15 @@ async function main() {
   const mentionDedup = new MentionDedup();
 
   // ─── NATS subscriber ────────────────────────────────────────
-  console.log(JSON.stringify({
-    msg: 'notification-dispatcher: starting',
-    nats: natsUrl,
-    redis: redisUrl,
-    channels: ['slack', 'teams', 'email', 'in_app', 'webhook'],
-    collab_enabled: collabEnabled,
-  }));
+  console.log(
+    JSON.stringify({
+      msg: 'notification-dispatcher: starting',
+      nats: natsUrl,
+      redis: redisUrl,
+      channels: ['slack', 'teams', 'email', 'in_app', 'webhook'],
+      collab_enabled: collabEnabled,
+    }),
+  );
 
   // Test-only: if NOTIFICATION_DISPATCHER_TEST_EVENT is set, evaluate
   // and dispatch a single event from the environment.
@@ -88,11 +92,13 @@ async function main() {
     const event: CRMSyncEvent = JSON.parse(testEvent);
     const rules: NotificationRule[] = [];
     const rows = await dispatcher.dispatch(rules, event);
-    console.log(JSON.stringify({
-      msg: 'notification-dispatcher: test event processed',
-      notifications: rows.length,
-      rows,
-    }));
+    console.log(
+      JSON.stringify({
+        msg: 'notification-dispatcher: test event processed',
+        notifications: rows.length,
+        rows,
+      }),
+    );
   }
 
   // ─── CRM event handler ───────────────────────────────────────
@@ -109,10 +115,12 @@ async function main() {
     try {
       envelope = parseCollabEvent(raw);
     } catch (err) {
-      console.error(JSON.stringify({
-        msg: 'notification-dispatcher: collab event parse failed',
-        error: err instanceof Error ? err.message : String(err),
-      }));
+      console.error(
+        JSON.stringify({
+          msg: 'notification-dispatcher: collab event parse failed',
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
       return;
     }
 
@@ -130,11 +138,13 @@ async function main() {
     if (toDispatch.length === 0) return;
 
     const rows = await dispatcher.dispatchNotifications(toDispatch);
-    console.log(JSON.stringify({
-      msg: 'notification-dispatcher: collab event dispatched',
-      event_type: envelope.event_type,
-      notifications: rows.length,
-    }));
+    console.log(
+      JSON.stringify({
+        msg: 'notification-dispatcher: collab event dispatched',
+        event_type: envelope.event_type,
+        notifications: rows.length,
+      }),
+    );
   }
 
   // ─── Connect to NATS ────────────────────────────────────────
@@ -156,7 +166,11 @@ async function main() {
   const shutdown = async () => {
     console.log(JSON.stringify({ msg: 'notification-dispatcher: shutting down' }));
     if (nc) {
-      try { await nc.drain(); } catch { /* already draining */ }
+      try {
+        await nc.drain();
+      } catch {
+        /* already draining */
+      }
     }
     process.exit(0);
   };
@@ -169,6 +183,8 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(`notification-dispatcher: startup failed: ${err instanceof Error ? err.message : String(err)}`);
+  console.error(
+    `notification-dispatcher: startup failed: ${err instanceof Error ? err.message : String(err)}`,
+  );
   process.exit(1);
 });

@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  listSCIMTokens,
-  createSCIMToken,
-  revokeSCIMToken,
-} from './scim-service';
+import { listSCIMTokens, createSCIMToken, revokeSCIMToken } from './scim-service';
 
 describe('scim-service', () => {
   it('lists seeded tokens', async () => {

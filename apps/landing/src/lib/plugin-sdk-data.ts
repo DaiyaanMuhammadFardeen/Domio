@@ -63,8 +63,7 @@ export const PUBLISH_STEPS: ReadonlyArray<PublishStep> = [
   {
     step: 3,
     title: 'Submit',
-    description:
-      'Push a tagged release, fill out the marketplace listing, and submit for review.',
+    description: 'Push a tagged release, fill out the marketplace listing, and submit for review.',
   },
   {
     step: 4,

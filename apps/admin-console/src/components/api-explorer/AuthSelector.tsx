@@ -19,10 +19,30 @@ export interface AuthSelectorProps {
 
 type Kind = ApiExplorerAuth['kind'];
 
-const KIND_META: ReadonlyArray<{ kind: Kind; label: string; icon: React.ReactNode; placeholder: string }> = [
-  { kind: 'api_key', label: 'API Key', icon: <Key className="h-3.5 w-3.5" aria-hidden />, placeholder: 'pk_live_xxx…' },
-  { kind: 'oauth', label: 'OAuth', icon: <ShieldCheck className="h-3.5 w-3.5" aria-hidden />, placeholder: 'oauth bearer token…' },
-  { kind: 'mcp_token', label: 'MCP Token', icon: <Cpu className="h-3.5 w-3.5" aria-hidden />, placeholder: 'mcp token…' },
+const KIND_META: ReadonlyArray<{
+  kind: Kind;
+  label: string;
+  icon: React.ReactNode;
+  placeholder: string;
+}> = [
+  {
+    kind: 'api_key',
+    label: 'API Key',
+    icon: <Key className="h-3.5 w-3.5" aria-hidden />,
+    placeholder: 'pk_live_xxx…',
+  },
+  {
+    kind: 'oauth',
+    label: 'OAuth',
+    icon: <ShieldCheck className="h-3.5 w-3.5" aria-hidden />,
+    placeholder: 'oauth bearer token…',
+  },
+  {
+    kind: 'mcp_token',
+    label: 'MCP Token',
+    icon: <Cpu className="h-3.5 w-3.5" aria-hidden />,
+    placeholder: 'mcp token…',
+  },
 ];
 
 export function AuthSelector({ auth, onChange }: AuthSelectorProps) {
@@ -44,9 +64,7 @@ export function AuthSelector({ auth, onChange }: AuthSelectorProps) {
 
   return (
     <div ref={ref} className="relative flex items-center gap-2">
-      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-        Auth
-      </span>
+      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Auth</span>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

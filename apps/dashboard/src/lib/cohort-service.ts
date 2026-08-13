@@ -56,10 +56,7 @@ export async function fetchCohortMatrix(
   const baseUrl = opts.baseUrl ?? DEFAULT_BASE;
   const url = new URL('/v1/analytics/cohorts', baseUrl);
   url.searchParams.set('workspace_id', workspaceId);
-  url.searchParams.set(
-    'from_ms',
-    String(opts.fromMs ?? Date.now() - 12 * 7 * 24 * 60 * 60 * 1000),
-  );
+  url.searchParams.set('from_ms', String(opts.fromMs ?? Date.now() - 12 * 7 * 24 * 60 * 60 * 1000));
   url.searchParams.set('to_ms', String(opts.toMs ?? Date.now()));
   if (typeof opts.weeks === 'number') url.searchParams.set('weeks', String(opts.weeks));
   try {
@@ -162,9 +159,7 @@ export async function saveKpi(
     cache: 'no-store',
   });
   if (!res.ok) {
-    throw new Error(
-      `POST /v1/analytics/kpis → ${res.status}`,
-    );
+    throw new Error(`POST /v1/analytics/kpis → ${res.status}`);
   }
   const json = (await res.json()) as { kpi?: KpiDefinition };
   if (!json.kpi) {

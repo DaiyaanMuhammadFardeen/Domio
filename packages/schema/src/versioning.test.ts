@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  DECK_SCHEMA_VERSION,
-  parseVersion,
-  SEMVER_COMPATIBLE,
-} from './version.js';
+import { DECK_SCHEMA_VERSION, parseVersion, SEMVER_COMPATIBLE } from './version.js';
 import { MigrationRegistry } from './registry.js';
 import {
   inspectSnapshotVersion,

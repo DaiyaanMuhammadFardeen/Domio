@@ -64,10 +64,7 @@ describe('motion-path', () => {
   });
 
   it('sampleMotionPath returns the origin when there are no keyframes', () => {
-    const sample = sampleMotionPath(
-      { id: 'empty', origin: { x: 10, y: 5 }, keyframes: [] },
-      500,
-    );
+    const sample = sampleMotionPath({ id: 'empty', origin: { x: 10, y: 5 }, keyframes: [] }, 500);
     expect(sample.x).toBe(10);
     expect(sample.y).toBe(5);
   });

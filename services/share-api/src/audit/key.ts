@@ -11,10 +11,14 @@ import type { Key as AuditKey } from '@domio/audit-ts';
 
 const DEV_KID = 'dev-key-do-not-use-in-prod';
 
-export function shareAuditKey(envValue: string | undefined = process.env.SHARE_AUDIT_HMAC_KEY): AuditKey {
+export function shareAuditKey(
+  envValue: string | undefined = process.env.SHARE_AUDIT_HMAC_KEY,
+): AuditKey {
   const keyHex = envValue ?? devKeyHex();
   if (keyHex.length !== 64) {
-    throw new Error(`SHARE_AUDIT_HMAC_KEY must be 32 bytes hex-encoded (64 chars); got ${keyHex.length}`);
+    throw new Error(
+      `SHARE_AUDIT_HMAC_KEY must be 32 bytes hex-encoded (64 chars); got ${keyHex.length}`,
+    );
   }
   return {
     kid: DEV_KID,

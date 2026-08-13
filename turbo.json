@@ -1,13 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "stream",
-  "globalDependencies": [
-    ".env",
-    ".env.local",
-    "tsconfig.base.json",
-    ".tool-versions",
-    "buf.yaml"
-  ],
+  "globalDependencies": [".env", ".env.local", "tsconfig.base.json", ".tool-versions", "buf.yaml"],
   "globalEnv": ["NODE_ENV", "CI", "DOMIO_ENV"],
   "tasks": {
     "build": {
@@ -43,10 +37,7 @@
         "contracts/openapi/**/*.yaml",
         "contracts/schema/**/*.json"
       ],
-      "outputs": [
-        "**/gen/**",
-        "**/generated/**"
-      ]
+      "outputs": ["**/gen/**", "**/generated/**"]
     }
   }
 }

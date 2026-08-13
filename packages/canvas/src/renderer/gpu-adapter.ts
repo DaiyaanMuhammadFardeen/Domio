@@ -84,7 +84,7 @@ export function selectAdapter(
       return {
         kind: 'canvas2d',
         warning:
-          options.warnOnCanvas2D ?? true
+          (options.warnOnCanvas2D ?? true)
             ? 'Editing in Canvas2D mode — performance and effects are reduced.'
             : undefined,
       };
@@ -96,7 +96,7 @@ export function selectAdapter(
   return {
     kind: 'canvas2d',
     warning:
-      options.warnOnCanvas2D ?? true
+      (options.warnOnCanvas2D ?? true)
         ? 'Editing in Canvas2D mode — performance and effects are reduced.'
         : undefined,
   };

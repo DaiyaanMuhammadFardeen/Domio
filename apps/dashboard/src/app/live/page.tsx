@@ -24,9 +24,7 @@ export default function LivePage() {
     <div className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Live HUD</h1>
-        <p className="text-sm text-slate-500">
-          Streaming concurrent viewers and reactions
-        </p>
+        <p className="text-sm text-slate-500">Streaming concurrent viewers and reactions</p>
       </header>
 
       <form

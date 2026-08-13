@@ -274,8 +274,6 @@ export class InMemoryThemeApplicationEventRepository implements ThemeApplication
     orgId: string,
     limit = 100,
   ): Promise<ThemeApplicationEventRecord[]> {
-    return this.store
-      .filter((r) => r.orgId === orgId && r.deckId === deckId)
-      .slice(-limit);
+    return this.store.filter((r) => r.orgId === orgId && r.deckId === deckId).slice(-limit);
   }
 }

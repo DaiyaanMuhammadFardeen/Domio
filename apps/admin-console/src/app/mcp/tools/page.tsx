@@ -89,9 +89,7 @@ export default function MCPToolsPage() {
   }, [loadData]);
 
   function toggleEnabled(name: string) {
-    setTools((prev) =>
-      prev.map((t) => (t.name === name ? { ...t, enabled: !t.enabled } : t)),
-    );
+    setTools((prev) => prev.map((t) => (t.name === name ? { ...t, enabled: !t.enabled } : t)));
   }
 
   const sorted = useMemo(() => {
@@ -105,8 +103,8 @@ export default function MCPToolsPage() {
           <FormattedMessage id="admin.mcp.tools.heading" catalogue={CATALOGUE} />
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">
-          Every tool the MCP server exposes to external agents. Click any row
-          for the full JSON schema.
+          Every tool the MCP server exposes to external agents. Click any row for the full JSON
+          schema.
         </p>
       </header>
 
@@ -143,40 +141,22 @@ export default function MCPToolsPage() {
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.mcp.tools.col.name"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.mcp.tools.col.name" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.mcp.tools.col.description"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.mcp.tools.col.description" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.mcp.tools.col.params"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.mcp.tools.col.params" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.mcp.tools.col.return"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.mcp.tools.col.return" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.mcp.tools.col.rateLimit"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.mcp.tools.col.rateLimit" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.mcp.tools.col.enabled"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.mcp.tools.col.enabled" catalogue={CATALOGUE} />
                   </th>
                 </tr>
               </thead>
@@ -192,9 +172,7 @@ export default function MCPToolsPage() {
                       {tool.name}
                     </td>
                     <td className="max-w-md px-4 py-2.5 text-slate-700">
-                      <span className="line-clamp-2">
-                        {truncate(tool.description, 140)}
-                      </span>
+                      <span className="line-clamp-2">{truncate(tool.description, 140)}</span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-2.5 text-right tabular-nums text-slate-800">
                       {countParams(tool.params_schema)}
@@ -207,10 +185,7 @@ export default function MCPToolsPage() {
                         {humanRateLimit(tool.rate_limit_class)}
                       </Badge>
                     </td>
-                    <td
-                      className="px-4 py-2.5 text-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <td className="px-4 py-2.5 text-center" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
                         role="switch"

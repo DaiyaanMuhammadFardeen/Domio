@@ -7,7 +7,7 @@
   "required": ["query", "hits", "scanned", "tool_version"],
   "additionalProperties": false,
   "properties": {
-    "query":   { "type": "string" },
+    "query": { "type": "string" },
     "deck_id": { "type": "string" },
     "hits": {
       "type": "array",
@@ -17,13 +17,13 @@
         "additionalProperties": false,
         "properties": {
           "slide_id": { "type": "string" },
-          "title":    { "type": "string" },
-          "score":    { "type": "number", "minimum": 0, "maximum": 1 },
-          "snippet":  { "type": "string" }
+          "title": { "type": "string" },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "snippet": { "type": "string" }
         }
       }
     },
-    "scanned":     { "type": "integer", "minimum": 0 },
+    "scanned": { "type": "integer", "minimum": 0 },
     "tool_version": { "type": "string" }
   }
 }

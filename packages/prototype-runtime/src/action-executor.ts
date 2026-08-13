@@ -58,14 +58,17 @@ export function defaultActionHandlers(store: VarStore): Record<ActionKind, Actio
     disable: ({ targetId }) => dispatchHostEvent('action:disable', { targetId }),
     set_variable: ({ name, value, scope }) => {
       if (typeof name !== 'string') throw new Error('set_variable: `name` required');
-      store.write(name, value, { scope: (scope as 'deck' | 'slide' | 'session' | 'viewer' | 'component_instance') ?? 'deck' });
+      store.write(name, value, {
+        scope: (scope as 'deck' | 'slide' | 'session' | 'viewer' | 'component_instance') ?? 'deck',
+      });
     },
     navigate_to: ({ slideId }) => {
       if (typeof slideId !== 'string') throw new Error('navigate_to: `slideId` required');
       dispatchHostEvent('action:navigate_to', { slideId });
     },
     play_animation: ({ animationId }) => {
-      if (typeof animationId !== 'string') throw new Error('play_animation: `animationId` required');
+      if (typeof animationId !== 'string')
+        throw new Error('play_animation: `animationId` required');
       dispatchHostEvent('action:play_animation', { animationId });
     },
     submit_form: ({ formId }) => {

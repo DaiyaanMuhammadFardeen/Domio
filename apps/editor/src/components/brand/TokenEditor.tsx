@@ -68,7 +68,11 @@ export function TokenEditor(props: TokenEditorProps): ReactElement {
   return (
     <div className="token-editor" data-testid={id ?? 'token-editor'}>
       <ColorSection scales={kit.colors} onChange={updateColors} readOnly={props.readOnly} />
-      <TypographySection scales={kit.typography} onChange={updateTypography} readOnly={props.readOnly} />
+      <TypographySection
+        scales={kit.typography}
+        onChange={updateTypography}
+        readOnly={props.readOnly}
+      />
       <SpacingSection scales={kit.spacing} onChange={updateSpacing} readOnly={props.readOnly} />
       <RadiusSection scales={kit.radius} onChange={updateRadius} readOnly={props.readOnly} />
       <ShadowSection scales={kit.shadows} onChange={updateShadows} readOnly={props.readOnly} />
@@ -79,7 +83,13 @@ export function TokenEditor(props: TokenEditorProps): ReactElement {
 
 // ─── Shared section header ──────────────────────────────────────────────────
 
-function SectionHead({ label, hint, onAdd, addLabel, readOnly }: {
+function SectionHead({
+  label,
+  hint,
+  onAdd,
+  addLabel,
+  readOnly,
+}: {
   label: string;
   hint?: string;
   onAdd?: () => void;
@@ -247,7 +257,13 @@ function TypographySection({
 
   return (
     <section className="token-editor__section" data-testid="token-editor-section-typography">
-      <SectionHead label="Typography" hint={`${scales.length} styles`} onAdd={add} addLabel="+ Add style" readOnly={readOnly} />
+      <SectionHead
+        label="Typography"
+        hint={`${scales.length} styles`}
+        onAdd={add}
+        addLabel="+ Add style"
+        readOnly={readOnly}
+      />
       <div className="token-editor__type-grid">
         {scales.map((t) => (
           <article key={t.id} className="token-editor__type-card">
@@ -323,7 +339,9 @@ function TypographySection({
                   disabled={readOnly}
                 >
                   {[300, 400, 500, 600, 700, 800, 900].map((w) => (
-                    <option key={w} value={w}>{w}</option>
+                    <option key={w} value={w}>
+                      {w}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -368,15 +386,17 @@ function SpacingSection({
   );
   const remove = useCallback(
     (id: string) =>
-      onChange(
-        scales.map((s) => ({ ...s, stops: s.stops.filter((t) => t.id !== id) })),
-      ),
+      onChange(scales.map((s) => ({ ...s, stops: s.stops.filter((t) => t.id !== id) }))),
     [scales, onChange],
   );
 
   return (
     <section className="token-editor__section" data-testid="token-editor-section-spacing">
-      <SectionHead label="Spacing" hint={`${scales[0]?.stops.length ?? 0} steps`} readOnly={readOnly} />
+      <SectionHead
+        label="Spacing"
+        hint={`${scales[0]?.stops.length ?? 0} steps`}
+        readOnly={readOnly}
+      />
       {scales.map((scale) => (
         <div key={scale.id} className="token-editor__ramp">
           {scale.stops.map((stop) => (
@@ -558,7 +578,8 @@ function TokenPreview({ kit }: { kit: BrandKitDetail }): ReactElement {
             : undefined
         }
       >
-        Live preview of the brand kit. Tokens drive every element on the canvas; any edit above is reflected here instantly.
+        Live preview of the brand kit. Tokens drive every element on the canvas; any edit above is
+        reflected here instantly.
       </p>
       <button
         type="button"
@@ -594,7 +615,14 @@ function TokenPreview({ kit }: { kit: BrandKitDetail }): ReactElement {
 function normalizeHex(value: string): string {
   if (/^#[0-9a-fA-F]{6}$/.test(value)) return value;
   const m = /^#([0-9a-fA-F]{3})$/.exec(value);
-  if (m && m[1]) return '#' + m[1].split('').map((c) => c + c).join('');
+  if (m && m[1])
+    return (
+      '#' +
+      m[1]
+        .split('')
+        .map((c) => c + c)
+        .join('')
+    );
   return '#888888';
 }
 

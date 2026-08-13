@@ -29,7 +29,12 @@ function makeCtx() {
   const audit = new InMemoryAuditRecorder(() => 'unused');
   return {
     svc,
-    ctx: { service: svc, metrics, audit } as { service: ScenarioService; metrics: ScenarioMetrics; audit: InMemoryAuditRecorder; authorize?: ScenarioHandlerContext['authorize'] },
+    ctx: { service: svc, metrics, audit } as {
+      service: ScenarioService;
+      metrics: ScenarioMetrics;
+      audit: InMemoryAuditRecorder;
+      authorize?: ScenarioHandlerContext['authorize'];
+    },
     metrics,
     audit,
   };
@@ -49,12 +54,18 @@ describe('scenario handlers — CRUD', () => {
   it('POST /v1/scenarios creates a root scenario', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createScenario(
-      req('POST', '/v1/scenarios', { tenantId: TENANT }, {
-        deckId: 'deck-1',
-        parentId: null,
-        name: 'Baseline',
-        description: 'Base scenario',
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/scenarios',
+        { tenantId: TENANT },
+        {
+          deckId: 'deck-1',
+          parentId: null,
+          name: 'Baseline',
+          description: 'Base scenario',
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -72,7 +83,9 @@ describe('scenario handlers — CRUD', () => {
       createdBy: ACTOR,
     });
     const res = await handlers.getScenario(
-      req('GET', '/v1/scenarios/:id', { tenantId: TENANT, id: created.id }, undefined, { actorId: ACTOR }),
+      req('GET', '/v1/scenarios/:id', { tenantId: TENANT, id: created.id }, undefined, {
+        actorId: ACTOR,
+      }),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -82,7 +95,9 @@ describe('scenario handlers — CRUD', () => {
   it('GET /v1/scenarios/:id returns 404 for unknown', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.getScenario(
-      req('GET', '/v1/scenarios/:id', { tenantId: TENANT, id: 'unknown' }, undefined, { actorId: ACTOR }),
+      req('GET', '/v1/scenarios/:id', { tenantId: TENANT, id: 'unknown' }, undefined, {
+        actorId: ACTOR,
+      }),
       ctx,
     );
     expect(res.status).toBe(404);
@@ -99,7 +114,10 @@ describe('scenario handlers — CRUD', () => {
       createdBy: ACTOR,
     });
     const res = await handlers.listByDeck(
-      req('GET', '/v1/scenarios', { tenantId: TENANT }, undefined, { deck_id: 'deck-1', actorId: ACTOR }),
+      req('GET', '/v1/scenarios', { tenantId: TENANT }, undefined, {
+        deck_id: 'deck-1',
+        actorId: ACTOR,
+      }),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -117,7 +135,9 @@ describe('scenario handlers — CRUD', () => {
       createdBy: ACTOR,
     });
     const res = await handlers.deleteScenario(
-      req('DELETE', '/v1/scenarios/:id', { tenantId: TENANT, id: created.id }, undefined, { actorId: ACTOR }),
+      req('DELETE', '/v1/scenarios/:id', { tenantId: TENANT, id: created.id }, undefined, {
+        actorId: ACTOR,
+      }),
       ctx,
     );
     expect(res.status).toBe(204);
@@ -145,9 +165,15 @@ describe('scenario handlers — 400 cycle', () => {
     });
     // Try to make Parent a child of Child → cycle
     const res = await handlers.updateScenario(
-      req('PATCH', '/v1/scenarios/:id', { tenantId: TENANT, id: parent.id }, {
-        parentId: child.id,
-      }, { actorId: ACTOR }),
+      req(
+        'PATCH',
+        '/v1/scenarios/:id',
+        { tenantId: TENANT, id: parent.id },
+        {
+          parentId: child.id,
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -159,12 +185,17 @@ describe('scenario handlers — 401', () => {
   it('rejects writes when no actorId', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createScenario(
-      req('POST', '/v1/scenarios', { tenantId: TENANT }, {
-        deckId: 'deck-1',
-        parentId: null,
-        name: 'Test',
-        description: '',
-      }),
+      req(
+        'POST',
+        '/v1/scenarios',
+        { tenantId: TENANT },
+        {
+          deckId: 'deck-1',
+          parentId: null,
+          name: 'Test',
+          description: '',
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(401);
@@ -179,12 +210,18 @@ describe('scenario handlers — ACL', () => {
     };
     await expect(
       handlers.createScenario(
-        req('POST', '/v1/scenarios', { tenantId: TENANT }, {
-          deckId: 'deck-1',
-          parentId: null,
-          name: 'Test',
-          description: '',
-        }, { actorId: ACTOR }),
+        req(
+          'POST',
+          '/v1/scenarios',
+          { tenantId: TENANT },
+          {
+            deckId: 'deck-1',
+            parentId: null,
+            name: 'Test',
+            description: '',
+          },
+          { actorId: ACTOR },
+        ),
         ctx,
       ),
     ).rejects.toThrow('Forbidden');
@@ -195,12 +232,18 @@ describe('scenario handlers — audit', () => {
   it('records audit events on writes', async () => {
     const { ctx, audit } = makeCtx();
     await handlers.createScenario(
-      req('POST', '/v1/scenarios', { tenantId: TENANT }, {
-        deckId: 'deck-1',
-        parentId: null,
-        name: 'Audited',
-        description: '',
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/scenarios',
+        { tenantId: TENANT },
+        {
+          deckId: 'deck-1',
+          parentId: null,
+          name: 'Audited',
+          description: '',
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     const events = await audit.listByTenant(TENANT);

@@ -27,7 +27,20 @@
  */
 
 import type { TokenValue } from '@domio/tokens';
-import { ThemeService, type ApplyThemeResult, type CreateTokenInput, type CreateAliasInput, type CreateThemeInput, type CreateOverrideInput, type ApplyThemeInput, TokenAliasCycleError, TokenReferencedError, InvalidTokenIdError, TokenValidationError, ThemeNotFoundError } from './service.js';
+import {
+  ThemeService,
+  type ApplyThemeResult,
+  type CreateTokenInput,
+  type CreateAliasInput,
+  type CreateThemeInput,
+  type CreateOverrideInput,
+  type ApplyThemeInput,
+  TokenAliasCycleError,
+  TokenReferencedError,
+  InvalidTokenIdError,
+  TokenValidationError,
+  ThemeNotFoundError,
+} from './service.js';
 import type { ThemeMetrics } from './metrics.js';
 import type { AuditRecorder } from './audit.js';
 
@@ -56,7 +69,10 @@ export interface ThemeHandlerContext {
   /** Actor ID for audit logging; usually from the auth header. */
   resolveActorId?: (req: HttpRequest) => string | undefined;
   /** ACL guard; should reject viewers before data is read. */
-  authorize?: (args: { actorId: string | undefined; action: 'read' | 'write-token' | 'write-theme' | 'write-override' }) => void;
+  authorize?: (args: {
+    actorId: string | undefined;
+    action: 'read' | 'write-token' | 'write-theme' | 'write-override';
+  }) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -94,7 +110,11 @@ function conflict(message: string, code: string, extra?: Record<string, unknown>
 // ---------------------------------------------------------------------------
 
 export async function createTokenHandler(
-  req: HttpRequest<{ orgId: string }, Omit<CreateTokenInput, 'orgId' | 'createdBy'> & { createdBy?: string }, { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    Omit<CreateTokenInput, 'orgId' | 'createdBy'> & { createdBy?: string },
+    { actorId?: string }
+  >,
   ctx: ThemeHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.createdBy ?? req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -103,7 +123,11 @@ export async function createTokenHandler(
   const { createdBy: _ignored, ...rest } = req.body;
   void _ignored;
   try {
-    const record = await ctx.service.createToken({ ...rest, orgId: req.params.orgId, createdBy: actorId });
+    const record = await ctx.service.createToken({
+      ...rest,
+      orgId: req.params.orgId,
+      createdBy: actorId,
+    });
     ctx.audit?.record({
       orgId: req.params.orgId,
       actorId,
@@ -129,17 +153,26 @@ export async function listTokensHandler(
 }
 
 export async function updateTokenHandler(
-  req: HttpRequest<{ orgId: string; tokenId: string }, { value?: TokenValue; description?: string; roles?: readonly string[] }, { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string; tokenId: string },
+    { value?: TokenValue; description?: string; roles?: readonly string[] },
+    { actorId?: string }
+  >,
   ctx: ThemeHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);
   if (!actorId) return unauthorized();
   ctx.authorize?.({ actorId, action: 'write-token' });
-  const updated = await ctx.service.updateToken(req.params.tokenId, req.params.orgId, {
-    ...(req.body.value !== undefined ? { value: req.body.value } : {}),
-    ...(req.body.description !== undefined ? { description: req.body.description } : {}),
-    ...(req.body.roles !== undefined ? { roles: req.body.roles as never } : {}),
-  }, actorId);
+  const updated = await ctx.service.updateToken(
+    req.params.tokenId,
+    req.params.orgId,
+    {
+      ...(req.body.value !== undefined ? { value: req.body.value } : {}),
+      ...(req.body.description !== undefined ? { description: req.body.description } : {}),
+      ...(req.body.roles !== undefined ? { roles: req.body.roles as never } : {}),
+    },
+    actorId,
+  );
   ctx.audit?.record({
     orgId: req.params.orgId,
     actorId,
@@ -150,7 +183,11 @@ export async function updateTokenHandler(
 }
 
 export async function deleteTokenHandler(
-  req: HttpRequest<{ orgId: string; tokenId: string }, undefined, { force?: string; actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string; tokenId: string },
+    undefined,
+    { force?: string; actorId?: string }
+  >,
   ctx: ThemeHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -236,7 +273,11 @@ export async function deleteAliasHandler(
 // ---------------------------------------------------------------------------
 
 export async function createThemeHandler(
-  req: HttpRequest<{ orgId: string }, Omit<CreateThemeInput, 'orgId' | 'createdBy'> & { createdBy?: string }, { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    Omit<CreateThemeInput, 'orgId' | 'createdBy'> & { createdBy?: string },
+    { actorId?: string }
+  >,
   ctx: ThemeHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.createdBy ?? req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -244,7 +285,11 @@ export async function createThemeHandler(
   ctx.authorize?.({ actorId, action: 'write-theme' });
   const { createdBy: _ignored, ...rest } = req.body;
   void _ignored;
-  const theme = await ctx.service.createTheme({ ...rest, orgId: req.params.orgId, createdBy: actorId });
+  const theme = await ctx.service.createTheme({
+    ...rest,
+    orgId: req.params.orgId,
+    createdBy: actorId,
+  });
   ctx.audit?.record({
     orgId: req.params.orgId,
     actorId,
@@ -280,7 +325,10 @@ export async function getThemeHandler(
 }
 
 export async function applyThemeHandler(
-  req: HttpRequest<{ orgId: string; themeId: string }, Omit<ApplyThemeInput, 'orgId' | 'toThemeId' | 'actorId'> & { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string; themeId: string },
+    Omit<ApplyThemeInput, 'orgId' | 'toThemeId' | 'actorId'> & { actorId?: string }
+  >,
   ctx: ThemeHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.actorId ?? ctx.resolveActorId?.(req);
@@ -320,7 +368,11 @@ export async function applyThemeHandler(
 // ---------------------------------------------------------------------------
 
 export async function createOverrideHandler(
-  req: HttpRequest<{ orgId: string }, Omit<CreateOverrideInput, 'orgId' | 'createdBy'> & { createdBy?: string }, { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    Omit<CreateOverrideInput, 'orgId' | 'createdBy'> & { createdBy?: string },
+    { actorId?: string }
+  >,
   ctx: ThemeHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.createdBy ?? req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -377,7 +429,10 @@ export async function deleteOverrideHandler(
 // ---------------------------------------------------------------------------
 
 export async function resolveTokensHandler(
-  req: HttpRequest<{ orgId: string }, { tokenRefs: string[]; deckId?: string; scope?: { kind: 'deck' | 'theme' | 'org' | 'brand' } }>,
+  req: HttpRequest<
+    { orgId: string },
+    { tokenRefs: string[]; deckId?: string; scope?: { kind: 'deck' | 'theme' | 'org' | 'brand' } }
+  >,
   ctx: ThemeHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = ctx.resolveActorId?.(req);
@@ -397,7 +452,11 @@ export async function findReferrersHandler(
 ): Promise<HttpResponse> {
   const actorId = ctx.resolveActorId?.(req);
   ctx.authorize?.({ actorId, action: 'read' });
-  const refs = await ctx.service.findReferrers(req.params.orgId, req.body.deckId, req.params.tokenId);
+  const refs = await ctx.service.findReferrers(
+    req.params.orgId,
+    req.body.deckId,
+    req.params.tokenId,
+  );
   return ok(refs);
 }
 
@@ -407,7 +466,11 @@ export async function computeThemeDiffHandler(
 ): Promise<HttpResponse> {
   const actorId = ctx.resolveActorId?.(req);
   ctx.authorize?.({ actorId, action: 'read' });
-  const diff = await ctx.service.computeThemeDiff(req.body.themeAId, req.body.themeBId, req.params.orgId);
+  const diff = await ctx.service.computeThemeDiff(
+    req.body.themeAId,
+    req.body.themeBId,
+    req.params.orgId,
+  );
   return ok({ diff });
 }
 

@@ -10,16 +10,16 @@
 // ---------------------------------------------------------------------------
 
 export interface ExchangeRateRecord {
-  readonly pair: string;          // e.g. "USD/EUR"
+  readonly pair: string; // e.g. "USD/EUR"
   readonly rate: number;
   readonly asOf: Date;
 }
 
 export interface LocaleConfigRecord {
-  readonly localeId: string;       // e.g. "en-US", "de-DE"
-  readonly currency: string;       // e.g. "USD", "EUR"
-  readonly numberFormat: string;   // e.g. "#,##0.00"
-  readonly dateFormat: string;     // e.g. "MM/dd/yyyy"
+  readonly localeId: string; // e.g. "en-US", "de-DE"
+  readonly currency: string; // e.g. "USD", "EUR"
+  readonly numberFormat: string; // e.g. "#,##0.00"
+  readonly dateFormat: string; // e.g. "MM/dd/yyyy"
 }
 
 // ---------------------------------------------------------------------------

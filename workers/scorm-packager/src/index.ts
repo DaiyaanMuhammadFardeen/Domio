@@ -34,7 +34,8 @@ export interface ScormPackage {
 
 export class ScormPackager {
   build(input: ScormInput): ScormPackage {
-    const organization_id = input.organization_id || `ORG-${input.workspace_id}-${input.session_id}`;
+    const organization_id =
+      input.organization_id || `ORG-${input.workspace_id}-${input.session_id}`;
     const resource_id = input.resource_id || `RES-${input.session_id}`;
     const item_id = input.item_id || `ITEM-${input.session_id}`;
     const at4_id = input.session_id_at4ed ?? input.session_id;
@@ -50,13 +51,19 @@ export class ScormPackager {
       '    <schema>ADL SCORM</schema>',
       '    <schemaversion>2004 4th Edition</schemaversion>',
       '    <lom xmlns="http://ltsc.ieee.org/xsd/LOM">',
-      '      <general><title><string language="en">' + escapeXml(input.title) + '</string></title></general>',
+      '      <general><title><string language="en">' +
+        escapeXml(input.title) +
+        '</string></title></general>',
       '      <technical><format>text/html</format></technical>',
       '    </lom>',
       '  </metadata>',
       '  <organizations default="' + escapeXml(organization_id) + '">',
       '    <organization identifier="' + escapeXml(organization_id) + '" structure="hierarchical">',
-      '      <item identifier="' + escapeXml(item_id) + '" identifierref="' + escapeXml(resource_id) + '" isvisible="true">',
+      '      <item identifier="' +
+        escapeXml(item_id) +
+        '" identifierref="' +
+        escapeXml(resource_id) +
+        '" isvisible="true">',
       '        <title>' + escapeXml(input.title) + '</title>',
       '        <adlcp:completionStatus>completed</adlcp:completionStatus>',
       '        <imsss:tracking><imsss:tracked>true</imsss:tracked></imsss:tracking>',
@@ -64,7 +71,11 @@ export class ScormPackager {
       '    </organization>',
       '  </organizations>',
       '  <resources>',
-      '    <resource identifier="' + escapeXml(resource_id) + '" type="webcontent" adlcp:scormType="sco" href="' + escapeXml(input.launch_url) + '">',
+      '    <resource identifier="' +
+        escapeXml(resource_id) +
+        '" type="webcontent" adlcp:scormType="sco" href="' +
+        escapeXml(input.launch_url) +
+        '">',
       '      <file href="' + escapeXml(input.launch_url) + '"/>',
       '      <metadata><adlcp:location>' + escapeXml(at4_id) + '</adlcp:location></metadata>',
       '    </resource>',
@@ -74,7 +85,13 @@ export class ScormPackager {
     const imsxml = [
       '<?xml version="1.0" encoding="UTF-8"?>',
       '<session id="' + escapeXml(input.session_id) + '">',
-      '  <attendance unique="' + input.unique_participants + '" duration_ms="' + input.duration_ms + '" chain_intact="' + input.attendance_chain_intact + '"/>',
+      '  <attendance unique="' +
+        input.unique_participants +
+        '" duration_ms="' +
+        input.duration_ms +
+        '" chain_intact="' +
+        input.attendance_chain_intact +
+        '"/>',
       '  <scorm version="2004 4th Edition" conformance="ADL"/>',
       '</session>',
     ].join('\n');

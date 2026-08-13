@@ -10,11 +10,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
-import {
-  BranchingGraph,
-  DEFAULT_MAX_HOPS,
-  type GraphValidation,
-} from '@domio/prototype-runtime';
+import { BranchingGraph, DEFAULT_MAX_HOPS, type GraphValidation } from '@domio/prototype-runtime';
 import type { Slide } from '@domio/schema';
 
 export interface ConnectionsPanelHotspot {
@@ -101,17 +97,18 @@ export function ConnectionsPanel({
           defaultStart: s.id === slides[0]?.id,
         });
       }
-      for (const e of edges) g.addEdge({
-        id: e.id,
-        tenantId: '',
-        deckId: '',
-        fromSlideId: e.fromSlideId,
-        toSlideId: e.toSlideId,
-        name: e.name,
-        ruleId: e.ruleId,
-        priority: e.priority,
-        createdAt: 0,
-      });
+      for (const e of edges)
+        g.addEdge({
+          id: e.id,
+          tenantId: '',
+          deckId: '',
+          fromSlideId: e.fromSlideId,
+          toSlideId: e.toSlideId,
+          name: e.name,
+          ruleId: e.ruleId,
+          priority: e.priority,
+          createdAt: 0,
+        });
       setCycleReport(g.validate());
     } catch (err) {
       setGraphError(err instanceof Error ? err.message : String(err));
@@ -213,11 +210,7 @@ export function ConnectionsPanel({
                 </option>
               ))}
             </select>
-            <button
-              type="button"
-              data-testid="p10-hotspot-add"
-              onClick={handleAddHotspot}
-            >
+            <button type="button" data-testid="p10-hotspot-add" onClick={handleAddHotspot}>
               Add hotspot
             </button>
           </div>
@@ -278,7 +271,9 @@ export function ConnectionsPanel({
               {edges.map((e) => (
                 <li key={e.id} className="connections-panel__item" data-testid="p10-edge-row">
                   <span>{e.name}</span>
-                  <small>{e.fromSlideId.slice(-6)} → {e.toSlideId.slice(-6)}</small>
+                  <small>
+                    {e.fromSlideId.slice(-6)} → {e.toSlideId.slice(-6)}
+                  </small>
                   <button
                     type="button"
                     data-testid="p10-edge-remove"
@@ -327,11 +322,7 @@ export function ConnectionsPanel({
           <p className="connections-panel__hint">
             Default max hops per session: {DEFAULT_MAX_HOPS}.
           </p>
-          <button
-            type="button"
-            data-testid="p10-graph-validate"
-            onClick={handleValidateGraph}
-          >
+          <button type="button" data-testid="p10-graph-validate" onClick={handleValidateGraph}>
             Validate graph
           </button>
           {graphError && (

@@ -15,24 +15,27 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** During a live session, every interaction — slide advance, scenario toggle, drill-down, hover, annotation, poll vote, Q&A submission, hidden-slide reveal, reorder, audience-driven navigation, presenter note spoken aloud — is appended to an ordered, replayable event log. After the session, an attendee (or someone who wasn't there) can scrub through the exact presentation as it happened, including every state the deck passed through.
 
 **Acceptance criteria.**
+
 - The timeline captures both **discrete events** (slide 3 → slide 4 at t=00:01:23, "Bear case" scenario toggled at t=00:04:11) and **derived state snapshots** (the actual rendered pixel state at t=00:01:23.500) at a configurable cadence (default 1 Hz, adjustable up to 10 Hz for short sessions).
 - Replay shows the slide exactly as it appeared: live data values, scenario state, animations mid-flight (paused at the correct frame), open overlays, active polls with their running totals at each moment, and the presenter's annotations on top.
 - Replay supports scrub, play/pause, and ±0.25× / 0.5× / 1× / 2× / 4× speed.
-- Replay is *deterministic*: given the same timeline, the same deck version, and the same data-source snapshots, the replay is byte-identical across viewers.
+- Replay is _deterministic_: given the same timeline, the same deck version, and the same data-source snapshots, the replay is byte-identical across viewers.
 - An "actions taken" rail shows a textual summary alongside the visual replay ("clicked Bull scenario on slide 7; opened ROI calculator on slide 12 with slider=15; jumped to appendix B from Q&A queue").
 - Replay is sharable: a URL like `https://domio.app/replay/<session_id>` that any authorized viewer can open with no extra setup.
 - Replay respects the same access controls as the underlying deck — confidential decks produce gated replays (F158).
 - Replay data is stored separately from deck edits; deleting a replay does not delete the deck.
 
 **Behavioral details.**
+
 - The recorder runs on the presenter client (the "source of truth" for what was on screen) and streams events to a server-side append-only log with monotonically increasing sequence numbers per session.
 - Each event carries `{session_id, seq, t_wall, t_mono, actor_id, event_type, payload, deck_version_hash, data_source_snapshot_id}`.
 - Snapshots are stored as compact deltas against the prior snapshot using a CRDT-style diff (reusing F21's CRDT machinery where possible) to keep storage small.
 - Scenario toggles (F57), calculator inputs (F102), branch choices (F97), and audience-driven navigation votes (F148) are first-class event types — they replay exactly.
-- Animations (F85–F95) replay by recording animation *clock time*, not wall time: scrub to t=4.1 s of a slide and you see the animation at frame 4.1 s, regardless of how fast the user scrubs.
+- Animations (F85–F95) replay by recording animation _clock time_, not wall time: scrub to t=4.1 s of a slide and you see the animation at frame 4.1 s, regardless of how fast the user scrubs.
 - Live data (F48–F63) replays from **snapshot values captured during the live session**, not from re-querying the source — otherwise the replay is non-deterministic (today's revenue won't match what was shown yesterday).
 
 **Edge cases.**
+
 - **Presenter disconnects mid-session (F136):** recorder on phone (if F127 is enabled) takes over with same `session_id` and continues appending events with a `actor_changed` event at the boundary. Replay shows the seam as a single annotation, not a discontinuity.
 - **Two presenters simultaneously (F135):** events carry `actor_id`; replay UI shows a per-actor color band on the timeline so it's clear who did what.
 - **Audience-driven navigation (F148) wins over presenter click:** both events are in the log; replay shows the audience vote and the auto-jump.
@@ -47,6 +50,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** A deck marked "living" is bound to its data sources permanently and updates itself in place: every viewer always sees the current numbers, every comment ever made on the deck accumulates forever, and the deck URL never goes stale. The convention "Q3 deck v2" is eliminated by removing the need for a "v2."
 
 **Acceptance criteria.**
+
 - A living deck has a stable `deck_id` that never changes; URL `domio.app/d/<deck_id>` always resolves to the current state.
 - Data bindings (F48) refresh on a configurable cadence (default: every 5 min during business hours, hourly off-hours; manual "refresh now" always available).
 - Comments (F179) accumulate: every comment ever made on the deck is preserved; comments on deleted slides are archived but searchable.
@@ -56,6 +60,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - A living deck can be "cloned" (with full copy) for archival or for creating a divergent variant (tied to F19, F212).
 
 **Behavioral details.**
+
 - Living is a deck-level flag, not a per-slide flag; binding either persists everything or nothing.
 - When data refreshes, only the data-bearing elements update; layout, theme, animations, and non-data text remain byte-identical, so the user's mental model of "where things are" doesn't shift underneath them.
 - Changes accumulate into a "living log" — a deduplicated, semantic diff (not a textual diff) showing "Revenue changed from $4.2M to $4.5M, source refreshed at <ts>."
@@ -63,6 +68,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Subscriptions (see F206 data model below) let specific roles opt into push notifications for changes ("notify #finance-team when the burn-rate slide changes by > 5%").
 
 **Edge cases.**
+
 - **Source system deleted or schema changed (F48):** affected elements are marked stale (F125); the deck remains viewable but with a banner; remediation requires rebinding.
 - **Two viewers editing the same living deck:** collaborative editing (F17, F21) applies normally; the living nature doesn't change conflict resolution — CRDTs still merge.
 - **Comments on a slide that's since been deleted:** comments are preserved in an "archived comments" section of the living log, searchable.
@@ -77,6 +83,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** With presenter's explicit opt-in, the presenter's webcam performs on-device eye-tracking; the slide subtly spotlights the region the presenter is looking at (a soft circular highlight, like a faint spotlight following their gaze) so the audience's attention is gently guided. The highlight is present on the audience's view only — the presenter's own view is unaffected.
 
 **Acceptance criteria.**
+
 - Gaze tracking is **strictly opt-in per session**, with a separate, more prominent opt-in for recording the gaze data vs. only using it transiently.
 - All gaze computation happens on-device (webcam frames never leave the presenter's machine) unless the user explicitly opts into cloud processing (off by default; not even offered in the default UI for users in PDPA-restricted jurisdictions).
 - The highlight follows the presenter's gaze with a perceptible but not jarring easing (300 ms ease-out); "flicker" between regions is debounced to a minimum 250 ms dwell per region.
@@ -86,6 +93,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Eye-tracking accuracy target: ±50 px on a 1920×1080 slide at 60 cm viewing distance, on a 720p webcam, in good lighting (300+ lux).
 
 **Behavioral details.**
+
 - Eye-tracking model runs in a WebAssembly module (MediaPipe FaceMesh or a custom 6-DOF gaze model) at ~15 Hz on the presenter's webcam stream.
 - The model outputs a gaze ray; the ray is intersected with the slide plane (known from the presenter's viewport geometry) to produce a (x, y) coordinate in slide space.
 - That coordinate is broadcast (if audience sync, F213) at ~10 Hz via the real-time channel, throttled and quantized to 32×24 grid to minimize bandwidth and to discourage fine-grained behavioral profiling.
@@ -93,6 +101,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Consent record (see F207 data model) stores: presenter id, session id, opt-in timestamp, scope (transient vs. recorded), expiry, and revocation timestamp if revoked.
 
 **Edge cases.**
+
 - **Webcam permission denied:** feature is unavailable; no error, no nag, no fallback highlight (avoids suggesting the feature is on when it isn't).
 - **Poor lighting / off-axis gaze / glasses glare:** the model reports a confidence score; below threshold, the highlight fades out gracefully (no jittery jumps).
 - **Presenter looks away from screen (notes, audience):** highlight fades to center over 1 s rather than snapping to where the model last saw the gaze.
@@ -108,6 +117,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** The presenter uses hand gestures captured by their webcam to advance slides, go back, point at regions, and trigger a small set of presenter actions — useful on stage without a clicker, in sterile environments (kitchen demos, labs), or when hands are otherwise occupied.
 
 **Acceptance criteria.**
+
 - Supported gestures (default set, all configurable on/off):
   - **Open palm forward, push right** → next slide
   - **Open palm forward, push left** → previous slide
@@ -123,12 +133,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Gesture recognition runs entirely on-device; webcam frames never leave the presenter's machine.
 
 **Behavioral details.**
+
 - Hand-pose model runs at ~24 Hz on the webcam stream (MediaPipe Hands or a custom 21-landmark model).
-- A small state machine tracks gesture *trajectories*, not just instantaneous poses — "push right" is detected as palm-open + rightward velocity over 300 ms, not just "palm open at frame N."
+- A small state machine tracks gesture _trajectories_, not just instantaneous poses — "push right" is detected as palm-open + rightward velocity over 300 ms, not just "palm open at frame N."
 - Pointer mode projects the fingertip (x, y, z) onto the slide plane using the presenter's webcam position relative to the screen (calibrated at session start with a 3-second "look at each corner of the screen" routine).
 - A gesture-to-action mapping is user-editable: a power user can remap "thumbs up" to "open calculator" instead of "next build."
 
 **Edge cases.**
+
 - **Multiple hands in frame (audience behind presenter):** the model picks the largest/closest hand and labels it; if the chosen hand isn't the presenter's (e.g., a co-presenter walks by), the HUD shows "ambiguous — gesture ignored" and waits.
 - **Gesture misfire:** the cooldown prevents rapid re-trigger, but if a gesture fires incorrectly, the presenter can hit `Esc` or any keyboard shortcut to override.
 - **Lighting too dark / too backlit:** model confidence drops; HUD shows "low confidence, gestures disabled"; presenter is told to use keyboard or clicker.
@@ -144,6 +156,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** The presenter speaks natural phrases ("let's look at the bear case", "show the appendix", "next slide", "zoom in on Q3") and the deck responds by toggling scenarios, jumping, or activating elements. A "confirmation guard" prevents accidental triggers from incidental conversation.
 
 **Acceptance criteria.**
+
 - Trigger phrases are configurable per deck; defaults include scenario toggles (e.g., "bear case" / "bull case" / "base case" for the F57 scenario switcher), navigation ("next slide", "go back", "jump to <slide-name>"), and content actions ("show sources", "open calculator", "zoom to <region>").
 - A "wake word" prefix is configurable (default "hey deck", off by default — many users prefer always-on with confirmation instead).
 - The confirmation guard: every voice trigger must be confirmed by one of:
@@ -155,12 +168,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Microphone audio is never recorded unless the user explicitly opts into recording (separate consent from F214 AI listener).
 
 **Behavioral details.**
+
 - ASR runs continuously while voice trigger is enabled; partial transcripts are matched against the trigger phrase list with fuzzy matching (edit distance ≤ 2, or semantic similarity ≥ 0.85 using a small embedding model).
 - The matching engine is event-driven: a partial transcript crossing 70% similarity to any trigger raises a "candidate" event; crossing 95% raises a "trigger" event that goes into the confirmation queue.
 - The HUD shows "heard: '...bear case...' — say 'confirmed' or press Enter" so the presenter knows the system is listening and what's pending.
 - A "voice trigger log" is kept (in-memory only, zeroed on session end) for debugging false negatives/positives; never persisted to disk or network.
 
 **Edge cases.**
+
 - **False trigger from a participant's question ("can you show the bear case?"):** the confirmation guard catches it; if the presenter says "yes do it" deliberately, it fires; otherwise it's a no-op.
 - **Presenter has a cold / voice is hoarse:** ASR can be set to a more permissive acoustic model temporarily.
 - **Background noise / crosstalk:** the model has a noise gate; if SNR drops below threshold, voice trigger auto-pauses for the duration.
@@ -175,6 +190,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** When a deck is scheduled to present soon (per calendar integration F190) or is opened on a room display before a meeting, it enters "ambient mode": it idles on a branded dashboard of the live data the deck is about to discuss — KPIs ticking, scenarios rotating, headlines from the deck cycling in — waiting for the presenter to take over.
 
 **Acceptance criteria.**
+
 - Ambient mode activates automatically when:
   - The deck is opened on a "room display" device profile (kiosk tablet, wall-mounted screen), OR
   - The deck's calendar entry (F190) is < 15 min away (configurable), OR
@@ -185,12 +201,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - If no one takes over for > 30 min (configurable), ambient mode powers down to a single still frame ("standby") to save screen and energy.
 
 **Behavioral details.**
+
 - The ambient dashboard is generated from the deck's data bindings: any element bound to a live source (F48) is eligible to appear on the dashboard; the author can curate which elements appear via a "Ambient composition" panel.
 - Scenarios (F57) rotate slowly (one every 10 s) so the audience sees all the cases before the meeting starts.
 - The dashboard respects the deck's theme (F37–F47) but defaults to a dimmer, larger-type variant optimized for across-the-room viewing.
 - A "news" strip at the bottom shows the deck's most recent living-log entries (F206) — "Revenue updated 2 min ago, +$300K" — so the room sees the deck is alive.
 
 **Edge cases.**
+
 - **No calendar integration:** ambient mode still works via manual enable or scheduled windows ("ambient every weekday 9–10am on this display").
 - **Data source unavailable:** ambient shows last-known values with a "data as of <ts>" badge; never shows blanks.
 - **Meeting runs late:** the countdown adjusts automatically when the calendar event is moved.
@@ -205,6 +223,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** A specific slide type — most commonly a pricing negotiation, term sheet, or split allocation — accepts simultaneous input from multiple parties (each on their own device), converges on a shared visible state, and records the convergence path into the deck for later reference.
 
 **Acceptance criteria.**
+
 - A "two-way slide" is a slide containing one or more **negotiation widgets**: sliders, allocation bars, multi-party split inputs, or free-form counters.
 - Each party is invited via the existing F142 audience-join mechanism (QR code) and identified by name/role ("Buyer", "Seller", "Legal", "Observer").
 - Each party's inputs are visible (in real time, < 500 ms) to all other parties and to the presenter.
@@ -214,13 +233,15 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Observers can watch without input rights.
 
 **Behavioral details.**
+
 - A two-way widget is declared in the deck schema with `{type: "two_way", parties: [...], convergence_rule: ..., initial_state: ..., record: true}`.
 - The widget renders identical UI to all parties (responsive: desktop sliders on big screens, large-tap sliders on phones).
 - Inputs are CRDT-merged: each party's slider position is an independent field; the visible "agreed value" is a derived value computed by the convergence rule.
-- Conflicts (e.g., two parties move sliders to incompatible positions) are *not* errors — they're the point: the widget shows both values, the gap, and a "delta" indicator until convergence.
+- Conflicts (e.g., two parties move sliders to incompatible positions) are _not_ errors — they're the point: the widget shows both values, the gap, and a "delta" indicator until convergence.
 - The recorded path is a sequence of `{t, party_id, value, intent: "propose"|"accept"|"reject"}` events.
 
 **Edge cases.**
+
 - **A party drops off mid-negotiation:** their last proposed value remains visible (greyed out) until they rejoin or the session times out; if timeout, they're marked "withdrew."
 - **All parties disagree at deadline:** the widget shows "no agreement" and the timeline records it; the deck can be configured to auto-trigger a "follow-up scheduled" slide.
 - **Recording with PII visible:** party names are recorded by default but can be pseudonymized ("Party A", "Party B") for confidential negotiations.
@@ -234,6 +255,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** Every deck ever derived from a master deck (via clone, template, fork, or share-and-edit) is tracked in a tree. The owner of an ancestor can see all descendants, push updates down the tree selectively (some updates to some descendants, not to others), and see which descendants have unmerged local changes.
 
 **Acceptance criteria.**
+
 - Each deck has a `parent_deck_id` (nullable, set at creation if derived). Derivation paths are recorded: clone, fork-from-template, fork-from-shared, two-way-fork.
 - The inheritance view shows a tree (or forest, if multiple roots), with each node showing: deck title, owner, last-modified, divergence-from-parent (semantic diff size), unmerged-changes count, and "updates available" badge.
 - "Push update down" lets an ancestor owner select specific changes (slides, themes, components, data bindings) and target specific descendants (one, a group, or "all that haven't diverged").
@@ -242,12 +264,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - A descendant can "break inheritance" — detach from the parent, becoming a root; after this, no more pushes from the parent apply.
 
 **Behavioral details.**
+
 - Inheritance is computed from `parent_deck_id` recursively; the tree is materialized in a graph store for fast traversal.
 - "Updates available" is computed as: `ancestor.head ≠ descendant.ancestor_snapshot_at_fork` ∧ `diff(ancestor.head, descendant.ancestor_snapshot_at_fork) ∩ selected_push_set ≠ ∅`.
 - Push proposals are themselves decks (or deck-fragments) — they have an id, a diff, a target list, and a status; this lets them be reviewed like any other deck change.
 - When a push is accepted, the descendant's `ancestor_snapshot` is updated to the pushed version; subsequent diffs are computed from that snapshot.
 
 **Edge cases.**
+
 - **Diamond inheritance (A → B and A → C; B and C merge into D):** D has two ancestors; conflict resolution follows normal merge semantics (F21 CRDTs + manual review).
 - **Circular reference (impossible by design but defensively checked):** the parent pointer is set at creation only and validated against cycles.
 - **Parent deck deleted:** descendants are not auto-deleted; they retain a "dangling parent" marker; the inheritance view shows the parent as "deleted" with a tombstone.
@@ -261,6 +285,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** A presenter in one location presents to audience members across the globe; every audience member's view is synchronized to the presenter's slide and state with a sub-second budget, regardless of network distance. Includes the audience view (the slides), the presenter's annotations, gaze highlight (F207), pointer (F208), and any live data updates.
 
 **Acceptance criteria.**
+
 - End-to-end sync budget: presenter action → all audience members see the change within 800 ms p95, 400 ms p50, measured from the moment the presenter's client commits the action.
 - Audience members see exactly what the presenter sees, modulo per-user personalization (e.g., their own language captions per F153).
 - Sync survives presenter reconnects (F136): audience views do not disconnect; they hold the last state and resume when the presenter is back, with a "reconnecting" badge.
@@ -269,6 +294,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Bandwidth-adaptive: on poor networks, the client degrades to snapshot-only (no annotations, no gaze) rather than falling behind.
 
 **Behavioral details.**
+
 - The presenter client is the source of truth; it produces a stream of `presenter_state_event`s: slide changes, annotations, scenario toggles, live data updates, pointer position, gaze position.
 - Events are broadcast via a global edge network (anycast routing of audience clients to the nearest edge node; the presenter publishes to a coordinator node).
 - Each audience client maintains a `last_applied_seq` and a buffer of pending events; if it falls behind, it requests a snapshot.
@@ -276,6 +302,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Annotations are layered: an annotation event is small (path, color, lifetime) and ephemeral (not persisted beyond session unless explicitly saved).
 
 **Edge cases.**
+
 - **Audience member on a 200 ms RTT link:** still within budget if the edge is well-placed; falls behind only if RTT > 600 ms, in which case snapshot-only mode kicks in.
 - **Audience member on a flaky network (50% packet loss):** WebRTC data channels with FEC handle this; fallback to long-polling on legacy networks.
 - **Two presenters in different time zones (F135):** the "active presenter" flag is a single field; audience views follow the active presenter with a small "switching to <name>" overlay during handoff.
@@ -288,6 +315,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** With explicit, prominent opt-in (and ideally a verbal "yes, I'm okay with the listener being on" recorded at session start), the platform listens to the live presentation audio, performs low-latency ASR + intent matching, and quietly surfaces relevant slides to the presenter when the conversation warrants. Classic use case: an audience member asks "what about churn?" — the listener hears it, finds the churn appendix, and surfaces it in the presenter's private view without the audience knowing.
 
 **Acceptance criteria.**
+
 - Opt-in is per-session, with a separate, prominent consent for "listener mode" vs. plain recording.
 - The listener audio path is opt-in only: it requires explicit microphone permission for the listener (not just the presenter's mic) and an additional toggle in the presenter UI.
 - Audio processing for the listener happens on a dedicated, isolated worker that has no access to other platform data; the listener cannot exfiltrate or persist audio.
@@ -298,12 +326,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - The listener's detection log (what was heard, what was matched, what was surfaced) is available to the presenter for review after the session but never to anyone else.
 
 **Behavioral details.**
+
 - ASR runs on the presenter's audio stream (since the listener needs to hear both presenter and audience). A separate small model classifies intent against the deck's slide corpus.
 - Intent matching uses slide titles, slide content (text), and a precomputed embedding per slide; matching is by cosine similarity, threshold 0.78.
 - The matching is biased by recency (recently discussed topics are more likely matches) and by presenter context (presenter is currently on slide 5 about revenue — a churn question is more likely about the churn impact on revenue, not the churn definition).
 - Surfacing is a non-destructive UI overlay; jumping to the surfaced slide requires an explicit presenter action.
 
 **Edge cases.**
+
 - **Listener misfires (matches wrong slide):** presenter dismisses the chip; the dismissal is a negative training signal that improves the matching for that session and (anonymized) for future sessions.
 - **Sensitive content (HR, legal, M&A):** org-level policy can disable the listener for decks tagged "sensitive" or in meetings with certain participant roles.
 - **Multiple questions in quick succession:** the listener surfaces the most relevant; chips queue if more than 2 are relevant within 5 s.
@@ -318,6 +348,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** Any stat, number, or claim on any slide can display a small "provenance chip" — a chip the viewer hovers over to see where the value came from: source system, query/SQL, owner, last-verified date, and a "stale" indicator if the value is past its freshness threshold.
 
 **Acceptance criteria.**
+
 - Provenance is attached to data bindings (F48) and to AI-generated content (F108–F125); the chip renders automatically when provenance exists.
 - Hover (desktop) or tap-and-hold (mobile) reveals the chip with: source system name (linked to its config), query/SQL (read-only, with a "copy" button), data owner (avatar + name), last-verified timestamp, and freshness indicator (green / amber / red based on threshold).
 - The chip is keyboard-accessible: Tab to the stat, Enter to expand the chip.
@@ -326,12 +357,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Provenance data is permissioned: the query/SQL is visible only to users with read access on the source system; for viewers without access, the chip shows "source: [Salesforce]" but not the query.
 
 **Behavioral details.**
+
 - Provenance is stored as a `provenance_record` attached to the data binding (see F215 data model).
 - "Last-verified" is updated each time the data refreshes successfully; it's independent of "last-shown" (a value can be shown many times but verified rarely).
 - The freshness threshold is configurable per data source: e.g., "revenue: stale after 24h", "stock price: stale after 5 min".
 - The lineage side panel reuses the cross-deck knowledge graph (F219) for downstream usage tracking.
 
 **Edge cases.**
+
 - **Source system deleted:** chip shows "source: [Salesforce] (disconnected)"; query is hidden; freshness is "unknown".
 - **Data owner has left the org:** chip shows "owner: <name> (former)"; re-assignment is a separate governance task (tied to F194).
 - **AI-generated stat with no underlying source (e.g., a projection):** chip shows "AI projection based on <prompt and sources>; confidence: <score>" (tied to F238).
@@ -345,6 +378,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** Given a deck (and optionally the presenter's notes), the platform generates a two-voice audio discussion (e.g., "Alex" and "Jamie") that walks through the deck as if two podcast hosts were discussing it. Stakeholders who prefer listening (commute, workout, screen-free review) get an audio version of the deck.
 
 **Acceptance criteria.**
+
 - The generated podcast is a real, listenable audio file (MP3 or AAC, default 128 kbps mono), not a screen-driven TTS read-through.
 - Two distinct voices (configurable: male/female, neutral/accent, etc.) with natural prosody, pacing, and turn-taking.
 - The script is generated by an LLM that ingests the deck's slide content + presenter notes, then produces a "host A explains, host B asks follow-up, host A answers" pattern.
@@ -355,12 +389,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Source citations from the deck (F109) are audibly mentioned ("according to Q3 Salesforce data...") at the script's discretion.
 
 **Behavioral details.**
+
 - Pipeline: deck → slide-level summary → per-slide conversational script → cross-slide narrative arc → TTS with two voices → audio post-processing (EQ, normalization, silence trimming) → MP3.
 - TTS uses a neural TTS provider (e.g., ElevenLabs, Azure Neural TTS, or self-hosted XTTS); voice selection is per presenter.
 - The script is editable post-generation; any edits are re-rendered for the affected segments.
 - The audio file is stored as an asset of the deck (similar to a video export); access controls mirror the deck.
 
 **Edge cases.**
+
 - **Deck has no notes:** the script is generated from slide titles + body + data context; quality is lower but still listenable.
 - **Deck is heavily visual (charts, diagrams) without text:** the script describes the visuals ("here's a bar chart showing revenue by region, with APAC leading at $4.5M"); quality of description depends on the chart's alt-text (F122).
 - **Very long deck (100+ slides):** generation is chunked (per-section); the audio file is a concatenation with section intros ("Part 2: financial review").
@@ -375,6 +411,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** The phone used as a presenter remote (F127) vibrates at rehearsed pacing checkpoints during a live presentation — e.g., a soft tap at the 50% mark of a slide's allocated time, a stronger pulse when over time — giving the presenter a tactile signal they can feel without looking at the screen.
 
 **Acceptance criteria.**
+
 - Haptic patterns are distinct for distinct signals:
   - **Soft tap** = halfway through slide's allotted time
   - **Double tap** = 80% through (warning)
@@ -387,11 +424,13 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Rehearsal mode (F131) lets the presenter rehearse the haptic timing without an audience; the haptic log is reviewable post-rehearsal.
 
 **Behavioral details.**
+
 - The remote (F127) is already a phone-based web app; haptics use the Web Vibration API (`navigator.vibrate`) with platform-specific patterns.
 - Cue timing is computed against the deck's per-slide time targets (F131) or the presenter's historical per-slide average (with consent, F131 stores rehearsal times).
 - The haptic log (in-memory only, zeroed on session end unless the presenter opts in to save it) shows what fired when, for post-session review.
 
 **Edge cases.**
+
 - **Phone in pocket / silenced:** haptics still work (vibration motor is independent of audio).
 - **Presenter using a different clicker:** haptics only fire on the phone remote; a hardware clicker has no haptic channel.
 - **Cue fires during an animation (F85):** the haptic doesn't pause the animation; the presenter is expected to glance at the time cue separately.
@@ -404,6 +443,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** A deck configured for unattended display — typically at a trade-show booth, in a lobby, or on a showroom floor — auto-loops through its content with optional touch interactivity (F96–F105), and reliably resets to a clean state on a schedule, on touch-idle, or on a hard timeout.
 
 **Acceptance criteria.**
+
 - Kiosk mode runs in a dedicated browser profile (full-screen, no chrome, no address bar, no system menus) on the configured device.
 - The loop is a configurable sequence: which slides play, in what order, with what dwell time per slide (default 15 s, configurable per slide).
 - Touch interactivity is enabled per-element: any element flagged "interactive in kiosk" responds to touch (e.g., a tap on a chart drills down; F49).
@@ -417,12 +457,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - Kiosk devices have an isolated user account (no access to other decks, no edit access, no access to the device's other apps).
 
 **Behavioral details.**
+
 - Kiosk runtime is a thin client (Chromium-based, packaged or PWA with full-screen + kiosk print keys).
 - The client pre-caches the deck and its data (for offline operation; F137) on launch; refreshes from server periodically.
 - Touch input is debounced and rate-limited to prevent accidental rapid-fire taps from triggering dozens of state changes.
 - "Reset" is implemented as a soft reset (clear state, return to slide 1, replay cached data) plus an optional hard reset (reload the page) on a longer cadence.
 
 **Edge cases.**
+
 - **Network drops mid-loop:** the kiosk continues on cached data (F137); if cached data is stale beyond threshold, the kiosk shows a "data unavailable" slide until reconnect.
 - **Touch screen fails:** kiosk falls back to timed-only loop (no interactivity); admin is alerted.
 - **Device stolen / removed:** the kiosk reports its last-known IP and a heartbeat; missing heartbeats alert the admin; the deck can be remotely revoked.
@@ -436,6 +478,7 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 **Definition.** The platform maintains a knowledge graph over every deck in the user's workspace: entities (companies, products, metrics, people, dates) are extracted from every deck, linked across decks, and indexed for queries like "show me every slide across the company that cites our NPS score — and which ones are stale."
 
 **Acceptance criteria.**
+
 - Entities are extracted from: slide titles, body text, data binding labels, AI-generated content, and provenance records (F215).
 - Entity types include: organizations, products, people, metrics (with values and units), locations, dates, and custom types per workspace.
 - Each entity has a stable id (e.g., `metric:net_promoter_score`), a canonical label, aliases ("NPS", "Net Promoter Score", "NPS Score"), and a value history (when did different decks cite different values?).
@@ -448,12 +491,14 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 - The graph re-extracts incrementally as decks change; full re-extraction runs weekly.
 
 **Behavioral details.**
+
 - Extraction is a two-pass pipeline: (1) NER + rule-based extractors for known types, (2) LLM-based extraction for ambiguous cases and custom entity types.
 - The graph is stored in a graph database (e.g., Neo4j, Memgraph, or self-hosted equivalent) with a separate read-replica for queries.
 - "Cites NPS" is a graph traversal: `(deck)-[cites]->(entity:metric:nps)`. Staleness is a derived property: `entity.last_verified_at < now() - threshold OR exists(entity.conflicting_values)`.
 - PII is redacted at extraction time: people entities are linked to a directory entry (if org has one) but full names are stored encrypted at rest; public display uses initials or role-based labels per workspace policy.
 
 **Edge cases.**
+
 - **Same name, different concept:** "Apple" the company vs. "apple" the fruit — disambiguation via context (a fruit in a recipe deck vs. a tech company in a market analysis); the graph keeps both as separate entities with a "disambiguation-needed" flag if confidence is low.
 - **Entity value conflict across decks:** both values are preserved; the query "show me NPS" returns both, each tagged with their deck; a "consolidate" workflow (out of scope for the graph, but exposed via API) lets an admin pick a canonical value.
 - **Extraction quality low (LLM hallucinations):** every extracted entity has a confidence score; entities below threshold are not surfaced in queries (but are kept in the graph for re-extraction).
@@ -464,149 +509,149 @@ The secondary tension is **reliability under live conditions.** Unlike editor-mo
 
 ## 2. UX Flows
 
-This section walks through 14 of the most consequential user flows, each touching one or more of F205–F219. Flow notation: bold = user action; *italic* = system response; `(decision)` = branching point.
+This section walks through 14 of the most consequential user flows, each touching one or more of F205–F219. Flow notation: bold = user action; _italic_ = system response; `(decision)` = branching point.
 
 ### 2.1 Replaying a presentation session (F205)
 
-1. **Presenter ends session** → *system auto-finalizes the timeline log; presenter sees "Replay ready" in their dashboard.*
-2. **Presenter clicks "Replay"** → *system opens the replay viewer in a new tab.*
-3. *Viewer loads the timeline, prefetches the deck version and data snapshots, renders the first slide at t=0.*
-4. **Presenter scrubs the timeline** → *viewer shows the slide state at the scrubbed time; a side rail shows the textual action log aligned to the scrub position.*
-5. **Presenter hits Play** → *viewer plays back at 1× by default; animations and live data values evolve as they did live.*
-6. **Presenter clicks a specific event in the rail (e.g., "Bear case toggled")** → *viewer snaps the scrub to that event's timestamp and shows the resulting slide state.*
-7. **Presenter shares the replay URL with a colleague** → *colleague opens the link, sees the same replay from t=0; replay is identical because timeline + deck version + data snapshots are deterministic.*
-8. `(decision)` If the deck has been edited since the session, the replay *shows the "as presented" version* with a banner "this is the version shown on <date>; the deck has been edited since."
+1. **Presenter ends session** → _system auto-finalizes the timeline log; presenter sees "Replay ready" in their dashboard._
+2. **Presenter clicks "Replay"** → _system opens the replay viewer in a new tab._
+3. _Viewer loads the timeline, prefetches the deck version and data snapshots, renders the first slide at t=0._
+4. **Presenter scrubs the timeline** → _viewer shows the slide state at the scrubbed time; a side rail shows the textual action log aligned to the scrub position._
+5. **Presenter hits Play** → _viewer plays back at 1× by default; animations and live data values evolve as they did live._
+6. **Presenter clicks a specific event in the rail (e.g., "Bear case toggled")** → _viewer snaps the scrub to that event's timestamp and shows the resulting slide state._
+7. **Presenter shares the replay URL with a colleague** → _colleague opens the link, sees the same replay from t=0; replay is identical because timeline + deck version + data snapshots are deterministic._
+8. `(decision)` If the deck has been edited since the session, the replay _shows the "as presented" version_ with a banner "this is the version shown on <date>; the deck has been edited since."
 
 ### 2.2 Viewing living-document commentary (F206)
 
-1. **User opens a living QBR deck** → *system loads current state; data refreshes in background.*
-2. *Sidebar shows "Living log" — the accumulated change history.*
-3. **User clicks a log entry ("Revenue changed $4.2M → $4.5M, 2h ago")** → *system highlights the affected element on the current slide; a tooltip shows the old vs. new value, the source, and the refresh timestamp.*
-4. **User scrolls the log** → *system shows years of accumulated entries; semantic search filters ("show only revenue-related changes").*
-5. **User clicks "View all 47 comments on this deck"** → *panel opens with all comments (active + archived); comments on since-deleted slides appear in "Archived" subpanel.*
-6. **User sees a slide badge "Updated since you last viewed (3 changes)"** → *hover reveals the per-slide change summary.*
-7. `(decision)` If the user wants the *previous* version of a slide (before the last refresh), they click "View as of <timestamp>" — system renders the deck state at that timestamp using the historical snapshots.
+1. **User opens a living QBR deck** → _system loads current state; data refreshes in background._
+2. _Sidebar shows "Living log" — the accumulated change history._
+3. **User clicks a log entry ("Revenue changed $4.2M → $4.5M, 2h ago")** → _system highlights the affected element on the current slide; a tooltip shows the old vs. new value, the source, and the refresh timestamp._
+4. **User scrolls the log** → _system shows years of accumulated entries; semantic search filters ("show only revenue-related changes")._
+5. **User clicks "View all 47 comments on this deck"** → _panel opens with all comments (active + archived); comments on since-deleted slides appear in "Archived" subpanel._
+6. **User sees a slide badge "Updated since you last viewed (3 changes)"** → _hover reveals the per-slide change summary._
+7. `(decision)` If the user wants the _previous_ version of a slide (before the last refresh), they click "View as of <timestamp>" — system renders the deck state at that timestamp using the historical snapshots.
 
 ### 2.3 Presenting with gaze-guided highlighting (F207)
 
-1. **Before session: presenter enables gaze tracking in settings** → *system shows consent dialog: "Gaze tracking will run on your webcam. Your gaze is computed on-device and never leaves this computer unless audience sync is enabled (it isn't, by default)."*
-2. **Presenter accepts** → *consent record stored with scope = "transient only"; system starts calibration (3-second "look at each corner" routine).*
-3. **Presenter goes live** → *audience view shows a faint "👁 presenter eye-tracking on" badge linked to disclosure.*
-4. **Presenter looks at the upper-left chart** → *audience view shows a soft radial highlight around the chart; presenter view is unaffected.*
-5. **Presenter looks away at their notes** → *highlight fades to center over 1 s.*
-6. **Presenter toggles gaze off mid-session (`G` key)** → *highlight disappears; consent record updated with revocation timestamp.*
+1. **Before session: presenter enables gaze tracking in settings** → _system shows consent dialog: "Gaze tracking will run on your webcam. Your gaze is computed on-device and never leaves this computer unless audience sync is enabled (it isn't, by default)."_
+2. **Presenter accepts** → _consent record stored with scope = "transient only"; system starts calibration (3-second "look at each corner" routine)._
+3. **Presenter goes live** → _audience view shows a faint "👁 presenter eye-tracking on" badge linked to disclosure._
+4. **Presenter looks at the upper-left chart** → _audience view shows a soft radial highlight around the chart; presenter view is unaffected._
+5. **Presenter looks away at their notes** → _highlight fades to center over 1 s._
+6. **Presenter toggles gaze off mid-session (`G` key)** → _highlight disappears; consent record updated with revocation timestamp._
 7. `(decision)` If the audience member prefers reduced motion, the highlight defaults to a static ring per `prefers-reduced-motion`.
 
 ### 2.4 Using gestures to advance slides (F208)
 
-1. **Before session: presenter enables gestures, does the 5-gesture calibration routine** → *model calibrates to presenter's hand proportions.*
-2. **Presenter goes live, both hands free (no clicker)** → *HUD shows "gestures: ON" with current detection confidence.*
-3. **Presenter pushes palm right** → *HUD flashes "NEXT, conf 0.91"; slide advances.*
-4. **Presenter holds up index finger** → *HUD shows "POINTER"; virtual laser follows fingertip; laser is visible on audience view.*
-5. **Presenter makes fist** → *HUD shows "LASER OFF"; laser disappears.*
-6. **Presenter accidentally triggers a back gesture** → *slide goes back; presenter re-advances with another gesture.*
-7. **Presenter disables gestures (`Esc`)** → *HUD shows "gestures: OFF"; presenter uses keyboard or clicker.*
+1. **Before session: presenter enables gestures, does the 5-gesture calibration routine** → _model calibrates to presenter's hand proportions._
+2. **Presenter goes live, both hands free (no clicker)** → _HUD shows "gestures: ON" with current detection confidence._
+3. **Presenter pushes palm right** → _HUD flashes "NEXT, conf 0.91"; slide advances._
+4. **Presenter holds up index finger** → _HUD shows "POINTER"; virtual laser follows fingertip; laser is visible on audience view._
+5. **Presenter makes fist** → _HUD shows "LASER OFF"; laser disappears._
+6. **Presenter accidentally triggers a back gesture** → _slide goes back; presenter re-advances with another gesture._
+7. **Presenter disables gestures (`Esc`)** → _HUD shows "gestures: OFF"; presenter uses keyboard or clicker._
 8. `(decision)` If lighting drops, confidence falls below threshold; HUD shows "low confidence — gestures disabled"; presenter is told to use keyboard.
 
 ### 2.5 Triggering slide states by voice (F209)
 
-1. **Presenter enables voice trigger** → *system shows "Voice trigger is listening. Say 'confirmed' or press Enter after each trigger phrase."*
-2. **Presenter says "let's look at the bear case"** → *HUD shows "heard: '...bear case...' — confirm?"*
-3. **Presenter says "confirmed"** → *scenario switches to bear case; data updates; HUD flashes "bear case applied."*
-4. **An audience member asks "could you show the bear case?"** → *HUD shows the same pending suggestion; presenter does NOT confirm; no slide change.*
-5. **Presenter wants to repeat without confirmation** → *presses `Shift+Enter` to enable "fast-confirm" mode (single utterance triggers); toggled off by default.*
-6. **Presenter disables voice trigger** → *HUD shows "voice trigger: OFF"; system stops listening.*
+1. **Presenter enables voice trigger** → _system shows "Voice trigger is listening. Say 'confirmed' or press Enter after each trigger phrase."_
+2. **Presenter says "let's look at the bear case"** → _HUD shows "heard: '...bear case...' — confirm?"_
+3. **Presenter says "confirmed"** → _scenario switches to bear case; data updates; HUD flashes "bear case applied."_
+4. **An audience member asks "could you show the bear case?"** → _HUD shows the same pending suggestion; presenter does NOT confirm; no slide change._
+5. **Presenter wants to repeat without confirmation** → _presses `Shift+Enter` to enable "fast-confirm" mode (single utterance triggers); toggled off by default._
+6. **Presenter disables voice trigger** → _HUD shows "voice trigger: OFF"; system stops listening._
 
 ### 2.6 Ambient boardroom pre-meeting dashboard (F210)
 
-1. **Day-of-meeting: room display is on the deck's calendar event in 8 minutes** → *display automatically transitions to ambient mode.*
-2. **Ambient dashboard shows: hero metric (MRR ticking), rotating scenarios (Base → Bull → Bear every 10s), headlines cycling, "Meeting starts in 8:00" countdown.*
-3. **Data refreshes on cadence** → *every 5 min, numbers update; small "data refreshed <ts>" badge appears.*
-4. **Presenter walks into the room, taps the screen** → *ambient transitions to presenter view (single tap); meeting starts.*
+1. **Day-of-meeting: room display is on the deck's calendar event in 8 minutes** → _display automatically transitions to ambient mode._
+2. \*_Ambient dashboard shows: hero metric (MRR ticking), rotating scenarios (Base → Bull → Bear every 10s), headlines cycling, "Meeting starts in 8:00" countdown._
+3. **Data refreshes on cadence** → _every 5 min, numbers update; small "data refreshed <ts>" badge appears._
+4. **Presenter walks into the room, taps the screen** → _ambient transitions to presenter view (single tap); meeting starts._
 5. `(decision)` If no one takes over for 30 min, ambient fades to a still "Standby" frame.
 6. `(decision)` If the meeting runs late (calendar updated), countdown adjusts without a manual refresh.
 
 ### 2.7 Two-way pricing negotiation (F211)
 
-1. **Seller opens the pricing slide with a two-way widget** → *widget shows initial offer (e.g., $100K); a unique session QR is generated.*
-2. **Buyer scans QR on their phone** → *joins as "Buyer"; sees the slider; their value is visible to both parties.*
-3. **Buyer drags slider to $80K** → *Seller sees the buyer's $80K within 500 ms; both see the "delta: -$20K" indicator.*
-4. **Seller drags to $90K** → *Buyer sees $90K; both see "delta: +$10K (from buyer's last)."*
-5. **Buyer says "yes, $90K works" and taps "Accept"** → *convergence rule (any party accepts) fires; widget locks at $90K; timeline records `{t, party: buyer, value: 90000, intent: accept}`.*
-6. **Both parties exit** → *negotiation session is recorded into the deck's timeline with full path: `propose $100K → propose $80K → propose $90K → accept $90K`.*
+1. **Seller opens the pricing slide with a two-way widget** → _widget shows initial offer (e.g., $100K); a unique session QR is generated._
+2. **Buyer scans QR on their phone** → _joins as "Buyer"; sees the slider; their value is visible to both parties._
+3. **Buyer drags slider to $80K** → _Seller sees the buyer's $80K within 500 ms; both see the "delta: -$20K" indicator._
+4. **Seller drags to $90K** → _Buyer sees $90K; both see "delta: +$10K (from buyer's last)."_
+5. **Buyer says "yes, $90K works" and taps "Accept"** → _convergence rule (any party accepts) fires; widget locks at $90K; timeline records `{t, party: buyer, value: 90000, intent: accept}`._
+6. **Both parties exit** → _negotiation session is recorded into the deck's timeline with full path: `propose $100K → propose $80K → propose $90K → accept $90K`._
 7. `(decision)` If a third party (Legal) joins, they see the widget but their input is "observer only" — visible but not counted toward convergence.
 
 ### 2.8 Browsing deck inheritance tree (F212)
 
-1. **Owner of the master pitch deck opens "Inheritance view"** → *tree shows master + 23 descendants (cloned for different prospects, forked for different industries).*
-2. **Owner sees one descendant has an "Updates available" badge (3 new slides in master since fork)** → *clicks the badge.*
-3. **Diff view opens** → *shows master.slide[5], master.slide[8], master.theme updated; descendant has none of these.*
-4. **Owner selects "push master.slide[5] only" to "all descendants that haven't diverged"** → *12 descendants receive a push proposal.*
-5. **Each descendant's owner reviews and accepts** → *their deck's `ancestor_snapshot` updates; subsequent diffs from master.*
-6. **One descendant's owner rejects** → *their deck remains on old master.slide[5]; rejection logged.*
+1. **Owner of the master pitch deck opens "Inheritance view"** → _tree shows master + 23 descendants (cloned for different prospects, forked for different industries)._
+2. **Owner sees one descendant has an "Updates available" badge (3 new slides in master since fork)** → _clicks the badge._
+3. **Diff view opens** → _shows master.slide[5], master.slide[8], master.theme updated; descendant has none of these._
+4. **Owner selects "push master.slide[5] only" to "all descendants that haven't diverged"** → _12 descendants receive a push proposal._
+5. **Each descendant's owner reviews and accepts** → _their deck's `ancestor_snapshot` updates; subsequent diffs from master._
+6. **One descendant's owner rejects** → _their deck remains on old master.slide[5]; rejection logged._
 7. `(decision)` If a descendant has diverged significantly, the push is held for manual merge.
 
 ### 2.9 Syncing audience views across continents (F213)
 
-1. **Presenter in NYC clicks "Next slide"** → *presenter client publishes `slide_changed` event to the edge network.*
-2. **Audience members in London (40ms RTT), Singapore (240ms RTT), Sydney (220ms RTT) receive the event** → *all apply within their respective budgets (p95 = RTT + processing ~ 50ms).*
-3. **Presenter annotates with a red circle** → *annotation event broadcasts; all audience members see the annotation drawn in real time.*
-4. **Presenter's network drops for 2 seconds** → *audience views hold last state; show "reconnecting" badge; presenter client reconnects; replays missed events from snapshot.*
-5. **Presenter's network drops for 30 seconds** → *failover to phone (F136); phone takes over publishing; audience views seamlessly follow.*
+1. **Presenter in NYC clicks "Next slide"** → _presenter client publishes `slide_changed` event to the edge network._
+2. **Audience members in London (40ms RTT), Singapore (240ms RTT), Sydney (220ms RTT) receive the event** → _all apply within their respective budgets (p95 = RTT + processing ~ 50ms)._
+3. **Presenter annotates with a red circle** → _annotation event broadcasts; all audience members see the annotation drawn in real time._
+4. **Presenter's network drops for 2 seconds** → _audience views hold last state; show "reconnecting" badge; presenter client reconnects; replays missed events from snapshot._
+5. **Presenter's network drops for 30 seconds** → _failover to phone (F136); phone takes over publishing; audience views seamlessly follow._
 6. `(decision)` If an audience member is on a 1Mbps link with high loss, they enter "snapshot-only" mode (no annotations, no gaze) but still see slides advancing.
 
 ### 2.10 AI meeting listener raising relevant slides (F214)
 
-1. **Presenter opts in to listener mode at session start** → *consent recorded: "Listener mode active for this session; audio processed in isolated worker; never persisted."*
-2. **Audience member asks "what about churn in the SMB segment?"** → *listener ASR transcribes; intent matcher scores against deck's slide corpus.*
-3. **Match found: slide 14 ("SMB churn deep-dive")** → *small chip appears in presenter's private view: "→ SMB churn deep-dive (slide 14), confidence 0.89."*
-4. **Presenter glances at the chip, decides it's relevant** → *taps chip → presenter view jumps to slide 14; audience view unaffected.*
-5. **Audience member asks a follow-up that's also relevant** → *second chip appears in the queue; presenter taps when ready.*
-6. **Listener misfires** → *presenter dismisses chip; dismissal logged as negative training signal.*
-7. **Presenter ends session** → *listener disabled; audio buffer zeroed; consent record retains session scope and revocation.*
+1. **Presenter opts in to listener mode at session start** → _consent recorded: "Listener mode active for this session; audio processed in isolated worker; never persisted."_
+2. **Audience member asks "what about churn in the SMB segment?"** → _listener ASR transcribes; intent matcher scores against deck's slide corpus._
+3. **Match found: slide 14 ("SMB churn deep-dive")** → _small chip appears in presenter's private view: "→ SMB churn deep-dive (slide 14), confidence 0.89."_
+4. **Presenter glances at the chip, decides it's relevant** → _taps chip → presenter view jumps to slide 14; audience view unaffected._
+5. **Audience member asks a follow-up that's also relevant** → _second chip appears in the queue; presenter taps when ready._
+6. **Listener misfires** → _presenter dismisses chip; dismissal logged as negative training signal._
+7. **Presenter ends session** → _listener disabled; audio buffer zeroed; consent record retains session scope and revocation._
 
 ### 2.11 Hovering over a stat to see lineage (F215)
 
-1. **Viewer hovers over "$4.5M ARR" on a slide** → *chip appears: "Source: Salesforce (Q3 report); Owner: Priya R.; Last verified: 2h ago; Fresh: ✓."*
-2. **Viewer clicks "View full lineage"** → *side panel opens showing: source → Salesforce → query → SFDC report ID 00Q... → transformation → none → downstream usages → 7 other slides cite this same metric.*
-3. **Viewer notices one downstream slide is tagged "stale"** → *clicks it; navigates to that slide; the chip there shows red.*
+1. **Viewer hovers over "$4.5M ARR" on a slide** → _chip appears: "Source: Salesforce (Q3 report); Owner: Priya R.; Last verified: 2h ago; Fresh: ✓."_
+2. **Viewer clicks "View full lineage"** → _side panel opens showing: source → Salesforce → query → SFDC report ID 00Q... → transformation → none → downstream usages → 7 other slides cite this same metric._
+3. **Viewer notices one downstream slide is tagged "stale"** → _clicks it; navigates to that slide; the chip there shows red._
 4. `(decision)` If the viewer doesn't have access to the source system, the chip shows source name but no query/SQL.
 
 ### 2.12 Listening to a deck-to-podcast (F216)
 
-1. **Presenter clicks "Generate podcast" on the deck** → *LLM generates the script; presenter sees text preview ("Host A: ... Host B: ...").*
-2. **Presenter edits one segment ("make the intro more concrete")** → *system re-renders only that segment; preview updates.*
-3. **Presenter commits to full audio generation** → *neural TTS produces two-voice audio; ~4 minutes for a 30-slide deck.*
-4. **Audio file appears in deck assets** → *embedded player on deck page; RSS feed generated; downloadable MP3.*
-5. **Stakeholder listens during commute** → *hears "Host A: this quarter's revenue came in at $4.5M, up 7% from last quarter, driven primarily by..." with citations.*
+1. **Presenter clicks "Generate podcast" on the deck** → _LLM generates the script; presenter sees text preview ("Host A: ... Host B: ...")._
+2. **Presenter edits one segment ("make the intro more concrete")** → _system re-renders only that segment; preview updates._
+3. **Presenter commits to full audio generation** → _neural TTS produces two-voice audio; ~4 minutes for a 30-slide deck._
+4. **Audio file appears in deck assets** → _embedded player on deck page; RSS feed generated; downloadable MP3._
+5. **Stakeholder listens during commute** → _hears "Host A: this quarter's revenue came in at $4.5M, up 7% from last quarter, driven primarily by..." with citations._
 6. `(decision)` If the deck is tagged "internal only," the audio inherits that tag and is gated the same way.
 
 ### 2.13 Haptic remote feedback cues (F217)
 
-1. **Presenter's phone is the remote (F127) in their pocket** → *haptics fire at pre-rehearsed cues.*
-2. **At 50% of slide's allotted time: soft tap** → *presenter feels a single tap; glances at notes; knows they have time.*
-3. **At 80%: double tap** → *presenter feels double tap; knows to start wrapping up the slide.*
-4. **Over time: strong pulse** → *presenter feels a long buzz; knows to advance.*
-5. **Audience vote suggests skipping (F148)** → *long buzz fires; presenter sees the vote tally on phone.*
+1. **Presenter's phone is the remote (F127) in their pocket** → _haptics fire at pre-rehearsed cues._
+2. **At 50% of slide's allotted time: soft tap** → _presenter feels a single tap; glances at notes; knows they have time._
+3. **At 80%: double tap** → _presenter feels double tap; knows to start wrapping up the slide._
+4. **Over time: strong pulse** → _presenter feels a long buzz; knows to advance._
+5. **Audience vote suggests skipping (F148)** → _long buzz fires; presenter sees the vote tally on phone._
 6. `(decision)` In rehearsal mode (F131), a triple pulse at the end of each slide = "good pacing."
 
 ### 2.14 Configuring a kiosk loop (F218)
 
-1. **Admin opens Kiosk management dashboard** → *sees all registered kiosks with status (online / offline / last-heartbeat).*
-2. **Admin selects "Booth 4 — Lobby iPad"** → *edits loop: slide order, dwell times, touch-enabled elements.*
-3. **Admin sets reset triggers: idle after 60s, hard timeout 30min, daily reset at midnight** → *config pushed to device.*
-4. **Kiosk starts loop** → *runs unattended; touch responses (e.g., tapping a chart) trigger drill-downs.*
-5. **Kiosk goes 60s without touch** → *auto-resets to slide 1; reset logged.*
-6. **Admin sees a kiosk offline** → *checks last-heartbeat; reboots remotely; kiosk resumes cached loop on restart.*
+1. **Admin opens Kiosk management dashboard** → _sees all registered kiosks with status (online / offline / last-heartbeat)._
+2. **Admin selects "Booth 4 — Lobby iPad"** → _edits loop: slide order, dwell times, touch-enabled elements._
+3. **Admin sets reset triggers: idle after 60s, hard timeout 30min, daily reset at midnight** → _config pushed to device._
+4. **Kiosk starts loop** → _runs unattended; touch responses (e.g., tapping a chart) trigger drill-downs._
+5. **Kiosk goes 60s without touch** → _auto-resets to slide 1; reset logged._
+6. **Admin sees a kiosk offline** → _checks last-heartbeat; reboots remotely; kiosk resumes cached loop on restart._
 7. `(decision)` If a kiosk becomes unresponsive (watchdog fires after 5s), it force-reloads the page; a reload is logged with reason "watchdog."
 
 ### 2.15 Querying the cross-deck knowledge graph (F219)
 
-1. **User opens global search, types "NPS"** → *results show: 23 slides across 8 decks citing NPS; each tagged with value, freshness, and deck.*
-2. **User filters: "stale only"** → *results narrow to 4 stale citations; each links to the affected slide.*
-3. **User clicks one** → *navigates to the slide; the stat's provenance chip (F215) shows why it's stale.*
-4. **User opens "View as graph"** → *visualization shows NPS entity with all 23 citations as nodes; conflicting values (42 vs 38) highlighted.*
-5. **User queries via MCP (F221): `search_entities(query="NPS", include_stale=true)`** → *returns structured JSON for an external agent to consume.*
+1. **User opens global search, types "NPS"** → _results show: 23 slides across 8 decks citing NPS; each tagged with value, freshness, and deck._
+2. **User filters: "stale only"** → _results narrow to 4 stale citations; each links to the affected slide._
+3. **User clicks one** → _navigates to the slide; the stat's provenance chip (F215) shows why it's stale._
+4. **User opens "View as graph"** → _visualization shows NPS entity with all 23 citations as nodes; conflicting values (42 vs 38) highlighted._
+5. **User queries via MCP (F221): `search_entities(query="NPS", include_stale=true)`** → _returns structured JSON for an external agent to consume._
 6. `(decision)` If PII redaction is required (e.g., the entity is a person), the result hides full names per workspace policy.
 
 ---
@@ -618,6 +663,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Every discrete interaction during a live session produces exactly one event in the timeline. Event ordering is total (per-session sequence numbers). Replay is deterministic given the timeline + deck version + data snapshots.
 
 **Non-functional.**
+
 - Recorder CPU/memory overhead: < 3% CPU, < 50 MB RAM on a typical presenter's laptop.
 - Timeline storage: ≤ 30 KB per minute of session for events; ≤ 200 KB per minute for snapshots (at 1 Hz cadence).
 - Replay startup: first frame painted within 1.5 s of opening the replay URL.
@@ -628,6 +674,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Living decks refresh data bindings on a configurable cadence (default 5 min). Layout, theme, and non-data text remain stable across refreshes. Comments accumulate and are searchable. The deck URL is stable forever.
 
 **Non-functional.**
+
 - Refresh latency: data binding update → all viewers see the update within 10 s p95 (matches F48 refresh budgets).
 - Storage growth: living deck adds ≤ 1 MB per month to the deck's log (semantic summaries); raw events are compacted at 90 days.
 - Availability: living decks are always served from a live source; if the source is down, last-known values are served with a "data as of" badge.
@@ -637,6 +684,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Gaze is opt-in per session. Computation is on-device. Coordinate broadcasts (if enabled) are quantized to 32×24 and not persisted server-side. Consent record is stored with scope, expiry, and revocation.
 
 **Non-functional.**
+
 - Webcam frame processing latency: ≤ 33 ms per frame (30 Hz capture, ~15 Hz inference).
 - Gaze coordinate accuracy: ±50 px on 1920×1080 at 60 cm viewing distance, 720p webcam, 300 lux.
 - Bandwidth for gaze broadcast: ≤ 500 bytes/sec per audience member (10 Hz × quantized coordinate).
@@ -647,6 +695,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Five default gestures with configurable on/off, debounce, and confidence threshold. On-device only. Per-gesture enable/disable.
 
 **Non-functional.**
+
 - End-to-end gesture → action latency: < 200 ms p95.
 - Gesture recognition FPS: 24 Hz inference, 30 Hz capture.
 - False-positive rate: < 1 per 100 gestures at default confidence 0.85 in normal lighting.
@@ -657,6 +706,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Trigger phrases configurable. Confirmation guard mandatory unless explicitly disabled. ASR runs on-device by default; cloud opt-in only. No audio persisted.
 
 **Non-functional.**
+
 - End-to-end voice trigger → action latency: < 1 s p95 (assuming confirmation within 2 s).
 - ASR word error rate (WER): < 8% in normal office noise, English; < 15% with moderate accent variation.
 - False-positive rate: < 1 per hour of continuous listening at default settings.
@@ -666,6 +716,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Refresh cadence configurable per deck (default: 5 min during business hours, hourly off-hours). Calendar integration triggers auto-ambient in the 15 min before meeting. Manual enable also supported.
 
 **Non-functional.**
+
 - Ambient startup: < 3 s to first frame painted on a room display.
 - Refresh delta: only data-bearing elements update; layout/theme/animation untouched.
 - Power: ambient mode dims after 5 min of no interaction; standby after 30 min.
@@ -675,6 +726,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Inputs are CRDT-merged per party. Convergence rule is configurable. Recording captures the full proposal path. Pause/resume within 24 h.
 
 **Non-functional.**
+
 - Input → visibility latency: < 500 ms p95 across all parties globally.
 - Convergence computation: < 100 ms for up to 10 parties.
 - Recording fidelity: full path captured; no lossy compression.
@@ -684,6 +736,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Tree derived from `parent_deck_id`. Push proposals are reviewable; auto-apply only with explicit permission. Diamond inheritance handled. "Break inheritance" supported.
 
 **Non-functional.**
+
 - Tree traversal: O(N) where N = descendants; cached for 60 s; invalidated on any change.
 - Push to 1000 descendants: completed within 5 min p95; per-descendant progress visible.
 - Diff computation: semantic diff (element-level) within 10 s for decks up to 500 slides.
@@ -693,6 +746,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** All audience members see exactly what the presenter sees. Modulo per-user personalization. Survives presenter reconnects.
 
 **Non-functional.**
+
 - Sync budget: 800 ms p95, 400 ms p50 from presenter commit to all audience viewers.
 - Scale: 10k concurrent audience members per session.
 - Bandwidth per audience member: ≤ 5 KB/s average (varies by annotation density).
@@ -703,6 +757,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Opt-in per session. Audio processed in isolated worker; never persisted. Surfacing only updates presenter's private view. Quiet UI surface.
 
 **Non-functional.**
+
 - Question detection → slide surface latency: < 1.5 s p95.
 - Listener CPU/memory: < 5% CPU, < 100 MB RAM on presenter machine.
 - ASR WER target: same as F209 (< 8% in normal conditions).
@@ -713,6 +768,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Provenance attached to data bindings and AI-generated content. Lineage graph queryable via side panel and API. Permissioned (source-system access controls query visibility).
 
 **Non-functional.**
+
 - Lineage query latency: < 500 ms p95 for "show all descendants of this source."
 - Provenance record size: ≤ 2 KB per data binding.
 - PII redaction: applied at query time, not at storage time (so the same record serves both redacted and full views).
@@ -722,6 +778,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Two-voice neural TTS. Editable script before generation. Per-deck pronunciation dictionary. Source citations audibly mentioned.
 
 **Non-functional.**
+
 - Generation time: ≤ 6 min for a 30-slide deck.
 - Audio quality: 128 kbps MP3 default; 22 kHz sample rate minimum; intelligible in car/headphone environments.
 - Voice naturalness: MOS (Mean Opinion Score) ≥ 4.0 on standard evaluation set.
@@ -732,6 +789,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Five distinct haptic patterns. Fires only on active presenter's phone. Configurable per cue. Rehearsal-mode positive reinforcement.
 
 **Non-functional.**
+
 - Web Vibration API compatibility: iOS Safari 16.4+, Android Chrome 100+.
 - Haptic fire latency: < 50 ms from cue event to motor activation.
 - Power: haptics add < 1% battery drain per hour of presenting.
@@ -741,6 +799,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Three reset triggers (scheduled, idle, hard timeout). Watchdog force-resets on unresponsiveness > 5 s. Remote management dashboard. Isolated user account.
 
 **Non-functional.**
+
 - Reset reliability: 99.99% — kiosks are always in a clean state.
 - Watchdog detection latency: < 5 s from unresponsiveness to force-reset.
 - Offline operation: cached deck continues to serve loop for ≥ 7 days without network.
@@ -751,6 +810,7 @@ This section walks through 14 of the most consequential user flows, each touchin
 **Functional.** Entities extracted from text, data bindings, AI content, provenance. Cross-deck linking by entity. Staleness computed. Queryable via UI, API, MCP.
 
 **Non-functional.**
+
 - Extraction precision: ≥ 90% on standard entity types (organizations, products, metrics).
 - Extraction recall: ≥ 85% on standard types.
 - Query latency: < 1 s p95 for entity lookup; < 3 s p95 for "all citations of this entity."
@@ -767,12 +827,14 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Capture every discrete interaction during a live session as a structured event; stream events to a server-side append-only log; capture periodic state snapshots.
 
 **Components.**
+
 - **Client-side recorder (in presenter client).** Listens to the editor event bus and presenter action bus; emits `presenter_event` records with monotonic sequence numbers.
 - **Server-side timeline service.** Receives events; validates ordering; persists to an append-only log (Kafka or equivalent); periodically compacts to per-session event streams.
 - **Snapshot service.** Receives state snapshots from the presenter client at the configured cadence; stores with delta-compression (CRDT-style) against the prior snapshot.
 - **Replay service.** Reads the timeline + snapshots + deck version; produces a deterministic replay by stepping through events and snapshotting the deck state at each timestamp.
 
 **Storage.**
+
 - Events: append-only log, partitioned by `session_id`, retained 365 days.
 - Snapshots: blob storage, delta-compressed, retained 365 days.
 - Replay URLs: short-lived signed URLs to the replay bundle (events + snapshots + deck version).
@@ -782,12 +844,14 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Manage the "living" lifecycle of a deck; refresh data bindings; accumulate semantic change history; emit change notifications.
 
 **Components.**
+
 - **Living state store.** A per-deck materialized view that includes current data values + a compact change log.
 - **Refresh scheduler.** Cron-like scheduler that triggers data refreshes per the deck's cadence (per-binding overrides allowed).
 - **Change detector.** Computes semantic diffs between refreshes; emits change events.
 - **Notification dispatcher.** Fans out change events to subscribers (per-role, per-metric, per-threshold).
 
 **Storage.**
+
 - Current state: same store as the deck (F21 CRDT), with a "living" flag and a refresh log.
 - Change history: separate append-only stream, compacted at 90 days to semantic summaries.
 
@@ -796,6 +860,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Capture webcam frames on the presenter's device; run on-device eye-tracking; emit gaze coordinates; broadcast (if enabled) to the audience sync channel.
 
 **Components.**
+
 - **Webcam capture module.** Requests permission; captures at 30 Hz; never persists frames.
 - **On-device inference.** MediaPipe FaceMesh (or custom) in WASM at 15 Hz; outputs gaze ray + confidence.
 - **Coordinate projector.** Intersects gaze ray with slide plane using presenter viewport geometry.
@@ -803,6 +868,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 - **Broadcaster.** Quantizes coordinates to 32×24; broadcasts to audience sync channel (F213) at 10 Hz.
 
 **Privacy properties.**
+
 - No frame data leaves the device.
 - No raw gaze coordinates leave the device.
 - Broadcast coordinates are quantized and ephemeral.
@@ -813,6 +879,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Capture webcam frames; run on-device hand-pose model; classify gestures; fire gesture events to the presenter action bus.
 
 **Components.**
+
 - **Webcam capture module** (shared with F207, but independently consented).
 - **Hand-pose model** (MediaPipe Hands or custom) at 24 Hz.
 - **Gesture state machine.** Tracks hand trajectories; classifies into the gesture vocabulary; applies debounce and confidence threshold.
@@ -823,6 +890,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Capture presenter mic audio; run on-device ASR; match partial transcripts against the trigger phrase list; manage confirmation queue.
 
 **Components.**
+
 - **Mic capture module** (consent-gated).
 - **On-device ASR** (Web Speech API or Whisper-tiny in WASM).
 - **Phrase matcher.** Fuzzy match (edit distance ≤ 2 OR semantic similarity ≥ 0.85) against the configurable trigger list.
@@ -834,6 +902,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Render the branded dashboard before a meeting; refresh data; handle presenter takeover; manage standby.
 
 **Components.**
+
 - **Ambient composer.** Generates the dashboard layout from the deck's data bindings (curated by author).
 - **Refresh daemon.** Polls data sources per cadence.
 - **Presence detector.** Optional (opt-in) room-display camera to detect a person approaching.
@@ -844,6 +913,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Manage multi-party negotiation sessions; CRDT-merge per-party inputs; compute convergence; record the negotiation path.
 
 **Components.**
+
 - **Session coordinator.** One per negotiation; assigns party roles; manages join/leave.
 - **CRDT store.** Per-session state, with one field per party per widget.
 - **Convergence evaluator.** Computes the "agreed value" from per-party inputs and the convergence rule.
@@ -854,6 +924,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Maintain the inheritance forest; compute "updates available"; manage push proposals; track accept/reject.
 
 **Components.**
+
 - **Graph store.** Materialized tree/forest in a graph database (or recursive CTE in Postgres for smaller scales).
 - **Diff engine.** Computes semantic diffs between ancestor head and descendant snapshot.
 - **Push proposal manager.** Creates, dispatches, tracks proposals.
@@ -864,11 +935,13 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Distribute presenter state events to all audience members within the sub-second budget.
 
 **Components.**
+
 - **Coordinator node.** Receives events from the presenter; fans out to edge nodes.
 - **Edge nodes.** Geographically distributed; serve audience clients via WebRTC data channels or WebSocket.
 - **Client-side buffer.** Each audience client maintains `last_applied_seq`; requests snapshots on fall-behind.
 
 **Infrastructure.**
+
 - Edge network with anycast routing of audience clients to the nearest edge.
 - WebRTC data channels for low-latency delivery; WebSocket fallback for restrictive networks.
 - FEC (Forward Error Correction) for lossy links.
@@ -878,12 +951,14 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Listen to live audio; perform low-latency ASR; match intents against the deck's slide corpus; surface matches to the presenter.
 
 **Components.**
+
 - **Isolated audio worker.** Sandboxed; has no access to other platform data; processes audio frames in real time.
 - **ASR module.** Cloud or on-device (user choice); outputs partial transcripts.
 - **Intent matcher.** Computes embeddings of partial transcripts; matches against precomputed slide embeddings (using cosine similarity, threshold 0.78).
 - **Surface renderer.** Quiet UI overlay in the presenter's private view; non-destructive.
 
 **Privacy properties.**
+
 - Worker is sandboxed; no network egress except to the matcher (which receives only embedding comparisons, not raw audio, if cloud).
 - Audio buffer is zeroed on session end.
 - Surface events are not persisted.
@@ -893,6 +968,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Store provenance records; render chips; compute freshness; serve lineage queries.
 
 **Components.**
+
 - **Provenance store.** Per-data-binding record with source, query, owner, last-verified.
 - **Freshness evaluator.** Per-source threshold; recomputes on access.
 - **Chip renderer.** Hover/tap UI; keyboard accessible.
@@ -903,6 +979,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Generate a two-voice audio discussion from a deck + notes.
 
 **Components.**
+
 - **Script generator.** LLM-based; produces host-A/host-B script with citations.
 - **Script editor.** UI for the presenter to review and edit.
 - **TTS engine.** Neural TTS provider; two voices; per-deck pronunciation dictionary.
@@ -914,6 +991,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Fire distinct haptic patterns on the phone remote (F127) at rehearsed pacing checkpoints.
 
 **Components.**
+
 - **Cue scheduler.** Per-slide cue timing (using F131 per-slide targets or historical averages).
 - **Pattern library.** Five default patterns with Web Vibration API calls.
 - **Log buffer.** In-memory log for review; zeroed on session end unless opt-in save.
@@ -923,6 +1001,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Run an unattended deck loop with auto-reset and remote management.
 
 **Components.**
+
 - **Kiosk client.** Packaged Chromium-based; full-screen; isolated user account; pre-cached deck.
 - **Reset manager.** Scheduled, idle, hard-timeout triggers; watchdog for unresponsiveness.
 - **Touch router.** Debounced touch input → element interactions (F96–F105).
@@ -934,6 +1013,7 @@ The novel & frontier layer is a set of services that plug into the core editor (
 **Responsibilities.** Extract entities from all decks; build the cross-deck graph; serve queries.
 
 **Components.**
+
 - **Extraction pipeline.** NER + rule-based + LLM-based; incremental on deck change; weekly full re-extraction.
 - **Graph store.** Graph database (Neo4j, Memgraph, or self-hosted) with read replica.
 - **Entity resolver.** Disambiguates same-name different-concept cases; flags low-confidence resolutions.
@@ -950,31 +1030,31 @@ Schemas below use TypeScript-like notation for clarity. All schemas are illustra
 ```ts
 // F205 — Presentation state timeline
 interface StateTimelineEvent {
-  id: string;                       // ULID
+  id: string; // ULID
   session_id: string;
-  seq: number;                      // monotonic per session
-  t_wall: number;                   // wall-clock ms since session start
-  t_mono: number;                   // monotonic ms (for animation timing)
-  actor_id: string;                 // presenter or co-presenter or system
+  seq: number; // monotonic per session
+  t_wall: number; // wall-clock ms since session start
+  t_mono: number; // monotonic ms (for animation timing)
+  actor_id: string; // presenter or co-presenter or system
   event_type: StateTimelineEventType;
   payload: Record<string, unknown>;
   deck_version_hash: string;
   data_source_snapshot_id?: string;
-  recorded_at: number;              // wall-clock ms
+  recorded_at: number; // wall-clock ms
 }
 
 type StateTimelineEventType =
-  | "slide_changed"
-  | "scenario_toggled"
-  | "calculator_input"
-  | "branch_chosen"
-  | "annotation_drawn"
-  | "poll_vote_cast"
-  | "qa_submitted"
-  | "hidden_slide_revealed"
-  | "slide_reordered"
-  | "data_refreshed"
-  | "actor_changed";
+  | 'slide_changed'
+  | 'scenario_toggled'
+  | 'calculator_input'
+  | 'branch_chosen'
+  | 'annotation_drawn'
+  | 'poll_vote_cast'
+  | 'qa_submitted'
+  | 'hidden_slide_revealed'
+  | 'slide_reordered'
+  | 'data_refreshed'
+  | 'actor_changed';
 
 // F205 — Snapshot (CRDT delta against prior snapshot)
 interface StateTimelineSnapshot {
@@ -985,21 +1065,21 @@ interface StateTimelineSnapshot {
   data_source_snapshot_id: string;
   // Delta against prior snapshot (CRDT-style)
   delta: Record<string, unknown>;
-  full_state?: Record<string, unknown>;  // every Nth snapshot is a full anchor
+  full_state?: Record<string, unknown>; // every Nth snapshot is a full anchor
 }
 
 // F206 — Living document subscription
 interface LivingDocSubscription {
   id: string;
   deck_id: string;
-  subscriber_id: string;            // user or role or channel
-  scope: "all" | "metric" | "slide" | "threshold";
+  subscriber_id: string; // user or role or channel
+  scope: 'all' | 'metric' | 'slide' | 'threshold';
   filter?: {
     metric_ids?: string[];
     slide_ids?: string[];
     threshold?: { metric_id: string; pct_change: number };
   };
-  channel: "in_app" | "email" | "slack" | "webhook";
+  channel: 'in_app' | 'email' | 'slack' | 'webhook';
   created_at: number;
   active: boolean;
 }
@@ -1008,45 +1088,46 @@ interface LivingDocSubscription {
 interface GazeConsent {
   id: string;
   user_id: string;
-  session_id?: string;              // null = workspace-wide
-  scope: "transient_only" | "recorded";
+  session_id?: string; // null = workspace-wide
+  scope: 'transient_only' | 'recorded';
   granted_at: number;
-  expires_at?: number;              // null = until revoked
+  expires_at?: number; // null = until revoked
   revoked_at?: number;
-  jurisdiction?: string;            // for PDPA / GDPR routing
+  jurisdiction?: string; // for PDPA / GDPR routing
 }
 
 // F208 — Gesture model (per-user calibration)
 interface GestureModel {
   id: string;
   user_id: string;
-  hand_size_calibration?: {          // calibrated at session start
+  hand_size_calibration?: {
+    // calibrated at session start
     palm_width_px: number;
     finger_length_px: number;
   };
   enabled_gestures: GestureType[];
-  per_gesture_threshold: Record<GestureType, number>;  // 0..1
+  per_gesture_threshold: Record<GestureType, number>; // 0..1
   per_gesture_cooldown_ms: Record<GestureType, number>;
   updated_at: number;
 }
 
 type GestureType =
-  | "push_right"        // next slide
-  | "push_left"         // previous slide
-  | "point"             // virtual laser
-  | "fist"              // laser off
-  | "two_finger_tap"    // pause/resume
-  | "thumbs_up";        // next build step
+  | 'push_right' // next slide
+  | 'push_left' // previous slide
+  | 'point' // virtual laser
+  | 'fist' // laser off
+  | 'two_finger_tap' // pause/resume
+  | 'thumbs_up'; // next build step
 
 // F209 — Voice trigger
 interface VoiceTrigger {
   id: string;
-  deck_id?: string;                  // null = workspace default
-  phrase: string;                    // "bear case", "next slide", etc.
-  action: string;                    // action identifier (scenario_toggle, slide_advance, etc.)
+  deck_id?: string; // null = workspace default
+  phrase: string; // "bear case", "next slide", etc.
+  action: string; // action identifier (scenario_toggle, slide_advance, etc.)
   phonetic_variants: string[];
-  require_confirmation: boolean;     // default true
-  language: string;                  // BCP-47
+  require_confirmation: boolean; // default true
+  language: string; // BCP-47
   enabled: boolean;
 }
 
@@ -1054,15 +1135,15 @@ interface VoiceTrigger {
 interface AmbientSession {
   id: string;
   deck_id: string;
-  device_id: string;                 // kiosk/room display
+  device_id: string; // kiosk/room display
   started_at: number;
   ended_at?: number;
-  trigger: "calendar" | "manual" | "scheduled_window";
-  composition: string[];             // element ids in the ambient dashboard
-  refresh_cadence: "5min_business" | "hourly" | "custom";
+  trigger: 'calendar' | 'manual' | 'scheduled_window';
+  composition: string[]; // element ids in the ambient dashboard
+  refresh_cadence: '5min_business' | 'hourly' | 'custom';
   custom_cadence_seconds?: number;
-  takeover_at?: number;              // when a presenter took over
-  standby_at?: number;               // when ambient dimmed to standby
+  takeover_at?: number; // when a presenter took over
+  standby_at?: number; // when ambient dimmed to standby
 }
 
 // F211 — Two-way negotiation
@@ -1072,21 +1153,21 @@ interface TwoWayNegotiation {
   slide_id: string;
   widget_id: string;
   parties: NegotiationParty[];
-  convergence_rule: "any_accepts" | "all_accept" | "median" | "custom";
+  convergence_rule: 'any_accepts' | 'all_accept' | 'median' | 'custom';
   custom_formula?: string;
-  state: Record<string, number>;     // per-party current value
+  state: Record<string, number>; // per-party current value
   agreed_value?: number;
   recorded_path: NegotiationPathEntry[];
-  status: "active" | "paused" | "converged" | "abandoned" | "timeout";
+  status: 'active' | 'paused' | 'converged' | 'abandoned' | 'timeout';
   started_at: number;
   paused_at?: number;
-  expires_at?: number;               // default +24h
+  expires_at?: number; // default +24h
 }
 
 interface NegotiationParty {
   party_id: string;
-  label: string;                     // "Buyer", "Seller"
-  role: "negotiator" | "observer";
+  label: string; // "Buyer", "Seller"
+  role: 'negotiator' | 'observer';
   joined_at: number;
   left_at?: number;
 }
@@ -1095,7 +1176,7 @@ interface NegotiationPathEntry {
   t: number;
   party_id: string;
   value: number;
-  intent: "propose" | "accept" | "reject" | "withdraw";
+  intent: 'propose' | 'accept' | 'reject' | 'withdraw';
 }
 
 // F212 — Deck inheritance edge
@@ -1103,22 +1184,22 @@ interface DeckInheritanceEdge {
   id: string;
   parent_deck_id: string;
   child_deck_id: string;
-  derived_via: "clone" | "fork_template" | "fork_shared" | "two_way_fork";
+  derived_via: 'clone' | 'fork_template' | 'fork_shared' | 'two_way_fork';
   ancestor_snapshot_at_fork: string; // version hash
   current_ancestor_version: string;
   unmerged_changes: number;
   updates_available: boolean;
-  auto_apply_pushes: boolean;        // requires explicit permission at fork time
-  broken: boolean;                   // true if "break inheritance" was called
+  auto_apply_pushes: boolean; // requires explicit permission at fork time
+  broken: boolean; // true if "break inheritance" was called
   created_at: number;
 }
 
 // F213 — Audience view state (live broadcast cursor)
 interface AudienceViewState {
   session_id: string;
-  last_event_seq: number;            // most recent event broadcast
+  last_event_seq: number; // most recent event broadcast
   audience_count: number;
-  audience_by_region: Record<string, number>;  // country -> count
+  audience_by_region: Record<string, number>; // country -> count
   presenter_connected: boolean;
   last_presenter_heartbeat: number;
 }
@@ -1126,13 +1207,13 @@ interface AudienceViewState {
 // F214 — Meeting listener session
 interface MeetingListenerSession {
   id: string;
-  session_id: string;                // presenter session
-  user_id: string;                   // presenter (consent giver)
-  consent_id: string;                // FK to consent record
-  status: "active" | "paused" | "ended";
+  session_id: string; // presenter session
+  user_id: string; // presenter (consent giver)
+  consent_id: string; // FK to consent record
+  status: 'active' | 'paused' | 'ended';
   started_at: number;
   ended_at?: number;
-  surfaces: ListenerSurface[];       // in-session log (not persisted after end)
+  surfaces: ListenerSurface[]; // in-session log (not persisted after end)
   // surfaces zeroed on session end; only metadata retained for audit
 }
 
@@ -1140,57 +1221,58 @@ interface ListenerSurface {
   t: number;
   matched_slide_id: string;
   confidence: number;
-  intent_text: string;               // partial transcript that matched
+  intent_text: string; // partial transcript that matched
   dismissed: boolean;
 }
 
 // F215 — Provenance chip (attached to a data binding or AI-generated content)
 interface ProvenanceChip {
   id: string;
-  binding_id: string;                // FK to data binding (F48)
-  source_system: string;             // "Salesforce", "BigQuery:warehouse", etc.
-  source_query?: string;             // SQL or query DSL (permissioned)
-  source_query_redacted?: string;    // fallback when user lacks source access
+  binding_id: string; // FK to data binding (F48)
+  source_system: string; // "Salesforce", "BigQuery:warehouse", etc.
+  source_query?: string; // SQL or query DSL (permissioned)
+  source_query_redacted?: string; // fallback when user lacks source access
   owner_user_id: string;
   last_verified_at: number;
   freshness_threshold_seconds: number;
   ai_generated: boolean;
-  ai_generation_context?: {          // present iff ai_generated
+  ai_generation_context?: {
+    // present iff ai_generated
     prompt_summary: string;
     source_binding_ids: string[];
-    confidence_score: number;        // ties to F238
+    confidence_score: number; // ties to F238
   };
-  lineage_upstream: string[];        // source/transform IDs
-  lineage_downstream: string[];      // other binding IDs citing the same value
+  lineage_upstream: string[]; // source/transform IDs
+  lineage_downstream: string[]; // other binding IDs citing the same value
 }
 
 // F216 — Podcast episode
 interface PodcastEpisode {
   id: string;
   deck_id: string;
-  version_hash: string;              // deck version at generation time
+  version_hash: string; // deck version at generation time
   title: string;
   script: PodcastScriptSegment[];
-  audio_url: string;                 // MP3/AAC
+  audio_url: string; // MP3/AAC
   duration_seconds: number;
-  voice_a: string;                   // voice id
+  voice_a: string; // voice id
   voice_b: string;
-  pronunciation_dict: Record<string, string>;  // "NPS" -> "Net Promoter Score"
+  pronunciation_dict: Record<string, string>; // "NPS" -> "Net Promoter Score"
   generation_metadata: {
     generated_at: number;
     generation_cost_usd: number;
     tts_provider: string;
     model_versions: Record<string, string>;
   };
-  access_tag: string;                // inherits deck's confidentiality
+  access_tag: string; // inherits deck's confidentiality
 }
 
 interface PodcastScriptSegment {
   segment_index: number;
-  speaker: "host_a" | "host_b";
+  speaker: 'host_a' | 'host_b';
   text: string;
-  audio_segment_url?: string;        // for partial re-renders after edit
-  slide_id?: string;                 // the slide this segment is based on
+  audio_segment_url?: string; // for partial re-renders after edit
+  slide_id?: string; // the slide this segment is based on
 }
 
 // F217 — Haptic cue (per-deck or per-rehearsal definition)
@@ -1198,14 +1280,14 @@ interface HapticCue {
   id: string;
   deck_id: string;
   slide_id: string;
-  cue_type: "halfway" | "warning" | "over_time" | "skip_vote" | "good_pacing";
+  cue_type: 'halfway' | 'warning' | 'over_time' | 'skip_vote' | 'good_pacing';
   trigger: {
-    kind: "time_offset";             // "X% of allotted time"
-    pct: number;                     // 50, 80, 100, 110
+    kind: 'time_offset'; // "X% of allotted time"
+    pct: number; // 50, 80, 100, 110
   };
-  pattern: number[];                 // Web Vibration API pattern, e.g. [200]
+  pattern: number[]; // Web Vibration API pattern, e.g. [200]
   enabled: boolean;
-  rehearsal_only: boolean;           // true = only fires in rehearsal mode
+  rehearsal_only: boolean; // true = only fires in rehearsal mode
 }
 
 // F218 — Kiosk configuration
@@ -1215,31 +1297,38 @@ interface KioskConfig {
   deck_id: string;
   loop: KioskLoopEntry[];
   reset_triggers: {
-    idle_seconds: number;            // default 60
-    hard_timeout_minutes: number;    // default 30
-    schedule_cron?: string;          // e.g., "0 0 * * *" for daily midnight
+    idle_seconds: number; // default 60
+    hard_timeout_minutes: number; // default 30
+    schedule_cron?: string; // e.g., "0 0 * * *" for daily midnight
   };
-  watchdog_timeout_seconds: number;  // default 5
-  touch_enabled_elements: string[];  // element ids that respond to touch
-  isolation_profile: "kiosk_only" | "kiosk_plus_whitelist";
+  watchdog_timeout_seconds: number; // default 5
+  touch_enabled_elements: string[]; // element ids that respond to touch
+  isolation_profile: 'kiosk_only' | 'kiosk_plus_whitelist';
   last_heartbeat: number;
   last_reset: {
     at: number;
-    reason: "scheduled" | "idle" | "hard_timeout" | "watchdog" | "manual";
+    reason: 'scheduled' | 'idle' | 'hard_timeout' | 'watchdog' | 'manual';
   };
-  offline_cache_expires_at: number;  // cached deck validity
+  offline_cache_expires_at: number; // cached deck validity
 }
 
 interface KioskLoopEntry {
   slide_id: string;
-  dwell_seconds: number;             // default 15
-  start_state?: Record<string, unknown>;  // e.g., scenario="bull"
+  dwell_seconds: number; // default 15
+  start_state?: Record<string, unknown>; // e.g., scenario="bull"
 }
 
 // F219 — Cross-deck knowledge graph nodes and edges
 interface KnowledgeGraphNode {
   id: string;
-  entity_type: "organization" | "product" | "person" | "metric" | "location" | "date" | "custom";
+  entity_type:
+    | 'organization'
+    | 'product'
+    | 'person'
+    | 'metric'
+    | 'location'
+    | 'date'
+    | 'custom';
   canonical_label: string;
   aliases: string[];
   current_value?: string | number;
@@ -1256,8 +1345,8 @@ interface KnowledgeGraphEdge {
   id: string;
   from_node_id: string;
   to_node_id: string;
-  edge_type: "cites" | "defines" | "owns" | "transforms" | "conflicts_with";
-  from_deck_id: string;              // the deck that contains the citation
+  edge_type: 'cites' | 'defines' | 'owns' | 'transforms' | 'conflicts_with';
+  from_deck_id: string; // the deck that contains the citation
   from_slide_id?: string;
   first_seen_at: number;
   last_seen_at: number;
@@ -1506,6 +1595,7 @@ MCP tool: knowledge_graph_get_citations(entity_id: string)
 ### 9.1 Metrics
 
 Each service exports:
+
 - **Request rate, error rate, latency** (RED metrics) per endpoint.
 - **Custom domain metrics:**
   - F205: timeline event rate, snapshot rate, replay startup time, determinism check pass rate.
@@ -1526,6 +1616,7 @@ Each service exports:
 ### 9.2 Logs
 
 Structured JSON logs with:
+
 - `service`, `trace_id`, `session_id`, `actor_id`, `event_type`.
 - PII redaction at log emission: person names, email addresses, raw gaze/gesture/voice data are never logged.
 - Biometric-feature logs (F207, F208, F209, F214) are tagged `pii:sensitive` and retained for a shorter window (30 days default) with stricter access.
@@ -1625,20 +1716,20 @@ Section 15 doesn't stand alone; it leans heavily on the rest of the platform and
 
 ## Appendix — Coverage summary
 
-| Feature | Mapping (F-by-F) | UX flows | F/NFR | Architecture | Data model | APIs | Security | Performance | Observability | Cross-section |
-|---|---|---|---|---|---|---|---|---|---|---|
-| F205 State timeline | §1 | §2.1 | §3.1 | §4.1 | §5 | §6.1 | §7.1 | §8.1 | §9 | §10.1, §10.2, §10.5, §10.6, §10.8 |
-| F206 Living documents | §1 | §2.2 | §3.2 | §4.2 | §5 | §6 | §7 | §8 | §9 | §10.1, §10.5, §10.6, §10.7 |
-| F207 Gaze highlighting | §1 | §2.3 | §3.3 | §4.3 | §5 | §6.2 | §7.1, §7.2 | §8.2 | §9 | §10.2, §10.5 |
-| F208 Gesture control | §1 | §2.4 | §3.4 | §4.4 | §5 | §6.2 | §7.1, §7.2 | §8.3 | §9 | §10.5 |
-| F209 Voice triggers | §1 | §2.5 | §3.5 | §4.5 | §5 | §6.2 | §7.1, §7.2 | §8.4 | §9 | §10.5 |
-| F210 Ambient boardroom | §1 | §2.6 | §3.6 | §4.6 | §5 | §6 | §7 | §8 | §9 | §10.5 |
-| F211 Two-way slides | §1 | §2.7 | §3.7 | §4.7 | §5 | §6.3 | §7 | §8.5 | §9 | §10.3, §10.5 |
-| F212 Inheritance tree | §1 | §2.8 | §3.8 | §4.8 | §5 | §6.4 | §7 | §8 | §9 | §10.1, §10.7, §10.8 |
-| F213 Audience view sync | §1 | §2.9 | §3.9 | §4.9 | §5 | §6.5 | §7 | §8.6 | §9 | §10.2, §10.3, §10.5, §10.6 |
-| F214 AI meeting listener | §1 | §2.10 | §3.10 | §4.10 | §5 | §6.6 | §7.1, §7.2 | §8.7 | §9 | §10.4, §10.5 |
-| F215 Provenance chips | §1 | §2.11 | §3.11 | §4.11 | §5 | §6.7 | §7.3 | §8 | §9 | §10.1, §10.4, §10.6, §10.8 |
-| F216 Deck-to-podcast | §1 | §2.12 | §3.12 | §4.12 | §5 | §6.8 | §7 | §8 | §9 | §10.1, §10.4 |
-| F217 Haptic remote | §1 | §2.13 | §3.13 | §4.13 | §5 | §6 | §7 | §8 | §9 | §10.2, §10.5 |
-| F218 Kiosk mode | §1 | §2.14 | §3.14 | §4.14 | §5 | §6 | §7.4 | §8 | §9 | §10.3, §10.5 |
-| F219 Knowledge graph | §1 | §2.15 | §3.15 | §4.15 | §5 | §6.9 | §7.5 | §8.8 | §9 | §10.1, §10.4, §10.6, §10.8 |
+| Feature                  | Mapping (F-by-F) | UX flows | F/NFR | Architecture | Data model | APIs | Security   | Performance | Observability | Cross-section                     |
+| ------------------------ | ---------------- | -------- | ----- | ------------ | ---------- | ---- | ---------- | ----------- | ------------- | --------------------------------- |
+| F205 State timeline      | §1               | §2.1     | §3.1  | §4.1         | §5         | §6.1 | §7.1       | §8.1        | §9            | §10.1, §10.2, §10.5, §10.6, §10.8 |
+| F206 Living documents    | §1               | §2.2     | §3.2  | §4.2         | §5         | §6   | §7         | §8          | §9            | §10.1, §10.5, §10.6, §10.7        |
+| F207 Gaze highlighting   | §1               | §2.3     | §3.3  | §4.3         | §5         | §6.2 | §7.1, §7.2 | §8.2        | §9            | §10.2, §10.5                      |
+| F208 Gesture control     | §1               | §2.4     | §3.4  | §4.4         | §5         | §6.2 | §7.1, §7.2 | §8.3        | §9            | §10.5                             |
+| F209 Voice triggers      | §1               | §2.5     | §3.5  | §4.5         | §5         | §6.2 | §7.1, §7.2 | §8.4        | §9            | §10.5                             |
+| F210 Ambient boardroom   | §1               | §2.6     | §3.6  | §4.6         | §5         | §6   | §7         | §8          | §9            | §10.5                             |
+| F211 Two-way slides      | §1               | §2.7     | §3.7  | §4.7         | §5         | §6.3 | §7         | §8.5        | §9            | §10.3, §10.5                      |
+| F212 Inheritance tree    | §1               | §2.8     | §3.8  | §4.8         | §5         | §6.4 | §7         | §8          | §9            | §10.1, §10.7, §10.8               |
+| F213 Audience view sync  | §1               | §2.9     | §3.9  | §4.9         | §5         | §6.5 | §7         | §8.6        | §9            | §10.2, §10.3, §10.5, §10.6        |
+| F214 AI meeting listener | §1               | §2.10    | §3.10 | §4.10        | §5         | §6.6 | §7.1, §7.2 | §8.7        | §9            | §10.4, §10.5                      |
+| F215 Provenance chips    | §1               | §2.11    | §3.11 | §4.11        | §5         | §6.7 | §7.3       | §8          | §9            | §10.1, §10.4, §10.6, §10.8        |
+| F216 Deck-to-podcast     | §1               | §2.12    | §3.12 | §4.12        | §5         | §6.8 | §7         | §8          | §9            | §10.1, §10.4                      |
+| F217 Haptic remote       | §1               | §2.13    | §3.13 | §4.13        | §5         | §6   | §7         | §8          | §9            | §10.2, §10.5                      |
+| F218 Kiosk mode          | §1               | §2.14    | §3.14 | §4.14        | §5         | §6   | §7.4       | §8          | §9            | §10.3, §10.5                      |
+| F219 Knowledge graph     | §1               | §2.15    | §3.15 | §4.15        | §5         | §6.9 | §7.5       | §8.8        | §9            | §10.1, §10.4, §10.6, §10.8        |

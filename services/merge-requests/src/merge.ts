@@ -13,6 +13,6 @@ export function allConflictsResolved(
   conflictingSlideIds: string[],
   resolutions: Array<{ slide_id: string }>,
 ): boolean {
-  const resolvedIds = new Set(resolutions.map(r => r.slide_id));
-  return conflictingSlideIds.every(id => resolvedIds.has(id));
+  const resolvedIds = new Set(resolutions.map((r) => r.slide_id));
+  return conflictingSlideIds.every((id) => resolvedIds.has(id));
 }

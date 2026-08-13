@@ -42,10 +42,7 @@ export interface AuditQueryRequest {
   readonly offset?: string;
 }
 
-export function parseAuditQuery(
-  req: AuditQueryRequest,
-  ctx: AuditCallerContext,
-): AuditQuery {
+export function parseAuditQuery(req: AuditQueryRequest, ctx: AuditCallerContext): AuditQuery {
   const builder: {
     tenantId: string;
     actorId?: string;
@@ -60,7 +57,10 @@ export function parseAuditQuery(
 
   if (req.actor) builder.actorId = req.actor;
   if (req.action) {
-    const parts = req.action.split(',').map((s) => s.trim()).filter(Boolean);
+    const parts = req.action
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
     const valid: AuditAction[] = [];
     for (const p of parts) {
       if (AUDIT_ACTIONS.includes(p as AuditAction)) {
@@ -100,12 +100,7 @@ export function parseAuditQuery(
   return builder as AuditQuery;
 }
 
-const READ_ROLES: ReadonlySet<string> = new Set([
-  'owner',
-  'admin',
-  'compliance-admin',
-  'system',
-]);
+const READ_ROLES: ReadonlySet<string> = new Set(['owner', 'admin', 'compliance-admin', 'system']);
 
 function assertCanRead(ctx: AuditCallerContext): void {
   if (!READ_ROLES.has(ctx.role)) {

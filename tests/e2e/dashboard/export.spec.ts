@@ -25,11 +25,12 @@ test.describe('dashboard — export CSV', () => {
     const [download, response] = await Promise.all([
       page.waitForEvent('download'),
       page.waitForResponse(
-        (r) =>
-          r.url().includes('/v1/exports/csv') &&
-          r.request().method() === 'GET',
+        (r) => r.url().includes('/v1/exports/csv') && r.request().method() === 'GET',
       ),
-      page.locator('[data-testid="export-csv-button"], button:has-text("Export CSV")').first().click(),
+      page
+        .locator('[data-testid="export-csv-button"], button:has-text("Export CSV")')
+        .first()
+        .click(),
     ]);
 
     expect(response.status()).toBe(200);

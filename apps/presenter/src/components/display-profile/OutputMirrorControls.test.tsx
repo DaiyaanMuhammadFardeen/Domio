@@ -22,8 +22,14 @@ describe('OutputMirrorControls', () => {
 
   it('marks the current mode as checked', () => {
     render(<OutputMirrorControls mode="audience_only" />);
-    expect(screen.getByTestId('output-mirror-controls-audience_only')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('output-mirror-controls-extend')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('output-mirror-controls-audience_only')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    expect(screen.getByTestId('output-mirror-controls-extend')).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
   });
 
   it('calls onChange when switching mode', () => {
@@ -35,13 +41,7 @@ describe('OutputMirrorControls', () => {
 
   it('calls onChange with new target when selecting a display', () => {
     const onChange = vi.fn();
-    render(
-      <OutputMirrorControls
-        mode="extend"
-        availableDisplays={DISPLAYS}
-        onChange={onChange}
-      />,
-    );
+    render(<OutputMirrorControls mode="extend" availableDisplays={DISPLAYS} onChange={onChange} />);
     const select = screen.getByTestId('output-mirror-controls-target') as HTMLSelectElement;
     fireEvent.change(select, { target: { value: 'projector' } });
     expect(onChange).toHaveBeenCalledWith('extend', 'projector');
@@ -55,12 +55,7 @@ describe('OutputMirrorControls', () => {
   });
 
   it('renders one option per provided display', () => {
-    render(
-      <OutputMirrorControls
-        mode="extend"
-        availableDisplays={DISPLAYS}
-      />,
-    );
+    render(<OutputMirrorControls mode="extend" availableDisplays={DISPLAYS} />);
     const select = screen.getByTestId('output-mirror-controls-target') as HTMLSelectElement;
     expect(select.options.length).toBe(4); // auto-detect + 3 displays
   });

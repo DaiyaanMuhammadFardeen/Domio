@@ -20,9 +20,10 @@ interface QuizPayload {
 }
 
 export function QuizInner(props: WidgetProps<QuizPayload>) {
-  const options = Array.isArray(props.payload.options) && props.payload.options.length > 0
-    ? props.payload.options
-    : ['A', 'B', 'C', 'D'];
+  const options =
+    Array.isArray(props.payload.options) && props.payload.options.length > 0
+      ? props.payload.options
+      : ['A', 'B', 'C', 'D'];
   const correct = props.payload.correct;
   const timerMs = props.payload.timer_ms;
   const [pick, setPick] = useState<number | null>(null);

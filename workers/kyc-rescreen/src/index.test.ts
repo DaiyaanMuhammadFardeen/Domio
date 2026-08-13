@@ -3,19 +3,14 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import {
-  KycRescreenWorker,
-  InMemoryRescreenProvider,
-} from './index.js';
+import { KycRescreenWorker, InMemoryRescreenProvider } from './index.js';
 import type { CreatorRecord } from './index.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeCreator(
-  overrides: Partial<CreatorRecord> & { creator_id: string },
-): CreatorRecord {
+function makeCreator(overrides: Partial<CreatorRecord> & { creator_id: string }): CreatorRecord {
   return {
     display_name: 'Alice Creator',
     country_code: 'US',
@@ -29,11 +24,10 @@ function makeCreator(
 // ---------------------------------------------------------------------------
 
 describe('KycRescreenWorker', () => {
-
   it('constructor throws when provider is missing', () => {
-    expect(
-      () => new KycRescreenWorker({ provider: undefined as never }),
-    ).toThrow('provider is required');
+    expect(() => new KycRescreenWorker({ provider: undefined as never })).toThrow(
+      'provider is required',
+    );
   });
 
   it('runOnce returns zero counts when no approved creators', async () => {

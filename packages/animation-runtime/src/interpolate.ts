@@ -90,11 +90,7 @@ function interpolateStringWithNumbers(a: string, b: string, t: number): string {
  * - Strings with numeric parts: interpolate the numeric parts.
  * - Fallback: step (return b when t >= 0.5).
  */
-export function interpolate(
-  a: number | string,
-  b: number | string,
-  t: number,
-): number | string {
+export function interpolate(a: number | string, b: number | string, t: number): number | string {
   // Both numbers — linear lerp
   if (typeof a === 'number' && typeof b === 'number') {
     return a + (b - a) * t;

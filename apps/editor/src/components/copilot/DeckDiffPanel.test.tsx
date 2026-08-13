@@ -112,9 +112,11 @@ describe('DeckDiffPanel', () => {
       expect.objectContaining({ method: 'POST' }),
     );
 
-    const [, init] = (mockFetch as unknown as {
-      mock: { calls: Array<[string, RequestInit]> };
-    }).mock.calls[0]!;
+    const [, init] = (
+      mockFetch as unknown as {
+        mock: { calls: Array<[string, RequestInit]> };
+      }
+    ).mock.calls[0]!;
     expect(JSON.parse(String(init.body))).toEqual({
       deckIdA: 'a',
       deckIdB: 'b',
@@ -143,7 +145,9 @@ describe('DeckDiffPanel', () => {
 
     // Classification labels
     expect(screen.getByTestId('deck-diff-entry-classification-slide-3')).toHaveTextContent('Added');
-    expect(screen.getByTestId('deck-diff-entry-classification-slide-1')).toHaveTextContent('Removed');
+    expect(screen.getByTestId('deck-diff-entry-classification-slide-1')).toHaveTextContent(
+      'Removed',
+    );
     expect(screen.getByTestId('deck-diff-entry-classification-t-1')).toHaveTextContent('Changed');
 
     // Diff kind exposed on the element (used by test hooks + a11y).

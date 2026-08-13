@@ -136,7 +136,7 @@ function sanitizeNode(node: unknown): unknown {
 
 export interface LottieTokenMap {
   from: number[]; // [r, g, b, a] in 0-255
-  to: number[];   // [r, g, b, a] in 0-255
+  to: number[]; // [r, g, b, a] in 0-255
 }
 
 /**
@@ -168,12 +168,10 @@ export function recolorLottie(
   json: Record<string, unknown>,
   tokenMap: LottieTokenMap,
 ): Record<string, unknown> {
-  const fromArray = typeof tokenMap.from[0] === 'string'
-    ? hexToRgba(tokenMap.from[0] as string)
-    : tokenMap.from;
-  const toArray = typeof tokenMap.to[0] === 'string'
-    ? hexToRgba(tokenMap.to[0] as string)
-    : tokenMap.to;
+  const fromArray =
+    typeof tokenMap.from[0] === 'string' ? hexToRgba(tokenMap.from[0] as string) : tokenMap.from;
+  const toArray =
+    typeof tokenMap.to[0] === 'string' ? hexToRgba(tokenMap.to[0] as string) : tokenMap.to;
 
   const result = structuredClone(json) as Record<string, unknown>;
   const layers = result.layers as Array<Record<string, unknown>> | undefined;
@@ -194,11 +192,7 @@ export function recolorLottie(
   return result;
 }
 
-function recolorShapeNode(
-  node: Record<string, unknown>,
-  from: number[],
-  to: number[],
-): void {
+function recolorShapeNode(node: Record<string, unknown>, from: number[], to: number[]): void {
   // Check if this node has a fill (ty: 'fl') or stroke (ty: 'st')
   if (
     (node.ty === 'fl' || node.ty === 'st') &&

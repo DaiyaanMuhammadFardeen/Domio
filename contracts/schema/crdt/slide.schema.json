@@ -119,10 +119,7 @@
           "description": "Layer type discriminator."
         },
         "parentId": {
-          "oneOf": [
-            { "type": "null" },
-            { "type": "string", "minLength": 26, "maxLength": 26 }
-          ],
+          "oneOf": [{ "type": "null" }, { "type": "string", "minLength": 26, "maxLength": 26 }],
           "description": "Parent element ID or null for root-level elements."
         },
         "transform": {

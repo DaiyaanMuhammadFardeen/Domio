@@ -295,7 +295,10 @@ describe('NullThumbnailCache — never returns a hit', () => {
   it('always re-renders', async () => {
     let renders = 0;
     const producer: RenderProducer = {
-      render: async (input) => { renders++; return new BitmapRenderProducer().render(input); },
+      render: async (input) => {
+        renders++;
+        return new BitmapRenderProducer().render(input);
+      },
     };
     const service = new ThumbnailService({
       cache: new NullThumbnailCache(),

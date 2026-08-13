@@ -113,10 +113,12 @@ describe('PhonePairingService — rotation', () => {
     expect(second.epoch).toBe(2);
 
     // Old token must be rejected as replayed (epoch behind).
-    await expect(service.verify({
-      token: first.token,
-      session_id: 'sess-1',
-    })).rejects.toBeInstanceOf(PairingTokenReplayedError);
+    await expect(
+      service.verify({
+        token: first.token,
+        session_id: 'sess-1',
+      }),
+    ).rejects.toBeInstanceOf(PairingTokenReplayedError);
 
     // New token verifies.
     const claims = await service.verify({
@@ -134,10 +136,12 @@ describe('PhonePairingService — rotation', () => {
     });
     // Advance the clock past expiry.
     now += 120_000;
-    await expect(service.verify({
-      token: minted.token,
-      session_id: 'sess-1',
-    })).rejects.toBeInstanceOf(PairingTokenExpiredError);
+    await expect(
+      service.verify({
+        token: minted.token,
+        session_id: 'sess-1',
+      }),
+    ).rejects.toBeInstanceOf(PairingTokenExpiredError);
   });
 });
 
@@ -222,10 +226,12 @@ describe('PhonePairingService — security', () => {
       presenter_session_id: 'sess-A',
       device_id: 'dev-1',
     });
-    await expect(service.verify({
-      token: minted.token,
-      session_id: 'sess-B',
-    })).rejects.toBeInstanceOf(PairingSessionMismatchError);
+    await expect(
+      service.verify({
+        token: minted.token,
+        session_id: 'sess-B',
+      }),
+    ).rejects.toBeInstanceOf(PairingSessionMismatchError);
   });
 
   it('rejects a tampered signature', async () => {
@@ -244,10 +250,12 @@ describe('PhonePairingService — security', () => {
     // PairingTokenReplayedError (epoch=0 lookup is bypassed) — but the
     // safer fallback is signature-invalid. Either is acceptable; we
     // assert the call rejects.
-    await expect(service.verify({
-      token: tampered,
-      session_id: 'sess-A',
-    })).rejects.toBeInstanceOf(PairingSignatureError);
+    await expect(
+      service.verify({
+        token: tampered,
+        session_id: 'sess-A',
+      }),
+    ).rejects.toBeInstanceOf(PairingSignatureError);
   });
 });
 
@@ -302,9 +310,12 @@ describe('PhonePairingService — heartbeat', () => {
 
 describe('TokenSigner — invariant', () => {
   it('service construction refuses a key that is not 32 bytes', () => {
-    expect(() => new PhonePairingService({
-      store: new InMemoryPairingStore(),
-      signer: { key: new Uint8Array(16) },
-    })).toThrow(/32-byte key/);
+    expect(
+      () =>
+        new PhonePairingService({
+          store: new InMemoryPairingStore(),
+          signer: { key: new Uint8Array(16) },
+        }),
+    ).toThrow(/32-byte key/);
   });
 });

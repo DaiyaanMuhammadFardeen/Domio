@@ -108,10 +108,7 @@ export function History({
       ) : null}
 
       {!loading && !error && entries.length === 0 ? (
-        <p
-          className="text-[11px] text-slate-500"
-          data-testid="copilot-history-empty"
-        >
+        <p className="text-[11px] text-slate-500" data-testid="copilot-history-empty">
           No recent prompts yet. Your last 20 prompts will appear here.
         </p>
       ) : null}
@@ -136,7 +133,9 @@ export function History({
               {entry.prompt || '(untitled prompt)'}
             </button>
             <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
-              <span>{formatRelative(entry.createdAtMs)} ago · {entry.status}</span>
+              <span>
+                {formatRelative(entry.createdAtMs)} ago · {entry.status}
+              </span>
               <button
                 type="button"
                 className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-slate-400 transition-colors hover:bg-slate-700/60 hover:text-slate-200"

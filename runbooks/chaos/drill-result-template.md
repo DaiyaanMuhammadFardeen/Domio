@@ -8,11 +8,11 @@
 
 ## Measurements
 
-| Metric | Budget | Measured | Verdict |
-|--------|--------|----------|---------|
+| Metric   | Budget | Measured | Verdict     |
+| -------- | ------ | -------- | ----------- |
 | RTO      | 60 s   | NN s     | PASS / FAIL |
 | RPO      | 0      | NN bytes | PASS / FAIL |
-| Other... |        |          |          |
+| Other... |        |          |             |
 
 ## Drill verdict
 

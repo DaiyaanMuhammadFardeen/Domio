@@ -4,7 +4,15 @@
   "title": "CollabExpiryFreshnessConfirmed",
   "description": "Emitted when a user confirms a resource is fresh, resolving its open freshness flags.",
   "type": "object",
-  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "required": [
+    "event_id",
+    "event_type",
+    "ts_ms",
+    "workspace_id",
+    "actor_id",
+    "actor_type",
+    "payload"
+  ],
   "properties": {
     "event_id": {
       "type": "string",

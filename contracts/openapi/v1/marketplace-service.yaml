@@ -225,8 +225,14 @@ paths:
               type: object
               required: [version, changelog]
               properties:
-                version: { type: string, minLength: 1, description: "Semver version (e.g. '1.1.0')." }
-                changelog: { type: string, maxLength: 4096, description: "Human-readable changelog for this version." }
+                version:
+                  { type: string, minLength: 1, description: "Semver version (e.g. '1.1.0')." }
+                changelog:
+                  {
+                    type: string,
+                    maxLength: 4096,
+                    description: 'Human-readable changelog for this version.',
+                  }
       responses:
         '201':
           description: Version added
@@ -505,7 +511,13 @@ paths:
               type: object
               required: [reason]
               properties:
-                reason: { type: string, minLength: 1, maxLength: 4096, description: "Reason for the refund request." }
+                reason:
+                  {
+                    type: string,
+                    minLength: 1,
+                    maxLength: 4096,
+                    description: 'Reason for the refund request.',
+                  }
       responses:
         '202':
           description: Refund request accepted for processing
@@ -686,7 +698,8 @@ paths:
               type: object
               required: [vendor]
               properties:
-                vendor: { type: string, description: "KYC vendor to use (e.g. 'persona', 'sumsub')." }
+                vendor:
+                  { type: string, description: "KYC vendor to use (e.g. 'persona', 'sumsub')." }
       responses:
         '200':
           description: KYC session started
@@ -754,9 +767,15 @@ paths:
               type: object
               required: [kind, external_account_id]
               properties:
-                kind: { type: string, enum: [stripe_connect, bkash, nagad, bank], description: "Payout method type." }
-                external_account_id: { type: string, description: "Provider-side account identifier." }
-                metadata: { type: object, description: "Provider-specific metadata." }
+                kind:
+                  {
+                    type: string,
+                    enum: [stripe_connect, bkash, nagad, bank],
+                    description: 'Payout method type.',
+                  }
+                external_account_id:
+                  { type: string, description: 'Provider-side account identifier.' }
+                metadata: { type: object, description: 'Provider-specific metadata.' }
       responses:
         '201':
           description: Payout method created
@@ -814,7 +833,8 @@ paths:
               type: object
               required: [return_url]
               properties:
-                return_url: { type: string, format: uri, description: "URL to redirect after onboarding." }
+                return_url:
+                  { type: string, format: uri, description: 'URL to redirect after onboarding.' }
       responses:
         '200':
           description: Connect link generated
@@ -1068,7 +1088,11 @@ paths:
       parameters:
         - name: status
           in: query
-          schema: { type: string, enum: [received, in_review, confirmed, dismissed, counter_notice, resolved] }
+          schema:
+            {
+              type: string,
+              enum: [received, in_review, confirmed, dismissed, counter_notice, resolved],
+            }
         - name: kind
           in: query
           schema: { type: string, enum: [dmca, trademark, policy] }
@@ -1264,11 +1288,11 @@ components:
           type: string
           format: uri
           description: URI reference identifying the problem type.
-          example: "https://domio.example/problems/not-found"
+          example: 'https://domio.example/problems/not-found'
         title:
           type: string
           description: Short human-readable summary.
-          example: "Resource not found"
+          example: 'Resource not found'
         status:
           type: integer
           description: HTTP status code.
@@ -1281,25 +1305,27 @@ components:
           type: string
           format: uri
           description: URI reference identifying the specific occurrence.
-          example: "https://api.domio.example.com/v1/marketplace/listings/lst-abc"
+          example: 'https://api.domio.example.com/v1/marketplace/listings/lst-abc'
 
     # ── Marketplace Listing ────────────────────────────────────────────────
     MarketplaceListingInput:
       type: object
       required: [catalog_id, seller_id, title, kind, license_id, price]
       properties:
-        catalog_id: { type: string, minLength: 1, description: "Catalog entry identifier." }
-        seller_id: { type: string, minLength: 1, description: "Creator selling this listing." }
+        catalog_id: { type: string, minLength: 1, description: 'Catalog entry identifier.' }
+        seller_id: { type: string, minLength: 1, description: 'Creator selling this listing.' }
         title: { type: string, minLength: 1, maxLength: 120 }
         kind: { type: string, enum: [component, template, theme, sticker_pack, icon_pack] }
-        license_id: { type: string, minLength: 1, description: "License identifier for this listing." }
+        license_id:
+          { type: string, minLength: 1, description: 'License identifier for this listing.' }
         description: { type: string, maxLength: 4096 }
         tags: { type: array, items: { type: string, maxLength: 40 }, default: [] }
         price:
           type: object
           required: [model, price_cents, currency]
           properties:
-            model: { type: string, enum: [free, one_time, subscription, team_seats, enterprise_quote] }
+            model:
+              { type: string, enum: [free, one_time, subscription, team_seats, enterprise_quote] }
             price_cents: { type: integer, minimum: 0 }
             currency: { type: string, pattern: '^[A-Z]{3}$' }
 
@@ -1358,22 +1384,25 @@ components:
       required: [gross_cents, fee_cents, net_cents, currency, fx_rate, fx_timestamp]
       properties:
         model: { type: string, enum: [free, one_time, subscription, team_seats, enterprise_quote] }
-        gross_cents: { type: integer, description: "Gross amount in integer cents." }
-        fee_cents: { type: integer, description: "Platform fee in integer cents." }
-        net_cents: { type: integer, description: "Net amount to creator in integer cents." }
+        gross_cents: { type: integer, description: 'Gross amount in integer cents.' }
+        fee_cents: { type: integer, description: 'Platform fee in integer cents.' }
+        net_cents: { type: integer, description: 'Net amount to creator in integer cents.' }
         currency: { type: string, pattern: '^[A-Z]{3}$' }
-        fx_rate: { type: number, description: "FX rate locked at invoice time." }
-        fx_timestamp: { type: integer, description: "Epoch milliseconds of FX rate snapshot." }
+        fx_rate: { type: number, description: 'FX rate locked at invoice time.' }
+        fx_timestamp: { type: integer, description: 'Epoch milliseconds of FX rate snapshot.' }
         license_scope: { type: string, enum: [single_seat, team_n_seats, enterprise_pool] }
 
     # ── Payout Policy ──────────────────────────────────────────────────────
     PayoutPolicy:
       type: object
       properties:
-        split_creator_bps: { type: integer, description: "Basis points for creator share (7000 = 70%)." }
-        split_platform_bps: { type: integer, description: "Basis points for platform share (3000 = 30%)." }
-        min_payout_cents: { type: integer, description: "Minimum payout threshold in integer cents." }
-        first_payout_hold_days: { type: integer, description: "Hold period for first-ever payout." }
+        split_creator_bps:
+          { type: integer, description: 'Basis points for creator share (7000 = 70%).' }
+        split_platform_bps:
+          { type: integer, description: 'Basis points for platform share (3000 = 30%).' }
+        min_payout_cents:
+          { type: integer, description: 'Minimum payout threshold in integer cents.' }
+        first_payout_hold_days: { type: integer, description: 'Hold period for first-ever payout.' }
         updated_at: { type: integer }
 
     # ── Reviews ────────────────────────────────────────────────────────────
@@ -1410,259 +1439,449 @@ components:
       type: object
       required: [listing_id, title, slug, is_free, price_cents, currency, brand_locked_state]
       properties:
-        listing_id: { type: string, description: "Marketplace listing identifier." }
-        title: { type: string, description: "Listing title." }
-        slug: { type: string, description: "URL-safe listing slug." }
-        is_free: { type: boolean, description: "Whether the listing is free." }
-        price_cents: { type: integer, description: "Listing price in integer cents." }
-        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
-        override_price_cents: { type: integer, nullable: true, description: "Per-brand price override in integer cents." }
-        brand_locked_state: { type: string, enum: [allow, override], description: "Brand-lock curation state." }
+        listing_id: { type: string, description: 'Marketplace listing identifier.' }
+        title: { type: string, description: 'Listing title.' }
+        slug: { type: string, description: 'URL-safe listing slug.' }
+        is_free: { type: boolean, description: 'Whether the listing is free.' }
+        price_cents: { type: integer, description: 'Listing price in integer cents.' }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: 'ISO 4217 currency code.' }
+        override_price_cents:
+          {
+            type: integer,
+            nullable: true,
+            description: 'Per-brand price override in integer cents.',
+          }
+        brand_locked_state:
+          { type: string, enum: [allow, override], description: 'Brand-lock curation state.' }
 
     # ── Checkout (Phase 19 W2) ──────────────────────────────────────────
     PurchaseInput:
       type: object
       required: [listing_id, provider, currency, idempotency_key]
       properties:
-        listing_id: { type: string, minLength: 1, description: "Marketplace listing to purchase." }
-        provider: { type: string, enum: [stripe, bkash, nagad], description: "Payment provider." }
-        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
-        idempotency_key: { type: string, minLength: 1, description: "Client-generated idempotency key (UUID v4/v7). Prevents duplicate charges." }
-        quantity: { type: integer, minimum: 1, default: 1, description: "Number of seats/licenses to purchase." }
-        success_url: { type: string, format: uri, description: "Redirect URL after successful payment." }
-        cancel_url: { type: string, format: uri, description: "Redirect URL if the buyer cancels." }
+        listing_id: { type: string, minLength: 1, description: 'Marketplace listing to purchase.' }
+        provider: { type: string, enum: [stripe, bkash, nagad], description: 'Payment provider.' }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: 'ISO 4217 currency code.' }
+        idempotency_key:
+          {
+            type: string,
+            minLength: 1,
+            description: 'Client-generated idempotency key (UUID v4/v7). Prevents duplicate charges.',
+          }
+        quantity:
+          {
+            type: integer,
+            minimum: 1,
+            default: 1,
+            description: 'Number of seats/licenses to purchase.',
+          }
+        success_url:
+          { type: string, format: uri, description: 'Redirect URL after successful payment.' }
+        cancel_url: { type: string, format: uri, description: 'Redirect URL if the buyer cancels.' }
 
     PurchaseInitiation:
       type: object
       required: [purchase_id, provider, status, expires_at]
       properties:
-        purchase_id: { type: string, description: "Application-level purchase identifier." }
-        provider: { type: string, enum: [stripe, bkash, nagad], description: "Payment provider used." }
-        provider_intent_id: { type: string, description: "Provider-side payment intent identifier." }
-        checkout_url: { type: string, format: uri, nullable: true, description: "Provider checkout URL. Null for redirect-less flows (e.g., bKash token collection)." }
-        status: { type: string, enum: [pending, processing, succeeded, failed, expired], description: "Current purchase status." }
-        expires_at: { type: integer, description: "Epoch milliseconds when this purchase intent expires." }
+        purchase_id: { type: string, description: 'Application-level purchase identifier.' }
+        provider:
+          { type: string, enum: [stripe, bkash, nagad], description: 'Payment provider used.' }
+        provider_intent_id:
+          { type: string, description: 'Provider-side payment intent identifier.' }
+        checkout_url:
+          {
+            type: string,
+            format: uri,
+            nullable: true,
+            description: 'Provider checkout URL. Null for redirect-less flows (e.g., bKash token collection).',
+          }
+        status:
+          {
+            type: string,
+            enum: [pending, processing, succeeded, failed, expired],
+            description: 'Current purchase status.',
+          }
+        expires_at:
+          { type: integer, description: 'Epoch milliseconds when this purchase intent expires.' }
 
     RefundRequest:
       type: object
       required: [purchase_id, refund_status, auto_approved, review_required]
       properties:
-        purchase_id: { type: string, description: "Original purchase identifier." }
-        refund_status: { type: string, enum: [pending, approved, rejected, processing, completed], description: "Current refund status." }
-        auto_approved: { type: boolean, description: "True if refund was auto-approved (within 14-day window and usage < 5 inserts)." }
-        review_required: { type: boolean, description: "True if the refund requires admin review." }
+        purchase_id: { type: string, description: 'Original purchase identifier.' }
+        refund_status:
+          {
+            type: string,
+            enum: [pending, approved, rejected, processing, completed],
+            description: 'Current refund status.',
+          }
+        auto_approved:
+          {
+            type: boolean,
+            description: 'True if refund was auto-approved (within 14-day window and usage < 5 inserts).',
+          }
+        review_required: { type: boolean, description: 'True if the refund requires admin review.' }
 
     WebhookReceipt:
       type: object
       required: [received]
       properties:
-        received: { type: boolean, description: "Always true when the webhook is acknowledged." }
+        received: { type: boolean, description: 'Always true when the webhook is acknowledged.' }
 
     # ── Creator Profile (Phase 19 W3) ────────────────────────────────────
     CreatorProfile:
       type: object
       required: [user_id, display_name, slug, kyc_status, payout_ready, onboarding_state, currency]
       properties:
-        user_id: { type: string, description: "Platform user identifier." }
-        display_name: { type: string, description: "Public display name." }
-        slug: { type: string, description: "URL-safe creator slug." }
-        bio: { type: string, description: "Creator biography." }
-        country_code: { type: string, pattern: '^[A-Z]{2}$', description: "ISO 3166-1 alpha-2 country code." }
-        payout_method: { type: string, enum: [stripe_connect, bkash, nagad, bank], description: "Default payout method." }
-        payout_ready: { type: boolean, description: "True if creator can receive payouts." }
-        kyc_status: { type: string, enum: [pending, approved, rejected, expired], description: "Current KYC verification status." }
-        balance_cents: { type: integer, description: "Accumulated unpaid balance in integer cents." }
-        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
-        onboarding_state: { type: string, enum: [pending, profile_complete, kyc_required, kyc_submitted, kyc_approved, payout_ready, active], description: "Current onboarding funnel state." }
-        created_at_ms: { type: integer, description: "Profile creation timestamp (epoch ms)." }
-        updated_at_ms: { type: integer, description: "Last update timestamp (epoch ms)." }
+        user_id: { type: string, description: 'Platform user identifier.' }
+        display_name: { type: string, description: 'Public display name.' }
+        slug: { type: string, description: 'URL-safe creator slug.' }
+        bio: { type: string, description: 'Creator biography.' }
+        country_code:
+          { type: string, pattern: '^[A-Z]{2}$', description: 'ISO 3166-1 alpha-2 country code.' }
+        payout_method:
+          {
+            type: string,
+            enum: [stripe_connect, bkash, nagad, bank],
+            description: 'Default payout method.',
+          }
+        payout_ready: { type: boolean, description: 'True if creator can receive payouts.' }
+        kyc_status:
+          {
+            type: string,
+            enum: [pending, approved, rejected, expired],
+            description: 'Current KYC verification status.',
+          }
+        balance_cents:
+          { type: integer, description: 'Accumulated unpaid balance in integer cents.' }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: 'ISO 4217 currency code.' }
+        onboarding_state:
+          {
+            type: string,
+            enum:
+              [
+                pending,
+                profile_complete,
+                kyc_required,
+                kyc_submitted,
+                kyc_approved,
+                payout_ready,
+                active,
+              ],
+            description: 'Current onboarding funnel state.',
+          }
+        created_at_ms: { type: integer, description: 'Profile creation timestamp (epoch ms).' }
+        updated_at_ms: { type: integer, description: 'Last update timestamp (epoch ms).' }
 
     CreatorProfileUpdate:
       type: object
       properties:
         display_name: { type: string, minLength: 1, maxLength: 120 }
         bio: { type: string, maxLength: 4096 }
-        country_code: { type: string, pattern: '^[A-Z]{2}$', description: "ISO 3166-1 alpha-2 country code." }
-        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+        country_code:
+          { type: string, pattern: '^[A-Z]{2}$', description: 'ISO 3166-1 alpha-2 country code.' }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: 'ISO 4217 currency code.' }
 
     KycSessionStart:
       type: object
       required: [kyc_session_id, session_url]
       properties:
-        kyc_session_id: { type: string, description: "KYC session identifier." }
-        session_url: { type: string, format: uri, description: "URL to redirect the creator to the KYC vendor." }
+        kyc_session_id: { type: string, description: 'KYC session identifier.' }
+        session_url:
+          {
+            type: string,
+            format: uri,
+            description: 'URL to redirect the creator to the KYC vendor.',
+          }
 
     KycStatusResult:
       type: object
       required: [kyc_session_id, status, onboarding_state]
       properties:
-        kyc_session_id: { type: string, description: "KYC session identifier." }
-        status: { type: string, enum: [pending, submitted, approved, rejected], description: "Current KYC session status." }
-        onboarding_state: { type: string, enum: [pending, profile_complete, kyc_required, kyc_submitted, kyc_approved, payout_ready, active], description: "Creator onboarding state." }
+        kyc_session_id: { type: string, description: 'KYC session identifier.' }
+        status:
+          {
+            type: string,
+            enum: [pending, submitted, approved, rejected],
+            description: 'Current KYC session status.',
+          }
+        onboarding_state:
+          {
+            type: string,
+            enum:
+              [
+                pending,
+                profile_complete,
+                kyc_required,
+                kyc_submitted,
+                kyc_approved,
+                payout_ready,
+                active,
+              ],
+            description: 'Creator onboarding state.',
+          }
 
     CreatorPayoutMethod:
       type: object
       required: [id, creator_id, kind, verified, external_account_id]
       properties:
-        id: { type: string, description: "Payout method identifier." }
-        creator_id: { type: string, description: "Owner creator identifier." }
-        kind: { type: string, enum: [stripe_connect, bkash, nagad, bank], description: "Payout method type." }
-        verified: { type: boolean, description: "True if provider has confirmed the account." }
-        external_account_id: { type: string, description: "Provider-side account identifier." }
-        metadata: { type: object, description: "Provider-specific metadata." }
-        created_at_ms: { type: integer, description: "Creation timestamp (epoch ms)." }
-        updated_at_ms: { type: integer, description: "Last update timestamp (epoch ms)." }
+        id: { type: string, description: 'Payout method identifier.' }
+        creator_id: { type: string, description: 'Owner creator identifier.' }
+        kind:
+          {
+            type: string,
+            enum: [stripe_connect, bkash, nagad, bank],
+            description: 'Payout method type.',
+          }
+        verified: { type: boolean, description: 'True if provider has confirmed the account.' }
+        external_account_id: { type: string, description: 'Provider-side account identifier.' }
+        metadata: { type: object, description: 'Provider-specific metadata.' }
+        created_at_ms: { type: integer, description: 'Creation timestamp (epoch ms).' }
+        updated_at_ms: { type: integer, description: 'Last update timestamp (epoch ms).' }
 
     PayoutConnectLink:
       type: object
       required: [connect_url, expires_at]
       properties:
-        connect_url: { type: string, format: uri, description: "Stripe Connect onboarding URL." }
-        expires_at: { type: integer, description: "Epoch milliseconds when the link expires." }
+        connect_url: { type: string, format: uri, description: 'Stripe Connect onboarding URL.' }
+        expires_at: { type: integer, description: 'Epoch milliseconds when the link expires.' }
 
     # ── Payout Runs (Phase 19 W3) ────────────────────────────────────────
     PayoutRun:
       type: object
       required: [id, period_month, status, total_creators, total_payout_cents, currency]
       properties:
-        id: { type: string, description: "Payout run identifier." }
-        period_month: { type: string, pattern: "^\\d{4}-\\d{2}$", description: "Period in YYYY-MM format." }
-        status: { type: string, enum: [pending, processing, completed, failed], description: "Payout run status." }
-        total_creators: { type: integer, description: "Number of creators included in this run." }
-        total_payout_cents: { type: integer, description: "Total payout amount in integer cents." }
-        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
-        created_at_ms: { type: integer, description: "Run creation timestamp (epoch ms)." }
-        completed_at_ms: { type: integer, description: "Run completion timestamp (epoch ms)." }
+        id: { type: string, description: 'Payout run identifier.' }
+        period_month:
+          { type: string, pattern: "^\\d{4}-\\d{2}$", description: 'Period in YYYY-MM format.' }
+        status:
+          {
+            type: string,
+            enum: [pending, processing, completed, failed],
+            description: 'Payout run status.',
+          }
+        total_creators: { type: integer, description: 'Number of creators included in this run.' }
+        total_payout_cents: { type: integer, description: 'Total payout amount in integer cents.' }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: 'ISO 4217 currency code.' }
+        created_at_ms: { type: integer, description: 'Run creation timestamp (epoch ms).' }
+        completed_at_ms: { type: integer, description: 'Run completion timestamp (epoch ms).' }
 
     # ── FX (Phase 19 W3) ─────────────────────────────────────────────────
     FxRate:
       type: object
       required: [base, quote, rate, fetched_at, source]
       properties:
-        base: { type: string, pattern: '^[A-Z]{3}$', description: "Base currency code." }
-        quote: { type: string, pattern: '^[A-Z]{3}$', description: "Quote currency code." }
-        rate: { type: number, description: "Exchange rate (quote per base)." }
-        fetched_at: { type: integer, description: "Epoch milliseconds when the rate was fetched." }
+        base: { type: string, pattern: '^[A-Z]{3}$', description: 'Base currency code.' }
+        quote: { type: string, pattern: '^[A-Z]{3}$', description: 'Quote currency code.' }
+        rate: { type: number, description: 'Exchange rate (quote per base).' }
+        fetched_at: { type: integer, description: 'Epoch milliseconds when the rate was fetched.' }
         source: { type: string, description: "FX rate data provider (e.g. 'openexchangerates')." }
 
     # ── Creator Analytics (Phase 19 W3) ──────────────────────────────────
     CreatorAnalytics:
       type: object
-      required: [creator_id, period, downloads, installs, mrr_cents, conversion_rate, refund_rate, top_geos]
+      required:
+        [creator_id, period, downloads, installs, mrr_cents, conversion_rate, refund_rate, top_geos]
       properties:
-        creator_id: { type: string, description: "Creator identifier." }
-        period: { type: string, pattern: "^\\d{4}-\\d{2}$", description: "Period in YYYY-MM format." }
-        downloads: { type: integer, description: "Total downloads across all listings." }
-        installs: { type: integer, description: "Total installs across all listings." }
-        mrr_cents: { type: integer, description: "Monthly recurring revenue in integer cents." }
-        conversion_rate: { type: number, description: "Listing view-to-install conversion rate (0.0–1.0)." }
-        refund_rate: { type: number, description: "Refund rate (0.0–1.0)." }
+        creator_id: { type: string, description: 'Creator identifier.' }
+        period:
+          { type: string, pattern: "^\\d{4}-\\d{2}$", description: 'Period in YYYY-MM format.' }
+        downloads: { type: integer, description: 'Total downloads across all listings.' }
+        installs: { type: integer, description: 'Total installs across all listings.' }
+        mrr_cents: { type: integer, description: 'Monthly recurring revenue in integer cents.' }
+        conversion_rate:
+          { type: number, description: 'Listing view-to-install conversion rate (0.0–1.0).' }
+        refund_rate: { type: number, description: 'Refund rate (0.0–1.0).' }
         top_geos:
           type: array
           items:
             type: object
             required: [country_code, installs]
             properties:
-              country_code: { type: string, pattern: '^[A-Z]{2}$', description: "ISO 3166-1 alpha-2 country code." }
-              installs: { type: integer, description: "Install count for this country." }
-          description: "Top geographies by install count."
-        listings: { type: integer, description: "Number of active listings." }
-        avg_rating: { type: number, description: "Average review rating across all listings." }
-        created_at_ms: { type: integer, description: "Analytics snapshot timestamp (epoch ms)." }
+              country_code:
+                {
+                  type: string,
+                  pattern: '^[A-Z]{2}$',
+                  description: 'ISO 3166-1 alpha-2 country code.',
+                }
+              installs: { type: integer, description: 'Install count for this country.' }
+          description: 'Top geographies by install count.'
+        listings: { type: integer, description: 'Number of active listings.' }
+        avg_rating: { type: number, description: 'Average review rating across all listings.' }
+        created_at_ms: { type: integer, description: 'Analytics snapshot timestamp (epoch ms).' }
 
     # ── Statements (Phase 19 W3) ─────────────────────────────────────────
     StatementSummary:
       type: object
-      required: [statement_id, creator_id, period_month, kind, total_gross_cents, total_fee_cents, total_net_cents, currency, generated_at]
+      required:
+        [
+          statement_id,
+          creator_id,
+          period_month,
+          kind,
+          total_gross_cents,
+          total_fee_cents,
+          total_net_cents,
+          currency,
+          generated_at,
+        ]
       properties:
-        statement_id: { type: string, description: "Statement identifier." }
-        creator_id: { type: string, description: "Creator identifier." }
-        period_month: { type: string, pattern: "^\\d{4}-\\d{2}$", description: "Period in YYYY-MM format." }
-        kind: { type: string, enum: [monthly, yearly_1099k], description: "Statement type." }
-        total_gross_cents: { type: integer, description: "Total gross revenue in integer cents." }
-        total_fee_cents: { type: integer, description: "Total platform fees in integer cents." }
-        total_net_cents: { type: integer, description: "Total net payout in integer cents." }
-        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
-        generated_at: { type: integer, description: "Epoch milliseconds when the statement was generated." }
+        statement_id: { type: string, description: 'Statement identifier.' }
+        creator_id: { type: string, description: 'Creator identifier.' }
+        period_month:
+          { type: string, pattern: "^\\d{4}-\\d{2}$", description: 'Period in YYYY-MM format.' }
+        kind: { type: string, enum: [monthly, yearly_1099k], description: 'Statement type.' }
+        total_gross_cents: { type: integer, description: 'Total gross revenue in integer cents.' }
+        total_fee_cents: { type: integer, description: 'Total platform fees in integer cents.' }
+        total_net_cents: { type: integer, description: 'Total net payout in integer cents.' }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: 'ISO 4217 currency code.' }
+        generated_at:
+          { type: integer, description: 'Epoch milliseconds when the statement was generated.' }
 
     # ── Takedowns (Phase 19 W4) ──────────────────────────────────────────
     TakedownInput:
       type: object
       required: [listing_id, claimant_id, kind, statement]
       properties:
-        listing_id: { type: string, minLength: 1, description: "Target marketplace listing identifier." }
-        claimant_id: { type: string, minLength: 1, description: "Identifier of the party filing the takedown." }
-        kind: { type: string, enum: [dmca, trademark, policy], description: "Type of takedown request." }
-        evidence_url: { type: string, format: uri, description: "URL to supporting evidence document." }
-        statement: { type: string, minLength: 1, maxLength: 4096, description: "Takedown statement or justification." }
-        email: { type: string, format: email, description: "Contact email for the claimant." }
+        listing_id:
+          { type: string, minLength: 1, description: 'Target marketplace listing identifier.' }
+        claimant_id:
+          {
+            type: string,
+            minLength: 1,
+            description: 'Identifier of the party filing the takedown.',
+          }
+        kind:
+          {
+            type: string,
+            enum: [dmca, trademark, policy],
+            description: 'Type of takedown request.',
+          }
+        evidence_url:
+          { type: string, format: uri, description: 'URL to supporting evidence document.' }
+        statement:
+          {
+            type: string,
+            minLength: 1,
+            maxLength: 4096,
+            description: 'Takedown statement or justification.',
+          }
+        email: { type: string, format: email, description: 'Contact email for the claimant.' }
 
     TakedownRequest:
       type: object
       required: [request_id, listing_id, claimant_id, kind, statement, status, submitted_at]
       properties:
-        request_id: { type: string, description: "Takedown request identifier." }
-        listing_id: { type: string, description: "Target marketplace listing identifier." }
-        claimant_id: { type: string, description: "Identifier of the party filing the takedown." }
-        kind: { type: string, enum: [dmca, trademark, policy], description: "Type of takedown request." }
-        evidence_url: { type: string, format: uri, nullable: true, description: "URL to supporting evidence document." }
-        statement: { type: string, description: "Takedown statement or justification." }
-        status: { type: string, enum: [received, in_review, confirmed, dismissed, counter_notice, resolved], description: "Current takedown status." }
-        resolution_notes: { type: string, nullable: true, description: "Notes from the resolution process." }
-        submitted_at: { type: integer, description: "Epoch milliseconds when the takedown was submitted." }
-        resolved_at: { type: integer, nullable: true, description: "Epoch milliseconds when the takedown was resolved." }
+        request_id: { type: string, description: 'Takedown request identifier.' }
+        listing_id: { type: string, description: 'Target marketplace listing identifier.' }
+        claimant_id: { type: string, description: 'Identifier of the party filing the takedown.' }
+        kind:
+          {
+            type: string,
+            enum: [dmca, trademark, policy],
+            description: 'Type of takedown request.',
+          }
+        evidence_url:
+          {
+            type: string,
+            format: uri,
+            nullable: true,
+            description: 'URL to supporting evidence document.',
+          }
+        statement: { type: string, description: 'Takedown statement or justification.' }
+        status:
+          {
+            type: string,
+            enum: [received, in_review, confirmed, dismissed, counter_notice, resolved],
+            description: 'Current takedown status.',
+          }
+        resolution_notes:
+          { type: string, nullable: true, description: 'Notes from the resolution process.' }
+        submitted_at:
+          { type: integer, description: 'Epoch milliseconds when the takedown was submitted.' }
+        resolved_at:
+          {
+            type: integer,
+            nullable: true,
+            description: 'Epoch milliseconds when the takedown was resolved.',
+          }
 
     TakedownRequestList:
       type: object
       required: [items, total]
       properties:
-        items: { type: array, items: { $ref: '#/components/schemas/TakedownRequest' }, description: "List of takedown requests." }
-        total: { type: integer, description: "Total number of matching takedown requests." }
+        items:
+          {
+            type: array,
+            items: { $ref: '#/components/schemas/TakedownRequest' },
+            description: 'List of takedown requests.',
+          }
+        total: { type: integer, description: 'Total number of matching takedown requests.' }
 
     ResolveTakedownInput:
       type: object
       required: [decision]
       properties:
-        decision: { type: string, enum: [confirmed, dismissed], description: "Resolution decision." }
-        resolution_notes: { type: string, maxLength: 4096, description: "Optional notes for the resolution." }
+        decision:
+          { type: string, enum: [confirmed, dismissed], description: 'Resolution decision.' }
+        resolution_notes:
+          { type: string, maxLength: 4096, description: 'Optional notes for the resolution.' }
 
     CounterNoticeInput:
       type: object
       required: [statement]
       properties:
-        statement: { type: string, minLength: 1, maxLength: 4096, description: "Counter-notice statement." }
+        statement:
+          { type: string, minLength: 1, maxLength: 4096, description: 'Counter-notice statement.' }
 
     # ── Brand Locks (Phase 19 W4) ────────────────────────────────────────
     BrandLockInput:
       type: object
       required: [tenant_id, brand_kit_id, marketplace_listing_id, state]
       properties:
-        tenant_id: { type: string, minLength: 1, description: "Tenant identifier." }
-        brand_kit_id: { type: string, minLength: 1, description: "Brand kit identifier." }
-        marketplace_listing_id: { type: string, minLength: 1, description: "Marketplace listing identifier." }
-        state: { type: string, enum: [allow, deny, override], description: "Brand-lock curation state." }
-        override_price_cents: { type: integer, minimum: 0, description: "Per-brand price override in integer cents." }
-        notes: { type: string, maxLength: 4096, description: "Optional notes about this brand lock." }
+        tenant_id: { type: string, minLength: 1, description: 'Tenant identifier.' }
+        brand_kit_id: { type: string, minLength: 1, description: 'Brand kit identifier.' }
+        marketplace_listing_id:
+          { type: string, minLength: 1, description: 'Marketplace listing identifier.' }
+        state:
+          { type: string, enum: [allow, deny, override], description: 'Brand-lock curation state.' }
+        override_price_cents:
+          { type: integer, minimum: 0, description: 'Per-brand price override in integer cents.' }
+        notes:
+          { type: string, maxLength: 4096, description: 'Optional notes about this brand lock.' }
 
     BrandLock:
       type: object
       required: [id, tenant_id, brand_kit_id, marketplace_listing_id, state, created_at]
       properties:
-        id: { type: string, description: "Brand lock identifier." }
-        tenant_id: { type: string, description: "Tenant identifier." }
-        brand_kit_id: { type: string, description: "Brand kit identifier." }
-        marketplace_listing_id: { type: string, description: "Marketplace listing identifier." }
-        state: { type: string, enum: [allow, deny, override], description: "Brand-lock curation state." }
-        override_price_cents: { type: integer, nullable: true, description: "Per-brand price override in integer cents." }
-        notes: { type: string, nullable: true, description: "Optional notes about this brand lock." }
-        created_at: { type: integer, description: "Epoch milliseconds when the brand lock was created." }
+        id: { type: string, description: 'Brand lock identifier.' }
+        tenant_id: { type: string, description: 'Tenant identifier.' }
+        brand_kit_id: { type: string, description: 'Brand kit identifier.' }
+        marketplace_listing_id: { type: string, description: 'Marketplace listing identifier.' }
+        state:
+          { type: string, enum: [allow, deny, override], description: 'Brand-lock curation state.' }
+        override_price_cents:
+          {
+            type: integer,
+            nullable: true,
+            description: 'Per-brand price override in integer cents.',
+          }
+        notes:
+          { type: string, nullable: true, description: 'Optional notes about this brand lock.' }
+        created_at:
+          { type: integer, description: 'Epoch milliseconds when the brand lock was created.' }
 
     BrandLockList:
       type: object
       required: [items, total]
       properties:
-        items: { type: array, items: { $ref: '#/components/schemas/BrandLock' }, description: "List of brand locks." }
-        total: { type: integer, description: "Total number of matching brand locks." }
+        items:
+          {
+            type: array,
+            items: { $ref: '#/components/schemas/BrandLock' },
+            description: 'List of brand locks.',
+          }
+        total: { type: integer, description: 'Total number of matching brand locks.' }
 
     # ── Curated Listing (Phase 19 W4 update) ─────────────────────────────
     CuratedListingPage:
@@ -1672,5 +1891,5 @@ components:
         items:
           type: array
           items: { $ref: '#/components/schemas/CuratedListing' }
-          description: "Curated listing results."
-        total: { type: integer, description: "Total number of matching curated listings." }
+          description: 'Curated listing results.'
+        total: { type: integer, description: 'Total number of matching curated listings.' }

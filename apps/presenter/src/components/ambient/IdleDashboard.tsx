@@ -107,11 +107,7 @@ export function IdleDashboard({
     >
       <BackgroundWash brand={session.brand_kit} />
       <div style={contentGridStyle}>
-        <HeaderRow
-          session={session}
-          minutes={minutes}
-          starting={starting}
-        />
+        <HeaderRow session={session} minutes={minutes} starting={starting} />
 
         <KpiRow
           snapshots={visibleSnapshots}
@@ -237,12 +233,7 @@ function KpiRow({ snapshots, brand, pulseDurationMs }: KpiRowProps): ReactElemen
       }}
     >
       {snapshots.map((snap) => (
-        <KpiTile
-          key={snap.id}
-          snapshot={snap}
-          brand={brand}
-          pulseDurationMs={pulseDurationMs}
-        />
+        <KpiTile key={snap.id} snapshot={snap} brand={brand} pulseDurationMs={pulseDurationMs} />
       ))}
     </section>
   );
@@ -369,11 +360,7 @@ function TickerRow({ items, rotationMs }: TickerRowProps): ReactElement {
 
   if (items.length === 0) {
     return (
-      <section
-        data-testid="idle-dashboard-ticker"
-        aria-label="Latest"
-        style={tickerShellStyle}
-      >
+      <section data-testid="idle-dashboard-ticker" aria-label="Latest" style={tickerShellStyle}>
         <span style={{ fontSize: 12, opacity: 0.5 }}>No updates yet</span>
       </section>
     );
@@ -382,11 +369,7 @@ function TickerRow({ items, rotationMs }: TickerRowProps): ReactElement {
   const active = items[cursor] ?? items[0]!;
 
   return (
-    <section
-      data-testid="idle-dashboard-ticker"
-      aria-label="Latest"
-      style={tickerShellStyle}
-    >
+    <section data-testid="idle-dashboard-ticker" aria-label="Latest" style={tickerShellStyle}>
       <span style={tickerLabelStyle}>Latest</span>
       <span
         key={active.id}
@@ -485,8 +468,14 @@ function AmbientStylesheet(): ReactElement {
   return (
     <style jsx>{`
       @keyframes ambient-ticker-in {
-        from { opacity: 0; transform: translateX(-12px); }
-        to   { opacity: 1; transform: translateX(0); }
+        from {
+          opacity: 0;
+          transform: translateX(-12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
       }
     `}</style>
   );

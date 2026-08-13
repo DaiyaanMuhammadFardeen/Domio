@@ -52,13 +52,7 @@ describe('ErrorBoundary', () => {
 describe('ErrorCard', () => {
   it('renders error message and a retry button when provided', () => {
     const onRetry = vi.fn();
-    render(
-      <ErrorCard
-        error={new Error('something bad')}
-        onRetry={onRetry}
-        traceId="abc123"
-      />,
-    );
+    render(<ErrorCard error={new Error('something bad')} onRetry={onRetry} traceId="abc123" />);
     expect(screen.getByText(/something bad/i)).toBeInTheDocument();
     expect(screen.getByText(/abc123/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /retry/i }));

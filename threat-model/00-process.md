@@ -8,13 +8,13 @@ decomposition of a single deployable unit.
 
 We use STRIDE with the following severity matrix:
 
-| Severity | Description                                                                                  |
-|----------|----------------------------------------------------------------------------------------------|
-| Critical | Permanent data loss, full-tenant breach, regulator reportable. Triggers `SEV-0`.             |
-| High     | Tenant data exposure, primary path compromise. Triggers `SEV-1`.                             |
-| Medium   | Bounded data exposure or DoS. Triggers `SEV-2`.                                              |
-| Low      | Self-inflicted or unauthenticated-trivial. Triggers `SEV-3`, addressed in next minor.       |
-| Info     | Hygiene only; no business impact                                                             |
+| Severity | Description                                                                           |
+| -------- | ------------------------------------------------------------------------------------- |
+| Critical | Permanent data loss, full-tenant breach, regulator reportable. Triggers `SEV-0`.      |
+| High     | Tenant data exposure, primary path compromise. Triggers `SEV-1`.                      |
+| Medium   | Bounded data exposure or DoS. Triggers `SEV-2`.                                       |
+| Low      | Self-inflicted or unauthenticated-trivial. Triggers `SEV-3`, addressed in next minor. |
+| Info     | Hygiene only; no business impact                                                      |
 
 The score (likelihood × impact) is computed as `score = L * I` where both
 are `1..5`. Threshold:
@@ -37,6 +37,7 @@ are `1..5`. Threshold:
 ## Privacy posture
 
 By design, the platform never persists PII at rest in:
+
 - Trace or log payloads (redaction is built into `@domio/observability`,
   `@redact-pii`)
 - Database primary keys (only opaque IDs; NID, phone, email are indexed

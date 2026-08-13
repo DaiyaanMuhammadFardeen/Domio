@@ -13,22 +13,14 @@ describe('EmptyState', () => {
 
   it('renders an action button when provided', () => {
     render(
-      <EmptyState
-        title="No decks"
-        action={{ label: 'Create deck', onClick: () => undefined }}
-      />,
+      <EmptyState title="No decks" action={{ label: 'Create deck', onClick: () => undefined }} />,
     );
     const btn = screen.getByRole('button', { name: /create deck/i });
     expect(btn).toBeInTheDocument();
   });
 
   it('renders an action link with href when provided', () => {
-    render(
-      <EmptyState
-        title="No decks"
-        action={{ label: 'Open docs', href: '/docs' }}
-      />,
-    );
+    render(<EmptyState title="No decks" action={{ label: 'Open docs', href: '/docs' }} />);
     const link = screen.getByRole('link', { name: /open docs/i });
     expect(link).toHaveAttribute('href', '/docs');
   });

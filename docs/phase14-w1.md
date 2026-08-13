@@ -15,31 +15,31 @@ data plane. For the planning summary and rationale, see
 
 ## Endpoints
 
-| Endpoint | Method | Notes |
-|---|---|---|
-| `/v1/shares` | POST | Create. 201 with snapshot + token. |
-| `/v1/shares/{link_id}` | GET | Read. 200/404. |
-| `/v1/shares/{link_id}` | PATCH | Update. Requires `If-Match: <seq>`. |
-| `/v1/shares/{link_id}` | DELETE | Soft-revoke. Requires `If-Match: <seq>`. |
-| `/v1/shares/{link_id}/rotate-token` | POST | Mint a fresh token. |
-| `/v1/shares/{link_id}/extend-expiry` | POST | Push expiry forward. |
-| `/v1/shares/{link_id}/policy` | GET | Read the policy. |
-| `/v1/shares/{link_id}/policy` | PUT | Replace policy fields. |
-| `/mcp/share-introspect` | POST | Verify a token (no session). |
+| Endpoint                             | Method | Notes                                    |
+| ------------------------------------ | ------ | ---------------------------------------- |
+| `/v1/shares`                         | POST   | Create. 201 with snapshot + token.       |
+| `/v1/shares/{link_id}`               | GET    | Read. 200/404.                           |
+| `/v1/shares/{link_id}`               | PATCH  | Update. Requires `If-Match: <seq>`.      |
+| `/v1/shares/{link_id}`               | DELETE | Soft-revoke. Requires `If-Match: <seq>`. |
+| `/v1/shares/{link_id}/rotate-token`  | POST   | Mint a fresh token.                      |
+| `/v1/shares/{link_id}/extend-expiry` | POST   | Push expiry forward.                     |
+| `/v1/shares/{link_id}/policy`        | GET    | Read the policy.                         |
+| `/v1/shares/{link_id}/policy`        | PUT    | Replace policy fields.                   |
+| `/mcp/share-introspect`              | POST   | Verify a token (no session).             |
 
 ## Environment
 
 Share-api is configured via the following environment variables:
 
-| Variable | Description | Default |
-|---|---|---|
-| `SHARE_API_PORT` | HTTP listen port. | `8087` |
-| `SHARE_API_STORE` | `memory` or `pg`. M2 wires the pg store. | `memory` |
-| `DATABASE_URL` | Required when `SHARE_API_STORE=pg`. | — |
-| `SHARE_AUDIT_HMAC_KEY` | Hex-encoded 32-byte key for the audit chain. | dev fallback (sha256 of a fixed seed) |
-| `SHARE_LINK_TOKEN_KEY` | Hex-encoded 32-byte key for mint/verify. | — |
-| `SHARE_API_NONCE_STORE` | `memory` or `redis`. M2 wires Redis. | `memory` |
-| `REDIS_URL` | Required when `SHARE_API_NONCE_STORE=redis`. | — |
+| Variable                | Description                                  | Default                               |
+| ----------------------- | -------------------------------------------- | ------------------------------------- |
+| `SHARE_API_PORT`        | HTTP listen port.                            | `8087`                                |
+| `SHARE_API_STORE`       | `memory` or `pg`. M2 wires the pg store.     | `memory`                              |
+| `DATABASE_URL`          | Required when `SHARE_API_STORE=pg`.          | —                                     |
+| `SHARE_AUDIT_HMAC_KEY`  | Hex-encoded 32-byte key for the audit chain. | dev fallback (sha256 of a fixed seed) |
+| `SHARE_LINK_TOKEN_KEY`  | Hex-encoded 32-byte key for mint/verify.     | —                                     |
+| `SHARE_API_NONCE_STORE` | `memory` or `redis`. M2 wires Redis.         | `memory`                              |
+| `REDIS_URL`             | Required when `SHARE_API_NONCE_STORE=redis`. | —                                     |
 
 > **Production must set** both `SHARE_AUDIT_HMAC_KEY` and
 > `SHARE_LINK_TOKEN_KEY` to distinct random 32-byte hex values. The
@@ -53,14 +53,14 @@ openssl rand -hex 32   # produces a 64-char hex string; suitable for either env 
 
 ## Capability scopes
 
-| Scope | Grants |
-|---|---|
-| `share:create` | `POST /v1/shares` |
-| `share:read` | `GET /v1/shares/{id}` and `/v1/shares/{id}/policy` |
+| Scope          | Grants                                                                     |
+| -------------- | -------------------------------------------------------------------------- |
+| `share:create` | `POST /v1/shares`                                                          |
+| `share:read`   | `GET /v1/shares/{id}` and `/v1/shares/{id}/policy`                         |
 | `share:update` | `PATCH /v1/shares/{id}`, `PUT /v1/shares/{id}/policy`, `.../extend-expiry` |
-| `share:delete` | `DELETE /v1/shares/{id}` |
-| `share:rotate` | `POST /v1/shares/{id}/rotate-token` |
-| `share:policy` | `PUT /v1/shares/{id}/policy` |
+| `share:delete` | `DELETE /v1/shares/{id}`                                                   |
+| `share:rotate` | `POST /v1/shares/{id}/rotate-token`                                        |
+| `share:policy` | `PUT /v1/shares/{id}/policy`                                               |
 
 The `/mcp/share-introspect` endpoint does NOT require any session
 scope — the signed token is the credential.
@@ -71,14 +71,14 @@ Every privileged action emits one hash-chained event into the
 `agent_audit_event` table via `@domio/audit-ts`. The event payload
 keys are:
 
-| `event_type` | Trigger |
-|---|---|
-| `share.created` | `POST /v1/shares` |
-| `share.updated` | `PATCH /v1/shares/{id}` when only link-level fields change |
-| `share.policy_changed` | `PATCH /v1/shares/{id}` or `PUT .../policy` when at least one policy field changes |
-| `share.token_rotated` | `POST .../rotate-token` |
-| `share.expiry_extended` | `POST .../extend-expiry` |
-| `share.deleted` | `DELETE /v1/shares/{id}` (soft-revoke) |
+| `event_type`            | Trigger                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `share.created`         | `POST /v1/shares`                                                                  |
+| `share.updated`         | `PATCH /v1/shares/{id}` when only link-level fields change                         |
+| `share.policy_changed`  | `PATCH /v1/shares/{id}` or `PUT .../policy` when at least one policy field changes |
+| `share.token_rotated`   | `POST .../rotate-token`                                                            |
+| `share.expiry_extended` | `POST .../extend-expiry`                                                           |
+| `share.deleted`         | `DELETE /v1/shares/{id}` (soft-revoke)                                             |
 
 Each event payload includes `actor_id`, `link_id`, `ts`, `before`
 (snapshot), and `after` (snapshot) so the audit chain is

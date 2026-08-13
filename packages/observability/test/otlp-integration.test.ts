@@ -164,9 +164,10 @@ describe('OTLP HTTP integration — positive', () => {
         body.resourceMetrics?.[0]?.resource ??
         body.resourceLogs?.[0]?.resource;
       const attrs = Object.fromEntries(
-        (resource.attributes as Array<{ key: string; value: { stringValue: string } }>).map(
-          (a) => [a.key, a.value.stringValue],
-        ),
+        (resource.attributes as Array<{ key: string; value: { stringValue: string } }>).map((a) => [
+          a.key,
+          a.value.stringValue,
+        ]),
       );
       expect(attrs['service.name']).toBe('integration-test');
       expect(attrs['service.version']).toBe('1.0.0');

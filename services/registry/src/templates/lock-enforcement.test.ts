@@ -12,7 +12,9 @@ import type { BrandLockRegion } from '../store/types.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeLock(overrides: Partial<BrandLockRegion> & { id: string; deckId: string }): BrandLockRegion {
+function makeLock(
+  overrides: Partial<BrandLockRegion> & { id: string; deckId: string },
+): BrandLockRegion {
   return {
     scope: 'element',
     strictness: 'strict',
@@ -35,13 +37,15 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-1',
-        deckId: 'deck-1',
-        strictness: 'strict',
-        allowedOverrides: ['text', 'color'],
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-1',
+          deckId: 'deck-1',
+          strictness: 'strict',
+          allowedOverrides: ['text', 'color'],
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -57,13 +61,15 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-2',
-        deckId: 'deck-1',
-        strictness: 'strict',
-        allowedOverrides: ['text'],
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-2',
+          deckId: 'deck-1',
+          strictness: 'strict',
+          allowedOverrides: ['text'],
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -81,14 +87,16 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-3',
-        deckId: 'deck-1',
-        strictness: 'strict',
-        allowedOverrides: [],
-        ownerUserId: 'owner-1',
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-3',
+          deckId: 'deck-1',
+          strictness: 'strict',
+          allowedOverrides: [],
+          ownerUserId: 'owner-1',
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -106,12 +114,14 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-4',
-        deckId: 'deck-1',
-        strictness: 'color-only',
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-4',
+          deckId: 'deck-1',
+          strictness: 'color-only',
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -127,12 +137,14 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-5',
-        deckId: 'deck-1',
-        strictness: 'color-only',
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-5',
+          deckId: 'deck-1',
+          strictness: 'color-only',
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -150,13 +162,15 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-6',
-        deckId: 'deck-1',
-        strictness: 'color-only',
-        ownerUserId: 'owner-1',
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-6',
+          deckId: 'deck-1',
+          strictness: 'color-only',
+          ownerUserId: 'owner-1',
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -172,12 +186,14 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-7',
-        deckId: 'deck-1',
-        strictness: 'color-only',
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-7',
+          deckId: 'deck-1',
+          strictness: 'color-only',
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -196,12 +212,14 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-8',
-        deckId: 'deck-1',
-        strictness: 'text-only',
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-8',
+          deckId: 'deck-1',
+          strictness: 'text-only',
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -217,12 +235,14 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-9',
-        deckId: 'deck-1',
-        strictness: 'text-only',
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-9',
+          deckId: 'deck-1',
+          strictness: 'text-only',
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -239,13 +259,15 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-10',
-        deckId: 'deck-1',
-        strictness: 'text-only',
-        ownerUserId: 'owner-1',
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-10',
+          deckId: 'deck-1',
+          strictness: 'text-only',
+          ownerUserId: 'owner-1',
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -263,13 +285,15 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-11',
-        deckId: 'deck-1',
-        strictness: 'strict',
-        allowedOverrides: [],
-        sceneGraphSelector: 'slide[0].text[title]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-11',
+          deckId: 'deck-1',
+          strictness: 'strict',
+          allowedOverrides: [],
+          sceneGraphSelector: 'slide[0].text[title]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',
@@ -285,13 +309,15 @@ describe('enforceBrandLock', () => {
       const store = new InMemoryStore();
       const deps: ServiceDeps = defaultDeps(store);
 
-      await store.putBrandLock(makeLock({
-        id: 'lock-12',
-        deckId: 'deck-1',
-        strictness: 'strict',
-        allowedOverrides: [],
-        sceneGraphSelector: 'slide[*].text[*]',
-      }));
+      await store.putBrandLock(
+        makeLock({
+          id: 'lock-12',
+          deckId: 'deck-1',
+          strictness: 'strict',
+          allowedOverrides: [],
+          sceneGraphSelector: 'slide[*].text[*]',
+        }),
+      );
 
       const result = await enforceBrandLock(deps, {
         deckId: 'deck-1',

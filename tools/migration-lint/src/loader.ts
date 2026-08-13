@@ -20,7 +20,7 @@ export function loadMigrations(root: string): LintMigration[] {
         const annotations = parseAnnotations(sql);
         const direction: 'up' | 'down' = rel.endsWith('.down.sql') ? 'down' : 'up';
         const seqMatch = basename(rel).match(/^(\d{4,})_/);
-        const sequence = (seqMatch?.[1]) ?? '';
+        const sequence = seqMatch?.[1] ?? '';
         out.push({
           file: rel,
           direction,

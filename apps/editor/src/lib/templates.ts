@@ -16,7 +16,14 @@
 import type { Slide, AspectRatio, Element } from '@domio/schema';
 import { asULID } from '@domio/schema';
 
-export type UseCase = 'Pitch' | 'Board Report' | 'QBR' | 'All-hands' | 'Demo Day' | 'Sales' | 'Education';
+export type UseCase =
+  | 'Pitch'
+  | 'Board Report'
+  | 'QBR'
+  | 'All-hands'
+  | 'Demo Day'
+  | 'Sales'
+  | 'Education';
 
 export interface TemplateDef {
   id: string;
@@ -133,33 +140,186 @@ const investorPitch: TemplateDef = {
     const w = 1600;
     const h = w * (aspect.ratioH / aspect.ratioW);
     return [
-      makeSlide('pitch-cover', 0, aspect, [
-        makeFrame({ id: 'pitch-cover-bg', x: 0, y: 0, w, h, aspect, fill: FILL_DARK }),
-        makeText({ id: 'pitch-cover-title', text: 'Series A', x: 120, y: h * 0.4, w: w * 0.7, h: 120, fontSize: 84, fontWeight: 700, align: 'left' }),
-        makeText({ id: 'pitch-cover-sub', text: 'The future of business storytelling', x: 120, y: h * 0.55, w: w * 0.7, h: 60, fontSize: 28, align: 'left' }),
-      ], 'Cover'),
-      makeSlide('pitch-problem', 1, aspect, [
-        makeText({ id: 'pitch-problem-eyebrow', text: 'PROBLEM', x: 120, y: 100, w: 600, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'pitch-problem-title', text: 'Slides are stale the moment they ship.', x: 120, y: 140, w: 1300, h: 120, fontSize: 48, fontWeight: 700 }),
-        makeText({ id: 'pitch-problem-body', text: 'Decks lose the conversation. Numbers are wrong. Insights decay.', x: 120, y: 280, w: 1300, h: 80, fontSize: 24 }),
-      ], 'Problem'),
-      makeSlide('pitch-solution', 2, aspect, [
-        makeText({ id: 'pitch-sol-eyebrow', text: 'SOLUTION', x: 120, y: 100, w: 600, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'pitch-sol-title', text: 'Live, data-bound narrative.', x: 120, y: 140, w: 1300, h: 120, fontSize: 48, fontWeight: 700 }),
-      ], 'Solution'),
-      makeSlide('pitch-traction', 3, aspect, [
-        makeText({ id: 'pitch-tr-eyebrow', text: 'TRACTION', x: 120, y: 100, w: 600, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'pitch-tr-title', text: '3x growth Y/Y', x: 120, y: 140, w: 1300, h: 120, fontSize: 48, fontWeight: 700 }),
-      ], 'Traction'),
-      makeSlide('pitch-product', 4, aspect, [
-        makeText({ id: 'pitch-pr-eyebrow', text: 'PRODUCT', x: 120, y: 100, w: 600, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'pitch-pr-title', text: 'A platform, not a deck.', x: 120, y: 140, w: 1300, h: 120, fontSize: 48, fontWeight: 700 }),
-      ], 'Product'),
-      makeSlide('pitch-ask', 5, aspect, [
-        makeFrame({ id: 'pitch-ask-bg', x: 0, y: 0, w, h, aspect, fill: FILL_ACCENT }),
-        makeText({ id: 'pitch-ask-eyebrow', text: 'THE ASK', x: 120, y: h * 0.3, w: 600, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'pitch-ask-title', text: 'Raising $8M Series A', x: 120, y: h * 0.4, w: 1300, h: 120, fontSize: 60, fontWeight: 700 }),
-      ], 'Ask'),
+      makeSlide(
+        'pitch-cover',
+        0,
+        aspect,
+        [
+          makeFrame({ id: 'pitch-cover-bg', x: 0, y: 0, w, h, aspect, fill: FILL_DARK }),
+          makeText({
+            id: 'pitch-cover-title',
+            text: 'Series A',
+            x: 120,
+            y: h * 0.4,
+            w: w * 0.7,
+            h: 120,
+            fontSize: 84,
+            fontWeight: 700,
+            align: 'left',
+          }),
+          makeText({
+            id: 'pitch-cover-sub',
+            text: 'The future of business storytelling',
+            x: 120,
+            y: h * 0.55,
+            w: w * 0.7,
+            h: 60,
+            fontSize: 28,
+            align: 'left',
+          }),
+        ],
+        'Cover',
+      ),
+      makeSlide(
+        'pitch-problem',
+        1,
+        aspect,
+        [
+          makeText({
+            id: 'pitch-problem-eyebrow',
+            text: 'PROBLEM',
+            x: 120,
+            y: 100,
+            w: 600,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'pitch-problem-title',
+            text: 'Slides are stale the moment they ship.',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 120,
+            fontSize: 48,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'pitch-problem-body',
+            text: 'Decks lose the conversation. Numbers are wrong. Insights decay.',
+            x: 120,
+            y: 280,
+            w: 1300,
+            h: 80,
+            fontSize: 24,
+          }),
+        ],
+        'Problem',
+      ),
+      makeSlide(
+        'pitch-solution',
+        2,
+        aspect,
+        [
+          makeText({
+            id: 'pitch-sol-eyebrow',
+            text: 'SOLUTION',
+            x: 120,
+            y: 100,
+            w: 600,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'pitch-sol-title',
+            text: 'Live, data-bound narrative.',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 120,
+            fontSize: 48,
+            fontWeight: 700,
+          }),
+        ],
+        'Solution',
+      ),
+      makeSlide(
+        'pitch-traction',
+        3,
+        aspect,
+        [
+          makeText({
+            id: 'pitch-tr-eyebrow',
+            text: 'TRACTION',
+            x: 120,
+            y: 100,
+            w: 600,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'pitch-tr-title',
+            text: '3x growth Y/Y',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 120,
+            fontSize: 48,
+            fontWeight: 700,
+          }),
+        ],
+        'Traction',
+      ),
+      makeSlide(
+        'pitch-product',
+        4,
+        aspect,
+        [
+          makeText({
+            id: 'pitch-pr-eyebrow',
+            text: 'PRODUCT',
+            x: 120,
+            y: 100,
+            w: 600,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'pitch-pr-title',
+            text: 'A platform, not a deck.',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 120,
+            fontSize: 48,
+            fontWeight: 700,
+          }),
+        ],
+        'Product',
+      ),
+      makeSlide(
+        'pitch-ask',
+        5,
+        aspect,
+        [
+          makeFrame({ id: 'pitch-ask-bg', x: 0, y: 0, w, h, aspect, fill: FILL_ACCENT }),
+          makeText({
+            id: 'pitch-ask-eyebrow',
+            text: 'THE ASK',
+            x: 120,
+            y: h * 0.3,
+            w: 600,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'pitch-ask-title',
+            text: 'Raising $8M Series A',
+            x: 120,
+            y: h * 0.4,
+            w: 1300,
+            h: 120,
+            fontSize: 60,
+            fontWeight: 700,
+          }),
+        ],
+        'Ask',
+      ),
     ];
   },
 };
@@ -187,22 +347,118 @@ const boardReport: TemplateDef = {
   `,
   buildSlides: (aspect) => {
     return [
-      makeSlide('br-cover', 0, aspect, [
-        makeText({ id: 'br-cover-eyebrow', text: 'Q4 BOARD REPORT', x: 120, y: 100, w: 800, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'br-cover-title', text: 'Quarterly snapshot', x: 120, y: 140, w: 1300, h: 120, fontSize: 48, fontWeight: 700 }),
-      ], 'Cover'),
-      makeSlide('br-kpi', 1, aspect, [
-        makeText({ id: 'br-kpi-eyebrow', text: 'KEY METRICS', x: 120, y: 100, w: 600, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'br-kpi-title', text: 'Revenue, retention, growth.', x: 120, y: 140, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'KPI'),
-      makeSlide('br-financials', 2, aspect, [
-        makeText({ id: 'br-fin-eyebrow', text: 'FINANCIALS', x: 120, y: 100, w: 600, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'br-fin-title', text: 'P&L summary', x: 120, y: 140, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Financials'),
-      makeSlide('br-strategy', 3, aspect, [
-        makeText({ id: 'br-str-eyebrow', text: 'STRATEGY', x: 120, y: 100, w: 600, h: 30, fontSize: 18, fontWeight: 700 }),
-        makeText({ id: 'br-str-title', text: 'Next quarter priorities', x: 120, y: 140, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Strategy'),
+      makeSlide(
+        'br-cover',
+        0,
+        aspect,
+        [
+          makeText({
+            id: 'br-cover-eyebrow',
+            text: 'Q4 BOARD REPORT',
+            x: 120,
+            y: 100,
+            w: 800,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'br-cover-title',
+            text: 'Quarterly snapshot',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 120,
+            fontSize: 48,
+            fontWeight: 700,
+          }),
+        ],
+        'Cover',
+      ),
+      makeSlide(
+        'br-kpi',
+        1,
+        aspect,
+        [
+          makeText({
+            id: 'br-kpi-eyebrow',
+            text: 'KEY METRICS',
+            x: 120,
+            y: 100,
+            w: 600,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'br-kpi-title',
+            text: 'Revenue, retention, growth.',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'KPI',
+      ),
+      makeSlide(
+        'br-financials',
+        2,
+        aspect,
+        [
+          makeText({
+            id: 'br-fin-eyebrow',
+            text: 'FINANCIALS',
+            x: 120,
+            y: 100,
+            w: 600,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'br-fin-title',
+            text: 'P&L summary',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Financials',
+      ),
+      makeSlide(
+        'br-strategy',
+        3,
+        aspect,
+        [
+          makeText({
+            id: 'br-str-eyebrow',
+            text: 'STRATEGY',
+            x: 120,
+            y: 100,
+            w: 600,
+            h: 30,
+            fontSize: 18,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'br-str-title',
+            text: 'Next quarter priorities',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Strategy',
+      ),
     ];
   },
 };
@@ -230,21 +486,96 @@ const allHands: TemplateDef = {
     const w = 1600;
     const h = w * (aspect.ratioH / aspect.ratioW);
     return [
-      makeSlide('ah-cover', 0, aspect, [
-        makeText({ id: 'ah-cover-title', text: 'All-hands', x: 120, y: h * 0.4, w: 1300, h: 120, fontSize: 84, fontWeight: 700 }),
-      ], 'Cover'),
-      makeSlide('ah-wins', 1, aspect, [
-        makeText({ id: 'ah-wins-title', text: 'Wins this month', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Wins'),
-      makeSlide('ah-roadmap', 2, aspect, [
-        makeText({ id: 'ah-rm-title', text: 'Roadmap', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Roadmap'),
-      makeSlide('ah-hiring', 3, aspect, [
-        makeText({ id: 'ah-hr-title', text: 'Hiring', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Hiring'),
-      makeSlide('ah-qa', 4, aspect, [
-        makeText({ id: 'ah-qa-title', text: 'Q&A', x: 120, y: h * 0.45, w: 1300, h: 120, fontSize: 84, fontWeight: 700 }),
-      ], 'Q&A'),
+      makeSlide(
+        'ah-cover',
+        0,
+        aspect,
+        [
+          makeText({
+            id: 'ah-cover-title',
+            text: 'All-hands',
+            x: 120,
+            y: h * 0.4,
+            w: 1300,
+            h: 120,
+            fontSize: 84,
+            fontWeight: 700,
+          }),
+        ],
+        'Cover',
+      ),
+      makeSlide(
+        'ah-wins',
+        1,
+        aspect,
+        [
+          makeText({
+            id: 'ah-wins-title',
+            text: 'Wins this month',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Wins',
+      ),
+      makeSlide(
+        'ah-roadmap',
+        2,
+        aspect,
+        [
+          makeText({
+            id: 'ah-rm-title',
+            text: 'Roadmap',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Roadmap',
+      ),
+      makeSlide(
+        'ah-hiring',
+        3,
+        aspect,
+        [
+          makeText({
+            id: 'ah-hr-title',
+            text: 'Hiring',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Hiring',
+      ),
+      makeSlide(
+        'ah-qa',
+        4,
+        aspect,
+        [
+          makeText({
+            id: 'ah-qa-title',
+            text: 'Q&A',
+            x: 120,
+            y: h * 0.45,
+            w: 1300,
+            h: 120,
+            fontSize: 84,
+            fontWeight: 700,
+          }),
+        ],
+        'Q&A',
+      ),
     ];
   },
 };
@@ -269,16 +600,61 @@ const demoDay: TemplateDef = {
     const w = 1600;
     const h = w * (aspect.ratioH / aspect.ratioW);
     return [
-      makeSlide('dd-cover', 0, aspect, [
-        makeFrame({ id: 'dd-bg', x: 0, y: 0, w, h, aspect, fill: FILL_DARK }),
-        makeText({ id: 'dd-title', text: 'Demo day', x: 120, y: h * 0.4, w: 1300, h: 120, fontSize: 84, fontWeight: 700 }),
-      ], 'Cover'),
-      makeSlide('dd-demo', 1, aspect, [
-        makeText({ id: 'dd-demo-title', text: 'Live demo', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Demo'),
-      makeSlide('dd-future', 2, aspect, [
-        makeText({ id: 'dd-future-title', text: 'What\u2019s next', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Next'),
+      makeSlide(
+        'dd-cover',
+        0,
+        aspect,
+        [
+          makeFrame({ id: 'dd-bg', x: 0, y: 0, w, h, aspect, fill: FILL_DARK }),
+          makeText({
+            id: 'dd-title',
+            text: 'Demo day',
+            x: 120,
+            y: h * 0.4,
+            w: 1300,
+            h: 120,
+            fontSize: 84,
+            fontWeight: 700,
+          }),
+        ],
+        'Cover',
+      ),
+      makeSlide(
+        'dd-demo',
+        1,
+        aspect,
+        [
+          makeText({
+            id: 'dd-demo-title',
+            text: 'Live demo',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Demo',
+      ),
+      makeSlide(
+        'dd-future',
+        2,
+        aspect,
+        [
+          makeText({
+            id: 'dd-future-title',
+            text: 'What\u2019s next',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Next',
+      ),
     ];
   },
 };
@@ -307,20 +683,89 @@ const education: TemplateDef = {
     const w = 1600;
     const h = w * (aspect.ratioH / aspect.ratioW);
     return [
-      makeSlide('edu-cover', 0, aspect, [
-        makeFrame({ id: 'edu-bg', x: 0, y: 0, w, h, aspect, fill: FILL_MUTED }),
-        makeText({ id: 'edu-cover-title', text: 'Module 03', x: 120, y: h * 0.3, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-        makeText({ id: 'edu-cover-sub', text: 'Foundations of data storytelling', x: 120, y: h * 0.4, w: 1300, h: 120, fontSize: 60, fontWeight: 700 }),
-      ], 'Cover'),
-      makeSlide('edu-outline', 1, aspect, [
-        makeText({ id: 'edu-outline-title', text: 'Today', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Outline'),
-      makeSlide('edu-content', 2, aspect, [
-        makeText({ id: 'edu-content-title', text: 'Concept walkthrough', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Content'),
-      makeSlide('edu-recap', 3, aspect, [
-        makeText({ id: 'edu-recap-title', text: 'Recap', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Recap'),
+      makeSlide(
+        'edu-cover',
+        0,
+        aspect,
+        [
+          makeFrame({ id: 'edu-bg', x: 0, y: 0, w, h, aspect, fill: FILL_MUTED }),
+          makeText({
+            id: 'edu-cover-title',
+            text: 'Module 03',
+            x: 120,
+            y: h * 0.3,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'edu-cover-sub',
+            text: 'Foundations of data storytelling',
+            x: 120,
+            y: h * 0.4,
+            w: 1300,
+            h: 120,
+            fontSize: 60,
+            fontWeight: 700,
+          }),
+        ],
+        'Cover',
+      ),
+      makeSlide(
+        'edu-outline',
+        1,
+        aspect,
+        [
+          makeText({
+            id: 'edu-outline-title',
+            text: 'Today',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Outline',
+      ),
+      makeSlide(
+        'edu-content',
+        2,
+        aspect,
+        [
+          makeText({
+            id: 'edu-content-title',
+            text: 'Concept walkthrough',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Content',
+      ),
+      makeSlide(
+        'edu-recap',
+        3,
+        aspect,
+        [
+          makeText({
+            id: 'edu-recap-title',
+            text: 'Recap',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Recap',
+      ),
     ];
   },
 };
@@ -345,16 +790,69 @@ const salesBrief: TemplateDef = {
   `,
   buildSlides: (aspect) => {
     return [
-      makeSlide('sb-cover', 0, aspect, [
-        makeText({ id: 'sb-cover-title', text: 'Acme Inc', x: 120, y: 100, w: 1300, h: 80, fontSize: 48, fontWeight: 700 }),
-        makeText({ id: 'sb-cover-sub', text: '3-minute brief', x: 120, y: 200, w: 1300, h: 40, fontSize: 24 }),
-      ], 'Cover'),
-      makeSlide('sb-pain', 1, aspect, [
-        makeText({ id: 'sb-pain-title', text: 'Today\u2019s pain', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Pain'),
-      makeSlide('sb-fit', 2, aspect, [
-        makeText({ id: 'sb-fit-title', text: 'How we fit', x: 120, y: 100, w: 1300, h: 80, fontSize: 36, fontWeight: 700 }),
-      ], 'Fit'),
+      makeSlide(
+        'sb-cover',
+        0,
+        aspect,
+        [
+          makeText({
+            id: 'sb-cover-title',
+            text: 'Acme Inc',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 48,
+            fontWeight: 700,
+          }),
+          makeText({
+            id: 'sb-cover-sub',
+            text: '3-minute brief',
+            x: 120,
+            y: 200,
+            w: 1300,
+            h: 40,
+            fontSize: 24,
+          }),
+        ],
+        'Cover',
+      ),
+      makeSlide(
+        'sb-pain',
+        1,
+        aspect,
+        [
+          makeText({
+            id: 'sb-pain-title',
+            text: 'Today\u2019s pain',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Pain',
+      ),
+      makeSlide(
+        'sb-fit',
+        2,
+        aspect,
+        [
+          makeText({
+            id: 'sb-fit-title',
+            text: 'How we fit',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+            fontSize: 36,
+            fontWeight: 700,
+          }),
+        ],
+        'Fit',
+      ),
     ];
   },
 };

@@ -9,10 +9,7 @@
 
 import { clsx } from 'clsx';
 import { Check } from 'lucide-react';
-import {
-  CHANGE_FEED_OP_KINDS,
-  type ChangeFeedOpKind,
-} from '../../lib/change-feed-service';
+import { CHANGE_FEED_OP_KINDS, type ChangeFeedOpKind } from '../../lib/change-feed-service';
 
 export interface OpKindFilterProps {
   readonly selected: Set<ChangeFeedOpKind>;

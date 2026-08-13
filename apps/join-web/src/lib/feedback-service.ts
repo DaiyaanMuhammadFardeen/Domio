@@ -21,7 +21,7 @@ export class FeedbackSubmitError extends Error {
 }
 
 const DEFAULT_BASE: string =
-  (typeof process !== 'undefined' ? process.env['JOIN_WEB_API_BASE_URL'] ?? '' : '');
+  typeof process !== 'undefined' ? (process.env['JOIN_WEB_API_BASE_URL'] ?? '') : '';
 
 /**
  * Submit session feedback. Throws on non-2xx — the caller may choose to

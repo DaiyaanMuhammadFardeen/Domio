@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { selectAdapter, type AdapterProbe, type RenderCapabilities } from '../src/renderer/gpu-adapter.js';
+import {
+  selectAdapter,
+  type AdapterProbe,
+  type RenderCapabilities,
+} from '../src/renderer/gpu-adapter.js';
 
 class StubProbe implements AdapterProbe {
   constructor(private readonly caps: RenderCapabilities) {}

@@ -27,9 +27,7 @@ describe('NlPatchPanel', () => {
   });
 
   it('invokes onApply when Apply is clicked', async () => {
-    const calls: NlToolCallSummary[] = [
-      { toolName: 'create_rule', input: { deckId: 'd' } },
-    ];
+    const calls: NlToolCallSummary[] = [{ toolName: 'create_rule', input: { deckId: 'd' } }];
     const onParse = vi.fn(async () => calls);
     const onApply = vi.fn(async () => undefined);
     render(<NlPatchPanel deckId="d" onParse={onParse} onApply={onApply} />);
@@ -43,9 +41,7 @@ describe('NlPatchPanel', () => {
   });
 
   it('invokes onRollback when Rollback is clicked', async () => {
-    const calls: NlToolCallSummary[] = [
-      { toolName: 'create_rule', input: { deckId: 'd' } },
-    ];
+    const calls: NlToolCallSummary[] = [{ toolName: 'create_rule', input: { deckId: 'd' } }];
     const onParse = vi.fn(async () => calls);
     const onRollback = vi.fn(async () => undefined);
     render(<NlPatchPanel deckId="d" onParse={onParse} onRollback={onRollback} />);

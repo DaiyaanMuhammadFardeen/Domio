@@ -70,23 +70,19 @@ export class CreatorAnalyticsService {
     const licenseGrants = await this.store.getLicenseGrants(input.creator_id);
 
     // Count refunds: revenue events with event_type = 'refund'
-    const refunds = revenueEvents.filter(e => e.event_type === 'refund').length;
+    const refunds = revenueEvents.filter((e) => e.event_type === 'refund').length;
 
     // Build geo data — revenue events don't carry geo, so geos come from
     // payment intents or are empty (real geo data is a later-wave addition)
     const geos: Array<{ country_code: string; count: number }> = [];
 
-    return computeAnalyticsBody(
-      input.creator_id,
-      input.period,
-      {
-        installs: licenseGrants.length,
-        revenue_events: revenueEvents,
-        payments,
-        refunds,
-        geos,
-      },
-    );
+    return computeAnalyticsBody(input.creator_id, input.period, {
+      installs: licenseGrants.length,
+      revenue_events: revenueEvents,
+      payments,
+      refunds,
+      geos,
+    });
   }
 
   // -------------------------------------------------------------------------
@@ -132,7 +128,7 @@ export class CreatorAnalyticsService {
       creator_id: input.creator_id,
       kind: 'monthly',
     });
-    const found = existing.find(s => s.period_month === input.period_month);
+    const found = existing.find((s) => s.period_month === input.period_month);
     if (found) return found;
 
     // Fetch revenue events for this period
@@ -142,11 +138,7 @@ export class CreatorAnalyticsService {
     });
 
     // Build statement body
-    const { summary } = buildStatementBody(
-      input.creator_id,
-      input.period_month,
-      revenueEvents,
-    );
+    const { summary } = buildStatementBody(input.creator_id, input.period_month, revenueEvents);
 
     const now = this.now();
     const fullSummary: StatementSummary = {
@@ -174,7 +166,7 @@ export class CreatorAnalyticsService {
       kind: 'yearly_1099k',
     });
     const yearMarker = `${input.year}-12`;
-    const found = existing.find(s => s.period_month === yearMarker);
+    const found = existing.find((s) => s.period_month === yearMarker);
     if (found) return found;
 
     // Fetch monthly statements for this year
@@ -182,15 +174,10 @@ export class CreatorAnalyticsService {
       creator_id: input.creator_id,
       kind: 'monthly',
     });
-    const yearMonthly = monthlyStatements.filter(s =>
-      s.period_month.startsWith(input.year),
-    );
+    const yearMonthly = monthlyStatements.filter((s) => s.period_month.startsWith(input.year));
 
     // Build yearly body
-    const { summary } = buildYearly1099KBody(
-      input.creator_id,
-      yearMonthly,
-    );
+    const { summary } = buildYearly1099KBody(input.creator_id, yearMonthly);
 
     const now = this.now();
     const fullSummary: StatementSummary = {

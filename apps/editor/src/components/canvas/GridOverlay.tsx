@@ -33,10 +33,7 @@ export function GridOverlay(props: GridOverlayProps): ReactElement | null {
   const showGrid = useEditorStore((s) => s.showGrid);
   const { zoom, pan } = useViewport();
 
-  const tileId = useMemo(
-    () => `grid-${size}-${(zoom * 1000) | 0}`,
-    [size, zoom],
-  );
+  const tileId = useMemo(() => `grid-${size}-${(zoom * 1000) | 0}`, [size, zoom]);
 
   if (!showGrid) return null;
 
@@ -59,12 +56,7 @@ export function GridOverlay(props: GridOverlayProps): ReactElement | null {
       data-testid="canvas-grid"
     >
       <defs>
-        <pattern
-          id={tileId}
-          width={size}
-          height={size}
-          patternUnits="userSpaceOnUse"
-        >
+        <pattern id={tileId} width={size} height={size} patternUnits="userSpaceOnUse">
           <path
             d={`M ${size} 0 L 0 0 0 ${size}`}
             fill="none"
@@ -74,13 +66,7 @@ export function GridOverlay(props: GridOverlayProps): ReactElement | null {
         </pattern>
       </defs>
       <g transform={`translate(${pan.x / zoom} ${pan.y / zoom})`}>
-        <rect
-          x={0}
-          y={0}
-          width={slideWidth}
-          height={slideHeight}
-          fill={`url(#${tileId})`}
-        />
+        <rect x={0} y={0} width={slideWidth} height={slideHeight} fill={`url(#${tileId})`} />
       </g>
     </svg>
   );

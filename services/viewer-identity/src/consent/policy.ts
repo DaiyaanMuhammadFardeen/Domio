@@ -25,10 +25,7 @@ export interface PolicyDecision {
   reason?: string;
 }
 
-export function evaluateMode(
-  mode: PrivacyMode,
-  accepted: readonly PrivacyMode[],
-): PolicyDecision {
+export function evaluateMode(mode: PrivacyMode, accepted: readonly PrivacyMode[]): PolicyDecision {
   if (accepted.includes(mode)) {
     return { accept: true };
   }

@@ -80,9 +80,14 @@ export interface PayoutProvider {
   /** Execute a transfer to a creator. */
   transfer(req: TransferRequest): Promise<TransferResult>;
   /** Create a payout run record and return its run_id. */
-  createPayoutRun(period_month: string, totals: { creators_paid: number; total_payout_cents: number }): Promise<PayoutRun>;
+  createPayoutRun(
+    period_month: string,
+    totals: { creators_paid: number; total_payout_cents: number },
+  ): Promise<PayoutRun>;
   /** Record a ledger entry (deduped by executor_run_id + event_id). */
-  createPayoutLedgerEntry(entry: Omit<PayoutLedgerEntry, 'executor_run_id'> & { executor_run_id: string }): Promise<void>;
+  createPayoutLedgerEntry(
+    entry: Omit<PayoutLedgerEntry, 'executor_run_id'> & { executor_run_id: string },
+  ): Promise<void>;
 }
 
 export interface PayoutExecutorResult {
@@ -142,7 +147,7 @@ export class InMemoryPayoutProvider implements PayoutProvider {
   }
 
   async listEligibleEvents(period_month: string): Promise<readonly EligibleRevenueShareEvent[]> {
-    return this.events.filter(e => e.period_month === period_month);
+    return this.events.filter((e) => e.period_month === period_month);
   }
 
   async getPayoutPolicy(): Promise<PayoutPolicy> {
@@ -157,7 +162,7 @@ export class InMemoryPayoutProvider implements PayoutProvider {
     const created = this.creatorCreated.get(creator_id);
     if (!created) return false;
     const holdMs = this.policy.first_payout_hold_days * 24 * 60 * 60 * 1000;
-    return (now.getTime() - created.getTime()) >= holdMs;
+    return now.getTime() - created.getTime() >= holdMs;
   }
 
   async transfer(req: TransferRequest): Promise<TransferResult> {
@@ -173,7 +178,10 @@ export class InMemoryPayoutProvider implements PayoutProvider {
     return result;
   }
 
-  async createPayoutRun(_period_month: string, _totals: { creators_paid: number; total_payout_cents: number }): Promise<PayoutRun> {
+  async createPayoutRun(
+    _period_month: string,
+    _totals: { creators_paid: number; total_payout_cents: number },
+  ): Promise<PayoutRun> {
     this.runCounter++;
     return { run_id: `run_${this.runCounter}_${Date.now()}` };
   }
@@ -214,9 +222,15 @@ export class PayoutExecutorWorker {
     this.nowFn = opts.now ?? (() => new Date());
     this.tickMs = opts.tickMs ?? Number(process.env['WORKER_TICK_MS'] ?? '60000');
     this.logger = opts.logger ?? {
-      info: () => { /* noop */ },
-      error: () => { /* noop */ },
-      warn: () => { /* noop */ },
+      info: () => {
+        /* noop */
+      },
+      error: () => {
+        /* noop */
+      },
+      warn: () => {
+        /* noop */
+      },
     };
   }
 

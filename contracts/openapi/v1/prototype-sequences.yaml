@@ -19,10 +19,10 @@ paths:
       operationId: listPresentationSequences
       summary: List presentation sequences for a deck
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Sequences.
           content:
             application/json:
@@ -32,71 +32,71 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/PresentationSequence" }
+                    items: { $ref: '#/components/schemas/PresentationSequence' }
     post:
       tags: [sequences]
       operationId: createPresentationSequence
       summary: Create a presentation sequence
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreatePresentationSequenceRequest" }
+            schema: { $ref: '#/components/schemas/CreatePresentationSequenceRequest' }
       responses:
-        "201":
+        '201':
           description: Sequence created.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/PresentationSequence" }
-        "422": { description: Validation error. }
+              schema: { $ref: '#/components/schemas/PresentationSequence' }
+        '422': { description: Validation error. }
   /v1/presentation-sequences/{id}:
     get:
       tags: [sequences]
       operationId: getPresentationSequence
       summary: Get a sequence
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Sequence details.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/PresentationSequence" }
-        "404": { description: Sequence not found. }
+              schema: { $ref: '#/components/schemas/PresentationSequence' }
+        '404': { description: Sequence not found. }
     patch:
       tags: [sequences]
       operationId: patchPresentationSequence
       summary: Update a sequence
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PatchPresentationSequenceRequest" }
+            schema: { $ref: '#/components/schemas/PatchPresentationSequenceRequest' }
       responses:
-        "200":
+        '200':
           description: Sequence updated.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/PresentationSequence" }
-        "404": { description: Sequence not found. }
-        "409": { description: Version conflict. }
+              schema: { $ref: '#/components/schemas/PresentationSequence' }
+        '404': { description: Sequence not found. }
+        '409': { description: Version conflict. }
     delete:
       tags: [sequences]
       operationId: deletePresentationSequence
       summary: Delete a sequence
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "204": { description: Sequence deleted. }
-        "404": { description: Sequence not found. }
+        '204': { description: Sequence deleted. }
+        '404': { description: Sequence not found. }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer }
@@ -120,7 +120,24 @@ components:
     PresentationSequence:
       type: object
       additionalProperties: false
-      required: [id, tenantId, deckId, name, slides, intervalMs, pauseOnEvent, loop, count, interruptionPolicy, reducedMotionDefaultOff, pauseWarnAtMs, version, createdAt, updatedAt]
+      required:
+        [
+          id,
+          tenantId,
+          deckId,
+          name,
+          slides,
+          intervalMs,
+          pauseOnEvent,
+          loop,
+          count,
+          interruptionPolicy,
+          reducedMotionDefaultOff,
+          pauseWarnAtMs,
+          version,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id: { type: string }
         tenantId: { type: string }

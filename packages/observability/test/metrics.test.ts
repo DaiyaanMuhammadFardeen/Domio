@@ -41,7 +41,10 @@ describe('createMeter — positive coverage', () => {
     expect(byName.unit).toBe('1');
     // The OTLP wrapper is intentionally permissive; assert at least one
     // data point per attribute bucket.
-    const allPoints = metrics.flatMap((x: { sum?: number; dataPoints?: unknown[] }) => [x, ...(x.dataPoints ?? [])]);
+    const allPoints = metrics.flatMap((x: { sum?: number; dataPoints?: unknown[] }) => [
+      x,
+      ...(x.dataPoints ?? []),
+    ]);
     expect(allPoints.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -108,9 +111,8 @@ describe('createMeter — positive coverage', () => {
     const metrics = body.resourceMetrics[0].scopeMetrics[0].metrics;
     expect(metrics).toHaveLength(2);
     const byRoute = (r: string) =>
-      metrics.find(
-        (x: { attributes: Array<{ key: string; value: { stringValue: string } }> }) =>
-          x.attributes.some((a) => a.key === 'route' && a.value.stringValue === r),
+      metrics.find((x: { attributes: Array<{ key: string; value: { stringValue: string } }> }) =>
+        x.attributes.some((a) => a.key === 'route' && a.value.stringValue === r),
       );
     expect(byRoute('/a').sum).toBe(4);
     expect(byRoute('/b').sum).toBe(2);

@@ -66,7 +66,9 @@ describe('SemanticSearch', () => {
   it('calls onJump when clicking a result', async () => {
     const onJump = vi.fn();
     renderSearch({ onJump });
-    fireEvent.change(screen.getByTestId('p6-semantic-search-input'), { target: { value: 'pricing' } });
+    fireEvent.change(screen.getByTestId('p6-semantic-search-input'), {
+      target: { value: 'pricing' },
+    });
 
     await waitFor(
       () => {
@@ -107,7 +109,9 @@ describe('SemanticSearch', () => {
     }) as unknown as typeof fetch;
 
     renderSearch();
-    fireEvent.change(screen.getByTestId('p6-semantic-search-input'), { target: { value: 'pricing' } });
+    fireEvent.change(screen.getByTestId('p6-semantic-search-input'), {
+      target: { value: 'pricing' },
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId('p6-search-result-1')).toBeInTheDocument();

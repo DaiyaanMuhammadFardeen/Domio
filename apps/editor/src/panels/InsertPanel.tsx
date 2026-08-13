@@ -18,32 +18,27 @@
 
 import { useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
-import {
-  listComponents,
-  type DomioComponentDef,
-} from '@domio/components';
+import { listComponents, type DomioComponentDef } from '@domio/components';
 import { MagicCard } from '../components/ui/magic-card';
 import { Marquee } from '../components/ui/marquee';
 import { ComponentThumb } from '../components/ComponentThumb';
 import { cn } from '../lib/cn';
 import { useT } from '../lib/locale';
-import {
-  searchTemplates,
-  TEMPLATES,
-  type TemplateDef,
-  type UseCase,
-} from '../lib/templates';
-import {
-  SECTION_TEMPLATES,
-  searchSections,
-  type SectionTemplate,
-} from '../lib/sections';
+import { searchTemplates, TEMPLATES, type TemplateDef, type UseCase } from '../lib/templates';
+import { SECTION_TEMPLATES, searchSections, type SectionTemplate } from '../lib/sections';
 import { searchStock, type StockPhoto } from '../lib/stock';
 import { searchLottie, type LottieAnimation } from '../lib/lottie';
 import { getStickerPacks } from '../lib/sticker-packs';
 import { searchIcons, type IconEntry } from '../lib/icons';
 
-type InsertTab = 'components' | 'templates' | 'sections' | 'stock' | 'lottie' | 'stickers' | 'icons';
+type InsertTab =
+  | 'components'
+  | 'templates'
+  | 'sections'
+  | 'stock'
+  | 'lottie'
+  | 'stickers'
+  | 'icons';
 
 const TABS: { id: InsertTab; label: string }[] = [
   { id: 'components', label: 'Components' },
@@ -105,15 +100,9 @@ export function InsertPanel(props: InsertPanelProps): ReactElement {
       {tab === 'templates' && (
         <TemplatesTab onInsertTemplate={props.onInsertTemplate ?? noopTemplate} />
       )}
-      {tab === 'sections' && (
-        <SectionsTab onInsertSection={props.onInsertSection ?? noopSection} />
-      )}
-      {tab === 'stock' && (
-        <StockTab onInsertStock={props.onInsertStockImage ?? noopStock} />
-      )}
-      {tab === 'lottie' && (
-        <LottieTab onInsertLottie={props.onInsertLottie ?? noopLottie} />
-      )}
+      {tab === 'sections' && <SectionsTab onInsertSection={props.onInsertSection ?? noopSection} />}
+      {tab === 'stock' && <StockTab onInsertStock={props.onInsertStockImage ?? noopStock} />}
+      {tab === 'lottie' && <LottieTab onInsertLottie={props.onInsertLottie ?? noopLottie} />}
       {tab === 'stickers' && <StickersTab onInsert={props.onInsert} />}
       {tab === 'icons' && (
         <IconsTab
@@ -155,10 +144,7 @@ function ComponentsTab({ onInsert }: { onInsert: (catalogId: string) => void }):
     });
   }, [all, query, category]);
 
-  const marqueeItems = useMemo(
-    () => all.slice(0, 12).map((c) => c.name),
-    [all],
-  );
+  const marqueeItems = useMemo(() => all.slice(0, 12).map((c) => c.name), [all]);
 
   return (
     <>
@@ -209,9 +195,7 @@ function ComponentsTab({ onInsert }: { onInsert: (catalogId: string) => void }):
             key={def.catalogId}
             def={def}
             variant={variantById[def.catalogId] ?? def.defaultVariant}
-            onVariantChange={(v) =>
-              setVariantById((prev) => ({ ...prev, [def.catalogId]: v }))
-            }
+            onVariantChange={(v) => setVariantById((prev) => ({ ...prev, [def.catalogId]: v }))}
             onInsert={() => onInsert(def.catalogId)}
           />
         ))}
@@ -271,7 +255,15 @@ function ComponentCard({
 // Templates — full-deck gallery with use-case chips
 // ---------------------------------------------------------------------------
 
-const USE_CASES: readonly UseCase[] = ['Pitch', 'Board Report', 'QBR', 'All-hands', 'Demo Day', 'Sales', 'Education'];
+const USE_CASES: readonly UseCase[] = [
+  'Pitch',
+  'Board Report',
+  'QBR',
+  'All-hands',
+  'Demo Day',
+  'Sales',
+  'Education',
+];
 
 function TemplatesTab({
   onInsertTemplate,
@@ -356,7 +348,9 @@ function TemplateCard({
         <p className="template-card__desc">{template.description}</p>
         <ul className="template-card__chips" aria-label={t('insert.useCases')}>
           {template.useCases.map((uc) => (
-            <li key={uc} className="template-card__chip">{uc}</li>
+            <li key={uc} className="template-card__chip">
+              {uc}
+            </li>
           ))}
         </ul>
         <button
@@ -398,11 +392,7 @@ function SectionsTab({
       />
       <div className="insert-panel__sections" data-testid="insert-sections">
         {filtered.map((sec) => (
-          <SectionCard
-            key={sec.id}
-            section={sec}
-            onInsert={() => onInsertSection(sec.id)}
-          />
+          <SectionCard key={sec.id} section={sec} onInsert={() => onInsertSection(sec.id)} />
         ))}
         {filtered.length === 0 ? (
           <div className="insert-panel__empty">{t('insert.emptySections')}</div>
@@ -435,7 +425,9 @@ function SectionCard({
         </p>
         <ul className="section-card__tags" aria-label={t('insert.tags')}>
           {section.tags.map((tag) => (
-            <li key={tag} className="section-card__tag">{tag}</li>
+            <li key={tag} className="section-card__tag">
+              {tag}
+            </li>
           ))}
         </ul>
         <button
@@ -455,11 +447,7 @@ function SectionCard({
 // Stock — bootstrap seam (Unsplash/Pexels) with local fallback
 // ---------------------------------------------------------------------------
 
-function StockTab({
-  onInsertStock,
-}: {
-  onInsertStock: (assetId: string) => void;
-}): ReactElement {
+function StockTab({ onInsertStock }: { onInsertStock: (assetId: string) => void }): ReactElement {
   const t = useT();
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<{ photos: readonly StockPhoto[]; fallback: boolean }>({
@@ -492,9 +480,7 @@ function StockTab({
         onChange={(e) => setQuery(e.target.value)}
         aria-label={t('insert.searchStock')}
       />
-      {result.fallback && (
-        <p className="insert-panel__fallback">{t('insert.stockFallback')}</p>
-      )}
+      {result.fallback && <p className="insert-panel__fallback">{t('insert.stockFallback')}</p>}
       <div className="insert-panel__grid" data-testid="insert-stock-grid">
         {result.photos.map((photo) => (
           <button
@@ -508,9 +494,7 @@ function StockTab({
             <span className="stock-card__attr">{photo.attribution}</span>
           </button>
         ))}
-        {loading && (
-          <div className="insert-panel__empty">{t('insert.loading')}</div>
-        )}
+        {loading && <div className="insert-panel__empty">{t('insert.loading')}</div>}
         {!loading && result.photos.length === 0 ? (
           <div className="insert-panel__empty">{t('insert.emptyStock')}</div>
         ) : null}
@@ -530,7 +514,10 @@ function LottieTab({
 }): ReactElement {
   const t = useT();
   const [query, setQuery] = useState('');
-  const [result, setResult] = useState<{ animations: readonly LottieAnimation[]; fallback: boolean }>({
+  const [result, setResult] = useState<{
+    animations: readonly LottieAnimation[];
+    fallback: boolean;
+  }>({
     animations: [],
     fallback: true,
   });
@@ -557,9 +544,7 @@ function LottieTab({
         onChange={(e) => setQuery(e.target.value)}
         aria-label={t('insert.searchLottie')}
       />
-      {result.fallback && (
-        <p className="insert-panel__fallback">{t('insert.lottieFallback')}</p>
-      )}
+      {result.fallback && <p className="insert-panel__fallback">{t('insert.lottieFallback')}</p>}
       <div className="insert-panel__grid" data-testid="insert-lottie-grid">
         {result.animations.map((anim) => (
           <button
@@ -692,8 +677,16 @@ function IconsTab({
 }
 
 const ICON_COLORS = [
-  '#E6EDF3', '#58a6ff', '#3fb950', '#f0883e', '#f778ba',
-  '#bc8cff', '#ff7b72', '#d2a8ff', '#79c0ff', '#ffa657',
+  '#E6EDF3',
+  '#58a6ff',
+  '#3fb950',
+  '#f0883e',
+  '#f778ba',
+  '#bc8cff',
+  '#ff7b72',
+  '#d2a8ff',
+  '#79c0ff',
+  '#ffa657',
 ];
 
 function IconCard({

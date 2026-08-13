@@ -33,26 +33,38 @@ paths:
           required: true
           schema:
             type: string
-            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+            enum:
+              [
+                google_sheets,
+                excel,
+                airtable,
+                notion,
+                postgres,
+                mysql,
+                bigquery,
+                snowflake,
+                rest,
+                graphql,
+              ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConnectorAuthStartRequest"
+              $ref: '#/components/schemas/ConnectorAuthStartRequest'
       responses:
-        "200":
+        '200':
           description: Auth start succeeded. Returns redirect URL and CSRF state.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConnectorAuthStartResponse"
-        "409":
+                $ref: '#/components/schemas/ConnectorAuthStartResponse'
+        '409':
           description: Adapter version mismatch.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/connectors/{connector_id}/auth/callback:
     get:
       tags: [connectors]
@@ -68,7 +80,19 @@ paths:
           required: true
           schema:
             type: string
-            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+            enum:
+              [
+                google_sheets,
+                excel,
+                airtable,
+                notion,
+                postgres,
+                mysql,
+                bigquery,
+                snowflake,
+                rest,
+                graphql,
+              ]
         - in: query
           name: code
           required: true
@@ -84,20 +108,20 @@ paths:
           required: false
           schema:
             type: string
-            default: "1.0.0"
+            default: '1.0.0'
       responses:
-        "200":
+        '200':
           description: Callback succeeded. Returns credential reference.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConnectorAuthCallbackResponse"
-        "400":
+                $ref: '#/components/schemas/ConnectorAuthCallbackResponse'
+        '400':
           description: Auth state mismatch.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/connectors/{connector_id}/ping:
     post:
       tags: [connectors]
@@ -112,32 +136,44 @@ paths:
           required: true
           schema:
             type: string
-            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+            enum:
+              [
+                google_sheets,
+                excel,
+                airtable,
+                notion,
+                postgres,
+                mysql,
+                bigquery,
+                snowflake,
+                rest,
+                graphql,
+              ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConnectorPingRequest"
+              $ref: '#/components/schemas/ConnectorPingRequest'
       responses:
-        "200":
+        '200':
           description: Ping succeeded.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConnectorPingResponse"
-        "404":
+                $ref: '#/components/schemas/ConnectorPingResponse'
+        '404':
           description: Connection not found.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
           description: Adapter version mismatch.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/connectors/{connector_id}/discover:
     post:
       tags: [connectors]
@@ -152,32 +188,44 @@ paths:
           required: true
           schema:
             type: string
-            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+            enum:
+              [
+                google_sheets,
+                excel,
+                airtable,
+                notion,
+                postgres,
+                mysql,
+                bigquery,
+                snowflake,
+                rest,
+                graphql,
+              ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConnectorDiscoverRequest"
+              $ref: '#/components/schemas/ConnectorDiscoverRequest'
       responses:
-        "200":
+        '200':
           description: Discover succeeded. Returns available tables.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConnectorDiscoverResponse"
-        "404":
+                $ref: '#/components/schemas/ConnectorDiscoverResponse'
+        '404':
           description: Connection not found.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
           description: Adapter version mismatch.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/connectors/{connector_id}/query:
     post:
       tags: [connectors]
@@ -192,32 +240,44 @@ paths:
           required: true
           schema:
             type: string
-            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+            enum:
+              [
+                google_sheets,
+                excel,
+                airtable,
+                notion,
+                postgres,
+                mysql,
+                bigquery,
+                snowflake,
+                rest,
+                graphql,
+              ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConnectorQueryRequest"
+              $ref: '#/components/schemas/ConnectorQueryRequest'
       responses:
-        "200":
+        '200':
           description: Query succeeded. Returns canonical rows and column metadata.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConnectorQueryResponse"
-        "404":
+                $ref: '#/components/schemas/ConnectorQueryResponse'
+        '404':
           description: Connection not found.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
           description: Adapter version mismatch.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/connectors/{connector_id}/subscribe:
     post:
       tags: [connectors]
@@ -232,26 +292,38 @@ paths:
           required: true
           schema:
             type: string
-            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+            enum:
+              [
+                google_sheets,
+                excel,
+                airtable,
+                notion,
+                postgres,
+                mysql,
+                bigquery,
+                snowflake,
+                rest,
+                graphql,
+              ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConnectorSubscribeRequest"
+              $ref: '#/components/schemas/ConnectorSubscribeRequest'
       responses:
-        "200":
+        '200':
           description: Subscribe succeeded.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConnectorSubscribeResponse"
-        "404":
+                $ref: '#/components/schemas/ConnectorSubscribeResponse'
+        '404':
           description: Connection not found.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/connectors/{connector_id}/invalidate:
     post:
       tags: [connectors]
@@ -266,26 +338,38 @@ paths:
           required: true
           schema:
             type: string
-            enum: [google_sheets, excel, airtable, notion, postgres, mysql, bigquery, snowflake, rest, graphql]
+            enum:
+              [
+                google_sheets,
+                excel,
+                airtable,
+                notion,
+                postgres,
+                mysql,
+                bigquery,
+                snowflake,
+                rest,
+                graphql,
+              ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ConnectorInvalidateRequest"
+              $ref: '#/components/schemas/ConnectorInvalidateRequest'
       responses:
-        "200":
+        '200':
           description: Invalidation succeeded.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConnectorInvalidateResponse"
-        "404":
+                $ref: '#/components/schemas/ConnectorInvalidateResponse'
+        '404':
           description: Connection not found.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/connectors:
     get:
       tags: [connectors]
@@ -293,7 +377,7 @@ paths:
       summary: List all registered connectors
       description: Returns the list of all registered connector adapters and their version info.
       responses:
-        "200":
+        '200':
           description: List of registered connectors.
           content:
             application/json:
@@ -303,7 +387,7 @@ paths:
                   connectors:
                     type: array
                     items:
-                      $ref: "#/components/schemas/AdapterVersionInfo"
+                      $ref: '#/components/schemas/AdapterVersionInfo'
 components:
   securitySchemes:
     bearerAuth:
@@ -343,7 +427,7 @@ components:
       type: object
       properties:
         credential_ref:
-          $ref: "#/components/schemas/CredentialRef"
+          $ref: '#/components/schemas/CredentialRef'
     ConnectorPingRequest:
       type: object
       required: [version, connection_id, tenant_id]
@@ -382,7 +466,7 @@ components:
         tables:
           type: array
           items:
-            $ref: "#/components/schemas/DiscoveredTable"
+            $ref: '#/components/schemas/DiscoveredTable'
     ConnectorQueryRequest:
       type: object
       required: [version, connection_id, tenant_id, sql]
@@ -415,11 +499,11 @@ components:
         columns:
           type: array
           items:
-            $ref: "#/components/schemas/CanonicalColumn"
+            $ref: '#/components/schemas/CanonicalColumn'
         cursor:
           type: string
         stats:
-          $ref: "#/components/schemas/QueryStats"
+          $ref: '#/components/schemas/QueryStats'
     ConnectorSubscribeRequest:
       type: object
       required: [version, connection_id, tenant_id, table]
@@ -488,7 +572,7 @@ components:
         columns:
           type: array
           items:
-            $ref: "#/components/schemas/CanonicalColumn"
+            $ref: '#/components/schemas/CanonicalColumn'
         row_count_estimate:
           type: integer
     QueryStats:

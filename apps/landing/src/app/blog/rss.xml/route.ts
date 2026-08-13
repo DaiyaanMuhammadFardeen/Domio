@@ -10,8 +10,7 @@
 import { BLOG_POSTS } from '../../../lib/blog-data';
 
 const SITE_TITLE = 'Domio blog';
-const SITE_DESCRIPTION =
-  'Engineering, product, customer, and company updates from the Domio team.';
+const SITE_DESCRIPTION = 'Engineering, product, customer, and company updates from the Domio team.';
 const SITE_LANGUAGE = 'en-us';
 
 function escapeXml(value: string): string {
@@ -55,9 +54,7 @@ function buildRssXml(): string {
   const items = BLOG_POSTS.map((post) => {
     const link = `${origin}/blog/${post.slug}`;
     const description = escapeXml(stripMarkdown(post.body_md));
-    const categories = post.tags
-      .map((t) => `<category>${escapeXml(t)}</category>`)
-      .join('');
+    const categories = post.tags.map((t) => `<category>${escapeXml(t)}</category>`).join('');
     return [
       '    <item>',
       `      <title>${escapeXml(post.title)}</title>`,

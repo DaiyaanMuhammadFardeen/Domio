@@ -20,22 +20,19 @@ import { InvalidTakedownTransitionError } from './types.js';
  *                           dismissed → resolved
  */
 export const TAKEDOWN_TRANSITIONS: Record<TakedownStatus, readonly TakedownStatus[]> = {
-  received:       ['in_review'],
-  in_review:      ['confirmed', 'dismissed'],
-  confirmed:      ['counter_notice', 'resolved'],
-  dismissed:      ['resolved'],
+  received: ['in_review'],
+  in_review: ['confirmed', 'dismissed'],
+  confirmed: ['counter_notice', 'resolved'],
+  dismissed: ['resolved'],
   counter_notice: ['resolved'],
-  resolved:       [],
+  resolved: [],
 };
 
 /**
  * Validate whether a takedown transition is allowed.
  * Throws InvalidTakedownTransitionError if not.
  */
-export function validateTakedownTransition(
-  from: TakedownStatus,
-  to: TakedownStatus,
-): void {
+export function validateTakedownTransition(from: TakedownStatus, to: TakedownStatus): void {
   const allowed = TAKEDOWN_TRANSITIONS[from];
   if (!allowed.includes(to)) {
     throw new InvalidTakedownTransitionError(from, to);
@@ -60,7 +57,9 @@ export function validateTakedownInput(input: {
     throw new Error('kind is required');
   }
   if (!VALID_KINDS.includes(input.kind as TakedownKind)) {
-    throw new Error(`Invalid takedown kind: '${input.kind}'. Must be one of: ${VALID_KINDS.join(', ')}`);
+    throw new Error(
+      `Invalid takedown kind: '${input.kind}'. Must be one of: ${VALID_KINDS.join(', ')}`,
+    );
   }
   if (!input.statement || input.statement.trim().length === 0) {
     throw new Error('statement is required and must be non-empty');
@@ -101,9 +100,7 @@ export function fileTakedownBody(): {
 /**
  * Resolve a confirmed takedown. Sets listing to 'removed' + resolved_at.
  */
-export function resolveBody(
-  currentStatus: TakedownStatus,
-): {
+export function resolveBody(currentStatus: TakedownStatus): {
   status: 'resolved';
   resolvedAt: Date;
   listingStatus: 'removed' | null;
@@ -121,9 +118,7 @@ export function resolveBody(
 /**
  * Dismiss a takedown. Sets resolved_at.
  */
-export function dismissBody(
-  currentStatus: TakedownStatus,
-): {
+export function dismissBody(currentStatus: TakedownStatus): {
   status: 'resolved';
   resolvedAt: Date;
 } {
@@ -139,9 +134,7 @@ export function dismissBody(
 /**
  * File a counter-notice. Transitions confirmed → counter_notice.
  */
-export function counterNoticeBody(
-  currentStatus: TakedownStatus,
-): {
+export function counterNoticeBody(currentStatus: TakedownStatus): {
   status: 'counter_notice';
 } {
   if (currentStatus !== 'confirmed') {
@@ -161,9 +154,7 @@ export function counterNoticeBody(
  * Simple weighted average: each signal contributes a value between 0 and 1.
  * Default score is 0 (no signals = no trust).
  */
-export function computeTrustScore(
-  signals: Record<string, unknown>,
-): number {
+export function computeTrustScore(signals: Record<string, unknown>): number {
   const weights: Record<string, number> = {
     malware_scan: 0.3,
     pricing_anomaly: 0.2,

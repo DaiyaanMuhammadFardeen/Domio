@@ -60,16 +60,18 @@ export default function () {
       wsOpenMs.add(Date.now() - t0);
       const helloAt = Date.now();
       const participant_id = `p-${randomString(8)}`;
-      socket.send(JSON.stringify({
-        kind: 'hello',
-        session_code: SessionCode,
-        workspace_id: WorkspaceId,
-        participant_id,
-        display_name: `vu-${__VU}`,
-        locale: 'en-US',
-        ts_ms: Date.now(),
-        idempotency_key: randomString(16),
-      }));
+      socket.send(
+        JSON.stringify({
+          kind: 'hello',
+          session_code: SessionCode,
+          workspace_id: WorkspaceId,
+          participant_id,
+          display_name: `vu-${__VU}`,
+          locale: 'en-US',
+          ts_ms: Date.now(),
+          idempotency_key: randomString(16),
+        }),
+      );
       socket.on('message', (msg) => {
         try {
           const env = JSON.parse(msg);
@@ -77,24 +79,28 @@ export default function () {
             helloMs.add(Date.now() - helloAt);
             // After welcome, send a vote and a reaction.
             pollAt = Date.now();
-            socket.send(JSON.stringify({
-              kind: 'poll_vote',
-              poll_id: `poll-${randomString(6)}`,
-              option_id: 'yes',
-              session_code: SessionCode,
-              participant_id,
-              ts_ms: Date.now(),
-              idempotency_key: randomString(16),
-            }));
-            socket.send(JSON.stringify({
-              kind: 'reaction',
-              session_code: SessionCode,
-              participant_id,
-              slide_id: `slide-${randomString(4)}`,
-              emoji: '👏',
-              ts_ms: Date.now(),
-              idempotency_key: randomString(16),
-            }));
+            socket.send(
+              JSON.stringify({
+                kind: 'poll_vote',
+                poll_id: `poll-${randomString(6)}`,
+                option_id: 'yes',
+                session_code: SessionCode,
+                participant_id,
+                ts_ms: Date.now(),
+                idempotency_key: randomString(16),
+              }),
+            );
+            socket.send(
+              JSON.stringify({
+                kind: 'reaction',
+                session_code: SessionCode,
+                participant_id,
+                slide_id: `slide-${randomString(4)}`,
+                emoji: '👏',
+                ts_ms: Date.now(),
+                idempotency_key: randomString(16),
+              }),
+            );
           } else if (env.kind === 'poll_vote_ack') {
             pollMs.add(Date.now() - pollAt);
           }
@@ -112,5 +118,5 @@ export default function () {
       socket.close();
     }, 60 * 1000);
   });
-  check(res, { 'connected': (r) => r && r.status === 101 });
+  check(res, { connected: (r) => r && r.status === 101 });
 }

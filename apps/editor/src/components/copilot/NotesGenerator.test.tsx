@@ -73,7 +73,9 @@ describe('NotesGenerator (Wave 6 S6.6)', () => {
     fireEvent.click(screen.getByTestId('notes-generator-generate'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('notes-generator-preview')).toHaveTextContent('Highlight the headline');
+      expect(screen.getByTestId('notes-generator-preview')).toHaveTextContent(
+        'Highlight the headline',
+      );
     });
   });
 
@@ -106,7 +108,9 @@ describe('NotesGenerator (Wave 6 S6.6)', () => {
     const secondCall = generateNotesFn.mock.calls[1];
     expect(secondCall).toBeDefined();
     expect(secondCall![0]).toBe('slide-1');
-    expect((secondCall![1] as { style: string; feedback: string; previousNotes: string }).feedback).toBe('More concise');
+    expect(
+      (secondCall![1] as { style: string; feedback: string; previousNotes: string }).feedback,
+    ).toBe('More concise');
     expect((secondCall![1] as { previousNotes: string }).previousNotes).toBe(mockResponse.notes);
   });
 

@@ -79,7 +79,7 @@ function generateNumber(rng: () => number, dist: Distribution, field: MockField)
       const end = field.end ?? max;
       const step = field.step ?? 1;
       const steps = Math.floor((end - start) / step);
-      return start + (rng() * steps | 0) * step;
+      return start + ((rng() * steps) | 0) * step;
     }
     case 'constant':
       return min;
@@ -126,11 +126,6 @@ export function generate(spec: MockSpec): MockResult {
  * Generate multiple correlated datasets sharing a base seed.
  * Each spec uses baseSeed + index for its seed.
  */
-export function generateMany(
-  specs: MockSpec[],
-  baseSeed: number,
-): MockResult[] {
-  return specs.map((spec, i) =>
-    generate({ ...spec, seed: baseSeed + i }),
-  );
+export function generateMany(specs: MockSpec[], baseSeed: number): MockResult[] {
+  return specs.map((spec, i) => generate({ ...spec, seed: baseSeed + i }));
 }

@@ -30,7 +30,11 @@ function MatchupCard(props: { readonly matchup: Matchup }) {
       <div
         className={
           'flex items-center justify-between text-sm ' +
-          (aWon ? 'font-bold text-emerald-700' : decided ? 'text-slate-400 line-through' : 'text-slate-700')
+          (aWon
+            ? 'font-bold text-emerald-700'
+            : decided
+              ? 'text-slate-400 line-through'
+              : 'text-slate-700')
         }
         data-testid="tournament-matchup-a"
         data-participant-id={a.participantId}
@@ -42,7 +46,11 @@ function MatchupCard(props: { readonly matchup: Matchup }) {
       <div
         className={
           'flex items-center justify-between text-sm ' +
-          (bWon ? 'font-bold text-emerald-700' : decided ? 'text-slate-400 line-through' : 'text-slate-700')
+          (bWon
+            ? 'font-bold text-emerald-700'
+            : decided
+              ? 'text-slate-400 line-through'
+              : 'text-slate-700')
         }
         data-testid="tournament-matchup-b"
         data-participant-id={b.participantId}

@@ -149,12 +149,7 @@ export class SpatialIndex {
 }
 
 function intersects(a: Aabb, b: Aabb): boolean {
-  return !(
-    a.x + a.w < b.x ||
-    b.x + b.w < a.x ||
-    a.y + a.h < b.y ||
-    b.y + b.h < a.y
-  );
+  return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
 }
 
 function cellKey(cx: number, cy: number): string {

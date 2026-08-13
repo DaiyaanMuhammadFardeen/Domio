@@ -49,9 +49,7 @@ export function CursorChat({
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
-      setVisibleBubbles(
-        messages.filter((m) => now - m.timestamp < bubbleDurationMs),
-      );
+      setVisibleBubbles(messages.filter((m) => now - m.timestamp < bubbleDurationMs));
     }, 200);
     return () => clearInterval(interval);
   }, [messages, bubbleDurationMs]);

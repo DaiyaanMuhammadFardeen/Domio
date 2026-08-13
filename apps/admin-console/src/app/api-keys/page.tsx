@@ -14,12 +14,7 @@ import { Copy, Plus, X } from 'lucide-react';
 import { FormattedMessage } from '@domio/ui';
 import enMessages from '../../../messages/en.json';
 import { Badge } from '../../components/Badge';
-import {
-  API_KEY_SCOPES,
-  createAPIKey,
-  listAPIKeys,
-  revokeAPIKey,
-} from '../../lib/api-key-service';
+import { API_KEY_SCOPES, createAPIKey, listAPIKeys, revokeAPIKey } from '../../lib/api-key-service';
 import type { APIKey, APIKeyInput, APIKeyScope } from '../../lib/types';
 
 const CATALOGUE = enMessages as Readonly<Record<string, string>>;
@@ -105,8 +100,7 @@ export default function APIKeysPage() {
       scopes,
       ...(Number.isFinite(days) && days > 0
         ? {
-            expires_at_ms:
-              Date.now() + days * 1000 * 60 * 60 * 24,
+            expires_at_ms: Date.now() + days * 1000 * 60 * 60 * 24,
           }
         : {}),
     };
@@ -155,10 +149,7 @@ export default function APIKeysPage() {
             <FormattedMessage id="admin.apiKeys.heading" catalogue={CATALOGUE} />
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            <FormattedMessage
-              id="admin.apiKeys.subheading"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.apiKeys.subheading" catalogue={CATALOGUE} />
           </p>
         </div>
         <button
@@ -183,10 +174,7 @@ export default function APIKeysPage() {
           className="rounded-xl border border-amber-200 bg-amber-50 p-4"
         >
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
-            <FormattedMessage
-              id="admin.apiKeys.secretBanner"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.apiKeys.secretBanner" catalogue={CATALOGUE} />
           </div>
           <div className="flex items-center gap-2">
             <code className="flex-1 overflow-x-auto rounded-md bg-white px-3 py-2 font-mono text-xs text-amber-900">
@@ -198,7 +186,11 @@ export default function APIKeysPage() {
               className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-white px-2 py-1.5 text-xs font-medium text-amber-800 transition hover:bg-amber-100"
             >
               <Copy className="h-3 w-3" aria-hidden />
-              {copied ? 'Copied' : <FormattedMessage id="admin.apiKeys.copy" catalogue={CATALOGUE} />}
+              {copied ? (
+                'Copied'
+              ) : (
+                <FormattedMessage id="admin.apiKeys.copy" catalogue={CATALOGUE} />
+              )}
             </button>
           </div>
           <button
@@ -223,10 +215,7 @@ export default function APIKeysPage() {
           <div className="space-y-4">
             <label className="block">
               <span className="block text-xs font-medium uppercase tracking-wide text-slate-500">
-                <FormattedMessage
-                  id="admin.apiKeys.col.name"
-                  catalogue={CATALOGUE}
-                />
+                <FormattedMessage id="admin.apiKeys.col.name" catalogue={CATALOGUE} />
               </span>
               <input
                 data-testid="api-keys-form-name"
@@ -240,10 +229,7 @@ export default function APIKeysPage() {
 
             <fieldset>
               <legend className="block text-xs font-medium uppercase tracking-wide text-slate-500">
-                <FormattedMessage
-                  id="admin.apiKeys.col.scopes"
-                  catalogue={CATALOGUE}
-                />
+                <FormattedMessage id="admin.apiKeys.col.scopes" catalogue={CATALOGUE} />
               </legend>
               <div
                 data-testid="api-keys-form-scopes"
@@ -269,12 +255,8 @@ export default function APIKeysPage() {
 
             <label className="block max-w-xs">
               <span className="block text-xs font-medium uppercase tracking-wide text-slate-500">
-                <FormattedMessage
-                  id="admin.apiKeys.col.expires"
-                  catalogue={CATALOGUE}
-                />
-                {' '}(
-                days, optional)
+                <FormattedMessage id="admin.apiKeys.col.expires" catalogue={CATALOGUE} /> ( days,
+                optional)
               </span>
               <input
                 type="number"
@@ -333,56 +315,32 @@ export default function APIKeysPage() {
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.apiKeys.col.name"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.apiKeys.col.name" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.apiKeys.col.scopes"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.apiKeys.col.scopes" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.apiKeys.col.prefix"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.apiKeys.col.prefix" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.apiKeys.col.lastUsed"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.apiKeys.col.lastUsed" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.apiKeys.col.expires"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.apiKeys.col.expires" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.apiKeys.col.created"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.apiKeys.col.created" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.apiKeys.col.actions"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.apiKeys.col.actions" catalogue={CATALOGUE} />
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {keys.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan={7}
-                      className="px-4 py-12 text-center text-sm text-slate-500"
-                    >
+                    <td colSpan={7} className="px-4 py-12 text-center text-sm text-slate-500">
                       No API keys yet.
                     </td>
                   </tr>
@@ -395,9 +353,7 @@ export default function APIKeysPage() {
                     >
                       <td className="whitespace-nowrap px-4 py-2.5 text-slate-800">
                         <div className="font-medium">{k.name}</div>
-                        <div className="font-mono text-[11px] text-slate-400">
-                          {k.id}
-                        </div>
+                        <div className="font-mono text-[11px] text-slate-400">{k.id}</div>
                       </td>
                       <td className="px-4 py-2.5">
                         <div className="flex flex-wrap gap-1">
@@ -427,10 +383,7 @@ export default function APIKeysPage() {
                           data-testid={`api-keys-revoke-${k.id}`}
                           className="rounded-md border border-rose-200 bg-white px-2 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-50"
                         >
-                          <FormattedMessage
-                            id="admin.apiKeys.revoke"
-                            catalogue={CATALOGUE}
-                          />
+                          <FormattedMessage id="admin.apiKeys.revoke" catalogue={CATALOGUE} />
                         </button>
                       </td>
                     </tr>

@@ -16,7 +16,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { DisplayProfileSnapshot } from '../../runtime/types';
 
-export const PROFILES: ReadonlyArray<{ id: string; label: string; description: string; snapshot: DisplayProfileSnapshot }> = [
+export const PROFILES: ReadonlyArray<{
+  id: string;
+  label: string;
+  description: string;
+  snapshot: DisplayProfileSnapshot;
+}> = [
   {
     id: 'standard',
     label: 'Standard',
@@ -113,13 +118,16 @@ export function ProfileSelector({ actorId, onChange }: ProfileSelectorProps) {
     setActive(loadStoredProfile(actorId));
   }, [actorId]);
 
-  const choose = useCallback((id: string) => {
-    const found = PROFILES.find((p) => p.id === id);
-    if (!found) return;
-    setActive(id);
-    persistProfile(actorId, id);
-    onChange?.(found.snapshot, id);
-  }, [actorId, onChange]);
+  const choose = useCallback(
+    (id: string) => {
+      const found = PROFILES.find((p) => p.id === id);
+      if (!found) return;
+      setActive(id);
+      persistProfile(actorId, id);
+      onChange?.(found.snapshot, id);
+    },
+    [actorId, onChange],
+  );
 
   return (
     <div className="profile-selector" role="radiogroup" aria-label="Display profile">
@@ -137,7 +145,9 @@ export function ProfileSelector({ actorId, onChange }: ProfileSelectorProps) {
             <span className="profile-selector__label">{p.label}</span>
             <span className="profile-selector__desc">{p.description}</span>
             <span className="profile-selector__spec">
-              {p.snapshot.width}×{p.snapshot.height}@{p.snapshot.refresh_hz}Hz · {p.snapshot.color_profile}{p.snapshot.hdr ? ' · HDR' : ''}
+              {p.snapshot.width}×{p.snapshot.height}@{p.snapshot.refresh_hz}Hz ·{' '}
+              {p.snapshot.color_profile}
+              {p.snapshot.hdr ? ' · HDR' : ''}
             </span>
           </button>
         ))}

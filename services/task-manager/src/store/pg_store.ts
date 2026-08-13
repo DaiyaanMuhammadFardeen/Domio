@@ -67,10 +67,7 @@ export class PgTaskLinkStore implements TaskLinkStore {
 
   async getLink(linkId: string): Promise<TaskLink | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getLink');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM task_link WHERE id = $1',
-      [linkId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM task_link WHERE id = $1', [linkId]);
     if (rows.length === 0) return null;
     return taskLinkRowToDomain(rows[0]!);
   }
@@ -147,10 +144,7 @@ export class PgTaskLinkStore implements TaskLinkStore {
 
   async deleteLink(linkId: string): Promise<void> {
     if (!this.pool) throw new StoreNotConfiguredError('deleteLink');
-    const { rowCount } = await this.pool.query(
-      'DELETE FROM task_link WHERE id = $1',
-      [linkId],
-    );
+    const { rowCount } = await this.pool.query('DELETE FROM task_link WHERE id = $1', [linkId]);
     if (rowCount === 0) throw new TaskLinkNotFoundError(linkId);
   }
 }
@@ -213,7 +207,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

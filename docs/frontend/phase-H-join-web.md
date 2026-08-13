@@ -13,12 +13,12 @@ and answer whatever the presenter puts on screen.
 
 ## Routes to build
 
-| Route                      | Renders                                            |
-| -------------------------- | -------------------------------------------------- |
-| `/`                        | Join form (already exists, needs wiring)           |
-| `/join/[code]`             | Live widget stream once joined                     |
-| `/join/[code]/results`     | After-session results (poll tallies, quiz score)   |
-| `/manifest.webmanifest`    | PWA manifest (already exists)                      |
+| Route                   | Renders                                          |
+| ----------------------- | ------------------------------------------------ |
+| `/`                     | Join form (already exists, needs wiring)         |
+| `/join/[code]`          | Live widget stream once joined                   |
+| `/join/[code]/results`  | After-session results (poll tallies, quiz score) |
+| `/manifest.webmanifest` | PWA manifest (already exists)                    |
 
 ## Files to change
 
@@ -40,13 +40,31 @@ to events: `widget_show`, `widget_hide`, `reaction_burst`. Renders whichever
 widget the presenter currently has on screen:
 
 ```tsx
-{session.currentWidget === 'poll'   && <PollWidget poll={session.activePoll} />}
-{session.currentWidget === 'qa'     && <QaWidget qa={session.activeQa} />}
-{session.currentWidget === 'quiz'   && <QuizWidget quiz={session.activeQuiz} />}
-{session.currentWidget === 'cloud'  && <WordCloudWidget cloud={session.activeCloud} />}
-{session.currentWidget === 'hand'   && <RaiseHandWidget session={session} />}
-{session.currentWidget === 'vote'   && <NavVoteWidget vote={session.activeVote} />}
-{session.currentWidget === 'reaction' && <ReactionWidget/>}
+{
+  session.currentWidget === 'poll' && <PollWidget poll={session.activePoll} />;
+}
+{
+  session.currentWidget === 'qa' && <QaWidget qa={session.activeQa} />;
+}
+{
+  session.currentWidget === 'quiz' && <QuizWidget quiz={session.activeQuiz} />;
+}
+{
+  session.currentWidget === 'cloud' && (
+    <WordCloudWidget cloud={session.activeCloud} />
+  );
+}
+{
+  session.currentWidget === 'hand' && <RaiseHandWidget session={session} />;
+}
+{
+  session.currentWidget === 'vote' && (
+    <NavVoteWidget vote={session.activeVote} />
+  );
+}
+{
+  session.currentWidget === 'reaction' && <ReactionWidget />;
+}
 ```
 
 Each widget posts back via `ws-client.send({ type: 'widget_response', ... })`.

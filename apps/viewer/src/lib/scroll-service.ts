@@ -16,8 +16,6 @@ export interface ScrollEvent {
 
 export const BOOTSTRAP_SCROLL_EVENTS: ReadonlyArray<ScrollEvent> = [];
 
-export async function listScrollEvents(
-  _deckId: string,
-): Promise<ReadonlyArray<ScrollEvent>> {
+export async function listScrollEvents(_deckId: string): Promise<ReadonlyArray<ScrollEvent>> {
   return BOOTSTRAP_SCROLL_EVENTS;
 }

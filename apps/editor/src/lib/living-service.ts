@@ -103,24 +103,132 @@ interface SeedUpdateSpec {
  * Deterministic — same wall-clock → same IDs/ordering.
  */
 const UPDATE_SPECS: ReadonlyArray<SeedUpdateSpec> = [
-  { minutesAgo: 2, kind: 'auto_refresh', actorIdx: 0, sectionIdx: 1, summary: 'Auto-refreshed sales pipeline data.' },
-  { minutesAgo: 4, kind: 'data_refresh', actorIdx: 1, sectionIdx: 1, summary: 'Refreshed Q3 revenue chart from Salesforce.' },
-  { minutesAgo: 9, kind: 'comment_added', actorIdx: 1, sectionIdx: 1, summary: 'Alice commented: "EMEA numbers look off — pulling from CSV instead."' },
-  { minutesAgo: 14, kind: 'comment_added', actorIdx: 2, sectionIdx: 3, summary: 'Bob commented: "Let\'s trim the bullet list for the exec read-out."' },
-  { minutesAgo: 22, kind: 'data_refresh', actorIdx: 3, sectionIdx: 3, summary: 'Refreshed team-headcount breakdown.' },
-  { minutesAgo: 35, kind: 'version_published', actorIdx: 5, sectionIdx: 2, summary: 'Slide Builder published v4 of the pipeline slide.' },
-  { minutesAgo: 48, kind: 'auto_refresh', actorIdx: 0, sectionIdx: 4, summary: 'Auto-refreshed closing CTA performance metrics.' },
-  { minutesAgo: 67, kind: 'data_refresh', actorIdx: 4, sectionIdx: 2, summary: 'Content Polisher reran the data pipeline and updated charts.' },
-  { minutesAgo: 92, kind: 'comment_added', actorIdx: 2, sectionIdx: 0, summary: 'Bob commented: "Move the title to the left for visual balance."' },
-  { minutesAgo: 130, kind: 'version_published', actorIdx: 1, sectionIdx: 0, summary: 'Alice published v3 of the cover slide.' },
-  { minutesAgo: 180, kind: 'data_refresh', actorIdx: 3, sectionIdx: 1, summary: 'Data Explorer refreshed Q3 revenue numbers.' },
-  { minutesAgo: 240, kind: 'comment_added', actorIdx: 1, sectionIdx: 4, summary: 'Alice commented: "Add a link to the pricing sheet in the CTA."' },
-  { minutesAgo: 320, kind: 'auto_refresh', actorIdx: 0, sectionIdx: 1, summary: 'Auto-refresh ran on schedule.' },
-  { minutesAgo: 410, kind: 'version_published', actorIdx: 5, sectionIdx: 4, summary: 'Slide Builder published v2 of the closing CTA.' },
-  { minutesAgo: 530, kind: 'section_restored', actorIdx: 2, sectionIdx: 2, summary: 'Bob restored pipeline slide to v3.' },
-  { minutesAgo: 720, kind: 'data_refresh', actorIdx: 3, sectionIdx: 3, summary: 'Data Explorer refreshed team metrics.' },
-  { minutesAgo: 980, kind: 'comment_added', actorIdx: 1, sectionIdx: 2, summary: 'Alice commented: "Try a funnel chart here instead of bars."' },
-  { minutesAgo: 1320, kind: 'version_published', actorIdx: 4, sectionIdx: 1, summary: 'Content Polisher published v2 of the revenue slide.' },
+  {
+    minutesAgo: 2,
+    kind: 'auto_refresh',
+    actorIdx: 0,
+    sectionIdx: 1,
+    summary: 'Auto-refreshed sales pipeline data.',
+  },
+  {
+    minutesAgo: 4,
+    kind: 'data_refresh',
+    actorIdx: 1,
+    sectionIdx: 1,
+    summary: 'Refreshed Q3 revenue chart from Salesforce.',
+  },
+  {
+    minutesAgo: 9,
+    kind: 'comment_added',
+    actorIdx: 1,
+    sectionIdx: 1,
+    summary: 'Alice commented: "EMEA numbers look off — pulling from CSV instead."',
+  },
+  {
+    minutesAgo: 14,
+    kind: 'comment_added',
+    actorIdx: 2,
+    sectionIdx: 3,
+    summary: 'Bob commented: "Let\'s trim the bullet list for the exec read-out."',
+  },
+  {
+    minutesAgo: 22,
+    kind: 'data_refresh',
+    actorIdx: 3,
+    sectionIdx: 3,
+    summary: 'Refreshed team-headcount breakdown.',
+  },
+  {
+    minutesAgo: 35,
+    kind: 'version_published',
+    actorIdx: 5,
+    sectionIdx: 2,
+    summary: 'Slide Builder published v4 of the pipeline slide.',
+  },
+  {
+    minutesAgo: 48,
+    kind: 'auto_refresh',
+    actorIdx: 0,
+    sectionIdx: 4,
+    summary: 'Auto-refreshed closing CTA performance metrics.',
+  },
+  {
+    minutesAgo: 67,
+    kind: 'data_refresh',
+    actorIdx: 4,
+    sectionIdx: 2,
+    summary: 'Content Polisher reran the data pipeline and updated charts.',
+  },
+  {
+    minutesAgo: 92,
+    kind: 'comment_added',
+    actorIdx: 2,
+    sectionIdx: 0,
+    summary: 'Bob commented: "Move the title to the left for visual balance."',
+  },
+  {
+    minutesAgo: 130,
+    kind: 'version_published',
+    actorIdx: 1,
+    sectionIdx: 0,
+    summary: 'Alice published v3 of the cover slide.',
+  },
+  {
+    minutesAgo: 180,
+    kind: 'data_refresh',
+    actorIdx: 3,
+    sectionIdx: 1,
+    summary: 'Data Explorer refreshed Q3 revenue numbers.',
+  },
+  {
+    minutesAgo: 240,
+    kind: 'comment_added',
+    actorIdx: 1,
+    sectionIdx: 4,
+    summary: 'Alice commented: "Add a link to the pricing sheet in the CTA."',
+  },
+  {
+    minutesAgo: 320,
+    kind: 'auto_refresh',
+    actorIdx: 0,
+    sectionIdx: 1,
+    summary: 'Auto-refresh ran on schedule.',
+  },
+  {
+    minutesAgo: 410,
+    kind: 'version_published',
+    actorIdx: 5,
+    sectionIdx: 4,
+    summary: 'Slide Builder published v2 of the closing CTA.',
+  },
+  {
+    minutesAgo: 530,
+    kind: 'section_restored',
+    actorIdx: 2,
+    sectionIdx: 2,
+    summary: 'Bob restored pipeline slide to v3.',
+  },
+  {
+    minutesAgo: 720,
+    kind: 'data_refresh',
+    actorIdx: 3,
+    sectionIdx: 3,
+    summary: 'Data Explorer refreshed team metrics.',
+  },
+  {
+    minutesAgo: 980,
+    kind: 'comment_added',
+    actorIdx: 1,
+    sectionIdx: 2,
+    summary: 'Alice commented: "Try a funnel chart here instead of bars."',
+  },
+  {
+    minutesAgo: 1320,
+    kind: 'version_published',
+    actorIdx: 4,
+    sectionIdx: 1,
+    summary: 'Content Polisher published v2 of the revenue slide.',
+  },
 ];
 
 interface SeedVersionSpec {
@@ -130,10 +238,26 @@ interface SeedVersionSpec {
 }
 
 const VERSION_SPECS: ReadonlyArray<SeedVersionSpec> = [
-  { minutesAgo: 45, author: 'Alice Chen', change_summary: 'Updated Q3 numbers, fixed EMEA column.' },
-  { minutesAgo: 180, author: 'Data Explorer', change_summary: 'Auto-restated revenue from Salesforce refresh.' },
-  { minutesAgo: 360, author: 'Slide Builder', change_summary: 'Restructured layout to two-column.' },
-  { minutesAgo: 720, author: 'Alice Chen', change_summary: 'Initial draft with hand-curated values.' },
+  {
+    minutesAgo: 45,
+    author: 'Alice Chen',
+    change_summary: 'Updated Q3 numbers, fixed EMEA column.',
+  },
+  {
+    minutesAgo: 180,
+    author: 'Data Explorer',
+    change_summary: 'Auto-restated revenue from Salesforce refresh.',
+  },
+  {
+    minutesAgo: 360,
+    author: 'Slide Builder',
+    change_summary: 'Restructured layout to two-column.',
+  },
+  {
+    minutesAgo: 720,
+    author: 'Alice Chen',
+    change_summary: 'Initial draft with hand-curated values.',
+  },
 ];
 
 function pseudoRandomFromSeed(seed: number): () => number {
@@ -144,16 +268,15 @@ function pseudoRandomFromSeed(seed: number): () => number {
     state ^= state >>> 17;
     state ^= state << 5;
     state >>>= 0;
-    return state / 0xFFFFFFFF;
+    return state / 0xffffffff;
   };
 }
 
 function buildSeedUpdates(nowMs: number): readonly LivingUpdate[] {
-  void pseudoRandomFromSeed(0xBEEF_F00D); // reserved for future jitter
+  void pseudoRandomFromSeed(0xbeef_f00d); // reserved for future jitter
   return UPDATE_SPECS.map((spec, i): LivingUpdate => {
     const actor = ACTORS[spec.actorIdx] ?? ACTORS[0]!;
-    const sectionId =
-      spec.sectionIdx !== undefined ? SECTIONS[spec.sectionIdx] : undefined;
+    const sectionId = spec.sectionIdx !== undefined ? SECTIONS[spec.sectionIdx] : undefined;
     return {
       id: `upd-${i.toString().padStart(3, '0')}`,
       timestamp_ms: nowMs - spec.minutesAgo * 60_000,
@@ -166,13 +289,15 @@ function buildSeedUpdates(nowMs: number): readonly LivingUpdate[] {
 }
 
 function buildSeedVersions(sectionId: string, nowMs: number): readonly SectionVersion[] {
-  return VERSION_SPECS.map((spec, i): SectionVersion => ({
-    id: `ver-${sectionId}-${i.toString().padStart(3, '0')}`,
-    section_id: sectionId,
-    timestamp_ms: nowMs - spec.minutesAgo * 60_000,
-    author: spec.author,
-    change_summary: spec.change_summary,
-  }));
+  return VERSION_SPECS.map(
+    (spec, i): SectionVersion => ({
+      id: `ver-${sectionId}-${i.toString().padStart(3, '0')}`,
+      section_id: sectionId,
+      timestamp_ms: nowMs - spec.minutesAgo * 60_000,
+      author: spec.author,
+      change_summary: spec.change_summary,
+    }),
+  );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -219,11 +344,7 @@ export async function listUpdatesWithSource(
   const url = `${baseUrl}/v1/decks/${encodeURIComponent(opts.deckId)}/updates${qs ? `?${qs}` : ''}`;
 
   const body = await safeFetchJson(url);
-  if (
-    body &&
-    typeof body === 'object' &&
-    Array.isArray((body as { updates?: unknown }).updates)
-  ) {
+  if (body && typeof body === 'object' && Array.isArray((body as { updates?: unknown }).updates)) {
     const updates = (body as { updates: readonly LivingUpdate[] }).updates;
     return { updates: applySinceFilter(updates, opts.sinceMs), source: 'network' };
   }
@@ -302,9 +423,7 @@ export function formatRelative(timestamp_ms: number, nowMs: number = Date.now())
 }
 
 /** Distinct kinds present in an update list. Preserves first-seen order. */
-export function distinctKinds(
-  updates: readonly LivingUpdate[],
-): ReadonlyArray<LivingUpdateKind> {
+export function distinctKinds(updates: readonly LivingUpdate[]): ReadonlyArray<LivingUpdateKind> {
   const seen = new Set<LivingUpdateKind>();
   const out: LivingUpdateKind[] = [];
   for (const u of updates) {

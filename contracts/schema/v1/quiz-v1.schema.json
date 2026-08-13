@@ -5,8 +5,14 @@
   "description": "A deck-level assessment with one or more questions of any supported type. Phase 10 M6.1.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "name", "questions",
-    "version", "created_at", "updated_at"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "name",
+    "questions",
+    "version",
+    "created_at",
+    "updated_at"
   ],
   "additionalProperties": false,
   "properties": {
@@ -20,7 +26,9 @@
       "items": { "$ref": "#/$defs/question" }
     },
     "pass_threshold": {
-      "type": "number", "minimum": 0, "maximum": 1,
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
       "description": "Default 0.7. Percent score required to pass."
     },
     "version": { "type": "integer", "minimum": 0 },
@@ -36,8 +44,14 @@
         "id": { "type": "string", "minLength": 1, "maxLength": 64 },
         "type": {
           "enum": [
-            "multiple_choice", "multi_select", "true_false", "short_answer",
-            "fill_blank", "drag_to_match", "hotspot_quiz", "flash_card",
+            "multiple_choice",
+            "multi_select",
+            "true_false",
+            "short_answer",
+            "fill_blank",
+            "drag_to_match",
+            "hotspot_quiz",
+            "flash_card",
             "short_answer_llm"
           ]
         },
@@ -66,7 +80,10 @@
           "items": { "type": "string", "maxLength": 256 }
         },
         "typo_tolerance": {
-          "type": "number", "minimum": 0, "maximum": 1, "default": 0.85
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.85
         },
         "blanks": {
           "type": "array",

@@ -18,16 +18,8 @@ import { KpiTile } from '../../components/KpiTile';
 import { Badge, type BadgeTone } from '../../components/Badge';
 import { SortableTable, type SortableColumn } from '../../components/SortableTable';
 import { SeatUsageChart } from '../../components/seats/SeatUsageChart';
-import {
-  getLicenseSummary,
-  getSeatUsageHistory,
-  listUserActivity,
-} from '../../lib/seat-service';
-import type {
-  LicenseSummary,
-  SeatUsagePoint,
-  UserActivity,
-} from '../../lib/types';
+import { getLicenseSummary, getSeatUsageHistory, listUserActivity } from '../../lib/seat-service';
+import type { LicenseSummary, SeatUsagePoint, UserActivity } from '../../lib/types';
 
 const CATALOGUE = enMessages as Readonly<Record<string, string>>;
 
@@ -257,16 +249,10 @@ export default function SeatsPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
             <FormattedMessage id="admin.seats.users.heading" catalogue={CATALOGUE} />
           </h2>
-          <span className="text-xs text-slate-500 tabular-nums">
-            {rows.length} users
-          </span>
+          <span className="text-xs text-slate-500 tabular-nums">{rows.length} users</span>
         </div>
         <div data-testid="seats-table">
-          <SortableTable<Row>
-            rows={rows}
-            columns={columns}
-            emptyMessage="No user activity yet."
-          />
+          <SortableTable<Row> rows={rows} columns={columns} emptyMessage="No user activity yet." />
         </div>
       </section>
 

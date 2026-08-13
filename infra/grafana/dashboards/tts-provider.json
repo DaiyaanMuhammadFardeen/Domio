@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "tts-provider"
-  ],
+  "tags": ["tier-2", "domio", "tts-provider"],
   "panels": [
     {
       "id": 1,

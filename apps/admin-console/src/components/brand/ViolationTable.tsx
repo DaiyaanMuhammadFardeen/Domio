@@ -65,16 +65,28 @@ export function ViolationTable({ rows, onOpen }: ViolationTableProps): ReactElem
         <thead className="bg-slate-50">
           <tr>
             <th className="w-8" scope="col" aria-label="Expand" />
-            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+            <th
+              scope="col"
+              className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
+            >
               Deck
             </th>
-            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+            <th
+              scope="col"
+              className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
+            >
               Kind
             </th>
-            <th scope="col" className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+            <th
+              scope="col"
+              className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
+            >
               Severity
             </th>
-            <th scope="col" className="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
+            <th
+              scope="col"
+              className="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-slate-600"
+            >
               Slide
             </th>
           </tr>

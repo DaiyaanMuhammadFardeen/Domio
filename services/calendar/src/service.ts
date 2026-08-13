@@ -21,10 +21,7 @@ import type {
   SyncProvider,
   OverrideProvider,
 } from './types.js';
-import {
-  CalendarLinkNotFoundError,
-  DuplicateCalendarLinkError,
-} from './types.js';
+import { CalendarLinkNotFoundError, DuplicateCalendarLinkError } from './types.js';
 import { noopEmitter, noopSyncProvider, noopOverrideProvider } from './types.js';
 import type { CalendarStore } from './store/store.js';
 
@@ -262,9 +259,7 @@ export class CalendarService {
     }
 
     // Sort by event_start_at
-    return todayItems.sort(
-      (a, b) => a.event_start_at.getTime() - b.event_start_at.getTime(),
-    );
+    return todayItems.sort((a, b) => a.event_start_at.getTime() - b.event_start_at.getTime());
   }
 
   // -------------------------------------------------------------------------
@@ -277,11 +272,7 @@ export class CalendarService {
    *
    * The actual notification send is a later wave (notification-dispatcher).
    */
-  shouldPrompt(
-    link: CalendarLink,
-    now: Date,
-    promptMinutesBefore: number = 5,
-  ): boolean {
+  shouldPrompt(link: CalendarLink, now: Date, promptMinutesBefore: number = 5): boolean {
     const promptWindowMs = promptMinutesBefore * 60 * 1000;
     const eventStartMs = link.event_start_at.getTime();
     const promptStartMs = eventStartMs - promptWindowMs;

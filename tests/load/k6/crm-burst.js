@@ -19,8 +19,8 @@ import { Trend, Rate, Counter } from 'k6/metrics';
 
 const crmLatencyMs = new Trend('crm_latency_ms');
 const crmErrorRate = new Rate('crm_errors');
-const crmAccepted  = new Counter('crm_accepted_total');
-const crmDlq       = new Counter('crm_dlq_total');
+const crmAccepted = new Counter('crm_accepted_total');
+const crmDlq = new Counter('crm_dlq_total');
 
 export const options = {
   scenarios: {
@@ -35,9 +35,9 @@ export const options = {
   },
   thresholds: {
     'http_req_duration{name:crm}': ['p(95)<200'],
-    'crm_errors':                  ['rate<0.05'],
-    'crm_dlq_total':               ['count<10000'],
-    'checks':                      ['rate>0.95'],
+    crm_errors: ['rate<0.05'],
+    crm_dlq_total: ['count<10000'],
+    checks: ['rate>0.95'],
   },
 };
 

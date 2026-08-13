@@ -59,14 +59,16 @@ export class NotionAdapter implements ConnectorAdapter {
 
   async discover(_ctx: AdapterContext, _spec: DiscoverSpec): Promise<DiscoverResult> {
     return {
-      tables: [{
-        name: 'pages',
-        columns: [
-          { name: 'Title', type: 'string', semantic_role: 'dimension' },
-          { name: 'Created', type: 'date', semantic_role: 'date' },
-        ],
-        row_count_estimate: 75,
-      }],
+      tables: [
+        {
+          name: 'pages',
+          columns: [
+            { name: 'Title', type: 'string', semantic_role: 'dimension' },
+            { name: 'Created', type: 'date', semantic_role: 'date' },
+          ],
+          row_count_estimate: 75,
+        },
+      ],
     };
   }
 
@@ -80,7 +82,11 @@ export class NotionAdapter implements ConnectorAdapter {
     const body = resp.body as { results?: Array<{ properties: Record<string, unknown> }> };
     const results = body.results ?? [];
     if (results.length === 0) {
-      return { rows: [], columns: [], stats: { duration_ms: Date.now() - t0, row_count: 0, source: 'live' } };
+      return {
+        rows: [],
+        columns: [],
+        stats: { duration_ms: Date.now() - t0, row_count: 0, source: 'live' },
+      };
     }
     const first = results[0]!;
     const headers = Object.keys(first.properties);

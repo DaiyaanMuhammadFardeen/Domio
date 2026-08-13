@@ -23,7 +23,8 @@ const SSN_RE = /\b\d{3}-\d{2}-\d{4}\b/g;
 const IPV4_RE = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
 const IPV6_RE = /\b(?:[A-Fa-f0-9]{1,4}:){2,7}[A-Fa-f0-9]{1,4}\b/g;
 
-const UA_FAMILY_RE = /\b(?:Chrome|Firefox|Safari|Edge|Opera|SamsungBrowser|UCBrowser|Vivaldi|Brave)\b/;
+const UA_FAMILY_RE =
+  /\b(?:Chrome|Firefox|Safari|Edge|Opera|SamsungBrowser|UCBrowser|Vivaldi|Brave)\b/;
 
 export interface PiiStripper {
   strip<T extends Record<string, unknown>>(event: T): Record<string, unknown>;

@@ -65,7 +65,10 @@ export function restRoutes(deps: RestDeps): Hono {
     const scope = parseScope(q);
     const deckId = c.req.param('deckId');
     const stepsParam = q['steps'];
-    const steps = (stepsParam ?? '').split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+    const steps = (stepsParam ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
     const rows = await deps.dao.funnel({ ...scope, deck_id: deckId, steps });
     return c.json({ rows });
   });
@@ -93,7 +96,10 @@ export interface GraphQLRouteDeps {
 export function graphqlRoute(deps: GraphQLRouteDeps): Hono {
   const app = new Hono();
   const yoga = createYoga({
-    schema: createSchema({ typeDefs: analyticsTypeDefs, resolvers: buildResolvers({ dao: deps.dao }) }),
+    schema: createSchema({
+      typeDefs: analyticsTypeDefs,
+      resolvers: buildResolvers({ dao: deps.dao }),
+    }),
     graphqlEndpoint: '/graphql',
     fetchAPI: { Response, Request },
   });

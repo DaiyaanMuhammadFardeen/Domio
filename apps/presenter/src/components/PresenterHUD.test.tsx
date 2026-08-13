@@ -36,9 +36,7 @@ const STATE = {
   mode: 'live' as const,
   last_heartbeat_at: JUST_NOW,
   plan: { hidden: [], order: [] },
-  agenda_timers: [
-    { id: 'agenda1', label: 'Main', duration_ms: 60 * 60_000 },
-  ],
+  agenda_timers: [{ id: 'agenda1', label: 'Main', duration_ms: 60 * 60_000 }],
 };
 
 describe('PresenterHUD', () => {

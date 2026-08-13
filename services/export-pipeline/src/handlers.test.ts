@@ -14,7 +14,13 @@ import { handlers, type HttpRequest, type ExportHandlerContext } from './handler
 import { ExportService, type ExportJobRepository } from './service.js';
 import { ExportMetrics } from './metrics.js';
 import { InMemoryExportAuditRecorder } from './audit.js';
-import type { Encoder, ExportFrame, ExportJob, FrameSource, CreateExportJobInput } from './types.js';
+import type {
+  Encoder,
+  ExportFrame,
+  ExportJob,
+  FrameSource,
+  CreateExportJobInput,
+} from './types.js';
 import { JobNotFoundError } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -130,10 +136,7 @@ const DEFAULT_BODY: CreateExportJobInput & { actorId?: string } = {
 describe('export handlers — createJob', () => {
   it('POST /v1/export/jobs creates a job (201)', async () => {
     const { ctx } = makeCtx();
-    const res = await handlers.createJob(
-      req('POST', '/v1/export/jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const res = await handlers.createJob(req('POST', '/v1/export/jobs', {}, DEFAULT_BODY), ctx);
     expect(res.status).toBe(201);
     expect((res.body as ExportJob).status).toBe('queued');
   });
@@ -151,10 +154,7 @@ describe('export handlers — createJob', () => {
 describe('export handlers — getJob', () => {
   it('GET /v1/export/jobs/:id returns job (200)', async () => {
     const { ctx } = makeCtx();
-    const created = await handlers.createJob(
-      req('POST', '/v1/export/jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const created = await handlers.createJob(req('POST', '/v1/export/jobs', {}, DEFAULT_BODY), ctx);
     const jobId = (created.body as ExportJob).id;
     const res = await handlers.getJob(
       req('GET', '/v1/export/jobs/:id', { id: jobId }, undefined),
@@ -177,10 +177,7 @@ describe('export handlers — getJob', () => {
 describe('export handlers — listJobs', () => {
   it('GET /v1/export/jobs returns job list (200)', async () => {
     const { ctx } = makeCtx();
-    await handlers.createJob(
-      req('POST', '/v1/export/jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    await handlers.createJob(req('POST', '/v1/export/jobs', {}, DEFAULT_BODY), ctx);
     const res = await handlers.listJobs(
       req('GET', '/v1/export/jobs', {}, undefined, { tenantId: 'tenant-1' }),
       ctx,
@@ -191,10 +188,7 @@ describe('export handlers — listJobs', () => {
 
   it('returns 400 when tenantId missing', async () => {
     const { ctx } = makeCtx();
-    const res = await handlers.listJobs(
-      req('GET', '/v1/export/jobs', {}, undefined, {}),
-      ctx,
-    );
+    const res = await handlers.listJobs(req('GET', '/v1/export/jobs', {}, undefined, {}), ctx);
     expect(res.status).toBe(400);
   });
 });
@@ -202,10 +196,7 @@ describe('export handlers — listJobs', () => {
 describe('export handlers — cancelJob', () => {
   it('DELETE /v1/export/jobs/:id cancels queued job (204)', async () => {
     const { ctx } = makeCtx();
-    const created = await handlers.createJob(
-      req('POST', '/v1/export/jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const created = await handlers.createJob(req('POST', '/v1/export/jobs', {}, DEFAULT_BODY), ctx);
     const jobId = (created.body as ExportJob).id;
     const res = await handlers.cancelJob(
       req('DELETE', '/v1/export/jobs/:id', { id: jobId }, undefined, { actorId: 'alice' }),
@@ -227,10 +218,7 @@ describe('export handlers — cancelJob', () => {
 describe('export handlers — unauthorized', () => {
   it('cancelJob returns 401 when no actorId', async () => {
     const { ctx } = makeCtx();
-    const created = await handlers.createJob(
-      req('POST', '/v1/export/jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const created = await handlers.createJob(req('POST', '/v1/export/jobs', {}, DEFAULT_BODY), ctx);
     const jobId = (created.body as ExportJob).id;
     const res = await handlers.cancelJob(
       req('DELETE', '/v1/export/jobs/:id', { id: jobId }, undefined, {}),

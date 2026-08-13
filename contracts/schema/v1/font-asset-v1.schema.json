@@ -4,7 +4,19 @@
   "title": "Domio Font Asset V1",
   "description": "Font asset metadata for Phase 07 theming. Tracks font files, licensing, glyph coverage, and OpenType axis support.",
   "type": "object",
-  "required": ["schemaVersion", "fontId", "kitId", "fileUrl", "format", "weight", "subsets", "glyphCoverage", "sha256", "licenseStatus", "createdAt"],
+  "required": [
+    "schemaVersion",
+    "fontId",
+    "kitId",
+    "fileUrl",
+    "format",
+    "weight",
+    "subsets",
+    "glyphCoverage",
+    "sha256",
+    "licenseStatus",
+    "createdAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -97,10 +109,7 @@
       "format": "uri"
     },
     "licenseExpiresAt": {
-      "oneOf": [
-        { "type": "string", "format": "date-time" },
-        { "type": "null" }
-      ]
+      "oneOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }]
     },
     "antiPiracyScore": {
       "type": "number",

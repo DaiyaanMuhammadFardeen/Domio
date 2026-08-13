@@ -21,8 +21,8 @@ export function Features(): JSX.Element {
           24 capabilities. One workspace.
         </h2>
         <p className="features-section__lede">
-          Editor, viewer, presenter, audience, analytics, marketplace,
-          enterprise, and agentic — everything in the same workspace.
+          Editor, viewer, presenter, audience, analytics, marketplace, enterprise, and agentic —
+          everything in the same workspace.
         </p>
       </header>
       <FeatureGrid />

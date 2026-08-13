@@ -113,9 +113,7 @@ export function canonicalJson(value: unknown): string {
   }
   const obj = value as Record<string, unknown>;
   const keys = Object.keys(obj).sort();
-  const body = keys
-    .map((k) => `${JSON.stringify(k)}:${canonicalJson(obj[k])}`)
-    .join(',');
+  const body = keys.map((k) => `${JSON.stringify(k)}:${canonicalJson(obj[k])}`).join(',');
   return `{${body}}`;
 }
 
@@ -286,9 +284,7 @@ export function verifyToken(opts: VerifyTokenOptions): TokenPayload {
 
   const now = clock();
   if (now > payload.exp) {
-    throw new TokenExpiredError(
-      `Token expired at ${new Date(payload.exp).toISOString()}`,
-    );
+    throw new TokenExpiredError(`Token expired at ${new Date(payload.exp).toISOString()}`);
   }
 
   return payload;

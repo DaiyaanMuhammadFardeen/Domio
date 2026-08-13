@@ -19,14 +19,14 @@ export interface RecordingChunk {
 }
 
 /** The possible states of the draft state machine. */
-export type DraftState = "idle" | "recording" | "paused" | "finalized";
+export type DraftState = 'idle' | 'recording' | 'paused' | 'finalized';
 
 /** Action types for the reducer. */
 export type DraftAction =
-  | { readonly type: "start" }
-  | { readonly type: "pause" }
-  | { readonly type: "resume" }
-  | { readonly type: "finalize" };
+  | { readonly type: 'start' }
+  | { readonly type: 'pause' }
+  | { readonly type: 'resume' }
+  | { readonly type: 'finalize' };
 
 /** Result of finalizing a draft. */
 export interface FinalizedDraft {
@@ -45,14 +45,14 @@ export interface DraftMachine {
 export class InvalidTransitionError extends Error {
   constructor(from: DraftState, action: DraftState) {
     super(`Invalid transition: cannot ${action} from state ${from}`);
-    this.name = "InvalidTransitionError";
+    this.name = 'InvalidTransitionError';
   }
 }
 
 const VALID_TRANSITIONS: Record<DraftState, DraftState[]> = {
-  idle: ["recording"],
-  recording: ["paused", "finalized"],
-  paused: ["recording", "finalized"],
+  idle: ['recording'],
+  recording: ['paused', 'finalized'],
+  paused: ['recording', 'finalized'],
   finalized: [],
 };
 
@@ -67,25 +67,25 @@ export function draftReducer(
 ): DraftMachine {
   const allowed = VALID_TRANSITIONS[machine.state];
   const nextTarget: DraftState =
-    action.type === "start"
-      ? "recording"
-      : action.type === "pause"
-        ? "paused"
-        : action.type === "resume"
-          ? "recording"
-          : "finalized";
+    action.type === 'start'
+      ? 'recording'
+      : action.type === 'pause'
+        ? 'paused'
+        : action.type === 'resume'
+          ? 'recording'
+          : 'finalized';
   if (!allowed.includes(nextTarget)) {
     throw new InvalidTransitionError(machine.state, nextTarget);
   }
   switch (action.type) {
-    case "start":
-      return { state: "recording", chunks: [], startedAt: now };
-    case "pause":
-      return { ...machine, state: "paused" };
-    case "resume":
-      return { ...machine, state: "recording" };
-    case "finalize":
-      return { ...machine, state: "finalized" };
+    case 'start':
+      return { state: 'recording', chunks: [], startedAt: now };
+    case 'pause':
+      return { ...machine, state: 'paused' };
+    case 'resume':
+      return { ...machine, state: 'recording' };
+    case 'finalize':
+      return { ...machine, state: 'finalized' };
   }
 }
 
@@ -93,12 +93,9 @@ export function draftReducer(
  * Append a chunk to a recording machine. The machine must be in
  * `recording` state.
  */
-export function appendChunk(
-  machine: DraftMachine,
-  chunk: RecordingChunk,
-): DraftMachine {
-  if (machine.state !== "recording") {
-    throw new InvalidTransitionError(machine.state, "recording");
+export function appendChunk(machine: DraftMachine, chunk: RecordingChunk): DraftMachine {
+  if (machine.state !== 'recording') {
+    throw new InvalidTransitionError(machine.state, 'recording');
   }
   return { ...machine, chunks: [...machine.chunks, chunk] };
 }
@@ -107,7 +104,7 @@ export function appendChunk(
  * Create a fresh idle machine.
  */
 export function createDraft(): DraftMachine {
-  return { state: "idle", chunks: [], startedAt: null };
+  return { state: 'idle', chunks: [], startedAt: null };
 }
 
 /**
@@ -115,17 +112,14 @@ export function createDraft(): DraftMachine {
  * dispatches the `resume` action.
  */
 export function resumeDraft(machine: DraftMachine, now: number): DraftMachine {
-  return draftReducer(machine, { type: "resume" }, now);
+  return draftReducer(machine, { type: 'resume' }, now);
 }
 
 /**
  * Finalize a draft and return the blob list plus total duration in ms.
  */
-export function finalizeDraft(
-  machine: DraftMachine,
-  now: number,
-): FinalizedDraft {
-  const finalized = draftReducer(machine, { type: "finalize" }, now);
+export function finalizeDraft(machine: DraftMachine, now: number): FinalizedDraft {
+  const finalized = draftReducer(machine, { type: 'finalize' }, now);
   return {
     chunks: finalized.chunks,
     durationMs: computeDuration(finalized),

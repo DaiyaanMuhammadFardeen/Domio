@@ -8,9 +8,9 @@ Edge-side pub/sub bridge for low-latency event fanout.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-edge-pubsub` | availability | 99.9% | 30d |
+| SLO                 | Kind         | Target | Window |
+| ------------------- | ------------ | ------ | ------ |
+| `avail-edge-pubsub` | availability | 99.9%  | 30d    |
 
 ## Triage
 

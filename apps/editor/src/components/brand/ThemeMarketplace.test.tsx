@@ -97,7 +97,11 @@ describe('ThemeMarketplace', () => {
     });
     fireEvent.click(screen.getByTestId('theme-marketplace-install-theme-1'));
     expect(onInstall).toHaveBeenCalled();
-    const theme = onInstall.mock.calls[0]?.[0] as { id: string; name: string; tokens: Record<string, string> };
+    const theme = onInstall.mock.calls[0]?.[0] as {
+      id: string;
+      name: string;
+      tokens: Record<string, string>;
+    };
     expect(theme.id).toBe('marketplace-theme-1');
     expect(theme.name).toBe('Sunrise');
     expect(theme.tokens['color.brand.primary']).toMatch(/^#[0-9a-f]{6}$/);

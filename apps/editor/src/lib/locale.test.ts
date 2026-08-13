@@ -57,4 +57,3 @@ describe('i18n', () => {
     expect(translate('insert.title', 'en')).toBe('Insert');
   });
 });
-

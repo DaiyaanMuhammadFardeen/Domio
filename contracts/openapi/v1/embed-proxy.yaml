@@ -30,16 +30,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateEmbedTokenRequest"
+              $ref: '#/components/schemas/CreateEmbedTokenRequest'
       responses:
-        "200":
+        '200':
           description: Token created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EmbedTokenResponse"
-        "400":
-          $ref: "#/components/responses/BadRequest"
+                $ref: '#/components/schemas/EmbedTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /v1/embed/tokens/{token}:
     get:
       tags: [embed]
@@ -54,14 +54,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Token is valid
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EmbedTokenValidationResponse"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                $ref: '#/components/schemas/EmbedTokenValidationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /v1/embed/{bindingId}/proxy:
     post:
       tags: [embed]
@@ -77,18 +77,18 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Proxied response
           content:
             application/json:
               schema:
                 type: object
-        "400":
-          $ref: "#/components/responses/SsrfBlocked"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+        '400':
+          $ref: '#/components/responses/SsrfBlocked'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
 components:
   securitySchemes:
@@ -131,25 +131,25 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
     NotFound:
       description: Not found
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
     SsrfBlocked:
       description: SSRF blocked
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
     ErrorResponse:
       type: object

@@ -16,10 +16,7 @@
  *     `pause()`/`resume()`).
  */
 
-import type {
-  InterruptionPolicy,
-  PresentationSequence,
-} from '../types.js';
+import type { InterruptionPolicy, PresentationSequence } from '../types.js';
 import {
   applyInterruption,
   initialInterruptionState,

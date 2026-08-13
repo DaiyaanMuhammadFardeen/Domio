@@ -34,48 +34,60 @@ export function renderGauge(
   const startAngle = Math.PI * 0.8;
   const endAngle = Math.PI * 2.2;
   const bgPath = describeArc(cx, cy, R, startAngle, endAngle);
-  elements.push(createElement({
-    kind: 'path',
-    semanticId: 'gauge_bg',
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-    d: bgPath,
-    stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
-    strokeWidth: 16,
-  }));
+  elements.push(
+    createElement({
+      kind: 'path',
+      semanticId: 'gauge_bg',
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      d: bgPath,
+      stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
+      strokeWidth: 16,
+    }),
+  );
 
   // Value arc
   const valueAngle = startAngle + ratio * (endAngle - startAngle);
   const valPath = describeArc(cx, cy, R, startAngle, valueAngle);
   const color = ratio < 0.5 ? '#EF4444' : ratio < 0.8 ? '#F59E0B' : '#10B981';
-  elements.push(createElement({
-    kind: 'path',
-    semanticId: 'gauge_value',
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-    d: valPath,
-    stroke: color,
-    strokeWidth: 16,
-  }));
+  elements.push(
+    createElement({
+      kind: 'path',
+      semanticId: 'gauge_value',
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      d: valPath,
+      stroke: color,
+      strokeWidth: 16,
+    }),
+  );
 
   // Value text
-  elements.push(text(cx - 30, cy - 10, String(Math.round(value)), 'gauge_value_text', {
-    width: 60,
-    height: 28,
-    fontSize: (opts.fontSize ?? 14) + 8,
-    fill: theme === 'dark' ? '#e2e8f0' : '#1e293b',
-    textAnchor: 'middle',
-    fontWeight: 700,
-  }));
+  elements.push(
+    text(cx - 30, cy - 10, String(Math.round(value)), 'gauge_value_text', {
+      width: 60,
+      height: 28,
+      fontSize: (opts.fontSize ?? 14) + 8,
+      fill: theme === 'dark' ? '#e2e8f0' : '#1e293b',
+      textAnchor: 'middle',
+      fontWeight: 700,
+    }),
+  );
 
   return elements;
 }
 
-function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
+function describeArc(
+  cx: number,
+  cy: number,
+  r: number,
+  startAngle: number,
+  endAngle: number,
+): string {
   const x1 = cx + r * Math.cos(startAngle);
   const y1 = cy + r * Math.sin(startAngle);
   const x2 = cx + r * Math.cos(endAngle);

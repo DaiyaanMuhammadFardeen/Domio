@@ -65,10 +65,14 @@ function confidenceColor(c: number): string {
 
 function statusPillClass(status: string): string {
   switch (status) {
-    case 'queued': return 'bg-slate-500/15 text-slate-300';
-    case 'running': return 'bg-blue-500/15 text-blue-400';
-    case 'succeeded': return 'bg-emerald-500/15 text-emerald-400';
-    default: return 'bg-slate-500/15 text-slate-300';
+    case 'queued':
+      return 'bg-slate-500/15 text-slate-300';
+    case 'running':
+      return 'bg-blue-500/15 text-blue-400';
+    case 'succeeded':
+      return 'bg-emerald-500/15 text-emerald-400';
+    default:
+      return 'bg-slate-500/15 text-slate-300';
   }
 }
 
@@ -105,17 +109,23 @@ function SlideCard({
   // `reorderSlide` is the canonical source of truth for ordering.
   // We use capture-phase handlers (`*Capture`) so they run before
   // motion's own drag handlers intercept the events.
-  const handleDragStartCapture = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.setData('text/plain', slide.id);
-    e.dataTransfer.effectAllowed = 'move';
-  }, [slide.id]);
+  const handleDragStartCapture = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.dataTransfer.setData('text/plain', slide.id);
+      e.dataTransfer.effectAllowed = 'move';
+    },
+    [slide.id],
+  );
 
-  const handleDropOnCard = useCallback((e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const draggedId = e.dataTransfer.getData('text/plain');
-    if (!draggedId || draggedId === slide.id) return;
-    reorderSlide(draggedId, index < total - 1 ? 'down' : 'up');
-  }, [index, slide.id, total]);
+  const handleDropOnCard = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      const draggedId = e.dataTransfer.getData('text/plain');
+      if (!draggedId || draggedId === slide.id) return;
+      reorderSlide(draggedId, index < total - 1 ? 'down' : 'up');
+    },
+    [index, slide.id, total],
+  );
 
   const handleCardDragOverCapture = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -152,7 +162,10 @@ function SlideCard({
             onBlur={commitEdit}
             onKeyDown={(e) => {
               if (e.key === 'Enter') commitEdit();
-              if (e.key === 'Escape') { setDraft(slide.intent); setEditing(false); }
+              if (e.key === 'Escape') {
+                setDraft(slide.intent);
+                setEditing(false);
+              }
             }}
             className="flex-1 rounded border border-blue-500/50 bg-slate-900/80 px-1.5 py-0.5 text-sm text-slate-100 outline-none focus:border-blue-400"
             autoFocus
@@ -234,11 +247,7 @@ function SlideCard({
           data-testid={`p12-slide-citations-${slide.id}`}
         >
           {citationIdsFor(slide).map((cid) => (
-            <SourceCitation
-              key={cid}
-              citationId={cid}
-              label={cid}
-            />
+            <SourceCitation key={cid} citationId={cid} label={cid} />
           ))}
         </div>
       ) : null}
@@ -294,7 +303,10 @@ function citationIdsFor(slide: OutlineSlide): ReadonlyArray<string> {
     ids.push(`ds:${slide.dataBinding.sourceRef}`);
   }
   for (const block of slide.contentBlocks.slice(0, 2)) {
-    const slug = block.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 24);
+    const slug = block
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .slice(0, 24);
     if (slug) ids.push(`src:${slug}`);
   }
   return ids;
@@ -321,9 +333,7 @@ function ProgressView(): ReactElement {
           {jobStatus === 'running' && (
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400" />
           )}
-          {jobStatus === 'succeeded' && (
-            <span className="text-emerald-400">&#10003;</span>
-          )}
+          {jobStatus === 'succeeded' && <span className="text-emerald-400">&#10003;</span>}
           {t(`p12.copilot.status.${jobStatus}`)}
         </span>
         <span className="text-xs text-slate-500">
@@ -435,9 +445,7 @@ export function OutlineApproval(): ReactElement {
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-slate-700/60 px-4 py-3">
         <Sparkles size={16} className="text-blue-400" />
-        <h2 className="text-sm font-semibold text-slate-100">
-          {t('p12.copilot.title')}
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-100">{t('p12.copilot.title')}</h2>
       </div>
 
       {/* Content area */}
@@ -458,12 +466,8 @@ export function OutlineApproval(): ReactElement {
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10">
                   <Sparkles size={24} className="text-blue-400" />
                 </div>
-                <p className="text-sm font-medium text-slate-200">
-                  {t('p12.copilot.emptyTitle')}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {t('p12.copilot.emptyHint')}
-                </p>
+                <p className="text-sm font-medium text-slate-200">{t('p12.copilot.emptyTitle')}</p>
+                <p className="mt-1 text-xs text-slate-500">{t('p12.copilot.emptyHint')}</p>
               </div>
 
               {/* Prompt input */}

@@ -16,9 +16,15 @@ beforeEach(() => {
   Object.defineProperty(globalThis, 'localStorage', {
     value: {
       getItem: (key: string) => store.get(key) ?? null,
-      setItem: (key: string, value: string) => { store.set(key, value); },
-      removeItem: (key: string) => { store.delete(key); },
-      clear: () => { store.clear(); },
+      setItem: (key: string, value: string) => {
+        store.set(key, value);
+      },
+      removeItem: (key: string) => {
+        store.delete(key);
+      },
+      clear: () => {
+        store.clear();
+      },
     },
     writable: true,
     configurable: true,
@@ -67,9 +73,19 @@ describe('LibraryPanel', () => {
   });
 
   it('renders personal library rows from localStorage', () => {
-    localStorage.setItem('domio.my-library', JSON.stringify([
-      { catalogId: 'p-1', name: 'Personal 1', version: '1.0.0', pinMode: 'track', pinValue: '', addedAt: 0 },
-    ]));
+    localStorage.setItem(
+      'domio.my-library',
+      JSON.stringify([
+        {
+          catalogId: 'p-1',
+          name: 'Personal 1',
+          version: '1.0.0',
+          pinMode: 'track',
+          pinValue: '',
+          addedAt: 0,
+        },
+      ]),
+    );
     const onInsert = vi.fn();
     render(<LibraryPanel onInsert={onInsert} />);
     // Insert is disabled when the component isn't registered (since

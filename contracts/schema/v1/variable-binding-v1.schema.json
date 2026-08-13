@@ -5,8 +5,14 @@
   "description": "A reactive binding from a variable to a target element/slide/deck/overlay prop. Phase 10 M2.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "variable_id",
-    "target_kind", "target_id", "target_prop", "version"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "variable_id",
+    "target_kind",
+    "target_id",
+    "target_prop",
+    "version"
   ],
   "additionalProperties": false,
   "properties": {

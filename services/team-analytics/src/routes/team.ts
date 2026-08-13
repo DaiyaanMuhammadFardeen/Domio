@@ -45,35 +45,48 @@ export function teamRoutes(deps: TeamRoutesDeps): Hono {
 
   app.get('/v1/team/templates/top', async (c) => {
     const scope = parseScope(c.req);
-    if (!scope) return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
+    if (!scope)
+      return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
     const rows = await deps.dao.topTemplates(scope, parseLimit(c.req, 10));
     return c.json({ workspace_id: scope.workspace_id, rows });
   });
 
   app.get('/v1/team/components/top', async (c) => {
     const scope = parseScope(c.req);
-    if (!scope) return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
+    if (!scope)
+      return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
     const rows = await deps.dao.topComponents(scope, parseLimit(c.req, 10));
     return c.json({ workspace_id: scope.workspace_id, rows });
   });
 
   app.get('/v1/team/brands/health', async (c) => {
     const workspace_id = c.req.query('workspace_id');
-    if (!workspace_id) return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
+    if (!workspace_id)
+      return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
     const rows = await deps.dao.brandHealth(workspace_id, Date.now());
     return c.json({ workspace_id, rows });
   });
 
   app.get('/v1/team/funnel', async (c) => {
     const scope = parseScope(c.req);
-    if (!scope) return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
+    if (!scope)
+      return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
     const stepsParam = c.req.query('steps');
     if (!stepsParam) {
-      return c.json({ error: { code: 'bad_request', message: 'steps query parameter required' } }, 400);
+      return c.json(
+        { error: { code: 'bad_request', message: 'steps query parameter required' } },
+        400,
+      );
     }
-    const steps = stepsParam.split(',').map((s) => s.trim()).filter((s): s is string => Boolean(s));
+    const steps = stepsParam
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s): s is string => Boolean(s));
     if (steps.length === 0) {
-      return c.json({ error: { code: 'bad_request', message: 'steps must contain at least one event name' } }, 400);
+      return c.json(
+        { error: { code: 'bad_request', message: 'steps must contain at least one event name' } },
+        400,
+      );
     }
     const rows = await deps.dao.funnel(scope, steps);
     return c.json({ workspace_id: scope.workspace_id, steps, rows });
@@ -81,7 +94,8 @@ export function teamRoutes(deps: TeamRoutesDeps): Hono {
 
   app.get('/v1/team/retention', async (c) => {
     const workspace_id = c.req.query('workspace_id');
-    if (!workspace_id) return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
+    if (!workspace_id)
+      return c.json({ error: { code: 'bad_request', message: 'workspace_id required' } }, 400);
     const weeksRaw = Number(c.req.query('weeks') ?? '8');
     const weeks = Number.isFinite(weeksRaw) ? Math.max(1, Math.min(26, Math.floor(weeksRaw))) : 8;
     const rows = await deps.dao.retentionCohorts(workspace_id, weeks, Date.now());

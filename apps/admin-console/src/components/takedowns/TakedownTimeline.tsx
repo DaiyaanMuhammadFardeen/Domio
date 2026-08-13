@@ -45,23 +45,14 @@ export function TakedownTimeline({ events }: TakedownTimelineProps) {
     <ol className="space-y-3" data-testid="takedown-timeline">
       {events.map((ev) => (
         <li key={ev.id} className="flex gap-3">
-          <span
-            aria-hidden
-            className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-brand-500"
-          />
+          <span aria-hidden className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-brand-500" />
           <div className="flex-1">
             <div className="flex flex-wrap items-baseline gap-x-2">
-              <span className="text-sm font-medium text-slate-900">
-                {ACTION_LABEL[ev.action]}
-              </span>
-              <span className="text-xs text-slate-500">
-                {formatDate(ev.timestamp_ms)}
-              </span>
+              <span className="text-sm font-medium text-slate-900">{ACTION_LABEL[ev.action]}</span>
+              <span className="text-xs text-slate-500">{formatDate(ev.timestamp_ms)}</span>
             </div>
             <div className="text-xs text-slate-500">by {ev.actor}</div>
-            {ev.notes && (
-              <p className="mt-1 text-sm text-slate-700">{ev.notes}</p>
-            )}
+            {ev.notes && <p className="mt-1 text-sm text-slate-700">{ev.notes}</p>}
           </div>
         </li>
       ))}

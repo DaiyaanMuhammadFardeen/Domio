@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  StudyConfigPanel,
-  type StudyConfig,
-} from './study-config-panel';
+import { StudyConfigPanel, type StudyConfig } from './study-config-panel';
 
 const CONFIG: StudyConfig = {
   samplingRate: 0.5,
@@ -17,7 +14,9 @@ const CONFIG: StudyConfig = {
   anonymousIps: true,
 };
 
-function defaultProps(overrides: Partial<React.ComponentProps<typeof StudyConfigPanel>> = {}): React.ComponentProps<typeof StudyConfigPanel> {
+function defaultProps(
+  overrides: Partial<React.ComponentProps<typeof StudyConfigPanel>> = {},
+): React.ComponentProps<typeof StudyConfigPanel> {
   return {
     config: CONFIG,
     onChange: vi.fn(),
@@ -68,14 +67,18 @@ describe('StudyConfigPanel', () => {
   it('changes the consent tier', () => {
     const onChange = vi.fn();
     render(<StudyConfigPanel {...defaultProps({ onChange })} />);
-    fireEvent.change(screen.getByTestId('m5-study-consent-select'), { target: { value: 'anonymous' } });
+    fireEvent.change(screen.getByTestId('m5-study-consent-select'), {
+      target: { value: 'anonymous' },
+    });
     expect(onChange).toHaveBeenCalledWith({ ...CONFIG, consent: 'anonymous' });
   });
 
   it('adds a new redaction field', () => {
     const onChange = vi.fn();
     render(<StudyConfigPanel {...defaultProps({ onChange })} />);
-    fireEvent.change(screen.getByTestId('m5-study-redaction-input'), { target: { value: 'phone' } });
+    fireEvent.change(screen.getByTestId('m5-study-redaction-input'), {
+      target: { value: 'phone' },
+    });
     fireEvent.click(screen.getByTestId('m5-study-redaction-add'));
     expect(onChange).toHaveBeenCalledWith({ ...CONFIG, redactionFields: ['email', 'phone'] });
   });
@@ -93,17 +96,16 @@ describe('StudyConfigPanel', () => {
     fireEvent.click(screen.getByTestId('m5-study-ab-add'));
     expect(onChange).toHaveBeenCalledWith({
       ...CONFIG,
-      abVariants: [
-        ...CONFIG.abVariants,
-        { name: 'variant-3', weight: 0.5 },
-      ],
+      abVariants: [...CONFIG.abVariants, { name: 'variant-3', weight: 0.5 }],
     });
   });
 
   it('updates an A/B variant weight', () => {
     const onChange = vi.fn();
     render(<StudyConfigPanel {...defaultProps({ onChange })} />);
-    fireEvent.change(screen.getAllByTestId('m5-study-ab-weight')[0]!, { target: { value: '0.25' } });
+    fireEvent.change(screen.getAllByTestId('m5-study-ab-weight')[0]!, {
+      target: { value: '0.25' },
+    });
     expect(onChange).toHaveBeenCalledWith({
       ...CONFIG,
       abVariants: [

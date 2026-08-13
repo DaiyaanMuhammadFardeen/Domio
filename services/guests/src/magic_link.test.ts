@@ -34,7 +34,12 @@ describe('issueMagicLinkToken', () => {
 
   it('tokenHash is SHA-256 hex of token', () => {
     const expiresAt = new Date('2026-01-01T00:15:00Z');
-    const { token, tokenHash } = issueMagicLinkToken('ga-001', 'guest@example.com', expiresAt, 'secret');
+    const { token, tokenHash } = issueMagicLinkToken(
+      'ga-001',
+      'guest@example.com',
+      expiresAt,
+      'secret',
+    );
     const expectedHash = createHash('sha256').update(token).digest('hex');
     expect(tokenHash).toBe(expectedHash);
   });
@@ -56,7 +61,9 @@ describe('issueMagicLinkToken', () => {
 
 describe('isExpired', () => {
   it('returns false when now is before expiresAt', () => {
-    expect(isExpired(new Date('2026-01-01T00:15:00Z'), new Date('2026-01-01T00:14:59Z'))).toBe(false);
+    expect(isExpired(new Date('2026-01-01T00:15:00Z'), new Date('2026-01-01T00:14:59Z'))).toBe(
+      false,
+    );
   });
 
   it('returns true when now equals expiresAt', () => {
@@ -65,7 +72,9 @@ describe('isExpired', () => {
   });
 
   it('returns true when now is after expiresAt', () => {
-    expect(isExpired(new Date('2026-01-01T00:15:00Z'), new Date('2026-01-01T00:15:01Z'))).toBe(true);
+    expect(isExpired(new Date('2026-01-01T00:15:00Z'), new Date('2026-01-01T00:15:01Z'))).toBe(
+      true,
+    );
   });
 });
 

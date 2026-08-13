@@ -57,7 +57,15 @@ export class S3Adapter implements ObjectStore {
     }
   }
 
-  async put(key: string, body: Uint8Array, opts: { contentType?: string; metadata?: Readonly<Record<string, string>>; cacheControl?: string } = {}): Promise<void> {
+  async put(
+    key: string,
+    body: Uint8Array,
+    opts: {
+      contentType?: string;
+      metadata?: Readonly<Record<string, string>>;
+      cacheControl?: string;
+    } = {},
+  ): Promise<void> {
     const headers: Record<string, string> = {
       'content-type': opts.contentType ?? 'application/octet-stream',
       'content-length': String(body.byteLength),
@@ -75,7 +83,10 @@ export class S3Adapter implements ObjectStore {
         headers,
         body,
       },
-      { accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY, secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY },
+      {
+        accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY,
+        secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY,
+      },
     );
 
     const res = await this.request(signed, body);
@@ -93,15 +104,22 @@ export class S3Adapter implements ObjectStore {
         service: 's3',
         path: this.objectPath(key),
       },
-      { accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY, secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY },
+      {
+        accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY,
+        secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY,
+      },
     );
     const res = await this.request(signed);
     if (res.status === 404) throw new ObjectStoreKeyError(key, 'NoSuchKey');
-    if (res.status >= 300) throw new ObjectStoreError(`S3 GET ${key} failed: ${res.status}`, res.status);
+    if (res.status >= 300)
+      throw new ObjectStoreError(`S3 GET ${key} failed: ${res.status}`, res.status);
     return {
       body: res.body,
       contentType: res.headers.get('content-type'),
-      contentLength: Number.parseInt(res.headers.get('content-length') ?? `${res.body.byteLength}`, 10),
+      contentLength: Number.parseInt(
+        res.headers.get('content-length') ?? `${res.body.byteLength}`,
+        10,
+      ),
       metadata: extractMetadata(res.headers),
       etag: res.headers.get('etag'),
       lastModified: parseHttpDate(res.headers.get('last-modified')),
@@ -117,11 +135,15 @@ export class S3Adapter implements ObjectStore {
         service: 's3',
         path: this.objectPath(key),
       },
-      { accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY, secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY },
+      {
+        accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY,
+        secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY,
+      },
     );
     const res = await this.request(signed);
     if (res.status === 404) throw new ObjectStoreKeyError(key, 'NoSuchKey');
-    if (res.status >= 300) throw new ObjectStoreError(`S3 HEAD ${key} failed: ${res.status}`, res.status);
+    if (res.status >= 300)
+      throw new ObjectStoreError(`S3 HEAD ${key} failed: ${res.status}`, res.status);
     return {
       contentLength: Number.parseInt(res.headers.get('content-length') ?? '0', 10),
       contentType: res.headers.get('content-type'),
@@ -140,7 +162,10 @@ export class S3Adapter implements ObjectStore {
         service: 's3',
         path: this.objectPath(key),
       },
-      { accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY, secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY },
+      {
+        accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY,
+        secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY,
+      },
     );
     const res = await this.request(signed);
     if (res.status >= 300 && res.status !== 404) {
@@ -162,7 +187,8 @@ export class S3Adapter implements ObjectStore {
     const expires = opts.expiresInSeconds ?? 900;
     const headers: Record<string, string> = {};
     if (opts.responseContentType) headers['response-content-type'] = opts.responseContentType;
-    if (opts.responseContentDisposition) headers['response-content-disposition'] = opts.responseContentDisposition;
+    if (opts.responseContentDisposition)
+      headers['response-content-disposition'] = opts.responseContentDisposition;
     const { url } = presignUrl(
       {
         method: 'GET',
@@ -172,7 +198,10 @@ export class S3Adapter implements ObjectStore {
         path: this.objectPath(key),
         query: headers,
       },
-      { accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY, secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY },
+      {
+        accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY,
+        secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY,
+      },
       expires,
     );
     return this.prependScheme(url);
@@ -188,16 +217,22 @@ export class S3Adapter implements ObjectStore {
         service: 's3',
         path: this.objectPath(key),
       },
-      { accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY, secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY },
+      {
+        accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY,
+        secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY,
+      },
       expires,
     );
     return this.prependScheme(url);
   }
 
-  async list(prefix: string, opts: { maxKeys?: number; cursor?: string } = {}): Promise<{ keys: readonly string[]; nextCursor: string | null }> {
+  async list(
+    prefix: string,
+    opts: { maxKeys?: number; cursor?: string } = {},
+  ): Promise<{ keys: readonly string[]; nextCursor: string | null }> {
     const query: Record<string, string> = {
       'list-type': '2',
-      'prefix': prefix,
+      prefix: prefix,
       'max-keys': String(opts.maxKeys ?? 1000),
     };
     if (opts.cursor) query['continuation-token'] = opts.cursor;
@@ -211,13 +246,18 @@ export class S3Adapter implements ObjectStore {
         path: '/',
         query,
       },
-      { accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY, secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY },
+      {
+        accessKey: this.opts.env.OBJECT_STORE_ACCESS_KEY,
+        secretKey: this.opts.env.OBJECT_STORE_SECRET_KEY,
+      },
     );
     const res = await this.request(signed);
-    if (res.status >= 300) throw new ObjectStoreError(`S3 LIST ${prefix} failed: ${res.status}`, res.status);
+    if (res.status >= 300)
+      throw new ObjectStoreError(`S3 LIST ${prefix} failed: ${res.status}`, res.status);
     const xml = new TextDecoder().decode(res.body);
     const keys = [...xml.matchAll(/<Key>([^<]+)<\/Key>/g)].map((m) => m[1] ?? '');
-    const nextToken = /<NextContinuationToken>([^<]+)<\/NextContinuationToken>/.exec(xml)?.[1] ?? null;
+    const nextToken =
+      /<NextContinuationToken>([^<]+)<\/NextContinuationToken>/.exec(xml)?.[1] ?? null;
     return { keys, nextCursor: nextToken };
   }
 
@@ -231,7 +271,10 @@ export class S3Adapter implements ObjectStore {
     return `${this.useHttp ? 'http' : 'https'}:${url}`;
   }
 
-  private async request(req: ReturnType<typeof signRequest>, body?: Uint8Array): Promise<HttpResponse> {
+  private async request(
+    req: ReturnType<typeof signRequest>,
+    body?: Uint8Array,
+  ): Promise<HttpResponse> {
     const scheme = this.useHttp ? 'http' : 'https';
     const url = `${scheme}://${req.host}${req.path}${req.query ? '?' + new URLSearchParams(req.query as Record<string, string>).toString() : ''}`;
     const init: globalThis.RequestInit = { method: req.method, headers: req.headers };
@@ -245,7 +288,10 @@ export class S3Adapter implements ObjectStore {
 }
 
 export class ObjectStoreError extends Error {
-  constructor(message: string, public readonly status: number) {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
     super(message);
     this.name = 'ObjectStoreError';
   }

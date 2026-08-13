@@ -65,10 +65,7 @@ export interface ThemeReviewRecord {
 
 export interface MarketplaceRepository {
   insertListing(record: ThemeListingRecord): Promise<void>;
-  updateListing(
-    listingId: string,
-    patch: Partial<ThemeListingRecord>,
-  ): Promise<ThemeListingRecord>;
+  updateListing(listingId: string, patch: Partial<ThemeListingRecord>): Promise<ThemeListingRecord>;
   findListing(listingId: string): Promise<ThemeListingRecord | null>;
   listListings(status?: ListingStatus): Promise<ThemeListingRecord[]>;
   insertInstall(record: ThemeInstallRecord): Promise<void>;

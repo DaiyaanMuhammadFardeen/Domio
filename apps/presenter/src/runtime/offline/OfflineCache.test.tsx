@@ -13,13 +13,7 @@ describe('OfflineCache', () => {
   });
 
   it('renders a preparing banner with progress percentage', () => {
-    render(
-      <OfflineCache
-        status="preparing"
-        cachedSlideCount={3}
-        totalSlideCount={10}
-      />,
-    );
+    render(<OfflineCache status="preparing" cachedSlideCount={3} totalSlideCount={10} />);
     const banner = screen.getByTestId('offline-cache');
     expect(banner).toHaveAttribute('data-status', 'preparing');
     expect(banner).toHaveTextContent(/Caching deck 30%/);

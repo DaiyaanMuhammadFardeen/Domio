@@ -80,7 +80,14 @@ describe('template-preview-renderer worker', () => {
           position: 0,
           aspect: { ratioW: 1920, ratioH: 1080 },
           elements: [
-            { id: 'el-1', semanticId: 'slide[0].text[t1]', name: 't1', type: 'text', parentId: null, text: { content: 'Slide 1' } },
+            {
+              id: 'el-1',
+              semanticId: 'slide[0].text[t1]',
+              name: 't1',
+              type: 'text',
+              parentId: null,
+              text: { content: 'Slide 1' },
+            },
           ],
         },
         {
@@ -89,7 +96,14 @@ describe('template-preview-renderer worker', () => {
           position: 1,
           aspect: { ratioW: 1920, ratioH: 1080 },
           elements: [
-            { id: 'el-2', semanticId: 'slide[1].text[t2]', name: 't2', type: 'text', parentId: null, text: { content: 'Slide 2' } },
+            {
+              id: 'el-2',
+              semanticId: 'slide[1].text[t2]',
+              name: 't2',
+              type: 'text',
+              parentId: null,
+              text: { content: 'Slide 2' },
+            },
           ],
         },
       ]),
@@ -121,7 +135,14 @@ describe('template-preview-renderer worker', () => {
           position: 0,
           aspect: { ratioW: 1920, ratioH: 1080 },
           elements: [
-            { id: 'el-1', semanticId: 'slide[0].text[t1]', name: 't1', type: 'text', parentId: null, text: { content: 'Slide 1' } },
+            {
+              id: 'el-1',
+              semanticId: 'slide[0].text[t1]',
+              name: 't1',
+              type: 'text',
+              parentId: null,
+              text: { content: 'Slide 1' },
+            },
           ],
         },
         {
@@ -130,7 +151,14 @@ describe('template-preview-renderer worker', () => {
           position: 1,
           aspect: { ratioW: 1920, ratioH: 1080 },
           elements: [
-            { id: 'el-2', semanticId: 'slide[1].text[t2]', name: 't2', type: 'text', parentId: null, text: { content: 'Slide 2' } },
+            {
+              id: 'el-2',
+              semanticId: 'slide[1].text[t2]',
+              name: 't2',
+              type: 'text',
+              parentId: null,
+              text: { content: 'Slide 2' },
+            },
           ],
         },
       ]),
@@ -177,7 +205,14 @@ describe('template-preview-renderer worker', () => {
           position: 0,
           aspect: { ratioW: 1920, ratioH: 1080 },
           elements: [
-            { id: 'el-1', semanticId: 'slide[0].text[t1]', name: 't1', type: 'text', parentId: null, text: { content: 'Hello' } },
+            {
+              id: 'el-1',
+              semanticId: 'slide[0].text[t1]',
+              name: 't1',
+              type: 'text',
+              parentId: null,
+              text: { content: 'Hello' },
+            },
           ],
         },
       ]),

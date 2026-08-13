@@ -44,7 +44,9 @@ export class IndexedDBQueue {
   constructor(opts: IndexedDBQueueOptions = {}) {
     this.dbName = opts.dbName ?? DB_NAME;
     this.maxBytes = opts.maxBytes ?? MAX_BYTES_DEFAULT;
-    this.indexedDB = opts.indexedDB ?? (typeof indexedDB !== 'undefined' ? indexedDB : (null as unknown as IDBFactory));
+    this.indexedDB =
+      opts.indexedDB ??
+      (typeof indexedDB !== 'undefined' ? indexedDB : (null as unknown as IDBFactory));
   }
 
   private open(): Promise<IDBDatabase> {
@@ -94,7 +96,9 @@ export class IndexedDBQueue {
       const req = tx.objectStore(STORE).getAll();
       req.onsuccess = () => {
         const list = (req.result as QueuedRecordInternal[]).map((r) => ({
-          seq: r.seq, bytes: r.bytes, event: r.event,
+          seq: r.seq,
+          bytes: r.bytes,
+          event: r.event,
         }));
         // Clear in a parallel write transaction.
         const write = db.transaction(STORE, 'readwrite');
@@ -146,7 +150,7 @@ export class IndexedDBQueue {
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
     });
-    this.bytes -= (this.bytes + incomingBytes > this.maxBytes ? incomingBytes : 0);
+    this.bytes -= this.bytes + incomingBytes > this.maxBytes ? incomingBytes : 0;
     // Conservative byte accounting.
     if (this.bytes < 0) this.bytes = 0;
   }

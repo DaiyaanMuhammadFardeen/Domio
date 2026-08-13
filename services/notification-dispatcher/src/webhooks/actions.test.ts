@@ -47,7 +47,11 @@ describe('webhooks/actions', () => {
         callback_id: 'cb-1',
         action: {
           action_id: 'approve_btn',
-          value: JSON.stringify({ notificationId: 'n-1', action: 'approve', idempotencyKey: 'k-1' }),
+          value: JSON.stringify({
+            notificationId: 'n-1',
+            action: 'approve',
+            idempotencyKey: 'k-1',
+          }),
         },
         user: { id: 'u-1' },
         response_url: 'https://hooks.slack.com/actions',
@@ -85,10 +89,13 @@ describe('webhooks/actions', () => {
 
   describe('handleAction', () => {
     it('returns 400 for invalid payload', async () => {
-      const result = await handleAction({}, {
-        idempotencyStore: new InMemoryIdempotencyStore(),
-        actionHandler: new NoopActionHandler(),
-      });
+      const result = await handleAction(
+        {},
+        {
+          idempotencyStore: new InMemoryIdempotencyStore(),
+          actionHandler: new NoopActionHandler(),
+        },
+      );
       expect(result.status).toBe(400);
     });
 
@@ -112,7 +119,11 @@ describe('webhooks/actions', () => {
         callback_id: 'cb-1',
         action: {
           action_id: 'btn',
-          value: JSON.stringify({ notificationId: 'n-1', action: 'approve', idempotencyKey: 'k-1' }),
+          value: JSON.stringify({
+            notificationId: 'n-1',
+            action: 'approve',
+            idempotencyKey: 'k-1',
+          }),
         },
       };
       const result = await handleAction(raw, {
@@ -136,7 +147,11 @@ describe('webhooks/actions', () => {
         callback_id: 'cb-1',
         action: {
           action_id: 'btn',
-          value: JSON.stringify({ notificationId: 'n-1', action: 'approve', idempotencyKey: 'k-1' }),
+          value: JSON.stringify({
+            notificationId: 'n-1',
+            action: 'approve',
+            idempotencyKey: 'k-1',
+          }),
         },
       };
 
@@ -171,21 +186,35 @@ describe('webhooks/actions', () => {
         actionHandler: handler,
       };
 
-      await handleAction({
-        callback_id: 'cb-1',
-        action: {
-          action_id: 'btn',
-          value: JSON.stringify({ notificationId: 'n-1', action: 'approve', idempotencyKey: 'k-1' }),
+      await handleAction(
+        {
+          callback_id: 'cb-1',
+          action: {
+            action_id: 'btn',
+            value: JSON.stringify({
+              notificationId: 'n-1',
+              action: 'approve',
+              idempotencyKey: 'k-1',
+            }),
+          },
         },
-      }, deps);
+        deps,
+      );
 
-      await handleAction({
-        callback_id: 'cb-1',
-        action: {
-          action_id: 'btn',
-          value: JSON.stringify({ notificationId: 'n-1', action: 'approve', idempotencyKey: 'k-2' }),
+      await handleAction(
+        {
+          callback_id: 'cb-1',
+          action: {
+            action_id: 'btn',
+            value: JSON.stringify({
+              notificationId: 'n-1',
+              action: 'approve',
+              idempotencyKey: 'k-2',
+            }),
+          },
         },
-      }, deps);
+        deps,
+      );
 
       expect(callCount).toBe(2);
     });

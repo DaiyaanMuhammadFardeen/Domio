@@ -43,16 +43,24 @@ describe('semver', () => {
 
   describe('compareSemver', () => {
     it('compares major', () => {
-      expect(compareSemver({ major: 2, minor: 0, patch: 0 }, { major: 1, minor: 0, patch: 0 })).toBeGreaterThan(0);
+      expect(
+        compareSemver({ major: 2, minor: 0, patch: 0 }, { major: 1, minor: 0, patch: 0 }),
+      ).toBeGreaterThan(0);
     });
     it('compares minor', () => {
-      expect(compareSemver({ major: 1, minor: 3, patch: 0 }, { major: 1, minor: 2, patch: 0 })).toBeGreaterThan(0);
+      expect(
+        compareSemver({ major: 1, minor: 3, patch: 0 }, { major: 1, minor: 2, patch: 0 }),
+      ).toBeGreaterThan(0);
     });
     it('compares patch', () => {
-      expect(compareSemver({ major: 1, minor: 2, patch: 4 }, { major: 1, minor: 2, patch: 3 })).toBeGreaterThan(0);
+      expect(
+        compareSemver({ major: 1, minor: 2, patch: 4 }, { major: 1, minor: 2, patch: 3 }),
+      ).toBeGreaterThan(0);
     });
     it('equal returns 0', () => {
-      expect(compareSemver({ major: 1, minor: 2, patch: 3 }, { major: 1, minor: 2, patch: 3 })).toBe(0);
+      expect(
+        compareSemver({ major: 1, minor: 2, patch: 3 }, { major: 1, minor: 2, patch: 3 }),
+      ).toBe(0);
     });
     it('release > prerelease', () => {
       const a: SemVer = { major: 1, minor: 0, patch: 0 };
@@ -92,41 +100,105 @@ describe('semver', () => {
   });
 
   describe('maxVersion', () => {
-    it('returns highest', () => { expect(maxVersion(['1.0.0', '2.0.0', '1.5.0'])).toBe('2.0.0'); });
-    it('returns null for empty', () => { expect(maxVersion([])).toBeNull(); });
+    it('returns highest', () => {
+      expect(maxVersion(['1.0.0', '2.0.0', '1.5.0'])).toBe('2.0.0');
+    });
+    it('returns null for empty', () => {
+      expect(maxVersion([])).toBeNull();
+    });
   });
 
   describe('matchesRange', () => {
-    it('exact match', () => { expect(matchesRange('1.2.3', '1.2.3')).toBe(true); });
-    it('exact mismatch', () => { expect(matchesRange('1.2.3', '1.2.4')).toBe(false); });
-    it('^1.2.3 matches 1.2.4', () => { expect(matchesRange('1.2.4', '^1.2.3')).toBe(true); });
-    it('^1.2.3 no match 2.0.0', () => { expect(matchesRange('2.0.0', '^1.2.3')).toBe(false); });
-    it('^1.2.3 no match 1.1.0', () => { expect(matchesRange('1.1.0', '^1.2.3')).toBe(false); });
-    it('^1.2.3 no match 1.2.2', () => { expect(matchesRange('1.2.2', '^1.2.3')).toBe(false); });
-    it('~1.2.3 matches 1.2.5', () => { expect(matchesRange('1.2.5', '~1.2.3')).toBe(true); });
-    it('~1.2.3 no match 1.3.0', () => { expect(matchesRange('1.3.0', '~1.2.3')).toBe(false); });
-    it('~1.2.3 no match 1.2.2', () => { expect(matchesRange('1.2.2', '~1.2.3')).toBe(false); });
-    it('1.x matches major', () => { expect(matchesRange('1.5.0', '1.x')).toBe(true); });
-    it('1.x no match 2.0.0', () => { expect(matchesRange('2.0.0', '1.x')).toBe(false); });
-    it('1.2.x matches 1.2.3', () => { expect(matchesRange('1.2.3', '1.2.x')).toBe(true); });
-    it('1.2.x no match 1.3.0', () => { expect(matchesRange('1.3.0', '1.2.x')).toBe(false); });
-    it('1.* matches major', () => { expect(matchesRange('1.9.9', '1.*')).toBe(true); });
-    it('returns false for invalid version', () => { expect(matchesRange('not-semver', '1.0.0')).toBe(false); });
-    it('|| with space-separated intervals', () => { expect(matchesRange('1.5.0', '>=1.0.0 <2.0.0 || >=3.0.0')).toBe(true); });
-    it('|| alternates false', () => { expect(matchesRange('2.5.0', '>=1.0.0 <2.0.0 || >=3.0.0')).toBe(false); });
-    it('>1.0.0 matches 2.0.0', () => { expect(matchesRange('2.0.0', '>1.0.0')).toBe(true); });
-    it('>1.0.0 no match 1.0.0', () => { expect(matchesRange('1.0.0', '>1.0.0')).toBe(false); });
-    it('<2.0.0 matches 1.0.0', () => { expect(matchesRange('1.0.0', '<2.0.0')).toBe(true); });
-    it('<2.0.0 no match 2.0.0', () => { expect(matchesRange('2.0.0', '<2.0.0')).toBe(false); });
-    it('>=1.0.0 matches 1.0.0', () => { expect(matchesRange('1.0.0', '>=1.0.0')).toBe(true); });
-    it('>=1.0.0 no match 0.9.0', () => { expect(matchesRange('0.9.0', '>=1.0.0')).toBe(false); });
-    it('<=1.0.0 matches 1.0.0', () => { expect(matchesRange('1.0.0', '<=1.0.0')).toBe(true); });
-    it('<=1.0.0 no match 1.1.0', () => { expect(matchesRange('1.1.0', '<=1.0.0')).toBe(false); });
-    it('invalid ^ range', () => { expect(matchesRange('1.0.0', '^abc')).toBe(false); });
-    it('invalid ~ range', () => { expect(matchesRange('1.0.0', '~abc')).toBe(false); });
-    it('complex range: >=1.0.0 <2.0.0', () => { expect(matchesRange('1.5.0', '>=1.0.0 <2.0.0')).toBe(true); });
-    it('complex range: >=1.0.0 <2.0.0 no match', () => { expect(matchesRange('2.0.0', '>=1.0.0 <2.0.0')).toBe(false); });
-    it('1.x || 2.x matches 3.0.0 no (|| with .x not supported)', () => { expect(matchesRange('3.0.0', '1.x || 2.x')).toBe(false); });
+    it('exact match', () => {
+      expect(matchesRange('1.2.3', '1.2.3')).toBe(true);
+    });
+    it('exact mismatch', () => {
+      expect(matchesRange('1.2.3', '1.2.4')).toBe(false);
+    });
+    it('^1.2.3 matches 1.2.4', () => {
+      expect(matchesRange('1.2.4', '^1.2.3')).toBe(true);
+    });
+    it('^1.2.3 no match 2.0.0', () => {
+      expect(matchesRange('2.0.0', '^1.2.3')).toBe(false);
+    });
+    it('^1.2.3 no match 1.1.0', () => {
+      expect(matchesRange('1.1.0', '^1.2.3')).toBe(false);
+    });
+    it('^1.2.3 no match 1.2.2', () => {
+      expect(matchesRange('1.2.2', '^1.2.3')).toBe(false);
+    });
+    it('~1.2.3 matches 1.2.5', () => {
+      expect(matchesRange('1.2.5', '~1.2.3')).toBe(true);
+    });
+    it('~1.2.3 no match 1.3.0', () => {
+      expect(matchesRange('1.3.0', '~1.2.3')).toBe(false);
+    });
+    it('~1.2.3 no match 1.2.2', () => {
+      expect(matchesRange('1.2.2', '~1.2.3')).toBe(false);
+    });
+    it('1.x matches major', () => {
+      expect(matchesRange('1.5.0', '1.x')).toBe(true);
+    });
+    it('1.x no match 2.0.0', () => {
+      expect(matchesRange('2.0.0', '1.x')).toBe(false);
+    });
+    it('1.2.x matches 1.2.3', () => {
+      expect(matchesRange('1.2.3', '1.2.x')).toBe(true);
+    });
+    it('1.2.x no match 1.3.0', () => {
+      expect(matchesRange('1.3.0', '1.2.x')).toBe(false);
+    });
+    it('1.* matches major', () => {
+      expect(matchesRange('1.9.9', '1.*')).toBe(true);
+    });
+    it('returns false for invalid version', () => {
+      expect(matchesRange('not-semver', '1.0.0')).toBe(false);
+    });
+    it('|| with space-separated intervals', () => {
+      expect(matchesRange('1.5.0', '>=1.0.0 <2.0.0 || >=3.0.0')).toBe(true);
+    });
+    it('|| alternates false', () => {
+      expect(matchesRange('2.5.0', '>=1.0.0 <2.0.0 || >=3.0.0')).toBe(false);
+    });
+    it('>1.0.0 matches 2.0.0', () => {
+      expect(matchesRange('2.0.0', '>1.0.0')).toBe(true);
+    });
+    it('>1.0.0 no match 1.0.0', () => {
+      expect(matchesRange('1.0.0', '>1.0.0')).toBe(false);
+    });
+    it('<2.0.0 matches 1.0.0', () => {
+      expect(matchesRange('1.0.0', '<2.0.0')).toBe(true);
+    });
+    it('<2.0.0 no match 2.0.0', () => {
+      expect(matchesRange('2.0.0', '<2.0.0')).toBe(false);
+    });
+    it('>=1.0.0 matches 1.0.0', () => {
+      expect(matchesRange('1.0.0', '>=1.0.0')).toBe(true);
+    });
+    it('>=1.0.0 no match 0.9.0', () => {
+      expect(matchesRange('0.9.0', '>=1.0.0')).toBe(false);
+    });
+    it('<=1.0.0 matches 1.0.0', () => {
+      expect(matchesRange('1.0.0', '<=1.0.0')).toBe(true);
+    });
+    it('<=1.0.0 no match 1.1.0', () => {
+      expect(matchesRange('1.1.0', '<=1.0.0')).toBe(false);
+    });
+    it('invalid ^ range', () => {
+      expect(matchesRange('1.0.0', '^abc')).toBe(false);
+    });
+    it('invalid ~ range', () => {
+      expect(matchesRange('1.0.0', '~abc')).toBe(false);
+    });
+    it('complex range: >=1.0.0 <2.0.0', () => {
+      expect(matchesRange('1.5.0', '>=1.0.0 <2.0.0')).toBe(true);
+    });
+    it('complex range: >=1.0.0 <2.0.0 no match', () => {
+      expect(matchesRange('2.0.0', '>=1.0.0 <2.0.0')).toBe(false);
+    });
+    it('1.x || 2.x matches 3.0.0 no (|| with .x not supported)', () => {
+      expect(matchesRange('3.0.0', '1.x || 2.x')).toBe(false);
+    });
   });
 
   describe('resolvePolicyTarget', () => {

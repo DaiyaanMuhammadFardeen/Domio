@@ -51,12 +51,7 @@ export function ContextMenu(props: ContextMenuProps): ReactElement | null {
   if (!open) return null;
 
   return (
-    <div
-      ref={ref}
-      className="context-menu"
-      role="menu"
-      style={{ left: x, top: y }}
-    >
+    <div ref={ref} className="context-menu" role="menu" style={{ left: x, top: y }}>
       {items.map((item) => (
         <button
           key={item.id}

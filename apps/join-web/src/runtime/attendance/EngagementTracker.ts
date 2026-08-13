@@ -55,9 +55,7 @@ export class EngagementTracker {
   /** Record a widget interaction. Capped at INTERACTION_CAP per window. */
   recordInteraction(kind: InteractionKind, slideId?: string): void {
     const ts = this.now();
-    const record: InteractionRecord = slideId !== undefined
-      ? { kind, ts, slideId }
-      : { kind, ts };
+    const record: InteractionRecord = slideId !== undefined ? { kind, ts, slideId } : { kind, ts };
     this.interactions.push(record);
     this.notify();
   }
@@ -113,7 +111,8 @@ export class EngagementTracker {
   }
 
   private computeScore(): number {
-    const interactionPoints = Math.min(this.interactions.length, INTERACTION_CAP) * INTERACTION_POINTS;
+    const interactionPoints =
+      Math.min(this.interactions.length, INTERACTION_CAP) * INTERACTION_POINTS;
     const rejoinPoints = this.rejoins.length * REJOIN_PENALTY;
     const dwellPoints = this.dwellSeconds.length * DWELL_PER_SECOND;
     return interactionPoints + rejoinPoints + dwellPoints;

@@ -27,10 +27,7 @@ export {
   type SessionServiceOptions,
 } from './service.js';
 
-export {
-  createArSessionRoutes,
-  type RouteContext,
-} from './handlers.js';
+export { createArSessionRoutes, type RouteContext } from './handlers.js';
 
 export {
   mintToken,
@@ -52,8 +49,4 @@ export {
   type MintTokenResult,
 } from './tokens.js';
 
-export {
-  buildAudienceUrl,
-  buildQrPayload,
-  type QrPayload,
-} from './deeplink.js';
+export { buildAudienceUrl, buildQrPayload, type QrPayload } from './deeplink.js';

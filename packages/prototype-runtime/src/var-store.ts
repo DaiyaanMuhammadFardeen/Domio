@@ -206,5 +206,7 @@ export function scopeLadder(scope?: VariableScope): readonly VariableScope[] {
   // If caller specified a scope, only walk from that scope up to deck.
   const start = ['viewer', 'session', 'component_instance', 'slide', 'deck'].indexOf(scope);
   if (start < 0) return ['viewer', 'session', 'component_instance', 'slide', 'deck'];
-  return ['viewer', 'session', 'component_instance', 'slide', 'deck'].slice(start) as readonly VariableScope[];
+  return ['viewer', 'session', 'component_instance', 'slide', 'deck'].slice(
+    start,
+  ) as readonly VariableScope[];
 }

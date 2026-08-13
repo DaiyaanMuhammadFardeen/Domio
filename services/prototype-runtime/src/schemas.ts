@@ -19,18 +19,36 @@ const ALLOWED_HOTSPOT_TARGET_TYPES = ['slide', 'url', 'overlay', 'action'] as co
 const ALLOWED_OVERLAY_TYPES = ['modal', 'tooltip', 'drawer', 'popover', 'sheet'] as const;
 const ALLOWED_OVERLAY_SIZES = ['small', 'medium', 'large', 'fullscreen', 'auto'] as const;
 const ALLOWED_BINDING_TARGETS = [
-  'element_prop', 'slide_prop', 'deck_prop', 'overlay_open', 'hotspot_target',
+  'element_prop',
+  'slide_prop',
+  'deck_prop',
+  'overlay_open',
+  'hotspot_target',
 ] as const;
 const ALLOWED_ACTIONS = [
-  'show', 'hide', 'enable', 'disable', 'set_variable', 'navigate_to',
-  'play_animation', 'submit_form', 'open_overlay', 'close_overlay',
+  'show',
+  'hide',
+  'enable',
+  'disable',
+  'set_variable',
+  'navigate_to',
+  'play_animation',
+  'submit_form',
+  'open_overlay',
+  'close_overlay',
 ] as const;
 const ALLOWED_STATE_SCOPES = ['session', 'slide', 'deck', 'persistent_session'] as const;
 const ALLOWED_STATE_EVENTS = ['focus', 'press', 'click', 'hover', 'default'] as const;
 const ALLOWED_INTERRUPTION_POLICIES = ['ignore', 'queue', 'abort'] as const;
 const ALLOWED_QUESTION_TYPES = [
-  'multiple_choice', 'multi_select', 'true_false', 'short_answer',
-  'fill_blank', 'drag_to_match', 'hotspot_quiz', 'flash_card',
+  'multiple_choice',
+  'multi_select',
+  'true_false',
+  'short_answer',
+  'fill_blank',
+  'drag_to_match',
+  'hotspot_quiz',
+  'flash_card',
   'short_answer_llm',
 ] as const;
 
@@ -52,11 +70,21 @@ function fail(errors: ValidationError[]): ValidationResult<never> {
   return { valid: false, errors };
 }
 
-function isString(v: unknown): v is string { return typeof v === 'string'; }
-function isNumber(v: unknown): v is number { return typeof v === 'number' && Number.isFinite(v); }
-function isObject(v: unknown): v is Record<string, unknown> { return typeof v === 'object' && v !== null && !Array.isArray(v); }
-function isArray(v: unknown): v is unknown[] { return Array.isArray(v); }
-function inSet<T extends string>(set: readonly T[], v: unknown): v is T { return typeof v === 'string' && (set as readonly string[]).includes(v); }
+function isString(v: unknown): v is string {
+  return typeof v === 'string';
+}
+function isNumber(v: unknown): v is number {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+function isArray(v: unknown): v is unknown[] {
+  return Array.isArray(v);
+}
+function inSet<T extends string>(set: readonly T[], v: unknown): v is T {
+  return typeof v === 'string' && (set as readonly string[]).includes(v);
+}
 
 // ── Hotspot ─────────────────────────────────────────────────────────────
 
@@ -74,10 +102,13 @@ export function validateCreateHotspot(body: unknown): ValidationResult<CreateHot
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { slideId, name, geometry, targetType, targetRef } = body;
-  if (!isString(slideId) || !ULID.test(slideId)) errors.push({ path: 'slideId', message: 'must be a ULID' });
-  if (!isString(name) || name.length < 1 || name.length > 128) errors.push({ path: 'name', message: '1..128 chars required' });
+  if (!isString(slideId) || !ULID.test(slideId))
+    errors.push({ path: 'slideId', message: 'must be a ULID' });
+  if (!isString(name) || name.length < 1 || name.length > 128)
+    errors.push({ path: 'name', message: '1..128 chars required' });
   if (!isObject(geometry)) errors.push({ path: 'geometry', message: 'must be an object' });
-  if (!inSet(ALLOWED_HOTSPOT_TARGET_TYPES, targetType)) errors.push({ path: 'targetType', message: 'invalid targetType' });
+  if (!inSet(ALLOWED_HOTSPOT_TARGET_TYPES, targetType))
+    errors.push({ path: 'targetType', message: 'invalid targetType' });
   if (!isObject(targetRef)) errors.push({ path: 'targetRef', message: 'must be an object' });
 
   const gestureMask = (body as { gestureMask?: unknown }).gestureMask;
@@ -121,7 +152,8 @@ export function validatePatchHotspot(body: unknown): ValidationResult<PatchHotsp
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { version } = body;
-  if (!isNumber(version) || version < 0) errors.push({ path: 'version', message: 'non-negative integer required' });
+  if (!isNumber(version) || version < 0)
+    errors.push({ path: 'version', message: 'non-negative integer required' });
   if (errors.length) return fail(errors);
   return ok({ version, ...(body as Record<string, unknown>) } as PatchHotspotInput);
 }
@@ -144,22 +176,27 @@ export function validateCreateOverlay(body: unknown): ValidationResult<CreateOve
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { slideId, name, type, sizeStrategy, schema } = body;
-  if (!isString(slideId) || !ULID.test(slideId)) errors.push({ path: 'slideId', message: 'must be a ULID' });
+  if (!isString(slideId) || !ULID.test(slideId))
+    errors.push({ path: 'slideId', message: 'must be a ULID' });
   if (!isString(name) || name.length < 1) errors.push({ path: 'name', message: 'required' });
   if (!inSet(ALLOWED_OVERLAY_TYPES, type)) errors.push({ path: 'type', message: 'invalid type' });
-  if (!inSet(ALLOWED_OVERLAY_SIZES, sizeStrategy)) errors.push({ path: 'sizeStrategy', message: 'invalid sizeStrategy' });
+  if (!inSet(ALLOWED_OVERLAY_SIZES, sizeStrategy))
+    errors.push({ path: 'sizeStrategy', message: 'invalid sizeStrategy' });
   if (!isObject(schema)) errors.push({ path: 'schema', message: 'must be an object' });
 
   if (errors.length) return fail(errors);
   return ok({ ...(body as unknown as CreateOverlayInput) });
 }
 
-export interface PatchOverlayInput { readonly version: number }
+export interface PatchOverlayInput {
+  readonly version: number;
+}
 export function validatePatchOverlay(body: unknown): ValidationResult<PatchOverlayInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { version } = body;
-  if (!isNumber(version) || version < 0) errors.push({ path: 'version', message: 'non-negative integer required' });
+  if (!isNumber(version) || version < 0)
+    errors.push({ path: 'version', message: 'non-negative integer required' });
   if (errors.length) return fail(errors);
   return ok({ version: version as number });
 }
@@ -174,13 +211,18 @@ export interface CreateBranchingEdgeInput {
   readonly priority?: number;
 }
 
-export function validateCreateBranchingEdge(body: unknown): ValidationResult<CreateBranchingEdgeInput> {
+export function validateCreateBranchingEdge(
+  body: unknown,
+): ValidationResult<CreateBranchingEdgeInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { fromSlideId, toSlideId, name } = body;
-  if (!isString(fromSlideId) || !ULID.test(fromSlideId)) errors.push({ path: 'fromSlideId', message: 'must be a ULID' });
-  if (!isString(toSlideId) || !ULID.test(toSlideId)) errors.push({ path: 'toSlideId', message: 'must be a ULID' });
-  if (fromSlideId === toSlideId) errors.push({ path: 'toSlideId', message: 'self-loops not allowed' });
+  if (!isString(fromSlideId) || !ULID.test(fromSlideId))
+    errors.push({ path: 'fromSlideId', message: 'must be a ULID' });
+  if (!isString(toSlideId) || !ULID.test(toSlideId))
+    errors.push({ path: 'toSlideId', message: 'must be a ULID' });
+  if (fromSlideId === toSlideId)
+    errors.push({ path: 'toSlideId', message: 'self-loops not allowed' });
   if (!isString(name) || name.length < 1) errors.push({ path: 'name', message: 'required' });
 
   const ruleId = (body as { ruleId?: unknown }).ruleId;
@@ -196,8 +238,15 @@ export function validateCreateBranchingEdge(body: unknown): ValidationResult<Cre
   return ok({ ...(body as unknown as CreateBranchingEdgeInput) });
 }
 
-export interface PatchBranchingEdgeInput { readonly name?: string; readonly toSlideId?: string; readonly ruleId?: string | null; readonly priority?: number }
-export function validatePatchBranchingEdge(body: unknown): ValidationResult<PatchBranchingEdgeInput> {
+export interface PatchBranchingEdgeInput {
+  readonly name?: string;
+  readonly toSlideId?: string;
+  readonly ruleId?: string | null;
+  readonly priority?: number;
+}
+export function validatePatchBranchingEdge(
+  body: unknown,
+): ValidationResult<PatchBranchingEdgeInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   return ok({ ...(body as Record<string, unknown>) } as PatchBranchingEdgeInput);
 }
@@ -220,7 +269,8 @@ export function validateCreateVariable(body: unknown): ValidationResult<CreateVa
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { name, scope, type } = body;
-  if (!isString(name) || !VAR_NAME.test(name)) errors.push({ path: 'name', message: 'must match ^[A-Za-z_][A-Za-z0-9_]{0,63}$' });
+  if (!isString(name) || !VAR_NAME.test(name))
+    errors.push({ path: 'name', message: 'must match ^[A-Za-z_][A-Za-z0-9_]{0,63}$' });
   if (!inSet(ALLOWED_SCOPES, scope)) errors.push({ path: 'scope', message: 'invalid scope' });
   if (!inSet(ALLOWED_TYPES, type)) errors.push({ path: 'type', message: 'invalid type' });
 
@@ -228,19 +278,25 @@ export function validateCreateVariable(body: unknown): ValidationResult<CreateVa
   return ok({ ...(body as unknown as CreateVariableInput) });
 }
 
-export interface PatchVariableInput { readonly version: number }
+export interface PatchVariableInput {
+  readonly version: number;
+}
 export function validatePatchVariable(body: unknown): ValidationResult<PatchVariableInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { version } = body;
-  if (!isNumber(version) || version < 0) errors.push({ path: 'version', message: 'non-negative integer required' });
+  if (!isNumber(version) || version < 0)
+    errors.push({ path: 'version', message: 'non-negative integer required' });
   if (errors.length) return fail(errors);
   return ok({ version: version as number });
 }
 
 /** Domain-level validation for variable patches (numeric range, enum). */
 export function validateVariableSemantics(patch: {
-  type?: string; enumValues?: readonly string[]; min?: number; max?: number;
+  type?: string;
+  enumValues?: readonly string[];
+  min?: number;
+  max?: number;
 }): void {
   if (patch.type === 'enum' && (!patch.enumValues || patch.enumValues.length === 0)) {
     throw new VariableValidationError('enum type requires non-empty enumValues');
@@ -248,7 +304,11 @@ export function validateVariableSemantics(patch: {
   if (patch.min !== undefined && patch.max !== undefined && patch.min > patch.max) {
     throw new VariableValidationError('min > max');
   }
-  if (patch.type !== 'number' && patch.type !== 'enum' && (patch.min !== undefined || patch.max !== undefined)) {
+  if (
+    patch.type !== 'number' &&
+    patch.type !== 'enum' &&
+    (patch.min !== undefined || patch.max !== undefined)
+  ) {
     throw new VariableValidationError('min/max only allowed for number/enum');
   }
 }
@@ -263,14 +323,20 @@ export interface CreateVariableBindingInput {
   readonly transform?: string;
 }
 
-export function validateCreateVariableBinding(body: unknown): ValidationResult<CreateVariableBindingInput> {
+export function validateCreateVariableBinding(
+  body: unknown,
+): ValidationResult<CreateVariableBindingInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { variableId, targetKind, targetId, targetProp, transform } = body;
-  if (!isString(variableId) || !ULID.test(variableId)) errors.push({ path: 'variableId', message: 'must be ULID' });
-  if (!inSet(ALLOWED_BINDING_TARGETS, targetKind)) errors.push({ path: 'targetKind', message: 'invalid targetKind' });
-  if (!isString(targetId) || !ULID.test(targetId)) errors.push({ path: 'targetId', message: 'must be ULID' });
-  if (!isString(targetProp) || targetProp.length < 1) errors.push({ path: 'targetProp', message: 'required' });
+  if (!isString(variableId) || !ULID.test(variableId))
+    errors.push({ path: 'variableId', message: 'must be ULID' });
+  if (!inSet(ALLOWED_BINDING_TARGETS, targetKind))
+    errors.push({ path: 'targetKind', message: 'invalid targetKind' });
+  if (!isString(targetId) || !ULID.test(targetId))
+    errors.push({ path: 'targetId', message: 'must be ULID' });
+  if (!isString(targetProp) || targetProp.length < 1)
+    errors.push({ path: 'targetProp', message: 'required' });
   if (transform !== undefined && (!isString(transform) || transform.length > 4096)) {
     errors.push({ path: 'transform', message: 'string up to 4096 chars' });
   }
@@ -290,7 +356,9 @@ export interface CreateConditionalRuleInput {
   readonly enabled?: boolean;
 }
 
-export function validateCreateConditionalRule(body: unknown): ValidationResult<CreateConditionalRuleInput> {
+export function validateCreateConditionalRule(
+  body: unknown,
+): ValidationResult<CreateConditionalRuleInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { name, conditionSource, action } = body;
@@ -301,7 +369,8 @@ export function validateCreateConditionalRule(body: unknown): ValidationResult<C
   if (!isObject(action)) errors.push({ path: 'action', message: 'must be an object' });
   else {
     const a = action as { kind?: unknown; params?: unknown };
-    if (!inSet(ALLOWED_ACTIONS, a.kind)) errors.push({ path: 'action.kind', message: 'invalid kind' });
+    if (!inSet(ALLOWED_ACTIONS, a.kind))
+      errors.push({ path: 'action.kind', message: 'invalid kind' });
     if (!isObject(a.params)) errors.push({ path: 'action.params', message: 'must be an object' });
   }
 
@@ -309,27 +378,40 @@ export function validateCreateConditionalRule(body: unknown): ValidationResult<C
   return ok({ ...(body as unknown as CreateConditionalRuleInput) });
 }
 
-export interface PatchConditionalRuleInput { readonly version: number }
-export function validatePatchConditionalRule(body: unknown): ValidationResult<PatchConditionalRuleInput> {
+export interface PatchConditionalRuleInput {
+  readonly version: number;
+}
+export function validatePatchConditionalRule(
+  body: unknown,
+): ValidationResult<PatchConditionalRuleInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { version } = body;
-  if (!isNumber(version) || version < 0) errors.push({ path: 'version', message: 'non-negative integer required' });
+  if (!isNumber(version) || version < 0)
+    errors.push({ path: 'version', message: 'non-negative integer required' });
   if (errors.length) return fail(errors);
   return ok({ version: version as number });
 }
 
 export const __validationConstants = {
-  ALLOWED_SCOPES, ALLOWED_TYPES, ALLOWED_VISIBILITIES,
-  ALLOWED_GESTURES, ALLOWED_HOTSPOT_TARGET_TYPES,
-  ALLOWED_OVERLAY_TYPES, ALLOWED_OVERLAY_SIZES,
-  ALLOWED_BINDING_TARGETS, ALLOWED_ACTIONS,
-  ALLOWED_STATE_SCOPES, ALLOWED_STATE_EVENTS,
-  ALLOWED_INTERRUPTION_POLICIES, ALLOWED_QUESTION_TYPES,
-  ULID, VAR_NAME,
+  ALLOWED_SCOPES,
+  ALLOWED_TYPES,
+  ALLOWED_VISIBILITIES,
+  ALLOWED_GESTURES,
+  ALLOWED_HOTSPOT_TARGET_TYPES,
+  ALLOWED_OVERLAY_TYPES,
+  ALLOWED_OVERLAY_SIZES,
+  ALLOWED_BINDING_TARGETS,
+  ALLOWED_ACTIONS,
+  ALLOWED_STATE_SCOPES,
+  ALLOWED_STATE_EVENTS,
+  ALLOWED_INTERRUPTION_POLICIES,
+  ALLOWED_QUESTION_TYPES,
+  ULID,
+  VAR_NAME,
 };
 
-const _exhaustive: never = (undefined as never);
+const _exhaustive: never = undefined as never;
 export const _ = _exhaustive;
 
 // ── Interaction state (P10 M3) ─────────────────────────────────────────
@@ -354,7 +436,9 @@ export interface CreateInteractionStateInput {
   readonly persistInstanceState?: boolean;
 }
 
-export function validateCreateInteractionState(body: unknown): ValidationResult<CreateInteractionStateInput> {
+export function validateCreateInteractionState(
+  body: unknown,
+): ValidationResult<CreateInteractionStateInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const { instanceId, stateMachine, currentState, scope } = body;
@@ -406,16 +490,28 @@ export function validateCreateInteractionState(body: unknown): ValidationResult<
         }
         const tt = t as { from?: unknown; to?: unknown; event?: unknown; guard?: unknown };
         if (typeof tt.from !== 'string' || !stateNames.has(tt.from)) {
-          errors.push({ path: `stateMachine.transitions[${i}].from`, message: 'must be a state name in `states`' });
+          errors.push({
+            path: `stateMachine.transitions[${i}].from`,
+            message: 'must be a state name in `states`',
+          });
         }
         if (typeof tt.to !== 'string' || !stateNames.has(tt.to)) {
-          errors.push({ path: `stateMachine.transitions[${i}].to`, message: 'must be a state name in `states`' });
+          errors.push({
+            path: `stateMachine.transitions[${i}].to`,
+            message: 'must be a state name in `states`',
+          });
         }
         if (typeof tt.event !== 'string' || tt.event.length === 0 || tt.event.length > 64) {
-          errors.push({ path: `stateMachine.transitions[${i}].event`, message: '1..64 chars required' });
+          errors.push({
+            path: `stateMachine.transitions[${i}].event`,
+            message: '1..64 chars required',
+          });
         }
         if (tt.guard !== undefined && (typeof tt.guard !== 'string' || tt.guard.length > 4096)) {
-          errors.push({ path: `stateMachine.transitions[${i}].guard`, message: 'string up to 4096 chars' });
+          errors.push({
+            path: `stateMachine.transitions[${i}].guard`,
+            message: 'string up to 4096 chars',
+          });
         }
       });
     }
@@ -438,10 +534,14 @@ export interface PatchInteractionStateInput {
   readonly persistInstanceState?: boolean;
 }
 
-export function validatePatchInteractionState(body: unknown): ValidationResult<PatchInteractionStateInput> {
+export function validatePatchInteractionState(
+  body: unknown,
+): ValidationResult<PatchInteractionStateInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
-  type WritablePatch = { -readonly [K in keyof PatchInteractionStateInput]: PatchInteractionStateInput[K] };
+  type WritablePatch = {
+    -readonly [K in keyof PatchInteractionStateInput]: PatchInteractionStateInput[K];
+  };
   const out: WritablePatch = {};
   const raw = body as Record<string, unknown>;
   if (raw['currentState'] !== undefined) {
@@ -475,7 +575,10 @@ export function validatePatchInteractionState(body: unknown): ValidationResult<P
     });
     if (!inner.valid) {
       for (const e of inner.errors) {
-        errors.push({ path: e.path ? `stateMachine.${e.path}` : 'stateMachine', message: e.message });
+        errors.push({
+          path: e.path ? `stateMachine.${e.path}` : 'stateMachine',
+          message: e.message,
+        });
       }
     } else {
       out.stateMachine = inner.value!.stateMachine;
@@ -539,7 +642,10 @@ export function validateCreateQuiz(body: unknown): ValidationResult<CreateQuizIn
     });
   }
   const passThreshold = bodyObj['passThreshold'];
-  if (passThreshold !== undefined && (!isNumber(passThreshold) || passThreshold < 0 || passThreshold > 1)) {
+  if (
+    passThreshold !== undefined &&
+    (!isNumber(passThreshold) || passThreshold < 0 || passThreshold > 1)
+  ) {
     errors.push({ path: 'passThreshold', message: '0..1 required' });
   }
   if (errors.length) return fail(errors);
@@ -695,7 +801,9 @@ export interface CreatePresentationSequenceInput {
   readonly pauseWarnAtMs?: number;
 }
 
-export function validateCreatePresentationSequence(body: unknown): ValidationResult<CreatePresentationSequenceInput> {
+export function validateCreatePresentationSequence(
+  body: unknown,
+): ValidationResult<CreatePresentationSequenceInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const bodyObj = body as Record<string, unknown>;
@@ -727,7 +835,10 @@ export function validateCreatePresentationSequence(body: unknown): ValidationRes
     errors.push({ path: 'count', message: 'integer 1..1024' });
   }
   const interruptionPolicy = bodyObj['interruptionPolicy'];
-  if (interruptionPolicy !== undefined && !inSet(ALLOWED_INTERRUPTION_POLICIES, interruptionPolicy)) {
+  if (
+    interruptionPolicy !== undefined &&
+    !inSet(ALLOWED_INTERRUPTION_POLICIES, interruptionPolicy)
+  ) {
     errors.push({ path: 'interruptionPolicy', message: 'must be ignore|queue|abort' });
   }
   const reducedMotionDefaultOff = bodyObj['reducedMotionDefaultOff'];
@@ -735,7 +846,10 @@ export function validateCreatePresentationSequence(body: unknown): ValidationRes
     errors.push({ path: 'reducedMotionDefaultOff', message: 'boolean required' });
   }
   const pauseWarnAtMs = bodyObj['pauseWarnAtMs'];
-  if (pauseWarnAtMs !== undefined && (!isNumber(pauseWarnAtMs) || pauseWarnAtMs < 1000 || pauseWarnAtMs > 7_200_000)) {
+  if (
+    pauseWarnAtMs !== undefined &&
+    (!isNumber(pauseWarnAtMs) || pauseWarnAtMs < 1000 || pauseWarnAtMs > 7_200_000)
+  ) {
     errors.push({ path: 'pauseWarnAtMs', message: 'integer 1000..7_200_000 (max 2h)' });
   }
 
@@ -747,8 +861,12 @@ export function validateCreatePresentationSequence(body: unknown): ValidationRes
     ...(pauseOnEvent !== undefined ? { pauseOnEvent: pauseOnEvent as boolean } : {}),
     ...(loop !== undefined ? { loop: loop as boolean } : {}),
     ...(count !== undefined ? { count: count as number } : {}),
-    ...(interruptionPolicy !== undefined ? { interruptionPolicy: interruptionPolicy as string } : {}),
-    ...(reducedMotionDefaultOff !== undefined ? { reducedMotionDefaultOff: reducedMotionDefaultOff as boolean } : {}),
+    ...(interruptionPolicy !== undefined
+      ? { interruptionPolicy: interruptionPolicy as string }
+      : {}),
+    ...(reducedMotionDefaultOff !== undefined
+      ? { reducedMotionDefaultOff: reducedMotionDefaultOff as boolean }
+      : {}),
     ...(pauseWarnAtMs !== undefined ? { pauseWarnAtMs: pauseWarnAtMs as number } : {}),
   });
 }
@@ -766,7 +884,9 @@ export interface PatchPresentationSequenceInput {
   readonly pauseWarnAtMs?: number;
 }
 
-export function validatePatchPresentationSequence(body: unknown): ValidationResult<PatchPresentationSequenceInput> {
+export function validatePatchPresentationSequence(
+  body: unknown,
+): ValidationResult<PatchPresentationSequenceInput> {
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const errors: ValidationError[] = [];
   const bodyObj = body as Record<string, unknown>;
@@ -774,9 +894,15 @@ export function validatePatchPresentationSequence(body: unknown): ValidationResu
   if (!isNumber(version) || version < 0) {
     errors.push({ path: 'version', message: 'non-negative integer required' });
   }
-  if (bodyObj['interruptionPolicy'] !== undefined && !inSet(ALLOWED_INTERRUPTION_POLICIES, bodyObj['interruptionPolicy'])) {
+  if (
+    bodyObj['interruptionPolicy'] !== undefined &&
+    !inSet(ALLOWED_INTERRUPTION_POLICIES, bodyObj['interruptionPolicy'])
+  ) {
     errors.push({ path: 'interruptionPolicy', message: 'must be ignore|queue|abort' });
   }
   if (errors.length) return fail(errors);
-  return ok({ version: version as number, ...(body as Record<string, unknown>) } as PatchPresentationSequenceInput);
+  return ok({
+    version: version as number,
+    ...(body as Record<string, unknown>),
+  } as PatchPresentationSequenceInput);
 }

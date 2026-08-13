@@ -36,10 +36,9 @@ export default function CareersPage(): JSX.Element {
               Build the future of presentations with us.
             </h1>
             <p className="careers-hero__subtitle">
-              We&rsquo;re a small, fully remote team building Domio &mdash; the
-              interactive deck platform powering pitches, demos, and live
-              presentations for thousands of teams. We hire across engineering,
-              design, product, go-to-market, operations, and finance.
+              We&rsquo;re a small, fully remote team building Domio &mdash; the interactive deck
+              platform powering pitches, demos, and live presentations for thousands of teams. We
+              hire across engineering, design, product, go-to-market, operations, and finance.
             </p>
             <div className="careers-hero__actions">
               <a
@@ -81,8 +80,8 @@ export default function CareersPage(): JSX.Element {
               Don&rsquo;t see the right role?
             </h2>
             <p className="careers-cta__sub">
-              We always want to hear from strong generalists. Send a note, your
-              work, and what you want to build next.
+              We always want to hear from strong generalists. Send a note, your work, and what you
+              want to build next.
             </p>
             <div className="careers-cta__actions">
               <a

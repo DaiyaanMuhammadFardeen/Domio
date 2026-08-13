@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  participantId,
-  sessionCode,
-  type AudienceWidgetDescriptor,
-} from './types.js';
+import { participantId, sessionCode, type AudienceWidgetDescriptor } from './types.js';
 import {
   AudienceConflictError,
   AudienceModerationError,

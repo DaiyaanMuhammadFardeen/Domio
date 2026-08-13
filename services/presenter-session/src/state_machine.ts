@@ -15,11 +15,11 @@
 import type { SessionMode, StageState } from './types.js';
 
 export const ALLOWED_MODE_TRANSITIONS: Readonly<Record<SessionMode, ReadonlyArray<SessionMode>>> = {
-  live:             ['rehearsal', 'multi_presenter', 'offline', 'failover'],
-  rehearsal:        ['live', 'offline'],
-  offline:          ['live', 'failover'],
-  multi_presenter:  ['live', 'failover'],
-  failover:         ['live', 'multi_presenter', 'offline'],
+  live: ['rehearsal', 'multi_presenter', 'offline', 'failover'],
+  rehearsal: ['live', 'offline'],
+  offline: ['live', 'failover'],
+  multi_presenter: ['live', 'failover'],
+  failover: ['live', 'multi_presenter', 'offline'],
 };
 
 /** Pure reducer: returns the next state without mutating inputs. */

@@ -16,11 +16,7 @@ import {
   type GraphFiltersState,
   type EntityTypeValue,
 } from '../../components/graph';
-import {
-  getGraph,
-  type Entity,
-  type GraphView,
-} from '../../lib/knowledge-graph-service';
+import { getGraph, type Entity, type GraphView } from '../../lib/knowledge-graph-service';
 import enMessages from '../../../messages/en.json';
 
 function t(key: string): string {
@@ -108,12 +104,7 @@ export function GraphExperience({ initial }: GraphExperienceProps) {
       className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_1fr_320px]"
       data-testid="graph-experience"
     >
-      <GraphFilters
-        teams={teams}
-        typeCounts={typeCounts}
-        state={state}
-        onChange={setState}
-      />
+      <GraphFilters teams={teams} typeCounts={typeCounts} state={state} onChange={setState} />
 
       <div className="space-y-3">
         <p className="text-xs text-slate-500" data-testid="graph-legend">

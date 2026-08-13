@@ -10,14 +10,7 @@
  *   - View history (popover listing the last 10 refresh events)
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
 
 import {
@@ -32,11 +25,7 @@ import {
 /* -------------------------------------------------------------------------- */
 
 function isRefreshEvent(u: LivingUpdate): boolean {
-  return (
-    u.kind === 'data_refresh' ||
-    u.kind === 'auto_refresh' ||
-    u.kind === 'section_restored'
-  );
+  return u.kind === 'data_refresh' || u.kind === 'auto_refresh' || u.kind === 'section_restored';
 }
 
 /* -------------------------------------------------------------------------- */
@@ -214,10 +203,7 @@ export function LivingBadge({
         {timeAgo === null ? (
           <FormattedMessage id="editor.living.badge.justNow" />
         ) : (
-          <FormattedMessage
-            id="editor.living.badge.lastRefreshed"
-            values={{ time_ago: timeAgo }}
-          />
+          <FormattedMessage id="editor.living.badge.lastRefreshed" values={{ time_ago: timeAgo }} />
         )}
       </button>
 

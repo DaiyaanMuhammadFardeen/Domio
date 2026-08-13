@@ -4,12 +4,7 @@
  * `clipContent`; `Cmd+Alt+Up` selects parent.
  */
 
-import type {
-  DeckDocument,
-  Element,
-  FrameLayer,
-  ULID,
-} from '@domio/schema';
+import type { DeckDocument, Element, FrameLayer, ULID } from '@domio/schema';
 
 export interface FrameContext {
   frame: FrameLayer;

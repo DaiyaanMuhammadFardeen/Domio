@@ -71,9 +71,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 // ----- Comments (#179) -----
 
 export async function listComments(deckId: string): Promise<Comment[]> {
-  return cached(`comments:${deckId}`, () =>
-    apiFetch<Comment[]>(`/v1/decks/${deckId}/comments`),
-  );
+  return cached(`comments:${deckId}`, () => apiFetch<Comment[]>(`/v1/decks/${deckId}/comments`));
 }
 
 export async function resolveComment(commentId: string): Promise<Comment> {
@@ -84,10 +82,7 @@ export async function resolveComment(commentId: string): Promise<Comment> {
   });
 }
 
-export async function addReaction(
-  commentId: string,
-  emoji: string,
-): Promise<Comment> {
+export async function addReaction(commentId: string, emoji: string): Promise<Comment> {
   invalidate('comments:');
   return apiFetch<Comment>(`/v1/comments/${commentId}/reactions`, {
     method: 'POST',
@@ -97,9 +92,7 @@ export async function addReaction(
 
 // ----- Approvals (#180) -----
 
-export async function listApprovalRequests(
-  deckId: string,
-): Promise<ApprovalRequest[]> {
+export async function listApprovalRequests(deckId: string): Promise<ApprovalRequest[]> {
   return cached(`approvals:${deckId}`, () =>
     apiFetch<ApprovalRequest[]>(`/v1/decks/${deckId}/approval-requests`),
   );
@@ -110,13 +103,10 @@ export async function postDecision(
   decision: ApprovalDecision,
 ): Promise<ApprovalRequest> {
   invalidate('approvals:');
-  return apiFetch<ApprovalRequest>(
-    `/v1/approval-requests/${requestId}/decisions`,
-    {
-      method: 'POST',
-      body: JSON.stringify(decision),
-    },
-  );
+  return apiFetch<ApprovalRequest>(`/v1/approval-requests/${requestId}/decisions`, {
+    method: 'POST',
+    body: JSON.stringify(decision),
+  });
 }
 
 // ----- Assignments (#181) -----

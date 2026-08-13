@@ -60,15 +60,31 @@ export const COMPARISON_TABLE: DomioComponentDef = {
         'x-domio-prop': { category: 'Content', control: 'repeatable' },
       },
       accent: { ...accentSchema },
-      highlightColumn: { type: 'integer', title: 'Highlight column', default: 2, minimum: 0, maximum: 4, 'x-domio-prop': { category: 'Style', control: 'stepper', step: 1 } },
+      highlightColumn: {
+        type: 'integer',
+        title: 'Highlight column',
+        default: 2,
+        minimum: 0,
+        maximum: 4,
+        'x-domio-prop': { category: 'Style', control: 'stepper', step: 1 },
+      },
     },
   },
   build: (props, ctx) => {
     const tokens = tokensFor(ctx.variantId, accentOf(props));
     const accent = accentOf(props) ?? tokens.accent;
-    const columns = asArray<string>(props.columns, ['Feature', 'Option A', 'Option B', 'Option C']).slice(0, 5);
+    const columns = asArray<string>(props.columns, [
+      'Feature',
+      'Option A',
+      'Option B',
+      'Option C',
+    ]).slice(0, 5);
     const rows = asArray<unknown[]>(props.rows, []).slice(0, 8);
-    const highlight = clamp(typeof props.highlightColumn === 'number' ? props.highlightColumn : 2, 0, columns.length - 1);
+    const highlight = clamp(
+      typeof props.highlightColumn === 'number' ? props.highlightColumn : 2,
+      0,
+      columns.length - 1,
+    );
 
     const W = 720;
     const H = 360;
@@ -80,8 +96,29 @@ export const COMPARISON_TABLE: DomioComponentDef = {
     columns.forEach((col, i) => {
       const x = i * colW;
       const isHighlight = i === highlight;
-      out.push(rect(ctx, { x, y: 0, w: colW, h: headerH, fill: isHighlight ? accent : tokens.surface, semanticId: `header_${i}` }));
-      out.push(text(ctx, { x: x + 12, y: (headerH - 16) / 2, w: colW - 24, h: 16, content: fitText(col, colW - 24, 13), fontSize: 13, color: isHighlight ? '#FFFFFF' : tokens.text, fontWeight: 600, semanticId: `header_text_${i}` }));
+      out.push(
+        rect(ctx, {
+          x,
+          y: 0,
+          w: colW,
+          h: headerH,
+          fill: isHighlight ? accent : tokens.surface,
+          semanticId: `header_${i}`,
+        }),
+      );
+      out.push(
+        text(ctx, {
+          x: x + 12,
+          y: (headerH - 16) / 2,
+          w: colW - 24,
+          h: 16,
+          content: fitText(col, colW - 24, 13),
+          fontSize: 13,
+          color: isHighlight ? '#FFFFFF' : tokens.text,
+          fontWeight: 600,
+          semanticId: `header_text_${i}`,
+        }),
+      );
     });
 
     rows.forEach((row, r) => {
@@ -91,9 +128,31 @@ export const COMPARISON_TABLE: DomioComponentDef = {
         const value = typeof row[c] === 'string' ? (row[c] as string) : '';
         const isFirst = c === 0;
         const isHighlight = c === highlight;
-        out.push(text(ctx, { x: x + 12, y: y + (rowH - 15) / 2, w: colW - 24, h: 15, content: fitText(value, colW - 24, 13), fontSize: 13, color: isHighlight ? accent : isFirst ? tokens.text : tokens.muted, fontWeight: isFirst ? 600 : 400, semanticId: `cell_${r}_${c}` }));
+        out.push(
+          text(ctx, {
+            x: x + 12,
+            y: y + (rowH - 15) / 2,
+            w: colW - 24,
+            h: 15,
+            content: fitText(value, colW - 24, 13),
+            fontSize: 13,
+            color: isHighlight ? accent : isFirst ? tokens.text : tokens.muted,
+            fontWeight: isFirst ? 600 : 400,
+            semanticId: `cell_${r}_${c}`,
+          }),
+        );
       });
-      out.push(line(ctx, { x1: 0, y1: y + rowH, x2: W, y2: y + rowH, stroke: tokens.border, strokeWidth: 1, semanticId: `row_line_${r}` }));
+      out.push(
+        line(ctx, {
+          x1: 0,
+          y1: y + rowH,
+          x2: W,
+          y2: y + rowH,
+          stroke: tokens.border,
+          strokeWidth: 1,
+          semanticId: `row_line_${r}`,
+        }),
+      );
     });
 
     return out;
@@ -137,12 +196,20 @@ export const DATA_TABLE: DomioComponentDef = {
         ],
         'x-domio-prop': { category: 'Content', control: 'repeatable' },
       },
-      zebra: { type: 'boolean', title: 'Zebra stripes', default: true, 'x-domio-prop': { category: 'Style', control: 'toggle' } },
+      zebra: {
+        type: 'boolean',
+        title: 'Zebra stripes',
+        default: true,
+        'x-domio-prop': { category: 'Style', control: 'toggle' },
+      },
     },
   },
   build: (props, ctx) => {
     const tokens = tokensFor(ctx.variantId, undefined);
-    const headers = asArray<string>(props.headers, ['Name', 'Region', 'Revenue', 'Growth']).slice(0, 6);
+    const headers = asArray<string>(props.headers, ['Name', 'Region', 'Revenue', 'Growth']).slice(
+      0,
+      6,
+    );
     const rows = asArray<unknown[]>(props.rows, []).slice(0, 8);
     const zebra = asBoolean(props.zebra, true);
 
@@ -153,21 +220,50 @@ export const DATA_TABLE: DomioComponentDef = {
     const colW = W / headers.length;
     const out: Element[] = [];
 
-    out.push(rect(ctx, { x: 0, y: 0, w: W, h: headerH, fill: tokens.surface, semanticId: 'header_bg' }));
+    out.push(
+      rect(ctx, { x: 0, y: 0, w: W, h: headerH, fill: tokens.surface, semanticId: 'header_bg' }),
+    );
     headers.forEach((h, i) => {
       const x = i * colW;
-      out.push(text(ctx, { x: x + 14, y: (headerH - 15) / 2, w: colW - 28, h: 15, content: fitText(h.toUpperCase(), colW - 28, 12), fontSize: 12, color: tokens.muted, fontWeight: 600, letterSpacing: 0.8, semanticId: `header_${i}` }));
+      out.push(
+        text(ctx, {
+          x: x + 14,
+          y: (headerH - 15) / 2,
+          w: colW - 28,
+          h: 15,
+          content: fitText(h.toUpperCase(), colW - 28, 12),
+          fontSize: 12,
+          color: tokens.muted,
+          fontWeight: 600,
+          letterSpacing: 0.8,
+          semanticId: `header_${i}`,
+        }),
+      );
     });
 
     rows.forEach((row, r) => {
       const y = headerH + r * rowH;
       if (zebra && r % 2 === 1) {
-        out.push(rect(ctx, { x: 0, y, w: W, h: rowH, fill: tokens.surface, semanticId: `stripe_${r}` }));
+        out.push(
+          rect(ctx, { x: 0, y, w: W, h: rowH, fill: tokens.surface, semanticId: `stripe_${r}` }),
+        );
       }
       headers.forEach((_, c) => {
         const x = c * colW;
         const value = typeof row[c] === 'string' ? (row[c] as string) : '';
-        out.push(text(ctx, { x: x + 14, y: y + (rowH - 15) / 2, w: colW - 28, h: 15, content: fitText(value, colW - 28, 13), fontSize: 13, color: c === 0 ? tokens.text : tokens.muted, fontWeight: c === 0 ? 600 : 400, semanticId: `cell_${r}_${c}` }));
+        out.push(
+          text(ctx, {
+            x: x + 14,
+            y: y + (rowH - 15) / 2,
+            w: colW - 28,
+            h: 15,
+            content: fitText(value, colW - 28, 13),
+            fontSize: 13,
+            color: c === 0 ? tokens.text : tokens.muted,
+            fontWeight: c === 0 ? 600 : 400,
+            semanticId: `cell_${r}_${c}`,
+          }),
+        );
       });
     });
 
@@ -200,7 +296,11 @@ export const ROADMAP: DomioComponentDef = {
           properties: {
             name: { type: 'string', default: 'Phase' },
             timeframe: { type: 'string', default: 'Q1' },
-            status: { type: 'string', enum: ['planned', 'in-progress', 'done'], default: 'planned' },
+            status: {
+              type: 'string',
+              enum: ['planned', 'in-progress', 'done'],
+              default: 'planned',
+            },
           },
           required: ['name'],
         },
@@ -224,19 +324,70 @@ export const ROADMAP: DomioComponentDef = {
     const n = phases.length;
     const slot = W / n;
     const lineY = 76;
-    const statusColor: Record<string, string> = { done: accent, 'in-progress': '#F59E0B', planned: tokens.muted };
+    const statusColor: Record<string, string> = {
+      done: accent,
+      'in-progress': '#F59E0B',
+      planned: tokens.muted,
+    };
     const out: Element[] = [];
 
-    out.push(line(ctx, { x1: 0, y1: lineY, x2: W, y2: lineY, stroke: tokens.border, strokeWidth: 2, semanticId: 'track' }));
+    out.push(
+      line(ctx, {
+        x1: 0,
+        y1: lineY,
+        x2: W,
+        y2: lineY,
+        stroke: tokens.border,
+        strokeWidth: 2,
+        semanticId: 'track',
+      }),
+    );
 
     phases.forEach((ph, i) => {
       const cx = slot * i + slot / 2;
       const status = typeof ph.status === 'string' ? ph.status : 'planned';
       const color = statusColor[status] ?? tokens.muted;
       const radius = status === 'in-progress' ? 10 : 7;
-      out.push(rect(ctx, { x: cx - radius, y: lineY - radius, w: radius * 2, h: radius * 2, radius, fill: status === 'planned' ? tokens.background : color, stroke: color, strokeWidth: 2, semanticId: `dot_${i}` }));
-      out.push(text(ctx, { x: cx - 90, y: lineY + 22, w: 180, h: 20, content: fitText(ph.name as string, 180, 16), fontSize: 16, color: tokens.text, align: 'middle', fontWeight: 600, semanticId: `phase_${i}` }));
-      out.push(text(ctx, { x: cx - 90, y: lineY - 28, w: 180, h: 16, content: typeof ph.timeframe === 'string' ? ph.timeframe : '', fontSize: 13, color: tokens.muted, align: 'middle', semanticId: `timeframe_${i}` }));
+      out.push(
+        rect(ctx, {
+          x: cx - radius,
+          y: lineY - radius,
+          w: radius * 2,
+          h: radius * 2,
+          radius,
+          fill: status === 'planned' ? tokens.background : color,
+          stroke: color,
+          strokeWidth: 2,
+          semanticId: `dot_${i}`,
+        }),
+      );
+      out.push(
+        text(ctx, {
+          x: cx - 90,
+          y: lineY + 22,
+          w: 180,
+          h: 20,
+          content: fitText(ph.name as string, 180, 16),
+          fontSize: 16,
+          color: tokens.text,
+          align: 'middle',
+          fontWeight: 600,
+          semanticId: `phase_${i}`,
+        }),
+      );
+      out.push(
+        text(ctx, {
+          x: cx - 90,
+          y: lineY - 28,
+          w: 180,
+          h: 16,
+          content: typeof ph.timeframe === 'string' ? ph.timeframe : '',
+          fontSize: 13,
+          color: tokens.muted,
+          align: 'middle',
+          semanticId: `timeframe_${i}`,
+        }),
+      );
     });
 
     return out;
@@ -295,15 +446,70 @@ export const TIMELINE: DomioComponentDef = {
     const rowH = H / Math.max(1, n);
     const out: Element[] = [];
 
-    out.push(line(ctx, { x1: railX, y1: rowH / 2, x2: railX, y2: H - rowH / 2, stroke: tokens.border, strokeWidth: 2, semanticId: 'rail' }));
+    out.push(
+      line(ctx, {
+        x1: railX,
+        y1: rowH / 2,
+        x2: railX,
+        y2: H - rowH / 2,
+        stroke: tokens.border,
+        strokeWidth: 2,
+        semanticId: 'rail',
+      }),
+    );
 
     events.forEach((ev, i) => {
       const cy = rowH * i + rowH / 2;
-      out.push(rect(ctx, { x: railX - 6, y: cy - 6, w: 12, h: 12, radius: 6, fill: accent, semanticId: `dot_${i}` }));
-      out.push(text(ctx, { x: railX + 22, y: cy - 16, w: 120, h: 16, content: typeof ev.date === 'string' ? ev.date : '', fontSize: 13, color: accent, fontWeight: 600, semanticId: `date_${i}` }));
-      out.push(text(ctx, { x: railX + 22, y: cy + 4, w: W - railX - 40, h: 20, content: fitText(ev.title as string, W - railX - 40, 16), fontSize: 16, color: tokens.text, fontWeight: 600, semanticId: `title_${i}` }));
+      out.push(
+        rect(ctx, {
+          x: railX - 6,
+          y: cy - 6,
+          w: 12,
+          h: 12,
+          radius: 6,
+          fill: accent,
+          semanticId: `dot_${i}`,
+        }),
+      );
+      out.push(
+        text(ctx, {
+          x: railX + 22,
+          y: cy - 16,
+          w: 120,
+          h: 16,
+          content: typeof ev.date === 'string' ? ev.date : '',
+          fontSize: 13,
+          color: accent,
+          fontWeight: 600,
+          semanticId: `date_${i}`,
+        }),
+      );
+      out.push(
+        text(ctx, {
+          x: railX + 22,
+          y: cy + 4,
+          w: W - railX - 40,
+          h: 20,
+          content: fitText(ev.title as string, W - railX - 40, 16),
+          fontSize: 16,
+          color: tokens.text,
+          fontWeight: 600,
+          semanticId: `title_${i}`,
+        }),
+      );
       if (typeof ev.detail === 'string' && ev.detail) {
-        out.push(text(ctx, { x: railX + 22, y: cy + 26, w: W - railX - 40, h: 16, content: fitText(ev.detail, W - railX - 40, 13), fontSize: 13, color: tokens.muted, semanticId: `detail_${i}` }));
+        out.push(
+          text(ctx, {
+            x: railX + 22,
+            y: cy + 26,
+            w: W - railX - 40,
+            h: 16,
+            content: fitText(ev.detail, W - railX - 40, 13),
+            fontSize: 13,
+            color: tokens.muted,
+            semanticId: `detail_${i}`,
+          }),
+        );
       }
     });
 

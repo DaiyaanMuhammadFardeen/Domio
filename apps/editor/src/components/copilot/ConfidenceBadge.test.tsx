@@ -52,7 +52,9 @@ describe('ConfidenceBadge', () => {
     expect(screen.queryByTestId('confidence-badge-provenance')).not.toBeInTheDocument();
     fireEvent.mouseEnter(screen.getByTestId('confidence-badge-root'));
     expect(screen.getByTestId('confidence-badge-tooltip')).toBeInTheDocument();
-    expect(screen.getByTestId('confidence-badge-provenance')).toHaveTextContent('finance.reporting/q4');
+    expect(screen.getByTestId('confidence-badge-provenance')).toHaveTextContent(
+      'finance.reporting/q4',
+    );
   });
 
   it('renders provenance as a link when href is provided', () => {

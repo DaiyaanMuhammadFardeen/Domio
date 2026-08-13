@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "lint"
-  ],
+  "tags": ["tier-2", "domio", "lint"],
   "panels": [
     {
       "id": 1,

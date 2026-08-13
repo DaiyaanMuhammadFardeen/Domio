@@ -12,7 +12,9 @@ import {
   useWidgetState,
 } from './WidgetEngineConnector';
 
-function frame(extra: { kind: AudienceEnvelope['kind']; widget_id: string } & Record<string, unknown>): AudienceEnvelope {
+function frame(
+  extra: { kind: AudienceEnvelope['kind']; widget_id: string } & Record<string, unknown>,
+): AudienceEnvelope {
   const base: Record<string, unknown> = {
     ts_ms: Date.now(),
     participant_id: 'p1',

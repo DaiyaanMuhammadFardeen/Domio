@@ -24,7 +24,13 @@ export interface TeleprompterOverlayProps {
 
 const DEFAULT_FONT_PX = 36;
 
-export function TeleprompterOverlay({ slide, enabled, onClose, fontPx = DEFAULT_FONT_PX, mirror = false }: TeleprompterOverlayProps) {
+export function TeleprompterOverlay({
+  slide,
+  enabled,
+  onClose,
+  fontPx = DEFAULT_FONT_PX,
+  mirror = false,
+}: TeleprompterOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [scrolling, setScrolling] = useState(true);
   const [speedPx, setSpeedPx] = useState(40); // px/sec
@@ -84,39 +90,62 @@ export function TeleprompterOverlay({ slide, enabled, onClose, fontPx = DEFAULT_
     return () => window.removeEventListener('keydown', handler);
   }, [enabled, onClose]);
 
-  const onWheel = useCallback((e: React.WheelEvent) => {
-    // Manual scroll always works — pausing auto-scroll temporarily.
-    if (scrolling && Math.abs(e.deltaY) > 4) setScrolling(false);
-  }, [scrolling]);
+  const onWheel = useCallback(
+    (e: React.WheelEvent) => {
+      // Manual scroll always works — pausing auto-scroll temporarily.
+      if (scrolling && Math.abs(e.deltaY) > 4) setScrolling(false);
+    },
+    [scrolling],
+  );
 
   if (!enabled) return null;
   const text = slide?.notes ?? '(no notes for this slide)';
 
   return (
-    <div className={`teleprompter-overlay ${mirror ? 'teleprompter-overlay--mirror' : ''}`} role="dialog" aria-label="Teleprompter">
+    <div
+      className={`teleprompter-overlay ${mirror ? 'teleprompter-overlay--mirror' : ''}`}
+      role="dialog"
+      aria-label="Teleprompter"
+    >
       <div className="teleprompter-overlay__chrome">
-        <button type="button" className="teleprompter-overlay__btn" onClick={() => setScrolling((s) => !s)}>
+        <button
+          type="button"
+          className="teleprompter-overlay__btn"
+          onClick={() => setScrolling((s) => !s)}
+        >
           {scrolling ? '⏸ Pause' : '▶ Resume'}
         </button>
         <label className="teleprompter-overlay__speed">
           Speed
-          <input type="range" min={10} max={120} value={speedPx} onChange={(e) => setSpeedPx(Number(e.target.value))} />
+          <input
+            type="range"
+            min={10}
+            max={120}
+            value={speedPx}
+            onChange={(e) => setSpeedPx(Number(e.target.value))}
+          />
           <span>{speedPx}px/s</span>
         </label>
         <label className="teleprompter-overlay__size">
           Size
-          <input type="range" min={16} max={72} value={internalFontPx} onChange={(e) => setInternalFontPx(Number(e.target.value))} />
+          <input
+            type="range"
+            min={16}
+            max={72}
+            value={internalFontPx}
+            onChange={(e) => setInternalFontPx(Number(e.target.value))}
+          />
           <span>{internalFontPx}px</span>
         </label>
-        <button type="button" className="teleprompter-overlay__btn teleprompter-overlay__btn--close" onClick={onClose}>
+        <button
+          type="button"
+          className="teleprompter-overlay__btn teleprompter-overlay__btn--close"
+          onClick={onClose}
+        >
           ✕ Close (Esc)
         </button>
       </div>
-      <div
-        ref={containerRef}
-        className="teleprompter-overlay__scroll"
-        onWheel={onWheel}
-      >
+      <div ref={containerRef} className="teleprompter-overlay__scroll" onWheel={onWheel}>
         <div className="teleprompter-overlay__text" style={{ fontSize: `${internalFontPx}px` }}>
           {text}
         </div>

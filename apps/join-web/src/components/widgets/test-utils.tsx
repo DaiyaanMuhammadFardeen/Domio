@@ -16,7 +16,12 @@ export function buildProps<P>(
   type: AudienceWidgetDescriptor['type'],
   widgetId: string,
   payload: P,
-  opts: { onSubmit?: (p: Record<string, unknown>) => void; disabled?: boolean; state?: unknown; error?: string | null } = {},
+  opts: {
+    onSubmit?: (p: Record<string, unknown>) => void;
+    disabled?: boolean;
+    state?: unknown;
+    error?: string | null;
+  } = {},
 ): WidgetProps<P> {
   const descriptor: AudienceWidgetDescriptor = {
     widget_id: widgetId,

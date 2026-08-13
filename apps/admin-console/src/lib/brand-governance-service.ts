@@ -19,10 +19,7 @@ export interface BrandScoreTrendPoint {
   readonly score: number;
 }
 
-export type BrandViolationKind =
-  | 'off-brand-color'
-  | 'forbidden-font'
-  | 'logo-misuse';
+export type BrandViolationKind = 'off-brand-color' | 'forbidden-font' | 'logo-misuse';
 
 export type BrandViolationSeverity = 'low' | 'medium' | 'high';
 
@@ -186,9 +183,7 @@ const VIOLATIONS: ReadonlyArray<BrandViolation> = [
 
 export async function getBrandGovernanceSnapshot(): Promise<BrandGovernanceSnapshot> {
   try {
-    const json = await fetcher<BrandGovernanceSnapshot>(
-      '/v1/admin/brand-governance/snapshot',
-    );
+    const json = await fetcher<BrandGovernanceSnapshot>('/v1/admin/brand-governance/snapshot');
     return json;
   } catch {
     // Backend endpoint deferred — return deterministic seed data.

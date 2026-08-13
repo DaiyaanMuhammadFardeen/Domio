@@ -28,10 +28,7 @@ const VALID_VENDORS: ReadonlySet<string> = new Set(['google', 'outlook', 'icloud
  *  - event_start_at must be a valid ISO-8601 date string
  *  - recurrence_id is required when is_recurring is true
  */
-export function validateCalendarLinkInput(
-  input: CalendarLinkInput,
-  userId: string,
-): void {
+export function validateCalendarLinkInput(input: CalendarLinkInput, userId: string): void {
   if (!input.deck_id) {
     throw new CalendarValidationError('deck_id is required');
   }
@@ -52,15 +49,11 @@ export function validateCalendarLinkInput(
 
   const startDate = new Date(input.event_start_at);
   if (Number.isNaN(startDate.getTime())) {
-    throw new CalendarValidationError(
-      `Invalid event_start_at: ${input.event_start_at}`,
-    );
+    throw new CalendarValidationError(`Invalid event_start_at: ${input.event_start_at}`);
   }
 
   if (input.is_recurring && (!input.recurrence_id || input.recurrence_id.trim().length === 0)) {
-    throw new CalendarValidationError(
-      'recurrence_id is required when is_recurring is true',
-    );
+    throw new CalendarValidationError('recurrence_id is required when is_recurring is true');
   }
 }
 

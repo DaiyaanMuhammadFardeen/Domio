@@ -44,7 +44,8 @@ export function effectivePolicy(
     resource_type: policyOverride.resource_type ?? '',
     resource_id: policyOverride.resource_id ?? '',
     interval_days: policyOverride.interval_days ?? base.interval_days,
-    responsible_id: 'responsible_id' in policyOverride ? (policyOverride.responsible_id ?? null) : null,
+    responsible_id:
+      'responsible_id' in policyOverride ? (policyOverride.responsible_id ?? null) : null,
     escalation: policyOverride.escalation ?? base.escalation,
     auto_revoke_share: policyOverride.auto_revoke_share ?? base.auto_revoke_share,
     created_at: 'created_at' in policyOverride ? policyOverride.created_at : new Date(),
@@ -63,11 +64,7 @@ export function effectivePolicy(
  * resource's collab/assignment entry.
  * Returns true when (now - lastReviewedAt) >= interval_days.
  */
-export function isOverdue(
-  policy: ExpiryPolicy,
-  lastReviewedAt: Date | null,
-  now: Date,
-): boolean {
+export function isOverdue(policy: ExpiryPolicy, lastReviewedAt: Date | null, now: Date): boolean {
   if (!lastReviewedAt) return true;
   const intervalMs = policy.interval_days * 24 * 60 * 60 * 1000;
   return now.getTime() - lastReviewedAt.getTime() >= intervalMs;

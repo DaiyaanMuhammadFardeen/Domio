@@ -61,11 +61,7 @@ function countParams(schema: Record<string, unknown>): number {
   return 0;
 }
 
-export function MCPToolDetailDrawer({
-  tool,
-  open,
-  onClose,
-}: MCPToolDetailDrawerProps) {
+export function MCPToolDetailDrawer({ tool, open, onClose }: MCPToolDetailDrawerProps) {
   const closeRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
@@ -100,9 +96,7 @@ export function MCPToolDetailDrawer({
             <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
               Tool detail
             </div>
-            <div className="mt-1 font-mono text-xs text-slate-700">
-              {tool.name}
-            </div>
+            <div className="mt-1 font-mono text-xs text-slate-700">{tool.name}</div>
           </div>
           <button
             ref={closeRef}

@@ -54,8 +54,12 @@ function normalize(s: string): string {
 
 // ── Predicates ──────────────────────────────────────────────────────────
 
-export function isNaN(x: string): boolean { return x === 'NaN'; }
-export function isInfinity(x: string): boolean { return x === 'Infinity' || x === '-Infinity'; }
+export function isNaN(x: string): boolean {
+  return x === 'NaN';
+}
+export function isInfinity(x: string): boolean {
+  return x === 'Infinity' || x === '-Infinity';
+}
 export function isFinite(x: string): boolean {
   return !isNaN(x) && !isInfinity(x);
 }
@@ -65,10 +69,12 @@ export function isZero(x: string): boolean {
 }
 
 export function compare(a: string, b: string): -1 | 0 | 1 {
-  const x = toString(a), y = toString(b);
+  const x = toString(a),
+    y = toString(b);
   if (x === y) return 0;
   if (isNaN(x) || isNaN(y)) return NaN as unknown as -1;
-  const ax = toParts(x), ay = toParts(y);
+  const ax = toParts(x),
+    ay = toParts(y);
   if (ax.sign !== ay.sign) return ax.sign === '+' ? 1 : -1;
   return (cmpMagnitude(ax, ay) * (ax.sign === '+' ? 1 : -1)) as -1 | 0 | 1;
 }
@@ -148,7 +154,8 @@ function streamDigits(p: Parts, adjustedExp: number): string {
 // ── Add / Sub ───────────────────────────────────────────────────────────
 
 export function add(a: DecInput, b: DecInput): DecResult {
-  const x = toString(a), y = toString(b);
+  const x = toString(a),
+    y = toString(b);
   if (isNaN(x) || isNaN(y)) return { value: 'NaN' };
   if (isInfinity(x) || isInfinity(y)) {
     if ((x === 'Infinity' && y === '-Infinity') || (x === '-Infinity' && y === 'Infinity')) {
@@ -156,7 +163,8 @@ export function add(a: DecInput, b: DecInput): DecResult {
     }
     return { value: isInfinity(x) ? x : y };
   }
-  const xa = toParts(x), ya = toParts(y);
+  const xa = toParts(x),
+    ya = toParts(y);
   if (xa.sign === ya.sign) {
     const sum = addMagnitudes(xa, ya);
     return clamp({ value: applySign(sum.value, xa.sign), was_overflow: sum.overflow });
@@ -195,13 +203,17 @@ function scaleToBigInt(p: Parts, scale: number): bigint {
   // val * 10^scale = intPart * 10^(exp + scale) + fracPart * 10^(exp + scale - fracLen)
   const intExp = exp + scale;
   const fracExp = exp + scale - fracLen;
-  let total = intPart * (10n ** BigInt(intExp));
-  if (fracPart !== 0n && fracExp >= 0) total += fracPart * (10n ** BigInt(fracExp));
-  else if (fracPart !== 0n && fracExp < 0) total += fracPart / (10n ** BigInt(-fracExp));
+  let total = intPart * 10n ** BigInt(intExp);
+  if (fracPart !== 0n && fracExp >= 0) total += fracPart * 10n ** BigInt(fracExp);
+  else if (fracPart !== 0n && fracExp < 0) total += fracPart / 10n ** BigInt(-fracExp);
   return p.sign === '-' ? -total : total;
 }
 
-function bigIntToDecimal(value: bigint, scale: number, sign: '+' | '-'): { value: string; overflow: boolean } {
+function bigIntToDecimal(
+  value: bigint,
+  scale: number,
+  sign: '+' | '-',
+): { value: string; overflow: boolean } {
   if (value === 0n) return { value: '0', overflow: false };
   const negative = value < 0n;
   const abs = negative ? -value : value;
@@ -245,20 +257,22 @@ function clamp(r: DecResult): DecResult {
 // ── Multiply ────────────────────────────────────────────────────────────
 
 export function mul(a: DecInput, b: DecInput): DecResult {
-  const x = toString(a), y = toString(b);
+  const x = toString(a),
+    y = toString(b);
   if (isNaN(x) || isNaN(y)) return { value: 'NaN' };
   if (isZero(x) || isZero(y)) {
     if (isInfinity(x) || isInfinity(y)) return { value: 'NaN' };
     return { value: '0' };
   }
   if (isInfinity(x) || isInfinity(y)) {
-    return { value: (signOf(x) * signOf(y) > 0) ? 'Infinity' : '-Infinity' };
+    return { value: signOf(x) * signOf(y) > 0 ? 'Infinity' : '-Infinity' };
   }
-  const xa = toParts(x), ya = toParts(y);
+  const xa = toParts(x),
+    ya = toParts(y);
   const SCALE = 38;
   const aScaled = scaleToBigInt(xa, SCALE);
   const bScaled = scaleToBigInt(ya, SCALE);
-  const product = (aScaled * bScaled) / (10n ** BigInt(SCALE));
+  const product = (aScaled * bScaled) / 10n ** BigInt(SCALE);
   const out = bigIntToDecimal(product, SCALE, '+');
   // bigIntToDecimal already handles sign from the BigInt itself.
   return clamp({ value: out.value, was_overflow: out.overflow });
@@ -276,7 +290,8 @@ export interface DivResult extends DecResult {
 }
 
 export function div(a: DecInput, b: DecInput): DecResult {
-  const x = toString(a), y = toString(b);
+  const x = toString(a),
+    y = toString(b);
   if (isNaN(x) || isNaN(y)) return { value: 'NaN' };
   if (isZero(y)) {
     if (isZero(x)) return { value: 'NaN' };
@@ -290,11 +305,12 @@ export function div(a: DecInput, b: DecInput): DecResult {
   if (isInfinity(y)) {
     return { value: '0' };
   }
-  const xa = toParts(x), ya = toParts(y);
+  const xa = toParts(x),
+    ya = toParts(y);
   const SCALE = 38;
   const aScaled = scaleToBigInt(xa, SCALE);
   const bScaled = scaleToBigInt(ya, SCALE);
-  const product = (aScaled * (10n ** BigInt(SCALE))) / bScaled;
+  const product = (aScaled * 10n ** BigInt(SCALE)) / bScaled;
   const out = bigIntToDecimal(product, SCALE, '+');
   return clamp({ value: out.value, was_overflow: out.overflow });
 }
@@ -347,7 +363,10 @@ export function round(value: DecInput, scale: number, mode: RoundingMode = 'bank
   while (lastIdx >= 0 && carry) {
     const d = Number(chars[lastIdx]);
     let nd = d + carry;
-    if (nd >= 10) { nd -= 10; carry = 1; } else carry = 0;
+    if (nd >= 10) {
+      nd -= 10;
+      carry = 1;
+    } else carry = 0;
     chars[lastIdx] = String(nd);
     lastIdx--;
   }
@@ -382,7 +401,7 @@ function roundInt(value: string, mode: RoundingMode): string {
   } else {
     if (firstDigit > 5) bump = 1;
     else if (firstDigit < 5) bump = 0;
-    else bump = (allZeros && isEvenLast(intPart)) ? 0 : 1;
+    else bump = allZeros && isEvenLast(intPart) ? 0 : 1;
   }
   if (bump === 0) return intPart;
   return addOne(intPart);
@@ -395,7 +414,10 @@ function addOne(intPart: string): string {
   for (let i = digits.length - 1; i >= 0 && carry; i--) {
     const d = Number(digits[i]);
     let nd = d + 1;
-    if (nd >= 10) { nd -= 10; carry = 1; } else carry = 0;
+    if (nd >= 10) {
+      nd -= 10;
+      carry = 1;
+    } else carry = 0;
     digits[i] = String(nd);
   }
   if (carry) digits.unshift('1');

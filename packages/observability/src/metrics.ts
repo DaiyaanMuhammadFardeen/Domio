@@ -139,7 +139,10 @@ export function createMeter(cfg: MeterConfig): Meter {
     return keys.map((k) => `${k}=${attrs[k] ?? ''}`).join(',');
   }
 
-  function decorateOpts(target: { description?: string; unit?: string }, opts?: { description?: string; unit?: string }) {
+  function decorateOpts(
+    target: { description?: string; unit?: string },
+    opts?: { description?: string; unit?: string },
+  ) {
     if (opts?.description !== undefined) target.description = opts.description;
     if (opts?.unit !== undefined) target.unit = opts.unit;
   }
@@ -158,7 +161,10 @@ export function createMeter(cfg: MeterConfig): Meter {
     return counter;
   }
 
-  function createUpDownCounter(name: string, opts?: { description?: string; unit?: string }): UpDownCounter {
+  function createUpDownCounter(
+    name: string,
+    opts?: { description?: string; unit?: string },
+  ): UpDownCounter {
     const state = getOrCreateCounter(name, 'up_down_counter', opts?.description, opts?.unit);
     const udc: UpDownCounter = {
       type: 'up_down_counter',
@@ -172,7 +178,10 @@ export function createMeter(cfg: MeterConfig): Meter {
     return udc;
   }
 
-  function createHistogram(name: string, opts?: { description?: string; unit?: string }): Histogram {
+  function createHistogram(
+    name: string,
+    opts?: { description?: string; unit?: string },
+  ): Histogram {
     const state = getOrCreateHistogram(name, opts?.description, opts?.unit);
     const h: Histogram = {
       type: 'histogram',
@@ -282,7 +291,9 @@ export function createMeter(cfg: MeterConfig): Meter {
   };
 }
 
-function attrToOtlp(attrs: Record<string, string>): Array<{ key: string; value: { stringValue: string } }> {
+function attrToOtlp(
+  attrs: Record<string, string>,
+): Array<{ key: string; value: { stringValue: string } }> {
   return Object.entries(attrs).map(([key, value]) => ({ key, value: { stringValue: value } }));
 }
 

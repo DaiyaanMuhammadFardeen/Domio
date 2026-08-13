@@ -35,7 +35,7 @@ export function MigrationPlanner({
 }: MigrationPlannerProps) {
   const candidate = regions.find((r) => r.id !== workspace.region);
   const [target, setTarget] = useState<Region>(
-    workspace.region === 'us-east' ? 'us-west' : candidate?.id ?? 'us-east',
+    workspace.region === 'us-east' ? 'us-west' : (candidate?.id ?? 'us-east'),
   );
   const [plan, setPlan] = useState<MigrationPlan | null>(null);
   const [previewing, setPreviewing] = useState(false);

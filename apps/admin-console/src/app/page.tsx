@@ -22,22 +22,26 @@ export default function OverviewPage() {
     async function load() {
       try {
         const [listingsRes, takedownsRes, brandLocksRes, payoutRes] = await Promise.allSettled([
-          fetcher<{ items: MarketplaceListing[]; total: number }>('/v1/marketplace/listings?status=published', { signal: ctrl.signal }),
-          fetcher<{ items: TakedownRequest[]; total: number }>('/v1/takedowns?status=received', { signal: ctrl.signal }),
-          fetcher<{ items: BrandLock[]; total: number }>('/v1/marketplace/brand-locks', { signal: ctrl.signal }),
+          fetcher<{ items: MarketplaceListing[]; total: number }>(
+            '/v1/marketplace/listings?status=published',
+            { signal: ctrl.signal },
+          ),
+          fetcher<{ items: TakedownRequest[]; total: number }>('/v1/takedowns?status=received', {
+            signal: ctrl.signal,
+          }),
+          fetcher<{ items: BrandLock[]; total: number }>('/v1/marketplace/brand-locks', {
+            signal: ctrl.signal,
+          }),
           fetcher<PayoutRun[]>('/v1/payouts', { signal: ctrl.signal }),
         ]);
 
-        const publishedListings =
-          listingsRes.status === 'fulfilled' ? listingsRes.value.total : 0;
-        const pendingTakedowns =
-          takedownsRes.status === 'fulfilled' ? takedownsRes.value.total : 0;
+        const publishedListings = listingsRes.status === 'fulfilled' ? listingsRes.value.total : 0;
+        const pendingTakedowns = takedownsRes.status === 'fulfilled' ? takedownsRes.value.total : 0;
         const deniedBrandLocks =
           brandLocksRes.status === 'fulfilled'
             ? brandLocksRes.value.items.filter((b) => b.state === 'deny').length
             : 0;
-        const totalPayoutRuns =
-          payoutRes.status === 'fulfilled' ? payoutRes.value.length : 0;
+        const totalPayoutRuns = payoutRes.status === 'fulfilled' ? payoutRes.value.length : 0;
 
         setStats({ publishedListings, pendingTakedowns, deniedBrandLocks, totalPayoutRuns });
       } catch (e) {
@@ -54,17 +58,19 @@ export default function OverviewPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold tracking-tight text-slate-900">
-        Admin Overview
-      </h1>
+      <h1 className="mb-1 text-2xl font-semibold tracking-tight text-slate-900">Admin Overview</h1>
       <p className="mb-6 text-sm text-slate-500">
-        Real-time snapshot of marketplace health. Numbers are computed client-side from live API endpoints.
+        Real-time snapshot of marketplace health. Numbers are computed client-side from live API
+        endpoints.
       </p>
 
       {loading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-busy>
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div
+              key={i}
+              className="animate-pulse rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            >
               <div className="h-3 w-20 rounded bg-slate-200" />
               <div className="mt-2 h-7 w-16 rounded bg-slate-200" />
             </div>
@@ -73,7 +79,10 @@ export default function OverviewPage() {
       )}
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700" role="alert">
+        <div
+          className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+          role="alert"
+        >
           <strong className="font-semibold">Could not load overview.</strong> {error}
         </div>
       )}
@@ -95,11 +104,7 @@ export default function OverviewPage() {
             value={String(stats.deniedBrandLocks)}
             tone={stats.deniedBrandLocks > 0 ? 'warning' : 'muted'}
           />
-          <KpiTile
-            title="Payout Runs"
-            value={String(stats.totalPayoutRuns)}
-            tone="brand"
-          />
+          <KpiTile title="Payout Runs" value={String(stats.totalPayoutRuns)} tone="brand" />
         </div>
       )}
 
@@ -109,10 +114,26 @@ export default function OverviewPage() {
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { href: '/brand-locks', label: 'Brand-Lock Curation', desc: 'Approve, deny, or override brand locks for marketplace listings.' },
-            { href: '/takedowns', label: 'Takedown Queue', desc: 'Review and resolve DMCA, trademark, and policy takedown requests.' },
-            { href: '/trust', label: 'Trust Scoring', desc: 'Monitor listing trust scores and auto-hidden flags.' },
-            { href: '/payouts', label: 'Payout Policy', desc: 'View payout splits, minimum thresholds, and run history.' },
+            {
+              href: '/brand-locks',
+              label: 'Brand-Lock Curation',
+              desc: 'Approve, deny, or override brand locks for marketplace listings.',
+            },
+            {
+              href: '/takedowns',
+              label: 'Takedown Queue',
+              desc: 'Review and resolve DMCA, trademark, and policy takedown requests.',
+            },
+            {
+              href: '/trust',
+              label: 'Trust Scoring',
+              desc: 'Monitor listing trust scores and auto-hidden flags.',
+            },
+            {
+              href: '/payouts',
+              label: 'Payout Policy',
+              desc: 'View payout splits, minimum thresholds, and run history.',
+            },
           ].map((item) => (
             <a
               key={item.href}

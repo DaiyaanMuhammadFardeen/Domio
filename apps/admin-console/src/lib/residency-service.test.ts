@@ -27,9 +27,15 @@ describe('residency-service', () => {
     for (const ws of items) {
       expect(typeof ws.workspace_id).toBe('string');
       expect(typeof ws.workspace_name).toBe('string');
-      expect(['us-east', 'us-west', 'eu-west', 'eu-central', 'ap-south', 'ap-northeast', 'sa-east']).toContain(
-        ws.region,
-      );
+      expect([
+        'us-east',
+        'us-west',
+        'eu-west',
+        'eu-central',
+        'ap-south',
+        'ap-northeast',
+        'sa-east',
+      ]).toContain(ws.region);
     }
   });
 

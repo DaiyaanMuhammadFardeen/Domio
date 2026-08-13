@@ -12,7 +12,9 @@ import type { Template, TemplatePlaceholder } from '../store/types.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makePlaceholder(overrides: Partial<TemplatePlaceholder> & { key: string }): TemplatePlaceholder {
+function makePlaceholder(
+  overrides: Partial<TemplatePlaceholder> & { key: string },
+): TemplatePlaceholder {
   return {
     id: `ph-${overrides.key}`,
     label: overrides.key,
@@ -69,10 +71,7 @@ function makeDeckJson(slides?: unknown[]): Record<string, unknown> {
   };
 }
 
-async function seedTemplate(
-  store: InMemoryStore,
-  template: Template,
-): Promise<void> {
+async function seedTemplate(store: InMemoryStore, template: Template): Promise<void> {
   await store.putTemplate(template);
 }
 

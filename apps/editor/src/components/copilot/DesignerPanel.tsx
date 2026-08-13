@@ -83,18 +83,13 @@ export function DesignerPanel({
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-slate-700/60 px-4 py-3">
         <Wand2 size={16} className="text-blue-400" />
-        <h2 className="text-sm font-semibold text-slate-100">
-          {t('s63.designer.title')}
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-100">{t('s63.designer.title')}</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {/* Prompt input */}
         <div className="flex flex-col gap-2">
-          <label
-            htmlFor="designer-prompt-input"
-            className="text-xs font-medium text-slate-400"
-          >
+          <label htmlFor="designer-prompt-input" className="text-xs font-medium text-slate-400">
             {t('s63.designer.promptLabel')}
           </label>
           <textarea
@@ -114,9 +109,7 @@ export function DesignerPanel({
             data-testid="designer-prompt-input"
           />
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-slate-500">
-              {t('s63.designer.shortcutHint')}
-            </span>
+            <span className="text-[10px] text-slate-500">{t('s63.designer.shortcutHint')}</span>
             <button
               type="button"
               onClick={() => void handleGenerate()}

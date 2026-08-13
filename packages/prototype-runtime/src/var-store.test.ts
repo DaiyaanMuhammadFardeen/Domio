@@ -49,7 +49,10 @@ describe('VarStore', () => {
     s.subscribe('x', (e) => seen.push([e.previous, e.next]));
     s.write('x', 1, { scope: 'deck' });
     s.write('x', 2, { scope: 'deck' });
-    expect(seen).toEqual([[null, 1], [1, 2]]);
+    expect(seen).toEqual([
+      [null, 1],
+      [1, 2],
+    ]);
   });
 
   it('subscribeAll sees every change', () => {

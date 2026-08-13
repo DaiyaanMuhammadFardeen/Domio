@@ -25,12 +25,7 @@ export interface Track {
   readonly easing?: EasingFn;
 }
 
-export type TriggerKind =
-  | 'on_click'
-  | 'on_enter'
-  | 'on_hover'
-  | 'on_data_change'
-  | 'on_timer';
+export type TriggerKind = 'on_click' | 'on_enter' | 'on_hover' | 'on_data_change' | 'on_timer';
 
 export interface Trigger {
   readonly kind: TriggerKind;

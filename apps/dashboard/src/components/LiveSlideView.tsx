@@ -47,9 +47,7 @@ export function LiveSlideView({ slide, sessionId }: LiveSlideViewProps): ReactEl
         <span className="text-xs text-slate-500">{sessionId}</span>
       </div>
       <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold tabular-nums text-slate-900">
-          {slideLabel}
-        </span>
+        <span className="text-2xl font-semibold tabular-nums text-slate-900">{slideLabel}</span>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-3 text-xs">
         <div className="rounded-md bg-slate-50 px-3 py-2">

@@ -49,17 +49,26 @@ interface LeaderboardPanelProps {
   aggregates?: readonly LeaderboardAggregate[];
   onUpdate: (
     id: string,
-    patch: { status?: LeaderboardEntry['status']; reviewerId?: string | null; overrideScore?: number | null },
+    patch: {
+      status?: LeaderboardEntry['status'];
+      reviewerId?: string | null;
+      overrideScore?: number | null;
+    },
   ) => void;
 }
 
 function badgeFor(status: LeaderboardEntry['status']): string {
   switch (status) {
-    case 'pending': return '⏳';
-    case 'approved': return '✓';
-    case 'rejected': return '✗';
-    case 'overridden': return '⚙';
-    default: return '?';
+    case 'pending':
+      return '⏳';
+    case 'approved':
+      return '✓';
+    case 'rejected':
+      return '✗';
+    case 'overridden':
+      return '⚙';
+    default:
+      return '?';
   }
 }
 
@@ -106,7 +115,10 @@ export function LeaderboardPanel({
                   Avg: <strong>{agg.averageScore.toFixed(2)}</strong>
                 </span>
                 <span>
-                  Min/Max: <strong>{agg.lowestScore.toFixed(2)}/{agg.highestScore.toFixed(2)}</strong>
+                  Min/Max:{' '}
+                  <strong>
+                    {agg.lowestScore.toFixed(2)}/{agg.highestScore.toFixed(2)}
+                  </strong>
                 </span>
               </div>
             </div>
@@ -139,7 +151,10 @@ export function LeaderboardPanel({
             {item.submittedAnswer}
           </div>
           {item.llmReason && (
-            <div className="leaderboard-row__reason" data-testid={`m6-leaderboard-reason-${item.id}`}>
+            <div
+              className="leaderboard-row__reason"
+              data-testid={`m6-leaderboard-reason-${item.id}`}
+            >
               {item.llmReason}
             </div>
           )}

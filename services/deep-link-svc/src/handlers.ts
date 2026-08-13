@@ -9,11 +9,7 @@
 
 import { NotFoundError, DeepLinkValidationError, DeepLinkAudienceError } from './dal.js';
 import { DeepLinkResolveError, type DeepLinkService } from './service.js';
-import type {
-  DeepLinkAudience,
-  DeepLinkVarEntry,
-  DeepLinkViewerScope,
-} from '@domio/deep-link';
+import type { DeepLinkAudience, DeepLinkVarEntry, DeepLinkViewerScope } from '@domio/deep-link';
 
 // ── HTTP types ─────────────────────────────────────────────────────────
 
@@ -33,12 +29,20 @@ export interface HttpResponse {
 
 export interface DeepLinkHandlerContext {
   readonly service: DeepLinkService;
-  resolveActorId?: (req: HttpRequest<unknown, unknown, Record<string, string | undefined>>) => string | undefined;
+  resolveActorId?: (
+    req: HttpRequest<unknown, unknown, Record<string, string | undefined>>,
+  ) => string | undefined;
 }
 
-function ok<T>(body: T): HttpResponse { return { status: 200, body }; }
-function created<T>(body: T): HttpResponse { return { status: 201, body }; }
-function noContent(): HttpResponse { return { status: 204, body: null }; }
+function ok<T>(body: T): HttpResponse {
+  return { status: 200, body };
+}
+function created<T>(body: T): HttpResponse {
+  return { status: 201, body };
+}
+function noContent(): HttpResponse {
+  return { status: 204, body: null };
+}
 function badRequest(message: string, code: string): HttpResponse {
   return { status: 400, body: { error: message, code } };
 }
@@ -60,7 +64,10 @@ function unprocessable(message: string, code: string, details?: unknown): HttpRe
 
 // ── Shorten handler ────────────────────────────────────────────────────
 
-export interface ShortenPath { tenantId: string; deckId: string }
+export interface ShortenPath {
+  tenantId: string;
+  deckId: string;
+}
 export interface ShortenBody {
   slide_id?: string;
   path_stack?: readonly string[];
@@ -75,13 +82,19 @@ export interface ShortenBody {
   ttl_seconds?: number;
   authoring_viewer_id?: string;
 }
-export interface ShortenQuery { tenant_id?: string }
+export interface ShortenQuery {
+  tenant_id?: string;
+}
 
 export async function shortenHandler(
   req: HttpRequest<ShortenPath, ShortenBody, ShortenQuery>,
   ctx: DeepLinkHandlerContext,
 ): Promise<HttpResponse> {
-  const baseReq = req as unknown as HttpRequest<unknown, unknown, Record<string, string | undefined>>;
+  const baseReq = req as unknown as HttpRequest<
+    unknown,
+    unknown,
+    Record<string, string | undefined>
+  >;
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(baseReq);
   if (!tenantId) return unauthorized();
   const body = req.body ?? {};
@@ -104,7 +117,9 @@ export async function shortenHandler(
       ...(body.viewer_scope ? { viewer_scope: body.viewer_scope } : {}),
       ...(body.single_use !== undefined ? { single_use: body.single_use } : {}),
       ...(body.ttl_seconds !== undefined ? { ttl_seconds: body.ttl_seconds } : {}),
-      ...(body.authoring_viewer_id !== undefined ? { authoring_viewer_id: body.authoring_viewer_id } : {}),
+      ...(body.authoring_viewer_id !== undefined
+        ? { authoring_viewer_id: body.authoring_viewer_id }
+        : {}),
       ...(actorId !== undefined ? { created_by: actorId } : {}),
     });
     return created(result);
@@ -115,7 +130,9 @@ export async function shortenHandler(
 
 // ── Resolve handler ────────────────────────────────────────────────────
 
-export interface ResolvePath { readonly tenantId: string }
+export interface ResolvePath {
+  readonly tenantId: string;
+}
 export interface ResolveBody {
   id?: string;
   audience?: DeepLinkAudience;
@@ -145,7 +162,10 @@ export async function resolveHandler(
 
 // ── Delete handler ─────────────────────────────────────────────────────
 
-export interface DeletePath { readonly tenantId: string; readonly id: string }
+export interface DeletePath {
+  readonly tenantId: string;
+  readonly id: string;
+}
 
 export async function deleteHandler(
   req: HttpRequest<DeletePath, unknown, Record<string, string | undefined>>,
@@ -163,7 +183,10 @@ export async function deleteHandler(
 
 // ── Stats handler ──────────────────────────────────────────────────────
 
-export interface StatsPath { readonly tenantId: string; readonly id: string }
+export interface StatsPath {
+  readonly tenantId: string;
+  readonly id: string;
+}
 
 export async function statsHandler(
   req: HttpRequest<StatsPath, unknown, Record<string, string | undefined>>,
@@ -179,7 +202,10 @@ export async function statsHandler(
 
 // ── List handler ───────────────────────────────────────────────────────
 
-export interface ListPath { readonly tenantId: string; readonly deckId: string }
+export interface ListPath {
+  readonly tenantId: string;
+  readonly deckId: string;
+}
 
 export async function listHandler(
   req: HttpRequest<ListPath, unknown, Record<string, string | undefined>>,
@@ -192,7 +218,10 @@ export async function listHandler(
 
 // ── Rotate key handler (admin) ─────────────────────────────────────────
 
-export interface RotatePath { readonly tenantId: string; readonly deckId: string }
+export interface RotatePath {
+  readonly tenantId: string;
+  readonly deckId: string;
+}
 
 export async function rotateKeyHandler(
   req: HttpRequest<RotatePath, unknown, Record<string, string | undefined>>,

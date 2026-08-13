@@ -45,31 +45,39 @@ export function renderSankey(
   // Left column (sources)
   srcList.forEach((s, i) => {
     const y = pad + (i * (H - pad * 2)) / Math.max(srcList.length - 1, 1);
-    elements.push(rect(pad, y - 12, 100, 24, `src_${i}`, {
-      fill: PALETTE[i % PALETTE.length],
-      rx: 4,
-    }));
-    elements.push(text(pad + 8, y - 4, s, `src_label_${i}`, {
-      width: 84,
-      height: 16,
-      fontSize: opts.fontSize ?? 11,
-      fill: '#ffffff',
-    }));
+    elements.push(
+      rect(pad, y - 12, 100, 24, `src_${i}`, {
+        fill: PALETTE[i % PALETTE.length],
+        rx: 4,
+      }),
+    );
+    elements.push(
+      text(pad + 8, y - 4, s, `src_label_${i}`, {
+        width: 84,
+        height: 16,
+        fontSize: opts.fontSize ?? 11,
+        fill: '#ffffff',
+      }),
+    );
   });
 
   // Right column (targets)
   tgtList.forEach((t, i) => {
     const y = pad + (i * (H - pad * 2)) / Math.max(tgtList.length - 1, 1);
-    elements.push(rect(W - pad - 100, y - 12, 100, 24, `tgt_${i}`, {
-      fill: PALETTE[(i + 2) % PALETTE.length],
-      rx: 4,
-    }));
-    elements.push(text(W - pad - 92, y - 4, t, `tgt_label_${i}`, {
-      width: 84,
-      height: 16,
-      fontSize: opts.fontSize ?? 11,
-      fill: '#ffffff',
-    }));
+    elements.push(
+      rect(W - pad - 100, y - 12, 100, 24, `tgt_${i}`, {
+        fill: PALETTE[(i + 2) % PALETTE.length],
+        rx: 4,
+      }),
+    );
+    elements.push(
+      text(W - pad - 92, y - 4, t, `tgt_label_${i}`, {
+        width: 84,
+        height: 16,
+        fontSize: opts.fontSize ?? 11,
+        fill: '#ffffff',
+      }),
+    );
   });
 
   // Flows (simplified as lines)
@@ -82,10 +90,12 @@ export function renderSankey(
     const ty = pad + (tgtIdx * (H - pad * 2)) / Math.max(tgtList.length - 1, 1);
     const sw = Math.max(1, (f.value / maxVal) * 8);
 
-    elements.push(svgLine(pad + 100, sy, W - pad - 100, ty, `flow_${i}`, {
-      stroke: PALETTE[srcIdx % PALETTE.length],
-      strokeWidth: sw,
-    }));
+    elements.push(
+      svgLine(pad + 100, sy, W - pad - 100, ty, `flow_${i}`, {
+        stroke: PALETTE[srcIdx % PALETTE.length],
+        strokeWidth: sw,
+      }),
+    );
   });
 
   return elements;

@@ -15,8 +15,7 @@
 
 name: domio-kafka
 
-x-kafka-env: &kafka-env
-  # Single-node KRaft config.
+x-kafka-env: &kafka-env # Single-node KRaft config.
   KAFKA_NODE_ID: 1
   KAFKA_PROCESS_ROLES: broker,controller
   KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
@@ -33,7 +32,7 @@ x-kafka-env: &kafka-env
   KAFKA_NUM_PARTITIONS: 12
   KAFKA_DEFAULT_REPLICATION_FACTOR: 1
   KAFKA_MIN_INSYNC_REPLICAS: 1
-  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
   KAFKA_LOG_RETENTION_HOURS: 168
   KAFKA_LOG_SEGMENT_BYTES: 1073741824
   # Cluster id is fixed for KRaft so the meta-log replay is deterministic.
@@ -45,15 +44,19 @@ services:
     container_name: domio-kafka
     restart: unless-stopped
     ports:
-      - "${KAFKA_PORT:-9092}:9092"
-      - "${KAFKA_SASL_PORT:-9094}:9094"
+      - '${KAFKA_PORT:-9092}:9092'
+      - '${KAFKA_SASL_PORT:-9094}:9094'
     environment:
       <<: *kafka-env
     volumes:
       - kafka-data:/var/lib/kafka/data
       - ./kraft/server.properties:/opt/kafka/config/kraft/server.properties:ro
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      test:
+        [
+          'CMD-SHELL',
+          '/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1',
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -69,7 +72,7 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-    entrypoint: ["/bin/sh", "-c"]
+    entrypoint: ['/bin/sh', '-c']
     command:
       - |
         echo "kafka init: cluster id = ${CLUSTER_ID:-MkU3OEVBNTcwNTJENDM2Qk}"

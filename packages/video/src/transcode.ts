@@ -33,8 +33,8 @@ export interface CanPlayResult {
 const VALID_TRANSITIONS: Record<TranscodeState, TranscodeState[]> = {
   queued: ['processing'],
   processing: ['ready', 'failed'],
-  ready: [],    // terminal state
-  failed: [],   // terminal state
+  ready: [], // terminal state
+  failed: [], // terminal state
 };
 
 /**
@@ -62,9 +62,7 @@ export function reduceTranscodeState(
 
   const allowed = VALID_TRANSITIONS[current];
   if (!allowed || !allowed.includes(next)) {
-    throw new Error(
-      `Invalid transition: ${current} → ${next} (action: "${action}")`,
-    );
+    throw new Error(`Invalid transition: ${current} → ${next} (action: "${action}")`);
   }
 
   return next;

@@ -6,14 +6,13 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  bindPresenterMetrics,
-  nullPresenterMetrics,
-  type PresenterMetrics,
-} from './metrics.js';
+import { bindPresenterMetrics, nullPresenterMetrics, type PresenterMetrics } from './metrics.js';
 import type { Meter, Histogram } from '@domio/observability';
 
-function fakeMeter(): { meter: Meter; records: { name: string; value: number; attrs?: Record<string, string> }[] } {
+function fakeMeter(): {
+  meter: Meter;
+  records: { name: string; value: number; attrs?: Record<string, string> }[];
+} {
   const records: { name: string; value: number; attrs?: Record<string, string> }[] = [];
   function makeHist(name: string): Histogram {
     return {
@@ -96,7 +95,9 @@ describe('presenter metrics', () => {
       createCounter: () => ({ type: 'counter', name: 'c', add: () => {} }),
       createHistogram: () => ({ type: 'histogram', name: 'h', record: () => {} }),
       createUpDownCounter: () => ({ type: 'up_down_counter', name: 'u', add: () => {} }),
-      flush: async () => { flushed += 1; },
+      flush: async () => {
+        flushed += 1;
+      },
       shutdown: async () => {},
       resource: {
         'service.name': 'test',

@@ -45,7 +45,11 @@ async function createJob(
   return app.fetch(req);
 }
 
-async function getJob(app: Hono, id: string, headers: Record<string, string> = {}): Promise<Response> {
+async function getJob(
+  app: Hono,
+  id: string,
+  headers: Record<string, string> = {},
+): Promise<Response> {
   const req = new Request(`http://test.local/v1/cad_jobs/${id}`, {
     method: 'GET',
     headers: { 'x-tenant-id': TEST_TENANT, ...headers },
@@ -53,7 +57,11 @@ async function getJob(app: Hono, id: string, headers: Record<string, string> = {
   return app.fetch(req);
 }
 
-async function deleteJob(app: Hono, id: string, headers: Record<string, string> = {}): Promise<Response> {
+async function deleteJob(
+  app: Hono,
+  id: string,
+  headers: Record<string, string> = {},
+): Promise<Response> {
   const req = new Request(`http://test.local/v1/cad_jobs/${id}`, {
     method: 'DELETE',
     headers: { 'x-tenant-id': TEST_TENANT, ...headers },

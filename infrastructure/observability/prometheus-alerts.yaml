@@ -21,7 +21,7 @@ groups:
           service: presenter
           slo: ws_open
         annotations:
-          summary: "Presenter WS handshake p95 above 800 ms (session {{ $labels.session_id }})"
+          summary: 'Presenter WS handshake p95 above 800 ms (session {{ $labels.session_id }})'
           description: |
             p95 = {{ $value }} ms over the last 5 minutes. Threshold: 800 ms.
             See https://runbooks.domio.internal/presenter/ws-p95
@@ -39,7 +39,7 @@ groups:
           service: presenter
           slo: annotation_replay
         annotations:
-          summary: "Annotation replay p95 above 200 ms (kind {{ $labels.kind }})"
+          summary: 'Annotation replay p95 above 200 ms (kind {{ $labels.kind }})'
           description: |
             p95 = {{ $value }} ms over the last 5 minutes. Threshold: 200 ms.
             See https://runbooks.domio.internal/presenter/annotation-replay
@@ -57,7 +57,7 @@ groups:
           service: presenter
           slo: handoff
         annotations:
-          summary: "Handover p95 above 1500 ms (session {{ $labels.session_id }})"
+          summary: 'Handover p95 above 1500 ms (session {{ $labels.session_id }})'
           description: |
             p95 = {{ $value }} ms over the last 5 minutes. Threshold: 1500 ms.
             See https://runbooks.domio.internal/presenter/handoff
@@ -75,7 +75,7 @@ groups:
           service: presenter
           slo: recap
         annotations:
-          summary: "Recap p95 above 2000 ms (phase {{ $labels.phase }})"
+          summary: 'Recap p95 above 2000 ms (phase {{ $labels.phase }})'
           description: |
             p95 = {{ $value }} ms over the last 5 minutes. Threshold: 2000 ms.
             See https://runbooks.domio.internal/presenter/recap

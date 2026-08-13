@@ -13,17 +13,11 @@
 
 import { useMemo } from 'react';
 
-import {
-  DEFAULT_LOCALE,
-  isLocaleId,
-  type LocaleId,
-} from '@domio/i18n';
+import { DEFAULT_LOCALE, isLocaleId, type LocaleId } from '@domio/i18n';
 
 export const LOCALE_COOKIE = 'domio-locale';
 
-export function readLocaleFromCookie(
-  cookieHeader: string | null | undefined,
-): LocaleId | null {
+export function readLocaleFromCookie(cookieHeader: string | null | undefined): LocaleId | null {
   if (!cookieHeader) return null;
   for (const part of cookieHeader.split(/;\s*/)) {
     const eq = part.indexOf('=');
@@ -37,9 +31,10 @@ export function readLocaleFromCookie(
 
 export function readLocaleFromNavigator(): LocaleId | null {
   if (typeof navigator === 'undefined') return null;
-  const candidates = (navigator.languages && navigator.languages.length > 0
-    ? navigator.languages
-    : [navigator.language]
+  const candidates = (
+    navigator.languages && navigator.languages.length > 0
+      ? navigator.languages
+      : [navigator.language]
   ).filter((l): l is string => typeof l === 'string' && l.length > 0);
   for (const c of candidates) {
     const lower = c.toLowerCase();
@@ -63,9 +58,7 @@ export interface UseLocaleResult {
  * `catalogue` is an optional flat key->message map. If a key is missing,
  * returns `fallback` if provided, otherwise the key itself.
  */
-export function useLocale(
-  catalogue?: Readonly<Record<string, string>>,
-): UseLocaleResult {
+export function useLocale(catalogue?: Readonly<Record<string, string>>): UseLocaleResult {
   return useMemo<UseLocaleResult>(() => {
     let locale: LocaleId = DEFAULT_LOCALE;
     if (typeof document !== 'undefined') {

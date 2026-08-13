@@ -44,9 +44,7 @@ describe('PanelRail', () => {
 
     const coreHeader = getAllByTestId('panel-group-core')[0] as HTMLElement;
     expect(coreHeader).toBeTruthy();
-    const headerBtn = coreHeader.querySelector(
-      '.panel-rail__group-header',
-    ) as HTMLButtonElement;
+    const headerBtn = coreHeader.querySelector('.panel-rail__group-header') as HTMLButtonElement;
     expect(headerBtn).toBeTruthy();
     expect(headerBtn.getAttribute('aria-expanded')).toBe('true');
 

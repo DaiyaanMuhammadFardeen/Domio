@@ -9,14 +9,7 @@
  * entries are summarized as "{n} older updates — view history".
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
 
 import {
@@ -289,10 +282,7 @@ export function UpdateStream({
                 fontStyle: 'italic',
               }}
             >
-              <FormattedMessage
-                id="editor.living.stream.olderHidden"
-                values={{ n: olderCount }}
-              />
+              <FormattedMessage id="editor.living.stream.olderHidden" values={{ n: olderCount }} />
             </li>
           ) : null}
         </ol>

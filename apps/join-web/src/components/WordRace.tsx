@@ -50,9 +50,7 @@ export function WordRace(props: WordRaceProps) {
         <h2 className="text-base font-semibold text-slate-900" data-testid="word-race-prompt">
           {props.prompt}
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
-          First {props.winnerSlots} submissions win.
-        </p>
+        <p className="text-xs text-slate-500 mt-1">First {props.winnerSlots} submissions win.</p>
       </header>
 
       <form onSubmit={handleSubmit} className="flex gap-2" data-testid="word-race-form">

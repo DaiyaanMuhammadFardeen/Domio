@@ -1,13 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type {
-  DLPRule,
-  DLPRuleInput,
-  DLPPatternKind,
-  DLPScope,
-  DLPAction,
-} from '../../lib/types';
+import type { DLPRule, DLPRuleInput, DLPPatternKind, DLPScope, DLPAction } from '../../lib/types';
 
 export interface RuleBuilderProps {
   initial?: DLPRule | undefined;
@@ -15,12 +9,7 @@ export interface RuleBuilderProps {
   onCancel?: () => void;
 }
 
-const ALL_SCOPES: ReadonlyArray<DLPScope> = [
-  'deck-title',
-  'slide-content',
-  'comment',
-  'asset',
-];
+const ALL_SCOPES: ReadonlyArray<DLPScope> = ['deck-title', 'slide-content', 'comment', 'asset'];
 
 const ALL_ACTIONS: ReadonlyArray<DLPAction> = ['block-share', 'redact', 'notify'];
 

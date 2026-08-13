@@ -54,7 +54,7 @@ const JWT_SECRET = __ENV.JWT_SECRET || '';
 const NUM_DECKS = parseInt(__ENV.NUM_DECKS || '10', 10);
 const VUS_PER_DECK = parseInt(__ENV.VUS_PER_DECK || '50', 10);
 const K6_DURATION = __ENV.K6_DURATION || '600s'; // default 10 min for doc-spec
-const CI_DURATION = __ENV.CI_DURATION || '30s';  // default for CI-friendly scenarios
+const CI_DURATION = __ENV.CI_DURATION || '30s'; // default for CI-friendly scenarios
 const DOC_SPEC_OPS_PER_SEC = parseInt(__ENV.DOC_SPEC_OPS_PER_SEC || '200', 10);
 
 // ─── Deck IDs for multi-deck scenarios ─────────────────────────────
@@ -123,7 +123,7 @@ function encodeVarint(value) {
   var bytes = [];
   var v = value < 0 ? BigInt(value) + (1n << 64n) : BigInt(value);
   while (v > 127n) {
-    bytes.push(Number((v & 0x7Fn) | 0x80n));
+    bytes.push(Number((v & 0x7fn) | 0x80n));
     v >>= 7n;
   }
   bytes.push(Number(v));
@@ -148,10 +148,7 @@ function encodeFieldEmbedded(fieldNumber, messageBytes) {
 }
 
 function encodeHLC(physical, logical) {
-  return concatBytes(
-    encodeFieldVarint(1, physical),
-    encodeFieldVarint(2, logical)
-  );
+  return concatBytes(encodeFieldVarint(1, physical), encodeFieldVarint(2, logical));
 }
 
 function concatBytes() {
@@ -176,7 +173,7 @@ function buildHello(actorId, deckId, sessionId) {
     encodeFieldLengthDelimited(3, 'main'),
     encodeFieldLengthDelimited(4, sessionId),
     encodeFieldLengthDelimited(5, 'sync'),
-    encodeFieldLengthDelimited(5, 'presence')
+    encodeFieldLengthDelimited(5, 'presence'),
   );
 }
 
@@ -190,7 +187,7 @@ function buildOp(opId, deckId, authorId, hlcPhysical, hlcLogical, payloadBytes, 
     encodeFieldEmbedded(7, encodeHLC(hlcPhysical - 1000000, 0)),
     encodeFieldLengthDelimited(8, payloadBytes),
     encodeFieldVarint(9, clientClock || 0),
-    encodeFieldVarint(10, 1) // OP_TYPE_YJS_UPDATE
+    encodeFieldVarint(10, 1), // OP_TYPE_YJS_UPDATE
   );
 }
 
@@ -202,10 +199,13 @@ function buildPresenceCursor(actorId, deckId, x, y) {
     encodeFieldLengthDelimited(2, deckId),
     encodeFieldLengthDelimited(3, 'main'),
     encodeFieldVarint(4, 3), // PRESENCE_KIND_UPDATE
-    encodeFieldEmbedded(5, concatBytes(
-      encodeFieldVarint(1, Math.round(x * 1000)), // x * 1000
-      encodeFieldVarint(2, Math.round(y * 1000))  // y * 1000
-    ))
+    encodeFieldEmbedded(
+      5,
+      concatBytes(
+        encodeFieldVarint(1, Math.round(x * 1000)), // x * 1000
+        encodeFieldVarint(2, Math.round(y * 1000)), // y * 1000
+      ),
+    ),
   );
 }
 
@@ -319,8 +319,12 @@ export function connectStorm() {
 
   var upgradeOk = res && res.status === 101;
   check(res, {
-    'WS upgrade succeeded': function (r) { return r && r.status === 101; },
-    'WS connection established': function () { return connected; },
+    'WS upgrade succeeded': function (r) {
+      return r && r.status === 101;
+    },
+    'WS connection established': function () {
+      return connected;
+    },
   });
 
   connectSuccess.add(upgradeOk);
@@ -370,9 +374,7 @@ export function opStream() {
       var opId = generateULID();
       var hlcPhysical = Date.now() * 1000000; // nanoseconds
       var hlcLogical = opsSubmitted;
-      var payload = stringToBytes(
-        JSON.stringify({ seq: opsSubmitted, ts: Date.now() })
-      );
+      var payload = stringToBytes(JSON.stringify({ seq: opsSubmitted, ts: Date.now() }));
 
       var opBytes = buildOp(opId, deckId, actorId, hlcPhysical, hlcLogical, payload, opsSubmitted);
       var frame = encodeFrame(opBytes);
@@ -394,9 +396,15 @@ export function opStream() {
 
   var upgradeOk = res && res.status === 101;
   check(res, {
-    'WS upgrade succeeded': function (r) { return r && r.status === 101; },
-    'WS connected for op stream': function () { return connected; },
-    'ops were submitted': function () { return opsSubmitted > 0; },
+    'WS upgrade succeeded': function (r) {
+      return r && r.status === 101;
+    },
+    'WS connected for op stream': function () {
+      return connected;
+    },
+    'ops were submitted': function () {
+      return opsSubmitted > 0;
+    },
   });
 
   connectSuccess.add(upgradeOk);
@@ -464,7 +472,7 @@ export function docSpec() {
       var hlcPhysical = Date.now() * 1000000;
       var hlcLogical = opsSubmitted;
       var payload = stringToBytes(
-        JSON.stringify({ seq: opsSubmitted, ts: Date.now(), deck: deckId })
+        JSON.stringify({ seq: opsSubmitted, ts: Date.now(), deck: deckId }),
       );
 
       var opBytes = buildOp(opId, deckId, actorId, hlcPhysical, hlcLogical, payload, opsSubmitted);
@@ -487,9 +495,15 @@ export function docSpec() {
 
   var upgradeOk = res && res.status === 101;
   check(res, {
-    'doc_spec WS upgrade succeeded': function (r) { return r && r.status === 101; },
-    'doc_spec WS connected': function () { return connected; },
-    'doc_spec ops submitted': function () { return opsSubmitted > 0; },
+    'doc_spec WS upgrade succeeded': function (r) {
+      return r && r.status === 101;
+    },
+    'doc_spec WS connected': function () {
+      return connected;
+    },
+    'doc_spec ops submitted': function () {
+      return opsSubmitted > 0;
+    },
   });
 
   connectSuccess.add(upgradeOk);
@@ -543,7 +557,9 @@ export function presenceCursor() {
 
   var upgradeOk = res && res.status === 101;
   check(res, {
-    'presence WS upgrade': function (r) { return r && r.status === 101; },
+    'presence WS upgrade': function (r) {
+      return r && r.status === 101;
+    },
   });
   connectSuccess.add(upgradeOk);
 }
@@ -569,6 +585,6 @@ export function handleSummary(data) {
   }
 
   return {
-    'stdout': JSON.stringify(summary, null, 2),
+    stdout: JSON.stringify(summary, null, 2),
   };
 }

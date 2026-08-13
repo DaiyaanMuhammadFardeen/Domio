@@ -8,9 +8,9 @@ Brand / theme registry; brand tokens + asset resolution.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-brand` | availability | 99.9% | 30d |
+| SLO           | Kind         | Target | Window |
+| ------------- | ------------ | ------ | ------ |
+| `avail-brand` | availability | 99.9%  | 30d    |
 
 ## Triage
 

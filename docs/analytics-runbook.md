@@ -1,7 +1,7 @@
 # Phase 17 — Analytics on-call runbook
 
 This runbook is the canonical on-call reference for the Phase 17
-analytics & engagement-intelligence stack.  It pairs with
+analytics & engagement-intelligence stack. It pairs with
 [`infrastructure/observability/runbook-links.md`](../infrastructure/observability/runbook-links.md),
 which maps every alert name to the matching section here.
 
@@ -66,7 +66,7 @@ helm upgrade --reuse-values domio-platform ./infrastructure/helm/platform \
 ```
 
 All Phase 17 services then return 503 from their public routes within
-30 s.  Investigate offline; flip back when resolved:
+30 s. Investigate offline; flip back when resolved:
 
 ```bash
 helm upgrade --reuse-values domio-platform ./infrastructure/helm/platform \
@@ -80,6 +80,7 @@ helm upgrade --reuse-values domio-platform ./infrastructure/helm/platform \
 <a id="ingest"></a>
 
 ### {#ingest-lag}
+
 `ingest-lag-page` — event-ingest p95 > 60 s.
 
 ```bash
@@ -96,10 +97,12 @@ kubectl get pods -l app=kafka
 ```
 
 ### {#ingest-p95-latency}
-`Ingest p95 > 5s` — general ingest latency SLO breach.  Same
+
+`Ingest p95 > 5s` — general ingest latency SLO breach. Same
 diagnosis as above; the threshold is tighter (5 s).
 
 ### {#ingest-5xx-rate}
+
 `Ingest 5xx rate > 1%` — sustained 5xx on `/v1/events`.
 
 ```bash
@@ -113,9 +116,11 @@ kubectl logs -l app=event-ingest --tail=500 | grep -E 'status=5'
 ```
 
 ### {#kafka-producer-lag}
+
 `Kafka producer lag` — KafkaJS producer queue depth > 10 s.
 
 ### {#ingest-backpressure}
+
 `Backpressure spool > 5 GB` — disk-spool buffer overflow.
 
 ```bash
@@ -129,6 +134,7 @@ kubectl exec -it $(kubectl get pod -l app=event-ingest -o name | head -1) -- \
 ```
 
 ### {#columnar-loader-stuck}
+
 `Columnar loader lag > 60s` — clickhouse-loader stuck.
 
 ---
@@ -138,6 +144,7 @@ kubectl exec -it $(kubectl get pod -l app=event-ingest -o name | head -1) -- \
 <a id="clickhouse"></a>
 
 ### {#clickhouse-replication-lag}
+
 `clickhouse-replication-lag-warn` — replication lag > 5 m.
 
 ```bash
@@ -153,7 +160,7 @@ kubectl delete pod -l app=clickhouse,role=replica --grace-period=0
 
 ### CH disk usage
 
-See Grafana panel "ClickHouse disk usage".  > 80 percent -> page.  Mitigation:
+See Grafana panel "ClickHouse disk usage". > 80 percent -> page. Mitigation:
 
 ```bash
 # 1. Inspect largest tables.
@@ -178,6 +185,7 @@ helm upgrade domio-clickhouse ./infrastructure/helm/clickhouse \
 <a id="crm"></a>
 
 ### {#crm-dlq-depth}
+
 `crm-dlq-depth-page` — DLQ depth > 1000.
 
 ```bash
@@ -195,7 +203,8 @@ kubectl create job --from=cronjob/crm-reconciler crm-reconciler-manual
 ```
 
 ### {#crm-sync-failures}
-`CRM sync failure rate > 1%` — per-provider failures spiking.  Same
+
+`CRM sync failure rate > 1%` — per-provider failures spiking. Same
 diagnosis as above.
 
 ---
@@ -205,8 +214,9 @@ diagnosis as above.
 <a id="ab-testing"></a>
 
 ### {#ab-cross-workspace-leak}
+
 `A/B cross-workspace contamination` — **critical**: workspace_id
-filter failed in `services/ab-assignment`.  Page immediately.
+filter failed in `services/ab-assignment`. Page immediately.
 
 ```bash
 # 1. Inspect the offending assignment.
@@ -225,6 +235,7 @@ psql -c "
 ```
 
 ### {#ab-sequential-stuck}
+
 `ab-sequential-test-stuck-warn` — sequential test has not decided in
 24 h.
 
@@ -237,7 +248,8 @@ psql -c "UPDATE ab_test SET planned_horizon = planned_horizon * 2 WHERE id = '<i
 ```
 
 ### {#ab-assignment-latency}
-`A/B assignment p95 > 5ms` — sub-ms hot path regression.  Restart the
+
+`A/B assignment p95 > 5ms` — sub-ms hot path regression. Restart the
 service first; if it persists, check Redis cache hit rate.
 
 ---
@@ -247,11 +259,13 @@ service first; if it persists, check Redis cache hit rate.
 <a id="sessionization"></a>
 
 ### {#sessionization-lag}
+
 `Sessionization consumer lag` — Kafka consumer lag > 50 000.
 
 ### {#bot-tag-false-positive}
+
 `Bot tag false positive > 0.5%` — bot filter over-classifying human
-traffic.  Inspect UA rule set; revert last rule change.
+traffic. Inspect UA rule set; revert last rule change.
 
 ---
 
@@ -260,6 +274,7 @@ traffic.  Inspect UA rule set; revert last rule change.
 <a id="heatmap"></a>
 
 ### {#heatmap-refresh-slo}
+
 `Heatmap refresh SLO breached` — heatmap-generator lag > 60 s.
 
 ```bash
@@ -278,6 +293,7 @@ helm upgrade domio-heatmap ./infrastructure/helm/heatmap \
 <a id="live"></a>
 
 ### {#live-hud-latency}
+
 `Live HUD p95 > 1s` — WebSocket fan-out slow.
 
 ```bash
@@ -295,13 +311,16 @@ redis-cli --stat | grep connected_clients
 <a id="notifications--team"></a>
 
 ### {#notification-trigger-latency}
+
 `Notification trigger p95 > 10s` — CEP rules engine slow.
 
 ### {#notification-rate-limit}
+
 `Notification rate-limit bypass` — **critical**: rate-limit counter
-failed; could lead to spam.  Page the channel owner immediately.
+failed; could lead to spam. Page the channel owner immediately.
 
 ### {#team-rollup-missed}
+
 `Team rollup job missed` — workers/team-analytics-rollup did not
 complete.
 
@@ -317,14 +336,16 @@ kubectl create job --from=cronjob/team-analytics-rollup team-rollup-manual
 <a id="identity"></a>
 
 ### {#gdpr-erasure-lag}
+
 `GDPR erasure lag > 24h` — viewer-identity has not processed an
-erasure in 24 h.  Check the erasure queue:
+erasure in 24 h. Check the erasure queue:
 
 ```bash
 psql -c "SELECT COUNT(*) FROM viewer_identity_erasure_queue WHERE processed_at IS NULL"
 ```
 
 ### {#identity-merge-collisions}
+
 `Identity merge collision rate` — merge heuristic over-colliding.
 Revert last merge_rules change.
 
@@ -335,6 +356,7 @@ Revert last merge_rules change.
 <a id="benchmarks"></a>
 
 ### {#benchmark-ingest-error-rate}
+
 `benchmark-ingestion-error-warn` — error rate > 5 percent over 10 m.
 
 ```bash
@@ -346,6 +368,7 @@ clickhouse-client --host ch-benchmarks --query "SELECT 1"
 ```
 
 ### {#benchmark-rollup-missed}
+
 `Benchmark nightly job missed` — workers/benchmark-rollup did not
 run.
 
@@ -360,6 +383,7 @@ kubectl create job --from=cronjob/benchmark-rollup benchmark-rollup-manual
 <a id="dashboard"></a>
 
 ### {#dashboard-query-latency}
+
 `Dashboard query p95 > 800ms` — analytics-warehouse slow.
 
 ```bash
@@ -375,7 +399,7 @@ kubectl logs -l app=dashboard --tail=200 | grep persisted_query
 ## HMAC key rotation
 
 The `INGEST_HMAC_KEY_HEX` secret signs every analytics event the
-client SDK posts to `/v1/events`.  Rotating it requires care so that
+client SDK posts to `/v1/events`. Rotating it requires care so that
 in-flight events from clients using the old key are still accepted
 during the rotation window.
 
@@ -391,7 +415,7 @@ during the rotation window.
    ```
 
 2. **Start a 24 h dual-write window.** The ingest service accepts both
-   the current key and the new key.  Push the new key into the
+   the current key and the new key. Push the new key into the
    `INGEST_HMAC_KEY_HEX_NEXT` env var on every event-ingest pod:
 
    ```bash
@@ -400,15 +424,15 @@ during the rotation window.
    ```
 
    During this window, the SDK still signs with the **current** key;
-   the server accepts both.  Verify the dual-write is active:
+   the server accepts both. Verify the dual-write is active:
 
    ```bash
    kubectl logs -l app=event-ingest --tail=50 | grep dual_write_active
    ```
 
 3. **Roll the SDK key.** Ship `@domio/analytics-sdk` 2.0.0 with the
-   new key embedded.  Wait for the 24 h window to drain so all
-   clients have fetched the new bundle.  Track via:
+   new key embedded. Wait for the 24 h window to drain so all
+   clients have fetched the new bundle. Track via:
 
    ```bash
    clickhouse-client --query "
@@ -456,5 +480,5 @@ can ship a fix.
 ### Audit
 
 Every rotation is recorded in `analytics_hmac_rotation_audit`
-(inserted by the event-ingest boot path).  The table is included in
+(inserted by the event-ingest boot path). The table is included in
 the monthly security review (see `SECURITY.md`).

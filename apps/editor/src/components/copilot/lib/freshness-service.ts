@@ -20,11 +20,7 @@ const DEFAULT_API_BASE: string =
 // Types
 // ---------------------------------------------------------------------------
 
-export type FreshnessKind =
-  | 'stat'
-  | 'date'
-  | 'quote'
-  | 'figure';
+export type FreshnessKind = 'stat' | 'date' | 'quote' | 'figure';
 
 export interface FreshnessClaim {
   readonly id: string;
@@ -104,10 +100,10 @@ export function suggestFreshnessUpdate(
   req: FreshnessUpdateRequest,
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<FreshnessUpdateResponse> {
-  return postJson<FreshnessUpdateResponse>(
-    `${baseUrl}/v1/ai/check-freshness/update`,
-    { deck_id: deckId, ...req },
-  );
+  return postJson<FreshnessUpdateResponse>(`${baseUrl}/v1/ai/check-freshness/update`, {
+    deck_id: deckId,
+    ...req,
+  });
 }
 
 // ---------------------------------------------------------------------------

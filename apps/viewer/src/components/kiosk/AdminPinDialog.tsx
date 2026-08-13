@@ -99,10 +99,13 @@ export function AdminPinDialog({
     [maxLength],
   );
 
-  const onChangeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-    const v = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLength);
-    setPin(v);
-  }, [maxLength]);
+  const onChangeInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>): void => {
+      const v = e.target.value.replace(/[^0-9]/g, '').slice(0, maxLength);
+      setPin(v);
+    },
+    [maxLength],
+  );
 
   const onSubmitInternal = useCallback((): void => {
     if (pin.length === 0) return;
@@ -194,7 +197,9 @@ export function AdminPinDialog({
                   type="button"
                   onClick={() => pressKey(key)}
                   data-testid={`${dataTestId}-key-${key}`}
-                  aria-label={key === 'back' ? 'Backspace' : key === 'clear' ? 'Clear' : `Digit ${key}`}
+                  aria-label={
+                    key === 'back' ? 'Backspace' : key === 'clear' ? 'Clear' : `Digit ${key}`
+                  }
                   style={{
                     padding: '14px 0',
                     fontSize: 18,

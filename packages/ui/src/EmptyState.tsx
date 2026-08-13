@@ -101,9 +101,7 @@ export function EmptyState(props: EmptyStateProps): ReactElement {
       {(action || secondaryAction) && (
         <div style={actionsStyle}>
           {action ? <EmptyStateButton {...action} variant="primary" /> : null}
-          {secondaryAction ? (
-            <EmptyStateButton {...secondaryAction} variant="secondary" />
-          ) : null}
+          {secondaryAction ? <EmptyStateButton {...secondaryAction} variant="secondary" /> : null}
         </div>
       )}
     </div>

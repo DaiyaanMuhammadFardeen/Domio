@@ -10,7 +10,10 @@ describe('MemoryObjectStore', () => {
   it('round-trips a put/get with metadata', async () => {
     const store = new MemoryObjectStore({ OBJECT_STORE_BUCKET: 'domio-test' });
     const body = new Uint8Array([1, 2, 3, 4]);
-    await store.put('recordings/ws-1/sess/00001.bin', body, { contentType: 'application/octet-stream', metadata: { session_id: 'sess' } });
+    await store.put('recordings/ws-1/sess/00001.bin', body, {
+      contentType: 'application/octet-stream',
+      metadata: { session_id: 'sess' },
+    });
     const got = await store.get('recordings/ws-1/sess/00001.bin');
     expect(got.body).toEqual(body);
     expect(got.contentType).toBe('application/octet-stream');
@@ -50,7 +53,12 @@ describe('MemoryObjectStore', () => {
     await store.put('k', new Uint8Array([72, 101, 108, 108, 111]), { contentType: 'text/plain' });
     const url = await store.presignGet('k');
     expect(url.startsWith('data:text/plain;base64,')).toBe(true);
-    expect(Buffer.from(url.slice('data:text/plain;base64,'.length).split('#')[0] ?? '', 'base64').toString()).toBe('Hello');
+    expect(
+      Buffer.from(
+        url.slice('data:text/plain;base64,'.length).split('#')[0] ?? '',
+        'base64',
+      ).toString(),
+    ).toBe('Hello');
   });
 });
 

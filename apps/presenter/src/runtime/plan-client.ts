@@ -38,8 +38,12 @@ export class PlanClient {
     this.fetcher = opts.fetcher ?? fetch;
   }
 
-  etag(): string | null { return this.cachedEtag; }
-  setEtag(etag: string | null): void { this.cachedEtag = etag; }
+  etag(): string | null {
+    return this.cachedEtag;
+  }
+  setEtag(etag: string | null): void {
+    this.cachedEtag = etag;
+  }
 
   async patch(sessionId: string, body: PlanPatch): Promise<PresenterSessionState> {
     const idempotencyKey = ensureIdempotencyKey(sessionId, 'plan');
@@ -64,7 +68,11 @@ export class PlanClient {
 }
 
 async function safeBody(res: Response): Promise<unknown> {
-  try { return await res.json(); } catch { return null; }
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
 
 const NS = 'domio.presenter.plan.idem';

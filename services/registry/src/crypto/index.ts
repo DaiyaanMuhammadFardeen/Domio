@@ -14,11 +14,14 @@ export function canonicalHash(body: unknown): string {
  * Compact JWS (RFC 7515) sign/verify using HMAC-SHA256 via node crypto.
  * Deterministic and dependency-free; used for license grants.
  */
-const b64url = (buf: Buffer | Uint8Array): string =>
-  Buffer.from(buf).toString('base64url');
+const b64url = (buf: Buffer | Uint8Array): string => Buffer.from(buf).toString('base64url');
 const b64urlJson = (obj: unknown): string => b64url(Buffer.from(JSON.stringify(obj), 'utf8'));
 
-export function signJws(payload: Record<string, unknown>, secret: string, header?: Record<string, string>): string {
+export function signJws(
+  payload: Record<string, unknown>,
+  secret: string,
+  header?: Record<string, string>,
+): string {
   const protectedHeader = b64urlJson({ alg: 'HS256', typ: 'JWT', ...header });
   const encodedPayload = b64urlJson(payload);
   const signingInput = `${protectedHeader}.${encodedPayload}`;
@@ -95,7 +98,8 @@ export function verifySignedUrl(
     .digest('hex');
   const a = Buffer.from(expected, 'hex');
   const b = Buffer.from(sig, 'hex');
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return { valid: false, reason: 'bad-signature' };
+  if (a.length !== b.length || !timingSafeEqual(a, b))
+    return { valid: false, reason: 'bad-signature' };
   return { valid: true };
 }
 

@@ -53,8 +53,8 @@ export default async function FunnelPage({
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Funnel</h1>
         <p className="text-sm text-slate-500">
-          Deck <code className="rounded bg-slate-100 px-1.5 py-0.5">{report.deckId}</code> · workspace{' '}
-          <code className="rounded bg-slate-100 px-1.5 py-0.5">{report.workspaceId}</code>
+          Deck <code className="rounded bg-slate-100 px-1.5 py-0.5">{report.deckId}</code> ·
+          workspace <code className="rounded bg-slate-100 px-1.5 py-0.5">{report.workspaceId}</code>
         </p>
       </header>
 
@@ -92,10 +92,7 @@ export default async function FunnelPage({
                 <tbody className="divide-y divide-slate-100">
                   {report.weeklyCohort.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan={4}
-                        className="px-4 py-6 text-center text-sm text-slate-500"
-                      >
+                      <td colSpan={4} className="px-4 py-6 text-center text-sm text-slate-500">
                         No weekly cohort yet.
                       </td>
                     </tr>
@@ -103,8 +100,12 @@ export default async function FunnelPage({
                     report.weeklyCohort.map((w) => (
                       <tr key={w.weekStart}>
                         <td className="px-4 py-2 font-mono text-xs">{w.weekStart}</td>
-                        <td className="px-4 py-2 text-right tabular-nums">{w.viewers.toLocaleString()}</td>
-                        <td className="px-4 py-2 text-right tabular-nums">{w.conversions.toLocaleString()}</td>
+                        <td className="px-4 py-2 text-right tabular-nums">
+                          {w.viewers.toLocaleString()}
+                        </td>
+                        <td className="px-4 py-2 text-right tabular-nums">
+                          {w.conversions.toLocaleString()}
+                        </td>
                         <td className="px-4 py-2 text-right tabular-nums">
                           {w.viewers > 0
                             ? `${((w.conversions / w.viewers) * 100).toFixed(1)}%`

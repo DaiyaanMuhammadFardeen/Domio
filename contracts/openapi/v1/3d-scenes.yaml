@@ -34,13 +34,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: List of scenes.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SceneList"
-        "401":
+                $ref: '#/components/schemas/SceneList'
+        '401':
           description: Unauthenticated.
     post:
       tags: [scenes]
@@ -51,21 +51,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateSceneRequest"
+              $ref: '#/components/schemas/CreateSceneRequest'
       responses:
-        "201":
+        '201':
           description: Scene created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Scene"
-        "400":
+                $ref: '#/components/schemas/Scene'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
   /v1/scenes/{id}:
     get:
@@ -79,15 +79,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Scene details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Scene"
-        "401":
+                $ref: '#/components/schemas/Scene'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Scene not found.
     patch:
       tags: [scenes]
@@ -104,23 +104,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchSceneRequest"
+              $ref: '#/components/schemas/PatchSceneRequest'
       responses:
-        "200":
+        '200':
           description: Scene updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Scene"
-        "400":
+                $ref: '#/components/schemas/Scene'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Scene not found.
     delete:
       tags: [scenes]
@@ -133,11 +133,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Scene deleted.
-        "401":
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Scene not found.
 components:
   securitySchemes:
@@ -158,7 +158,7 @@ components:
           format: uuid
         environment:
           type: object
-          description: "Environment map config: {hdr, background_blur, background_intensity, exposure}"
+          description: 'Environment map config: {hdr, background_blur, background_intensity, exposure}'
           additionalProperties: true
         lights:
           type: array
@@ -227,7 +227,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/Scene"
+            $ref: '#/components/schemas/Scene'
         total:
           type: integer
     CreateSceneRequest:

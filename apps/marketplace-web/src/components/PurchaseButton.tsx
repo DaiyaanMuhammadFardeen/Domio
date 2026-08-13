@@ -20,7 +20,9 @@ export function PurchaseButton({
   slug,
 }: PurchaseButtonProps) {
   const { t, formatPrice } = useLocale();
-  const [status, setStatus] = useState<'idle' | 'loading' | 'redirecting' | 'success' | 'failed' | 'expired' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'loading' | 'redirecting' | 'success' | 'failed' | 'expired' | 'error'
+  >('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
   const priceText = formatPrice(priceCents, currency, isFree);
@@ -109,9 +111,7 @@ export function PurchaseButton({
     return (
       <div className="rounded-xl bg-error/8 p-4 text-center">
         <p className="mb-1 text-sm text-error">{t('error.title')}</p>
-        {errorMessage && (
-          <p className="mb-3 text-xs text-muted">{errorMessage}</p>
-        )}
+        {errorMessage && <p className="mb-3 text-xs text-muted">{errorMessage}</p>}
         <button
           type="button"
           onClick={() => setStatus('idle')}

@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  generateProbes,
-  renderProbesYaml,
-  verifyProbesCoverTier1,
-} from './synthetics.js';
+import { generateProbes, renderProbesYaml, verifyProbesCoverTier1 } from './synthetics.js';
 import type { SloEntry } from './types.js';
 
 function makeSlo(overrides: Partial<SloEntry> = {}): SloEntry {

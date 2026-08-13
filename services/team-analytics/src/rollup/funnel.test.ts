@@ -16,7 +16,12 @@ describe('computeFunnel', () => {
   it('returns entered=0 for unknown steps with no events', () => {
     const rows = computeFunnel({ steps: ['view', 'share'], events: [] });
     expect(rows).toHaveLength(2);
-    expect(rows[0]).toMatchObject({ step_index: 0, step_name: 'view', entered: 0, conversion_rate: 0 });
+    expect(rows[0]).toMatchObject({
+      step_index: 0,
+      step_name: 'view',
+      entered: 0,
+      conversion_rate: 0,
+    });
     expect(rows[1]).toMatchObject({ step_index: 1, step_name: 'share', entered: 0 });
   });
 

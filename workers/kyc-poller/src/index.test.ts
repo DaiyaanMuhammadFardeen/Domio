@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import {
-  KycPollerWorker,
-  InMemoryKycSessionProvider,
-  SandboxKycClient,
-} from './index.js';
+import { KycPollerWorker, InMemoryKycSessionProvider, SandboxKycClient } from './index.js';
 import type { KycSessionRecord, KycClient } from './index.js';
 
 // ---------------------------------------------------------------------------
@@ -31,16 +27,20 @@ function makeSession(
 // ---------------------------------------------------------------------------
 
 describe('KycPollerWorker', () => {
-
   it('constructor throws when provider is missing', () => {
     expect(
-      () => new KycPollerWorker({ provider: undefined as never, kycClient: new SandboxKycClient() }),
+      () =>
+        new KycPollerWorker({ provider: undefined as never, kycClient: new SandboxKycClient() }),
     ).toThrow('provider is required');
   });
 
   it('constructor throws when kycClient is missing', () => {
     expect(
-      () => new KycPollerWorker({ provider: new InMemoryKycSessionProvider(), kycClient: undefined as never }),
+      () =>
+        new KycPollerWorker({
+          provider: new InMemoryKycSessionProvider(),
+          kycClient: undefined as never,
+        }),
     ).toThrow('kycClient is required');
   });
 

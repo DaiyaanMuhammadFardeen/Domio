@@ -26,10 +26,11 @@ export function JumpGrid({ slides, onJump }: JumpGridProps) {
   const filtered = useMemo(() => {
     if (!query) return slides;
     const q = query.toLowerCase();
-    return slides.filter((s) =>
-      s.title.toLowerCase().includes(q)
-      || s.slide_id.toLowerCase().includes(q)
-      || String(s.slide_index).includes(q)
+    return slides.filter(
+      (s) =>
+        s.title.toLowerCase().includes(q) ||
+        s.slide_id.toLowerCase().includes(q) ||
+        String(s.slide_index).includes(q),
     );
   }, [slides, query]);
 
@@ -46,13 +47,11 @@ export function JumpGrid({ slides, onJump }: JumpGridProps) {
           spellCheck={false}
         />
       </div>
-      <div
-        className="jump-grid__list"
-        role="grid"
-        aria-label="Slide grid"
-      >
+      <div className="jump-grid__list" role="grid" aria-label="Slide grid">
         {filtered.length === 0 ? (
-          <div style={{ padding: 8, color: 'var(--muted)', fontFamily: 'var(--mono)', fontSize: 12 }}>
+          <div
+            style={{ padding: 8, color: 'var(--muted)', fontFamily: 'var(--mono)', fontSize: 12 }}
+          >
             No matches.
           </div>
         ) : (
@@ -65,19 +64,25 @@ export function JumpGrid({ slides, onJump }: JumpGridProps) {
                 'jump-grid__cell',
                 s.is_current && 'jump-grid__cell--current',
                 s.hidden && 'jump-grid__cell--hidden',
-              ].filter(Boolean).join(' ')}
+              ]
+                .filter(Boolean)
+                .join(' ')}
               onClick={() => onJump(s.slide_id, s.slide_index)}
               aria-current={s.is_current ? 'true' : undefined}
               aria-label={`Slide ${s.slide_index + 1}: ${s.title}${s.hidden ? ' (hidden)' : ''}`}
             >
               <div className="jump-grid__thumb">
-                {s.thumbnail_url
-                  ? <img src={s.thumbnail_url} alt="" width={96} height={54} loading="lazy" />
-                  : <span>{s.slide_index + 1}</span>}
+                {s.thumbnail_url ? (
+                  <img src={s.thumbnail_url} alt="" width={96} height={54} loading="lazy" />
+                ) : (
+                  <span>{s.slide_index + 1}</span>
+                )}
               </div>
               <div className="jump-grid__caption">
                 <span className="jump-grid__index">{s.slide_index + 1}</span>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span
+                  style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
                   {s.title}
                 </span>
               </div>

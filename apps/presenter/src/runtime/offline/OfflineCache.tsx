@@ -48,10 +48,7 @@ export function OfflineCache({
   if (status === 'online') return null;
 
   const isOffline = status === 'offline' || status === 'stale';
-  const pct =
-    totalSlideCount > 0
-      ? Math.round((cachedSlideCount / totalSlideCount) * 100)
-      : 0;
+  const pct = totalSlideCount > 0 ? Math.round((cachedSlideCount / totalSlideCount) * 100) : 0;
 
   return (
     <div

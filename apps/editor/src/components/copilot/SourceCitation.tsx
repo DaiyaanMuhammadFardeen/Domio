@@ -47,11 +47,13 @@ export function SourceCitation({
     }
     setPending(true);
     setError(null);
-    openCitation(citationId).catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : String(err));
-    }).finally(() => {
-      setPending(false);
-    });
+    openCitation(citationId)
+      .catch((err: unknown) => {
+        setError(err instanceof Error ? err.message : String(err));
+      })
+      .finally(() => {
+        setPending(false);
+      });
   }, [citationId, onActivate]);
 
   return (

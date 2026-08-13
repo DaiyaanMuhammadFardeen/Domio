@@ -9,5 +9,8 @@ export { GazeHighlight, type GazeHighlightProps } from './GazeHighlight';
 export { GazePrivacyNotice, type GazePrivacyNoticeProps } from './GazePrivacyNotice';
 export { GazeCalibration, type GazeCalibrationProps } from './GazeCalibration';
 export { PiPBubble, type PiPBubbleProps } from './PiPBubble';
-export { VirtualBackgroundSelector, type VirtualBackgroundSelectorProps } from './VirtualBackgroundSelector';
+export {
+  VirtualBackgroundSelector,
+  type VirtualBackgroundSelectorProps,
+} from './VirtualBackgroundSelector';
 export { PipPanel } from './PipPanel';

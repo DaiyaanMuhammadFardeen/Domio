@@ -2,13 +2,14 @@
 
 > **Status:** Authoritative for IA, design tokens, accessibility patterns, copy voice, and locale conventions across all surfaces (editor, presenter, audience, admin, marketplace, CLI/API docs). Surfaces share tokens and components but each has its own IA expression.
 > **Assumptions:**
-> - The product is a *suite* of coordinated surfaces (9 named in §3.0), not a single app.
+>
+> - The product is a _suite_ of coordinated surfaces (9 named in §3.0), not a single app.
 > - WCAG 2.2 AA is the floor; AAA where achievable.
 > - Bangla is a first-class locale from day one; UI strings, sample content, numerals toggle, font fallback (Noto Sans Bengali → SolaimanLipi → system Bengali).
 > - `prefers-reduced-motion` is respected across all surfaces.
 > - Mobile-first for audience join and presenter remote; desktop-first for editor and admin.
-> **Owner:** Design director + UX research lead.
-> **Last reviewed:** 2026-07-29.
+>   **Owner:** Design director + UX research lead.
+>   **Last reviewed:** 2026-07-29.
 
 ---
 
@@ -18,21 +19,21 @@
 
 ---
 
-## 3.0 Surfaces (the product is a *suite*)
+## 3.0 Surfaces (the product is a _suite_)
 
-Domio is not one app — it is a coordinated set of surfaces. Each surface has its own IA, design system *expression*, and a11y profile, but they share tokens, components, and copy voice.
+Domio is not one app — it is a coordinated set of surfaces. Each surface has its own IA, design system _expression_, and a11y profile, but they share tokens, components, and copy voice.
 
-| Surface | Primary users | Devices | Primary use |
-|---|---|---|---|
-| **Editor (web)** | P1 Designer, P4 Analyst, P9 Creator | desktop | Author/edit deck |
-| **Presenter view (web + phone remote)** | P2 Exec, P3 Speaker | laptop + phone | Present |
-| **Audience join (mobile web)** | Audience members (no account) | phone | Participate |
-| **Viewer / shared deck (web)** | Viewers (public, password, SSO) | any | Read/watch/interact |
-| **Admin console** | P8 Admin | desktop | Govern org |
-| **Marketplace portal** | P9 Creator + buyers | desktop | Discover/sell/purchase |
-| **CLI / API / MCP docs** | P10 Developer/Agent | desktop | Drive the engine |
-| **Phone remote (mobile web)** | P2/P3 | phone | Clicker + confidence monitor |
-| **Ops console (internal)** | Internal SRE/on-call | desktop | Operate the platform |
+| Surface                                 | Primary users                       | Devices        | Primary use                  |
+| --------------------------------------- | ----------------------------------- | -------------- | ---------------------------- |
+| **Editor (web)**                        | P1 Designer, P4 Analyst, P9 Creator | desktop        | Author/edit deck             |
+| **Presenter view (web + phone remote)** | P2 Exec, P3 Speaker                 | laptop + phone | Present                      |
+| **Audience join (mobile web)**          | Audience members (no account)       | phone          | Participate                  |
+| **Viewer / shared deck (web)**          | Viewers (public, password, SSO)     | any            | Read/watch/interact          |
+| **Admin console**                       | P8 Admin                            | desktop        | Govern org                   |
+| **Marketplace portal**                  | P9 Creator + buyers                 | desktop        | Discover/sell/purchase       |
+| **CLI / API / MCP docs**                | P10 Developer/Agent                 | desktop        | Drive the engine             |
+| **Phone remote (mobile web)**           | P2/P3                               | phone          | Clicker + confidence monitor |
+| **Ops console (internal)**              | Internal SRE/on-call                | desktop        | Operate the platform         |
 
 ---
 
@@ -132,14 +133,14 @@ Domio is not one app — it is a coordinated set of surfaces. Each surface has i
 
 ## 3.2 Navigation
 
-| Surface | Primary nav pattern | Notes |
-|---|---|---|
-| Editor | Persistent left/right rails + top bar | Cmd+K palette for everything |
-| Presenter | Bottom toolbar (autohide) + Cmd shortcuts | Mouse stays out of the way |
-| Audience | Hidden chrome; minimal bottom bar | Distraction-free; bottom bar only if interactive features on |
-| Admin | Sidebar (collapsible) | Multi-section tabs |
-| Marketplace | Top nav + grid | Standard SaaS pattern |
-| Docs | Sidebar + content + right TOC | Verbatim from `06` docs site |
+| Surface     | Primary nav pattern                       | Notes                                                        |
+| ----------- | ----------------------------------------- | ------------------------------------------------------------ |
+| Editor      | Persistent left/right rails + top bar     | Cmd+K palette for everything                                 |
+| Presenter   | Bottom toolbar (autohide) + Cmd shortcuts | Mouse stays out of the way                                   |
+| Audience    | Hidden chrome; minimal bottom bar         | Distraction-free; bottom bar only if interactive features on |
+| Admin       | Sidebar (collapsible)                     | Multi-section tabs                                           |
+| Marketplace | Top nav + grid                            | Standard SaaS pattern                                        |
+| Docs        | Sidebar + content + right TOC             | Verbatim from `06` docs site                                 |
 
 **Keyboard reachability:** every interactive element is reachable in N tab stops where N ≤ 7 from any starting focus. The Cmd+K palette is the universal "I don't know where this is" escape hatch.
 
@@ -176,6 +177,7 @@ Domio is not one app — it is a coordinated set of surfaces. Each surface has i
 ```
 
 Notes:
+
 - Left rail collapses to icons; right rail collapses to icons; both can be hidden entirely (Zen mode).
 - Tabs in the right rail are vertically stacked (vertical tabs) to maximize canvas height.
 - FPS and profile shown in dev builds; hidden by default in production.
@@ -185,6 +187,7 @@ Notes:
 ## 3.4 Responsive Viewer Layout (web-shared deck)
 
 Breakpoints (mobile-first):
+
 - `xs` ≤ 480px (audience join)
 - `sm` ≤ 768px (scroll-mode)
 - `md` ≤ 1280px (slide-mode, scaled)
@@ -463,13 +466,13 @@ flowchart LR
 
 ### 3.8.11 Empty / loading / error / offline — universal rules
 
-| State | Rule |
-|---|---|
-| Empty | Always provide a next action ("Create your first deck" rather than "Nothing here"). |
-| Loading | Skeleton matches the shape of the final content; never show a spinner alone. |
-| Error | Plain-language cause; remediation; link to docs; never raw stack traces in UI. |
-| Offline | Banner: "You're offline — changes are saved locally."; sync state visible in top bar. |
-| Conflict | Visible diff; user picks; CRDT ensures no silent overwrites. |
+| State    | Rule                                                                                  |
+| -------- | ------------------------------------------------------------------------------------- |
+| Empty    | Always provide a next action ("Create your first deck" rather than "Nothing here").   |
+| Loading  | Skeleton matches the shape of the final content; never show a spinner alone.          |
+| Error    | Plain-language cause; remediation; link to docs; never raw stack traces in UI.        |
+| Offline  | Banner: "You're offline — changes are saved locally."; sync state visible in top bar. |
+| Conflict | Visible diff; user picks; CRDT ensures no silent overwrites.                          |
 
 ---
 
@@ -487,6 +490,7 @@ flowchart LR
 ### 3.9.2 Components
 
 A shared library (token-named, no hard-coded colors):
+
 - Button (primary, secondary, ghost, danger; sizes sm/md/lg)
 - Input (text, number, color, select, combobox, date)
 - Popover, Dialog, Toast, Tooltip, DropdownMenu
@@ -544,18 +548,18 @@ A shared library (token-named, no hard-coded colors):
 
 ### 3.10.3 Tone per persona
 
-| Persona | Tone | Notes |
-|---|---|---|
-| Designer | Crisp, technical | Trust them; reduce hand-holding. |
-| Exec | Calm, confident | "Everything's under control." |
-| Sales/Trainer | Energetic, encouraging | "Let's go!" energy in audience prompts. |
-| Analyst | Precise, factual | Numbers and units are precise; no rounding for clarity. |
-| Educator | Patient, accessible | Use classroom analogies; avoid jargon. |
-| Marketer | Outcome-focused | Tie UX to measurable results. |
-| Reviewer | Diplomatic, neutral | Frame suggestions, not commands. |
-| Admin | Authoritative, audit-friendly | Clear boundaries; no surprises. |
-| Creator | Encouraging, commercial | Highlight revenue and reach. |
-| Developer/Agent | Technical, exact | No fluff; show code. |
+| Persona         | Tone                          | Notes                                                   |
+| --------------- | ----------------------------- | ------------------------------------------------------- |
+| Designer        | Crisp, technical              | Trust them; reduce hand-holding.                        |
+| Exec            | Calm, confident               | "Everything's under control."                           |
+| Sales/Trainer   | Energetic, encouraging        | "Let's go!" energy in audience prompts.                 |
+| Analyst         | Precise, factual              | Numbers and units are precise; no rounding for clarity. |
+| Educator        | Patient, accessible           | Use classroom analogies; avoid jargon.                  |
+| Marketer        | Outcome-focused               | Tie UX to measurable results.                           |
+| Reviewer        | Diplomatic, neutral           | Frame suggestions, not commands.                        |
+| Admin           | Authoritative, audit-friendly | Clear boundaries; no surprises.                         |
+| Creator         | Encouraging, commercial       | Highlight revenue and reach.                            |
+| Developer/Agent | Technical, exact              | No fluff; show code.                                    |
 
 ---
 
@@ -563,58 +567,58 @@ A shared library (token-named, no hard-coded colors):
 
 ### 3.11.1 Universal shortcuts
 
-| Combo | Action |
-|---|---|
-| `Cmd/Ctrl + K` | Open command palette |
-| `Cmd/Ctrl + Z` / `Shift+Z` | Undo / redo |
-| `Cmd/Ctrl + S` | No-op (auto-save) — but binds to "Save snapshot" in history |
-| `?` | Open shortcut cheatsheet |
-| `Esc` | Close dialog / exit mode |
+| Combo                      | Action                                                      |
+| -------------------------- | ----------------------------------------------------------- |
+| `Cmd/Ctrl + K`             | Open command palette                                        |
+| `Cmd/Ctrl + Z` / `Shift+Z` | Undo / redo                                                 |
+| `Cmd/Ctrl + S`             | No-op (auto-save) — but binds to "Save snapshot" in history |
+| `?`                        | Open shortcut cheatsheet                                    |
+| `Esc`                      | Close dialog / exit mode                                    |
 
 ### 3.11.2 Editor shortcuts
 
-| Combo | Action |
-|---|---|
-| `V` | Select tool |
-| `T` | Text tool |
-| `F` | Frame tool |
-| `R` | Rectangle |
-| `O` | Ellipse |
-| `L` | Line |
-| `P` | Pen |
-| `C` | Comment tool |
-| `Cmd/Ctrl + D` | Duplicate |
-| `Cmd/Ctrl + G` / `Shift+G` | Group / ungroup |
-| `Cmd/Ctrl + Shift + K` | Open components |
-| `Cmd/Ctrl + ;` | Open comments |
-| `Cmd/Ctrl + Alt + T` | Insert token |
-| `Cmd/Ctrl + Alt + B` | Bind data |
-| `[` / `]` | Send back / bring forward |
-| `Space + drag` | Pan canvas |
-| `Cmd/Ctrl + 1..9` | Switch tab (Design, Prototype, Animate, Data, Inspect, etc.) |
+| Combo                      | Action                                                       |
+| -------------------------- | ------------------------------------------------------------ |
+| `V`                        | Select tool                                                  |
+| `T`                        | Text tool                                                    |
+| `F`                        | Frame tool                                                   |
+| `R`                        | Rectangle                                                    |
+| `O`                        | Ellipse                                                      |
+| `L`                        | Line                                                         |
+| `P`                        | Pen                                                          |
+| `C`                        | Comment tool                                                 |
+| `Cmd/Ctrl + D`             | Duplicate                                                    |
+| `Cmd/Ctrl + G` / `Shift+G` | Group / ungroup                                              |
+| `Cmd/Ctrl + Shift + K`     | Open components                                              |
+| `Cmd/Ctrl + ;`             | Open comments                                                |
+| `Cmd/Ctrl + Alt + T`       | Insert token                                                 |
+| `Cmd/Ctrl + Alt + B`       | Bind data                                                    |
+| `[` / `]`                  | Send back / bring forward                                    |
+| `Space + drag`             | Pan canvas                                                   |
+| `Cmd/Ctrl + 1..9`          | Switch tab (Design, Prototype, Animate, Data, Inspect, etc.) |
 
 ### 3.11.3 Presenter shortcuts
 
-| Combo | Action |
-|---|---|
-| `→` / `Space` / `Click` | Next |
-| `←` / `Backspace` | Previous |
-| `B` | Blackout |
-| `W` | Whiteout |
-| `Cmd/Ctrl + J` | Slide grid |
-| `Cmd/Ctrl + L` | Laser pointer toggle |
-| `Cmd/Ctrl + P` | Pen |
-| `Cmd/Ctrl + H` | Hide slide |
-| `Cmd/Ctrl + Shift + R` | Reorder (modal) |
-| `Esc` | End |
+| Combo                   | Action               |
+| ----------------------- | -------------------- |
+| `→` / `Space` / `Click` | Next                 |
+| `←` / `Backspace`       | Previous             |
+| `B`                     | Blackout             |
+| `W`                     | Whiteout             |
+| `Cmd/Ctrl + J`          | Slide grid           |
+| `Cmd/Ctrl + L`          | Laser pointer toggle |
+| `Cmd/Ctrl + P`          | Pen                  |
+| `Cmd/Ctrl + H`          | Hide slide           |
+| `Cmd/Ctrl + Shift + R`  | Reorder (modal)      |
+| `Esc`                   | End                  |
 
 ### 3.11.4 Audience shortcuts
 
-| Combo | Action |
-|---|---|
-| `R` | Raise hand toggle |
-| `1..5` | React with emoji |
-| `?` | Open help |
+| Combo  | Action            |
+| ------ | ----------------- |
+| `R`    | Raise hand toggle |
+| `1..5` | React with emoji  |
+| `?`    | Open help         |
 
 ### 3.11.5 Focus management rules
 
@@ -736,13 +740,13 @@ A shared library (token-named, no hard-coded colors):
 
 ## 3.16 Open Decisions
 
-| ID | Decision | Owner | Deadline |
-|---|---|---|---|
-| OD-UX-01 | Whether the editor ships with a vertical or horizontal right rail by default. | Design lead | M2 |
-| OD-UX-02 | Whether audience join uses SSO for enterprise sessions by default or email alias. | Product + Enterprise | M6 |
-| OD-UX-03 | Whether RTL UI ships in v1 or only data-readiness. | i18n lead | M3 |
-| OD-UX-04 | Final Bangla font fallback chain. | Design + i18n | M3 |
-| OD-UX-05 | Voice defaults for AI rehearsal coach: warm vs. neutral. | AI product | M5 |
+| ID       | Decision                                                                          | Owner                | Deadline |
+| -------- | --------------------------------------------------------------------------------- | -------------------- | -------- |
+| OD-UX-01 | Whether the editor ships with a vertical or horizontal right rail by default.     | Design lead          | M2       |
+| OD-UX-02 | Whether audience join uses SSO for enterprise sessions by default or email alias. | Product + Enterprise | M6       |
+| OD-UX-03 | Whether RTL UI ships in v1 or only data-readiness.                                | i18n lead            | M3       |
+| OD-UX-04 | Final Bangla font fallback chain.                                                 | Design + i18n        | M3       |
+| OD-UX-05 | Voice defaults for AI rehearsal coach: warm vs. neutral.                          | AI product           | M5       |
 
 ---
 

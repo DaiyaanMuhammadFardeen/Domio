@@ -92,5 +92,9 @@ export const Errors = {
 /** Map a thrown unknown to a RegistryError (unknown → 500). */
 export function toRegistryError(err: unknown): RegistryError {
   if (err instanceof RegistryError) return err;
-  return new RegistryError('ERR_VALIDATION', err instanceof Error ? err.message : 'Unknown error', 500);
+  return new RegistryError(
+    'ERR_VALIDATION',
+    err instanceof Error ? err.message : 'Unknown error',
+    500,
+  );
 }

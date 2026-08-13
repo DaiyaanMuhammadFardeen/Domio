@@ -32,17 +32,10 @@ const TIMESTAMP_RE =
   /^(\d{2}):(\d{2}):(\d{2})[.,](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[.,](\d{3})$/;
 
 function parseTimestamp(ts: string): number | null {
-  const match = ts.trim().match(
-    /^(\d{2}):(\d{2}):(\d{2})[.,](\d{3})$/,
-  );
+  const match = ts.trim().match(/^(\d{2}):(\d{2}):(\d{2})[.,](\d{3})$/);
   if (!match) return null;
   const [, hh, mm, ss, ms] = match;
-  return (
-    Number(hh) * 3_600_000 +
-    Number(mm) * 60_000 +
-    Number(ss) * 1_000 +
-    Number(ms)
-  );
+  return Number(hh) * 3_600_000 + Number(mm) * 60_000 + Number(ss) * 1_000 + Number(ms);
 }
 
 function pad2(n: number): string {
@@ -104,8 +97,24 @@ export function parseVTT(vtt: string): ParseResult {
       continue;
     }
 
-    const startMs = parseTimestamp(timestampMatch[1] + ':' + timestampMatch[2] + ':' + timestampMatch[3] + '.' + timestampMatch[4]);
-    const endMs = parseTimestamp(timestampMatch[5] + ':' + timestampMatch[6] + ':' + timestampMatch[7] + '.' + timestampMatch[8]);
+    const startMs = parseTimestamp(
+      timestampMatch[1] +
+        ':' +
+        timestampMatch[2] +
+        ':' +
+        timestampMatch[3] +
+        '.' +
+        timestampMatch[4],
+    );
+    const endMs = parseTimestamp(
+      timestampMatch[5] +
+        ':' +
+        timestampMatch[6] +
+        ':' +
+        timestampMatch[7] +
+        '.' +
+        timestampMatch[8],
+    );
 
     if (startMs === null || endMs === null) {
       warnings.push({

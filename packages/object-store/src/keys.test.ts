@@ -41,9 +41,9 @@ describe('key builders', () => {
   });
 
   it('formats caption manifest key', () => {
-    expect(captionManifestKey({ workspace_id: 'ws-abc', session_id: 'sess-001', language: 'bn' })).toBe(
-      'captions/ws-abc/sess-001/bn/manifest.vtt',
-    );
+    expect(
+      captionManifestKey({ workspace_id: 'ws-abc', session_id: 'sess-001', language: 'bn' }),
+    ).toBe('captions/ws-abc/sess-001/bn/manifest.vtt');
   });
 
   it('formats clip segment + caption keys', () => {
@@ -53,14 +53,18 @@ describe('key builders', () => {
     expect(clipCaptionKey({ workspace_id: 'ws-abc', clip_id: 'clip-001', language: 'en' })).toBe(
       'clips/ws-abc/clip-001/captions/en.vtt',
     );
-    expect(clipSpecKey({ workspace_id: 'ws-abc', clip_id: 'clip-001' })).toBe('clips/ws-abc/clip-001/spec.json');
+    expect(clipSpecKey({ workspace_id: 'ws-abc', clip_id: 'clip-001' })).toBe(
+      'clips/ws-abc/clip-001/spec.json',
+    );
   });
 
   it('formats scorm + replay + thumbnail keys', () => {
-    expect(scormPackageKey({ workspace_id: 'ws-abc', package_id: 'pkg-001' })).toBe('scorm/ws-abc/pkg-001.zip');
-    expect(replayAssetKey({ workspace_id: 'ws-abc', recording_id: 'rec-001', asset: 'manifest' })).toBe(
-      'replays/ws-abc/rec-001/manifest.json',
+    expect(scormPackageKey({ workspace_id: 'ws-abc', package_id: 'pkg-001' })).toBe(
+      'scorm/ws-abc/pkg-001.zip',
     );
+    expect(
+      replayAssetKey({ workspace_id: 'ws-abc', recording_id: 'rec-001', asset: 'manifest' }),
+    ).toBe('replays/ws-abc/rec-001/manifest.json');
     expect(thumbnailKey({ workspace_id: 'ws-abc', entity_id: 'ent-001', sequence: 3 })).toBe(
       'thumbnails/ws-abc/ent-001/00003.jpg',
     );
@@ -68,7 +72,11 @@ describe('key builders', () => {
 
   it('parseKey round-trips well-formed keys', () => {
     const parsed = parseKey('recordings/ws-abc/sess-001/screen/00007.mp4');
-    expect(parsed).toEqual({ bucket: 'recordings', workspace_id: 'ws-abc', parts: ['sess-001', 'screen', '00007.mp4'] });
+    expect(parsed).toEqual({
+      bucket: 'recordings',
+      workspace_id: 'ws-abc',
+      parts: ['sess-001', 'screen', '00007.mp4'],
+    });
   });
 
   it('parseKey rejects unknown buckets', () => {

@@ -51,9 +51,15 @@ export class InMemoryElectionStore implements ElectionStore {
     last_heartbeat_at_ms: 0,
     role: 'disabled',
   };
-  async load(): Promise<ElectionState> { return this.state; }
-  async save(state: ElectionState): Promise<void> { this.state = state; }
-  __raw(): ElectionState { return this.state; }
+  async load(): Promise<ElectionState> {
+    return this.state;
+  }
+  async save(state: ElectionState): Promise<void> {
+    this.state = state;
+  }
+  __raw(): ElectionState {
+    return this.state;
+  }
 }
 
 export interface ElectionOptions {
@@ -101,12 +107,15 @@ export class Election {
   /** Try to claim primary. If no primary is alive, bump epoch and assign
    *  ourselves. If the primary is ourselves, refresh the heartbeat.
    *  Otherwise return `false` — another primary is healthy. */
-  async tryClaim(): Promise<{ claimed: true; state: ElectionState } | { claimed: false; state: ElectionState }> {
+  async tryClaim(): Promise<
+    { claimed: true; state: ElectionState } | { claimed: false; state: ElectionState }
+  > {
     const current = await this.store.load();
     const now = this.clock();
-    const primaryAlive = current.primary_id !== null
-      && current.last_heartbeat_at_ms > 0
-      && now - current.last_heartbeat_at_ms <= this.primaryTtlMs;
+    const primaryAlive =
+      current.primary_id !== null &&
+      current.last_heartbeat_at_ms > 0 &&
+      now - current.last_heartbeat_at_ms <= this.primaryTtlMs;
 
     if (current.primary_id === this.candidateId) {
       const next: ElectionState = { ...current, last_heartbeat_at_ms: now };

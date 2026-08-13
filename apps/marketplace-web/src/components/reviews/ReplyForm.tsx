@@ -59,10 +59,7 @@ export function ReplyForm({ reviewId, onSubmitted }: ReplyFormProps) {
       className="space-y-2 rounded-lg border border-border bg-bg p-3"
       data-testid={`reply-form-${reviewId}`}
     >
-      <label
-        htmlFor={`reply-body-${reviewId}`}
-        className="block text-xs font-medium text-muted"
-      >
+      <label htmlFor={`reply-body-${reviewId}`} className="block text-xs font-medium text-muted">
         {t('market.review.reply.title')}
       </label>
       <textarea

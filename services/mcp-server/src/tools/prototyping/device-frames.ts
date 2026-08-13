@@ -128,8 +128,8 @@ export const list_device_frames: McpTool<DeviceFrameListInput, readonly DeviceFr
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_device_frames', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/device-frames`).then(
-        (r) => (r as DeviceFrame[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/device-frames`).then((r) =>
+        (r as DeviceFrame[]).slice(),
       ),
     );
   },

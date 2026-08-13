@@ -27,7 +27,12 @@ beforeAll(() => {
   app = buildApp(deps);
 });
 
-async function req(method: string, path: string, body?: unknown, headers?: Record<string, string>): Promise<Response> {
+async function req(
+  method: string,
+  path: string,
+  body?: unknown,
+  headers?: Record<string, string>,
+): Promise<Response> {
   const init: RequestInit = {
     method,
     headers: {
@@ -41,7 +46,12 @@ async function req(method: string, path: string, body?: unknown, headers?: Recor
   return app.request(path, init);
 }
 
-async function reqRaw(method: string, path: string, body: ArrayBuffer, headers?: Record<string, string>): Promise<Response> {
+async function reqRaw(
+  method: string,
+  path: string,
+  body: ArrayBuffer,
+  headers?: Record<string, string>,
+): Promise<Response> {
   return app.request(path, {
     method,
     headers: {
@@ -66,7 +76,7 @@ describe('Catalog routes', () => {
     const blobBytes = new TextEncoder().encode('{"content":"hello"}');
     const blobRes = await reqRaw('POST', '/v1/blobs', blobBytes.buffer);
     expect(blobRes.status).toBe(201);
-    const blobJson = await blobRes.json() as { sha256: string };
+    const blobJson = (await blobRes.json()) as { sha256: string };
     expect(blobJson.sha256).toMatch(/^[0-9a-f]{64}$/);
 
     // 2. Publish a package referencing that blob
@@ -80,7 +90,10 @@ describe('Catalog routes', () => {
       files: { main: blobJson.sha256 },
     });
     expect(pubRes.status).toBe(201);
-    const pubBody = await pubRes.json() as { pkg: { id: string; catalogId: string; version: string }; created: boolean };
+    const pubBody = (await pubRes.json()) as {
+      pkg: { id: string; catalogId: string; version: string };
+      created: boolean;
+    };
     expect(pubBody.created).toBe(true);
     expect(pubBody.pkg.catalogId).toBe(catalogId);
     expect(pubBody.pkg.version).toBe(version);
@@ -89,7 +102,7 @@ describe('Catalog routes', () => {
   it('GET /v1/registry/packages?q=button (search)', async () => {
     const res = await req('GET', '/v1/registry/packages?q=button');
     expect(res.status).toBe(200);
-    const body = await res.json() as { packages: Array<{ catalogId: string }> };
+    const body = (await res.json()) as { packages: Array<{ catalogId: string }> };
     expect(body.packages.length).toBeGreaterThanOrEqual(1);
     expect(body.packages.some((p) => p.catalogId === catalogId)).toBe(true);
   });
@@ -97,28 +110,28 @@ describe('Catalog routes', () => {
   it('GET /v1/registry/packages/:catalogId (get latest)', async () => {
     const res = await req('GET', `/v1/registry/packages/${catalogId}`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { pkg: { version: string } };
+    const body = (await res.json()) as { pkg: { version: string } };
     expect(body.pkg.version).toBe(version);
   });
 
   it('GET /v1/registry/packages/:catalogId?version=1.0.0 (get by version)', async () => {
     const res = await req('GET', `/v1/registry/packages/${catalogId}?version=${version}`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { pkg: { version: string } };
+    const body = (await res.json()) as { pkg: { version: string } };
     expect(body.pkg.version).toBe(version);
   });
 
   it('GET /v1/registry/packages/:catalogId/versions', async () => {
     const res = await req('GET', `/v1/registry/packages/${catalogId}/versions`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { versions: string[] };
+    const body = (await res.json()) as { versions: string[] };
     expect(body.versions).toContain(version);
   });
 
   it('GET /v1/registry/packages/:catalogId/variants', async () => {
     const res = await req('GET', `/v1/registry/packages/${catalogId}/variants`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { variants: Array<{ id: string; label: string }> };
+    const body = (await res.json()) as { variants: Array<{ id: string; label: string }> };
     expect(body.variants).toBeDefined();
     expect(Array.isArray(body.variants)).toBe(true);
   });
@@ -129,7 +142,11 @@ describe('Catalog routes', () => {
       pinMode: 'pin-version',
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { version: string; bundleUrls: Array<{ name: string }>; updated?: boolean };
+    const body = (await res.json()) as {
+      version: string;
+      bundleUrls: Array<{ name: string }>;
+      updated?: boolean;
+    };
     expect(body.version).toBe(version);
     expect(body.bundleUrls.length).toBeGreaterThanOrEqual(1);
     expect(body.bundleUrls[0]!.name).toBe('main');
@@ -138,7 +155,7 @@ describe('Catalog routes', () => {
   it('GET /v1/blobs/:sha256 (retrieve blob with hash verification)', async () => {
     const blobBytes = new TextEncoder().encode('{"content":"hello"}');
     const blobRes = await reqRaw('POST', '/v1/blobs', blobBytes.buffer);
-    const { sha256 } = await blobRes.json() as { sha256: string };
+    const { sha256 } = (await blobRes.json()) as { sha256: string };
 
     const getRes = await app.request(`/v1/blobs/${sha256}`);
     expect(getRes.status).toBe(200);
@@ -157,7 +174,7 @@ describe('Blob tamper rejection', () => {
     // Store a blob
     const blobBytes = new TextEncoder().encode('real content');
     const blobRes = await reqRaw('POST', '/v1/blobs', blobBytes.buffer);
-    const { sha256: realHash } = await blobRes.json() as { sha256: string };
+    const { sha256: realHash } = (await blobRes.json()) as { sha256: string };
 
     // Publish with a different hash as the file reference
     const fakeHash = 'b'.repeat(64);
@@ -170,7 +187,7 @@ describe('Blob tamper rejection', () => {
     });
     // Should fail because the fake hash blob doesn't exist
     expect(res.status).toBeGreaterThanOrEqual(400);
-    const body = await res.json() as { error: { code: string } };
+    const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBeDefined();
     void realHash;
   });
@@ -199,7 +216,7 @@ describe('Deprecate after publish', () => {
       reason: 'Superseded by v2',
     });
     expect(depRes.status).toBe(200);
-    const body = await depRes.json() as { pkg: { deprecation: { reason: string } | null } };
+    const body = (await depRes.json()) as { pkg: { deprecation: { reason: string } | null } };
     expect(body.pkg.deprecation).toBeDefined();
     expect(body.pkg.deprecation!.reason).toBe('Superseded by v2');
   });
@@ -233,13 +250,13 @@ describe('Marketplace routes', () => {
       tags: ['ui', 'button'],
     });
     expect(createRes.status).toBe(201);
-    const { listing } = await createRes.json() as { listing: { id: string; status: string } };
+    const { listing } = (await createRes.json()) as { listing: { id: string; status: string } };
     expect(listing.status).toBe('draft');
 
     // Publish
     const pubRes = await req('POST', `/v1/marketplace/listings/${listing.id}/publish`);
     expect(pubRes.status).toBe(200);
-    const pubBody = await pubRes.json() as { listing: { status: string } };
+    const pubBody = (await pubRes.json()) as { listing: { status: string } };
     expect(pubBody.listing.status).toBe('published');
 
     // Get listing
@@ -261,7 +278,7 @@ describe('Marketplace routes', () => {
     // Search
     const searchRes = await req('GET', '/v1/marketplace/search?q=market');
     expect(searchRes.status).toBe(200);
-    const searchBody = await searchRes.json() as { items: Array<{ id: string }>; total: number };
+    const searchBody = (await searchRes.json()) as { items: Array<{ id: string }>; total: number };
     expect(searchBody.total).toBeGreaterThanOrEqual(1);
   });
 
@@ -276,7 +293,7 @@ describe('Marketplace routes', () => {
 
     // We need a published listing for this; use the existing one
     const listRes = await req('GET', '/v1/marketplace/listings');
-    const { listings } = await listRes.json() as { listings: Array<{ id: string }> };
+    const { listings } = (await listRes.json()) as { listings: Array<{ id: string }> };
     const listingId = listings[0]!.id;
 
     const purchaseRes = await req('POST', '/v1/marketplace/purchases', {
@@ -287,7 +304,9 @@ describe('Marketplace routes', () => {
       grossCents: 499,
     });
     expect(purchaseRes.status).toBe(201);
-    const body = await purchaseRes.json() as { revenueEvent: { grossCents: number; feeCents: number; netCents: number } };
+    const body = (await purchaseRes.json()) as {
+      revenueEvent: { grossCents: number; feeCents: number; netCents: number };
+    };
     expect(body.revenueEvent.grossCents).toBe(499);
     expect(body.revenueEvent.feeCents).toBeGreaterThan(0);
     expect(body.revenueEvent.netCents).toBeLessThan(499);
@@ -296,9 +315,12 @@ describe('Marketplace routes', () => {
   });
 
   it('GET /v1/marketplace/payouts/eligibility', async () => {
-    const res = await req('GET', '/v1/marketplace/payouts/eligibility?sellerId=seller-1&periodMonth=2026-01');
+    const res = await req(
+      'GET',
+      '/v1/marketplace/payouts/eligibility?sellerId=seller-1&periodMonth=2026-01',
+    );
     expect(res.status).toBe(200);
-    const body = await res.json() as { eligible: boolean; minPayoutCents: number };
+    const body = (await res.json()) as { eligible: boolean; minPayoutCents: number };
     expect(typeof body.eligible).toBe('boolean');
     expect(typeof body.minPayoutCents).toBe('number');
   });
@@ -328,7 +350,7 @@ describe('License routes', () => {
       priceCents: 1999,
       tags: ['paid'],
     });
-    const { listing } = await createRes.json() as { listing: { id: string } };
+    const { listing } = (await createRes.json()) as { listing: { id: string } };
     listingId = listing.id;
     await req('POST', `/v1/marketplace/listings/${listingId}/publish`);
   });
@@ -342,7 +364,11 @@ describe('License routes', () => {
       seats: 3,
     });
     expect(grantRes.status).toBe(201);
-    const grantBody = await grantRes.json() as { grantId: string; token: string; expiresAt: number };
+    const grantBody = (await grantRes.json()) as {
+      grantId: string;
+      token: string;
+      expiresAt: number;
+    };
     expect(grantBody.token).toBeDefined();
     expect(grantBody.expiresAt).toBeGreaterThan(0);
 
@@ -353,7 +379,7 @@ describe('License routes', () => {
       version: '1.0.0',
     });
     expect(verifyRes.status).toBe(200);
-    const verifyBody = await verifyRes.json() as { valid: boolean; grant?: { id: string } };
+    const verifyBody = (await verifyRes.json()) as { valid: boolean; grant?: { id: string } };
     expect(verifyBody.valid).toBe(true);
     expect(verifyBody.grant).toBeDefined();
     expect(verifyBody.grant!.id).toBe(grantBody.grantId);
@@ -366,7 +392,10 @@ describe('License routes', () => {
       seats: 1,
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { version: string; licenseGrant?: { id: string; signedToken: string } };
+    const body = (await res.json()) as {
+      version: string;
+      licenseGrant?: { id: string; signedToken: string };
+    };
     expect(body.version).toBe('1.0.0');
     // Paid listing should include a license grant
     expect(body.licenseGrant).toBeDefined();
@@ -382,7 +411,7 @@ describe('Error mapping', () => {
   it('GET /v1/registry/packages/:catalogId returns 404 for missing package', async () => {
     const res = await req('GET', '/v1/registry/packages/does.notexist');
     expect(res.status).toBe(404);
-    const body = await res.json() as { error: { code: string; message: string } };
+    const body = (await res.json()) as { error: { code: string; message: string } };
     expect(body.error.code).toBe('ERR_NOT_FOUND');
     expect(body.error.message).toContain('not found');
   });
@@ -395,14 +424,14 @@ describe('Error mapping', () => {
       name: 'Bad Version',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { error: { code: string } };
+    const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBe('ERR_VALIDATION');
   });
 
   it('GET /v1/blobs/:sha256 returns 404 for missing blob', async () => {
     const res = await app.request(`/v1/blobs/${'c'.repeat(64)}`);
     expect(res.status).toBe(404);
-    const body = await res.json() as { error: { code: string } };
+    const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBe('ERR_NOT_FOUND');
   });
 
@@ -414,7 +443,7 @@ describe('Error mapping', () => {
       name: 'Bad ID',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { error: { code: string } };
+    const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBe('ERR_VALIDATION');
   });
 });
@@ -434,13 +463,18 @@ describe('x-tenant-id header passthrough', () => {
     });
 
     // Install with a specific tenant id header
-    const res = await req('POST', '/v1/registry/packages/test.tenant-test/install', {
-      version: '1.0.0',
-      pinMode: 'pin-version',
-    }, {
-      'x-tenant-id': 'acme-corp',
-      'x-user-id': 'user-42',
-    });
+    const res = await req(
+      'POST',
+      '/v1/registry/packages/test.tenant-test/install',
+      {
+        version: '1.0.0',
+        pinMode: 'pin-version',
+      },
+      {
+        'x-tenant-id': 'acme-corp',
+        'x-user-id': 'user-42',
+      },
+    );
     expect(res.status).toBe(200);
 
     // Verify the library item was stored with the correct workspaceId
@@ -499,7 +533,10 @@ describe('Template routes', () => {
       values: { title: 'My Custom Title' },
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { deck: Record<string, unknown>; manifest: Array<{ key: string; value: unknown }> };
+    const body = (await res.json()) as {
+      deck: Record<string, unknown>;
+      manifest: Array<{ key: string; value: unknown }>;
+    };
     expect(body.deck).toBeDefined();
     expect(body.manifest.length).toBeGreaterThanOrEqual(1);
     expect(body.manifest[0]!.value).toBe('My Custom Title');
@@ -508,7 +545,7 @@ describe('Template routes', () => {
   it('GET /v1/templates/:templateId/guided-order', async () => {
     const res = await req('GET', `/v1/templates/${templateId}/guided-order`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { placeholders: Array<{ id: string; required: boolean }> };
+    const body = (await res.json()) as { placeholders: Array<{ id: string; required: boolean }> };
     expect(body.placeholders.length).toBeGreaterThanOrEqual(1);
     // Required placeholders come first
     const requiredIdx = body.placeholders.findIndex((p) => p.required);
@@ -521,7 +558,12 @@ describe('Template routes', () => {
   it('GET /v1/templates/:templateId/preview', async () => {
     const res = await req('GET', `/v1/templates/${templateId}/preview`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { svg: string; width: number; height: number; frames: Array<{ slideIndex: number }> };
+    const body = (await res.json()) as {
+      svg: string;
+      width: number;
+      height: number;
+      frames: Array<{ slideIndex: number }>;
+    };
     expect(body.svg).toContain('<svg');
     expect(body.width).toBeGreaterThan(0);
     expect(body.frames.length).toBeGreaterThan(0);
@@ -543,14 +585,16 @@ describe('Media routes — icons', () => {
       viewBox: '0 0 24 24',
     });
     expect(ingestRes.status).toBe(201);
-    const ingestBody = await ingestRes.json() as { icon: { id: string; name: string; perceptualHash?: string } };
+    const ingestBody = (await ingestRes.json()) as {
+      icon: { id: string; name: string; perceptualHash?: string };
+    };
     expect(ingestBody.icon.name).toBe('test-pin');
     expect(ingestBody.icon.perceptualHash).toBeDefined();
 
     // Search
     const searchRes = await req('GET', '/v1/media/icons/search?q=pin');
     expect(searchRes.status).toBe(200);
-    const searchBody = await searchRes.json() as { icons: Array<{ name: string }> };
+    const searchBody = (await searchRes.json()) as { icons: Array<{ name: string }> };
     expect(searchBody.icons.length).toBeGreaterThanOrEqual(1);
     expect(searchBody.icons.some((i) => i.name === 'test-pin')).toBe(true);
   });
@@ -561,14 +605,14 @@ describe('Media routes — icons', () => {
       name: 'test-recolor',
       pathData: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
     });
-    const { icon } = await ingestRes.json() as { icon: { id: string; pathData: string } };
+    const { icon } = (await ingestRes.json()) as { icon: { id: string; pathData: string } };
 
     // Recolor
     const res = await req('POST', `/v1/media/icons/${icon.id}/recolor`, {
       color: '#ff0000',
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { color: string; pathData: string };
+    const body = (await res.json()) as { color: string; pathData: string };
     expect(body.color).toBe('#ff0000');
   });
 });
@@ -593,14 +637,16 @@ describe('Media routes — stickers', () => {
   it('GET /v1/media/stickers lists packs', async () => {
     const res = await req('GET', '/v1/media/stickers');
     expect(res.status).toBe(200);
-    const body = await res.json() as { packs: Array<{ id: string; name: string }> };
+    const body = (await res.json()) as { packs: Array<{ id: string; name: string }> };
     expect(body.packs.some((p) => p.id === 'pack-test-001')).toBe(true);
   });
 
   it('POST /v1/media/stickers/:packId/install', async () => {
     const res = await req('POST', '/v1/media/stickers/pack-test-001/install');
     expect(res.status).toBe(200);
-    const body = await res.json() as { stickers: Array<{ catalogId: string; installed: boolean }> };
+    const body = (await res.json()) as {
+      stickers: Array<{ catalogId: string; installed: boolean }>;
+    };
     expect(body.stickers.length).toBe(2);
     expect(body.stickers[0]!.catalogId).toBe('comp-a');
   });
@@ -614,7 +660,7 @@ describe('Health check', () => {
   it('GET /healthz returns ok', async () => {
     const res = await app.request('/healthz');
     expect(res.status).toBe(200);
-    const body = await res.json() as { ok: boolean };
+    const body = (await res.json()) as { ok: boolean };
     expect(body.ok).toBe(true);
   });
 });

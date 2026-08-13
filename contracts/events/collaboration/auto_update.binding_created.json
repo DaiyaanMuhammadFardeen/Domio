@@ -4,7 +4,15 @@
   "title": "CollabAutoUpdateBindingCreated",
   "description": "Emitted when an auto-update binding is created (reference insert from the slide library).",
   "type": "object",
-  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "actor_id", "actor_type", "payload"],
+  "required": [
+    "event_id",
+    "event_type",
+    "ts_ms",
+    "workspace_id",
+    "actor_id",
+    "actor_type",
+    "payload"
+  ],
   "properties": {
     "event_id": {
       "type": "string",

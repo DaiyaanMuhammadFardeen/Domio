@@ -5,7 +5,18 @@
   "description": "License grant document for a marketplace purchase. Tracks the grant lifecycle including issuance, expiry, revocation, and offline grace period. Phase 19.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "workspace_id", "user_id", "catalog_id", "version", "listing_id", "license_id", "seats", "signed_token", "issued_at_ms"],
+  "required": [
+    "id",
+    "workspace_id",
+    "user_id",
+    "catalog_id",
+    "version",
+    "listing_id",
+    "license_id",
+    "seats",
+    "signed_token",
+    "issued_at_ms"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -82,7 +93,15 @@
     "PurchaseLicenseGrant": {
       "type": "object",
       "description": "License grant issued at purchase time. Mirrors the LicenseGrant shape but scoped to the purchase transaction.",
-      "required": ["license_grant_id", "listing_id", "buyer_id", "version", "scopes", "issued_at_ms", "signed_token"],
+      "required": [
+        "license_grant_id",
+        "listing_id",
+        "buyer_id",
+        "version",
+        "scopes",
+        "issued_at_ms",
+        "signed_token"
+      ],
       "properties": {
         "license_grant_id": {
           "type": "string",

@@ -28,35 +28,35 @@ services/analytics-warehouse/
 
 ## Endpoints
 
-| Method | Path | Notes |
-|---|---|---|
-| GET | `/v1/decks/summary` | `?workspace_id=&from_ms=&to_ms=&deck_id=` |
-| GET | `/v1/decks/:deckId/slides` | `?workspace_id=&from_ms=&to_ms=` |
-| GET | `/v1/decks/:deckId/funnel` | `?steps=dwell,scroll,click&...` |
-| GET | `/v1/decks/:deckId/slides/:slideId/heatmap` | `?workspace_id=&from_ms=&to_ms=` |
-| POST | `/graphql` | see `graphql/schema.ts` |
-| GET | `/healthz` / `/readyz` | ClickHouse ping included |
+| Method | Path                                        | Notes                                     |
+| ------ | ------------------------------------------- | ----------------------------------------- |
+| GET    | `/v1/decks/summary`                         | `?workspace_id=&from_ms=&to_ms=&deck_id=` |
+| GET    | `/v1/decks/:deckId/slides`                  | `?workspace_id=&from_ms=&to_ms=`          |
+| GET    | `/v1/decks/:deckId/funnel`                  | `?steps=dwell,scroll,click&...`           |
+| GET    | `/v1/decks/:deckId/slides/:slideId/heatmap` | `?workspace_id=&from_ms=&to_ms=`          |
+| POST   | `/graphql`                                  | see `graphql/schema.ts`                   |
+| GET    | `/healthz` / `/readyz`                      | ClickHouse ping included                  |
 
 ## Rollup
 
 The orchestrator runs in process and is safe to run multiple replicas
 of (idempotent on each table). It honours:
 
-| Cadence | Action |
-|---|---|
-| Hourly | `OPTIMIZE TABLE FINAL` on `events`, `session_agg_mv`, `slide_metric_5m` |
+| Cadence | Action                                                                     |
+| ------- | -------------------------------------------------------------------------- |
+| Hourly  | `OPTIMIZE TABLE FINAL` on `events`, `session_agg_mv`, `slide_metric_5m`    |
 | Nightly | `TRUNCATE TABLE benchmark_snapshot` (re-populated by the benchmark worker) |
 
 ## Configuration
 
-| Env | Default | Notes |
-|---|---|---|
-| `CLICKHOUSE_URL` | `http://localhost:8123` | HTTP endpoint |
-| `CLICKHOUSE_DB` | `domio_analytics` | |
-| `CLICKHOUSE_USER` | `default` | |
-| `CLICKHOUSE_PASSWORD` | `` | |
-| `PORT` | `3030` | |
-| `READ_ONLY` | `true` | adds `readonly = 1` setting to every query |
+| Env                   | Default                 | Notes                                      |
+| --------------------- | ----------------------- | ------------------------------------------ |
+| `CLICKHOUSE_URL`      | `http://localhost:8123` | HTTP endpoint                              |
+| `CLICKHOUSE_DB`       | `domio_analytics`       |                                            |
+| `CLICKHOUSE_USER`     | `default`               |                                            |
+| `CLICKHOUSE_PASSWORD` | ``                      |                                            |
+| `PORT`                | `3030`                  |                                            |
+| `READ_ONLY`           | `true`                  | adds `readonly = 1` setting to every query |
 
 ## Run
 

@@ -31,14 +31,14 @@ benefit at each tier exceeds the cost.
 We adopt a **polyglot backend** with the following tier-by-tier language
 commitment:
 
-| Tier | Language | Runtime | Why |
-|---|---|---|---|
-| Control plane | TypeScript | Node 22 + Hono | Type sharing with editor / MCP / CLI / SDK; fastest iteration on business logic; large hiring pool. |
-| Realtime gateway | Go 1.23 | gorilla/websocket + NATS | Memory-efficient per-WebSocket connection; concurrency primitives fit fan-out. |
-| CPU workers (primary) | Go 1.23 | nats.go + container | Same team as gateway; fast iteration. |
-| CPU workers (hot path) | Rust 1.82 | axum + prost | Profiling-justified escape hatch (see §6). |
-| AI orchestrator | TypeScript | Node 22 | Shares types with the control plane. |
-| ML / eval | Python 3.12 | uv + Pydantic | Standard ML ecosystem; eval harnesses. |
+| Tier                   | Language    | Runtime                  | Why                                                                                                 |
+| ---------------------- | ----------- | ------------------------ | --------------------------------------------------------------------------------------------------- |
+| Control plane          | TypeScript  | Node 22 + Hono           | Type sharing with editor / MCP / CLI / SDK; fastest iteration on business logic; large hiring pool. |
+| Realtime gateway       | Go 1.23     | gorilla/websocket + NATS | Memory-efficient per-WebSocket connection; concurrency primitives fit fan-out.                      |
+| CPU workers (primary)  | Go 1.23     | nats.go + container      | Same team as gateway; fast iteration.                                                               |
+| CPU workers (hot path) | Rust 1.82   | axum + prost             | Profiling-justified escape hatch (see §6).                                                          |
+| AI orchestrator        | TypeScript  | Node 22                  | Shares types with the control plane.                                                                |
+| ML / eval              | Python 3.12 | uv + Pydantic            | Standard ML ecosystem; eval harnesses.                                                              |
 
 **The contract rule is non-negotiable:**
 

@@ -101,7 +101,9 @@ export interface MeetingEventEmitter {
 }
 
 export const noopEmitter: MeetingEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------

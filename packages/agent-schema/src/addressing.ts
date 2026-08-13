@@ -49,7 +49,10 @@ const KIND_SET = new Set<string>(KINDS);
 const SEGMENT_RE = /^([a-zA-Z][a-zA-Z0-9_-]*)\[([^\]]+)\]$/;
 
 export class AddressParseError extends Error {
-  constructor(message: string, public readonly path: string) {
+  constructor(
+    message: string,
+    public readonly path: string,
+  ) {
     super(`Invalid address path "${path}": ${message}`);
     this.name = 'AddressParseError';
   }

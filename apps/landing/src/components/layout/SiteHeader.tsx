@@ -19,10 +19,7 @@ const PRIMARY_LANDING_NODES: ReadonlyArray<NavNode> = ALL_LANDING_NODES.filter(
   (node) => node.primary === true && node.surface === 'landing',
 ).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-function resolveActivePrimary(
-  nodes: ReadonlyArray<NavNode>,
-  currentPath: string,
-): string | null {
+function resolveActivePrimary(nodes: ReadonlyArray<NavNode>, currentPath: string): string | null {
   if (nodes.length === 0) return null;
   let bestId: string | null = null;
   let bestLen = -1;
@@ -40,9 +37,7 @@ export interface SiteHeaderProps {
   readonly currentPath?: string;
 }
 
-export function SiteHeader({
-  currentPath = '/',
-}: SiteHeaderProps): JSX.Element {
+export function SiteHeader({ currentPath = '/' }: SiteHeaderProps): JSX.Element {
   return (
     <AppNav
       currentPath={currentPath}

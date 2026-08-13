@@ -71,148 +71,183 @@ interface InProgressStroke {
 const DEFAULT_COLOR = '#f85149';
 const DEFAULT_WIDTH = 4;
 
-export const AnnotationCanvas = forwardRef<AnnotationCanvasHandle, AnnotationCanvasProps>(function AnnotationCanvas(
-  { layers, slideId, tool, color, strokeWidth, enabled, onStrokeComplete, className, style },
-  ref,
-) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const inProgressRef = useRef<InProgressStroke | null>(null);
+export const AnnotationCanvas = forwardRef<AnnotationCanvasHandle, AnnotationCanvasProps>(
+  function AnnotationCanvas(
+    { layers, slideId, tool, color, strokeWidth, enabled, onStrokeComplete, className, style },
+    ref,
+  ) {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const inProgressRef = useRef<InProgressStroke | null>(null);
 
-  // ---------------------------------------------------------------------------
-  // Drawing helpers
-  // ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+    // Drawing helpers
+    // ---------------------------------------------------------------------------
 
-  const drawLayer = useCallback((ctx: CanvasRenderingContext2D, layer: AnnotationLayerDto, w: number, h: number) => {
-    const strokeColor = layer.color ?? DEFAULT_COLOR;
-    const width = layer.stroke_width ?? DEFAULT_WIDTH;
-    switch (layer.kind) {
-      case 'pen':
-        drawPen(ctx, layer.geometry as PenGeometry, w, h, strokeColor, width, false);
-        break;
-      case 'highlighter':
-        drawPen(ctx, layer.geometry as PenGeometry, w, h, strokeColor, width * 4, true);
-        break;
-      case 'spotlight':
-        drawSpotlight(ctx, layer.geometry as SpotlightGeometry, w, h);
-        break;
-      case 'zoom':
-        drawZoom(ctx, layer.geometry as ZoomGeometry, w, h);
-        break;
-      case 'blur':
-        drawBlur(ctx, layer.geometry as BlurGeometry, w, h, width);
-        break;
-    }
-  }, []);
+    const drawLayer = useCallback(
+      (ctx: CanvasRenderingContext2D, layer: AnnotationLayerDto, w: number, h: number) => {
+        const strokeColor = layer.color ?? DEFAULT_COLOR;
+        const width = layer.stroke_width ?? DEFAULT_WIDTH;
+        switch (layer.kind) {
+          case 'pen':
+            drawPen(ctx, layer.geometry as PenGeometry, w, h, strokeColor, width, false);
+            break;
+          case 'highlighter':
+            drawPen(ctx, layer.geometry as PenGeometry, w, h, strokeColor, width * 4, true);
+            break;
+          case 'spotlight':
+            drawSpotlight(ctx, layer.geometry as SpotlightGeometry, w, h);
+            break;
+          case 'zoom':
+            drawZoom(ctx, layer.geometry as ZoomGeometry, w, h);
+            break;
+          case 'blur':
+            drawBlur(ctx, layer.geometry as BlurGeometry, w, h, width);
+            break;
+        }
+      },
+      [],
+    );
 
-  const redraw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const w = canvas.width;
-    const h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
-    for (const layer of layers) {
-      if (layer.slide_id !== slideId) continue;
-      drawLayer(ctx, layer, w, h);
-    }
-    // In-progress stroke on top.
-    if (inProgressRef.current) {
-      const ip = inProgressRef.current;
-      drawPen(ctx, { strokes: [ip.points] }, w, h, color ?? DEFAULT_COLOR, strokeWidth ?? DEFAULT_WIDTH, false);
-    }
-  }, [layers, slideId, drawLayer, color, strokeWidth]);
-
-  useImperativeHandle(ref, () => ({
-    clear: () => {
-      inProgressRef.current = null;
-      redraw();
-    },
-    redraw,
-  }), [redraw]);
-
-  // Resize canvas to match its CSS size on every frame.
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ro = new ResizeObserver(() => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.round(rect.width * dpr);
-      canvas.height = Math.round(rect.height * dpr);
+    const redraw = useCallback(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!ctx) return;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      for (const layer of layers) {
+        if (layer.slide_id !== slideId) continue;
+        drawLayer(ctx, layer, w, h);
+      }
+      // In-progress stroke on top.
+      if (inProgressRef.current) {
+        const ip = inProgressRef.current;
+        drawPen(
+          ctx,
+          { strokes: [ip.points] },
+          w,
+          h,
+          color ?? DEFAULT_COLOR,
+          strokeWidth ?? DEFAULT_WIDTH,
+          false,
+        );
+      }
+    }, [layers, slideId, drawLayer, color, strokeWidth]);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        clear: () => {
+          inProgressRef.current = null;
+          redraw();
+        },
+        redraw,
+      }),
+      [redraw],
+    );
+
+    // Resize canvas to match its CSS size on every frame.
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ro = new ResizeObserver(() => {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        redraw();
+      });
+      ro.observe(canvas);
+      return () => ro.disconnect();
+    }, [redraw]);
+
+    useEffect(() => {
       redraw();
-    });
-    ro.observe(canvas);
-    return () => ro.disconnect();
-  }, [redraw]);
+    }, [redraw]);
 
-  useEffect(() => { redraw(); }, [redraw]);
+    // ---------------------------------------------------------------------------
+    // Pointer handling
+    // ---------------------------------------------------------------------------
 
-  // ---------------------------------------------------------------------------
-  // Pointer handling
-  // ---------------------------------------------------------------------------
+    const drawable = enabled && (tool === 'pen' || tool === 'highlighter');
 
-  const drawable = enabled && (tool === 'pen' || tool === 'highlighter');
+    const onPointerDown = useCallback(
+      (e: ReactPointerEvent<HTMLCanvasElement>) => {
+        if (!drawable) return;
+        e.preventDefault();
+        (e.target as Element).setPointerCapture(e.pointerId);
+        const rect = e.currentTarget.getBoundingClientRect();
+        inProgressRef.current = {
+          points: [
+            {
+              x: (e.clientX - rect.left) / rect.width,
+              y: (e.clientY - rect.top) / rect.height,
+              pressure: e.pressure || 0.5,
+              t: 0,
+            },
+          ],
+          startedAt: performance.now(),
+        };
+      },
+      [drawable],
+    );
 
-  const onPointerDown = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (!drawable) return;
-    e.preventDefault();
-    (e.target as Element).setPointerCapture(e.pointerId);
-    const rect = e.currentTarget.getBoundingClientRect();
-    inProgressRef.current = {
-      points: [{ x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height, pressure: e.pressure || 0.5, t: 0 }],
-      startedAt: performance.now(),
-    };
-  }, [drawable]);
+    const onPointerMove = useCallback(
+      (e: ReactPointerEvent<HTMLCanvasElement>) => {
+        if (!drawable || !inProgressRef.current) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const ip = inProgressRef.current;
+        const last = ip.points[ip.points.length - 1];
+        const t = performance.now() - ip.startedAt;
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        if (last && last.x === x && last.y === y) return;
+        ip.points.push({ x, y, pressure: e.pressure || 0.5, t });
+        redraw();
+      },
+      [drawable, redraw],
+    );
 
-  const onPointerMove = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (!drawable || !inProgressRef.current) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ip = inProgressRef.current;
-    const last = ip.points[ip.points.length - 1];
-    const t = performance.now() - ip.startedAt;
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    if (last && last.x === x && last.y === y) return;
-    ip.points.push({ x, y, pressure: e.pressure || 0.5, t });
-    redraw();
-  }, [drawable, redraw]);
+    const onPointerUp = useCallback(
+      (e: ReactPointerEvent<HTMLCanvasElement>) => {
+        if (!drawable || !inProgressRef.current) return;
+        (e.target as Element).releasePointerCapture(e.pointerId);
+        const ip = inProgressRef.current;
+        inProgressRef.current = null;
+        if (ip.points.length >= 2) {
+          onStrokeComplete?.({ strokes: [ip.points] });
+        }
+        redraw();
+      },
+      [drawable, onStrokeComplete, redraw],
+    );
 
-  const onPointerUp = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (!drawable || !inProgressRef.current) return;
-    (e.target as Element).releasePointerCapture(e.pointerId);
-    const ip = inProgressRef.current;
-    inProgressRef.current = null;
-    if (ip.points.length >= 2) {
-      onStrokeComplete?.({ strokes: [ip.points] });
-    }
-    redraw();
-  }, [drawable, onStrokeComplete, redraw]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      data-testid="annotation-canvas"
-      data-slide-id={slideId}
-      className={className ?? 'annotation-canvas'}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: drawable ? 'auto' : 'none',
-        touchAction: 'none',
-        ...style,
-      }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-    />
-  );
-});
+    return (
+      <canvas
+        ref={canvasRef}
+        data-testid="annotation-canvas"
+        data-slide-id={slideId}
+        className={className ?? 'annotation-canvas'}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: drawable ? 'auto' : 'none',
+          touchAction: 'none',
+          ...style,
+        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+      />
+    );
+  },
+);
 
 // ---------------------------------------------------------------------------
 // Pure drawing helpers — also exported for tests

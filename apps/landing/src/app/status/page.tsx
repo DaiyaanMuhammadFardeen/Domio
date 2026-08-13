@@ -61,9 +61,8 @@ export default async function StatusPage(): Promise<JSX.Element> {
             Domio service status
           </h1>
           <p className="status-hero__sub">
-            Live availability for every public Domio service. We refresh this
-            page every minute; subscribe below to be notified by email when an
-            incident opens or resolves.
+            Live availability for every public Domio service. We refresh this page every minute;
+            subscribe below to be notified by email when an incident opens or resolves.
           </p>
         </header>
 
@@ -73,18 +72,13 @@ export default async function StatusPage(): Promise<JSX.Element> {
           aria-live="polite"
         >
           <span className="status-banner__dot" aria-hidden="true" />
-          <span className="status-banner__label">
-            {OVERALL_LABEL[snapshot.overall]}
-          </span>
+          <span className="status-banner__label">{OVERALL_LABEL[snapshot.overall]}</span>
           <span className="status-banner__fetched">
             Last updated {formatFetchedAt(snapshot.fetched_at_ms)}
           </span>
         </section>
 
-        <section
-          className="status-services"
-          aria-labelledby="status-services-heading"
-        >
+        <section className="status-services" aria-labelledby="status-services-heading">
           <h2 id="status-services-heading">Services</h2>
           <ul className="status-services__list">
             {snapshot.services.map((svc) => (

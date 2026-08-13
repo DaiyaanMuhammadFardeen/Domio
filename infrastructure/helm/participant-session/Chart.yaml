@@ -1,10 +1,10 @@
 apiVersion: v2
 name: participant-session
 description: Phase 16 W1 — Participant session service. Owns the audience-side
-             session row, idempotency, and presenter lookup.
+  session row, idempotency, and presenter lookup.
 type: application
 version: 0.1.0
-appVersion: "0.1.0"
+appVersion: '0.1.0'
 keywords:
   - domio
   - audience

@@ -13,9 +13,7 @@ function makeRepo() {
 describe('rates — ingest + convert', () => {
   it('ingests and converts USD/EUR', async () => {
     const repo = makeRepo();
-    await ingestRates(repo, [
-      { pair: 'USD/EUR', rate: 0.92, asOf: new Date('2026-08-01') },
-    ]);
+    await ingestRates(repo, [{ pair: 'USD/EUR', rate: 0.92, asOf: new Date('2026-08-01') }]);
     const result = await convert(repo, 100, 'USD', 'EUR');
     expect(result.convertedAmount).toBe(92);
     expect(result.rate).toBe(0.92);
@@ -53,9 +51,7 @@ describe('rates — asOf fallback', () => {
 
   it('falls back to latest if asOf is after all records', async () => {
     const repo = makeRepo();
-    await ingestRates(repo, [
-      { pair: 'JPY/EUR', rate: 0.0061, asOf: new Date('2026-08-01') },
-    ]);
+    await ingestRates(repo, [{ pair: 'JPY/EUR', rate: 0.0061, asOf: new Date('2026-08-01') }]);
     const result = await convert(repo, 1000, 'JPY', 'EUR', new Date('2026-12-31'));
     expect(result.rate).toBe(0.0061);
   });

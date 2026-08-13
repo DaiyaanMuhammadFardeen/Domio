@@ -37,16 +37,16 @@ export function Step4FirstListing({ state }: Step4FirstListingProps) {
       <h2 id={headingId} className="text-lg font-semibold text-slate-900">
         {t('creator.onboarding.listing.heading')}
       </h2>
-      <p className="text-sm text-slate-600">
-        {t('creator.onboarding.listing.body')}
-      </p>
+      <p className="text-sm text-slate-600">{t('creator.onboarding.listing.body')}</p>
 
       <ul className="space-y-2 rounded-md border border-slate-200 bg-white p-4">
         <SummaryRow
           label={t('creator.onboarding.step.identity')}
-          value={state.identity.verified
-            ? `${state.identity.legal_name ?? '—'} · ${state.identity.country ?? '—'}`
-            : '—'}
+          value={
+            state.identity.verified
+              ? `${state.identity.legal_name ?? '—'} · ${state.identity.country ?? '—'}`
+              : '—'
+          }
           ok={state.identity.verified}
         />
         <SummaryRow
@@ -89,15 +89,7 @@ export function Step4FirstListing({ state }: Step4FirstListingProps) {
   );
 }
 
-function SummaryRow({
-  label,
-  value,
-  ok,
-}: {
-  label: string;
-  value: string;
-  ok: boolean;
-}) {
+function SummaryRow({ label, value, ok }: { label: string; value: string; ok: boolean }) {
   return (
     <li className="flex items-center justify-between gap-3 text-sm">
       <div className="flex items-center gap-2">

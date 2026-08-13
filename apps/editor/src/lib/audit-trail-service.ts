@@ -241,12 +241,12 @@ function pseudoRandomFromSeed(seed: number): () => number {
     state ^= state >>> 17;
     state ^= state << 5;
     state >>>= 0;
-    return state / 0xFFFFFFFF;
+    return state / 0xffffffff;
   };
 }
 
 function buildSeedEntries(nowMs: number): readonly AuditEntry[] {
-  const rand = pseudoRandomFromSeed(0xA0D17EE9);
+  const rand = pseudoRandomFromSeed(0xa0d17ee9);
   return SEED_SPECS.map((spec, i): AuditEntry => {
     const agent = AGENTS[spec.agentIdx] ?? AGENTS[0]!;
     const toolDef = TOOLS[spec.toolIdx] ?? TOOLS[0]!;

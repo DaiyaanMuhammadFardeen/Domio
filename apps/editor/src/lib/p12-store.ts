@@ -137,7 +137,7 @@ function synthesizeOutline(prompt: string): OutlineSlide[] {
       ...src,
       id,
       // Slightly vary confidence per-slide for realism
-      confidence: Math.min(0.99, src.confidence + ((seed + i * 7) % 10 - 5) / 100),
+      confidence: Math.min(0.99, src.confidence + (((seed + i * 7) % 10) - 5) / 100),
     };
   });
 }
@@ -173,7 +173,9 @@ function clearTimers() {
 // Public API
 // ---------------------------------------------------------------------------
 
-export function getState(): P12State { return _state; }
+export function getState(): P12State {
+  return _state;
+}
 
 /** Create a synthetic outline from a prompt string (demo — no backend). */
 export function createOutlineFromPrompt(prompt: string): void {
@@ -203,9 +205,7 @@ export function editSlideTitle(id: string, title: string): void {
   if (!_state.outline) return;
   setState({
     outline: {
-      slides: _state.outline.slides.map((s) =>
-        s.id === id ? { ...s, intent: title } : s,
-      ),
+      slides: _state.outline.slides.map((s) => (s.id === id ? { ...s, intent: title } : s)),
     },
   });
 }
@@ -220,9 +220,7 @@ export function setChartType(id: string, type: ChartType): void {
   if (!_state.outline) return;
   setState({
     outline: {
-      slides: _state.outline.slides.map((s) =>
-        s.id === id ? { ...s, chartType: type } : s,
-      ),
+      slides: _state.outline.slides.map((s) => (s.id === id ? { ...s, chartType: type } : s)),
     },
   });
 }
@@ -270,7 +268,9 @@ export function approveAndGenerate(): void {
 
 export function subscribe(listener: () => void): () => void {
   _listeners = [..._listeners, listener];
-  return () => { _listeners = _listeners.filter((l) => l !== listener); };
+  return () => {
+    _listeners = _listeners.filter((l) => l !== listener);
+  };
 }
 
 /** Reset store for tests. */

@@ -2,9 +2,16 @@
  * @domio/qa-engine — observability.
  */
 
-export interface CounterLike { inc(by?: number, attrs?: Record<string, string>): void; }
-export interface HistogramLike { observe(value_ms: number, attrs?: Record<string, string>): void; }
-export interface UpDownCounterLike { inc(by?: number, attrs?: Record<string, string>): void; dec(by?: number, attrs?: Record<string, string>): void; }
+export interface CounterLike {
+  inc(by?: number, attrs?: Record<string, string>): void;
+}
+export interface HistogramLike {
+  observe(value_ms: number, attrs?: Record<string, string>): void;
+}
+export interface UpDownCounterLike {
+  inc(by?: number, attrs?: Record<string, string>): void;
+  dec(by?: number, attrs?: Record<string, string>): void;
+}
 export interface QaEngineMetrics {
   threads_created: CounterLike;
   submits: CounterLike;
@@ -19,5 +26,9 @@ export class NullQaEngineMetrics implements QaEngineMetrics {
   submit_latency_ms = makeHistogram();
   parking_lot_promotions = makeCounter();
 }
-function makeCounter(): CounterLike { return { inc: () => undefined }; }
-function makeHistogram(): HistogramLike { return { observe: () => undefined }; }
+function makeCounter(): CounterLike {
+  return { inc: () => undefined };
+}
+function makeHistogram(): HistogramLike {
+  return { observe: () => undefined };
+}

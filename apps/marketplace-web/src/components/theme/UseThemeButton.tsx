@@ -13,11 +13,7 @@ export interface UseThemeButtonProps {
   variant?: 'primary' | 'secondary';
 }
 
-export function UseThemeButton({
-  themeId,
-  slug,
-  variant = 'primary',
-}: UseThemeButtonProps) {
+export function UseThemeButton({ themeId, slug, variant = 'primary' }: UseThemeButtonProps) {
   const { t } = useLocale();
 
   const handleClick = useCallback(() => {
@@ -38,12 +34,7 @@ export function UseThemeButton({
       : 'w-full rounded-xl border border-border bg-panel py-3.5 text-sm font-semibold text-fg transition-all hover:border-accent';
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      data-testid="theme-use-cta"
-      className={className}
-    >
+    <button type="button" onClick={handleClick} data-testid="theme-use-cta" className={className}>
       {t('market.theme.useTheme')}
     </button>
   );

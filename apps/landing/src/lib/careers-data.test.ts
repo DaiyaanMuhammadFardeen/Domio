@@ -39,9 +39,7 @@ describe('careers-data', () => {
     expect(role!.employment_type.length).toBeGreaterThan(0);
     expect(role!.level.length).toBeGreaterThan(0);
     expect(role!.summary.length).toBeGreaterThan(0);
-    expect(role!.apply_url).toMatch(
-      /^https:\/\/boards\.greenhouse\.io\/domio\/jobs\/\d+$/,
-    );
+    expect(role!.apply_url).toMatch(/^https:\/\/boards\.greenhouse\.io\/domio\/jobs\/\d+$/);
     expect(() => new Date(role!.posted_at_iso).toISOString()).not.toThrow();
     expect(role!.posted_at_iso.startsWith('2026')).toBe(true);
   });
@@ -55,37 +53,21 @@ describe('careers-data', () => {
   });
 
   it('uses location values from the closed set', () => {
-    const allowed: ReadonlyArray<RoleLocation> = [
-      'remote',
-      'sf',
-      'nyc',
-      'berlin',
-      'singapore',
-    ];
+    const allowed: ReadonlyArray<RoleLocation> = ['remote', 'sf', 'nyc', 'berlin', 'singapore'];
     for (const role of OPEN_ROLES) {
       expect(allowed).toContain(role.location);
     }
   });
 
   it('uses employment_type values from the closed set', () => {
-    const allowed: ReadonlyArray<EmploymentType> = [
-      'full_time',
-      'contract',
-      'intern',
-    ];
+    const allowed: ReadonlyArray<EmploymentType> = ['full_time', 'contract', 'intern'];
     for (const role of OPEN_ROLES) {
       expect(allowed).toContain(role.employment_type);
     }
   });
 
   it('uses level values from the closed set', () => {
-    const allowed: ReadonlyArray<RoleLevel> = [
-      'junior',
-      'mid',
-      'senior',
-      'staff',
-      'principal',
-    ];
+    const allowed: ReadonlyArray<RoleLevel> = ['junior', 'mid', 'senior', 'staff', 'principal'];
     for (const role of OPEN_ROLES) {
       expect(allowed).toContain(role.level);
     }

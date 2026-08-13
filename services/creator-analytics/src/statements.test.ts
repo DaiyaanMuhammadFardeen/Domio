@@ -5,11 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  buildStatementBody,
-  buildYearly1099KBody,
-  generateStatementId,
-} from './statements.js';
+import { buildStatementBody, buildYearly1099KBody, generateStatementId } from './statements.js';
 import type { RevenueEventRow, StatementSummary } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -72,7 +68,12 @@ describe('buildStatementBody', () => {
     const events = [
       makeRevenueEvent({ event_type: 'purchase', gross_cents: 1000, net_cents: 700 }),
       makeRevenueEvent({ event_type: 'purchase', gross_cents: 2000, net_cents: 1400, id: 'rev-2' }),
-      makeRevenueEvent({ event_type: 'subscription', gross_cents: 500, net_cents: 350, id: 'rev-3' }),
+      makeRevenueEvent({
+        event_type: 'subscription',
+        gross_cents: 500,
+        net_cents: 350,
+        id: 'rev-3',
+      }),
     ];
 
     const { summary, lineItems } = buildStatementBody('creator-1', '2025-06', events);
@@ -84,13 +85,13 @@ describe('buildStatementBody', () => {
 
     expect(lineItems).toHaveLength(2);
 
-    const purchaseItem = lineItems.find(l => l.event_type === 'purchase');
+    const purchaseItem = lineItems.find((l) => l.event_type === 'purchase');
     expect(purchaseItem).toBeDefined();
     expect(purchaseItem!.count).toBe(2);
     expect(purchaseItem!.gross_cents).toBe(3000);
     expect(purchaseItem!.net_cents).toBe(2100);
 
-    const subscriptionItem = lineItems.find(l => l.event_type === 'subscription');
+    const subscriptionItem = lineItems.find((l) => l.event_type === 'subscription');
     expect(subscriptionItem).toBeDefined();
     expect(subscriptionItem!.count).toBe(1);
     expect(subscriptionItem!.gross_cents).toBe(500);
@@ -121,9 +122,7 @@ describe('buildStatementBody', () => {
   });
 
   it('uses first event currency', () => {
-    const events = [
-      makeRevenueEvent({ currency: 'EUR' }),
-    ];
+    const events = [makeRevenueEvent({ currency: 'EUR' })];
 
     const { summary } = buildStatementBody('creator-1', '2025-06', events);
     expect(summary.currency).toBe('EUR');
@@ -137,9 +136,24 @@ describe('buildStatementBody', () => {
 describe('buildYearly1099KBody', () => {
   it('aggregates monthly statements into yearly totals', () => {
     const monthlyStatements = [
-      makeStatement({ period_month: '2025-01', total_gross_cents: 1000, total_fee_cents: 300, total_net_cents: 700 }),
-      makeStatement({ period_month: '2025-02', total_gross_cents: 2000, total_fee_cents: 600, total_net_cents: 1400 }),
-      makeStatement({ period_month: '2025-03', total_gross_cents: 500, total_fee_cents: 150, total_net_cents: 350 }),
+      makeStatement({
+        period_month: '2025-01',
+        total_gross_cents: 1000,
+        total_fee_cents: 300,
+        total_net_cents: 700,
+      }),
+      makeStatement({
+        period_month: '2025-02',
+        total_gross_cents: 2000,
+        total_fee_cents: 600,
+        total_net_cents: 1400,
+      }),
+      makeStatement({
+        period_month: '2025-03',
+        total_gross_cents: 500,
+        total_fee_cents: 150,
+        total_net_cents: 350,
+      }),
     ];
 
     const { summary, monthlyBreakdown } = buildYearly1099KBody('creator-1', monthlyStatements);
@@ -169,9 +183,7 @@ describe('buildYearly1099KBody', () => {
   });
 
   it('uses first statement currency', () => {
-    const monthlyStatements = [
-      makeStatement({ currency: 'GBP' }),
-    ];
+    const monthlyStatements = [makeStatement({ currency: 'GBP' })];
 
     const { summary } = buildYearly1099KBody('creator-1', monthlyStatements);
     expect(summary.currency).toBe('GBP');

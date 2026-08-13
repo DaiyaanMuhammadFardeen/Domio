@@ -11,11 +11,7 @@
 import { useMemo, useState, type JSX } from 'react';
 import { CategoryFilter } from '../../components/blog/CategoryFilter';
 import { PostCard } from '../../components/blog/PostCard';
-import {
-  BLOG_CATEGORY_LABELS,
-  type BlogCategory,
-  type BlogPost,
-} from '../../lib/blog-data';
+import { BLOG_CATEGORY_LABELS, type BlogCategory, type BlogPost } from '../../lib/blog-data';
 
 export interface BlogClientProps {
   readonly posts: ReadonlyArray<BlogPost>;

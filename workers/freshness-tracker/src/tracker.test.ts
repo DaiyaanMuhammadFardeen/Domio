@@ -11,7 +11,9 @@ function makeTracker(ttlMs = 5000, staleGraceMs = 0) {
   let now = 1000;
   const clock = () => new Date(now);
   const tracker = new FreshnessTracker({ clock });
-  const advance = (ms: number) => { now += ms; };
+  const advance = (ms: number) => {
+    now += ms;
+  };
   tracker.addBinding({
     bindingId: 'binding-1',
     freshnessTtlMs: ttlMs,

@@ -10,10 +10,7 @@
  */
 
 import type { JSX } from 'react';
-import {
-  userFacingByCategory,
-  type ServiceCategory,
-} from '../../lib/services-registry';
+import { userFacingByCategory, type ServiceCategory } from '../../lib/services-registry';
 import { ServiceCard } from './ServiceCard';
 
 const CATEGORY_LABELS: Readonly<Record<ServiceCategory, string>> = {
@@ -44,10 +41,7 @@ export function ServicesDirectory(): JSX.Element {
           aria-labelledby={`services-group-${group.category}`}
           data-testid={`services-group-${group.category}`}
         >
-          <h2
-            id={`services-group-${group.category}`}
-            className="services-directory__heading"
-          >
+          <h2 id={`services-group-${group.category}`} className="services-directory__heading">
             {CATEGORY_LABELS[group.category]}
           </h2>
           <ul className="services-directory__list">

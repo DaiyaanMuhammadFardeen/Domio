@@ -41,7 +41,9 @@ export interface LintHandlerContext {
   authorize?: (args: { actorId: string | undefined; action: 'read' | 'write' }) => void;
 }
 
-function ok<T>(b: T): HttpResponse { return { status: 200, body: b }; }
+function ok<T>(b: T): HttpResponse {
+  return { status: 200, body: b };
+}
 function badRequest(message: string, code: string, extra?: Record<string, unknown>): HttpResponse {
   return { status: 400, body: { error: message, code, ...(extra ?? {}) } };
 }
@@ -50,7 +52,10 @@ function unauthorized(): HttpResponse {
 }
 
 export async function runLintHandler(
-  req: HttpRequest<{ orgId: string }, Omit<LintRunRequest, 'orgId' | 'actorId'> & { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    Omit<LintRunRequest, 'orgId' | 'actorId'> & { actorId?: string }
+  >,
   ctx: LintHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.actorId ?? ctx.resolveActorId?.(req);
@@ -75,7 +80,8 @@ export async function runLintHandler(
     });
     return ok(result);
   } catch (e) {
-    if (e instanceof LintValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof LintValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     throw e;
   }
 }

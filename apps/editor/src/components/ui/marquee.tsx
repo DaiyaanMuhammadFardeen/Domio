@@ -13,11 +13,14 @@ interface MarqueeProps {
   children: ReactNode;
 }
 
-export function Marquee({ className, reverse = false, pauseOnHover = false, children }: MarqueeProps): ReactElement {
+export function Marquee({
+  className,
+  reverse = false,
+  pauseOnHover = false,
+  children,
+}: MarqueeProps): ReactElement {
   return (
-    <div
-      className={cn('group flex overflow-hidden [--gap:1rem] [--duration:40s]', className)}
-    >
+    <div className={cn('group flex overflow-hidden [--gap:1rem] [--duration:40s]', className)}>
       {[0, 1].map((copy) => (
         <div
           key={copy}

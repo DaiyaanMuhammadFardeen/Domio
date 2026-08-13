@@ -38,20 +38,48 @@ export class TimelineMetrics {
   validationFailedTotal = 0;
   versionConflictsTotal = 0;
 
-  recordTimelineCreated(): void { this.timelinesCreatedTotal++; }
-  recordTimelineUpdated(): void { this.timelinesUpdatedTotal++; }
-  recordTimelineDeleted(): void { this.timelinesDeletedTotal++; }
-  recordTrackCreated(): void { this.tracksCreatedTotal++; }
-  recordKeyframeCreated(): void { this.keyframesCreatedTotal++; }
-  recordTriggerCreated(): void { this.triggersCreatedTotal++; }
-  recordEasingCurveCreated(): void { this.easingCurvesCreatedTotal++; }
-  recordEasingValidationFailed(): void { this.easingValidationFailedTotal++; }
-  recordPresetApplied(): void { this.presetsAppliedTotal++; }
-  recordPresetValidationFailed(): void { this.presetValidationFailedTotal++; }
-  recordTransitionCreated(): void { this.transitionsCreatedTotal++; }
-  recordReducedMotionUpdated(): void { this.reducedMotionUpdatedTotal++; }
-  recordValidationFailed(): void { this.validationFailedTotal++; }
-  recordVersionConflict(): void { this.versionConflictsTotal++; }
+  recordTimelineCreated(): void {
+    this.timelinesCreatedTotal++;
+  }
+  recordTimelineUpdated(): void {
+    this.timelinesUpdatedTotal++;
+  }
+  recordTimelineDeleted(): void {
+    this.timelinesDeletedTotal++;
+  }
+  recordTrackCreated(): void {
+    this.tracksCreatedTotal++;
+  }
+  recordKeyframeCreated(): void {
+    this.keyframesCreatedTotal++;
+  }
+  recordTriggerCreated(): void {
+    this.triggersCreatedTotal++;
+  }
+  recordEasingCurveCreated(): void {
+    this.easingCurvesCreatedTotal++;
+  }
+  recordEasingValidationFailed(): void {
+    this.easingValidationFailedTotal++;
+  }
+  recordPresetApplied(): void {
+    this.presetsAppliedTotal++;
+  }
+  recordPresetValidationFailed(): void {
+    this.presetValidationFailedTotal++;
+  }
+  recordTransitionCreated(): void {
+    this.transitionsCreatedTotal++;
+  }
+  recordReducedMotionUpdated(): void {
+    this.reducedMotionUpdatedTotal++;
+  }
+  recordValidationFailed(): void {
+    this.validationFailedTotal++;
+  }
+  recordVersionConflict(): void {
+    this.versionConflictsTotal++;
+  }
 
   snapshot(): TimelineMetricSnapshot {
     return {

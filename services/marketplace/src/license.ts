@@ -32,7 +32,8 @@ export interface LicenseSigner {
 // Constants
 // ---------------------------------------------------------------------------
 
-const LICENSE_SECRET = process.env.MARKETPLACE_LICENSE_SECRET ?? 'domio-marketplace-license-dev-secret';
+const LICENSE_SECRET =
+  process.env.MARKETPLACE_LICENSE_SECRET ?? 'domio-marketplace-license-dev-secret';
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
@@ -75,9 +76,7 @@ export class SandboxLicenseSigner implements LicenseSigner {
     });
 
     const signingInput = `${header}.${payload}`;
-    const signature = createHmac('sha256', LICENSE_SECRET)
-      .update(signingInput)
-      .digest();
+    const signature = createHmac('sha256', LICENSE_SECRET).update(signingInput).digest();
     const sigB64 = b64url(signature);
 
     return `${signingInput}.${sigB64}`;
@@ -88,7 +87,10 @@ export class SandboxLicenseSigner implements LicenseSigner {
 // Verify helper (for testing)
 // ---------------------------------------------------------------------------
 
-export function verifyLicenseToken(token: string, secret: string = LICENSE_SECRET): {
+export function verifyLicenseToken(
+  token: string,
+  secret: string = LICENSE_SECRET,
+): {
   valid: boolean;
   payload?: Record<string, unknown>;
   reason?: string;
@@ -97,9 +99,7 @@ export function verifyLicenseToken(token: string, secret: string = LICENSE_SECRE
   if (parts.length !== 3) return { valid: false, reason: 'malformed' };
 
   const [header, payload, sigB64] = parts as [string, string, string];
-  const expected = createHmac('sha256', secret)
-    .update(`${header}.${payload}`)
-    .digest();
+  const expected = createHmac('sha256', secret).update(`${header}.${payload}`).digest();
 
   let provided: Buffer;
   try {

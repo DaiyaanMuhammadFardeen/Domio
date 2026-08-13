@@ -4,7 +4,16 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pg from 'pg';
 
-const MIGRATIONS_DIR = join(__dirname, '..', '..', '..', '..', 'infrastructure', 'postgres', 'migrations');
+const MIGRATIONS_DIR = join(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  '..',
+  'infrastructure',
+  'postgres',
+  'migrations',
+);
 const P06_MIGRATIONS = [
   '0011_phase06_component_catalog',
   '0012_phase06_libraries',
@@ -65,7 +74,20 @@ describe.skipIf(!hasDocker())('P06 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -178,7 +200,13 @@ describe.skipIf(!hasDocker())('P06 migrations apply + rollback', () => {
       `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`,
     );
     const tables = rows.map((r) => r.table_name);
-    for (const t of ['component_packages', 'marketplace_listing', 'brand_lock_region', 'icons', 'team_library_event']) {
+    for (const t of [
+      'component_packages',
+      'marketplace_listing',
+      'brand_lock_region',
+      'icons',
+      'team_library_event',
+    ]) {
       expect(tables).not.toContain(t);
     }
   });
@@ -198,7 +226,20 @@ describe.skipIf(!hasDocker())('P07 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -359,8 +400,12 @@ describe.skipIf(!hasDocker())('P07 migrations apply + rollback', () => {
     // Every P07 table should have at least one RLS policy.
     const tablesWithPolicies = new Set(rows.map((r) => r.tablename));
     for (const t of [
-      'design_token', 'token_alias', 'theme', 'brand_kit',
-      'brand_context', 'audit_brand_event',
+      'design_token',
+      'token_alias',
+      'theme',
+      'brand_kit',
+      'brand_context',
+      'audit_brand_event',
     ]) {
       expect(tablesWithPolicies.has(t)).toBe(true);
     }
@@ -382,11 +427,23 @@ describe.skipIf(!hasDocker())('P07 migrations apply + rollback', () => {
     );
     const tables = rows.map((r) => r.table_name);
     for (const t of [
-      'design_token', 'token_alias', 'theme', 'theme_version',
-      'theme_override', 'theme_application_event', 'brand_kit',
-      'brand_kit_logo', 'brand_kit_palette', 'brand_kit_font',
-      'brand_kit_imagery_rule', 'brand_kit_sub_brand', 'brand_kit_archive',
-      'brand_context', 'brand_extraction_job', 'font_asset', 'audit_brand_event',
+      'design_token',
+      'token_alias',
+      'theme',
+      'theme_version',
+      'theme_override',
+      'theme_application_event',
+      'brand_kit',
+      'brand_kit_logo',
+      'brand_kit_palette',
+      'brand_kit_font',
+      'brand_kit_imagery_rule',
+      'brand_kit_sub_brand',
+      'brand_kit_archive',
+      'brand_context',
+      'brand_extraction_job',
+      'font_asset',
+      'audit_brand_event',
     ]) {
       expect(tables).not.toContain(t);
     }
@@ -396,14 +453,20 @@ describe.skipIf(!hasDocker())('P07 migrations apply + rollback', () => {
 // ---------------------------------------------------------------------------
 // P08 migrations — live data plane.
 // ---------------------------------------------------------------------------
-const P08_MIGRATIONS = [
-  '0021_phase08_data_plane',
-  '0022_phase08_live_data_indexes_seed',
-];
+const P08_MIGRATIONS = ['0021_phase08_data_plane', '0022_phase08_live_data_indexes_seed'];
 const P08_TABLES = [
-  'data_connection', 'data_source', 'query', 'dataset_snapshot',
-  'scenario', 'formula_field', 'chart_widget', 'chart_binding',
-  'annotation', 'threshold_rule', 'embed_config', 'freshness_record',
+  'data_connection',
+  'data_source',
+  'query',
+  'dataset_snapshot',
+  'scenario',
+  'formula_field',
+  'chart_widget',
+  'chart_binding',
+  'annotation',
+  'threshold_rule',
+  'embed_config',
+  'freshness_record',
 ];
 
 describe.skipIf(!hasDocker())('P08 migrations apply + rollback', () => {
@@ -417,7 +480,20 @@ describe.skipIf(!hasDocker())('P08 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -585,14 +661,18 @@ describe.skipIf(!hasDocker())('P08 migrations apply + rollback', () => {
   });
 });
 
-const P09_MIGRATIONS = [
-  '0023_phase09_animation',
-  '0024_phase09_animation_indexes_seed',
-];
+const P09_MIGRATIONS = ['0023_phase09_animation', '0024_phase09_animation_indexes_seed'];
 const P09_TABLES = [
-  'timeline', 'timeline_track', 'timeline_keyframe', 'timeline_trigger',
-  'easing_curve', 'animation_preset', 'transition', 'reduced_motion_settings',
-  'magic_move_config', 'animation_export_job',
+  'timeline',
+  'timeline_track',
+  'timeline_keyframe',
+  'timeline_trigger',
+  'easing_curve',
+  'animation_preset',
+  'transition',
+  'reduced_motion_settings',
+  'magic_move_config',
+  'animation_export_job',
 ];
 
 describe.skipIf(!hasDocker())('P09 migrations apply + rollback', () => {
@@ -606,7 +686,20 @@ describe.skipIf(!hasDocker())('P09 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -632,8 +725,16 @@ describe.skipIf(!hasDocker())('P09 migrations apply + rollback', () => {
   }, 180000);
 
   afterAll(async () => {
-    try { await client.end(); } catch { /* ignore */ }
-    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+    try {
+      await client.end();
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+    } catch {
+      /* ignore */
+    }
   });
 
   it('applies 0023 + 0024 cleanly', async () => {
@@ -666,7 +767,12 @@ describe.skipIf(!hasDocker())('P09 migrations apply + rollback', () => {
       `SELECT indexname FROM pg_indexes WHERE schemaname = 'public'`,
     );
     const indexes = idx.map((r) => r.indexname);
-    for (const i of ['timeline_tenant_deck_idx', 'timeline_track_timeline_idx', 'timeline_keyframe_track_idx', 'transition_tenant_deck_idx']) {
+    for (const i of [
+      'timeline_tenant_deck_idx',
+      'timeline_track_timeline_idx',
+      'timeline_keyframe_track_idx',
+      'transition_tenant_deck_idx',
+    ]) {
       expect(indexes).toContain(i);
     }
   });
@@ -765,13 +871,15 @@ describe.skipIf(!hasDocker())('P09 migrations apply + rollback', () => {
   });
 });
 
-const P10_MIGRATIONS = [
-  '0025_phase10_prototyping',
-  '0026_phase10_prototyping_indexes_seed',
-];
+const P10_MIGRATIONS = ['0025_phase10_prototyping', '0026_phase10_prototyping_indexes_seed'];
 const P10_TABLES = [
-  'hotspot', 'overlay', 'branching_edge', 'interaction_state',
-  'variable', 'variable_binding', 'conditional_rule',
+  'hotspot',
+  'overlay',
+  'branching_edge',
+  'interaction_state',
+  'variable',
+  'variable_binding',
+  'conditional_rule',
 ];
 
 describe.skipIf(!hasDocker())('P10 migrations apply + rollback', () => {
@@ -785,7 +893,20 @@ describe.skipIf(!hasDocker())('P10 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -811,8 +932,16 @@ describe.skipIf(!hasDocker())('P10 migrations apply + rollback', () => {
   }, 180000);
 
   afterAll(async () => {
-    try { await client.end(); } catch { /* ignore */ }
-    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+    try {
+      await client.end();
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+    } catch {
+      /* ignore */
+    }
   });
 
   it('applies 0025 + 0026 cleanly', async () => {
@@ -834,22 +963,31 @@ describe.skipIf(!hasDocker())('P10 migrations apply + rollback', () => {
     );
     const cols = new Set(rows.map((r) => `${r.table_name}.${r.column_name}`));
     for (const c of [
-      'hotspot.geometry', 'hotspot.target_ref', 'overlay.schema',
-      'branching_edge.from_slide_id', 'branching_edge.to_slide_id',
-      'interaction_state.state_machine', 'variable.default_value',
-      'variable_binding.variable_id', 'conditional_rule.condition',
+      'hotspot.geometry',
+      'hotspot.target_ref',
+      'overlay.schema',
+      'branching_edge.from_slide_id',
+      'branching_edge.to_slide_id',
+      'interaction_state.state_machine',
+      'variable.default_value',
+      'variable_binding.variable_id',
+      'conditional_rule.condition',
       'conditional_rule.action',
-    ]) expect(cols.has(c)).toBe(true);
+    ])
+      expect(cols.has(c)).toBe(true);
 
     const { rows: idx } = await client.query<{ indexname: string }>(
       `SELECT indexname FROM pg_indexes WHERE schemaname = 'public'`,
     );
     const indexes = new Set(idx.map((r) => r.indexname));
     for (const i of [
-      'hotspot_geometry_gin_idx', 'interaction_state_machine_gin_idx',
-      'branching_edge_tenant_deck_idx', 'variable_tenant_deck_idx',
+      'hotspot_geometry_gin_idx',
+      'interaction_state_machine_gin_idx',
+      'branching_edge_tenant_deck_idx',
+      'variable_tenant_deck_idx',
       'conditional_rule_deck_priority_idx',
-    ]) expect(indexes.has(i)).toBe(true);
+    ])
+      expect(indexes.has(i)).toBe(true);
   });
 
   it('enforces RLS policies on all P10 tables', async () => {
@@ -941,12 +1079,8 @@ describe.skipIf(!hasDocker())('P10 migrations apply + rollback', () => {
   });
 });
 
-const P10_M5_MIGRATIONS = [
-  '0031_phase10_telemetry',
-];
-const P10_M5_TABLES = [
-  'prototype_sessions', 'prototype_events', 'integrity_chain',
-];
+const P10_M5_MIGRATIONS = ['0031_phase10_telemetry'];
+const P10_M5_TABLES = ['prototype_sessions', 'prototype_events', 'integrity_chain'];
 
 describe.skipIf(!hasDocker())('P10-M5 migrations apply + rollback', () => {
   let containerName = '';
@@ -959,7 +1093,20 @@ describe.skipIf(!hasDocker())('P10-M5 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -985,8 +1132,16 @@ describe.skipIf(!hasDocker())('P10-M5 migrations apply + rollback', () => {
   }, 180000);
 
   afterAll(async () => {
-    try { await client.end(); } catch { /* ignore */ }
-    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+    try {
+      await client.end();
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+    } catch {
+      /* ignore */
+    }
   });
 
   it('applies 0031 cleanly', async () => {
@@ -1008,13 +1163,22 @@ describe.skipIf(!hasDocker())('P10-M5 migrations apply + rollback', () => {
     );
     const cols2 = new Set(cols.map((r) => `${r.table_name}.${r.column_name}`));
     for (const c of [
-      'prototype_sessions.consent', 'prototype_sessions.region_pinned',
-      'prototype_sessions.kid', 'prototype_sessions.expires_at',
-      'prototype_events.seq', 'prototype_events.prev_hash', 'prototype_events.event_hash',
-      'prototype_events.payload', 'prototype_events.kid', 'prototype_events.client_fingerprint',
-      'integrity_chain.kid', 'integrity_chain.key_hex',
-      'integrity_chain.overlap_until', 'integrity_chain.expires_at',
-    ]) expect(cols2.has(c)).toBe(true);
+      'prototype_sessions.consent',
+      'prototype_sessions.region_pinned',
+      'prototype_sessions.kid',
+      'prototype_sessions.expires_at',
+      'prototype_events.seq',
+      'prototype_events.prev_hash',
+      'prototype_events.event_hash',
+      'prototype_events.payload',
+      'prototype_events.kid',
+      'prototype_events.client_fingerprint',
+      'integrity_chain.kid',
+      'integrity_chain.key_hex',
+      'integrity_chain.overlap_until',
+      'integrity_chain.expires_at',
+    ])
+      expect(cols2.has(c)).toBe(true);
 
     const { rows: idx } = await client.query<{ indexname: string }>(
       `SELECT indexname FROM pg_indexes WHERE schemaname = 'public'`,
@@ -1026,7 +1190,8 @@ describe.skipIf(!hasDocker())('P10-M5 migrations apply + rollback', () => {
       'prototype_events_deck_type_idx',
       'prototype_sessions_expires_idx',
       'integrity_chain_active_idx',
-    ]) expect(indexes.has(i)).toBe(true);
+    ])
+      expect(indexes.has(i)).toBe(true);
   });
 
   it('enforces RLS policies on all P10-M5 tables', async () => {
@@ -1124,7 +1289,20 @@ describe.skipIf(!hasDocker())('P10-M3 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -1150,8 +1328,16 @@ describe.skipIf(!hasDocker())('P10-M3 migrations apply + rollback', () => {
   }, 180000);
 
   afterAll(async () => {
-    try { await client.end(); } catch { /* ignore */ }
-    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+    try {
+      await client.end();
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+    } catch {
+      /* ignore */
+    }
   });
 
   it('applies 0025 → 0027 cleanly and exposes interaction_state', async () => {
@@ -1166,7 +1352,11 @@ describe.skipIf(!hasDocker())('P10-M3 migrations apply + rollback', () => {
   });
 
   it('adds persist_instance_state with the expected default', async () => {
-    const { rows: cols } = await client.query<{ column_name: string; data_type: string; column_default: string | null }>(
+    const { rows: cols } = await client.query<{
+      column_name: string;
+      data_type: string;
+      column_default: string | null;
+    }>(
       `SELECT column_name, data_type, column_default
          FROM information_schema.columns
          WHERE table_schema = 'public' AND table_name = 'interaction_state'`,
@@ -1196,7 +1386,11 @@ describe.skipIf(!hasDocker())('P10-M3 migrations apply + rollback', () => {
             "transitions":[{"from":"idle","to":"active","event":"click"}]}'::jsonb,
           'idle', 'slide', true)`,
     );
-    const { rows } = await client.query<{ current_state: string; persist_instance_state: boolean; state_machine: unknown }>(
+    const { rows } = await client.query<{
+      current_state: string;
+      persist_instance_state: boolean;
+      state_machine: unknown;
+    }>(
       `SELECT current_state, persist_instance_state, state_machine
          FROM interaction_state WHERE id = '01H000000000000000000M301'`,
     );
@@ -1246,9 +1440,7 @@ describe.skipIf(!hasDocker())('P10-M3 migrations apply + rollback', () => {
  * seeds a demo row under the `system` tenant so the harness can
  * resolve something concrete after applying.
  */
-const P10_M7_MIGRATIONS = [
-  '0034_phase10_deep_links',
-];
+const P10_M7_MIGRATIONS = ['0034_phase10_deep_links'];
 
 describe.skipIf(!hasDocker())('P10-M7 migrations apply + rollback', () => {
   let containerName = '';
@@ -1261,7 +1453,20 @@ describe.skipIf(!hasDocker())('P10-M7 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -1287,8 +1492,16 @@ describe.skipIf(!hasDocker())('P10-M7 migrations apply + rollback', () => {
   }, 180000);
 
   afterAll(async () => {
-    try { await client.end(); } catch { /* ignore */ }
-    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+    try {
+      await client.end();
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+    } catch {
+      /* ignore */
+    }
   });
 
   it('applies 0034 cleanly and exposes deep_links', async () => {
@@ -1309,8 +1522,17 @@ describe.skipIf(!hasDocker())('P10-M7 migrations apply + rollback', () => {
     );
     const columns = new Map(rows.map((r) => [r.column_name, r.data_type]));
     for (const c of [
-      'id', 'tenant_id', 'deck_id', 'kid', 'payload', 'click_count',
-      'expires_at', 'viewer_scope', 'single_use', 'created_at', 'created_by',
+      'id',
+      'tenant_id',
+      'deck_id',
+      'kid',
+      'payload',
+      'click_count',
+      'expires_at',
+      'viewer_scope',
+      'single_use',
+      'created_at',
+      'created_by',
     ]) {
       expect(columns.has(c), `column ${c} should exist`).toBe(true);
     }
@@ -1368,7 +1590,11 @@ describe.skipIf(!hasDocker())('P10-M7 migrations apply + rollback', () => {
                              'slide_id', 's-1', 'aud', 'viewer', 'sig', 'x'),
           now() + interval '30 days', 'tenant', true, 'user-1')`,
     );
-    const { rows } = await client.query<{ click_count: number; viewer_scope: string; single_use: boolean }>(
+    const { rows } = await client.query<{
+      click_count: number;
+      viewer_scope: string;
+      single_use: boolean;
+    }>(
       `SELECT click_count, viewer_scope, single_use FROM deep_links WHERE id = 'dlk_round_trip01'`,
     );
     expect(rows[0]?.click_count).toBe(0);
@@ -1411,7 +1637,20 @@ describe.skipIf(!hasDocker())('P10-M6.1 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -1437,8 +1676,16 @@ describe.skipIf(!hasDocker())('P10-M6.1 migrations apply + rollback', () => {
   }, 180000);
 
   afterAll(async () => {
-    try { await client.end(); } catch { /* ignore */ }
-    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+    try {
+      await client.end();
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+    } catch {
+      /* ignore */
+    }
   });
 
   it('applies 0025 + 0026 + 0032 cleanly and exposes all M6.1 tables', async () => {
@@ -1551,7 +1798,20 @@ describe.skipIf(!hasDocker())('P10-M6.2 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -1577,8 +1837,16 @@ describe.skipIf(!hasDocker())('P10-M6.2 migrations apply + rollback', () => {
   }, 180000);
 
   afterAll(async () => {
-    try { await client.end(); } catch { /* ignore */ }
-    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+    try {
+      await client.end();
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+    } catch {
+      /* ignore */
+    }
   });
 
   it('applies 0025 + 0026 + 0033 cleanly and exposes presentation_sequence', async () => {
@@ -1654,10 +1922,21 @@ const P11_MIGRATIONS = [
   '0038_phase11_3d_indexes_seed',
 ];
 const P11_TABLES = [
-  'license', 'model_asset', 'scene', 'camera_keyframe', 'shader',
-  'video_asset', 'audio_track', 'lottie_asset', 'ar_session',
-  'code_sandbox_policy', 'embed_policy', 'latex_doc', 'map_style',
-  'cad_jobs', 'video_jobs',
+  'license',
+  'model_asset',
+  'scene',
+  'camera_keyframe',
+  'shader',
+  'video_asset',
+  'audio_track',
+  'lottie_asset',
+  'ar_session',
+  'code_sandbox_policy',
+  'embed_policy',
+  'latex_doc',
+  'map_style',
+  'cad_jobs',
+  'video_jobs',
 ];
 
 describe.skipIf(!hasDocker())('P11 migrations apply + rollback', () => {
@@ -1671,7 +1950,20 @@ describe.skipIf(!hasDocker())('P11 migrations apply + rollback', () => {
     containerName = name;
     spawn(
       'docker',
-      ['run', '-d', '--rm', '--name', name, '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=domio', '-p', '0:5432', 'postgres:16-alpine'],
+      [
+        'run',
+        '-d',
+        '--rm',
+        '--name',
+        name,
+        '-e',
+        'POSTGRES_PASSWORD=test',
+        '-e',
+        'POSTGRES_DB=domio',
+        '-p',
+        '0:5432',
+        'postgres:16-alpine',
+      ],
       { stdio: 'ignore' },
     );
     let attempts = 90;
@@ -1697,8 +1989,16 @@ describe.skipIf(!hasDocker())('P11 migrations apply + rollback', () => {
   }, 180000);
 
   afterAll(async () => {
-    try { await client.end(); } catch { /* ignore */ }
-    try { execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' }); } catch { /* ignore */ }
+    try {
+      await client.end();
+    } catch {
+      /* ignore */
+    }
+    try {
+      execSync(`docker rm -f ${containerName}`, { stdio: 'ignore' });
+    } catch {
+      /* ignore */
+    }
   });
 
   it('applies 0035–0038 cleanly', async () => {
@@ -1738,15 +2038,26 @@ describe.skipIf(!hasDocker())('P11 migrations apply + rollback', () => {
     const colSet = new Set(cols.map((r) => `${r.table_name}.${r.column_name}`));
     // Spot-check key columns across all 15 tables
     for (const c of [
-      'model_asset.tenant_id', 'model_asset.format', 'scene.model_asset_id',
-      'camera_keyframe.slide_id', 'camera_keyframe.order_index',
-      'shader.tenant_id', 'shader.kind', 'license.source',
-      'video_asset.tenant_id', 'video_asset.transcode_state',
-      'audio_track.slide_id', 'lottie_asset.format',
-      'ar_session.token', 'ar_session.expires_at',
-      'code_sandbox_policy.tenant_id', 'embed_policy.sandbox_flags',
-      'latex_doc.cache_key', 'map_style.provider',
-      'cad_jobs.progress', 'video_jobs.status',
+      'model_asset.tenant_id',
+      'model_asset.format',
+      'scene.model_asset_id',
+      'camera_keyframe.slide_id',
+      'camera_keyframe.order_index',
+      'shader.tenant_id',
+      'shader.kind',
+      'license.source',
+      'video_asset.tenant_id',
+      'video_asset.transcode_state',
+      'audio_track.slide_id',
+      'lottie_asset.format',
+      'ar_session.token',
+      'ar_session.expires_at',
+      'code_sandbox_policy.tenant_id',
+      'embed_policy.sandbox_flags',
+      'latex_doc.cache_key',
+      'map_style.provider',
+      'cad_jobs.progress',
+      'video_jobs.status',
     ]) {
       expect(colSet.has(c)).toBe(true);
     }
@@ -1756,13 +2067,18 @@ describe.skipIf(!hasDocker())('P11 migrations apply + rollback', () => {
     );
     const indexes = idx.map((r) => r.indexname);
     for (const i of [
-      'model_asset_tenant_idx', 'model_asset_format_idx',
-      'scene_model_asset_idx', 'camera_keyframe_slide_order_idx',
+      'model_asset_tenant_idx',
+      'model_asset_format_idx',
+      'scene_model_asset_idx',
+      'camera_keyframe_slide_order_idx',
       'shader_tenant_kind_idx',
-      'video_asset_tenant_idx', 'video_asset_transcode_idx',
-      'audio_track_slide_idx', 'lottie_asset_tenant_format_idx',
+      'video_asset_tenant_idx',
+      'video_asset_transcode_idx',
+      'audio_track_slide_idx',
+      'lottie_asset_tenant_format_idx',
       'ar_session_expires_idx',
-      'code_sandbox_policy_tenant_idx', 'latex_doc_cache_key_idx',
+      'code_sandbox_policy_tenant_idx',
+      'latex_doc_cache_key_idx',
       'map_style_tenant_idx',
     ]) {
       expect(indexes).toContain(i);

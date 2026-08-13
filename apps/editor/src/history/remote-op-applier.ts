@@ -52,10 +52,7 @@ export interface RemoteOpApplierOptions {
  * Returns the `RemoteOpApplied` entry for observability / logging, or
  * `null` if the op was irrelevant (unknown slide, empty payload).
  */
-export function applyRemoteOp(
-  op: Op,
-  options: RemoteOpApplierOptions,
-): RemoteOpApplied | null {
+export function applyRemoteOp(op: Op, options: RemoteOpApplierOptions): RemoteOpApplied | null {
   const { deck, subdocs, onRemoteDeckChange } = options;
 
   const slideId = op.slideId;
@@ -98,10 +95,7 @@ export function applyRemoteOp(
  * for text/position, but the schema-level representation is kept current
  * via this reconstruction.
  */
-function rebuildDeckFromDocs(
-  deck: DeckDocument,
-  subdocs: DeckSubDocs,
-): DeckDocument {
+function rebuildDeckFromDocs(deck: DeckDocument, subdocs: DeckSubDocs): DeckDocument {
   const slides = deck.slides.map((slideSchema) => {
     const slideDoc = subdocs.slideDocs.get(slideSchema.semanticId);
     if (!slideDoc) return slideSchema;

@@ -152,9 +152,7 @@ export function AgentNodeDetail({ node }: AgentNodeDetailProps) {
             <span
               className={clsx(
                 'inline-flex items-center rounded-md px-2 py-1 text-xs font-mono',
-                node.latency_ms !== undefined
-                  ? 'bg-slate-100 text-slate-800'
-                  : 'text-slate-400',
+                node.latency_ms !== undefined ? 'bg-slate-100 text-slate-800' : 'text-slate-400',
               )}
             >
               {formatLatency(node.latency_ms)}

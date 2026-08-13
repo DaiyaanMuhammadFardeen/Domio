@@ -43,11 +43,16 @@ describe('lint-service handlers — run', () => {
   it('POST /v1/lint/run returns findings', async () => {
     const { ctx, metrics } = makeCtx();
     const res = await handlers.runLint(
-      req('POST', '/v1/lint/run', { orgId: ORG }, {
-        deckId: 'd-1',
-        elements: [{ elementRef: 'e1' }],
-        actorId: ACTOR,
-      }),
+      req(
+        'POST',
+        '/v1/lint/run',
+        { orgId: ORG },
+        {
+          deckId: 'd-1',
+          elements: [{ elementRef: 'e1' }],
+          actorId: ACTOR,
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -57,11 +62,16 @@ describe('lint-service handlers — run', () => {
   it('POST /v1/lint/run 400s on empty elements', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.runLint(
-      req('POST', '/v1/lint/run', { orgId: ORG }, {
-        deckId: 'd-1',
-        elements: [],
-        actorId: ACTOR,
-      }),
+      req(
+        'POST',
+        '/v1/lint/run',
+        { orgId: ORG },
+        {
+          deckId: 'd-1',
+          elements: [],
+          actorId: ACTOR,
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -81,19 +91,29 @@ describe('lint-service handlers — list + latest', () => {
   it('GET /v1/lint/runs + latest', async () => {
     const { ctx } = makeCtx();
     await handlers.runLint(
-      req('POST', '/v1/lint/run', { orgId: ORG }, {
-        deckId: 'd-1',
-        elements: [{ elementRef: 'e1' }],
-        actorId: ACTOR,
-      }),
+      req(
+        'POST',
+        '/v1/lint/run',
+        { orgId: ORG },
+        {
+          deckId: 'd-1',
+          elements: [{ elementRef: 'e1' }],
+          actorId: ACTOR,
+        },
+      ),
       ctx,
     );
     await handlers.runLint(
-      req('POST', '/v1/lint/run', { orgId: ORG }, {
-        deckId: 'd-1',
-        elements: [{ elementRef: 'e1' }],
-        actorId: ACTOR,
-      }),
+      req(
+        'POST',
+        '/v1/lint/run',
+        { orgId: ORG },
+        {
+          deckId: 'd-1',
+          elements: [{ elementRef: 'e1' }],
+          actorId: ACTOR,
+        },
+      ),
       ctx,
     );
     const list = await handlers.listByDeck(
@@ -113,11 +133,16 @@ describe('lint-service handlers — audit', () => {
   it('records audit events on runs', async () => {
     const { ctx, audit } = makeCtx();
     await handlers.runLint(
-      req('POST', '/v1/lint/run', { orgId: ORG }, {
-        deckId: 'd-1',
-        elements: [{ elementRef: 'e1' }],
-        actorId: ACTOR,
-      }),
+      req(
+        'POST',
+        '/v1/lint/run',
+        { orgId: ORG },
+        {
+          deckId: 'd-1',
+          elements: [{ elementRef: 'e1' }],
+          actorId: ACTOR,
+        },
+      ),
       ctx,
     );
     const events = await audit.listByOrg(ORG);

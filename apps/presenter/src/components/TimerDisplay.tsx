@@ -24,7 +24,10 @@ export function TimerDisplay({ startedAtMs, budgetMs, reducedMotion }: TimerDisp
   const [tick, setTick] = useState(() => ({ elapsed_ms: 0, remaining_ms: budgetMs, over: false }));
 
   useEffect(() => {
-    const opts: { startedAtMs: number; budgetMs: number; reducedMotion?: boolean } = { startedAtMs, budgetMs };
+    const opts: { startedAtMs: number; budgetMs: number; reducedMotion?: boolean } = {
+      startedAtMs,
+      budgetMs,
+    };
     if (reducedMotion !== undefined) opts.reducedMotion = reducedMotion;
     const timer = new SessionTimer(opts);
     const dispose = timer.onTick(setTick);
@@ -42,9 +45,12 @@ export function TimerDisplay({ startedAtMs, budgetMs, reducedMotion }: TimerDisp
         <span className="timer__elapsed" aria-label="Elapsed time">
           {formatElapsed(tick.elapsed_ms)}
         </span>
-        <span className={`timer__remaining ${tick.over ? 'timer__remaining--over' : ''}`}
-              aria-label={tick.over ? 'Over budget' : 'Remaining time'}>
-          {tick.over ? '−' : ''}{formatRemaining(Math.abs(tick.remaining_ms))}
+        <span
+          className={`timer__remaining ${tick.over ? 'timer__remaining--over' : ''}`}
+          aria-label={tick.over ? 'Over budget' : 'Remaining time'}
+        >
+          {tick.over ? '−' : ''}
+          {formatRemaining(Math.abs(tick.remaining_ms))}
         </span>
       </div>
     </div>

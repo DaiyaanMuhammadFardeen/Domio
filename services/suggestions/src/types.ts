@@ -62,7 +62,9 @@ export interface SuggestionEventEmitter {
 }
 
 export const noopEmitter: SuggestionEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -82,7 +84,9 @@ export interface BrandLockProvider {
 }
 
 export const defaultBrandLockProvider: BrandLockProvider = {
-  isBrandLocked(): boolean { return false; },
+  isBrandLocked(): boolean {
+    return false;
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -120,7 +124,9 @@ export class InvalidStatusTransitionError extends Error {
 export class BrandLockError extends Error {
   readonly code = 'BRAND_LOCK_ERROR' as const;
   constructor(public readonly targetId: string) {
-    super(`Cannot accept suggestion: target ${targetId} is brand-locked. Set break_brand_lock=true to override.`);
+    super(
+      `Cannot accept suggestion: target ${targetId} is brand-locked. Set break_brand_lock=true to override.`,
+    );
     this.name = 'BrandLockError';
   }
 }

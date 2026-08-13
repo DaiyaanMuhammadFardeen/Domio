@@ -15,11 +15,7 @@
 
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { HandoutView } from './HandoutView';
-import {
-  fetchHandout,
-  HandoutResolveError,
-  type HandoutDescriptor,
-} from '@/lib/handout-service';
+import { fetchHandout, HandoutResolveError, type HandoutDescriptor } from '@/lib/handout-service';
 
 export interface HandoutResolverProps {
   readonly token: string;
@@ -47,7 +43,8 @@ export function HandoutResolver({
   useEffect(() => {
     let cancelled = false;
     setState({ status: 'loading' });
-    const fn = fetchFn ?? ((t: string, base?: string, f?: typeof fetch) => fetchHandout(t, base, f));
+    const fn =
+      fetchFn ?? ((t: string, base?: string, f?: typeof fetch) => fetchHandout(t, base, f));
     Promise.resolve()
       .then(() => fn(token, apiBaseUrl))
       .then((descriptor) => {

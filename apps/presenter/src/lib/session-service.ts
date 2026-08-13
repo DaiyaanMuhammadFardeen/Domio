@@ -92,11 +92,14 @@ export class SessionClient {
 
   /** Send a heartbeat — keeps the session alive past TTL. */
   async heartbeat(sessionId: string): Promise<PresenterSessionState> {
-    const res = await this.fetcher(`${this.baseUrl}/api/v1/presenter/sessions/${sessionId}/heartbeat`, {
-      method: 'POST',
-      headers: { accept: 'application/json' },
-      credentials: 'same-origin',
-    });
+    const res = await this.fetcher(
+      `${this.baseUrl}/api/v1/presenter/sessions/${sessionId}/heartbeat`,
+      {
+        method: 'POST',
+        headers: { accept: 'application/json' },
+        credentials: 'same-origin',
+      },
+    );
     if (!res.ok) {
       throw new SessionClientError(res.status, `heartbeat: ${res.status}`, await safeBody(res));
     }
@@ -132,11 +135,14 @@ export class SessionClient {
 
   /** Get the current pairing QR token for phone-as-remote pairing. */
   async getPairing(sessionId: string): Promise<PairingInfo> {
-    const res = await this.fetcher(`${this.baseUrl}/api/v1/presenter/sessions/${sessionId}/pairing`, {
-      method: 'GET',
-      headers: { accept: 'application/json' },
-      credentials: 'same-origin',
-    });
+    const res = await this.fetcher(
+      `${this.baseUrl}/api/v1/presenter/sessions/${sessionId}/pairing`,
+      {
+        method: 'GET',
+        headers: { accept: 'application/json' },
+        credentials: 'same-origin',
+      },
+    );
     if (!res.ok) {
       throw new SessionClientError(res.status, `pairing: ${res.status}`, await safeBody(res));
     }
@@ -218,7 +224,11 @@ function cryptoRandomHex(bytes: number): string {
 }
 
 async function safeBody(res: Response): Promise<unknown> {
-  try { return await res.json(); } catch { return null; }
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
 
 export type { AdvanceEvent };

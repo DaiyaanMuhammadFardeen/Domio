@@ -8,7 +8,7 @@ describe('canvas autosave integration', () => {
     queue.enqueue('1', { slideId: 'a', delta: 'one' });
     await queue.flush();
     expect(queue.pendingCount()).toBe(0);
-    expect((await store.list())).toHaveLength(1);
+    expect(await store.list()).toHaveLength(1);
   });
 
   it('survives a reload via rehydrate', async () => {

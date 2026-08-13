@@ -64,7 +64,11 @@ export function ReviewForm({ listingId, onSubmitted }: ReviewFormProps) {
         <label className="block text-xs font-medium text-muted">
           {t('market.review.form.rating')}
         </label>
-        <div className="flex items-center gap-1" role="radiogroup" aria-label={t('market.review.form.rating')}>
+        <div
+          className="flex items-center gap-1"
+          role="radiogroup"
+          aria-label={t('market.review.form.rating')}
+        >
           {[1, 2, 3, 4, 5].map((n) => (
             <button
               key={n}
@@ -79,9 +83,7 @@ export function ReviewForm({ listingId, onSubmitted }: ReviewFormProps) {
               data-testid={`review-star-${n}`}
             >
               <svg
-                className={`h-6 w-6 ${
-                  n <= (hover || rating) ? 'text-gold' : 'text-border'
-                }`}
+                className={`h-6 w-6 ${n <= (hover || rating) ? 'text-gold' : 'text-border'}`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 aria-hidden="true"
@@ -95,10 +97,7 @@ export function ReviewForm({ listingId, onSubmitted }: ReviewFormProps) {
 
       {/* Body */}
       <div className="space-y-1">
-        <label
-          htmlFor="review-body"
-          className="block text-xs font-medium text-muted"
-        >
+        <label htmlFor="review-body" className="block text-xs font-medium text-muted">
           {t('market.review.form.body')}
         </label>
         <textarea
@@ -136,9 +135,7 @@ export function ReviewForm({ listingId, onSubmitted }: ReviewFormProps) {
           className="inline-flex items-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           data-testid="review-form-submit"
         >
-          {submitting
-            ? t('market.review.form.submitting')
-            : t('market.review.form.submit')}
+          {submitting ? t('market.review.form.submitting') : t('market.review.form.submit')}
         </button>
       </div>
     </form>

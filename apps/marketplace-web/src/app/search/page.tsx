@@ -68,12 +68,17 @@ export default function SearchPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8" data-testid="search-page">
-      <h1 className="mb-6 font-display text-3xl font-bold text-fg">
-        {t('market.search.heading')}
-      </h1>
+      <h1 className="mb-6 font-display text-3xl font-bold text-fg">{t('market.search.heading')}</h1>
 
       <div className="mb-8">
-        <SearchBar value={q} onChange={(v) => { setQ(v); setPage(1); }} syncToUrl />
+        <SearchBar
+          value={q}
+          onChange={(v) => {
+            setQ(v);
+            setPage(1);
+          }}
+          syncToUrl
+        />
       </div>
 
       <div className="flex flex-col gap-8 pb-16 lg:flex-row">
@@ -86,12 +91,30 @@ export default function SearchPage() {
             selectedLanguage={language}
             selectedPrice={price}
             selectedRating={rating}
-            onKindToggle={(v) => { setKind(toggleIn(kind, v)); setPage(1); }}
-            onThemeToggle={(v) => { setTheme(toggleIn(theme, v)); setPage(1); }}
-            onColorToggle={(v) => { setColor(toggleIn(color, v)); setPage(1); }}
-            onLanguageToggle={(v) => { setLanguage(toggleIn(language, v)); setPage(1); }}
-            onPriceChange={(v) => { setPrice(v); setPage(1); }}
-            onRatingChange={(v) => { setRating(v); setPage(1); }}
+            onKindToggle={(v) => {
+              setKind(toggleIn(kind, v));
+              setPage(1);
+            }}
+            onThemeToggle={(v) => {
+              setTheme(toggleIn(theme, v));
+              setPage(1);
+            }}
+            onColorToggle={(v) => {
+              setColor(toggleIn(color, v));
+              setPage(1);
+            }}
+            onLanguageToggle={(v) => {
+              setLanguage(toggleIn(language, v));
+              setPage(1);
+            }}
+            onPriceChange={(v) => {
+              setPrice(v);
+              setPage(1);
+            }}
+            onRatingChange={(v) => {
+              setRating(v);
+              setPage(1);
+            }}
             onClear={() => {
               setKind([]);
               setTheme([]);
@@ -107,12 +130,14 @@ export default function SearchPage() {
         <div className="flex-1 min-w-0">
           <div className="mb-6 flex items-center justify-between">
             <p className="text-sm text-muted" data-testid="search-results-count">
-              {result &&
-                t('market.search.results', { total: result.total })}
+              {result && t('market.search.results', { total: result.total })}
             </p>
             <SortDropdown
               value={sort}
-              onChange={(s) => { setSort(s); setPage(1); }}
+              onChange={(s) => {
+                setSort(s);
+                setPage(1);
+              }}
             />
           </div>
 

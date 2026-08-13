@@ -88,11 +88,7 @@ function buildThrowCurve(gravity: number, v0: number): (t: number) => number {
   };
 }
 
-function buildBounceCurve(
-  gravity: number,
-  v0: number,
-  restitution: number,
-): (t: number) => number {
+function buildBounceCurve(gravity: number, v0: number, restitution: number): (t: number) => number {
   const steps = Math.ceil(1 / SUBSTEP);
   const curve = new Float64Array(steps + 1);
   let v = v0;

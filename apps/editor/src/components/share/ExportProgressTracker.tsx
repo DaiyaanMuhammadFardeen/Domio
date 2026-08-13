@@ -132,7 +132,14 @@ export function ExportProgressTracker({
           }}
         />
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(0,0,0,0.6)' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: 11,
+          color: 'rgba(0,0,0,0.6)',
+        }}
+      >
         <span data-testid={`${dataTestId}-percent`}>{pct}%</span>
         {typeof latest.remainingSlides === 'number' ? (
           <span data-testid={`${dataTestId}-remaining`}>

@@ -33,7 +33,17 @@
         "name": { "type": "string", "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$" },
         "type": {
           "type": "string",
-          "enum": ["number", "integer", "currency", "percent", "string", "category", "boolean", "date", "datetime"]
+          "enum": [
+            "number",
+            "integer",
+            "currency",
+            "percent",
+            "string",
+            "category",
+            "boolean",
+            "date",
+            "datetime"
+          ]
         },
         "distribution": {
           "type": "string",
@@ -48,8 +58,15 @@
           "type": "array",
           "items": { "type": "string" }
         },
-        "format": { "type": "string", "description": "Currency code (USD/BDT/EUR) or percent scale." },
-        "start": { "type": "string", "format": "date", "description": "Date/datetime lower bound." },
+        "format": {
+          "type": "string",
+          "description": "Currency code (USD/BDT/EUR) or percent scale."
+        },
+        "start": {
+          "type": "string",
+          "format": "date",
+          "description": "Date/datetime lower bound."
+        },
         "end": { "type": "string", "format": "date", "description": "Date/datetime upper bound." },
         "step": { "type": "number", "description": "Linear/date step." }
       }

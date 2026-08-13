@@ -155,32 +155,32 @@ flowchart LR
 
 Most phases share contracts defined in earlier phases. The minimum contract surface each phase must respect:
 
-| Phase | Consumes contracts from | Produces contracts consumed by |
-|---|---|---|
-| 00 | (none) | `contracts/proto/domio/v1/common.proto`, `contracts/openapi/v1/health.yaml`, repo conventions |
-| 01 | 00 | CI/CD pipeline, telemetry SDK, infra Terraform modules, container images |
-| 02 | 00, 01 | `contracts/schema/deck.schema.json`, `contracts/schema/scene-graph.schema.json`, `packages/schema` |
-| 03 | 02 | canvas packages, scene-graph render pipeline |
-| 04 | 03 | CRDT protocol, presence channel |
-| 05 | 03, 04 | versioning events, branch/merge API |
-| 06 | 05 | component prop schema, marketplace listing events |
-| 07 | 05 | design token schema, theme API, brand extraction events |
-| 08 | 05 | data source adapter interface, query gateway, snapshot API |
-| 09 | 05 | timeline schema, animation preset library |
-| 10 | 05 | variable store, interaction schema, deep-link state codec |
-| 11 | 05 | model asset API, render/embed API |
-| 12 | 05 | AI job/run API, citation schema |
-| 13 | 05, 12 | MCP tool surface, deck-as-code YAML schema, agent audit events |
-| 14 | 06, 07, 11 | share-link API, export-job API |
-| 15 | 06, 07, 08, 09, 10, 11, 13 | presenter session API, stage signaling, recap API |
-| 16 | 15 | audience session API, poll/Q&A APIs |
-| 17 | 14, 15, 16 | analytics event schema, dashboard query API |
-| 18 | 05, 13 | comment/approval/MR APIs |
-| 19 | 06, 07, 20 | marketplace billing & payout events |
-| 20 | (all) | governance, DLP, audit, residency APIs |
-| 20.5 | 00, 01, 03, 05 | policy-engine API, audit-event API, dlp-warn API, rate-limit middleware; gates public beta |
-| 21 | (most) | novel state timeline, gaze/voice consent APIs, knowledge graph API |
-| 22 | (all) | (closes gaps) |
+| Phase | Consumes contracts from    | Produces contracts consumed by                                                                     |
+| ----- | -------------------------- | -------------------------------------------------------------------------------------------------- |
+| 00    | (none)                     | `contracts/proto/domio/v1/common.proto`, `contracts/openapi/v1/health.yaml`, repo conventions      |
+| 01    | 00                         | CI/CD pipeline, telemetry SDK, infra Terraform modules, container images                           |
+| 02    | 00, 01                     | `contracts/schema/deck.schema.json`, `contracts/schema/scene-graph.schema.json`, `packages/schema` |
+| 03    | 02                         | canvas packages, scene-graph render pipeline                                                       |
+| 04    | 03                         | CRDT protocol, presence channel                                                                    |
+| 05    | 03, 04                     | versioning events, branch/merge API                                                                |
+| 06    | 05                         | component prop schema, marketplace listing events                                                  |
+| 07    | 05                         | design token schema, theme API, brand extraction events                                            |
+| 08    | 05                         | data source adapter interface, query gateway, snapshot API                                         |
+| 09    | 05                         | timeline schema, animation preset library                                                          |
+| 10    | 05                         | variable store, interaction schema, deep-link state codec                                          |
+| 11    | 05                         | model asset API, render/embed API                                                                  |
+| 12    | 05                         | AI job/run API, citation schema                                                                    |
+| 13    | 05, 12                     | MCP tool surface, deck-as-code YAML schema, agent audit events                                     |
+| 14    | 06, 07, 11                 | share-link API, export-job API                                                                     |
+| 15    | 06, 07, 08, 09, 10, 11, 13 | presenter session API, stage signaling, recap API                                                  |
+| 16    | 15                         | audience session API, poll/Q&A APIs                                                                |
+| 17    | 14, 15, 16                 | analytics event schema, dashboard query API                                                        |
+| 18    | 05, 13                     | comment/approval/MR APIs                                                                           |
+| 19    | 06, 07, 20                 | marketplace billing & payout events                                                                |
+| 20    | (all)                      | governance, DLP, audit, residency APIs                                                             |
+| 20.5  | 00, 01, 03, 05             | policy-engine API, audit-event API, dlp-warn API, rate-limit middleware; gates public beta         |
+| 21    | (most)                     | novel state timeline, gaze/voice consent APIs, knowledge graph API                                 |
+| 22    | (all)                      | (closes gaps)                                                                                      |
 
 ## Bottleneck watch
 

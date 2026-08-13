@@ -48,9 +48,7 @@ export function SlideBreakdownTable({
   filter,
   hypothesisFetcher = fetchWhyHypotheses,
 }: SlideBreakdownTableProps): ReactElement {
-  const [hypothesisBySlide, setHypothesisBySlide] = useState<
-    Record<string, HypothesisState>
-  >({});
+  const [hypothesisBySlide, setHypothesisBySlide] = useState<Record<string, HypothesisState>>({});
 
   const visible = filter ? slides.filter(filter) : slides;
 
@@ -152,8 +150,8 @@ function SlideRow({ slide, hyp, expanded, onWhy }: SlideRowProps): ReactElement 
               slide.bounceRate >= 0.5
                 ? 'bg-rose-50 text-rose-700'
                 : slide.bounceRate >= 0.3
-                ? 'bg-amber-50 text-amber-700'
-                : 'bg-emerald-50 text-emerald-700',
+                  ? 'bg-amber-50 text-amber-700'
+                  : 'bg-emerald-50 text-emerald-700',
             )}
           >
             {pct(slide.bounceRate)}
@@ -176,9 +174,7 @@ function SlideRow({ slide, hyp, expanded, onWhy }: SlideRowProps): ReactElement 
         <tr data-testid={`slide-why-detail-${slide.slideId}`}>
           <td colSpan={6} className="bg-slate-50 px-4 py-3">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-slate-900">
-                {hyp?.summary ?? 'Hypotheses'}
-              </p>
+              <p className="text-sm font-medium text-slate-900">{hyp?.summary ?? 'Hypotheses'}</p>
               <ul className="list-inside list-disc text-xs text-slate-600">
                 {(hyp?.items ?? []).map((text, i) => (
                   <li key={i}>{text}</li>

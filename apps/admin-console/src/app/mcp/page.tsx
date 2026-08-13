@@ -46,8 +46,7 @@ function sparkPath(points: number[]): string {
 
 // Deterministic placeholder for the request-rate chart.
 const SPARK_POINTS: number[] = [
-  12, 18, 22, 19, 25, 28, 32, 30, 26, 29, 34, 38, 41, 37, 44, 48, 45, 42, 46, 50,
-  48, 44, 41, 38,
+  12, 18, 22, 19, 25, 28, 32, 30, 26, 29, 34, 38, 41, 37, 44, 48, 45, 42, 46, 50, 48, 44, 41, 38,
 ];
 
 export default function MCPPage() {
@@ -100,8 +99,7 @@ export default function MCPPage() {
             <FormattedMessage id="admin.mcp.heading" catalogue={CATALOGUE} />
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-500">
-            Status of the Model Context Protocol server that exposes Domio
-            tools to external agents.
+            Status of the Model Context Protocol server that exposes Domio tools to external agents.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -152,11 +150,7 @@ export default function MCPPage() {
               <div className="mt-2">
                 <Badge tone={toneForStatus(status.running)}>
                   <FormattedMessage
-                    id={
-                      status.running
-                        ? 'admin.mcp.status.running'
-                        : 'admin.mcp.status.stopped'
-                    }
+                    id={status.running ? 'admin.mcp.status.running' : 'admin.mcp.status.stopped'}
                     catalogue={CATALOGUE}
                   />
                 </Badge>
@@ -190,10 +184,7 @@ export default function MCPPage() {
 
             <div className="rounded-xl border border-slate-200 bg-white p-4">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                <FormattedMessage
-                  id="admin.mcp.requestsPerMin"
-                  catalogue={CATALOGUE}
-                />
+                <FormattedMessage id="admin.mcp.requestsPerMin" catalogue={CATALOGUE} />
               </div>
               <div className="mt-2 flex items-baseline gap-1.5">
                 <Activity className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
@@ -212,8 +203,8 @@ export default function MCPPage() {
                   Request rate (last 24h, sample)
                 </h2>
                 <p className="mt-0.5 text-xs text-slate-500">
-                  Placeholder sparkline — wired to the real metrics stream once
-                  the platform-api exposes it.
+                  Placeholder sparkline — wired to the real metrics stream once the platform-api
+                  exposes it.
                 </p>
               </div>
               <span className="text-xs text-slate-400">sparkline placeholder</span>
@@ -243,17 +234,12 @@ export default function MCPPage() {
               className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition hover:border-brand-300 hover:bg-brand-50"
             >
               <div>
-                <div className="text-sm font-semibold text-slate-800">
-                  Tool registry
-                </div>
+                <div className="text-sm font-semibold text-slate-800">Tool registry</div>
                 <div className="mt-0.5 text-xs text-slate-500">
                   Every MCP tool registered with the server.
                 </div>
               </div>
-              <Wrench
-                className="h-5 w-5 text-slate-400 group-hover:text-brand-600"
-                aria-hidden
-              />
+              <Wrench className="h-5 w-5 text-slate-400 group-hover:text-brand-600" aria-hidden />
             </Link>
             <Link
               href={adminConsole('mcp-permissions')}
@@ -261,17 +247,12 @@ export default function MCPPage() {
               className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition hover:border-brand-300 hover:bg-brand-50"
             >
               <div>
-                <div className="text-sm font-semibold text-slate-800">
-                  Agent permissions
-                </div>
+                <div className="text-sm font-semibold text-slate-800">Agent permissions</div>
                 <div className="mt-0.5 text-xs text-slate-500">
                   Per-agent scopes and token rotation.
                 </div>
               </div>
-              <Wrench
-                className="h-5 w-5 text-slate-400 group-hover:text-brand-600"
-                aria-hidden
-              />
+              <Wrench className="h-5 w-5 text-slate-400 group-hover:text-brand-600" aria-hidden />
             </Link>
             <Link
               href={adminConsole('mcp-audit')}
@@ -279,17 +260,12 @@ export default function MCPPage() {
               className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition hover:border-brand-300 hover:bg-brand-50"
             >
               <div>
-                <div className="text-sm font-semibold text-slate-800">
-                  Agent audit log
-                </div>
+                <div className="text-sm font-semibold text-slate-800">Agent audit log</div>
                 <div className="mt-0.5 text-xs text-slate-500">
                   Every tool call made by an agent against the platform.
                 </div>
               </div>
-              <Wrench
-                className="h-5 w-5 text-slate-400 group-hover:text-brand-600"
-                aria-hidden
-              />
+              <Wrench className="h-5 w-5 text-slate-400 group-hover:text-brand-600" aria-hidden />
             </Link>
           </section>
         </>

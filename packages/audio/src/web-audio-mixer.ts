@@ -68,7 +68,11 @@ export class WebAudioMixer {
   private cleanup: (() => void) | null = null;
   private fadeOffset: number;
 
-  constructor(ctx: AudioContextLike, options: WebAudioMixerOptions = {}, clock: () => number = () => Date.now()) {
+  constructor(
+    ctx: AudioContextLike,
+    options: WebAudioMixerOptions = {},
+    clock: () => number = () => Date.now(),
+  ) {
     this.ctx = ctx;
     this.clock = clock;
     this.fadeOffset = options.fadeInMs ?? 0;
@@ -109,7 +113,10 @@ export class WebAudioMixer {
   }
 
   /** Update track volume/mute in place. */
-  patchTrack(trackId: string, patch: Partial<Pick<TrackConfig, 'volume' | 'pan' | 'mute'>>): boolean {
+  patchTrack(
+    trackId: string,
+    patch: Partial<Pick<TrackConfig, 'volume' | 'pan' | 'mute'>>,
+  ): boolean {
     let found = false;
     const next = this.state.tracks.map((t) => {
       if (t.id !== trackId) return t;

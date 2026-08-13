@@ -36,7 +36,11 @@ export interface NotificationRule {
 export type RuleCondition =
   | { kind: 'always' }
   | { kind: 'event_name'; equals: string }
-  | { kind: 'lead_score'; gte: number; source: 'engagement_score' | 'dwell_ms' | 'completion_rate' };
+  | {
+      kind: 'lead_score';
+      gte: number;
+      source: 'engagement_score' | 'dwell_ms' | 'completion_rate';
+    };
 
 /** CRMSyncEvent is the input the rules engine evaluates. */
 export interface CRMSyncEvent {

@@ -6,13 +6,22 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { Element, ULID } from '@domio/schema/generated/scene-graph';
 import { SlideStage } from './SlideStage';
-import { arHandoffFor, createElementRendererRegistry, riveFor, segmentedVideoFor } from './ElementRendererRegistry';
+import {
+  arHandoffFor,
+  createElementRendererRegistry,
+  riveFor,
+  segmentedVideoFor,
+} from './ElementRendererRegistry';
 import exampleDeck from '../../../../fixtures/example-deck.json' with { type: 'json' };
 import type { DeckDocument } from '@domio/schema/generated/scene-graph';
 
 const deck = exampleDeck as unknown as DeckDocument;
 
-function makeLayer(overrides: { type: Element['type']; id: string; [k: string]: unknown }): Element {
+function makeLayer(overrides: {
+  type: Element['type'];
+  id: string;
+  [k: string]: unknown;
+}): Element {
   const { id, type, ...rest } = overrides;
   void type;
   return {
@@ -36,51 +45,87 @@ describe('ElementRendererRegistry', () => {
   it('routes video to VideoPlayer', () => {
     const registry = createElementRendererRegistry();
     const layer = makeLayer({ id: 'v1', type: 'video', assetId: 'asset-1' });
-    expect(registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' })).not.toBeNull();
+    expect(
+      registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' }),
+    ).not.toBeNull();
   });
 
   it('routes audio to AudioTrack', () => {
     const registry = createElementRendererRegistry();
     const layer = makeLayer({ id: 'a1', type: 'audio', assetId: 'asset-1' });
-    expect(registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' })).not.toBeNull();
+    expect(
+      registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' }),
+    ).not.toBeNull();
   });
 
   it('routes lottie to LottiePlayer', () => {
     const registry = createElementRendererRegistry();
     const layer = makeLayer({ id: 'l1', type: 'lottie', assetId: 'asset-1' });
-    expect(registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' })).not.toBeNull();
+    expect(
+      registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' }),
+    ).not.toBeNull();
   });
 
   it('routes embed to LiveAppEmbed with workspaceId', () => {
     const registry = createElementRendererRegistry();
     const layer = makeLayer({ id: 'e1', type: 'embed', url: 'https://example.com' });
-    expect(registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test', workspaceId: 'ws-1' })).not.toBeNull();
+    expect(
+      registry[layer.type]({
+        element: layer,
+        reducedMotion: false,
+        dataTestId: 'test',
+        workspaceId: 'ws-1',
+      }),
+    ).not.toBeNull();
   });
 
   it('routes codeBlock to CodeBlock', () => {
     const registry = createElementRendererRegistry();
     const layer = makeLayer({ id: 'c1', type: 'codeBlock', code: 'console.log(1)' });
-    expect(registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' })).not.toBeNull();
+    expect(
+      registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' }),
+    ).not.toBeNull();
   });
 
   it('routes latex to LatexBlock', () => {
     const registry = createElementRendererRegistry();
     const layer = makeLayer({ id: 'lx1', type: 'latex', source: 'E=mc^2' });
-    expect(registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' })).not.toBeNull();
+    expect(
+      registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' }),
+    ).not.toBeNull();
   });
 
   it('routes map to Map', () => {
     const registry = createElementRendererRegistry();
-    const layer = makeLayer({ id: 'mp1', type: 'map', styleId: 'osm', zoom: 5, center: { lng: 0, lat: 0 } });
-    expect(registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' })).not.toBeNull();
+    const layer = makeLayer({
+      id: 'mp1',
+      type: 'map',
+      styleId: 'osm',
+      zoom: 5,
+      center: { lng: 0, lat: 0 },
+    });
+    expect(
+      registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' }),
+    ).not.toBeNull();
   });
 
   it('text/frame/group/etc do not have a specialized renderer', () => {
     const registry = createElementRendererRegistry();
-    const kinds: Element['type'][] = ['text', 'frame', 'group', 'autoLayout', 'image', 'vector', 'boolean', 'component'];
+    const kinds: Element['type'][] = [
+      'text',
+      'frame',
+      'group',
+      'autoLayout',
+      'image',
+      'vector',
+      'boolean',
+      'component',
+    ];
     for (const k of kinds) {
       const layer = makeLayer({ id: `${k}1`, type: k });
-      expect(registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' })).toBeNull();
+      expect(
+        registry[layer.type]({ element: layer, reducedMotion: false, dataTestId: 'test' }),
+      ).toBeNull();
     }
   });
 });
@@ -175,10 +220,7 @@ describe('SlideStage with rich elements', () => {
     const slide = deck.slides[0]!;
     const withLatex = {
       ...slide,
-      elements: [
-        ...slide.elements,
-        makeLayer({ id: 'lx1', type: 'latex', source: 'E=mc^2' }),
-      ],
+      elements: [...slide.elements, makeLayer({ id: 'lx1', type: 'latex', source: 'E=mc^2' })],
     };
     render(<SlideStage slide={withLatex} reducedMotion={false} dataTestId="stage" />);
     expect(screen.queryByTestId('stage-element-lx1')).not.toBeNull();
@@ -201,10 +243,7 @@ describe('SlideStage with rich elements', () => {
     const slide = deck.slides[0]!;
     const withModel = {
       ...slide,
-      elements: [
-        ...slide.elements,
-        makeLayer({ id: 'm1', type: 'model3d', modelAssetId: 'a' }),
-      ],
+      elements: [...slide.elements, makeLayer({ id: 'm1', type: 'model3d', modelAssetId: 'a' })],
     };
     render(<SlideStage slide={withModel} reducedMotion={false} deckId="demo" dataTestId="stage" />);
     expect(screen.queryByTestId('ar-handoff')).not.toBeNull();

@@ -46,7 +46,10 @@ export function CSATBreakdown({ data }: CSATBreakdownProps) {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="text-xs font-medium uppercase tracking-wide text-slate-500">CSAT</div>
-          <div className="mt-1 text-2xl font-semibold tabular-nums text-slate-900" data-testid="csat-pct">
+          <div
+            className="mt-1 text-2xl font-semibold tabular-nums text-slate-900"
+            data-testid="csat-pct"
+          >
             {data.csatPct}%
           </div>
           <div className="mt-1 text-xs text-slate-500">{data.total} responses</div>
@@ -62,12 +65,12 @@ export function CSATBreakdown({ data }: CSATBreakdownProps) {
           >
             {data.nps}
           </div>
-          <div className="mt-1 text-xs text-slate-500">
-            promoter − detractor
-          </div>
+          <div className="mt-1 text-xs text-slate-500">promoter − detractor</div>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Distribution</div>
+          <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            Distribution
+          </div>
           <div className="mt-2 flex h-3 w-full overflow-hidden rounded-full bg-slate-100">
             <span
               className="bg-emerald-500"
@@ -120,7 +123,9 @@ export function CSATBreakdown({ data }: CSATBreakdownProps) {
                 data-testid="csat-per-slide-row"
                 data-slide-id={row.slideId}
               >
-                <span className="w-32 truncate font-mono text-xs text-slate-500">{row.slideId}</span>
+                <span className="w-32 truncate font-mono text-xs text-slate-500">
+                  {row.slideId}
+                </span>
                 <div className="relative h-3 flex-1 overflow-hidden rounded-full bg-slate-100">
                   <span
                     className={clsx('absolute left-0 top-0 h-full', NPS_TONE[tone])}

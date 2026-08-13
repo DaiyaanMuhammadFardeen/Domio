@@ -134,8 +134,7 @@ export function PhonePairingPanel({
 
           <div style={{ fontSize: 11, color: 'var(--content-secondary)' }}>
             <div>
-              Token:{' '}
-              <code style={{ fontFamily: 'var(--font-mono)' }}>{pairing.token}</code>
+              Token: <code style={{ fontFamily: 'var(--font-mono)' }}>{pairing.token}</code>
             </div>
             <div>Epoch: {pairing.epoch}</div>
             <div>Paired devices: {pairing.paired_devices}</div>

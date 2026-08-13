@@ -8,10 +8,14 @@ import type { IngestDeps } from '../deps.js';
 export function healthRoutes(deps: IngestDeps): Hono {
   const app = new Hono();
 
-  app.get('/healthz', () => new Response(JSON.stringify({ ok: true, service: 'event-ingest' }), {
-    status: 200,
-    headers: { 'content-type': 'application/json' },
-  }));
+  app.get(
+    '/healthz',
+    () =>
+      new Response(JSON.stringify({ ok: true, service: 'event-ingest' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
+  );
 
   app.get('/readyz', async (c) => {
     const kafkaOk = deps.publisher.ready();
@@ -23,10 +27,14 @@ export function healthRoutes(deps: IngestDeps): Hono {
     });
   });
 
-  app.get('/metrics', () => new Response(deps.metrics.render(), {
-    status: 200,
-    headers: { 'content-type': 'text/plain; version=0.0.4; charset=utf-8' },
-  }));
+  app.get(
+    '/metrics',
+    () =>
+      new Response(deps.metrics.render(), {
+        status: 200,
+        headers: { 'content-type': 'text/plain; version=0.0.4; charset=utf-8' },
+      }),
+  );
 
   return app;
 }

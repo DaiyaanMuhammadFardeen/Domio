@@ -32,13 +32,17 @@ export function Tutorials({
           <article key={tutorial.slug} className="psdk-tutorial-card">
             <header className="psdk-tutorial-card__header">
               <h3 className="psdk-tutorial-card__title">{tutorial.title}</h3>
-              <span className={`psdk-tutorial-card__difficulty psdk-tutorial-card__difficulty--${tutorial.difficulty}`}>
+              <span
+                className={`psdk-tutorial-card__difficulty psdk-tutorial-card__difficulty--${tutorial.difficulty}`}
+              >
                 {tutorial.difficulty}
               </span>
             </header>
             <p className="psdk-tutorial-card__body">{tutorial.description}</p>
             <footer className="psdk-tutorial-card__footer">
-              <span className="psdk-tutorial-card__time">{minutesLabel(tutorial.time_estimate_min)}</span>
+              <span className="psdk-tutorial-card__time">
+                {minutesLabel(tutorial.time_estimate_min)}
+              </span>
               <a
                 className="psdk-tutorial-card__cta"
                 href={`#tutorial-${tutorial.slug}`}

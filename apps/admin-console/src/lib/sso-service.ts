@@ -104,16 +104,10 @@ const SEED: readonly SSOProvider[] = [
   },
 ];
 
-export async function listSSOProviders(
-  tenantId?: string,
-): Promise<ReadonlyArray<SSOProvider>> {
+export async function listSSOProviders(tenantId?: string): Promise<ReadonlyArray<SSOProvider>> {
   try {
-    const params = tenantId
-      ? `?tenant_id=${encodeURIComponent(tenantId)}`
-      : '';
-    const json = await fetcher<{ items?: SSOProvider[] }>(
-      `/v1/admin/sso/providers${params}`,
-    );
+    const params = tenantId ? `?tenant_id=${encodeURIComponent(tenantId)}` : '';
+    const json = await fetcher<{ items?: SSOProvider[] }>(`/v1/admin/sso/providers${params}`);
     const items = json.items ?? [];
     if (items.length > 0) return items;
   } catch {
@@ -122,9 +116,7 @@ export async function listSSOProviders(
   return tenantId ? SEED.filter((p) => p.tenant_id === tenantId) : SEED.slice();
 }
 
-export async function getSSOProvider(
-  id: string,
-): Promise<SSOProvider | undefined> {
+export async function getSSOProvider(id: string): Promise<SSOProvider | undefined> {
   try {
     return await fetcher<SSOProvider>(`/v1/admin/sso/providers/${encodeURIComponent(id)}`);
   } catch {
@@ -140,9 +132,7 @@ export interface CreateSSOProviderInput {
   readonly role_mapping?: ReadonlyArray<SSORoleMapping>;
 }
 
-export async function createSSOProvider(
-  input: CreateSSOProviderInput,
-): Promise<SSOProvider> {
+export async function createSSOProvider(input: CreateSSOProviderInput): Promise<SSOProvider> {
   const id = `sso-${Math.random().toString(36).slice(2, 10)}`;
   const provider: SSOProvider = {
     id,
@@ -180,9 +170,7 @@ export async function deleteSSOProvider(id: string): Promise<void> {
   }
 }
 
-export async function testSSOLogin(
-  req: SSOTestLoginRequest,
-): Promise<SSOTestLoginResult> {
+export async function testSSOLogin(req: SSOTestLoginRequest): Promise<SSOTestLoginResult> {
   const start = Date.now();
   try {
     return await fetcher<SSOTestLoginResult>(

@@ -22,7 +22,11 @@ export interface CadImportDialogProps {
   onImport: (glbUrl: string, fileName: string) => void;
 }
 
-export function CadImportDialog({ open, onClose, onImport }: CadImportDialogProps): ReactElement | null {
+export function CadImportDialog({
+  open,
+  onClose,
+  onImport,
+}: CadImportDialogProps): ReactElement | null {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [job, setJob] = useState<CadJob | null>(null);
@@ -42,7 +46,14 @@ export function CadImportDialog({ open, onClose, onImport }: CadImportDialogProp
     setError(null);
     try {
       const lower = file.name.toLowerCase();
-      const format = lower.endsWith('.step') || lower.endsWith('.stp') ? 'step' : lower.endsWith('.fbx') ? 'fbx' : lower.endsWith('.obj') ? 'obj' : 'iges';
+      const format =
+        lower.endsWith('.step') || lower.endsWith('.stp')
+          ? 'step'
+          : lower.endsWith('.fbx')
+            ? 'fbx'
+            : lower.endsWith('.obj')
+              ? 'obj'
+              : 'iges';
       const buf = await file.arrayBuffer();
       const base64 = btoa(String.fromCharCode(...new Uint8Array(buf).slice(0, 1024)));
       const submitted = await submitCadJob(format, base64);
@@ -73,12 +84,21 @@ export function CadImportDialog({ open, onClose, onImport }: CadImportDialogProp
       <div className="cad-dialog__panel" role="dialog" aria-label="CAD import">
         <header className="cad-dialog__header">
           <h2>Import CAD</h2>
-          <button type="button" className="cad-dialog__close" onClick={onClose} aria-label="Close" data-testid="cad-dialog-close">
+          <button
+            type="button"
+            className="cad-dialog__close"
+            onClick={onClose}
+            aria-label="Close"
+            data-testid="cad-dialog-close"
+          >
             ×
           </button>
         </header>
         <div className="cad-dialog__body">
-          <p>Drop a STEP, FBX, IGES, or OBJ file. We&rsquo;ll convert it to a GLB optimized for the web.</p>
+          <p>
+            Drop a STEP, FBX, IGES, or OBJ file. We&rsquo;ll convert it to a GLB optimized for the
+            web.
+          </p>
           <input
             ref={fileRef}
             type="file"

@@ -16,7 +16,10 @@ afterEach(() => {
 
 function renderRecommender(overrides?: {
   onApply?: ReturnType<typeof vi.fn>;
-  dataPreview?: { columns: ReadonlyArray<string>; rows: ReadonlyArray<ReadonlyArray<string | number>> };
+  dataPreview?: {
+    columns: ReadonlyArray<string>;
+    rows: ReadonlyArray<ReadonlyArray<string | number>>;
+  };
   currentChartType?: 'bar' | 'line' | 'pie' | 'scatter' | 'area' | 'table';
 }) {
   const onApply = overrides?.onApply ?? vi.fn();

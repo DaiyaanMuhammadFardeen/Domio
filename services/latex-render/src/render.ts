@@ -56,11 +56,7 @@ export function renderLatex(source: string, options: RenderOptions = {}): Render
  * Compute a deterministic cache key from source + themeHash + displayMode.
  * Uses SHA-256 truncated to 32 hex chars.
  */
-export function computeCacheKey(
-  source: string,
-  themeHash: string,
-  displayMode: boolean,
-): string {
+export function computeCacheKey(source: string, themeHash: string, displayMode: boolean): string {
   const payload = `${source}|${themeHash}|${displayMode}`;
   return createHash('sha256').update(payload).digest('hex').slice(0, 32);
 }

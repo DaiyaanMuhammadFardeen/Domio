@@ -101,12 +101,14 @@ describe('mintToken + verifyToken', () => {
     // Advance clock past expiry
     const expiredClock = () => now + 61_000;
 
-    expect(() => verifyToken({
-      token: result.token,
-      secret,
-      kid: 'kid-1',
-      clock: expiredClock,
-    })).toThrow(TokenExpiredError);
+    expect(() =>
+      verifyToken({
+        token: result.token,
+        secret,
+        kid: 'kid-1',
+        clock: expiredClock,
+      }),
+    ).toThrow(TokenExpiredError);
   });
 
   it('rejects tampered token (HMAC mismatch)', () => {
@@ -133,12 +135,14 @@ describe('mintToken + verifyToken', () => {
     const tamperedJson = JSON.stringify(parsed);
     const tamperedB64 = Buffer.from(tamperedJson).toString('base64url');
 
-    expect(() => verifyToken({
-      token: tamperedB64,
-      secret,
-      kid: 'kid-1',
-      clock,
-    })).toThrow(TokenSignatureError);
+    expect(() =>
+      verifyToken({
+        token: tamperedB64,
+        secret,
+        kid: 'kid-1',
+        clock,
+      }),
+    ).toThrow(TokenSignatureError);
   });
 
   it('rejects token signed with wrong secret', () => {
@@ -155,12 +159,14 @@ describe('mintToken + verifyToken', () => {
       ttlMs: 60_000,
     });
 
-    expect(() => verifyToken({
-      token: result.token,
-      secret: secret2,
-      kid: 'kid-1',
-      clock,
-    })).toThrow(TokenSignatureError);
+    expect(() =>
+      verifyToken({
+        token: result.token,
+        secret: secret2,
+        kid: 'kid-1',
+        clock,
+      }),
+    ).toThrow(TokenSignatureError);
   });
 
   it('rejects token with wrong kid', () => {
@@ -177,41 +183,49 @@ describe('mintToken + verifyToken', () => {
     });
 
     // Use the SAME secret so HMAC passes, but wrong kid
-    expect(() => verifyToken({
-      token: result.token,
-      secret,
-      kid: 'kid-2',
-      clock,
-    })).toThrow(TokenKeyMismatchError);
+    expect(() =>
+      verifyToken({
+        token: result.token,
+        secret,
+        kid: 'kid-2',
+        clock,
+      }),
+    ).toThrow(TokenKeyMismatchError);
   });
 
   it('rejects empty token', () => {
     const secret = generateSecret();
-    expect(() => verifyToken({
-      token: '',
-      secret,
-      kid: 'kid-1',
-    })).toThrow(TokenMalformedError);
+    expect(() =>
+      verifyToken({
+        token: '',
+        secret,
+        kid: 'kid-1',
+      }),
+    ).toThrow(TokenMalformedError);
   });
 
   it('rejects non-base64 token', () => {
     const secret = generateSecret();
-    expect(() => verifyToken({
-      token: 'not-a-valid-token!!!',
-      secret,
-      kid: 'kid-1',
-    })).toThrow(TokenMalformedError);
+    expect(() =>
+      verifyToken({
+        token: 'not-a-valid-token!!!',
+        secret,
+        kid: 'kid-1',
+      }),
+    ).toThrow(TokenMalformedError);
   });
 
   it('rejects valid base64 but invalid JSON', () => {
     const secret = generateSecret();
     // base64url of "not json"
     const badToken = Buffer.from('not json').toString('base64url');
-    expect(() => verifyToken({
-      token: badToken,
-      secret,
-      kid: 'kid-1',
-    })).toThrow(TokenMalformedError);
+    expect(() =>
+      verifyToken({
+        token: badToken,
+        secret,
+        kid: 'kid-1',
+      }),
+    ).toThrow(TokenMalformedError);
   });
 
   it('uses default TTL of 30 minutes when not specified', () => {
@@ -290,12 +304,14 @@ describe('rotateToken', () => {
     expect(payload.kid).toBe('kid-2');
 
     // Old token should NOT verify with new key (different secret = HMAC mismatch)
-    expect(() => verifyToken({
-      token: result1.token,
-      secret: secret2,
-      kid: 'kid-2',
-      clock,
-    })).toThrow(TokenSignatureError);
+    expect(() =>
+      verifyToken({
+        token: result1.token,
+        secret: secret2,
+        kid: 'kid-2',
+        clock,
+      }),
+    ).toThrow(TokenSignatureError);
   });
 
   it('old key can still verify old token until TTL expiry', () => {

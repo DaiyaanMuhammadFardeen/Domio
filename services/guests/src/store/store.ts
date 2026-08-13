@@ -17,7 +17,11 @@ export interface GuestStore {
   createGuestAccess(row: GuestAccess): Promise<GuestAccess>;
   createMagicLink(row: GuestMagicLink): Promise<GuestMagicLink>;
   getGuestAccess(id: string): Promise<GuestAccess | null>;
-  getGuestAccessByEmail(scopeType: string, scopeId: string, email: string): Promise<GuestAccess | null>;
+  getGuestAccessByEmail(
+    scopeType: string,
+    scopeId: string,
+    email: string,
+  ): Promise<GuestAccess | null>;
   getOpenMagicLinks(guestAccessId: string): Promise<GuestMagicLink[]>;
   getMagicLinkByHash(tokenHash: string): Promise<GuestMagicLink | null>;
   markMagicLinkConsumed(id: string, at: Date): Promise<void>;

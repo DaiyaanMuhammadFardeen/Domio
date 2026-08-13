@@ -1,7 +1,10 @@
 export const DECK_SCHEMA_VERSION = '1.0.0';
 
 /** True when two schema versions can safely exchange an additive document. */
-export function SEMVER_COMPATIBLE(fromVersion: string, toVersion: string = DECK_SCHEMA_VERSION): boolean {
+export function SEMVER_COMPATIBLE(
+  fromVersion: string,
+  toVersion: string = DECK_SCHEMA_VERSION,
+): boolean {
   const from = parseVersion(fromVersion);
   const to = parseVersion(toVersion);
   return from !== null && to !== null && from.major === to.major;

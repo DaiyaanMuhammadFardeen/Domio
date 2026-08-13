@@ -6,7 +6,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SuggestionsService } from './service.js';
 import { InMemorySuggestionsStore } from './store/mem_store.js';
 import type { SuggestionOperation, SuggestionEventEmitter, BrandLockProvider } from './types.js';
-import { FeatureDisabledError, BrandLockError, InvalidStatusTransitionError, SuggestionNotFoundError } from './types.js';
+import {
+  FeatureDisabledError,
+  BrandLockError,
+  InvalidStatusTransitionError,
+  SuggestionNotFoundError,
+} from './types.js';
 import { SUGGESTION_RETENTION_MS } from './suggestion/lifecycle.js';
 
 const fixedDate = new Date('2026-08-01T10:00:00Z');
@@ -21,8 +26,18 @@ function makeOp(overrides: Partial<SuggestionOperation> = {}): SuggestionOperati
   };
 }
 
-function makeEventEmitter(): SuggestionEventEmitter & { events: Array<{ subject: string; payload: Record<string, unknown>; innerPayload: Record<string, unknown> }> } {
-  const events: Array<{ subject: string; payload: Record<string, unknown>; innerPayload: Record<string, unknown> }> = [];
+function makeEventEmitter(): SuggestionEventEmitter & {
+  events: Array<{
+    subject: string;
+    payload: Record<string, unknown>;
+    innerPayload: Record<string, unknown>;
+  }>;
+} {
+  const events: Array<{
+    subject: string;
+    payload: Record<string, unknown>;
+    innerPayload: Record<string, unknown>;
+  }> = [];
   return {
     events,
     async publish(subject: string, payload: Record<string, unknown>): Promise<void> {
@@ -236,7 +251,9 @@ describe('SuggestionsService', () => {
       );
 
       await service.acceptSuggestion(created.id, 'user-2', false);
-      await expect(service.acceptSuggestion(created.id, 'user-3', false)).rejects.toThrow(InvalidStatusTransitionError);
+      await expect(service.acceptSuggestion(created.id, 'user-3', false)).rejects.toThrow(
+        InvalidStatusTransitionError,
+      );
     });
 
     it('marks conflicting suggestions obsolete on accept', async () => {
@@ -271,9 +288,11 @@ describe('SuggestionsService', () => {
       const s2Updated = await service.getSuggestion(s2.id);
       expect(s2Updated.status).toBe('obsolete');
 
-      expect(emitter.events.some((e) =>
-        e.subject === 'suggestion.obsolete' && e.innerPayload.suggestion_id === s2.id,
-      )).toBe(true);
+      expect(
+        emitter.events.some(
+          (e) => e.subject === 'suggestion.obsolete' && e.innerPayload.suggestion_id === s2.id,
+        ),
+      ).toBe(true);
     });
   });
 
@@ -341,7 +360,9 @@ describe('SuggestionsService', () => {
       );
 
       await service.rejectSuggestion(created.id, 'user-2');
-      await expect(service.rejectSuggestion(created.id, 'user-3')).rejects.toThrow(InvalidStatusTransitionError);
+      await expect(service.rejectSuggestion(created.id, 'user-3')).rejects.toThrow(
+        InvalidStatusTransitionError,
+      );
     });
   });
 
@@ -376,7 +397,9 @@ describe('SuggestionsService', () => {
       );
 
       // Accepting by a DIFFERENT user with brand lock should fail without break_brand_lock
-      await expect(lockedService.acceptSuggestion(created.id, 'user-2', false)).rejects.toThrow(BrandLockError);
+      await expect(lockedService.acceptSuggestion(created.id, 'user-2', false)).rejects.toThrow(
+        BrandLockError,
+      );
     });
 
     it('allows accept with break_brand_lock=true', async () => {
@@ -505,9 +528,11 @@ describe('SuggestionsService', () => {
       const count = await futureService.sweepOpenSuggestions();
       expect(count).toBe(1);
 
-      expect(emitter.events.some((e) =>
-        e.subject === 'suggestion.obsolete' && e.innerPayload.reason === 'expired',
-      )).toBe(true);
+      expect(
+        emitter.events.some(
+          (e) => e.subject === 'suggestion.obsolete' && e.innerPayload.reason === 'expired',
+        ),
+      ).toBe(true);
     });
 
     it('does not mark non-expired suggestions', async () => {

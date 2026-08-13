@@ -35,13 +35,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Ordered list of camera keyframes.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CameraKeyframeList"
-        "401":
+                $ref: '#/components/schemas/CameraKeyframeList'
+        '401':
           description: Unauthenticated.
     post:
       tags: [camera-keyframes]
@@ -58,21 +58,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateCameraKeyframeRequest"
+              $ref: '#/components/schemas/CreateCameraKeyframeRequest'
       responses:
-        "201":
+        '201':
           description: Keyframe created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CameraKeyframe"
-        "400":
+                $ref: '#/components/schemas/CameraKeyframe'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
   /v1/camera_keyframes/{id}:
     get:
@@ -86,15 +86,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Camera keyframe details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CameraKeyframe"
-        "401":
+                $ref: '#/components/schemas/CameraKeyframe'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Keyframe not found.
     patch:
       tags: [camera-keyframes]
@@ -111,23 +111,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchCameraKeyframeRequest"
+              $ref: '#/components/schemas/PatchCameraKeyframeRequest'
       responses:
-        "200":
+        '200':
           description: Keyframe updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CameraKeyframe"
-        "400":
+                $ref: '#/components/schemas/CameraKeyframe'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Keyframe not found.
     delete:
       tags: [camera-keyframes]
@@ -140,11 +140,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Keyframe deleted.
-        "401":
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Keyframe not found.
 components:
   securitySchemes:
@@ -192,7 +192,7 @@ components:
           description: Camera roll in degrees
         easing:
           type: object
-          description: "Cubic bezier control points: {p1x, p1y, p2x, p2y}"
+          description: 'Cubic bezier control points: {p1x, p1y, p2x, p2y}'
           required: [p1x, p1y, p2x, p2y]
           properties:
             p1x: { type: number }
@@ -215,7 +215,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/CameraKeyframe"
+            $ref: '#/components/schemas/CameraKeyframe'
     CreateCameraKeyframeRequest:
       type: object
       required: [position, target, fov]

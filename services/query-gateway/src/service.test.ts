@@ -29,11 +29,13 @@ const ORG = 'org-1';
 const ACTOR = 'alice';
 const SECRET = 'hmac-test-secret-key-1234567890';
 
-async function makeService(opts: {
-  rateLimitCapacity?: number;
-  rateLimitRefillPerSec?: number;
-  cacheTtlMs?: number;
-} = {}) {
+async function makeService(
+  opts: {
+    rateLimitCapacity?: number;
+    rateLimitRefillPerSec?: number;
+    cacheTtlMs?: number;
+  } = {},
+) {
   let counter = 0;
   const idGen = (): string => {
     counter++;
@@ -41,7 +43,9 @@ async function makeService(opts: {
   };
   let now = new Date('2026-08-04T12:00:00Z');
   const clock = () => now;
-  const advanceTime = (ms: number) => { now = new Date(now.getTime() + ms); };
+  const advanceTime = (ms: number) => {
+    now = new Date(now.getTime() + ms);
+  };
 
   const queries = new InMemoryQueryRepository();
   const snapshots = new InMemoryDatasetSnapshotRepository();
@@ -74,7 +78,18 @@ async function makeService(opts: {
   await acl.insert({ orgId: ORG, actorId: ACTOR, action: 'webhook', allowed: true });
   await acl.insert({ orgId: ORG, actorId: ACTOR, action: 'issue-token', allowed: true });
 
-  return { svc, queries, snapshots, freshness, viewerTokens, acl, webhookDedup, idGen, clock, advanceTime };
+  return {
+    svc,
+    queries,
+    snapshots,
+    freshness,
+    viewerTokens,
+    acl,
+    webhookDedup,
+    idGen,
+    clock,
+    advanceTime,
+  };
 }
 
 async function insertTestQuery(queries: InMemoryQueryRepository, queryId: string) {
@@ -113,7 +128,10 @@ describe('QueryGatewayService — rate limiting', () => {
   });
 
   it('refills tokens over time', async () => {
-    const { svc, queries, advanceTime } = await makeService({ rateLimitCapacity: 2, rateLimitRefillPerSec: 1 });
+    const { svc, queries, advanceTime } = await makeService({
+      rateLimitCapacity: 2,
+      rateLimitRefillPerSec: 1,
+    });
     await insertTestQuery(queries, 'q1');
 
     await svc.executeQuery('q1', ORG, ACTOR);
@@ -172,7 +190,7 @@ describe('QueryGatewayService — cache', () => {
     ]);
 
     // At least one should have cacheTier 'miss'
-    const misses = results.filter(r => r.cacheTier === 'miss');
+    const misses = results.filter((r) => r.cacheTier === 'miss');
     expect(misses.length).toBeGreaterThanOrEqual(1);
     expect(results.length).toBe(3);
   });
@@ -198,9 +216,7 @@ describe('QueryGatewayService — ACL', () => {
       executeFn: async () => ({ columns: ['id'], rows: [[1]] }),
     });
 
-    await expect(
-      svc.checkACL(ACTOR, 'invalidate', ORG),
-    ).rejects.toThrow(ACLDeniedError);
+    await expect(svc.checkACL(ACTOR, 'invalidate', ORG)).rejects.toThrow(ACLDeniedError);
   });
 
   it('allows execute by default', async () => {
@@ -221,9 +237,7 @@ describe('QueryGatewayService — ACL', () => {
       executeFn: async () => ({ columns: ['id'], rows: [[1]] }),
     });
 
-    await expect(
-      svc.checkACL(ACTOR, 'execute', ORG),
-    ).resolves.toBeUndefined();
+    await expect(svc.checkACL(ACTOR, 'execute', ORG)).resolves.toBeUndefined();
   });
 
   it('denies when explicit ACL rule says deny', async () => {
@@ -247,14 +261,12 @@ describe('QueryGatewayService — ACL', () => {
     });
     await aclRepo.insert({ orgId: ORG, actorId: ACTOR, action: 'execute', allowed: false });
 
-    await expect(
-      svc.checkACL(ACTOR, 'execute', ORG),
-    ).rejects.toThrow(ACLDeniedError);
+    await expect(svc.checkACL(ACTOR, 'execute', ORG)).rejects.toThrow(ACLDeniedError);
   });
 
   it('denies anonymous users', async () => {
     await expect(
-      makeService().then(s => s.svc.checkACL(undefined, 'execute', ORG)),
+      makeService().then((s) => s.svc.checkACL(undefined, 'execute', ORG)),
     ).rejects.toThrow(ACLDeniedError);
   });
 });
@@ -268,7 +280,9 @@ describe('QueryGatewayService — audit', () => {
     };
     let now = new Date('2026-08-04T12:00:00Z');
     const clock = () => now;
-    const advanceTime = (ms: number) => { now = new Date(now.getTime() + ms); };
+    const advanceTime = (ms: number) => {
+      now = new Date(now.getTime() + ms);
+    };
 
     const queries = new InMemoryQueryRepository();
     const snapshots = new InMemoryDatasetSnapshotRepository();
@@ -302,7 +316,9 @@ describe('QueryGatewayService — audit', () => {
       cacheTtlMs: 60_000,
       idGenerator: idGen,
       clock,
-      executeFn: async () => { throw new Error('SQL syntax error'); },
+      executeFn: async () => {
+        throw new Error('SQL syntax error');
+      },
     });
 
     void advanceTime;
@@ -365,9 +381,9 @@ describe('QueryGatewayService — webhook', () => {
     const { svc, queries } = await makeService();
     await insertTestQuery(queries, 'q1');
 
-    await expect(
-      svc.processWebhook('{}', 'deadbeef', 'wh-2', ORG, 'q1', ACTOR),
-    ).rejects.toThrow(WebhookHMACError);
+    await expect(svc.processWebhook('{}', 'deadbeef', 'wh-2', ORG, 'q1', ACTOR)).rejects.toThrow(
+      WebhookHMACError,
+    );
   });
 
   it('deduplicates by idempotency key', async () => {
@@ -402,8 +418,8 @@ describe('QueryGatewayService — invalidation', () => {
 
   it('returns 404 for unknown query', async () => {
     const { svc } = await makeService();
-    await expect(
-      svc.invalidateQuery('nonexistent', ORG, ACTOR),
-    ).rejects.toThrow(QueryNotFoundError);
+    await expect(svc.invalidateQuery('nonexistent', ORG, ACTOR)).rejects.toThrow(
+      QueryNotFoundError,
+    );
   });
 });

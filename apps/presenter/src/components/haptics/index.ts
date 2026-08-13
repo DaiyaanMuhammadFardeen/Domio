@@ -35,8 +35,4 @@ export {
   triggerAdvanceVibrate,
   triggerVibrate,
 } from '../../lib/haptics-service';
-export type {
-  PacingCheckpoint,
-  VibrationPattern,
-  VibrationPulse,
-} from '../../lib/haptics-service';
+export type { PacingCheckpoint, VibrationPattern, VibrationPulse } from '../../lib/haptics-service';

@@ -153,10 +153,7 @@ export interface ModelAdapter {
   capabilities: Capability[];
 
   /** Streaming text generation. */
-  generateText(
-    req: GenerateTextRequest,
-    ctx?: { signal?: AbortSignal },
-  ): AsyncIterable<Delta>;
+  generateText(req: GenerateTextRequest, ctx?: { signal?: AbortSignal }): AsyncIterable<Delta>;
 
   /** Image generation. */
   generateImage(
@@ -165,10 +162,7 @@ export interface ModelAdapter {
   ): Promise<GenerateImageResult>;
 
   /** Embedding generation. */
-  embed(
-    req: EmbedRequest,
-    ctx?: { signal?: AbortSignal },
-  ): Promise<EmbedResult>;
+  embed(req: EmbedRequest, ctx?: { signal?: AbortSignal }): Promise<EmbedResult>;
 
   /** Vision (M1 stub — throws UnsupportedCapabilityError by default). */
   generateVision?(
@@ -183,10 +177,7 @@ export interface ModelAdapter {
   ): Promise<GenerateSpeechResult>;
 
   /** Transcribe/ASR (M1 stub — throws UnsupportedCapabilityError by default). */
-  transcribe?(
-    req: TranscribeRequest,
-    ctx?: { signal?: AbortSignal },
-  ): Promise<TranscribeResult>;
+  transcribe?(req: TranscribeRequest, ctx?: { signal?: AbortSignal }): Promise<TranscribeResult>;
 }
 
 // ---------------------------------------------------------------------------
@@ -237,10 +228,7 @@ export function parseModelClass(model: string): ParsedModelClass {
  * Factory: create the appropriate adapter for the given model class string.
  * Dispatches by provider prefix.
  */
-export function createAdapter(
-  model: string,
-  opts?: AdapterOptions,
-): ModelAdapter {
+export function createAdapter(model: string, opts?: AdapterOptions): ModelAdapter {
   const { provider } = parseModelClass(model);
 
   switch (provider) {
@@ -264,10 +252,7 @@ export function createAdapter(
 // Helper: conditionally build init with or without signal
 // ---------------------------------------------------------------------------
 
-function fetchOpts(
-  init: Omit<RequestInit, 'signal'>,
-  signal?: AbortSignal,
-): RequestInit {
+function fetchOpts(init: Omit<RequestInit, 'signal'>, signal?: AbortSignal): RequestInit {
   if (signal !== undefined) {
     return { ...init, signal };
   }
@@ -427,10 +412,7 @@ class OpenAIAdapter implements ModelAdapter {
     };
   }
 
-  async embed(
-    req: EmbedRequest,
-    ctx?: { signal?: AbortSignal },
-  ): Promise<EmbedResult> {
+  async embed(req: EmbedRequest, ctx?: { signal?: AbortSignal }): Promise<EmbedResult> {
     const inputs = Array.isArray(req.input) ? req.input : [req.input];
     const body = {
       model: 'text-embedding-3-small',
@@ -597,10 +579,7 @@ class AnthropicAdapter implements ModelAdapter {
     throw new UnsupportedCapabilityError('image-generation', this.id);
   }
 
-  async embed(
-    _req: EmbedRequest,
-    _ctx?: { signal?: AbortSignal },
-  ): Promise<EmbedResult> {
+  async embed(_req: EmbedRequest, _ctx?: { signal?: AbortSignal }): Promise<EmbedResult> {
     throw new UnsupportedCapabilityError('embed', this.id);
   }
 
@@ -724,10 +703,7 @@ class GoogleAdapter implements ModelAdapter {
     throw new UnsupportedCapabilityError('image-generation', this.id);
   }
 
-  async embed(
-    _req: EmbedRequest,
-    _ctx?: { signal?: AbortSignal },
-  ): Promise<EmbedResult> {
+  async embed(_req: EmbedRequest, _ctx?: { signal?: AbortSignal }): Promise<EmbedResult> {
     throw new UnsupportedCapabilityError('embed', this.id);
   }
 
@@ -760,8 +736,7 @@ class VLLMAdapter implements ModelAdapter {
     this.id = `vllm-${model.replace('/', '-')}`;
     this.fetchImpl = opts?.fetchImpl ?? globalThis.fetch.bind(globalThis);
     this.apiKey = opts?.apiKey ?? process.env['VLLM_API_KEY'] ?? '';
-    this.baseURL =
-      opts?.baseURL ?? process.env['VLLM_BASE_URL'] ?? 'http://localhost:8000/v1';
+    this.baseURL = opts?.baseURL ?? process.env['VLLM_BASE_URL'] ?? 'http://localhost:8000/v1';
   }
 
   async *generateText(
@@ -852,10 +827,7 @@ class VLLMAdapter implements ModelAdapter {
     throw new UnsupportedCapabilityError('image-generation', this.id);
   }
 
-  async embed(
-    _req: EmbedRequest,
-    _ctx?: { signal?: AbortSignal },
-  ): Promise<EmbedResult> {
+  async embed(_req: EmbedRequest, _ctx?: { signal?: AbortSignal }): Promise<EmbedResult> {
     throw new UnsupportedCapabilityError('embed', this.id);
   }
 

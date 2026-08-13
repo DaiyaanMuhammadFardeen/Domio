@@ -21,11 +21,7 @@
 
 import type { StateMachine } from './state-machine.js';
 
-export type StatePersistenceScope =
-  | 'session'
-  | 'slide'
-  | 'deck'
-  | 'persistent_session';
+export type StatePersistenceScope = 'session' | 'slide' | 'deck' | 'persistent_session';
 
 export const SCOPE_LADDER: readonly StatePersistenceScope[] = [
   'session',
@@ -87,7 +83,9 @@ export class StateScope {
   /** Reset state for every machine whose `scope === 'slide'`, unless
    *  `persist_instance_state` is true. Returns the list of instanceIds
    *  that were reset. */
-  resetOnSlideEnter(slideMachines: readonly string[] = Array.from(this.machines.keys())): readonly string[] {
+  resetOnSlideEnter(
+    slideMachines: readonly string[] = Array.from(this.machines.keys()),
+  ): readonly string[] {
     const reset: string[] = [];
     for (const id of slideMachines) {
       const bound = this.machines.get(id);

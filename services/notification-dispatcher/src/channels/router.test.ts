@@ -61,7 +61,10 @@ describe('channels/router', () => {
   it('EmailSender delegates to transport', async () => {
     const sent: Array<{ to: string; subject: string; body: string }> = [];
     const transport: EmailTransport = {
-      send: async (opts) => { sent.push(opts); return { ok: true }; },
+      send: async (opts) => {
+        sent.push(opts);
+        return { ok: true };
+      },
     };
     const sender = new EmailSender(transport);
     const r = await sender.send(notif({ channel: 'email', recipient: 'a@b.com' }));

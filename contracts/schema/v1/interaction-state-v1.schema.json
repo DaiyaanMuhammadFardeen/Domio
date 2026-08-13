@@ -5,8 +5,13 @@
   "description": "A small finite-state machine attached to a component instance. Phase 10 M1 (state-machine editor surfaces in M3).",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "instance_id",
-    "state_machine", "current_state", "scope"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "instance_id",
+    "state_machine",
+    "current_state",
+    "scope"
   ],
   "additionalProperties": false,
   "properties": {

@@ -66,10 +66,10 @@ const DEFAULT_API_BASE: string =
     : undefined) ?? 'http://localhost:8080';
 
 const NOW = (): number =>
-  (typeof process !== 'undefined' && typeof process.hrtime === 'function'
+  typeof process !== 'undefined' && typeof process.hrtime === 'function'
     ? // deterministic-ish reference for tests — Date.now() is fine here
       Date.now()
-    : Date.now());
+    : Date.now();
 
 interface InternalTreeState {
   readonly nodes: DeckNode[];
@@ -274,21 +274,15 @@ export async function listInheritanceTree(
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<ListInheritanceTreeResult> {
   try {
-    const res = await fetch(
-      `${baseUrl}/v1/inheritance/trees/${encodeURIComponent(masterDeckId)}`,
-    );
+    const res = await fetch(`${baseUrl}/v1/inheritance/trees/${encodeURIComponent(masterDeckId)}`);
     if (!res.ok) throw new Error(`inheritance API ${res.status}`);
     const data = (await res.json()) as ListInheritanceTreeResult;
     return data;
   } catch {
     // Offline fallback — include the master + every derived deck.
-    const nodes = STATE.nodes.filter(
-      (n) => n.id === masterDeckId || n.parent_id === masterDeckId,
-    );
+    const nodes = STATE.nodes.filter((n) => n.id === masterDeckId || n.parent_id === masterDeckId);
     const nodeIds = new Set(nodes.map((n) => n.id));
-    const edges = STATE.edges.filter(
-      (e) => nodeIds.has(e.parent_id) && nodeIds.has(e.child_id),
-    );
+    const edges = STATE.edges.filter((e) => nodeIds.has(e.parent_id) && nodeIds.has(e.child_id));
     return { nodes, edges };
   }
 }
@@ -372,9 +366,7 @@ export async function listConflictingSlides(
     const derived = new Set(
       STATE.edges.filter((e) => e.parent_id === masterDeckId).map((e) => e.child_id),
     );
-    return STATE.conflicts.filter((c) =>
-      c.downstream_decks.some((id) => derived.has(id)),
-    );
+    return STATE.conflicts.filter((c) => c.downstream_decks.some((id) => derived.has(id)));
   }
 }
 

@@ -42,9 +42,7 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
@@ -56,7 +54,9 @@ const VERSIONS: readonly DeckVersion[] = [
 
 describe('VersionPinSelector', () => {
   it('renders the latest option + every version', () => {
-    render(withLocale(<VersionPinSelector versions={VERSIONS} value="latest" onChange={vi.fn()} />));
+    render(
+      withLocale(<VersionPinSelector versions={VERSIONS} value="latest" onChange={vi.fn()} />),
+    );
     const sel = screen.getByTestId('version-pin-selector-select') as HTMLSelectElement;
     expect(sel.options.length).toBe(4); // latest + 3 versions
     expect(sel.options[0]?.value).toBe('latest');
@@ -64,7 +64,9 @@ describe('VersionPinSelector', () => {
 
   it('emits the chosen version id', () => {
     const onChange = vi.fn();
-    render(withLocale(<VersionPinSelector versions={VERSIONS} value="latest" onChange={onChange} />));
+    render(
+      withLocale(<VersionPinSelector versions={VERSIONS} value="latest" onChange={onChange} />),
+    );
     fireEvent.change(screen.getByTestId('version-pin-selector-select'), {
       target: { value: 'v2' },
     });
@@ -72,7 +74,9 @@ describe('VersionPinSelector', () => {
   });
 
   it('shows the latest-hint when value is "latest"', () => {
-    render(withLocale(<VersionPinSelector versions={VERSIONS} value="latest" onChange={vi.fn()} />));
+    render(
+      withLocale(<VersionPinSelector versions={VERSIONS} value="latest" onChange={vi.fn()} />),
+    );
     expect(screen.getByTestId('version-pin-selector-latest-hint')).toBeInTheDocument();
   });
 
@@ -83,7 +87,9 @@ describe('VersionPinSelector', () => {
   });
 
   it('sorts versions by createdAtMs descending', () => {
-    render(withLocale(<VersionPinSelector versions={VERSIONS} value="latest" onChange={vi.fn()} />));
+    render(
+      withLocale(<VersionPinSelector versions={VERSIONS} value="latest" onChange={vi.fn()} />),
+    );
     const sel = screen.getByTestId('version-pin-selector-select') as HTMLSelectElement;
     // latest + v3 (300) + v2 (200) + v1 (100)
     expect(sel.options[1]?.value).toBe('v3');

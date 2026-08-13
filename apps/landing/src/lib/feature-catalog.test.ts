@@ -22,9 +22,7 @@ describe('feature-catalog', () => {
       expect(feature.title.length).toBeGreaterThan(0);
       expect(feature.tagline.length).toBeGreaterThan(0);
       expect(feature.hero_description.length).toBeGreaterThan(0);
-      expect(feature.try_cta_href).toBe(
-        `/signup?feature=${encodeURIComponent(feature.slug)}`,
-      );
+      expect(feature.try_cta_href).toBe(`/signup?feature=${encodeURIComponent(feature.slug)}`);
     }
   });
 

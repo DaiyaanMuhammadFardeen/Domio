@@ -73,7 +73,9 @@ function defaultGenerateToken(): string {
   const bytes = new Uint8Array(32);
   // Node 22+ has globalThis.crypto
   globalThis.crypto.getRandomValues(bytes);
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('') + tokenCounter.toString(36);
+  return (
+    Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('') + tokenCounter.toString(36)
+  );
 }
 
 export class EmbedTokenService {

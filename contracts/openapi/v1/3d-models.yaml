@@ -39,7 +39,7 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: "Model file (.glb, .gltf, .usdz, .step, .stp, .iges, .igs, .fbx, .obj)"
+                  description: 'Model file (.glb, .gltf, .usdz, .step, .stp, .iges, .igs, .fbx, .obj)'
                 workspaceId:
                   type: string
                   format: uuid
@@ -54,26 +54,26 @@ paths:
                   maximum: 10000000
                   description: Target polygon count for auto-decimation (default 250000)
       responses:
-        "202":
+        '202':
           description: Upload accepted; processing asynchronously.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ModelUploadAccepted"
-        "400":
+                $ref: '#/components/schemas/ModelUploadAccepted'
+        '400':
           description: Invalid file format or missing fields.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
-        "413":
+        '413':
           description: File exceeds size limit.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /v1/models:
     get:
       tags: [models]
@@ -99,13 +99,13 @@ paths:
             maximum: 200
             default: 50
       responses:
-        "200":
+        '200':
           description: List of model assets.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ModelAssetList"
-        "401":
+                $ref: '#/components/schemas/ModelAssetList'
+        '401':
           description: Unauthenticated.
   /v1/models/{id}:
     get:
@@ -119,15 +119,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Model asset details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ModelAsset"
-        "401":
+                $ref: '#/components/schemas/ModelAsset'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Model not found.
     patch:
       tags: [models]
@@ -144,23 +144,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchModelRequest"
+              $ref: '#/components/schemas/PatchModelRequest'
       responses:
-        "200":
+        '200':
           description: Model asset updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ModelAsset"
-        "400":
+                $ref: '#/components/schemas/ModelAsset'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Model not found.
     delete:
       tags: [models]
@@ -173,11 +173,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: Model deleted.
-        "401":
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: Model not found.
 components:
   securitySchemes:
@@ -188,7 +188,8 @@ components:
   schemas:
     ModelAsset:
       type: object
-      required: [id, workspaceId, uploaderId, name, format, sourceUrl, derivedUrl, polyCount, textureCount]
+      required:
+        [id, workspaceId, uploaderId, name, format, sourceUrl, derivedUrl, polyCount, textureCount]
       properties:
         id:
           type: string
@@ -245,7 +246,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/ModelAsset"
+            $ref: '#/components/schemas/ModelAsset'
         total:
           type: integer
         page:

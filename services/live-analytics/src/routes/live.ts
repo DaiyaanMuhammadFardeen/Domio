@@ -20,7 +20,10 @@ export function liveRoutes(deps: LiveRoutesDeps): Hono {
     const workspace_id = c.req.query('workspace_id');
     const session_id = c.req.query('session_id');
     if (!workspace_id || !session_id) {
-      return c.json({ error: { code: 'bad_request', message: 'workspace_id and session_id required' } }, 400);
+      return c.json(
+        { error: { code: 'bad_request', message: 'workspace_id and session_id required' } },
+        400,
+      );
     }
     const pulse = deps.orch.pulse(workspace_id, session_id);
     return c.json({ pulse });

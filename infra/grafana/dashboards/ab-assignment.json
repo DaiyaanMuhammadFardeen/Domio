@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "ab-assignment"
-  ],
+  "tags": ["tier-2", "domio", "ab-assignment"],
   "panels": [
     {
       "id": 1,

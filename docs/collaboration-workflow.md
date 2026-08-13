@@ -3,7 +3,7 @@
 > **Source:** `feature-list.md` §13, `pre-development-planning-guide.md` (full document, applied contextually).
 > **Status:** Planning document — no code, no commits.
 
-Section 13 turns Domio from a single-author canvas into a **team-operated production system** for presentations. Comments pin to *elements*, not just slides. Approvals are workflow-enforced, not advisory. Suggestion mode is a CRDT-isolated branch, not raw text suggestions. Merge requests produce a *visual* diff of the deck as a rendered object. The slide library is a governed source of truth, with auto-update propagation across every consumer. Meeting tools, chat tools, calendars, and task managers are first-class collaborators, not afterthoughts. Guest collaborators are scoped and expiring. This document covers features 179–192 end-to-end: feature mapping, UX flows, functional & non-functional requirements, architecture, data model, API contracts, security, performance, observability/testing, and cross-section ties.
+Section 13 turns Domio from a single-author canvas into a **team-operated production system** for presentations. Comments pin to _elements_, not just slides. Approvals are workflow-enforced, not advisory. Suggestion mode is a CRDT-isolated branch, not raw text suggestions. Merge requests produce a _visual_ diff of the deck as a rendered object. The slide library is a governed source of truth, with auto-update propagation across every consumer. Meeting tools, chat tools, calendars, and task managers are first-class collaborators, not afterthoughts. Guest collaborators are scoped and expiring. This document covers features 179–192 end-to-end: feature mapping, UX flows, functional & non-functional requirements, architecture, data model, API contracts, security, performance, observability/testing, and cross-section ties.
 
 ---
 
@@ -14,6 +14,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 179. Comments pinned to elements or slides, with threads, mentions, and resolve states
 
 **Acceptance criteria**
+
 - A user can right-click any element (or slide canvas) → **Comment** → a pin appears at the element's current canvas coordinate (in 2D canvas space, not document space).
 - Threaded replies render in a side panel grouped by element/slide with **resolve / reopen / delete** actions.
 - A comment can `@mention` any workspace member, guest (#192), or role handle (`@designers`, `@legal`); mentioned users receive a notification within **p95 ≤ 5s** (see §3).
@@ -22,6 +23,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Pin coordinates are **not** absolute pixels — they are element-relative anchors, so changing the slide layout (or rendering on a smaller viewport) keeps pins meaningful.
 
 **Behavioral details**
+
 - Pins are stored as `(target_type, target_id, anchor)` tuples where `anchor` is an element-relative offset (e.g., `(0.42, 0.31)` of the element's bounding box) plus a fallback slide-relative offset.
 - The comment side-panel supports **filter by status** (open / resolved / mentioning me), **filter by author**, **filter by date range**.
 - A comment can attach a **file** (image / PDF / doc up to 25 MB) using the same object storage as the asset library; previews render inline in the thread.
@@ -31,6 +33,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - A separate **comment feed view** lists every comment in the deck chronologically with quick navigation.
 
 **Edge cases**
+
 - Pin target is on an element inside a locked / brand-locked region (#36) → comment is still permitted, but the comment thread displays a "this region is brand-locked" badge; edit/resolve actions remain available.
 - Mentioning a deactivated user → notification suppressed, mention rendered as `‹@inactive-user›` with strikethrough; thread remains intact.
 - A deleted slide has 12 comments on it → on slide delete, comments move to a **deck-level trash view** (auto-purge after 30 days, configurable per workspace), restorable if the slide is restored from version history (#20).
@@ -42,6 +45,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 180. Review/approval workflows (legal signs off before a deck can be shared externally)
 
 **Acceptance criteria**
+
 - A deck can be marked **"Request Review"** with a configurable approval policy: e.g., `legal_required, brand_required, finance_required` — each is a role or named individual.
 - Until all required approvals are `approved`, **external share links cannot be published** (#155–#158); the share dialog shows "blocked pending approval" with the list of pending approvers.
 - Approvers receive an **approval request** with: a deck thumbnail, the deck version under review (immutable snapshot), the requested approver role(s), and a comment thread dedicated to the review.
@@ -49,6 +53,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - A complete **decision audit trail** records every state transition with actor, timestamp, justification, and the immutable version_id.
 
 **Behavioral details**
+
 - Approval is on a **deck version snapshot**, not the live editable deck — so approvers see a stable artifact even if the author edits mid-review.
 - Approval states are a strict **state machine**: `draft → pending → approved | changes_requested | rejected → (back to draft on edit) → pending → ...`. Illegal transitions are rejected at the API level and the UI does not surface transitions the actor cannot perform.
 - The deck can have **multiple parallel approval lanes** (legal and brand can review simultaneously); each lane has its own decision.
@@ -56,6 +61,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - The approval policy is **deck-level and workspace-level** — workspace admins can set a default policy that authors can override per deck (within allowed policy types).
 
 **Edge cases**
+
 - An approver is removed from the workspace mid-review → the approval reassigns to the role's fallback approver (configurable per workspace) and the original approver's prior decisions remain in the audit log.
 - Author submits for review while still editing → the system creates an **immutable version snapshot** at submit-time; further edits create new versions that auto-resubmit (configurable: auto vs. requires manual resubmit).
 - An approver requests changes → the author edits → a new version is created and the reviewer is auto-notified; previous approval decisions on older versions remain visible but do **not** apply to the new version.
@@ -67,20 +73,23 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 181. Slide-level assignments ("Priya owns slides 4–7") with status tracking
 
 **Acceptance criteria**
+
 - A user (with appropriate permission) can select one or more slides → **Assign** → choose an assignee (or role handle) and an optional due date.
 - The assignee sees the deck in a "My assignments" view across the workspace, filterable by `status` and `due`.
 - Each assignment has a **status**: `not_started | in_progress | blocked | review | done`, settable by the assignee or the assignor.
 - Assignments show up in **presenter view** as overlays during a live session (with assignee initials in a corner badge) — purely informational, not audience-visible.
 
 **Behavioral details**
+
 - Assignment scope is **slide-level or section-level** (a continuous range of slides) — not element-level.
 - An assignment can have **multiple assignees** (primary + watchers); only the primary's status counts toward "all done" rollups.
-- A `blocked` status requires a **reason text** (mandatory) so the team can see *why* a slide is blocked, not just that it is.
+- A `blocked` status requires a **reason text** (mandatory) so the team can see _why_ a slide is blocked, not just that it is.
 - Assignments have **email / Slack / Teams / in-app** notification hooks per status transition.
 - An assignment timeline view shows all decks and all assignments in a Gantt-like chart with critical path detection (slides downstream of `blocked` are highlighted).
 - Assignment **reassignment** preserves the original assignment in an audit log; the new assignee is notified.
 
 **Edge cases**
+
 - Assignee leaves the workspace → assignment transitions to `unassigned`; the assignor is notified and can reassign.
 - A slide is deleted → its assignments auto-cancel with a notification; if the slide is restored, assignments restore with it.
 - Two people assigned to the same slide → both see the assignment; status is set by either, with last-write-wins (with a brief "X also updated this" attribution).
@@ -91,6 +100,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 182. Suggestion mode — propose edits without changing the deck (Google-Docs-style)
 
 **Acceptance criteria**
+
 - A user can toggle **Suggestion mode** in the editor (toolbar toggle or `Cmd+I` shortcut). While on, **all of the user's edits are recorded as suggestions**, not applied to the live deck.
 - Suggestions render in **distinct visual style** (typically a colored margin + changed text/element stroke) with a hover-tooltip showing the original and the suggested value.
 - The deck author / a reviewer can **Accept** or **Reject** each suggestion individually, or **Accept all** / **Reject all** in bulk.
@@ -98,6 +108,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Suggestion mode is **per-user-session**, not per-deck: two users can each be in suggestion mode simultaneously, producing independent suggestion threads.
 
 **Behavioral details**
+
 - Suggestions are stored as **CRDT deltas** on a parallel branch (see §4 architecture) — not as raw text patches. This is essential because Domio edits are not text: a suggestion may be "move this chart 40px right" or "swap this chart type to waterfall" or "change the data binding to the Q3 sheet."
 - The suggestion representation captures the **intent** (semantic operation) plus the resulting **state diff** so both can be reviewed.
 - Suggestions are **scoped per editor session** but **persisted** in the deck for the lifetime of the review cycle (configurable retention, default 90 days).
@@ -105,6 +116,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - The deck author can see a **suggestion count badge** in the editor toolbar and a "Review suggestions" panel listing all open suggestions with author + timestamp.
 
 **Edge cases**
+
 - A suggestion is made on an element that **moves before it's accepted** → the suggestion stores element-relative anchoring (like comments #179), so it follows the element. If the element is deleted before accept, the suggestion auto-resolves as "obsolete" with a notification.
 - A suggestion conflicts with a parallel suggestion (two suggesters edit the same element differently) → on the second suggestion's accept attempt, the system detects the conflict and offers "your accept will override theirs / merge / abort."
 - Author is **in suggestion mode** themselves and accepts a suggestion → that counts as a normal accept (their own session's suggestions remain pending).
@@ -116,6 +128,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 183. Deck merge requests with visual diffing between branches
 
 **Acceptance criteria**
+
 - A user can **branch** the current deck (#19 — branching is already in section 1, this feature surfaces it for collaboration) into a named branch (e.g., `priya/experiment-pricing-layout`).
 - On a branch, the user (or team) edits freely. When ready, they **Open a Merge Request** against `main` (or any chosen target branch).
 - The merge request UI shows a **visual diff** of the two deck versions: thumbnails side-by-side, element-level diff overlay, and structural diff (added / removed / modified slides).
@@ -123,6 +136,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Merging applies the branch's changes to the target branch. If both branches edited the same element, the system detects **semantic conflicts** and offers a 3-way merge UI.
 
 **Behavioral details**
+
 - The merge request is implemented as a **server-side synthesis**: the server computes the diff between two deck snapshots (#19 branch heads), persists it as a `merge_request`, and stores the visual diff payload.
 - Visual diff is at **three granularities**: (a) slide-level (added/removed/reordered slides), (b) element-level within a slide (added/removed/moved/resized/restyled elements), (c) data-binding-level (which data source changed, what fields updated).
 - The element-level diff renders the **target slide in two states** (before/after) with a **highlighted overlay** (red = removed, green = added, amber = modified) and a slider so the reviewer can drag between the two states.
@@ -132,6 +146,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - The merge is **atomic**: either all non-conflicting changes apply, or none. Conflict resolution is required to complete.
 
 **Edge cases**
+
 - Branch deleted before merge → MR becomes orphaned, surfaces as "branch deleted, can you re-create?" — the MR remains open with stale data.
 - Target branch is deleted → MR auto-closes with reason "target branch deleted."
 - Author of branch leaves workspace → MR remains open; reassignable to a new author.
@@ -143,6 +158,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 184. Team workspaces with folders, projects, and granular permissions
 
 **Acceptance criteria**
+
 - A workspace has a **hierarchical folder structure**: workspace → folders → projects → decks (and standalone decks at any level).
 - Permissions are assigned per **role** (owner, admin, editor, commenter, viewer, guest — see #192) and per **principal** (named user or group).
 - Permission inheritance flows: workspace → folder → project → deck → element (via #179 comment pinning) but can be **overridden at any level**.
@@ -151,6 +167,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Permissions are **typed**: `read`, `comment`, `suggest`, `edit`, `share_internal`, `share_external`, `manage_members`, `manage_billing`. Each is a separate capability.
 
 **Behavioral details**
+
 - Permissions are evaluated by the **workspace permission engine** (§4) at every API call. The engine resolves the principal → group memberships → role → resource hierarchy → effective capabilities.
 - A user can have **multiple roles** on a single resource (e.g., editor on the deck, commenter on slide 4 only); the **union of allowed** is taken.
 - **Denied permissions** are explicit, not silent: an attempted share_external that the user lacks returns a clear error rather than an opaque 403.
@@ -159,6 +176,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Workspace admins can set **workspace-level defaults** that propagate but are overridable.
 
 **Edge cases**
+
 - A user is removed from a workspace mid-edit → their open sessions are invalidated; their unsaved CRDT state (#21) is reconciled as a final commit if the deck has shared edit history.
 - Permission downgrade mid-review → the user's review access persists until the review closes (configurable); they cannot start new reviews.
 - Permission inheritance broken by an intermediate "no-inherit" folder → permissions below it are not affected by above; this is opt-in per folder.
@@ -169,6 +187,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 185. Slide library — a governed pool of approved slides anyone can pull from
 
 **Acceptance criteria**
+
 - A **Slide Library** is a workspace-level (or organization-level) collection of slides marked **Approved for Reuse**.
 - Any workspace member with `share_to_library` permission can publish a slide to the library with a **title, description, owner, tags, and an approval stamp**.
 - The library has **search and filter**: by tag, owner, data-binding type, brand-kit, last updated, approval status.
@@ -176,6 +195,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - The library has **governance** features: required reviewers for publish, retire/archive workflow, usage analytics ("this slide is used in 47 decks"), and a freshness indicator (last reviewed date).
 
 **Behavioral details**
+
 - A library entry stores **the canonical slide** plus **metadata**: owner, tags, data-binding summary, brand compliance, freshness, approval chain.
 - Library entries can have **supersedes** and **superseded_by** relationships, enabling retire/refresh cycles.
 - The library is **scoped**: workspace-level (everyone in the workspace can use), org-level (across workspaces, admin-managed), or **team-level** (specific group only).
@@ -183,6 +203,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - The library has an **admin view** showing pending approvals, usage heatmap, stale slides (no update in N days), and off-brand outliers.
 
 **Edge cases**
+
 - Library slide is deleted → consumers' references break; the system prompts to either pin to the last available version or remove the reference (and the slide is replaced with a placeholder).
 - Library slide has a **data binding** (#48) → on import, the consumer is asked whether to reuse the same binding (live-linked) or copy with a new binding (snapshot).
 - A user wants to publish a slide that has **comments** (#179) → comments are stripped on publish by default, with a "carry reviewer notes" toggle that imports only resolved-comment summaries.
@@ -193,6 +214,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 186. Auto-updating shared slides — legal updates the disclaimer once; all 400 decks using it update
 
 **Acceptance criteria**
+
 - When a deck inserts a slide as a **library reference** (not a copy, per #185), edits to the library master **propagate automatically** to every deck that references it, within **p95 ≤ 60s** for normal update windows.
 - Consumers can opt to **freeze** a reference (snapshot the library version, stop receiving updates) on a per-reference basis.
 - Updates are **non-destructive by default**: a library update that conflicts with a consumer's local edit triggers a **conflict UI** (similar to #183) and pauses propagation for that consumer until resolved.
@@ -200,6 +222,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Every consumer can see a **"last synced with library" timestamp** and a **"what changed in this update"** changelog entry.
 
 **Behavioral details**
+
 - Auto-update is implemented as an **event bus + lazy materialization** hybrid (see §3 NFRs and §4 architecture): the library write emits an event; consumers either pull on read (lazy) or get pushed (write-through) depending on configuration.
 - The **propagation unit** is the **slide**, not the deck — consumers can have one deck with five library slides, each with independent update settings.
 - An update can be **mandatory** (compliance: "you must accept this update") or **opt-in** (improvement: "you can take this update if you want").
@@ -207,6 +230,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Auto-update respects **brand-locked regions** — locked regions of a library slide cannot be overridden by the consumer, ever.
 
 **Edge cases**
+
 - Library master is deleted while consumers reference it → consumers see a "reference broken" badge and the slide is replaced with a snapshot of the last version; the snapshot is marked `frozen_due_to_deletion`.
 - Consumer's local edit conflicts with incoming update → conflict UI; if not resolved within N days, the conflict auto-resolves by preferring the local edit and emitting a notification (configurable).
 - A library update would **break data bindings** in a consumer (e.g., library master changed a bound field name) → propagation paused for that consumer until bindings are re-mapped.
@@ -217,12 +241,14 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 187. Content expiry policies (this pricing slide auto-flags for review every quarter)
 
 **Acceptance criteria**
+
 - An **expiry policy** can be attached to a slide, deck, library entry, or section. The policy defines: a **review interval** (e.g., 90 days), a **responsible role/user**, and a **flag behavior** (badge, notify, auto-archive).
 - When content exceeds its review interval without an explicit **freshness confirmation**, the system **flags it**: a "stale" badge appears, notifications go to the responsible party, and (if configured) the deck's external share links display "contains content pending review."
 - Freshness can be confirmed by any user with edit rights; the confirmation resets the timer and is logged.
 - Expiry policies can be **inherited** from workspace defaults and overridden per resource.
 
 **Behavioral details**
+
 - The **expiry policy scheduler** (§4) runs daily, scanning all resources for upcoming and overdue freshness windows.
 - Three escalation tiers: **gentle** (badge only), **moderate** (badge + notification), **strict** (badge + notification + auto-revoke external share on overdue).
 - Stale content is surfaced in a **dashboard**: "42 slides across 12 decks need review this week."
@@ -230,6 +256,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - AI freshness checker (#125) can **auto-confirm** freshness if it can verify the bound data is current — saving manual review for purely data-driven slides.
 
 **Edge cases**
+
 - Resource has no responsible party (e.g., the user who owned it left) → escalates to the workspace admin.
 - Policy is **disabled** mid-cycle → existing flags clear on next scheduler run.
 - A library entry's expiry passes → all consumers inherit the staleness flag (they cannot independently freshen a library slide's flag; only the library owner can).
@@ -240,12 +267,14 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 188. Meeting-tool integrations: present natively inside Zoom/Meet/Teams with participation features intact
 
 **Acceptance criteria**
+
 - From the share dialog (#155) or the presenter view (#126), a user can **"Present in Zoom"** / **"Present in Google Meet"** / **"Present in Microsoft Teams"** — the deck launches **inside the meeting** as a native app or a connected app.
 - All participation features survive: live polls (#143), Q&A (#145), word clouds (#144), emoji reactions (#147), audience-driven navigation (#148), live translation captions (#153), attention heatmap data capture.
 - The presenter controls the deck from inside the meeting (no separate tab needed) and audience members see the slides synchronized.
 - The integration is **bidirectional**: the meeting's chat, participants list, and recording state are visible inside Domio's presenter view (optional, configurable).
 
 **Behavioral details**
+
 - Three integration patterns are supported per vendor:
   1. **In-meeting app / SDK** (Teams Meetings apps, Zoom Apps SDK) — full-featured, runs inside the meeting chrome.
   2. **Connected app via deep link** — opens the deck in a co-pane window tied to the meeting lifecycle.
@@ -256,6 +285,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - The integration respects **the meeting's permission model**: only meeting attendees see the deck; Domio does not bypass meeting-level access control.
 
 **Edge cases**
+
 - Vendor API rate limit hit during a high-traffic poll → Domio queues events and degrades gracefully (e.g., emoji reactions may briefly lag but not drop).
 - Vendor SDK deprecation → fall back to deep-link integration with reduced feature set; banner in presenter view.
 - Network drop during meeting → presenter reconnects via #136 (presenter failover) and resumes at the same slide.
@@ -266,6 +296,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 189. Slack/Teams notifications (comments, approvals, viewer activity)
 
 **Acceptance criteria**
+
 - Workspace admins connect a **Slack workspace** or **Teams tenant** via OAuth; on connect, Domio posts to configured channels via **incoming webhooks** and supports **slash commands** (`/domio approve`, `/domio share`).
 - Notification triggers: comment added, mention, approval requested/decided, assignment created/updated, viewer activity (per #172 sales-mode notifications), library updates, expiry alerts.
 - Users can **mute** notifications per channel or per event type; admins can **route** event types to specific channels (e.g., #legal-approvals, #design-reviews).
@@ -273,6 +304,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Notifications honor **do-not-disturb / quiet hours** by checking the user's Slack/Teams status before sending.
 
 **Behavioral details**
+
 - Implementation: **incoming webhooks** for outbound notifications (Domio → Slack/Teams), **slash commands + interactive payloads** for inbound (Slack/Teams → Domio).
 - Outbound uses Domio's **notification fan-out service** (§4) with a Slack/Teams adapter.
 - Inbound slash commands are authenticated via Slack/Teams' signing secret verification.
@@ -281,6 +313,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Notification **batching**: rapid-fire events (e.g., 10 comments in 5 minutes) are batched into a digest.
 
 **Edge cases**
+
 - Slack/Teams outage → notifications queue in Domio with retry; on recovery, they flush in order. No notifications are dropped silently.
 - Slack/Teams workspace disconnected (admin revokes) → Domio switches to email fallback for affected notifications.
 - Slash command issued by an unauthorized user → rejected with a friendly "you don't have access to this deck" message.
@@ -291,6 +324,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 190. Calendar integration — deck linked to the meeting invite, opens in presenter mode at meeting time
 
 **Acceptance criteria**
+
 - A user can **link a deck to a calendar event** (Google Calendar / Outlook / iCloud) — the link is stored on the event and surfaced in the event description.
 - At meeting start (configurable: 5 min before by default), a **prompt appears** on the presenter's device: "Your meeting 'Q3 Board Review' starts in 5 min — open in presenter mode?"
 - Calendar links are **bi-directional** when the vendor supports it (Google Calendar, Outlook): updating the meeting time in the calendar updates the deck's scheduled reminder.
@@ -298,6 +332,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Meeting attendance can be cross-referenced with viewer analytics (#169) to surface "this deck was shown in 12 of your meetings this quarter."
 
 **Behavioral details**
+
 - Calendar integration is OAuth-based: the user grants Domio calendar-read (and optional write) scopes.
 - Linked decks show up in **presenter view's "Today" view** along with the meeting details (attendees, agenda if present).
 - **Pre-meeting ambient mode** (#210) auto-engages if a linked meeting is the user's next calendar event.
@@ -305,6 +340,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - **Recording consent** flow: if the meeting is recorded, Domio's presenter view prompts for attendee notification (per the meeting vendor's rules + GDPR / PDPA).
 
 **Edge cases**
+
 - Calendar access revoked → Domio falls back to no calendar integration; existing links remain on events but stop updating.
 - Meeting moved to a time the user has a conflict → Domio doesn't auto-reschedule; surfaces a notification.
 - Meeting canceled → Domio removes the scheduled reminder but keeps the deck-meeting association for analytics.
@@ -315,6 +351,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 191. Task-manager integrations (Asana/Jira/Linear) for deck production pipelines
 
 **Acceptance criteria**
+
 - A workspace can connect **Asana, Jira, Linear** (one or more) via OAuth or API token.
 - Slide-level assignments (#181) can be **mirrored to a task manager**: each assignment creates a task in the chosen project; status changes in Domio sync to the task manager and vice versa.
 - A **deck production pipeline** view aggregates all assignments across decks into a kanban-style board sourced from the task manager.
@@ -322,6 +359,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - **Bulk operations**: changing a deck's status in the task manager updates all of its assignments.
 
 **Behavioral details**
+
 - The integration uses each vendor's REST/GraphQL API; sync runs via **webhook receivers** (vendor → Domio) and **outbound webhooks** (Domio → vendor).
 - A **project mapping** config: which Asana project / Jira project / Linear team maps to which Domio workspace/folder.
 - **Field mapping**: assignment status ↔ task status (configurable per mapping), assignee, due date, description (slide link).
@@ -329,6 +367,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - **Custom fields** in task managers can be mapped to Domio assignment metadata (e.g., "priority" → "P0/P1/P2").
 
 **Edge cases**
+
 - Task deleted in task manager → Domio assignment cancels with a notification; reversible via the task manager's restore.
 - Sync conflict (both updated in same minute) → configurable conflict resolution; default is "last write wins" with a "merge" option in conflict UI.
 - Task manager auth expired → sync paused with admin notification; backlog re-syncs on re-auth.
@@ -339,6 +378,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 192. Guest collaborators with scoped, expiring access
 
 **Acceptance criteria**
+
 - A workspace member with `invite_guest` permission can invite a **guest** by email — guests do not need a full workspace account; they sign in via email link / SSO.
 - Guest access is **scoped**: the inviter picks a folder or project (or specific decks), and the guest only sees those resources.
 - Guest access is **time-bounded**: an `expires_at` is mandatory; on expiry, the guest's access is revoked and any active sessions are invalidated.
@@ -347,6 +387,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Guests can be **converted to full members** by an admin if needed.
 
 **Behavioral details**
+
 - Guests authenticate via **magic link** (default) or **SSO** if the workspace enforces it. They never see workspace-wide content.
 - Guest **notifications** route to the guest's email only; guests do not appear in workspace member rosters, only in the per-resource access list.
 - Guest **billing**: guests count toward seat usage (#199) at a different rate (typically lower or zero); configurable per workspace.
@@ -354,6 +395,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Guest **download/export** is disabled by default; opt-in by the inviter.
 
 **Edge cases**
+
 - Guest's email domain matches a domain-restricted share (#157) → the guest can authenticate via their domain SSO, gaining guest-tier access.
 - Guest access to a library entry (#185) → guests see the library entry but cannot publish to it (cannot become a library contributor).
 - Guest invited to a deck with brand-locked regions (#36) → the locks apply; guest cannot break them.
@@ -368,6 +410,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 ### 2.1 Pinning a comment to an element (feature #179)
 
 **Happy path:**
+
 1. User right-clicks an element on the canvas → context menu shows "Add comment."
 2. User picks "Add comment" → comment pin appears at the element's bounding box anchor, in a stable color tied to the user; a comment composer opens anchored to the pin.
 3. User types `@priya` → mention autocomplete suggests Priya from workspace members; user picks Priya.
@@ -376,15 +419,18 @@ The flows below are the canonical user journeys for section 13. Each describes t
 6. Priya opens the deck from the notification, sees the highlighted pin, opens the thread, replies, resolves.
 
 **Edge — pin target moves:**
+
 - User moves the element → pin moves with it (anchor is element-relative).
 - User deletes the element → pin promotes to slide-level with an `orphaned` badge; the thread remains readable; resolution moves to the slide context.
 
 **Edge — element is in a brand-locked region:**
+
 - Pin is allowed; a "this region is brand-locked" badge appears on the comment thread; resolve/reply remain available.
 
 ### 2.2 Requesting review / approval (feature #180)
 
 **Happy path:**
+
 1. Author finishes a deck → clicks "Request Review" in the toolbar.
 2. System creates an immutable version snapshot of the deck (#180 behavioral detail).
 3. Author picks approvers: legal team, brand team, finance team (a configured approval policy).
@@ -395,14 +441,17 @@ The flows below are the canonical user journeys for section 13. Each describes t
 8. Author publishes the share; the audit log records the entire decision chain.
 
 **Edge — approval with parallel changes:**
+
 - Mid-review, author edits → a new version is created; auto-resubmit (configurable) sends the new version to approvers; previous approvals on the older version remain in the audit log but do not apply.
 
 **Edge — approval rejected mid-share:**
+
 - An external link was previously approved → author edits → link auto-revokes; share creator notified.
 
 ### 2.3 Assigning slides to teammates (feature #181)
 
 **Happy path:**
+
 1. PM selects slides 4–7 in the slide panel → right-click → "Assign to..."
 2. PM picks "Priya" from the team dropdown, sets due date "Friday," and adds a brief ("please redesign the comparison slide").
 3. Slide panel shows a chip on each assigned slide with Priya's initials and a status indicator (initially `not_started`).
@@ -412,14 +461,17 @@ The flows below are the canonical user journeys for section 13. Each describes t
 7. PM reviews, marks `done`.
 
 **Edge — reassignment:**
+
 - PM reassigns to a new teammate mid-flow → original assignee notified; new assignee gets the assignment; audit log records both events.
 
 **Edge — assignment cascade:**
+
 - A slide assigned to Priya is later moved to a different section; the assignment persists with the slide.
 
 ### 2.4 Drafting in suggestion mode (feature #182)
 
 **Happy path:**
+
 1. Reviewer opens a deck in suggestion mode (`Cmd+I`).
 2. Reviewer's cursor becomes a "suggesting" indicator (e.g., a different color).
 3. Reviewer moves a chart, edits a label, changes a data binding → all changes show up as suggestions (different color stroke, comment-style markers).
@@ -430,14 +482,17 @@ The flows below are the canonical user journeys for section 13. Each describes t
 8. Suggestions panel now shows the remaining unresolved ones.
 
 **Edge — suggestion conflict:**
+
 - Two reviewers each suggest a different layout for slide 4 → author accepts Priya's first, then opens Raj's suggestion → system detects "Priya already accepted a change to this element" and offers to override, merge, or abort.
 
 **Edge — suggestion on brand-locked region:**
+
 - Reviewer can author the suggestion; accept is denied unless the author is an admin who can break the lock.
 
 ### 2.5 Opening a merge request with visual diff (feature #183)
 
 **Happy path:**
+
 1. Developer branches the deck from `main` into `priya/pricing-experiment`.
 2. Developer edits freely in the branch.
 3. Developer clicks "Open Merge Request" → picks target `main`, fills in title and description.
@@ -448,14 +503,17 @@ The flows below are the canonical user journeys for section 13. Each describes t
 8. Developer merges; the MR shows a "merged" state with the merge commit's deck version; the deck's `main` branch now reflects the changes.
 
 **Edge — conflict:**
+
 - `main` has moved on (someone else merged another MR) → MR detects conflict; conflict resolution UI shows three columns for the conflicting element; developer resolves, then re-runs validation hooks.
 
 **Edge — validation failure:**
+
 - A linting hook (#46) detects off-brand colors in the MR → merge is blocked; developer fixes; re-runs.
 
 ### 2.6 Browsing the shared slide library (feature #185)
 
 **Happy path:**
+
 1. User opens "Slide Library" in the workspace sidebar.
 2. Library panel shows all approved slides with thumbnails, titles, tags, owners, freshness.
 3. User filters by tag "pricing," by owner "Legal," and by freshness "last 30 days" → list narrows.
@@ -463,28 +521,34 @@ The flows below are the canonical user journeys for section 13. Each describes t
 5. The deck now has the library slide referenced; the slide panel shows a "library" badge.
 
 **Edge — reference vs. copy:**
+
 - User picks "copy" instead → the inserted slide is a one-time snapshot, no longer updates from the library.
 
 **Edge — library has stale data:**
+
 - A library entry's freshness is past its review interval → it shows a "stale" badge and the insert dialog warns "this slide is pending review."
 
 ### 2.7 Configuring auto-update for shared slides (feature #186)
 
 **Happy path:**
+
 1. User inserts a library slide as a reference → system prompts for auto-update settings: `immediate`, `scheduled (e.g., monthly)`, `on-publish`, or `manual`.
 2. User picks `scheduled: 1st of each month` → system confirms and shows the next sync date.
 3. Library owner updates the master → consumer sees a notification ("Standard Pricing updated by Legal — auto-update scheduled for Aug 1").
 4. On Aug 1, the consumer's deck updates; a changelog entry appears on the slide's panel ("Updated from library: copy revised for FY25").
 
 **Edge — mandatory update:**
+
 - Compliance update marked mandatory → consumer receives a high-priority notification; if the consumer's local edit conflicts, the conflict UI surfaces immediately, not on schedule.
 
 **Edge — freeze:**
+
 - Consumer freezes the reference → no further updates; slide panel shows "frozen as of Jul 1, 2025."
 
 ### 2.8 Integrating with Zoom / Meet / Teams (feature #188)
 
 **Happy path:**
+
 1. From the presenter view, presenter clicks "Present in Teams" → if not already connected, OAuth flow to grant Domio Teams Meetings access.
 2. System detects the user's next Teams meeting (via calendar #190 if linked) or asks the presenter to pick a meeting.
 3. Domio opens as an in-meeting app inside Teams; presenter sees the deck and the Teams meeting chrome.
@@ -493,14 +557,17 @@ The flows below are the canonical user journeys for section 13. Each describes t
 6. Meeting ends → Domio cleans up the session; a recording marker per slide is written if the meeting is recorded.
 
 **Edge — vendor SDK missing:**
+
 - Teams SDK not available in this meeting (older client) → falls back to co-pane deep link with reduced feature set; banner in presenter view.
 
 **Edge — high poll traffic:**
+
 - 200 audience members voting on a poll → Domio batches updates to Teams; brief lag, no drops.
 
 ### 2.9 Calendar linking (feature #190)
 
 **Happy path:**
+
 1. Author clicks "Schedule meeting with this deck" → OAuth flow to Google Calendar (or Outlook).
 2. Author picks attendees, time, title; calendar event is created with the deck link in the description.
 3. Author's calendar shows the meeting; the deck link is clickable.
@@ -508,9 +575,11 @@ The flows below are the canonical user journeys for section 13. Each describes t
 5. Author clicks → Domio opens in presenter view with the deck, notes, timer, and a deep link back to the calendar event.
 
 **Edge — bidirectional update:**
+
 - Author moves the meeting in Google Calendar → Domio updates the linked reminder time.
 
 **Edge — recurring series:**
+
 - Author links to a weekly recurring meeting → the link applies to all instances; presenter can override per-instance.
 
 ---
@@ -519,26 +588,27 @@ The flows below are the canonical user journeys for section 13. Each describes t
 
 ### 3.1 Functional requirements summary
 
-| # | Feature | Functional capabilities |
-|---|---------|------------------------|
-| 179 | Comments | Pin to element/slide; thread; mention; resolve; element-relative anchoring; reactions; attachments; orphan handling |
-| 180 | Approval | State machine; per-version snapshots; multi-lane parallel approvals; SLA escalation; audit log |
-| 181 | Assignments | Slide-level scope; multi-assignee; status workflow; reason-on-blocked; notifications; timeline view |
-| 182 | Suggestions | CRDT-isolated per-session branch; semantic diff; per-suggestion accept/reject; conflict resolution; retention policy |
-| 183 | Merge requests | Branching; visual diff (slide/element/data-binding); 3-way merge; validation hooks; atomic merge |
-| 184 | Workspaces | Hierarchical folders; typed permissions; group support; deny-first; historical queries |
-| 185 | Slide library | Governed pool; search/filter; reference vs. copy; versioned; supersedes chain; usage analytics |
-| 186 | Auto-update | Event-driven propagation; lazy + write-through; per-reference config; conflict detection; mandatory vs. opt-in |
-| 187 | Expiry | Policy attachment; three escalation tiers; dashboard; AI-assisted freshness verification |
-| 188 | Meeting integrations | In-meeting app; deep link; OAuth; participation sync; recording markers |
-| 189 | Slack/Teams | Incoming webhooks + slash commands; action buttons; digest batching; DND awareness |
-| 190 | Calendar | OAuth calendar access; meeting→deck link; pre-meeting prompt; bidirectional update |
-| 191 | Task managers | Asana/Jira/Linear; two-way sync; field mapping; conflict resolution; bulk operations |
-| 192 | Guests | Scoped, expiring access; restricted capabilities; audit-distinct identity; conversion-to-member |
+| #   | Feature              | Functional capabilities                                                                                              |
+| --- | -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 179 | Comments             | Pin to element/slide; thread; mention; resolve; element-relative anchoring; reactions; attachments; orphan handling  |
+| 180 | Approval             | State machine; per-version snapshots; multi-lane parallel approvals; SLA escalation; audit log                       |
+| 181 | Assignments          | Slide-level scope; multi-assignee; status workflow; reason-on-blocked; notifications; timeline view                  |
+| 182 | Suggestions          | CRDT-isolated per-session branch; semantic diff; per-suggestion accept/reject; conflict resolution; retention policy |
+| 183 | Merge requests       | Branching; visual diff (slide/element/data-binding); 3-way merge; validation hooks; atomic merge                     |
+| 184 | Workspaces           | Hierarchical folders; typed permissions; group support; deny-first; historical queries                               |
+| 185 | Slide library        | Governed pool; search/filter; reference vs. copy; versioned; supersedes chain; usage analytics                       |
+| 186 | Auto-update          | Event-driven propagation; lazy + write-through; per-reference config; conflict detection; mandatory vs. opt-in       |
+| 187 | Expiry               | Policy attachment; three escalation tiers; dashboard; AI-assisted freshness verification                             |
+| 188 | Meeting integrations | In-meeting app; deep link; OAuth; participation sync; recording markers                                              |
+| 189 | Slack/Teams          | Incoming webhooks + slash commands; action buttons; digest batching; DND awareness                                   |
+| 190 | Calendar             | OAuth calendar access; meeting→deck link; pre-meeting prompt; bidirectional update                                   |
+| 191 | Task managers        | Asana/Jira/Linear; two-way sync; field mapping; conflict resolution; bulk operations                                 |
+| 192 | Guests               | Scoped, expiring access; restricted capabilities; audit-distinct identity; conversion-to-member                      |
 
 ### 3.2 Non-functional requirements
 
 **Comment threading performance (feature #179)**
+
 - Comment write latency: **p95 ≤ 200 ms** end-to-end (UI → persisted → broadcast).
 - Comment read (fetch thread + count): **p95 ≤ 150 ms**.
 - Thread fan-out to subscribers (in-app + email + Slack/Teams): **p95 ≤ 5 s** for first delivery; **p99 ≤ 15 s**.
@@ -546,6 +616,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - A pin's anchor survives element motion at 60fps drag (no comment jitter during real-time multiplayer editing, #17).
 
 **Mention notifications (#179, #189)**
+
 - Mention-to-notification latency: **p95 ≤ 5 s** end-to-end.
 - Notification **deduplication**: a user mentioned in 5 comments in 30 s receives a single batched digest, not 5 separate notifications.
 - **Routing rules**: Slack-channel-bound mentions go to Slack (with action buttons); email-only subscribers get an email; do-not-disturb users get a queued morning digest.
@@ -553,6 +624,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - Mention **autocomplete**: ≤ 100 ms response for typical workspace sizes; scales to 10k-member workspaces with search index.
 
 **Approval state machine integrity (#180)**
+
 - The state machine is **server-enforced**: any state transition not in the allowed list is rejected at the API with a `409 Conflict`.
 - **Idempotent**: a duplicate "approve" call from the same approver on the same version is a no-op (200 OK with current state), not a duplicate audit entry.
 - **No lost approvals**: an approver who submits a decision during a network partition sees their decision reconciled on reconnect; if the version they were approving has since been superseded, the decision is rejected with a clear message.
@@ -560,6 +632,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - **Audit trail completeness**: every state transition (including no-op idempotent ones, except where omitted for noise reduction) appears in the audit log with actor, timestamp, version_id, and justification.
 
 **Suggestion-mode semantic diff (vs raw text) (#182)**
+
 - Suggestions are **CRDT operations** on the parallel branch, not raw text patches — preserving layout, data bindings, and element identity.
 - A suggestion can express: element move, resize, restyle, delete, add; data binding change; text content change (as a structured op, not raw text); theme/token change.
 - The diff viewer renders **structured before/after** with semantic annotation ("moved chart from (100,200) to (140,200); increased width from 200 to 240; rebound from Q3_sheet to Q3_sheet_v2").
@@ -567,6 +640,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - A suggestion set on a 100-slide deck serializes to **≤ 50 KB** typically (compared to raw text diff which would balloon with element metadata).
 
 **Merge request visual diff at slide/element level (#183)**
+
 - MR creation latency: **p95 ≤ 3 s** for diff computation on decks up to 100 slides; **≤ 15 s** for decks up to 500 slides; computed in background for larger.
 - The visual diff is rendered at **three granularities** (slide-level, element-level, data-binding-level); each is independently browsable.
 - Element-level diff rendering: **60 fps** slider drag between before/after states; the renderer uses WebGL acceleration for complex slides.
@@ -574,12 +648,14 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - **3-way merge conflict detection** at the element level; conflicts are surfaced immediately, not on merge attempt.
 
 **Slide library governance (#185)**
+
 - Library publish → approval gate: configurable; default = one approver required for any publish, two for "approved for org-wide use."
 - Library search: **p95 ≤ 300 ms** for filter+search on libraries up to 10,000 entries.
 - Library entry versioning: each version is **immutable**; edits create a new version; consumers can pin to a version (not a "latest" pointer).
 - Library **supersedes chain** enforced: a retired entry cannot be the head; consumers on retired heads see a migration prompt.
 
 **Auto-update propagation: write-through vs lazy (#186)**
+
 - **Write-through**: library edit → event published within 1 s → consumers subscribed to immediate updates receive within **p95 ≤ 60 s** total.
 - **Lazy**: consumer's next read of the slide triggers a freshness check; if stale, lazy-fetch and update on the fly (no user-visible latency added for typical deck sizes).
 - **Hybrid default**: write-through for mandatory updates, lazy for opt-in updates; configurable per library.
@@ -587,12 +663,14 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - **Conflict detection** runs before write-through pushes land; conflicts are queued per-consumer, not per-slide.
 
 **Content expiry policy enforcement (#187)**
+
 - Scheduler runs daily; **completes within 10 minutes** for workspaces up to 100k resources.
 - Flag application: **immediate** on policy trip (no batch lag).
 - Strict-mode auto-revoke: **immediate** on overdue; share links are revoked within **p95 ≤ 30 s**.
 - AI freshness verification (#125 integration): async, with a budget of **p95 ≤ 60 s** per slide; results cache for 24h.
 
 **Meeting-tool integration protocol (#188)**
+
 - **In-meeting app** uses each vendor's official SDK (Teams Meetings apps, Zoom Apps SDK, Google Meet add-ons).
 - **Deep link** fallback uses each vendor's URL scheme with auth tokens.
 - **OAuth scopes** are minimal: meeting read, meeting write (for chat integration), app registration.
@@ -601,6 +679,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - **Recording markers**: time-stamped per slide transition; encoded into vendor recording metadata if supported.
 
 **Slack/Teams webhook semantics (#189)**
+
 - Outbound webhooks use **HMAC-SHA256 signed payloads**; receivers verify before trusting.
 - **Retry policy**: failed deliveries retry with exponential backoff up to 24h; after that, fall back to email.
 - **Slash commands** are authenticated via each vendor's signing secret; Domio rejects unsigned or stale (>5 min) requests.
@@ -608,6 +687,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - **DND awareness**: Domio checks each user's Slack/Teams status before sending non-critical notifications; quiet-hours users get morning digests instead.
 
 **Calendar event linking (#190)**
+
 - Calendar OAuth scopes: `read` events (always), `write` events (opt-in).
 - Pre-meeting prompt: **5 min before** default; configurable per user per workspace.
 - Bi-directional update latency: **p95 ≤ 30 s** for vendor push → Domio update; Domio → vendor update is **p95 ≤ 5 s**.
@@ -615,6 +695,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - **No silent calendar writes**: every Domio-initiated calendar change is logged in the user's audit trail.
 
 **Task-manager integration (#191)**
+
 - Two-way sync latency: **p95 ≤ 10 s** per change; batched for bulk operations.
 - Field mapping is **declarative** per workspace; configuration UI lets admins map custom fields.
 - Conflict resolution: configurable per workspace (Domio-wins / task-manager-wins / last-write-wins).
@@ -622,6 +703,7 @@ The flows below are the canonical user journeys for section 13. Each describes t
 - Vendor API rate limits: respect and back off; sync queue persists across restarts.
 
 **Guest collaborator scoping (#192)**
+
 - Guest session creation: **p95 ≤ 1 s** end-to-end (invite → magic link → access).
 - Guest access revocation: **immediate** on expiry; active sessions invalidated within **p95 ≤ 5 s**.
 - Guest identity is **distinct in audit log**: every guest action tagged with `actor_type=guest` and the original inviter's ID.
@@ -666,80 +748,94 @@ Section 13 has 14 distinct services. They're organized as a **modular monolith**
 ### 4.2 Services
 
 **Comment Service** (feature #179)
+
 - Owns `comment`, `comment_thread`, `mention` (§5).
 - Provides CRUD, threading, mention parsing, resolve/reopen.
 - Stores pin anchors as element-relative offsets (not absolute pixels) so they survive layout changes.
 - Broadcasts comment events to the **notification fan-out** service and to live editor sessions via WebSocket.
 
 **Review/Approval Workflow Engine** (feature #180)
+
 - Owns `approval_request`, `approval_decision` (§5).
 - Implements the approval state machine (§3) with server-enforced transitions.
 - Creates immutable version snapshots on submit.
 - Schedules SLA escalations via the expiry scheduler (shared infrastructure).
 
 **Assignment Service** (feature #181)
+
 - Owns `assignment` (§5).
 - Slide-level scope; multi-assignee; status workflow.
 - Emits assignment events to the notification fan-out and to task-manager adapters for sync (#191).
 
 **Suggestion Mode CRDT** (feature #182)
+
 - Owns `suggestion` (§5).
 - Per-session **isolated CRDT branch** of the deck schema; the user's edits land here instead of the main branch.
 - Suggestions are **CRDT operations** (move, resize, restyle, content change, binding change), not raw text patches.
 - The suggestion set is serialized to the deck on submission; the live editor continues to render the main branch until accept.
 
 **Merge Request Service + Diff Engine** (feature #183)
+
 - Owns `merge_request`, `slide_diff` (§5).
 - Computes and persists **three-level diffs** (slide/element/data-binding).
 - The diff engine is a separate worker process that handles long-running diff computations for large decks.
 - 3-way merge engine for conflicts; validation hooks as pre-merge checks.
 
 **Workspace Permission Engine** (feature #184)
+
 - Owns `workspace`, `workspace_member`, group definitions (§5).
 - Evaluates permissions at every API call: principal → groups → role → resource hierarchy → effective capabilities.
 - Deny-first resolution; historical (point-in-time) queries supported.
 - A cache layer (Redis) holds hot permission resolutions; invalidated on permission changes.
 
 **Shared Slide Library Service** (feature #185)
+
 - Owns `slide_library_entry` (§5).
 - Manages library entries: publish, approve, retire, version, supersede.
 - Search/filter via a dedicated search index (OpenSearch / Elasticsearch).
 - Emits library events to the auto-update bus.
 
 **Auto-Update Event Bus** (feature #186)
+
 - The propagation fabric for #185 → consumer.
 - Hybrid model: write-through for mandatory updates, lazy for opt-in (see §3).
 - Per-reference configuration; per-consumer state.
 - Backpressure: sharded propagation for high-fanout consumers.
 
 **Expiry Policy Scheduler** (feature #187)
+
 - Owns `expiry_policy` (§5).
 - Daily scan; flag application; escalation tiers.
 - Auto-revoke of external shares in strict mode.
 - Integrates with AI freshness checker (#125) for auto-confirmation.
 
 **Meeting Tool Adapters** (feature #188)
+
 - Per-vendor adapters (Zoom, Meet, Teams) implementing a common interface.
 - Each adapter encapsulates: OAuth flow, in-meeting app / SDK integration, deep-link fallback, participation sync, recording markers.
 
 **Notification Fan-Out Service** (feature #179, #189, #191)
+
 - Owns `notification_subscription` (§5).
 - Subscribes to event bus events; routes to in-app, email, Slack, Teams, and meeting adapters.
 - Digest batching; DND awareness; deduplication.
 - Action button callback handling.
 
 **Calendar Integration** (feature #190)
+
 - Owns `calendar_link` (§5).
 - OAuth flows for Google Calendar, Outlook, iCloud.
 - Bidirectional sync (vendor-dependent).
 - Pre-meeting prompt scheduling.
 
 **Task-Manager Adapters** (feature #191)
+
 - Per-vendor adapters (Asana, Jira, Linear).
 - Two-way sync; field mapping; conflict resolution.
 - Webhook receivers and outbound webhook emitters.
 
 **Guest Access Manager** (feature #192)
+
 - Owns `guest_access` (§5).
 - Magic-link auth for guests.
 - Scoped permission enforcement; expiry enforcement; audit-distinct identity.
@@ -747,6 +843,7 @@ Section 13 has 14 distinct services. They're organized as a **modular monolith**
 ### 4.3 Event bus and async communication
 
 All inter-service state changes flow through a **Kafka** (or NATS, depending on scale) event bus. Key topics:
+
 - `comment.created`, `comment.resolved`, `comment.mentioned`
 - `approval.requested`, `approval.decided`
 - `assignment.created`, `assignment.status_changed`
@@ -1293,6 +1390,7 @@ Section 13 services also emit outbound webhooks for #201 (webhooks platform feat
 ### 7.6 Audit log (#196)
 
 Every action in section 13 is recorded in the central audit log with:
+
 - **Actor**: user_id, actor_type (`member` / `guest` / `agent` / `system`), IP, user-agent, session_id
 - **Action**: typed (e.g., `comment.create`, `approval.decision`, `mr.merge`, `library.publish`, `guest.invite`)
 - **Resource**: type + id
@@ -1309,6 +1407,7 @@ Audit log is **append-only**, retained per workspace policy (min 1 year, max ind
 ### 8.1 Comment thread fan-out (#179)
 
 A comment with mentions may fan out to N subscribers across in-app, email, Slack, Teams. The fan-out pattern:
+
 1. Comment write to `comment` + `mention` tables (single transaction).
 2. Event `comment.created` published to event bus.
 3. Notification fan-out service consumes event; for each subscriber, picks the highest-priority channel (in-app if online, else Slack/Teams if connected, else email).
@@ -1316,6 +1415,7 @@ A comment with mentions may fan out to N subscribers across in-app, email, Slack
 5. **DND check**: if user is DND or in quiet hours, the notification queues for digest at the end of the quiet window.
 
 Targets:
+
 - Single comment write: **p95 ≤ 200 ms**.
 - Fan-out start: **p95 ≤ 1 s** after write.
 - Delivery complete: **p95 ≤ 5 s** for first delivery, **p99 ≤ 15 s**.
@@ -1325,6 +1425,7 @@ Targets:
 Library update propagation must scale to **400+ consumer decks** in a single update cycle (per the #186 spec example).
 
 Architecture:
+
 - Library write → event `library.entry_updated` published.
 - Event bus partitions by `entry_id` so updates to the same entry are ordered.
 - A **fan-out worker** consumes the event and queries all `auto_update_binding` rows for that entry.
@@ -1340,6 +1441,7 @@ For **mandatory updates**, priority is raised; the queue is drained faster (shor
 ### 8.3 Auto-update propagation latency (#186)
 
 Detailed in §3.2 and §8.2; the targets are:
+
 - Immediate (write-through): **p95 ≤ 60 s**.
 - Lazy: **0 ms** added to user-visible latency on read (the update is applied during the slide's hydration).
 - Mandatory: **p95 ≤ 30 s** (higher priority).
@@ -1352,6 +1454,7 @@ Detailed in §3.2 and §8.2; the targets are:
 ### 9.1 Observability
 
 **Metrics** (per service, exported to Prometheus / OTLP):
+
 - Comment write/read latencies (p50, p95, p99)
 - Approval state transition counts and durations
 - Suggestion counts (open / accepted / rejected / obsolete)
@@ -1364,15 +1467,18 @@ Detailed in §3.2 and §8.2; the targets are:
 - Guest session counts and revocation latency
 
 **Logs** (structured JSON, shipped to a central store):
+
 - Every state-changing action logs `{actor, action, resource, before, after, trace_id}`.
 - Logs redact PII in comment bodies by default; an opt-in `audit_verbose` mode includes redacted bodies.
 - Per-service log levels; no PII in INFO-level logs.
 
 **Traces** (OpenTelemetry):
+
 - API requests traced across the gateway → services → event bus → downstream consumers.
 - Cross-service operations (e.g., "create comment + fan out notifications") are parented by a single trace.
 
 **Alerts**:
+
 - Comment write p99 > 1 s → warn.
 - Approval state transition rejection (409) rate > 1% → warn (suggests client misuse).
 - Auto-update propagation p95 > 60 s → critical.
@@ -1386,6 +1492,7 @@ Detailed in §3.2 and §8.2; the targets are:
 **Unit tests**: every state machine (approval, assignment status, suggestion conflict detection, permission resolution, expiry escalation, guest expiry) has exhaustive state-coverage tests. The approval state machine alone is tested with hundreds of transition combinations.
 
 **Integration tests**:
+
 - Comment + notification fan-out (in-app + Slack + email + Teams): full pipeline test with vendor stubs.
 - Approval flow end-to-end: submit → notify → decide → audit → unblock external share.
 - Suggestion session: parallel CRDT branches; conflict detection between suggestions.
@@ -1395,16 +1502,19 @@ Detailed in §3.2 and §8.2; the targets are:
 - Guest: invite → magic link → access → expire → revoke.
 
 **Contract tests**:
+
 - Every webhook handler (inbound Slack/Teams/Calendar/Task) is tested with vendor-recorded payloads.
 - Every outbound webhook payload is schema-validated against the contract.
 
 **Load tests**:
+
 - Comment thread fan-out: 10k mentions/min, target delivery p99 ≤ 15 s.
 - Library propagation: 10k bindings, single update, target p95 ≤ 60 s.
 - Permission evaluation: 1k req/s, target p95 ≤ 50 ms (cached).
 - Expiry scheduler: 100k resources, target scheduler run ≤ 10 min.
 
 **Security tests**:
+
 - Permission denial cases (deny-first overrides): comprehensive.
 - Guest scope enforcement: cross-resource access attempts blocked.
 - Suggestion isolation: a suggestion cannot affect the main branch until accepted.
@@ -1412,6 +1522,7 @@ Detailed in §3.2 and §8.2; the targets are:
 - Webhook signing verification: unsigned requests rejected.
 
 **Property-based / fuzz tests**:
+
 - CRDT suggestion operations: malformed ops rejected.
 - Permission resolution: no combination of grants can escalate beyond the union of granted capabilities.
 - Approval state machine: no illegal transition reachable via any sequence of valid API calls.
@@ -1488,22 +1599,22 @@ Section 13 doesn't stand alone — it touches every other section. The ties belo
 
 ## Appendix A — Section 13 at a glance
 
-| # | Feature | Service | Storage | Key integration |
-|---|---------|---------|---------|-----------------|
-| 179 | Comments | Comment Service | `comment`, `mention` | Section 1 editor; section 11 share |
-| 180 | Approval | Approval Engine | `approval_request`, `approval_decision` | Section 11 external share; section 14 audit |
-| 181 | Assignments | Assignment Service | `assignment` | Section 13 #191 task mgr; section 14 audit |
-| 182 | Suggestions | Suggestion CRDT | `suggestion` | Section 1 CRDT; section 16 agentic |
-| 183 | Merge requests | MR Service + Diff Engine | `merge_request`, `slide_diff` | Section 1 branching; section 16 MCP |
-| 184 | Workspaces | Workspace Permission Engine | `workspace`, `workspace_member`, `permission_grant` | All sections (every API call) |
-| 185 | Slide library | Library Service | `slide_library_entry`, `library_version` | Section 2 component libs; section 14 governance |
-| 186 | Auto-update | Auto-Update Bus + Bindings | `auto_update_binding` | Section 11 propagation; section 14 governance |
-| 187 | Expiry | Expiry Policy Scheduler | `expiry_policy`, `freshness_flag` | Section 14 governance; section 8 #125 |
-| 188 | Meeting integrations | Meeting Tool Adapters | `meeting_integration` | Section 9 presenter; section 10 audience |
-| 189 | Slack/Teams | Notification Fan-Out + Adapters | `notification_subscription` | Section 14 audit; section 16 webhooks |
-| 190 | Calendar | Calendar Integration | `calendar_link` | Section 9 presenter; section 10 audience |
-| 191 | Task managers | Task Manager Adapters | `task_link` | Section 13 #181 assignments; section 14 audit |
-| 192 | Guest access | Guest Access Manager | `guest_access` | Section 14 SSO/audit; section 16 agent scoping |
+| #   | Feature              | Service                         | Storage                                             | Key integration                                 |
+| --- | -------------------- | ------------------------------- | --------------------------------------------------- | ----------------------------------------------- |
+| 179 | Comments             | Comment Service                 | `comment`, `mention`                                | Section 1 editor; section 11 share              |
+| 180 | Approval             | Approval Engine                 | `approval_request`, `approval_decision`             | Section 11 external share; section 14 audit     |
+| 181 | Assignments          | Assignment Service              | `assignment`                                        | Section 13 #191 task mgr; section 14 audit      |
+| 182 | Suggestions          | Suggestion CRDT                 | `suggestion`                                        | Section 1 CRDT; section 16 agentic              |
+| 183 | Merge requests       | MR Service + Diff Engine        | `merge_request`, `slide_diff`                       | Section 1 branching; section 16 MCP             |
+| 184 | Workspaces           | Workspace Permission Engine     | `workspace`, `workspace_member`, `permission_grant` | All sections (every API call)                   |
+| 185 | Slide library        | Library Service                 | `slide_library_entry`, `library_version`            | Section 2 component libs; section 14 governance |
+| 186 | Auto-update          | Auto-Update Bus + Bindings      | `auto_update_binding`                               | Section 11 propagation; section 14 governance   |
+| 187 | Expiry               | Expiry Policy Scheduler         | `expiry_policy`, `freshness_flag`                   | Section 14 governance; section 8 #125           |
+| 188 | Meeting integrations | Meeting Tool Adapters           | `meeting_integration`                               | Section 9 presenter; section 10 audience        |
+| 189 | Slack/Teams          | Notification Fan-Out + Adapters | `notification_subscription`                         | Section 14 audit; section 16 webhooks           |
+| 190 | Calendar             | Calendar Integration            | `calendar_link`                                     | Section 9 presenter; section 10 audience        |
+| 191 | Task managers        | Task Manager Adapters           | `task_link`                                         | Section 13 #181 assignments; section 14 audit   |
+| 192 | Guest access         | Guest Access Manager            | `guest_access`                                      | Section 14 SSO/audit; section 16 agent scoping  |
 
 ---
 

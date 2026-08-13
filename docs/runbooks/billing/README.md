@@ -8,9 +8,9 @@ Stripe-backed billing; P22 stretch goal.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-billing` | availability | 99.9% | 30d |
+| SLO             | Kind         | Target | Window |
+| --------------- | ------------ | ------ | ------ |
+| `avail-billing` | availability | 99.9%  | 30d    |
 
 ## Triage
 

@@ -52,7 +52,7 @@ import { validateEasingCurveRules, type EasingValidationError } from './schemas.
 export class EasingValidationRejectedError extends Error {
   readonly code = 'EASING_VALIDATION_REJECTED' as const;
   constructor(public readonly errors: readonly EasingValidationError[]) {
-    super(`Easing curve validation failed: ${errors.map(e => e.message).join('; ')}`);
+    super(`Easing curve validation failed: ${errors.map((e) => e.message).join('; ')}`);
     this.name = 'EasingValidationRejectedError';
   }
 }
@@ -63,7 +63,9 @@ export class PresetMissingPropertyError extends Error {
     public readonly presetId: string,
     public readonly missingProperty: string,
   ) {
-    super(`Preset ${presetId} requires property "${missingProperty}" which is missing from the element`);
+    super(
+      `Preset ${presetId} requires property "${missingProperty}" which is missing from the element`,
+    );
     this.name = 'PresetMissingPropertyError';
   }
 }
@@ -136,8 +138,19 @@ export class TimelineService {
     loop?: boolean;
     playCount?: number;
     startOffsetMs?: number;
-    tracks?: ReadonlyArray<{ property: string; keyframes: ReadonlyArray<{ timeMs: number; value: unknown; easing?: string }>; startOffsetMs?: number; easing: string }>;
-    triggers?: ReadonlyArray<{ kind: TriggerKind; sourceId?: string; fieldPath?: string; offsetMs?: number; debounceMs?: number }>;
+    tracks?: ReadonlyArray<{
+      property: string;
+      keyframes: ReadonlyArray<{ timeMs: number; value: unknown; easing?: string }>;
+      startOffsetMs?: number;
+      easing: string;
+    }>;
+    triggers?: ReadonlyArray<{
+      kind: TriggerKind;
+      sourceId?: string;
+      fieldPath?: string;
+      offsetMs?: number;
+      debounceMs?: number;
+    }>;
   }): Promise<Timeline> {
     const now = this.clock();
     const id = this.idGen();
@@ -146,7 +159,7 @@ export class TimelineService {
     if (input.tracks) {
       for (const t of input.tracks) {
         const trackId = this.idGen();
-        const keyframes: Keyframe[] = t.keyframes.map(k => ({
+        const keyframes: Keyframe[] = t.keyframes.map((k) => ({
           id: this.idGen(),
           trackId,
           timeMs: k.timeMs,
@@ -230,8 +243,19 @@ export class TimelineService {
       playCount?: number;
       startOffsetMs?: number;
       version: number;
-      tracks?: ReadonlyArray<{ property: string; keyframes: ReadonlyArray<{ timeMs: number; value: unknown; easing?: string }>; startOffsetMs?: number; easing: string }>;
-      triggers?: ReadonlyArray<{ kind: TriggerKind; sourceId?: string; fieldPath?: string; offsetMs?: number; debounceMs?: number }>;
+      tracks?: ReadonlyArray<{
+        property: string;
+        keyframes: ReadonlyArray<{ timeMs: number; value: unknown; easing?: string }>;
+        startOffsetMs?: number;
+        easing: string;
+      }>;
+      triggers?: ReadonlyArray<{
+        kind: TriggerKind;
+        sourceId?: string;
+        fieldPath?: string;
+        offsetMs?: number;
+        debounceMs?: number;
+      }>;
     },
   ): Promise<Timeline> {
     const updatePatch: Record<string, unknown> = {};
@@ -245,7 +269,7 @@ export class TimelineService {
       const tracks: Track[] = [];
       for (const t of patch.tracks) {
         const trackId = this.idGen();
-        const keyframes: Keyframe[] = t.keyframes.map(k => ({
+        const keyframes: Keyframe[] = t.keyframes.map((k) => ({
           id: this.idGen(),
           trackId,
           timeMs: k.timeMs,
@@ -300,13 +324,18 @@ export class TimelineService {
   async createTrack(
     timelineId: string,
     tenantId: string,
-    input: { property: string; keyframes: ReadonlyArray<{ timeMs: number; value: unknown; easing?: string }>; startOffsetMs?: number; easing: string },
+    input: {
+      property: string;
+      keyframes: ReadonlyArray<{ timeMs: number; value: unknown; easing?: string }>;
+      startOffsetMs?: number;
+      easing: string;
+    },
   ): Promise<Track> {
     // Verify timeline exists
     await this.getTimeline(timelineId, tenantId);
 
     const trackId = this.idGen();
-    const keyframes: Keyframe[] = input.keyframes.map(k => ({
+    const keyframes: Keyframe[] = input.keyframes.map((k) => ({
       id: this.idGen(),
       trackId,
       timeMs: k.timeMs,
@@ -360,7 +389,13 @@ export class TimelineService {
   async createTrigger(
     timelineId: string,
     tenantId: string,
-    input: { kind: TriggerKind; sourceId?: string; fieldPath?: string; offsetMs?: number; debounceMs?: number },
+    input: {
+      kind: TriggerKind;
+      sourceId?: string;
+      fieldPath?: string;
+      offsetMs?: number;
+      debounceMs?: number;
+    },
   ): Promise<Trigger> {
     // Verify timeline exists
     await this.getTimeline(timelineId, tenantId);
@@ -445,7 +480,12 @@ export class TimelineService {
 
   async createAnimationPreset(
     workspaceId: string,
-    input: { name: string; category: AnimationPresetCategory; tags?: readonly string[]; definition: AnimationPresetDefinition },
+    input: {
+      name: string;
+      category: AnimationPresetCategory;
+      tags?: readonly string[];
+      definition: AnimationPresetDefinition;
+    },
   ): Promise<AnimationPreset> {
     const record: AnimationPreset = {
       id: this.idGen(),
@@ -510,7 +550,7 @@ export class TimelineService {
     const tracks: Track[] = [];
     for (const t of preset.definition.tracks) {
       const trackId = this.idGen();
-      const keyframes: Keyframe[] = t.keyframes.map(k => ({
+      const keyframes: Keyframe[] = t.keyframes.map((k) => ({
         id: this.idGen(),
         trackId,
         timeMs: k.timeMs,

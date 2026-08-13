@@ -77,7 +77,11 @@ function conflict(message: string, code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 export async function createJobHandler(
-  req: HttpRequest<Record<string, never>, CreateExportJobInput & { actorId?: string }, Record<string, string | undefined>>,
+  req: HttpRequest<
+    Record<string, never>,
+    CreateExportJobInput & { actorId?: string },
+    Record<string, string | undefined>
+  >,
   ctx: ExportHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.actorId ?? ctx.resolveActorId?.(req);

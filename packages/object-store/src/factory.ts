@@ -20,7 +20,12 @@ export function createObjectStore(env: Partial<ObjectStoreEnv>): ObjectStore {
     return new MemoryObjectStore({ OBJECT_STORE_BUCKET: bucket });
   }
   const full = env as ObjectStoreEnv;
-  if (!full.OBJECT_STORE_BUCKET || !full.OBJECT_STORE_REGION || !full.OBJECT_STORE_ACCESS_KEY || !full.OBJECT_STORE_SECRET_KEY) {
+  if (
+    !full.OBJECT_STORE_BUCKET ||
+    !full.OBJECT_STORE_REGION ||
+    !full.OBJECT_STORE_ACCESS_KEY ||
+    !full.OBJECT_STORE_SECRET_KEY
+  ) {
     throw new Error(
       `createObjectStore: backend=${backend} requires OBJECT_STORE_BUCKET, OBJECT_STORE_REGION, OBJECT_STORE_ACCESS_KEY, OBJECT_STORE_SECRET_KEY`,
     );
@@ -38,6 +43,7 @@ export function readObjectStoreEnv(src: NodeJS.ProcessEnv = process.env): Partia
   if (src.OBJECT_STORE_ENDPOINT) out['OBJECT_STORE_ENDPOINT'] = src.OBJECT_STORE_ENDPOINT;
   if (src.OBJECT_STORE_ACCESS_KEY) out['OBJECT_STORE_ACCESS_KEY'] = src.OBJECT_STORE_ACCESS_KEY;
   if (src.OBJECT_STORE_SECRET_KEY) out['OBJECT_STORE_SECRET_KEY'] = src.OBJECT_STORE_SECRET_KEY;
-  if (src.OBJECT_STORE_FORCE_PATH_STYLE) out['OBJECT_STORE_FORCE_PATH_STYLE'] = src.OBJECT_STORE_FORCE_PATH_STYLE;
+  if (src.OBJECT_STORE_FORCE_PATH_STYLE)
+    out['OBJECT_STORE_FORCE_PATH_STYLE'] = src.OBJECT_STORE_FORCE_PATH_STYLE;
   return out as Partial<ObjectStoreEnv>;
 }

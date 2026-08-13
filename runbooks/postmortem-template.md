@@ -68,8 +68,9 @@ the proximate cause to happen". Example:
 ## Action items
 
 Each item: `AI-<n>: <title>` + `Owner:` + `Priority:` (`P0` / `P1` / `P2`)
-+ `Due:`. P0 = within 1 week. P1 = within 1 month. P2 = within 1 quarter.
-These items go into the linear backlog.
+
+- `Due:`. P0 = within 1 week. P1 = within 1 month. P2 = within 1 quarter.
+  These items go into the linear backlog.
 
 ```
 AI-1: Add a canary stage to migrations.  Owner: data-eng  Priority: P0  Due: YYYY-MM-DD

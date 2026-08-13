@@ -272,7 +272,9 @@ export class CredentialValidationError extends Error {
     public readonly connector_id: ConnectorId,
     public readonly errors: Array<{ field: string; message: string }>,
   ) {
-    super(`Credential validation failed for ${connector_id}: ${errors.map((e) => `${e.field}: ${e.message}`).join('; ')}`);
+    super(
+      `Credential validation failed for ${connector_id}: ${errors.map((e) => `${e.field}: ${e.message}`).join('; ')}`,
+    );
     this.name = 'CredentialValidationError';
   }
 }

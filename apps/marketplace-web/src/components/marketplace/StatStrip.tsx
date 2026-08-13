@@ -25,12 +25,8 @@ export function StatStrip({ stats, className = '' }: StatStripProps) {
     >
       {stats.map((s) => (
         <div key={s.label} className="text-center">
-          <p className="font-display text-3xl font-bold text-fg sm:text-4xl">
-            {s.value}
-          </p>
-          <p className="mt-2 text-xs uppercase tracking-wider text-muted">
-            {s.label}
-          </p>
+          <p className="font-display text-3xl font-bold text-fg sm:text-4xl">{s.value}</p>
+          <p className="mt-2 text-xs uppercase tracking-wider text-muted">{s.label}</p>
         </div>
       ))}
     </div>

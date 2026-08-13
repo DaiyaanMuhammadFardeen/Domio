@@ -13,11 +13,11 @@ Items flagged **P20-deferred** will ship with the full P20 enterprise phase.
 
 ## Rung summary
 
-| Rung | Workstreams required | Status |
-|---|---|---|
-| **Locked** | B1, B5 | **Complete** |
-| **Beta-ready** | Locked + B2, B3, B4 | **Complete** |
-| **Public beta** | Beta-ready + B6 | **Workflow + checklist complete; scanners unverified until SNYK_TOKEN + ZAP auth header are set in repo secrets** |
+| Rung            | Workstreams required | Status                                                                                                            |
+| --------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Locked**      | B1, B5               | **Complete**                                                                                                      |
+| **Beta-ready**  | Locked + B2, B3, B4  | **Complete**                                                                                                      |
+| **Public beta** | Beta-ready + B6      | **Workflow + checklist complete; scanners unverified until SNYK_TOKEN + ZAP auth header are set in repo secrets** |
 
 ---
 
@@ -180,7 +180,7 @@ branch protection so P0/P1 findings block merge.
     failure; on nightly failures, opens `security/audit-p3` issues for
     triage.
 - `.trivyignore` — empty stub; entries require `CVE + reason + ticket
-  link + expiry date`.
+link + expiry date`.
 - `docs/runbooks/security/owasp-top10-manual-review.md` — full OWASP
   Top-10 checklist (A01–A10) with concrete control mappings (e.g. A01 →
   `brandLockRegionsPolicy`, A09 → `audit_event` actions).
@@ -201,65 +201,65 @@ performed by the Security lead before public beta rung.
 
 ## Files added or modified by P20.5
 
-| Path | Type | Workstream |
-|---|---|---|
-| `docs/development_phases/phase-20.5-beta-security-hardening.md` | new | (planning) |
-| `docs/development_phases/phase-20.5-IMPLEMENTATION-STATUS.md` | new | (this file) |
-| `docs/development_phases/README.md` | modified | (planning) |
-| `docs/development_phases/phase-graph.md` | modified | (planning) |
-| `docs/07-security-planning.md` | modified | (planning) |
-| `docs/runbooks/security/owasp-top10-manual-review.md` | new | B6 |
-| `.github/workflows/security.yml` | new | B6 |
-| `.trivyignore` | new | B6 |
-| `services/permission-engine/src/abac.ts` | new | B1 |
-| `services/permission-engine/src/abac.test.ts` | new | B1 |
-| `services/permission-engine/src/index.ts` | modified | B1 |
-| `services/audit/src/types.ts` | new | B2 |
-| `services/audit/src/stores.ts` | new | B2 |
-| `services/audit/src/service.ts` | new | B2 |
-| `services/audit/src/handlers.ts` | new | B2 |
-| `services/audit/src/index.ts` | new | B2 |
-| `services/audit/src/service.test.ts` | new | B2 |
-| `infrastructure/postgres/migrations/0025_audit_event.up.sql` | new | B2 |
-| `infrastructure/postgres/migrations/0025_audit_event.down.sql` | new | B2 |
-| `packages/dlp-warn/src/types.ts` | new | B3 |
-| `packages/dlp-warn/src/luhn.ts` | new | B3 |
-| `packages/dlp-warn/src/scanner.ts` | new | B3 |
-| `packages/dlp-warn/src/summary.ts` | new | B3 |
-| `packages/dlp-warn/src/index.ts` | new | B3 |
-| `packages/dlp-warn/src/scanner.test.ts` | new | B3 |
-| `packages/rate-limit/src/types.ts` | new | B4 |
-| `packages/rate-limit/src/stores.ts` | new | B4 |
-| `packages/rate-limit/src/limiter.ts` | new | B4 |
-| `packages/rate-limit/src/index.ts` | new | B4 |
-| `packages/rate-limit/src/limiter.test.ts` | new | B4 |
-| `packages/web-security/src/headers.ts` | new | B5 |
-| `packages/web-security/src/headers.test.ts` | new | B5 |
-| `packages/web-security/src/index.ts` | new | B5 |
-| `packages/web-security/package.json`, `tsconfig.json`, `vitest.config.ts` | new | B5 |
-| 5× Next.js apps (CSP wiring) | modified | B5 |
+| Path                                                                      | Type     | Workstream  |
+| ------------------------------------------------------------------------- | -------- | ----------- |
+| `docs/development_phases/phase-20.5-beta-security-hardening.md`           | new      | (planning)  |
+| `docs/development_phases/phase-20.5-IMPLEMENTATION-STATUS.md`             | new      | (this file) |
+| `docs/development_phases/README.md`                                       | modified | (planning)  |
+| `docs/development_phases/phase-graph.md`                                  | modified | (planning)  |
+| `docs/07-security-planning.md`                                            | modified | (planning)  |
+| `docs/runbooks/security/owasp-top10-manual-review.md`                     | new      | B6          |
+| `.github/workflows/security.yml`                                          | new      | B6          |
+| `.trivyignore`                                                            | new      | B6          |
+| `services/permission-engine/src/abac.ts`                                  | new      | B1          |
+| `services/permission-engine/src/abac.test.ts`                             | new      | B1          |
+| `services/permission-engine/src/index.ts`                                 | modified | B1          |
+| `services/audit/src/types.ts`                                             | new      | B2          |
+| `services/audit/src/stores.ts`                                            | new      | B2          |
+| `services/audit/src/service.ts`                                           | new      | B2          |
+| `services/audit/src/handlers.ts`                                          | new      | B2          |
+| `services/audit/src/index.ts`                                             | new      | B2          |
+| `services/audit/src/service.test.ts`                                      | new      | B2          |
+| `infrastructure/postgres/migrations/0025_audit_event.up.sql`              | new      | B2          |
+| `infrastructure/postgres/migrations/0025_audit_event.down.sql`            | new      | B2          |
+| `packages/dlp-warn/src/types.ts`                                          | new      | B3          |
+| `packages/dlp-warn/src/luhn.ts`                                           | new      | B3          |
+| `packages/dlp-warn/src/scanner.ts`                                        | new      | B3          |
+| `packages/dlp-warn/src/summary.ts`                                        | new      | B3          |
+| `packages/dlp-warn/src/index.ts`                                          | new      | B3          |
+| `packages/dlp-warn/src/scanner.test.ts`                                   | new      | B3          |
+| `packages/rate-limit/src/types.ts`                                        | new      | B4          |
+| `packages/rate-limit/src/stores.ts`                                       | new      | B4          |
+| `packages/rate-limit/src/limiter.ts`                                      | new      | B4          |
+| `packages/rate-limit/src/index.ts`                                        | new      | B4          |
+| `packages/rate-limit/src/limiter.test.ts`                                 | new      | B4          |
+| `packages/web-security/src/headers.ts`                                    | new      | B5          |
+| `packages/web-security/src/headers.test.ts`                               | new      | B5          |
+| `packages/web-security/src/index.ts`                                      | new      | B5          |
+| `packages/web-security/package.json`, `tsconfig.json`, `vitest.config.ts` | new      | B5          |
+| 5× Next.js apps (CSP wiring)                                              | modified | B5          |
 
 ---
 
 ## Verification matrix
 
-| Control | Where it lives | Test |
-|---|---|---|
-| ABAC: brand-locked regions | `services/permission-engine/src/abac.ts:97` | `abac.test.ts:34-83` |
-| ABAC: restricted-data share | `services/permission-engine/src/abac.ts:131` | `abac.test.ts:86-133` |
-| RBAC baseline (existing) | `services/permission-engine/src/resolver.ts` | `resolver.test.ts` (27 tests) |
-| Audit emit (in source tx) | `services/audit/src/service.ts` | `service.test.ts:16` |
-| Audit query + CSV export | `services/audit/src/handlers.ts` | `service.test.ts:14-15` |
-| Audit retention dry-run | `services/audit/src/service.ts` | `service.test.ts` |
-| DLP credit-card Luhn | `packages/dlp-warn/src/luhn.ts` | `scanner.test.ts:25` |
-| DLP email + SSN | `packages/dlp-warn/src/scanner.ts` | `scanner.test.ts:25` |
-| Rate-limit login | `packages/rate-limit/src/limiter.ts` | `limiter.test.ts:20` |
-| Rate-limit tenant CB | `packages/rate-limit/src/stores.ts:48` | `limiter.test.ts:20` |
-| Rate-limit anomaly | `packages/rate-limit/src/limiter.ts:200` | `limiter.test.ts:20` |
-| CSP strict | `packages/web-security/src/headers.ts` | `headers.test.ts:18` |
-| Cookie hardening | `packages/web-security/src/headers.ts` | `headers.test.ts:18` |
-| Secret scan (gitleaks) | `.gitleaks/gitleaks.toml` | `leak-scan.yml` (already wired) |
-| Pen-test gate | `.github/workflows/security.yml` | manual |
+| Control                     | Where it lives                               | Test                            |
+| --------------------------- | -------------------------------------------- | ------------------------------- |
+| ABAC: brand-locked regions  | `services/permission-engine/src/abac.ts:97`  | `abac.test.ts:34-83`            |
+| ABAC: restricted-data share | `services/permission-engine/src/abac.ts:131` | `abac.test.ts:86-133`           |
+| RBAC baseline (existing)    | `services/permission-engine/src/resolver.ts` | `resolver.test.ts` (27 tests)   |
+| Audit emit (in source tx)   | `services/audit/src/service.ts`              | `service.test.ts:16`            |
+| Audit query + CSV export    | `services/audit/src/handlers.ts`             | `service.test.ts:14-15`         |
+| Audit retention dry-run     | `services/audit/src/service.ts`              | `service.test.ts`               |
+| DLP credit-card Luhn        | `packages/dlp-warn/src/luhn.ts`              | `scanner.test.ts:25`            |
+| DLP email + SSN             | `packages/dlp-warn/src/scanner.ts`           | `scanner.test.ts:25`            |
+| Rate-limit login            | `packages/rate-limit/src/limiter.ts`         | `limiter.test.ts:20`            |
+| Rate-limit tenant CB        | `packages/rate-limit/src/stores.ts:48`       | `limiter.test.ts:20`            |
+| Rate-limit anomaly          | `packages/rate-limit/src/limiter.ts:200`     | `limiter.test.ts:20`            |
+| CSP strict                  | `packages/web-security/src/headers.ts`       | `headers.test.ts:18`            |
+| Cookie hardening            | `packages/web-security/src/headers.ts`       | `headers.test.ts:18`            |
+| Secret scan (gitleaks)      | `.gitleaks/gitleaks.toml`                    | `leak-scan.yml` (already wired) |
+| Pen-test gate               | `.github/workflows/security.yml`             | manual                          |
 
 **Total new unit tests:** 168 across 5 packages/services.
 

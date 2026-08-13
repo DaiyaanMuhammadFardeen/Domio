@@ -1,6 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Dispatcher } from './dispatcher.js';
-import { Router, SlackSender, EmailSender, InAppSender, type EmailTransport, type NatsPublisher } from './channels/router.js';
+import {
+  Router,
+  SlackSender,
+  EmailSender,
+  InAppSender,
+  type EmailTransport,
+  type NatsPublisher,
+} from './channels/router.js';
 import { MemoryDailyCap } from './caps/daily.js';
 import { MemoryAuditWriter } from './audit/redact.js';
 import type { CRMSyncEvent, NotificationRule } from './types.js';
@@ -32,7 +39,9 @@ function event(overrides: Partial<CRMSyncEvent> = {}): CRMSyncEvent {
 }
 
 function buildDeps(opts: { slackSend?: typeof fetch; caps?: MemoryDailyCap } = {}) {
-  const slack = new SlackSender(opts.slackSend ?? (async () => new Response(null, { status: 200 })));
+  const slack = new SlackSender(
+    opts.slackSend ?? (async () => new Response(null, { status: 200 })),
+  );
   const emailTransport: EmailTransport = { send: async () => ({ ok: true }) };
   const nats: NatsPublisher = { publish: async () => {} };
   const router = new Router([slack, new EmailSender(emailTransport), new InAppSender(nats)]);
@@ -114,10 +123,7 @@ describe('dispatcher', () => {
     // The dispatcher tolerates a deleted rule by falling back to a
     // large cap. This is a safety net, not a security control.
     const { dispatcher } = buildDeps();
-    const rows = await dispatcher.dispatch(
-      [rule({ rule_id: 'r-real' })],
-      event(),
-    );
+    const rows = await dispatcher.dispatch([rule({ rule_id: 'r-real' })], event());
     expect(rows[0]?.state).toBe('sent');
   });
 

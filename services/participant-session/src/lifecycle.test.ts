@@ -13,7 +13,15 @@ describe('lifecycle broadcaster', () => {
     });
     const broadcaster = new LifecycleBroadcaster({
       bus,
-      activeSessions: () => [{ workspace_id: 'w1', session_id: 's1', active_count: 5, idle_count: 0, last_seen_at_ms: 1_000 }],
+      activeSessions: () => [
+        {
+          workspace_id: 'w1',
+          session_id: 's1',
+          active_count: 5,
+          idle_count: 0,
+          last_seen_at_ms: 1_000,
+        },
+      ],
       tickMs: 100_000,
       now: () => 1_000,
     });
@@ -28,7 +36,15 @@ describe('lifecycle broadcaster', () => {
     const bus = new InMemoryEdgeBus();
     const broadcaster = new LifecycleBroadcaster({
       bus,
-      activeSessions: () => [{ workspace_id: 'w1', session_id: 's1', active_count: 5, idle_count: 0, last_seen_at_ms: 1_000 }],
+      activeSessions: () => [
+        {
+          workspace_id: 'w1',
+          session_id: 's1',
+          active_count: 5,
+          idle_count: 0,
+          last_seen_at_ms: 1_000,
+        },
+      ],
       now: () => 1_000,
     });
     const seen: unknown[] = [];
@@ -53,7 +69,15 @@ describe('lifecycle broadcaster', () => {
     let nowMs = 1_000;
     const broadcaster = new LifecycleBroadcaster({
       bus,
-      activeSessions: () => [{ workspace_id: 'w1', session_id: 's1', active_count: 5, idle_count: 0, last_seen_at_ms: 1_000 }],
+      activeSessions: () => [
+        {
+          workspace_id: 'w1',
+          session_id: 's1',
+          active_count: 5,
+          idle_count: 0,
+          last_seen_at_ms: 1_000,
+        },
+      ],
       softTtlMs: 5_000,
       hardTtlMs: 60_000,
       now: () => nowMs,
@@ -61,7 +85,9 @@ describe('lifecycle broadcaster', () => {
     await broadcaster.tick();
     nowMs = 7_000;
     await broadcaster.tick();
-    const phases = seen.map((s) => decode((s as { payload: Uint8Array }).payload) as { phase: string });
+    const phases = seen.map(
+      (s) => decode((s as { payload: Uint8Array }).payload) as { phase: string },
+    );
     expect(phases.map((p) => p.phase)).toEqual(['started', 'idle_warning']);
   });
 
@@ -76,7 +102,15 @@ describe('lifecycle broadcaster', () => {
     let nowMs = 1_000;
     const broadcaster = new LifecycleBroadcaster({
       bus,
-      activeSessions: () => [{ workspace_id: 'w1', session_id: 's1', active_count: 5, idle_count: 0, last_seen_at_ms: 1_000 }],
+      activeSessions: () => [
+        {
+          workspace_id: 'w1',
+          session_id: 's1',
+          active_count: 5,
+          idle_count: 0,
+          last_seen_at_ms: 1_000,
+        },
+      ],
       softTtlMs: 5_000,
       hardTtlMs: 10_000,
       now: () => nowMs,
@@ -84,7 +118,9 @@ describe('lifecycle broadcaster', () => {
     await broadcaster.tick();
     nowMs = 12_000;
     await broadcaster.tick();
-    const phases = seen.map((s) => decode((s as { payload: Uint8Array }).payload) as { phase: string });
+    const phases = seen.map(
+      (s) => decode((s as { payload: Uint8Array }).payload) as { phase: string },
+    );
     expect(phases.map((p) => p.phase)).toContain('ended');
   });
 

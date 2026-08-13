@@ -171,9 +171,10 @@ export interface EasingValidationError {
   readonly code: string;
 }
 
-export function validateEasingMonotonicity(
-  easing: { readonly p1x: number; readonly p2x: number },
-): EasingValidationError[] {
+export function validateEasingMonotonicity(easing: {
+  readonly p1x: number;
+  readonly p2x: number;
+}): EasingValidationError[] {
   const errors: EasingValidationError[] = [];
   if (easing.p1x > easing.p2x) {
     errors.push({

@@ -2,6 +2,7 @@
 
 > **Status:** Authoritative for source-of-truth boundaries, ERD, schema versioning, retention, and PII classification. Schema migrations are owned by the data platform team; changes require ADRs and are gated by 06 (technology stack) choices.
 > **Assumptions:**
+>
 > - **Postgres 16** is the control-plane source of truth (tenants, identity, permissions, audit, decks, schema versions, durable state).
 > - **Object storage** (S3-compatible) is authoritative for media binaries and render artifacts; never Postgres bytea for large objects.
 > - **CRDT append-only logs** are the collaboration source of truth for unmerged edits; materialized snapshots are projections.
@@ -9,8 +10,8 @@
 > - **JSONB schema versioning** is bidirectional (N ↔ N+1) and idempotent; CRDT migration is decoupled from schema migration.
 > - **Multi-tenant isolation** via Postgres RLS + tenant-context middleware; tenancy is established per request from auth claims.
 > - i18n: all timestamps UTC; display per locale. Currency stored as integer minor units; display per locale. Collation locale-aware per column.
-> **Owner:** Principal architect + DBA.
-> **Last reviewed:** 2026-07-29.
+>   **Owner:** Principal architect + DBA.
+>   **Last reviewed:** 2026-07-29.
 
 ---
 
@@ -22,23 +23,23 @@
 
 ## 5.0 Source-of-Truth Boundaries
 
-| Domain | Authoritative store | Reads | Notes |
-|---|---|---|---|
-| Tenants, identity, permissions, audit | Postgres | control plane only | strict RLS |
-| Decks, schema versions, branches | Postgres + CRDT log | control plane, sync, search, audit | schema version is canonical |
-| Element commands / operations | Postgres (materialized) + CRDT (append-only) | editor, sync | CRDT for conflicts, Postgres for durable revision |
-| Components, themes, templates, tokens | Postgres | marketplace, editor, brand kit | versioned |
-| Data sources, bindings, snapshots, formulas | Postgres (metadata) + object storage (snapshot blobs) | editor, presenter, MCP | read-only sources; agent-write requires explicit consent |
-| Media, 3D, render artifacts | Object storage + Postgres metadata | renderer, viewer | encrypted at rest |
-| Animation, prototyping variables | In deck schema | editor, render | versioned with deck |
-| AI runs, prompts, citations | Postgres + object storage (input/output blobs) | AI service, audit, freshness | agent-scope tracked |
-| Presenter / audience sessions | Redis (ephemeral) + Postgres (final state) + event log | realtime, analytics | ephemeral + final |
-| Shares, links, access policies | Postgres | share service, viewer | RLS |
-| Analytics events | ClickHouse | analytics query API, dashboard | append-only |
-| Search / knowledge graph | OpenSearch (full-text/vector) + graph projection (PG recursive CTEs or dedicated store) | search service, MCP | eventually consistent |
-| Audit log | Postgres (append-only) + WORM bucket | compliance, audit | immutable |
-| Marketplace | Postgres + payments aggregator | marketplace | revenue splits computed in DB |
-| Notifications, webhooks | Postgres (rules) + queue | delivery workers | outbound idempotency |
+| Domain                                      | Authoritative store                                                                     | Reads                              | Notes                                                    |
+| ------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------- | -------------------------------------------------------- |
+| Tenants, identity, permissions, audit       | Postgres                                                                                | control plane only                 | strict RLS                                               |
+| Decks, schema versions, branches            | Postgres + CRDT log                                                                     | control plane, sync, search, audit | schema version is canonical                              |
+| Element commands / operations               | Postgres (materialized) + CRDT (append-only)                                            | editor, sync                       | CRDT for conflicts, Postgres for durable revision        |
+| Components, themes, templates, tokens       | Postgres                                                                                | marketplace, editor, brand kit     | versioned                                                |
+| Data sources, bindings, snapshots, formulas | Postgres (metadata) + object storage (snapshot blobs)                                   | editor, presenter, MCP             | read-only sources; agent-write requires explicit consent |
+| Media, 3D, render artifacts                 | Object storage + Postgres metadata                                                      | renderer, viewer                   | encrypted at rest                                        |
+| Animation, prototyping variables            | In deck schema                                                                          | editor, render                     | versioned with deck                                      |
+| AI runs, prompts, citations                 | Postgres + object storage (input/output blobs)                                          | AI service, audit, freshness       | agent-scope tracked                                      |
+| Presenter / audience sessions               | Redis (ephemeral) + Postgres (final state) + event log                                  | realtime, analytics                | ephemeral + final                                        |
+| Shares, links, access policies              | Postgres                                                                                | share service, viewer              | RLS                                                      |
+| Analytics events                            | ClickHouse                                                                              | analytics query API, dashboard     | append-only                                              |
+| Search / knowledge graph                    | OpenSearch (full-text/vector) + graph projection (PG recursive CTEs or dedicated store) | search service, MCP                | eventually consistent                                    |
+| Audit log                                   | Postgres (append-only) + WORM bucket                                                    | compliance, audit                  | immutable                                                |
+| Marketplace                                 | Postgres + payments aggregator                                                          | marketplace                        | revenue splits computed in DB                            |
+| Notifications, webhooks                     | Postgres (rules) + queue                                                                | delivery workers                   | outbound idempotency                                     |
 
 Rule: a single source of truth per entity; projections are derived and explicitly labeled as projections.
 
@@ -906,6 +907,7 @@ create index crdt_logs_deck_revision_idx on crdt_logs (deck_id, revision);
 ## 5.6 Indexes
 
 Major indexes enumerated per table above. Additional principles:
+
 - Composite indexes ordered by selectivity (workspace_id, then time, then status, etc.).
 - Partial indexes for hot filters (e.g., `where deleted_at is null`).
 - GIN on JSONB where queries target deep keys (`gin (props jsonb_path_ops)`).
@@ -953,13 +955,13 @@ Major indexes enumerated per table above. Additional principles:
 
 ## 5.10 PII Classification
 
-| Class | Examples | At-rest | In-transit | Logging | Access |
-|---|---|---|---|---|---|
-| High (regulated) | email, phone, NID, payment data | encrypted with tenant-scoped key | TLS 1.3 | redacted | least-privilege, audited |
-| Medium | name, address, profile data | encrypted | TLS 1.3 | masked | least-privilege |
-| Low | deck titles, slide content (non-sensitive) | encrypted | TLS 1.3 | sampled RUM | product access |
-| Internal | metrics, counts | standard | TLS 1.3 | standard | product access |
-| Public | published decks | standard | TLS 1.3 | standard | public |
+| Class            | Examples                                   | At-rest                          | In-transit | Logging     | Access                   |
+| ---------------- | ------------------------------------------ | -------------------------------- | ---------- | ----------- | ------------------------ |
+| High (regulated) | email, phone, NID, payment data            | encrypted with tenant-scoped key | TLS 1.3    | redacted    | least-privilege, audited |
+| Medium           | name, address, profile data                | encrypted                        | TLS 1.3    | masked      | least-privilege          |
+| Low              | deck titles, slide content (non-sensitive) | encrypted                        | TLS 1.3    | sampled RUM | product access           |
+| Internal         | metrics, counts                            | standard                         | TLS 1.3    | standard    | product access           |
+| Public           | published decks                            | standard                         | TLS 1.3    | standard    | public                   |
 
 - Encryption keys managed in KMS; per-tenant data-encryption keys (DEKs) wrapped by tenant master.
 - Logs: never log raw PII; structured fields are allowlisted.
@@ -1022,13 +1024,13 @@ Major indexes enumerated per table above. Additional principles:
 
 ## 5.14 Open Decisions
 
-| ID | Decision | Owner |
-|---|---|---|
-| OD-DATA-01 | Postgres partitioning granularity for analytics_events (per-day vs per-week). | Platform + Analytics |
-| OD-DATA-02 | Knowledge graph projection: Postgres recursive CTEs only, or dedicated graph store. | Knowledge lead |
-| OD-DATA-03 | Whether to store deck schema JSONB inline or in object storage with Postgres metadata pointer. | Schema lead |
-| OD-DATA-04 | Multi-region: single primary with read replicas vs active-active for largest tenants. | SRE |
-| OD-DATA-05 | Default CRDT retention before compaction. | Editor lead |
+| ID         | Decision                                                                                       | Owner                |
+| ---------- | ---------------------------------------------------------------------------------------------- | -------------------- |
+| OD-DATA-01 | Postgres partitioning granularity for analytics_events (per-day vs per-week).                  | Platform + Analytics |
+| OD-DATA-02 | Knowledge graph projection: Postgres recursive CTEs only, or dedicated graph store.            | Knowledge lead       |
+| OD-DATA-03 | Whether to store deck schema JSONB inline or in object storage with Postgres metadata pointer. | Schema lead          |
+| OD-DATA-04 | Multi-region: single primary with read replicas vs active-active for largest tenants.          | SRE                  |
+| OD-DATA-05 | Default CRDT retention before compaction.                                                      | Editor lead          |
 
 ---
 
@@ -1040,28 +1042,28 @@ follow-up actions captured during the G1-6 query-plan review.
 
 ### 5.15.1 Top-20 hot queries
 
-| # | Service | Table(s) | Query intent | Existing index | G1-6 action |
-|---|---|---|---|---|---|
-| 1 | `collab` | `comments` | `select * where deck_id=$1 and parent_id is null order by created_at desc` | `idx_comments_deck_parent_created` | Verify partial index `parent_id is null` is in place. |
-| 2 | `collab` | `comments` | `insert (deck_id, parent_id, body, ...)` returning id | PK + `idx_comments_deck_parent_created` | None — covered. |
-| 3 | `collab` | `assignments` | `select * where assignee_id=$1 and status='open' order by due_at asc` | `idx_assignments_assignee_status_due` | None — covered. |
-| 4 | `collab` | `approval_requests` | `select count(*) where deck_id=$1 and status='pending'` | `idx_approval_deck_status` | None — covered. |
-| 5 | `collab` | `presence` | `upsert (user_id, deck_id, last_seen)` | PK `(user_id, deck_id)` | None — covered. |
-| 6 | `query-gateway` | `slides` | `select * where deck_id=$1 order by position asc` | `idx_slides_deck_position` | None — covered. |
-| 7 | `query-gateway` | `elements` | `select * where slide_id=$1` | `idx_elements_slide` | None — covered. |
-| 8 | `query-gateway` | `decks` | `select * where workspace_id=$1 and deleted_at is null order by updated_at desc limit 50` | `idx_decks_ws_updated` (partial) | None — covered. |
-| 9 | `query-gateway` | `decks` | `select count(*) where workspace_id=$1 and created_at > now() - interval '7 days'` | `idx_decks_ws_created` | **Add** if missing — drives usage dashboards. |
-| 10 | `share-api` | `share_links` | `select * where token=$1` | PK on token | None — covered. |
-| 11 | `share-api` | `share_links` | `select * where deck_id=$1 and expires_at > now()` | `idx_share_deck_active` | None — covered. |
-| 12 | `audit` | `audit_events` | `insert (...)` | BRIN on `occurred_at` | None — covered. |
-| 13 | `audit` | `audit_events` | `select * where workspace_id=$1 and occurred_at > $2 order by occurred_at desc limit 100` | `idx_audit_ws_occurred` | None — covered. |
-| 14 | `presenter-session` | `sessions` | `select * where id=$1 for update` | PK | None — covered. |
-| 15 | `presenter-session` | `sessions` | `update ... where id=$1 and version=$2` (CAS) | PK + `version` | None — covered. |
-| 16 | `event-ingest` | `events_raw` | `insert ... returning id` | PK | None — covered. |
-| 17 | `analytics-warehouse` | `events_aggregated` | `select bucket, count(*) ... where tenant_id=$1 group by bucket` | `idx_agg_tenant_bucket` | None — covered. |
-| 18 | `library` | `library_items` | `select * where workspace_id=$1 and kind=$2 order by created_at desc` | `idx_library_ws_kind_created` | None — covered. |
-| 19 | `notification-dispatcher` | `notifications` | `select * where recipient_id=$1 and read_at is null order by created_at desc limit 50` | `idx_notif_recipient_unread` (partial) | None — covered. |
-| 20 | `merge-requests` | `merge_requests` | `select * where target_deck_id=$1 and status='open'` | `idx_mr_target_status` | None — covered. |
+| #   | Service                   | Table(s)            | Query intent                                                                              | Existing index                          | G1-6 action                                           |
+| --- | ------------------------- | ------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------- |
+| 1   | `collab`                  | `comments`          | `select * where deck_id=$1 and parent_id is null order by created_at desc`                | `idx_comments_deck_parent_created`      | Verify partial index `parent_id is null` is in place. |
+| 2   | `collab`                  | `comments`          | `insert (deck_id, parent_id, body, ...)` returning id                                     | PK + `idx_comments_deck_parent_created` | None — covered.                                       |
+| 3   | `collab`                  | `assignments`       | `select * where assignee_id=$1 and status='open' order by due_at asc`                     | `idx_assignments_assignee_status_due`   | None — covered.                                       |
+| 4   | `collab`                  | `approval_requests` | `select count(*) where deck_id=$1 and status='pending'`                                   | `idx_approval_deck_status`              | None — covered.                                       |
+| 5   | `collab`                  | `presence`          | `upsert (user_id, deck_id, last_seen)`                                                    | PK `(user_id, deck_id)`                 | None — covered.                                       |
+| 6   | `query-gateway`           | `slides`            | `select * where deck_id=$1 order by position asc`                                         | `idx_slides_deck_position`              | None — covered.                                       |
+| 7   | `query-gateway`           | `elements`          | `select * where slide_id=$1`                                                              | `idx_elements_slide`                    | None — covered.                                       |
+| 8   | `query-gateway`           | `decks`             | `select * where workspace_id=$1 and deleted_at is null order by updated_at desc limit 50` | `idx_decks_ws_updated` (partial)        | None — covered.                                       |
+| 9   | `query-gateway`           | `decks`             | `select count(*) where workspace_id=$1 and created_at > now() - interval '7 days'`        | `idx_decks_ws_created`                  | **Add** if missing — drives usage dashboards.         |
+| 10  | `share-api`               | `share_links`       | `select * where token=$1`                                                                 | PK on token                             | None — covered.                                       |
+| 11  | `share-api`               | `share_links`       | `select * where deck_id=$1 and expires_at > now()`                                        | `idx_share_deck_active`                 | None — covered.                                       |
+| 12  | `audit`                   | `audit_events`      | `insert (...)`                                                                            | BRIN on `occurred_at`                   | None — covered.                                       |
+| 13  | `audit`                   | `audit_events`      | `select * where workspace_id=$1 and occurred_at > $2 order by occurred_at desc limit 100` | `idx_audit_ws_occurred`                 | None — covered.                                       |
+| 14  | `presenter-session`       | `sessions`          | `select * where id=$1 for update`                                                         | PK                                      | None — covered.                                       |
+| 15  | `presenter-session`       | `sessions`          | `update ... where id=$1 and version=$2` (CAS)                                             | PK + `version`                          | None — covered.                                       |
+| 16  | `event-ingest`            | `events_raw`        | `insert ... returning id`                                                                 | PK                                      | None — covered.                                       |
+| 17  | `analytics-warehouse`     | `events_aggregated` | `select bucket, count(*) ... where tenant_id=$1 group by bucket`                          | `idx_agg_tenant_bucket`                 | None — covered.                                       |
+| 18  | `library`                 | `library_items`     | `select * where workspace_id=$1 and kind=$2 order by created_at desc`                     | `idx_library_ws_kind_created`           | None — covered.                                       |
+| 19  | `notification-dispatcher` | `notifications`     | `select * where recipient_id=$1 and read_at is null order by created_at desc limit 50`    | `idx_notif_recipient_unread` (partial)  | None — covered.                                       |
+| 20  | `merge-requests`          | `merge_requests`    | `select * where target_deck_id=$1 and status='open'`                                      | `idx_mr_target_status`                  | None — covered.                                       |
 
 ### 5.15.2 New / verified indexes (G1-6 follow-up)
 

@@ -32,11 +32,11 @@ export interface MarketplaceListing {
 
 /** Allowed lifecycle transitions (mirrors services/registry LISTING_TRANSITIONS). */
 export const LISTING_TRANSITIONS: Record<ListingStatus, readonly ListingStatus[]> = {
-  draft:      ['in_review', 'removed'],
-  in_review:  ['published', 'removed', 'draft'],
-  published:  ['deprecated', 'removed', 'draft'],
+  draft: ['in_review', 'removed'],
+  in_review: ['published', 'removed', 'draft'],
+  published: ['deprecated', 'removed', 'draft'],
   deprecated: ['removed', 'draft'],
-  removed:    [],
+  removed: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -152,7 +152,9 @@ export interface MarketplaceEventEmitter {
 }
 
 export const noopEmitter: MarketplaceEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -232,13 +234,21 @@ export class MarketplaceValidationError extends Error {
 // Brand Lock Errors (Phase 19 Wave 4 — WS-MKT-5)
 // ---------------------------------------------------------------------------
 
-export { BrandLockDeniedError, InvalidBrandLockError, BrandLockNotFoundError } from './curated/types.js';
+export {
+  BrandLockDeniedError,
+  InvalidBrandLockError,
+  BrandLockNotFoundError,
+} from './curated/types.js';
 
 // ---------------------------------------------------------------------------
 // Takedown Errors (Phase 19 Wave 4 — WS-MKT-8)
 // ---------------------------------------------------------------------------
 
-export { InvalidTakedownTransitionError, TakedownNotFoundError, TrustScoreNotFoundError } from './takedown/types.js';
+export {
+  InvalidTakedownTransitionError,
+  TakedownNotFoundError,
+  TrustScoreNotFoundError,
+} from './takedown/types.js';
 
 // ---------------------------------------------------------------------------
 // Payment Intent (Phase 19 Wave 2)
@@ -365,7 +375,11 @@ export interface PayoutLedgerEntry {
 // Chargeback Event Types
 // ---------------------------------------------------------------------------
 
-export type ChargebackEventType = 'dispute.opened' | 'dispute.won' | 'dispute.lost' | 'dispute.resolved';
+export type ChargebackEventType =
+  | 'dispute.opened'
+  | 'dispute.won'
+  | 'dispute.lost'
+  | 'dispute.resolved';
 
 // ---------------------------------------------------------------------------
 // Usage Provider Interface (Wave 2 stub)
@@ -508,7 +522,10 @@ export class InvalidClientSecretError extends Error {
 
 export class InsufficientScopeError extends Error {
   readonly code = 'INSUFFICIENT_SCOPE' as const;
-  constructor(public readonly required: string, public readonly granted: readonly string[]) {
+  constructor(
+    public readonly required: string,
+    public readonly granted: readonly string[],
+  ) {
     super(`Insufficient scope: ${required} required, granted: [${granted.join(', ')}]`);
     this.name = 'InsufficientScopeError';
   }

@@ -83,7 +83,12 @@ export function NlPatchPanel({
         onChange={(e) => setPrompt(e.target.value)}
         rows={4}
       />
-      <button type="button" data-testid="m8-nl-patch" onClick={patch} disabled={busy || prompt.length === 0}>
+      <button
+        type="button"
+        data-testid="m8-nl-patch"
+        onClick={patch}
+        disabled={busy || prompt.length === 0}
+      >
         Patch
       </button>
       <div data-testid="m8-nl-diff">

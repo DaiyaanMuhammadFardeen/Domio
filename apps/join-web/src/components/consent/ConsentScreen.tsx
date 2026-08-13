@@ -128,7 +128,8 @@ export function ConsentScreen({
           Before you join
         </h1>
         <p className="text-sm text-slate-600 mb-6">
-          Tell us what you're comfortable sharing. You can change these later from your session header.
+          Tell us what you're comfortable sharing. You can change these later from your session
+          header.
         </p>
         <ul className="space-y-3 mb-6">
           {categories.map((c) => (

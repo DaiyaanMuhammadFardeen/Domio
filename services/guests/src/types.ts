@@ -73,7 +73,9 @@ export interface GuestEventEmitter {
 }
 
 export const noopEmitter: GuestEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------

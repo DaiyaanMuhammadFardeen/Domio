@@ -160,9 +160,7 @@ export default function TakedownsPage() {
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Takedown Queue
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Takedown Queue</h1>
           <p className="mt-1 text-sm text-slate-500">
             Review DMCA, trademark, and policy takedown requests. Resolve or dismiss each claim.
           </p>
@@ -211,7 +209,10 @@ export default function TakedownsPage() {
       )}
 
       {error && (
-        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700" role="alert">
+        <div
+          className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+          role="alert"
+        >
           <strong className="font-semibold">Error.</strong> {error}
         </div>
       )}
@@ -226,7 +227,12 @@ export default function TakedownsPage() {
 
       {/* Detail drawer */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label="Takedown details">
+        <div
+          className="fixed inset-0 z-50 flex justify-end"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Takedown details"
+        >
           <div className="absolute inset-0 bg-black/30" onClick={() => setSelected(null)} />
           <div className="relative ml-auto flex h-full w-full max-w-lg flex-col overflow-y-auto bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">

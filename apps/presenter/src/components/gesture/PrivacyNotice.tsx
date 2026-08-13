@@ -59,10 +59,7 @@ export function PrivacyNotice({
           gap: 12,
         }}
       >
-        <h2
-          id="gesture-privacy-title"
-          style={{ margin: 0, fontSize: 16, fontWeight: 600 }}
-        >
+        <h2 id="gesture-privacy-title" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
           <FormattedMessage id="presenter.gesture.privacy.title" />
         </h2>
         <p

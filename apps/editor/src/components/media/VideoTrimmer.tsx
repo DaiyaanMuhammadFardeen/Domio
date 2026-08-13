@@ -30,17 +30,23 @@ export interface VideoTrimmerProps {
 export function VideoTrimmer({ durationMs, value, onChange }: VideoTrimmerProps): ReactElement {
   const [pending, setPending] = useState<VideoTrim>(value);
 
-  const handleStart = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const next = { ...pending, startMs: Math.min(Number(e.target.value), pending.endMs - 100) };
-    setPending(next);
-    onChange(next);
-  }, [pending, onChange]);
+  const handleStart = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const next = { ...pending, startMs: Math.min(Number(e.target.value), pending.endMs - 100) };
+      setPending(next);
+      onChange(next);
+    },
+    [pending, onChange],
+  );
 
-  const handleEnd = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const next = { ...pending, endMs: Math.max(Number(e.target.value), pending.startMs + 100) };
-    setPending(next);
-    onChange(next);
-  }, [pending, onChange]);
+  const handleEnd = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const next = { ...pending, endMs: Math.max(Number(e.target.value), pending.startMs + 100) };
+      setPending(next);
+      onChange(next);
+    },
+    [pending, onChange],
+  );
 
   const startPct = durationMs === 0 ? 0 : (pending.startMs / durationMs) * 100;
   const endPct = durationMs === 0 ? 100 : (pending.endMs / durationMs) * 100;
@@ -82,7 +88,7 @@ export function VideoTrimmer({ durationMs, value, onChange }: VideoTrimmerProps)
           <span>{pending.endMs}ms</span>
         </label>
         <span className="video-trimmer__duration">
-          Duration: {(pending.endMs - pending.startMs)}ms
+          Duration: {pending.endMs - pending.startMs}ms
         </span>
       </div>
     </div>

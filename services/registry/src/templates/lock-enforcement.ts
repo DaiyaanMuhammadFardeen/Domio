@@ -50,10 +50,7 @@ function isColorOp(op: MutationOp): boolean {
  *  - `slide[*].text[*]`      — any text element on any slide
  *  - `slide[0]`              — matches the slide itself
  */
-function matchesSelector(
-  semanticId: string | undefined,
-  selector: string,
-): boolean {
+function matchesSelector(semanticId: string | undefined, selector: string): boolean {
   if (!semanticId) return false;
 
   const selectorParts = selector.split('.');
@@ -120,9 +117,7 @@ export async function enforceBrandLock(
   const locks = await deps.store.listBrandLocks(input.deckId);
 
   for (const lock of locks) {
-    const targetsMatch = input.targets.some((t) =>
-      matchesSelector(t, lock.sceneGraphSelector),
-    );
+    const targetsMatch = input.targets.some((t) => matchesSelector(t, lock.sceneGraphSelector));
     if (!targetsMatch) continue;
 
     const verdict = evaluateLock(lock, input.operation, input.actorId);

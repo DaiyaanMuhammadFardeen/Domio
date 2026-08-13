@@ -26,16 +26,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import type {
-  DeckDocument,
-  Element,
-  Slide,
-  ULID,
-} from '@domio/schema/generated/scene-graph';
-import {
-  HistoryEngine,
-  LocalPingAdapter,
-} from '@domio/canvas';
+import type { DeckDocument, Element, Slide, ULID } from '@domio/schema/generated/scene-graph';
+import { HistoryEngine, LocalPingAdapter } from '@domio/canvas';
 
 import { HistoryPanel } from '../panels/HistoryPanel';
 import { PropsPanel } from '../panels/PropsPanel';
@@ -44,10 +36,7 @@ import { ContextMenu, contextMenuFor, type ContextMenuItem } from '../panels/Con
 import { SyncIndicator } from './SyncIndicator';
 import { LocalPing } from './LocalPing';
 import { ElementSvg } from './ElementSvg';
-import {
-  createAutosaveFacade,
-  type AutosaveFacade,
-} from '../lib/autosave';
+import { createAutosaveFacade, type AutosaveFacade } from '../lib/autosave';
 import { PromoteDialog } from '../panels/promote-dialog';
 import { ScenarioSwitcher } from '../panels/scenario-switcher';
 import {
@@ -58,12 +47,16 @@ import { CommentPins } from '../collab/comment-pins';
 import { ApprovalBanner } from '../collab/approval-banner';
 import { AssignmentPanel } from '../collab/assignment-panel';
 
-import { Rulers, Guides, GridOverlay, ZoomHUD, GroupTransformHandle, PanelRail, PanelFooter } from './canvas';
 import {
-  setEngineRef,
-  snapshotHistory,
-  onEngineEvent,
-} from '../store/engine-bridge';
+  Rulers,
+  Guides,
+  GridOverlay,
+  ZoomHUD,
+  GroupTransformHandle,
+  PanelRail,
+  PanelFooter,
+} from './canvas';
+import { setEngineRef, snapshotHistory, onEngineEvent } from '../store/engine-bridge';
 import { useEditorStore } from '../store/editor-store';
 import {
   editorBootstrapBrandKits,
@@ -164,8 +157,7 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
   // prop so the SSR HTML reflects the deck.
   // ---------------------------------------------------------------------
   const deck = useEditorStore((s) => s.deck) ?? doc;
-  const activeSlideId =
-    useEditorStore((s) => s.activeSlideId) ?? doc.slides[0]?.id ?? null;
+  const activeSlideId = useEditorStore((s) => s.activeSlideId) ?? doc.slides[0]?.id ?? null;
   const paletteOpen = useEditorStore((s) => s.paletteOpen);
   const contextMenu = useEditorStore((s) => s.contextMenu);
   const storeLeftTab = useEditorStore((s) => s.leftTab);
@@ -284,9 +276,7 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
   return (
     <div className="editor-root">
       <header className="editor-toolbar" onContextMenu={onContextMenu}>
-        <div className="editor-toolbar__brand">
-          Domio · {deck?.title ?? 'Untitled'}
-        </div>
+        <div className="editor-toolbar__brand">Domio · {deck?.title ?? 'Untitled'}</div>
         <nav className="editor-toolbar__slides">
           {deck?.slides.map((slide) => (
             <button
@@ -312,9 +302,7 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
           <button
             type="button"
             className="toolbar-insert"
-            onClick={() =>
-              handleSetLeftTab(leftTab === 'insert' ? 'layers' : 'insert')
-            }
+            onClick={() => handleSetLeftTab(leftTab === 'insert' ? 'layers' : 'insert')}
           >
             + Insert
           </button>
@@ -352,10 +340,7 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
             slideId={activeSlideId ?? ('' as ULID)}
             currentActorId={ACTOR_ID}
           />
-          <div
-            className="editor-canvas__ping"
-            ref={(el) => setPingContainer(el)}
-          />
+          <div className="editor-canvas__ping" ref={(el) => setPingContainer(el)} />
           <LocalPing
             adapter={pingAdapter}
             container={{ current: pingContainer } as React.RefObject<HTMLElement>}
@@ -382,12 +367,8 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
             <ZoomHUD
               slideWidth={SLIDE_WIDTH}
               slideHeight={SLIDE_HEIGHT}
-              viewportWidth={
-                typeof window !== 'undefined' ? window.innerWidth : 1280
-              }
-              viewportHeight={
-                typeof window !== 'undefined' ? window.innerHeight : 720
-              }
+              viewportWidth={typeof window !== 'undefined' ? window.innerWidth : 1280}
+              viewportHeight={typeof window !== 'undefined' ? window.innerHeight : 720}
             />
           ) : null}
         </section>
@@ -458,9 +439,7 @@ function CanvasChromeOverlay(): ReactElement {
           viewportHeight={viewportH}
         />
       ) : null}
-      {showGrid ? (
-        <GridOverlay slideWidth={SLIDE_WIDTH} slideHeight={SLIDE_HEIGHT} />
-      ) : null}
+      {showGrid ? <GridOverlay slideWidth={SLIDE_WIDTH} slideHeight={SLIDE_HEIGHT} /> : null}
       <Guides slideWidth={SLIDE_WIDTH} slideHeight={SLIDE_HEIGHT} />
     </>
   );
@@ -573,9 +552,8 @@ interface SlidePreviewProps {
 
 function SlidePreview({ slide }: SlidePreviewProps): ReactElement {
   const sorted = [...slide.elements]
-    .filter(
-      (el): el is Element & { transform: NonNullable<Element['transform']> } =>
-        Boolean(el.transform),
+    .filter((el): el is Element & { transform: NonNullable<Element['transform']> } =>
+      Boolean(el.transform),
     )
     .sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
   return (
@@ -594,16 +572,11 @@ function SlidePreview({ slide }: SlidePreviewProps): ReactElement {
   );
 }
 
-function buildShareState(
-  deckId: string,
-  slideId: ULID | null,
-): () => ShareStateButtonCurrentState {
+function buildShareState(deckId: string, slideId: ULID | null): () => ShareStateButtonCurrentState {
   return () => ({
     deck_id: deckId,
     slide_id: slideId ?? ('' as ULID),
-    var_snapshot: [
-      { name: 'TIER', value: 'bear', visibility: 'deck_public', scope: 'deck' },
-    ],
+    var_snapshot: [{ name: 'TIER', value: 'bear', visibility: 'deck_public', scope: 'deck' }],
     device_frame_state: { kind: 'iphone', orientation: 'portrait' },
     scenario: 'bear',
     form_drafts: {},

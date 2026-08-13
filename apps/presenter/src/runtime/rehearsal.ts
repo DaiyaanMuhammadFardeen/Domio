@@ -27,7 +27,7 @@ export interface RehearsalTick {
   pace: 'green' | 'yellow' | 'blue' | 'red' | null;
 }
 
-const GREEN_BAND = 0.10;
+const GREEN_BAND = 0.1;
 const YELLOW_BAND = 0.25;
 
 export function computePace(target_ms: number, elapsed_ms: number): RehearsalTick['pace'] {
@@ -121,9 +121,10 @@ export class RehearsalEngine {
       session_id: '', // Caller sets this — engine is session-agnostic.
       started_at_ms: this.startedAtMs ?? 0,
       ended_at_ms: this.endedAtMs,
-      total_ms: this.endedAtMs !== null && this.startedAtMs !== null
-        ? this.endedAtMs - this.startedAtMs - this.pausedMs
-        : 0,
+      total_ms:
+        this.endedAtMs !== null && this.startedAtMs !== null
+          ? this.endedAtMs - this.startedAtMs - this.pausedMs
+          : 0,
       paused_ms: this.pausedMs,
       per_slide_ms: { ...this.perSlideMs },
       pacing_targets: { ...this.pacingTargets },

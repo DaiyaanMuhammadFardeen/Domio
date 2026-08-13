@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "magic-move"
-  ],
+  "tags": ["tier-2", "domio", "magic-move"],
   "panels": [
     {
       "id": 1,

@@ -26,10 +26,9 @@ export default function ServicesIndexPage(): JSX.Element {
           <p className="services-page__eyebrow">Services</p>
           <h1 className="services-page__title">Domio service directory</h1>
           <p className="services-page__subtitle">
-            Every user-facing service Domio ships: name, dev port, owning
-            team, and what it does. Pure backend services (event streams,
-            analytics, identity) and infrastructure (Postgres, Redis, NATS)
-            are intentionally excluded — they have no UI surface.
+            Every user-facing service Domio ships: name, dev port, owning team, and what it does.
+            Pure backend services (event streams, analytics, identity) and infrastructure (Postgres,
+            Redis, NATS) are intentionally excluded — they have no UI surface.
           </p>
         </header>
 

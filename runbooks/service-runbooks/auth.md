@@ -20,30 +20,30 @@ authenticated request touches this service (or its cached verify path).
 
 ## Health checks
 
-| Signal | Threshold |
-|--------|-----------|
-| Login success rate | > 99% over 5m |
-| Token-validate p95 | < 50 ms |
-| 5xx rate | < 0.1% |
-| Failed-login spike | < 10× baseline |
-| Session-store (Redis) hit rate | > 95% |
+| Signal                         | Threshold      |
+| ------------------------------ | -------------- |
+| Login success rate             | > 99% over 5m  |
+| Token-validate p95             | < 50 ms        |
+| 5xx rate                       | < 0.1%         |
+| Failed-login spike             | < 10× baseline |
+| Session-store (Redis) hit rate | > 95%          |
 
 ## Common failure modes
 
 1. **Redis outage.** Symptom: token-validate latency grows; cache misses
    hit Postgres.
-   *Mitigation:* see Redis incident runbook. Fallback: degraded mode
+   _Mitigation:_ see Redis incident runbook. Fallback: degraded mode
    (skip cache, accept latency).
 2. **IdP (Google / Microsoft) outage.** Symptom: social-login 5xx.
-   *Mitigation:* status page update; IdP is external, no internal action.
+   _Mitigation:_ status page update; IdP is external, no internal action.
 3. **Password hash library CVEs.** Symptom: depends on the CVE.
-   *Mitigation:* rotate hashes (separate playbook).
+   _Mitigation:_ rotate hashes (separate playbook).
 4. **Rate-limit false positives.** Symptom: legitimate users see 429.
-   *Mitigation:* check the rate-limit rule logs; if rule too strict,
+   _Mitigation:_ check the rate-limit rule logs; if rule too strict,
    raise threshold via runbook automation.
 5. **JWT signing-key rotation stuck.** Symptom: tokens issued with
    old key not validating.
-   *Mitigation:* see "JWT key rotation" runbook (separate).
+   _Mitigation:_ see "JWT key rotation" runbook (separate).
 
 ## Rollback
 

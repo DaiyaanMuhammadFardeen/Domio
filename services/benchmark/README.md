@@ -59,12 +59,12 @@ curl -s -X POST http://localhost:8095/v1/benchmarks/$ID/sign \
 
 ## Configuration
 
-| Env var                | Default            | Notes                            |
-|------------------------|--------------------|----------------------------------|
-| `PORT`                 | `8095`             | listen port                      |
-| `CLICKHOUSE_URL`       | _(empty)_          | enables the warehouse sink       |
-| `CLICKHOUSE_DB`        | `domio_analytics`  |                                  |
-| `CLICKHOUSE_USER`      | `default`          |                                  |
-| `CLICKHOUSE_PASSWORD`  | _(empty)_          |                                  |
-| `DATABASE_URL`         | _(empty)_          | enables the Postgres mirror      |
-| `BENCHMARK_INGEST_KEY` | _(empty)_          | required for `/snapshots` (HMAC) |
+| Env var                | Default           | Notes                            |
+| ---------------------- | ----------------- | -------------------------------- |
+| `PORT`                 | `8095`            | listen port                      |
+| `CLICKHOUSE_URL`       | _(empty)_         | enables the warehouse sink       |
+| `CLICKHOUSE_DB`        | `domio_analytics` |                                  |
+| `CLICKHOUSE_USER`      | `default`         |                                  |
+| `CLICKHOUSE_PASSWORD`  | _(empty)_         |                                  |
+| `DATABASE_URL`         | _(empty)_         | enables the Postgres mirror      |
+| `BENCHMARK_INGEST_KEY` | _(empty)_         | required for `/snapshots` (HMAC) |

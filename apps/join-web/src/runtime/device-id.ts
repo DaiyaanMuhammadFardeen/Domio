@@ -57,9 +57,10 @@ export async function getOrCreateParticipantId(): Promise<string> {
       return id;
     }
   }
-  id = (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
-    ? crypto.randomUUID()
-    : Math.random().toString(36).slice(2) + Date.now().toString(36);
+  id =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2) + Date.now().toString(36);
   if (typeof localStorage !== 'undefined') localStorage.setItem(STORAGE_KEY, id);
   await writeKv(STORAGE_KEY, id);
   return id;

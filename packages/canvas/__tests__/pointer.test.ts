@@ -4,7 +4,12 @@ import { PointerRouter, type NormalizedPointerEvent } from '../src/input/pointer
 function down(x: number, y: number, timestamp: number): NormalizedPointerEvent {
   return { kind: 'down', pointerId: 1, x, y, timestamp };
 }
-function move(x: number, y: number, timestamp: number, modifiers: NormalizedPointerEvent['modifiers'] = {}): NormalizedPointerEvent {
+function move(
+  x: number,
+  y: number,
+  timestamp: number,
+  modifiers: NormalizedPointerEvent['modifiers'] = {},
+): NormalizedPointerEvent {
   return { kind: 'move', pointerId: 1, x, y, timestamp, modifiers };
 }
 function up(x: number, y: number, timestamp: number): NormalizedPointerEvent {

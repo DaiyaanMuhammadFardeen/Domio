@@ -6,10 +6,45 @@
  */
 
 export type KeyboardKey =
-  | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M'
-  | 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
-  | 'Escape' | 'Enter' | 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
-  | 'Backspace' | 'Delete' | 'Space' | 'Tab' | 'Digit0' | 'Digit1' | 'Digit2';
+  | 'A'
+  | 'B'
+  | 'C'
+  | 'D'
+  | 'E'
+  | 'F'
+  | 'G'
+  | 'H'
+  | 'I'
+  | 'J'
+  | 'K'
+  | 'L'
+  | 'M'
+  | 'N'
+  | 'O'
+  | 'P'
+  | 'Q'
+  | 'R'
+  | 'S'
+  | 'T'
+  | 'U'
+  | 'V'
+  | 'W'
+  | 'X'
+  | 'Y'
+  | 'Z'
+  | 'Escape'
+  | 'Enter'
+  | 'ArrowUp'
+  | 'ArrowDown'
+  | 'ArrowLeft'
+  | 'ArrowRight'
+  | 'Backspace'
+  | 'Delete'
+  | 'Space'
+  | 'Tab'
+  | 'Digit0'
+  | 'Digit1'
+  | 'Digit2';
 
 export interface NormalizedKeyboardEvent {
   key: KeyboardKey;
@@ -25,7 +60,9 @@ export interface NormalizedKeyboardEvent {
 
 export type Platform = 'mac' | 'win' | 'linux' | 'other';
 
-export function detectPlatform(ua: string = (typeof navigator !== 'undefined' ? navigator.userAgent : '')): Platform {
+export function detectPlatform(
+  ua: string = typeof navigator !== 'undefined' ? navigator.userAgent : '',
+): Platform {
   if (/Mac|iPhone|iPad/i.test(ua)) return 'mac';
   if (/Windows/i.test(ua)) return 'win';
   if (/Linux/i.test(ua)) return 'linux';

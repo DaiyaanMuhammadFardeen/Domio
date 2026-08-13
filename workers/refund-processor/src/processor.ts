@@ -74,7 +74,7 @@ export class InMemoryRefundProvider implements RefundProvider {
   }
 
   async listPendingRefunds(): Promise<readonly PaymentIntentRecord[]> {
-    return this.paymentIntents.filter(pi => pi.refundStatus === 'requested');
+    return this.paymentIntents.filter((pi) => pi.refundStatus === 'requested');
   }
 
   async approveRefund(pi: PaymentIntentRecord): Promise<void> {
@@ -103,9 +103,15 @@ export class RefundProcessorWorker {
     this.provider = opts.provider;
     this.tickMs = opts.tickMs ?? Number(process.env['WORKER_TICK_MS'] ?? '60000');
     this.logger = opts.logger ?? {
-      info: () => { /* noop */ },
-      error: () => { /* noop */ },
-      warn: () => { /* noop */ },
+      info: () => {
+        /* noop */
+      },
+      error: () => {
+        /* noop */
+      },
+      warn: () => {
+        /* noop */
+      },
     };
   }
 

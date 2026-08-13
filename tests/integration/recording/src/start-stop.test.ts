@@ -49,7 +49,12 @@ class HashChainedAuditEmitter {
     this.keyHex = keyHex;
   }
   async emit(event: RecordingAuditEvent): Promise<void> {
-    const hash = await computeEventHash(this.keyHex, event.payload ?? {}, event.sequence, this.prevHash);
+    const hash = await computeEventHash(
+      this.keyHex,
+      event.payload ?? {},
+      event.sequence,
+      this.prevHash,
+    );
     const stored: RecordingAuditEvent = { ...event, hash, prev_hash: this.prevHash };
     this.events.push(stored);
     this.prevHash = hash;

@@ -55,21 +55,15 @@ describe('lint (integration)', () => {
       `BEGIN;\nCREATE TABLE health_check (id uuid PRIMARY KEY);\nCOMMIT;\n`,
     );
     const v = await lint({ migrationsDir: dir });
-    expect(v.some((x) => x.rule === 'forward-only' && /Missing paired down/.test(x.message))).toBe(true);
+    expect(v.some((x) => x.rule === 'forward-only' && /Missing paired down/.test(x.message))).toBe(
+      true,
+    );
   });
 
   it('flags DDL outside transaction', async () => {
     const dir = tmpMigrations();
-    writeMig(
-      dir,
-      '0001_health_check.up.sql',
-      `CREATE TABLE health_check (id uuid PRIMARY KEY);\n`,
-    );
-    writeMig(
-      dir,
-      '0001_health_check.down.sql',
-      `DROP TABLE IF EXISTS health_check;\n`,
-    );
+    writeMig(dir, '0001_health_check.up.sql', `CREATE TABLE health_check (id uuid PRIMARY KEY);\n`);
+    writeMig(dir, '0001_health_check.down.sql', `DROP TABLE IF EXISTS health_check;\n`);
     const v = await lint({ migrationsDir: dir });
     expect(v.some((x) => x.rule === 'require-transaction')).toBe(true);
   });
@@ -81,11 +75,7 @@ describe('lint (integration)', () => {
       '0001_health_check.up.sql',
       `BEGIN;\nCREATE TABLE health_check (id uuid PRIMARY KEY);\nCOMMIT;\n`,
     );
-    writeMig(
-      dir,
-      '0001_health_check.down.sql',
-      `BEGIN;\nDROP TABLE health_check;\nCOMMIT;\n`,
-    );
+    writeMig(dir, '0001_health_check.down.sql', `BEGIN;\nDROP TABLE health_check;\nCOMMIT;\n`);
     const v = await lint({ migrationsDir: dir });
     expect(v.some((x) => x.rule === 'require-if-exists')).toBe(true);
   });
@@ -114,17 +104,11 @@ describe('lint (integration)', () => {
 
   it('strict mode escalates warnings to failures', async () => {
     const dir = tmpMigrations();
-    writeMig(
-      dir,
-      '0001_tmp.up.sql',
-      `BEGIN;\nCREATE TABLE tmp (id int);\nCOMMIT;\n`,
-    );
-    writeMig(
-      dir,
-      '0001_tmp.down.sql',
-      `BEGIN;\nDROP TABLE IF EXISTS tmp;\nCOMMIT;\n`,
-    );
+    writeMig(dir, '0001_tmp.up.sql', `BEGIN;\nCREATE TABLE tmp (id int);\nCOMMIT;\n`);
+    writeMig(dir, '0001_tmp.down.sql', `BEGIN;\nDROP TABLE IF EXISTS tmp;\nCOMMIT;\n`);
     const v = await lint({ migrationsDir: dir, strict: true });
-    expect(v.some((x) => x.rule === 'enforce-naming-convention' && x.severity === 'warning')).toBe(true);
+    expect(v.some((x) => x.rule === 'enforce-naming-convention' && x.severity === 'warning')).toBe(
+      true,
+    );
   });
 });

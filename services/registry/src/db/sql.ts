@@ -73,7 +73,9 @@ export function rowToPackage(row: Record<string, unknown>): ComponentPackage {
   if (r.signing_key_id != null) pkg.signingKeyId = String(r.signing_key_id);
   if (r.signature != null) pkg.signature = String(r.signature);
   if (r.deprecation != null) {
-    pkg.deprecation = parseJson<{ reason: string; replaceWith?: string; deprecatedAt: number }>(r.deprecation);
+    pkg.deprecation = parseJson<{ reason: string; replaceWith?: string; deprecatedAt: number }>(
+      r.deprecation,
+    );
   }
   // NOTE: DB null for deprecation is treated as "not deprecated" (omitted).
   // SQL cannot distinguish "property never set" from "property set to null".
@@ -216,7 +218,8 @@ export function rowToLicenseGrant(row: Record<string, unknown>): LicenseGrant {
   if (r.user_id != null) grant.userId = String(r.user_id);
   if (r.listing_id != null) grant.listingId = String(r.listing_id);
   if (r.revoked_at_ms != null) grant.revokedAt = bigintToNum(r.revoked_at_ms);
-  if (r.offline_grace_until_ms != null) grant.offlineGraceUntil = bigintToNum(r.offline_grace_until_ms);
+  if (r.offline_grace_until_ms != null)
+    grant.offlineGraceUntil = bigintToNum(r.offline_grace_until_ms);
   return grant;
 }
 
@@ -299,8 +302,8 @@ export function rowToIcon(row: Record<string, unknown>): IconRecord {
   const icon: IconRecord = {
     id: String(r.id),
     name: String(r.name),
-    synonyms: Array.isArray(r.synonyms) ? r.synonyms : parseJson<string[]>(r.synonyms) ?? [],
-    styles: Array.isArray(r.styles) ? r.styles : parseJson<string[]>(r.styles) ?? [],
+    synonyms: Array.isArray(r.synonyms) ? r.synonyms : (parseJson<string[]>(r.synonyms) ?? []),
+    styles: Array.isArray(r.styles) ? r.styles : (parseJson<string[]>(r.styles) ?? []),
     pathData: String(r.path_data),
     viewBox: String(r.view_box ?? '0 0 24 24'),
     vendor: String(r.vendor),
@@ -375,10 +378,9 @@ export class SqlStore implements RegistryStore {
   }
 
   async hasBlob(sha256: string): Promise<boolean> {
-    const { rows } = await this.pool.query(
-      'SELECT 1 FROM stored_blobs WHERE sha256 = $1',
-      [sha256],
-    );
+    const { rows } = await this.pool.query('SELECT 1 FROM stored_blobs WHERE sha256 = $1', [
+      sha256,
+    ]);
     return rows.length > 0;
   }
 
@@ -410,11 +412,25 @@ export class SqlStore implements RegistryStore {
          size_budget_bytes = EXCLUDED.size_budget_bytes,
          updated_at = EXCLUDED.updated_at`,
       [
-        row.id, row.catalog_id, row.version, row.kind, row.name, row.description,
-        row.category, row.author, row.license_id,
-        row.props_schema, row.variants, row.files, row.package_hash,
-        row.signing_key_id, row.signature, row.deprecation,
-        row.size_budget_bytes, row.created_at, row.updated_at,
+        row.id,
+        row.catalog_id,
+        row.version,
+        row.kind,
+        row.name,
+        row.description,
+        row.category,
+        row.author,
+        row.license_id,
+        row.props_schema,
+        row.variants,
+        row.files,
+        row.package_hash,
+        row.signing_key_id,
+        row.signature,
+        row.deprecation,
+        row.size_budget_bytes,
+        row.created_at,
+        row.updated_at,
       ],
     );
   }
@@ -428,14 +444,15 @@ export class SqlStore implements RegistryStore {
   }
 
   async getPackageById(id: string): Promise<ComponentPackage | undefined> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM component_packages WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM component_packages WHERE id = $1', [id]);
     return rows.length > 0 ? rowToPackage(rows[0] as Record<string, unknown>) : undefined;
   }
 
-  async listPackages(opts?: { kind?: string; category?: string; limit?: number }): Promise<ComponentPackage[]> {
+  async listPackages(opts?: {
+    kind?: string;
+    category?: string;
+    limit?: number;
+  }): Promise<ComponentPackage[]> {
     const conditions: string[] = [];
     const params: unknown[] = [];
     if (opts?.kind) {
@@ -467,9 +484,7 @@ export class SqlStore implements RegistryStore {
     query: string,
     opts?: { kind?: string; limit?: number },
   ): Promise<ComponentPackage[]> {
-    const conditions: string[] = [
-      '(name ILIKE $1 OR catalog_id ILIKE $1 OR description ILIKE $1)',
-    ];
+    const conditions: string[] = ['(name ILIKE $1 OR catalog_id ILIKE $1 OR description ILIKE $1)'];
     const params: unknown[] = [`%${query}%`];
     if (opts?.kind) {
       params.push(opts.kind);
@@ -484,10 +499,10 @@ export class SqlStore implements RegistryStore {
   }
 
   async deletePackage(catalogId: string, version: string): Promise<void> {
-    await this.pool.query(
-      'DELETE FROM component_packages WHERE catalog_id = $1 AND version = $2',
-      [catalogId, version],
-    );
+    await this.pool.query('DELETE FROM component_packages WHERE catalog_id = $1 AND version = $2', [
+      catalogId,
+      version,
+    ]);
   }
 
   async putSmartProps(componentId: string, props: SmartProp[]): Promise<void> {
@@ -541,10 +556,16 @@ export class SqlStore implements RegistryStore {
          license_grant_id = EXCLUDED.license_grant_id,
          updated_at = EXCLUDED.updated_at`,
       [
-        item.id, item.userId, item.workspaceId, item.catalogId,
-        item.installedVersion, item.pinMode,
-        item.pinValue ?? null, item.licenseGrantId ?? null,
-        new Date(item.createdAt), new Date(item.updatedAt),
+        item.id,
+        item.userId,
+        item.workspaceId,
+        item.catalogId,
+        item.installedVersion,
+        item.pinMode,
+        item.pinValue ?? null,
+        item.licenseGrantId ?? null,
+        new Date(item.createdAt),
+        new Date(item.updatedAt),
       ],
     );
   }
@@ -569,11 +590,7 @@ export class SqlStore implements RegistryStore {
     return rows.map((r) => rowToLibraryItem(r as Record<string, unknown>));
   }
 
-  async deleteLibraryItem(
-    userId: string,
-    workspaceId: string,
-    catalogId: string,
-  ): Promise<void> {
+  async deleteLibraryItem(userId: string, workspaceId: string, catalogId: string): Promise<void> {
     await this.pool.query(
       'DELETE FROM user_library WHERE user_id = $1 AND workspace_id = $2 AND catalog_id = $3',
       [userId, workspaceId, catalogId],
@@ -593,17 +610,19 @@ export class SqlStore implements RegistryStore {
          owner_id = EXCLUDED.owner_id,
          updated_at = EXCLUDED.updated_at`,
       [
-        lib.id, lib.workspaceId, lib.name, lib.policyMode,
-        lib.ownerId, new Date(lib.createdAt), new Date(lib.updatedAt),
+        lib.id,
+        lib.workspaceId,
+        lib.name,
+        lib.policyMode,
+        lib.ownerId,
+        new Date(lib.createdAt),
+        new Date(lib.updatedAt),
       ],
     );
   }
 
   async getTeamLibrary(id: string): Promise<TeamLibrary | undefined> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM team_library WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM team_library WHERE id = $1', [id]);
     return rows.length > 0 ? rowToTeamLibrary(rows[0] as Record<string, unknown>) : undefined;
   }
 
@@ -624,9 +643,16 @@ export class SqlStore implements RegistryStore {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
        ON CONFLICT (library_id, seq) DO NOTHING`,
       [
-        event.id, event.libraryId, event.seq, event.kind, event.componentId,
-        event.version ?? null, event.payloadRef ?? null,
-        event.actorId, event.actorKind, new Date(event.createdAt),
+        event.id,
+        event.libraryId,
+        event.seq,
+        event.kind,
+        event.componentId,
+        event.version ?? null,
+        event.payloadRef ?? null,
+        event.actorId,
+        event.actorKind,
+        new Date(event.createdAt),
       ],
     );
   }
@@ -677,21 +703,27 @@ export class SqlStore implements RegistryStore {
          deprecated_at_ms = EXCLUDED.deprecated_at_ms,
          updated_at = EXCLUDED.updated_at`,
       [
-        listing.id, listing.catalogId, listing.sellerId, listing.title,
-        listing.description, listing.status, listing.isFree,
-        listing.priceCents ?? null, listing.currency ?? null,
-        listing.tags, listing.preview ?? null,
-        listing.publishedAt ?? null, listing.deprecatedAt ?? null,
-        new Date(listing.createdAt), new Date(listing.updatedAt),
+        listing.id,
+        listing.catalogId,
+        listing.sellerId,
+        listing.title,
+        listing.description,
+        listing.status,
+        listing.isFree,
+        listing.priceCents ?? null,
+        listing.currency ?? null,
+        listing.tags,
+        listing.preview ?? null,
+        listing.publishedAt ?? null,
+        listing.deprecatedAt ?? null,
+        new Date(listing.createdAt),
+        new Date(listing.updatedAt),
       ],
     );
   }
 
   async getListing(id: string): Promise<MarketplaceListing | undefined> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM marketplace_listing WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM marketplace_listing WHERE id = $1', [id]);
     return rows.length > 0 ? rowToListing(rows[0] as Record<string, unknown>) : undefined;
   }
 
@@ -703,9 +735,11 @@ export class SqlStore implements RegistryStore {
     return rows.length > 0 ? rowToListing(rows[0] as Record<string, unknown>) : undefined;
   }
 
-  async listListings(
-    opts?: { status?: string; sellerId?: string; limit?: number },
-  ): Promise<MarketplaceListing[]> {
+  async listListings(opts?: {
+    status?: string;
+    sellerId?: string;
+    limit?: number;
+  }): Promise<MarketplaceListing[]> {
     const conditions: string[] = [];
     const params: unknown[] = [];
     if (opts?.status) {
@@ -762,18 +796,20 @@ export class SqlStore implements RegistryStore {
          status = EXCLUDED.status,
          verified_buyer = EXCLUDED.verified_buyer`,
       [
-        review.id, review.listingId, review.reviewerId,
-        review.rating, review.body, review.status,
-        review.verifiedBuyer, new Date(review.createdAt),
+        review.id,
+        review.listingId,
+        review.reviewerId,
+        review.rating,
+        review.body,
+        review.status,
+        review.verifiedBuyer,
+        new Date(review.createdAt),
       ],
     );
   }
 
   async getReview(id: string): Promise<Review | undefined> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM marketplace_review WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM marketplace_review WHERE id = $1', [id]);
     return rows.length > 0 ? rowToReview(rows[0] as Record<string, unknown>) : undefined;
   }
 
@@ -820,28 +856,32 @@ export class SqlStore implements RegistryStore {
          revoked_at_ms = EXCLUDED.revoked_at_ms,
          offline_grace_until_ms = EXCLUDED.offline_grace_until_ms`,
       [
-        grant.id, grant.workspaceId, grant.userId ?? null,
-        grant.catalogId, grant.version, grant.listingId ?? null,
-        grant.licenseId, grant.seats, grant.signedToken,
-        grant.issuedAt, grant.expiresAt,
-        grant.revokedAt ?? null, grant.offlineGraceUntil ?? null,
+        grant.id,
+        grant.workspaceId,
+        grant.userId ?? null,
+        grant.catalogId,
+        grant.version,
+        grant.listingId ?? null,
+        grant.licenseId,
+        grant.seats,
+        grant.signedToken,
+        grant.issuedAt,
+        grant.expiresAt,
+        grant.revokedAt ?? null,
+        grant.offlineGraceUntil ?? null,
         new Date(grant.createdAt),
       ],
     );
   }
 
   async getLicenseGrant(licenseId: string): Promise<LicenseGrant | undefined> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM license_grant WHERE id = $1',
-      [licenseId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM license_grant WHERE id = $1', [
+      licenseId,
+    ]);
     return rows.length > 0 ? rowToLicenseGrant(rows[0] as Record<string, unknown>) : undefined;
   }
 
-  async listLicenseGrants(
-    workspaceId: string,
-    catalogId?: string,
-  ): Promise<LicenseGrant[]> {
+  async listLicenseGrants(workspaceId: string, catalogId?: string): Promise<LicenseGrant[]> {
     let sql = 'SELECT * FROM license_grant WHERE workspace_id = $1';
     const params: unknown[] = [workspaceId];
     if (catalogId) {
@@ -854,10 +894,10 @@ export class SqlStore implements RegistryStore {
   }
 
   async revokeLicenseGrant(licenseId: string, revokedAt: number): Promise<void> {
-    await this.pool.query(
-      'UPDATE license_grant SET revoked_at_ms = $1 WHERE id = $2',
-      [revokedAt, licenseId],
-    );
+    await this.pool.query('UPDATE license_grant SET revoked_at_ms = $1 WHERE id = $2', [
+      revokedAt,
+      licenseId,
+    ]);
   }
 
   // ---- revenue events ----
@@ -870,18 +910,23 @@ export class SqlStore implements RegistryStore {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
        ON CONFLICT (id) DO NOTHING`,
       [
-        event.id, event.listingId, event.sellerId, event.workspaceId,
-        event.currency, event.grossCents, event.feeCents, event.netCents,
-        event.payoutStatus, event.periodMonth, event.eventType,
+        event.id,
+        event.listingId,
+        event.sellerId,
+        event.workspaceId,
+        event.currency,
+        event.grossCents,
+        event.feeCents,
+        event.netCents,
+        event.payoutStatus,
+        event.periodMonth,
+        event.eventType,
         new Date(event.createdAt),
       ],
     );
   }
 
-  async listRevenueEvents(
-    sellerId: string,
-    periodMonth?: string,
-  ): Promise<RevenueEvent[]> {
+  async listRevenueEvents(sellerId: string, periodMonth?: string): Promise<RevenueEvent[]> {
     let sql = 'SELECT * FROM revenue_share_event WHERE seller_id = $1';
     const params: unknown[] = [sellerId];
     if (periodMonth) {
@@ -911,18 +956,22 @@ export class SqlStore implements RegistryStore {
          preview = EXCLUDED.preview,
          updated_at = EXCLUDED.updated_at`,
       [
-        t.id, t.kind, t.name, t.description,
-        t.deckJson ?? null, t.placeholders, t.authorId,
-        t.preview ?? null, new Date(t.createdAt), new Date(t.updatedAt),
+        t.id,
+        t.kind,
+        t.name,
+        t.description,
+        t.deckJson ?? null,
+        t.placeholders,
+        t.authorId,
+        t.preview ?? null,
+        new Date(t.createdAt),
+        new Date(t.updatedAt),
       ],
     );
   }
 
   async getTemplate(id: string): Promise<Template | undefined> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM template WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM template WHERE id = $1', [id]);
     return rows.length > 0 ? rowToTemplate(rows[0] as Record<string, unknown>) : undefined;
   }
 
@@ -948,10 +997,7 @@ export class SqlStore implements RegistryStore {
          name = EXCLUDED.name,
          slides = EXCLUDED.slides,
          spreadable = EXCLUDED.spreadable`,
-      [
-        s.id, s.templateId, s.name, s.slides,
-        s.spreadable, new Date(s.createdAt),
-      ],
+      [s.id, s.templateId, s.name, s.slides, s.spreadable, new Date(s.createdAt)],
     );
   }
 
@@ -976,8 +1022,12 @@ export class SqlStore implements RegistryStore {
          informal_only = EXCLUDED.informal_only,
          sticker_component_ids = EXCLUDED.sticker_component_ids`,
       [
-        pack.id, pack.name, pack.theme, pack.informalOnly,
-        pack.stickerComponentIds, new Date(pack.createdAt),
+        pack.id,
+        pack.name,
+        pack.theme,
+        pack.informalOnly,
+        pack.stickerComponentIds,
+        new Date(pack.createdAt),
       ],
     );
   }
@@ -1011,18 +1061,21 @@ export class SqlStore implements RegistryStore {
          scene_graph_selector = EXCLUDED.scene_graph_selector,
          updated_at = EXCLUDED.updated_at`,
       [
-        lock.id, lock.deckId, lock.scope, lock.strictness,
-        lock.allowedOverrides, lock.ownerUserId,
-        lock.sceneGraphSelector, new Date(lock.createdAt), new Date(lock.updatedAt),
+        lock.id,
+        lock.deckId,
+        lock.scope,
+        lock.strictness,
+        lock.allowedOverrides,
+        lock.ownerUserId,
+        lock.sceneGraphSelector,
+        new Date(lock.createdAt),
+        new Date(lock.updatedAt),
       ],
     );
   }
 
   async getBrandLock(id: string): Promise<BrandLockRegion | undefined> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM brand_lock_region WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM brand_lock_region WHERE id = $1', [id]);
     return rows.length > 0 ? rowToBrandLock(rows[0] as Record<string, unknown>) : undefined;
   }
 
@@ -1055,18 +1108,22 @@ export class SqlStore implements RegistryStore {
          license_id = EXCLUDED.license_id,
          perceptual_hash = EXCLUDED.perceptual_hash`,
       [
-        icon.id, icon.name, icon.synonyms, icon.styles,
-        icon.pathData, icon.viewBox, icon.vendor, icon.licenseId,
-        icon.perceptualHash ?? null, new Date(icon.createdAt),
+        icon.id,
+        icon.name,
+        icon.synonyms,
+        icon.styles,
+        icon.pathData,
+        icon.viewBox,
+        icon.vendor,
+        icon.licenseId,
+        icon.perceptualHash ?? null,
+        new Date(icon.createdAt),
       ],
     );
   }
 
   async getIcon(id: string): Promise<IconRecord | undefined> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM icons WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM icons WHERE id = $1', [id]);
     return rows.length > 0 ? rowToIcon(rows[0] as Record<string, unknown>) : undefined;
   }
 
@@ -1116,8 +1173,13 @@ export class SqlStore implements RegistryStore {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
        ON CONFLICT (id) DO NOTHING`,
       [
-        row.id, row.actorId, row.actorKind, row.action,
-        row.resourceType, row.resourceId, row.detail,
+        row.id,
+        row.actorId,
+        row.actorKind,
+        row.action,
+        row.resourceType,
+        row.resourceId,
+        row.detail,
         new Date(row.createdAt),
       ],
     );

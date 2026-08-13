@@ -51,7 +51,9 @@ describe('SummaryGenerator', () => {
       expect(screen.getByTestId('summary-generator-tldr')).toBeInTheDocument();
     });
     expect(screen.getByTestId('summary-generator-tldr').textContent).toContain('TL;DR');
-    expect(screen.getByTestId('summary-generator-slide-title').textContent).toBe('Executive summary');
+    expect(screen.getByTestId('summary-generator-slide-title').textContent).toBe(
+      'Executive summary',
+    );
     expect(screen.getByTestId('summary-generator-slide-body').textContent).toContain('bullet one');
   });
 

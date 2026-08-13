@@ -10,11 +10,11 @@ Intelligence. Each item mirrors a §9 entry in the Phase 17 spec; the
 verification commands are reproducible locally with the standard
 `./bin/dev-up` stack.
 
-| Status legend | Meaning |
-|---|---|
-| ✅ | verifiable locally; command and result included |
-| ⏳ | blocked on infra (CI / staging / vendor); rationale noted |
-| n/a | intentionally not applicable for this phase |
+| Status legend | Meaning                                                   |
+| ------------- | --------------------------------------------------------- |
+| ✅            | verifiable locally; command and result included           |
+| ⏳            | blocked on infra (CI / staging / vendor); rationale noted |
+| n/a           | intentionally not applicable for this phase               |
 
 ---
 
@@ -82,7 +82,7 @@ curl -fsS http://localhost:8082/healthz   # crm-sync
   [`.github/workflows/load.yml`](../../.github/workflows/load.yml).
   The 10-min sustained 200k events/sec run executes in CI nightly;
   full per-PR execution is gated on runner availability. The
-  *shorter* soak (10k events/s for 60s) is runnable locally and
+  _shorter_ soak (10k events/s for 60s) is runnable locally and
   passes the ingest accept-rate SLO.
 - ✅ ClickHouse query p95 < 2s for the top 20 dashboard queries —
   verified by `tests/integration/analytics-warehouse/queries.test.ts`
@@ -305,12 +305,12 @@ head -10 docs/development_phases/phase-17-spec.md
 
 ## Sign-off
 
-| Role                                | Name                       | Date         |
-|-------------------------------------|----------------------------|--------------|
-| Stream F lead                       | analytics-platform-lead    | 2026-08-08   |
-| SRE on-call                         | platform-eng-lead          | 2026-08-08   |
-| Compliance (Bangladesh residency)   | compliance-eng             | 2026-08-08   |
-| Security (PII / GDPR)               | security-eng               | 2026-08-08   |
+| Role                              | Name                    | Date       |
+| --------------------------------- | ----------------------- | ---------- |
+| Stream F lead                     | analytics-platform-lead | 2026-08-08 |
+| SRE on-call                       | platform-eng-lead       | 2026-08-08 |
+| Compliance (Bangladesh residency) | compliance-eng          | 2026-08-08 |
+| Security (PII / GDPR)             | security-eng            | 2026-08-08 |
 
 **Phase 17 is signed off.** The Phase 18 — Collaboration & Workflow
 workstream is now unblocked.

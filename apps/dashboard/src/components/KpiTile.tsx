@@ -31,9 +31,7 @@ export function KpiTile({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
-        <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-          {title}
-        </div>
+        <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{title}</div>
         <span
           className={clsx(
             'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase',
@@ -47,9 +45,7 @@ export function KpiTile({
         </span>
       </div>
       <div className="mt-1 flex items-baseline justify-between gap-3">
-        <div className="text-2xl font-semibold tabular-nums text-slate-900">
-          {value}
-        </div>
+        <div className="text-2xl font-semibold tabular-nums text-slate-900">{value}</div>
         {typeof delta === 'number' ? (
           <div
             className={clsx(
@@ -67,9 +63,7 @@ export function KpiTile({
           </div>
         ) : null}
       </div>
-      {sparkline ? (
-        <div className="mt-3 h-6 text-slate-500">{sparkline}</div>
-      ) : null}
+      {sparkline ? <div className="mt-3 h-6 text-slate-500">{sparkline}</div> : null}
     </div>
   );
 }

@@ -25,13 +25,27 @@ export class BrandMetrics {
   brandContextSwitchTotal = 0;
   subBrandCycleBlockedTotal = 0;
 
-  recordKitCreate(): void { this.brandKitCreatedTotal++; }
-  recordKitPublish(): void { this.brandKitPublishedTotal++; }
-  recordKitArchive(): void { this.brandKitArchivedTotal++; }
-  recordExtractionStart(): void { this.brandExtractionStartedTotal++; }
-  recordExtractionLatency(latencyMs: number): void { this.brandExtractionLatencyMs.push(latencyMs); }
-  recordContextSwitch(): void { this.brandContextSwitchTotal++; }
-  recordSubBrandCycle(): void { this.subBrandCycleBlockedTotal++; }
+  recordKitCreate(): void {
+    this.brandKitCreatedTotal++;
+  }
+  recordKitPublish(): void {
+    this.brandKitPublishedTotal++;
+  }
+  recordKitArchive(): void {
+    this.brandKitArchivedTotal++;
+  }
+  recordExtractionStart(): void {
+    this.brandExtractionStartedTotal++;
+  }
+  recordExtractionLatency(latencyMs: number): void {
+    this.brandExtractionLatencyMs.push(latencyMs);
+  }
+  recordContextSwitch(): void {
+    this.brandContextSwitchTotal++;
+  }
+  recordSubBrandCycle(): void {
+    this.subBrandCycleBlockedTotal++;
+  }
 
   snapshot(): BrandMetricSnapshot {
     return {

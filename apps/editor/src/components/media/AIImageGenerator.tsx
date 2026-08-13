@@ -106,10 +106,7 @@ export function AIImageGenerator({ onInsert, apiBaseUrl }: AIImageGeneratorProps
   return (
     <div className="flex flex-col gap-3" data-testid="p6-ai-image-generator">
       <div className="flex flex-col gap-1">
-        <label
-          htmlFor="p6-ai-image-prompt"
-          className="text-[11px] font-medium text-slate-400"
-        >
+        <label htmlFor="p6-ai-image-prompt" className="text-[11px] font-medium text-slate-400">
           {t('p6.copilot.aiImage.prompt')}
         </label>
         <textarea
@@ -145,7 +142,11 @@ export function AIImageGenerator({ onInsert, apiBaseUrl }: AIImageGeneratorProps
         <span className="text-[11px] font-medium text-slate-400">
           {t('p6.copilot.aiImage.style')}
         </span>
-        <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t('p6.copilot.aiImage.style')}>
+        <div
+          className="flex flex-wrap gap-1.5"
+          role="radiogroup"
+          aria-label={t('p6.copilot.aiImage.style')}
+        >
           {AI_IMAGE_STYLE_OPTIONS.map((opt) => {
             const selected = style === opt.id;
             return (
@@ -187,7 +188,10 @@ export function AIImageGenerator({ onInsert, apiBaseUrl }: AIImageGeneratorProps
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] text-red-300" data-testid="p6-ai-image-error">
+        <div
+          className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] text-red-300"
+          data-testid="p6-ai-image-error"
+        >
           {error}
         </div>
       )}
@@ -235,7 +239,9 @@ export function AIImageGenerator({ onInsert, apiBaseUrl }: AIImageGeneratorProps
                     className="rounded border border-slate-700/60 bg-slate-900/40 px-1.5 py-0.5 text-[10px] text-slate-300 transition-colors hover:border-slate-600 hover:text-slate-100 disabled:opacity-50"
                     data-testid={`${CANDIDATE_TESTID_PREFIX}-${i}-remove-bg`}
                   >
-                    {isRemoving ? t('p6.copilot.aiImage.removingBg') : t('p6.copilot.aiImage.removeBg')}
+                    {isRemoving
+                      ? t('p6.copilot.aiImage.removingBg')
+                      : t('p6.copilot.aiImage.removeBg')}
                   </button>
                 </div>
               </div>

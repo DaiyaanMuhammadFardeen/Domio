@@ -148,9 +148,7 @@ export default function MCPAuditPage() {
       key: 'tool',
       header: CATALOGUE['admin.mcp.audit.col.tool'] ?? 'Tool',
       type: 'string',
-      format: (val) => (
-        <span className="font-mono text-xs text-slate-700">{String(val)}</span>
-      ),
+      format: (val) => <span className="font-mono text-xs text-slate-700">{String(val)}</span>,
     },
     {
       key: 'args_display',
@@ -175,9 +173,7 @@ export default function MCPAuditPage() {
         return (
           <span className="inline-flex items-center gap-1.5">
             <Badge tone={tone}>{codeStr ?? '—'}</Badge>
-            <span className="text-xs text-slate-700">
-              {truncate(summary, 80)}
-            </span>
+            <span className="text-xs text-slate-700">{truncate(summary, 80)}</span>
           </span>
         );
       },
@@ -187,37 +183,28 @@ export default function MCPAuditPage() {
       header: CATALOGUE['admin.mcp.audit.col.latency'] ?? 'Latency',
       type: 'number',
       align: 'right',
-      format: (val) => (
-        <span className="tabular-nums">{String(val)} ms</span>
-      ),
+      format: (val) => <span className="tabular-nums">{String(val)} ms</span>,
     },
     {
       key: 'trace_id',
       header: CATALOGUE['admin.mcp.audit.col.trace'] ?? 'Trace ID',
       type: 'string',
       format: (val) => (
-        <span className="font-mono text-[11px] text-slate-500">
-          {truncate(String(val), 16)}
-        </span>
+        <span className="font-mono text-[11px] text-slate-500">{truncate(String(val), 16)}</span>
       ),
     },
   ];
 
-  const activeCount =
-    (agentFilter ? 1 : 0) + (toolFilter ? 1 : 0) + (range === '24h' ? 0 : 1);
+  const activeCount = (agentFilter ? 1 : 0) + (toolFilter ? 1 : 0) + (range === '24h' ? 0 : 1);
 
   return (
     <div className="space-y-4" data-testid="mcp-audit-page">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          <FormattedMessage
-            id="admin.mcp.audit.heading"
-            catalogue={CATALOGUE}
-          />
+          <FormattedMessage id="admin.mcp.audit.heading" catalogue={CATALOGUE} />
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">
-          Every tool call made by an MCP-registered agent against the
-          platform.
+          Every tool call made by an MCP-registered agent against the platform.
           {activeCount > 0 && (
             <>
               {' '}
@@ -239,10 +226,7 @@ export default function MCPAuditPage() {
             className="text-[11px] font-semibold uppercase tracking-wider text-slate-500"
             htmlFor="mcp-audit-agent"
           >
-            <FormattedMessage
-              id="admin.mcp.audit.filter.agent"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.mcp.audit.filter.agent" catalogue={CATALOGUE} />
           </label>
           <select
             id="mcp-audit-agent"
@@ -263,10 +247,7 @@ export default function MCPAuditPage() {
             className="text-[11px] font-semibold uppercase tracking-wider text-slate-500"
             htmlFor="mcp-audit-tool"
           >
-            <FormattedMessage
-              id="admin.mcp.audit.filter.tool"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.mcp.audit.filter.tool" catalogue={CATALOGUE} />
           </label>
           <select
             id="mcp-audit-tool"
@@ -287,10 +268,7 @@ export default function MCPAuditPage() {
             className="text-[11px] font-semibold uppercase tracking-wider text-slate-500"
             htmlFor="mcp-audit-range"
           >
-            <FormattedMessage
-              id="admin.mcp.audit.filter.range"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.mcp.audit.filter.range" catalogue={CATALOGUE} />
           </label>
           <select
             id="mcp-audit-range"
@@ -299,28 +277,16 @@ export default function MCPAuditPage() {
             className="rounded-md border border-slate-300 px-2 py-1.5 text-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           >
             <option value="1h">
-              <FormattedMessage
-                id="admin.mcp.audit.range.1h"
-                catalogue={CATALOGUE}
-              />
+              <FormattedMessage id="admin.mcp.audit.range.1h" catalogue={CATALOGUE} />
             </option>
             <option value="24h">
-              <FormattedMessage
-                id="admin.mcp.audit.range.24h"
-                catalogue={CATALOGUE}
-              />
+              <FormattedMessage id="admin.mcp.audit.range.24h" catalogue={CATALOGUE} />
             </option>
             <option value="7d">
-              <FormattedMessage
-                id="admin.mcp.audit.range.7d"
-                catalogue={CATALOGUE}
-              />
+              <FormattedMessage id="admin.mcp.audit.range.7d" catalogue={CATALOGUE} />
             </option>
             <option value="30d">
-              <FormattedMessage
-                id="admin.mcp.audit.range.30d"
-                catalogue={CATALOGUE}
-              />
+              <FormattedMessage id="admin.mcp.audit.range.30d" catalogue={CATALOGUE} />
             </option>
           </select>
         </div>

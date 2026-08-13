@@ -14,12 +14,7 @@
  * and snapshot rendering stay reproducible.
  */
 
-import type {
-  Incident,
-  ServiceHealth,
-  StatusService,
-  StatusSnapshot,
-} from './status-types';
+import type { Incident, ServiceHealth, StatusService, StatusSnapshot } from './status-types';
 
 const HISTORY_LENGTH = 90;
 
@@ -152,8 +147,7 @@ const SERVICE_META: ReadonlyArray<{ id: string; name: string; description: strin
 export function buildSeedSnapshot(): StatusSnapshot {
   const services: StatusService[] = SERVICE_META.map((meta) => {
     const history = buildServiceHistory(meta.id);
-    const status: ServiceHealth =
-      history[history.length - 1] ?? 'operational';
+    const status: ServiceHealth = history[history.length - 1] ?? 'operational';
     return {
       id: meta.id,
       name: meta.name,
@@ -250,9 +244,7 @@ function isIncident(value: unknown): value is Incident {
  * deterministic seed on any error so the marketing page never
  * goes blank.
  */
-export async function fetchStatus(
-  options: FetchOptions = {},
-): Promise<StatusSnapshot> {
+export async function fetchStatus(options: FetchOptions = {}): Promise<StatusSnapshot> {
   if (options.offline) {
     return buildSeedSnapshot();
   }

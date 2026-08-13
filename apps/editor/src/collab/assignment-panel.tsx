@@ -62,9 +62,7 @@ export function AssignmentPanel({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [blockedReasons, setBlockedReasons] = useState<
-    Record<string, string>
-  >({});
+  const [blockedReasons, setBlockedReasons] = useState<Record<string, string>>({});
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -73,9 +71,7 @@ export function AssignmentPanel({
       setAssignments(all.filter((a) => isActiveSlide(a, slidePosition)));
       setError(null);
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : 'Unable to load assignments.',
-      );
+      setError(cause instanceof Error ? cause.message : 'Unable to load assignments.');
     } finally {
       setLoading(false);
     }
@@ -103,11 +99,7 @@ export function AssignmentPanel({
         await patchAssignment(assignment.id, { status: next });
         await refresh();
       } catch (cause) {
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : 'Unable to update assignment.',
-        );
+        setError(cause instanceof Error ? cause.message : 'Unable to update assignment.');
       } finally {
         setBusyId(null);
       }
@@ -133,11 +125,7 @@ export function AssignmentPanel({
         });
         await refresh();
       } catch (cause) {
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : 'Unable to update assignment.',
-        );
+        setError(cause instanceof Error ? cause.message : 'Unable to update assignment.');
       } finally {
         setBusyId(null);
       }
@@ -172,8 +160,7 @@ export function AssignmentPanel({
       {assignments.map((a) => {
         const isPrimary = a.primary_id === currentActorId;
         const isWatcher = a.watchers.includes(currentActorId);
-        const showBlockedReason =
-          a.status === 'blocked' || blockedReasons[a.id] !== undefined;
+        const showBlockedReason = a.status === 'blocked' || blockedReasons[a.id] !== undefined;
 
         return (
           <div key={a.id} className="collab-assignment">
@@ -181,9 +168,7 @@ export function AssignmentPanel({
               <span className="collab-assignment__role">
                 {isPrimary ? 'Primary' : isWatcher ? 'Watcher' : a.primary_id}
               </span>
-              {isPrimary && (
-                <span className="collab-assignment__you">(you)</span>
-              )}
+              {isPrimary && <span className="collab-assignment__you">(you)</span>}
             </div>
 
             <div
@@ -197,9 +182,7 @@ export function AssignmentPanel({
                   type="button"
                   role="radio"
                   aria-checked={a.status === opt}
-                  className={`collab-segmented__btn${
-                    a.status === opt ? ' is-active' : ''
-                  }`}
+                  className={`collab-segmented__btn${a.status === opt ? ' is-active' : ''}`}
                   disabled={busyId === a.id}
                   onClick={() => void handleStatusChange(a, opt)}
                 >
@@ -232,10 +215,7 @@ export function AssignmentPanel({
                 <button
                   type="button"
                   className="collab-btn collab-btn--reject"
-                  disabled={
-                    busyId === a.id ||
-                    !(blockedReasons[a.id]?.trim())
-                  }
+                  disabled={busyId === a.id || !blockedReasons[a.id]?.trim()}
                   onClick={() => void handleBlockedConfirm(a.id)}
                 >
                   Confirm blocked
@@ -244,9 +224,7 @@ export function AssignmentPanel({
             )}
 
             {a.watchers.length > 0 && (
-              <p className="collab-assignment__watchers">
-                Watchers: {a.watchers.join(', ')}
-              </p>
+              <p className="collab-assignment__watchers">Watchers: {a.watchers.join(', ')}</p>
             )}
           </div>
         );

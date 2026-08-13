@@ -36,7 +36,12 @@ export class InMemoryLibraryStore implements LibraryStore {
 
   async updateEntry(
     entryId: string,
-    patch: Partial<Pick<SlideLibraryEntry, 'status' | 'version_id' | 'superseded_by' | 'last_reviewed_at' | 'updated_at' | 'updated_by'>>,
+    patch: Partial<
+      Pick<
+        SlideLibraryEntry,
+        'status' | 'version_id' | 'superseded_by' | 'last_reviewed_at' | 'updated_at' | 'updated_by'
+      >
+    >,
   ): Promise<SlideLibraryEntry> {
     const existing = this.entries.get(entryId);
     if (!existing) throw new EntryNotFoundError(entryId);
@@ -105,7 +110,19 @@ export class InMemoryLibraryStore implements LibraryStore {
 
   async updateBinding(
     bindingId: string,
-    patch: Partial<Pick<AutoUpdateBinding, 'pinned_version_id' | 'mode' | 'schedule' | 'is_mandatory' | 'last_synced_at' | 'last_sync_status' | 'updated_at' | 'updated_by'>>,
+    patch: Partial<
+      Pick<
+        AutoUpdateBinding,
+        | 'pinned_version_id'
+        | 'mode'
+        | 'schedule'
+        | 'is_mandatory'
+        | 'last_synced_at'
+        | 'last_sync_status'
+        | 'updated_at'
+        | 'updated_by'
+      >
+    >,
   ): Promise<AutoUpdateBinding> {
     const existing = this.bindings.get(bindingId);
     if (!existing) throw new BindingNotFoundError(bindingId);

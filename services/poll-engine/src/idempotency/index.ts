@@ -44,14 +44,20 @@ export class InMemoryIdempotencyStore implements IdempotencyStore {
     }
     if (!existing) {
       this.records.set(k, {
-        key: args.key, workspace_id: args.workspace_id, poll_id: args.poll_id,
-        response: undefined, recorded_at_ms: 0, expires_at_ms: 0,
+        key: args.key,
+        workspace_id: args.workspace_id,
+        poll_id: args.poll_id,
+        response: undefined,
+        recorded_at_ms: 0,
+        expires_at_ms: 0,
       });
     }
     return { exists: false };
   }
 
-  async commit(record: Omit<IdempotencyRecord, 'expires_at_ms'> & { ttl_ms: number }): Promise<void> {
+  async commit(
+    record: Omit<IdempotencyRecord, 'expires_at_ms'> & { ttl_ms: number },
+  ): Promise<void> {
     const k = this.tripleKey(record.key, record.workspace_id, record.poll_id);
     this.records.set(k, {
       key: record.key,

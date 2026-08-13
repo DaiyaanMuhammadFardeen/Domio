@@ -36,14 +36,11 @@ export default function ChangelogPage(): JSX.Element {
               What&rsquo;s new in Domio
             </h1>
             <p className="cl-hero__subtitle">
-              Every release, newest first. Filter by category, watch for
-              breaking changes, and follow the migration guide when it&rsquo;s
-              time to upgrade.
+              Every release, newest first. Filter by category, watch for breaking changes, and
+              follow the migration guide when it&rsquo;s time to upgrade.
             </p>
             <div className="cl-hero__meta">
-              <span className="cl-hero__badge">
-                {CHANGELOG.length} releases
-              </span>
+              <span className="cl-hero__badge">{CHANGELOG.length} releases</span>
               <a className="cl-hero__rss" href={rssHref} aria-label="Changelog RSS feed">
                 RSS
               </a>
@@ -58,13 +55,10 @@ export default function ChangelogPage(): JSX.Element {
             Upgrading an older version?
           </h2>
           <p className="cl-cta__sub">
-            The migration index walks through every breaking change since
-            v1.0 and includes migration scripts for the CLI.
+            The migration index walks through every breaking change since v1.0 and includes
+            migration scripts for the CLI.
           </p>
-          <a
-            className="cl-cta__button"
-            href={docsMigrationsHref}
-          >
+          <a className="cl-cta__button" href={docsMigrationsHref}>
             Read the migration index →
           </a>
         </section>

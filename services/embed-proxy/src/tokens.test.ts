@@ -20,7 +20,13 @@ describe('EmbedTokenService', () => {
       clock,
       generateToken: () => 'test-token-abc',
     });
-    return { svc, getNow: () => now, advance: (ms: number) => { now += ms; } };
+    return {
+      svc,
+      getNow: () => now,
+      advance: (ms: number) => {
+        now += ms;
+      },
+    };
   }
 
   it('creates a token with correct fields', () => {

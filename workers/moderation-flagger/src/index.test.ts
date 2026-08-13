@@ -7,8 +7,10 @@ describe('moderation-flagger', () => {
     const store = new InMemoryFlaggerStore();
     const f = new ModerationFlagger(new HeuristicMlModerator(), store);
     const d = await f.process({
-      workspace_id: 'w1', session_id: 's1',
-      subject_kind: 'qa_submit', subject_id: 'q-1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      subject_kind: 'qa_submit',
+      subject_id: 'q-1',
       raw_text: 'you idiot loser',
     });
     expect(d.decision).toBe('block');
@@ -21,8 +23,10 @@ describe('moderation-flagger', () => {
     const store = new InMemoryFlaggerStore();
     const f = new ModerationFlagger(new HeuristicMlModerator(), store);
     const d = await f.process({
-      workspace_id: 'w1', session_id: 's1',
-      subject_kind: 'word_cloud_submit', subject_id: 'w-1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      subject_kind: 'word_cloud_submit',
+      subject_id: 'w-1',
       raw_text: 'wonderful',
     });
     expect(d.decision).toBe('allow');

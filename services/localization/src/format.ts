@@ -31,7 +31,9 @@ export function formatNumber(value: number, opts: FormatNumberOptions): string {
   const formatter = new Intl.NumberFormat(opts.locale, {
     style: opts.style ?? 'decimal',
     ...(opts.currency && opts.style === 'currency' ? { currency: opts.currency } : {}),
-    ...(opts.decimals !== undefined ? { minimumFractionDigits: opts.decimals, maximumFractionDigits: opts.decimals } : {}),
+    ...(opts.decimals !== undefined
+      ? { minimumFractionDigits: opts.decimals, maximumFractionDigits: opts.decimals }
+      : {}),
   });
   return formatter.format(value);
 }
@@ -39,7 +41,10 @@ export function formatNumber(value: number, opts: FormatNumberOptions): string {
 /**
  * Format a number as currency.
  */
-export function formatCurrency(value: number, opts: { locale: string; currency: string; decimals?: number }): string {
+export function formatCurrency(
+  value: number,
+  opts: { locale: string; currency: string; decimals?: number },
+): string {
   return formatNumber(value, { ...opts, style: 'currency' });
 }
 
@@ -55,7 +60,11 @@ export function formatPercent(value: number, opts: { locale: string; decimals?: 
  */
 export function formatDate(
   date: Date,
-  opts: { locale: string; dateStyle?: 'full' | 'long' | 'medium' | 'short'; timeStyle?: 'full' | 'long' | 'medium' | 'short' },
+  opts: {
+    locale: string;
+    dateStyle?: 'full' | 'long' | 'medium' | 'short';
+    timeStyle?: 'full' | 'long' | 'medium' | 'short';
+  },
 ): string {
   const formatter = new Intl.DateTimeFormat(opts.locale, {
     dateStyle: opts.dateStyle ?? 'medium',

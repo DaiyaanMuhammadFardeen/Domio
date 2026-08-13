@@ -40,50 +40,62 @@ describe('validateOp', () => {
 
   it('accepts valid content op with structured params', () => {
     expect(() =>
-      validateOp(makeOp({
-        type: 'content',
-        params: { paragraphs: [{ text: 'Hello' }] },
-      })),
+      validateOp(
+        makeOp({
+          type: 'content',
+          params: { paragraphs: [{ text: 'Hello' }] },
+        }),
+      ),
     ).not.toThrow();
   });
 
   it('accepts content op with blocks params', () => {
     expect(() =>
-      validateOp(makeOp({
-        type: 'content',
-        params: { blocks: [{ type: 'paragraph', content: 'Hi' }] },
-      })),
+      validateOp(
+        makeOp({
+          type: 'content',
+          params: { blocks: [{ type: 'paragraph', content: 'Hi' }] },
+        }),
+      ),
     ).not.toThrow();
   });
 
   it('rejects unknown op type', () => {
-    expect(() => validateOp(makeOp({ type: 'unknown_type' as never }))).toThrow(SuggestionValidationError);
+    expect(() => validateOp(makeOp({ type: 'unknown_type' as never }))).toThrow(
+      SuggestionValidationError,
+    );
   });
 
   it('rejects raw text via params.text', () => {
     expect(() =>
-      validateOp(makeOp({
-        type: 'content',
-        params: { text: 'Hello world' },
-      })),
+      validateOp(
+        makeOp({
+          type: 'content',
+          params: { text: 'Hello world' },
+        }),
+      ),
     ).toThrow(SuggestionValidationError);
   });
 
   it('rejects raw text via params.value without structured content', () => {
     expect(() =>
-      validateOp(makeOp({
-        type: 'content',
-        params: { value: 'Hello world' },
-      })),
+      validateOp(
+        makeOp({
+          type: 'content',
+          params: { value: 'Hello world' },
+        }),
+      ),
     ).toThrow(SuggestionValidationError);
   });
 
   it('accepts params.value if paragraphs present', () => {
     expect(() =>
-      validateOp(makeOp({
-        type: 'content',
-        params: { value: 'Hello', paragraphs: [{ text: 'Hello' }] },
-      })),
+      validateOp(
+        makeOp({
+          type: 'content',
+          params: { value: 'Hello', paragraphs: [{ text: 'Hello' }] },
+        }),
+      ),
     ).not.toThrow();
   });
 

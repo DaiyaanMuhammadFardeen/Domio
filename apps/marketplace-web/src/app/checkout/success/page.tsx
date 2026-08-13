@@ -21,13 +21,17 @@ export default function CheckoutSuccessPage() {
   }, []);
 
   return (
-    <div
-      className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8"
-      data-testid="checkout-success"
-    >
+    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8" data-testid="checkout-success">
       <div className="rounded-2xl border border-border bg-panel p-8 text-center">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-success/12">
-          <svg className="h-8 w-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <svg
+            className="h-8 w-8 text-success"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
@@ -44,7 +48,10 @@ export default function CheckoutSuccessPage() {
       </div>
 
       {receipt && (
-        <section className="mt-8 rounded-2xl border border-border bg-panel p-6" data-testid="checkout-receipt">
+        <section
+          className="mt-8 rounded-2xl border border-border bg-panel p-6"
+          data-testid="checkout-receipt"
+        >
           <h2 className="mb-4 font-display text-base font-semibold text-fg">
             {t('market.success.receipt')}
           </h2>

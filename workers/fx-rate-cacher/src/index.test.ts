@@ -3,20 +3,17 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import {
-  FxRateCacherWorker,
-  InMemoryFxRateProvider,
-} from './index.js';
+import { FxRateCacherWorker, InMemoryFxRateProvider } from './index.js';
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
 describe('FxRateCacherWorker', () => {
-
   it('constructor throws when provider is missing', () => {
-    expect(() => new FxRateCacherWorker({ provider: undefined as never }))
-      .toThrow('provider is required');
+    expect(() => new FxRateCacherWorker({ provider: undefined as never })).toThrow(
+      'provider is required',
+    );
   });
 
   it('runOnce fetches and upserts all 6 currency pairs', async () => {
@@ -49,7 +46,7 @@ describe('FxRateCacherWorker', () => {
     await worker.runOnce();
 
     const records = provider.getUpsertedRecords();
-    const usdBdt = records.find(r => r.base === 'USD' && r.quote === 'BDT');
+    const usdBdt = records.find((r) => r.base === 'USD' && r.quote === 'BDT');
     expect(usdBdt).toBeDefined();
     expect(usdBdt!.rate).toBeCloseTo(110, 0);
   });
@@ -61,7 +58,7 @@ describe('FxRateCacherWorker', () => {
     await worker.runOnce();
 
     const records = provider.getUpsertedRecords();
-    const bdtEur = records.find(r => r.base === 'BDT' && r.quote === 'EUR');
+    const bdtEur = records.find((r) => r.base === 'BDT' && r.quote === 'EUR');
     expect(bdtEur).toBeDefined();
     // BDT/EUR = quoteUsd/baseUsd = EUR_usd/BDT_usd = 0.92/110 ≈ 0.008363...
     expect(bdtEur!.rate).toBeCloseTo(0.92 / 110, 6);
@@ -74,7 +71,7 @@ describe('FxRateCacherWorker', () => {
     await worker.runOnce();
 
     const records = provider.getUpsertedRecords();
-    const eurUsd = records.find(r => r.base === 'EUR' && r.quote === 'USD');
+    const eurUsd = records.find((r) => r.base === 'EUR' && r.quote === 'USD');
     expect(eurUsd).toBeDefined();
     expect(eurUsd!.rate).toBeCloseTo(1 / 0.92, 3);
   });

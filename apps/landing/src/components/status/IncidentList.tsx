@@ -51,23 +51,15 @@ export function IncidentList({ incidents }: IncidentListProps): JSX.Element {
 
   if (ordered.length === 0) {
     return (
-      <section
-        className="status-incidents"
-        aria-labelledby="status-incidents-heading"
-      >
+      <section className="status-incidents" aria-labelledby="status-incidents-heading">
         <h2 id="status-incidents-heading">Recent incidents</h2>
-        <p className="status-incidents__empty">
-          No incidents in the past 90 days.
-        </p>
+        <p className="status-incidents__empty">No incidents in the past 90 days.</p>
       </section>
     );
   }
 
   return (
-    <section
-      className="status-incidents"
-      aria-labelledby="status-incidents-heading"
-    >
+    <section className="status-incidents" aria-labelledby="status-incidents-heading">
       <h2 id="status-incidents-heading">Recent incidents</h2>
       <ul className="status-incidents__list">
         {ordered.map((inc) => {
@@ -75,14 +67,10 @@ export function IncidentList({ incidents }: IncidentListProps): JSX.Element {
           return (
             <li
               key={inc.id}
-              className={
-                'status-incident' + (active ? ' status-incident--active' : '')
-              }
+              className={'status-incident' + (active ? ' status-incident--active' : '')}
             >
               <header className="status-incident__head">
-                <span
-                  className={`status-incident__severity ${SEVERITY_CLASS[inc.severity]}`}
-                >
+                <span className={`status-incident__severity ${SEVERITY_CLASS[inc.severity]}`}>
                   {inc.severity}
                 </span>
                 <h3 className="status-incident__title">{inc.title}</h3>
@@ -95,11 +83,7 @@ export function IncidentList({ incidents }: IncidentListProps): JSX.Element {
               <p className="status-incident__meta">
                 <span>{formatDate(inc.started_at_ms)}</span>
                 <span aria-hidden="true"> → </span>
-                <span>
-                  {inc.resolved_at_ms === null
-                    ? 'now'
-                    : formatDate(inc.resolved_at_ms)}
-                </span>
+                <span>{inc.resolved_at_ms === null ? 'now' : formatDate(inc.resolved_at_ms)}</span>
                 <span aria-hidden="true"> · </span>
                 <span>{durationLabel(inc.started_at_ms, inc.resolved_at_ms)}</span>
               </p>

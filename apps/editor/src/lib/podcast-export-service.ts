@@ -94,9 +94,10 @@ interface SlideRef {
 function loadSlideRefs(deckId: string): SlideRef[] {
   try {
     const loader = createDocumentLoader();
-    const doc: { slides?: Array<{ id?: string; title?: string }> } = loader.example() as unknown as {
-      slides?: Array<{ id?: string; title?: string }>;
-    };
+    const doc: { slides?: Array<{ id?: string; title?: string }> } =
+      loader.example() as unknown as {
+        slides?: Array<{ id?: string; title?: string }>;
+      };
     void deckId; // bootstrap ignores deckId and returns the bundled example
     const slides = doc.slides ?? [];
     const refs: SlideRef[] = slides.map((s, idx) => ({

@@ -112,7 +112,10 @@ export function ScenarioSwitcher(): ReactElement {
                 placeholder="Scenario name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); if (e.key === 'Escape') setCreating(false); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreate();
+                  if (e.key === 'Escape') setCreating(false);
+                }}
                 autoFocus
                 data-testid="p08-scenario-create-input"
               />

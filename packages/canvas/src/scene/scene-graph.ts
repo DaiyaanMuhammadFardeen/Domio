@@ -10,13 +10,7 @@
  * operations.
  */
 
-import type {
-  DeckDocument,
-  Element,
-  Slide,
-  ULID,
-  Transform2D,
-} from '@domio/schema';
+import type { DeckDocument, Element, Slide, ULID, Transform2D } from '@domio/schema';
 import type { Aabb } from '../renderer/camera.js';
 import { SpatialIndex, type SpatialItem } from './spatial-index.js';
 

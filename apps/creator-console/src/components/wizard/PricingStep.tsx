@@ -32,9 +32,7 @@ export function PricingStep({ pricing, onSave }: PricingStepProps) {
   const [interval, setInterval] = useState<'monthly' | 'yearly' | null>(
     pricing?.subscription_interval ?? null,
   );
-  const [royaltyBps, setRoyaltyBps] = useState<number | null>(
-    pricing?.royalty_bps ?? null,
-  );
+  const [royaltyBps, setRoyaltyBps] = useState<number | null>(pricing?.royalty_bps ?? null);
   const [error, setError] = useState<string | null>(null);
 
   function handleSave() {
@@ -42,11 +40,7 @@ export function PricingStep({ pricing, onSave }: PricingStepProps) {
       setError('Pick a subscription interval');
       return;
     }
-    if (
-      model !== 'free' &&
-      model !== 'enterprise_quote' &&
-      priceCents < 0
-    ) {
+    if (model !== 'free' && model !== 'enterprise_quote' && priceCents < 0) {
       setError('Price must be ≥ 0');
       return;
     }
@@ -131,10 +125,7 @@ export function PricingStep({ pricing, onSave }: PricingStepProps) {
             />
           </div>
           <div>
-            <label
-              htmlFor="wizard-currency"
-              className="block text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="wizard-currency" className="block text-sm font-medium text-slate-700">
               {t('creator.wizard.pricing.currency')}
             </label>
             <select
@@ -156,10 +147,7 @@ export function PricingStep({ pricing, onSave }: PricingStepProps) {
 
       {model === 'subscription' && (
         <div>
-          <label
-            htmlFor="wizard-interval"
-            className="block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="wizard-interval" className="block text-sm font-medium text-slate-700">
             {t('creator.wizard.pricing.subscriptionInterval')}
           </label>
           <select
@@ -180,10 +168,7 @@ export function PricingStep({ pricing, onSave }: PricingStepProps) {
 
       {showRoyalty && (
         <div>
-          <label
-            htmlFor="wizard-royalty-bps"
-            className="block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="wizard-royalty-bps" className="block text-sm font-medium text-slate-700">
             {t('creator.wizard.pricing.royaltyBps')}
           </label>
           <input
@@ -193,9 +178,7 @@ export function PricingStep({ pricing, onSave }: PricingStepProps) {
             min={0}
             max={10000}
             value={royaltyBps ?? ''}
-            onChange={(e) =>
-              setRoyaltyBps(e.target.value === '' ? null : Number(e.target.value))
-            }
+            onChange={(e) => setRoyaltyBps(e.target.value === '' ? null : Number(e.target.value))}
             placeholder="e.g. 1500 = 15%"
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
           />

@@ -4,7 +4,16 @@
   "title": "Domio LaTeX Doc V1",
   "description": "LaTeX expression cache entry for Phase 11 scientific decks. Stores source, rendered HTML/SVG, theme fingerprint, and CDN cache key.",
   "type": "object",
-  "required": ["schemaVersion", "id", "workspaceId", "source", "renderedHtml", "themeHash", "cacheKey", "createdAt"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "workspaceId",
+    "source",
+    "renderedHtml",
+    "themeHash",
+    "cacheKey",
+    "createdAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -30,10 +39,7 @@
       "description": "Server-rendered HTML output from MathJax/KaTeX."
     },
     "renderedSvg": {
-      "oneOf": [
-        { "type": "string", "minLength": 1 },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }],
       "description": "Server-rendered SVG output (preferred for export)."
     },
     "themeHash": {

@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-3",
-    "domio",
-    "sentiment-collector"
-  ],
+  "tags": ["tier-3", "domio", "sentiment-collector"],
   "panels": [
     {
       "id": 1,

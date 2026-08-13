@@ -166,7 +166,10 @@ export function CrossLinksFooter({ nodeId }: CrossLinksFooterProps): ReactElemen
   const crumbs = breadcrumbsFor(node);
   const related = relatedFor(node).slice(0, 3);
   return (
-    <footer className="mt-12 space-y-6 border-t border-slate-200 pt-6" data-testid="cross-links-footer">
+    <footer
+      className="mt-12 space-y-6 border-t border-slate-200 pt-6"
+      data-testid="cross-links-footer"
+    >
       {crumbs.length > 0 ? (
         <Breadcrumbs
           items={crumbs.map((c) => ({

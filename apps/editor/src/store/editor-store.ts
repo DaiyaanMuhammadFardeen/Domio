@@ -42,17 +42,11 @@ import type {
   ConnectionsPanelHotspot,
   ConnectionsPanelOverlay,
 } from '../panels/connections-panel';
-import type {
-  VariablesPanelRule,
-  VariablesPanelVariable,
-} from '../panels/variables-panel';
+import type { VariablesPanelRule, VariablesPanelVariable } from '../panels/variables-panel';
 import type { StateInspectorMachine } from '../panels/state-inspector-panel';
 import type { DeepLinkRecord } from '../panels/deep-links-panel';
 import type { QuizRecord } from '../panels/quiz-panel';
-import type {
-  LeaderboardAggregate,
-  LeaderboardEntry,
-} from '../panels/leaderboard-panel';
+import type { LeaderboardAggregate, LeaderboardEntry } from '../panels/leaderboard-panel';
 import type { PresentationSequenceRecord } from '../panels/sequence-inspector-panel';
 import type { A11yAuditFinding } from '../lib/theme-audit';
 
@@ -71,9 +65,7 @@ export interface SelectionSlice {
   setActiveSlideId: (id: ULID | null) => void;
 }
 
-export const createSelectionSlice = (
-  set: StoreApi<EditorState>['setState'],
-): SelectionSlice => ({
+export const createSelectionSlice = (set: StoreApi<EditorState>['setState']): SelectionSlice => ({
   selectedIds: new Set<ULID>(),
   toggleSelected: (id, modifiers = {}) =>
     set((state) => {
@@ -115,9 +107,7 @@ export interface DeckSlice {
   setDeck: (deck: DeckDocument | null) => void;
 }
 
-export const createDeckSlice = (
-  set: StoreApi<EditorState>['setState'],
-): DeckSlice => ({
+export const createDeckSlice = (set: StoreApi<EditorState>['setState']): DeckSlice => ({
   deck: null,
   setDeck: (deck) => set({ deck }),
 });
@@ -132,12 +122,8 @@ export interface UiSlice {
   setLeftTab: (tab: string) => void;
   paletteOpen: boolean;
   setPaletteOpen: (open: boolean) => void;
-  contextMenu:
-    | { x: number; y: number; targetId: ULID | null }
-    | null;
-  openContextMenu: (
-    ctx: { x: number; y: number; targetId: ULID | null } | null,
-  ) => void;
+  contextMenu: { x: number; y: number; targetId: ULID | null } | null;
+  openContextMenu: (ctx: { x: number; y: number; targetId: ULID | null } | null) => void;
   promoteOpen: boolean;
   setPromoteOpen: (open: boolean) => void;
   selectedDataSourceId: string | null;
@@ -159,9 +145,7 @@ export interface UiSlice {
   removeGuide: (id: string) => void;
 }
 
-export const createUiSlice = (
-  set: StoreApi<EditorState>['setState'],
-): UiSlice => ({
+export const createUiSlice = (set: StoreApi<EditorState>['setState']): UiSlice => ({
   leftTab: 'layers',
   setLeftTab: (tab) => set({ leftTab: tab }),
   paletteOpen: false,
@@ -191,8 +175,7 @@ export const createUiSlice = (
         { id: `g-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, ...g },
       ],
     })),
-  removeGuide: (id) =>
-    set((s) => ({ guides: s.guides.filter((g) => g.id !== id) })),
+  removeGuide: (id) => set((s) => ({ guides: s.guides.filter((g) => g.id !== id) })),
 });
 
 // ---------------------------------------------------------------------------
@@ -232,17 +215,14 @@ export interface ThemeSlice {
   patchElement: (elementId: string, next: Partial<unknown>) => void;
 }
 
-export const createThemeSlice = (
-  set: StoreApi<EditorState>['setState'],
-): ThemeSlice => ({
+export const createThemeSlice = (set: StoreApi<EditorState>['setState']): ThemeSlice => ({
   activeThemeId: 'theme-acme-light',
   setActiveThemeId: (id) => set({ activeThemeId: id }),
   activeBrandKitId: 'brand-acme',
   setActiveBrandKitId: (id) => set({ activeBrandKitId: id }),
   colorScheme: 'light',
   setColorScheme: (s) => set({ colorScheme: s }),
-  toggleScheme: () =>
-    set((s) => ({ colorScheme: s.colorScheme === 'light' ? 'dark' : 'light' })),
+  toggleScheme: () => set((s) => ({ colorScheme: s.colorScheme === 'light' ? 'dark' : 'light' })),
   overrides: {},
   setOverride: (slideId, override) =>
     set((s) => {
@@ -310,9 +290,7 @@ export interface AnimationSlice {
   setCopiedAnimation: (t: LayerTimeline | null) => void;
 }
 
-export const createAnimationSlice = (
-  set: StoreApi<EditorState>['setState'],
-): AnimationSlice => ({
+export const createAnimationSlice = (set: StoreApi<EditorState>['setState']): AnimationSlice => ({
   crossFilters: [],
   setCrossFilters: (filters) => set({ crossFilters: filters }),
   timeline: null,
@@ -350,10 +328,7 @@ export interface ConnectionsSlice {
   stateMachines: readonly StateInspectorMachine[];
   addStateMachine: (m: StateInspectorMachine) => void;
   removeStateMachine: (id: string) => void;
-  updateStateMachine: (
-    id: string,
-    patch: Partial<StateInspectorMachine>,
-  ) => void;
+  updateStateMachine: (id: string, patch: Partial<StateInspectorMachine>) => void;
   deepLinks: readonly DeepLinkRecord[];
   setDeepLinks: (links: readonly DeepLinkRecord[]) => void;
 }
@@ -363,39 +338,31 @@ export const createConnectionsSlice = (
 ): ConnectionsSlice => ({
   hotspots: [],
   addHotspot: (h) => set((s) => ({ hotspots: [...s.hotspots, h] })),
-  removeHotspot: (id) =>
-    set((s) => ({ hotspots: s.hotspots.filter((h) => h.id !== id) })),
+  removeHotspot: (id) => set((s) => ({ hotspots: s.hotspots.filter((h) => h.id !== id) })),
   overlays: [],
   addOverlay: (o) => set((s) => ({ overlays: [...s.overlays, o] })),
-  removeOverlay: (id) =>
-    set((s) => ({ overlays: s.overlays.filter((o) => o.id !== id) })),
+  removeOverlay: (id) => set((s) => ({ overlays: s.overlays.filter((o) => o.id !== id) })),
   branchingEdges: [],
-  addBranchingEdge: (e) =>
-    set((s) => ({ branchingEdges: [...s.branchingEdges, e] })),
+  addBranchingEdge: (e) => set((s) => ({ branchingEdges: [...s.branchingEdges, e] })),
   removeBranchingEdge: (id) =>
     set((s) => ({
       branchingEdges: s.branchingEdges.filter((e) => e.id !== id),
     })),
   variables: [],
   addVariable: (v) => set((s) => ({ variables: [...s.variables, v] })),
-  removeVariable: (id) =>
-    set((s) => ({ variables: s.variables.filter((v) => v.id !== id) })),
+  removeVariable: (id) => set((s) => ({ variables: s.variables.filter((v) => v.id !== id) })),
   rules: [],
   addRule: (r) => set((s) => ({ rules: [...s.rules, r] })),
-  removeRule: (id) =>
-    set((s) => ({ rules: s.rules.filter((r) => r.id !== id) })),
+  removeRule: (id) => set((s) => ({ rules: s.rules.filter((r) => r.id !== id) })),
   stateMachines: [],
-  addStateMachine: (m) =>
-    set((s) => ({ stateMachines: [...s.stateMachines, m] })),
+  addStateMachine: (m) => set((s) => ({ stateMachines: [...s.stateMachines, m] })),
   removeStateMachine: (id) =>
     set((s) => ({
       stateMachines: s.stateMachines.filter((m) => m.id !== id),
     })),
   updateStateMachine: (id, patch) =>
     set((s) => ({
-      stateMachines: s.stateMachines.map((m) =>
-        m.id === id ? { ...m, ...patch } : m,
-      ),
+      stateMachines: s.stateMachines.map((m) => (m.id === id ? { ...m, ...patch } : m)),
     })),
   deepLinks: [],
   setDeepLinks: (links) => set({ deepLinks: links }),
@@ -411,16 +378,12 @@ export interface AudienceSlice {
   leaderboardItems: readonly LeaderboardEntry[];
   setLeaderboardItems: (items: readonly LeaderboardEntry[]) => void;
   leaderboardAggregates: readonly LeaderboardAggregate[];
-  setLeaderboardAggregates: (
-    aggs: readonly LeaderboardAggregate[],
-  ) => void;
+  setLeaderboardAggregates: (aggs: readonly LeaderboardAggregate[]) => void;
   activeSequence: PresentationSequenceRecord;
   setActiveSequence: (s: PresentationSequenceRecord) => void;
 }
 
-export const createAudienceSlice = (
-  set: StoreApi<EditorState>['setState'],
-): AudienceSlice => ({
+export const createAudienceSlice = (set: StoreApi<EditorState>['setState']): AudienceSlice => ({
   activeQuiz: {
     id: 'quiz-default',
     tenantId: 'tenant-local',
@@ -463,9 +426,7 @@ export interface AgentSlice {
   setAuditEntries: (entries: readonly unknown[]) => void;
 }
 
-export const createAgentSlice = (
-  set: StoreApi<EditorState>['setState'],
-): AgentSlice => ({
+export const createAgentSlice = (set: StoreApi<EditorState>['setState']): AgentSlice => ({
   auditEntries: [],
   setAuditEntries: (entries) => set({ auditEntries: entries }),
 });
@@ -474,28 +435,27 @@ export const createAgentSlice = (
 // Root store — composition of slices.
 // ---------------------------------------------------------------------------
 
-export type EditorState =
-  & SelectionSlice
-  & DeckSlice
-  & UiSlice
-  & ThemeSlice
-  & AnimationSlice
-  & ConnectionsSlice
-  & AudienceSlice
-  & AgentSlice;
+export type EditorState = SelectionSlice &
+  DeckSlice &
+  UiSlice &
+  ThemeSlice &
+  AnimationSlice &
+  ConnectionsSlice &
+  AudienceSlice &
+  AgentSlice;
 
-export const useEditorStore: UseBoundStore<StoreApi<EditorState>> = create<
-  EditorState
->()((set) => ({
-  ...createSelectionSlice(set as StoreApi<EditorState>['setState']),
-  ...createDeckSlice(set as StoreApi<EditorState>['setState']),
-  ...createUiSlice(set as StoreApi<EditorState>['setState']),
-  ...createThemeSlice(set as StoreApi<EditorState>['setState']),
-  ...createAnimationSlice(set as StoreApi<EditorState>['setState']),
-  ...createConnectionsSlice(set as StoreApi<EditorState>['setState']),
-  ...createAudienceSlice(set as StoreApi<EditorState>['setState']),
-  ...createAgentSlice(set as StoreApi<EditorState>['setState']),
-}));
+export const useEditorStore: UseBoundStore<StoreApi<EditorState>> = create<EditorState>()(
+  (set) => ({
+    ...createSelectionSlice(set as StoreApi<EditorState>['setState']),
+    ...createDeckSlice(set as StoreApi<EditorState>['setState']),
+    ...createUiSlice(set as StoreApi<EditorState>['setState']),
+    ...createThemeSlice(set as StoreApi<EditorState>['setState']),
+    ...createAnimationSlice(set as StoreApi<EditorState>['setState']),
+    ...createConnectionsSlice(set as StoreApi<EditorState>['setState']),
+    ...createAudienceSlice(set as StoreApi<EditorState>['setState']),
+    ...createAgentSlice(set as StoreApi<EditorState>['setState']),
+  }),
+);
 
 /** Reset the entire store to its initial values. Used by tests + a future logout action. */
 export function resetEditorStore(): void {

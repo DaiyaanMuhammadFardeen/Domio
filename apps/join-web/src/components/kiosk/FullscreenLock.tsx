@@ -26,10 +26,7 @@ export interface FullscreenLockProps {
   readonly active: boolean;
 }
 
-export function FullscreenLock({
-  children,
-  active,
-}: FullscreenLockProps): ReactElement {
+export function FullscreenLock({ children, active }: FullscreenLockProps): ReactElement {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -41,9 +38,11 @@ export function FullscreenLock({
     // for the first call, but we still attempt so that subsequent
     // mounts inside a pre-authenticated iframe work.
     const tryFullscreen = async (): Promise<void> => {
-      const el = root as (HTMLElement & {
-        requestFullscreen?: () => Promise<void>;
-      }) | null;
+      const el = root as
+        | (HTMLElement & {
+            requestFullscreen?: () => Promise<void>;
+          })
+        | null;
       if (el && typeof el.requestFullscreen === 'function') {
         try {
           await el.requestFullscreen();
@@ -55,9 +54,11 @@ export function FullscreenLock({
     };
 
     const tryPointerLock = async (): Promise<void> => {
-      const el = root as (HTMLElement & {
-        requestPointerLock?: () => Promise<void>;
-      }) | null;
+      const el = root as
+        | (HTMLElement & {
+            requestPointerLock?: () => Promise<void>;
+          })
+        | null;
       if (el && typeof el.requestPointerLock === 'function') {
         try {
           await el.requestPointerLock();

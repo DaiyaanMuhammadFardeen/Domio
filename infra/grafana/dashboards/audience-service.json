@@ -16,7 +16,10 @@
       "title": "Request rate (req/s)",
       "gridPos": { "x": 0, "y": 0, "w": 8, "h": 6 },
       "targets": [
-        { "expr": "sum(rate(http_requests_total{service=\"audience\"}[1m]))", "legendFormat": "rps" }
+        {
+          "expr": "sum(rate(http_requests_total{service=\"audience\"}[1m]))",
+          "legendFormat": "rps"
+        }
       ],
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "options": {}

@@ -63,9 +63,15 @@ export class ExpiryScannerWorker {
     this.resourceProvider = opts.resourceProvider ?? { getResources: async () => [] };
     this.tickMs = opts.tickMs ?? Number(process.env['WORKER_TICK_MS'] ?? '60000');
     this.logger = opts.logger ?? {
-      info: () => { /* noop */ },
-      error: () => { /* noop */ },
-      warn: () => { /* noop */ },
+      info: () => {
+        /* noop */
+      },
+      error: () => {
+        /* noop */
+      },
+      warn: () => {
+        /* noop */
+      },
     };
   }
 
@@ -116,7 +122,7 @@ export class ExpiryScannerWorker {
       for (const [workspaceId, wsResources] of byWorkspace) {
         const result = await this.service.scanWorkspace(
           workspaceId,
-          wsResources.map(r => ({
+          wsResources.map((r) => ({
             type: r.type,
             id: r.id,
             lastReviewedAt: r.lastReviewedAt ?? null,

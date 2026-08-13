@@ -10,7 +10,7 @@ ClickHouse cluster for the Phase 17 analytics plane.
    `AggregatingMergeTree` rollups stay live and small (deck_metric_5m is
    one row per deck per 5-min bucket).
 3. **Partition drops for retention + GDPR.** `ALTER TABLE ... DROP PARTITION
-   'YYYYMM'` is O(1) and atomic; the tombstone table records per-viewer
+'YYYYMM'` is O(1) and atomic; the tombstone table records per-viewer
    deletions for late-arriving events.
 4. **TTL + object-store tiering.** Hot 13 months in ClickHouse; cold
    Parquet in object-store for 7 years.
@@ -18,7 +18,7 @@ ClickHouse cluster for the Phase 17 analytics plane.
 ## Layout
 
 - `init/001_phase17_schema.sql` — `events` table (MergeTree) + projections
-  + viewer_tombstone + consent_events.
+  - viewer_tombstone + consent_events.
 - `init/002_phase17_views.sql` — `session_agg_mv`, `deck_metric_5m`,
   `slide_metric_5m`, `funnel_step_hourly`, `team_metric_mv`.
 - `init/003_phase17_heatmap.sql` — `heatmap_tile` + `heatmap_mv`.

@@ -132,16 +132,10 @@ export function ConfirmationOverlay({
           marginBottom: 6,
         }}
       >
-        <strong
-          id={`${dataTestId}-heading`}
-          style={{ fontSize: 13, fontWeight: 700 }}
-        >
+        <strong id={`${dataTestId}-heading`} style={{ fontSize: 13, fontWeight: 700 }}>
           {heading}
         </strong>
-        <span
-          data-testid={`${dataTestId}-countdown`}
-          style={{ fontSize: 11, opacity: 0.7 }}
-        >
+        <span data-testid={`${dataTestId}-countdown`} style={{ fontSize: 11, opacity: 0.7 }}>
           {seconds}s
         </span>
       </div>

@@ -75,8 +75,7 @@ export interface XapiQuizContext {
   readonly questionId?: string;
 }
 
-export const QUIZ_OBJECT_TYPE =
-  'http://adlnet.gov/expapi/activities/assessment';
+export const QUIZ_OBJECT_TYPE = 'http://adlnet.gov/expapi/activities/assessment';
 
 /**
  * Generate a UUID-like id for an xAPI statement. Uses Math.random —
@@ -84,7 +83,10 @@ export const QUIZ_OBJECT_TYPE =
  */
 function generateStatementId(): string {
   // RFC 4122 v4 — replaceable with a stronger RNG in production.
-  const r = () => Math.floor(Math.random() * 0xffff).toString(16).padStart(4, '0');
+  const r = () =>
+    Math.floor(Math.random() * 0xffff)
+      .toString(16)
+      .padStart(4, '0');
   return `${r()}${r()}-${r()}-4${r().slice(1)}-${r()}-${r()}${r()}${r()}`;
 }
 

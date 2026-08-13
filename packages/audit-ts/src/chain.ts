@@ -60,7 +60,10 @@ export class ErrKeyExpired extends Error {
 
 export class ErrKeyInvalidSize extends Error {
   readonly code = 'AUDIT_KEY_INVALID_SIZE' as const;
-  constructor(public readonly kid: string, public readonly actualHexLen: number) {
+  constructor(
+    public readonly kid: string,
+    public readonly actualHexLen: number,
+  ) {
     super(`audit: key must be 32 bytes hex-encoded (64 hex chars), got ${actualHexLen}`);
     this.name = 'ErrKeyInvalidSize';
   }
@@ -92,7 +95,10 @@ export class ErrChainMismatch extends Error {
 
 export class ErrSequenceGap extends Error {
   readonly code = 'AUDIT_SEQUENCE_GAP' as const;
-  constructor(public readonly expected: number, public readonly got: number) {
+  constructor(
+    public readonly expected: number,
+    public readonly got: number,
+  ) {
     super(`audit: sequence gap, expected seq=${expected}, got seq=${got}`);
     this.name = 'ErrSequenceGap';
   }
@@ -253,7 +259,9 @@ export class Chain {
    *  key whose overlapUntil is still in the future; falls back to the
    *  latest non-expired key. */
   activeKey(now: Date = this.clock()): Key {
-    const all = [...this.keys.values()].sort((a, b) => a.rotatedAt.getTime() - b.rotatedAt.getTime());
+    const all = [...this.keys.values()].sort(
+      (a, b) => a.rotatedAt.getTime() - b.rotatedAt.getTime(),
+    );
     const stillActive = all.filter((k) => k.overlapUntil > now && k.expiresAt > now);
     if (stillActive.length > 0) {
       return stillActive[stillActive.length - 1] as Key;

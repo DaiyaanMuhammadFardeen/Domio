@@ -32,7 +32,11 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function paceLabel(wpm: number, target: number, tolerance: number): {
+function paceLabel(
+  wpm: number,
+  target: number,
+  tolerance: number,
+): {
   band: 'slow' | 'on-target' | 'fast';
   text: string;
 } {
@@ -43,17 +47,23 @@ function paceLabel(wpm: number, target: number, tolerance: number): {
 
 function bandClass(band: 'slow' | 'on-target' | 'fast'): string {
   switch (band) {
-    case 'slow': return 'bg-amber-500/15 text-amber-300';
-    case 'fast': return 'bg-rose-500/15 text-rose-300';
-    case 'on-target': return 'bg-emerald-500/15 text-emerald-300';
+    case 'slow':
+      return 'bg-amber-500/15 text-amber-300';
+    case 'fast':
+      return 'bg-rose-500/15 text-rose-300';
+    case 'on-target':
+      return 'bg-emerald-500/15 text-emerald-300';
   }
 }
 
 function barFillClass(band: 'slow' | 'on-target' | 'fast'): string {
   switch (band) {
-    case 'slow': return 'bg-amber-400';
-    case 'fast': return 'bg-rose-400';
-    case 'on-target': return 'bg-emerald-400';
+    case 'slow':
+      return 'bg-amber-400';
+    case 'fast':
+      return 'bg-rose-400';
+    case 'on-target':
+      return 'bg-emerald-400';
   }
 }
 
@@ -69,7 +79,7 @@ export function PaceTracker({
   );
 
   // Normalize into the [0..MAX_WPM] range for the fill bar.
-  const pct = clamp(((clamp(wpm, MIN_WPM, MAX_WPM)) / MAX_WPM) * 100, 0, 100);
+  const pct = clamp((clamp(wpm, MIN_WPM, MAX_WPM) / MAX_WPM) * 100, 0, 100);
   const targetPct = clamp((targetWpm / MAX_WPM) * 100, 0, 100);
 
   return (

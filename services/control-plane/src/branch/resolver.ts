@@ -54,9 +54,7 @@ export interface ResolveResult {
 
 export class MissingManualResolutionsError extends Error {
   constructor(public readonly missing: string[]) {
-    super(
-      `Manual resolution required for ${missing.length} conflict(s): ${missing.join(', ')}.`,
-    );
+    super(`Manual resolution required for ${missing.length} conflict(s): ${missing.join(', ')}.`);
     this.name = 'MissingManualResolutionsError';
   }
 }
@@ -80,9 +78,7 @@ export function resolveConflicts(args: {
   let applied: ResolutionStrategy = request.strategy;
 
   if (request.strategy === 'manual') {
-    const missing = diff.conflicts
-      .map((c) => c.path)
-      .filter((p) => !(p in resolutions));
+    const missing = diff.conflicts.map((c) => c.path).filter((p) => !(p in resolutions));
     if (missing.length > 0) {
       throw new MissingManualResolutionsError(missing);
     }
@@ -136,19 +132,13 @@ function applyElementChange(
   if (!match) return;
   const elementId = match[1]!;
   const subPath = match[2]?.slice(1) ?? '';
-  const slide = merged.slides.find((s) =>
-    s.elements.some((e) => (e.id as string) === elementId),
-  );
+  const slide = merged.slides.find((s) => s.elements.some((e) => (e.id as string) === elementId));
   const sourceSlide = source.slides.find((s) =>
     s.elements.some((e) => (e.id as string) === elementId),
   );
   if (!slide || !sourceSlide) return;
-  const targetElemIndex = slide.elements.findIndex(
-    (e) => (e.id as string) === elementId,
-  );
-  const sourceElem = sourceSlide.elements.find(
-    (e) => (e.id as string) === elementId,
-  );
+  const targetElemIndex = slide.elements.findIndex((e) => (e.id as string) === elementId);
+  const sourceElem = sourceSlide.elements.find((e) => (e.id as string) === elementId);
   if (change.kind === 'added') {
     if (sourceElem && !slide.elements.some((e) => (e.id as string) === elementId)) {
       slide.elements = [...slide.elements, structuredClone(sourceElem)];

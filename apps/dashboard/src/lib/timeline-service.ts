@@ -135,9 +135,7 @@ function asActorType(value: string | undefined): ActorType {
   return 'system';
 }
 
-function snapshotFromWire(
-  wire: SessionEventWire['snapshot'],
-): SessionSnapshot {
+function snapshotFromWire(wire: SessionEventWire['snapshot']): SessionSnapshot {
   return {
     slide_index: Number(wire?.slide_index ?? 0),
     scenarios_active: Array.isArray(wire?.scenarios_active)
@@ -188,13 +186,23 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
   const baseMs = Date.parse('2026-08-12T15:00:00Z');
   const decks = [
     { id: 'deck-q3-board', title: 'Q3 board update', presenter: 'Ada Lovelace' },
-    { id: 'deck-product-launch', title: 'Product launch — Domio Studio', presenter: 'Grace Hopper' },
+    {
+      id: 'deck-product-launch',
+      title: 'Product launch — Domio Studio',
+      presenter: 'Grace Hopper',
+    },
     { id: 'deck-investor-brief', title: 'Series C investor brief', presenter: 'Linus Torvalds' },
     { id: 'deck-onboard', title: 'New customer onboarding', presenter: 'Margaret Hamilton' },
   ];
   const audienceNames = [
-    'Sam Patel', 'Yui Tanaka', 'Marco Bianchi', 'Priya Singh',
-    'Esther Wanjiru', 'Diego Rivera', 'Mei Lin', 'Ola Kowalski',
+    'Sam Patel',
+    'Yui Tanaka',
+    'Marco Bianchi',
+    'Priya Singh',
+    'Esther Wanjiru',
+    'Diego Rivera',
+    'Mei Lin',
+    'Ola Kowalski',
   ];
 
   return decks.map((deck, deckIdx) => {
@@ -218,7 +226,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
       actor: { type: 'presenter', id: `presenter-${deckIdx}`, name: deck.presenter },
       summary: `Session started for ${deck.title}`,
       payload: { deck_id: deck.id },
-      snapshot: { slide_index: 0, scenarios_active: [...scenarios], annotations_count: 0, polls_count: 0, qa_count: 0, comments_count: 0 },
+      snapshot: {
+        slide_index: 0,
+        scenarios_active: [...scenarios],
+        annotations_count: 0,
+        polls_count: 0,
+        qa_count: 0,
+        comments_count: 0,
+      },
     });
 
     for (let i = 1; i < total - 1; i++) {
@@ -237,7 +252,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
           actor: { type: 'presenter', id: `presenter-${deckIdx}`, name: deck.presenter },
           summary: `Advanced to slide ${slide + 1}`,
           payload: { slide_index: slide, previous_slide_index: slide - 1 },
-          snapshot: { slide_index: slide, scenarios_active: [...scenarios], annotations_count: annotations, polls_count: polls, qa_count: qa, comments_count: comments },
+          snapshot: {
+            slide_index: slide,
+            scenarios_active: [...scenarios],
+            annotations_count: annotations,
+            polls_count: polls,
+            qa_count: qa,
+            comments_count: comments,
+          },
         });
       } else if (variant === 1) {
         const scenarioName = ['bear-case', 'bull-case', 'what-if', 'stretch'][i % 4] ?? 'what-if';
@@ -251,7 +273,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
           actor: { type: 'presenter', id: `presenter-${deckIdx}`, name: deck.presenter },
           summary: `Scenario '${scenarioName}' toggled ${isOn ? 'ON' : 'OFF'}`,
           payload: { scenario: scenarioName, state: isOn ? 'on' : 'off' },
-          snapshot: { slide_index: slide, scenarios_active: [...scenarios], annotations_count: annotations, polls_count: polls, qa_count: qa, comments_count: comments },
+          snapshot: {
+            slide_index: slide,
+            scenarios_active: [...scenarios],
+            annotations_count: annotations,
+            polls_count: polls,
+            qa_count: qa,
+            comments_count: comments,
+          },
         });
       } else if (variant === 2) {
         annotations += 1;
@@ -262,7 +291,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
           actor: { type: 'presenter', id: `presenter-${deckIdx}`, name: deck.presenter },
           summary: `Annotated slide ${slide + 1}`,
           payload: { slide_index: slide, note: 'Highlighted key metric' },
-          snapshot: { slide_index: slide, scenarios_active: [...scenarios], annotations_count: annotations, polls_count: polls, qa_count: qa, comments_count: comments },
+          snapshot: {
+            slide_index: slide,
+            scenarios_active: [...scenarios],
+            annotations_count: annotations,
+            polls_count: polls,
+            qa_count: qa,
+            comments_count: comments,
+          },
         });
       } else if (variant === 3) {
         polls += 1;
@@ -273,7 +309,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
           actor: { type: 'presenter', id: `presenter-${deckIdx}`, name: deck.presenter },
           summary: `Launched poll "What is the priority?"`,
           payload: { poll_id: `poll-${i}`, question: 'What is the priority?' },
-          snapshot: { slide_index: slide, scenarios_active: [...scenarios], annotations_count: annotations, polls_count: polls, qa_count: qa, comments_count: comments },
+          snapshot: {
+            slide_index: slide,
+            scenarios_active: [...scenarios],
+            annotations_count: annotations,
+            polls_count: polls,
+            qa_count: qa,
+            comments_count: comments,
+          },
         });
       } else if (variant === 4) {
         qa += 1;
@@ -284,7 +327,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
           actor: { type: 'audience', id: `aud-${audienceIdx}`, name: audienceName },
           summary: `${audienceName} submitted a Q&A question`,
           payload: { question: 'Can you expand on the timeline?' },
-          snapshot: { slide_index: slide, scenarios_active: [...scenarios], annotations_count: annotations, polls_count: polls, qa_count: qa, comments_count: comments },
+          snapshot: {
+            slide_index: slide,
+            scenarios_active: [...scenarios],
+            annotations_count: annotations,
+            polls_count: polls,
+            qa_count: qa,
+            comments_count: comments,
+          },
         });
       } else if (variant === 5) {
         comments += 1;
@@ -295,7 +345,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
           actor: { type: 'audience', id: `aud-${audienceIdx}`, name: audienceName },
           summary: `${audienceName} commented`,
           payload: { comment: 'Great point!' },
-          snapshot: { slide_index: slide, scenarios_active: [...scenarios], annotations_count: annotations, polls_count: polls, qa_count: qa, comments_count: comments },
+          snapshot: {
+            slide_index: slide,
+            scenarios_active: [...scenarios],
+            annotations_count: annotations,
+            polls_count: polls,
+            qa_count: qa,
+            comments_count: comments,
+          },
         });
       } else {
         events.push({
@@ -305,7 +362,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
           actor: { type: 'system', id: 'system', name: 'Domio' },
           summary: 'Heartbeat',
           payload: { kind: 'heartbeat' },
-          snapshot: { slide_index: slide, scenarios_active: [...scenarios], annotations_count: annotations, polls_count: polls, qa_count: qa, comments_count: comments },
+          snapshot: {
+            slide_index: slide,
+            scenarios_active: [...scenarios],
+            annotations_count: annotations,
+            polls_count: polls,
+            qa_count: qa,
+            comments_count: comments,
+          },
         });
       }
     }
@@ -319,7 +383,14 @@ function buildSeedSessions(): ReadonlyArray<SeedSession> {
       actor: { type: 'system', id: 'system', name: 'Domio' },
       summary: 'Session ended',
       payload: { duration_ms: endedAt - start },
-      snapshot: { slide_index: slide, scenarios_active: [...scenarios], annotations_count: annotations, polls_count: polls, qa_count: qa, comments_count: comments },
+      snapshot: {
+        slide_index: slide,
+        scenarios_active: [...scenarios],
+        annotations_count: annotations,
+        polls_count: polls,
+        qa_count: qa,
+        comments_count: comments,
+      },
     });
 
     const attendeeCount = 8 + (seed % 80);
@@ -352,10 +423,7 @@ function findSeedSession(sessionId: string): SeedSession | null {
 /**
  * Compute a structured diff between two snapshots.
  */
-export function diffSnapshots(
-  before: SessionSnapshot,
-  after: SessionSnapshot,
-): EventChange[] {
+export function diffSnapshots(before: SessionSnapshot, after: SessionSnapshot): EventChange[] {
   const changes: EventChange[] = [];
   if (before.slide_index !== after.slide_index) {
     changes.push({
@@ -444,7 +512,10 @@ export async function listSessionEvents(
     seed = SEED_SESSIONS[0] ?? null;
   }
   if (!seed) return [];
-  return seed.events.map((e) => ({ ...e, snapshot: { ...e.snapshot, scenarios_active: [...e.snapshot.scenarios_active] } }));
+  return seed.events.map((e) => ({
+    ...e,
+    snapshot: { ...e.snapshot, scenarios_active: [...e.snapshot.scenarios_active] },
+  }));
 }
 
 /**

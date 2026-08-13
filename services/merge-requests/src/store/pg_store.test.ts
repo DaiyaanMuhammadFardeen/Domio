@@ -120,8 +120,9 @@ describe('PgMergeRequestStore', () => {
   describe('StoreNotConfiguredError', () => {
     it('throws when pool is null', async () => {
       const store = new PgMergeRequestStore(null);
-      await expect(store.insertMergeRequest(makeMergeRequest()))
-        .rejects.toThrow(StoreNotConfiguredError);
+      await expect(store.insertMergeRequest(makeMergeRequest())).rejects.toThrow(
+        StoreNotConfiguredError,
+      );
     });
   });
 
@@ -253,7 +254,9 @@ describe('PgMergeRequestStore', () => {
       const store = new PgMergeRequestStore(pool as never);
 
       await store.updateSlideDiff('sd-001', {
-        slide_diffs: [{ slide_id: 's1', change_type: 'modified', before: null, after: null, element_diffs: [] }],
+        slide_diffs: [
+          { slide_id: 's1', change_type: 'modified', before: null, after: null, element_diffs: [] },
+        ],
         binding_diffs: [],
       });
 
@@ -267,7 +270,8 @@ describe('PgMergeRequestStore', () => {
   describe('withTransaction', () => {
     it('calls BEGIN, COMMIT on success', async () => {
       const client = {
-        query: vi.fn()
+        query: vi
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({}), // COMMIT
         release: vi.fn(),
@@ -289,7 +293,8 @@ describe('PgMergeRequestStore', () => {
 
     it('calls ROLLBACK on error', async () => {
       const client = {
-        query: vi.fn()
+        query: vi
+          .fn()
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({}), // ROLLBACK (succeeds)
         release: vi.fn(),

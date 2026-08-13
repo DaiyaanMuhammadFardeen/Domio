@@ -15,11 +15,11 @@ follow-up commits landing in this PR.
 
 ## 1. Test totals (headline)
 
-| Surface                                    | Tests | Pass | Fail |
-|--------------------------------------------|------:|-----:|-----:|
-| TS services (8 packages)                   |   258 |  258 |    0 |
-| Go services (4 packages)                   |   121 |  121 |    0 |
-| **Total**                                  | **379** | **379** | **0** |
+| Surface                  |   Tests |    Pass |  Fail |
+| ------------------------ | ------: | ------: | ----: |
+| TS services (8 packages) |     258 |     258 |     0 |
+| Go services (4 packages) |     121 |     121 |     0 |
+| **Total**                | **379** | **379** | **0** |
 
 - **TS detail:** 8 vitest test-runs, all green; per-package counts
   in §2 below.
@@ -65,17 +65,17 @@ services/notification-dispatcher test: Tests  48 passed (48)
 
 ### 2.1 Per-package breakdown
 
-| Package                          | Test files | Tests |
-|----------------------------------|-----------:|------:|
-| `@domio/event-ingest`            | 9          | 45    |
-| `@domio/analytics-warehouse`     | 3          | 12    |
-| `@domio/viewer-identity`         | 8          | 59    |
-| `@domio/sessionization`          | 6          | 26    |
-| `@domio/heatmap-generator`       | 3          | 23    |
-| `@domio/team-analytics`          | 4          | 21    |
-| `@domio/live-analytics`          | 4          | 24    |
-| `@domio/notification-dispatcher` | 5          | 48    |
-| **Total**                        | **42**     | **258** |
+| Package                          | Test files |   Tests |
+| -------------------------------- | ---------: | ------: |
+| `@domio/event-ingest`            |          9 |      45 |
+| `@domio/analytics-warehouse`     |          3 |      12 |
+| `@domio/viewer-identity`         |          8 |      59 |
+| `@domio/sessionization`          |          6 |      26 |
+| `@domio/heatmap-generator`       |          3 |      23 |
+| `@domio/team-analytics`          |          4 |      21 |
+| `@domio/live-analytics`          |          4 |      24 |
+| `@domio/notification-dispatcher` |          5 |      48 |
+| **Total**                        |     **42** | **258** |
 
 (42 `.test.ts` files across the 8 services — counted via
 `find services/{event-ingest,analytics-warehouse,viewer-identity,sessionization,heatmap-generator,team-analytics,live-analytics,notification-dispatcher} -name "*.test.ts" | wc -l`.)
@@ -128,13 +128,13 @@ are cmd/main entrypoints and internal/model DTOs.
 
 ### 3.1 Per-package breakdown
 
-| Service          | Internal packages tested | Tests (PASS) |
-|------------------|-------------------------:|-------------:|
-| `ab-assignment`  | 5 (`assigner`, `graphql`, `hash`, `integration`, `store`) | 25 |
-| `ab-measurement` | 2 (`api`, `stats`)                                          | 16 |
-| `ab-statistics`  | 2 (`api`, `seqtest`)                                        | 12 |
-| `crm-sync`       | 7 (`adapters`, `clickhouse`, `dlq`, `idempotency`, `ratelimit`, `registry`, `sync`) | 68 |
-| **Total**        | **16**                                                      | **121** |
+| Service          |                                                            Internal packages tested | Tests (PASS) |
+| ---------------- | ----------------------------------------------------------------------------------: | -----------: |
+| `ab-assignment`  |                           5 (`assigner`, `graphql`, `hash`, `integration`, `store`) |           25 |
+| `ab-measurement` |                                                                  2 (`api`, `stats`) |           16 |
+| `ab-statistics`  |                                                                2 (`api`, `seqtest`) |           12 |
+| `crm-sync`       | 7 (`adapters`, `clickhouse`, `dlq`, `idempotency`, `ratelimit`, `registry`, `sync`) |           68 |
+| **Total**        |                                                                              **16** |      **121** |
 
 ---
 
@@ -235,17 +235,17 @@ this section is the high-level grouping.
 
 ## 5. Verification summary
 
-| Check                                                    | Result   |
-|----------------------------------------------------------|----------|
-| TS test run on 8 services                                | ✅ 258/258 |
-| Go test run on 4 services                                | ✅ 121/121 |
-| `pnpm-lock.yaml` stays in sync with the worktree         | ✅ clean  |
-| `git log --oneline 7e5d362^..HEAD` is 67 commits         | ✅ matches|
-| SLOs referenced in `slo/phase-17.md` and present         | ✅ present|
-| New CI workflows parse as valid YAML                     | ✅ parsed |
-| All `phase-17-*` docs reference real services             | ✅ all real|
-| `docs/architecture/phase-17-data-flow.md` is referenced  | ✅ referenced|
-| `phase-graph.md` already references Phase 17             | ✅ no edit needed |
+| Check                                                   | Result            |
+| ------------------------------------------------------- | ----------------- |
+| TS test run on 8 services                               | ✅ 258/258        |
+| Go test run on 4 services                               | ✅ 121/121        |
+| `pnpm-lock.yaml` stays in sync with the worktree        | ✅ clean          |
+| `git log --oneline 7e5d362^..HEAD` is 67 commits        | ✅ matches        |
+| SLOs referenced in `slo/phase-17.md` and present        | ✅ present        |
+| New CI workflows parse as valid YAML                    | ✅ parsed         |
+| All `phase-17-*` docs reference real services           | ✅ all real       |
+| `docs/architecture/phase-17-data-flow.md` is referenced | ✅ referenced     |
+| `phase-graph.md` already references Phase 17            | ✅ no edit needed |
 
 **Phase 17 is verified.** The DoD checklist
 ([`phase-17-dod.md`](phase-17-dod.md)) and the commit log

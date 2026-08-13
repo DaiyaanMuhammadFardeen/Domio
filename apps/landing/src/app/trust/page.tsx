@@ -42,9 +42,8 @@ export default function TrustLandingPage(): JSX.Element {
               Built for procurement review
             </h1>
             <p className="trust-hero__subtitle">
-              Independent attestations, region-pinned data, and a security
-              team that responds within a business day. Everything you need
-              to clear vendor review is below.
+              Independent attestations, region-pinned data, and a security team that responds within
+              a business day. Everything you need to clear vendor review is below.
             </p>
           </div>
         </section>
@@ -61,8 +60,8 @@ export default function TrustLandingPage(): JSX.Element {
             Need a signed DPA or BAA?
           </h2>
           <p className="trust-cta__sub">
-            Our enterprise team will route your request to legal and turn
-            around a counter-signed agreement within five business days.
+            Our enterprise team will route your request to legal and turn around a counter-signed
+            agreement within five business days.
           </p>
           <div className="trust-cta__actions">
             <a className="trust-cta__button trust-cta__button--primary" href={enterpriseHref}>

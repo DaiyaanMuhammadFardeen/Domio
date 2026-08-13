@@ -171,13 +171,7 @@ export interface ConversionFunnel {
 
 export type WizardStep = 'details' | 'media' | 'files' | 'pricing';
 
-export type AssetKind =
-  | 'cover'
-  | 'gallery'
-  | 'video'
-  | 'component'
-  | 'template'
-  | 'sample-deck';
+export type AssetKind = 'cover' | 'gallery' | 'video' | 'component' | 'template' | 'sample-deck';
 
 export type UploadStatus = 'queued' | 'uploading' | 'completed' | 'failed';
 
@@ -219,19 +213,9 @@ export interface WizardDraft {
   readonly updated_at_ms: number;
 }
 
-export type ListingKind =
-  | 'component'
-  | 'template'
-  | 'theme'
-  | 'sticker_pack'
-  | 'icon_pack';
+export type ListingKind = 'component' | 'template' | 'theme' | 'sticker_pack' | 'icon_pack';
 
-export type PriceModel =
-  | 'free'
-  | 'one_time'
-  | 'subscription'
-  | 'team_seats'
-  | 'enterprise_quote';
+export type PriceModel = 'free' | 'one_time' | 'subscription' | 'team_seats' | 'enterprise_quote';
 
 // ---------------------------------------------------------------------------
 // Wave 9 §S9.4 — Statements + payouts.

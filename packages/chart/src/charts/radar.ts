@@ -42,19 +42,23 @@ export function renderRadar(
       const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
       return { x: cx + rr * Math.cos(angle), y: cy + rr * Math.sin(angle) };
     });
-    elements.push(polyline(points, `ring_${ring}`, {
-      stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
-      strokeWidth: 1,
-    }));
+    elements.push(
+      polyline(points, `ring_${ring}`, {
+        stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
+        strokeWidth: 1,
+      }),
+    );
   }
 
   // Axis lines
   for (let i = 0; i < n; i++) {
     const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-    elements.push(svgLine(cx, cy, cx + R * Math.cos(angle), cy + R * Math.sin(angle), `axis_${i}`, {
-      stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
-      strokeWidth: 1,
-    }));
+    elements.push(
+      svgLine(cx, cy, cx + R * Math.cos(angle), cy + R * Math.sin(angle), `axis_${i}`, {
+        stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
+        strokeWidth: 1,
+      }),
+    );
   }
 
   // Data polygon
@@ -63,24 +67,28 @@ export function renderRadar(
     const r = (v / maxVal) * R;
     return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
   });
-  elements.push(polyline(dataPoints, 'data', {
-    fill: 'rgba(79,70,229,0.25)',
-    stroke: '#4F46E5',
-    strokeWidth: 2,
-  }));
+  elements.push(
+    polyline(dataPoints, 'data', {
+      fill: 'rgba(79,70,229,0.25)',
+      stroke: '#4F46E5',
+      strokeWidth: 2,
+    }),
+  );
 
   // Labels
   labels.forEach((label, i) => {
     const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
     const lx = cx + (R + 16) * Math.cos(angle);
     const ly = cy + (R + 16) * Math.sin(angle);
-    elements.push(text(lx - 20, ly - 6, label, `label_${i}`, {
-      width: 40,
-      height: 14,
-      fontSize: (opts.fontSize ?? 11) - 1,
-      fill: mutedColor,
-      textAnchor: 'middle',
-    }));
+    elements.push(
+      text(lx - 20, ly - 6, label, `label_${i}`, {
+        width: 40,
+        height: 14,
+        fontSize: (opts.fontSize ?? 11) - 1,
+        fill: mutedColor,
+        textAnchor: 'middle',
+      }),
+    );
   });
 
   return elements;

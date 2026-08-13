@@ -52,13 +52,11 @@ export function findLocaleDescriptor(code: string | null | undefined): LocaleDes
     const fallback = LIST_LOCALES_DETAILED.find((l) => l.bcp47 === DEFAULT_LOCALE);
     return fallback ?? LIST_LOCALES_DETAILED[0]!;
   }
-  const exact = LIST_LOCALES_DETAILED.find(
-    (l) => l.bcp47 === code || l.code === code,
-  );
+  const exact = LIST_LOCALES_DETAILED.find((l) => l.bcp47 === code || l.code === code);
   if (exact) return exact;
   const base = code.split('-')[0] ?? '';
   const byBase = LIST_LOCALES_DETAILED.find((l) => l.code === base.toLowerCase());
-  return byBase ?? (LIST_LOCALES_DETAILED[0]!);
+  return byBase ?? LIST_LOCALES_DETAILED[0]!;
 }
 
 /**
@@ -125,10 +123,13 @@ export function loadSavedLocale(cookieJar?: string): string | null {
   return null;
 }
 
-export function saveLocale(locale: string, options?: {
-  readonly days?: number;
-  readonly writeCookie?: (cookie: string) => void;
-}): void {
+export function saveLocale(
+  locale: string,
+  options?: {
+    readonly days?: number;
+    readonly writeCookie?: (cookie: string) => void;
+  },
+): void {
   if (!isSupportedLocale(locale)) return;
   const days = options?.days ?? 365;
   const maxAge = Math.max(1, Math.floor(days * 24 * 60 * 60));

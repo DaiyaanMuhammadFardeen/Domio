@@ -16,15 +16,14 @@
  *   - kicked     — moderator removed the participant
  */
 
-import type { AudienceSnapshot, ParticipantId, SessionCode, ShardCoordinate } from '@domio/audience-service';
+import type {
+  AudienceSnapshot,
+  ParticipantId,
+  SessionCode,
+  ShardCoordinate,
+} from '@domio/audience-service';
 
-export type ParticipantState =
-  | 'joined'
-  | 'active'
-  | 'idle'
-  | 'left'
-  | 'reaped'
-  | 'kicked';
+export type ParticipantState = 'joined' | 'active' | 'idle' | 'left' | 'reaped' | 'kicked';
 
 export interface ParticipantSession {
   readonly id: string;
@@ -85,7 +84,12 @@ export interface HeartbeatInput {
 export interface LeaveInput {
   readonly session_id: string;
   readonly participant_id: ParticipantId;
-  readonly reason: 'user_action' | 'socket_timeout' | 'session_ended' | 'moderator_kick' | 'rate_limit';
+  readonly reason:
+    | 'user_action'
+    | 'socket_timeout'
+    | 'session_ended'
+    | 'moderator_kick'
+    | 'rate_limit';
   readonly idempotency_key?: string;
 }
 
@@ -175,9 +179,6 @@ export function validateJoinInput(input: JoinInput): void {
   }
 }
 
-export function shardCoordinate(
-  session_code: SessionCode,
-  shard_index: number,
-): ShardCoordinate {
+export function shardCoordinate(session_code: SessionCode, shard_index: number): ShardCoordinate {
   return { session_code, shard_index };
 }

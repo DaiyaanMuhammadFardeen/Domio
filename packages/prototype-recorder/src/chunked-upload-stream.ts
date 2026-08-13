@@ -22,7 +22,11 @@ export class ChunkedUploadStream {
 
   constructor(opts: ChunkedUploadStreamOptions = {}) {
     this.chunkBytes = opts.chunkBytes ?? DEFAULT_CHUNK_BYTES;
-    this.fetchImpl = opts.fetchImpl ?? (typeof fetch !== 'undefined' ? fetch : (() => Promise.reject(new Error('no fetch'))) as typeof fetch);
+    this.fetchImpl =
+      opts.fetchImpl ??
+      (typeof fetch !== 'undefined'
+        ? fetch
+        : ((() => Promise.reject(new Error('no fetch'))) as typeof fetch));
     this.headers = opts.headers ?? { 'Content-Type': 'application/json' };
   }
 

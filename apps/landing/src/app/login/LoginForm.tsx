@@ -104,9 +104,7 @@ export function LoginForm(): JSX.Element {
           value={state.password}
           onChange={(e) => update('password', e.target.value)}
           aria-invalid={errors['password'] !== undefined}
-          aria-describedby={
-            errors['password'] !== undefined ? `${passwordId}-err` : undefined
-          }
+          aria-describedby={errors['password'] !== undefined ? `${passwordId}-err` : undefined}
         />
         {errors['password'] !== undefined ? (
           <p id={`${passwordId}-err`} className="auth-form__error">

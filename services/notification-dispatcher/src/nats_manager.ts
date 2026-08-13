@@ -153,9 +153,7 @@ export interface ConnectOptions {
  * simple linear back-off. Returns `null` when all attempts are
  * exhausted (the caller should run in degraded mode).
  */
-export async function connectWithRetry(
-  opts: ConnectOptions = {},
-): Promise<NatsConnection | null> {
+export async function connectWithRetry(opts: ConnectOptions = {}): Promise<NatsConnection | null> {
   const { connect } = await import('nats');
   const servers = opts.servers ?? process.env.NATS_URL ?? 'nats://localhost:4222';
   const maxAttempts = opts.maxReconnect ?? Number(process.env.NATS_MAX_RECONNECT ?? 3);
@@ -164,31 +162,37 @@ export async function connectWithRetry(
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const nc = await connect({ servers });
-      console.log(JSON.stringify({
-        msg: `${prefix}: nats_connected`,
-        servers,
-        attempt,
-      }));
+      console.log(
+        JSON.stringify({
+          msg: `${prefix}: nats_connected`,
+          servers,
+          attempt,
+        }),
+      );
       return nc;
     } catch (err) {
-      console.log(JSON.stringify({
-        msg: `${prefix}: nats_connect_retry`,
-        servers,
-        attempt,
-        maxAttempts,
-        error: err instanceof Error ? err.message : String(err),
-      }));
+      console.log(
+        JSON.stringify({
+          msg: `${prefix}: nats_connect_retry`,
+          servers,
+          attempt,
+          maxAttempts,
+          error: err instanceof Error ? err.message : String(err),
+        }),
+      );
       if (attempt < maxAttempts) {
         await sleep(1_000);
       }
     }
   }
 
-  console.log(JSON.stringify({
-    msg: `${prefix}: nats_connect_failed_degraded`,
-    servers,
-    maxAttempts,
-  }));
+  console.log(
+    JSON.stringify({
+      msg: `${prefix}: nats_connect_failed_degraded`,
+      servers,
+      maxAttempts,
+    }),
+  );
   return null;
 }
 

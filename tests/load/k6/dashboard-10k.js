@@ -34,14 +34,14 @@ export const options = {
   },
   thresholds: {
     'http_req_duration{name:graphql}': ['p(95)<800'],
-    'dashboard_errors':               ['rate<0.01'],
-    'checks':                         ['rate>0.99'],
-    'vus':                            ['value<11000'],
+    dashboard_errors: ['rate<0.01'],
+    checks: ['rate>0.99'],
+    vus: ['value<11000'],
   },
 };
 
 const DASHBOARD_URL = __ENV.DASHBOARD_URL || 'http://localhost:3003';
-const GRAPHQL_PATH  = __ENV.GRAPHQL_PATH  || '/api/graphql';
+const GRAPHQL_PATH = __ENV.GRAPHQL_PATH || '/api/graphql';
 
 export default function () {
   const body = JSON.stringify({

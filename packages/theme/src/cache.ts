@@ -5,7 +5,13 @@
  * The service layer must call invalidate() on token/theme/kit/override changes.
  */
 
-import type { TokenRef, TokenValue, ResolvedToken, ResolvedTokenSource, ResolvedTokenWarn } from './types.js';
+import type {
+  TokenRef,
+  TokenValue,
+  ResolvedToken,
+  ResolvedTokenSource,
+  ResolvedTokenWarn,
+} from './types.js';
 
 export interface CacheEntry {
   readonly value: TokenValue | null;

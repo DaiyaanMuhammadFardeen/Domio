@@ -122,11 +122,14 @@ function buildSeedSliders(slideId: string): BidirSlider[] {
   ];
 }
 
-let store: Map<string, {
-  sliders: BidirSlider[];
-  adjustments: BidirAdjustment[];
-  savedAtMs: number | null;
-}> = new Map();
+let store: Map<
+  string,
+  {
+    sliders: BidirSlider[];
+    adjustments: BidirAdjustment[];
+    savedAtMs: number | null;
+  }
+> = new Map();
 
 function ensureSlide(slideId: string): {
   sliders: BidirSlider[];

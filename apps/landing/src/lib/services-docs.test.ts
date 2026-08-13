@@ -3,9 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  USER_FACING_SERVICES,
-} from './services-registry';
+import { USER_FACING_SERVICES } from './services-registry';
 import { buildServiceDoc, listServiceDocs } from './services-docs';
 
 describe('services-docs', () => {

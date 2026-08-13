@@ -10,7 +10,9 @@ describe('BranchPanel', () => {
     const client = new InMemoryBranchClient(DECK);
     await client.createBranch(DECK, 'feature/ui');
     render(<BranchPanel deckId={DECK} client={client} activeBranchId="main" />);
-    await waitFor(() => expect(screen.getByRole('button', { name: /feature\/ui\s+r0/ })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /feature\/ui\s+r0/ })).toBeInTheDocument(),
+    );
     expect(screen.getByRole('button', { name: /main/ })).toBeInTheDocument();
   });
 
@@ -27,7 +29,10 @@ describe('BranchPanel', () => {
 
   it('shows errors when loading fails', async () => {
     const client = new InMemoryBranchClient(DECK);
-    const failing = { ...client, listBranches: vi.fn().mockRejectedValue(new Error('offline')) } as unknown as InMemoryBranchClient;
+    const failing = {
+      ...client,
+      listBranches: vi.fn().mockRejectedValue(new Error('offline')),
+    } as unknown as InMemoryBranchClient;
     render(<BranchPanel deckId={DECK} client={failing} />);
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('offline'));
   });

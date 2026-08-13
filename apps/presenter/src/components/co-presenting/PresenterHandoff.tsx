@@ -125,11 +125,16 @@ export function PresenterHandoff({
     }
   }, [confirmId, onComplete, refresh, sessionId]);
 
-  const confirmTarget = confirmId ? others.find((p) => p.id === confirmId) ?? null : null;
-  const doneTarget = doneId ? presenters.find((p) => p.id === doneId) ?? null : null;
+  const confirmTarget = confirmId ? (others.find((p) => p.id === confirmId) ?? null) : null;
+  const doneTarget = doneId ? (presenters.find((p) => p.id === doneId) ?? null) : null;
 
   return (
-    <div className="presenter-handoff" role="dialog" aria-label={t.heading} data-testid={dataTestId}>
+    <div
+      className="presenter-handoff"
+      role="dialog"
+      aria-label={t.heading}
+      data-testid={dataTestId}
+    >
       <header className="presenter-handoff__header">
         <h3 className="presenter-handoff__title">{t.heading}</h3>
         {onClose && (
@@ -214,11 +219,7 @@ export function PresenterHandoff({
         </div>
       )}
       {error && (
-        <div
-          className="presenter-handoff__error"
-          role="alert"
-          data-testid={`${dataTestId}-error`}
-        >
+        <div className="presenter-handoff__error" role="alert" data-testid={`${dataTestId}-error`}>
           {error}
         </div>
       )}

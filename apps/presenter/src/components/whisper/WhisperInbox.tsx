@@ -108,7 +108,14 @@ export function WhisperInbox({
             animation: 'whisper-in 200ms ease-out',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
             <span style={{ fontWeight: 600, fontSize: 11, opacity: 0.85 }}>
               🤫 {t.message.author_display_name ?? t.message.author_id}
             </span>

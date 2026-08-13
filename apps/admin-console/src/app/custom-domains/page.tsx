@@ -118,7 +118,11 @@ export default function CustomDomainsPage() {
   }
 
   async function handleRevoke(row: Row) {
-    if (!window.confirm(`Revoke ${row.hostname}? Existing share links will fall back to deck.domio.app.`)) {
+    if (
+      !window.confirm(
+        `Revoke ${row.hostname}? Existing share links will fall back to deck.domio.app.`,
+      )
+    ) {
       return;
     }
     setActionBusy(row.id);
@@ -143,7 +147,9 @@ export default function CustomDomainsPage() {
       format: (val) => {
         const state = String(val) as CustomDomainState;
         return (
-          <Badge tone={toneForCustomDomainState(state)}>{CUSTOM_DOMAIN_STATE_TONES[state] ? state : state}</Badge>
+          <Badge tone={toneForCustomDomainState(state)}>
+            {CUSTOM_DOMAIN_STATE_TONES[state] ? state : state}
+          </Badge>
         );
       },
     },
@@ -210,9 +216,7 @@ export default function CustomDomainsPage() {
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Custom Domains
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Custom Domains</h1>
           <p className="mt-1 text-sm text-slate-500">
             Per-tenant viewer hostnames. Verified domains rewrite share links from{' '}
             <code className="text-xs">deck.domio.app</code> to the tenant&apos;s hostname.

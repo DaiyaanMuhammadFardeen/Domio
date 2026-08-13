@@ -19,10 +19,7 @@ import {
   BrandLockError,
   FeatureDisabledError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-  StoreNotImplementedError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -74,7 +71,9 @@ function serviceUnavailable(message: string, code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -98,14 +97,17 @@ function mapError(e: unknown): HttpResponse {
 // ---------------------------------------------------------------------------
 
 export async function createSuggestionHandler(
-  req: HttpRequest<{ deck_id: string }, {
-    workspace_id: string;
-    session_id: string;
-    target_type: string;
-    target_id: string;
-    operation: SuggestionOperation;
-    thread_id?: string;
-  }>,
+  req: HttpRequest<
+    { deck_id: string },
+    {
+      workspace_id: string;
+      session_id: string;
+      target_type: string;
+      target_id: string;
+      operation: SuggestionOperation;
+      thread_id?: string;
+    }
+  >,
   ctx: SuggestionsHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -135,7 +137,12 @@ export async function listSuggestionsHandler(
   try {
     const statusRaw = req.query.status;
     const opts: { status?: SuggestionStatus } = {};
-    if (statusRaw === 'open' || statusRaw === 'accepted' || statusRaw === 'rejected' || statusRaw === 'obsolete') {
+    if (
+      statusRaw === 'open' ||
+      statusRaw === 'accepted' ||
+      statusRaw === 'rejected' ||
+      statusRaw === 'obsolete'
+    ) {
       opts.status = statusRaw;
     }
     const suggestions = await ctx.service.listSuggestions(req.params.deck_id, opts);

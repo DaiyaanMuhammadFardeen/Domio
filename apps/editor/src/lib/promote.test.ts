@@ -3,7 +3,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { inferPropsSchema, buildComponentDef, replaceWithComponentOp, detachFromComponentOp } from './promote';
+import {
+  inferPropsSchema,
+  buildComponentDef,
+  replaceWithComponentOp,
+  detachFromComponentOp,
+} from './promote';
 import type { Element } from '@domio/schema/generated/scene-graph';
 
 function makeTextElement(overrides: Partial<Element> = {}): Element {
@@ -13,7 +18,15 @@ function makeTextElement(overrides: Partial<Element> = {}): Element {
     semanticId: 's1',
     name: 'Text',
     parentId: null,
-    text: { content: 'Hello', fontSize: 16, fontFamily: 'sans', color: '#E6EDF3', fontWeight: 400, lineHeight: 1.4, align: 'left' },
+    text: {
+      content: 'Hello',
+      fontSize: 16,
+      fontFamily: 'sans',
+      color: '#E6EDF3',
+      fontWeight: 400,
+      lineHeight: 1.4,
+      align: 'left',
+    },
     transform: { x: 0, y: 0, w: 100, h: 50 },
     ...overrides,
   } as unknown as Element;
@@ -45,7 +58,15 @@ describe('inferPropsSchema', () => {
 
   it('infers string prop for text content', () => {
     const el = makeTextElement({
-      text: { content: 'Hello World', fontSize: 16, fontFamily: 'sans', color: '#E6EDF3', fontWeight: 400, lineHeight: 1.4, align: 'left' },
+      text: {
+        content: 'Hello World',
+        fontSize: 16,
+        fontFamily: 'sans',
+        color: '#E6EDF3',
+        fontWeight: 400,
+        lineHeight: 1.4,
+        align: 'left',
+      },
     } as any);
     const schema = inferPropsSchema([el]);
     expect(schema.properties).toHaveProperty('prop0');
@@ -55,7 +76,15 @@ describe('inferPropsSchema', () => {
 
   it('infers number prop for numeric content', () => {
     const el = makeTextElement({
-      text: { content: '42', fontSize: 16, fontFamily: 'sans', color: '#E6EDF3', fontWeight: 400, lineHeight: 1.4, align: 'left' },
+      text: {
+        content: '42',
+        fontSize: 16,
+        fontFamily: 'sans',
+        color: '#E6EDF3',
+        fontWeight: 400,
+        lineHeight: 1.4,
+        align: 'left',
+      },
     } as any);
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({ type: 'number', default: 42 });
@@ -63,7 +92,15 @@ describe('inferPropsSchema', () => {
 
   it('infers number prop for decimal content', () => {
     const el = makeTextElement({
-      text: { content: '3.14', fontSize: 16, fontFamily: 'sans', color: '#E6EDF3', fontWeight: 400, lineHeight: 1.4, align: 'left' },
+      text: {
+        content: '3.14',
+        fontSize: 16,
+        fontFamily: 'sans',
+        color: '#E6EDF3',
+        fontWeight: 400,
+        lineHeight: 1.4,
+        align: 'left',
+      },
     } as any);
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({ type: 'number', default: 3.14 });
@@ -71,7 +108,15 @@ describe('inferPropsSchema', () => {
 
   it('infers boolean prop for true/false content', () => {
     const el = makeTextElement({
-      text: { content: 'true', fontSize: 16, fontFamily: 'sans', color: '#E6EDF3', fontWeight: 400, lineHeight: 1.4, align: 'left' },
+      text: {
+        content: 'true',
+        fontSize: 16,
+        fontFamily: 'sans',
+        color: '#E6EDF3',
+        fontWeight: 400,
+        lineHeight: 1.4,
+        align: 'left',
+      },
     } as any);
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({ type: 'boolean', default: true });
@@ -79,7 +124,15 @@ describe('inferPropsSchema', () => {
 
   it('infers boolean prop for false content', () => {
     const el = makeTextElement({
-      text: { content: 'false', fontSize: 16, fontFamily: 'sans', color: '#E6EDF3', fontWeight: 400, lineHeight: 1.4, align: 'left' },
+      text: {
+        content: 'false',
+        fontSize: 16,
+        fontFamily: 'sans',
+        color: '#E6EDF3',
+        fontWeight: 400,
+        lineHeight: 1.4,
+        align: 'left',
+      },
     } as any);
     const schema = inferPropsSchema([el]);
     expect(schema.properties.prop0).toMatchObject({ type: 'boolean', default: false });
@@ -106,7 +159,15 @@ describe('inferPropsSchema', () => {
 
   it('handles mixed selection with text + color element', () => {
     const textEl = makeTextElement({
-      text: { content: 'Revenue', fontSize: 16, fontFamily: 'sans', color: '#E6EDF3', fontWeight: 400, lineHeight: 1.4, align: 'left' },
+      text: {
+        content: 'Revenue',
+        fontSize: 16,
+        fontFamily: 'sans',
+        color: '#E6EDF3',
+        fontWeight: 400,
+        lineHeight: 1.4,
+        align: 'left',
+      },
     } as any);
     const colorEl = {
       id: 'test-el-2' as any,
@@ -120,7 +181,11 @@ describe('inferPropsSchema', () => {
     const schema = inferPropsSchema([textEl, colorEl]);
     expect(Object.keys(schema.properties)).toHaveLength(2);
     expect(schema.properties.prop0).toMatchObject({ type: 'string', default: 'Revenue' });
-    expect(schema.properties.prop1).toMatchObject({ type: 'string', format: 'color', default: '#3fb950' });
+    expect(schema.properties.prop1).toMatchObject({
+      type: 'string',
+      format: 'color',
+      default: '#3fb950',
+    });
   });
 });
 
@@ -143,7 +208,15 @@ describe('buildComponentDef', () => {
 
   it('build function produces elements with mapped props', () => {
     const el = makeTextElement({
-      text: { content: 'placeholder', fontSize: 16, fontFamily: 'sans', color: '#E6EDF3', fontWeight: 400, lineHeight: 1.4, align: 'left' },
+      text: {
+        content: 'placeholder',
+        fontSize: 16,
+        fontFamily: 'sans',
+        color: '#E6EDF3',
+        fontWeight: 400,
+        lineHeight: 1.4,
+        align: 'left',
+      },
     } as any);
     const schema = inferPropsSchema([el]);
     const def = buildComponentDef({
@@ -153,11 +226,14 @@ describe('buildComponentDef', () => {
       schema,
     });
 
-    const result = def.build({ prop0: 'Revenue' }, {
-      variantId: 'default',
-      id: () => 'new-id' as any,
-      semanticId: (s: string) => s,
-    });
+    const result = def.build(
+      { prop0: 'Revenue' },
+      {
+        variantId: 'default',
+        id: () => 'new-id' as any,
+        semanticId: (s: string) => s,
+      },
+    );
 
     expect(result).toHaveLength(1);
     expect(result[0]!.id).toBe('new-id');

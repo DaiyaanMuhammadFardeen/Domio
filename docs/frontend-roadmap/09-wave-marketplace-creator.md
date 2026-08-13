@@ -20,6 +20,7 @@
 **Features:** #28, #29, #45, #235.
 
 **Files to modify:**
+
 - `apps/marketplace-web/src/app/page.tsx`
 - `apps/marketplace-web/src/app/listing/[slug]/page.tsx`
 - `apps/marketplace-web/src/app/search/page.tsx`
@@ -28,6 +29,7 @@
 - `apps/marketplace-web/src/app/library/page.tsx`
 
 **Build instructions:**
+
 1. Home page: featured, top-rated, recently added, by category.
 2. Faceted search: type, theme, color, language, price, rating.
 3. Listing detail: gallery, video preview, reviews, changelog, related listings, "Add to library" CTA.
@@ -36,9 +38,11 @@
 6. Library page: purchased listings, available updates, license terms.
 
 **SOLID notes:**
+
 - **S:** each page owns one concern; checkout is a separate flow from browse.
 
 **Acceptance:**
+
 - Full purchase → install → install-in-editor → render in deck round-trip <30 s.
 
 ---
@@ -48,15 +52,18 @@
 **Features:** #28, #29.
 
 **Files to modify:**
+
 - `apps/creator-console/src/app/listings/create/page.tsx`
 
 **Build instructions:**
+
 1. 4-step wizard: **Details** (title, description, tags, category), **Media** (cover, gallery, video), **Files** (upload component/template + sample deck), **Pricing** (free, one-time, subscription, royalty).
 2. Real upload via `POST /v1/marketplace/listings/{id}/assets` (presigned URLs); progress per file.
 3. Preview tab: how the listing looks in the marketplace.
 4. Submit for review.
 
 **Acceptance:**
+
 - Upload handles 100 MB files without crashing the browser.
 - Preview matches live storefront.
 
@@ -67,10 +74,12 @@
 **Features:** #174.
 
 **Files to modify:**
+
 - `apps/creator-console/src/app/analytics/page.tsx`
 - `apps/creator-console/src/components/analytics/{RevenueChart,GeoDistribution,ConversionFunnel}.tsx`
 
 **Build instructions:**
+
 1. Revenue chart per day/month.
 2. Top-selling listings.
 3. Geographic distribution.
@@ -83,10 +92,12 @@
 **Features:** #28, #198.
 
 **Files to modify:**
+
 - `apps/creator-console/src/app/statements/page.tsx`
 - `apps/creator-console/src/app/payouts/page.tsx`
 
 **Build instructions:**
+
 1. Generate monthly statement: `POST /v1/marketplace/statements/generate`.
 2. Statement detail: gross, fees, refunds, net.
 3. Payout settings: bank account, schedule.
@@ -98,10 +109,12 @@
 **Features:** #28.
 
 **Files to create:**
+
 - `apps/marketplace-web/src/components/reviews/{ReviewList,ReviewForm,ReplyForm}.tsx`
 - `apps/creator-console/src/app/reviews/page.tsx`
 
 **Build instructions:**
+
 1. Buyers leave 1–5 stars + review.
 2. Creator can reply once.
 3. Moderation-aware: spam filter via `services/moderation-ml`.
@@ -113,9 +126,11 @@
 **Features:** #28.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/takedowns/[id]/page.tsx` (new — detail)
 
 **Build instructions:**
+
 1. Dispute list with status (open / under review / resolved).
 2. Detail view: filing party, respondent, evidence, decision.
 
@@ -126,9 +141,11 @@
 **Features:** #45.
 
 **Files to modify:**
+
 - `apps/marketplace-web/src/app/theme/[slug]/page.tsx` (new)
 
 **Build instructions:**
+
 1. Theme preview shows a sample deck rendered with the theme.
 2. "Use this theme" CTA → opens the editor with the theme applied to a new deck.
 
@@ -139,9 +156,11 @@
 **Features:** #28.
 
 **Files to create:**
+
 - `apps/creator-console/src/app/onboarding/page.tsx`
 
 **Build instructions:**
+
 1. Step 1: identity verification (Persona).
 2. Step 2: payout setup (Stripe Connect).
 3. Step 3: tax info.
@@ -154,10 +173,12 @@
 **Features:** #28.
 
 **Files to create:**
+
 - `apps/marketplace-web/src/app/sellers/page.tsx`
 - `apps/marketplace-web/src/app/creators/[handle]/page.tsx`
 
 **Build instructions:**
+
 1. "Become a creator" landing page.
 2. Per-creator profile: bio, listings, reviews, ratings.
 
@@ -166,6 +187,7 @@
 ## 3. SOLID injection
 
 ### Module map
+
 ```
 apps/marketplace-web/src/
 ├── app/
@@ -193,6 +215,7 @@ apps/creator-console/src/
 ```
 
 ### Rule: marketplace is split into buyer / seller / admin
+
 Three Next.js apps, each with narrow responsibility. The buyer's app never imports from the creator console; data flows through `packages/sdk-ts`.
 
 ---

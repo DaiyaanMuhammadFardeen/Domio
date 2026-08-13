@@ -72,19 +72,21 @@ export function ConditionalLogicBuilder({
   };
 
   const addClause = (): void => {
-    setClauses((prev) => [
-      ...prev,
-      { id: nextId('c'), variable: 'var.foo', op: '==', value: '' },
-    ]);
+    setClauses((prev) => [...prev, { id: nextId('c'), variable: 'var.foo', op: '==', value: '' }]);
   };
 
   const renderedSource = clauses
-    .map((c) => `${c.variable} ${c.op} ${c.value.startsWith('"') || /^-?\d/.test(c.value) ? c.value : `"${c.value.replace(/"/g, '\\"')}"`}`)
+    .map(
+      (c) =>
+        `${c.variable} ${c.op} ${c.value.startsWith('"') || /^-?\d/.test(c.value) ? c.value : `"${c.value.replace(/"/g, '\\"')}"`}`,
+    )
     .join(` ${op} `);
 
   return (
     <div className="prototyping-conditional" data-testid="prototyping-conditional">
-      <div style={{ fontSize: 11, color: 'var(--muted, #888)', marginBottom: 4 }}>Conditional logic</div>
+      <div style={{ fontSize: 11, color: 'var(--muted, #888)', marginBottom: 4 }}>
+        Conditional logic
+      </div>
 
       <div
         style={{
@@ -113,7 +115,9 @@ export function ConditionalLogicBuilder({
           }}
         >
           {GROUP_OPS.map((g) => (
-            <option key={g} value={g}>{g}</option>
+            <option key={g} value={g}>
+              {g}
+            </option>
           ))}
         </select>
       </div>
@@ -159,7 +163,9 @@ export function ConditionalLogicBuilder({
               }}
             >
               {OPS.map((o) => (
-                <option key={o} value={o}>{o}</option>
+                <option key={o} value={o}>
+                  {o}
+                </option>
               ))}
             </select>
             <input

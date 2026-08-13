@@ -22,11 +22,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  generateRoutes,
-  verifyRoutesCoverAlerts,
-  renderAlertmanagerYaml,
-} from './alertmanager.js';
+import { generateRoutes, verifyRoutesCoverAlerts, renderAlertmanagerYaml } from './alertmanager.js';
 import type { BurnRateAlert, SloEntry } from './types.js';
 
 function slo(overrides: Partial<SloEntry> = {}): SloEntry {
@@ -50,7 +46,14 @@ function alert(sloIn: SloEntry, severity: 'page' | 'ticket', windowTag = '1h'): 
     alertName: `SLOBurn${severity === 'page' ? 'High' : 'Low'}T${sloIn.tier === 'tier-1' ? 1 : sloIn.tier === 'tier-2' ? 2 : 3}${sloIn.service.replace(/^@domio\//, '').replace(/-/g, '')}${sloIn.slo.replace(/-/g, '')}${windowTag.toUpperCase()}`,
     slo: sloIn,
     severity,
-    windowSeconds: windowTag === '1h' ? 3600 : windowTag === '6h' ? 6 * 3600 : windowTag === '24h' ? 24 * 3600 : 72 * 3600,
+    windowSeconds:
+      windowTag === '1h'
+        ? 3600
+        : windowTag === '6h'
+          ? 6 * 3600
+          : windowTag === '24h'
+            ? 24 * 3600
+            : 72 * 3600,
     windowLabel: windowTag,
     expr: '(some expression)',
     for: '2m',
@@ -66,7 +69,8 @@ describe('generateRoutes', () => {
   it('tier-1 page → 24/7 PagerDuty primary', () => {
     const routes = generateRoutes([slo()]);
     const t1Page = routes.find(
-      (r) => r.matchers.some((m) => m.value === 'tier-1') && r.matchers.some((m) => m.value === 'page'),
+      (r) =>
+        r.matchers.some((m) => m.value === 'tier-1') && r.matchers.some((m) => m.value === 'page'),
     );
     expect(t1Page?.receiver).toBe('pagerduty-platform-primary');
   });
@@ -74,7 +78,8 @@ describe('generateRoutes', () => {
   it('tier-2 page → business-hours PagerDuty', () => {
     const routes = generateRoutes([slo()]);
     const t2Page = routes.find(
-      (r) => r.matchers.some((m) => m.value === 'tier-2') && r.matchers.some((m) => m.value === 'page'),
+      (r) =>
+        r.matchers.some((m) => m.value === 'tier-2') && r.matchers.some((m) => m.value === 'page'),
     );
     expect(t2Page?.receiver).toBe('pagerduty-platform-business-hours');
   });

@@ -67,7 +67,10 @@ export async function proxyHandler(
       return { status: 401, body: { error: 'Embed token expired', code: 'TOKEN_EXPIRED' } };
     }
     if (e instanceof TokenAlreadyUsedError) {
-      return { status: 401, body: { error: 'Embed token already used', code: 'TOKEN_ALREADY_USED' } };
+      return {
+        status: 401,
+        body: { error: 'Embed token already used', code: 'TOKEN_ALREADY_USED' },
+      };
     }
     throw e;
   }
@@ -103,7 +106,10 @@ export async function proxyHandler(
           verifyJwt(jwtToken, ctx.jwtSecret, policy.jwtAudience ?? undefined);
         } catch (e) {
           if (e instanceof JwtError) {
-            return { status: 401, body: { error: 'Missing or invalid token', code: 'JWT_INVALID' } };
+            return {
+              status: 401,
+              body: { error: 'Missing or invalid token', code: 'JWT_INVALID' },
+            };
           }
           throw e;
         }

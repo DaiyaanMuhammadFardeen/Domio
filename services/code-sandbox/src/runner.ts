@@ -80,11 +80,27 @@ interface BlockedPattern {
 
 const BLOCKED_PATTERNS: readonly BlockedPattern[] = [
   { capability: 'allowNetwork', pattern: /\bfetch\s*\(/g, description: 'fetch() is not allowed' },
-  { capability: 'allowNetwork', pattern: /\bXMLHttpRequest\b/g, description: 'XMLHttpRequest is not allowed' },
-  { capability: 'allowNetwork', pattern: /\bWebSocket\b/g, description: 'WebSocket is not allowed' },
-  { capability: 'allowDom', pattern: /\bdocument\b/g, description: 'document access is not allowed' },
+  {
+    capability: 'allowNetwork',
+    pattern: /\bXMLHttpRequest\b/g,
+    description: 'XMLHttpRequest is not allowed',
+  },
+  {
+    capability: 'allowNetwork',
+    pattern: /\bWebSocket\b/g,
+    description: 'WebSocket is not allowed',
+  },
+  {
+    capability: 'allowDom',
+    pattern: /\bdocument\b/g,
+    description: 'document access is not allowed',
+  },
   { capability: 'allowDom', pattern: /\bwindow\b/g, description: 'window access is not allowed' },
-  { capability: 'allowImport', pattern: /\bimport\s*\(/g, description: 'dynamic import is not allowed' },
+  {
+    capability: 'allowImport',
+    pattern: /\bimport\s*\(/g,
+    description: 'dynamic import is not allowed',
+  },
 ];
 
 function checkSourcePatterns(code: string, policy: SandboxPolicy): string | null {
@@ -269,12 +285,18 @@ async function runWithQuickJs(
     if (policy.allowConsole) {
       const consoleObj = ctx.newObject();
       const logFn = ctx.newFunction('log', (...args: unknown[]) => {
-        const msg = args.map((a) => {
-          if (typeof a === 'string') return a;
-          // QuickJS passes handles; ctx.dump converts them to JS values
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          try { return ctx.dump(a as any); } catch { return String(a); }
-        }).join(' ');
+        const msg = args
+          .map((a) => {
+            if (typeof a === 'string') return a;
+            // QuickJS passes handles; ctx.dump converts them to JS values
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            try {
+              return ctx.dump(a as any);
+            } catch {
+              return String(a);
+            }
+          })
+          .join(' ');
         const ok = collector.append(msg + '\n');
         if (!ok) throw new Error('stdout cap exceeded');
         return ctx.undefined;
@@ -300,8 +322,14 @@ async function runWithQuickJs(
 
     if (result.error) {
       const errorDump = ctx.dump(result.error);
-      const errorName = typeof errorDump === 'object' && errorDump !== null ? (errorDump as Record<string, unknown>).name : undefined;
-      const errorMsg = typeof errorDump === 'object' && errorDump !== null ? (errorDump as Record<string, unknown>).message : errorDump;
+      const errorName =
+        typeof errorDump === 'object' && errorDump !== null
+          ? (errorDump as Record<string, unknown>).name
+          : undefined;
+      const errorMsg =
+        typeof errorDump === 'object' && errorDump !== null
+          ? (errorDump as Record<string, unknown>).message
+          : errorDump;
       const errorMsgStr = typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg);
 
       // Check if this is a CPU interrupt
@@ -426,9 +454,15 @@ export async function runSandboxCode(
 /**
  * Report which runner path is available.
  */
-export async function getRunnerInfo(): Promise<{ engine: 'quickjs' | 'fallback'; reason?: string }> {
+export async function getRunnerInfo(): Promise<{
+  engine: 'quickjs' | 'fallback';
+  reason?: string;
+}> {
   if (await isQuickJsAvailable()) {
     return { engine: 'quickjs' };
   }
-  return { engine: 'fallback', reason: '@jitl/quickjs-emscripten-core not installed — using Node.js vm module' };
+  return {
+    engine: 'fallback',
+    reason: '@jitl/quickjs-emscripten-core not installed — using Node.js vm module',
+  };
 }

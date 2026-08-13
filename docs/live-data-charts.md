@@ -28,11 +28,13 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Connect Domio charts, tables, and computed fields to external sources of truth.
 
 **Source list (v1):**
+
 - Google Sheets, Excel Online, Airtable, Notion (sheets/databases)
 - PostgreSQL, MySQL, BigQuery, Snowflake (databases / warehouses)
 - REST APIs (JSON / CSV), GraphQL endpoints
 
 **Acceptance Criteria:**
+
 - **AC-48.1** A user can authenticate against a connector via OAuth 2.0 (Google, Microsoft, Airtable, Notion) or via a credential screen (DBs + REST/GraphQL with API key / basic auth / bearer).
 - **AC-48.2** A successful auth creates a `data_connection` row scoped to user/team (never global).
 - **AC-48.3** Connection wizard validates the credential by issuing a sample read (`ping` query) and reporting latency / row count before "save" is enabled.
@@ -41,11 +43,13 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-48.6** Anonymous read-only connectors (for public REST endpoints) require zero credentials and document the CORS posture.
 
 **Behavioral Details:**
+
 - All connectors go through a **Connector Framework** (see §4.1) with a common `Adapter` interface: `discover()`, `ping()`, `query(spec, ctx)`, `subscribe(spec, ctx)`, `invalidate()`.
 - Connectors are versioned; pinning a connector version on a connection allows forward compatibility.
 - Schema discovery (tables/datasets/fields) is lazy and cached. Field types are normalized to a canonical scalar + measure/dimension taxonomy.
 
 **Edge Cases:**
+
 - **Token leakage:** A user's OAuth refresh token is stored only in the credential vault (see §7.1) — never returned to the client.
 - **Read-only DB user:** Encouraged (and enforced via a one-click "create read-only role" helper for Postgres/MySQL).
 - **Network captive portals:** Connector setup must work behind typical corporate firewalls; we do not require raw socket access.
@@ -59,6 +63,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Charts are interactive in presenter mode and in the shared web deck.
 
 **Acceptance Criteria:**
+
 - **AC-49.1** Hover tooltips, brush selection (zoom into a time range), and legend toggle (show/hide series) work in presenter mode and the public viewer.
 - **AC-49.2** Drill-down: clicking a bar/point opens a detail view (same chart, deeper granularity) without leaving the slide.
 - **AC-49.3** Drill-down respects the current scenario (#57) and cross-chart filters (#52).
@@ -66,10 +71,12 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-49.5** All interactions are keyboard accessible (tab to chart, arrow keys to move selection, Enter to drill).
 
 **Behavioral Details:**
+
 - Interaction is driven by the chart rendering pipeline (§4.4) and the **query gateway** (§4.3). Hover/tooltip resolution can be local (already in dataset) or remote (lazy aggregate query).
 - Drill-downs are modeled as a **drill hierarchy** bound to the chart, not hard-coded levels.
 
 **Edge Cases:**
+
 - **Empty chart:** Renders a typed empty state with a "no data" reason ("source returned 0 rows for this filter").
 - **Sparse data:** Line/area charts gracefully handle gaps (configurable: connect, gap, zero).
 - **Single-series with one point:** No interaction-driven errors; legend and tooltip work.
@@ -81,6 +88,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Bar, line, area, pie, scatter, funnel, sankey, treemap, heatmap, waterfall, gauge, radar, candlestick, bullet.
 
 **Acceptance Criteria:**
+
 - **AC-50.1** All 14 chart types are selectable in the chart picker.
 - **AC-50.2** Each chart type has a typed **binding schema** (e.g., candlestick requires OHLC + volume; sankey requires `source`, `target`, `value`).
 - **AC-50.3** Each chart type has a default style honoring theme tokens (#37) and can be customized per-instance.
@@ -88,10 +96,12 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-50.5** Chart type is not silently lost on rebind — if a binding invalidates required fields, the user is shown a typed warning and the chart type is preserved.
 
 **Behavioral Details:**
+
 - Charts are **smart components** (#25) — every chart exposes a JSON Schema for its props (per #233), enabling agent-driven creation.
 - Each chart ships an "AI chart selection" hint (#123) — if a dataset better fits a different chart type, the editor suggests it.
 
 **Edge Cases:**
+
 - **Incompatible type swap:** Switching from pie (1 dimension, 1 measure) to sankey (2 dims, 1 measure) surfaces a binding assistant.
 - **Color-blind safety:** Series colors are derived from a colorblind-safe palette when accessibility theming is enabled (#44).
 
@@ -102,6 +112,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Numbers shown to the audience are current as of "this morning."
 
 **Acceptance Criteria:**
+
 - **AC-51.1** On entering presenter mode, all bound widgets evaluate freshness and refresh if stale per their policy.
 - **AC-51.2** A "refresh now" button in the presenter toolbar triggers an immediate fetch, with a progress indicator that doesn't block the current slide.
 - **AC-51.3** Refreshes are budgeted per user/session (§3.3) and gracefully degrade to cached data when budget exhausted.
@@ -109,10 +120,12 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-51.5** A configurable **freshness policy** per binding: `eager` (always refresh on stage open), `lazy` (refresh on first view), `manual` (never auto-refresh), `on-interval` (refresh every N seconds).
 
 **Behavioral Details:**
+
 - Polling vs. webhook-driven refresh per source (§3.2).
 - Mid-presentation refresh is **non-blocking** — the existing chart stays visible until the new dataset lands, then a transition animation swaps it (#58 ties to animated chart builds).
 
 **Edge Cases:**
+
 - **Source is down:** Cached data is shown with a stale badge; refresh attempts are rate-limited and circuit-broken.
 - **Refresh exceeds query budget:** Returns cached; logs the skip; surfaces a presenter-only diagnostic.
 - **Clock skew:** Server time is the source of truth for "as of"; client clocks are not trusted.
@@ -124,6 +137,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** A single click on a chart filters all other charts on the slide (dashboard behavior inside a slide).
 
 **Acceptance Criteria:**
+
 - **AC-52.1** Selecting a region/segment on Chart A applies a dimension filter to Chart B, Chart C, … on the same slide.
 - **AC-52.2** Filter is reversible (clear-filter chip) and persistent across slide navigation within the same scenario.
 - **AC-52.3** When the active scenario changes (#57), filter state is reset per scenario.
@@ -132,10 +146,12 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-52.6** In static exports, filter chips are removed visually but the latest filter state is preserved for repro.
 
 **Behavioral Details:**
+
 - Implemented by the **filter cross-link manager** (§4.1, F52) — a lightweight subscription bus scoped to the slide.
 - Charts opt-in to receiving filters via a binding config (`listen_to_filters: ["region", "product"]`).
 
 **Edge Cases:**
+
 - **Conflicting filters:** User selects "EU" on Chart A and "US" on Chart B; precedence is chart-local > slide-global > scenario-default.
 - **No matching data post-filter:** Empty-state hint per chart.
 
@@ -146,6 +162,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Drag a slider during a board meeting, the chart recalculates live.
 
 **Acceptance Criteria:**
+
 - **AC-53.1** A formula field can be bound to a slider input (numeric, range, with min/max/step).
 - **AC-53.2** Slider movement triggers formula recompute and chart re-render within 100ms (#NFR-3).
 - **AC-53.3** Slider state is captured in scenario datasets (#57) and is replayable via the state timeline (#205).
@@ -154,10 +171,12 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-53.6** Mid-presentation interaction requires opt-in by the presenter (privacy & focus) — disabled by default unless the slide is tagged "interactive."
 
 **Behavioral Details:**
+
 - Driven by the **what-if slider evaluator** (§4.1).
 - Evaluation runs on the client (where supported) and on the formula engine server-side for chart-shape verification.
 
 **Edge Cases:**
+
 - **Slider out of range due to formula explosion:** Slider is clamped; user sees a "clamped" tooltip.
 - **Combinatorial explosion:** Simulation sweep (#239) is server-side; the UI slider is single-value.
 
@@ -168,6 +187,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Spreadsheet-style computed fields inside the deck.
 
 **Acceptance Criteria:**
+
 - **AC-54.1** A formula field references columns of any bound dataset using `A1`-style or named ranges.
 - **AC-54.2** Supported language: arithmetic, comparisons, logical ops, conditional, text, date, aggregation (`SUMIF`, `AVERAGEIF`, `COUNTIF`, `VLOOKUP`-style), cross-dataset joins via `LOOKUP` against a key.
 - **AC-54.3** Formula execution is sandboxed (§8.4) and deterministic — same inputs ⇒ same outputs.
@@ -176,10 +196,12 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-54.6** Formulas are versioned with the deck and survive connector renames via stable IDs.
 
 **Behavioral Details:**
+
 - Implemented as a spreadsheet AST (see §4.5) — algebraic optimization, constant folding, dependency tracking.
 - Supports **incremental recomputation**: when a slider changes (#53), only the dependent formula fields re-evaluate.
 
 **Edge Cases:**
+
 - **Circular references:** Detected at parse time; user sees a `#CYCLE!` and a reachable cycles view.
 - **Locale-separators:** The engine expects `.` for decimals; UI accepts locale input and pre-parses.
 - **Huge datasets:** Aggregations are pushed down to the source where possible (BigQuery, Snowflake).
@@ -191,6 +213,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Tables with sorting, pagination, conditional formatting, sparklines.
 
 **Acceptance Criteria:**
+
 - **AC-55.1** Sortable columns (single + multi-key with stable tie-break).
 - **AC-55.2** Pagination (page size configurable; "show all" with a confirmation gate beyond 10k rows).
 - **AC-55.3** Conditional formatting rules: gradient, threshold, icon-set, sparkline.
@@ -199,6 +222,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-55.6** Tables export to CSV/Excel with formatted-preserving options.
 
 **Edge Cases:**
+
 - **10M+ rows:** Server-side pagination with cursor-based streaming; the editor shows aggregate totals only.
 - **Sort language:** Collation is locale-aware (#61).
 
@@ -209,6 +233,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Realistic fake data by schema for prototypes and templates.
 
 **Acceptance Criteria:**
+
 - **AC-56.1** Given a schema (column names + types), the generator produces N rows with realistic distributions.
 - **AC-56.2** Distributions: uniform, gaussian, lognormal, seasonal, "business-like" (currency, percentage, dates).
 - **AC-56.3** Generator is deterministic — a seed produces reproducible rows.
@@ -216,6 +241,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-56.5** Mock data does not leave the project (no upstream writes).
 
 **Edge Cases:**
+
 - **PII-shaped fields:** Names, emails, phones are generated from a public synthetic list, never from real data.
 - **Realistic correlations:** The generator can encode "regions" and "quarter" fields with correlated measures.
 
@@ -226,6 +252,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Toggle "Base / Bull / Bear" and every chart, table, and callout swaps datasets.
 
 **Acceptance Criteria:**
+
 - **AC-57.1** A slide can declare one or more named scenarios; each scenario is a full set of dataset snapshots bound to the chart bindings on the slide.
 - **AC-57.2** A scenario switcher UI is present in presenter mode and in the published viewer.
 - **AC-57.3** Scenarios are slide-scoped by default; deck-level scenarios can be defined via inheritance.
@@ -234,10 +261,12 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-57.6** Voice/gesture triggers (#209, #208) can switch scenarios with a confirmation guard.
 
 **Behavioral Details:**
+
 - The **scenario manager** (§4.1) maintains a scenario DAG. A scenario is a named overlay of dataset snapshots + formula constants + slider values.
 - Scenarios enable **simulation mode** (#239) where an agent sweeps the entire space programmatically.
 
 **Edge Cases:**
+
 - **Partial scenarios:** If a scenario is missing a binding, the chart degrades to the default scenario's value with a "scenario-incomplete" badge.
 - **Scenario dependency:** Inheriting from a parent deck's scenario is supported but versioned.
 
@@ -248,6 +277,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Numbers and charts animate to their real values on entry.
 
 **Acceptance Criteria:**
+
 - **AC-58.1** A number updates with a tween (count-up) when its value changes.
 - **AC-58.2** A chart's bars/lines animate from zero (or previous state) to the new values on entry and on data refresh.
 - **AC-58.3** Animation is throttled to the renderer's frame budget (§8.3).
@@ -255,9 +285,11 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-58.5** Animation is configurable per chart — duration, easing, stagger.
 
 **Behavioral Details:**
+
 - Reuses the animation engine (§6) — chart scrubber hook on `dataChange` event.
 
 **Edge Cases:**
+
 - **Rapid data refreshes:** In-flight tweens are coalesced; the latest value wins.
 - **Negative values:** Bar charts animate to negative correctly (axis-aware).
 
@@ -268,6 +300,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Notes pinned to data points ("this dip = server outage, March 3").
 
 **Acceptance Criteria:**
+
 - **AC-59.1** An annotation is a `{bindable_point, text, author, timestamp, color}` object.
 - **AC-59.2** Annotations persist with the dataset snapshot where applicable.
 - **AC-59.3** Annotations are scoped per scenario (#57) — an annotation can be "Bull case only."
@@ -275,6 +308,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-59.5** Annotations are writable back to the source when the source supports it (#48 extension) — agent-writable data layer.
 
 **Edge Cases:**
+
 - **Point disappears on refresh:** Annotation is marked `orphaned` with a one-click "rebind" flow.
 - **Permission mismatch:** Some viewers can read annotations, only authors can write.
 
@@ -285,6 +319,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** When a KPI crosses a threshold, the slide callout restyles automatically.
 
 **Acceptance Criteria:**
+
 - **AC-60.1** A threshold rule is `{measure, comparator, value(s), severity, style}`.
 - **AC-60.2** Rules bind to a chart binding or formula field (#54).
 - **AC-60.3** Threshold breaches are visible in the presenter UI (e.g., system tray icon) and optionally push a notification.
@@ -292,6 +327,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-60.5** Threshold rules are subject to scenario overlays (#57).
 
 **Edge Cases:**
+
 - **Floating-point comparison:** Tolerance threshold defined per rule.
 - **Animated threshold breach:** Animation respects reduced-motion (#93).
 
@@ -302,6 +338,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Present the same deck in USD to one board, EUR to another.
 
 **Acceptance Criteria:**
+
 - **AC-61.1** Each data binding has a stored `source_currency` and `source_unit`.
 - **AC-61.2** A presentation locale is set per session (manual or auto-detected from the viewer's profile).
 - **AC-61.3** Numbers are converted at render time using an **exchange rate snapshot** (per-deck, per-session, or live).
@@ -309,10 +346,12 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-61.5** Original source currency is recoverable from the chart via the provenance chip (#215).
 
 **Behavioral Details:**
+
 - Implemented by the **localization service** (§4.1) — a stateless function applied at render time.
 - Exchange rates are themselves a data source (with their own freshness policy).
 
 **Edge Cases:**
+
 - **Currency missing in snapshot:** Use last-known rate with a stale badge.
 - **Compound units:** `USD/kWh`, `EUR/MWh` — handled via unit registry.
 
@@ -323,6 +362,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Embed Looker, Tableau, Power BI, Grafana (or any third-party iframe) with auth passthrough.
 
 **Acceptance Criteria:**
+
 - **AC-62.1** An embed config is `{url, provider, sizing, auth_passthrough}`.
 - **AC-62.2** Auth passthrough is mediated by the **embed proxy** (§4.1) — Domio issues short-lived tokens that the embed provider exchanges upstream.
 - **AC-62.3** Embeds are sandboxed (`Content-Security-Policy: frame-ancestors …`) and never carry raw viewer credentials.
@@ -330,6 +370,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-62.5** Embeds respect the freshness policy (#51) — re-fetch the embed URL on stage-open if configurable.
 
 **Edge Cases:**
+
 - **Provider outage:** Embed falls back to a cached snapshot shown with a stale badge.
 - **SSRF:** The proxy rejects embed URLs against internal IPs / localhost.
 
@@ -340,15 +381,18 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Always show when a source was last synced.
 
 **Acceptance Criteria:**
+
 - **AC-63.1** Every chart/table binding has a visible freshness indicator — "Updated 12s ago" / "Last sync: 04:12 UTC".
 - **AC-63.2** Stale threshold is configurable per binding (default: 1× the binding's refresh policy).
 - **AC-63.3** A "freshness panel" aggregates per-slide and per-deck staleness.
 - **AC-63.4** In static exports, the timestamp is preserved as a footer.
 
 **Behavioral Details:**
+
 - Driven by the **freshness tracker** (§4.1) — append-only `freshness_record` rows.
 
 **Edge Cases:**
+
 - **No successful sync ever:** Indicator shows "never" with a high-visibility badge.
 - **Clock skew:** Server time is authoritative.
 
@@ -359,6 +403,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 **Scope:** Viewers see the chart, never the raw credentials.
 
 **Acceptance Criteria:**
+
 - **AC-64.1** Viewer-side requests never include raw credentials — they pass through the query gateway with a **per-viewer access token** (opaque, short-lived).
 - **AC-64.2** Credentials are scoped to the deck author/team and rotate without invalidating existing tokens.
 - **AC-64.3** A viewer cannot enumerate other data sources or connections.
@@ -366,6 +411,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 - **AC-64.5** Permission errors are surfaced generically to viewers ("no access") without leaking connection details.
 
 **Edge Cases:**
+
 - **Token theft:** Tokens are short-lived (≤5 min) and bound to viewer + deck + scenario.
 - **Replay attack:** Tokens are single-use for mutating calls; idempotency keys (§4.8) apply.
 
@@ -392,6 +438,7 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 ```
 
 **Key screens:**
+
 - **Connector picker** with logos, last-used, and "Bring your own" (custom REST/GraphQL).
 - **Auth screen** with explicit permission disclosure and consent (mirrors PDPA consent basis, §11.1).
 - **Ping result** with latency, row count, and warnings ("this dataset has personal data — flagged for DLP").
@@ -468,14 +515,14 @@ Each feature is decomposed into: **acceptance criteria**, **behavioral details**
 
 ### 3.1 Connector Types and Protocols
 
-| Class | Protocol | Auth | Examples |
-|---|---|---|---|
-| SaaS spreadsheet | HTTPS + OAuth 2.0 | OAuth | Google Sheets, Excel Online |
-| SaaS database | HTTPS + OAuth 2.0 / API key | OAuth / API key | Airtable, Notion |
-| RDBMS | Wire protocol (TLS) | User/password, mTLS | Postgres, MySQL |
-| Warehouse | Wire protocol (TLS) | OAuth / Key-pair | BigQuery, Snowflake |
-| REST | HTTPS | Bearer / API key / Anonymous | Public & private APIs |
-| GraphQL | HTTPS | Bearer / API key | Public & private APIs |
+| Class            | Protocol                    | Auth                         | Examples                    |
+| ---------------- | --------------------------- | ---------------------------- | --------------------------- |
+| SaaS spreadsheet | HTTPS + OAuth 2.0           | OAuth                        | Google Sheets, Excel Online |
+| SaaS database    | HTTPS + OAuth 2.0 / API key | OAuth / API key              | Airtable, Notion            |
+| RDBMS            | Wire protocol (TLS)         | User/password, mTLS          | Postgres, MySQL             |
+| Warehouse        | Wire protocol (TLS)         | OAuth / Key-pair             | BigQuery, Snowflake         |
+| REST             | HTTPS                       | Bearer / API key / Anonymous | Public & private APIs       |
+| GraphQL          | HTTPS                       | Bearer / API key             | Public & private APIs       |
 
 All connectors go through the **Connector Framework** (§4.1).
 
@@ -841,6 +888,7 @@ ALTER TABLE freshness_record ENABLE ROW LEVEL SECURITY;
 ```
 
 **Notes:**
+
 - `tenant_id` on every row enforces isolation in a shared DB. For self-hosted, a per-tenant schema is also supported.
 - **Vault** stores `credential_ref` — keys reference the secrets manager; raw credentials never live in Postgres.
 - **Dataset snapshots** are immutable; TTL is policy-driven.
@@ -1014,14 +1062,14 @@ POST /v1/embeds/{embed_config_id}/token
 
 ### 8.3 Chart Render Budgets (FPS Targets)
 
-| Chart type | Target FPS | Render budget / frame |
-|---|---|---|
-| Bar / Line / Area / Pie | 60 | 16ms |
-| Scatter (≤10k points) | 60 | 16ms |
-| Heatmap (≤100k cells) | 30 | 32ms |
-| Sankey / Treemap | 60 | 16ms |
-| Network graph (3D, #68) | 60 | 16ms (WebGL) |
-| Scrolling table (10k rows) | 60 | 16ms virtualized |
+| Chart type                 | Target FPS | Render budget / frame |
+| -------------------------- | ---------- | --------------------- |
+| Bar / Line / Area / Pie    | 60         | 16ms                  |
+| Scatter (≤10k points)      | 60         | 16ms                  |
+| Heatmap (≤100k cells)      | 30         | 32ms                  |
+| Sankey / Treemap           | 60         | 16ms                  |
+| Network graph (3D, #68)    | 60         | 16ms (WebGL)          |
+| Scrolling table (10k rows) | 60         | 16ms virtualized      |
 
 ### 8.4 Sandboxed JS for Formulas
 

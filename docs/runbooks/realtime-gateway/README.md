@@ -8,10 +8,10 @@ WebSocket realtime collab (Yjs CRDT sync, presence, ops).
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-rt-gateway` | availability | 99.9% | 30d |
-| `lat-rt-gateway-p95` | latency | < 200 ms | 30d |
+| SLO                  | Kind         | Target   | Window |
+| -------------------- | ------------ | -------- | ------ |
+| `avail-rt-gateway`   | availability | 99.9%    | 30d    |
+| `lat-rt-gateway-p95` | latency      | < 200 ms | 30d    |
 
 ## Triage
 

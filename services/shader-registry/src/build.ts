@@ -47,7 +47,10 @@ export type ShaderCompiler = (shader: Shader) => CompileResult;
  */
 export function defaultCompiler(shader: Shader): CompileResult {
   if (shader.sourceWgsl.includes('TODO_COMPILE_ERROR')) {
-    return { success: false, error: 'Compile error: TODO_COMPILE_ERROR marker found in WGSL source' };
+    return {
+      success: false,
+      error: 'Compile error: TODO_COMPILE_ERROR marker found in WGSL source',
+    };
   }
   const programKey = `prog-${shader.id}-${shader.kind}`;
   return { success: true, programKey };

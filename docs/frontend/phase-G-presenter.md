@@ -14,13 +14,13 @@ pairing / annotations.
 
 ## Routes to build
 
-| Route                       | Renders                                                 |
-| --------------------------- | ------------------------------------------------------- |
-| `/`                         | Session-code entry (or list of recent sessions)         |
-| `/session/[id]`             | Live presenter view                                     |
-| `/session/[id]?display=secondary` | Secondary display (audience preview + QR code)    |
-| `/session/[id]/rehearsal`   | Rehearsal mode (no audience)                            |
-| `/session/[id]/recap`       | Recap after the session                                 |
+| Route                             | Renders                                         |
+| --------------------------------- | ----------------------------------------------- |
+| `/`                               | Session-code entry (or list of recent sessions) |
+| `/session/[id]`                   | Live presenter view                             |
+| `/session/[id]?display=secondary` | Secondary display (audience preview + QR code)  |
+| `/session/[id]/rehearsal`         | Rehearsal mode (no audience)                    |
+| `/session/[id]/recap`             | Recap after the session                         |
 
 ## Files to change
 
@@ -40,7 +40,7 @@ Client component. Lays out the panes using the runtime clients:
 
 ```tsx
 <PresenterShell>
-  <SlidePane current={deck.slides[idx]} next={deck.slides[idx+1]} />
+  <SlidePane current={deck.slides[idx]} next={deck.slides[idx + 1]} />
   <NotesPane notes={deck.slides[idx].notes} />
   <TimerPane client={timer} />
   <AudiencePreviewPane ws={wsClient} />

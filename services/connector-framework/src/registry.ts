@@ -6,12 +6,7 @@
  * and deprecated adapters.
  */
 
-import type {
-  ConnectorAdapter,
-  ConnectorId,
-  AdapterVersionInfo,
-  AuthKind,
-} from './types.js';
+import type { ConnectorAdapter, ConnectorId, AdapterVersionInfo, AuthKind } from './types.js';
 import { AdapterVersionMismatchError } from './types.js';
 
 export interface RegisteredAdapter {
@@ -47,7 +42,10 @@ export class AdapterRegistry {
    * If an adapter at the same (connector_id, version) already exists,
    * it is replaced (useful for tests).
    */
-  register(adapter: ConnectorAdapter, opts?: { deprecated?: boolean; deprecated_since?: string; replaced_by?: string }): void {
+  register(
+    adapter: ConnectorAdapter,
+    opts?: { deprecated?: boolean; deprecated_since?: string; replaced_by?: string },
+  ): void {
     const list = this.entries.get(this.key(adapter.connector_id)) ?? [];
     const existing = list.findIndex((e) => e.version === adapter.version);
     const entry: RegisteredAdapter = {
@@ -86,11 +84,12 @@ export class AdapterRegistry {
     const caretMatch = pinned_version.match(/^\^(\d+)\./);
     if (caretMatch) {
       const major = Number(caretMatch[1]);
-      const candidates = list
-        .filter((e) => {
-          const parts = e.version.split('.').map(Number);
-          return (parts[0] ?? 0) === major && this.versionCompare(e.version, pinned_version.slice(1)) >= 0;
-        });
+      const candidates = list.filter((e) => {
+        const parts = e.version.split('.').map(Number);
+        return (
+          (parts[0] ?? 0) === major && this.versionCompare(e.version, pinned_version.slice(1)) >= 0
+        );
+      });
       if (candidates.length === 0) {
         throw new AdapterVersionMismatchError(
           connector_id,
@@ -145,6 +144,9 @@ export class AdapterRegistry {
 
   /** Check if a connector_id is registered at all. */
   has(connector_id: ConnectorId): boolean {
-    return this.entries.has(this.key(connector_id)) && (this.entries.get(this.key(connector_id))?.length ?? 0) > 0;
+    return (
+      this.entries.has(this.key(connector_id)) &&
+      (this.entries.get(this.key(connector_id))?.length ?? 0) > 0
+    );
   }
 }

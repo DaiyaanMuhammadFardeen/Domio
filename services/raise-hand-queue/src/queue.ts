@@ -36,9 +36,7 @@ export class RaiseHandQueue {
 
   list(now_ms: number): ReadonlyArray<RaiseHand> {
     this.expire(now_ms);
-    return this.byIndex
-      .filter((e) => e.hand.status === 'queued')
-      .map((e) => e.hand);
+    return this.byIndex.filter((e) => e.hand.status === 'queued').map((e) => e.hand);
   }
 
   call(participant_id: string, now_ms: number): RaiseHand | null {
@@ -83,7 +81,12 @@ export class RaiseHandQueue {
     for (const e of this.byIndex) {
       if (e.hand.status === 'queued' && e.hand.raised_at_ms < cutoff) {
         this.hands.set(e.hand.participant_id, {
-          hand: { ...e.hand, status: 'expired', resolved_at_ms: now_ms, version: e.hand.version + 1 },
+          hand: {
+            ...e.hand,
+            status: 'expired',
+            resolved_at_ms: now_ms,
+            version: e.hand.version + 1,
+          },
         });
         changed = true;
       }

@@ -27,7 +27,10 @@ export interface SessionCoordinatorStore {
   /** Returns the shards that have active participants for fan-out. */
   fanoutPlan(input: { workspace_id: string; session_id: string }): Promise<ShardFanoutPlan | null>;
   /** Replayable row projection for export. */
-  exportMembership(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<MembershipRow>>;
+  exportMembership(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<MembershipRow>>;
 }
 
 export function isCoordinatorStore(v: unknown): v is SessionCoordinatorStore {

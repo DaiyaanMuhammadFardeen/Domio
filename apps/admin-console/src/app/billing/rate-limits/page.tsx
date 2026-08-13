@@ -115,8 +115,7 @@ export default function RateLimitsPage() {
           const usage = Number(val);
           const limit = Number(row.limit);
           const tone = toneForUsageRatio(usage, limit);
-          const pct =
-            limit > 0 ? Math.round((usage / limit) * 100) : null;
+          const pct = limit > 0 ? Math.round((usage / limit) * 100) : null;
           return (
             <span className="inline-flex items-center gap-2">
               <Badge tone={tone}>
@@ -178,9 +177,7 @@ export default function RateLimitsPage() {
     try {
       if (editing) {
         const updated = await updateRateLimitRule(editing.id, input);
-        setRules((prev) =>
-          prev.map((r) => (r.id === updated.id ? updated : r)),
-        );
+        setRules((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
       } else {
         const created = await createRateLimitRule(input);
         setRules((prev) => [...prev, created]);
@@ -211,8 +208,7 @@ export default function RateLimitsPage() {
             {t('admin.billing.rateLimits.heading')}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Cap API usage per key, agent, or client IP. Counts reset at the
-            end of each window.
+            Cap API usage per key, agent, or client IP. Counts reset at the end of each window.
           </p>
         </div>
         <button
@@ -229,8 +225,7 @@ export default function RateLimitsPage() {
           className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
           role="alert"
         >
-          <strong className="font-semibold">Could not load rate limits.</strong>{' '}
-          {error}
+          <strong className="font-semibold">Could not load rate limits.</strong> {error}
         </div>
       ) : null}
 

@@ -23,7 +23,14 @@ describe('XapiEmitter — answered', () => {
   it('records response and success on each answer', () => {
     const emitter = new XapiEmitter({ actor: ACTOR });
     const stmt = emitter.answered(
-      { quizId: 'q1', deckId: 'd1', attemptId: 'a1', questionId: 'q-q1', response: 'paris', correct: true },
+      {
+        quizId: 'q1',
+        deckId: 'd1',
+        attemptId: 'a1',
+        questionId: 'q-q1',
+        response: 'paris',
+        correct: true,
+      },
       'Capital of France?',
     );
     expect(stmt.verb.id).toBe('http://adlnet.gov/expapi/verbs/answered');
@@ -68,11 +75,25 @@ describe('XapiEmitter — replayability', () => {
     const emitter = new XapiEmitter({ actor: ACTOR });
     emitter.experienced({ quizId: 'q1', deckId: 'd1', attemptId: 'a1' }, 'Onboarding');
     emitter.answered(
-      { quizId: 'q1', deckId: 'd1', attemptId: 'a1', questionId: 'q-1', response: 'paris', correct: true },
+      {
+        quizId: 'q1',
+        deckId: 'd1',
+        attemptId: 'a1',
+        questionId: 'q-1',
+        response: 'paris',
+        correct: true,
+      },
       'Q1?',
     );
     emitter.answered(
-      { quizId: 'q1', deckId: 'd1', attemptId: 'a1', questionId: 'q-2', response: 'true', correct: false },
+      {
+        quizId: 'q1',
+        deckId: 'd1',
+        attemptId: 'a1',
+        questionId: 'q-2',
+        response: 'true',
+        correct: false,
+      },
       'Q2?',
     );
     emitter.completed(

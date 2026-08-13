@@ -83,7 +83,11 @@ describe('query-gateway handlers — execute', () => {
       ctx,
     );
     expect(res.status).toBe(200);
-    const body = res.body as { snapshot: { columns: string[]; rows: unknown[][] }; fromCache: boolean; cacheTier: string };
+    const body = res.body as {
+      snapshot: { columns: string[]; rows: unknown[][] };
+      fromCache: boolean;
+      cacheTier: string;
+    };
     expect(body.snapshot.columns).toEqual(['id', 'name']);
     expect(body.fromCache).toBe(false);
     expect(body.cacheTier).toBe('miss');
@@ -113,7 +117,13 @@ describe('query-gateway handlers — execute', () => {
   it('POST /v1/queries/execute returns 404 for unknown query', async () => {
     const { ctx } = await makeCtx();
     const res = await handlers.executeQuery(
-      req('POST', '/v1/queries/execute', { orgId: ORG }, { queryId: 'nonexistent' }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/queries/execute',
+        { orgId: ORG },
+        { queryId: 'nonexistent' },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(404);
@@ -190,12 +200,18 @@ describe('query-gateway handlers — webhook', () => {
     const signature = createHmac('sha256', WEBHOOK_SECRET).update(payload).digest('hex');
 
     const res = await handlers.processWebhook(
-      req('POST', '/v1/queries/webhook', { orgId: ORG }, {
-        payload,
-        signature,
-        idempotencyKey: 'wh-1',
-        queryId: 'q1',
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/queries/webhook',
+        { orgId: ORG },
+        {
+          payload,
+          signature,
+          idempotencyKey: 'wh-1',
+          queryId: 'q1',
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -219,12 +235,18 @@ describe('query-gateway handlers — webhook', () => {
     });
 
     const res = await handlers.processWebhook(
-      req('POST', '/v1/queries/webhook', { orgId: ORG }, {
-        payload: '{}',
-        signature: 'invalid-hmac-signature',
-        idempotencyKey: 'wh-2',
-        queryId: 'q1',
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/queries/webhook',
+        { orgId: ORG },
+        {
+          payload: '{}',
+          signature: 'invalid-hmac-signature',
+          idempotencyKey: 'wh-2',
+          queryId: 'q1',
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -249,17 +271,35 @@ describe('query-gateway handlers — webhook', () => {
     const signature = createHmac('sha256', WEBHOOK_SECRET).update(payload).digest('hex');
 
     const res1 = await handlers.processWebhook(
-      req('POST', '/v1/queries/webhook', { orgId: ORG }, {
-        payload, signature, idempotencyKey: 'wh-dup', queryId: 'q1',
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/queries/webhook',
+        { orgId: ORG },
+        {
+          payload,
+          signature,
+          idempotencyKey: 'wh-dup',
+          queryId: 'q1',
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res1.status).toBe(200);
 
     const res2 = await handlers.processWebhook(
-      req('POST', '/v1/queries/webhook', { orgId: ORG }, {
-        payload, signature, idempotencyKey: 'wh-dup', queryId: 'q1',
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/queries/webhook',
+        { orgId: ORG },
+        {
+          payload,
+          signature,
+          idempotencyKey: 'wh-dup',
+          queryId: 'q1',
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res2.status).toBe(200);
@@ -328,7 +368,13 @@ describe('query-gateway handlers — viewer tokens', () => {
     });
 
     const res = await handlers.issueViewerToken(
-      req('POST', '/v1/viewer-tokens', { orgId: ORG }, { queryId: 'q1', scopes: ['read'], ttlMs: 60000 }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/viewer-tokens',
+        { orgId: ORG },
+        { queryId: 'q1', scopes: ['read'], ttlMs: 60000 },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -386,7 +432,9 @@ describe('query-gateway handlers — get query', () => {
   it('GET /v1/queries/:id returns 404 for unknown query', async () => {
     const { ctx } = await makeCtx();
     const res = await handlers.getQuery(
-      req('GET', '/v1/queries/:id', { orgId: ORG, queryId: 'nonexistent' }, undefined, { actorId: ACTOR }),
+      req('GET', '/v1/queries/:id', { orgId: ORG, queryId: 'nonexistent' }, undefined, {
+        actorId: ACTOR,
+      }),
       ctx,
     );
     expect(res.status).toBe(404);

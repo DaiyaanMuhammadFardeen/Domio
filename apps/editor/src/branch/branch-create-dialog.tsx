@@ -51,20 +51,38 @@ export function BranchCreateDialog({
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Create branch" className="branch-create-dialog">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Create branch"
+      className="branch-create-dialog"
+    >
       <form onSubmit={submit}>
         <h2>New branch</h2>
         <label htmlFor="bc-dialog-name">Name</label>
-        <input id="bc-dialog-name" autoFocus value={name} onChange={(e) => setName(e.target.value)} />
+        <input
+          id="bc-dialog-name"
+          autoFocus
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
         <label htmlFor="bc-dialog-base">Base checkpoint</label>
         <select id="bc-dialog-base" value={baseId} onChange={(e) => setBaseId(e.target.value)}>
           <option value="">Use current head</option>
-          {baseCheckpoints.map((cp) => <option key={cp.id} value={cp.id}>{cp.name}</option>)}
+          {baseCheckpoints.map((cp) => (
+            <option key={cp.id} value={cp.id}>
+              {cp.name}
+            </option>
+          ))}
         </select>
         {error && <p role="alert">{error}</p>}
         <menu>
-          <button type="button" onClick={onClose} disabled={submitting}>Cancel</button>
-          <button type="submit" disabled={submitting || !name.trim()}>Create</button>
+          <button type="button" onClick={onClose} disabled={submitting}>
+            Cancel
+          </button>
+          <button type="submit" disabled={submitting || !name.trim()}>
+            Create
+          </button>
         </menu>
       </form>
     </div>

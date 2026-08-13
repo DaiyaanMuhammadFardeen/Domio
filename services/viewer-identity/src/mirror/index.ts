@@ -17,4 +17,8 @@ export class NullIdentityMirror implements IdentityMirror {
   }
 }
 
-export { buildIdentityMirror, type IdentityMirror, type IdentityMirrorClient } from './clickhouse.js';
+export {
+  buildIdentityMirror,
+  type IdentityMirror,
+  type IdentityMirrorClient,
+} from './clickhouse.js';

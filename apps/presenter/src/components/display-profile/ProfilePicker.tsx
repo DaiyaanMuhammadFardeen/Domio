@@ -65,7 +65,10 @@ function detectAuto(): { width: number; height: number; refresh: number } | null
   // Prefer the largest connected screen's resolution.
   const screens = window.screen ? [window.screen] : [];
   if (screens.length === 0) return null;
-  const widest = screens.reduce((acc, s) => (s.width * s.height > acc.width * acc.height ? s : acc), screens[0]!);
+  const widest = screens.reduce(
+    (acc, s) => (s.width * s.height > acc.width * acc.height ? s : acc),
+    screens[0]!,
+  );
   return {
     width: widest.width,
     height: widest.height,
@@ -87,7 +90,11 @@ export function ProfilePicker({
     color: 'rec2020',
     hdr: true,
   });
-  const [autoDetected, setAutoDetected] = useState<{ width: number; height: number; refresh: number } | null>(null);
+  const [autoDetected, setAutoDetected] = useState<{
+    width: number;
+    height: number;
+    refresh: number;
+  } | null>(null);
 
   useEffect(() => {
     const stored = loadSnapshot(actorId);
@@ -177,11 +184,17 @@ export function ProfilePicker({
         </span>
       </header>
 
-      <div role="radiogroup" aria-label="Display profile presets" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div
+        role="radiogroup"
+        aria-label="Display profile presets"
+        style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
+      >
         <button
           type="button"
           role="radio"
-          aria-checked={snapshot?.name === `auto-${autoDetected?.width ?? 0}x${autoDetected?.height ?? 0}`}
+          aria-checked={
+            snapshot?.name === `auto-${autoDetected?.width ?? 0}x${autoDetected?.height ?? 0}`
+          }
           data-testid={`${dataTestId}-auto`}
           onClick={chooseAuto}
           disabled={!autoDetected}
@@ -321,7 +334,15 @@ interface NumberFieldProps {
 
 function NumberField({ label, value, min, max, onChange }: NumberFieldProps): ReactElement {
   return (
-    <label style={{ display: 'flex', flexDirection: 'column', fontSize: 10, color: 'var(--content-secondary)', flex: 1 }}>
+    <label
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        fontSize: 10,
+        color: 'var(--content-secondary)',
+        flex: 1,
+      }}
+    >
       {label}
       <input
         type="number"

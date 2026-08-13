@@ -25,12 +25,13 @@ describe('P06 panels — axe a11y', () => {
   });
 
   it('InsertPanel has no critical/serious violations', async () => {
-    const { container } = render(
-      <InsertPanel onInsert={() => {}} />,
-      { container: document.getElementById('root')! },
-    );
+    const { container } = render(<InsertPanel onInsert={() => {}} />, {
+      container: document.getElementById('root')!,
+    });
     const results = await runAxe(container);
-    const serious = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
+    const serious = results.violations.filter(
+      (v) => v.impact === 'critical' || v.impact === 'serious',
+    );
     expect(serious).toEqual([]);
     cleanup();
   });
@@ -51,7 +52,9 @@ describe('P06 panels — axe a11y', () => {
       { container: document.getElementById('root')! },
     );
     const results = await runAxe(container);
-    const serious = results.violations.filter((v) => v.impact === 'critical' || v.impact === 'serious');
+    const serious = results.violations.filter(
+      (v) => v.impact === 'critical' || v.impact === 'serious',
+    );
     expect(serious).toEqual([]);
     cleanup();
   });

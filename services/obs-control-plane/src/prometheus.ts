@@ -74,9 +74,12 @@ function alertName(slo: SloEntry, spec: WindowSpec): string {
 /** Tier tag for the alert name. */
 function tierTag(tier: SloEntry['tier']): string {
   switch (tier) {
-    case 'tier-1': return 'T1';
-    case 'tier-2': return 'T2';
-    case 'tier-3': return 'T3';
+    case 'tier-1':
+      return 'T1';
+    case 'tier-2':
+      return 'T2';
+    case 'tier-3':
+      return 'T3';
   }
 }
 
@@ -134,7 +137,12 @@ function renderGroup(name: string, slo: SloEntry, alerts: readonly BurnRateAlert
   return [
     '- name: slo-burn-rate-' + name,
     '  rules:',
-    ...rules.map((r) => r.split('\n').map((l) => '    ' + l).join('\n')),
+    ...rules.map((r) =>
+      r
+        .split('\n')
+        .map((l) => '    ' + l)
+        .join('\n'),
+    ),
   ].join('\n');
 }
 

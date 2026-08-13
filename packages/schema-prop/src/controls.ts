@@ -94,11 +94,31 @@ export function inferControl(
       case 'textarea':
         return { ...base, kind: 'textarea', placeholder: ext.placeholder };
       case 'number':
-        return { ...base, kind: 'number', min: fragment.minimum, max: fragment.maximum, step: ext.step };
+        return {
+          ...base,
+          kind: 'number',
+          min: fragment.minimum,
+          max: fragment.maximum,
+          step: ext.step,
+        };
       case 'stepper':
-        return { ...base, kind: 'stepper', min: fragment.minimum, max: fragment.maximum, step: ext.step ?? 1, unit: ext.unit };
+        return {
+          ...base,
+          kind: 'stepper',
+          min: fragment.minimum,
+          max: fragment.maximum,
+          step: ext.step ?? 1,
+          unit: ext.unit,
+        };
       case 'slider':
-        return { ...base, kind: 'slider', min: fragment.minimum ?? 0, max: fragment.maximum ?? 100, step: ext.step ?? 1, unit: ext.unit };
+        return {
+          ...base,
+          kind: 'slider',
+          min: fragment.minimum ?? 0,
+          max: fragment.maximum ?? 100,
+          step: ext.step ?? 1,
+          unit: ext.unit,
+        };
       case 'toggle':
         return { ...base, kind: 'toggle' };
       case 'segmented':
@@ -199,7 +219,10 @@ function firstEnum(fragment: PropSchemaFragment): unknown {
 /** Ordered, category-grouped control descriptors for the whole schema. */
 export function controlDescriptors(
   schema: DomioPropsSchema,
-): Array<{ category: NonNullable<DomioPropExtension['category']>; controls: TypedControlDescriptor[] }> {
+): Array<{
+  category: NonNullable<DomioPropExtension['category']>;
+  controls: TypedControlDescriptor[];
+}> {
   const groups = new Map<NonNullable<DomioPropExtension['category']>, TypedControlDescriptor[]>();
   for (const [key, fragment] of Object.entries(schema.properties ?? {})) {
     const descriptor = inferControl(key, fragment);
@@ -208,7 +231,11 @@ export function controlDescriptors(
     groups.get(category)!.push(descriptor);
   }
   const order: Array<NonNullable<DomioPropExtension['category']>> = [
-    'Content', 'Layout', 'Style', 'Behavior', 'Advanced',
+    'Content',
+    'Layout',
+    'Style',
+    'Behavior',
+    'Advanced',
   ];
   return [...groups.entries()]
     .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))

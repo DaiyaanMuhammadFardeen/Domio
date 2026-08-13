@@ -26,7 +26,24 @@ export interface CollabStore {
     opts?: { threadId?: string; status?: string },
   ): Promise<Comment[]>;
   getComment(commentId: string): Promise<Comment | null>;
-  updateComment(commentId: string, patch: Partial<Pick<Comment, 'bodyMd' | 'status' | 'resolvedAt' | 'resolvedBy' | 'isOrphaned' | 'targetType' | 'targetId' | 'anchor' | 'emojiReactions' | 'updatedAt'>>): Promise<Comment>;
+  updateComment(
+    commentId: string,
+    patch: Partial<
+      Pick<
+        Comment,
+        | 'bodyMd'
+        | 'status'
+        | 'resolvedAt'
+        | 'resolvedBy'
+        | 'isOrphaned'
+        | 'targetType'
+        | 'targetId'
+        | 'anchor'
+        | 'emojiReactions'
+        | 'updatedAt'
+      >
+    >,
+  ): Promise<Comment>;
   insertMentions(mentions: Mention[]): Promise<void>;
 
   // -------------------------------------------------------------------------
@@ -35,10 +52,18 @@ export interface CollabStore {
 
   insertApprovalRequest(request: ApprovalRequest): Promise<void>;
   getApprovalRequest(requestId: string): Promise<ApprovalRequest | null>;
-  updateApprovalRequest(requestId: string, patch: Partial<Pick<ApprovalRequest, 'status' | 'requestedAt' | 'closedAt' | 'updatedAt' | 'updatedBy'>>): Promise<ApprovalRequest>;
+  updateApprovalRequest(
+    requestId: string,
+    patch: Partial<
+      Pick<ApprovalRequest, 'status' | 'requestedAt' | 'closedAt' | 'updatedAt' | 'updatedBy'>
+    >,
+  ): Promise<ApprovalRequest>;
   insertApprovalDecision(decision: ApprovalDecision): Promise<void>;
   listApprovalDecisions(requestId: string): Promise<ApprovalDecision[]>;
-  listApprovalRequestsByDeck(deckId: string, opts?: { status?: string }): Promise<ApprovalRequest[]>;
+  listApprovalRequestsByDeck(
+    deckId: string,
+    opts?: { status?: string },
+  ): Promise<ApprovalRequest[]>;
 
   // -------------------------------------------------------------------------
   // Assignments
@@ -46,7 +71,21 @@ export interface CollabStore {
 
   insertAssignment(assignment: Assignment): Promise<void>;
   getAssignment(assignmentId: string): Promise<Assignment | null>;
-  updateAssignment(assignmentId: string, patch: Partial<Pick<Assignment, 'status' | 'blockedReason' | 'dueAt' | 'watchers' | 'primaryId' | 'completedAt' | 'updatedAt'>>): Promise<Assignment>;
+  updateAssignment(
+    assignmentId: string,
+    patch: Partial<
+      Pick<
+        Assignment,
+        | 'status'
+        | 'blockedReason'
+        | 'dueAt'
+        | 'watchers'
+        | 'primaryId'
+        | 'completedAt'
+        | 'updatedAt'
+      >
+    >,
+  ): Promise<Assignment>;
   listAssignmentsByUser(userId: string): Promise<Assignment[]>;
 
   // -------------------------------------------------------------------------

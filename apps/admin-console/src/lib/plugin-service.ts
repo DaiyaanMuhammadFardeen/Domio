@@ -10,12 +10,7 @@
  * mutation returns a freshly-shaped object so callers can re-render.
  */
 
-import type {
-  Plugin,
-  PluginPublishRequest,
-  PluginScope,
-  PluginState,
-} from './types';
+import type { Plugin, PluginPublishRequest, PluginScope, PluginState } from './types';
 
 const NOW = Date.UTC(2026, 6, 1);
 
@@ -106,8 +101,7 @@ const PLUGINS: Plugin[] = [
     installed_at_ms: NOW - 1000 * 60 * 60 * 24 * 365,
     installed_by: 'admin@acme.com',
     last_used_at_ms: NOW - 1000 * 60 * 60 * 24 * 120,
-    deprecation_notice:
-      'Removed from the embed pipeline on 2026-04-01. Uninstall to free a slot.',
+    deprecation_notice: 'Removed from the embed pipeline on 2026-04-01. Uninstall to free a slot.',
   },
 ];
 
@@ -263,9 +257,17 @@ export async function getPluginAuditLog(id: string): Promise<ReadonlyArray<Plugi
     { timestamp_ms: base + 1000 * 60 * 5, action: 'plugin.installed', actor: 'admin@acme.com' },
     { timestamp_ms: base + 1000 * 60 * 60 * 12, action: 'plugin.enabled', actor: 'admin@acme.com' },
     { timestamp_ms: base + 1000 * 60 * 60 * 24, action: 'plugin.scope.granted', actor: 'system' },
-    { timestamp_ms: base + 1000 * 60 * 60 * 48, action: 'plugin.scope.granted', actor: 'admin@acme.com' },
+    {
+      timestamp_ms: base + 1000 * 60 * 60 * 48,
+      action: 'plugin.scope.granted',
+      actor: 'admin@acme.com',
+    },
     { timestamp_ms: base + 1000 * 60 * 60 * 60, action: 'plugin.token.rotated', actor: 'system' },
-    { timestamp_ms: base + 1000 * 60 * 60 * 72, action: 'plugin.used', actor: 'workspace:acme-sales' },
+    {
+      timestamp_ms: base + 1000 * 60 * 60 * 72,
+      action: 'plugin.used',
+      actor: 'workspace:acme-sales',
+    },
   ];
   // Stable per-id offset so different plugins look distinct.
   const offset = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
@@ -281,7 +283,9 @@ export async function getPluginAuditLog(id: string): Promise<ReadonlyArray<Plugi
 
 // ── Display helpers ─────────────────────────────────────────────────────
 
-export const PLUGIN_STATE_TONES: Readonly<Record<PluginState, 'success' | 'warning' | 'danger' | 'muted' | 'brand'>> = {
+export const PLUGIN_STATE_TONES: Readonly<
+  Record<PluginState, 'success' | 'warning' | 'danger' | 'muted' | 'brand'>
+> = {
   installed: 'success',
   available: 'brand',
   deprecated: 'muted',

@@ -28,9 +28,7 @@ vi.mock('@domio/ui', async () => {
   const React = await import('react');
   return {
     ...actual,
-    FormattedMessage: function MockFormattedMessage(props: {
-      id: string;
-    }): React.ReactElement {
+    FormattedMessage: function MockFormattedMessage(props: { id: string }): React.ReactElement {
       const catalogue = React.useContext(FormattedMessageContext);
       const resolved = catalogue[props.id] ?? props.id;
       return <span>{resolved}</span>;
@@ -40,9 +38,7 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
@@ -66,9 +62,30 @@ const DECK = {
   brandKitId: 'b',
   themeId: 'th',
   slides: [
-    { id: 's1', semanticId: 's1', position: 0, title: 'Intro', aspect: { ratioW: 16, ratioH: 9 }, elements: [] },
-    { id: 's2', semanticId: 's2', position: 1, title: 'Body', aspect: { ratioW: 16, ratioH: 9 }, elements: [] },
-    { id: 's3', semanticId: 's3', position: 2, title: 'Appendix', aspect: { ratioW: 16, ratioH: 9 }, elements: [] },
+    {
+      id: 's1',
+      semanticId: 's1',
+      position: 0,
+      title: 'Intro',
+      aspect: { ratioW: 16, ratioH: 9 },
+      elements: [],
+    },
+    {
+      id: 's2',
+      semanticId: 's2',
+      position: 1,
+      title: 'Body',
+      aspect: { ratioW: 16, ratioH: 9 },
+      elements: [],
+    },
+    {
+      id: 's3',
+      semanticId: 's3',
+      position: 2,
+      title: 'Appendix',
+      aspect: { ratioW: 16, ratioH: 9 },
+      elements: [],
+    },
   ],
 };
 
@@ -82,7 +99,9 @@ describe('ContentControlTab', () => {
 
   it('emits onChange when a checkbox is toggled', () => {
     const onChange = vi.fn();
-    render(withLocale(<ContentControlTab deck={DECK as never} value={['s1']} onChange={onChange} />));
+    render(
+      withLocale(<ContentControlTab deck={DECK as never} value={['s1']} onChange={onChange} />),
+    );
     fireEvent.click(screen.getByTestId('content-control-tab-check-s1'));
     expect(onChange).toHaveBeenCalledWith([]);
   });
@@ -96,7 +115,11 @@ describe('ContentControlTab', () => {
 
   it('select-none clears the selection', () => {
     const onChange = vi.fn();
-    render(withLocale(<ContentControlTab deck={DECK as never} value={['s1', 's2']} onChange={onChange} />));
+    render(
+      withLocale(
+        <ContentControlTab deck={DECK as never} value={['s1', 's2']} onChange={onChange} />,
+      ),
+    );
     fireEvent.click(screen.getByTestId('content-control-tab-none'));
     expect(onChange).toHaveBeenCalledWith([]);
   });

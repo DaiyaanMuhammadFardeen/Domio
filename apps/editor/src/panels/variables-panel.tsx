@@ -151,9 +151,11 @@ export function VariablesPanel({
       }));
       const evaluator = new RuleEvaluator();
       const result = evaluator.evaluate(candidates, ruleStore);
-      setPreviewResult(matched
-        ? `True: rule ${result.ruleId ?? 'inline'} fires → ${result.action?.kind ?? 'n/a'}`
-        : 'False: no rule fires');
+      setPreviewResult(
+        matched
+          ? `True: rule ${result.ruleId ?? 'inline'} fires → ${result.action?.kind ?? 'n/a'}`
+          : 'False: no rule fires',
+      );
     } catch (err) {
       setPreviewError(err instanceof Error ? err.message : String(err));
     }
@@ -205,7 +207,11 @@ export function VariablesPanel({
               value={scope}
               onChange={(e) => setScope(e.target.value as VariableScope)}
             >
-              {SCOPE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+              {SCOPE_OPTIONS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
             </select>
             <label htmlFor="p10-var-type">Type</label>
             <select
@@ -214,7 +220,11 @@ export function VariablesPanel({
               value={type}
               onChange={(e) => setType(e.target.value as VariableType)}
             >
-              {TYPE_OPTIONS.map((t) => <option key={t} value={t}>{t}</option>)}
+              {TYPE_OPTIONS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
             </select>
             <label htmlFor="p10-var-default">Default value</label>
             <input
@@ -235,7 +245,9 @@ export function VariablesPanel({
               {variables.map((v) => (
                 <li key={v.id} className="variables-panel__item" data-testid="p10-var-row">
                   <span>{v.name}</span>
-                  <small>{v.scope} · {v.type}</small>
+                  <small>
+                    {v.scope} · {v.type}
+                  </small>
                   <button
                     type="button"
                     data-testid="p10-var-remove"
@@ -285,7 +297,9 @@ export function VariablesPanel({
               onChange={(e) => setActionKind(e.target.value as Action['kind'])}
             >
               {ACTION_OPTIONS.map((a) => (
-                <option key={a.value} value={a.value}>{a.label}</option>
+                <option key={a.value} value={a.value}>
+                  {a.label}
+                </option>
               ))}
             </select>
             <div className="variables-panel__actions">

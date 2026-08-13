@@ -92,7 +92,15 @@ export function OverviewGrid({
             }}
           >
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>#{i + 1}</div>
-            <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {s.title ?? s.semanticId}
             </div>
           </button>

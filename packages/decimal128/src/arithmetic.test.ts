@@ -5,20 +5,43 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  add, sub, mul, div, round,
-  compare, isZero, isInfinity, isNaN, formatCurrency, formatNumber,
-  toString, OVERFLOW_MAX, type RoundingMode,
+  add,
+  sub,
+  mul,
+  div,
+  round,
+  compare,
+  isZero,
+  isInfinity,
+  isNaN,
+  formatCurrency,
+  formatNumber,
+  toString,
+  OVERFLOW_MAX,
+  type RoundingMode,
 } from './index.js';
 
 // ── add / sub / mul / div ───────────────────────────────────────────────
 
 describe('decimal128 add', () => {
-  it('adds two integers', () => { expect(add('2', '3').value).toBe('5'); });
-  it('adds two decimals', () => { expect(add('0.1', '0.2').value).toBe('0.3'); });
-  it('adds negative and positive', () => { expect(add('-5', '3').value).toBe('-2'); });
-  it('preserves sign for zero result', () => { expect(add('1', '-1').value).toBe('0'); });
-  it('returns Infinity when one operand is', () => { expect(add('Infinity', '1').value).toBe('Infinity'); });
-  it('returns NaN for Infinity + -Infinity', () => { expect(add('Infinity', '-Infinity').value).toBe('NaN'); });
+  it('adds two integers', () => {
+    expect(add('2', '3').value).toBe('5');
+  });
+  it('adds two decimals', () => {
+    expect(add('0.1', '0.2').value).toBe('0.3');
+  });
+  it('adds negative and positive', () => {
+    expect(add('-5', '3').value).toBe('-2');
+  });
+  it('preserves sign for zero result', () => {
+    expect(add('1', '-1').value).toBe('0');
+  });
+  it('returns Infinity when one operand is', () => {
+    expect(add('Infinity', '1').value).toBe('Infinity');
+  });
+  it('returns NaN for Infinity + -Infinity', () => {
+    expect(add('Infinity', '-Infinity').value).toBe('NaN');
+  });
   it('clamps on overflow', () => {
     const r = add(OVERFLOW_MAX, '1');
     expect(r.was_overflow).toBe(true);
@@ -27,28 +50,50 @@ describe('decimal128 add', () => {
 });
 
 describe('decimal128 sub', () => {
-  it('subtracts', () => { expect(sub('5', '3').value).toBe('2'); });
-  it('flips sign of result', () => { expect(sub('3', '5').value).toBe('-2'); });
-  it('returns 0 for self', () => { expect(sub('7', '7').value).toBe('0'); });
+  it('subtracts', () => {
+    expect(sub('5', '3').value).toBe('2');
+  });
+  it('flips sign of result', () => {
+    expect(sub('3', '5').value).toBe('-2');
+  });
+  it('returns 0 for self', () => {
+    expect(sub('7', '7').value).toBe('0');
+  });
 });
 
 describe('decimal128 mul', () => {
-  it('multiplies', () => { expect(mul('2.5', '4').value).toBe('10'); });
-  it('signs multiply', () => { expect(mul('-2', '3').value).toBe('-6'); });
-  it('0 * Inf is NaN', () => { expect(mul('0', 'Infinity').value).toBe('NaN'); });
-  it('Inf * finite is Inf', () => { expect(mul('Infinity', '2').value).toBe('Infinity'); });
+  it('multiplies', () => {
+    expect(mul('2.5', '4').value).toBe('10');
+  });
+  it('signs multiply', () => {
+    expect(mul('-2', '3').value).toBe('-6');
+  });
+  it('0 * Inf is NaN', () => {
+    expect(mul('0', 'Infinity').value).toBe('NaN');
+  });
+  it('Inf * finite is Inf', () => {
+    expect(mul('Infinity', '2').value).toBe('Infinity');
+  });
 });
 
 describe('decimal128 div', () => {
-  it('divides', () => { expect(div('10', '2').value).toBe('5'); });
+  it('divides', () => {
+    expect(div('10', '2').value).toBe('5');
+  });
   it('divide by zero returns 0 with flag', () => {
     const r = div('5', '0');
     expect(r.value).toBe('0');
     expect(r.was_zero_division).toBe(true);
   });
-  it('0 / 0 is NaN', () => { expect(div('0', '0').value).toBe('NaN'); });
-  it('Inf / finite is Inf', () => { expect(div('Infinity', '2').value).toBe('Infinity'); });
-  it('finite / Inf is 0', () => { expect(div('1', 'Infinity').value).toBe('0'); });
+  it('0 / 0 is NaN', () => {
+    expect(div('0', '0').value).toBe('NaN');
+  });
+  it('Inf / finite is Inf', () => {
+    expect(div('Infinity', '2').value).toBe('Infinity');
+  });
+  it('finite / Inf is 0', () => {
+    expect(div('1', 'Infinity').value).toBe('0');
+  });
 });
 
 // ── compare / predicates ───────────────────────────────────────────────
@@ -132,10 +177,18 @@ describe('decimal128 format', () => {
 // ── toString ───────────────────────────────────────────────────────────
 
 describe('decimal128 toString', () => {
-  it('round-trips integers', () => { expect(toString(42)).toBe('42'); });
-  it('round-trips decimals', () => { expect(toString(1.5)).toBe('1.5'); });
-  it('round-trips scientific', () => { expect(toString('1.5e3')).toBe('1.5e3'); });
-  it('throws on invalid', () => { expect(() => toString('abc')).toThrow(); });
+  it('round-trips integers', () => {
+    expect(toString(42)).toBe('42');
+  });
+  it('round-trips decimals', () => {
+    expect(toString(1.5)).toBe('1.5');
+  });
+  it('round-trips scientific', () => {
+    expect(toString('1.5e3')).toBe('1.5e3');
+  });
+  it('throws on invalid', () => {
+    expect(() => toString('abc')).toThrow();
+  });
 });
 
 // ── IRR/NPV via calculator engine (proxy through recompute) ────────────

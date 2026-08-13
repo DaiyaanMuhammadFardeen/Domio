@@ -33,7 +33,10 @@ export const DEFAULT_LIMITS: ServiceLimits = {
   gifBudgetKb: 5000,
 };
 
-export function defaultDeps(store: RegistryStore, overrides: Partial<ServiceDeps> = {}): ServiceDeps {
+export function defaultDeps(
+  store: RegistryStore,
+  overrides: Partial<ServiceDeps> = {},
+): ServiceDeps {
   return {
     store,
     licenseSecret: overrides.licenseSecret ?? 'test-license-secret',

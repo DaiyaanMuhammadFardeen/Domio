@@ -19,7 +19,10 @@ describe('qa-engine', () => {
 
   it('creates a thread', async () => {
     const t = await engine.createThread({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1', created_by: 'p1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
+      created_by: 'p1',
     });
     expect(t.status).toBe('open');
     expect(t.version).toBe(1);
@@ -27,11 +30,18 @@ describe('qa-engine', () => {
 
   it('submits and upvotes', async () => {
     const t = await engine.createThread({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1', created_by: 'p1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
+      created_by: 'p1',
     });
     const s = await engine.submit({
-      workspace_id: 'w1', session_id: 's1', thread_id: t.id,
-      participant_id: 'u-1', body: 'How does this work?', idempotency_key: 'k1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      thread_id: t.id,
+      participant_id: 'u-1',
+      body: 'How does this work?',
+      idempotency_key: 'k1',
     });
     expect(s.upvotes).toBe(0);
     const up = await engine.upvote({ workspace_id: 'w1', submit_id: s.id, participant_id: 'u-2' });
@@ -43,14 +53,23 @@ describe('qa-engine', () => {
 
   it('promotes to parking lot', async () => {
     const t = await engine.createThread({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1', created_by: 'p1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
+      created_by: 'p1',
     });
     const s = await engine.submit({
-      workspace_id: 'w1', session_id: 's1', thread_id: t.id,
-      participant_id: 'u-1', body: 'Off-topic question', idempotency_key: 'k1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      thread_id: t.id,
+      participant_id: 'u-1',
+      body: 'Off-topic question',
+      idempotency_key: 'k1',
     });
     const r = await engine.promoteToParkingLot({
-      thread_id: t.id, submit_id: s.id, actor_id: 'p1',
+      thread_id: t.id,
+      submit_id: s.id,
+      actor_id: 'p1',
     });
     expect(r.promoted).toBe(true);
     expect(r.submit.id).toBe(s.id);
@@ -58,7 +77,10 @@ describe('qa-engine', () => {
 
   it('defers a thread', async () => {
     const t = await engine.createThread({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1', created_by: 'p1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
+      created_by: 'p1',
     });
     const d = await engine.defer(t.id, 1, 'p1');
     expect(d.status).toBe('deferred');
@@ -68,19 +90,29 @@ describe('qa-engine', () => {
   it('rejects too-long bodies', async () => {
     await expect(
       engine.submit({
-        workspace_id: 'w1', session_id: 's1', participant_id: 'u-1',
-        body: 'x'.repeat(600), idempotency_key: 'k1',
+        workspace_id: 'w1',
+        session_id: 's1',
+        participant_id: 'u-1',
+        body: 'x'.repeat(600),
+        idempotency_key: 'k1',
       }),
     ).rejects.toThrow(/too long/);
   });
 
   it('emits a verifiable audit chain', async () => {
     const t = await engine.createThread({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1', created_by: 'p1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
+      created_by: 'p1',
     });
     await engine.submit({
-      workspace_id: 'w1', session_id: 's1', thread_id: t.id,
-      participant_id: 'u-1', body: 'Question', idempotency_key: 'k1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      thread_id: t.id,
+      participant_id: 'u-1',
+      body: 'Question',
+      idempotency_key: 'k1',
     });
     const v = await audit.verify();
     expect(v.ok).toBe(true);

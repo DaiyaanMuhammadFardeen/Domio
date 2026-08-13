@@ -9,11 +9,7 @@ export const metadata: Metadata = {
   description: 'Domio — creator studio, analytics, and statements',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="bg-slate-50 text-slate-900 min-h-screen">

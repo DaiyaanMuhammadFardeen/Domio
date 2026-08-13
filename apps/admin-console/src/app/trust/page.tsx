@@ -7,10 +7,11 @@ import { Badge, toneForListingStatus } from '../../components/Badge';
 import { fetcher } from '../../lib/fetcher';
 import type { MarketplaceListing } from '../../lib/types';
 
-type Row = Record<string, unknown> & MarketplaceListing & {
-  trust_score: number;
-  auto_hidden: boolean;
-};
+type Row = Record<string, unknown> &
+  MarketplaceListing & {
+    trust_score: number;
+    auto_hidden: boolean;
+  };
 
 /**
  * Derive a trust score from listing attributes.
@@ -152,9 +153,7 @@ export default function TrustPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Trust Scoring
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Trust Scoring</h1>
         <p className="mt-1 text-sm text-slate-500">
           Monitor listing trust scores. Scores are derived from listing completeness and recency.
           Listings scoring below 20 are auto-hidden from the marketplace.
@@ -170,7 +169,10 @@ export default function TrustPage() {
       )}
 
       {error && (
-        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700" role="alert">
+        <div
+          className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+          role="alert"
+        >
           <strong className="font-semibold">Error.</strong> {error}
         </div>
       )}
@@ -189,9 +191,10 @@ export default function TrustPage() {
           <div>
             <h3 className="text-sm font-semibold text-slate-900">About Trust Scores</h3>
             <p className="mt-1 text-xs text-slate-500 leading-relaxed">
-              Trust scores are computed from listing completeness (description, tags, pricing, version history,
-              preview media) and recency. A dedicated trust scoring API endpoint is planned for a future phase.
-              Until then, this heuristic provides a reasonable signal for admin review triage.
+              Trust scores are computed from listing completeness (description, tags, pricing,
+              version history, preview media) and recency. A dedicated trust scoring API endpoint is
+              planned for a future phase. Until then, this heuristic provides a reasonable signal
+              for admin review triage.
             </p>
           </div>
         </div>

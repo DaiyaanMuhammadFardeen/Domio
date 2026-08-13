@@ -8,9 +8,9 @@ Public sharing + view tokens + viewer identity.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-share-api` | availability | 99.9% | 30d |
+| SLO               | Kind         | Target | Window |
+| ----------------- | ------------ | ------ | ------ |
+| `avail-share-api` | availability | 99.9%  | 30d    |
 
 ## Triage
 

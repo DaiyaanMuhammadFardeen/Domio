@@ -35,7 +35,15 @@ export interface ChainVerifyResult {
 }
 
 export function verifyChain(
-  records: ReadonlyArray<{ prev_hash: string | null; hash: string; workspace_id: string; session_id: string; participant_id: string; joined_at_ms: number; left_at_ms: number | null }>,
+  records: ReadonlyArray<{
+    prev_hash: string | null;
+    hash: string;
+    workspace_id: string;
+    session_id: string;
+    participant_id: string;
+    joined_at_ms: number;
+    left_at_ms: number | null;
+  }>,
 ): ChainVerifyResult {
   let prev: string | null = null;
   for (let i = 0; i < records.length; i++) {

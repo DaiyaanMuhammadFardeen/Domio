@@ -187,8 +187,7 @@ const TOOL_RETURN_PIPELINE: Record<string, unknown> = {
 const SEED_TOOLS: readonly MCPTool[] = [
   {
     name: 'deck.summarize',
-    description:
-      'Returns a textual summary of a deck plus slide count and a confidence score.',
+    description: 'Returns a textual summary of a deck plus slide count and a confidence score.',
     params_schema: TOOL_PARAMS_DECK_SUMMARIZE,
     return_schema: TOOL_RETURN_DECK_SUMMARIZE,
     rate_limit_class: 'high',
@@ -196,8 +195,7 @@ const SEED_TOOLS: readonly MCPTool[] = [
   },
   {
     name: 'brand.check',
-    description:
-      'Validates a deck against brand-lock rules for a given region.',
+    description: 'Validates a deck against brand-lock rules for a given region.',
     params_schema: TOOL_PARAMS_BRAND_CHECK,
     return_schema: TOOL_RETURN_BRAND_CHECK,
     rate_limit_class: 'medium',
@@ -205,8 +203,7 @@ const SEED_TOOLS: readonly MCPTool[] = [
   },
   {
     name: 'data.bind',
-    description:
-      'Binds a sample value to a data-binding slot inside a deck.',
+    description: 'Binds a sample value to a data-binding slot inside a deck.',
     params_schema: TOOL_PARAMS_DATA_BIND,
     return_schema: TOOL_RETURN_DATA_BIND,
     rate_limit_class: 'medium',
@@ -214,8 +211,7 @@ const SEED_TOOLS: readonly MCPTool[] = [
   },
   {
     name: 'deck.export',
-    description:
-      'Queues an export job that converts a deck to PDF, PPTX, or PNG.',
+    description: 'Queues an export job that converts a deck to PDF, PPTX, or PNG.',
     params_schema: TOOL_PARAMS_EXPORT,
     return_schema: TOOL_RETURN_EXPORT,
     rate_limit_class: 'low',
@@ -223,8 +219,7 @@ const SEED_TOOLS: readonly MCPTool[] = [
   },
   {
     name: 'pipeline.run',
-    description:
-      'Runs a multi-stage agent pipeline (research → deck-builder → brand-compliance).',
+    description: 'Runs a multi-stage agent pipeline (research → deck-builder → brand-compliance).',
     params_schema: TOOL_PARAMS_PIPELINE,
     return_schema: TOOL_RETURN_PIPELINE,
     rate_limit_class: 'high',
@@ -287,24 +282,204 @@ interface SeedAuditSpec {
 }
 
 const SEED_AUDIT_SPECS: ReadonlyArray<SeedAuditSpec> = [
-  { hours_ago: 0, minute: 5, agent_id: 'agent-researcher', agent_name: 'Researcher', tool: 'deck.summarize', args: { deck_id: 'd-001', max_slides: 12 }, result_status: 200, result_summary: 'OK — 12 slides summarized', latency_ms: 412 },
-  { hours_ago: 0, minute: 14, agent_id: 'agent-deck-builder', agent_name: 'Deck builder', tool: 'data.bind', args: { deck_id: 'd-001', binding_id: 'kpi.revenue', sample_value: '$4.2M' }, result_status: 200, result_summary: 'Bound to slide 7', latency_ms: 38 },
-  { hours_ago: 0, minute: 33, agent_id: 'agent-brand-compliance', agent_name: 'Brand compliance', tool: 'brand.check', args: { deck_id: 'd-001', region: 'EU', strict: true }, result_status: 200, result_summary: '0 violations', latency_ms: 188 },
-  { hours_ago: 1, minute: 12, agent_id: 'agent-researcher', agent_name: 'Researcher', tool: 'deck.summarize', args: { deck_id: 'd-002' }, result_status: 200, result_summary: 'OK — 8 slides', latency_ms: 354 },
-  { hours_ago: 1, minute: 47, agent_id: 'agent-deck-builder', agent_name: 'Deck builder', tool: 'pipeline.run', args: { pipeline: 'deck-build-v3', inputs: { topic: 'Q3 review' } }, result_status: 200, result_summary: 'Run r-441 completed', latency_ms: 4230 },
-  { hours_ago: 2, minute: 18, agent_id: 'agent-researcher', agent_name: 'Researcher', tool: 'deck.summarize', args: { deck_id: 'd-002', style: 'detailed' }, result_status: 429, result_summary: 'rate_limited — try again in 30s', latency_ms: 22 },
-  { hours_ago: 3, minute: 9, agent_id: 'agent-brand-compliance', agent_name: 'Brand compliance', tool: 'brand.check', args: { deck_id: 'd-009', region: 'US' }, result_status: 200, result_summary: '3 violations (minor)', latency_ms: 211 },
-  { hours_ago: 4, minute: 22, agent_id: 'agent-deck-builder', agent_name: 'Deck builder', tool: 'data.bind', args: { deck_id: 'd-003', binding_id: 'kpi.margin' }, result_status: 422, result_summary: 'missing binding', latency_ms: 18 },
-  { hours_ago: 5, minute: 51, agent_id: 'agent-rehearsal-coach', agent_name: 'Rehearsal coach', tool: 'deck.summarize', args: { deck_id: 'd-004' }, result_status: 401, result_summary: 'token revoked', latency_ms: 9 },
-  { hours_ago: 7, minute: 3, agent_id: 'agent-researcher', agent_name: 'Researcher', tool: 'pipeline.run', args: { pipeline: 'research-v2', inputs: { query: 'market trends' } }, result_status: 200, result_summary: 'Run r-422 completed', latency_ms: 1944 },
-  { hours_ago: 9, minute: 18, agent_id: 'agent-brand-compliance', agent_name: 'Brand compliance', tool: 'brand.check', args: { deck_id: 'd-005', region: 'APAC' }, result_status: 200, result_summary: '1 violation', latency_ms: 174 },
-  { hours_ago: 11, minute: 41, agent_id: 'agent-deck-builder', agent_name: 'Deck builder', tool: 'data.bind', args: { deck_id: 'd-006', binding_id: 'kpi.users' }, result_status: 200, result_summary: 'Bound to slide 2', latency_ms: 41 },
-  { hours_ago: 14, minute: 27, agent_id: 'agent-researcher', agent_name: 'Researcher', tool: 'deck.summarize', args: { deck_id: 'd-007' }, result_status: 200, result_summary: 'OK — 16 slides', latency_ms: 489 },
-  { hours_ago: 17, minute: 9, agent_id: 'agent-brand-compliance', agent_name: 'Brand compliance', tool: 'brand.check', args: { deck_id: 'd-007', region: 'EU' }, result_status: 200, result_summary: '0 violations', latency_ms: 156 },
-  { hours_ago: 19, minute: 38, agent_id: 'agent-deck-builder', agent_name: 'Deck builder', tool: 'pipeline.run', args: { pipeline: 'deck-build-v3', inputs: { topic: 'Roadmap' } }, result_status: 200, result_summary: 'Run r-389 completed', latency_ms: 3672 },
-  { hours_ago: 20, minute: 51, agent_id: 'agent-researcher', agent_name: 'Researcher', tool: 'deck.summarize', args: { deck_id: 'd-008' }, result_status: 500, result_summary: 'upstream_timeout', latency_ms: 5000 },
-  { hours_ago: 22, minute: 14, agent_id: 'agent-brand-compliance', agent_name: 'Brand compliance', tool: 'brand.check', args: { deck_id: 'd-008', region: 'US', strict: false }, result_status: 200, result_summary: '2 violations', latency_ms: 198 },
-  { hours_ago: 23, minute: 33, agent_id: 'agent-deck-builder', agent_name: 'Deck builder', tool: 'data.bind', args: { deck_id: 'd-008', binding_id: 'kpi.revenue' }, result_status: 200, result_summary: 'Bound to slide 11', latency_ms: 44 },
+  {
+    hours_ago: 0,
+    minute: 5,
+    agent_id: 'agent-researcher',
+    agent_name: 'Researcher',
+    tool: 'deck.summarize',
+    args: { deck_id: 'd-001', max_slides: 12 },
+    result_status: 200,
+    result_summary: 'OK — 12 slides summarized',
+    latency_ms: 412,
+  },
+  {
+    hours_ago: 0,
+    minute: 14,
+    agent_id: 'agent-deck-builder',
+    agent_name: 'Deck builder',
+    tool: 'data.bind',
+    args: { deck_id: 'd-001', binding_id: 'kpi.revenue', sample_value: '$4.2M' },
+    result_status: 200,
+    result_summary: 'Bound to slide 7',
+    latency_ms: 38,
+  },
+  {
+    hours_ago: 0,
+    minute: 33,
+    agent_id: 'agent-brand-compliance',
+    agent_name: 'Brand compliance',
+    tool: 'brand.check',
+    args: { deck_id: 'd-001', region: 'EU', strict: true },
+    result_status: 200,
+    result_summary: '0 violations',
+    latency_ms: 188,
+  },
+  {
+    hours_ago: 1,
+    minute: 12,
+    agent_id: 'agent-researcher',
+    agent_name: 'Researcher',
+    tool: 'deck.summarize',
+    args: { deck_id: 'd-002' },
+    result_status: 200,
+    result_summary: 'OK — 8 slides',
+    latency_ms: 354,
+  },
+  {
+    hours_ago: 1,
+    minute: 47,
+    agent_id: 'agent-deck-builder',
+    agent_name: 'Deck builder',
+    tool: 'pipeline.run',
+    args: { pipeline: 'deck-build-v3', inputs: { topic: 'Q3 review' } },
+    result_status: 200,
+    result_summary: 'Run r-441 completed',
+    latency_ms: 4230,
+  },
+  {
+    hours_ago: 2,
+    minute: 18,
+    agent_id: 'agent-researcher',
+    agent_name: 'Researcher',
+    tool: 'deck.summarize',
+    args: { deck_id: 'd-002', style: 'detailed' },
+    result_status: 429,
+    result_summary: 'rate_limited — try again in 30s',
+    latency_ms: 22,
+  },
+  {
+    hours_ago: 3,
+    minute: 9,
+    agent_id: 'agent-brand-compliance',
+    agent_name: 'Brand compliance',
+    tool: 'brand.check',
+    args: { deck_id: 'd-009', region: 'US' },
+    result_status: 200,
+    result_summary: '3 violations (minor)',
+    latency_ms: 211,
+  },
+  {
+    hours_ago: 4,
+    minute: 22,
+    agent_id: 'agent-deck-builder',
+    agent_name: 'Deck builder',
+    tool: 'data.bind',
+    args: { deck_id: 'd-003', binding_id: 'kpi.margin' },
+    result_status: 422,
+    result_summary: 'missing binding',
+    latency_ms: 18,
+  },
+  {
+    hours_ago: 5,
+    minute: 51,
+    agent_id: 'agent-rehearsal-coach',
+    agent_name: 'Rehearsal coach',
+    tool: 'deck.summarize',
+    args: { deck_id: 'd-004' },
+    result_status: 401,
+    result_summary: 'token revoked',
+    latency_ms: 9,
+  },
+  {
+    hours_ago: 7,
+    minute: 3,
+    agent_id: 'agent-researcher',
+    agent_name: 'Researcher',
+    tool: 'pipeline.run',
+    args: { pipeline: 'research-v2', inputs: { query: 'market trends' } },
+    result_status: 200,
+    result_summary: 'Run r-422 completed',
+    latency_ms: 1944,
+  },
+  {
+    hours_ago: 9,
+    minute: 18,
+    agent_id: 'agent-brand-compliance',
+    agent_name: 'Brand compliance',
+    tool: 'brand.check',
+    args: { deck_id: 'd-005', region: 'APAC' },
+    result_status: 200,
+    result_summary: '1 violation',
+    latency_ms: 174,
+  },
+  {
+    hours_ago: 11,
+    minute: 41,
+    agent_id: 'agent-deck-builder',
+    agent_name: 'Deck builder',
+    tool: 'data.bind',
+    args: { deck_id: 'd-006', binding_id: 'kpi.users' },
+    result_status: 200,
+    result_summary: 'Bound to slide 2',
+    latency_ms: 41,
+  },
+  {
+    hours_ago: 14,
+    minute: 27,
+    agent_id: 'agent-researcher',
+    agent_name: 'Researcher',
+    tool: 'deck.summarize',
+    args: { deck_id: 'd-007' },
+    result_status: 200,
+    result_summary: 'OK — 16 slides',
+    latency_ms: 489,
+  },
+  {
+    hours_ago: 17,
+    minute: 9,
+    agent_id: 'agent-brand-compliance',
+    agent_name: 'Brand compliance',
+    tool: 'brand.check',
+    args: { deck_id: 'd-007', region: 'EU' },
+    result_status: 200,
+    result_summary: '0 violations',
+    latency_ms: 156,
+  },
+  {
+    hours_ago: 19,
+    minute: 38,
+    agent_id: 'agent-deck-builder',
+    agent_name: 'Deck builder',
+    tool: 'pipeline.run',
+    args: { pipeline: 'deck-build-v3', inputs: { topic: 'Roadmap' } },
+    result_status: 200,
+    result_summary: 'Run r-389 completed',
+    latency_ms: 3672,
+  },
+  {
+    hours_ago: 20,
+    minute: 51,
+    agent_id: 'agent-researcher',
+    agent_name: 'Researcher',
+    tool: 'deck.summarize',
+    args: { deck_id: 'd-008' },
+    result_status: 500,
+    result_summary: 'upstream_timeout',
+    latency_ms: 5000,
+  },
+  {
+    hours_ago: 22,
+    minute: 14,
+    agent_id: 'agent-brand-compliance',
+    agent_name: 'Brand compliance',
+    tool: 'brand.check',
+    args: { deck_id: 'd-008', region: 'US', strict: false },
+    result_status: 200,
+    result_summary: '2 violations',
+    latency_ms: 198,
+  },
+  {
+    hours_ago: 23,
+    minute: 33,
+    agent_id: 'agent-deck-builder',
+    agent_name: 'Deck builder',
+    tool: 'data.bind',
+    args: { deck_id: 'd-008', binding_id: 'kpi.revenue' },
+    result_status: 200,
+    result_summary: 'Bound to slide 11',
+    latency_ms: 44,
+  },
 ];
 
 function buildAuditEntry(spec: SeedAuditSpec, index: number): MCPAuditEntry {
@@ -360,9 +535,7 @@ export async function listMCPTools(): Promise<MCPTool[]> {
 
 export async function listMCPAgents(): Promise<MCPAgentPermission[]> {
   try {
-    const json = await fetcher<{ items?: MCPAgentPermission[] }>(
-      '/v1/mcp/agents',
-    );
+    const json = await fetcher<{ items?: MCPAgentPermission[] }>('/v1/mcp/agents');
     const items = json.items ?? [];
     if (items.length > 0) return items;
   } catch {
@@ -380,10 +553,9 @@ export async function rotateAgentToken(agentId: string): Promise<void> {
     }
   }
   try {
-    await fetcher<void>(
-      `/v1/mcp/agents/${encodeURIComponent(agentId)}/rotate-token`,
-      { method: 'POST' },
-    );
+    await fetcher<void>(`/v1/mcp/agents/${encodeURIComponent(agentId)}/rotate-token`, {
+      method: 'POST',
+    });
   } catch {
     // best-effort — local state already updated.
   }
@@ -398,18 +570,13 @@ export async function revokeAgent(agentId: string): Promise<void> {
     }
   }
   try {
-    await fetcher<void>(
-      `/v1/mcp/agents/${encodeURIComponent(agentId)}/revoke`,
-      { method: 'POST' },
-    );
+    await fetcher<void>(`/v1/mcp/agents/${encodeURIComponent(agentId)}/revoke`, { method: 'POST' });
   } catch {
     // best-effort
   }
 }
 
-export async function listMCPAudit(
-  opts: ListMCPAuditOptions = {},
-): Promise<MCPAuditEntry[]> {
+export async function listMCPAudit(opts: ListMCPAuditOptions = {}): Promise<MCPAuditEntry[]> {
   let items: MCPAuditEntry[];
   try {
     const params = new URLSearchParams();

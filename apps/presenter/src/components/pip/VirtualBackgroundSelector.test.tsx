@@ -4,7 +4,10 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { VirtualBackgroundSelector, type VirtualBackgroundOption } from './VirtualBackgroundSelector';
+import {
+  VirtualBackgroundSelector,
+  type VirtualBackgroundOption,
+} from './VirtualBackgroundSelector';
 
 const OPTIONS: VirtualBackgroundOption[] = [
   { id: 'none', label: 'No background', mode: 'none' },
@@ -22,8 +25,12 @@ describe('VirtualBackgroundSelector', () => {
 
   it('marks the active option as checked', () => {
     render(<VirtualBackgroundSelector options={OPTIONS} activeId="blur" onChange={vi.fn()} />);
-    expect(screen.getByTestId('virtual-background-selector-option-blur').getAttribute('aria-checked')).toBe('true');
-    expect(screen.getByTestId('virtual-background-selector-option-none').getAttribute('aria-checked')).toBe('false');
+    expect(
+      screen.getByTestId('virtual-background-selector-option-blur').getAttribute('aria-checked'),
+    ).toBe('true');
+    expect(
+      screen.getByTestId('virtual-background-selector-option-none').getAttribute('aria-checked'),
+    ).toBe('false');
   });
 
   it('emits onChange when an option is clicked', () => {
@@ -34,7 +41,11 @@ describe('VirtualBackgroundSelector', () => {
   });
 
   it('disables all options when disabled', () => {
-    render(<VirtualBackgroundSelector options={OPTIONS} activeId="none" disabled onChange={vi.fn()} />);
-    expect((screen.getByTestId('virtual-background-selector-option-blur') as HTMLButtonElement).disabled).toBe(true);
+    render(
+      <VirtualBackgroundSelector options={OPTIONS} activeId="none" disabled onChange={vi.fn()} />,
+    );
+    expect(
+      (screen.getByTestId('virtual-background-selector-option-blur') as HTMLButtonElement).disabled,
+    ).toBe(true);
   });
 });

@@ -85,7 +85,9 @@ describe('EngagementTracker', () => {
     const clock = { now: 0 };
     const tracker = new EngagementTracker({ now: () => clock.now });
     let count = 0;
-    const off = tracker.subscribe(() => { count += 1; });
+    const off = tracker.subscribe(() => {
+      count += 1;
+    });
     tracker.recordInteraction('click');
     off();
     tracker.recordInteraction('click');

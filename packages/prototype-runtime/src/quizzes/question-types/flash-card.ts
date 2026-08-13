@@ -14,9 +14,7 @@
 
 import type { QuestionValidationResult } from '../../types.js';
 
-export function validateFlashCard(
-  answer: unknown,
-): QuestionValidationResult {
+export function validateFlashCard(answer: unknown): QuestionValidationResult {
   if (typeof answer !== 'object' || answer === null || Array.isArray(answer)) {
     return { correct: false, confidence: 1, score: 0 };
   }

@@ -47,15 +47,8 @@ export interface PanelRailProps {
   readonly onSelect: (id: string) => void;
 }
 
-export function PanelRail({
-  panels,
-  groups,
-  activeId,
-  onSelect,
-}: PanelRailProps): JSX.Element {
-  const [expanded, setExpanded] = useState<ReadonlyArray<string>>(
-    () => groups.map((g) => g.id),
-  );
+export function PanelRail({ panels, groups, activeId, onSelect }: PanelRailProps): JSX.Element {
+  const [expanded, setExpanded] = useState<ReadonlyArray<string>>(() => groups.map((g) => g.id));
   const [search, setSearch] = useState<string>('');
 
   const trimmed = search.trim().toLowerCase();
@@ -68,9 +61,7 @@ export function PanelRail({
 
   const toggleGroup = (groupId: string): void => {
     setExpanded((prev) =>
-      prev.includes(groupId)
-        ? prev.filter((id) => id !== groupId)
-        : [...prev, groupId],
+      prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId],
     );
   };
 
@@ -99,11 +90,7 @@ export function PanelRail({
       {isSearching ? (
         <ul className="panel-rail__group-list" role="list">
           {filteredPanels.length === 0 ? (
-            <li
-              className="panel-rail__empty"
-              data-testid="panel-rail-empty"
-              role="status"
-            >
+            <li className="panel-rail__empty" data-testid="panel-rail-empty" role="status">
               No panels match.
             </li>
           ) : (
@@ -140,10 +127,7 @@ export function PanelRail({
                 aria-expanded={isExpanded}
                 onClick={() => toggleGroup(group.id)}
               >
-                <span
-                  className="panel-rail__group-caret"
-                  aria-hidden="true"
-                >
+                <span className="panel-rail__group-caret" aria-hidden="true">
                   {isExpanded ? '▾' : '▸'}
                 </span>
                 <span data-testid="panel-group-label">{group.label}</span>

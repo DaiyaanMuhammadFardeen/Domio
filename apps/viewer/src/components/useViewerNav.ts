@@ -43,12 +43,21 @@ export interface UseViewerNavOptions {
   readonly initialIdx?: number;
 }
 
-export function useViewerNav({ slideCount, loop = false, initialIdx = 0 }: UseViewerNavOptions): ViewerNavApi {
-  const [currentIdx, setCurrentIdx] = useState(() => Math.max(0, Math.min(initialIdx, slideCount - 1)));
+export function useViewerNav({
+  slideCount,
+  loop = false,
+  initialIdx = 0,
+}: UseViewerNavOptions): ViewerNavApi {
+  const [currentIdx, setCurrentIdx] = useState(() =>
+    Math.max(0, Math.min(initialIdx, slideCount - 1)),
+  );
   const [isHelpOpen, setHelpOpen] = useState(false);
   const [isOverviewOpen, setOverviewOpen] = useState(false);
   const [isFullscreen, setFullscreen] = useState(false);
-  const gPressCount = useRef<{ count: number; timer: ReturnType<typeof setTimeout> | null }>({ count: 0, timer: null });
+  const gPressCount = useRef<{ count: number; timer: ReturnType<typeof setTimeout> | null }>({
+    count: 0,
+    timer: null,
+  });
 
   const clamp = useCallback(
     (idx: number): number => {
@@ -92,7 +101,11 @@ export function useViewerNav({ slideCount, loop = false, initialIdx = 0 }: UseVi
     const onKey = (e: KeyboardEvent): void => {
       const target = e.target as HTMLElement | null;
       // Skip when typing in an input / textarea / contenteditable.
-      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      if (
+        target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+      )
+        return;
 
       if (e.key === 'ArrowLeft' || e.key === 'h' || e.key === 'H') {
         e.preventDefault();

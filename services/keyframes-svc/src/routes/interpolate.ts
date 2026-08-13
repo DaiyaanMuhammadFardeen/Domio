@@ -59,9 +59,7 @@ export function createInterpolateRoutes(cache?: EasingLruCache): Hono {
     const pose = interpolatePose(sorted, req.time_ms, sharedCache);
     const crossfade = checkCrossfade(sorted);
 
-    return c.json(
-      crossfade ? { pose, crossfade: true } : { pose },
-    );
+    return c.json(crossfade ? { pose, crossfade: true } : { pose });
   });
 
   return app;

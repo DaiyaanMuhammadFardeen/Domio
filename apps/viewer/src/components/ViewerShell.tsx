@@ -117,10 +117,7 @@ export function ViewerShell({
         dataTestId={`${dataTestId}-progress`}
       />
 
-      <header
-        data-testid={`${dataTestId}-header`}
-        style={{ padding: '16px 0', marginBottom: 16 }}
-      >
+      <header data-testid={`${dataTestId}-header`} style={{ padding: '16px 0', marginBottom: 16 }}>
         <h1
           style={{
             margin: 0,
@@ -146,7 +143,10 @@ export function ViewerShell({
             dataTestId={`${dataTestId}-slide`}
           />
         ) : (
-          <div data-testid={`${dataTestId}-empty`} style={{ padding: 32, color: 'rgba(255,255,255,0.5)' }}>
+          <div
+            data-testid={`${dataTestId}-empty`}
+            style={{ padding: 32, color: 'rgba(255,255,255,0.5)' }}
+          >
             No slides
           </div>
         )}
@@ -165,7 +165,11 @@ export function ViewerShell({
         dataTestId={`${dataTestId}-nav`}
       />
 
-      <ViewerHelp open={nav.isHelpOpen} onClose={nav.toggleHelp} dataTestId={`${dataTestId}-help`} />
+      <ViewerHelp
+        open={nav.isHelpOpen}
+        onClose={nav.toggleHelp}
+        dataTestId={`${dataTestId}-help`}
+      />
       <OverviewGrid
         deck={deck}
         currentIdx={nav.currentIdx}

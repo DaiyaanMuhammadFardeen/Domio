@@ -249,9 +249,7 @@ let PIPELINES: Pipeline[] = PIPELINE_SEEDS.map(buildPipeline);
 
 export async function listPipelines(): Promise<Pipeline[]> {
   try {
-    const json = await fetcher<{ items?: Pipeline[] }>(
-      '/v1/admin/agent-handoff/pipelines',
-    );
+    const json = await fetcher<{ items?: Pipeline[] }>('/v1/admin/agent-handoff/pipelines');
     const items = json.items ?? [];
     if (items.length > 0) return items;
   } catch {
@@ -286,9 +284,7 @@ export async function getPipeline(runId: string): Promise<Pipeline | null> {
   };
 }
 
-export async function replayPipeline(
-  runId: string,
-): Promise<{ new_run_id: string }> {
+export async function replayPipeline(runId: string): Promise<{ new_run_id: string }> {
   let newRunId = '';
   try {
     const json = await fetcher<{ new_run_id?: string }>(

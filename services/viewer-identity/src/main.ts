@@ -13,7 +13,12 @@ import { buildInMemoryStore } from './store/inmemory.js';
 import { buildApp } from './server.js';
 import { defaultPolicyFor } from './consent/policy.js';
 
-declare const process: { env: Record<string, string | undefined>; exit: (code: number) => never; on: (sig: string, fn: () => void) => void; argv: string[] };
+declare const process: {
+  env: Record<string, string | undefined>;
+  exit: (code: number) => never;
+  on: (sig: string, fn: () => void) => void;
+  argv: string[];
+};
 declare const console: { log: (...args: unknown[]) => void; error: (...args: unknown[]) => void };
 
 export async function boot(): Promise<{ port: number; close: () => Promise<void> }> {

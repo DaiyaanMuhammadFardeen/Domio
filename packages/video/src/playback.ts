@@ -69,7 +69,10 @@ export function getSegmentInfo(
 
   // Compute segment index: floor(playhead / segmentDuration) within effective range
   const trimStartMs = trim?.inMs ?? 0;
-  const relativePlayhead = Math.max(0, Math.min(clampedPlayheadMs - trimStartMs, effectiveDurationMs));
+  const relativePlayhead = Math.max(
+    0,
+    Math.min(clampedPlayheadMs - trimStartMs, effectiveDurationMs),
+  );
   const segmentIndex = Math.min(
     Math.floor(relativePlayhead / segmentDurationMs),
     Math.max(totalSegments - 1, 0),
@@ -95,10 +98,7 @@ export function getSegmentInfo(
  * Given a trim window, clip it to the source duration.
  * Returns undefined if the trim window is entirely outside the source.
  */
-export function clipTrimToSource(
-  durationMs: number,
-  trim: TrimWindow,
-): TrimWindow | undefined {
+export function clipTrimToSource(durationMs: number, trim: TrimWindow): TrimWindow | undefined {
   const clampedIn = Math.max(0, Math.min(trim.inMs, durationMs));
   const clampedOut = Math.max(0, Math.min(trim.outMs, durationMs));
 

@@ -22,9 +22,15 @@ class FailingWebSocket {
   onmessage: ((ev: MessageEvent) => void) | null = null;
   onerror: ((ev: Event) => void) | null = null;
   onclose: ((ev: CloseEvent) => void) | null = null;
-  constructor(url: string) { this.url = url; }
-  close(): void { /* no-op */ }
-  send(): void { /* no-op */ }
+  constructor(url: string) {
+    this.url = url;
+  }
+  close(): void {
+    /* no-op */
+  }
+  send(): void {
+    /* no-op */
+  }
 }
 
 describe('LowBandwidthFallback', () => {
@@ -88,12 +94,15 @@ describe('LowBandwidthFallback', () => {
   });
 
   it('close() shuts everything down and sets state=offline', () => {
-    const fetchMock = vi.fn(async () => ({
-      ok: true,
-      status: 200,
-      headers: new Map() as unknown as Headers,
-      json: async () => ({}),
-    } as unknown as Response));
+    const fetchMock = vi.fn(
+      async () =>
+        ({
+          ok: true,
+          status: 200,
+          headers: new Map() as unknown as Headers,
+          json: async () => ({}),
+        }) as unknown as Response,
+    );
 
     const t = connect({
       wsUrl: 'ws://invalid.test',
@@ -110,7 +119,9 @@ describe('LowBandwidthFallback', () => {
   });
 
   it('onStateChange fires the current state immediately on subscribe', () => {
-    const fetchMock = vi.fn(async () => ({ ok: true, json: async () => ({}) } as unknown as Response));
+    const fetchMock = vi.fn(
+      async () => ({ ok: true, json: async () => ({}) }) as unknown as Response,
+    );
     const t = connect({
       wsUrl: 'ws://invalid.test',
       pollUrl: 'http://api.test/poll',

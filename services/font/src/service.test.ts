@@ -8,11 +8,7 @@ import type { ULID } from '@domio/schema';
 import { asULID } from '@domio/schema';
 
 import { FontService } from './service.js';
-import {
-  FontValidationError,
-  FontLicenseBlockedError,
-  FontNotFoundError,
-} from './service.js';
+import { FontValidationError, FontLicenseBlockedError, FontNotFoundError } from './service.js';
 import { InMemoryFontAssetRepository } from './dal.js';
 
 const ORG = 'org-1';
@@ -59,33 +55,33 @@ describe('FontService — upload', () => {
 
   it('rejects invalid sha256', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.uploadFont(baseUpload({ sha256: 'tooshort' })),
-    ).rejects.toBeInstanceOf(FontValidationError);
+    await expect(svc.uploadFont(baseUpload({ sha256: 'tooshort' }))).rejects.toBeInstanceOf(
+      FontValidationError,
+    );
   });
 
   it('rejects weight out of range', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.uploadFont(baseUpload({ weight: 50 })),
-    ).rejects.toBeInstanceOf(FontValidationError);
-    await expect(
-      svc.uploadFont(baseUpload({ weight: 9999 })),
-    ).rejects.toBeInstanceOf(FontValidationError);
+    await expect(svc.uploadFont(baseUpload({ weight: 50 }))).rejects.toBeInstanceOf(
+      FontValidationError,
+    );
+    await expect(svc.uploadFont(baseUpload({ weight: 9999 }))).rejects.toBeInstanceOf(
+      FontValidationError,
+    );
   });
 
   it('rejects empty subsets', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.uploadFont(baseUpload({ subsets: [] })),
-    ).rejects.toBeInstanceOf(FontValidationError);
+    await expect(svc.uploadFont(baseUpload({ subsets: [] }))).rejects.toBeInstanceOf(
+      FontValidationError,
+    );
   });
 
   it('blocks high anti-piracy score', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.uploadFont(baseUpload({ antiPiracyScore: 0.9 })),
-    ).rejects.toBeInstanceOf(FontLicenseBlockedError);
+    await expect(svc.uploadFont(baseUpload({ antiPiracyScore: 0.9 }))).rejects.toBeInstanceOf(
+      FontLicenseBlockedError,
+    );
   });
 
   it('blocks expired restricted license', async () => {

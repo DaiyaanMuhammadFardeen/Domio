@@ -121,7 +121,9 @@ describe('routes — DELETE /v1/viewers/:id', () => {
       canonical_id: null,
       metadata: {},
     });
-    const res = await app.request(`/v1/viewers/${v.viewer_id}?workspace_id=ws-1`, { method: 'DELETE' });
+    const res = await app.request(`/v1/viewers/${v.viewer_id}?workspace_id=ws-1`, {
+      method: 'DELETE',
+    });
     expect(res.status).toBe(200);
     expect(await store.getViewerById(v.viewer_id)).toBeNull();
   });
@@ -163,7 +165,10 @@ describe('routes — POST /v1/viewers/:id/object', () => {
       canonical_id: null,
       metadata: {},
     });
-    const res = await app.request(`/v1/viewers/${v.viewer_id}/object?workspace_id=ws-1&source=gdpr`, { method: 'POST' });
+    const res = await app.request(
+      `/v1/viewers/${v.viewer_id}/object?workspace_id=ws-1&source=gdpr`,
+      { method: 'POST' },
+    );
     expect(res.status).toBe(200);
     const after = await store.getViewerById(v.viewer_id);
     expect(after?.privacy_mode).toBe('anon_no_track');

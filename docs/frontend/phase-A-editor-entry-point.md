@@ -10,6 +10,7 @@ editor app sees no deck list, no project picker, and no link into the editor
 itself. They assume nothing was built.
 
 After this phase the editor root URL (`http://localhost:3100/`) renders:
+
 1. A real deck list (fetched from the control plane, with a graceful fallback).
 2. An "Open demo deck" shortcut.
 3. A feature catalogue: one card per editor panel that exists today, each linking
@@ -41,34 +42,34 @@ Hardcoded list rendered as a grid. Each entry maps to a panel id the editor
 already understands. The mapping mirrors what `apps/editor/src/panels/index.ts`
 exposes (verify the exact id set during implementation by reading that file).
 
-| Label                     | panel id              |
-| ------------------------- | --------------------- |
-| Layers                    | `layers`              |
-| History                   | `history`             |
-| Insert                    | `insert`              |
-| Props                     | `props`               |
-| Theme & brand             | `theme-brand`         |
-| Variables                 | `variables`           |
-| Animations                | `animations`          |
-| Connections / hotspots    | `connections`         |
-| Marketplace               | `marketplace`         |
-| Library                   | `library`             |
-| Stickers                  | `stickers`            |
-| Data sources              | `data-source`         |
-| Filters                   | `filters`             |
-| Scenarios                 | `scenarios`           |
-| Quiz                      | `quiz`                |
-| Media                     | `media`               |
-| Leaderboard               | `leaderboard`         |
-| Sequence inspector        | `sequence-inspector`  |
-| NL patch                  | `nl-patch`            |
-| Deck diff                 | `deck-diff`           |
-| Deep links                | `deep-links`          |
-| License dashboard         | `license-dashboard`   |
-| Recording                 | `recording`           |
-| State inspector           | `state-inspector`     |
-| Outline approval (copilot)| `copilot-outline`     |
-| Audit trail               | `audit-trail`         |
+| Label                      | panel id             |
+| -------------------------- | -------------------- |
+| Layers                     | `layers`             |
+| History                    | `history`            |
+| Insert                     | `insert`             |
+| Props                      | `props`              |
+| Theme & brand              | `theme-brand`        |
+| Variables                  | `variables`          |
+| Animations                 | `animations`         |
+| Connections / hotspots     | `connections`        |
+| Marketplace                | `marketplace`        |
+| Library                    | `library`            |
+| Stickers                   | `stickers`           |
+| Data sources               | `data-source`        |
+| Filters                    | `filters`            |
+| Scenarios                  | `scenarios`          |
+| Quiz                       | `quiz`               |
+| Media                      | `media`              |
+| Leaderboard                | `leaderboard`        |
+| Sequence inspector         | `sequence-inspector` |
+| NL patch                   | `nl-patch`           |
+| Deck diff                  | `deck-diff`          |
+| Deep links                 | `deep-links`         |
+| License dashboard          | `license-dashboard`  |
+| Recording                  | `recording`          |
+| State inspector            | `state-inspector`    |
+| Outline approval (copilot) | `copilot-outline`    |
+| Audit trail                | `audit-trail`        |
 
 Cards link to `/editor/demo?panel=<id>`. The editor must NOT 404 on unknown
 panel ids — unknown ids are simply ignored and the default panel set opens.

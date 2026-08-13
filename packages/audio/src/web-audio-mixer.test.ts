@@ -30,7 +30,9 @@ import type {
 function makeFakeContext(): AudioContextLike & { log: string[] } {
   const log: string[] = [];
   const destination: AudioDestinationLike = {
-    connect: (_d: AudioNodeLike) => { log.push('destination.connect'); },
+    connect: (_d: AudioNodeLike) => {
+      log.push('destination.connect');
+    },
     channelCount: 2,
   };
   const ctx: AudioContextLike & { log: string[] } = {
@@ -50,8 +52,12 @@ function makeFakeContext(): AudioContextLike & { log: string[] } {
       };
       return {
         gain: audioParam,
-        connect: (_d: AudioNodeLike) => { log.push('gain.connect'); },
-        disconnect: () => { log.push('gain.disconnect'); },
+        connect: (_d: AudioNodeLike) => {
+          log.push('gain.connect');
+        },
+        disconnect: () => {
+          log.push('gain.disconnect');
+        },
       };
     },
     createPanner: (): PannerNodeLike => {
@@ -62,8 +68,12 @@ function makeFakeContext(): AudioContextLike & { log: string[] } {
       };
       return {
         pan: audioParam,
-        connect: (_d: AudioNodeLike) => { log.push('panner.connect'); },
-        disconnect: () => { log.push('panner.disconnect'); },
+        connect: (_d: AudioNodeLike) => {
+          log.push('panner.connect');
+        },
+        disconnect: () => {
+          log.push('panner.disconnect');
+        },
       };
     },
   };
@@ -87,8 +97,12 @@ function makeFakeExportContext(): ExportBusContext & { samples: Float32Array } {
   };
   // Wire the .samples getter/setter to track mutation
   Object.defineProperty(ctx, 'samples', {
-    get() { return samples; },
-    set(v: Float32Array) { samples = v; },
+    get() {
+      return samples;
+    },
+    set(v: Float32Array) {
+      samples = v;
+    },
   });
   return ctx;
 }
@@ -255,7 +269,10 @@ describe('ExportMixer', () => {
   it('combines WebAudioMixer + ExportBus', () => {
     const renderCtx = makeFakeContext();
     const exportCtx = makeFakeExportContext();
-    const em = new ExportMixer(renderCtx, exportCtx as unknown as ExportBusContext, { sampleRate: 48000, channels: 2 });
+    const em = new ExportMixer(renderCtx, exportCtx as unknown as ExportBusContext, {
+      sampleRate: 48000,
+      channels: 2,
+    });
     em.setTracks([trackA, trackB]);
     // mixer should have 2 user tracks + 1 capture track
     expect(em.mixer.tracks.length).toBeGreaterThanOrEqual(3);

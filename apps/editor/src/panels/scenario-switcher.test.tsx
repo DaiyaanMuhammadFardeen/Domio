@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ScenarioSwitcher } from './scenario-switcher.js';
-import { resetStore, getScenarios, getActiveScenarioId, createScenario } from '../lib/live-data-store.js';
+import {
+  resetStore,
+  getScenarios,
+  getActiveScenarioId,
+  createScenario,
+} from '../lib/live-data-store.js';
 
 beforeEach(() => {
   resetStore();

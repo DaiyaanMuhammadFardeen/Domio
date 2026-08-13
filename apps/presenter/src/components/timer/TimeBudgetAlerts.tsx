@@ -47,7 +47,8 @@ export function TimeBudgetAlerts({
   const softPct = thresholds?.softPct ?? 0.8;
   const hardPct = thresholds?.hardPct ?? 1.0;
   const pct = budgetMs > 0 ? dwellMs / budgetMs : 0;
-  const level: 'safe' | 'soft' | 'hard' = pct >= hardPct ? 'hard' : pct >= softPct ? 'soft' : 'safe';
+  const level: 'safe' | 'soft' | 'hard' =
+    pct >= hardPct ? 'hard' : pct >= softPct ? 'soft' : 'safe';
 
   // Fire each callback exactly once per (re-)entry into the level.
   const firedSoft = useRef(false);

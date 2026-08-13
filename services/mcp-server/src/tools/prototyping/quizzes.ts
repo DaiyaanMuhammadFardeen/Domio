@@ -93,7 +93,9 @@ export const create_quiz: McpTool<QuizCreateInput, Quiz> = {
     const v = validateCreate(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'create_quiz', v.value, () =>
-      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/quizzes`, v.value).then((r) => r as Quiz),
+      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/quizzes`, v.value).then(
+        (r) => r as Quiz,
+      ),
     );
   },
 };
@@ -109,9 +111,14 @@ export const submit_answer: McpTool<QuizSubmitInput, { score: number; correctCou
     const v = validateSubmit(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'submit_answer', { ...v.value, answers: '<<redacted>>' }, () =>
-      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/quizzes/${v.value.quizId}/submit`, {
-        answers: v.value.answers,
-      }).then((r) => r as { score: number; correctCount: number }),
+      callPrototypeRuntime(
+        ctx,
+        'POST',
+        `/decks/${v.value.deckId}/quizzes/${v.value.quizId}/submit`,
+        {
+          answers: v.value.answers,
+        },
+      ).then((r) => r as { score: number; correctCount: number }),
     );
   },
 };
@@ -127,7 +134,9 @@ export const list_quizzes: McpTool<QuizListInput, readonly Quiz[]> = {
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_quizzes', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/quizzes`).then((r) => (r as Quiz[]).slice()),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/quizzes`).then((r) =>
+        (r as Quiz[]).slice(),
+      ),
     );
   },
 };

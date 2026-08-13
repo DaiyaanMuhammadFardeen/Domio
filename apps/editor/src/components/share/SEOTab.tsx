@@ -17,11 +17,7 @@
 
 import { useCallback, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
-import {
-  SocialPreviewCard,
-  type SocialPlatform,
-  type SocialCardInput,
-} from './SocialPreviewCard';
+import { SocialPreviewCard, type SocialPlatform, type SocialCardInput } from './SocialPreviewCard';
 
 export interface SEOConfig {
   /** <title> and og:title. */
@@ -87,10 +83,7 @@ export function SEOTab({
   const descTooLong = cfg.description.length > DESC_MAX;
 
   return (
-    <section
-      data-testid={dataTestId}
-      style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-    >
+    <section data-testid={dataTestId} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <header>
         <strong>
           <FormattedMessage id="editor.share.seo.title" />
@@ -156,9 +149,7 @@ export function SEOTab({
         <FormattedMessage id="editor.share.seo.robots" />
         <select
           value={cfg.robots}
-          onChange={(e) =>
-            onPatch({ robots: e.target.value as SEOConfig['robots'] })
-          }
+          onChange={(e) => onPatch({ robots: e.target.value as SEOConfig['robots'] })}
           data-testid={`${dataTestId}-robots`}
           style={{ display: 'block', width: '100%', padding: 6, marginTop: 2 }}
         >

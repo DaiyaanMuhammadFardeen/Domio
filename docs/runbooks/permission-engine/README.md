@@ -8,10 +8,10 @@ Per-resource permission evaluation; < 5 ms p95 target.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-permission-engine` | availability | 99.9% | 30d |
-| `lat-permission-engine-p95` | latency | < 5 ms | 30d |
+| SLO                         | Kind         | Target | Window |
+| --------------------------- | ------------ | ------ | ------ |
+| `avail-permission-engine`   | availability | 99.9%  | 30d    |
+| `lat-permission-engine-p95` | latency      | < 5 ms | 30d    |
 
 ## Triage
 

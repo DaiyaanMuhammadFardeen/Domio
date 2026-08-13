@@ -13,9 +13,15 @@ function makeLogger() {
   const logs: Array<{ level: string; message: string }> = [];
   return {
     logs,
-    info(message: string) { logs.push({ level: 'info', message }); },
-    warn(message: string) { logs.push({ level: 'warn', message }); },
-    error(message: string) { logs.push({ level: 'error', message }); },
+    info(message: string) {
+      logs.push({ level: 'info', message });
+    },
+    warn(message: string) {
+      logs.push({ level: 'warn', message });
+    },
+    error(message: string) {
+      logs.push({ level: 'error', message });
+    },
   };
 }
 

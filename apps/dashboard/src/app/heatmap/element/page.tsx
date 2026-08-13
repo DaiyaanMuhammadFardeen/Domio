@@ -26,7 +26,9 @@ export default async function ElementHeatmapPage({
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Element heatmap</h1>
         <p className="text-sm text-slate-500">
-          Per-element attention on <code className="rounded bg-slate-100 px-1.5 py-0.5">{deckId}</code> · slide <code className="rounded bg-slate-100 px-1.5 py-0.5">{slideId}</code>
+          Per-element attention on{' '}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5">{deckId}</code> · slide{' '}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5">{slideId}</code>
         </p>
       </header>
 

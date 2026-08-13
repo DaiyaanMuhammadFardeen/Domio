@@ -63,11 +63,7 @@ export { selectRenderer, renderWithEscalation } from './select-renderer.js';
 // ---------------------------------------------------------------------------
 // Binding schema
 // ---------------------------------------------------------------------------
-export {
-  requiredBindings,
-  validateBinding,
-  bindingCompatible,
-} from './binding-schema.js';
+export { requiredBindings, validateBinding, bindingCompatible } from './binding-schema.js';
 
 // ---------------------------------------------------------------------------
 // Individual chart renderers

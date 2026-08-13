@@ -19,8 +19,6 @@ export interface WhisperMessage {
 
 export const BOOTSTRAP_WHISPERS: ReadonlyArray<WhisperMessage> = [];
 
-export async function listWhispers(
-  _sessionId: string,
-): Promise<ReadonlyArray<WhisperMessage>> {
+export async function listWhispers(_sessionId: string): Promise<ReadonlyArray<WhisperMessage>> {
   return BOOTSTRAP_WHISPERS;
 }

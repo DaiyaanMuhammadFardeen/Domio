@@ -4,7 +4,21 @@
   "title": "Domio Video Asset V1",
   "description": "Video asset metadata for Phase 11. Tracks source uploads, HLS/DASH streaming renditions, captions, waveform data, and transcode pipeline state.",
   "type": "object",
-  "required": ["schemaVersion", "id", "workspaceId", "uploaderId", "name", "sourceUrl", "durationMs", "width", "height", "hasAudio", "transcodeState", "metadata", "createdAt"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "workspaceId",
+    "uploaderId",
+    "name",
+    "sourceUrl",
+    "durationMs",
+    "width",
+    "height",
+    "hasAudio",
+    "transcodeState",
+    "metadata",
+    "createdAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -34,17 +48,11 @@
       "description": "CDN URL of the original uploaded video file."
     },
     "hlsUrl": {
-      "oneOf": [
-        { "type": "string", "format": "uri" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }],
       "description": "HLS manifest URL for adaptive streaming."
     },
     "dashUrl": {
-      "oneOf": [
-        { "type": "string", "format": "uri" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }],
       "description": "DASH manifest URL for adaptive streaming."
     },
     "durationMs": {
@@ -63,31 +71,19 @@
       "type": "boolean"
     },
     "captionsUrl": {
-      "oneOf": [
-        { "type": "string", "format": "uri" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }],
       "description": "WebVTT captions file URL."
     },
     "thumbnailUrl": {
-      "oneOf": [
-        { "type": "string", "format": "uri" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }],
       "description": "Poster/thumbnail image URL."
     },
     "waveformUrl": {
-      "oneOf": [
-        { "type": "string", "format": "uri" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }],
       "description": "Waveform visualization JSON URL."
     },
     "licenseId": {
-      "oneOf": [
-        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
-        { "type": "null" }
-      ]
+      "oneOf": [{ "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" }, { "type": "null" }]
     },
     "transcodeState": {
       "type": "string",

@@ -53,7 +53,11 @@ export interface MarketplacePanelProps {
    */
   activeBrandKitId?: string;
   /** Injectable data fetcher for tests and production. */
-  fetchListings?: (brandKitId: string, limit: number, offset: number) => Promise<CuratedListingPage>;
+  fetchListings?: (
+    brandKitId: string,
+    limit: number,
+    offset: number,
+  ) => Promise<CuratedListingPage>;
 }
 
 // ─── Default fetcher — delegates to marketplace-service ─────────────────────
@@ -155,7 +159,9 @@ export function MarketplacePanel({
         setLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [brandKitId, fetchListings]);
 
   // Filtering
@@ -172,10 +178,7 @@ export function MarketplacePanel({
     });
   }, [listings, query, kindFilter]);
 
-  const marqueeItems = useMemo(
-    () => listings.slice(0, 12).map((l) => l.title),
-    [listings],
-  );
+  const marqueeItems = useMemo(() => listings.slice(0, 12).map((l) => l.title), [listings]);
 
   // ── Loading ─────────────────────────────────────────────────────────────
   if (loading) {
@@ -184,7 +187,9 @@ export function MarketplacePanel({
         <header className="marketplace-panel__header">
           <h2 className="marketplace-panel__title">{t('marketplace.title')}</h2>
         </header>
-        <p className="marketplace-panel__loading" data-testid="marketplace-loading">{t('marketplace.loading')}</p>
+        <p className="marketplace-panel__loading" data-testid="marketplace-loading">
+          {t('marketplace.loading')}
+        </p>
       </section>
     );
   }
@@ -228,7 +233,11 @@ export function MarketplacePanel({
       </header>
 
       {usedCache && (
-        <p className="marketplace-panel__cache-note" data-testid="marketplace-cache-note" role="status">
+        <p
+          className="marketplace-panel__cache-note"
+          data-testid="marketplace-cache-note"
+          role="status"
+        >
           {t('marketplace.offlineCache')}
         </p>
       )}
@@ -252,7 +261,11 @@ export function MarketplacePanel({
         aria-label={t('marketplace.searchPlaceholder')}
       />
 
-      <div className="marketplace-panel__kinds" role="tablist" aria-label={t('marketplace.kindFilter')}>
+      <div
+        className="marketplace-panel__kinds"
+        role="tablist"
+        aria-label={t('marketplace.kindFilter')}
+      >
         <button
           type="button"
           role="tab"
@@ -313,19 +326,19 @@ function MarketplaceCard({ item, activeBrandKitId, onInsert }: MarketplaceCardPr
   // brand, the install stays disabled.
   const canInstallWhenLocked = isOverride && !!activeBrandKitId;
   const lockBlocksInsert = isDenied || (isOverride && !canInstallWhenLocked);
-  const displayPrice = isOverride && item.override_price_cents !== null
-    ? item.override_price_cents
-    : item.price_cents;
+  const displayPrice =
+    isOverride && item.override_price_cents !== null ? item.override_price_cents : item.price_cents;
   const priceLabel = formatPrice(displayPrice, item.currency);
-  const kindLabel = item.kind
-    ? (KIND_LABELS[item.kind as ListingKind] ?? item.kind)
-    : null;
+  const kindLabel = item.kind ? (KIND_LABELS[item.kind as ListingKind] ?? item.kind) : null;
 
   return (
     <MagicCard className="marketplace-card">
       <div className="marketplace-card__body">
         {/* Thumbnail */}
-        <div className="marketplace-card__thumb" data-testid={`marketplace-thumb-${item.listing_id}`}>
+        <div
+          className="marketplace-card__thumb"
+          data-testid={`marketplace-thumb-${item.listing_id}`}
+        >
           {item.poster_ref ? (
             <img
               src={item.poster_ref}
@@ -372,8 +385,7 @@ function MarketplaceCard({ item, activeBrandKitId, onInsert }: MarketplaceCardPr
               <>
                 <span className="marketplace-card__price--original">
                   {formatPrice(item.price_cents, item.currency)}
-                </span>
-                {' '}
+                </span>{' '}
               </>
             )}
             {priceLabel}
@@ -381,13 +393,21 @@ function MarketplaceCard({ item, activeBrandKitId, onInsert }: MarketplaceCardPr
 
           {/* Brand-lock overlay */}
           {isDenied && (
-            <div className="marketplace-card__lock" data-testid={`marketplace-lock-${item.listing_id}`}>
-              <span className="marketplace-card__lock-icon" aria-hidden="true">&#128274;</span>
+            <div
+              className="marketplace-card__lock"
+              data-testid={`marketplace-lock-${item.listing_id}`}
+            >
+              <span className="marketplace-card__lock-icon" aria-hidden="true">
+                &#128274;
+              </span>
               <span className="marketplace-card__lock-text">{t('marketplace.brandLocked')}</span>
             </div>
           )}
           {isOverride && (
-            <span className="marketplace-card__override-note" data-testid={`marketplace-override-${item.listing_id}`}>
+            <span
+              className="marketplace-card__override-note"
+              data-testid={`marketplace-override-${item.listing_id}`}
+            >
               {t('marketplace.brandOverride')}
             </span>
           )}
@@ -401,7 +421,9 @@ function MarketplaceCard({ item, activeBrandKitId, onInsert }: MarketplaceCardPr
         onClick={lockBlocksInsert ? undefined : onInsert}
         disabled={lockBlocksInsert}
         aria-disabled={lockBlocksInsert}
-        aria-label={lockBlocksInsert ? t('marketplace.lockedInsertDisabled') : t('marketplace.insert')}
+        aria-label={
+          lockBlocksInsert ? t('marketplace.lockedInsertDisabled') : t('marketplace.insert')
+        }
         data-testid={`marketplace-insert-${item.listing_id}`}
       >
         {lockBlocksInsert ? t('marketplace.locked') : t('marketplace.insert')}

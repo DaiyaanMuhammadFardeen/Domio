@@ -2,236 +2,236 @@
 
 probes:
   - id: probe-realtime-gateway-avail-rt-gateway
-    service: "@domio/realtime-gateway"
-    slo: "avail-rt-gateway"
+    service: '@domio/realtime-gateway'
+    slo: 'avail-rt-gateway'
     tier: tier-1
-    url: "https://realtime-gateway.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://realtime-gateway.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-realtime-gateway-lat-rt-gateway-p95
-    service: "@domio/realtime-gateway"
-    slo: "lat-rt-gateway-p95"
+    service: '@domio/realtime-gateway'
+    slo: 'lat-rt-gateway-p95'
     tier: tier-1
-    url: "https://realtime-gateway.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://realtime-gateway.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-participant-ws-gateway-avail-participant-ws
-    service: "@domio/participant-ws-gateway"
-    slo: "avail-participant-ws"
+    service: '@domio/participant-ws-gateway'
+    slo: 'avail-participant-ws'
     tier: tier-1
-    url: "https://participant-ws-gateway.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://participant-ws-gateway.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-audience-avail-audience
-    service: "@domio/audience-service"
-    slo: "avail-audience"
+    service: '@domio/audience-service'
+    slo: 'avail-audience'
     tier: tier-1
-    url: "https://audience.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://audience.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-audience-lat-audience-render-p95
-    service: "@domio/audience-service"
-    slo: "lat-audience-render-p95"
+    service: '@domio/audience-service'
+    slo: 'lat-audience-render-p95'
     tier: tier-1
-    url: "https://audience.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://audience.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-presenter-session-avail-presenter-session
-    service: "@domio/presenter-session"
-    slo: "avail-presenter-session"
+    service: '@domio/presenter-session'
+    slo: 'avail-presenter-session'
     tier: tier-1
-    url: "https://presenter-session.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://presenter-session.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-presenter-session-lat-presenter-action-p95
-    service: "@domio/presenter-session"
-    slo: "lat-presenter-action-p95"
+    service: '@domio/presenter-session'
+    slo: 'lat-presenter-action-p95'
     tier: tier-1
-    url: "https://presenter-session.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://presenter-session.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-share-api-avail-share-api
-    service: "@domio/share-api"
-    slo: "avail-share-api"
+    service: '@domio/share-api'
+    slo: 'avail-share-api'
     tier: tier-1
-    url: "https://share-api.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://share-api.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-audit-avail-audit
-    service: "@domio/audit-service"
-    slo: "avail-audit"
+    service: '@domio/audit-service'
+    slo: 'avail-audit'
     tier: tier-1
-    url: "https://audit.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://audit.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-permission-engine-avail-permission-engine
-    service: "@domio/permission-engine"
-    slo: "avail-permission-engine"
+    service: '@domio/permission-engine'
+    slo: 'avail-permission-engine'
     tier: tier-1
-    url: "https://permission-engine.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://permission-engine.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-permission-engine-lat-permission-engine-p95
-    service: "@domio/permission-engine"
-    slo: "lat-permission-engine-p95"
+    service: '@domio/permission-engine'
+    slo: 'lat-permission-engine-p95'
     tier: tier-1
-    url: "https://permission-engine.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://permission-engine.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-auth-avail-auth
-    service: "@domio/auth"
-    slo: "avail-auth"
+    service: '@domio/auth'
+    slo: 'avail-auth'
     tier: tier-1
-    url: "https://auth.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://auth.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-auth-lat-auth-p95
-    service: "@domio/auth"
-    slo: "lat-auth-p95"
+    service: '@domio/auth'
+    slo: 'lat-auth-p95'
     tier: tier-1
-    url: "https://auth.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://auth.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-billing-avail-billing
-    service: "@domio/billing"
-    slo: "avail-billing"
+    service: '@domio/billing'
+    slo: 'avail-billing'
     tier: tier-1
-    url: "https://billing.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://billing.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-edge-pubsub-avail-edge-pubsub
-    service: "@domio/edge-pubsub"
-    slo: "avail-edge-pubsub"
+    service: '@domio/edge-pubsub'
+    slo: 'avail-edge-pubsub'
     tier: tier-1
-    url: "https://edge-pubsub.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://edge-pubsub.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-session-coordinator-avail-session-coordinator
-    service: "@domio/session-coordinator"
-    slo: "avail-session-coordinator"
+    service: '@domio/session-coordinator'
+    slo: 'avail-session-coordinator'
     tier: tier-1
-    url: "https://session-coordinator.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://session-coordinator.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-participant-session-avail-participant-session
-    service: "@domio/participant-session"
-    slo: "avail-participant-session"
+    service: '@domio/participant-session'
+    slo: 'avail-participant-session'
     tier: tier-1
-    url: "https://participant-session.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://participant-session.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-collab-avail-collab
-    service: "@domio/collab-service"
-    slo: "avail-collab"
+    service: '@domio/collab-service'
+    slo: 'avail-collab'
     tier: tier-1
-    url: "https://collab.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://collab.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-library-avail-library
-    service: "@domio/library-service"
-    slo: "avail-library"
+    service: '@domio/library-service'
+    slo: 'avail-library'
     tier: tier-1
-    url: "https://library.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://library.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-moderation-blocklist-avail-moderation-blocklist
-    service: "@domio/moderation-blocklist"
-    slo: "avail-moderation-blocklist"
+    service: '@domio/moderation-blocklist'
+    slo: 'avail-moderation-blocklist'
     tier: tier-1
-    url: "https://moderation-blocklist.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://moderation-blocklist.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-registry-avail-registry
-    service: "@domio/registry-service"
-    slo: "avail-registry"
+    service: '@domio/registry-service'
+    slo: 'avail-registry'
     tier: tier-1
-    url: "https://registry.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://registry.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-brand-avail-brand
-    service: "@domio/brand-service"
-    slo: "avail-brand"
+    service: '@domio/brand-service'
+    slo: 'avail-brand'
     tier: tier-1
-    url: "https://brand.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://brand.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-theme-avail-theme
-    service: "@domio/theme-service"
-    slo: "avail-theme"
+    service: '@domio/theme-service'
+    slo: 'avail-theme'
     tier: tier-1
-    url: "https://theme.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://theme.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-component-avail-component-registry
-    service: "@domio/component"
-    slo: "avail-component-registry"
+    service: '@domio/component'
+    slo: 'avail-component-registry'
     tier: tier-1
-    url: "https://component.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://component.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-marketplace-avail-marketplace
-    service: "@domio/marketplace-service"
-    slo: "avail-marketplace"
+    service: '@domio/marketplace-service'
+    slo: 'avail-marketplace'
     tier: tier-1
-    url: "https://marketplace.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://marketplace.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200
   - id: probe-viewer-identity-avail-viewer-identity
-    service: "@domio/viewer-identity"
-    slo: "avail-viewer-identity"
+    service: '@domio/viewer-identity'
+    slo: 'avail-viewer-identity'
     tier: tier-1
-    url: "https://viewer-identity.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://viewer-identity.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200

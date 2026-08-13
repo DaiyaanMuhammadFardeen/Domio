@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  bucketKey,
-  getCombinedStopwords,
-  normalize,
-  tokenize,
-} from './index.js';
+import { bucketKey, getCombinedStopwords, normalize, tokenize } from './index.js';
 
 describe('text-normalize', () => {
   it('lowercases and collapses whitespace', () => {

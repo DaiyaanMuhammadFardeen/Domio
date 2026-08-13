@@ -232,7 +232,7 @@ describe('routes — POST /v1/latex/render', () => {
       body: JSON.stringify({ source: '\\frac{a}{b}', format: 'html' }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { rendered: string; cacheKey: string };
+    const body = (await res.json()) as { rendered: string; cacheKey: string };
     expect(body.rendered).toContain('katex');
     expect(body.cacheKey).toHaveLength(32);
   });
@@ -245,7 +245,7 @@ describe('routes — POST /v1/latex/render', () => {
       body: JSON.stringify({ format: 'html' }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('VALIDATION_ERROR');
   });
 
@@ -277,7 +277,7 @@ describe('routes — POST /v1/latex/render', () => {
       body: JSON.stringify({ source: 'x^2', format: 'png' }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { unsupported: boolean; message: string };
+    const body = (await res.json()) as { unsupported: boolean; message: string };
     expect(body.unsupported).toBe(true);
     expect(body.message).toContain('PNG');
   });
@@ -290,7 +290,7 @@ describe('routes — POST /v1/latex/render', () => {
       body: JSON.stringify({ source: 'x^2', format: 'svg' }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { unsupported: boolean; message: string };
+    const body = (await res.json()) as { unsupported: boolean; message: string };
     expect(body.unsupported).toBe(true);
     expect(body.message).toContain('SVG');
   });
@@ -303,7 +303,7 @@ describe('routes — POST /v1/latex/render', () => {
       body: JSON.stringify({ source: '\\input{secret}', format: 'html' }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toContain('not allowed');
   });
 
@@ -315,7 +315,7 @@ describe('routes — POST /v1/latex/render', () => {
       body: JSON.stringify({ source: '\\invalidCommand{', format: 'html' }),
     });
     expect(res.status).toBe(422);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBeDefined();
   });
 
@@ -338,7 +338,7 @@ describe('routes — POST /v1/latex/render', () => {
       body: JSON.stringify({ source: 'E=mc^2', format: 'html' }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { rendered: string; cacheKey: string };
+    const body = (await res.json()) as { rendered: string; cacheKey: string };
     // Verify cache has the entry
     const entry = cache.get(body.cacheKey);
     expect(entry).not.toBeNull();
@@ -366,12 +366,12 @@ describe('routes — GET /v1/latex/render/:cache_key', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source: 'x^2', format: 'html' }),
     });
-    const postBody = await postRes.json() as { rendered: string; cacheKey: string };
+    const postBody = (await postRes.json()) as { rendered: string; cacheKey: string };
 
     // Then, retrieve by cache key
     const getRes = await app.request(`/v1/latex/render/${postBody.cacheKey}`);
     expect(getRes.status).toBe(200);
-    const getBody = await getRes.json() as { rendered: string; cacheKey: string };
+    const getBody = (await getRes.json()) as { rendered: string; cacheKey: string };
     expect(getBody.rendered).toBe(postBody.rendered);
     expect(getBody.cacheKey).toBe(postBody.cacheKey);
   });
@@ -398,7 +398,7 @@ describe('routes — GET /v1/latex/render/:cache_key', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source: 'y^2', format: 'html' }),
     });
-    const postBody = await postRes.json() as { cacheKey: string };
+    const postBody = (await postRes.json()) as { cacheKey: string };
 
     // Create a new app with a clock past TTL — entries will be expired
     const expiredCache = new RenderCache({

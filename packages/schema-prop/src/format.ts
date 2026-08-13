@@ -9,9 +9,30 @@ const RGB_FN = /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0
 const HSL_FN =
   /^hsla?\(\s*\d{1,3}(?:\.\d+)?\s*,\s*\d{1,3}(?:\.\d+)?%\s*,\s*\d{1,3}(?:\.\d+)?%\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\)$/;
 const NAMED_COLORS = new Set([
-  'transparent', 'black', 'white', 'red', 'green', 'blue', 'gray', 'grey',
-  'orange', 'yellow', 'purple', 'pink', 'cyan', 'magenta', 'brown', 'navy',
-  'teal', 'lime', 'gold', 'silver', 'maroon', 'olive', 'violet', 'indigo',
+  'transparent',
+  'black',
+  'white',
+  'red',
+  'green',
+  'blue',
+  'gray',
+  'grey',
+  'orange',
+  'yellow',
+  'purple',
+  'pink',
+  'cyan',
+  'magenta',
+  'brown',
+  'navy',
+  'teal',
+  'lime',
+  'gold',
+  'silver',
+  'maroon',
+  'olive',
+  'violet',
+  'indigo',
 ]);
 
 /** Validates a CSS color string in the Domio working set. */

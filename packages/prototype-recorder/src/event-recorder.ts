@@ -69,7 +69,8 @@ export class EventRecorder {
     this.deps = deps;
     this.cap = cfg.bufferBytes ?? BUFFER_BYTES_DEFAULT;
     this.flushIntervalMs = cfg.flushIntervalMs ?? FLUSH_INTERVAL_MS_DEFAULT;
-    const fetchImpl = deps.fetchImpl ?? cfg.fetchImpl ?? (typeof fetch !== 'undefined' ? fetch : undefined);
+    const fetchImpl =
+      deps.fetchImpl ?? cfg.fetchImpl ?? (typeof fetch !== 'undefined' ? fetch : undefined);
     if (!fetchImpl) throw new Error('fetch is required');
     this.chunked = new ChunkedUploadStream({ fetchImpl });
     this.idb = cfg.useIndexedDb ? new IndexedDBQueue({ indexedDB: deps.indexedDb }) : null;
@@ -112,14 +113,22 @@ export class EventRecorder {
   }
 
   /** Returns the current in-memory buffer (read-only). */
-  peekBuffer(): readonly RecorderEvent[] { return this.buffer; }
+  peekBuffer(): readonly RecorderEvent[] {
+    return this.buffer;
+  }
 
-  bufferSizeBytes(): number { return this.bufferBytes; }
+  bufferSizeBytes(): number {
+    return this.bufferBytes;
+  }
 
   /** Returns true if any flush attempt has succeeded. */
-  hasFlushed(): boolean { return this.flushCount > 0; }
+  hasFlushed(): boolean {
+    return this.flushCount > 0;
+  }
 
-  lastError(): string | null { return this.lastFlushError; }
+  lastError(): string | null {
+    return this.lastFlushError;
+  }
 
   /**
    * Drain the buffer and POST it. Uses `navigator.sendBeacon` when the
@@ -134,7 +143,9 @@ export class EventRecorder {
     }
     const dropped = this.lastDroppedCount;
     this.lastDroppedCount = 0;
-    const events = this.buffer.filter((e) => !this.cfg.regionPinned || e.region === this.cfg.region);
+    const events = this.buffer.filter(
+      (e) => !this.cfg.regionPinned || e.region === this.cfg.region,
+    );
     const rejected = this.buffer.length - events.length;
     this.buffer = [];
     this.bufferBytes = 0;
@@ -152,7 +163,10 @@ export class EventRecorder {
       if (!ok) {
         // Put the events back; survive flush failure.
         this.buffer = events.concat(this.buffer);
-        this.bufferBytes += events.reduce((sum, event) => sum + JSON.stringify(event).length * 2, 0);
+        this.bufferBytes += events.reduce(
+          (sum, event) => sum + JSON.stringify(event).length * 2,
+          0,
+        );
         this.lastFlushError = 'network-error';
         this.surviveFlushFailures += 1;
         return { accepted: 0, dropped };
@@ -166,7 +180,9 @@ export class EventRecorder {
   }
 
   /** Used by tests to surface that buffer survival is exercised. */
-  get survivingFlushFailures(): number { return this.surviveFlushFailures; }
+  get survivingFlushFailures(): number {
+    return this.surviveFlushFailures;
+  }
 
   /** Force-flush and resolve. Equivalent to `flush()` but Promise-based. */
   async drain(): Promise<void> {

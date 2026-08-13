@@ -68,10 +68,18 @@ export default async function DecksIndexPage() {
                 {rows.map((r) => (
                   <tr key={r.deckId} data-testid="deck-row">
                     <td className="px-4 py-3 font-mono text-xs text-slate-700">{r.deckId}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{r.sessionCount.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{r.viewerCount.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{formatDuration(r.avgSessionMs)}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{formatPct(r.completionRate)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {r.sessionCount.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {r.viewerCount.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {formatDuration(r.avgSessionMs)}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {formatPct(r.completionRate)}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={dashboard('deck-detail', { id: r.deckId })}

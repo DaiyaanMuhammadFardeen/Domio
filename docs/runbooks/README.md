@@ -11,9 +11,9 @@ after every incident or operational change. Each runbook lists:
 
 ## Index
 
-| ID | Title | Owner | Last updated |
-|---:|---|---|---|
-| RB-001 | Local dev stack reset | Platform | 2026-07-29 |
+|     ID | Title                 | Owner    | Last updated |
+| -----: | --------------------- | -------- | ------------ |
+| RB-001 | Local dev stack reset | Platform | 2026-07-29   |
 
 ## Adding a runbook
 

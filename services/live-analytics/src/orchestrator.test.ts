@@ -10,11 +10,7 @@ import { buildOrchestrator } from './orchestrator.js';
 import { buildInMemoryClickHouseClient } from './store/clickhouse.js';
 import type { LiveEvent } from './types.js';
 
-function ev(
-  seq: number,
-  kind: LiveEvent['kind'],
-  opts: Partial<LiveEvent> = {},
-): LiveEvent {
+function ev(seq: number, kind: LiveEvent['kind'], opts: Partial<LiveEvent> = {}): LiveEvent {
   return {
     seq,
     ts_ms: opts.ts_ms ?? 1_700_000_000_000 + seq,
@@ -84,7 +80,9 @@ describe('orchestrator', () => {
     expect(ch.executes[0]?.sql).toMatch(/INSERT INTO live_session_summary/);
     // Final-pulse fan-out fired on close.
     expect(sub).toHaveBeenCalled();
-    const lastCall = sub.mock.calls[sub.mock.calls.length - 1]?.[0] as { concurrent_viewers: number };
+    const lastCall = sub.mock.calls[sub.mock.calls.length - 1]?.[0] as {
+      concurrent_viewers: number;
+    };
     expect(lastCall.concurrent_viewers).toBe(0);
   });
 

@@ -16,10 +16,10 @@ paths:
       operationId: listConditionalRules
       summary: List rules for a deck (priority desc, created_at asc)
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Conditional rules.
           content:
             application/json:
@@ -29,72 +29,72 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/ConditionalRule" }
+                    items: { $ref: '#/components/schemas/ConditionalRule' }
     post:
       tags: [conditional-rules]
       operationId: createConditionalRule
       summary: Create a rule
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreateConditionalRuleRequest" }
+            schema: { $ref: '#/components/schemas/CreateConditionalRuleRequest' }
       responses:
-        "201":
+        '201':
           description: Rule created.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ConditionalRule" }
-        "422": { description: Condition compile failed or validation error. }
+              schema: { $ref: '#/components/schemas/ConditionalRule' }
+        '422': { description: Condition compile failed or validation error. }
   /v1/conditional-rules/{id}:
     get:
       tags: [conditional-rules]
       operationId: getConditionalRule
       summary: Get a rule
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Rule details.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ConditionalRule" }
-        "404": { description: Rule not found. }
+              schema: { $ref: '#/components/schemas/ConditionalRule' }
+        '404': { description: Rule not found. }
     patch:
       tags: [conditional-rules]
       operationId: patchConditionalRule
       summary: Update a rule
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PatchConditionalRuleRequest" }
+            schema: { $ref: '#/components/schemas/PatchConditionalRuleRequest' }
       responses:
-        "200":
+        '200':
           description: Rule updated.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ConditionalRule" }
-        "404": { description: Rule not found. }
-        "409": { description: Version conflict. }
-        "422": { description: Condition compile failed. }
+              schema: { $ref: '#/components/schemas/ConditionalRule' }
+        '404': { description: Rule not found. }
+        '409': { description: Version conflict. }
+        '422': { description: Condition compile failed. }
     delete:
       tags: [conditional-rules]
       operationId: deleteConditionalRule
       summary: Delete a rule
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "204": { description: Rule deleted. }
-        "404": { description: Rule not found. }
+        '204': { description: Rule deleted. }
+        '404': { description: Rule not found. }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer }
@@ -122,13 +122,38 @@ components:
       properties:
         kind:
           enum:
-            [show, hide, enable, disable, set_variable, navigate_to,
-             play_animation, submit_form, open_overlay, close_overlay]
+            [
+              show,
+              hide,
+              enable,
+              disable,
+              set_variable,
+              navigate_to,
+              play_animation,
+              submit_form,
+              open_overlay,
+              close_overlay,
+            ]
         params: { type: object }
     ConditionalRule:
       type: object
       additionalProperties: false
-      required: [id, tenantId, deckId, name, priority, condition, conditionSource, scopeSlideId, action, enabled, version, createdAt, updatedAt]
+      required:
+        [
+          id,
+          tenantId,
+          deckId,
+          name,
+          priority,
+          condition,
+          conditionSource,
+          scopeSlideId,
+          action,
+          enabled,
+          version,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id: { type: string }
         tenantId: { type: string }
@@ -137,8 +162,8 @@ components:
         priority: { type: integer }
         condition: { type: object }
         conditionSource: { type: string }
-        scopeSlideId: { type: [string, "null"] }
-        action: { $ref: "#/components/schemas/Action" }
+        scopeSlideId: { type: [string, 'null'] }
+        action: { $ref: '#/components/schemas/Action' }
         enabled: { type: boolean }
         version: { type: integer }
         createdAt: { type: integer }
@@ -151,8 +176,8 @@ components:
         name: { type: string, minLength: 1 }
         priority: { type: integer, default: 0 }
         conditionSource: { type: string, maxLength: 4096 }
-        scopeSlideId: { type: [string, "null"] }
-        action: { $ref: "#/components/schemas/Action" }
+        scopeSlideId: { type: [string, 'null'] }
+        action: { $ref: '#/components/schemas/Action' }
         enabled: { type: boolean, default: true }
     PatchConditionalRuleRequest:
       type: object
@@ -163,6 +188,6 @@ components:
         name: { type: string }
         priority: { type: integer }
         conditionSource: { type: string }
-        scopeSlideId: { type: [string, "null"] }
-        action: { $ref: "#/components/schemas/Action" }
+        scopeSlideId: { type: [string, 'null'] }
+        action: { $ref: '#/components/schemas/Action' }
         enabled: { type: boolean }

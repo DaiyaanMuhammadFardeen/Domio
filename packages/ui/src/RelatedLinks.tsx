@@ -39,11 +39,7 @@ export function RelatedLinks({
   const rootClass = className ? `nav-related ${className}` : 'nav-related';
 
   return (
-    <section
-      className={rootClass}
-      aria-labelledby={`${testId}-heading`}
-      data-testid={testId}
-    >
+    <section className={rootClass} aria-labelledby={`${testId}-heading`} data-testid={testId}>
       <h2 id={`${testId}-heading`} className="nav-related__heading">
         {title}
       </h2>
@@ -70,7 +66,9 @@ export function RelatedLinks({
                   {node.tagline ? (
                     <span className="nav-related__tagline">{node.tagline}</span>
                   ) : null}
-                  <span className="nav-related__arrow" aria-hidden="true">→</span>
+                  <span className="nav-related__arrow" aria-hidden="true">
+                    →
+                  </span>
                 </span>
               </a>
             </li>

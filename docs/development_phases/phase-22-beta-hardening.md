@@ -19,15 +19,15 @@ P22 (the full phase) is the GA gate. It assumes every P21 frontier feature is sh
 
 ### In scope (P22-beta)
 
-| Area | What ships in P22-beta |
-|---|---|
-| Performance & scale | Canvas FPS regression suite; DB query-plan review + index sweep; CDN caching plan; N+1 audit. **No frontier-feature perf budgets.** |
-| Reliability & observability | SLOs for every *existing* service + feature; alert routing; runbook completeness; dashboard coverage; log redaction audit; tracing coverage; post-mortem template; synthetic probes; status page. **No frontier-feature SLOs.** |
-| Load tests | k6 / Locust scripts at design-partner scale for existing surfaces (`audience_50k.js`, `editors_10k.js`, `presenter_2h.js`, `decks_100k.js`); scaled staging env. **No kiosk / frontier-feature load tests.** |
-| Chaos drills | Postgres failover; NATS partition; AI provider failure; CDN outage; regional isolation. **No biometric sandbox escape drill** (deferred to P22b with F207/F208/F209/F214). |
-| Accessibility | WCAG 2.2 AA certification; axe-core CI on every surface; keyboard + screen-reader pass on every existing surface; Bangla full UI; RTL scaffolds for Arabic + Hebrew; locale/currency/timezone E2E. |
-| GA gate | External security review; pentest closeout; SOC 2 evidence binder; PDPA / GDPR binder; pricing + billing live; status page live; on-call rotation staffed; RTO/RPO game day; support runbooks; design-partner migration plan. |
-| Documentation | Every feature #1–#204 (P21 excluded) has a doc at `/docs/features/{NN}-*.md`; every doc has a demo; every endpoint documented; onboarding guide. |
+| Area                        | What ships in P22-beta                                                                                                                                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Performance & scale         | Canvas FPS regression suite; DB query-plan review + index sweep; CDN caching plan; N+1 audit. **No frontier-feature perf budgets.**                                                                                             |
+| Reliability & observability | SLOs for every _existing_ service + feature; alert routing; runbook completeness; dashboard coverage; log redaction audit; tracing coverage; post-mortem template; synthetic probes; status page. **No frontier-feature SLOs.** |
+| Load tests                  | k6 / Locust scripts at design-partner scale for existing surfaces (`audience_50k.js`, `editors_10k.js`, `presenter_2h.js`, `decks_100k.js`); scaled staging env. **No kiosk / frontier-feature load tests.**                    |
+| Chaos drills                | Postgres failover; NATS partition; AI provider failure; CDN outage; regional isolation. **No biometric sandbox escape drill** (deferred to P22b with F207/F208/F209/F214).                                                      |
+| Accessibility               | WCAG 2.2 AA certification; axe-core CI on every surface; keyboard + screen-reader pass on every existing surface; Bangla full UI; RTL scaffolds for Arabic + Hebrew; locale/currency/timezone E2E.                              |
+| GA gate                     | External security review; pentest closeout; SOC 2 evidence binder; PDPA / GDPR binder; pricing + billing live; status page live; on-call rotation staffed; RTO/RPO game day; support runbooks; design-partner migration plan.   |
+| Documentation               | Every feature #1–#204 (P21 excluded) has a doc at `/docs/features/{NN}-*.md`; every doc has a demo; every endpoint documented; onboarding guide.                                                                                |
 
 ### Out of scope (deferred to P22b)
 
@@ -43,11 +43,11 @@ P22 (the full phase) is the GA gate. It assumes every P21 frontier feature is sh
 ## 1. Goals
 
 - **G1.** Canvas sustains 60 fps with 500+ elements on a slide under sustained editor load on a mid-tier laptop; top-20 hot DB queries are indexed; CDN cache plan deployed; N+1 read patterns fixed at source. **No frontier-feature perf budgets.**
-- **G2.** Every existing feature (#1–#204) has at least one Prometheus metric, one structured log line per request, one trace span per user-facing action; every SLO has an alert; every alert has a runbook; every page has an on-call owner. The Grafana dashboard library covers latency, error rate, saturation, and feature-level KPIs per *existing* service.
-- **G3.** A scripted load test exercises 50,000 concurrent audience members per session, 100,000 decks per tenant, 10,000 concurrent editors on one deck, and 2-hour meeting replays on *existing surfaces*. Chaos engineering drills cover Postgres failover, NATS partition, AI provider failure, CDN outage, and regional isolation with measured RTO/RPO. **No biometric-sandbox chaos drill.**
-- **G4.** Security & compliance binder closeout for *existing* surfaces: external security review passed; pentest report action items closed; SOC 2 Type II evidence binder complete and given to the auditor; PDPA / GDPR binder finalized with jurisdictional rules; Bangladesh localisation and accessibility evidence captured.
+- **G2.** Every existing feature (#1–#204) has at least one Prometheus metric, one structured log line per request, one trace span per user-facing action; every SLO has an alert; every alert has a runbook; every page has an on-call owner. The Grafana dashboard library covers latency, error rate, saturation, and feature-level KPIs per _existing_ service.
+- **G3.** A scripted load test exercises 50,000 concurrent audience members per session, 100,000 decks per tenant, 10,000 concurrent editors on one deck, and 2-hour meeting replays on _existing surfaces_. Chaos engineering drills cover Postgres failover, NATS partition, AI provider failure, CDN outage, and regional isolation with measured RTO/RPO. **No biometric-sandbox chaos drill.**
+- **G4.** Security & compliance binder closeout for _existing_ surfaces: external security review passed; pentest report action items closed; SOC 2 Type II evidence binder complete and given to the auditor; PDPA / GDPR binder finalized with jurisdictional rules; Bangladesh localisation and accessibility evidence captured.
 - **G5.** Accessibility & internationalization hardening. WCAG 2.2 AA certification with documented manual + automated pass; Bangla UI shipping with verified Unicode/bidi rendering and numeral handling; RTL readiness audit (Arabic and Hebrew UI scaffolds, even if not full launch locales); timezone / currency / locale consistency verified across existing surfaces.
-- **G6.** Public-beta gate. Pricing model and billing live; status page live with all *existing* services listed and probing; on-call rotation staffed 24/7; RTO ≤1 h / RPO ≤15 min for tier-1 services validated by game day; support runbooks complete for the top 50 issue categories; design-partner migration plan to public-beta tier executed; public-beta sign-off by Heads of Eng, Product, Security/DPO, Design, Support.
+- **G6.** Public-beta gate. Pricing model and billing live; status page live with all _existing_ services listed and probing; on-call rotation staffed 24/7; RTO ≤1 h / RPO ≤15 min for tier-1 services validated by game day; support runbooks complete for the top 50 issue categories; design-partner migration plan to public-beta tier executed; public-beta sign-off by Heads of Eng, Product, Security/DPO, Design, Support.
 
 ---
 
@@ -55,20 +55,20 @@ P22 (the full phase) is the GA gate. It assumes every P21 frontier feature is sh
 
 ### 2.1 In scope — gap closures and hardening (residual gaps from P00–P20, excluding P21)
 
-| Area | What "in scope" means for P22-beta |
-|---|---|
-| Performance & scale | Canvas FPS regression suite; DB query-plan review; CDN caching plan; N+1 audit on read paths. |
-| Reliability | SLO definitions for existing services; alert routing; runbook completeness; dashboard coverage; error budgets; post-mortem template. |
-| Load tests | k6 / Locust scripts in `infra/loadtest/` for the existing-surface scale targets in §6; nightly CI run. |
-| Chaos engineering | Litmus / Gremlin drills on existing infrastructure (Postgres failover, NATS partition, AI provider failure, CDN outage, regional isolation). |
-| Documentation | Every feature #1–#204 has a doc; every doc has a demo video; every runbook has a tabletop test pass. |
-| Accessibility | WCAG 2.2 AA certification with axe + manual keyboard + screen-reader pass on every *existing* surface. |
-| Internationalization | Bangla full UI; RTL-ready scaffolds; locale/timezone/currency consistency; numeral display choices. |
-| Public-beta gate | Security review pass; pentest closeout; SOC 2 evidence; PDPA binder; pricing/billing live; status page live; on-call staffed; RTO/RPO validated. |
-| Enterprise hardening | All P20 Bronze/Silver/Gold gaps closed; enterprise-ready rung achieved (P20.5 was the beta rung; P22-beta closes the public-beta rung). |
-| Pricing & billing | Finalise pricing model, plumb through `services/billing-svc`, integrate with tax & invoicing. |
-| Status page | `status.domio.app` live with all *existing* services + edge nodes + DB clusters probing. |
-| Migration plan | Design-partner data migration to public-beta tier; archival of design-partner-only flags; remove "BETA" UI for new sign-ups. |
+| Area                 | What "in scope" means for P22-beta                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Performance & scale  | Canvas FPS regression suite; DB query-plan review; CDN caching plan; N+1 audit on read paths.                                                    |
+| Reliability          | SLO definitions for existing services; alert routing; runbook completeness; dashboard coverage; error budgets; post-mortem template.             |
+| Load tests           | k6 / Locust scripts in `infra/loadtest/` for the existing-surface scale targets in §6; nightly CI run.                                           |
+| Chaos engineering    | Litmus / Gremlin drills on existing infrastructure (Postgres failover, NATS partition, AI provider failure, CDN outage, regional isolation).     |
+| Documentation        | Every feature #1–#204 has a doc; every doc has a demo video; every runbook has a tabletop test pass.                                             |
+| Accessibility        | WCAG 2.2 AA certification with axe + manual keyboard + screen-reader pass on every _existing_ surface.                                           |
+| Internationalization | Bangla full UI; RTL-ready scaffolds; locale/timezone/currency consistency; numeral display choices.                                              |
+| Public-beta gate     | Security review pass; pentest closeout; SOC 2 evidence; PDPA binder; pricing/billing live; status page live; on-call staffed; RTO/RPO validated. |
+| Enterprise hardening | All P20 Bronze/Silver/Gold gaps closed; enterprise-ready rung achieved (P20.5 was the beta rung; P22-beta closes the public-beta rung).          |
+| Pricing & billing    | Finalise pricing model, plumb through `services/billing-svc`, integrate with tax & invoicing.                                                    |
+| Status page          | `status.domio.app` live with all _existing_ services + edge nodes + DB clusters probing.                                                         |
+| Migration plan       | Design-partner data migration to public-beta tier; archival of design-partner-only flags; remove "BETA" UI for new sign-ups.                     |
 
 ### 2.2 Out of scope (explicit)
 
@@ -132,7 +132,7 @@ P22b-E (final):  Public-beta gate sign-off; design-partner migration; BETA UI re
 6. **T-G1.6 — DB query-plan review.** Per service: `EXPLAIN ANALYZE` on the top-20 hot queries; add missing indexes (Postgres); document the top-20 in `docs/05-data-database-design.md`'s perf appendix.
 7. **T-G1.7 — CDN plan.** Finalise caching headers (`Cache-Control`, `Surrogate-Key`), Brotli, image optimisation pipeline (`apps/cdn-cache/`); measured TTFB improvement.
 8. **T-G1.8 — N+1 audit.** Use OpenTelemetry traces to detect N+1 patterns in `/services/*` read paths; fix at the source rather than papering over.
-9. **T-G1.9 — Cost model finalised.** Update `docs/08-infrastructure-devops.md` cost appendix with measured per-tenant per-day cost at 100k decks / 50k audience on *existing surfaces*; per-feature unit economics reported. (Frontier-feature unit economics land in P22b.)
+9. **T-G1.9 — Cost model finalised.** Update `docs/08-infrastructure-devops.md` cost appendix with measured per-tenant per-day cost at 100k decks / 50k audience on _existing surfaces_; per-feature unit economics reported. (Frontier-feature unit economics land in P22b.)
 10. **T-G1.10 — Definition of Done.** All perf regressions caught in CI nightly; 2-hour bench green on three reference machines; cost model approved by Finance.
 
 **Files / packages touched.** `packages/perf-harness/`, `packages/crdt-bench/`, `infra/loadtest/`, `apps/editor/perf/`, `runbooks/perf/regression.md`, `docs/05-data-database-design.md` (perf appendix), `docs/08-infrastructure-devops.md` (cost appendix).
@@ -152,7 +152,7 @@ P22b-E (final):  Public-beta gate sign-off; design-partner migration; BETA UI re
 3. **T-G2.3 — Alert routing.** Every alert from T-G2.1 routes to a PagerDuty service with a primary + secondary on-call; missing-routing gaps closed.
 4. **T-G2.4 — Runbook completeness.** Walk every alert; verify the linked runbook in `/runbooks/` is up-to-date, exercised at least once in a tabletop test (entry in `/runbooks/CHANGELOG.md`), and named owners are on-call.
 5. **T-G2.5 — Dashboard coverage audit.** Every service has a Grafana dashboard with RED metrics + feature-specific KPIs in `/infra/grafana/dashboards/`; missing dashboards created.
-6. **T-G2.6 — Log redaction audit.** Greps + OTel-based assertions prove no raw voice transcripts, raw AI prompts, raw biometric data, or cleartext PII land in logs at any service. (Raw webcam frames / raw audio / raw gaze coordinates cannot be in scope here because they belong to P21 sensors — the audit covers *future-proofing* the redaction patterns.)
+6. **T-G2.6 — Log redaction audit.** Greps + OTel-based assertions prove no raw voice transcripts, raw AI prompts, raw biometric data, or cleartext PII land in logs at any service. (Raw webcam frames / raw audio / raw gaze coordinates cannot be in scope here because they belong to P21 sensors — the audit covers _future-proofing_ the redaction patterns.)
 7. **T-G2.7 — Tracing coverage.** Every user-facing action is the root trace; child spans cover editor → API → DB → side-effect; orphans are fixed at the source.
 8. **T-G2.8 — Post-mortem template.** `runbooks/postmortem-template.md` adopted; the last 3 incidents already triaged via it.
 9. **T-G2.9 — Synthetic probes.** From multiple regions, continuous probes hit `/healthz`, `/readyz`, and key user journeys; failure surfaces in `infra/synthetics/`.
@@ -195,7 +195,7 @@ P22b-E (final):  Public-beta gate sign-off; design-partner migration; BETA UI re
 
 **Tasks (in order):**
 
-1. **T-G4.1 — Accessibility audit scope.** All *existing* surfaces: editor canvas, present mode, audience view, kiosk (existing market-facing UI, not the P21 kiosk runtime), ambient boardroom (existing UI — full ambient composer lands in P21), remote app, every auth flow.
+1. **T-G4.1 — Accessibility audit scope.** All _existing_ surfaces: editor canvas, present mode, audience view, kiosk (existing market-facing UI, not the P21 kiosk runtime), ambient boardroom (existing UI — full ambient composer lands in P21), remote app, every auth flow.
 2. **T-G4.2 — Automated pass.** axe-core in CI on every surface; remediation tickets filed for every AAA/AA violation; back to clean.
 3. **T-G4.3 — Manual keyboard pass.** Every interactive surface usable from keyboard only — recorded demos; documented in `docs/a11y/keyboard-pass.md`.
 4. **T-G4.4 — Screen-reader pass.** NVDA + VoiceOver pass on the editor, presenter, and audience surfaces; transcripts of any ambiguous announcement; remediation tracked.
@@ -301,56 +301,56 @@ None. P22-beta does not add new API surface; it hardens the existing surface.
 
 ### 6.1 Master matrix (existing surfaces only; frontier-feature rows omitted)
 
-| Area | Test | Expected result | Owner | Master doc reference |
-|---|---|---|---|---|
-| Canvas FPS | `packages/perf-harness/` on 3 reference laptops | 60 fps p50, ≥55 fps p95 with 500 elements over 60 min | PERF | `/docs/09-testing-strategy.md` §9.4 |
-| CRDT convergence | 1k editors, 1 deck, 30 min | No data loss; merge within 5 s p95 | PERF | `/docs/04-system-architecture.md` |
-| Presenter 2h | Synthetic 2-hour session on existing surfaces | Stable; no OOM | PERF | (no frontier features in scope) |
-| Audience sync at 50k | k6 `audience_50k.js` | 800 ms p95 / 400 ms p50 holds on existing broadcaster | PERF | `/docs/15-presenter-experience.md` |
-| SLO catalogue completeness | `docs/slos/catalogue.md` | Every existing service has an SLO | REL | `/docs/08-infrastructure-devops.md` |
-| Alert routing | PagerDuty integration test | Every alert reaches on-call | REL | same |
-| Runbook completeness | Walk all alerts; every alert has a runbook with a tabletop pass | 100% | REL | same |
-| Dashboard coverage | Grafana audit | Every existing service has a dashboard | REL | same |
-| Log redaction | Grep + OTel assertions across existing services | No raw voice transcripts / AI prompts / PII in logs | REL + SEC | `/docs/07-security-planning.md` |
-| Tracing coverage | Per-user-journey root trace | 100% | REL | `/docs/09-testing-strategy.md` §9.4 |
-| Status page | status.domio.app live; existing services monitored | Probes healthy; incident flow tested | REL | same |
-| Postgres failover | `infra/chaos/postgres_failover.tf` | RTO ≤ 60 s; RPO = 0 (sync replicas) | CHAOS | `/docs/08-infrastructure-devops.md` |
-| NATS partition | `infra/chaos/nats_partition.tf` | Backpressure; no data loss on resume | CHAOS | same |
-| AI provider failure | `infra/chaos/ai_provider_fail.tf` | Fallback within 5 s; no user-visible crash | CHAOS | `/docs/12-ai-copilot.md` |
-| CDN outage | `infra/chaos/cdn_outage.tf` | Core renders still served; status page incident opens | CHAOS | `/docs/08-infrastructure-devops.md` |
-| Regional isolation | `infra/chaos/region_isolation.tf` | Traffic shift within 30 s | CHAOS | same |
-| 24h soak | All load tests run continuously | No memory leaks, no clock skew | CHAOS | same |
-| WCAG 2.2 AA axe pass | Every surface in axe-core CI | Zero violations | A11Y | `/docs/07-security-planning.md` §7.x |
-| WCAG 2.2 AA manual keyboard pass | Per T-G4.3 | Recorded demos | A11Y | same |
-| WCAG 2.2 AA screen-reader pass | NVDA + VoiceOver | Transcripts clean | A11Y | same |
-| Bangla UI | `apps/*/locales/bn.json` complete; numerals policy enforced | Smoke tests pass | I18N | `/docs/11-legal-compliance-bangladesh.md` §12.4 |
-| RTL scaffolds | Arabic + Hebrew skeletons | bidi verified | I18N | same |
-| Locale / currency / timezone end-to-end | Test deck presented from Dhaka + NY | Numbers / dates / currency localised per user | I18N | `/docs/05-data-database-design.md` §5.7 |
-| External pentest | Public API + MCP + sharing surface | Zero criticals / highs open | SEC | `/docs/07-security-planning.md` |
-| SOC 2 binder | Auditor evidence review | Audit observation period begins | SEC + FIN | same |
-| PDPA / GDPR binder | DSR endpoints tested in staging | Round-trip access, erasure, portability | SEC | `/docs/11-legal-compliance-bangladesh.md` §11 |
-| Pricing & billing | `services/billing-svc` integration tests | BDT + USD invoicing; dunning; refunds | BILL | `/docs/06-technology-stack.md` |
-| On-call rotation | PagerDuty schedule | 24/7 staffed; escalation tree | GA + REL | `/docs/08-infrastructure-devops.md` |
-| RTO/RPO game day | Kill primary region | RTO ≤ 1 h, RPO ≤ 15 min for tier-1 | GA | same |
-| Support runbooks | Top 50 categories documented; tier-1/2/3 split; SLAs | Verified | GA + Support | `/runbooks/support/` |
-| Documentation completeness | `docs/dashboard.md` | Zero gaps for features #1–#204 | GA | `/docs/README.md` |
+| Area                                    | Test                                                            | Expected result                                       | Owner        | Master doc reference                            |
+| --------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------- | ------------ | ----------------------------------------------- |
+| Canvas FPS                              | `packages/perf-harness/` on 3 reference laptops                 | 60 fps p50, ≥55 fps p95 with 500 elements over 60 min | PERF         | `/docs/09-testing-strategy.md` §9.4             |
+| CRDT convergence                        | 1k editors, 1 deck, 30 min                                      | No data loss; merge within 5 s p95                    | PERF         | `/docs/04-system-architecture.md`               |
+| Presenter 2h                            | Synthetic 2-hour session on existing surfaces                   | Stable; no OOM                                        | PERF         | (no frontier features in scope)                 |
+| Audience sync at 50k                    | k6 `audience_50k.js`                                            | 800 ms p95 / 400 ms p50 holds on existing broadcaster | PERF         | `/docs/15-presenter-experience.md`              |
+| SLO catalogue completeness              | `docs/slos/catalogue.md`                                        | Every existing service has an SLO                     | REL          | `/docs/08-infrastructure-devops.md`             |
+| Alert routing                           | PagerDuty integration test                                      | Every alert reaches on-call                           | REL          | same                                            |
+| Runbook completeness                    | Walk all alerts; every alert has a runbook with a tabletop pass | 100%                                                  | REL          | same                                            |
+| Dashboard coverage                      | Grafana audit                                                   | Every existing service has a dashboard                | REL          | same                                            |
+| Log redaction                           | Grep + OTel assertions across existing services                 | No raw voice transcripts / AI prompts / PII in logs   | REL + SEC    | `/docs/07-security-planning.md`                 |
+| Tracing coverage                        | Per-user-journey root trace                                     | 100%                                                  | REL          | `/docs/09-testing-strategy.md` §9.4             |
+| Status page                             | status.domio.app live; existing services monitored              | Probes healthy; incident flow tested                  | REL          | same                                            |
+| Postgres failover                       | `infra/chaos/postgres_failover.tf`                              | RTO ≤ 60 s; RPO = 0 (sync replicas)                   | CHAOS        | `/docs/08-infrastructure-devops.md`             |
+| NATS partition                          | `infra/chaos/nats_partition.tf`                                 | Backpressure; no data loss on resume                  | CHAOS        | same                                            |
+| AI provider failure                     | `infra/chaos/ai_provider_fail.tf`                               | Fallback within 5 s; no user-visible crash            | CHAOS        | `/docs/12-ai-copilot.md`                        |
+| CDN outage                              | `infra/chaos/cdn_outage.tf`                                     | Core renders still served; status page incident opens | CHAOS        | `/docs/08-infrastructure-devops.md`             |
+| Regional isolation                      | `infra/chaos/region_isolation.tf`                               | Traffic shift within 30 s                             | CHAOS        | same                                            |
+| 24h soak                                | All load tests run continuously                                 | No memory leaks, no clock skew                        | CHAOS        | same                                            |
+| WCAG 2.2 AA axe pass                    | Every surface in axe-core CI                                    | Zero violations                                       | A11Y         | `/docs/07-security-planning.md` §7.x            |
+| WCAG 2.2 AA manual keyboard pass        | Per T-G4.3                                                      | Recorded demos                                        | A11Y         | same                                            |
+| WCAG 2.2 AA screen-reader pass          | NVDA + VoiceOver                                                | Transcripts clean                                     | A11Y         | same                                            |
+| Bangla UI                               | `apps/*/locales/bn.json` complete; numerals policy enforced     | Smoke tests pass                                      | I18N         | `/docs/11-legal-compliance-bangladesh.md` §12.4 |
+| RTL scaffolds                           | Arabic + Hebrew skeletons                                       | bidi verified                                         | I18N         | same                                            |
+| Locale / currency / timezone end-to-end | Test deck presented from Dhaka + NY                             | Numbers / dates / currency localised per user         | I18N         | `/docs/05-data-database-design.md` §5.7         |
+| External pentest                        | Public API + MCP + sharing surface                              | Zero criticals / highs open                           | SEC          | `/docs/07-security-planning.md`                 |
+| SOC 2 binder                            | Auditor evidence review                                         | Audit observation period begins                       | SEC + FIN    | same                                            |
+| PDPA / GDPR binder                      | DSR endpoints tested in staging                                 | Round-trip access, erasure, portability               | SEC          | `/docs/11-legal-compliance-bangladesh.md` §11   |
+| Pricing & billing                       | `services/billing-svc` integration tests                        | BDT + USD invoicing; dunning; refunds                 | BILL         | `/docs/06-technology-stack.md`                  |
+| On-call rotation                        | PagerDuty schedule                                              | 24/7 staffed; escalation tree                         | GA + REL     | `/docs/08-infrastructure-devops.md`             |
+| RTO/RPO game day                        | Kill primary region                                             | RTO ≤ 1 h, RPO ≤ 15 min for tier-1                    | GA           | same                                            |
+| Support runbooks                        | Top 50 categories documented; tier-1/2/3 split; SLAs            | Verified                                              | GA + Support | `/runbooks/support/`                            |
+| Documentation completeness              | `docs/dashboard.md`                                             | Zero gaps for features #1–#204                        | GA           | `/docs/README.md`                               |
 
 ---
 
 ## 7. Risks & open decisions
 
-1. **R1 — External security review delays.** Pentest reports often surface criticals mid-P22-beta. *Mitigation:* security firm engaged in P22b-B to leave P22b-D for closeouts; release captain may extend if a critical blocks public-beta.
-2. **R2 — SOC 2 audit observation period.** SOC 2 Type II is observation-based; the audit begins at public-beta. We cannot pre-certify the public-beta date; we can only hand the binder. *Mitigation:* clear communication in `/docs/11-legal-compliance-bangladesh.md` binder.
-3. **R3 — Cost model regression.** Performance wins may come at increased infra cost (more edge regions, bigger DB clusters). *Mitigation:* cost model finalised in T-G1.9; Finance signoff is a public-beta gate; cheaper-architecture trade-offs documented for post-public-beta.
-4. **R4 — Bangla UI completeness.** Translating the full surface may surface smaller UX bugs. *Mitigation:* translation partner engaged in P22b-C to leave P22b-D for remediation; per-feature "i18n owner" named across all squads.
-5. **R5 — WCAG manual pass surface.** Screen readers behave differently; manual sign-off takes time. *Mitigation:* A11Y lead starts in P22b-B; external firm engaged in P22b-C for the formal certificate.
-6. **R6 — Chaos drills in staging only.** Some failures (e.g., real-region isolation) cannot be drilled in prod until public-beta. *Mitigation:* staging environment with prod-equivalent topology; post-public-beta chaos drills in prod are a post-public-beta workstream.
-7. **R7 — Status page accuracy.** A wrong status page is worse than no status page. *Mitigation:* every probe tied to a synthetic that has been green for ≥24 h before flipping to "operational."
-8. **R8 — Support runbook coverage.** The first 200 customers will hit bugs not in the top 50 issue categories. *Mitigation:* on-call rotation has authority to author new runbooks during incidents; weekly review adds new ones to the catalogue.
-9. **R9 — Pricing / billing rollout in Bangladeshi market.** bKash / Nagad / SSLCommerz integration may hit regulatory friction. *Mitigation:* Bangladesh counsel engaged in P22b-B; counsel sign-off is a public-beta gate; aggregator approach (SSLCommerz / ShurjoPay) reduces regulatory exposure vs. direct integration.
-10. **R10 — Open decision: design-partner BETA labels.** Strip BETA UI at public-beta, or grandfather design partners? *Decision owner:* PMM + UX. *Default proposal:* strip BETA at public-beta for new sign-ups; grandfather design partners for 30 days then strip.
-11. **R11 — Open decision: post-public-beta roadmap freeze.** Hold all post-public-beta roadmap work for 30 days post-public-beta to absorb incidents? *Decision owner:* Head of Product + Eng Manager. *Default proposal:* 30-day stabilisation window; only critical fixes land.
-12. **R12 — Open decision: P21 pods running during P22-beta.** P21 frontier pods that don't touch shared surfaces (e.g., knowledge-graph-svc, negotiation-svc, podcast-svc) could ship in parallel with P22-beta. P21 pods that touch hardened surfaces (presenter-app, replay-viewer, ambient composer) should wait for P22-beta to land to avoid destabilising the public-beta cut. *Decision owner:* Head of Product + Eng Manager. *Default proposal:* P21 splits into P21a (parallel-safe pods) and P21b (post-public-beta pods).
+1. **R1 — External security review delays.** Pentest reports often surface criticals mid-P22-beta. _Mitigation:_ security firm engaged in P22b-B to leave P22b-D for closeouts; release captain may extend if a critical blocks public-beta.
+2. **R2 — SOC 2 audit observation period.** SOC 2 Type II is observation-based; the audit begins at public-beta. We cannot pre-certify the public-beta date; we can only hand the binder. _Mitigation:_ clear communication in `/docs/11-legal-compliance-bangladesh.md` binder.
+3. **R3 — Cost model regression.** Performance wins may come at increased infra cost (more edge regions, bigger DB clusters). _Mitigation:_ cost model finalised in T-G1.9; Finance signoff is a public-beta gate; cheaper-architecture trade-offs documented for post-public-beta.
+4. **R4 — Bangla UI completeness.** Translating the full surface may surface smaller UX bugs. _Mitigation:_ translation partner engaged in P22b-C to leave P22b-D for remediation; per-feature "i18n owner" named across all squads.
+5. **R5 — WCAG manual pass surface.** Screen readers behave differently; manual sign-off takes time. _Mitigation:_ A11Y lead starts in P22b-B; external firm engaged in P22b-C for the formal certificate.
+6. **R6 — Chaos drills in staging only.** Some failures (e.g., real-region isolation) cannot be drilled in prod until public-beta. _Mitigation:_ staging environment with prod-equivalent topology; post-public-beta chaos drills in prod are a post-public-beta workstream.
+7. **R7 — Status page accuracy.** A wrong status page is worse than no status page. _Mitigation:_ every probe tied to a synthetic that has been green for ≥24 h before flipping to "operational."
+8. **R8 — Support runbook coverage.** The first 200 customers will hit bugs not in the top 50 issue categories. _Mitigation:_ on-call rotation has authority to author new runbooks during incidents; weekly review adds new ones to the catalogue.
+9. **R9 — Pricing / billing rollout in Bangladeshi market.** bKash / Nagad / SSLCommerz integration may hit regulatory friction. _Mitigation:_ Bangladesh counsel engaged in P22b-B; counsel sign-off is a public-beta gate; aggregator approach (SSLCommerz / ShurjoPay) reduces regulatory exposure vs. direct integration.
+10. **R10 — Open decision: design-partner BETA labels.** Strip BETA UI at public-beta, or grandfather design partners? _Decision owner:_ PMM + UX. _Default proposal:_ strip BETA at public-beta for new sign-ups; grandfather design partners for 30 days then strip.
+11. **R11 — Open decision: post-public-beta roadmap freeze.** Hold all post-public-beta roadmap work for 30 days post-public-beta to absorb incidents? _Decision owner:_ Head of Product + Eng Manager. _Default proposal:_ 30-day stabilisation window; only critical fixes land.
+12. **R12 — Open decision: P21 pods running during P22-beta.** P21 frontier pods that don't touch shared surfaces (e.g., knowledge-graph-svc, negotiation-svc, podcast-svc) could ship in parallel with P22-beta. P21 pods that touch hardened surfaces (presenter-app, replay-viewer, ambient composer) should wait for P22-beta to land to avoid destabilising the public-beta cut. _Decision owner:_ Head of Product + Eng Manager. _Default proposal:_ P21 splits into P21a (parallel-safe pods) and P21b (post-public-beta pods).
 
 ---
 
@@ -416,65 +416,65 @@ This is the canonical Domio demo that the marketing team will use as the public-
 
 This is the P21-independent subset of `phase-22-polish-scale-hardening-ga.md`. Each full-P22 task is either **in P22-beta** (this doc), **deferred to P22b** (after P21), or **deferred to post-public-beta**.
 
-| Full P22 § | Task | P22-beta? | Notes |
-|---|---|---|---|
-| 4.1 T-G1.1 | Gap inventory | ✅ in P22-beta | |
-| 4.1 T-G1.2 | `packages/perf-harness/` | ✅ in P22-beta | |
-| 4.1 T-G1.3 | Canvas FPS regression suite | ✅ in P22-beta | |
-| 4.1 T-G1.4 | CRDT convergence at scale | ✅ in P22-beta | |
-| 4.1 T-G1.5 | Presenter 2-hour stability | ✅ in P22-beta | (extended in P22b with frontier features) |
-| 4.1 T-G1.6 | DB query-plan review | ✅ in P22-beta | |
-| 4.1 T-G1.7 | CDN plan | ✅ in P22-beta | |
-| 4.1 T-G1.8 | N+1 audit | ✅ in P22-beta | |
-| 4.1 T-G1.9 | Frontier perf verification | ❌ P22b | Needs F205–F219 |
-| 4.1 T-G1.10 | Cost model finalised | ✅ in P22-beta | (frontier-feature unit economics land in P22b) |
-| 4.2 T-G2.1 | SLO catalogue | ✅ in P22-beta | (P21-service SLOs land in P22b) |
-| 4.2 T-G2.2 | Error budget policy | ✅ in P22-beta | |
-| 4.2 T-G2.3 | Alert routing | ✅ in P22-beta | (P21-service alerts land in P22b) |
-| 4.2 T-G2.4 | Runbook completeness | ✅ in P22-beta | (P21-service runbooks land in P22b) |
-| 4.2 T-G2.5 | Dashboard coverage | ✅ in P22-beta | (P21-service dashboards land in P22b) |
-| 4.2 T-G2.6 | Log redaction audit | ✅ in P22-beta | (extends to biometric in P22b) |
-| 4.2 T-G2.7 | Tracing coverage | ✅ in P22-beta | |
-| 4.2 T-G2.8 | Post-mortem template | ✅ in P22-beta | |
-| 4.2 T-G2.9 | Synthetic probes | ✅ in P22-beta | |
-| 4.2 T-G2.10 | Status page wiring | ✅ in P22-beta | (P21-service probes added in P22b) |
-| 4.3 T-G3.1 | k6 / Locust scripts | ✅ in P22-beta | (kiosk + KG scripts added in P22b) |
-| 4.3 T-G3.2 | Load test staging | ✅ in P22-beta | |
-| 4.3 T-G3.3 | Postgres failover | ✅ in P22-beta | |
-| 4.3 T-G3.4 | NATS partition | ✅ in P22-beta | |
-| 4.3 T-G3.5 | AI provider failure | ✅ in P22-beta | |
-| 4.3 T-G3.6 | CDN outage | ✅ in P22-beta | |
-| 4.3 T-G3.7 | Regional isolation | ✅ in P22-beta | |
-| 4.3 T-G3.8 | Biometric sandbox escape | ❌ P22b | Needs F207/F208/F209/F214 |
-| 4.3 T-G3.9 | Soak tests | ✅ in P22-beta | (kiosk 7-day soak in P22b) |
-| 4.4 T-G4.1 | Accessibility audit scope | ✅ in P22-beta | (extends to kiosk/ambient/replay in P22b) |
-| 4.4 T-G4.2 | Automated pass | ✅ in P22-beta | |
-| 4.4 T-G4.3 | Manual keyboard pass | ✅ in P22-beta | |
-| 4.4 T-G4.4 | Screen-reader pass | ✅ in P22-beta | |
-| 4.4 T-G4.5 | WCAG 2.2 AA certification | ✅ in P22-beta | |
-| 4.4 T-G4.6 | Bangla full UI | ✅ in P22-beta | |
-| 4.4 T-G4.7 | RTL scaffolds | ✅ in P22-beta | |
-| 4.4 T-G4.8 | Locale, timezone, currency | ✅ in P22-beta | |
-| 4.5 T-G5.1 | External security review | ✅ in P22-beta | |
-| 4.5 T-G5.2 | Penetration test | ✅ in P22-beta | |
-| 4.5 T-G5.3 | SOC 2 evidence binder | ✅ in P22-beta | |
-| 4.5 T-G5.4 | PDPA / GDPR binder | ✅ in P22-beta | |
-| 4.5 T-G5.5 | Bangladesh compliance | ✅ in P22-beta | |
-| 4.5 T-G5.6 | Support runbooks | ✅ in P22-beta | |
-| 4.5 T-G5.7 | Pricing model | ✅ in P22-beta | |
-| 4.5 T-G5.8 | Status page live | ✅ in P22-beta | |
-| 4.5 T-G5.9 | On-call rotation | ✅ in P22-beta | |
-| 4.5 T-G5.10 | RTO/RPO validated | ✅ in P22-beta | |
-| 4.5 T-G5.11 | Design-partner migration | ✅ in P22-beta | |
-| 4.5 T-G5.12 | Public-beta blog + demo | ✅ in P22-beta | |
-| 4.5 T-G5.13 | Public-beta sign-off | ✅ in P22-beta | |
-| 4.5 T-G5.14 | Public-beta cut | ✅ in P22-beta | |
-| 4.6 T-G6.1 | Feature-doc completeness | ✅ in P22-beta | (range #1–#204 only; P21 docs land in P21) |
-| 4.6 T-G6.2 | Demo completeness | ✅ in P22-beta | (same range) |
-| 4.6 T-G6.3 | API reference | ✅ in P22-beta | (same range) |
-| 4.6 T-G6.4 | Runbook completeness | ✅ in P22-beta | |
-| 4.6 T-G6.5 | Onboarding guide | ✅ in P22-beta | |
-| 4.6 T-G6.6 | Docs dashboard | ✅ in P22-beta | |
+| Full P22 §  | Task                        | P22-beta?      | Notes                                          |
+| ----------- | --------------------------- | -------------- | ---------------------------------------------- |
+| 4.1 T-G1.1  | Gap inventory               | ✅ in P22-beta |                                                |
+| 4.1 T-G1.2  | `packages/perf-harness/`    | ✅ in P22-beta |                                                |
+| 4.1 T-G1.3  | Canvas FPS regression suite | ✅ in P22-beta |                                                |
+| 4.1 T-G1.4  | CRDT convergence at scale   | ✅ in P22-beta |                                                |
+| 4.1 T-G1.5  | Presenter 2-hour stability  | ✅ in P22-beta | (extended in P22b with frontier features)      |
+| 4.1 T-G1.6  | DB query-plan review        | ✅ in P22-beta |                                                |
+| 4.1 T-G1.7  | CDN plan                    | ✅ in P22-beta |                                                |
+| 4.1 T-G1.8  | N+1 audit                   | ✅ in P22-beta |                                                |
+| 4.1 T-G1.9  | Frontier perf verification  | ❌ P22b        | Needs F205–F219                                |
+| 4.1 T-G1.10 | Cost model finalised        | ✅ in P22-beta | (frontier-feature unit economics land in P22b) |
+| 4.2 T-G2.1  | SLO catalogue               | ✅ in P22-beta | (P21-service SLOs land in P22b)                |
+| 4.2 T-G2.2  | Error budget policy         | ✅ in P22-beta |                                                |
+| 4.2 T-G2.3  | Alert routing               | ✅ in P22-beta | (P21-service alerts land in P22b)              |
+| 4.2 T-G2.4  | Runbook completeness        | ✅ in P22-beta | (P21-service runbooks land in P22b)            |
+| 4.2 T-G2.5  | Dashboard coverage          | ✅ in P22-beta | (P21-service dashboards land in P22b)          |
+| 4.2 T-G2.6  | Log redaction audit         | ✅ in P22-beta | (extends to biometric in P22b)                 |
+| 4.2 T-G2.7  | Tracing coverage            | ✅ in P22-beta |                                                |
+| 4.2 T-G2.8  | Post-mortem template        | ✅ in P22-beta |                                                |
+| 4.2 T-G2.9  | Synthetic probes            | ✅ in P22-beta |                                                |
+| 4.2 T-G2.10 | Status page wiring          | ✅ in P22-beta | (P21-service probes added in P22b)             |
+| 4.3 T-G3.1  | k6 / Locust scripts         | ✅ in P22-beta | (kiosk + KG scripts added in P22b)             |
+| 4.3 T-G3.2  | Load test staging           | ✅ in P22-beta |                                                |
+| 4.3 T-G3.3  | Postgres failover           | ✅ in P22-beta |                                                |
+| 4.3 T-G3.4  | NATS partition              | ✅ in P22-beta |                                                |
+| 4.3 T-G3.5  | AI provider failure         | ✅ in P22-beta |                                                |
+| 4.3 T-G3.6  | CDN outage                  | ✅ in P22-beta |                                                |
+| 4.3 T-G3.7  | Regional isolation          | ✅ in P22-beta |                                                |
+| 4.3 T-G3.8  | Biometric sandbox escape    | ❌ P22b        | Needs F207/F208/F209/F214                      |
+| 4.3 T-G3.9  | Soak tests                  | ✅ in P22-beta | (kiosk 7-day soak in P22b)                     |
+| 4.4 T-G4.1  | Accessibility audit scope   | ✅ in P22-beta | (extends to kiosk/ambient/replay in P22b)      |
+| 4.4 T-G4.2  | Automated pass              | ✅ in P22-beta |                                                |
+| 4.4 T-G4.3  | Manual keyboard pass        | ✅ in P22-beta |                                                |
+| 4.4 T-G4.4  | Screen-reader pass          | ✅ in P22-beta |                                                |
+| 4.4 T-G4.5  | WCAG 2.2 AA certification   | ✅ in P22-beta |                                                |
+| 4.4 T-G4.6  | Bangla full UI              | ✅ in P22-beta |                                                |
+| 4.4 T-G4.7  | RTL scaffolds               | ✅ in P22-beta |                                                |
+| 4.4 T-G4.8  | Locale, timezone, currency  | ✅ in P22-beta |                                                |
+| 4.5 T-G5.1  | External security review    | ✅ in P22-beta |                                                |
+| 4.5 T-G5.2  | Penetration test            | ✅ in P22-beta |                                                |
+| 4.5 T-G5.3  | SOC 2 evidence binder       | ✅ in P22-beta |                                                |
+| 4.5 T-G5.4  | PDPA / GDPR binder          | ✅ in P22-beta |                                                |
+| 4.5 T-G5.5  | Bangladesh compliance       | ✅ in P22-beta |                                                |
+| 4.5 T-G5.6  | Support runbooks            | ✅ in P22-beta |                                                |
+| 4.5 T-G5.7  | Pricing model               | ✅ in P22-beta |                                                |
+| 4.5 T-G5.8  | Status page live            | ✅ in P22-beta |                                                |
+| 4.5 T-G5.9  | On-call rotation            | ✅ in P22-beta |                                                |
+| 4.5 T-G5.10 | RTO/RPO validated           | ✅ in P22-beta |                                                |
+| 4.5 T-G5.11 | Design-partner migration    | ✅ in P22-beta |                                                |
+| 4.5 T-G5.12 | Public-beta blog + demo     | ✅ in P22-beta |                                                |
+| 4.5 T-G5.13 | Public-beta sign-off        | ✅ in P22-beta |                                                |
+| 4.5 T-G5.14 | Public-beta cut             | ✅ in P22-beta |                                                |
+| 4.6 T-G6.1  | Feature-doc completeness    | ✅ in P22-beta | (range #1–#204 only; P21 docs land in P21)     |
+| 4.6 T-G6.2  | Demo completeness           | ✅ in P22-beta | (same range)                                   |
+| 4.6 T-G6.3  | API reference               | ✅ in P22-beta | (same range)                                   |
+| 4.6 T-G6.4  | Runbook completeness        | ✅ in P22-beta |                                                |
+| 4.6 T-G6.5  | Onboarding guide            | ✅ in P22-beta |                                                |
+| 4.6 T-G6.6  | Docs dashboard              | ✅ in P22-beta |                                                |
 
 **Coverage:** ~70% of full P22 by task count, ~75% by effort. The remaining ~30% is P21-dependent frontier-feature hardening and lands in P22b after P21.
 
@@ -482,7 +482,7 @@ This is the P21-independent subset of `phase-22-polish-scale-hardening-ga.md`. E
 
 ## 10. Definition of Done — **Public-beta gate**
 
-P22-beta is **done** when *every* box below is checked. The list is the gate for the public-beta flag to flip.
+P22-beta is **done** when _every_ box below is checked. The list is the gate for the public-beta flag to flip.
 
 ### 10.1 Performance & scale
 

@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import {
-  RefundProcessorWorker,
-  InMemoryRefundProvider,
-} from './index.js';
+import { RefundProcessorWorker, InMemoryRefundProvider } from './index.js';
 import type { PaymentIntentRecord } from './index.js';
 
 // ---------------------------------------------------------------------------
@@ -40,10 +37,10 @@ function makePI(overrides: Partial<PaymentIntentRecord> & { id: string }): Payme
 // ---------------------------------------------------------------------------
 
 describe('RefundProcessorWorker', () => {
-
   it('constructor throws when provider is missing', () => {
-    expect(() => new RefundProcessorWorker({ provider: undefined as never }))
-      .toThrow('provider is required');
+    expect(() => new RefundProcessorWorker({ provider: undefined as never })).toThrow(
+      'provider is required',
+    );
   });
 
   it('runOnce returns 0 counts when no pending refunds', async () => {

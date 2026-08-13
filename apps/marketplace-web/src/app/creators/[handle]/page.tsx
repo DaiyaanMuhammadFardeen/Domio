@@ -98,7 +98,10 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8" data-testid="creator-page-loading">
+      <div
+        className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
+        data-testid="creator-page-loading"
+      >
         <div className="mb-10 flex items-start gap-6 border-b border-border pb-10">
           <div className="skeleton h-28 w-28 rounded-full" />
           <div className="flex-1 space-y-3">
@@ -138,9 +141,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
             />
           </svg>
         </div>
-        <h1 className="font-display text-2xl font-bold text-fg">
-          {t('market.creator.notFound')}
-        </h1>
+        <h1 className="font-display text-2xl font-bold text-fg">{t('market.creator.notFound')}</h1>
         <p className="mt-2 text-sm text-muted">@{handle}</p>
         <Link
           href={marketplaceWeb('home')}
@@ -153,17 +154,21 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
   }
 
   return (
-    <div
-      className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
-      data-testid="creator-page"
-    >
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8" data-testid="creator-page">
       {/* ── Back to marketplace ───────────────────────────────────── */}
       <nav className="mb-8">
         <Link
           href={marketplaceWeb('home')}
           className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-fg"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+            aria-hidden="true"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
           {t('market.creator.browseMarketplace')}
@@ -222,10 +227,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
         ) : (
           <div className="space-y-4">
             {reviews.map((r) => (
-              <article
-                key={r.id}
-                className="rounded-xl border border-border bg-surface p-4"
-              >
+              <article key={r.id} className="rounded-xl border border-border bg-surface p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <StarRow rating={r.rating} />
@@ -256,9 +258,7 @@ function StatBlock({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="font-display text-2xl font-bold text-fg">{value}</p>
-      <p className="mt-1 text-[11px] uppercase tracking-wider text-muted">
-        {label}
-      </p>
+      <p className="mt-1 text-[11px] uppercase tracking-wider text-muted">{label}</p>
     </div>
   );
 }

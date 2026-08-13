@@ -109,10 +109,7 @@ export function computeAllGains(state: GainBusState): Map<string, number> {
  * Creates GainNodes and PannerNodes wired through the injectable context.
  * Returns cleanup function.
  */
-export function applyGainBus(
-  ctx: AudioContextLike,
-  state: GainBusState,
-): () => void {
+export function applyGainBus(ctx: AudioContextLike, state: GainBusState): () => void {
   const nodes: { gain: GainNodeLike; panner: PannerNodeLike }[] = [];
 
   for (const track of state.tracks) {

@@ -24,11 +24,7 @@ export interface ElementHeatmapProps {
  * forbidden by `domio/no-raw-hex`. The container is a 16:9 frame
  * (width 100%, height auto via `aspect-video`).
  */
-export function ElementHeatmap({
-  workspaceId,
-  data,
-  onElementClick,
-}: ElementHeatmapProps) {
+export function ElementHeatmap({ workspaceId, data, onElementClick }: ElementHeatmapProps) {
   const [selected, setSelected] = useState<SlideElement | null>(null);
 
   const handleClick = (el: SlideElement) => {
@@ -90,7 +86,9 @@ export function ElementHeatmap({
 
       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
         <span className="rounded bg-brand-100 px-2 py-0.5 font-medium text-brand-800">chart</span>
-        <span className="rounded bg-emerald-100 px-2 py-0.5 font-medium text-emerald-800">button</span>
+        <span className="rounded bg-emerald-100 px-2 py-0.5 font-medium text-emerald-800">
+          button
+        </span>
         <span className="rounded bg-slate-200 px-2 py-0.5 font-medium text-slate-800">text</span>
         <span className="rounded bg-amber-100 px-2 py-0.5 font-medium text-amber-800">image</span>
         <span className="rounded bg-violet-100 px-2 py-0.5 font-medium text-violet-800">table</span>

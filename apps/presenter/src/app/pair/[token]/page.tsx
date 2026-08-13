@@ -43,8 +43,7 @@ export default function PairPage() {
       return;
     }
     // Detect haptics support (Vibration API is the proxy).
-    const haptics =
-      typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+    const haptics = typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
     setSupportsHaptics(haptics);
 
     // Simulate a brief handshake before marking connected.
@@ -159,7 +158,9 @@ export default function PairPage() {
         </button>
       </section>
 
-      <footer className="pair__footer">Token: <code>{token.slice(0, 8)}…</code></footer>
+      <footer className="pair__footer">
+        Token: <code>{token.slice(0, 8)}…</code>
+      </footer>
     </main>
   );
 }

@@ -30,7 +30,11 @@ const BASE_CFG: RecorderConfig = {
   flushIntervalMs: 50,
 };
 
-function makeEvent(seq: number, type: RecorderEvent['eventType'] = 'click', payload: Record<string, unknown> = {}): RecorderEvent {
+function makeEvent(
+  seq: number,
+  type: RecorderEvent['eventType'] = 'click',
+  payload: Record<string, unknown> = {},
+): RecorderEvent {
   return {
     seq,
     eventType: type,
@@ -76,7 +80,9 @@ describe('EventRecorder', () => {
 
   it('buffer survives a flush failure (network-error)', async () => {
     const beacon = vi.fn(() => false);
-    const fetchImpl = vi.fn(async () => { throw new Error('offline'); });
+    const fetchImpl = vi.fn(async () => {
+      throw new Error('offline');
+    });
     const rec = new EventRecorder(BASE_CFG, { sendBeaconImpl: beacon, fetchImpl });
     rec.record(makeEvent(1));
     rec.record(makeEvent(2));
@@ -140,7 +146,9 @@ describe('ChunkedUploadStream', () => {
   it('splits events into 1 MB chunks and uploads each', async () => {
     const fetchImpl = vi.fn(async () => new Response('ok', { status: 200 }));
     const stream = new ChunkedUploadStream({ fetchImpl, chunkBytes: 64 });
-    const evs: RecorderEvent[] = Array.from({ length: 20 }, (_, i) => makeEvent(i, 'click', { blob: 'x'.repeat(16) }));
+    const evs: RecorderEvent[] = Array.from({ length: 20 }, (_, i) =>
+      makeEvent(i, 'click', { blob: 'x'.repeat(16) }),
+    );
     const ok = await stream.upload('/v1/ingest', evs);
     expect(ok).toBe(true);
     expect(fetchImpl.mock.calls.length).toBeGreaterThan(1);
@@ -154,7 +162,9 @@ describe('ChunkedUploadStream', () => {
       return new Response('ok', { status: 200 });
     });
     const stream = new ChunkedUploadStream({ fetchImpl, chunkBytes: 32 });
-    const evs: RecorderEvent[] = Array.from({ length: 5 }, (_, i) => makeEvent(i, 'click', { blob: 'x'.repeat(16) }));
+    const evs: RecorderEvent[] = Array.from({ length: 5 }, (_, i) =>
+      makeEvent(i, 'click', { blob: 'x'.repeat(16) }),
+    );
     const ok = await stream.upload('/v1/ingest', evs);
     expect(ok).toBe(false);
   });
@@ -203,10 +213,46 @@ describe('IndexedDBQueue', () => {
 
 describe('ReplayEngine', () => {
   const events = [
-    { id: 'e1', seq: 1, sessionId: 's1', eventType: 'slide_enter' as const, payload: { slide: 's1' }, createdAt: 1000, clientFingerprint: 'fp', region: 'us-east' as const },
-    { id: 'e2', seq: 2, sessionId: 's1', eventType: 'consent_change' as const, payload: { consent: 'opt_in' }, createdAt: 1100, clientFingerprint: 'fp', region: 'us-east' as const },
-    { id: 'e3', seq: 3, sessionId: 's1', eventType: 'form_submit' as const, payload: { form: { email: 'x' } }, createdAt: 1200, clientFingerprint: 'fp', region: 'us-east' as const },
-    { id: 'e4', seq: 4, sessionId: 's1', eventType: 'calculator_change' as const, payload: { name: 'total', value: 42 }, createdAt: 1300, clientFingerprint: 'fp', region: 'us-east' as const },
+    {
+      id: 'e1',
+      seq: 1,
+      sessionId: 's1',
+      eventType: 'slide_enter' as const,
+      payload: { slide: 's1' },
+      createdAt: 1000,
+      clientFingerprint: 'fp',
+      region: 'us-east' as const,
+    },
+    {
+      id: 'e2',
+      seq: 2,
+      sessionId: 's1',
+      eventType: 'consent_change' as const,
+      payload: { consent: 'opt_in' },
+      createdAt: 1100,
+      clientFingerprint: 'fp',
+      region: 'us-east' as const,
+    },
+    {
+      id: 'e3',
+      seq: 3,
+      sessionId: 's1',
+      eventType: 'form_submit' as const,
+      payload: { form: { email: 'x' } },
+      createdAt: 1200,
+      clientFingerprint: 'fp',
+      region: 'us-east' as const,
+    },
+    {
+      id: 'e4',
+      seq: 4,
+      sessionId: 's1',
+      eventType: 'calculator_change' as const,
+      payload: { name: 'total', value: 42 },
+      createdAt: 1300,
+      clientFingerprint: 'fp',
+      region: 'us-east' as const,
+    },
   ];
 
   it('load() builds an engine', () => {

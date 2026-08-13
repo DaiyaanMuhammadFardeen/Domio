@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { VariablesPanel } from './variables-panel';
 
-function defaultProps(overrides: Partial<React.ComponentProps<typeof VariablesPanel>> = {}): React.ComponentProps<typeof VariablesPanel> {
+function defaultProps(
+  overrides: Partial<React.ComponentProps<typeof VariablesPanel>> = {},
+): React.ComponentProps<typeof VariablesPanel> {
   return {
     variables: [],
     rules: [],
@@ -49,14 +51,16 @@ describe('VariablesPanel', () => {
     render(
       <VariablesPanel
         {...defaultProps({
-          variables: [{
-            id: 'v1',
-            name: 'TIER',
-            scope: 'deck',
-            type: 'string',
-            defaultValue: 'monthly',
-            visibility: 'deck_public',
-          }],
+          variables: [
+            {
+              id: 'v1',
+              name: 'TIER',
+              scope: 'deck',
+              type: 'string',
+              defaultValue: 'monthly',
+              visibility: 'deck_public',
+            },
+          ],
           onRemoveVariable,
         })}
       />,
@@ -79,14 +83,16 @@ describe('VariablesPanel', () => {
     render(
       <VariablesPanel
         {...defaultProps({
-          variables: [{
-            id: 'v1',
-            name: 'TIER',
-            scope: 'deck',
-            type: 'string',
-            defaultValue: 'annual',
-            visibility: 'deck_public',
-          }],
+          variables: [
+            {
+              id: 'v1',
+              name: 'TIER',
+              scope: 'deck',
+              type: 'string',
+              defaultValue: 'annual',
+              visibility: 'deck_public',
+            },
+          ],
         })}
       />,
     );
@@ -99,14 +105,16 @@ describe('VariablesPanel', () => {
     render(
       <VariablesPanel
         {...defaultProps({
-          variables: [{
-            id: 'v1',
-            name: 'TIER',
-            scope: 'deck',
-            type: 'string',
-            defaultValue: 'monthly',
-            visibility: 'deck_public',
-          }],
+          variables: [
+            {
+              id: 'v1',
+              name: 'TIER',
+              scope: 'deck',
+              type: 'string',
+              defaultValue: 'monthly',
+              visibility: 'deck_public',
+            },
+          ],
         })}
       />,
     );
@@ -128,14 +136,16 @@ describe('VariablesPanel', () => {
     render(
       <VariablesPanel
         {...defaultProps({
-          rules: [{
-            id: 'r1',
-            name: 'Rule',
-            priority: 0,
-            conditionSource: '$A == 1',
-            action: { kind: 'show', params: {} },
-            enabled: true,
-          }],
+          rules: [
+            {
+              id: 'r1',
+              name: 'Rule',
+              priority: 0,
+              conditionSource: '$A == 1',
+              action: { kind: 'show', params: {} },
+              enabled: true,
+            },
+          ],
           onRemoveRule,
         })}
       />,

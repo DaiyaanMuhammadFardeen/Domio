@@ -59,8 +59,8 @@ export default function DLPPage() {
   const active = rules.filter((r) => r.enabled).length;
   const hits24h = rules.reduce((acc, r) => acc + r.hits_24h, 0);
 
-  const editingRule = editingId ? rules.find((r) => r.id === editingId) ?? null : null;
-  const selectedRule = selectedId ? rules.find((r) => r.id === selectedId) ?? null : null;
+  const editingRule = editingId ? (rules.find((r) => r.id === editingId) ?? null) : null;
+  const selectedRule = selectedId ? (rules.find((r) => r.id === selectedId) ?? null) : null;
 
   async function handleSave(input: DLPRuleInput) {
     if (editingId) {
@@ -121,7 +121,11 @@ export default function DLPPage() {
           data-testid="dlp-new-rule"
           className="inline-flex items-center gap-1.5 self-start rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand-700"
         >
-          {creating ? <X className="h-3.5 w-3.5" aria-hidden /> : <Plus className="h-3.5 w-3.5" aria-hidden />}
+          {creating ? (
+            <X className="h-3.5 w-3.5" aria-hidden />
+          ) : (
+            <Plus className="h-3.5 w-3.5" aria-hidden />
+          )}
           {creating ? 'Cancel' : 'New rule'}
         </button>
       </div>
@@ -158,9 +162,7 @@ export default function DLPPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-            Rules
-          </h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Rules</h2>
           {loading ? (
             <div className="space-y-2" aria-busy>
               {[0, 1, 2].map((i) => (
@@ -179,15 +181,16 @@ export default function DLPPage() {
           )}
         </div>
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-            Tester
-          </h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Tester</h2>
           <TestRule rule={selectedRule} onTest={setTestResult} />
           {testResult && (
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-              Last result: <strong className="font-semibold">{testResult.matched ? 'matched' : 'no match'}</strong>{' '}
-              ({testResult.matches.length} occurrence{testResult.matches.length === 1 ? '' : 's'},
-              {' '}{testResult.latency_ms.toFixed(2)}ms).
+              Last result:{' '}
+              <strong className="font-semibold">
+                {testResult.matched ? 'matched' : 'no match'}
+              </strong>{' '}
+              ({testResult.matches.length} occurrence{testResult.matches.length === 1 ? '' : 's'},{' '}
+              {testResult.latency_ms.toFixed(2)}ms).
             </div>
           )}
         </div>

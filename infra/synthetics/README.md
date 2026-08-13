@@ -15,11 +15,11 @@ page (see `infra/status-page/`) and Alertmanager webhook routing.
 ```yaml
 probes:
   - id: probe-realtime-gateway-avail-rt-gateway
-    service: "@domio/realtime-gateway"
-    slo: "avail-rt-gateway"
+    service: '@domio/realtime-gateway'
+    slo: 'avail-rt-gateway'
     tier: tier-1
-    url: "https://realtime-gateway.domio.app/healthz"
-    regions: ["us-east-1", "eu-west-1", "ap-southeast-1"]
+    url: 'https://realtime-gateway.domio.app/healthz'
+    regions: ['us-east-1', 'eu-west-1', 'ap-southeast-1']
     interval_seconds: 60
     timeout_seconds: 5
     expected_status: 200

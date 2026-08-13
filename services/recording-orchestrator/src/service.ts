@@ -106,7 +106,9 @@ export class RecordingOrchestrator {
       version: 1,
     };
     await this.store.insertSession(session);
-    await this.transitionStatusInternal(session.id, session.version, 'recording', { kind: 'recording.started' });
+    await this.transitionStatusInternal(session.id, session.version, 'recording', {
+      kind: 'recording.started',
+    });
     this.metrics.inc(METRIC_STARTED, { workspace_id: input.workspace_id });
     const after = await this.store.get(session.id);
     if (!after) throw new RecordingNotFoundError(session.id);
@@ -114,34 +116,75 @@ export class RecordingOrchestrator {
   }
 
   async pause(input: TransitionInput): Promise<RecordingSession> {
-    return this.applyTransition(input, 'paused', { kind: 'recording.paused' }, ALLOWED_PAUSE, METRIC_PAUSED, {
-      paused_at: this.now().toISOString(),
-    });
+    return this.applyTransition(
+      input,
+      'paused',
+      { kind: 'recording.paused' },
+      ALLOWED_PAUSE,
+      METRIC_PAUSED,
+      {
+        paused_at: this.now().toISOString(),
+      },
+    );
   }
 
   async resume(input: TransitionInput): Promise<RecordingSession> {
-    return this.applyTransition(input, 'recording', { kind: 'recording.resumed' }, ALLOWED_RESUME, METRIC_RESUMED);
+    return this.applyTransition(
+      input,
+      'recording',
+      { kind: 'recording.resumed' },
+      ALLOWED_RESUME,
+      METRIC_RESUMED,
+    );
   }
 
   async stop(input: TransitionInput): Promise<RecordingSession> {
-    return this.applyTransition(input, 'finalizing', { kind: 'recording.stopped' }, ALLOWED_STOP, METRIC_STOPPED, {
-      stopped_at: this.now().toISOString(),
-    });
+    return this.applyTransition(
+      input,
+      'finalizing',
+      { kind: 'recording.stopped' },
+      ALLOWED_STOP,
+      METRIC_STOPPED,
+      {
+        stopped_at: this.now().toISOString(),
+      },
+    );
   }
 
   async finalize(input: FinalizeInput): Promise<RecordingSession> {
-    return this.applyTransition(input, 'ready', { kind: 'recording.ready' }, ALLOWED_FINALIZE, METRIC_FINALIZED, {
-      finalized_at: this.now().toISOString(),
-    });
+    return this.applyTransition(
+      input,
+      'ready',
+      { kind: 'recording.ready' },
+      ALLOWED_FINALIZE,
+      METRIC_FINALIZED,
+      {
+        finalized_at: this.now().toISOString(),
+      },
+    );
   }
 
   async fail(input: TransitionInput & { reason: string }): Promise<RecordingSession> {
-    return this.applyTransition(input, 'failed', { kind: 'recording.failed' }, ['recording', 'paused', 'finalizing', 'pending'], METRIC_FAILED, {
-      error: input.reason,
-    });
+    return this.applyTransition(
+      input,
+      'failed',
+      { kind: 'recording.failed' },
+      ['recording', 'paused', 'finalizing', 'pending'],
+      METRIC_FAILED,
+      {
+        error: input.reason,
+      },
+    );
   }
 
-  async commitChunk(input: CommitChunkInput): Promise<{ workspace_id: string; recording_session_id: string; track_kind: TrackKind; sequence: number }> {
+  async commitChunk(
+    input: CommitChunkInput,
+  ): Promise<{
+    workspace_id: string;
+    recording_session_id: string;
+    track_kind: TrackKind;
+    sequence: number;
+  }> {
     validateCommitChunkInput(input);
     const session = await this.store.get(input.recording_session_id);
     if (!session) throw new RecordingNotFoundError(input.recording_session_id);
@@ -151,7 +194,9 @@ export class RecordingOrchestrator {
     if (session.status !== 'recording' && session.status !== 'paused') {
       throw new RecordingInvalidTransitionError(session.status, 'recording');
     }
-    const idemKey = input.idempotency_key ?? `commit:${input.recording_session_id}:${input.track_kind}:${input.sequence}`;
+    const idemKey =
+      input.idempotency_key ??
+      `commit:${input.recording_session_id}:${input.track_kind}:${input.sequence}`;
     const claimed = await this.idempotency.claim(idemKey, 3600);
     if (!claimed) {
       // Already-committed sequence is a no-op (returns the existing key).
@@ -209,10 +254,17 @@ export class RecordingOrchestrator {
     return session;
   }
 
-  async listChunks(workspace_id: string, recording_session_id: string): Promise<readonly { track_kind: TrackKind; sequence: number; byte_size: number }[]> {
+  async listChunks(
+    workspace_id: string,
+    recording_session_id: string,
+  ): Promise<readonly { track_kind: TrackKind; sequence: number; byte_size: number }[]> {
     await this.get(workspace_id, recording_session_id);
     const chunks = await this.store.listChunks(recording_session_id);
-    return chunks.map((c) => ({ track_kind: c.track_kind, sequence: c.sequence, byte_size: c.byte_size }));
+    return chunks.map((c) => ({
+      track_kind: c.track_kind,
+      sequence: c.sequence,
+      byte_size: c.byte_size,
+    }));
   }
 
   // --- Internal ----------------------------------------------------------
@@ -225,7 +277,9 @@ export class RecordingOrchestrator {
     metricName: string,
     extras: { paused_at?: string; stopped_at?: string; finalized_at?: string; error?: string } = {},
   ): Promise<RecordingSession> {
-    const idemKey = input.idempotency_key ?? `transition:${input.recording_session_id}:${next}:${input.expected_version}`;
+    const idemKey =
+      input.idempotency_key ??
+      `transition:${input.recording_session_id}:${next}:${input.expected_version}`;
     const claimed = await this.idempotency.claim(idemKey, 3600);
     if (!claimed) {
       const cur = await this.store.get(input.recording_session_id);
@@ -246,7 +300,13 @@ export class RecordingOrchestrator {
     if (!allowedFrom.includes(session.status)) {
       throw new RecordingInvalidTransitionError(session.status, next);
     }
-    const updated = await this.transitionStatusInternal(input.recording_session_id, input.expected_version, next, auditMeta, extras);
+    const updated = await this.transitionStatusInternal(
+      input.recording_session_id,
+      input.expected_version,
+      next,
+      auditMeta,
+      extras,
+    );
     this.metrics.inc(metricName, { workspace_id: input.workspace_id });
     return updated;
   }
@@ -303,4 +363,8 @@ export class RecordingOrchestrator {
   }
 }
 
-export { RecordingConflictError, RecordingInvalidTransitionError, RecordingNotFoundError } from './types.js';
+export {
+  RecordingConflictError,
+  RecordingInvalidTransitionError,
+  RecordingNotFoundError,
+} from './types.js';

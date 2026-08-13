@@ -171,15 +171,13 @@ export async function generateSummary(
 }
 
 function bootstrapSummary(req: SummaryGenerateRequest): SummaryGenerateResponse {
-  const titles = req.deck.slides
-    .map((s) => s.title ?? s.slide_id)
-    .slice(0, 6);
-  const tldr = titles.length > 0
-    ? `TL;DR — ${titles.join(' · ')}`
-    : 'TL;DR — concise summary of the deck.';
-  const afterId = req.deck.slides.length > 0
-    ? (req.deck.slides[req.deck.slides.length - 1]?.slide_id ?? 'summary')
-    : 'summary';
+  const titles = req.deck.slides.map((s) => s.title ?? s.slide_id).slice(0, 6);
+  const tldr =
+    titles.length > 0 ? `TL;DR — ${titles.join(' · ')}` : 'TL;DR — concise summary of the deck.';
+  const afterId =
+    req.deck.slides.length > 0
+      ? (req.deck.slides[req.deck.slides.length - 1]?.slide_id ?? 'summary')
+      : 'summary';
   return {
     tldr,
     summary_slide: {

@@ -3,7 +3,11 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { ConsentPolicyFetchError, DEFAULT_POLICY_VERSION, fetchConsentPolicyVersion } from './consent-service';
+import {
+  ConsentPolicyFetchError,
+  DEFAULT_POLICY_VERSION,
+  fetchConsentPolicyVersion,
+} from './consent-service';
 
 describe('fetchConsentPolicyVersion', () => {
   it('returns the parsed version on 200', async () => {
@@ -11,7 +15,10 @@ describe('fetchConsentPolicyVersion', () => {
       ok: true,
       json: async () => ({ version: 'v2' }),
     });
-    const result = await fetchConsentPolicyVersion('http://api.test', fetchMock as unknown as typeof fetch);
+    const result = await fetchConsentPolicyVersion(
+      'http://api.test',
+      fetchMock as unknown as typeof fetch,
+    );
     expect(result.version).toBe('v2');
     expect(fetchMock).toHaveBeenCalledWith(
       'http://api.test/v1/consent/policy-version',

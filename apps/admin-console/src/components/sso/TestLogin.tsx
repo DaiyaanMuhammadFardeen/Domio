@@ -74,18 +74,15 @@ export function TestLogin({ provider, onResult }: TestLoginProps) {
         <div>
           <h3 className="text-sm font-semibold text-slate-900">Test login</h3>
           <p className="text-xs text-slate-500">
-            Simulate a SAML/OIDC round-trip for{' '}
-            <span className="font-medium">{provider.name}</span>.
+            Simulate a SAML/OIDC round-trip for <span className="font-medium">{provider.name}</span>
+            .
           </p>
         </div>
       </div>
 
       <form onSubmit={handleRun} className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[200px]">
-          <label
-            htmlFor="test-login-email"
-            className="block text-xs font-medium text-slate-600"
-          >
+          <label htmlFor="test-login-email" className="block text-xs font-medium text-slate-600">
             Subject email
           </label>
           <input
@@ -109,11 +106,7 @@ export function TestLogin({ provider, onResult }: TestLoginProps) {
         </button>
       </form>
 
-      {running && (
-        <div className="mt-3 text-xs text-slate-500">
-          Running… ({elapsed} ms)
-        </div>
-      )}
+      {running && <div className="mt-3 text-xs text-slate-500">Running… ({elapsed} ms)</div>}
 
       {result && !running && (
         <div
@@ -134,10 +127,7 @@ export function TestLogin({ provider, onResult }: TestLoginProps) {
               ? `Resolved ${result.resolved_subject} with roles ${result.resolved_roles.join(', ') || '—'}`
               : `Failed: ${result.error ?? 'unknown error'}`}
           </div>
-          <div
-            className="mt-1 text-xs text-slate-600"
-            data-testid="test-login-latency"
-          >
+          <div className="mt-1 text-xs text-slate-600" data-testid="test-login-latency">
             Latency: {result.latency_ms} ms
           </div>
         </div>

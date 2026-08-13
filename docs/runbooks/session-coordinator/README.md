@@ -8,9 +8,9 @@ Cross-region session coordination; one active session leader per deck.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-session-coordinator` | availability | 99.9% | 30d |
+| SLO                         | Kind         | Target | Window |
+| --------------------------- | ------------ | ------ | ------ |
+| `avail-session-coordinator` | availability | 99.9%  | 30d    |
 
 ## Triage
 

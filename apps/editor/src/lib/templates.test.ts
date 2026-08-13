@@ -7,12 +7,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  TEMPLATES,
-  getTemplate,
-  searchTemplates,
-  templatesByUseCase,
-} from './templates';
+import { TEMPLATES, getTemplate, searchTemplates, templatesByUseCase } from './templates';
 
 describe('templates', () => {
   it('ships a curated starter catalog', () => {

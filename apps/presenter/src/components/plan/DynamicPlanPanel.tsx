@@ -36,11 +36,12 @@ export function DynamicPlanPanel(props: DynamicPlanPanelProps) {
 
   const canonical = state.slides;
   const runningOrder = useMemo(
-    () => state.plan.order.length > 0
-      ? state.plan.order
-        .map((id) => canonical.find((s) => s.slide_id === id))
-        .filter((s): s is SlideSnapshot => !!s)
-      : canonical,
+    () =>
+      state.plan.order.length > 0
+        ? state.plan.order
+            .map((id) => canonical.find((s) => s.slide_id === id))
+            .filter((s): s is SlideSnapshot => !!s)
+        : canonical,
     [canonical, state.plan.order],
   );
 
@@ -57,22 +58,28 @@ export function DynamicPlanPanel(props: DynamicPlanPanelProps) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   const handleDragStart = useCallback((i: number) => () => setDragIndex(i), []);
-  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); }, []);
-  const handleDrop = useCallback((target: number) => () => {
-    setDragIndex((from) => {
-      if (from === null || from === target) return from;
-      const next = [...draftOrder];
-      const [moved] = next.splice(from, 1);
-      if (moved) next.splice(target, 0, moved);
-      setDraftOrder(next);
-      return null;
-    });
-  }, [draftOrder]);
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+  const handleDrop = useCallback(
+    (target: number) => () => {
+      setDragIndex((from) => {
+        if (from === null || from === target) return from;
+        const next = [...draftOrder];
+        const [moved] = next.splice(from, 1);
+        if (moved) next.splice(target, 0, moved);
+        setDraftOrder(next);
+        return null;
+      });
+    },
+    [draftOrder],
+  );
 
   const toggleHidden = useCallback((id: string) => {
     setDraftHidden((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }, []);
@@ -128,7 +135,9 @@ export function DynamicPlanPanel(props: DynamicPlanPanelProps) {
               onDragOver={handleDragOver}
               onDrop={handleDrop(i)}
             >
-              <span className="plan-row__grip" aria-hidden>⋮⋮</span>
+              <span className="plan-row__grip" aria-hidden>
+                ⋮⋮
+              </span>
               <span className="plan-row__index">{i + 1}</span>
               <span className="plan-row__title">{slide?.title ?? id}</span>
               <StageBadge canonicalIndex={canonicalIdx} runningIndex={i} isCurrent={isCurrent} />
@@ -146,7 +155,11 @@ export function DynamicPlanPanel(props: DynamicPlanPanelProps) {
         })}
       </ul>
       {status && (
-        <div className={`plan-panel__status plan-panel__status--${status.kind}`} role="status" aria-live="polite">
+        <div
+          className={`plan-panel__status plan-panel__status--${status.kind}`}
+          role="status"
+          aria-live="polite"
+        >
           {status.message}
         </div>
       )}
@@ -168,7 +181,9 @@ export function StageBadge({ canonicalIndex, runningIndex, isCurrent }: StageBad
       ? `was #${canonicalIndex + 1} • #${runningIndex + 1}`
       : `#${runningIndex + 1}`;
   return (
-    <span className={`stage-badge ${isCurrent ? 'stage-badge--current' : ''} ${moved && !isCurrent ? 'stage-badge--moved' : ''}`}>
+    <span
+      className={`stage-badge ${isCurrent ? 'stage-badge--current' : ''} ${moved && !isCurrent ? 'stage-badge--moved' : ''}`}
+    >
       {label}
     </span>
   );

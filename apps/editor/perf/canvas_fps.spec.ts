@@ -125,7 +125,9 @@ test.describe('canvas FPS regression', () => {
     if (baseline === null) {
       // First run — record the baseline and pass.
       saveBaseline(stats);
-      console.log(`baseline recorded: fps=${stats.fps.toFixed(1)}, p95Ms=${stats.p95Ms.toFixed(2)}`);
+      console.log(
+        `baseline recorded: fps=${stats.fps.toFixed(1)}, p95Ms=${stats.p95Ms.toFixed(2)}`,
+      );
     } else {
       const p95DeltaPct = ((stats.p95Ms - baseline.p95Ms) / baseline.p95Ms) * 100;
       const fpsDeltaPct = ((stats.fps - baseline.fps) / baseline.fps) * 100;

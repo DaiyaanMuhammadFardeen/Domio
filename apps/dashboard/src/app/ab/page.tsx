@@ -17,8 +17,7 @@ import { DecisionTable, type DecisionRow } from './DecisionTable';
 import { fetchExperiments } from '../../lib/ab-service';
 import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
-const AB_ASSIGNMENT_URL =
-  process.env['AB_ASSIGNMENT_URL'] ?? 'http://localhost:8090';
+const AB_ASSIGNMENT_URL = process.env['AB_ASSIGNMENT_URL'] ?? 'http://localhost:8090';
 
 const VALID_STATUSES = [
   'significant',
@@ -50,9 +49,7 @@ export default async function AbPage() {
     <div className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">A/B tests</h1>
-        <p className="text-sm text-slate-500">
-          Decisions from ab-measurement + ab-statistics
-        </p>
+        <p className="text-sm text-slate-500">Decisions from ab-measurement + ab-statistics</p>
       </header>
       <SuspenseBoundary>
         {rows.length === 0 ? (

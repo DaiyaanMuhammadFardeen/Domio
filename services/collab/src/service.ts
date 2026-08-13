@@ -17,7 +17,13 @@ import {
   removeReaction as removeReactionBody,
   promoteOrphan as promoteOrphanBody,
 } from './comments/logic.js';
-import type { CreateApprovalRequestInput, ApprovalRequest, ApprovalDecision, RecordDecisionInput, OverdueLane } from './approval/types.js';
+import type {
+  CreateApprovalRequestInput,
+  ApprovalRequest,
+  ApprovalDecision,
+  RecordDecisionInput,
+  OverdueLane,
+} from './approval/types.js';
 import {
   createApprovalRequestBody,
   submitApprovalRequestBody,
@@ -26,11 +32,12 @@ import {
   overdueLanes as overdueLanesBody,
   backToDraftBody,
 } from './approval/logic.js';
-import type { CreateAssignmentInput, Assignment, UpdateAssignmentInput } from './assignment/types.js';
-import {
-  createAssignmentBody,
-  updateAssignmentBody,
-} from './assignment/logic.js';
+import type {
+  CreateAssignmentInput,
+  Assignment,
+  UpdateAssignmentInput,
+} from './assignment/types.js';
+import { createAssignmentBody, updateAssignmentBody } from './assignment/logic.js';
 import { checkFeature, FEATURE_FLAGS } from './feature_flags.js';
 import type { CollabEventEmitter } from './types.js';
 import { noopEmitter } from './types.js';
@@ -75,7 +82,9 @@ export class CollabService {
   // Comments
   // -------------------------------------------------------------------------
 
-  async createComment(input: CreateCommentInput): Promise<{ comment: Comment; mentions: Mention[] }> {
+  async createComment(
+    input: CreateCommentInput,
+  ): Promise<{ comment: Comment; mentions: Mention[] }> {
     checkFeature(FEATURE_FLAGS.comments);
     const existing = await this.store.listCommentsByDeck(input.deckId);
     const { comment, mentions } = createCommentBody(input, existing, {
@@ -97,7 +106,11 @@ export class CollabService {
       deck_id: comment.deckId,
       actor_id: comment.authorId,
       actor_type: comment.authorType,
-      payload: { comment_id: comment.id, target_type: comment.targetType, target_id: comment.targetId },
+      payload: {
+        comment_id: comment.id,
+        target_type: comment.targetType,
+        target_id: comment.targetId,
+      },
     });
 
     for (const m of mentions) {
@@ -109,7 +122,11 @@ export class CollabService {
         deck_id: comment.deckId,
         actor_id: comment.authorId,
         actor_type: comment.authorType,
-        payload: { comment_id: comment.id, mentioned_id: m.mentionedId, mentioned_type: m.mentionedType },
+        payload: {
+          comment_id: comment.id,
+          mentioned_id: m.mentionedId,
+          mentioned_type: m.mentionedType,
+        },
       });
     }
 
@@ -124,10 +141,7 @@ export class CollabService {
     return this.store.listCommentsByDeck(deckId, opts);
   }
 
-  async updateComment(
-    commentId: string,
-    patch: UpdateCommentInput,
-  ): Promise<Comment> {
+  async updateComment(commentId: string, patch: UpdateCommentInput): Promise<Comment> {
     checkFeature(FEATURE_FLAGS.comments);
     const existing = await this.store.getComment(commentId);
     if (!existing) throw new Error(`Comment not found: ${commentId}`);
@@ -139,10 +153,7 @@ export class CollabService {
     });
   }
 
-  async resolveComment(
-    commentId: string,
-    resolvedBy: string,
-  ): Promise<Comment> {
+  async resolveComment(commentId: string, resolvedBy: string): Promise<Comment> {
     checkFeature(FEATURE_FLAGS.comments);
     const existing = await this.store.getComment(commentId);
     if (!existing) throw new Error(`Comment not found: ${commentId}`);
@@ -168,11 +179,7 @@ export class CollabService {
     return updated;
   }
 
-  async addReaction(
-    commentId: string,
-    emoji: string,
-    userId: string,
-  ): Promise<Comment> {
+  async addReaction(commentId: string, emoji: string, userId: string): Promise<Comment> {
     checkFeature(FEATURE_FLAGS.comments);
     const existing = await this.store.getComment(commentId);
     if (!existing) throw new Error(`Comment not found: ${commentId}`);
@@ -183,11 +190,7 @@ export class CollabService {
     });
   }
 
-  async removeReaction(
-    commentId: string,
-    emoji: string,
-    userId: string,
-  ): Promise<Comment> {
+  async removeReaction(commentId: string, emoji: string, userId: string): Promise<Comment> {
     checkFeature(FEATURE_FLAGS.comments);
     const existing = await this.store.getComment(commentId);
     if (!existing) throw new Error(`Comment not found: ${commentId}`);
@@ -198,10 +201,7 @@ export class CollabService {
     });
   }
 
-  async promoteOrphan(
-    commentId: string,
-    slideTargetId: string,
-  ): Promise<Comment> {
+  async promoteOrphan(commentId: string, slideTargetId: string): Promise<Comment> {
     checkFeature(FEATURE_FLAGS.comments);
     const existing = await this.store.getComment(commentId);
     if (!existing) throw new Error(`Comment not found: ${commentId}`);
@@ -245,10 +245,7 @@ export class CollabService {
     return { request, autoSubmitted };
   }
 
-  async submitApprovalRequest(
-    requestId: string,
-    actorId: string,
-  ): Promise<ApprovalRequest> {
+  async submitApprovalRequest(requestId: string, actorId: string): Promise<ApprovalRequest> {
     checkFeature(FEATURE_FLAGS.approval);
     const existing = await this.store.getApprovalRequest(requestId);
     if (!existing) throw new Error(`Approval request not found: ${requestId}`);
@@ -283,13 +280,10 @@ export class CollabService {
     const existing = await this.store.getApprovalRequest(requestId);
     if (!existing) throw new Error(`Approval request not found: ${requestId}`);
 
-    const { decision } = recordApprovalDecisionBody(
-      existing,
-      input,
-      actorId,
-      existing.versionId,
-      { now: () => this.now(), idGen: () => this.idGen() },
-    );
+    const { decision } = recordApprovalDecisionBody(existing, input, actorId, existing.versionId, {
+      now: () => this.now(),
+      idGen: () => this.idGen(),
+    });
 
     await this.store.insertApprovalDecision(decision);
 
@@ -340,10 +334,7 @@ export class CollabService {
     return overdueLanesBody(request, this.now());
   }
 
-  async backToDraft(
-    requestId: string,
-    actorId: string,
-  ): Promise<ApprovalRequest> {
+  async backToDraft(requestId: string, actorId: string): Promise<ApprovalRequest> {
     checkFeature(FEATURE_FLAGS.approval);
     const existing = await this.store.getApprovalRequest(requestId);
     if (!existing) throw new Error(`Approval request not found: ${requestId}`);
@@ -360,10 +351,7 @@ export class CollabService {
   // Assignments
   // -------------------------------------------------------------------------
 
-  async createAssignment(
-    input: CreateAssignmentInput,
-    actorId: string,
-  ): Promise<Assignment> {
+  async createAssignment(input: CreateAssignmentInput, actorId: string): Promise<Assignment> {
     checkFeature(FEATURE_FLAGS.assignments);
     const assignment = createAssignmentBody(input, actorId, {
       now: () => this.now(),

@@ -53,7 +53,7 @@ export class HandoutResolveError extends Error {
 
 const DEFAULT_BASE: string =
   (typeof window !== 'undefined' ? '' : '') +
-  (typeof process !== 'undefined' ? process.env['JOIN_WEB_API_BASE_URL'] ?? '' : '');
+  (typeof process !== 'undefined' ? (process.env['JOIN_WEB_API_BASE_URL'] ?? '') : '');
 
 /**
  * Resolve a signed handout token to a session code that the audience can

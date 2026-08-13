@@ -35,7 +35,7 @@ by hash from the package manifest.
     from `limits.signedUrlTtlMs`, default 5 min).
 - Identical payloads dedupe automatically because the address is the hash.
 - The storage adapter (`blobs` table) is behind `RegistryStore.putBlob/getBlob/
-  hasBlob` so a future object store (MinIO/S3) can replace Postgres `bytea`
+hasBlob` so a future object store (MinIO/S3) can replace Postgres `bytea`
   without touching service logic.
 
 ## Alternatives considered

@@ -61,9 +61,7 @@ function asStatus(value: string | undefined): AdapterHealth['status'] {
   return 'down';
 }
 
-function mapAdapter(
-  raw: NonNullable<SyncStatsWire['adapters']>[number],
-): AdapterHealth {
+function mapAdapter(raw: NonNullable<SyncStatsWire['adapters']>[number]): AdapterHealth {
   return {
     provider: String(raw.provider ?? ''),
     status: asStatus(raw.status),

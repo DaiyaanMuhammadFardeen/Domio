@@ -22,13 +22,8 @@
  *  - {@link ShareServiceOptions} — constructor options.
  */
 
-import type {
-  ViewerClaims} from '@domio/signed-link-token';
-import {
-  mintLinkToken,
-  mintShortId,
-  type NonceStore,
-} from '@domio/signed-link-token';
+import type { ViewerClaims } from '@domio/signed-link-token';
+import { mintLinkToken, mintShortId, type NonceStore } from '@domio/signed-link-token';
 import { createHash } from 'crypto';
 import type {
   CreateShareInput,
@@ -48,17 +43,9 @@ import {
   validateExtendExpiry,
   validateUpdateInput,
 } from './types.js';
-import type {
-  ShareLinkSnapshot,
-  ShareStore} from './store/store.js';
-import {
-  isStore,
-} from './store/store.js';
-import type {
-  AuditEmitter,
-  ShareAuditAction,
-  ShareAuditEvent,
-} from './audit/emit.js';
+import type { ShareLinkSnapshot, ShareStore } from './store/store.js';
+import { isStore } from './store/store.js';
+import type { AuditEmitter, ShareAuditAction, ShareAuditEvent } from './audit/emit.js';
 import { shareAuditKey } from './audit/key.js';
 
 // ---------------------------------------------------------------------------
@@ -131,7 +118,9 @@ export class ShareService {
   // Create
   // -------------------------------------------------------------------------
 
-  async createShare(input: CreateShareInput): Promise<{ snapshot: ShareLinkSnapshot; token: string }> {
+  async createShare(
+    input: CreateShareInput,
+  ): Promise<{ snapshot: ShareLinkSnapshot; token: string }> {
     validateCreateInput(input);
 
     // Phase 18 #180 — approval gate: consult before creating an external share link.
@@ -198,10 +187,7 @@ export class ShareService {
       short_id: shortId,
       iss: 'domio:share-api',
     };
-    const token = await mintLinkToken(
-      { claims, expiresAt },
-      this.tokenKey,
-    );
+    const token = await mintLinkToken({ claims, expiresAt }, this.tokenKey);
     const tokenHash = sha256Hex(token);
 
     // Persist the token hash by issuing a rotateToken-style update.
@@ -259,13 +245,14 @@ export class ShareService {
 
     // Detect policy-only vs full updates. If patch has visibility / allowedViewers
     // / any policy field, emit share.policy_changed. Otherwise emit share.updated.
-    const policyChanged = patch.visibility !== undefined
-      || patch.allowedViewers !== undefined
-      || patch.maxViews !== undefined
-      || patch.allowDownload !== undefined
-      || patch.allowPrint !== undefined
-      || patch.allowEmbed !== undefined
-      || patch.requirePasscode !== undefined;
+    const policyChanged =
+      patch.visibility !== undefined ||
+      patch.allowedViewers !== undefined ||
+      patch.maxViews !== undefined ||
+      patch.allowDownload !== undefined ||
+      patch.allowPrint !== undefined ||
+      patch.allowEmbed !== undefined ||
+      patch.requirePasscode !== undefined;
     const action: ShareAuditAction = policyChanged ? 'share.policy_changed' : 'share.updated';
 
     await this.emitShareAction({
@@ -323,14 +310,18 @@ export class ShareService {
       short_id: before.link.shortId,
       iss: 'domio:share-api',
     };
-    const expiresAt = before.link.expiresAt ?? new Date(this.clock().getTime() + 365 * 24 * 60 * 60 * 1000);
+    const expiresAt =
+      before.link.expiresAt ?? new Date(this.clock().getTime() + 365 * 24 * 60 * 60 * 1000);
     const now = this.clock();
-    const token = await mintLinkToken(
-      { claims, expiresAt },
-      this.tokenKey,
-    );
+    const token = await mintLinkToken({ claims, expiresAt }, this.tokenKey);
     const tokenHash = sha256Hex(token);
-    const after = await this.store.rotateToken(workspaceId, linkId, tokenHash, actorId, expectedSeq);
+    const after = await this.store.rotateToken(
+      workspaceId,
+      linkId,
+      tokenHash,
+      actorId,
+      expectedSeq,
+    );
 
     await this.emitShareAction({
       workspaceId,

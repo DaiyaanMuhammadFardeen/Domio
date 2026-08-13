@@ -12,7 +12,7 @@
  */
 
 const STOPS: ReadonlyArray<readonly [number, number, number]> = [
-  [68, 1, 84],   // deep purple (cold)
+  [68, 1, 84], // deep purple (cold)
   [59, 82, 139], // indigo
   [33, 145, 140], // teal
   [94, 201, 98], // green

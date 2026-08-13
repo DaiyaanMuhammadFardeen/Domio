@@ -2,10 +2,7 @@
  * apps/join-web — analytics events barrel.
  */
 
-export {
-  emitJoinInteraction,
-  joinEmitHelpers,
-} from './join_events.js';
+export { emitJoinInteraction, joinEmitHelpers } from './join_events.js';
 export {
   initializeJoinAnalytics,
   getJoinAnalyticsClient,

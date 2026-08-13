@@ -62,12 +62,7 @@ export interface ThemeServiceClient {
  * shape used by services/theme.
  */
 export interface ThemeServiceError {
-  readonly code:
-    | 'NOT_FOUND'
-    | 'UNAUTHORIZED'
-    | 'FORBIDDEN'
-    | 'INVALID_INPUT'
-    | 'NETWORK';
+  readonly code: 'NOT_FOUND' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'INVALID_INPUT' | 'NETWORK';
   readonly message: string;
   readonly details?: unknown;
 }

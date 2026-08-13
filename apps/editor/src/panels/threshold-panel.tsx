@@ -38,7 +38,11 @@ function nextId(): string {
   return `thr-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export function ThresholdPanel({ rules, onChange, maxRules = 64 }: ThresholdPanelProps): ReactElement {
+export function ThresholdPanel({
+  rules,
+  onChange,
+  maxRules = 64,
+}: ThresholdPanelProps): ReactElement {
   const addRule = useCallback(() => {
     if (rules.length >= maxRules) return;
     const rule: ThresholdRule = {
@@ -134,7 +138,7 @@ export function ThresholdPanel({ rules, onChange, maxRules = 64 }: ThresholdPane
               value={
                 typeof rule.styleOverride['color'] === 'string'
                   ? (rule.styleOverride['color'] as string)
-                  : sev?.color ?? '#3b82f6'
+                  : (sev?.color ?? '#3b82f6')
               }
               onChange={(e) =>
                 updateRule(rule.id, {
@@ -167,11 +171,7 @@ export function ThresholdPanel({ rules, onChange, maxRules = 64 }: ThresholdPane
         + Add rule
       </button>
 
-      {atMax && (
-        <div className="prop-field__hint">
-          Maximum {maxRules} rules reached
-        </div>
-      )}
+      {atMax && <div className="prop-field__hint">Maximum {maxRules} rules reached</div>}
     </div>
   );
 }

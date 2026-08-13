@@ -31,13 +31,7 @@ export const SCOPE_ORDER: readonly VariableScope[] = [
 ] as const;
 
 /** Type tag for runtime values. Determines which operations are valid. */
-export type VariableType =
-  | 'string'
-  | 'number'
-  | 'boolean'
-  | 'enum'
-  | 'json'
-  | 'array';
+export type VariableType = 'string' | 'number' | 'boolean' | 'enum' | 'json' | 'array';
 
 /** Visibility of a variable in deep-link snapshots, exports, MCP reads. */
 export type VariableVisibility = 'deck_public' | 'private' | 'server_only';
@@ -131,18 +125,9 @@ export interface ConditionalRule {
 
 // ── Hotspots ────────────────────────────────────────────────────────────
 
-export type GestureMask =
-  | 'click'
-  | 'double_click'
-  | 'long_press'
-  | 'hover'
-  | 'focus';
+export type GestureMask = 'click' | 'double_click' | 'long_press' | 'hover' | 'focus';
 
-export type HotspotTargetType =
-  | 'slide'
-  | 'url'
-  | 'overlay'
-  | 'action';
+export type HotspotTargetType = 'slide' | 'url' | 'overlay' | 'action';
 
 /**
  * Geometry in normalized `[0..1]` coordinates. Two shapes:
@@ -150,8 +135,17 @@ export type HotspotTargetType =
  *   - `polygon`: `[{x, y}, ...]` (≥ 3 vertices)
  */
 export type HotspotGeometry =
-  | { readonly kind: 'rect'; readonly x: number; readonly y: number; readonly w: number; readonly h: number }
-  | { readonly kind: 'polygon'; readonly points: ReadonlyArray<{ readonly x: number; readonly y: number }> };
+  | {
+      readonly kind: 'rect';
+      readonly x: number;
+      readonly y: number;
+      readonly w: number;
+      readonly h: number;
+    }
+  | {
+      readonly kind: 'polygon';
+      readonly points: ReadonlyArray<{ readonly x: number; readonly y: number }>;
+    };
 
 export interface Hotspot {
   readonly id: string;
@@ -176,19 +170,9 @@ export interface Hotspot {
 
 // ── Overlays ────────────────────────────────────────────────────────────
 
-export type OverlayType =
-  | 'modal'
-  | 'tooltip'
-  | 'drawer'
-  | 'popover'
-  | 'sheet';
+export type OverlayType = 'modal' | 'tooltip' | 'drawer' | 'popover' | 'sheet';
 
-export type OverlaySizeStrategy =
-  | 'small'
-  | 'medium'
-  | 'large'
-  | 'fullscreen'
-  | 'auto';
+export type OverlaySizeStrategy = 'small' | 'medium' | 'large' | 'fullscreen' | 'auto';
 
 export interface Overlay {
   readonly id: string;
@@ -199,8 +183,14 @@ export interface Overlay {
   readonly type: OverlayType;
   readonly sizeStrategy: OverlaySizeStrategy;
   readonly anchor: { readonly x: number; readonly y: number } | null;
-  readonly openTrigger: { readonly kind: string; readonly params?: Readonly<Record<string, unknown>> } | null;
-  readonly closeTrigger: { readonly kind: string; readonly params?: Readonly<Record<string, unknown>> } | null;
+  readonly openTrigger: {
+    readonly kind: string;
+    readonly params?: Readonly<Record<string, unknown>>;
+  } | null;
+  readonly closeTrigger: {
+    readonly kind: string;
+    readonly params?: Readonly<Record<string, unknown>>;
+  } | null;
   /** Persistent overlays do not auto-close on slide change. */
   readonly persistent: boolean;
   readonly schema: Readonly<Record<string, unknown>>;
@@ -227,11 +217,7 @@ export interface BranchingEdge {
 
 // ── Interaction states ──────────────────────────────────────────────────
 
-export type InteractionStateScope =
-  | 'session'
-  | 'slide'
-  | 'deck'
-  | 'persistent_session';
+export type InteractionStateScope = 'session' | 'slide' | 'deck' | 'persistent_session';
 
 export interface InteractionStateTransition {
   readonly from: string;

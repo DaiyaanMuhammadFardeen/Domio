@@ -28,19 +28,19 @@
 
 ### 2.1 In scope (feature numbers)
 
-| # | Feature | Notes |
-|---:|---|---|
-| 28 (parts) | Community marketplace — **billing + payout execution layer**. Listings, install, license grants, revenue share events arrived in P06; this phase adds the payout execution, refund window, chargeback handling, and the financial ledger close. | Deferred surface from P06 §2.2. |
-| 41 (parts) | Multi-brand marketplace listing — **brand-locked admin-curated marketplace**. A tenant admin curates a subset of the public marketplace visible to a brand-scope (#41); brand-locked marketplace items are gated behind the licensing model created in P07. | Cross-cite with P07. |
-| 45 (parts) | Theme marketplace — **storefront + billing surface for themes**. P07 owns the theme engine; P19 ships the public theme marketplace that reuses the same billing pipeline. | Cross-cite with P07. |
-| 154 (parts) | **Marketplace analytics** — creator-facing dashboard reads from the analytics event bus. | Cross-cite with P17. |
-| 196 (parts) | **Audit log coverage** for marketplace reads, KYC checks, takedowns, refunds, payouts. | Cross-cite with P20. |
+|           # | Feature                                                                                                                                                                                                                                                     | Notes                                          |
+| ----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+|  28 (parts) | Community marketplace — **billing + payout execution layer**. Listings, install, license grants, revenue share events arrived in P06; this phase adds the payout execution, refund window, chargeback handling, and the financial ledger close.             | Deferred surface from P06 §2.2.                |
+|  41 (parts) | Multi-brand marketplace listing — **brand-locked admin-curated marketplace**. A tenant admin curates a subset of the public marketplace visible to a brand-scope (#41); brand-locked marketplace items are gated behind the licensing model created in P07. | Cross-cite with P07.                           |
+|  45 (parts) | Theme marketplace — **storefront + billing surface for themes**. P07 owns the theme engine; P19 ships the public theme marketplace that reuses the same billing pipeline.                                                                                   | Cross-cite with P07.                           |
+| 154 (parts) | **Marketplace analytics** — creator-facing dashboard reads from the analytics event bus.                                                                                                                                                                    | Cross-cite with P17.                           |
+| 196 (parts) | **Audit log coverage** for marketplace reads, KYC checks, takedowns, refunds, payouts.                                                                                                                                                                      | Cross-cite with P20.                           |
 | 200 (parts) | **Partner marketplace API** — `POST /v1/marketplace/listings` (from partner OAuth consumer), `GET /v1/marketplace/search`, `POST /v1/marketplace/listings/{id}/purchase`, `GET /v1/marketplace/listings/{id}/download`. Distinct from the MCP tool surface. | Read-write guarded by OAuth scopes (P20 §3.9). |
-| 201 (parts) | **Marketplace webhooks** — `listing.published`, `order.created`, `order.refunded`, `payout.eligible`, `payout.paid`, `payout.held`, `takedown.filed`, `takedown.resolved`. | Co-signed with P06 §6.5. |
-| 222 (parts) | **MCP marketplace tools** — `purchase_listing`, `request_refund`, `get_payout_status`, `file_takedown` extend P06's tool list. | Cross-cite with P13. |
-| 225 (parts) | **Agent-scoped permissions** — MCP/agent purchasing is gated by a `purchase_marketplace` capability that is off by default and requires workspace-admin grant. | Cross-cite with P13/P20. |
-| 227 (parts) | **Agent audit trail** — agent-initiated purchases and refund requests tag `actor_kind='agent'` in the audit log. | Cross-cite with P13. |
-| 237 (parts) | **Marketplace lint** — `lint_marketplace_listing` exposes a creator-side accessibility + license + provenance check before publish. | Cross-cite with P13. |
+| 201 (parts) | **Marketplace webhooks** — `listing.published`, `order.created`, `order.refunded`, `payout.eligible`, `payout.paid`, `payout.held`, `takedown.filed`, `takedown.resolved`.                                                                                  | Co-signed with P06 §6.5.                       |
+| 222 (parts) | **MCP marketplace tools** — `purchase_listing`, `request_refund`, `get_payout_status`, `file_takedown` extend P06's tool list.                                                                                                                              | Cross-cite with P13.                           |
+| 225 (parts) | **Agent-scoped permissions** — MCP/agent purchasing is gated by a `purchase_marketplace` capability that is off by default and requires workspace-admin grant.                                                                                              | Cross-cite with P13/P20.                       |
+| 227 (parts) | **Agent audit trail** — agent-initiated purchases and refund requests tag `actor_kind='agent'` in the audit log.                                                                                                                                            | Cross-cite with P13.                           |
+| 237 (parts) | **Marketplace lint** — `lint_marketplace_listing` exposes a creator-side accessibility + license + provenance check before publish.                                                                                                                         | Cross-cite with P13.                           |
 
 ### 2.2 Out of scope (explicit non-goals)
 
@@ -66,7 +66,7 @@
 - **P01** — observability, CI/CD, infra baseline. OTel collector, Prometheus, object store, multi-region CDN, Vault/SecretsManager for Stripe & KYC provider keys.
 - **P02** — deck schema and scene-graph foundation.
 - **P05** — persistence, versioning, branches. `audit_*` tables reuse the P05 logging contract.
-- **P06** — **critical dependency.** Component registry, `marketplace_listing`, `license_grant`, `revenue_share_event` (deferred payout), review/moderation pipeline, MCP component tools. P19 *activates* `payout_executor_enabled = true`; P06 had it off.
+- **P06** — **critical dependency.** Component registry, `marketplace_listing`, `license_grant`, `revenue_share_event` (deferred payout), review/moderation pipeline, MCP component tools. P19 _activates_ `payout_executor_enabled = true`; P06 had it off.
 - **P07** — theming & brand. `marketplace.theme` listing category, brand-kit binding, design-token licensing, brand-locked theme assets.
 - **P13** — agentic & MCP. The marketplace MCP tool surface ships with P13's MCP server; P19 adds the financial tools.
 - **P17** — analytics. Marketplace event streams plug into the analytics event bus P17 owns.
@@ -96,6 +96,7 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks (ordered):**
 
 1. **Public storefront (`marketplace-web` web app + `marketplace-service` read API).**
+
    - Files: `apps/marketplace-web/src/{pages,components,search}/...`, `services/marketplace/src/{storefront,search,facets,recommendations}.ts`.
    - SSR-or-ISR web shell, server-rendered listing pages, lazy-loaded preview player.
    - Consumes: `GET /v1/marketplace/listings` (P06), extended with `?facet=...&geo=...&currency=...`.
@@ -103,6 +104,7 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
    - **DoD:** A buyer can browse a category, facet-filter, sort, open a listing, and see a live preview with < 2 s LCP.
 
 2. **Editor panel re-skin — "Insert → Marketplace".**
+
    - Files: `apps/canvas/src/panels/MarketplacePanel.tsx`, `apps/canvas/src/panels/marketplace/{Search,Filters,ListingCard,Preview}.tsx`.
    - Surfaces brand-locked overlay (WS-MKT-5 task 2) on top of the global marketplace, scoped to the active brand-kit.
    - Tests: in-editor search 400 ms p95 warm; facets update without page reload; preview modal thumbnails are keyboard-navigable.
@@ -119,18 +121,21 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks:**
 
 1. **Creator console (`apps/creator-console/src/...`).**
+
    - Files: `apps/creator-console/src/{listings,versions,pricing,assets,preview,submit,kyc,onboarding}/...`.
    - Studio UI: drag-upload listing assets, define `kind` (`component | template | theme | sticker_pack | icon_pack`), edit manifest, attach preview, set price, set license, declare dependencies, declare third-party licenses.
    - Tests: unit tests on `pricing` reducer (free / one-time / subscription / team), integration test on the submit → review → publish state machine.
    - **DoD:** a creator can draft a listing, attach a 5 MB preview MP4, declare `$19` one-time price + 5-seat team license, and submit for review.
 
 2. **Validation pipeline (pre-publish).**
+
    - Files: `services/marketplace/src/listing/validate.ts`, `workers/listing-validator/`.
    - Runs: P06 license compatibility check, P13 `lint_marketplace_listing` (accessibility + license + provenance), P07 brand-kit inheritance check for themes, package-hash + signature verification (P06 §7.1).
    - Tests: synthetic listings with deliberately bad metadata fail with structured error codes; valid listings pass cleanly.
    - **DoD:** the validator returns a structured JSON report; the creator console shows each warning inline, with "blocked" vs "info" severities.
 
 3. **Preview rendering (refresh of P06's `template-preview-renderer`).**
+
    - Files: `workers/preview-renderer/` (extends P06's worker), `services/marketplace/src/preview/queue.ts`.
    - Generates: 1 poster frame + 10-second WebM loop + 3 detail screenshots.
    - Tests: render ≤ 30 s p95 for a 12-slide template; cache invalidation on listing version bump.
@@ -147,12 +152,14 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks:**
 
 1. **Verified-buyer badge + review gating.**
+
    - Files: `services/marketplace/src/reviews/{submit,moderation}.ts`, `apps/marketplace-web/src/components/ReviewBadge.tsx`.
    - A review is accepted only if a `license_grant` exists for the reviewer→listing pair; rating is 1–5; the body is text + optional screenshots.
    - Tests: synthetic reviewers without grants receive 403; reviews with text > 4 KB rejected; admin override allows a non-buyer review (with a non-verified badge).
    - **DoD:** the storefront renders a verified-only badge; average rating is recomputed via materialized view refreshed on every approval.
 
 2. **Moderation pipeline (extends P06's `review-moderator`).**
+
    - Files: `services/marketplace/src/moderation/{reviews,profanity,spam,image}.ts`.
    - Pipeline: profanity → spam heuristics → trust score → image classification (if screenshots attached) → sentiment. SLA: human review within 24 h for flagged reviews.
    - Tests: synthetic spam corpus blocked; verified-buyer reviews with profanity still go to human review, not auto-rejected.
@@ -169,6 +176,7 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks:**
 
 1. **Pricing model + license policy.**
+
    - Files: `services/marketplace/src/pricing/{model,policy,calculator}.ts`, `contracts/schema/marketplace-license-v1.schema.json`.
    - Listing types: `free`, `one_time`, `subscription`, `team_seats`, `enterprise_quote`.
    - License scopes: `single_seat`, `team_n_seats`, `enterprise_pool`.
@@ -176,18 +184,21 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
    - **DoD:** a listing can be priced in `USD | BDT | EUR`; the calculator returns `{ gross_cents, fee_cents, net_cents, currency, fx_rate, fx_timestamp }`.
 
 2. **Purchase flow.**
+
    - Files: `services/marketplace/src/checkout/{cart,checkout,webhook}.ts`, `workers/license-signer/` (extends P06).
    - Flow: `POST /v1/marketplace/listings/{slug}/purchase` → Stripe Checkout (or bKash/Nagad token-collection) → webhook `checkout.session.completed` → in-tx write of `license_grant` + `revenue_share_event`(payout_status='eligible') + signed JWT delivery.
    - Tests: idempotency on the same `Idempotency-Key`; webhook re-delivery does not double-write; failed payment leaves no `license_grant` row.
    - **DoD:** a Stripe test-mode purchase completes in < 1.5 s p95 with a license JWT delivered; a bKash sandbox purchase completes the same way.
 
 3. **Subscription lifecycle.**
+
    - Files: `services/marketplace/src/subscription/{renewal,cancel,pause}.ts`, `workers/subscription-billing/`.
    - Daily cron scans Stripe subscription statuses; emits `payout.eligible` for each active month; cancelled subscriptions emit `license.revoked` after grace period.
    - Tests: a 30-day clock-advancing simulation advances billing, handles failed renewal, and only emits payout on success.
    - **DoD:** a subscription listing accrues monthly payouts; cancellation revokes the license after 7-day grace.
 
 4. **Refund window + flows.**
+
    - Files: `services/marketplace/src/refund/{request,approve,deny}.ts`, `workers/refund-processor/`.
    - Rule (per P06 §2.1, feature 28): 14-day window, usage < 5 inserts; auto-approve if criteria met, else admin review.
    - Tests: usage counter increments on `install` events; refund decrements `revenue_share_event.net_cents` and marks `payout_status='refunded'`; the corresponding `payout_ledger_entry` row is created.
@@ -204,12 +215,14 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks:**
 
 1. **Brand-locked listing schema.**
+
    - Files: `services/marketplace/src/curated/listing.ts`, `migrations/2026_07_p19_curated.sql`.
    - Table: `brand_locked_listing` (mapping: `tenant_id, brand_kit_id, marketplace_listing_id, allow? boolean, override_price_cents?`).
    - Tests: a `DENY` mapping overrides the global marketplace visibility for the brand-scope.
    - **DoD:** a tenant admin can map `Brand A → only allow these 12 listings`; users in Brand A see only those 12.
 
 2. **Editor-side filter.**
+
    - Files: `apps/canvas/src/panels/MarketplacePanel.tsx` (extends WS-MKT-1 task 2), `services/marketplace/src/curated/filter.ts`.
    - The panel's `Insert → Marketplace` calls a new endpoint `GET /v1/marketplace/curated?brand_kit_id=...` instead of the global listing.
    - Tests: a user with `Brand A` active sees only brand-locked listings; a user with `Brand B` (no curation) sees public listings.
@@ -226,18 +239,21 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks:**
 
 1. **Creator onboarding state machine.**
+
    - Files: `services/marketplace/src/creator/{onboarding,profile}.ts`, `contracts/schema/creator-profile-v1.schema.json`.
    - States: `pending → profile_complete → kyc_required → kyc_submitted → kyc_approved → payout_ready → active`.
    - Tests: paid-publish blocked until `payout_ready`; free listings allowed at `profile_complete`.
    - **DoD:** a creator can publish free listings before KYC; paid listings require KYC + payout method.
 
 2. **KYC integration.**
+
    - Files: `services/marketplace/src/kyc/{provider,session,callback}.ts`, `workers/kyc-webhook/`.
    - Vendor: Persona or Sumsub (TBD before kickoff). Vendor-agnostic interface: `start_session(creator_id) → session_url`, `poll_status(session_id) → { approved | rejected | pending }`.
    - Tests: synthetic webhook `approved` flips the creator to `kyc_approved`; periodic poll picks up long-tail vendor-callback failures.
    - **DoD:** a creator can complete KYC end-to-end in < 5 minutes; failed sessions fall through to a manual review queue.
 
 3. **Payout setup.**
+
    - Files: `services/marketplace/src/payout/method/{stripe_connect,bkash,nagad,bank}.ts`.
    - International creators: Stripe Connect Express account onboarding via OAuth-style link; status poll sync.
    - Bangladesh creators: bKash/Nagad merchant-account collection + bank-account fallback.
@@ -255,24 +271,28 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks:**
 
 1. **Payout executor (activates P06's deferred payout).**
+
    - Files: `services/marketplace/src/payout/executor.ts`, `workers/payout-executor/` (cron monthly), `payout_failure_recovery.ts`.
    - Reads `revenue_share_event` rows where `payout_status='eligible'` and `period_month = current_period`, groups by seller, applies creator-configured payout method, creates a `payout_ledger_entry` row, idempotently calls Stripe Transfer / bKash Disburse / Nagad Disburse.
    - Tests: idempotent on `payout_ledger(executor_run_id, event_id)`; partial failure (one seller fails, others succeed) does not roll back the batch.
    - **DoD:** a $1,234.56 monthly payout succeeds end-to-end in Stripe sandbox; the same $1,234.56 succeeds in bKash sandbox (BDT equivalent).
 
 2. **Minimum threshold + hold periods.**
+
    - Files: `services/marketplace/src/payout/policy.ts`.
    - Default: $50 minimum payout threshold; 30-day hold on first-ever payout (per Stripe Connect norms); configurable per creator (Pro tier can lower).
    - Tests: a creator at $49.99 has `payout_status='below_threshold'`; a first-ever payout holds for 30 days, then releases.
    - **DoD:** creator dashboard shows accrual vs. eligible vs. paid.
 
 3. **Currency conversion + tax.**
+
    - Files: `services/marketplace/src/finance/{fx,tax}.ts`, `workers/fx-rate-cacher/`.
    - FX mid-rate cached daily from a provider (e.g., openexchangerates.org); VAT computed per invoice for Bangladesh sales (current rate; verify against the prevailing Bangladesh VAT schedule at launch).
    - Tests: a USD-priced listing sold to a Bangladesh buyer records `gross_cents=1900`, `tax_cents=...`, `fx_rate=110.5`, `currency=BDT`.
    - **DoD:** every `revenue_share_event` row has `currency`, `gross_cents`, `tax_cents`, `fx_rate`, `fx_timestamp` populated; the creator dashboard reconciles.
 
 4. **Creator analytics dashboard.**
+
    - Files: `apps/creator-console/src/analytics/{Overview,Revenue,Geo,Funnel}.tsx`, `services/marketplace/src/analytics/{query,rollup}.ts`.
    - Reads from the analytics event bus (P17) + `revenue_share_event` (P06) + `install` events.
    - Charts: downloads, installs, MRR, conversion, refund rate, top geos (with geo-IP), top templates within the listing. CSV export.
@@ -290,12 +310,14 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks:**
 
 1. **Takedown intake.**
+
    - Files: `services/marketplace/src/takedown/{intake,form}.ts`, `apps/marketplace-web/src/legal/takedown.tsx`.
    - Public form for copyright (DMCA), trademark, and policy complaints; requires identity + good-faith statement (DMCA §512(c) elements).
    - Tests: a takedown filing creates a `takedown_request` row with structured fields; the filing user receives a confirmation email with a reference id.
    - **DoD:** the form is reachable from every listing's footer; a submission creates a trackable case.
 
 2. **Takedown workflow.**
+
    - Files: `services/marketplace/src/takedown/{triage,resolve,appeal}.ts`, `workers/takedown-router/`.
    - States: `received → in_review → confirmed | dismissed → counter_notice_window → resolved`.
    - On `confirmed`: listing is removed from storefront, installed instances show "Removed — please replace" badge, the creator is notified, payouts for that listing are held.
@@ -314,6 +336,7 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 **Tasks:**
 
 1. **Partner API (consumer-facing).**
+
    - Files: `services/marketplace/src/api/partner/{listings,search,download,purchase}.ts`, `contracts/openapi/v1/marketplace-partner.yaml`.
    - OAuth 2.1 consumer credentials (P20 §3.9); scopes `marketplace:read`, `marketplace:install`, `marketplace:purchase`.
    - Rate limits: 600 req/min (Pro), 6 000 req/min (Enterprise), per consumer.
@@ -321,6 +344,7 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
    - **DoD:** a partner CLI (`deckctl marketplace install <slug>`) round-trips through the consumer API.
 
 2. **MCP marketplace tools (agent-facing).**
+
    - Files: `packages/mcp-tools/src/marketplace.ts`, `services/marketplace/src/mcp/{handlers,tools}.ts`.
    - Tools: `purchase_listing`, `get_license_grant`, `request_refund`, `get_payout_status`, `file_takedown`, `lint_marketplace_listing`.
    - `purchase_listing` requires `purchase_marketplace` capability; default OFF.
@@ -328,6 +352,7 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
    - **DoD:** an MCP test agent can purchase a test listing in CI with a sealed workspace.
 
 3. **Audit log coverage.**
+
    - Files: `services/marketplace/src/audit/{emit,events}.ts`, `apps/audit-consumer/src/marketplace.ts` (P20 consumer).
    - Events: every purchase, refund, payout, takedown, KYC decision, license revoke, brand-lock curation change, MCP purchase.
    - Tests: every event has `actor_id`, `tenant_id`, `trace_id`, `prev_hash`; hash chain verifies via `deckctl audit verify`.
@@ -390,7 +415,7 @@ The phase is organized into eight workstreams. Tasks within each are ordered; th
 
 The marketplace service is a separate module (still part of the modular monolith at v1) exposing purchase, license, payout, takedown, KYC, and curated endpoints. The four external integrations (Stripe Connect, bKash/Nagad, KYC vendor, FX provider) are wrapped in narrow interfaces so the executor can be swapped per region.
 
-### 5.2 New tables (additions to P06's marketplace_* set)
+### 5.2 New tables (additions to P06's marketplace\_\* set)
 
 All tables use `id uuid primary key default gen_random_uuid()` and `created_at/updated_at timestamptz default now()` unless otherwise noted. Cents are integer (`bigint`); currency is `char(3)` ISO 4217.
 
@@ -448,29 +473,29 @@ All tables use `id uuid primary key default gen_random_uuid()` and `created_at/u
 
 ## 6. Verification matrix
 
-| Feature | Test | Expected result | Owner |
-|---:|---|---|---|
-| 28 (paid purchase) | A creator publishes a $19 `one_time` listing; a buyer in USD purchases via Stripe; a buyer in BDT purchases via bKash sandbox | Both purchases complete in < 1.5 s p95; license JWT issued; `revenue_share_event` row written with integer `gross_cents`, `tax_cents`, `fx_rate`, `currency`; creator balance updates | Marketplace lead |
-| 28 (subscription) | A creator publishes a $9.99/mo subscription; buyer subscribes; clock advances 30 days | Subscription renews; `payout.eligible` event emitted; second renewal works; cancellation revokes after 7-day grace | Marketplace lead |
-| 28 (refund) | A buyer requests a refund within 14 days, usage < 5 inserts | Refund auto-approved; `revenue_share_event.net_cents` decremented; `payout_ledger_entry.status='refunded'`; creator dashboard updates within 60 s | Marketplace lead |
-| 28 (chargeback) | A buyer disputes a charge via Stripe sandbox | Listing freezes; payout for that transaction is held; creator notified; resolution restores or voids the hold | Marketplace lead |
-| 28 (creator payout) | A creator reaches $50 eligible; monthly executor runs | Stripe transfer (USD) + bKash disburse (BDT) both succeed; `payout_ledger_entry.status='paid'`; `payout_run` row written; idempotent on re-run | Fintech lead |
-| 28 (KYC gate) | A new creator tries to publish a paid listing without KYC | Blocked with structured error; once KYC is approved, paid listing is allowed | Marketplace lead |
-| 41 (brand-locked) | Tenant admin sets `Brand A → only allow these 12 listings`; a user in Brand A opens `Insert → Marketplace` | Only the 12 curated listings appear; direct API calls to `GET /v1/marketplace/listings` are filtered server-side; brand B users see the public marketplace | P07 + Marketplace lead |
-| 45 (theme marketplace) | A creator publishes a theme from P07's theme engine; a buyer installs it | The storefront shows the theme with a live preview; install creates a `theme_install` row + `license_grant`; DRM is preserved | P07 lead |
-| 154 (creator analytics) | A creator opens the analytics dashboard for the last 90 days | Downloads, installs, revenue, MRR, conversion, refund rate, top geos all populated; p95 load ≤ 1 s; CSV export works | Analytics lead |
-| 196 (audit) | SOC 2 reviewer pulls audit events for a workspace | Every purchase, refund, payout, takedown, KYC decision, license revoke, brand-lock curation change has a chain-verified row | P20 lead |
-| 200 (partner API) | Partner CLI runs `deckctl marketplace install <slug>` with a Pro-tier consumer credential | Listing installs through the partner API; rate-limit respected; scoped consumer cannot purchase without `marketplace:purchase` | MCP/agentic lead |
-| 201 (webhooks) | A partner subscribes to `order.created`, `payout.paid`, `takedown.filed`; trigger events fire | Events delivered within P20 §3.10 budgets; signatures verify; replay is idempotent | Platform lead |
-| 222 (MCP purchase) | MCP test agent calls `purchase_listing` with a default token | Returns `ERR_PERMISSION_DENIED`; with `purchase_marketplace` capability granted, the purchase succeeds; audit row has `actor_kind='agent'` | MCP/agentic lead |
-| 225 (agent scope) | Agent token lacks `takedown:file`; agent calls `file_takedown` | Rejected with structured error; ABAC policy honored | P20 lead |
-| 227 (agent audit) | An MCP agent completes a purchase + a refund | Both events in the audit log tagged `actor_kind='agent'`, agent identifier, workspace | MCP/agentic lead |
-| 237 (lint) | A creator runs `lint_marketplace_listing` on a draft listing | Returns structured report with accessibility, license, and provenance warnings; blocked vs. info severities | Marketplace lead |
-| (DMCA) | A copyright holder files a takedown for a paid listing | Takedown case created; listing removed from storefront within SLA; installed instances show "Removed — please replace"; creator can submit a counter-notice | Trust & safety lead |
-| (Sanctions) | Nightly rescreen flags a creator | Creator payouts freeze; admin queue shows the case; admin override can unfreeze with audit row | Marketplace lead |
-| (Refund dispute) | A buyer is over the 14-day window | Refund denied; a `marketplace_audit_event` of kind `refund_denied` is written; appeal to support is documented | Marketplace lead |
-| (Cross-border) | A USD-priced listing is sold to a Bangladesh buyer | VAT computed per prevailing rate; FX rate at invoice timestamp; integer cents stored; audit trail present | Fintech lead |
-| (Residency) | A residency-pinned purchase is routed to the correct zone | Audit log has `residency_zone` on the payment intent; cross-zone assertions pass | P20 lead |
+|                 Feature | Test                                                                                                                          | Expected result                                                                                                                                                                       | Owner                  |
+| ----------------------: | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+|      28 (paid purchase) | A creator publishes a $19 `one_time` listing; a buyer in USD purchases via Stripe; a buyer in BDT purchases via bKash sandbox | Both purchases complete in < 1.5 s p95; license JWT issued; `revenue_share_event` row written with integer `gross_cents`, `tax_cents`, `fx_rate`, `currency`; creator balance updates | Marketplace lead       |
+|       28 (subscription) | A creator publishes a $9.99/mo subscription; buyer subscribes; clock advances 30 days                                         | Subscription renews; `payout.eligible` event emitted; second renewal works; cancellation revokes after 7-day grace                                                                    | Marketplace lead       |
+|             28 (refund) | A buyer requests a refund within 14 days, usage < 5 inserts                                                                   | Refund auto-approved; `revenue_share_event.net_cents` decremented; `payout_ledger_entry.status='refunded'`; creator dashboard updates within 60 s                                     | Marketplace lead       |
+|         28 (chargeback) | A buyer disputes a charge via Stripe sandbox                                                                                  | Listing freezes; payout for that transaction is held; creator notified; resolution restores or voids the hold                                                                         | Marketplace lead       |
+|     28 (creator payout) | A creator reaches $50 eligible; monthly executor runs                                                                         | Stripe transfer (USD) + bKash disburse (BDT) both succeed; `payout_ledger_entry.status='paid'`; `payout_run` row written; idempotent on re-run                                        | Fintech lead           |
+|           28 (KYC gate) | A new creator tries to publish a paid listing without KYC                                                                     | Blocked with structured error; once KYC is approved, paid listing is allowed                                                                                                          | Marketplace lead       |
+|       41 (brand-locked) | Tenant admin sets `Brand A → only allow these 12 listings`; a user in Brand A opens `Insert → Marketplace`                    | Only the 12 curated listings appear; direct API calls to `GET /v1/marketplace/listings` are filtered server-side; brand B users see the public marketplace                            | P07 + Marketplace lead |
+|  45 (theme marketplace) | A creator publishes a theme from P07's theme engine; a buyer installs it                                                      | The storefront shows the theme with a live preview; install creates a `theme_install` row + `license_grant`; DRM is preserved                                                         | P07 lead               |
+| 154 (creator analytics) | A creator opens the analytics dashboard for the last 90 days                                                                  | Downloads, installs, revenue, MRR, conversion, refund rate, top geos all populated; p95 load ≤ 1 s; CSV export works                                                                  | Analytics lead         |
+|             196 (audit) | SOC 2 reviewer pulls audit events for a workspace                                                                             | Every purchase, refund, payout, takedown, KYC decision, license revoke, brand-lock curation change has a chain-verified row                                                           | P20 lead               |
+|       200 (partner API) | Partner CLI runs `deckctl marketplace install <slug>` with a Pro-tier consumer credential                                     | Listing installs through the partner API; rate-limit respected; scoped consumer cannot purchase without `marketplace:purchase`                                                        | MCP/agentic lead       |
+|          201 (webhooks) | A partner subscribes to `order.created`, `payout.paid`, `takedown.filed`; trigger events fire                                 | Events delivered within P20 §3.10 budgets; signatures verify; replay is idempotent                                                                                                    | Platform lead          |
+|      222 (MCP purchase) | MCP test agent calls `purchase_listing` with a default token                                                                  | Returns `ERR_PERMISSION_DENIED`; with `purchase_marketplace` capability granted, the purchase succeeds; audit row has `actor_kind='agent'`                                            | MCP/agentic lead       |
+|       225 (agent scope) | Agent token lacks `takedown:file`; agent calls `file_takedown`                                                                | Rejected with structured error; ABAC policy honored                                                                                                                                   | P20 lead               |
+|       227 (agent audit) | An MCP agent completes a purchase + a refund                                                                                  | Both events in the audit log tagged `actor_kind='agent'`, agent identifier, workspace                                                                                                 | MCP/agentic lead       |
+|              237 (lint) | A creator runs `lint_marketplace_listing` on a draft listing                                                                  | Returns structured report with accessibility, license, and provenance warnings; blocked vs. info severities                                                                           | Marketplace lead       |
+|                  (DMCA) | A copyright holder files a takedown for a paid listing                                                                        | Takedown case created; listing removed from storefront within SLA; installed instances show "Removed — please replace"; creator can submit a counter-notice                           | Trust & safety lead    |
+|             (Sanctions) | Nightly rescreen flags a creator                                                                                              | Creator payouts freeze; admin queue shows the case; admin override can unfreeze with audit row                                                                                        | Marketplace lead       |
+|        (Refund dispute) | A buyer is over the 14-day window                                                                                             | Refund denied; a `marketplace_audit_event` of kind `refund_denied` is written; appeal to support is documented                                                                        | Marketplace lead       |
+|          (Cross-border) | A USD-priced listing is sold to a Bangladesh buyer                                                                            | VAT computed per prevailing rate; FX rate at invoice timestamp; integer cents stored; audit trail present                                                                             | Fintech lead           |
+|             (Residency) | A residency-pinned purchase is routed to the correct zone                                                                     | Audit log has `residency_zone` on the payment intent; cross-zone assertions pass                                                                                                      | P20 lead               |
 
 ---
 

@@ -22,8 +22,13 @@ export class InMemoryPairingStore implements PairingStore {
   private async withLock<T>(key: string, fn: () => Promise<T>): Promise<T> {
     const prev = this.locks.get(key) ?? Promise.resolve();
     let release!: () => void;
-    const next = new Promise<void>((resolve) => { release = resolve; });
-    this.locks.set(key, prev.then(() => next));
+    const next = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    this.locks.set(
+      key,
+      prev.then(() => next),
+    );
     try {
       await prev;
       return await fn();
@@ -36,8 +41,10 @@ export class InMemoryPairingStore implements PairingStore {
     const k = this.compositeKey(record.presenter_session_id, record.device_id);
     return this.withLock(k, async () => {
       if (this.bySessionDevice.has(k)) {
-        throw makePairingStoreError('PAIRING_CONFLICT',
-          `pairing for (${record.presenter_session_id}, ${record.device_id}) already exists`);
+        throw makePairingStoreError(
+          'PAIRING_CONFLICT',
+          `pairing for (${record.presenter_session_id}, ${record.device_id}) already exists`,
+        );
       }
       this.byId.set(record.id, record);
       this.bySessionDevice.set(k, record.id);
@@ -68,7 +75,12 @@ export class InMemoryPairingStore implements PairingStore {
     if (!existing) {
       throw makePairingStoreError('PAIRING_NOT_FOUND', `pairing ${id} not found`);
     }
-    const next: PairingRecord = { ...existing, ...patch, id: existing.id, updated_at_ms: Date.now() };
+    const next: PairingRecord = {
+      ...existing,
+      ...patch,
+      id: existing.id,
+      updated_at_ms: Date.now(),
+    };
     this.byId.set(id, next);
     return next;
   }

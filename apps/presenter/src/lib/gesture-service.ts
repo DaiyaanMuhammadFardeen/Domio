@@ -166,9 +166,7 @@ export async function saveGestureMap(map: GestureMap): Promise<GestureMap> {
   const normalized: GestureMap = {
     id: existing?.id ?? map.id ?? nextId('gmap'),
     session_id: map.session_id,
-    mappings: coerceMappings(
-      (map.mappings ?? {}) as Readonly<Record<string, unknown>>,
-    ),
+    mappings: coerceMappings((map.mappings ?? {}) as Readonly<Record<string, unknown>>),
   };
   store.maps.set(normalized.session_id, normalized);
   return normalized;
@@ -176,10 +174,7 @@ export async function saveGestureMap(map: GestureMap): Promise<GestureMap> {
 
 /** Record a single gesture detection for a session. Best-effort:
  *  ignores unknown gestures and clamps confidence. */
-export async function recordGestureEvent(
-  sessionId: string,
-  event: GestureEvent,
-): Promise<void> {
+export async function recordGestureEvent(sessionId: string, event: GestureEvent): Promise<void> {
   if (!isGestureKind(event.gesture)) return;
   const store = getStore();
   const list = store.events.get(sessionId) ?? [];
@@ -203,9 +198,8 @@ export async function listGestureEvents(
 ): Promise<GestureEvent[]> {
   const store = getStore();
   const list = store.events.get(sessionId) ?? [];
-  const filtered = typeof sinceMs === 'number'
-    ? list.filter((e) => e.timestamp_ms >= sinceMs)
-    : list;
+  const filtered =
+    typeof sinceMs === 'number' ? list.filter((e) => e.timestamp_ms >= sinceMs) : list;
   return [...filtered].sort((a, b) => a.timestamp_ms - b.timestamp_ms);
 }
 

@@ -4,10 +4,7 @@
  */
 
 export { ProgressBar } from './ProgressBar';
-export type {
-  ProgressBarProps,
-  ProgressBarStepDescriptor,
-} from './ProgressBar';
+export type { ProgressBarProps, ProgressBarStepDescriptor } from './ProgressBar';
 
 export { Step1Identity } from './Step1Identity';
 export type { Step1IdentityProps } from './Step1Identity';

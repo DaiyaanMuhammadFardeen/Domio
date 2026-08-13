@@ -28,12 +28,7 @@ import {
   listWorkspaceResidency,
   previewMigration,
 } from '../../lib/residency-service';
-import type {
-  MigrationPlan,
-  Region,
-  RegionInfo,
-  WorkspaceResidency,
-} from '../../lib/types';
+import type { MigrationPlan, Region, RegionInfo, WorkspaceResidency } from '../../lib/types';
 
 type Row = Record<string, unknown> & {
   workspace_id: string;
@@ -188,11 +183,7 @@ export default function ResidencyPage() {
           value={`${totalStorageGb.toLocaleString()} GB`}
           tone="success"
         />
-        <KpiTile
-          title="Regions in use"
-          value={String(distinctRegions)}
-          tone="muted"
-        />
+        <KpiTile title="Regions in use" value={String(distinctRegions)} tone="muted" />
       </div>
 
       <section className="space-y-3">

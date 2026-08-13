@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  computeTrackGain,
-  computeTrackPan,
-  computeAllGains,
-  type GainBusState,
-} from './mixer.js';
+import { computeTrackGain, computeTrackPan, computeAllGains, type GainBusState } from './mixer.js';
 
 function makeState(overrides: Partial<GainBusState> = {}): GainBusState {
   return {

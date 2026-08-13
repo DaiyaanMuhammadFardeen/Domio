@@ -2,6 +2,7 @@
 
 > **Status:** Authoritative for architectural invariants, module boundaries, communication patterns, and decision-drivers. Module-by-module detail is elaborated in feature-domain docs. ADRs that change architecture must cite this doc.
 > **Assumptions — backend is intentionally polyglot:**
+>
 > - **Control plane:** modular monolith on TypeScript (Node 22 + Hono), single deployable per business capability, table-per-service inside one Postgres. Split into separate services only when measurable benefit emerges (see §4.3.2).
 > - **Realtime gateway:** Go service (gorilla/websocket + NATS), independently scalable from the control plane. Adapter allows Liveblocks/Ably as managed fallback.
 > - **CPU workers:** Go primary; Rust allowed via ADR for raw throughput or memory determinism.
@@ -11,8 +12,8 @@
 > - **CRDT:** Yjs (over Automerge) chosen per M0 benchmark results stored in `docs/adr/`.
 > - **API styles:** REST + GraphQL external (with MCP server as the canonical agent surface); gRPC internal between control plane and workers, and between control plane and realtime gateway.
 > - Self-host parity: same module contracts work in SaaS and Docker/Kubernetes self-host deployments; each language tier has its own Deployment so they scale independently.
-> **Owner:** Principal architect.
-> **Last reviewed:** 2026-07-29.
+>   **Owner:** Principal architect.
+>   **Last reviewed:** 2026-07-29.
 
 ---
 
@@ -157,6 +158,7 @@ flowchart LR
 ```
 
 **Key boundary guarantees:**
+
 - The realtime gateway (Go) and the control plane (TS) never import each other's source code; they speak gRPC.
 - Workers (Go/TS/Python) never call the control plane's internal libraries directly; they call gRPC or REST endpoints.
 - The MCP gateway is a TS service in the control plane tier; it reuses the same domain command handlers as REST.
@@ -171,6 +173,7 @@ flowchart LR
 A pure microservice architecture would create dozens of distributed contracts before we know which boundaries matter. Domio's initial domain objects — tenant, workspace, deck, slide, element, share, workflow, data binding, AI run — have high transactional coupling. Splitting them prematurely would add network failure modes, duplicated auth/tenant checks, and cross-service consistency work without creating value.
 
 A pure monolith would be equally wrong because:
+
 - headless rendering and media/3D conversion are CPU/GPU-heavy and have different scaling profiles;
 - connector polling requires isolated credentials, network egress controls, and per-source retries;
 - AI execution requires provider quotas, GPU pools, prompt-injection isolation, and burst scaling;
@@ -195,32 +198,33 @@ Candidates likely to split first: realtime gateway, render service, connector se
 
 ## 4.4 Module Boundaries and Ownership
 
-| Module | Owns | Reads | Publishes events | Initial runtime | Split trigger |
-|---|---|---|---|---|---|
-| Identity & Tenancy | tenants, users, sessions, memberships, SCIM | policies | `user.*`, `tenant.*` | control plane (TS) | >10k auth RPS or independent compliance |
-| Deck & Schema | decks, slides, schema versions, branches | component/theme IDs | `deck.*`, `slide.*` | control plane (TS) | independently versioned schema service |
-| Canvas/Sync (presence fan-out) | CRDT rooms, presence channels | deck versions | `crdt.*`, `presence.*` | **realtime gateway (Go)** | >1M concurrent connections |
-| Components | components, variants, props schemas, libraries | themes, decks | `component.*` | control plane (TS) | marketplace scale |
-| Themes/Brand | themes, tokens, brand kits, lint | components, decks | `theme.*`, `brand.*` | control plane (TS) | none expected |
-| Data Binding | sources, bindings, snapshots, formula graph | permissions | `data.*` | control plane (TS) + connector workers (TS) | source polling scale |
-| Media/3D | asset metadata, processing jobs | object storage | `media.*`, `render.*` | workers (Go/Rust) | GPU demand |
-| Animation | timelines, keyframes, transitions | schema | `animation.*` | control plane (TS) + render workers (Go/Rust) | export scale |
-| Prototype | variables, interactions, test sessions | schema | `prototype.*` | control plane (TS) | session scale |
-| AI Orchestration | runs, prompts, citations, agent scopes | all approved context | `ai.*`, `agent.*` | control plane (TS) + AI workers (TS/Python) | provider isolation/cost |
-| Presenter | sessions, states, handoffs, recaps | published deck | `presenter.*` | control plane (TS) + realtime gateway (Go) | global scale |
-| Audience Channels | polls, Q&A, reactions, attendance | presenter session | `audience.*` | realtime gateway (Go) + control plane (TS) | 10k+ fan-out |
-| Publish/Share | links, domains, access policies, export jobs | deck versions, policies | `share.*`, `publish.*` | control plane (TS) + export workers (Go) | CDN/control plane scale |
-| Analytics | event definitions + query API | ClickHouse | `analytics.*` | workers (TS) + query API (TS) | independent OLAP scale |
-| Collaboration | comments, reviews, assignments, merges | deck versions | `comment.*`, `approval.*` | control plane (TS) | none expected |
-| Enterprise | DLP, audit, retention, residency | all | `audit.*`, `policy.*` | control plane (TS) | regulatory isolation |
-| Marketplace/Plugins | listings, installs, payouts, plugin manifests | components | `marketplace.*` | control plane (TS) + sandbox workers (TS) | marketplace volume |
-| Notification | channels, templates, delivery attempts | event bus | `notification.*` | control plane (TS) + workers (TS) | delivery volume |
-| Billing | plans, entitlements, invoices, payouts | tenant usage | `billing.*` | control plane (TS) | financial isolation |
-| Export (PDF/PPTX/Video/GIF) | long-running export jobs | deck versions, render workers | `export.*` | workers (Go) | export volume |
+| Module                         | Owns                                           | Reads                         | Publishes events          | Initial runtime                               | Split trigger                           |
+| ------------------------------ | ---------------------------------------------- | ----------------------------- | ------------------------- | --------------------------------------------- | --------------------------------------- |
+| Identity & Tenancy             | tenants, users, sessions, memberships, SCIM    | policies                      | `user.*`, `tenant.*`      | control plane (TS)                            | >10k auth RPS or independent compliance |
+| Deck & Schema                  | decks, slides, schema versions, branches       | component/theme IDs           | `deck.*`, `slide.*`       | control plane (TS)                            | independently versioned schema service  |
+| Canvas/Sync (presence fan-out) | CRDT rooms, presence channels                  | deck versions                 | `crdt.*`, `presence.*`    | **realtime gateway (Go)**                     | >1M concurrent connections              |
+| Components                     | components, variants, props schemas, libraries | themes, decks                 | `component.*`             | control plane (TS)                            | marketplace scale                       |
+| Themes/Brand                   | themes, tokens, brand kits, lint               | components, decks             | `theme.*`, `brand.*`      | control plane (TS)                            | none expected                           |
+| Data Binding                   | sources, bindings, snapshots, formula graph    | permissions                   | `data.*`                  | control plane (TS) + connector workers (TS)   | source polling scale                    |
+| Media/3D                       | asset metadata, processing jobs                | object storage                | `media.*`, `render.*`     | workers (Go/Rust)                             | GPU demand                              |
+| Animation                      | timelines, keyframes, transitions              | schema                        | `animation.*`             | control plane (TS) + render workers (Go/Rust) | export scale                            |
+| Prototype                      | variables, interactions, test sessions         | schema                        | `prototype.*`             | control plane (TS)                            | session scale                           |
+| AI Orchestration               | runs, prompts, citations, agent scopes         | all approved context          | `ai.*`, `agent.*`         | control plane (TS) + AI workers (TS/Python)   | provider isolation/cost                 |
+| Presenter                      | sessions, states, handoffs, recaps             | published deck                | `presenter.*`             | control plane (TS) + realtime gateway (Go)    | global scale                            |
+| Audience Channels              | polls, Q&A, reactions, attendance              | presenter session             | `audience.*`              | realtime gateway (Go) + control plane (TS)    | 10k+ fan-out                            |
+| Publish/Share                  | links, domains, access policies, export jobs   | deck versions, policies       | `share.*`, `publish.*`    | control plane (TS) + export workers (Go)      | CDN/control plane scale                 |
+| Analytics                      | event definitions + query API                  | ClickHouse                    | `analytics.*`             | workers (TS) + query API (TS)                 | independent OLAP scale                  |
+| Collaboration                  | comments, reviews, assignments, merges         | deck versions                 | `comment.*`, `approval.*` | control plane (TS)                            | none expected                           |
+| Enterprise                     | DLP, audit, retention, residency               | all                           | `audit.*`, `policy.*`     | control plane (TS)                            | regulatory isolation                    |
+| Marketplace/Plugins            | listings, installs, payouts, plugin manifests  | components                    | `marketplace.*`           | control plane (TS) + sandbox workers (TS)     | marketplace volume                      |
+| Notification                   | channels, templates, delivery attempts         | event bus                     | `notification.*`          | control plane (TS) + workers (TS)             | delivery volume                         |
+| Billing                        | plans, entitlements, invoices, payouts         | tenant usage                  | `billing.*`               | control plane (TS)                            | financial isolation                     |
+| Export (PDF/PPTX/Video/GIF)    | long-running export jobs                       | deck versions, render workers | `export.*`                | workers (Go)                                  | export volume                           |
 
 The module dependency graph is acyclic by policy. Cross-module writes go through commands; cross-module notifications go through events. Direct table reads across module boundaries are forbidden except via read models explicitly registered in the module contract.
 
 **Language-tier boundaries in the table above:**
+
 - **control plane (TS)** = Hono on Node 22, deployed as a modular monolith. Each module is a directory in `/services/control-plane` with its own module boundary.
 - **realtime gateway (Go)** = independent Deployment, talks to control plane over gRPC only.
 - **workers (Go/TS/Python)** = independent Deployments, talk to control plane over gRPC for commands and over NATS for events.
@@ -279,6 +283,7 @@ flowchart LR
 ### 4.6.1 API gateway
 
 Responsibilities:
+
 - TLS termination, WAF, request IDs, rate limits, auth token verification.
 - Tenant and region routing.
 - API version negotiation (`Accept: application/vnd.domio.v1+json`).
@@ -321,7 +326,7 @@ Uniform errors:
   "error": {
     "code": "REVISION_CONFLICT",
     "message": "The deck changed since you opened it.",
-    "details": {"currentRevision": 186, "expectedRevision": 184},
+    "details": { "currentRevision": 186, "expectedRevision": 184 },
     "requestId": "req_…",
     "retryable": false
   }
@@ -341,6 +346,7 @@ Uniform errors:
 Initial choice: NATS JetStream for low-latency events and simple self-host; Redpanda-compatible event log mode for high-volume analytics if required. See `06-technology-stack.md` §6.4.
 
 Rules:
+
 - Every event has `eventId`, `eventType`, `schemaVersion`, `tenantId`, `region`, `occurredAt`, `actor`, `traceId`.
 - Producers use an outbox table; a publisher relays committed events.
 - Consumers are idempotent using `eventId` + consumer group checkpoint.
@@ -350,18 +356,19 @@ Rules:
 
 The realtime gateway is the Go service that terminates every long-lived connection. It does **not** call the control plane's internal libraries; it speaks gRPC to the control plane for state changes and consumes NATS events for fan-out.
 
-| Channel | Transport | Scope | Data | Durability |
-|---|---|---|---|---|
-| `deck:{id}:sync` | WebSocket/WebRTC optional | editors | CRDT updates | CRDT log |
-| `deck:{id}:presence` | WebSocket | editors | cursors, selection, typing | ephemeral |
-| `session:{id}:stage` | WebSocket/SSE | presenter/audience | slide state, poll/Q&A events | event log + analytics |
-| `session:{id}:remote` | WebSocket | phone remote | commands + acknowledgments | ephemeral + session record |
-| `session:{id}:whisper` | WebSocket | presenter/team | private notes | session record, retention policy |
-| `viewer:{linkId}` | SSE/WebSocket | viewer | live data / interactions | analytics + event log |
+| Channel                | Transport                 | Scope              | Data                         | Durability                       |
+| ---------------------- | ------------------------- | ------------------ | ---------------------------- | -------------------------------- |
+| `deck:{id}:sync`       | WebSocket/WebRTC optional | editors            | CRDT updates                 | CRDT log                         |
+| `deck:{id}:presence`   | WebSocket                 | editors            | cursors, selection, typing   | ephemeral                        |
+| `session:{id}:stage`   | WebSocket/SSE             | presenter/audience | slide state, poll/Q&A events | event log + analytics            |
+| `session:{id}:remote`  | WebSocket                 | phone remote       | commands + acknowledgments   | ephemeral + session record       |
+| `session:{id}:whisper` | WebSocket                 | presenter/team     | private notes                | session record, retention policy |
+| `viewer:{linkId}`      | SSE/WebSocket             | viewer             | live data / interactions     | analytics + event log            |
 
 ### 4.6.6 Connector/AI/renderer worker pools
 
 Workers are separate deployment classes with:
+
 - workload-specific CPU/memory/GPU requests;
 - queue-based autoscaling;
 - per-tenant concurrency quotas;
@@ -455,17 +462,17 @@ sequenceDiagram
 
 ## 4.8 Consistency Model
 
-| Operation | Consistency | Mechanism |
-|---|---|---|
-| Permissions, policy, publish gate | strong | Postgres transaction + optimistic version |
-| Canvas edits | eventual across collaborators; causal within client | CRDT + server ack |
-| Presence/cursors | ephemeral, best effort | realtime pub/sub |
-| Live data snapshot | read-your-write for presenter, eventual for audience | snapshot id + broadcast |
-| Analytics | eventual | event bus → ClickHouse |
-| Search | eventual (target ≤30s) | index worker |
-| Marketplace listing | strong for purchase/payout; eventual for search | Postgres + index |
-| Audit log | append-only, durable | outbox + immutable store |
-| Knowledge graph | eventual | event-driven projection |
+| Operation                         | Consistency                                          | Mechanism                                 |
+| --------------------------------- | ---------------------------------------------------- | ----------------------------------------- |
+| Permissions, policy, publish gate | strong                                               | Postgres transaction + optimistic version |
+| Canvas edits                      | eventual across collaborators; causal within client  | CRDT + server ack                         |
+| Presence/cursors                  | ephemeral, best effort                               | realtime pub/sub                          |
+| Live data snapshot                | read-your-write for presenter, eventual for audience | snapshot id + broadcast                   |
+| Analytics                         | eventual                                             | event bus → ClickHouse                    |
+| Search                            | eventual (target ≤30s)                               | index worker                              |
+| Marketplace listing               | strong for purchase/payout; eventual for search      | Postgres + index                          |
+| Audit log                         | append-only, durable                                 | outbox + immutable store                  |
+| Knowledge graph                   | eventual                                             | event-driven projection                   |
 
 ### Conflict strategy
 
@@ -484,14 +491,14 @@ Required for: deck creation from API, element commands, publish, exports, data r
 
 ### Retry policy
 
-| Dependency | Retry | Backoff | Circuit breaker |
-|---|---|---|---|
-| Postgres | transaction retry on serialization | 10/50/250ms, max 3 | no; fail fast on outage |
-| Object storage | 5xx/timeout | exponential + jitter, max 5 | yes |
-| AI provider | transient 429/5xx | provider `Retry-After`, max 3 | yes per provider/model |
-| Data source | safe read only | exponential, max 3 | yes per connector |
-| Webhook delivery | any non-2xx | 1m, 5m, 30m, 2h, 12h | dead letter after 10 |
-| Realtime | reconnect | jittered capped backoff | client fallback to polling |
+| Dependency       | Retry                              | Backoff                       | Circuit breaker            |
+| ---------------- | ---------------------------------- | ----------------------------- | -------------------------- |
+| Postgres         | transaction retry on serialization | 10/50/250ms, max 3            | no; fail fast on outage    |
+| Object storage   | 5xx/timeout                        | exponential + jitter, max 5   | yes                        |
+| AI provider      | transient 429/5xx                  | provider `Retry-After`, max 3 | yes per provider/model     |
+| Data source      | safe read only                     | exponential, max 3            | yes per connector          |
+| Webhook delivery | any non-2xx                        | 1m, 5m, 30m, 2h, 12h          | dead letter after 10       |
+| Realtime         | reconnect                          | jittered capped backoff       | client fallback to polling |
 
 Timeout budgets are explicit; an upstream deadline is passed in `x-deadline-ms`. No request may wait indefinitely for a worker job — long jobs return a job ID and status endpoint.
 
@@ -521,18 +528,18 @@ Timeout budgets are explicit; an upstream deadline is passed in `x-deadline-ms`.
 
 ## 4.12 Disaster and Degradation Modes
 
-| Failure | User-visible mode | Recovery |
-|---|---|---|
-| Primary Postgres unavailable | read-only cached deck viewer; editor local-only | failover/restore |
-| Realtime unavailable | editor polls; presence hidden; audience uses 5s polling | reconnect |
-| Connector unavailable | stale badge + last snapshot; presenter can use snapshot | retry / reauth |
-| AI provider unavailable | AI actions disabled; manual editing works | provider fallback |
-| Renderer queue unavailable | exports delayed; editor/presenter unaffected | queue recovery |
-| Search unavailable | basic folder/title search from Postgres | index rebuild |
-| CDN unavailable | origin fallback for authenticated users | CDN recovery |
-| Object storage unavailable | metadata works; media placeholders; no destructive writes | provider recovery |
-| Analytics unavailable | events buffer locally/edge; no UX blocking | replay buffer |
-| Plugin sandbox unavailable | plugin UI disabled; base editor works | worker recovery |
+| Failure                      | User-visible mode                                         | Recovery          |
+| ---------------------------- | --------------------------------------------------------- | ----------------- |
+| Primary Postgres unavailable | read-only cached deck viewer; editor local-only           | failover/restore  |
+| Realtime unavailable         | editor polls; presence hidden; audience uses 5s polling   | reconnect         |
+| Connector unavailable        | stale badge + last snapshot; presenter can use snapshot   | retry / reauth    |
+| AI provider unavailable      | AI actions disabled; manual editing works                 | provider fallback |
+| Renderer queue unavailable   | exports delayed; editor/presenter unaffected              | queue recovery    |
+| Search unavailable           | basic folder/title search from Postgres                   | index rebuild     |
+| CDN unavailable              | origin fallback for authenticated users                   | CDN recovery      |
+| Object storage unavailable   | metadata works; media placeholders; no destructive writes | provider recovery |
+| Analytics unavailable        | events buffer locally/edge; no UX blocking                | replay buffer     |
+| Plugin sandbox unavailable   | plugin UI disabled; base editor works                     | worker recovery   |
 
 ---
 
@@ -550,18 +557,18 @@ Timeout budgets are explicit; an upstream deadline is passed in `x-deadline-ms`.
 
 ## 4.14 Architecture Decisions
 
-| ID | Decision | Rationale | Alternative |
-|---|---|---|---|
-| ADR-ARCH-01 | Modular monolith control plane on TypeScript/Node + Hono | Transactional cohesion + type sharing with editor/MCP/SDK + fastest iteration + BD hiring pool | Microservices from day one; rejected. Pure Go / Java / .NET backends — rejected for type-sharing cost (see `06-technology-stack.md` §6.2.1). |
-| ADR-ARCH-02 | Data-plane workers split by workload **and by language tier** | Independent scaling, fault isolation, **and right tool per workload** | One generic queue; rejected. Single-language polyglot; rejected for cost of CPU loops in Node. |
-| ADR-ARCH-03 | Structured deck schema is canonical | Enables canvas, API, MCP, render, export parity | Canvas JSON as source; rejected |
-| ADR-ARCH-04 | Yjs CRDT default | Mature ecosystem, performance | Automerge; benchmark fallback |
-| ADR-ARCH-05 | Event bus with outbox | At-least-once reliable integration | Direct synchronous calls; rejected for side effects |
-| ADR-ARCH-06 | REST external + GraphQL first-party reads + MCP + gRPC internal | Stable clients + agent surface + internal throughput | GraphQL-only; rejected for cache/version complexity |
-| ADR-ARCH-07 | Region-routed tenant homes | Data residency and latency | Global single region; rejected |
-| ADR-ARCH-08 | Degrade to snapshot for live data | Presenter safety | Blank chart on source failure; rejected |
-| ADR-ARCH-09 | **Polyglot backend with Go realtime gateway, Go/Rust CPU workers, TS/Python AI workers** | Each tier uses the language best suited to its workload; contract rule keeps coupling bounded | Monolithic TS; rejected for memory/perf. Pure Go; rejected for type-sharing cost. See `06-technology-stack.md` §6.2.0–§6.2.4. |
-| ADR-ARCH-10 | **No service imports another service's source code**; every polyglot boundary is a committed contract (Protobuf / OpenAPI / JSON Schema) | Prevents the polyglot structure from decaying into spaghetti; allows per-tier re-implementation without API changes | Shared internal libraries; rejected. Code generation across languages; rejected for codegen drift. |
+| ID          | Decision                                                                                                                                 | Rationale                                                                                                           | Alternative                                                                                                                                  |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| ADR-ARCH-01 | Modular monolith control plane on TypeScript/Node + Hono                                                                                 | Transactional cohesion + type sharing with editor/MCP/SDK + fastest iteration + BD hiring pool                      | Microservices from day one; rejected. Pure Go / Java / .NET backends — rejected for type-sharing cost (see `06-technology-stack.md` §6.2.1). |
+| ADR-ARCH-02 | Data-plane workers split by workload **and by language tier**                                                                            | Independent scaling, fault isolation, **and right tool per workload**                                               | One generic queue; rejected. Single-language polyglot; rejected for cost of CPU loops in Node.                                               |
+| ADR-ARCH-03 | Structured deck schema is canonical                                                                                                      | Enables canvas, API, MCP, render, export parity                                                                     | Canvas JSON as source; rejected                                                                                                              |
+| ADR-ARCH-04 | Yjs CRDT default                                                                                                                         | Mature ecosystem, performance                                                                                       | Automerge; benchmark fallback                                                                                                                |
+| ADR-ARCH-05 | Event bus with outbox                                                                                                                    | At-least-once reliable integration                                                                                  | Direct synchronous calls; rejected for side effects                                                                                          |
+| ADR-ARCH-06 | REST external + GraphQL first-party reads + MCP + gRPC internal                                                                          | Stable clients + agent surface + internal throughput                                                                | GraphQL-only; rejected for cache/version complexity                                                                                          |
+| ADR-ARCH-07 | Region-routed tenant homes                                                                                                               | Data residency and latency                                                                                          | Global single region; rejected                                                                                                               |
+| ADR-ARCH-08 | Degrade to snapshot for live data                                                                                                        | Presenter safety                                                                                                    | Blank chart on source failure; rejected                                                                                                      |
+| ADR-ARCH-09 | **Polyglot backend with Go realtime gateway, Go/Rust CPU workers, TS/Python AI workers**                                                 | Each tier uses the language best suited to its workload; contract rule keeps coupling bounded                       | Monolithic TS; rejected for memory/perf. Pure Go; rejected for type-sharing cost. See `06-technology-stack.md` §6.2.0–§6.2.4.                |
+| ADR-ARCH-10 | **No service imports another service's source code**; every polyglot boundary is a committed contract (Protobuf / OpenAPI / JSON Schema) | Prevents the polyglot structure from decaying into spaghetti; allows per-tier re-implementation without API changes | Shared internal libraries; rejected. Code generation across languages; rejected for codegen drift.                                           |
 
 ---
 
@@ -579,16 +586,16 @@ Timeout budgets are explicit; an upstream deadline is passed in `x-deadline-ms`.
 
 ## 4.16 Open Decisions
 
-| ID | Decision | Owner |
-|---|---|---|
-| OD-ARCH-01 | NATS JetStream alone vs Redpanda for analytics-grade event retention. | Platform |
-| OD-ARCH-02 | Managed realtime provider vs self-hosted Go gateway at first public beta. | SRE |
-| OD-ARCH-03 | Whether to use WebRTC data channels for large audience fan-out or WebSocket/SSE only. | Realtime lead |
-| OD-ARCH-04 | Exact geographic regions and Bangladesh local-hosting partner. | Legal + Infrastructure |
-| OD-ARCH-05 | Automerge benchmark threshold that would trigger a Yjs reconsideration. | Editor lead |
-| OD-ARCH-06 | ORM for the control plane: Prisma vs Drizzle vs raw SQL/pg. | Control-plane lead |
-| OD-ARCH-07 | When to introduce the first Rust CPU worker (deferred until profile data justifies). | Platform lead |
-| OD-ARCH-08 | Whether the realtime gateway is split per region or kept global with edge POPs. | SRE + Realtime lead |
+| ID         | Decision                                                                              | Owner                  |
+| ---------- | ------------------------------------------------------------------------------------- | ---------------------- |
+| OD-ARCH-01 | NATS JetStream alone vs Redpanda for analytics-grade event retention.                 | Platform               |
+| OD-ARCH-02 | Managed realtime provider vs self-hosted Go gateway at first public beta.             | SRE                    |
+| OD-ARCH-03 | Whether to use WebRTC data channels for large audience fan-out or WebSocket/SSE only. | Realtime lead          |
+| OD-ARCH-04 | Exact geographic regions and Bangladesh local-hosting partner.                        | Legal + Infrastructure |
+| OD-ARCH-05 | Automerge benchmark threshold that would trigger a Yjs reconsideration.               | Editor lead            |
+| OD-ARCH-06 | ORM for the control plane: Prisma vs Drizzle vs raw SQL/pg.                           | Control-plane lead     |
+| OD-ARCH-07 | When to introduce the first Rust CPU worker (deferred until profile data justifies).  | Platform lead          |
+| OD-ARCH-08 | Whether the realtime gateway is split per region or kept global with edge POPs.       | SRE + Realtime lead    |
 
 ---
 

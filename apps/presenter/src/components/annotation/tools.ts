@@ -21,11 +21,11 @@ export interface ToolMeta {
 }
 
 export const TOOL_REGISTRY: readonly ToolMeta[] = [
-  { kind: 'pen',         label: 'Pen',         icon: '✎', shortcut: 'P' },
-  { kind: 'highlighter', label: 'Highlight',   icon: '▮', shortcut: 'H' },
-  { kind: 'spotlight',   label: 'Spotlight',   icon: '◉', shortcut: 'S' },
-  { kind: 'zoom',        label: 'Zoom lens',   icon: '⊕', shortcut: 'Z' },
-  { kind: 'blur',        label: 'Blur region', icon: '▒', shortcut: 'B' },
+  { kind: 'pen', label: 'Pen', icon: '✎', shortcut: 'P' },
+  { kind: 'highlighter', label: 'Highlight', icon: '▮', shortcut: 'H' },
+  { kind: 'spotlight', label: 'Spotlight', icon: '◉', shortcut: 'S' },
+  { kind: 'zoom', label: 'Zoom lens', icon: '⊕', shortcut: 'Z' },
+  { kind: 'blur', label: 'Blur region', icon: '▒', shortcut: 'B' },
 ];
 
 export const COLORS: readonly string[] = [

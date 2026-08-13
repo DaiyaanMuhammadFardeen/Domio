@@ -11,7 +11,13 @@
  * (it isn't a list of matching rules).
  */
 
-import type { CRMSyncEvent, Notification, NotificationPayload, NotificationRule, RuleCondition } from '../types.js';
+import type {
+  CRMSyncEvent,
+  Notification,
+  NotificationPayload,
+  NotificationRule,
+  RuleCondition,
+} from '../types.js';
 
 /** RenderPayload turns the CRM sync event into a human-friendly payload. */
 export function renderPayload(event: CRMSyncEvent): NotificationPayload {
@@ -79,7 +85,10 @@ export function matches(cond: RuleCondition, event: CRMSyncEvent): boolean {
   }
 }
 
-function readNumeric(event: CRMSyncEvent, source: 'engagement_score' | 'dwell_ms' | 'completion_rate'): number | undefined {
+function readNumeric(
+  event: CRMSyncEvent,
+  source: 'engagement_score' | 'dwell_ms' | 'completion_rate',
+): number | undefined {
   switch (source) {
     case 'engagement_score':
       return event.engagement_score;

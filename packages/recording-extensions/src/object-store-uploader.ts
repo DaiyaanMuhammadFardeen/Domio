@@ -35,7 +35,8 @@ export class ObjectStoreUploader implements ChunkUploader {
     extension?: string;
     body: Uint8Array;
   }): Promise<{ storage_key: string; sha256: string; byte_size: number }> {
-    const extension = args.extension ?? this.opts.extension?.[args.track_kind] ?? DEFAULT_EXT[args.track_kind];
+    const extension =
+      args.extension ?? this.opts.extension?.[args.track_kind] ?? DEFAULT_EXT[args.track_kind];
     const storage_key = recordingChunkKey({
       workspace_id: args.workspace_id,
       session_id: args.recording_session_id,

@@ -78,7 +78,14 @@ const fragmentArb: fc.Arbitrary<PropSchemaFragment> = fc.letrec((tie) => {
     scalar: fc.oneof(...scalarBranches),
     array,
     object,
-    fragment: fc.oneof(scalarBranches[0]!, scalarBranches[1]!, scalarBranches[2]!, scalarBranches[3]!, array, object),
+    fragment: fc.oneof(
+      scalarBranches[0]!,
+      scalarBranches[1]!,
+      scalarBranches[2]!,
+      scalarBranches[3]!,
+      array,
+      object,
+    ),
   };
 }).fragment as fc.Arbitrary<PropSchemaFragment>;
 

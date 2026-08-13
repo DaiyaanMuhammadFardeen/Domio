@@ -33,13 +33,19 @@ export function notFoundError(id: string): WordCloudStoreError {
   return makeStoreError('NOT_FOUND', `word_cloud not found: ${id}`);
 }
 export function conflictError(id: string, currentVersion: number): WordCloudStoreError {
-  return makeStoreError('CONFLICT', `word_cloud ${id} optimistic concurrency conflict (current ${currentVersion})`);
+  return makeStoreError(
+    'CONFLICT',
+    `word_cloud ${id} optimistic concurrency conflict (current ${currentVersion})`,
+  );
 }
 export function closedError(id: string): WordCloudStoreError {
   return makeStoreError('CLOSED', `word_cloud ${id} is not open`);
 }
 export function repeatError(participant_id: string): WordCloudStoreError {
-  return makeStoreError('REPEAT_FORBIDDEN', `word_cloud repeats forbidden for participant ${participant_id}`);
+  return makeStoreError(
+    'REPEAT_FORBIDDEN',
+    `word_cloud repeats forbidden for participant ${participant_id}`,
+  );
 }
 export function tooLongError(len: number, max: number): WordCloudStoreError {
   return makeStoreError('TOO_LONG', `word_cloud submit too long: ${len} > ${max}`);
@@ -51,7 +57,10 @@ export interface WordCloudStore {
   update(row: UpdateWordCloudRow): Promise<WordCloud>;
   submit(row: SubmitRow): Promise<WordCloudSubmit>;
   aggregate(cloud_id: string): Promise<WordCloudAggregate>;
-  listBySession(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<WordCloud>>;
+  listBySession(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<WordCloud>>;
 }
 
 export function isWordCloudStore(v: unknown): v is WordCloudStore {

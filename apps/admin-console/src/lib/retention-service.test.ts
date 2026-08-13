@@ -15,7 +15,10 @@ describe('retention-service', () => {
   beforeEach(async () => {
     // Module-singleton store. Re-seed by upserting each content_type
     // back to its baseline period so test order doesn't matter.
-    const baselines: ReadonlyArray<{ content_type: RetentionContentType; period: RetentionPeriod }> = [
+    const baselines: ReadonlyArray<{
+      content_type: RetentionContentType;
+      period: RetentionPeriod;
+    }> = [
       { content_type: 'deck', period: '3y' },
       { content_type: 'asset', period: '1y' },
       { content_type: 'comment', period: '90d' },

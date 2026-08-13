@@ -12,7 +12,9 @@ import { SlowConnectionBanner } from './SlowConnectionBanner';
 
 describe('SlowConnectionBanner', () => {
   it('renders nothing when visible=false', () => {
-    const { container } = render(<SlowConnectionBanner visible={false} onDismiss={() => undefined} />);
+    const { container } = render(
+      <SlowConnectionBanner visible={false} onDismiss={() => undefined} />,
+    );
     expect(container).toBeEmptyDOMElement();
   });
 

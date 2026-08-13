@@ -102,17 +102,14 @@ export default function UsageDashboardPage() {
     }
   }, []);
 
-  const loadSeries = useCallback(
-    async (metric: UsageMetric, days: number) => {
-      try {
-        const s = await getUsageSeries(metric, days);
-        setSeries(s);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load series');
-      }
-    },
-    [],
-  );
+  const loadSeries = useCallback(async (metric: UsageMetric, days: number) => {
+    try {
+      const s = await getUsageSeries(metric, days);
+      setSeries(s);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load series');
+    }
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -147,23 +144,17 @@ export default function UsageDashboardPage() {
           className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
           role="alert"
         >
-          <strong className="font-semibold">Could not load usage data.</strong>{' '}
-          {error}
+          <strong className="font-semibold">Could not load usage data.</strong> {error}
         </div>
       ) : null}
 
-      <section
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-        aria-label="Usage KPIs"
-      >
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Usage KPIs">
         {METRIC_OPTIONS.map((m) => (
           <KpiTile
             key={m.metric}
             title={t(m.tileKey)}
             value={
-              summary
-                ? formatSummaryValue(m.metric, summary)
-                : t('admin.billing.usage.chart.empty')
+              summary ? formatSummaryValue(m.metric, summary) : t('admin.billing.usage.chart.empty')
             }
             tone={activeMetric === m.metric ? 'brand' : 'muted'}
           />
@@ -215,12 +206,7 @@ export default function UsageDashboardPage() {
 
         <div className="mt-4">
           {series && series.series.length > 0 ? (
-            <UsageChart
-              metric={series.metric}
-              series={series.series}
-              width={720}
-              height={220}
-            />
+            <UsageChart metric={series.metric} series={series.series} width={720} height={220} />
           ) : (
             <div className="flex h-[220px] items-center justify-center text-sm text-slate-500">
               {t('admin.billing.usage.chart.empty')}
@@ -235,10 +221,7 @@ export default function UsageDashboardPage() {
             {t('admin.billing.usage.agents.heading')}
           </h2>
         </header>
-        <AgentUsageTable
-          rows={agents as AgentUsageRow[]}
-          emptyMessage="No agent usage yet."
-        />
+        <AgentUsageTable rows={agents as AgentUsageRow[]} emptyMessage="No agent usage yet." />
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -270,9 +253,7 @@ export default function UsageDashboardPage() {
                     className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-1.5"
                   >
                     <span className="text-slate-600">{t(m.labelKey)}</span>
-                    <span className="tabular-nums text-slate-900">
-                      {formatCents(cents)}
-                    </span>
+                    <span className="tabular-nums text-slate-900">{formatCents(cents)}</span>
                   </li>
                 );
               })}

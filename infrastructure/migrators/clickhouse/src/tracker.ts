@@ -86,14 +86,7 @@ export async function recordAppliedMigration(
   await client.insert({
     table: `${database}.${MIGRATIONS_TABLE}`,
     values: [
-      [
-        file.ordinal,
-        file.slug,
-        file.checksum,
-        new Date().toISOString(),
-        statements,
-        duration_ms,
-      ],
+      [file.ordinal, file.slug, file.checksum, new Date().toISOString(), statements, duration_ms],
     ],
     format: ['ordinal', 'slug', 'checksum', 'applied_at', 'statements', 'duration_ms'],
   });

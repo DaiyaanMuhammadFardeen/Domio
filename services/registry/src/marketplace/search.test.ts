@@ -27,11 +27,43 @@ describe('search', () => {
   beforeEach(async () => {
     store = new InMemoryStore();
     const listings = [
-      makeListing({ id: 'a', title: 'Fancy Button', description: 'A clickable button', tags: ['ui', 'button'], priceCents: 1000 }),
-      makeListing({ id: 'b', title: 'Dark Navbar', description: 'A dark navigation bar', tags: ['ui', 'nav'], priceCents: 2000 }),
-      makeListing({ id: 'c', title: 'Hero Banner', description: 'A hero section banner', tags: ['layout', 'banner'], priceCents: 500, isFree: false }),
-      makeListing({ id: 'd', title: 'Cheap Input', description: 'An input field', tags: ['ui', 'form'], priceCents: 100 }),
-      makeListing({ id: 'e', title: 'Removed Widget', description: 'This was removed', tags: ['ui'], status: 'removed', priceCents: 500 }),
+      makeListing({
+        id: 'a',
+        title: 'Fancy Button',
+        description: 'A clickable button',
+        tags: ['ui', 'button'],
+        priceCents: 1000,
+      }),
+      makeListing({
+        id: 'b',
+        title: 'Dark Navbar',
+        description: 'A dark navigation bar',
+        tags: ['ui', 'nav'],
+        priceCents: 2000,
+      }),
+      makeListing({
+        id: 'c',
+        title: 'Hero Banner',
+        description: 'A hero section banner',
+        tags: ['layout', 'banner'],
+        priceCents: 500,
+        isFree: false,
+      }),
+      makeListing({
+        id: 'd',
+        title: 'Cheap Input',
+        description: 'An input field',
+        tags: ['ui', 'form'],
+        priceCents: 100,
+      }),
+      makeListing({
+        id: 'e',
+        title: 'Removed Widget',
+        description: 'This was removed',
+        tags: ['ui'],
+        status: 'removed',
+        priceCents: 500,
+      }),
     ];
     for (const l of listings) {
       await store.putListing(l);
@@ -49,7 +81,12 @@ describe('search', () => {
 
   describe('indexListing', () => {
     it('indexes a single listing', async () => {
-      const newListing = makeListing({ id: 'new', title: 'New Component', description: 'Brand new', tags: ['new'] });
+      const newListing = makeListing({
+        id: 'new',
+        title: 'New Component',
+        description: 'Brand new',
+        tags: ['new'],
+      });
       await store.putListing(newListing);
       await indexListing(defaultDeps(store), 'new');
       const result = await searchListings(defaultDeps(store), { q: 'Brand new' });

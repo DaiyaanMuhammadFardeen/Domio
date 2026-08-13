@@ -15,11 +15,7 @@ export interface ThroughputChartProps {
   readonly height?: number;
 }
 
-export function ThroughputChart({
-  points,
-  width = 640,
-  height = 180,
-}: ThroughputChartProps) {
+export function ThroughputChart({ points, width = 640, height = 180 }: ThroughputChartProps) {
   if (points.length === 0) {
     return (
       <svg
@@ -38,10 +34,8 @@ export function ThroughputChart({
   const innerW = width - padX * 2;
   const innerH = height - padY * 2;
 
-  const maxJobs =
-    Math.max(1, ...points.map((p) => p.jobs_per_minute)) * 1.15;
-  const maxErrors =
-    Math.max(1, ...points.map((p) => p.errors_per_minute)) * 1.15;
+  const maxJobs = Math.max(1, ...points.map((p) => p.jobs_per_minute)) * 1.15;
+  const maxErrors = Math.max(1, ...points.map((p) => p.errors_per_minute)) * 1.15;
 
   const stepX = points.length > 1 ? innerW / (points.length - 1) : 0;
 
@@ -54,12 +48,8 @@ export function ThroughputChart({
     y: padY + innerH - (p.errors_per_minute / maxErrors) * innerH,
   }));
 
-  const jobLine = jobCoords
-    .map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`)
-    .join(' ');
-  const errLine = errCoords
-    .map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`)
-    .join(' ');
+  const jobLine = jobCoords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+  const errLine = errCoords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
 
   return (
     <svg

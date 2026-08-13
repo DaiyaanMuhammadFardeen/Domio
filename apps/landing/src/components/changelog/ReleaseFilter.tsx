@@ -60,10 +60,7 @@ function countFor(
   }
 }
 
-function isActive(
-  id: ChangelogCategory | 'all',
-  value: ChangelogFilter,
-): boolean {
+function isActive(id: ChangelogCategory | 'all', value: ChangelogFilter): boolean {
   if (id === 'all') return value === 'all';
   if (value === 'all') return false;
   return value.has(id);
@@ -110,9 +107,7 @@ export function ReleaseFilter({
           <button
             key={chip.id}
             type="button"
-            className={
-              'cl-filter__chip' + (active ? ' cl-filter__chip--active' : '')
-            }
+            className={'cl-filter__chip' + (active ? ' cl-filter__chip--active' : '')}
             aria-pressed={active}
             data-testid={`changelog-filter-${chip.id}`}
             onClick={() => handleClick(chip.id)}

@@ -44,14 +44,8 @@ export interface RollupConfig {
 
 export function defaultRollupConfig(): RollupConfig {
   return {
-    hourlyOptimizeTables: [
-      'events',
-      'session_agg',
-      'slide_metric_5m',
-    ],
-    nightlyRebuildTables: [
-      'benchmark_snapshot',
-    ],
+    hourlyOptimizeTables: ['events', 'session_agg', 'slide_metric_5m'],
+    nightlyRebuildTables: ['benchmark_snapshot'],
     hourlyIntervalMs: 60 * 60 * 1000,
     nightlyIntervalMs: 24 * 60 * 60 * 1000,
   };
@@ -60,7 +54,10 @@ export function defaultRollupConfig(): RollupConfig {
 export function buildOrchestrator(
   ch: ClickHouseClient,
   cfg: RollupConfig = defaultRollupConfig(),
-  logger: { info: (msg: string, meta?: Record<string, unknown>) => void; warn: (msg: string, meta?: Record<string, unknown>) => void } = console,
+  logger: {
+    info: (msg: string, meta?: Record<string, unknown>) => void;
+    warn: (msg: string, meta?: Record<string, unknown>) => void;
+  } = console,
 ): RollupOrchestrator {
   let hourlyHandle: ReturnType<typeof setInterval> | null = null;
   let nightlyHandle: ReturnType<typeof setInterval> | null = null;
@@ -134,15 +131,24 @@ export function buildOrchestrator(
 export function startOrchestrator(
   ch: ClickHouseClient,
   cfg?: RollupConfig,
-  logger?: { info: (msg: string, meta?: Record<string, unknown>) => void; warn: (msg: string, meta?: Record<string, unknown>) => void },
+  logger?: {
+    info: (msg: string, meta?: Record<string, unknown>) => void;
+    warn: (msg: string, meta?: Record<string, unknown>) => void;
+  },
 ): () => void {
   const orch = buildOrchestrator(ch, cfg, logger);
-  const hourlyHandle = setInterval(() => {
-    void orch.runHourly();
-  }, (cfg ?? defaultRollupConfig()).hourlyIntervalMs);
-  const nightlyHandle = setInterval(() => {
-    void orch.runNightly();
-  }, (cfg ?? defaultRollupConfig()).nightlyIntervalMs);
+  const hourlyHandle = setInterval(
+    () => {
+      void orch.runHourly();
+    },
+    (cfg ?? defaultRollupConfig()).hourlyIntervalMs,
+  );
+  const nightlyHandle = setInterval(
+    () => {
+      void orch.runNightly();
+    },
+    (cfg ?? defaultRollupConfig()).nightlyIntervalMs,
+  );
   // Kick off immediately so a fresh pod has the latest snapshot.
   void orch.runHourly();
   void orch.runNightly();

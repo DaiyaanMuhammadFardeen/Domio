@@ -18,12 +18,7 @@ describe('blog-data', () => {
   });
 
   it('exports 4 known categories in the documented order', () => {
-    expect(BLOG_CATEGORIES).toEqual([
-      'engineering',
-      'product',
-      'customer-stories',
-      'company',
-    ]);
+    expect(BLOG_CATEGORIES).toEqual(['engineering', 'product', 'customer-stories', 'company']);
   });
 
   it('posts are sorted newest-first', () => {
@@ -86,17 +81,13 @@ describe('blog-data', () => {
   it('posts cover every category', () => {
     const seen = new Set(BLOG_POSTS.map((p) => p.category));
     for (const cat of BLOG_CATEGORIES) {
-      expect(seen.has(cat), `category ${cat} should have at least one post`).toBe(
-        true,
-      );
+      expect(seen.has(cat), `category ${cat} should have at least one post`).toBe(true);
     }
   });
 
   it('reading_minutes is positive for every post', () => {
     for (const post of BLOG_POSTS) {
-      expect(post.reading_minutes, `${post.slug} reading_minutes`).toBeGreaterThan(
-        0,
-      );
+      expect(post.reading_minutes, `${post.slug} reading_minutes`).toBeGreaterThan(0);
     }
   });
 });

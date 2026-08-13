@@ -11,7 +11,12 @@
  *   POST   /v1/merge-requests/{id}/resolve-conflict   resolveMergeRequestConflict
  */
 
-import type { MergeRequestInput, SlideDiffLevel, ConflictResolution, DeckSnapshot } from './types.js';
+import type {
+  MergeRequestInput,
+  SlideDiffLevel,
+  ConflictResolution,
+  DeckSnapshot,
+} from './types.js';
 import type { MergeRequestService } from './service.js';
 import {
   MergeRequestNotFoundError,
@@ -21,9 +26,7 @@ import {
   FeatureDisabledError,
   SlideDiffNotFoundError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -60,16 +63,52 @@ function created<T>(body: T): HttpResponse {
   return { status: 201, body };
 }
 function badRequest(message: string, _code: string): HttpResponse {
-  return { status: 400, body: { type: 'https://domio.example/problems/validation', title: 'Validation error', status: 400, detail: message, instance: '' } };
+  return {
+    status: 400,
+    body: {
+      type: 'https://domio.example/problems/validation',
+      title: 'Validation error',
+      status: 400,
+      detail: message,
+      instance: '',
+    },
+  };
 }
 function notFound(message: string): HttpResponse {
-  return { status: 404, body: { type: 'https://domio.example/problems/not-found', title: 'Not found', status: 404, detail: message, instance: '' } };
+  return {
+    status: 404,
+    body: {
+      type: 'https://domio.example/problems/not-found',
+      title: 'Not found',
+      status: 404,
+      detail: message,
+      instance: '',
+    },
+  };
 }
 function conflict(message: string, _code: string): HttpResponse {
-  return { status: 409, body: { type: 'https://domio.example/problems/conflict', title: 'Conflict', status: 409, detail: message, instance: '' } };
+  return {
+    status: 409,
+    body: {
+      type: 'https://domio.example/problems/conflict',
+      title: 'Conflict',
+      status: 409,
+      detail: message,
+      instance: '',
+    },
+  };
 }
 function serviceUnavailable(message: string, _code: string): HttpResponse {
-  return { status: 503, body: { type: 'https://domio.example/problems/service-unavailable', title: 'Service unavailable', status: 503, detail: message, instance: '' } };
+  return {
+    status: 503,
+    body: {
+      type: 'https://domio.example/problems/service-unavailable',
+      title: 'Service unavailable',
+      status: 503,
+      detail: message,
+      instance: '',
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -77,7 +116,9 @@ function serviceUnavailable(message: string, _code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -112,7 +153,9 @@ export async function createMergeRequestHandler(
     const emptyDeck = { slides: [] };
 
     // Use workspace_id from header or query, default empty
-    const workspaceId = (req.headers['x-workspace-id'] ?? (req.query as Record<string, string | undefined>).workspaceId ?? '') as string;
+    const workspaceId = (req.headers['x-workspace-id'] ??
+      (req.query as Record<string, string | undefined>).workspaceId ??
+      '') as string;
 
     const mr = await ctx.service.createMergeRequest(
       req.body,
@@ -142,7 +185,9 @@ export async function listMergeRequestsHandler(
     const status = req.query.status as string | undefined;
     const mrs = await ctx.service.listMergeRequests(
       deckId,
-      status ? { status: status as 'open' | 'approved' | 'merged' | 'closed' | 'conflict' } : undefined,
+      status
+        ? { status: status as 'open' | 'approved' | 'merged' | 'closed' | 'conflict' }
+        : undefined,
     );
     return ok(mrs);
   } catch (e) {
@@ -204,7 +249,10 @@ export async function mergeMergeRequestHandler(
 // ---------------------------------------------------------------------------
 
 export async function resolveMergeRequestConflictHandler(
-  req: HttpRequest<{ id: string }, { slide_id: string; resolution: ConflictResolution['resolution'] }>,
+  req: HttpRequest<
+    { id: string },
+    { slide_id: string; resolution: ConflictResolution['resolution'] }
+  >,
   ctx: MergeRequestHandlerContext,
 ): Promise<HttpResponse> {
   try {

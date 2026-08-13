@@ -32,9 +32,13 @@ export function NotesPane({ slide, stream }: NotesPaneProps) {
     <div className="panel" style={{ display: 'flex', flexDirection: 'column' }}>
       <p className="panel__title">Notes — slide {slide.slide_index + 1}</p>
       <div className="notes">
-        {notes
-          ? <p style={{ margin: 0 }}>{notes}</p>
-          : <p className="notes--empty" style={{ margin: 0 }}>No notes for this slide.</p>}
+        {notes ? (
+          <p style={{ margin: 0 }}>{notes}</p>
+        ) : (
+          <p className="notes--empty" style={{ margin: 0 }}>
+            No notes for this slide.
+          </p>
+        )}
         {live && (
           <p style={{ marginTop: 12, color: 'var(--accent)', fontStyle: 'italic' }}>{live}</p>
         )}

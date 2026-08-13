@@ -28,7 +28,8 @@ export default async function OverviewPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Overview</h1>
         <p className="text-sm text-slate-500">
-          Last 7 days · workspace <code className="rounded bg-slate-100 px-1.5 py-0.5">{workspaceId}</code>
+          Last 7 days · workspace{' '}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5">{workspaceId}</code>
         </p>
       </header>
       <SuspenseBoundary>

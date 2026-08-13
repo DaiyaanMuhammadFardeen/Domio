@@ -101,7 +101,10 @@ const HOST_ACCESS_PATTERNS = [
 
 const SIGNING_SECRET = 'asset-api-signing-secret';
 
-export function generateSignedUrl(resourceId: string, expiresInMs: number = 3_600_000): { url: string; expiresAt: number } {
+export function generateSignedUrl(
+  resourceId: string,
+  expiresInMs: number = 3_600_000,
+): { url: string; expiresAt: number } {
   const expiresAt = Date.now() + expiresInMs;
   const payload = `${resourceId}:${expiresAt}`;
   const signature = simpleHmac(payload, SIGNING_SECRET);
@@ -109,7 +112,11 @@ export function generateSignedUrl(resourceId: string, expiresInMs: number = 3_60
   return { url, expiresAt };
 }
 
-export function verifySignedUrl(url: string): { valid: boolean; resourceId?: string; reason?: string } {
+export function verifySignedUrl(url: string): {
+  valid: boolean;
+  resourceId?: string;
+  reason?: string;
+} {
   try {
     const parsed = new URL(url);
     const expiresAt = Number(parsed.searchParams.get('expires'));
@@ -154,17 +161,33 @@ export interface GlbParseResult {
 export function parseGlbMetadata(buffer: ArrayBuffer): GlbParseResult {
   const view = new DataView(buffer);
   if (buffer.byteLength < 12) {
-    return { polyCount: 0, textureCount: 0, hasAnimations: false, warnings: ['File too small for GLB header'] };
+    return {
+      polyCount: 0,
+      textureCount: 0,
+      hasAnimations: false,
+      warnings: ['File too small for GLB header'],
+    };
   }
 
   const magic = view.getUint32(0, true);
-  if (magic !== 0x46546C67) { // glTF
-    return { polyCount: 0, textureCount: 0, hasAnimations: false, warnings: ['Not a valid GLB file'] };
+  if (magic !== 0x46546c67) {
+    // glTF
+    return {
+      polyCount: 0,
+      textureCount: 0,
+      hasAnimations: false,
+      warnings: ['Not a valid GLB file'],
+    };
   }
 
   const version = view.getUint32(4, true);
   if (version !== 2) {
-    return { polyCount: 0, textureCount: 0, hasAnimations: false, warnings: [`Unsupported GLB version: ${version}`] };
+    return {
+      polyCount: 0,
+      textureCount: 0,
+      hasAnimations: false,
+      warnings: [`Unsupported GLB version: ${version}`],
+    };
   }
 
   // Parse JSON chunk
@@ -173,7 +196,8 @@ export function parseGlbMetadata(buffer: ArrayBuffer): GlbParseResult {
   for (let offset = 12; offset < Math.min(buffer.byteLength, 1024); offset += 8) {
     const chunkLength = view.getUint32(offset, true);
     const chunkType = view.getUint32(offset + 4, true);
-    if (chunkType === 0x4E4F534A) { // JSON
+    if (chunkType === 0x4e4f534a) {
+      // JSON
       jsonChunkLength = chunkLength;
       jsonChunkOffset = offset + 8;
       break;
@@ -181,7 +205,12 @@ export function parseGlbMetadata(buffer: ArrayBuffer): GlbParseResult {
   }
 
   if (jsonChunkLength === 0) {
-    return { polyCount: 0, textureCount: 0, hasAnimations: false, warnings: ['No JSON chunk found'] };
+    return {
+      polyCount: 0,
+      textureCount: 0,
+      hasAnimations: false,
+      warnings: ['No JSON chunk found'],
+    };
   }
 
   const jsonBytes = new Uint8Array(buffer, jsonChunkOffset, jsonChunkLength);
@@ -190,7 +219,12 @@ export function parseGlbMetadata(buffer: ArrayBuffer): GlbParseResult {
   try {
     json = JSON.parse(jsonStr) as Record<string, unknown>;
   } catch {
-    return { polyCount: 0, textureCount: 0, hasAnimations: false, warnings: ['Invalid JSON chunk'] };
+    return {
+      polyCount: 0,
+      textureCount: 0,
+      hasAnimations: false,
+      warnings: ['Invalid JSON chunk'],
+    };
   }
 
   const warnings: string[] = [];
@@ -244,14 +278,12 @@ export function sanitizeGlbJson(json: Record<string, unknown>): SanitizeResult {
 
   // Check for dangerous extensions
   const extensionsUsed = (cleaned['extensionsUsed'] as string[] | undefined) ?? [];
-  const unsafeExtensions = extensionsUsed.filter(ext =>
-    ext.startsWith('KHR_xmp') ||
-    ext.includes('External') ||
-    ext.includes('Script'),
+  const unsafeExtensions = extensionsUsed.filter(
+    (ext) => ext.startsWith('KHR_xmp') || ext.includes('External') || ext.includes('Script'),
   );
   if (unsafeExtensions.length > 0) {
     warnings.push(`Removed unsafe extensions: ${unsafeExtensions.join(', ')}`);
-    cleaned['extensionsUsed'] = extensionsUsed.filter(ext => !unsafeExtensions.includes(ext));
+    cleaned['extensionsUsed'] = extensionsUsed.filter((ext) => !unsafeExtensions.includes(ext));
   }
 
   // Check for embedded scripts in extensions
@@ -277,7 +309,10 @@ export function sanitizeGlbJson(json: Record<string, unknown>): SanitizeResult {
     if (xmpObj['external'] !== undefined || xmpObj['href'] !== undefined) {
       return {
         cleanedJson: cleaned,
-        warnings: [...warnings, 'KHR_xmp external reference detected — must be resolved before upload'],
+        warnings: [
+          ...warnings,
+          'KHR_xmp external reference detected — must be resolved before upload',
+        ],
       };
     }
   }
@@ -433,7 +468,9 @@ export function parseLottieMetadata(buffer: ArrayBuffer, format: string): Lottie
   const op = typeof json['op'] === 'number' ? json['op'] : 0;
   const durationMs = fps > 0 ? Math.floor(((op - ip) / fps) * 1000) : 0;
 
-  const layers = Array.isArray(json['layers']) ? json['layers'] as Array<Record<string, unknown>> : [];
+  const layers = Array.isArray(json['layers'])
+    ? (json['layers'] as Array<Record<string, unknown>>)
+    : [];
   const layerCount = layers.length;
 
   // Sanitize: walk all "ks" expressions and reject any that reference host APIs
@@ -443,7 +480,9 @@ export function parseLottieMetadata(buffer: ArrayBuffer, format: string): Lottie
     if (ks && typeof ks === 'object') {
       const str = JSON.stringify(ks);
       if (/\bwindow\b|\bdocument\b|\beval\s*\(|\brequire\s*\(|\bimport\s*\(/.test(str)) {
-        warnings.push(`Stripped host-referencing expression on layer "${layer['nm'] ?? 'unnamed'}"`);
+        warnings.push(
+          `Stripped host-referencing expression on layer "${layer['nm'] ?? 'unnamed'}"`,
+        );
         sanitized = false;
       }
     }
@@ -534,12 +573,15 @@ export class AssetService {
     return this.models.listByWorkspace(workspaceId);
   }
 
-  async patchModel(id: string, patch: {
-    name?: string;
-    licenseId?: string;
-    metadata?: Record<string, unknown>;
-    thumbnailUrl?: string;
-  }): Promise<ModelAsset> {
+  async patchModel(
+    id: string,
+    patch: {
+      name?: string;
+      licenseId?: string;
+      metadata?: Record<string, unknown>;
+      thumbnailUrl?: string;
+    },
+  ): Promise<ModelAsset> {
     return this.models.update(id, patch);
   }
 
@@ -599,10 +641,14 @@ export class AssetService {
         let jsonChunkOffset = glbOffset;
         let jsonChunkLength = 0;
 
-        for (let offset = glbOffset; offset < Math.min(input.buffer.byteLength, 1024); offset += 8) {
+        for (
+          let offset = glbOffset;
+          offset < Math.min(input.buffer.byteLength, 1024);
+          offset += 8
+        ) {
           const chunkLength = view.getUint32(offset, true);
           const chunkType = view.getUint32(offset + 4, true);
-          if (chunkType === 0x4E4F534A) {
+          if (chunkType === 0x4e4f534a) {
             jsonChunkLength = chunkLength;
             jsonChunkOffset = offset + 8;
             break;
@@ -623,10 +669,14 @@ export class AssetService {
 
     // Check poly budget warnings
     if (polyCount > POLY_BUDGET_WARN) {
-      warnings.push(`Polygon count (${polyCount}) exceeds recommended budget of ${POLY_BUDGET_WARN}`);
+      warnings.push(
+        `Polygon count (${polyCount}) exceeds recommended budget of ${POLY_BUDGET_WARN}`,
+      );
     }
     if (textureCount > TEXTURE_BUDGET_WARN) {
-      warnings.push(`Texture count (${textureCount}) exceeds recommended budget of ${TEXTURE_BUDGET_WARN}`);
+      warnings.push(
+        `Texture count (${textureCount}) exceeds recommended budget of ${TEXTURE_BUDGET_WARN}`,
+      );
     }
 
     // Create the model asset record
@@ -680,7 +730,9 @@ export class AssetService {
     const warnings: string[] = [];
     const lights = (input.lights ?? []) as unknown as Scene['lights'];
     if (lights.length > MAX_SCENE_LIGHTS) {
-      warnings.push(`Scene has ${lights.length} lights; ${MAX_SCENE_LIGHTS} is recommended to avoid GPU cost. Consider baking lights.`);
+      warnings.push(
+        `Scene has ${lights.length} lights; ${MAX_SCENE_LIGHTS} is recommended to avoid GPU cost. Consider baking lights.`,
+      );
     }
 
     const record: Scene = {
@@ -712,13 +764,16 @@ export class AssetService {
     return this.scenes.listByWorkspace(workspaceId, modelAssetId);
   }
 
-  async patchScene(id: string, patch: {
-    environment?: Record<string, unknown>;
-    lights?: Array<Record<string, unknown>>;
-    cameras?: Array<Record<string, unknown>>;
-    materials?: Record<string, Record<string, unknown>>;
-    metadata?: Record<string, unknown>;
-  }): Promise<Scene> {
+  async patchScene(
+    id: string,
+    patch: {
+      environment?: Record<string, unknown>;
+      lights?: Array<Record<string, unknown>>;
+      cameras?: Array<Record<string, unknown>>;
+      materials?: Record<string, Record<string, unknown>>;
+      metadata?: Record<string, unknown>;
+    },
+  ): Promise<Scene> {
     const updates: Record<string, unknown> = {};
     if (patch.environment !== undefined) updates.environment = patch.environment;
     if (patch.lights !== undefined) {
@@ -742,19 +797,22 @@ export class AssetService {
   // Camera Keyframe CRUD
   // -------------------------------------------------------------------------
 
-  async createCameraKeyframe(slideId: string, input: {
-    sceneId?: string;
-    orderIndex?: number;
-    position: { x: number; y: number; z: number };
-    target: { x: number; y: number; z: number };
-    fov: number;
-    roll?: number;
-    easing?: { p1x: number; p1y: number; p2x: number; p2y: number };
-    durationMs?: number;
-    trigger?: 'auto' | 'click' | 'scroll' | 'data';
-  }): Promise<CameraKeyframe> {
+  async createCameraKeyframe(
+    slideId: string,
+    input: {
+      sceneId?: string;
+      orderIndex?: number;
+      position: { x: number; y: number; z: number };
+      target: { x: number; y: number; z: number };
+      fov: number;
+      roll?: number;
+      easing?: { p1x: number; p1y: number; p2x: number; p2y: number };
+      durationMs?: number;
+      trigger?: 'auto' | 'click' | 'scroll' | 'data';
+    },
+  ): Promise<CameraKeyframe> {
     const now = this.clock();
-    const orderIndex = input.orderIndex ?? await this.cameraKeyframes.nextOrderIndex(slideId);
+    const orderIndex = input.orderIndex ?? (await this.cameraKeyframes.nextOrderIndex(slideId));
 
     // Default easing: ease-in-out
     const easing = input.easing ?? { p1x: 0.42, p1y: 0, p2x: 0.58, p2y: 1 };
@@ -787,16 +845,19 @@ export class AssetService {
     return this.cameraKeyframes.listBySlide(slideId);
   }
 
-  async patchCameraKeyframe(id: string, patch: {
-    position?: { x: number; y: number; z: number };
-    target?: { x: number; y: number; z: number };
-    fov?: number;
-    roll?: number;
-    easing?: { p1x: number; p1y: number; p2x: number; p2y: number };
-    durationMs?: number;
-    trigger?: 'auto' | 'click' | 'scroll' | 'data';
-    orderIndex?: number;
-  }): Promise<CameraKeyframe> {
+  async patchCameraKeyframe(
+    id: string,
+    patch: {
+      position?: { x: number; y: number; z: number };
+      target?: { x: number; y: number; z: number };
+      fov?: number;
+      roll?: number;
+      easing?: { p1x: number; p1y: number; p2x: number; p2y: number };
+      durationMs?: number;
+      trigger?: 'auto' | 'click' | 'scroll' | 'data';
+      orderIndex?: number;
+    },
+  ): Promise<CameraKeyframe> {
     const updates: Record<string, unknown> = {};
     if (patch.position !== undefined) updates.position = patch.position;
     if (patch.target !== undefined) updates.target = patch.target;
@@ -806,7 +867,10 @@ export class AssetService {
     if (patch.durationMs !== undefined) updates.durationMs = patch.durationMs;
     if (patch.trigger !== undefined) updates.trigger = patch.trigger;
     if (patch.orderIndex !== undefined) updates.orderIndex = patch.orderIndex;
-    return this.cameraKeyframes.update(id, updates as Partial<Omit<CameraKeyframe, 'id' | 'createdAt'>>);
+    return this.cameraKeyframes.update(
+      id,
+      updates as Partial<Omit<CameraKeyframe, 'id' | 'createdAt'>>,
+    );
   }
 
   async deleteCameraKeyframe(id: string): Promise<void> {
@@ -832,20 +896,34 @@ export class AssetService {
     }
 
     // Validate sourceWgsl must actually look like WGSL
-    if (!input.sourceWgsl.includes('@group') && !input.sourceWgsl.includes('@vertex') && !input.sourceWgsl.includes('@fragment') && !input.sourceWgsl.includes('@compute')) {
-      throw new ShaderValidationError('sourceWgsl must contain WGSL declarations (@group, @vertex, @fragment, or @compute)', 'WGSL_INVALID');
+    if (
+      !input.sourceWgsl.includes('@group') &&
+      !input.sourceWgsl.includes('@vertex') &&
+      !input.sourceWgsl.includes('@fragment') &&
+      !input.sourceWgsl.includes('@compute')
+    ) {
+      throw new ShaderValidationError(
+        'sourceWgsl must contain WGSL declarations (@group, @vertex, @fragment, or @compute)',
+        'WGSL_INVALID',
+      );
     }
 
     // Validate no host access in WGSL
     const hostViolations = detectHostAccess(input.sourceWgsl);
     if (hostViolations.length > 0) {
-      throw new ShaderValidationError(`Host-environment access is not allowed in shaders: ${hostViolations.join('; ')}`, 'HOST_ACCESS_REJECTED');
+      throw new ShaderValidationError(
+        `Host-environment access is not allowed in shaders: ${hostViolations.join('; ')}`,
+        'HOST_ACCESS_REJECTED',
+      );
     }
 
     // Also check GLSL
     const glslViolations = detectHostAccess(input.sourceGlsl);
     if (glslViolations.length > 0) {
-      throw new ShaderValidationError(`Host-environment access is not allowed in shaders: ${glslViolations.join('; ')}`, 'HOST_ACCESS_REJECTED');
+      throw new ShaderValidationError(
+        `Host-environment access is not allowed in shaders: ${glslViolations.join('; ')}`,
+        'HOST_ACCESS_REJECTED',
+      );
     }
 
     const now = this.clock();
@@ -875,28 +953,45 @@ export class AssetService {
     return this.shaders.listByWorkspace(workspaceId, kind);
   }
 
-  async updateShader(id: string, patch: {
-    name?: string;
-    sourceWgsl?: string;
-    sourceGlsl?: string;
-    inputs?: Record<string, ShaderInput>;
-  }): Promise<Shader> {
+  async updateShader(
+    id: string,
+    patch: {
+      name?: string;
+      sourceWgsl?: string;
+      sourceGlsl?: string;
+      inputs?: Record<string, ShaderInput>;
+    },
+  ): Promise<Shader> {
     if (patch.sourceWgsl !== undefined) {
       if (patch.sourceWgsl.trim().length === 0) {
         throw new ShaderValidationError('WGSL source is required', 'WGSL_REQUIRED');
       }
-      if (!patch.sourceWgsl.includes('@group') && !patch.sourceWgsl.includes('@vertex') && !patch.sourceWgsl.includes('@fragment') && !patch.sourceWgsl.includes('@compute')) {
-        throw new ShaderValidationError('sourceWgsl must contain WGSL declarations', 'WGSL_INVALID');
+      if (
+        !patch.sourceWgsl.includes('@group') &&
+        !patch.sourceWgsl.includes('@vertex') &&
+        !patch.sourceWgsl.includes('@fragment') &&
+        !patch.sourceWgsl.includes('@compute')
+      ) {
+        throw new ShaderValidationError(
+          'sourceWgsl must contain WGSL declarations',
+          'WGSL_INVALID',
+        );
       }
       const violations = detectHostAccess(patch.sourceWgsl);
       if (violations.length > 0) {
-        throw new ShaderValidationError(`Host-environment access is not allowed: ${violations.join('; ')}`, 'HOST_ACCESS_REJECTED');
+        throw new ShaderValidationError(
+          `Host-environment access is not allowed: ${violations.join('; ')}`,
+          'HOST_ACCESS_REJECTED',
+        );
       }
     }
     if (patch.sourceGlsl !== undefined) {
       const violations = detectHostAccess(patch.sourceGlsl);
       if (violations.length > 0) {
-        throw new ShaderValidationError(`Host-environment access is not allowed: ${violations.join('; ')}`, 'HOST_ACCESS_REJECTED');
+        throw new ShaderValidationError(
+          `Host-environment access is not allowed: ${violations.join('; ')}`,
+          'HOST_ACCESS_REJECTED',
+        );
       }
     }
 
@@ -952,13 +1047,16 @@ export class AssetService {
     return this.licenses.listByWorkspace(workspaceId);
   }
 
-  async patchLicense(id: string, patch: {
-    name?: string;
-    termsUrl?: string;
-    expiresAt?: string;
-    seats?: number;
-    metadata?: Record<string, unknown>;
-  }): Promise<License> {
+  async patchLicense(
+    id: string,
+    patch: {
+      name?: string;
+      termsUrl?: string;
+      expiresAt?: string;
+      seats?: number;
+      metadata?: Record<string, unknown>;
+    },
+  ): Promise<License> {
     return this.licenses.update(id, patch);
   }
 
@@ -1021,12 +1119,15 @@ export class AssetService {
     return this.audios.listByWorkspace(workspaceId);
   }
 
-  async patchAudioAsset(id: string, patch: {
-    name?: string;
-    licenseId?: string;
-    metadata?: Record<string, unknown>;
-    tracks?: Array<Record<string, unknown>>;
-  }): Promise<AudioAsset> {
+  async patchAudioAsset(
+    id: string,
+    patch: {
+      name?: string;
+      licenseId?: string;
+      metadata?: Record<string, unknown>;
+      tracks?: Array<Record<string, unknown>>;
+    },
+  ): Promise<AudioAsset> {
     return this.audios.update(id, patch);
   }
 
@@ -1159,14 +1260,17 @@ export class AssetService {
     return this.videos.listByWorkspace(workspaceId);
   }
 
-  async patchVideoAsset(id: string, patch: {
-    name?: string;
-    thumbnailUrl?: string;
-    chapters?: Array<Record<string, unknown>>;
-    captions?: Array<Record<string, unknown>>;
-    licenseId?: string;
-    metadata?: Record<string, unknown>;
-  }): Promise<VideoAsset> {
+  async patchVideoAsset(
+    id: string,
+    patch: {
+      name?: string;
+      thumbnailUrl?: string;
+      chapters?: Array<Record<string, unknown>>;
+      captions?: Array<Record<string, unknown>>;
+      licenseId?: string;
+      metadata?: Record<string, unknown>;
+    },
+  ): Promise<VideoAsset> {
     const updates: Record<string, unknown> = {};
     if (patch.name !== undefined) updates.name = patch.name;
     if (patch.thumbnailUrl !== undefined) updates.thumbnailUrl = patch.thumbnailUrl;
@@ -1216,7 +1320,10 @@ export class AssetService {
     }
 
     const fmt = input.format.toLowerCase();
-    const { durationMs, width, height, fps, hasAudio, warnings } = parseVideoMetadata(input.buffer, fmt);
+    const { durationMs, width, height, fps, hasAudio, warnings } = parseVideoMetadata(
+      input.buffer,
+      fmt,
+    );
 
     const videoId = this.idGen();
     const now = this.clock();
@@ -1300,7 +1407,9 @@ export class AssetService {
       layerCount: input.layerCount,
       layers: (input.layers ?? []) as unknown as LottieAsset['layers'],
       sanitized: input.sanitized ?? false,
-      ...(input.sanitizedWarnings !== undefined ? { sanitizedWarnings: input.sanitizedWarnings } : {}),
+      ...(input.sanitizedWarnings !== undefined
+        ? { sanitizedWarnings: input.sanitizedWarnings }
+        : {}),
       ...(input.licenseId !== undefined ? { licenseId: input.licenseId } : {}),
       metadata: input.metadata ?? {},
       createdAt: now,
@@ -1320,21 +1429,25 @@ export class AssetService {
     return this.lotties.listByWorkspace(workspaceId);
   }
 
-  async patchLottieAsset(id: string, patch: {
-    name?: string;
-    thumbnailUrl?: string;
-    layers?: Array<Record<string, unknown>>;
-    sanitized?: boolean;
-    sanitizedWarnings?: readonly string[];
-    licenseId?: string;
-    metadata?: Record<string, unknown>;
-  }): Promise<LottieAsset> {
+  async patchLottieAsset(
+    id: string,
+    patch: {
+      name?: string;
+      thumbnailUrl?: string;
+      layers?: Array<Record<string, unknown>>;
+      sanitized?: boolean;
+      sanitizedWarnings?: readonly string[];
+      licenseId?: string;
+      metadata?: Record<string, unknown>;
+    },
+  ): Promise<LottieAsset> {
     const updates: Record<string, unknown> = {};
     if (patch.name !== undefined) updates.name = patch.name;
     if (patch.thumbnailUrl !== undefined) updates.thumbnailUrl = patch.thumbnailUrl;
     if (patch.layers !== undefined) updates.layers = patch.layers;
     if (patch.sanitized !== undefined) updates.sanitized = patch.sanitized;
-    if (patch.sanitizedWarnings !== undefined) updates.sanitizedWarnings = [...patch.sanitizedWarnings];
+    if (patch.sanitizedWarnings !== undefined)
+      updates.sanitizedWarnings = [...patch.sanitizedWarnings];
     if (patch.licenseId !== undefined) updates.licenseId = patch.licenseId;
     if (patch.metadata !== undefined) updates.metadata = patch.metadata;
     return this.lotties.update(id, updates as Partial<Omit<LottieAsset, 'id' | 'createdAt'>>);
@@ -1381,8 +1494,10 @@ export class AssetService {
     }
 
     const fmt = input.format.toLowerCase();
-    const { durationMs, fps, width, height, layerCount, sanitized, warnings } =
-      parseLottieMetadata(input.buffer, fmt);
+    const { durationMs, fps, width, height, layerCount, sanitized, warnings } = parseLottieMetadata(
+      input.buffer,
+      fmt,
+    );
 
     const lottieId = this.idGen();
     const now = this.clock();

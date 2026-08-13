@@ -5,7 +5,7 @@ stream: E
 audience: on-call engineers, developers in Bangladesh
 last_reviewed: 2026-07-29
 severity: P2 (downstream unavailable) / P3 (degraded performance)
-tags: ["#mirror", "#bandwidth", "#fallback", "#bangladesh"]
+tags: ['#mirror', '#bandwidth', '#fallback', '#bangladesh']
 ---
 
 # Bangladesh Mirror Fallback Runbook
@@ -75,11 +75,11 @@ When the mirror is down but the upstream is reachable, the developer can
 work — but they pay the bandwidth cost. The apply.sh script always
 configures both endpoints:
 
-| Ecosystem  | Mirror → upstream switch when mirror is down                              |
-|------------|---------------------------------------------------------------------------|
-| npm        | `npm config set registry "$NPM_UPSTREAM"` (re-applies on next session)    |
-| PyPI       | `pip config set global.index-url "$PYPI_UPSTREAM/simple/"`               |
-| Go modules | `go env -w GOPROXY="${GO_UPSTREAM}|direct"`                              |
+| Ecosystem  | Mirror → upstream switch when mirror is down                                                                |
+| ---------- | ----------------------------------------------------------------------------------------------------------- | -------- |
+| npm        | `npm config set registry "$NPM_UPSTREAM"` (re-applies on next session)                                      |
+| PyPI       | `pip config set global.index-url "$PYPI_UPSTREAM/simple/"`                                                  |
+| Go modules | `go env -w GOPROXY="${GO_UPSTREAM}                                                                          | direct"` |
 | Docker     | edit `~/.docker/daemon.json` and replace `registry-mirrors` with `[]`, then `sudo systemctl restart docker` |
 
 All four switches are reversible: re-running `apply.sh` restores the

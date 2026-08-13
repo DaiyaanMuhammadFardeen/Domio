@@ -22,7 +22,10 @@ export function shaderRoutes(service: AssetService): Hono {
   app.get('/v1/shaders', async (c) => {
     const workspaceId = c.req.query('workspace_id');
     if (!workspaceId) {
-      return c.json({ error: 'Missing required query param: workspace_id', code: 'VALIDATION_ERROR' }, 400);
+      return c.json(
+        { error: 'Missing required query param: workspace_id', code: 'VALIDATION_ERROR' },
+        400,
+      );
     }
     const kind = c.req.query('kind') as 'background' | 'particle' | 'material' | 'post' | undefined;
     const shaders = await service.listShaders(workspaceId, kind);
@@ -34,11 +37,14 @@ export function shaderRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validateCreateShader(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
     try {
       const shader = await service.createShader(body);
@@ -57,7 +63,8 @@ export function shaderRoutes(service: AssetService): Hono {
       const shader = await service.getShader(c.req.param('id'));
       return c.json(shader);
     } catch (e) {
-      if (e instanceof ShaderNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof ShaderNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -67,17 +74,21 @@ export function shaderRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validateUpdateShader(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
     try {
       const shader = await service.updateShader(c.req.param('id'), body);
       return c.json(shader);
     } catch (e) {
-      if (e instanceof ShaderNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof ShaderNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       if (e instanceof ShaderValidationError) {
         return c.json({ error: e.message, code: e.code }, 400);
       }
@@ -91,7 +102,8 @@ export function shaderRoutes(service: AssetService): Hono {
       await service.deleteShader(c.req.param('id'));
       return c.body(null, 204);
     } catch (e) {
-      if (e instanceof ShaderNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof ShaderNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -102,7 +114,8 @@ export function shaderRoutes(service: AssetService): Hono {
       const shader = await service.publishShader(c.req.param('id'));
       return c.json(shader);
     } catch (e) {
-      if (e instanceof ShaderNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof ShaderNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });

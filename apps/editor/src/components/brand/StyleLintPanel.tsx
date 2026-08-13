@@ -92,13 +92,16 @@ export function StyleLintPanel(props: StyleLintPanelProps): ReactElement {
         </button>
         {report && (
           <span className="style-lint__summary" data-testid="style-lint-summary">
-            {report.issues.length} issue{report.issues.length === 1 ? '' : 's'} · {report.scannedElementCount} scanned
+            {report.issues.length} issue{report.issues.length === 1 ? '' : 's'} ·{' '}
+            {report.scannedElementCount} scanned
           </span>
         )}
       </div>
 
       {error && (
-        <div className="style-lint__error" data-testid="style-lint-error">{error}</div>
+        <div className="style-lint__error" data-testid="style-lint-error">
+          {error}
+        </div>
       )}
 
       {report && report.issues.length === 0 && (

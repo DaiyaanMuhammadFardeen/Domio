@@ -31,11 +31,7 @@ export function SnapshotFallback({
     : 'Stale';
 
   return (
-    <div
-      data-testid={dataTestId}
-      data-stale={isStale}
-      style={{ position: 'relative' }}
-    >
+    <div data-testid={dataTestId} data-stale={isStale} style={{ position: 'relative' }}>
       {children}
       {isStale && (
         <span

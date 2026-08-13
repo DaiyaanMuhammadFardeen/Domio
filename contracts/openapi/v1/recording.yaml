@@ -36,7 +36,7 @@ paths:
         carries the canonical `id` (used in all subsequent paths) and
         the initial `version` for optimistic concurrency.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: query
           name: workspace_id
           required: true
@@ -47,18 +47,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/StartRecordingRequest"
+              $ref: '#/components/schemas/StartRecordingRequest'
       responses:
-        "200":
+        '200':
           description: Recording session started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecordingSession"
-        "400":
-          $ref: "common.yaml#/components/responses/BadRequest"
-        "409":
-          $ref: "common.yaml#/components/responses/Conflict"
+                $ref: '#/components/schemas/RecordingSession'
+        '400':
+          $ref: 'common.yaml#/components/responses/BadRequest'
+        '409':
+          $ref: 'common.yaml#/components/responses/Conflict'
 
   /v1/recording/sessions/{recordingSessionId}:
     get:
@@ -77,14 +77,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Recording session.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecordingSession"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
+                $ref: '#/components/schemas/RecordingSession'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
 
   /v1/recording/sessions/{recordingSessionId}/pause:
     post:
@@ -97,7 +97,7 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: query
           name: workspace_id
           required: true
@@ -108,20 +108,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TransitionRequest"
+              $ref: '#/components/schemas/TransitionRequest'
       responses:
-        "200":
+        '200':
           description: Recording paused.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecordingSession"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
-        "409":
-          $ref: "common.yaml#/components/responses/Conflict"
-        "422":
-          $ref: "common.yaml#/components/responses/Unprocessable"
+                $ref: '#/components/schemas/RecordingSession'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: 'common.yaml#/components/responses/Conflict'
+        '422':
+          $ref: 'common.yaml#/components/responses/Unprocessable'
 
   /v1/recording/sessions/{recordingSessionId}/resume:
     post:
@@ -134,7 +134,7 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: query
           name: workspace_id
           required: true
@@ -145,20 +145,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TransitionRequest"
+              $ref: '#/components/schemas/TransitionRequest'
       responses:
-        "200":
+        '200':
           description: Recording resumed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecordingSession"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
-        "409":
-          $ref: "common.yaml#/components/responses/Conflict"
-        "422":
-          $ref: "common.yaml#/components/responses/Unprocessable"
+                $ref: '#/components/schemas/RecordingSession'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: 'common.yaml#/components/responses/Conflict'
+        '422':
+          $ref: 'common.yaml#/components/responses/Unprocessable'
 
   /v1/recording/sessions/{recordingSessionId}/stop:
     post:
@@ -171,7 +171,7 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: query
           name: workspace_id
           required: true
@@ -182,20 +182,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TransitionRequest"
+              $ref: '#/components/schemas/TransitionRequest'
       responses:
-        "200":
+        '200':
           description: Recording transitioning to finalizing.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecordingSession"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
-        "409":
-          $ref: "common.yaml#/components/responses/Conflict"
-        "422":
-          $ref: "common.yaml#/components/responses/Unprocessable"
+                $ref: '#/components/schemas/RecordingSession'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: 'common.yaml#/components/responses/Conflict'
+        '422':
+          $ref: 'common.yaml#/components/responses/Unprocessable'
 
   /v1/recording/sessions/{recordingSessionId}/finalize:
     post:
@@ -208,7 +208,7 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: query
           name: workspace_id
           required: true
@@ -219,20 +219,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TransitionRequest"
+              $ref: '#/components/schemas/TransitionRequest'
       responses:
-        "200":
+        '200':
           description: Recording ready.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecordingSession"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
-        "409":
-          $ref: "common.yaml#/components/responses/Conflict"
-        "422":
-          $ref: "common.yaml#/components/responses/Unprocessable"
+                $ref: '#/components/schemas/RecordingSession'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: 'common.yaml#/components/responses/Conflict'
+        '422':
+          $ref: 'common.yaml#/components/responses/Unprocessable'
 
   /v1/recording/sessions/{recordingSessionId}/fail:
     post:
@@ -245,7 +245,7 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: query
           name: workspace_id
           required: true
@@ -256,20 +256,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/FailRequest"
+              $ref: '#/components/schemas/FailRequest'
       responses:
-        "200":
+        '200':
           description: Recording failed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecordingSession"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
-        "409":
-          $ref: "common.yaml#/components/responses/Conflict"
-        "422":
-          $ref: "common.yaml#/components/responses/Unprocessable"
+                $ref: '#/components/schemas/RecordingSession'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: 'common.yaml#/components/responses/Conflict'
+        '422':
+          $ref: 'common.yaml#/components/responses/Unprocessable'
 
   /v1/recording/sessions/{recordingSessionId}/chunks:
     post:
@@ -288,7 +288,7 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: query
           name: workspace_id
           required: true
@@ -299,20 +299,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CommitChunkRequest"
+              $ref: '#/components/schemas/CommitChunkRequest'
       responses:
-        "200":
+        '200':
           description: Chunk committed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CommitChunkResponse"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
-        "409":
-          $ref: "common.yaml#/components/responses/Conflict"
-        "422":
-          $ref: "common.yaml#/components/responses/Unprocessable"
+                $ref: '#/components/schemas/CommitChunkResponse'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
+        '409':
+          $ref: 'common.yaml#/components/responses/Conflict'
+        '422':
+          $ref: 'common.yaml#/components/responses/Unprocessable'
     get:
       tags: [recording]
       operationId: listChunks
@@ -329,14 +329,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Chunks returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ChunkList"
-        "404":
-          $ref: "common.yaml#/components/responses/NotFound"
+                $ref: '#/components/schemas/ChunkList'
+        '404':
+          $ref: 'common.yaml#/components/responses/NotFound'
 
 components:
   schemas:
@@ -384,7 +384,7 @@ components:
 
     FailRequest:
       allOf:
-        - $ref: "#/components/schemas/TransitionRequest"
+        - $ref: '#/components/schemas/TransitionRequest'
         - type: object
           required: [reason]
           properties:
@@ -414,7 +414,7 @@ components:
         recording_session_id:
           type: string
         track_kind:
-          $ref: "#/components/schemas/TrackKind"
+          $ref: '#/components/schemas/TrackKind'
         sequence:
           type: integer
           format: int64
@@ -449,7 +449,7 @@ components:
         recording_session_id:
           type: string
         track_kind:
-          $ref: "#/components/schemas/TrackKind"
+          $ref: '#/components/schemas/TrackKind'
         sequence:
           type: integer
           format: int64
@@ -461,14 +461,14 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/ChunkSummary"
+            $ref: '#/components/schemas/ChunkSummary'
 
     ChunkSummary:
       type: object
       required: [track_kind, sequence, byte_size]
       properties:
         track_kind:
-          $ref: "#/components/schemas/TrackKind"
+          $ref: '#/components/schemas/TrackKind'
         sequence:
           type: integer
           format: int64
@@ -516,7 +516,7 @@ components:
           type: string
           nullable: true
         status:
-          $ref: "#/components/schemas/RecordingStatus"
+          $ref: '#/components/schemas/RecordingStatus'
         started_at:
           type: string
           format: date-time

@@ -15,10 +15,10 @@
         "required": ["code", "severity", "slide", "message"],
         "additionalProperties": false,
         "properties": {
-          "code":     { "type": "string" },
+          "code": { "type": "string" },
           "severity": { "type": "string", "enum": ["info", "warning", "error"] },
-          "slide":    { "type": "integer", "minimum": 0 },
-          "message":  { "type": "string" }
+          "slide": { "type": "integer", "minimum": 0 },
+          "message": { "type": "string" }
         }
       }
     },
@@ -27,10 +27,10 @@
       "required": ["info", "warning", "error", "total"],
       "additionalProperties": false,
       "properties": {
-        "info":    { "type": "integer", "minimum": 0 },
+        "info": { "type": "integer", "minimum": 0 },
         "warning": { "type": "integer", "minimum": 0 },
-        "error":   { "type": "integer", "minimum": 0 },
-        "total":   { "type": "integer", "minimum": 0 }
+        "error": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 }
       }
     },
     "tool_version": { "type": "string" }

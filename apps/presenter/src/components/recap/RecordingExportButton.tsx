@@ -68,7 +68,9 @@ export function RecordingExportButton({
     try {
       const queued = await serviceRef.current.requestExport(sessionId, format, watermark);
       setState({ kind: 'running', job: queued });
-      const finalJob = await serviceRef.current.waitForReady(queued.id, { signal: controller.signal });
+      const finalJob = await serviceRef.current.waitForReady(queued.id, {
+        signal: controller.signal,
+      });
       if (finalJob.status === 'failed') {
         setState({
           kind: 'failed',
@@ -94,7 +96,10 @@ export function RecordingExportButton({
           progressPct: 0,
           errorMessage: err.message ?? 'Unknown error',
         },
-        message: err.status === 404 ? 'Recording export service is not available.' : err.message ?? 'Export failed',
+        message:
+          err.status === 404
+            ? 'Recording export service is not available.'
+            : (err.message ?? 'Export failed'),
       });
     }
   }, [sessionId, format, watermark, onReady]);
@@ -130,7 +135,15 @@ export function RecordingExportButton({
 
       {state.kind === 'idle' && (
         <>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11, color: 'var(--content-secondary)' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'center',
+              fontSize: 11,
+              color: 'var(--content-secondary)',
+            }}
+          >
             <label>
               Format
               <select
@@ -224,12 +237,7 @@ export function RecordingExportButton({
               Download {state.job.format.toUpperCase()}
             </a>
           )}
-          <button
-            type="button"
-            onClick={reset}
-            data-testid={`${dataTestId}-reset`}
-            style={pillBtn}
-          >
+          <button type="button" onClick={reset} data-testid={`${dataTestId}-reset`} style={pillBtn}>
             Export another
           </button>
         </div>
@@ -244,12 +252,7 @@ export function RecordingExportButton({
           >
             {state.message}
           </p>
-          <button
-            type="button"
-            onClick={reset}
-            data-testid={`${dataTestId}-retry`}
-            style={pillBtn}
-          >
+          <button type="button" onClick={reset} data-testid={`${dataTestId}-retry`} style={pillBtn}>
             Try again
           </button>
         </div>

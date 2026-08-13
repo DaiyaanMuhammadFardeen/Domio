@@ -93,7 +93,13 @@ export function UnitFormatDialog(props: UnitFormatDialogProps): ReactElement | n
   };
 
   return (
-    <div className="dialog-backdrop" role="dialog" aria-modal="true" aria-label={t('locale.unitDialog')} data-testid="unit-format-dialog">
+    <div
+      className="dialog-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('locale.unitDialog')}
+      data-testid="unit-format-dialog"
+    >
       <div className="dialog">
         <header className="dialog__header">
           <h2 className="dialog__title">{t('locale.unitDialog')}</h2>

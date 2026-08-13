@@ -6,7 +6,9 @@
   "description": "Phase 16 W9 — append-only hash-chained attendance log (SCORM 2004 4th Ed).",
   "main": "src/index.ts",
   "types": "src/index.ts",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",

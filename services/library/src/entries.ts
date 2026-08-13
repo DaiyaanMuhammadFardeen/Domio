@@ -13,11 +13,7 @@ import type {
   AutoUpdateBinding,
   LibraryScope,
 } from './types.js';
-import {
-  LibraryValidationError,
-  RetiredEntryError,
-  SupersedeChainError,
-} from './types.js';
+import { LibraryValidationError, RetiredEntryError, SupersedeChainError } from './types.js';
 
 // ---------------------------------------------------------------------------
 // IdGen / Clock (injectable)
@@ -140,7 +136,9 @@ export function publishEntryBody(
   opts: DomainOpts,
 ): { status: EntryStatus; version_id: string; updated_at: Date } {
   if (entry.status !== 'draft' && entry.status !== 'pending') {
-    throw new LibraryValidationError(`Cannot publish entry in status '${entry.status}'; must be draft or pending`);
+    throw new LibraryValidationError(
+      `Cannot publish entry in status '${entry.status}'; must be draft or pending`,
+    );
   }
 
   return {
@@ -166,9 +164,7 @@ export function retireEntryBody(
 
   // Cannot retire if it would leave no head:
   // Check if this entry is the only non-retired entry
-  const otherActive = allEntries.filter(
-    (e) => e.id !== entry.id && e.status !== 'retired',
-  );
+  const otherActive = allEntries.filter((e) => e.id !== entry.id && e.status !== 'retired');
   if (otherActive.length === 0 && entry.status !== 'approved') {
     throw new LibraryValidationError('Cannot retire: would leave no active approved entry');
   }
@@ -216,10 +212,7 @@ export function insertFromLibraryBody(
 
 const SCHEDULED_WINDOW_MS = 60_000;
 
-export function isBindingDue(
-  binding: AutoUpdateBinding,
-  nowMs: number,
-): boolean {
+export function isBindingDue(binding: AutoUpdateBinding, nowMs: number): boolean {
   switch (binding.mode) {
     case 'immediate':
       return true;

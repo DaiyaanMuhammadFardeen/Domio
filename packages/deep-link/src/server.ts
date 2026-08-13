@@ -5,9 +5,4 @@
  * and must NOT be pulled into client bundles.
  */
 
-export {
-  Shortener,
-  newShortId,
-  type ShortenInput,
-  type ShortLinkStore,
-} from './shortener.js';
+export { Shortener, newShortId, type ShortenInput, type ShortLinkStore } from './shortener.js';

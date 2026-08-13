@@ -83,7 +83,9 @@ function renderText(el: Element & { type: 'text' }): string {
 function renderFrame(el: Element & { type: 'frame' | 'autoLayout' }): string {
   const t = el.transform;
   if (!t) return '';
-  const radius = (el.style as Record<string, unknown> | undefined)?.borderRadius as number | undefined;
+  const radius = (el.style as Record<string, unknown> | undefined)?.borderRadius as
+    | number
+    | undefined;
   const fill = el.fill?.color ? rgbaToCss(el.fill.color) : 'none';
   const strokeColor = el.stroke?.color ? rgbaToCss(el.stroke.color) : 'none';
   const strokeWidth = el.stroke?.width ?? (el.fill?.color ? 0 : 1);
@@ -107,7 +109,9 @@ function renderVector(el: Element & { type: 'vector' }): string {
   const fill = el.fill?.color ? rgbaToCss(el.fill.color) : 'none';
   const strokeColor = el.stroke?.color ? rgbaToCss(el.stroke.color) : 'none';
   const strokeWidth = el.stroke?.width ?? 1;
-  const dash = (el.style as Record<string, unknown> | undefined)?.strokeDasharray as string | undefined;
+  const dash = (el.style as Record<string, unknown> | undefined)?.strokeDasharray as
+    | string
+    | undefined;
 
   const attrs = [
     `d="${escapeXml(d)}"`,
@@ -211,9 +215,8 @@ export function renderDeckPoster(deckJson: Record<string, unknown>): RenderResul
   const slideWidth = DEFAULT_SLIDE_W;
   const slideHeight = DEFAULT_SLIDE_H;
   const spacing = 40;
-  const totalHeight = slides.length === 0
-    ? 0
-    : slides.length * slideHeight + (slides.length - 1) * spacing;
+  const totalHeight =
+    slides.length === 0 ? 0 : slides.length * slideHeight + (slides.length - 1) * spacing;
 
   let totalPlaceholderCount = 0;
   const slideParts: string[] = [];
@@ -223,7 +226,12 @@ export function renderDeckPoster(deckJson: Record<string, unknown>): RenderResul
     const y = i * (slideHeight + spacing);
     const { svg: innerSvg, placeholderCount } = renderSlideToSvg(slide, i);
     totalPlaceholderCount += placeholderCount;
-    slideParts.push(`<g transform="translate(0,${y})">\n${innerSvg.split('\n').map((l) => `  ${l}`).join('\n')}\n</g>`);
+    slideParts.push(
+      `<g transform="translate(0,${y})">\n${innerSvg
+        .split('\n')
+        .map((l) => `  ${l}`)
+        .join('\n')}\n</g>`,
+    );
   }
 
   const svg = [

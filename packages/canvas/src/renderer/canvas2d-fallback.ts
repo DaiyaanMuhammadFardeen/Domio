@@ -99,11 +99,7 @@ export class Canvas2DRenderer implements Renderer {
       case 'transform':
         ctx.save();
         if (cmd.translate) {
-          const t = worldToScreen(
-            camera,
-            { x: cmd.translate.x, y: cmd.translate.y },
-            viewport,
-          );
+          const t = worldToScreen(camera, { x: cmd.translate.x, y: cmd.translate.y }, viewport);
           ctx.translate(t.x - viewport.width / 2, t.y - viewport.height / 2);
         }
         if (cmd.rotate) ctx.rotate(cmd.rotate);

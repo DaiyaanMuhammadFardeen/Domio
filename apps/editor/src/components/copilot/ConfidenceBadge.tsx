@@ -15,11 +15,7 @@
 import { useState, type ReactElement } from 'react';
 import { ShieldCheck, ExternalLink } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import {
-  confidenceColor,
-  confidenceLabel,
-  type ConfidenceRecord,
-} from './lib/simulation-service';
+import { confidenceColor, confidenceLabel, type ConfidenceRecord } from './lib/simulation-service';
 
 export interface ConfidenceBadgeProps {
   /** 0-100 score. */
@@ -71,7 +67,9 @@ export function ConfidenceBadge({
       >
         <ShieldCheck size={10} />
         <span data-testid="confidence-badge-score">{pct}%</span>
-        <span className="hidden sm:inline" data-testid="confidence-badge-label">{display}</span>
+        <span className="hidden sm:inline" data-testid="confidence-badge-label">
+          {display}
+        </span>
       </button>
 
       {open ? (
@@ -83,9 +81,7 @@ export function ConfidenceBadge({
           <span className="block font-medium text-slate-100">
             {record.label} ({record.score}%)
           </span>
-          {claim ? (
-            <span className="mt-1 block text-slate-400">{claim}</span>
-          ) : null}
+          {claim ? <span className="mt-1 block text-slate-400">{claim}</span> : null}
           {provenance ? (
             provenanceHref ? (
               <a
@@ -106,9 +102,7 @@ export function ConfidenceBadge({
               </span>
             )
           ) : (
-            <span className="mt-1 block text-[10px] text-slate-500">
-              No provenance recorded
-            </span>
+            <span className="mt-1 block text-[10px] text-slate-500">No provenance recorded</span>
           )}
         </span>
       ) : null}

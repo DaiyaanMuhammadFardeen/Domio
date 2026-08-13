@@ -14,12 +14,7 @@
  * user belongs to.
  */
 
-import type {
-  ResourceType,
-  WorkspaceRole,
-  PermissionGrant,
-  PermissionDecision,
-} from './types.js';
+import type { ResourceType, WorkspaceRole, PermissionGrant, PermissionDecision } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Resolver context — abstracted stores for testability
@@ -29,7 +24,10 @@ export interface ResolverContext {
   /** All grants for a specific resource (direct, not inherited). */
   getGrantsForResource(resourceType: ResourceType, resourceId: string): Promise<PermissionGrant[]>;
   /** Workspace member record for the given user. */
-  getWorkspaceMember(workspaceId: string, userId: string): Promise<{
+  getWorkspaceMember(
+    workspaceId: string,
+    userId: string,
+  ): Promise<{
     role: WorkspaceRole;
     capabilities: readonly string[];
     effectiveFrom: Date;
@@ -66,7 +64,10 @@ function isTemporal(grant: { effectiveFrom: Date; effectiveTo: Date | null }, at
   return true;
 }
 
-function isRoleTemporal(member: { effectiveFrom: Date; effectiveTo: Date | null }, at: Date): boolean {
+function isRoleTemporal(
+  member: { effectiveFrom: Date; effectiveTo: Date | null },
+  at: Date,
+): boolean {
   if (member.effectiveFrom > at) return false;
   if (member.effectiveTo && member.effectiveTo < at) return false;
   return true;
@@ -85,7 +86,7 @@ function findRelevantGrants(
   at: Date,
 ): PermissionGrant[] {
   const groupSet = new Set(groupIds);
-  return grants.filter(g => {
+  return grants.filter((g) => {
     if (!isTemporal(g, at)) return false;
     if (!g.capabilities.includes(capability)) return false;
     if (g.principalType === 'user' && g.principalId === principalId) return true;
@@ -100,7 +101,7 @@ function findRelevantGrants(
  */
 function effectiveAtLevel(grants: readonly PermissionGrant[]): PermissionDecision | null {
   if (grants.length === 0) return null;
-  if (grants.some(g => g.isDeny)) return 'deny';
+  if (grants.some((g) => g.isDeny)) return 'deny';
   return 'allow';
 }
 
@@ -109,7 +110,10 @@ function effectiveAtLevel(grants: readonly PermissionGrant[]): PermissionDecisio
 // ---------------------------------------------------------------------------
 
 export async function buildAncestorChain(
-  getParent: (rt: ResourceType, rid: string) => Promise<{ parentType: ResourceType; parentId: string } | null>,
+  getParent: (
+    rt: ResourceType,
+    rid: string,
+  ) => Promise<{ parentType: ResourceType; parentId: string } | null>,
   resourceType: ResourceType,
   resourceId: string,
 ): Promise<Array<{ resourceType: ResourceType; resourceId: string }>> {

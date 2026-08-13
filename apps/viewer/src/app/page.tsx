@@ -29,8 +29,12 @@ function readRecent(): readonly RecentEntry[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((r): r is RecentEntry =>
-      typeof r === 'object' && r !== null && 'deckId' in r && typeof (r as RecentEntry).deckId === 'string'
+    return parsed.filter(
+      (r): r is RecentEntry =>
+        typeof r === 'object' &&
+        r !== null &&
+        'deckId' in r &&
+        typeof (r as RecentEntry).deckId === 'string',
     );
   } catch {
     return [];
@@ -136,7 +140,14 @@ export default function ViewerHomePage(): ReactElement {
       </section>
 
       <section>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 12,
+          }}
+        >
           <h2 style={{ fontSize: 16, margin: 0 }}>Recent decks</h2>
           {recent.length > 0 && (
             <button
@@ -156,13 +167,23 @@ export default function ViewerHomePage(): ReactElement {
           )}
         </div>
         {recent.length === 0 ? (
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }} data-testid="viewer-home-empty">
+          <p
+            style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}
+            data-testid="viewer-home-empty"
+          >
             No recent decks yet. Open one above to populate this list.
           </p>
         ) : (
           <ul
             data-testid="viewer-home-recent"
-            style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}
+            style={{
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4,
+            }}
           >
             {recent.map((r) => (
               <li key={r.deckId}>

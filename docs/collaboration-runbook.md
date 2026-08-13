@@ -8,6 +8,7 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
 ## What Wave 1 shipped
 
 ### Foundation
+
 - **Feature flags** — `infrastructure/feature-flags/phase-18.yaml`: 15 flags, all `default: false`
   (`collab.comments/approval/assignments/suggestions/mr/permissions/library/autoupdate/expiry/guests`,
   `collab.integrations.{meeting,slack,teams,calendar,tasks}`). Enforced via `FEATURE_<GROUP>_<NAME>_DISABLED`
@@ -29,12 +30,13 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
   `comment.created/resolved/mentioned`, `approval.requested/decision.recorded`, `assignment.created/status_changed`.
 
 ### Services
+
 - **`services/permission-engine`** (#184) — deny-first resolver: resource ancestry
   workspace→folder→project→deck→slide, ancestor-deny blocks descendants, deny overrides allow, temporal
   `effective_from/to` windows, point-in-time (`at`) evaluation, group membership expansion, workspace-role baselines
   (owner/admin/editor/commenter/viewer). `PermissionService.check/require/createGrant/listGrants/checkHistorical`.
-  Handlers: `POST /v1/permissions/grants`, `GET /v1/permissions/grants`, `POST /v1/permissions/check`. 72 tests (incl. pg_store).
-  _Deviation from phase doc: TS not Go (repo convention; query-gateway ACL precedent)._
+  Handlers: `POST /v1/permissions/grants`, `GET /v1/permissions/grants`, `POST /v1/permissions/check`. 72 tests (incl. pg*store).
+  \_Deviation from phase doc: TS not Go (repo convention; query-gateway ACL precedent).*
 - **`services/collab`** (@domio/collab-service) —
   - **Comments (#179)**: element anchors (fractional 0..1 validated), thread inheritance from parent, `@user`/`@role:`/`@group:`
     mention parsing, email/phone PII warning (non-blocking), idempotent reactions, orphan promotion (target→slide),
@@ -57,6 +59,7 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
 ## What Wave 3 shipped
 
 ### Migrations + contracts
+
 - **Migrations** (`0069–0071`, RLS via DO$$ loop incl. WITH CHECK):
   - `0069_phase18_library` — `slide_library_entry` (scope workspace/org/team, `approval_chain jsonb`, status
     draft/pending/approved/retired, `version_id`, `superseded_by` chain), `library_version`
@@ -66,11 +69,11 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
   - `0071_phase18_expiry` — `expiry_policy` (`interval_days`, escalation gentle/moderate/strict,
     `auto_revoke_share`), `freshness_flag` (reason policy_overdue|manual|ai_detected, resolved_at/by).
 - **Contracts** — `collab.yaml` grew to 29 operationIds (tags library/auto-update/expiry); collaboration event schemas
-  now **21 files**: +`library.entry_created/entry_published/entry_updated/entry_retired/version_added`,
-  +`auto_update.required/applied/conflict/binding_created`, +`expiry.policy_triggered/flag_applied/share_revoked/notification/freshness_confirmed`.
+  now **21 files**: +`library.entry_created/entry_published/entry_updated/entry_retired/version_added`, +`auto_update.required/applied/conflict/binding_created`, +`expiry.policy_triggered/flag_applied/share_revoked/notification/freshness_confirmed`.
   `actor_type` enum is now `[member, guest, agent, system]` across all 21 schemas (system actor for scanner/worker emissions).
 
 ### Services + workers
+
 - **`services/library`** (#185) — entries (create/addVersion/publish draft→pending→approved/retire with supersedes
   chain — retired ≠ head), insert-from-library with reference-vs-copy toggle (reference creates an immediate binding),
   auto-update bindings CRUD. Emits `library.entry_created/entry_published/entry_retired/version_added`,
@@ -84,6 +87,7 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
 - **`workers/expiry-scanner`** (#187) — `ExpiryScannerWorker` tick loop; `resourceProvider` injection (default empty). 4 tests.
 
 ### Hardening (folded in)
+
 - `services/collab/src/store/pg_store.ts` — full parameterized DML for all 14 methods + `withTransaction` (int4range
   half-open handling, jsonb, uuid[], dynamic UPDATE). 33 new tests (117 total).
 - `services/permission-engine/src/pg_store.ts` — full pg implementation of all 4 repository interfaces (temporal
@@ -94,20 +98,19 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
 ## What Wave 2 shipped
 
 ### Migrations + contracts
+
 - **Migrations** (`0072–0073`, RLS tenant isolation; `actor_type` enum `[member, guest, agent, system]`):
   - `0072_phase18_suggestions` — `suggestion` (deck_id, session_id, author_id, target_type element|slide|data_binding,
     target_id, `operation jsonb`, status open|accepted|rejected|obsolete, thread_id, resolved_at/by).
-  - `0073_phase18_merge_requests` — `slide_diff` (`mr_id`, base/target/source_version_id, `slide_diffs jsonb`,
+  - `0073_phase18_merge_requests` — `slide_diff` (`mr_id`, base/target/source*version_id, `slide_diffs jsonb`,
     `binding_diffs jsonb`, computed_at) created first, then `merge_request` (source_branch/target_branch TEXT, title,
     description, author_id, status open|approved|merged|closed|conflict, `diff_id` → slide_diff, merged_at/by,
-    merge_commit_id). _Note: legacy phase-05 `merge_requests` (0009) stays with control-plane — untouched._
-- **Contracts** — `collab.yaml` grew to **38 operationIds** (tags suggestions/merge-requests):
-  +`createSuggestion/listSuggestions/acceptSuggestion/rejectSuggestion`,
-  +`createMergeRequest/listMergeRequests/getMergeRequestDiffs/mergeMergeRequest/resolveMergeRequestConflict`.
-  Collaboration event schemas now **28 files**: +`suggestion.created/accepted/rejected/obsolete`,
-  +`merge_request.opened/merged/conflict_detected`.
+    merge_commit_id). \_Note: legacy phase-05 `merge_requests` (0009) stays with control-plane — untouched.*
+- **Contracts** — `collab.yaml` grew to **38 operationIds** (tags suggestions/merge-requests): +`createSuggestion/listSuggestions/acceptSuggestion/rejectSuggestion`, +`createMergeRequest/listMergeRequests/getMergeRequestDiffs/mergeMergeRequest/resolveMergeRequestConflict`.
+  Collaboration event schemas now **28 files**: +`suggestion.created/accepted/rejected/obsolete`, +`merge_request.opened/merged/conflict_detected`.
 
 ### Services + workers
+
 - **`services/suggestions`** (#182) — structured ops (move/resize/restyle/content/data_binding/theme; raw-text ops
   rejected), op-level semantic conflict detection (`detectOpConflict`, move-vs-resize, conflicting-obsolete cascade on
   accept), brand-lock (author ok / accept requires `break_brand_lock`), 90-day retention via `expires_at` + sweep,
@@ -127,6 +130,7 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
 ## What Wave 4 shipped
 
 ### Migrations + contracts
+
 - **Migrations** (`0074–0076`, RLS tenant isolation via DO$$ loop incl. WITH CHECK):
   - `0074_phase18_meeting_integrations` — `meeting_integration` (workspace_id, vendor zoom|meet|teams, `auth jsonb`
     encrypted OAuth tokens, status disconnected|connecting|connected|error, connected_by/at, UNIQUE(workspace_id, vendor)).
@@ -136,18 +140,15 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
     `field_map jsonb`, sync_mode domio_wins|task_wins|last_write_wins DEFAULT last_write_wins, last_synced_at).
 - **Webhooks OpenAPI** — `contracts/openapi/v1/webhooks/slack.yaml` (receiveSlackEvent/Interaction/Command) +
   `teams.yaml` (receiveTeamsAction/Command); unauthenticated HMAC-verified, 401 on bad signature.
-- **Contracts** — `collab.yaml` grew to **53 operationIds** (tags meeting-integrations/calendar/task-manager):
-  +`getMeetingIntegrationStatus/connectMeetingIntegration/disconnectMeetingIntegration/issueMeetingToken/recordMeetingMarker`,
-  +`createCalendarLink/listCalendarLinks/deleteCalendarLink/syncCalendarLink/getPresenterTodayView`,
-  +`createTaskLink/listTaskLinks/updateTaskLink/deleteTaskLink/syncTaskLink`. Collaboration event schemas now **34 files**:
-  +`meeting.session_started/session_ended`, +`calendar.event_linked/event_updated`, +`task.sync_requested/sync_completed`.
+- **Contracts** — `collab.yaml` grew to **53 operationIds** (tags meeting-integrations/calendar/task-manager): +`getMeetingIntegrationStatus/connectMeetingIntegration/disconnectMeetingIntegration/issueMeetingToken/recordMeetingMarker`, +`createCalendarLink/listCalendarLinks/deleteCalendarLink/syncCalendarLink/getPresenterTodayView`, +`createTaskLink/listTaskLinks/updateTaskLink/deleteTaskLink/syncTaskLink`. Collaboration event schemas now **34 files**: +`meeting.session_started/session_ended`, +`calendar.event_linked/event_updated`, +`task.sync_requested/sync_completed`.
 
 ### Services
+
 - **`services/meeting-integration`** (#188) — vendor connect/disconnect/status (zoom|meet|teams), scoped meeting
   tokens: HMAC-SHA256 over `${meetingId}.${presenterId}.${deckId}.${expiresAt}`, `expires_at = min(meetingEndAt+1h, now+4h)`,
-  `verifyMeetingToken` timing-safe scope check; recording markers (`recordMarker` — transitioned_at ≤2min future skew,
+  `verifyMeetingToken` timing-safe scope check; recording markers (`recordMarker` — transitioned*at ≤2min future skew,
   `meeting.session_started` emitted on first marker per meeting). Emits `meeting.session_started/session_ended`.
-  Store interface + mem impl + pg skeleton. 40 tests. _Token secret default is dev-only; production secret must be injected._
+  Store interface + mem impl + pg skeleton. 40 tests. \_Token secret default is dev-only; production secret must be injected.*
 - **`services/notification-dispatcher`** (#189 full) — 173 tests: webhook HMAC verification (`verifySignature`
   timing-safe, `NOTIFICATION_WEBHOOK_SECRET`), action buttons (approve/reject/open/resolve, InMemoryIdempotencyStore
   24h TTL, NoopActionHandler), slash commands (`parseSlashCommand`, built-in `/domio approve|open|help`),
@@ -155,27 +156,29 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
   (`routeBySubscription`: event-type match, channel mapping, quiet→digest, HMAC signing), outbound signature header
   (`X-Domio-Signature` via optional `OutboundSigner` on SlackSender/TeamsSender). _Deviations: real vendor API
   adapters (OAuth/DM delivery) and collab action wiring (NoopActionHandler) are later-wave follow-ups._
-- **`services/calendar`** (#190) — deck-to-event linking (dedupe (deck_id, vendor, event_id)), sync plan
+- **`services/calendar`** (#190) — deck-to-event linking (dedupe (deck*id, vendor, event_id)), sync plan
   (5-min pre-meeting prompt; created|updated|canceled change types), recurring-event per-instance override skip,
   presenter 'Today' view, `shouldPrompt` pure pre-meeting check. Emits `calendar.event_linked/event_updated`.
-  **Full pg DML** + withTransaction. 58 tests. _Deviations: SyncProvider default is in-memory round-trip; real
-  Google/Outlook/iCloud adapters later._
-- **`services/task-manager`** (#191) — declarative field mapping (status/priority/assignee/due_date/title,
+  **Full pg DML** + withTransaction. 58 tests. \_Deviations: SyncProvider default is in-memory round-trip; real
+  Google/Outlook/iCloud adapters later.*
+- **`services/task-manager`** (#191) — declarative field mapping (status/priority/assignee/due*date/title,
   string + {from,to} tuple forms), conflict resolution (`resolveSyncConflict`: domio_wins|task_wins|last_write_wins,
   newer-updatedAt wins per field), link CRUD (dedupe (assignment_id, vendor)), `syncLink` emits
   `task.sync_requested` then `task.sync_completed` (synced | conflict + resolution), bulk `syncLinks`.
   Emits `task.sync_requested/sync_completed`. Store interface + mem impl + pg skeleton. 52 tests.
-  _Deviations: TaskProvider default noop; real Asana/Jira/Linear adapters + receiveTaskWebhook later._
+  \_Deviations: TaskProvider default noop; real Asana/Jira/Linear adapters + receiveTaskWebhook later.*
 
 ## What Wave 5 shipped
 
 ### Migrations + contracts
+
 - **Migrations** (0077–0078, RLS tenant isolation DO$$ WITH CHECK):
   - `0077_phase18_guest_magic_links` — `guest_magic_link` (guest_access_id REFERENCES guest_access CASCADE, token_hash, expires_at, consumed_at, invalidated_at, created_by; idx access + token).
   - `0078_phase18_reassignment_history` — `reassignment_history` (assignment_id REFERENCES assignment CASCADE, old_primary_id, new_primary_id, actor_id, reason, changed_at; idx assignment).
 - **Contracts** — collab.yaml grew to **58 operationIds** (tag guests): `createGuest/getGuest/deleteGuest/resendGuestMagicLink/consumeGuestMagicLink`; event schemas now **36 files**: +`guest.access_granted/access_revoked` (actor_type [member,guest,agent,system]).
 
 ### Services + apps
+
 - **`services/guests`** (#192) — magic-link auth (HMAC token + nonce, default TTL 15min `GUEST_MAGIC_LINK_TTL_MINUTES`, resend invalidates prior links, consume rejects consumed/invalidated/expired/revoked), default capabilities `[comment,suggest,view]` only (download/export disabled by default), audit-distinct `actor_type=guest` on consume, soft revoke via revoked_at, **full pg DML** both tables + withTransaction. Emits `guest.access_granted/access_revoked`. 73 tests.
 - **`services/share-api`** (#180 approval gate) — optional `ShareApprovalGate` (default AllowAll), enforced on share delivery (`createShare` + `introspect`), 403 ProblemDetail `external_share_requires_approval`, admin ops ungated. 47 tests.
 - **`apps/api`** — all 10 P18 services mounted via `adaptHandler` (62 endpoints incl. unauthenticated `POST /v1/guest-access/consume`), in-memory stores via `createP18Services()`. 13 tests.
@@ -184,6 +187,7 @@ Wave 5: Guest access, share-api approval gate, apps/api mounting, remaining pg D
 - **`apps/magic-link-landing`** — token consumption page with invalid/expired/used/revoked/error states, redirects to deck on success.
 
 ## Follow-ups
+
 1. **Resolved in Wave 3:** collab pg DML (full parameterized SQL), permission-engine pg_store, real NATS subscription in notification-dispatcher.
 2. **Resolved in Wave 2:** suggestions + merge-requests shipped; merge-requests pg_store is full DML; diff-engine worker (in-memory replay provider, real crdt_logs replay later).
 3. **Resolved in Wave 4:** meeting integration (scoped HMAC tokens, recording markers), Slack/Teams full (#189: HMAC webhooks, action buttons, slash commands, quiet-hours digests, subscription routing), calendar service (full pg DML), task-manager service. Meeting handler `issueMeetingToken` response-shape bug fixed during reconciliation (`{token}` now returns full MeetingToken object, 40/40 tests).

@@ -24,26 +24,26 @@
 
 ### 2.1 In scope (features)
 
-| Feature | Title | Notes |
-|---:|---|---|
-| #108 | Full deck generation from a prompt / doc / transcript | Outline-first, approval gate, designed slides after approval |
-| #109 | Doc-to-deck with citations | PDF / DOCX / Notion export ingest, citation as first-class object |
-| #110 | Data-to-story narrative generation | Statistical findings → story arc → live-bound charts |
-| #111 | AI slide designer (prompt-to-layout) | 4 distinct options, "more like option N" |
-| #112 | AI slide redesign | Light vs. full, content-preserving, brand-aware |
-| #113 | Copy assistant | Shorten, punch-up, tone, translate (100+ langs) |
-| #114 | AI image generation + background removal | Style-locked to brand, two-layer moderation |
-| #115 | Voice-to-deck | ASR + diarization + transcript edit + outline |
-| #116 | Speaker notes generator | Terse / detailed / executive variants, ≤ 90s TTS |
-| #117 | AI rehearsal coach | Camera/mic with consent, on-device metrics, gaze + filler |
-| #118 | AI anticipated Q&A | Audience profile aware, board-prep weighting |
-| #119 | Smart summarization | Executive summary slide + TL;DR one-pager |
-| #120 | Audience-adaptive versions | 5-min / technical / executive / sales / customer |
-| #121 | Layout repair engine | Detect + auto-fix overlap / overflow / alignment / contrast |
-| #122 | Accessibility AI | Alt-text, reading-order, captions, contrast |
-| #123 | AI chart-selection recommender | Rule-based + LLM-assisted, explainable |
-| #124 | Semantic deck search | Workspace-wide, hybrid keyword + vector |
-| #125 | AI content freshness checker | Per-citation threshold, re-fetch via data connection |
+| Feature | Title                                                 | Notes                                                             |
+| ------: | ----------------------------------------------------- | ----------------------------------------------------------------- |
+|    #108 | Full deck generation from a prompt / doc / transcript | Outline-first, approval gate, designed slides after approval      |
+|    #109 | Doc-to-deck with citations                            | PDF / DOCX / Notion export ingest, citation as first-class object |
+|    #110 | Data-to-story narrative generation                    | Statistical findings → story arc → live-bound charts              |
+|    #111 | AI slide designer (prompt-to-layout)                  | 4 distinct options, "more like option N"                          |
+|    #112 | AI slide redesign                                     | Light vs. full, content-preserving, brand-aware                   |
+|    #113 | Copy assistant                                        | Shorten, punch-up, tone, translate (100+ langs)                   |
+|    #114 | AI image generation + background removal              | Style-locked to brand, two-layer moderation                       |
+|    #115 | Voice-to-deck                                         | ASR + diarization + transcript edit + outline                     |
+|    #116 | Speaker notes generator                               | Terse / detailed / executive variants, ≤ 90s TTS                  |
+|    #117 | AI rehearsal coach                                    | Camera/mic with consent, on-device metrics, gaze + filler         |
+|    #118 | AI anticipated Q&A                                    | Audience profile aware, board-prep weighting                      |
+|    #119 | Smart summarization                                   | Executive summary slide + TL;DR one-pager                         |
+|    #120 | Audience-adaptive versions                            | 5-min / technical / executive / sales / customer                  |
+|    #121 | Layout repair engine                                  | Detect + auto-fix overlap / overflow / alignment / contrast       |
+|    #122 | Accessibility AI                                      | Alt-text, reading-order, captions, contrast                       |
+|    #123 | AI chart-selection recommender                        | Rule-based + LLM-assisted, explainable                            |
+|    #124 | Semantic deck search                                  | Workspace-wide, hybrid keyword + vector                           |
+|    #125 | AI content freshness checker                          | Per-citation threshold, re-fetch via data connection              |
 
 ### 2.2 Out of scope (explicit)
 
@@ -313,20 +313,20 @@
 
 All tables inherit `created_at`, `updated_at`, `created_by`, `updated_by`, `ai_run_id`, `agent_session_id`. Full DDL is in `/docs/ai-copilot.md` §5.
 
-| Table | Purpose | Migrations file |
-|---|---|---|
-| `ai_job` | Queued generation request; idempotency-keyed | `migrations/2026_07_ai_job.sql` |
-| `ai_run` | One attempt of an `ai_job`, plus per-step records | `migrations/2026_07_ai_run.sql` |
-| `citation` | First-class citation record with snippet, location, confidence | `migrations/2026_07_citation.sql` |
-| `slide_citation` | Many-to-many slide ↔ citation ↔ claim | `migrations/2026_07_slide_citation.sql` |
-| `source` | Ingested document with chunks | `migrations/2026_07_source.sql` |
-| `image_generation_request` | Image-gen audit with prompt, model, moderation | `migrations/2026_07_igr.sql` |
-| `rehearsal_session` | Per-session metrics + consent flags + retention | `migrations/2026_07_rehearsal.sql` |
-| `qa_pair` | Per-slide anticipated Q&A | `migrations/2026_07_qa_pair.sql` |
-| `summary` | Executive summary + TL;DR per deck | `migrations/2026_07_summary.sql` |
-| `audience_variant` | Derived decks with diff summary | `migrations/2026_07_audience_variant.sql` |
-| `freshness_record` | Per-source freshness score | `migrations/2026_07_freshness.sql` |
-| `semantic_index_entry` | pgvector rows; mirrored relationally for traceability | `migrations/2026_07_semantic.sql` |
+| Table                      | Purpose                                                        | Migrations file                           |
+| -------------------------- | -------------------------------------------------------------- | ----------------------------------------- |
+| `ai_job`                   | Queued generation request; idempotency-keyed                   | `migrations/2026_07_ai_job.sql`           |
+| `ai_run`                   | One attempt of an `ai_job`, plus per-step records              | `migrations/2026_07_ai_run.sql`           |
+| `citation`                 | First-class citation record with snippet, location, confidence | `migrations/2026_07_citation.sql`         |
+| `slide_citation`           | Many-to-many slide ↔ citation ↔ claim                        | `migrations/2026_07_slide_citation.sql`   |
+| `source`                   | Ingested document with chunks                                  | `migrations/2026_07_source.sql`           |
+| `image_generation_request` | Image-gen audit with prompt, model, moderation                 | `migrations/2026_07_igr.sql`              |
+| `rehearsal_session`        | Per-session metrics + consent flags + retention                | `migrations/2026_07_rehearsal.sql`        |
+| `qa_pair`                  | Per-slide anticipated Q&A                                      | `migrations/2026_07_qa_pair.sql`          |
+| `summary`                  | Executive summary + TL;DR per deck                             | `migrations/2026_07_summary.sql`          |
+| `audience_variant`         | Derived decks with diff summary                                | `migrations/2026_07_audience_variant.sql` |
+| `freshness_record`         | Per-source freshness score                                     | `migrations/2026_07_freshness.sql`        |
+| `semantic_index_entry`     | pgvector rows; mirrored relationally for traceability          | `migrations/2026_07_semantic.sql`         |
 
 ### 5.2 New services / workers
 
@@ -369,55 +369,55 @@ All tables inherit `created_at`, `updated_at`, `created_by`, `updated_by`, `ai_r
 
 ## 6. Verification
 
-| Feature | Test | Expected result | Owner |
-|---:|---|---|---|
-| #108 | Submit prompt "Q3 board update, 12 slides, optimistic"; wait for outline | Outline rendered with editable slides, no slides rendered until Approve | WS-D2 |
-| #108 | Approve outline; wait for render | 12 slides rendered in ≤ 60s wall-clock; citations attached where claims are made | WS-D2 |
-| #108 | Toggle workspace setting "auto-approve outline" | Slides render without explicit approval; audit log records the flag | WS-D2 |
-| #109 | Upload PDF, DOCX, Notion export; each generates a deck | Each slide has ≥ 1 citation; citations panel lists chunk, page, snippet | WS-D2 |
-| #109 | Delete source doc after generation | Citations remain with flag "(source no longer available)" | WS-D2 |
-| #110 | Connect Sheets source with `analysis_intent="revenue trend"` | Outline labels each slide with the underlying finding; charts are data-bound | WS-D2 |
-| #110 | Refresh source data | Slide numbers update; chart is re-rendered, not re-typed | WS-D2 |
-| #111 | Prompt "comparison of 3 pricing tiers, playful" | 4 distinct layouts returned; no two share a template | WS-D2 |
-| #111 | Request "more like option 2" | 4 variants biased toward option 2's structure | WS-D2 |
-| #112 | Run light redesign on a slide | Diff shows only spacing/alignment changes; text, data, citations preserved | WS-D2 |
-| #112 | Run full redesign on a brand-locked slide | System refuses to touch the locked region; flags manual edit | WS-D2 |
-| #113 | Translate slide to Spanish with glossary override | Back-translation similarity ≥ 0.85; glossary terms unchanged | WS-D2 |
-| #113 | Translate to Arabic | Layout flips on affected element; no overflow | WS-D2 |
-| #114 | Generate "abstract hero illustration for a SaaS deck" | Style-locked image returned; provenance stored | WS-D2 |
-| #114 | Prompt "photo of Taylor Swift" | Refused with logged moderation verdict | WS-D2 |
-| #114 | Upload portrait; remove background | Transparent PNG; no jagged edges on hair (visual diff fixture) | WS-D2 |
-| #115 | Record 3-min audio in browser | Outline within 60s; transcript editable before outline | WS-D3 |
-| #115 | Multi-speaker audio | Diarization separates speakers; user marks "main" speaker | WS-D3 |
-| #116 | Generate notes for a data-heavy slide | Variant=terse/detailed/executive honored; duration ≤ 90s TTS | WS-D3 |
-| #117 | Start rehearsal; deny camera | Falls back to audio-only metrics; consent record stored | WS-D4 |
-| #117 | Complete rehearsal; view dashboard | Pace, filler, eye-contact %, stumble points shown; raw media absent | WS-D4 |
-| #117 | Click "delete all rehearsal data" | All `rehearsal_session` and any retained media removed | WS-D4 |
-| #118 | Run Q&A with audience_profile="board" | ≥ 1 financially-flavored question per slide with $/margin/revenue keywords | WS-D3 |
-| #119 | Run summarizer on a 30-slide deck | Executive summary slide + TL;DR PDF generated; every claim grounded in an existing slide | WS-D3 |
-| #120 | Generate "5-min" variant | Derived deck with `diff_summary`; re-derive after source change requires explicit user action | WS-D3 |
-| #121 | Run layout repair on a deck with 50 seeded issues | Issues classified; fix proposal per issue with confidence; per-slide accept/reject | WS-D5 |
-| #122 | Run accessibility audit | Every image has alt text (or marked decorative); captions ≥ 95% WER; contrast issues flagged | WS-D5 |
-| #123 | Recommend chart for a 12-row time series | Line chart recommended with "trend over time" rationale | WS-D5 |
-| #124 | Search "churn" across a 10K-slide workspace | p95 ≤ 1s; results respect permission boundaries | WS-D5 |
-| #125 | Citation older than 90 days | Flagged as stale; "refresh" action re-fetches via data connection | WS-D5 |
+| Feature | Test                                                                     | Expected result                                                                               | Owner |
+| ------: | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | ----- |
+|    #108 | Submit prompt "Q3 board update, 12 slides, optimistic"; wait for outline | Outline rendered with editable slides, no slides rendered until Approve                       | WS-D2 |
+|    #108 | Approve outline; wait for render                                         | 12 slides rendered in ≤ 60s wall-clock; citations attached where claims are made              | WS-D2 |
+|    #108 | Toggle workspace setting "auto-approve outline"                          | Slides render without explicit approval; audit log records the flag                           | WS-D2 |
+|    #109 | Upload PDF, DOCX, Notion export; each generates a deck                   | Each slide has ≥ 1 citation; citations panel lists chunk, page, snippet                       | WS-D2 |
+|    #109 | Delete source doc after generation                                       | Citations remain with flag "(source no longer available)"                                     | WS-D2 |
+|    #110 | Connect Sheets source with `analysis_intent="revenue trend"`             | Outline labels each slide with the underlying finding; charts are data-bound                  | WS-D2 |
+|    #110 | Refresh source data                                                      | Slide numbers update; chart is re-rendered, not re-typed                                      | WS-D2 |
+|    #111 | Prompt "comparison of 3 pricing tiers, playful"                          | 4 distinct layouts returned; no two share a template                                          | WS-D2 |
+|    #111 | Request "more like option 2"                                             | 4 variants biased toward option 2's structure                                                 | WS-D2 |
+|    #112 | Run light redesign on a slide                                            | Diff shows only spacing/alignment changes; text, data, citations preserved                    | WS-D2 |
+|    #112 | Run full redesign on a brand-locked slide                                | System refuses to touch the locked region; flags manual edit                                  | WS-D2 |
+|    #113 | Translate slide to Spanish with glossary override                        | Back-translation similarity ≥ 0.85; glossary terms unchanged                                  | WS-D2 |
+|    #113 | Translate to Arabic                                                      | Layout flips on affected element; no overflow                                                 | WS-D2 |
+|    #114 | Generate "abstract hero illustration for a SaaS deck"                    | Style-locked image returned; provenance stored                                                | WS-D2 |
+|    #114 | Prompt "photo of Taylor Swift"                                           | Refused with logged moderation verdict                                                        | WS-D2 |
+|    #114 | Upload portrait; remove background                                       | Transparent PNG; no jagged edges on hair (visual diff fixture)                                | WS-D2 |
+|    #115 | Record 3-min audio in browser                                            | Outline within 60s; transcript editable before outline                                        | WS-D3 |
+|    #115 | Multi-speaker audio                                                      | Diarization separates speakers; user marks "main" speaker                                     | WS-D3 |
+|    #116 | Generate notes for a data-heavy slide                                    | Variant=terse/detailed/executive honored; duration ≤ 90s TTS                                  | WS-D3 |
+|    #117 | Start rehearsal; deny camera                                             | Falls back to audio-only metrics; consent record stored                                       | WS-D4 |
+|    #117 | Complete rehearsal; view dashboard                                       | Pace, filler, eye-contact %, stumble points shown; raw media absent                           | WS-D4 |
+|    #117 | Click "delete all rehearsal data"                                        | All `rehearsal_session` and any retained media removed                                        | WS-D4 |
+|    #118 | Run Q&A with audience_profile="board"                                    | ≥ 1 financially-flavored question per slide with $/margin/revenue keywords                    | WS-D3 |
+|    #119 | Run summarizer on a 30-slide deck                                        | Executive summary slide + TL;DR PDF generated; every claim grounded in an existing slide      | WS-D3 |
+|    #120 | Generate "5-min" variant                                                 | Derived deck with `diff_summary`; re-derive after source change requires explicit user action | WS-D3 |
+|    #121 | Run layout repair on a deck with 50 seeded issues                        | Issues classified; fix proposal per issue with confidence; per-slide accept/reject            | WS-D5 |
+|    #122 | Run accessibility audit                                                  | Every image has alt text (or marked decorative); captions ≥ 95% WER; contrast issues flagged  | WS-D5 |
+|    #123 | Recommend chart for a 12-row time series                                 | Line chart recommended with "trend over time" rationale                                       | WS-D5 |
+|    #124 | Search "churn" across a 10K-slide workspace                              | p95 ≤ 1s; results respect permission boundaries                                               | WS-D5 |
+|    #125 | Citation older than 90 days                                              | Flagged as stale; "refresh" action re-fetches via data connection                             | WS-D5 |
 
 ---
 
 ## 7. Risks & Open Decisions
 
-| Risk | Mitigation |
-|---|---|
-| Model-adapter interface drifts as providers evolve | Pin adapter spec to a semver; every provider adapter carries a `compatibility_test` run in CI against a golden prompt |
-| Provider concentration risk (quality/cost favors one vendor) | Multi-provider from day one; per-workspace budget split enforced; per-workspace tier allows opting into additional providers |
-| Citation reliability on OCR'd PDFs | OCR'd chunks carry a `(OCR, low confidence)` marker and are not used unless user confirms |
-| Rehearsal biometric leakage | On-device pipeline by default; raw media only on opt-in with explicit retention window; constant-time deletion API |
-| Cost overrun on long decks | Per-`ai_job` `max_cost_cents`; per-workspace monthly cap; circuit breaker per provider |
-| Prompt injection via doc ingest | Document content wrapped in `<untrusted_document>` with channel separation; classifier flags suspicious patterns; citation-only output constraint (per `/docs/ai-copilot.md` §7.3) |
-| Bangladesh PDPA localization for AI-processed data | Confirm with counsel whether rehearsal data / voice-to-deck audio / AI-generated content are subject to localization. Until confirmed, the data residency configuration is opt-in per workspace and defaults to the workspace's residency setting |
-| Browser support matrix for rehearsal | Camera/mic fallback to audio-only when WebGL or MediaPipe unavailable |
-| Eval regression on prompt-template changes | Eval harness blocks rollout on golden-set regression; LLM-as-judge plus periodic human sampling |
-| Outline approval UX may feel slow for power users | "Auto-approve outline" workspace setting plus per-slide "regenerate" affordance |
+| Risk                                                         | Mitigation                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model-adapter interface drifts as providers evolve           | Pin adapter spec to a semver; every provider adapter carries a `compatibility_test` run in CI against a golden prompt                                                                                                                             |
+| Provider concentration risk (quality/cost favors one vendor) | Multi-provider from day one; per-workspace budget split enforced; per-workspace tier allows opting into additional providers                                                                                                                      |
+| Citation reliability on OCR'd PDFs                           | OCR'd chunks carry a `(OCR, low confidence)` marker and are not used unless user confirms                                                                                                                                                         |
+| Rehearsal biometric leakage                                  | On-device pipeline by default; raw media only on opt-in with explicit retention window; constant-time deletion API                                                                                                                                |
+| Cost overrun on long decks                                   | Per-`ai_job` `max_cost_cents`; per-workspace monthly cap; circuit breaker per provider                                                                                                                                                            |
+| Prompt injection via doc ingest                              | Document content wrapped in `<untrusted_document>` with channel separation; classifier flags suspicious patterns; citation-only output constraint (per `/docs/ai-copilot.md` §7.3)                                                                |
+| Bangladesh PDPA localization for AI-processed data           | Confirm with counsel whether rehearsal data / voice-to-deck audio / AI-generated content are subject to localization. Until confirmed, the data residency configuration is opt-in per workspace and defaults to the workspace's residency setting |
+| Browser support matrix for rehearsal                         | Camera/mic fallback to audio-only when WebGL or MediaPipe unavailable                                                                                                                                                                             |
+| Eval regression on prompt-template changes                   | Eval harness blocks rollout on golden-set regression; LLM-as-judge plus periodic human sampling                                                                                                                                                   |
+| Outline approval UX may feel slow for power users            | "Auto-approve outline" workspace setting plus per-slide "regenerate" affordance                                                                                                                                                                   |
 
 **Open decisions to close before P12 starts:**
 

@@ -33,7 +33,9 @@ describe('docs-search', () => {
   it('finds pages whose title contains the query', () => {
     const hits = searchDocs('Install');
     expect(hits.length).toBeGreaterThan(0);
-    const installHit = hits.find((h: DocsSearchHit) => h.page.title.toLowerCase().includes('install'));
+    const installHit = hits.find((h: DocsSearchHit) =>
+      h.page.title.toLowerCase().includes('install'),
+    );
     expect(installHit).toBeDefined();
   });
 

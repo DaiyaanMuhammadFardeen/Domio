@@ -48,22 +48,13 @@ export function StatementDetail({ statement }: StatementDetailProps) {
     >
       <header className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">
-            {statement.period_month}
-          </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Creator {statement.creator_id}
-          </p>
+          <h2 className="text-lg font-semibold text-slate-900">{statement.period_month}</h2>
+          <p className="mt-0.5 text-xs text-slate-500">Creator {statement.creator_id}</p>
         </div>
-        <Badge tone={toneForStatus(statement.status)}>
-          {statement.status}
-        </Badge>
+        <Badge tone={toneForStatus(statement.status)}>{statement.status}</Badge>
       </header>
 
-      <section
-        data-testid="statement-detail-lines"
-        aria-labelledby="statement-lines-heading"
-      >
+      <section data-testid="statement-detail-lines" aria-labelledby="statement-lines-heading">
         <h3
           id="statement-lines-heading"
           className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-600"
@@ -119,12 +110,8 @@ export function StatementDetail({ statement }: StatementDetailProps) {
                   data-testid={`statement-line-${line.listing_id}`}
                   className="hover:bg-slate-50"
                 >
-                  <td className="px-3 py-2 text-slate-900">
-                    {line.listing_title}
-                  </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-slate-700">
-                    {line.units}
-                  </td>
+                  <td className="px-3 py-2 text-slate-900">{line.listing_title}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-slate-700">{line.units}</td>
                   <td className="px-3 py-2 text-right tabular-nums text-slate-800">
                     {formatCurrency(line.gross_cents, statement.currency)}
                   </td>

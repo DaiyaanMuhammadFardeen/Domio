@@ -15,13 +15,7 @@ const SLIDES: SlideSnapshot[] = [
 
 describe('LivePlanEditor', () => {
   it('renders the slides in the given initial order', () => {
-    render(
-      <LivePlanEditor
-        slides={SLIDES}
-        initialOrder={['s1', 's2', 's3']}
-        initialHidden={[]}
-      />,
-    );
+    render(<LivePlanEditor slides={SLIDES} initialOrder={['s1', 's2', 's3']} initialHidden={[]} />);
     const titles = screen.getAllByTestId(/live-plan-editor-title-/);
     expect(titles.map((el) => el.textContent)).toEqual(['Intro', 'Body', 'Conclusion']);
   });
@@ -55,15 +49,11 @@ describe('LivePlanEditor', () => {
   });
 
   it('disables the up button on the first row and down on the last', () => {
-    render(
-      <LivePlanEditor
-        slides={SLIDES}
-        initialOrder={['s1', 's2', 's3']}
-        initialHidden={[]}
-      />,
-    );
+    render(<LivePlanEditor slides={SLIDES} initialOrder={['s1', 's2', 's3']} initialHidden={[]} />);
     expect((screen.getByTestId('live-plan-editor-up-s1') as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByTestId('live-plan-editor-down-s3') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId('live-plan-editor-down-s3') as HTMLButtonElement).disabled).toBe(
+      true,
+    );
   });
 
   it('toggles hidden and emits a new hidden set', () => {
@@ -85,11 +75,7 @@ describe('LivePlanEditor', () => {
 
   it('renders hidden slides with reduced opacity and strikethrough', () => {
     render(
-      <LivePlanEditor
-        slides={SLIDES}
-        initialOrder={['s1', 's2', 's3']}
-        initialHidden={['s2']}
-      />,
+      <LivePlanEditor slides={SLIDES} initialOrder={['s1', 's2', 's3']} initialHidden={['s2']} />,
     );
     const row = screen.getByTestId('live-plan-editor-row-s2');
     expect(row.getAttribute('data-hidden')).toBe('true');

@@ -208,7 +208,10 @@ export class BranchingGraph {
   }
 
   /** DFS-style traversal from `start` with `maxHops` cap. */
-  traverse(start: string, opts: { maxHops?: number; visit?: (id: string, depth: number) => void } = {}): {
+  traverse(
+    start: string,
+    opts: { maxHops?: number; visit?: (id: string, depth: number) => void } = {},
+  ): {
     path: string[];
     cappedAt: number | null;
   } {

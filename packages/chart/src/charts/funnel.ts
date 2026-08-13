@@ -41,16 +41,20 @@ export function renderFunnel(
     const x = pad + (plotW - w) / 2;
     const y = pad + i * slotH;
 
-    elements.push(rect(x, y, w, slotH - 4, `funnel_${i}`, {
-      fill: PALETTE[i % PALETTE.length],
-      rx: 4,
-    }));
-    elements.push(text(x + 10, y + slotH / 2 - 8, label, `funnel_label_${i}`, {
-      width: w - 20,
-      height: 16,
-      fontSize: opts.fontSize ?? 12,
-      fill: '#ffffff',
-    }));
+    elements.push(
+      rect(x, y, w, slotH - 4, `funnel_${i}`, {
+        fill: PALETTE[i % PALETTE.length],
+        rx: 4,
+      }),
+    );
+    elements.push(
+      text(x + 10, y + slotH / 2 - 8, label, `funnel_label_${i}`, {
+        width: w - 20,
+        height: 16,
+        fontSize: opts.fontSize ?? 12,
+        fill: '#ffffff',
+      }),
+    );
   });
 
   return elements;

@@ -74,9 +74,7 @@ export function VersionPinSelector({
           data-testid={`${dataTestId}-select`}
           style={{ display: 'block', width: '100%', padding: 6, marginTop: 2 }}
         >
-          <option value="latest">
-            {`(Latest)`}
-          </option>
+          <option value="latest">{`(Latest)`}</option>
           {sorted.map((v) => (
             <option key={v.id} value={v.id}>
               {v.label} {v.isLatest ? '· latest' : ''} — {v.authorLabel}
@@ -96,10 +94,7 @@ export function VersionPinSelector({
           data-testid={`${dataTestId}-pinned-hint`}
           style={{ fontSize: 11, color: 'rgba(0,0,0,0.5)', margin: 0 }}
         >
-          <FormattedMessage
-            id="editor.share.versionPin.pinnedHint"
-            values={{ version: value }}
-          />
+          <FormattedMessage id="editor.share.versionPin.pinnedHint" values={{ version: value }} />
         </p>
       )}
     </section>

@@ -6,13 +6,7 @@
  * applies the inverse.
  */
 
-import type {
-  DeckDocument,
-  Element,
-  GroupLayer,
-  Transform2D,
-  ULID,
-} from '@domio/schema';
+import type { DeckDocument, Element, GroupLayer, Transform2D, ULID } from '@domio/schema';
 
 export interface GroupInput {
   doc: DeckDocument;

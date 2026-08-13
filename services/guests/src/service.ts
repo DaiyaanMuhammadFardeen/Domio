@@ -8,7 +8,12 @@
  */
 
 import { randomUUID, createHash } from 'crypto';
-import type { CreateGuestInput, GuestAccess, GuestMagicLink, MagicLinkConsumeResult } from './types.js';
+import type {
+  CreateGuestInput,
+  GuestAccess,
+  GuestMagicLink,
+  MagicLinkConsumeResult,
+} from './types.js';
 import {
   GuestNotFoundError,
   MagicLinkInvalidError,
@@ -18,7 +23,13 @@ import {
   GuestRevokedError,
   GuestExpiredError,
 } from './types.js';
-import { validateCapabilities, issueMagicLinkToken, isExpired, resolveTtlMinutes, DEV_SECRET } from './magic_link.js';
+import {
+  validateCapabilities,
+  issueMagicLinkToken,
+  isExpired,
+  resolveTtlMinutes,
+  DEV_SECRET,
+} from './magic_link.js';
 import { checkFeature, FEATURE_FLAGS } from './feature_flags.js';
 import type { GuestEventEmitter } from './types.js';
 import { noopEmitter } from './types.js';
@@ -104,7 +115,13 @@ export class GuestService {
 
     // Issue magic link
     const linkId = this.idGen();
-    const { token, tokenHash } = issueMagicLinkToken(guestAccessId, input.guest_email, expiresAt, this.secret, linkId);
+    const { token, tokenHash } = issueMagicLinkToken(
+      guestAccessId,
+      input.guest_email,
+      expiresAt,
+      this.secret,
+      linkId,
+    );
     const magicLink: GuestMagicLink = {
       id: linkId,
       workspace_id: input.workspace_id,
@@ -219,7 +236,13 @@ export class GuestService {
 
     // Mint new link
     const linkId = this.idGen();
-    const { token, tokenHash } = issueMagicLinkToken(id, guest.guest_email, guest.expires_at, this.secret, linkId);
+    const { token, tokenHash } = issueMagicLinkToken(
+      id,
+      guest.guest_email,
+      guest.expires_at,
+      this.secret,
+      linkId,
+    );
     const magicLink: GuestMagicLink = {
       id: linkId,
       workspace_id: guest.workspace_id,

@@ -4,12 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  isUrlSafe,
-  isHostnameBlocked,
-  checkIpv4Blocked,
-  SsrfBlockedError,
-} from './ssrf.js';
+import { isUrlSafe, isHostnameBlocked, checkIpv4Blocked, SsrfBlockedError } from './ssrf.js';
 
 describe('ssrf — isHostnameBlocked', () => {
   it('blocks localhost', () => {
@@ -21,7 +16,9 @@ describe('ssrf — isHostnameBlocked', () => {
   });
 
   it('blocks GCP metadata hostname', () => {
-    expect(isHostnameBlocked('metadata.google.internal')).toBe('blocked hostname: metadata.google.internal');
+    expect(isHostnameBlocked('metadata.google.internal')).toBe(
+      'blocked hostname: metadata.google.internal',
+    );
   });
 
   it('blocks IPv6 loopback', () => {
@@ -161,7 +158,9 @@ describe('ssrf — isUrlSafe', () => {
   });
 
   it('handles DNS failure gracefully', async () => {
-    const resolveFn = async () => { throw new Error('ENOTFOUND'); };
+    const resolveFn = async () => {
+      throw new Error('ENOTFOUND');
+    };
     const result = await isUrlSafe('https://nonexistent.example.com', resolveFn);
     expect(result.safe).toBe(false);
     expect(result.reason).toContain('DNS resolution failed');

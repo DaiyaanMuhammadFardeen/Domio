@@ -46,17 +46,9 @@ export interface ValidationResult {
 
 const MIN_PASSWORD_LENGTH = 8;
 
-const SSO_PROVIDERS: ReadonlySet<SsoProvider> = new Set([
-  'google',
-  'github',
-  'microsoft',
-]);
+const SSO_PROVIDERS: ReadonlySet<SsoProvider> = new Set(['google', 'github', 'microsoft']);
 
-const SIGNUP_PLANS: ReadonlySet<SignupPlan> = new Set([
-  'free',
-  'pro',
-  'enterprise',
-]);
+const SIGNUP_PLANS: ReadonlySet<SignupPlan> = new Set(['free', 'pro', 'enterprise']);
 
 /**
  * Trims surrounding whitespace and normalises a string for comparison.
@@ -142,10 +134,7 @@ export function validateSignup(input: Partial<SignupRequest>): ValidationResult 
   const ssoError = validateSsoProvider(input.sso_provider);
   if (ssoError !== null) errors['sso_provider'] = ssoError;
 
-  if (
-    input.marketing_opt_in !== undefined &&
-    typeof input.marketing_opt_in !== 'boolean'
-  ) {
+  if (input.marketing_opt_in !== undefined && typeof input.marketing_opt_in !== 'boolean') {
     errors['marketing_opt_in'] = 'Marketing opt-in must be true or false.';
   }
 
@@ -181,9 +170,7 @@ export function validateLogin(input: Partial<LoginRequest>): ValidationResult {
 /**
  * Validates a forgot-password payload. Only an email is required.
  */
-export function validateForgotPassword(
-  input: Partial<ForgotPasswordRequest>,
-): ValidationResult {
+export function validateForgotPassword(input: Partial<ForgotPasswordRequest>): ValidationResult {
   const errors: Record<string, string> = {};
   const emailError = validateEmail(input.email ?? '');
   if (emailError !== null) errors['email'] = emailError;

@@ -32,14 +32,19 @@ function readChunk(buf: Buffer, off: number): { type: string; data: Buffer; next
 
 describe('encodeHeatmapPng', () => {
   it('emits a valid PNG with correct IHDR and at least one IDAT', () => {
-    const exp = buildExport('deck-1', 'slide-1', '2026-01-01', new Map(), { gridWidth: 32, gridHeight: 18 });
+    const exp = buildExport('deck-1', 'slide-1', '2026-01-01', new Map(), {
+      gridWidth: 32,
+      gridHeight: 18,
+    });
     // Re-add the tile manually since buildExport filters zeros via aggregate first.
     exp.tiles = [{ x: 0, y: 0, dwell_ms: 10, viewers: 1, pause_count: 0 }];
 
     const buf = encodeHeatmapPng(exp);
 
     // PNG signature.
-    expect(buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe(true);
+    expect(
+      buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+    ).toBe(true);
 
     // IHDR.
     const ihdr = readChunk(buf, 8);
@@ -88,6 +93,8 @@ describe('encodeHeatmapPng', () => {
     const exp = buildExport('d', 's', '2026-01-01', new Map(), { gridWidth: 32, gridHeight: 18 });
     expect(exp.tiles.length).toBe(0);
     const buf = encodeHeatmapPng(exp);
-    expect(buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe(true);
+    expect(
+      buf.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+    ).toBe(true);
   });
 });

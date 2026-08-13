@@ -69,37 +69,42 @@ Phase 01 turns the skeletons and placeholder workflows delivered by Phase 00 int
 
 ### Stream A — CI/CD pipeline productionization
 
-- **A.1 Lint + typecheck** *(files: `.github/workflows/lint.yml`, `.github/workflows/type.yml`, `.github/workflows/reusable/setup-node.yml`, `.github/workflows/reusable/setup-go.yml`, `.github/workflows/reusable/setup-python.yml`)*
+- **A.1 Lint + typecheck** _(files: `.github/workflows/lint.yml`, `.github/workflows/type.yml`, `.github/workflows/reusable/setup-node.yml`, `.github/workflows/reusable/setup-go.yml`, `.github/workflows/reusable/setup-python.yml`)_
+
   - Touched: `.github/workflows/`.
   - Contracts: none consumed directly; pins `puku-sh/puku-cli` (or chosen host) action to a specific SHA.
   - Tests written: each workflow is syntax-checked by `act` in CI; reusable workflows have a fixture test under `tests/ci/reusable-{node,go,python}.spec.ts` that asserts a hand-crafted workflow references them.
   - DoD: green on `main`; both lint and typecheck are required status checks; cache keys are scoped per OS + lockfile hash.
 
-- **A.2 Unit tests with coverage gate** *(files: `.github/workflows/unit.yml`, `vitest.config.ts`, `jest.config.ts` (if needed), `codecov.yml` or equivalent) — selects primary framework in §8.*
+- **A.2 Unit tests with coverage gate** _(files: `.github/workflows/unit.yml`, `vitest.config.ts`, `jest.config.ts` (if needed), `codecov.yml` or equivalent) — selects primary framework in §8._
+
   - Touched: `.github/workflows/unit.yml`, test framework configs.
   - Contracts: none.
   - Tests written: a smoke repo test `tests/ci/unit-coverage-gate.spec.ts` posts a synthetic failing-coverage PR and asserts CI blocks it.
   - DoD: coverage gate enforced at 70% lines / 60% branches for new code (the threshold is intentionally low for the foundation phase — P22 raises it).
 
-- **A.3 Contract tests (wire the skeletons from P00)** *(files: `.github/workflows/contract.yml` filled in, including jobs `proto-lint`, `proto-breaking`, `openapi-spectral`, `json-schema-ajv`, `contract-publish`)*
+- **A.3 Contract tests (wire the skeletons from P00)** _(files: `.github/workflows/contract.yml` filled in, including jobs `proto-lint`, `proto-breaking`, `openapi-spectral`, `json-schema-ajv`, `contract-publish`)_
+
   - Touched: `.github/workflows/contract.yml`.
   - Contracts: consumes every artifact under `contracts/`.
   - Tests written: contract CI is itself contract-tested by pushing a known-bad proto change to a feature branch and asserting CI red, then reverting and asserting green.
   - DoD: contract workflow is green on `main`; the contract artifact `contracts-<version>.tar.gz` is published to an internal registry on tag push; required status check.
 
-- **A.4 Accessibility scan (axe)** *(files: `.github/workflows/axe.yml`, `.axe/config.json`, `apps/web/test/a11y/smoke.spec.ts`)*
+- **A.4 Accessibility scan (axe)** _(files: `.github/workflows/axe.yml`, `.axe/config.json`, `apps/web/test/a11y/smoke.spec.ts`)_
+
   - Touched: `.github/workflows/axe.yml`, `apps/web/test/a11y/`.
   - Contracts: none directly; the scan crawls `apps/web` skeleton's pages.
   - Tests written: an a11y fixture test under `tests/ci/axe-rules.spec.ts` asserts the ruleset includes `wcag2a`, `wcag21a`, `wcag21aa`, `best-practice`.
   - DoD: axe workflow scans `apps/web`'s skeleton in CI; zero serious/critical violations to pass the gate. **Note:** Phase 01's `apps/web` is a skeleton with one screen; this gate becomes substantive from P03 onward when the editor lands.
 
-- **A.5 Threat-model diff** *(files: `.github/workflows/threat-model-diff.yml`, `threat-model/{00-process,components/index,components/services-template,components/apps-web-skeleton}.md`)*
+- **A.5 Threat-model diff** _(files: `.github/workflows/threat-model-diff.yml`, `threat-model/{00-process,components/index,components/services-template,components/apps-web-skeleton}.md`)_
+
   - Touched: `.github/workflows/threat-model-diff.yml`, new `threat-model/` directory.
   - Contracts: none directly; STRIDE sections are markdown-based.
   - Tests written: `tests/threat-model/frontmatter.spec.ts` validates every `threat-model/**/*.md` has required sections (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege).
   - DoD: workflow runs on PRs that touch `threat-model/**` and posts a diff comment; "no unresolved STRIDE sections in new components" rule enforced for new files.
 
-- **A.6 Schema-migration lint** *(files: `.github/workflows/schema-migration-lint.yml`, `tools/migration-lint/{lint.ts,sqlparse.ts,rules/*.ts}`)*
+- **A.6 Schema-migration lint** _(files: `.github/workflows/schema-migration-lint.yml`, `tools/migration-lint/{lint.ts,sqlparse.ts,rules/_.ts}`)\*
   - Touched: `.github/workflows/schema-migration-lint.yml`, new `tools/migration-lint/` directory.
   - Contracts: none.
   - Tests written: rule tests under `tools/migration-lint/test/*.spec.ts` exercise each rule against positive and negative SQL fixtures.
@@ -107,19 +112,21 @@ Phase 01 turns the skeletons and placeholder workflows delivered by Phase 00 int
 
 ### Stream B — Observability stack
 
-- **B.1 OTel collector (dev: Compose, staging/prod: Helm)** *(files: `infrastructure/observability/otel-collector/config.yaml`, `infrastructure/observability/otel-collector/docker-compose.dev.yml`, `infrastructure/helm/observability/templates/otel-collector.yaml`)*
+- **B.1 OTel collector (dev: Compose, staging/prod: Helm)** _(files: `infrastructure/observability/otel-collector/config.yaml`, `infrastructure/observability/otel-collector/docker-compose.dev.yml`, `infrastructure/helm/observability/templates/otel-collector.yaml`)_
+
   - Touched: `infrastructure/observability/`, `infrastructure/helm/`.
   - Contracts: none.
   - Tests written: `tests/observability/collector-pipeline.spec.ts` (Compose) and a `helm template` smoke under `tests/helm/observability.spec.ts`.
   - DoD: collector receives OTLP/HTTP and OTLP/gRPC, exports to Prometheus remote write (metrics), Tempo (traces), Loki (logs); pipeline visible in dev; Helm chart passes `helm lint` and a `helm template --dry-run` renders cleanly.
 
-- **B.2 Prometheus, Grafana, Tempo, Loki** *(files: `infrastructure/observability/prometheus/{prometheus.yml,rules/*.yml}`, `infrastructure/observability/grafana/{dashboards/*.json,datasources/*.yaml}`, `infrastructure/observability/tempo/tempo.yaml`, `infrastructure/observability/loki/loki.yaml`)*
+- **B.2 Prometheus, Grafana, Tempo, Loki** _(files: `infrastructure/observability/prometheus/{prometheus.yml,rules/_.yml}`, `infrastructure/observability/grafana/{dashboards/_.json,datasources/_.yaml}`, `infrastructure/observability/tempo/tempo.yaml`, `infrastructure/observability/loki/loki.yaml`)\*
+
   - Touched: `infrastructure/observability/`.
   - Contracts: none.
   - Tests written: a `promtool check config` step in CI for every rule file; Loki/Tempo config tests under `tests/observability/loki.spec.ts`/`tempo.spec.ts`.
   - DoD: all four components start clean in the dev Compose profile; Grafana serves on `:3001` and shows the four seeded SLO dashboards.
 
-- **B.3 OTel SDK wiring across runtimes** *(files: `packages/observability/src/exporters/otlp-http.ts` (real, not stub), `packages/observability/src/{trace,metrics,logs}.ts` updated to use it, `packages/observability-go/observe.go` and `observe_test.go` updated, `packages/observability-py/domio_obs/*` updated) — three runtime SDKs*
+- **B.3 OTel SDK wiring across runtimes** _(files: `packages/observability/src/exporters/otlp-http.ts` (real, not stub), `packages/observability/src/{trace,metrics,logs}.ts` updated to use it, `packages/observability-go/observe.go` and `observe_test.go` updated, `packages/observability-py/domio_obs/_` updated) — three runtime SDKs\*
   - Touched: three observability SDKs.
   - Contracts: consumes `OTEL_EXPORTER_OTLP_ENDPOINT` semantics (de facto standard).
   - Tests written: integration tests per runtime that boot a local OTel collector (in-memory) and assert spans/metrics/logs are received with the right resource attributes.
@@ -127,25 +134,28 @@ Phase 01 turns the skeletons and placeholder workflows delivered by Phase 00 int
 
 ### Stream C — Infrastructure, GitOps, and environments
 
-- **C.1 Terraform modules** *(files: `infrastructure/terraform/modules/{network,cluster,postgres,nats,minio,valkey,observability,vault}/main.tf` + `variables.tf` + `outputs.tf`, `infrastructure/terraform/envs/{dev,staging,prod}/{main.tf,variables.tf,backend.tf}`)*
+- **C.1 Terraform modules** _(files: `infrastructure/terraform/modules/{network,cluster,postgres,nats,minio,valkey,observability,vault}/main.tf` + `variables.tf` + `outputs.tf`, `infrastructure/terraform/envs/{dev,staging,prod}/{main.tf,variables.tf,backend.tf}`)_
+
   - Touched: new `infrastructure/terraform/` tree.
   - Contracts: none; the cluster module consumes the GitOps repo URL via a variable.
   - Tests written: `tests/terraform/tflint.spec.ts` runs `tflint --recursive` against modules; `tests/terraform/plan-baseline.spec.ts` runs `terraform init -backend=false && terraform plan -lock=false` on each env and asserts no diff against the checked-in baseline `tests/terraform/baselines/{env}.tfplan.json`.
   - DoD: every module passes `terraform validate`; every env produces a stable plan; backend config references S3/GCS (decided in §8) with state locking via DynamoDB/equivalent.
 
-- **C.2 Helm charts** *(files: `infrastructure/helm/{domio,observability,ingress,secrets}/Chart.yaml` + `values.yaml` + `templates/`)*
+- **C.2 Helm charts** _(files: `infrastructure/helm/{domio,observability,ingress,secrets}/Chart.yaml` + `values.yaml` + `templates/`)_
+
   - Touched: new `infrastructure/helm/` tree.
   - Contracts: none.
   - Tests written: `helm-unittest` fixtures per chart under `infrastructure/helm/*/templates/tests/`.
   - DoD: every chart passes `helm lint`, `helm template --dry-run`, and `helm-unittest`; values are documented in `values.yaml` comments.
 
-- **C.3 ArgoCD applications** *(files: `infrastructure/argocd/projects/domio.yaml`, `infrastructure/argocd/applications/{dev,staging,prod}.yaml`, `infrastructure/argocd/app-of-apps.yaml`)*
+- **C.3 ArgoCD applications** _(files: `infrastructure/argocd/projects/domio.yaml`, `infrastructure/argocd/applications/{dev,staging,prod}.yaml`, `infrastructure/argocd/app-of-apps.yaml`)_
+
   - Touched: new `infrastructure/argocd/` tree.
   - Contracts: none.
   - Tests written: yaml parse tests under `tests/argocd/parse.spec.ts`; an application-set validation under `tests/argocd/app-of-apps.spec.ts` that asserts the project exists and references existing apps.
   - DoD: ArgoCD can apply the `app-of-apps` against a fresh dev cluster; `dev` is auto-sync, `staging` and `prod` are manual-sync with `prune: true` and confirmed by a reviewer.
 
-- **C.4 Environment strategy doc** *(files: `docs/runbooks/environments.md`, `docs/runbooks/environment-parity-checklist.md`)*
+- **C.4 Environment strategy doc** _(files: `docs/runbooks/environments.md`, `docs/runbooks/environment-parity-checklist.md`)_
   - Touched: new docs under `docs/runbooks/`.
   - Contracts: none.
   - Tests written: a markdown lint test that asserts every required section heading is present.
@@ -153,25 +163,28 @@ Phase 01 turns the skeletons and placeholder workflows delivered by Phase 00 int
 
 ### Stream D — Secrets, security baseline, on-call, SLOs
 
-- **D.1 Secrets management** *(files: `infrastructure/helm/secrets/`, `infrastructure/terraform/modules/vault/`, `docs/runbooks/secrets-rotation.md`, `.env.example`, `.github/workflows/leak-scan.yml`)*
+- **D.1 Secrets management** _(files: `infrastructure/helm/secrets/`, `infrastructure/terraform/modules/vault/`, `docs/runbooks/secrets-rotation.md`, `.env.example`, `.github/workflows/leak-scan.yml`)_
+
   - Touched: `infrastructure/`, `.env.example`, `docs/runbooks/`.
   - Contracts: none directly.
   - Tests written: gitleaks/gandalf action test; `tests/secrets/rotate-fixtures.spec.ts` validates rotation YAML.
   - DoD: dev-mode Vault runs in dev; staging/prod use the agreed secrets backend (decision in §8); no secret values in `git`; `.env.example` is exhaustive.
 
-- **D.2 Threat-model diff process** (extends A.5) *(files: `threat-model/components/{apps-web-skeleton,services-template,observability-pipeline,gitops-loop,secrets-pipeline}.md`, `threat-model/00-process.md`, `threat-model/01-definitions.md`)*
+- **D.2 Threat-model diff process** (extends A.5) _(files: `threat-model/components/{apps-web-skeleton,services-template,observability-pipeline,gitops-loop,secrets-pipeline}.md`, `threat-model/00-process.md`, `threat-model/01-definitions.md`)_
+
   - Touched: `threat-model/`.
   - Contracts: none.
   - Tests written: frontmatter tests; STRIDE-coverage tests.
   - DoD: every P00 component has a STRIDE entry; new components require a STRIDE entry before merge (enforced via PR template check).
 
-- **D.3 On-call skeleton** *(files: `docs/runbooks/oncall/{escalation-policy.md,rotation-schema.md,index.md,handbook-template.md}`, `infrastructure/terraform/modules/oncall/{pagerduty.tf,opsgenie.tf}` (chosen vendor in §8))*
+- **D.3 On-call skeleton** _(files: `docs/runbooks/oncall/{escalation-policy.md,rotation-schema.md,index.md,handbook-template.md}`, `infrastructure/terraform/modules/oncall/{pagerduty.tf,opsgenie.tf}` (chosen vendor in §8))_
+
   - Touched: new `docs/runbooks/oncall/` tree.
   - Contracts: none.
   - Tests written: markdown structure tests asserting required sections per runbook.
   - DoD: vendor integration is wired in dev; a runbook template exists; the index links to every other runbook; first filled-in runbook is `docs/runbooks/oncall/otel-collector-down.md`.
 
-- **D.4 SLO catalog stub** *(files: `docs/slos/README.md`, `docs/slos/{request-availability,p95-latency,error-rate,ingestion-freshness}.md`, `infrastructure/observability/grafana/dashboards/slo-{request-availability,p95-latency,error-rate,ingestion-freshness}.json`, `infrastructure/observability/prometheus/rules/slos.yml`)*
+- **D.4 SLO catalog stub** _(files: `docs/slos/README.md`, `docs/slos/{request-availability,p95-latency,error-rate,ingestion-freshness}.md`, `infrastructure/observability/grafana/dashboards/slo-{request-availability,p95-latency,error-rate,ingestion-freshness}.json`, `infrastructure/observability/prometheus/rules/slos.yml`)_
   - Touched: `docs/slos/`, `infrastructure/observability/`.
   - Contracts: none directly; each SLO references contract-stable paths.
   - Tests written: `tests/slos/specfrontmatter.spec.ts` asserts every SLO doc has `objective`, `SLI`, `measurement window`, `error budget`, `burn-rate alerts`.
@@ -179,13 +192,14 @@ Phase 01 turns the skeletons and placeholder workflows delivered by Phase 00 int
 
 ### Stream E — Bandwidth-aware dependency mirrors
 
-- **E.1 Active mirror registry** *(files: `infrastructure/mirrors/registry/{npm,pypi,go-modules,docker}/`, `infrastructure/mirrors/apply.sh`, `infrastructure/mirrors/healthcheck.sh`, `docs/runbooks/bangladesh-mirror-fallback.md`)*
+- **E.1 Active mirror registry** _(files: `infrastructure/mirrors/registry/{npm,pypi,go-modules,docker}/`, `infrastructure/mirrors/apply.sh`, `infrastructure/mirrors/healthcheck.sh`, `docs/runbooks/bangladesh-mirror-fallback.md`)_
+
   - Touched: `infrastructure/mirrors/`.
   - Contracts: none.
   - Tests written: `tests/mirrors/registry-health.spec.ts` pings each upstream + mirror and asserts fall-over logic.
   - DoD: mirror registry is reachable from CI; it lists which upstream URLs it caches; fallback to upstream is automatic when mirror is down.
 
-- **E.2 Renovate + Dependabot tuning** *(files: `.github/renovate.json`, `.github/dependabot.yml`, `docs/runbooks/dependency-update.md`)*
+- **E.2 Renovate + Dependabot tuning** _(files: `.github/renovate.json`, `.github/dependabot.yml`, `docs/runbooks/dependency-update.md`)_
   - Touched: `.github/`, new runbook.
   - Contracts: none.
   - Tests written: a config spec under `tests/ci/renovate-config.spec.ts` validates scheduling.
@@ -193,12 +207,12 @@ Phase 01 turns the skeletons and placeholder workflows delivered by Phase 00 int
 
 ### Cross-cutting: telemetry and compliance hooks
 
-- **X.1 PII redaction library** *(files: `packages/redact-pii/src/index.ts`, `packages/redact-pii/test/redact.spec.ts`)*
+- **X.1 PII redaction library** _(files: `packages/redact-pii/src/index.ts`, `packages/redact-pii/test/redact.spec.ts`)_
   - Touched: new package.
   - Contracts: none.
   - Tests written: redaction coverage tests for email, phone, NID, and credit-card-shaped strings (Bangladesh-specific patterns included).
   - DoD: every observability SDK imports and applies the redact-pii helper on log output before emission.
-- **X.2 Provenance (SLSA-style) emission** *(files: `.github/workflows/build-provenance.yml`, `tools/provenance/emit.ts`)*
+- **X.2 Provenance (SLSA-style) emission** _(files: `.github/workflows/build-provenance.yml`, `tools/provenance/emit.ts`)_
   - Touched: `.github/workflows/`, `tools/`.
   - Contracts: none.
   - Tests written: `tests/provenance/emit.spec.ts` parses a generated SLSA provenance document and asserts the expected subject/builder fields.
@@ -274,37 +288,37 @@ Two seeded rows in `health_check`, plus a new `infrastructure/postgres/migration
 
 ## 7. Verification
 
-| Feature / acceptance item | Test (file / command) | Expected result | Owner |
-|---|---|---|---|
-| Lint CI blocks bad PRs | `tests/ci/lint-fail.spec.ts` (uses `act`) | Synthetic PR with intentional lint error returns red | DevOps |
-| Typecheck CI blocks mismatched types | `tests/ci/type-fail.spec.ts` | Synthetic PR returns red; reverting returns green | DevOps |
-| Unit test coverage gate | `tests/ci/unit-coverage-gate.spec.ts` | Sub-70% PR fails | DevOps |
-| Contract CI blocks proto breaking change | `tests/contracts/proto-cicd.spec.ts` | Field-number change produces red `buf-breaking` | Contracts |
-| Contract CI blocks OpenAPI breaking change | `tests/contracts/openapi-cicd.spec.ts` | Path removal produces red `spectral oas` | Contracts |
-| Contract CI blocks malformed JSON Schema | `tests/contracts/schema-cicd.spec.ts` | Bad draft produces red ajv | Contracts |
-| Axe CI blocks accessibility regressions | `tests/axe/axe-fail.spec.ts` | Mock page with missing alt-text fails | UX Lead |
-| Threat-model diff blocks new components without STRIDE | `tests/threat-model/ci-fail.spec.ts` | New component without STRIDE fails | Security |
-| Schema-migration lint blocks forward-only violation | `tools/migration-lint/test/lint.spec.ts` | Drop-column-without-rename fails | DevOps |
-| OTel SDK ships spans to local collector | `packages/observability/test/otlp-integration.spec.ts` | `InMemorySpanExporter` + OTLP HTTP forwarder test both pass | Platform Foundations |
-| OTel Go SDK ships spans | `packages/observability-go/observe_integration_test.go` | Same | Platform Foundations |
-| OTel Python SDK ships spans | `packages/observability-py/tests/test_obs_integration.py` | Same | Platform Foundations |
-| Prometheus rules valid | `promtool check rules infrastructure/observability/prometheus/rules/*.yml` | All rules valid | DevOps |
-| Grafana dashboards render | `tests/grafana/dashboards.spec.ts` parses each JSON | No parse errors; expected panels present | DevOps |
-| Tempo and Loki configs valid | `tests/observability/{tempo,loki}.spec.ts` | yamllint + vendor validators pass | DevOps |
-| Terraform plans deterministic | `tests/terraform/plan-baseline.spec.ts` | Plan unchanged from baseline (within allowed whitespace) | DevOps |
-| Helm charts lint cleanly | `helm-unittest` fixtures | Every chart passes | DevOps |
-| ArgoCD application set valid | `tests/argocd/parse.spec.ts` | All YAML parses; project references resolve | DevOps |
-| Secrets backend reachable in dev | `tests/secrets/dev-vault.spec.ts` | `vault kv get` returns the test secret | Security |
-| gitleaks blocks secret leaks | `tests/secrets/leak-scan.spec.ts` | Synthetic committed AWS key blocks | Security |
-| Renovate config valid | `tests/ci/renovate-config.spec.ts` | JSON parses; schedule reasonable | Eng Productivity |
-| SLSA provenance document valid | `tests/provenance/emit.spec.ts` | Document passes `slsa-verifier` | DevOps |
-| PII redaction covers BD patterns | `packages/redact-pii/test/redact.spec.ts` | Email, NID, phone patterns redacted in logs | Security |
-| On-call escalation policy exists | `tests/runbooks/oncall-index.spec.ts` | All required sections present | DevOps |
-| SLO catalog entries have objective + SLI | `tests/slos/specfrontmatter.spec.ts` | All four SLOs have full structure | DevOps |
-| Mirror registry healthy and fallback works | `tests/mirrors/registry-health.spec.ts` | When mirror returns 503, upstream serves the response | Platform Foundations |
-| Dev environment parity checklist run | `tests/runbooks/env-parity.spec.ts` | Checklist script produces a green report from dev → staging | DevOps |
-| Pipeline reproduces cold-start | `tests/devcontainer/post-create.spec.ts` re-run against new CI workflow | `make bootstrap && make dev-up && make smoke && make dev-down` exits 0 | Platform Foundations |
-| Telemetry SDKs do not leak secrets | `packages/observability/test/secret-leak.spec.ts` | Logging an API key triggers PII redaction | Security |
+| Feature / acceptance item                              | Test (file / command)                                                      | Expected result                                                        | Owner                |
+| ------------------------------------------------------ | -------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------- |
+| Lint CI blocks bad PRs                                 | `tests/ci/lint-fail.spec.ts` (uses `act`)                                  | Synthetic PR with intentional lint error returns red                   | DevOps               |
+| Typecheck CI blocks mismatched types                   | `tests/ci/type-fail.spec.ts`                                               | Synthetic PR returns red; reverting returns green                      | DevOps               |
+| Unit test coverage gate                                | `tests/ci/unit-coverage-gate.spec.ts`                                      | Sub-70% PR fails                                                       | DevOps               |
+| Contract CI blocks proto breaking change               | `tests/contracts/proto-cicd.spec.ts`                                       | Field-number change produces red `buf-breaking`                        | Contracts            |
+| Contract CI blocks OpenAPI breaking change             | `tests/contracts/openapi-cicd.spec.ts`                                     | Path removal produces red `spectral oas`                               | Contracts            |
+| Contract CI blocks malformed JSON Schema               | `tests/contracts/schema-cicd.spec.ts`                                      | Bad draft produces red ajv                                             | Contracts            |
+| Axe CI blocks accessibility regressions                | `tests/axe/axe-fail.spec.ts`                                               | Mock page with missing alt-text fails                                  | UX Lead              |
+| Threat-model diff blocks new components without STRIDE | `tests/threat-model/ci-fail.spec.ts`                                       | New component without STRIDE fails                                     | Security             |
+| Schema-migration lint blocks forward-only violation    | `tools/migration-lint/test/lint.spec.ts`                                   | Drop-column-without-rename fails                                       | DevOps               |
+| OTel SDK ships spans to local collector                | `packages/observability/test/otlp-integration.spec.ts`                     | `InMemorySpanExporter` + OTLP HTTP forwarder test both pass            | Platform Foundations |
+| OTel Go SDK ships spans                                | `packages/observability-go/observe_integration_test.go`                    | Same                                                                   | Platform Foundations |
+| OTel Python SDK ships spans                            | `packages/observability-py/tests/test_obs_integration.py`                  | Same                                                                   | Platform Foundations |
+| Prometheus rules valid                                 | `promtool check rules infrastructure/observability/prometheus/rules/*.yml` | All rules valid                                                        | DevOps               |
+| Grafana dashboards render                              | `tests/grafana/dashboards.spec.ts` parses each JSON                        | No parse errors; expected panels present                               | DevOps               |
+| Tempo and Loki configs valid                           | `tests/observability/{tempo,loki}.spec.ts`                                 | yamllint + vendor validators pass                                      | DevOps               |
+| Terraform plans deterministic                          | `tests/terraform/plan-baseline.spec.ts`                                    | Plan unchanged from baseline (within allowed whitespace)               | DevOps               |
+| Helm charts lint cleanly                               | `helm-unittest` fixtures                                                   | Every chart passes                                                     | DevOps               |
+| ArgoCD application set valid                           | `tests/argocd/parse.spec.ts`                                               | All YAML parses; project references resolve                            | DevOps               |
+| Secrets backend reachable in dev                       | `tests/secrets/dev-vault.spec.ts`                                          | `vault kv get` returns the test secret                                 | Security             |
+| gitleaks blocks secret leaks                           | `tests/secrets/leak-scan.spec.ts`                                          | Synthetic committed AWS key blocks                                     | Security             |
+| Renovate config valid                                  | `tests/ci/renovate-config.spec.ts`                                         | JSON parses; schedule reasonable                                       | Eng Productivity     |
+| SLSA provenance document valid                         | `tests/provenance/emit.spec.ts`                                            | Document passes `slsa-verifier`                                        | DevOps               |
+| PII redaction covers BD patterns                       | `packages/redact-pii/test/redact.spec.ts`                                  | Email, NID, phone patterns redacted in logs                            | Security             |
+| On-call escalation policy exists                       | `tests/runbooks/oncall-index.spec.ts`                                      | All required sections present                                          | DevOps               |
+| SLO catalog entries have objective + SLI               | `tests/slos/specfrontmatter.spec.ts`                                       | All four SLOs have full structure                                      | DevOps               |
+| Mirror registry healthy and fallback works             | `tests/mirrors/registry-health.spec.ts`                                    | When mirror returns 503, upstream serves the response                  | Platform Foundations |
+| Dev environment parity checklist run                   | `tests/runbooks/env-parity.spec.ts`                                        | Checklist script produces a green report from dev → staging            | DevOps               |
+| Pipeline reproduces cold-start                         | `tests/devcontainer/post-create.spec.ts` re-run against new CI workflow    | `make bootstrap && make dev-up && make smoke && make dev-down` exits 0 | Platform Foundations |
+| Telemetry SDKs do not leak secrets                     | `packages/observability/test/secret-leak.spec.ts`                          | Logging an API key triggers PII redaction                              | Security             |
 
 ## 8. Risks & open decisions
 

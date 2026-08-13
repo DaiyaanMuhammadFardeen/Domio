@@ -18,14 +18,8 @@ import type {
   SessionSummary,
   ShardFanoutPlan,
 } from './types.js';
-import {
-  SessionNotFoundError,
-  WorkspaceMismatchError,
-} from './types.js';
-import {
-  isCoordinatorStore,
-  type SessionCoordinatorStore,
-} from './store.js';
+import { SessionNotFoundError, WorkspaceMismatchError } from './types.js';
+import { isCoordinatorStore, type SessionCoordinatorStore } from './store.js';
 
 export interface SessionCoordinatorServiceOptions {
   readonly store: SessionCoordinatorStore;
@@ -33,7 +27,10 @@ export interface SessionCoordinatorServiceOptions {
   readonly sessionResolver?: SessionCodeResolver;
 }
 
-export type SessionCodeResolver = (input: { workspace_id: string; session_id: string }) => Promise<string>;
+export type SessionCodeResolver = (input: {
+  workspace_id: string;
+  session_id: string;
+}) => Promise<string>;
 
 export class SessionCoordinatorService {
   private readonly store: SessionCoordinatorStore;
@@ -67,7 +64,10 @@ export class SessionCoordinatorService {
     return plan;
   }
 
-  async exportMembership(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<MembershipRow>> {
+  async exportMembership(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<MembershipRow>> {
     return this.store.exportMembership(input);
   }
 }

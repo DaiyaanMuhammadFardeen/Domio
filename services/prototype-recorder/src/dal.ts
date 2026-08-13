@@ -27,7 +27,11 @@ export interface PrototypeSessionRepository {
   insert(record: PrototypeSession): Promise<void>;
   findById(id: string, tenantId: string): Promise<PrototypeSession | null>;
   /** List sessions for a deck. Optional `subjectId` filters to DSR requests. */
-  listByDeck(deckId: string, tenantId: string, opts?: { subjectId?: string; region?: Region }): Promise<PrototypeSession[]>;
+  listByDeck(
+    deckId: string,
+    tenantId: string,
+    opts?: { subjectId?: string; region?: Region },
+  ): Promise<PrototypeSession[]>;
   /** List every session for a subject across decks (DSR list endpoint). */
   listBySubject(subjectId: string, tenantId: string): Promise<PrototypeSession[]>;
   /** List every session for a tenant across decks (retention cron path). */
@@ -63,7 +67,10 @@ export interface IntegrityChainRepository {
 
 export class NotFoundError extends Error {
   readonly code = 'NOT_FOUND' as const;
-  constructor(public readonly resource: string, public readonly id: string) {
+  constructor(
+    public readonly resource: string,
+    public readonly id: string,
+  ) {
     super(`${resource} ${id} not found`);
     this.name = 'NotFoundError';
   }
@@ -79,8 +86,14 @@ export class HmacVerificationError extends Error {
 
 export class ReorderDetectedError extends Error {
   readonly code = 'CHAIN_REORDER_DETECTED' as const;
-  constructor(public readonly sessionId: string, public readonly expectedSeq: number, public readonly actualSeq: number) {
-    super(`Chain reorder detected for session ${sessionId}: expected seq ${expectedSeq}, got ${actualSeq}`);
+  constructor(
+    public readonly sessionId: string,
+    public readonly expectedSeq: number,
+    public readonly actualSeq: number,
+  ) {
+    super(
+      `Chain reorder detected for session ${sessionId}: expected seq ${expectedSeq}, got ${actualSeq}`,
+    );
     this.name = 'ReorderDetectedError';
   }
 }
@@ -95,7 +108,10 @@ export class ValidationError extends Error {
 
 export class RegionMismatchError extends Error {
   readonly code = 'REGION_PIN_MISMATCH' as const;
-  constructor(public readonly expected: Region, public readonly got: string) {
+  constructor(
+    public readonly expected: Region,
+    public readonly got: string,
+  ) {
     super(`Region pin mismatch: expected ${expected}, got ${got}`);
     this.name = 'RegionMismatchError';
   }
@@ -113,17 +129,28 @@ export class HmacKeyGenerationError extends Error {
 
 abstract class InMemoryRepo<R extends { readonly id: string; readonly tenantId: string }> {
   protected store = new Map<string, R>();
-  protected k(r: R): string { return `${r.tenantId}::${r.id}`; }
+  protected k(r: R): string {
+    return `${r.tenantId}::${r.id}`;
+  }
 }
 
-export class InMemoryPrototypeSessionRepository extends InMemoryRepo<PrototypeSession> implements PrototypeSessionRepository {
-  async insert(record: PrototypeSession): Promise<void> { this.store.set(this.k(record), record); }
+export class InMemoryPrototypeSessionRepository
+  extends InMemoryRepo<PrototypeSession>
+  implements PrototypeSessionRepository
+{
+  async insert(record: PrototypeSession): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<PrototypeSession | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
   }
 
-  async listByDeck(deckId: string, tenantId: string, opts?: { subjectId?: string; region?: Region }): Promise<PrototypeSession[]> {
+  async listByDeck(
+    deckId: string,
+    tenantId: string,
+    opts?: { subjectId?: string; region?: Region },
+  ): Promise<PrototypeSession[]> {
     const out: PrototypeSession[] = [];
     for (const r of this.store.values()) {
       if (r.tenantId !== tenantId) continue;
@@ -175,7 +202,9 @@ export class InMemoryPrototypeSessionRepository extends InMemoryRepo<PrototypeSe
 export class InMemoryPrototypeEventRepository implements PrototypeEventRepository {
   private events: PrototypeEvent[] = [];
 
-  async insert(record: PrototypeEvent): Promise<void> { this.events.push(record); }
+  async insert(record: PrototypeEvent): Promise<void> {
+    this.events.push(record);
+  }
 
   async listBySession(sessionId: string, tenantId: string): Promise<PrototypeEvent[]> {
     return this.events
@@ -194,7 +223,9 @@ export class InMemoryPrototypeEventRepository implements PrototypeEventRepositor
 
   async deleteBySession(sessionId: string, tenantId: string): Promise<number> {
     const before = this.events.length;
-    this.events = this.events.filter((e) => !(e.tenantId === tenantId && e.sessionId === sessionId));
+    this.events = this.events.filter(
+      (e) => !(e.tenantId === tenantId && e.sessionId === sessionId),
+    );
     return before - this.events.length;
   }
 
@@ -208,7 +239,9 @@ export class InMemoryPrototypeEventRepository implements PrototypeEventRepositor
 export class InMemoryIntegrityChainRepository implements IntegrityChainRepository {
   private store: IntegrityKey[] = [];
 
-  async insert(record: IntegrityKey): Promise<void> { this.store.push(record); }
+  async insert(record: IntegrityKey): Promise<void> {
+    this.store.push(record);
+  }
 
   async listForTenantDeck(tenantId: string, deckId: string): Promise<IntegrityKey[]> {
     return this.store
@@ -228,7 +261,10 @@ export class InMemoryIntegrityChainRepository implements IntegrityChainRepositor
     return stillActive.slice(-1)[0] ?? null;
   }
 
-  async pruneExpired(now: number): Promise<number> { return 0; void now; }
+  async pruneExpired(now: number): Promise<number> {
+    return 0;
+    void now;
+  }
 }
 
 // ── Tier / region re-exports ───────────────────────────────────────────

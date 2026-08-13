@@ -72,7 +72,8 @@ export function SequenceInspectorPanel({
   );
 
   const updatePolicy = useCallback(
-    (interruptionPolicy: InterruptionPolicy) => onPatch({ version: sequence.version, interruptionPolicy }),
+    (interruptionPolicy: InterruptionPolicy) =>
+      onPatch({ version: sequence.version, interruptionPolicy }),
     [sequence.version, onPatch],
   );
 
@@ -87,7 +88,8 @@ export function SequenceInspectorPanel({
   );
 
   const updateReducedMotion = useCallback(
-    (reducedMotionDefaultOff: boolean) => onPatch({ version: sequence.version, reducedMotionDefaultOff }),
+    (reducedMotionDefaultOff: boolean) =>
+      onPatch({ version: sequence.version, reducedMotionDefaultOff }),
     [sequence.version, onPatch],
   );
 
@@ -175,8 +177,8 @@ export function SequenceInspectorPanel({
             checked={sequence.pauseOnEvent}
             onChange={(e) => updatePauseOnEvent(e.target.checked)}
             data-testid="m6-sequence-pause-on-event"
-          />
-          {' '}Pause on event
+          />{' '}
+          Pause on event
         </label>
       </div>
       <div className="prop-field">
@@ -186,8 +188,8 @@ export function SequenceInspectorPanel({
             checked={sequence.loop}
             onChange={(e) => updateLoop(e.target.checked)}
             data-testid="m6-sequence-loop"
-          />
-          {' '}Loop
+          />{' '}
+          Loop
         </label>
       </div>
       <div className="prop-field">
@@ -223,8 +225,8 @@ export function SequenceInspectorPanel({
             checked={sequence.reducedMotionDefaultOff}
             onChange={(e) => updateReducedMotion(e.target.checked)}
             data-testid="m6-sequence-reduced-motion"
-          />
-          {' '}Default off when prefers-reduced-motion
+          />{' '}
+          Default off when prefers-reduced-motion
         </label>
       </div>
       <div className="prop-field">

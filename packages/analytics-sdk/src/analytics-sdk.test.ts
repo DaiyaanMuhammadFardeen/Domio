@@ -76,7 +76,11 @@ describe('stripPii', () => {
   });
 
   it('walks event payloads recursively', () => {
-    const out = stripEvent({ a: 'daiyaan2002@example.com', b: { c: '192.168.0.1' }, d: [1, 'x@y.com'] });
+    const out = stripEvent({
+      a: 'daiyaan2002@example.com',
+      b: { c: '192.168.0.1' },
+      d: [1, 'x@y.com'],
+    });
     expect(out).toEqual({ a: '[email]', b: { c: '[ip]' }, d: [1, '[email]'] });
   });
 });
@@ -123,14 +127,23 @@ describe('HMAC', () => {
 
 describe('ulid', () => {
   it('is 26 chars of crockford base32', () => {
-    const id = ulid(() => 0.5, () => 1_700_000_000_000);
+    const id = ulid(
+      () => 0.5,
+      () => 1_700_000_000_000,
+    );
     expect(id).toHaveLength(26);
     expect(id).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
   });
 
   it('is monotonic in the time prefix', () => {
-    const a = ulid(() => 0, () => 1);
-    const b = ulid(() => 0, () => 2);
+    const a = ulid(
+      () => 0,
+      () => 1,
+    );
+    const b = ulid(
+      () => 0,
+      () => 2,
+    );
     expect(b > a).toBe(true);
   });
 });
@@ -163,7 +176,12 @@ describe('AnalyticsClient', () => {
     const { client, transport } = makeClient({ detectDnt: () => true } as never);
     let dropped = false;
     try {
-      client.emitView({ workspace_id: 'ws-1', deck_id: 'deck-1', slide_id: 's', viewer_id_key: 'v' });
+      client.emitView({
+        workspace_id: 'ws-1',
+        deck_id: 'deck-1',
+        slide_id: 's',
+        viewer_id_key: 'v',
+      });
     } catch {
       dropped = true;
     }
@@ -174,7 +192,18 @@ describe('AnalyticsClient', () => {
 
   it('strips PII before emit', async () => {
     const { client, transport } = makeClient();
-    const interaction: Omit<InteractionEvent, 'event_id' | 'event_name' | 'schema_version' | 'ts_ms' | 'ingest_topic' | 'source_app' | 'privacy_mode' | 'device_class' | 'interaction_kind'> & {
+    const interaction: Omit<
+      InteractionEvent,
+      | 'event_id'
+      | 'event_name'
+      | 'schema_version'
+      | 'ts_ms'
+      | 'ingest_topic'
+      | 'source_app'
+      | 'privacy_mode'
+      | 'device_class'
+      | 'interaction_kind'
+    > & {
       interaction_kind: InteractionEvent['interaction_kind'];
     } = {
       workspace_id: 'ws-1',

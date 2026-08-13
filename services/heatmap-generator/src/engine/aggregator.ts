@@ -44,7 +44,10 @@ interface AggBucket {
  * Group rollup rows by (slide_id, tile_x, tile_y) and sum the engagement
  * fields. Rows with out-of-grid coordinates are silently dropped.
  */
-export function aggregate(rows: readonly HeatmapRow[], cfg: AggregatorConfig = DEFAULT_CFG): Map<string, AggBucket> {
+export function aggregate(
+  rows: readonly HeatmapRow[],
+  cfg: AggregatorConfig = DEFAULT_CFG,
+): Map<string, AggBucket> {
   const out = new Map<string, AggBucket>();
   for (const r of rows) {
     if (r.tile_x < 0 || r.tile_y < 0) continue;
@@ -153,6 +156,7 @@ export function stitchBuckets(
       }
     }
   }
-  const bucketLabel = buckets.length === 1 ? buckets[0]! : `${buckets[0]}..${buckets[buckets.length - 1]}`;
+  const bucketLabel =
+    buckets.length === 1 ? buckets[0]! : `${buckets[0]}..${buckets[buckets.length - 1]}`;
   return buildExport(deck_id, slide_id, bucketLabel, merged, cfg);
 }

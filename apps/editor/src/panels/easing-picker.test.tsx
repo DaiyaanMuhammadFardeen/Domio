@@ -32,7 +32,9 @@ describe('EasingPicker', () => {
     const onChange = vi.fn();
     render(<EasingPicker value="linear" onChange={onChange} />);
     fireEvent.change(screen.getByTestId('p09-easing-select'), { target: { value: '__custom' } });
-    fireEvent.change(screen.getByTestId('p09-easing-custom'), { target: { value: 'cubic-bezier(0.25, 0.1, 0.25, 1)' } });
+    fireEvent.change(screen.getByTestId('p09-easing-custom'), {
+      target: { value: 'cubic-bezier(0.25, 0.1, 0.25, 1)' },
+    });
     fireEvent.blur(screen.getByTestId('p09-easing-custom'));
     expect(onChange).toHaveBeenCalledWith('cubic-bezier(0.25, 0.1, 0.25, 1)');
   });

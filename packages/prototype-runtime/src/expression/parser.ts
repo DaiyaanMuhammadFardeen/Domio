@@ -74,7 +74,10 @@ class Parser {
 
   private parseEquality(): Expression {
     let left = this.parseRelational();
-    while (this.peek().kind === 'op' && (this.peek().value === '==' || this.peek().value === '!=')) {
+    while (
+      this.peek().kind === 'op' &&
+      (this.peek().value === '==' || this.peek().value === '!=')
+    ) {
       const op = this.advance().value as '==' | '!=';
       const right = this.parseRelational();
       left = { kind: 'binary', operator: op, left, right };

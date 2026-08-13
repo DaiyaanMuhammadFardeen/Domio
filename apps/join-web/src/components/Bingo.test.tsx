@@ -20,13 +20,7 @@ describe('Bingo', () => {
     // Grid rows/cols are A-E only, so we pick a longer word whose
     // 2-letter substrings all land on valid pairs.
     // 'badger' contains 'ba' and 'ad' which are valid pairs.
-    render(
-      <Bingo
-        prompt="Animals"
-        submittedWords={['badger']}
-        onSubmitWord={() => undefined}
-      />,
-    );
+    render(<Bingo prompt="Animals" submittedWords={['badger']} onSubmitWord={() => undefined} />);
 
     expect(screen.getByTestId('bingo-tile-BA')).toHaveAttribute('data-filled', 'true');
     expect(screen.getByTestId('bingo-tile-AD')).toHaveAttribute('data-filled', 'true');

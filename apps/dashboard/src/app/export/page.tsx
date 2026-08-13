@@ -21,9 +21,7 @@ export default function ExportPage() {
     <div className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Export</h1>
-        <p className="text-sm text-slate-500">
-          Queue CSV / PDF exports and poll for completion
-        </p>
+        <p className="text-sm text-slate-500">Queue CSV / PDF exports and poll for completion</p>
       </header>
 
       <SuspenseBoundary>

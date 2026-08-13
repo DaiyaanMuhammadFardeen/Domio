@@ -83,10 +83,7 @@ export function TestSessionsPanel({
   const [scrubSeq, setScrubSeq] = useState<number>(1);
   const [activeSnapshot, setActiveSnapshot] = useState<ReplaySnapshotView | null>(null);
 
-  const sorted = useMemo(
-    () => [...sessions].sort((a, b) => b.startedAt - a.startedAt),
-    [sessions],
-  );
+  const sorted = useMemo(() => [...sessions].sort((a, b) => b.startedAt - a.startedAt), [sessions]);
 
   const selected = useMemo(
     () => sorted.find((s) => s.id === selectedSessionId) ?? null,
@@ -108,8 +105,8 @@ export function TestSessionsPanel({
       <header className="test-sessions-panel__header">
         <h2>User-testing sessions</h2>
         <p className="test-sessions-panel__help">
-          Telemetry from the viewer. Pick a session, scrub the timeline, and inspect the
-          variable snapshot at any event.
+          Telemetry from the viewer. Pick a session, scrub the timeline, and inspect the variable
+          snapshot at any event.
         </p>
       </header>
 

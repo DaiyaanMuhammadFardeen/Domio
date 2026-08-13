@@ -62,13 +62,18 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const dlq = await buildDiskDlq(args.dir);
   const records = await dlq.filter({
-    reasons: args.reasons.length > 0 ? (args.reasons as ('schema' | 'pii' | 'consent' | 'parse' | 'unknown')[]) : undefined,
+    reasons:
+      args.reasons.length > 0
+        ? (args.reasons as ('schema' | 'pii' | 'consent' | 'parse' | 'unknown')[])
+        : undefined,
     sinceMs: args.sinceMs ?? undefined,
   });
   const sliced = records.slice(0, args.limit);
 
   if (args.dryRun) {
-    process.stdout.write(JSON.stringify({ count: sliced.length, sample: sliced.slice(0, 5) }, null, 2) + '\n');
+    process.stdout.write(
+      JSON.stringify({ count: sliced.length, sample: sliced.slice(0, 5) }, null, 2) + '\n',
+    );
     return;
   }
 
@@ -79,7 +84,9 @@ async function main() {
   }
 
   const cfg = loadConfigFromEnv();
-  const publisher = await buildKafkaPublisher(cfg.kafkaBrokers).catch(() => buildInMemoryKafkaPublisher());
+  const publisher = await buildKafkaPublisher(cfg.kafkaBrokers).catch(() =>
+    buildInMemoryKafkaPublisher(),
+  );
   try {
     const offsets = await publisher.publishMany(events);
     process.stdout.write(JSON.stringify({ ok: true, replayed: events.length, offsets }) + '\n');

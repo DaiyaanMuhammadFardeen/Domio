@@ -26,10 +26,7 @@ export interface WaveformResult {
  * @param barCount - Target number of bars (default 48).
  * @returns WaveformResult with min/max per bar.
  */
-export function computeWaveform(
-  samples: Float32Array,
-  barCount: number = 48,
-): WaveformResult {
+export function computeWaveform(samples: Float32Array, barCount: number = 48): WaveformResult {
   const n = samples.length;
   if (n === 0) {
     return {

@@ -8,9 +8,9 @@ Hash-chained audit trail; SEC-owned.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-audit` | availability | 99.9% | 30d |
+| SLO           | Kind         | Target | Window |
+| ------------- | ------------ | ------ | ------ |
+| `avail-audit` | availability | 99.9%  | 30d    |
 
 ## Triage
 

@@ -84,8 +84,11 @@ export function computeDiff(input: ComputeDiffInput): DiffResult {
 
     const elementDiffs: ElementDiffEntry[] = [];
     const slideHasConflicts = diffSlideElements(
-      baseSlide, sourceSlide, targetSlide,
-      level, elementDiffs,
+      baseSlide,
+      sourceSlide,
+      targetSlide,
+      level,
+      elementDiffs,
     );
 
     // Slide-level conflict: all three differ and none are equal
@@ -258,10 +261,7 @@ function diffSlideElements(
 
     if (baseElem && sourceElem && targetElem) {
       // Present on all three sides — walk property paths
-      walkJsonPaths(
-        baseElem, sourceElem, targetElem,
-        elemId, level, out, [],
-      );
+      walkJsonPaths(baseElem, sourceElem, targetElem, elemId, level, out, []);
     }
   }
 
@@ -328,7 +328,8 @@ function classifyBinding(
   if (!base && source) return 'added';
   if (base && !source) return 'removed';
   if (base && source && !deepEqual(base, source)) return 'modified';
-  if (base && source && deepEqual(base, source) && target && !deepEqual(base, target)) return 'modified';
+  if (base && source && deepEqual(base, source) && target && !deepEqual(base, target))
+    return 'modified';
   return null;
 }
 
@@ -448,7 +449,7 @@ function snapshotToPlain(slide: SlideSnapshot): Record<string, unknown> {
     id: slide.id,
     title: slide.title,
     notes: slide.notes,
-    elements: slide.elements.map(e => ({
+    elements: slide.elements.map((e) => ({
       id: e.id,
       type: e.type,
       binding: e.binding,

@@ -14,7 +14,11 @@ export interface ViewerHelpProps {
   readonly dataTestId?: string;
 }
 
-export function ViewerHelp({ open, onClose, dataTestId = 'viewer-help' }: ViewerHelpProps): ReactElement | null {
+export function ViewerHelp({
+  open,
+  onClose,
+  dataTestId = 'viewer-help',
+}: ViewerHelpProps): ReactElement | null {
   if (!open) return null;
   return (
     <div
@@ -58,8 +62,20 @@ export function ViewerHelp({ open, onClose, dataTestId = 'viewer-help' }: Viewer
               ['Esc', 'Close help / overview'],
             ].map(([k, v]) => (
               <tr key={k as string}>
-                <td style={{ padding: '4px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', fontFamily: 'monospace' }}>{k}</td>
-                <td style={{ padding: '4px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>{v}</td>
+                <td
+                  style={{
+                    padding: '4px 8px',
+                    borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {k}
+                </td>
+                <td
+                  style={{ padding: '4px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  {v}
+                </td>
               </tr>
             ))}
           </tbody>

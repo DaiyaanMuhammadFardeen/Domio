@@ -133,3 +133,4 @@ playwright/.cache/
 .hive/
 .slim/deepwork/
 infra/loadtest/fixtures/*.json
+graphify-out/

@@ -29,14 +29,14 @@ records the per-app scores below.
 
 ### Recorded scores
 
-| App | Performance | Accessibility | Best Practices | SEO |
-|---|---|---|---|---|
-| editor | _pending_ | _pending_ | _pending_ | _pending_ |
-| viewer | _pending_ | _pending_ | _pending_ | _pending_ |
-| presenter | _pending_ | _pending_ | _pending_ | _pending_ |
-| dashboard | _pending_ | _pending_ | _pending_ | _pending_ |
-| admin-console | _pending_ | _pending_ | _pending_ | _pending_ |
-| marketplace-web | _pending_ | _pending_ | _pending_ | _pending_ |
+| App             | Performance | Accessibility | Best Practices | SEO       |
+| --------------- | ----------- | ------------- | -------------- | --------- |
+| editor          | _pending_   | _pending_     | _pending_      | _pending_ |
+| viewer          | _pending_   | _pending_     | _pending_      | _pending_ |
+| presenter       | _pending_   | _pending_     | _pending_      | _pending_ |
+| dashboard       | _pending_   | _pending_     | _pending_      | _pending_ |
+| admin-console   | _pending_   | _pending_     | _pending_      | _pending_ |
+| marketplace-web | _pending_   | _pending_     | _pending_      | _pending_ |
 
 ## Acceptance gate (deferred)
 

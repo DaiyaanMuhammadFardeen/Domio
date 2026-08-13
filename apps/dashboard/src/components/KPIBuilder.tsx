@@ -35,12 +35,7 @@ export interface KPIBuilderProps {
  * The builder is intentionally uncontrolled — the parent owns the
  * list of saved tiles so the overview page can pick it up.
  */
-export function KPIBuilder({
-  workspaceId,
-  initial = [],
-  baseUrl,
-  onSave,
-}: KPIBuilderProps) {
+export function KPIBuilder({ workspaceId, initial = [], baseUrl, onSave }: KPIBuilderProps) {
   const [title, setTitle] = useState('');
   const [metric, setMetric] = useState<KpiMetric>(KPI_METRICS[0]);
   const [aggregation, setAggregation] = useState<KpiAggregation>('avg');
@@ -172,10 +167,7 @@ export function KPIBuilder({
         </div>
       </form>
 
-      <div
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
-        data-testid="kpi-tiles"
-      >
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="kpi-tiles">
         {saved.length === 0 ? (
           <div
             className="col-span-full rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500"

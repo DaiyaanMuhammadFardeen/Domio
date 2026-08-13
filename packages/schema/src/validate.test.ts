@@ -99,9 +99,7 @@ describe('validate', () => {
       text: { content: 'Same id' },
     });
     const result = validate(doc);
-    expect(
-      result.errors.some((e) => e.code === 'semantic_address_collision'),
-    ).toBe(true);
+    expect(result.errors.some((e) => e.code === 'semantic_address_collision')).toBe(true);
   });
 
   it('rejects empty slides array', () => {
@@ -155,7 +153,11 @@ describe('validate', () => {
       type: 'component',
       name: 'Broken stat',
       parentId: null,
-      component: { catalogId: '', version: 'not-a-version', props: [] as unknown as Record<string, unknown> },
+      component: {
+        catalogId: '',
+        version: 'not-a-version',
+        props: [] as unknown as Record<string, unknown>,
+      },
     } as Element);
     const result = validate(doc);
     expect(result.valid).toBe(false);

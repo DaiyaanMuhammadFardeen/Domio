@@ -19,11 +19,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
 import { RefreshCcw, Sparkles } from 'lucide-react';
 import { cn } from '../../lib/cn';
-import {
-  generateNotes,
-  type NotesStyle,
-  type NotesResponse,
-} from '../../lib/ai-service';
+import { generateNotes, type NotesStyle, type NotesResponse } from '../../lib/ai-service';
 
 const STYLE_OPTIONS: ReadonlyArray<{ value: NotesStyle; label: string }> = [
   { value: 'bullets', label: 'Bullets' },
@@ -148,19 +144,13 @@ export function NotesGenerator({
         className={cn(
           'inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5',
           'text-xs font-medium text-white transition-colors',
-          loading
-            ? 'bg-slate-700 opacity-70'
-            : 'bg-blue-600 hover:bg-blue-500',
+          loading ? 'bg-slate-700 opacity-70' : 'bg-blue-600 hover:bg-blue-500',
           disabled && 'opacity-50',
         )}
         data-testid="notes-generator-generate"
       >
         <Sparkles size={12} />
-        {loading
-          ? 'Generating…'
-          : regenCount === 0
-            ? 'Generate'
-            : 'Regenerate'}
+        {loading ? 'Generating…' : regenCount === 0 ? 'Generate' : 'Regenerate'}
       </button>
 
       <label className="flex flex-col gap-1 text-[11px] text-slate-400">

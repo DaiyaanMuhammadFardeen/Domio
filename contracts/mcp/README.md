@@ -5,7 +5,7 @@ M1 read-only tools.
 
 ## Layout
 
-- `tools/<tool>.input.schema.json`  — JSON Schema 2020-12 for the
+- `tools/<tool>.input.schema.json` — JSON Schema 2020-12 for the
   JSON-RPC `params` object.
 - `tools/<tool>.output.schema.json` — JSON Schema for the `result`
   object returned by the gateway.
@@ -15,14 +15,14 @@ M1 read-only tools.
 All M1 tools are **read-only**. They require the following capabilities
 on the bearer token:
 
-| Tool                  | Required scopes                       |
-|-----------------------|---------------------------------------|
-| `lint_deck`           | `read:deck`, `lint:deck`              |
-| `get_provenance`      | `audit:read`                          |
-| `semantic_search`     | `read:deck`, `search:deck`            |
-| `get_claim_confidence`| `read:deck`, `claim:read`             |
-| `accessibility_audit` | `read:deck`, `a11y:run`               |
-| `check_freshness`     | `claim:read`                          |
+| Tool                   | Required scopes            |
+| ---------------------- | -------------------------- |
+| `lint_deck`            | `read:deck`, `lint:deck`   |
+| `get_provenance`       | `audit:read`               |
+| `semantic_search`      | `read:deck`, `search:deck` |
+| `get_claim_confidence` | `read:deck`, `claim:read`  |
+| `accessibility_audit`  | `read:deck`, `a11y:run`    |
+| `check_freshness`      | `claim:read`               |
 
 ## Wire format
 
@@ -41,17 +41,17 @@ Successful responses are JSON-RPC 2.0 envelopes:
 Error responses use the JSON-RPC error object with an RFC-7807-style
 `data` field. Common codes:
 
-| Code    | Meaning                              |
-|---------|--------------------------------------|
-| -32700  | Parse error (invalid JSON)           |
-| -32600  | Invalid request                      |
-| -32601  | Method not found                     |
-| -32602  | Invalid params                       |
-| -32603  | Internal error                       |
-| -32001  | Unauthorized                         |
-| -32002  | Forbidden (missing capability)       |
-| -32003  | Tool unavailable                     |
-| -32004  | Idempotency conflict                 |
+| Code   | Meaning                        |
+| ------ | ------------------------------ |
+| -32700 | Parse error (invalid JSON)     |
+| -32600 | Invalid request                |
+| -32601 | Method not found               |
+| -32602 | Invalid params                 |
+| -32603 | Internal error                 |
+| -32001 | Unauthorized                   |
+| -32002 | Forbidden (missing capability) |
+| -32003 | Tool unavailable               |
+| -32004 | Idempotency conflict           |
 
 ## Streaming
 

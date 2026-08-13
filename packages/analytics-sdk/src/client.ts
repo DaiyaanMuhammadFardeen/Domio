@@ -95,33 +95,103 @@ export class AnalyticsClient {
   }
 
   /** Synchronous enqueue. Returns false when the event was dropped (DNT). */
-  emitView(input: Omit<ViewEvent, 'event_id' | 'event_name' | 'schema_version' | 'ts_ms' | 'ingest_topic' | 'source_app' | 'privacy_mode' | 'device_class'> & Partial<Pick<ViewEvent, 'privacy_mode' | 'device_class'>>): boolean {
+  emitView(
+    input: Omit<
+      ViewEvent,
+      | 'event_id'
+      | 'event_name'
+      | 'schema_version'
+      | 'ts_ms'
+      | 'ingest_topic'
+      | 'source_app'
+      | 'privacy_mode'
+      | 'device_class'
+    > &
+      Partial<Pick<ViewEvent, 'privacy_mode' | 'device_class'>>,
+  ): boolean {
     return this.emit({
       ...input,
       event_name: 'view',
     } as ViewEvent);
   }
 
-  emitInteraction(input: Omit<InteractionEvent, 'event_id' | 'event_name' | 'schema_version' | 'ts_ms' | 'ingest_topic' | 'source_app' | 'privacy_mode' | 'device_class' | 'interaction_kind'> & { interaction_kind: InteractionKind; privacy_mode?: PrivacyMode; device_class?: ViewEvent['device_class'] }): boolean {
+  emitInteraction(
+    input: Omit<
+      InteractionEvent,
+      | 'event_id'
+      | 'event_name'
+      | 'schema_version'
+      | 'ts_ms'
+      | 'ingest_topic'
+      | 'source_app'
+      | 'privacy_mode'
+      | 'device_class'
+      | 'interaction_kind'
+    > & {
+      interaction_kind: InteractionKind;
+      privacy_mode?: PrivacyMode;
+      device_class?: ViewEvent['device_class'];
+    },
+  ): boolean {
     return this.emit({
       ...input,
       event_name: 'interaction',
     } as InteractionEvent);
   }
 
-  emitScrollProgress(input: Omit<ScrollProgressEvent, 'event_id' | 'event_name' | 'schema_version' | 'ts_ms' | 'ingest_topic' | 'source_app' | 'privacy_mode' | 'device_class'>): boolean {
+  emitScrollProgress(
+    input: Omit<
+      ScrollProgressEvent,
+      | 'event_id'
+      | 'event_name'
+      | 'schema_version'
+      | 'ts_ms'
+      | 'ingest_topic'
+      | 'source_app'
+      | 'privacy_mode'
+      | 'device_class'
+    >,
+  ): boolean {
     return this.emit({ ...input, event_name: 'scroll_progress' } as ScrollProgressEvent);
   }
 
-  emitScrollPause(input: Omit<ScrollPauseEvent, 'event_id' | 'event_name' | 'schema_version' | 'ts_ms' | 'ingest_topic' | 'source_app' | 'privacy_mode' | 'device_class'>): boolean {
+  emitScrollPause(
+    input: Omit<
+      ScrollPauseEvent,
+      | 'event_id'
+      | 'event_name'
+      | 'schema_version'
+      | 'ts_ms'
+      | 'ingest_topic'
+      | 'source_app'
+      | 'privacy_mode'
+      | 'device_class'
+    >,
+  ): boolean {
     return this.emit({ ...input, event_name: 'scroll_pause' } as ScrollPauseEvent);
   }
 
-  emitPresenterEvent(input: Omit<PresenterEvent, 'event_id' | 'event_name' | 'schema_version' | 'ts_ms' | 'ingest_topic' | 'source_app' | 'action'> & { action: PresenterAction }): boolean {
+  emitPresenterEvent(
+    input: Omit<
+      PresenterEvent,
+      | 'event_id'
+      | 'event_name'
+      | 'schema_version'
+      | 'ts_ms'
+      | 'ingest_topic'
+      | 'source_app'
+      | 'action'
+    > & { action: PresenterAction },
+  ): boolean {
     return this.emit({ ...input, event_name: 'presenter_event' } as PresenterEvent);
   }
 
-  emitLiveSessionEvent(input: Omit<LiveSessionEvent, 'event_id' | 'event_name' | 'schema_version' | 'ts_ms' | 'ingest_topic' | 'live_event_kind'> & { live_event_kind: LiveEventKind }): boolean {
+  emitLiveSessionEvent(
+    input: Omit<
+      LiveSessionEvent,
+      'event_id' | 'event_name' | 'schema_version' | 'ts_ms' | 'ingest_topic' | 'live_event_kind'
+    > & { live_event_kind: LiveEventKind },
+  ): boolean {
     return this.emit({ ...input, event_name: 'live_session_event' } as LiveSessionEvent);
   }
 
@@ -167,7 +237,8 @@ function defaultDntDetector(): boolean {
   if (nav.doNotTrack === '1') return true;
   // Sec-CH-Prefers-Reduced-Tracking surfaces via UA client hints; we
   // approximate it with the `userAgentData` API where available.
-  const uaData = (nav as Navigator & { userAgentData?: { prefersReducedTracking?: boolean } }).userAgentData;
+  const uaData = (nav as Navigator & { userAgentData?: { prefersReducedTracking?: boolean } })
+    .userAgentData;
   if (uaData?.prefersReducedTracking) return true;
   return false;
 }

@@ -7,10 +7,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { LiveHUD } from './LiveHUD';
-import type {
-  LiveEvent,
-  LiveSubscription,
-} from '../lib/live-analytics-service';
+import type { LiveEvent, LiveSubscription } from '../lib/live-analytics-service';
 
 interface MockState {
   events: Array<(event: LiveEvent) => void>;
@@ -32,12 +29,10 @@ function createMockSubscribe() {
     },
   };
   const subscribe = vi.fn(
-    (
-      listeners: {
-        onEvent: (event: LiveEvent) => void;
-        onStatus: (state: { status: 'connecting' | 'open' | 'closed' | 'error' }) => void;
-      },
-    ): LiveSubscription => {
+    (listeners: {
+      onEvent: (event: LiveEvent) => void;
+      onStatus: (state: { status: 'connecting' | 'open' | 'closed' | 'error' }) => void;
+    }): LiveSubscription => {
       state.events.push(listeners.onEvent);
       state.statuses.push(listeners.onStatus);
       // Fire the initial connecting status.
@@ -116,9 +111,9 @@ describe('LiveHUD', () => {
     render(<LiveHUD sessionId="session-1" subscribe={subscribe} />);
 
     act(() => {
-      const onStatus = (subscribe.mock.calls[0]?.[0]?.onStatus ?? (() => {})) as (
-        state: { status: 'connecting' | 'open' | 'closed' | 'error' },
-      ) => void;
+      const onStatus = (subscribe.mock.calls[0]?.[0]?.onStatus ?? (() => {})) as (state: {
+        status: 'connecting' | 'open' | 'closed' | 'error';
+      }) => void;
       onStatus({ status: 'error' });
     });
 
@@ -127,9 +122,7 @@ describe('LiveHUD', () => {
 
   it('closes the subscription on unmount', () => {
     const { subscribe, state } = createMockSubscribe();
-    const { unmount } = render(
-      <LiveHUD sessionId="session-1" subscribe={subscribe} />,
-    );
+    const { unmount } = render(<LiveHUD sessionId="session-1" subscribe={subscribe} />);
     unmount();
     expect(state.closed).toBe(true);
   });

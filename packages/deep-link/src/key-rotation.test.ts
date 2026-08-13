@@ -20,14 +20,22 @@ class InMemoryKeyStore implements KeyRotationStore {
   async insert(record: DeepLinkSigningKey): Promise<void> {
     this.rows.push(record);
   }
-  async findActive(tenant_id: string, deck_id: string, now: number): Promise<DeepLinkSigningKey | null> {
+  async findActive(
+    tenant_id: string,
+    deck_id: string,
+    now: number,
+  ): Promise<DeepLinkSigningKey | null> {
     const active = this.rows
       .filter((k) => k.tenant_id === tenant_id && k.deck_id === deck_id)
       .filter((k) => k.not_before <= now && now <= k.not_after)
       .sort((a, b) => b.not_before - a.not_before);
     return active[0] ?? null;
   }
-  async findValid(tenant_id: string, deck_id: string, now: number): Promise<readonly DeepLinkSigningKey[]> {
+  async findValid(
+    tenant_id: string,
+    deck_id: string,
+    now: number,
+  ): Promise<readonly DeepLinkSigningKey[]> {
     return this.rows
       .filter((k) => k.tenant_id === tenant_id && k.deck_id === deck_id)
       .filter((k) => k.not_before <= now && now <= k.not_after + OVERLAP_MS);
@@ -37,7 +45,9 @@ class InMemoryKeyStore implements KeyRotationStore {
     // Postgres implementation. We just count.
     return this.rows.filter((k) => k.not_after + OVERLAP_MS <= cutoff).length;
   }
-  list(): readonly DeepLinkSigningKey[] { return this.rows; }
+  list(): readonly DeepLinkSigningKey[] {
+    return this.rows;
+  }
 }
 
 describe('KeyRotator', () => {

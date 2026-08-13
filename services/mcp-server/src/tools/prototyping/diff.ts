@@ -35,7 +35,10 @@ function keyOf(x: Identifiable): string {
   return (x.id ?? x.name ?? JSON.stringify(x)) as string;
 }
 
-function diffArrays<T extends Identifiable>(a: readonly T[], b: readonly T[]): {
+function diffArrays<T extends Identifiable>(
+  a: readonly T[],
+  b: readonly T[],
+): {
   added: DiffEntry[];
   removed: DiffEntry[];
   changed: DiffEntry[];
@@ -57,7 +60,11 @@ function diffArrays<T extends Identifiable>(a: readonly T[], b: readonly T[]): {
   return { added, removed, changed };
 }
 
-export async function diffDecks(ctx: McpContext, deckIdA: string, deckIdB: string): Promise<DeckDiff> {
+export async function diffDecks(
+  ctx: McpContext,
+  deckIdA: string,
+  deckIdB: string,
+): Promise<DeckDiff> {
   const claim = claimCapability(ctx.agentId, 'deck-diff');
   if (!claim.granted) throw new MCPError('PERMISSION_DENIED', claim.reason ?? 'permission denied');
   const ctxA = { ...ctx } as McpContext;
@@ -75,7 +82,10 @@ export async function diffDecks(ctx: McpContext, deckIdA: string, deckIdB: strin
     list_overlays.handler(ctxB, { deckId: deckIdB }),
   ] as const);
   const all: DiffEntry[] = [];
-  const push = (label: string, r: { added: DiffEntry[]; removed: DiffEntry[]; changed: DiffEntry[] }) => {
+  const push = (
+    label: string,
+    r: { added: DiffEntry[]; removed: DiffEntry[]; changed: DiffEntry[] },
+  ) => {
     const tag = (e: DiffEntry, suffix: string): DiffEntry => ({ ...e, kind: `${label}.${suffix}` });
     r.added.forEach((e) => all.push({ ...tag(e, 'added'), b: e.b }));
     r.removed.forEach((e) => all.push({ ...tag(e, 'removed'), a: e.a }));
@@ -83,8 +93,14 @@ export async function diffDecks(ctx: McpContext, deckIdA: string, deckIdB: strin
   };
   push('hotspot', diffArrays(hotA as unknown as Identifiable[], hotB as unknown as Identifiable[]));
   push('rule', diffArrays(ruleA as unknown as Identifiable[], ruleB as unknown as Identifiable[]));
-  push('variable', diffArrays(varA as unknown as Identifiable[], varB as unknown as Identifiable[]));
-  push('calculator', diffArrays(calcA as unknown as Identifiable[], calcB as unknown as Identifiable[]));
+  push(
+    'variable',
+    diffArrays(varA as unknown as Identifiable[], varB as unknown as Identifiable[]),
+  );
+  push(
+    'calculator',
+    diffArrays(calcA as unknown as Identifiable[], calcB as unknown as Identifiable[]),
+  );
   push('overlay', diffArrays(ovA as unknown as Identifiable[], ovB as unknown as Identifiable[]));
   return {
     added: all.filter((e) => e.kind.endsWith('.added')),
@@ -114,7 +130,9 @@ export const deck_diff: McpTool<{ deckIdA: string; deckIdB: string }, DeckDiff> 
   handler: async (ctx, input) => {
     const v = validateDiff(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
-    return withAuditTrail(ctx, 'deck_diff', v.value, async () => diffDecks(ctx, v.value.deckIdA, v.value.deckIdB));
+    return withAuditTrail(ctx, 'deck_diff', v.value, async () =>
+      diffDecks(ctx, v.value.deckIdA, v.value.deckIdB),
+    );
   },
 };
 

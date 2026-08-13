@@ -7,13 +7,8 @@
 import { describe, expect, it } from 'vitest';
 import { handlers, type HttpRequest } from './handlers.js';
 import { DeepLinkService } from './service.js';
-import {
-  InMemoryDeepLinkRepository,
-  InMemoryDeepLinkKeyRepository,
-} from './dal.js';
-import {
-  type DeepLinkHandlerContext,
-} from './handlers.js';
+import { InMemoryDeepLinkRepository, InMemoryDeepLinkKeyRepository } from './dal.js';
+import { type DeepLinkHandlerContext } from './handlers.js';
 
 const TENANT = 'tenant-1';
 const OTHER_TENANT = 'tenant-2';
@@ -51,9 +46,7 @@ describe('DeepLinkService — shorten', () => {
       deck_id: DECK,
       slide_id: SLIDE_A,
       path_stack: [SLIDE_A],
-      var_snapshot: [
-        { name: 'TIER', value: 'annual', visibility: 'deck_public', scope: 'deck' },
-      ],
+      var_snapshot: [{ name: 'TIER', value: 'annual', visibility: 'deck_public', scope: 'deck' }],
     });
     expect(result.id).toHaveLength(9);
     expect(result.token.length).toBeGreaterThan(20);
@@ -265,7 +258,12 @@ describe('HTTP handlers', () => {
     const service = makeService();
     const short = await service.shorten({ tenant_id: TENANT, deck_id: DECK, slide_id: SLIDE_A });
     const res = await handlers.stats(
-      req('GET', '/v1/tenants/t1/deep-links/x/stats', { tenantId: TENANT, id: short.id }, undefined),
+      req(
+        'GET',
+        '/v1/tenants/t1/deep-links/x/stats',
+        { tenantId: TENANT, id: short.id },
+        undefined,
+      ),
       ctxFor(service),
     );
     expect(res.status).toBe(200);

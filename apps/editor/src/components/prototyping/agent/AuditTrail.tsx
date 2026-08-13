@@ -15,13 +15,7 @@
  * downstream tests continue to compile.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
 
 import {
@@ -34,10 +28,7 @@ import {
   type AuditEntryKind,
 } from '../../../lib/audit-trail-service.js';
 import { AuditEntryDetail } from './AuditEntryDetail.js';
-import {
-  AuditFilterBar,
-  type AuditTimeRange,
-} from './AuditFilterBar.js';
+import { AuditFilterBar, type AuditTimeRange } from './AuditFilterBar.js';
 
 /* -------------------------------------------------------------------------- */
 /* Legacy public types — kept for backwards compatibility                     */
@@ -181,11 +172,7 @@ function LegacyAuditTrail({ entries, onDiff }: LegacyProps): ReactElement {
                       : stringify(entry.output)}
                   </pre>
                   {onDiff ? (
-                    <button
-                      type="button"
-                      data-testid="m8-audit-diff"
-                      onClick={() => onDiff(entry)}
-                    >
+                    <button type="button" data-testid="m8-audit-diff" onClick={() => onDiff(entry)}>
                       Show diff
                     </button>
                   ) : null}
@@ -226,9 +213,7 @@ function LiveAuditTrail({
   dataTestId = 'audit-trail',
 }: LiveProps): ReactElement {
   void deckId; // reserved for future server-side scoping
-  const [entries, setEntries] = useState<readonly AuditEntry[]>(
-    () => initialEntries ?? [],
-  );
+  const [entries, setEntries] = useState<readonly AuditEntry[]>(() => initialEntries ?? []);
   const [loading, setLoading] = useState<boolean>(initialEntries === undefined);
   const [error, setError] = useState<string | null>(null);
 
@@ -343,10 +328,7 @@ function LiveAuditTrail({
       ) : null}
 
       {!loading && !error && filtered.length > 0 ? (
-        <ul
-          data-testid={`${dataTestId}-list`}
-          style={{ listStyle: 'none', padding: 0, margin: 0 }}
-        >
+        <ul data-testid={`${dataTestId}-list`} style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {filtered.map((entry) => (
             <AuditRow
               key={entry.id}
@@ -375,13 +357,7 @@ interface AuditRowProps {
   readonly dataTestId: string;
 }
 
-function AuditRow({
-  entry,
-  open,
-  onToggle,
-  onDiff,
-  dataTestId,
-}: AuditRowProps): ReactElement {
+function AuditRow({ entry, open, onToggle, onDiff, dataTestId }: AuditRowProps): ReactElement {
   const kindLabelId =
     entry.kind === 'human_edit'
       ? 'editor.agent.audit.entry.kind.human'
@@ -439,15 +415,14 @@ function AuditRow({
             padding: '1px 6px',
             borderRadius: 4,
             background: isHuman ? 'rgba(99,102,241,0.18)' : 'rgba(34,197,94,0.18)',
-            color: isHuman ? 'var(--color-primary-fg, currentColor)' : 'var(--color-success-fg, currentColor)',
+            color: isHuman
+              ? 'var(--color-primary-fg, currentColor)'
+              : 'var(--color-success-fg, currentColor)',
           }}
         >
           <FormattedMessage id={kindLabelId} />
         </span>
-        <span
-          data-testid={`${dataTestId}-agent`}
-          style={{ fontSize: 11, fontWeight: 500 }}
-        >
+        <span data-testid={`${dataTestId}-agent`} style={{ fontSize: 11, fontWeight: 500 }}>
           {entry.agent_name}
         </span>
         <span

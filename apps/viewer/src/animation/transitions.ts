@@ -75,15 +75,19 @@ const KIND_PROPS: ReadonlyMap<TransitionKind, TransitionProps> = new Map([
 // ─── Helpers ────────────────────────────────────────────────────
 
 const ALL_KINDS: readonly TransitionKind[] = [
-  'fade', 'slide', 'wipe', 'zoom', 'flip', 'bubble', 'cube', 'shutter',
+  'fade',
+  'slide',
+  'wipe',
+  'zoom',
+  'flip',
+  'bubble',
+  'cube',
+  'shutter',
 ];
 
 function assertValidKind(kind: string): asserts kind is TransitionKind {
   if (!(ALL_KINDS as readonly string[]).includes(kind)) {
-    throw new TransitionError(
-      'UNKNOWN_KIND',
-      `Unknown transition kind: "${kind}"`,
-    );
+    throw new TransitionError('UNKNOWN_KIND', `Unknown transition kind: "${kind}"`);
   }
 }
 
@@ -98,10 +102,7 @@ function assertValidKind(kind: string): asserts kind is TransitionKind {
  *
  * @throws {TransitionError} UNKNOWN_KIND for unrecognised kinds.
  */
-export function transitionDuration(
-  kind: TransitionKind,
-  defaultMs: number,
-): number {
+export function transitionDuration(kind: TransitionKind, defaultMs: number): number {
   assertValidKind(kind);
   return KIND_DURATIONS.get(kind) ?? defaultMs;
 }

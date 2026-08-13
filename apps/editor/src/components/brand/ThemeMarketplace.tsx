@@ -15,10 +15,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
-import {
-  fetchCuratedListings,
-  type CuratedListingView,
-} from '../../lib/marketplace-service';
+import { fetchCuratedListings, type CuratedListingView } from '../../lib/marketplace-service';
 import type { ThemeDetail } from '../../lib/brand-service';
 import { contrastFor, generateColorScale } from '../../lib/design-tokens';
 
@@ -200,12 +197,19 @@ function ThemePreviewModal({
   const palette = generateColorScale(seedHex, { id: 'color.brand.primary', label: 'Primary' });
 
   return (
-    <div className="theme-marketplace__modal" role="dialog" aria-modal="true" data-testid="theme-marketplace-modal">
+    <div
+      className="theme-marketplace__modal"
+      role="dialog"
+      aria-modal="true"
+      data-testid="theme-marketplace-modal"
+    >
       <div className="theme-marketplace__modal-backdrop" onClick={onClose} />
       <div className="theme-marketplace__modal-panel">
         <header className="theme-marketplace__modal-head">
           <h3>{listing.title}</h3>
-          <button type="button" onClick={onClose} aria-label="Close">×</button>
+          <button type="button" onClick={onClose} aria-label="Close">
+            ×
+          </button>
         </header>
         <div
           className="theme-marketplace__modal-preview"
@@ -214,9 +218,7 @@ function ThemePreviewModal({
             color: contrastFor(palette.stops[0]?.value ?? '#000'),
           }}
         >
-          <h4 style={{ fontFamily: 'Inter', fontSize: 28, margin: '0 0 8px' }}>
-            {listing.title}
-          </h4>
+          <h4 style={{ fontFamily: 'Inter', fontSize: 28, margin: '0 0 8px' }}>{listing.title}</h4>
           <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: 1.5, opacity: 0.85 }}>
             {listing.description ??
               'A live preview of the theme on a representative canvas layout.'}
@@ -236,7 +238,9 @@ function ThemePreviewModal({
           </button>
         </div>
         <footer className="theme-marketplace__modal-foot">
-          <button type="button" onClick={onClose}>Close</button>
+          <button type="button" onClick={onClose}>
+            Close
+          </button>
           <button
             type="button"
             className="theme-marketplace__install"
@@ -254,15 +258,7 @@ function ThemePreviewModal({
 /** Pick a deterministic hex from the listing so demos are stable. */
 function pickAccentHex(listing: CuratedListingView): string {
   if (listing.poster_ref) return listing.poster_ref;
-  const palette = [
-    '#0a2540',
-    '#5b21b6',
-    '#15803d',
-    '#7c2d12',
-    '#0f172a',
-    '#aa3a14',
-    '#58a6ff',
-  ];
+  const palette = ['#0a2540', '#5b21b6', '#15803d', '#7c2d12', '#0f172a', '#aa3a14', '#58a6ff'];
   let h = 0;
   for (let i = 0; i < listing.listing_id.length; i++) {
     h = (h * 31 + listing.listing_id.charCodeAt(i)) >>> 0;

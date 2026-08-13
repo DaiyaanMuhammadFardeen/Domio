@@ -28,7 +28,10 @@ describe('TriggerResolver', () => {
       });
 
       resolver.fire('on_data_change', { sourceId: 'user', fieldPath: 'name' });
-      expect(onFire).toHaveBeenCalledWith('tl-1', expect.objectContaining({ kind: 'on_data_change' }));
+      expect(onFire).toHaveBeenCalledWith(
+        'tl-1',
+        expect.objectContaining({ kind: 'on_data_change' }),
+      );
     });
 
     it('does not fire on non-matching (sourceId, fieldPath)', () => {

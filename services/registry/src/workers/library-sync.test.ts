@@ -5,7 +5,9 @@ import { run } from './library-sync.js';
 import type { TeamLibrary } from '../store/types.js';
 
 function makeDeps(store: InMemoryStore): ServiceDeps {
-  return defaultDeps(store, { ulid: () => `ulid-${Date.now()}-${Math.random().toString(36).slice(2)}` });
+  return defaultDeps(store, {
+    ulid: () => `ulid-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  });
 }
 
 describe('library-sync worker', () => {

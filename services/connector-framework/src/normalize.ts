@@ -62,9 +62,31 @@ function inferColumnType(values: unknown[]): ColumnType {
 
 function inferSemanticRole(colName: string, type: ColumnType): SemanticRole {
   const lower = colName.toLowerCase();
-  if (type === 'currency' || lower.includes('price') || lower.includes('amount') || lower.includes('revenue') || lower.includes('cost') || lower.includes('salary')) return 'currency';
-  if (type === 'percent' || lower.includes('rate') || lower.includes('ratio') || lower.includes('pct') || lower.includes('percentage')) return 'percent';
-  if (type === 'date' || lower.includes('date') || lower.includes('time') || lower.includes('_at') || lower.includes('_ts')) return 'date';
+  if (
+    type === 'currency' ||
+    lower.includes('price') ||
+    lower.includes('amount') ||
+    lower.includes('revenue') ||
+    lower.includes('cost') ||
+    lower.includes('salary')
+  )
+    return 'currency';
+  if (
+    type === 'percent' ||
+    lower.includes('rate') ||
+    lower.includes('ratio') ||
+    lower.includes('pct') ||
+    lower.includes('percentage')
+  )
+    return 'percent';
+  if (
+    type === 'date' ||
+    lower.includes('date') ||
+    lower.includes('time') ||
+    lower.includes('_at') ||
+    lower.includes('_ts')
+  )
+    return 'date';
   if (lower.includes('id') && (lower.endsWith('_id') || lower === 'id')) return 'id';
   if (type === 'number') return 'measure';
   return 'dimension';

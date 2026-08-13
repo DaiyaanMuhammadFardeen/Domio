@@ -40,14 +40,7 @@ const THEMES: readonly string[] = [
   'developer',
 ];
 
-const COLORS: readonly string[] = [
-  'blue',
-  'purple',
-  'green',
-  'red',
-  'amber',
-  'neutral',
-];
+const COLORS: readonly string[] = ['blue', 'purple', 'green', 'red', 'amber', 'neutral'];
 
 const LANGUAGES: readonly string[] = ['en', 'bn', 'es', 'fr', 'de', 'ja', 'zh-CN'];
 
@@ -160,9 +153,8 @@ function buildListing(idx: number): MarketplaceListingWithMeta {
   };
 }
 
-const ALL: ReadonlyArray<MarketplaceListingWithMeta> = Array.from(
-  { length: 24 },
-  (_, i) => buildListing(i),
+const ALL: ReadonlyArray<MarketplaceListingWithMeta> = Array.from({ length: 24 }, (_, i) =>
+  buildListing(i),
 );
 
 /* ── Helpers ────────────────────────────────────────────────────────── */
@@ -307,9 +299,7 @@ export async function getFeatured(): Promise<MarketplaceListingWithMeta[]> {
 }
 
 export async function getTopRated(): Promise<MarketplaceListingWithMeta[]> {
-  return [...ALL]
-    .sort((a, b) => (b.rating_avg ?? 0) - (a.rating_avg ?? 0))
-    .slice(0, 6);
+  return [...ALL].sort((a, b) => (b.rating_avg ?? 0) - (a.rating_avg ?? 0)).slice(0, 6);
 }
 
 export async function getRecentlyAdded(): Promise<MarketplaceListingWithMeta[]> {
@@ -335,9 +325,7 @@ export async function getByCategory(): Promise<Record<ListingKind, MarketplaceLi
  * Fetch related listings for a given listing id.
  * Returns up to 4 other listings (excluding the source) sorted by kind match.
  */
-export async function getRelatedListings(
-  listingId: string,
-): Promise<ReadonlyArray<ListingCardVM>> {
+export async function getRelatedListings(listingId: string): Promise<ReadonlyArray<ListingCardVM>> {
   const source = ALL.find((l) => l.id === listingId);
   const others = ALL.filter((l) => l.id !== listingId);
   if (source?.kind) {

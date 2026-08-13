@@ -75,7 +75,12 @@ export class EasingLruCache {
  * Build easing key from bezier parameters and sample count.
  */
 export function easingKey(
-  easing: { readonly p1x: number; readonly p1y: number; readonly p2x: number; readonly p2y: number },
+  easing: {
+    readonly p1x: number;
+    readonly p1y: number;
+    readonly p2x: number;
+    readonly p2y: number;
+  },
   nSamples: number,
 ): string {
   return `${easing.p1x},${easing.p1y},${easing.p2x},${easing.p2y}|${nSamples}`;

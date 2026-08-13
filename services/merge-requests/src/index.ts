@@ -13,7 +13,11 @@ export type { MergeRequestServiceOptions } from './service.js';
 export { handlers } from './handlers.js';
 export type { HttpRequest, HttpResponse, MergeRequestHandlerContext } from './handlers.js';
 export { InMemoryMergeRequestStore } from './store/mem_store.js';
-export { PgMergeRequestStore, StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
+export {
+  PgMergeRequestStore,
+  StoreNotConfiguredError,
+  StoreNotImplementedError,
+} from './store/pg_store.js';
 export type { MergeRequestStore } from './store/store.js';
 export { FEATURE_FLAGS, checkFeature } from './feature_flags.js';
 export type { FeatureFlag } from './feature_flags.js';

@@ -22,10 +22,10 @@ paths:
       operationId: listInteractionStates
       summary: List interaction states for a deck
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Interaction states in deterministic creation order.
           content:
             application/json:
@@ -35,74 +35,74 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/InteractionState" }
+                    items: { $ref: '#/components/schemas/InteractionState' }
     post:
       tags: [state-machines]
       operationId: createInteractionState
       summary: Create an interaction state
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreateInteractionStateRequest" }
+            schema: { $ref: '#/components/schemas/CreateInteractionStateRequest' }
       responses:
-        "201":
+        '201':
           description: Interaction state created.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/InteractionState" }
-        "422": { description: Validation failed. }
+              schema: { $ref: '#/components/schemas/InteractionState' }
+        '422': { description: Validation failed. }
   /v1/tenants/{tenantId}/decks/{deckId}/interaction-states/{id}:
     get:
       tags: [state-machines]
       operationId: getInteractionState
       summary: Get an interaction state
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Interaction state.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/InteractionState" }
-        "404": { description: Interaction state not found. }
+              schema: { $ref: '#/components/schemas/InteractionState' }
+        '404': { description: Interaction state not found. }
     patch:
       tags: [state-machines]
       operationId: patchInteractionState
       summary: Update an interaction state
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PatchInteractionStateRequest" }
+            schema: { $ref: '#/components/schemas/PatchInteractionStateRequest' }
       responses:
-        "200":
+        '200':
           description: Updated interaction state.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/InteractionState" }
-        "404": { description: Interaction state not found. }
-        "422": { description: Validation failed. }
+              schema: { $ref: '#/components/schemas/InteractionState' }
+        '404': { description: Interaction state not found. }
+        '422': { description: Validation failed. }
     delete:
       tags: [state-machines]
       operationId: deleteInteractionState
       summary: Delete an interaction state
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "204": { description: Interaction state deleted. }
-        "404": { description: Interaction state not found. }
+        '204': { description: Interaction state deleted. }
+        '404': { description: Interaction state not found. }
   /v1/tenants/{tenantId}/decks/{deckId}/interaction-states/{id}/transition:
     post:
       tags: [state-machines]
@@ -114,16 +114,16 @@ paths:
         the winner via the precedence ladder
         `focus > press > click > hover > default`.
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/TransitionRequest" }
+            schema: { $ref: '#/components/schemas/TransitionRequest' }
       responses:
-        "200":
+        '200':
           description: Updated interaction state + transition metadata.
           content:
             application/json:
@@ -132,11 +132,11 @@ paths:
                 additionalProperties: false
                 required: [record, transition]
                 properties:
-                  record: { $ref: "#/components/schemas/InteractionState" }
-                  transition: { $ref: "#/components/schemas/TransitionResult" }
-        "400": { description: Invalid event. }
-        "404": { description: Interaction state not found. }
-        "422": { description: Validation failed. }
+                  record: { $ref: '#/components/schemas/InteractionState' }
+                  transition: { $ref: '#/components/schemas/TransitionResult' }
+        '400': { description: Invalid event. }
+        '404': { description: Interaction state not found. }
+        '422': { description: Validation failed. }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer }
@@ -164,7 +164,7 @@ components:
       properties:
         states:
           type: object
-          additionalProperties: { $ref: "#/components/schemas/StateNode" }
+          additionalProperties: { $ref: '#/components/schemas/StateNode' }
           minProperties: 1
           maxProperties: 64
         initial:
@@ -173,7 +173,7 @@ components:
           maxLength: 64
         transitions:
           type: array
-          items: { $ref: "#/components/schemas/StateTransition" }
+          items: { $ref: '#/components/schemas/StateTransition' }
           maxItems: 256
     StateNode:
       type: object
@@ -195,13 +195,24 @@ components:
     InteractionState:
       type: object
       additionalProperties: false
-      required: [id, tenantId, deckId, instanceId, stateMachine, currentState, scope, persistInstanceState, updatedAt]
+      required:
+        [
+          id,
+          tenantId,
+          deckId,
+          instanceId,
+          stateMachine,
+          currentState,
+          scope,
+          persistInstanceState,
+          updatedAt,
+        ]
       properties:
         id: { type: string }
         tenantId: { type: string }
         deckId: { type: string }
         instanceId: { type: string }
-        stateMachine: { $ref: "#/components/schemas/StateMachineSpec" }
+        stateMachine: { $ref: '#/components/schemas/StateMachineSpec' }
         currentState: { type: string }
         scope: { enum: [session, slide, deck, persistent_session] }
         persistInstanceState: { type: boolean }
@@ -212,7 +223,7 @@ components:
       required: [instanceId, stateMachine, currentState, scope]
       properties:
         instanceId: { type: string, minLength: 1, maxLength: 128 }
-        stateMachine: { $ref: "#/components/schemas/StateMachineSpec" }
+        stateMachine: { $ref: '#/components/schemas/StateMachineSpec' }
         currentState: { type: string, minLength: 1 }
         scope: { enum: [session, slide, deck, persistent_session] }
         persistInstanceState: { type: boolean, default: false }
@@ -223,7 +234,7 @@ components:
         currentState: { type: string, minLength: 1 }
         scope: { enum: [session, slide, deck, persistent_session] }
         persistInstanceState: { type: boolean }
-        stateMachine: { $ref: "#/components/schemas/StateMachineSpec" }
+        stateMachine: { $ref: '#/components/schemas/StateMachineSpec' }
     TransitionRequest:
       type: object
       additionalProperties: false

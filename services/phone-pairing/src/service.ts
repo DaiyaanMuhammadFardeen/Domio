@@ -32,16 +32,9 @@ import type {
   PairingTokenClaims,
   VerifyPairingTokenInput,
 } from './types.js';
-import {
-  DEFAULT_PAIRING_CAPABILITIES,
-  PAIRING_ROTATION_MS,
-} from './types.js';
+import { DEFAULT_PAIRING_CAPABILITIES, PAIRING_ROTATION_MS } from './types.js';
 import { isPairingStore, type PairingStore } from './store/store.js';
-import {
-  mintPairingToken,
-  parsePairingToken,
-  verifyPairingToken,
-} from './token.js';
+import { mintPairingToken, parsePairingToken, verifyPairingToken } from './token.js';
 import { PairingSignatureError } from './types.js';
 import type { TokenSigner } from './token.js';
 import { Chain, type JsonObject, GenesisHash } from '@domio/audit-ts';
@@ -94,9 +87,7 @@ export class PhonePairingService {
   // Mint
   // -------------------------------------------------------------------------
 
-  async mint(
-    input: MintPairingTokenInput,
-  ): Promise<MintedPairingToken> {
+  async mint(input: MintPairingTokenInput): Promise<MintedPairingToken> {
     const now = this.clock();
     const capabilities: PairingCapability[] = input.capabilities
       ? [...input.capabilities]
@@ -201,10 +192,7 @@ export class PhonePairingService {
     new_capabilities?: PairingCapability[] | undefined;
     new_platform?: PairingPlatform | undefined;
   }): Promise<MintedPairingToken> {
-    const existing = await this.store.getBySessionDevice(
-      args.presenter_session_id,
-      args.device_id,
-    );
+    const existing = await this.store.getBySessionDevice(args.presenter_session_id, args.device_id);
     if (!existing) {
       throw new Error(`rotate: no pairing for device ${args.device_id}`);
     }
@@ -231,10 +219,7 @@ export class PhonePairingService {
     device_id: string;
     revoked_by: string;
   }): Promise<PairingRecord> {
-    const existing = await this.store.getBySessionDevice(
-      args.presenter_session_id,
-      args.device_id,
-    );
+    const existing = await this.store.getBySessionDevice(args.presenter_session_id, args.device_id);
     if (!existing) {
       throw new Error(`revoke: no pairing for device ${args.device_id}`);
     }
@@ -259,10 +244,7 @@ export class PhonePairingService {
     presenter_session_id: string;
     device_id: string;
   }): Promise<PairingRecord | null> {
-    const existing = await this.store.getBySessionDevice(
-      args.presenter_session_id,
-      args.device_id,
-    );
+    const existing = await this.store.getBySessionDevice(args.presenter_session_id, args.device_id);
     if (!existing || existing.status !== 'active') return null;
     return this.store.update(existing.id, { last_seen_at_ms: this.clock() });
   }

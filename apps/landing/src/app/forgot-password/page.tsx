@@ -15,8 +15,7 @@ import { PageShell } from '../../components/layout/PageShell';
 
 export const metadata: Metadata = {
   title: 'Reset your Domio password',
-  description:
-    'Enter the email you used to sign up and we will send a password reset link.',
+  description: 'Enter the email you used to sign up and we will send a password reset link.',
 };
 
 export default function ForgotPasswordPage(): JSX.Element {

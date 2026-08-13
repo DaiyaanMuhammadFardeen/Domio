@@ -73,7 +73,9 @@ export function removeAnnotation(
   return writeAnnotations(props, next);
 }
 
-export function clearAnnotations(props: Record<string, unknown> | undefined): Record<string, unknown> {
+export function clearAnnotations(
+  props: Record<string, unknown> | undefined,
+): Record<string, unknown> {
   return writeAnnotations(props, []);
 }
 
@@ -81,7 +83,9 @@ export function clearAnnotations(props: Record<string, unknown> | undefined): Re
  * Create a fresh annotation pin with sensible defaults. The id and
  * `createdAtMs` are filled in if not supplied.
  */
-export function makeAnnotationPin(input: Partial<AnnotationPin> & Pick<AnnotationPin, 'dataPointId' | 'text' | 'author'>): AnnotationPin {
+export function makeAnnotationPin(
+  input: Partial<AnnotationPin> & Pick<AnnotationPin, 'dataPointId' | 'text' | 'author'>,
+): AnnotationPin {
   return {
     id: input.id ?? `pin-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
     dataPointId: input.dataPointId,

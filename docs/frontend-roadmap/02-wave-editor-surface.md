@@ -25,6 +25,7 @@
 **Features:** #10, #11, #13, #14, #16, #17.
 
 **Files to create/modify:**
+
 - `apps/editor/src/components/canvas/Rulers.tsx`
 - `apps/editor/src/components/canvas/Guides.tsx`
 - `apps/editor/src/components/canvas/GridOverlay.tsx`
@@ -34,6 +35,7 @@
 - `apps/editor/src/components/EditorRoot.tsx` (mounts the new chrome)
 
 **Build instructions:**
+
 1. Rulers render tick marks every 50 px and major marks every 100 px. Cursor coordinates update on hover. Click on a ruler drops a guide.
 2. Guides are draggable, double-click to remove, shift-click to convert to slide-bound. Position is persisted via CRDT.
 3. Grid overlay supports columns (1–12) and baseline grid (configurable px). Toggle in `canvas-controls-panel`.
@@ -42,11 +44,13 @@
 6. Keyboard shortcuts: `Shift+R` toggles rulers, `Shift+G` toggles grid, `Shift+;` toggles guides, `0` zoom-fit, `1` zoom-100%, `2` zoom-200%, `Cmd+;` snaps to nearest.
 
 **SOLID notes:**
+
 - **S:** each chrome element (ruler, guide, grid) is its own component; the canvas is not a god component.
 - **O:** adding a new overlay (e.g. bleed marks) is a new file.
 - **I:** chrome elements receive minimal props `{ zoom, panOffset, viewportSize }` — they do not see the entire deck.
 
 **Acceptance:**
+
 - All keyboard shortcuts work in production build.
 - Drag-to-snap correctly guides and releases.
 - Ruler coordinates match zoom level.
@@ -58,11 +62,13 @@
 **Features:** #4, #5, #17, #18.
 
 **Files to modify:**
+
 - `apps/editor/src/panels/LayersPanel.tsx` (existing)
 - `apps/editor/src/components/canvas/OutlineTree.tsx` (new)
 - `apps/editor/src/hooks/useSelection.ts` (new — centralizes selection state)
 
 **Build instructions:**
+
 1. Layers panel shows two tabs: **Flat** (current) and **Outline** (tree of slides → groups → elements).
 2. Drag-reorder works at any level (group, slide, element).
 3. Right-click on a layer opens a context menu with: rename, duplicate, group/ungroup, lock/unlock, hide/show, send-to-back/front, convert-to-component.
@@ -71,10 +77,12 @@
 6. Locked layers show a small lock icon and cannot be selected on canvas; hidden layers are excluded from canvas and exports.
 
 **SOLID notes:**
+
 - **L:** `useSelection` exposes a uniform API regardless of whether selection came from canvas or layers.
 - **D:** layers panel depends on `useSelection` interface, not on canvas internals.
 
 **Acceptance:**
+
 - 100-element deck renders layers panel in <100 ms.
 - Group/ungroup survives CRDT round-trip.
 
@@ -85,9 +93,11 @@
 **Features:** #4.
 
 **Files to create:**
+
 - `apps/editor/src/components/canvas/GroupTransformHandle.tsx`
 
 **Build instructions:**
+
 1. When ≥2 elements are selected, render a bounding box with 8 resize handles and a rotation handle.
 2. Hold Alt to scale from center; hold Shift to keep aspect ratio.
 3. Press `Cmd+G` to group, `Cmd+Shift+G` to ungroup, `Cmd+Option+→` to send forward.
@@ -100,12 +110,14 @@
 **Features:** #23, #24, #25, #28, #29, #30, #31, #32, #33, #34, #35.
 
 **Files to modify:**
+
 - `apps/editor/src/panels/InsertPanel.tsx`
 - `apps/editor/src/lib/component-service.ts` (new in Wave 1)
 - `apps/editor/src/components/widget-palette/ComponentThumb.tsx`
 - `apps/editor/src/components/widget-palette/TemplateGallery.tsx` (new)
 
 **Build instructions:**
+
 1. Tab the panel by source: **Components** (smart components), **Templates** (full-deck), **Sections** (slide-group), **Stock** (Unsplash/Pexels), **Lottie**, **Stickers**, **Icons**.
 2. Components subpanel shows variant selector when a component has variants (`light/dark`, `sm/md/lg`).
 3. Smart components render an editable props form in the side panel when selected (the existing `PropsPanel` schema-driven editor already does this; verify all variants wire through).
@@ -114,6 +126,7 @@
 6. Each insert emits a CRDT op; undo is one-click.
 
 **Acceptance:**
+
 - 10k+ components lazy-load in pages of 50; scrolling remains 60 fps.
 - Insert + undo works in real-time multiplayer without duplication.
 
@@ -124,6 +137,7 @@
 **Features:** #36–47.
 
 **Files to modify:**
+
 - `apps/editor/src/panels/theme-brand-panel.tsx`
 - `apps/editor/src/lib/brand-service.ts`
 - `apps/editor/src/components/brand/BrandExtractDialog.tsx` (new)
@@ -131,6 +145,7 @@
 - `apps/editor/src/components/brand/ThemeMarketplace.tsx` (new)
 
 **Build instructions:**
+
 1. Tab **Tokens**: full editor for color, type, spacing, radius, shadow scales. Live preview on canvas.
 2. Tab **Brand kits**: list brand kits from `/v1/brand/kits`; "Extract from URL" button opens `BrandExtractDialog` (calls `POST /v1/brand/extract`).
 3. Tab **Multi-brand**: agencies managing multiple clients; switch active brand kit per slide or per deck.
@@ -140,10 +155,12 @@
 7. Per-slide theme override: a slide-scoped color picker that takes precedence over the deck theme.
 
 **SOLID notes:**
+
 - **O:** the token editor doesn't know about brand kits; the brand panel composes both.
 - **I:** each tab is a separate component with its own props.
 
 **Acceptance:**
+
 - Token change updates every canvas element in <16 ms.
 - Brand extract from URL produces a kit with primary + accent + 3 typography choices.
 
@@ -154,11 +171,13 @@
 **Features:** #26, #27, #28, #33, #36.
 
 **Files to modify:**
+
 - `apps/editor/src/panels/library-panel.tsx`
 - `apps/editor/src/panels/marketplace-panel.tsx`
 - `apps/editor/src/components/library/VersionPinBadge.tsx`
 
 **Build instructions:**
+
 1. Library tab shows team libraries + personal libraries; track-version, pin-version, pin-range toggles exist.
 2. Update badges appear when a newer version of a subscribed component is published; "Update" CTA.
 3. Marketplace tab inside the editor is the same as `apps/marketplace-web` but constrained to "install-to-current-deck" actions.
@@ -166,6 +185,7 @@
 5. "Promote to library" action (the existing `promote-dialog.tsx`) uses the real `POST /v1/library/publish`.
 
 **Acceptance:**
+
 - Library pagination + search filters <100 ms for 1k items.
 - Marketplace install adds the component to the deck within 1 round-trip.
 
@@ -176,6 +196,7 @@
 **Features:** #48–64.
 
 **Files to modify:**
+
 - `apps/editor/src/panels/data-source-panel.tsx`
 - `apps/editor/src/panels/bind-inspector.tsx`
 - `apps/editor/src/panels/scenario-switcher.tsx`
@@ -184,6 +205,7 @@
 - `apps/editor/src/components/data/QueryBuilder.tsx` (new)
 
 **Build instructions:**
+
 1. Data source panel lists real sources (Sheets, Airtable, Notion, Postgres, MySQL, BigQuery, Snowflake, REST, GraphQL). Add-source form posts to `POST /v1/connector-framework/sources`.
 2. Connector-specific credential UI (OAuth flow for Sheets, connection string for Postgres).
 3. Bind inspector on each chart shows the current binding, allows rebinding via drag-and-drop, and displays last-synced timestamp from `services/freshness-tracker`.
@@ -193,10 +215,12 @@
 7. QueryBuilder: SQL editor (Monaco) with autocomplete from the data source's schema; safe-execute against a sandboxed account.
 
 **SOLID notes:**
+
 - **S:** QueryBuilder is not coupled to any chart component; it returns a query AST that any chart can bind to.
 - **D:** chart components depend on `BindingAdapter` interface, not on a specific connector.
 
 **Acceptance:**
+
 - A bound chart in editor reflects data changes within 500 ms of source refresh.
 - Scenario switch in editor triggers a CRDT op that updates every chart and text callout bound to that scenario.
 
@@ -207,10 +231,12 @@
 **Features:** #58, #59.
 
 **Files to create:**
+
 - `apps/editor/src/components/data/AnnotationPin.tsx`
 - `apps/editor/src/components/data/TickerAnimationPanel.tsx`
 
 **Build instructions:**
+
 1. Right-click a data point → "Pin annotation." Pin is a CRDT op with `{ dataPointId, text, color, author }`. Renders as a leader-line + chip.
 2. Ticker animation: count-up effect on KPIs. Configurable duration, easing, and locale (currency formatting).
 3. Number-ticker is a separate element type `kpi-ticker` so designers can place it like any element.
@@ -222,10 +248,12 @@
 **Features:** #61.
 
 **Files to create:**
+
 - `apps/editor/src/components/locale/LocalePicker.tsx`
 - `apps/editor/src/components/locale/UnitFormatDialog.tsx`
 
 **Build instructions:**
+
 1. Per-element locale picker: "Show USD to one audience, EUR to another."
 2. Calls `POST /v1/localization/format` to render preview values in chosen locale.
 3. Currency switch is per-deck-share, not per-element, so the editor surface is just configuration.
@@ -237,6 +265,7 @@
 **Features:** #65–84.
 
 **Files to modify:**
+
 - `apps/editor/src/panels/media-panel.tsx`
 - `apps/editor/src/components/media/Model3DEditor.tsx` (new)
 - `apps/editor/src/components/media/CadImportDialog.tsx` (new)
@@ -248,6 +277,7 @@
 - `apps/editor/src/components/media/MapPicker.tsx` (new)
 
 **Build instructions:**
+
 1. **3D editor** (model3d tab): load a GLB/USDZ; the panel shows a 3D viewport with lighting + camera controls. Add hotspots that trigger slide actions. Author camera keyframes on a timeline.
 2. **CAD import**: drop a STEP/FBX; the panel submits a `POST /v1/cad-jobs` and polls; on completion, replaces the drop with the optimized GLB.
 3. **AR preview**: "Preview in AR" button generates a QR for the AR view.
@@ -259,6 +289,7 @@
 9. **Live app embed**: iframe sandbox config (origin allowlist, allowed permissions, JWT generation).
 
 **Acceptance:**
+
 - 3D editor maintains ≥30 fps with 100k-triangle model.
 - Voiceover recording round-trips in <500 ms.
 - AR preview QR opens the `apps/viewer/ar` route.
@@ -270,11 +301,13 @@
 **Features:** #85–95.
 
 **Files to modify:**
+
 - `apps/editor/src/panels/animations-panel.tsx`
 - `apps/editor/src/components/animation/MotionPathEditor.tsx` (new)
 - `apps/editor/src/components/animation/EasingBezierEditor.tsx` (new)
 
 **Build instructions:**
+
 1. Timeline view shows tracks per element, keyframes, easing curves. Drag keyframes to retime.
 2. Magic-move: matching elements across two selected slides morph position/size/style. Preview button.
 3. Motion-path editor: draw a bezier path; elements animate along it. Triggered by on-click/on-enter/on-data-change/on-timer.
@@ -283,6 +316,7 @@
 6. Copy animation between elements and slides via right-click menu.
 
 **Acceptance:**
+
 - Magic move correctly identifies matching elements by stable id (`slide[3].chart[revenue_by_region]`).
 - Motion paths round-trip through CRDT.
 
@@ -293,6 +327,7 @@
 **Features:** #96–107.
 
 **Files to modify:**
+
 - `apps/editor/src/panels/connections-panel.tsx`
 - `apps/editor/src/panels/state-inspector-panel.tsx`
 - `apps/editor/src/panels/variables-panel.tsx`
@@ -306,6 +341,7 @@
 - `apps/editor/src/components/prototyping/DeviceFramePicker.tsx` (new)
 
 **Build instructions:**
+
 1. Connections panel: 4 tabs (Hotspots, Branching, Overlays, Graph) already exist; add **Triggers** tab with on-voice / on-gesture options.
 2. State inspector: visual state machine with states/transitions; pause-and-inspect toggle.
 3. Variables: 5 scopes, 6 types, 10 actions already; add a visual conditional-logic builder ("if annual_toggle = true → show annual pricing slide").
@@ -319,10 +355,12 @@
 11. Device frame picker: wrap a slide in an iPhone/iPad/Mac frame.
 
 **SOLID notes:**
+
 - **S:** prototyping panels do not import canvas directly; they bind to the canvas via an event bus.
 - **O:** adding a new trigger kind (e.g. proximity sensor) is one new file.
 
 **Acceptance:**
+
 - Hotspot click in editor preview jumps to the target slide with state restored.
 - Voice trigger surfaces in the test-sessions replay.
 
@@ -331,6 +369,7 @@
 ## 3. SOLID injection — concrete shapes for the editor
 
 ### Editor module map
+
 ```
 apps/editor/src/
 ├── panels/
@@ -351,9 +390,11 @@ apps/editor/src/
 ```
 
 ### Rule: no canvas import outside `components/canvas/**` and `panels/**`
+
 Panels describe state, never render canvas. Components in `components/canvas/**` render canvas. This separation is enforced by lint.
 
 ### Rule: every new element type is one file
+
 Adding `kpi-ticker` (S2.8) means creating `components/data/TickerElement.tsx`, registering it in `packages/scene-graph` registry, and writing tests. No edits to `EditorRoot` or `LayersPanel`.
 
 ---

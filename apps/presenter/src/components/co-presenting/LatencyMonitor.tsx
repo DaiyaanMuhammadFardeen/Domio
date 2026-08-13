@@ -17,7 +17,11 @@
  */
 
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { listRegionLatencies, type RegionLatency, type RegionSyncStatus } from '../../lib/co-presenting-service';
+import {
+  listRegionLatencies,
+  type RegionLatency,
+  type RegionSyncStatus,
+} from '../../lib/co-presenting-service';
 
 export interface LatencyMonitorProps {
   sessionId: string;
@@ -47,19 +51,28 @@ const DEFAULT_LABELS: Required<NonNullable<LatencyMonitorProps['labels']>> = {
   statusDisconnected: 'Disconnected',
 };
 
-function statusLabel(s: RegionSyncStatus, labels: { synced: string; lagging: string; disconnected: string }): string {
+function statusLabel(
+  s: RegionSyncStatus,
+  labels: { synced: string; lagging: string; disconnected: string },
+): string {
   switch (s) {
-    case 'synced':       return labels.synced;
-    case 'lagging':      return labels.lagging;
-    case 'disconnected': return labels.disconnected;
+    case 'synced':
+      return labels.synced;
+    case 'lagging':
+      return labels.lagging;
+    case 'disconnected':
+      return labels.disconnected;
   }
 }
 
 function statusClass(s: RegionSyncStatus): string {
   switch (s) {
-    case 'synced':       return 'latency-monitor__pill--synced';
-    case 'lagging':      return 'latency-monitor__pill--lagging';
-    case 'disconnected': return 'latency-monitor__pill--disconnected';
+    case 'synced':
+      return 'latency-monitor__pill--synced';
+    case 'lagging':
+      return 'latency-monitor__pill--lagging';
+    case 'disconnected':
+      return 'latency-monitor__pill--disconnected';
   }
 }
 
@@ -99,7 +112,11 @@ export function LatencyMonitor({
     >
       <header className="latency-monitor__header">
         <h3 className="latency-monitor__title">{t.heading}</h3>
-        {stale && <span className="latency-monitor__stale" data-testid={`${dataTestId}-stale`}>stale</span>}
+        {stale && (
+          <span className="latency-monitor__stale" data-testid={`${dataTestId}-stale`}>
+            stale
+          </span>
+        )}
       </header>
       <table className="latency-monitor__table">
         <thead>
@@ -113,7 +130,9 @@ export function LatencyMonitor({
         <tbody>
           {rows.length === 0 && (
             <tr>
-              <td colSpan={4} className="latency-monitor__empty">—</td>
+              <td colSpan={4} className="latency-monitor__empty">
+                —
+              </td>
             </tr>
           )}
           {rows.map((r) => (

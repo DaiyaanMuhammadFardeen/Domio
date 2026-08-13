@@ -15,10 +15,7 @@ import { createApp } from './app.js';
 import type { CameraKeyframe, BezierEasing } from './types.js';
 import { EasingLruCache, easingKey } from './easing-cache.js';
 import { interpolatePose, checkCrossfade } from './interpolator.js';
-import {
-  InMemoryCameraKeyframeRepository,
-  defaultIdGenerator,
-} from './repo.js';
+import { InMemoryCameraKeyframeRepository, defaultIdGenerator } from './repo.js';
 import {
   validateCreateKeyframe,
   validatePatchKeyframe,
@@ -77,7 +74,10 @@ describe('schema validation', () => {
   });
 
   it('validateCreateKeyframe rejects missing fov', () => {
-    const res = validateCreateKeyframe({ position: { x: 0, y: 0, z: 0 }, target: { x: 0, y: 0, z: 10 } });
+    const res = validateCreateKeyframe({
+      position: { x: 0, y: 0, z: 0 },
+      target: { x: 0, y: 0, z: 10 },
+    });
     expect(res.valid).toBe(false);
   });
 
@@ -122,7 +122,16 @@ describe('schema validation', () => {
 
   it('validateInterpolateBody accepts valid body', () => {
     const res = validateInterpolateBody({
-      keyframes: [{ orderIndex: 0, position: { x: 0, y: 0, z: 0 }, target: { x: 0, y: 0, z: 10 }, fov: 50, easing: LINEAR_EASING, durationMs: 1000 }],
+      keyframes: [
+        {
+          orderIndex: 0,
+          position: { x: 0, y: 0, z: 0 },
+          target: { x: 0, y: 0, z: 10 },
+          fov: 50,
+          easing: LINEAR_EASING,
+          durationMs: 1000,
+        },
+      ],
       time_ms: 500,
     });
     expect(res.valid).toBe(true);
@@ -145,7 +154,16 @@ describe('schema validation', () => {
 
   it('validateBatchBody accepts valid body', () => {
     const res = validateBatchBody({
-      keyframes: [{ orderIndex: 0, position: { x: 0, y: 0, z: 0 }, target: { x: 0, y: 0, z: 10 }, fov: 50, easing: LINEAR_EASING, durationMs: 1000 }],
+      keyframes: [
+        {
+          orderIndex: 0,
+          position: { x: 0, y: 0, z: 0 },
+          target: { x: 0, y: 0, z: 10 },
+          fov: 50,
+          easing: LINEAR_EASING,
+          durationMs: 1000,
+        },
+      ],
     });
     expect(res.valid).toBe(true);
   });
@@ -933,9 +951,24 @@ describe('LRU easing cache', () => {
 
 describe('interpolator — multi-segment', () => {
   it('three keyframes interpolate correctly across segments', () => {
-    const k1 = kf({ orderIndex: 0, position: { x: 0, y: 0, z: 0 }, easing: LINEAR_EASING, durationMs: 1000 });
-    const k2 = kf({ orderIndex: 1, position: { x: 10, y: 0, z: 0 }, easing: LINEAR_EASING, durationMs: 1000 });
-    const k3 = kf({ orderIndex: 2, position: { x: 10, y: 0, z: 10 }, easing: LINEAR_EASING, durationMs: 1000 });
+    const k1 = kf({
+      orderIndex: 0,
+      position: { x: 0, y: 0, z: 0 },
+      easing: LINEAR_EASING,
+      durationMs: 1000,
+    });
+    const k2 = kf({
+      orderIndex: 1,
+      position: { x: 10, y: 0, z: 0 },
+      easing: LINEAR_EASING,
+      durationMs: 1000,
+    });
+    const k3 = kf({
+      orderIndex: 2,
+      position: { x: 10, y: 0, z: 10 },
+      easing: LINEAR_EASING,
+      durationMs: 1000,
+    });
 
     // At t=0: first keyframe
     const p0 = interpolatePose([k1, k2, k3], 0);
@@ -996,7 +1029,11 @@ describe('InMemoryCameraKeyframeRepository', () => {
   });
 
   it('update merges position and target', async () => {
-    const record = kf({ id: 'test-1', position: { x: 0, y: 0, z: 0 }, target: { x: 1, y: 1, z: 1 } });
+    const record = kf({
+      id: 'test-1',
+      position: { x: 0, y: 0, z: 0 },
+      target: { x: 1, y: 1, z: 1 },
+    });
     await repo.insert(record);
     const updated = await repo.update('test-1', { position: { x: 5, y: 0, z: 0 } });
     expect(updated.position.x).toBe(5);

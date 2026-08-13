@@ -6,12 +6,12 @@
  * module exposes a single function so tests can stub the root key.
  */
 export interface AuditKeyResolver {
-    rootKey(): Promise<string>;
+  rootKey(): Promise<string>;
 }
 export declare function deriveAuditKey(rootKey: string, workspaceId: string): Buffer;
 export declare class StaticAuditKeyResolver implements AuditKeyResolver {
-    private readonly root;
-    constructor(root: string);
-    rootKey(): Promise<string>;
+  private readonly root;
+  constructor(root: string);
+  rootKey(): Promise<string>;
 }
 //# sourceMappingURL=key.d.ts.map

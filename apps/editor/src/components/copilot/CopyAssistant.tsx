@@ -184,9 +184,7 @@ export function CopyAssistant({
                       <span className="font-semibold uppercase tracking-wide text-slate-400">
                         {TONE_LABELS[tone]}
                       </span>
-                      <span className="text-slate-500">
-                        {variant.charCount} ch
-                      </span>
+                      <span className="text-slate-500">{variant.charCount} ch</span>
                     </div>
                     <div className="text-xs text-slate-100">{variant.text}</div>
                     {isApplied && (

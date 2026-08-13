@@ -28,7 +28,9 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
-export async function listPurchaseHistory(buyerId: string): Promise<ReadonlyArray<PurchaseHistoryRow>> {
+export async function listPurchaseHistory(
+  buyerId: string,
+): Promise<ReadonlyArray<PurchaseHistoryRow>> {
   try {
     const json = await apiFetch<{ rows?: PurchaseHistoryRow[] }>(
       `/v1/marketplace/purchases?buyer_id=${encodeURIComponent(buyerId)}`,

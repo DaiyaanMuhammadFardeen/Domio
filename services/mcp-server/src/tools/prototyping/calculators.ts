@@ -81,7 +81,10 @@ function validateList(input: unknown): ValidationResult<CalculatorListInput> {
   return { ok: true, value: { deckId } };
 }
 
-function gate(ctx: McpContext, cap: 'calculators:read' | 'calculators:write' | 'calculators:compute') {
+function gate(
+  ctx: McpContext,
+  cap: 'calculators:read' | 'calculators:write' | 'calculators:compute',
+) {
   const r = claimCapability(ctx.agentId, cap);
   if (!r.granted) throw new MCPError('PERMISSION_DENIED', r.reason ?? 'permission denied');
   void validateNumber;
@@ -105,7 +108,10 @@ export const create_calculator: McpTool<CalculatorCreateInput, Calculator> = {
   },
 };
 
-export const compute_calculator: McpTool<CalculatorComputeInput, { result: number | string | boolean }> = {
+export const compute_calculator: McpTool<
+  CalculatorComputeInput,
+  { result: number | string | boolean }
+> = {
   name: 'compute_calculator',
   description: 'Evaluate a calculator with the given values.',
   capability: 'calculators:compute',
@@ -137,8 +143,8 @@ export const list_calculators: McpTool<CalculatorListInput, readonly Calculator[
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_calculators', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/calculators`).then(
-        (r) => (r as Calculator[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/calculators`).then((r) =>
+        (r as Calculator[]).slice(),
       ),
     );
   },

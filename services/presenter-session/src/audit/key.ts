@@ -13,10 +13,7 @@ export interface AuditKeyMaterial {
   rootKey: Uint8Array;
 }
 
-export function deriveTenantAuditKey(
-  material: AuditKeyMaterial,
-  workspaceId: string,
-): Uint8Array {
+export function deriveTenantAuditKey(material: AuditKeyMaterial, workspaceId: string): Uint8Array {
   if (!material.rootKey || material.rootKey.length < 32) {
     throw new Error('deriveTenantAuditKey: rootKey must be >= 32 bytes');
   }

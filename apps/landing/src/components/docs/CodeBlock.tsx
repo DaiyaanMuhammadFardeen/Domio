@@ -42,12 +42,8 @@ export function CodeBlock({ code, language, filename }: CodeBlockProps): JSX.Ele
     <div className="docs-codeblock" data-testid="docs-codeblock">
       <div className="docs-codeblock__header">
         <span className="docs-codeblock__meta">
-          {filename ? (
-            <span className="docs-codeblock__filename">{filename}</span>
-          ) : null}
-          {language ? (
-            <span className="docs-codeblock__language">{language}</span>
-          ) : null}
+          {filename ? <span className="docs-codeblock__filename">{filename}</span> : null}
+          {language ? <span className="docs-codeblock__language">{language}</span> : null}
         </span>
         <button
           type="button"

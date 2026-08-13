@@ -27,9 +27,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
   const [retention, setRetention] = useState(config.retention_days);
   const [rateLimit, setRateLimit] = useState(config.rate_limit_per_tenant);
   const [errors, setErrors] = useState<FieldError>({});
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>(
-    'idle',
-  );
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isPending, startTransition] = useTransition();
 
   function validate(): FieldError {
@@ -98,9 +96,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
             className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
           />
           {errors.parallelism ? (
-            <span className="mt-1 block text-xs text-rose-600">
-              {errors.parallelism}
-            </span>
+            <span className="mt-1 block text-xs text-rose-600">{errors.parallelism}</span>
           ) : null}
         </label>
 
@@ -118,9 +114,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
             className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
           />
           {errors.retention ? (
-            <span className="mt-1 block text-xs text-rose-600">
-              {errors.retention}
-            </span>
+            <span className="mt-1 block text-xs text-rose-600">{errors.retention}</span>
           ) : null}
         </label>
 
@@ -138,19 +132,13 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
             className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
           />
           {errors.rateLimit ? (
-            <span className="mt-1 block text-xs text-rose-600">
-              {errors.rateLimit}
-            </span>
+            <span className="mt-1 block text-xs text-rose-600">{errors.rateLimit}</span>
           ) : null}
         </label>
       </div>
 
       <div className="mt-4 flex items-center justify-between">
-        <span
-          className="text-xs"
-          data-testid="render-config-status"
-          aria-live="polite"
-        >
+        <span className="text-xs" data-testid="render-config-status" aria-live="polite">
           {status === 'saved' ? (
             <span className="text-emerald-600">Saved.</span>
           ) : status === 'error' ? (

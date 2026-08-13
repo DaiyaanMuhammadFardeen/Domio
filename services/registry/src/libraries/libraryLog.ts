@@ -2,7 +2,12 @@ import type { ServiceDeps } from '../deps.js';
 import { nowMs } from '../deps.js';
 import { Errors } from '../errors.js';
 import { createHmac } from 'node:crypto';
-import type { LibraryEventKind, TeamLibrary, TeamLibraryEvent, UserLibraryItem } from '../store/types.js';
+import type {
+  LibraryEventKind,
+  TeamLibrary,
+  TeamLibraryEvent,
+  UserLibraryItem,
+} from '../store/types.js';
 import { resolvePolicyTarget } from '../util/semver.js';
 
 export interface AppendEventInput {
@@ -19,7 +24,10 @@ export interface AppendEventInput {
  * Append an event to a library's append-only log. The `seq` is derived from
  * the latest stored seq so replays are deterministic and idempotent.
  */
-export async function appendLibraryEvent(deps: ServiceDeps, input: AppendEventInput): Promise<TeamLibraryEvent> {
+export async function appendLibraryEvent(
+  deps: ServiceDeps,
+  input: AppendEventInput,
+): Promise<TeamLibraryEvent> {
   const lib = await deps.store.getTeamLibrary(input.libraryId);
   if (!lib) throw Errors.notFound(`team library ${input.libraryId}`);
 
@@ -72,7 +80,10 @@ export async function syncLibraryToLatest(
 ): Promise<ReplayResult> {
   const latest = await deps.store.latestLibrarySeq(libraryId);
   const start = 0;
-  return replayLibraryEvents(deps, libraryId, start, onEvent).then((r) => ({ ...r, lastSeq: latest }));
+  return replayLibraryEvents(deps, libraryId, start, onEvent).then((r) => ({
+    ...r,
+    lastSeq: latest,
+  }));
 }
 
 export async function changeLibraryPolicy(
@@ -149,7 +160,9 @@ export function verifyWebhook(
   return expected === signature;
 }
 
-export function summarizeUpdates(events: TeamLibraryEvent[]): { catalogId: string; kinds: LibraryEventKind[] }[] {
+export function summarizeUpdates(
+  events: TeamLibraryEvent[],
+): { catalogId: string; kinds: LibraryEventKind[] }[] {
   const byId = new Map<string, LibraryEventKind[]>();
   for (const e of events) {
     const list = byId.get(e.componentId) ?? [];
@@ -159,6 +172,9 @@ export function summarizeUpdates(events: TeamLibraryEvent[]): { catalogId: strin
   return [...byId.entries()].map(([catalogId, kinds]) => ({ catalogId, kinds }));
 }
 
-export function policyForItem(lib: TeamLibrary, _item: UserLibraryItem): UserLibraryItem['pinMode'] {
+export function policyForItem(
+  lib: TeamLibrary,
+  _item: UserLibraryItem,
+): UserLibraryItem['pinMode'] {
   return lib.policyMode === 'pinned' ? 'pin-version' : 'workspace-managed';
 }

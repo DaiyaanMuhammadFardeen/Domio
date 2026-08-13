@@ -18,8 +18,8 @@ export function SecurityContact(): JSX.Element {
         Report a vulnerability
       </h2>
       <p className="trust-contact__lede">
-        We welcome coordinated disclosure. Email is the primary channel for
-        sensitive reports; please encrypt with our PGP key when possible.
+        We welcome coordinated disclosure. Email is the primary channel for sensitive reports;
+        please encrypt with our PGP key when possible.
       </p>
 
       <div className="trust-contact__card" data-testid="trust-contact-card">
@@ -36,10 +36,7 @@ export function SecurityContact(): JSX.Element {
 
         <div className="trust-contact__row">
           <span className="trust-contact__label">PGP fingerprint</span>
-          <code
-            className="trust-contact__value trust-contact__pgp"
-            data-testid="trust-contact-pgp"
-          >
+          <code className="trust-contact__value trust-contact__pgp" data-testid="trust-contact-pgp">
             {SECURITY_CONTACT.pgp_fingerprint}
           </code>
           <a

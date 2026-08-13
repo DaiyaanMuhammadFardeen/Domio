@@ -17,7 +17,11 @@ export type SubscriberId = string;
 
 export interface Hub {
   /** Register a new subscriber for a session. Returns the subscriber id. */
-  subscribe(workspace_id: string, session_id: string, push: (pulse: LivePulse) => void): SubscriberId;
+  subscribe(
+    workspace_id: string,
+    session_id: string,
+    push: (pulse: LivePulse) => void,
+  ): SubscriberId;
   /** Remove a subscriber by id. */
   unsubscribe(workspace_id: string, session_id: string, id: SubscriberId): void;
   /** Send the latest pulse to every subscriber of a session. */

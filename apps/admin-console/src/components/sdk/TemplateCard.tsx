@@ -24,11 +24,12 @@ const FRAMEWORK_LABEL: Readonly<Record<ComponentTemplate['framework'], string>> 
   'no-framework': 'No framework',
 };
 
-const LANGUAGE_TONE: Readonly<Record<ComponentTemplate['language'], 'green' | 'amber' | 'brand'>> = {
-  typescript: 'green',
-  javascript: 'amber',
-  python: 'brand',
-};
+const LANGUAGE_TONE: Readonly<Record<ComponentTemplate['language'], 'green' | 'amber' | 'brand'>> =
+  {
+    typescript: 'green',
+    javascript: 'amber',
+    python: 'brand',
+  };
 
 export function TemplateCard({
   template,
@@ -42,16 +43,10 @@ export function TemplateCard({
     >
       <div>
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-base font-semibold text-slate-900">
-            {template.name}
-          </h3>
-          <Badge tone={LANGUAGE_TONE[template.language]}>
-            {template.language}
-          </Badge>
+          <h3 className="text-base font-semibold text-slate-900">{template.name}</h3>
+          <Badge tone={LANGUAGE_TONE[template.language]}>{template.language}</Badge>
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          {template.description}
-        </p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">{template.description}</p>
         <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
           <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono">
             {FRAMEWORK_LABEL[template.framework]}

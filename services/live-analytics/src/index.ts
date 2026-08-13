@@ -11,10 +11,7 @@ export {
   type ClickHouseClient,
   type InMemoryClickHouseClient,
 } from './store/clickhouse.js';
-export {
-  buildRingBuffer,
-  type RingBuffer,
-} from './store/ring_buffer.js';
+export { buildRingBuffer, type RingBuffer } from './store/ring_buffer.js';
 export {
   buildNatsSubscriber,
   buildInMemoryNatsSubscriber,
@@ -23,11 +20,7 @@ export {
   type NatsSubscriber,
   type InMemoryNatsSubscriber,
 } from './nats/subscriber.js';
-export {
-  buildHub,
-  type Hub,
-  type SubscriberId,
-} from './ws/hub.js';
+export { buildHub, type Hub, type SubscriberId } from './ws/hub.js';
 export { attachWebSocket } from './routes/ws.js';
 export { liveRoutes, type LiveRoutesDeps } from './routes/live.js';
 export { buildSummarySink, type SummarySink } from './summary/sink.js';

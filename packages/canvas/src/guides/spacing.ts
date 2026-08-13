@@ -20,7 +20,12 @@ export function findSpacingHints(
 ): SpacingHint[] {
   const index = graph.spatialIndex();
   const candidates = index.query({
-    bounds: { x: bounds.x - 10_000, y: bounds.y - 10_000, w: bounds.w + 20_000, h: bounds.h + 20_000 },
+    bounds: {
+      x: bounds.x - 10_000,
+      y: bounds.y - 10_000,
+      w: bounds.w + 20_000,
+      h: bounds.h + 20_000,
+    },
     skip: (item) => {
       const node = graph.byId(item.id);
       if (!node || node.kind !== 'element') return true;
@@ -38,9 +43,17 @@ export function findSpacingHints(
       const left = b.x + b.w < bounds.x ? b.x + b.w : null;
       const right = bounds.x + bounds.w < b.x ? b.x : null;
       if (left !== null) {
-        hints.push({ axis: 'x', position: (left + bounds.x) / 2, length: Math.abs(bounds.x - left) });
+        hints.push({
+          axis: 'x',
+          position: (left + bounds.x) / 2,
+          length: Math.abs(bounds.x - left),
+        });
       } else if (right !== null) {
-        hints.push({ axis: 'x', position: (right + (bounds.x + bounds.w)) / 2, length: Math.abs(right - (bounds.x + bounds.w)) });
+        hints.push({
+          axis: 'x',
+          position: (right + (bounds.x + bounds.w)) / 2,
+          length: Math.abs(right - (bounds.x + bounds.w)),
+        });
       }
     }
     const horizontalOverlap = Math.min(b.x + b.w, bounds.x + bounds.w) - Math.max(b.x, bounds.x);
@@ -50,7 +63,11 @@ export function findSpacingHints(
       if (top !== null) {
         hints.push({ axis: 'y', position: (top + bounds.y) / 2, length: Math.abs(bounds.y - top) });
       } else if (bottom !== null) {
-        hints.push({ axis: 'y', position: (bottom + (bounds.y + bounds.h)) / 2, length: Math.abs(bottom - (bounds.y + bounds.h)) });
+        hints.push({
+          axis: 'y',
+          position: (bottom + (bounds.y + bounds.h)) / 2,
+          length: Math.abs(bottom - (bounds.y + bounds.h)),
+        });
       }
     }
   }

@@ -129,19 +129,34 @@ export default function ListingsPage() {
           <table className="min-w-full divide-y divide-slate-200 text-sm">
             <thead className="bg-slate-50">
               <tr>
-                <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
+                >
                   {t('listings.table.title')}
                 </th>
-                <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
+                >
                   {t('listings.table.kind')}
                 </th>
-                <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
+                >
                   {t('listings.table.status')}
                 </th>
-                <th scope="col" className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-slate-600"
+                >
                   {t('listings.table.price')}
                 </th>
-                <th scope="col" className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-slate-600"
+                >
                   {t('listings.table.downloads')}
                 </th>
               </tr>

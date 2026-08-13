@@ -27,8 +27,4 @@ export interface TournamentRound {
   readonly matchups: ReadonlyArray<Matchup>;
 }
 
-export type TournamentName =
-  | 'Round of 16'
-  | 'Quarterfinals'
-  | 'Semifinals'
-  | 'Final';
+export type TournamentName = 'Round of 16' | 'Quarterfinals' | 'Semifinals' | 'Final';

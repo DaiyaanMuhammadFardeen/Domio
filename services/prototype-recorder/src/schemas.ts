@@ -11,9 +11,18 @@ const ULID = /^[0-9A-HJKMNP-TV-Z]{26}$/;
 const ALLOWED_CONSENT = ['opt_in', 'opt_out', 'anonymous'] as const;
 const ALLOWED_REGIONS = ['us-east', 'us-west', 'eu-central', 'ap-south', 'ap-east'] as const;
 const ALLOWED_EVENT_TYPES = [
-  'session_start', 'session_end', 'slide_enter', 'slide_exit',
-  'click', 'hover', 'form_submit', 'calculator_change',
-  'rage_click', 'error', 'device_frame_change', 'consent_change',
+  'session_start',
+  'session_end',
+  'slide_enter',
+  'slide_exit',
+  'click',
+  'hover',
+  'form_submit',
+  'calculator_change',
+  'rage_click',
+  'error',
+  'device_frame_change',
+  'consent_change',
 ] as const;
 
 export interface ValidationError {
@@ -27,21 +36,37 @@ export interface ValidationResult<T> {
   readonly errors: readonly ValidationError[];
 }
 
-function ok<T>(value: T): ValidationResult<T> { return { valid: true, value, errors: [] }; }
-function fail(errors: ValidationError[]): ValidationResult<never> { return { valid: false, errors }; }
+function ok<T>(value: T): ValidationResult<T> {
+  return { valid: true, value, errors: [] };
+}
+function fail(errors: ValidationError[]): ValidationResult<never> {
+  return { valid: false, errors };
+}
 
-function isString(v: unknown): v is string { return typeof v === 'string'; }
-function isNumber(v: unknown): v is number { return typeof v === 'number' && Number.isFinite(v); }
-function isObject(v: unknown): v is Record<string, unknown> { return typeof v === 'object' && v !== null && !Array.isArray(v); }
-function isArray(v: unknown): v is unknown[] { return Array.isArray(v); }
-function isInt(v: unknown): v is number { return isNumber(v) && Number.isInteger(v); }
-function inSet<T extends string>(set: readonly T[], v: unknown): v is T { return typeof v === 'string' && (set as readonly string[]).includes(v); }
+function isString(v: unknown): v is string {
+  return typeof v === 'string';
+}
+function isNumber(v: unknown): v is number {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+function isArray(v: unknown): v is unknown[] {
+  return Array.isArray(v);
+}
+function isInt(v: unknown): v is number {
+  return isNumber(v) && Number.isInteger(v);
+}
+function inSet<T extends string>(set: readonly T[], v: unknown): v is T {
+  return typeof v === 'string' && (set as readonly string[]).includes(v);
+}
 
 // ── StartSession ───────────────────────────────────────────────────────
 
 export interface StartSessionBody {
-  readonly consent: typeof ALLOWED_CONSENT[number];
-  readonly region: typeof ALLOWED_REGIONS[number];
+  readonly consent: (typeof ALLOWED_CONSENT)[number];
+  readonly region: (typeof ALLOWED_REGIONS)[number];
   readonly regionPinned?: boolean;
   readonly abVariant?: string | null;
   readonly samplingRate?: number;
@@ -54,7 +79,8 @@ export function validateStartSession(body: unknown): ValidationResult<StartSessi
   const errors: ValidationError[] = [];
   const consent = (body as { consent?: unknown }).consent;
   const region = (body as { region?: unknown }).region;
-  if (!inSet(ALLOWED_CONSENT, consent)) errors.push({ path: 'consent', message: 'opt_in|opt_out|anonymous required' });
+  if (!inSet(ALLOWED_CONSENT, consent))
+    errors.push({ path: 'consent', message: 'opt_in|opt_out|anonymous required' });
   if (!inSet(ALLOWED_REGIONS, region)) errors.push({ path: 'region', message: 'unknown region' });
 
   const regionPinned = (body as { regionPinned?: unknown }).regionPinned;
@@ -68,12 +94,18 @@ export function validateStartSession(body: unknown): ValidationResult<StartSessi
   }
 
   const samplingRate = (body as { samplingRate?: unknown }).samplingRate;
-  if (samplingRate !== undefined && (!isNumber(samplingRate) || samplingRate < 0 || samplingRate > 1)) {
+  if (
+    samplingRate !== undefined &&
+    (!isNumber(samplingRate) || samplingRate < 0 || samplingRate > 1)
+  ) {
     errors.push({ path: 'samplingRate', message: '0..1 required' });
   }
 
   const ttlMs = (body as { ttlMs?: unknown }).ttlMs;
-  if (ttlMs !== undefined && (!isInt(ttlMs) || ttlMs < 60_000 || ttlMs > 365 * 24 * 60 * 60 * 1000)) {
+  if (
+    ttlMs !== undefined &&
+    (!isInt(ttlMs) || ttlMs < 60_000 || ttlMs > 365 * 24 * 60 * 60 * 1000)
+  ) {
     errors.push({ path: 'ttlMs', message: 'integer ms (1 minute..1 year)' });
   }
 
@@ -84,8 +116,8 @@ export function validateStartSession(body: unknown): ValidationResult<StartSessi
 
   if (errors.length) return fail(errors);
   return ok({
-    consent: consent as typeof ALLOWED_CONSENT[number],
-    region: region as typeof ALLOWED_REGIONS[number],
+    consent: consent as (typeof ALLOWED_CONSENT)[number],
+    region: region as (typeof ALLOWED_REGIONS)[number],
     ...(typeof regionPinned === 'boolean' ? { regionPinned } : {}),
     ...(abVariant === null || isString(abVariant) ? { abVariant } : {}),
     ...(typeof samplingRate === 'number' ? { samplingRate } : {}),
@@ -97,7 +129,7 @@ export function validateStartSession(body: unknown): ValidationResult<StartSessi
 // ── IngestBatch ────────────────────────────────────────────────────────
 
 export interface IngestEventBody {
-  readonly eventType: typeof ALLOWED_EVENT_TYPES[number];
+  readonly eventType: (typeof ALLOWED_EVENT_TYPES)[number];
   readonly payload: Readonly<Record<string, unknown>>;
   readonly clientFingerprint: string;
   readonly createdAt?: number;
@@ -123,7 +155,7 @@ export function validateIngestBatch(body: unknown): ValidationResult<IngestBatch
   if (!isObject(body)) return fail([{ path: '', message: 'Body must be an object' }]);
   const sessionId = (body as { sessionId?: unknown }).sessionId;
   const events = (body as { events?: unknown }).events;
-  if (!isString(sessionId) || !ULID.test(sessionId) && sessionId.length < 1) {
+  if (!isString(sessionId) || (!ULID.test(sessionId) && sessionId.length < 1)) {
     // Allow non-ULID ids produced by the runtime (ps-xxxx style).
   }
   if (!isArray(events) || events.length === 0) {
@@ -147,7 +179,11 @@ export function validateIngestBatch(body: unknown): ValidationResult<IngestBatch
     if (!isObject(payload)) {
       errors.push({ path: `events[${i}].payload`, message: 'object required' });
     }
-    if (!isString(clientFingerprint) || clientFingerprint.length < 1 || clientFingerprint.length > 256) {
+    if (
+      !isString(clientFingerprint) ||
+      clientFingerprint.length < 1 ||
+      clientFingerprint.length > 256
+    ) {
       errors.push({ path: `events[${i}].clientFingerprint`, message: '1..256 chars required' });
     }
     const createdAt = (raw as { createdAt?: unknown }).createdAt;
@@ -163,11 +199,13 @@ export function validateIngestBatch(body: unknown): ValidationResult<IngestBatch
 
     if (errors.length === 0 || !errors.some((e) => e.path.startsWith(`events[${i}]`))) {
       validated.push({
-        eventType: eventType as typeof ALLOWED_EVENT_TYPES[number],
+        eventType: eventType as (typeof ALLOWED_EVENT_TYPES)[number],
         payload: payload as Readonly<Record<string, unknown>>,
         clientFingerprint: clientFingerprint as string,
         ...(typeof createdAt === 'number' ? { createdAt } : {}),
-        ...(isObject(signedEvent) ? { signedEvent: signedEvent as IngestEventBody['signedEvent'] } : {}),
+        ...(isObject(signedEvent)
+          ? { signedEvent: signedEvent as IngestEventBody['signedEvent'] }
+          : {}),
       });
     }
   }

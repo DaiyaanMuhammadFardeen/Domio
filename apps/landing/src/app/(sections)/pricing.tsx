@@ -22,9 +22,7 @@ export function Pricing(): JSX.Element {
         <h2 id="pricing-heading" className="pricing-section__title">
           Simple, per-workspace pricing.
         </h2>
-        <p className="pricing-section__lede">
-          No seats. No per-viewer fees. No upsell pressure.
-        </p>
+        <p className="pricing-section__lede">No seats. No per-viewer fees. No upsell pressure.</p>
       </header>
       <PricingTable tiers={PRICING_TIERS} />
     </section>

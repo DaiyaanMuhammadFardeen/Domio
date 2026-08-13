@@ -56,10 +56,10 @@ export function SoftHardAlerts({
         zIndex: 1300,
       }}
     >
-      <div style={{ fontSize: 64 }}>
-        {isHard ? '⏰' : '⚠️'}
+      <div style={{ fontSize: 64 }}>{isHard ? '⏰' : '⚠️'}</div>
+      <div style={{ fontSize: 18, fontWeight: 700, textAlign: 'center', maxWidth: 480 }}>
+        {message}
       </div>
-      <div style={{ fontSize: 18, fontWeight: 700, textAlign: 'center', maxWidth: 480 }}>{message}</div>
       <button
         type="button"
         onClick={() => {

@@ -27,21 +27,17 @@ export interface UseActiveSlideOptions {
   fallbackActiveId?: string | null;
 }
 
-export function useActiveSlide(
-  options: UseActiveSlideOptions = {},
-): UseActiveSlideResult {
+export function useActiveSlide(options: UseActiveSlideOptions = {}): UseActiveSlideResult {
   const { fallbackDeck = null, fallbackActiveId = null } = options;
   const storeDeck = useEditorStore((s) => s.deck);
   const storeId = useEditorStore((s) => s.activeSlideId);
   const deck = storeDeck ?? fallbackDeck;
-  const activeSlideId = (storeId ?? fallbackActiveId) ?? null;
+  const activeSlideId = storeId ?? fallbackActiveId ?? null;
   return useMemo<UseActiveSlideResult>(() => {
     if (!deck) return { slide: undefined, index: -1 };
     const slides = deck.slides ?? [];
     if (slides.length === 0) return { slide: undefined, index: -1 };
-    const idx = activeSlideId
-      ? slides.findIndex((s) => s.id === activeSlideId)
-      : 0;
+    const idx = activeSlideId ? slides.findIndex((s) => s.id === activeSlideId) : 0;
     if (idx < 0) return { slide: slides[0], index: 0 };
     return { slide: slides[idx], index: idx };
   }, [deck, activeSlideId]);

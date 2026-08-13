@@ -22,11 +22,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { getComponent } from '@domio/components';
 import { getLatestVersion } from '../lib/registry-manifest';
-import {
-  getLibraryItems,
-  type LibraryItem,
-  type PinMode,
-} from '../lib/library';
+import { getLibraryItems, type LibraryItem, type PinMode } from '../lib/library';
 import { ComponentThumb } from '../components/ComponentThumb';
 import {
   listLibraryEntries,
@@ -93,7 +89,9 @@ export function LibraryPanel({
   }, [tab]);
 
   useEffect(() => {
-    listUpdateCandidates().then(setUpdates).catch(() => undefined);
+    listUpdateCandidates()
+      .then(setUpdates)
+      .catch(() => undefined);
   }, []);
 
   const handleUpdate = useCallback(
@@ -120,7 +118,7 @@ export function LibraryPanel({
       const existing = personal.find((i) => i.catalogId === catalogId);
       const updatesPatch: Partial<LibraryItem> = {
         pinMode: mode,
-        pinValue: mode === 'track' ? '' : existing?.pinValue ?? existing?.version ?? '',
+        pinValue: mode === 'track' ? '' : (existing?.pinValue ?? existing?.version ?? ''),
       };
       // Defer to the local module
       import('../lib/library').then((m) => {
@@ -131,19 +129,20 @@ export function LibraryPanel({
     [personal, refreshPersonal],
   );
 
-  const items = tab === 'personal'
-    ? personal.map((item) => ({
-        catalogId: item.catalogId,
-        item,
-        update: updates.get(item.catalogId),
-        latest: getLatestVersion(item.catalogId),
-      }))
-    : team.map((entry) => ({
-        catalogId: entry.catalogId,
-        entry,
-        update: updates.get(entry.catalogId),
-        latest: entry.latestVersion,
-      }));
+  const items =
+    tab === 'personal'
+      ? personal.map((item) => ({
+          catalogId: item.catalogId,
+          item,
+          update: updates.get(item.catalogId),
+          latest: getLatestVersion(item.catalogId),
+        }))
+      : team.map((entry) => ({
+          catalogId: entry.catalogId,
+          entry,
+          update: updates.get(entry.catalogId),
+          latest: entry.latestVersion,
+        }));
 
   return (
     <section className="library-panel" data-testid={id ?? 'library-panel'}>

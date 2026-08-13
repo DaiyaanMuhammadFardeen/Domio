@@ -74,12 +74,9 @@ export function TransitionOverlay({
 
   const active = scheduleFromNow ? internal : phase;
 
-  const opacity =
-    active === 'connecting' ? 1 : active === 'handoff' ? 1 : 0;
+  const opacity = active === 'connecting' ? 1 : active === 'handoff' ? 1 : 0;
   const translate =
-    active === 'handoff' || active === 'done'
-      ? 'translateX(100%)'
-      : 'translateX(0)';
+    active === 'handoff' || active === 'done' ? 'translateX(100%)' : 'translateX(0)';
 
   const wrapperStyle: CSSProperties = {
     position: 'absolute',
@@ -103,12 +100,7 @@ export function TransitionOverlay({
   };
 
   return (
-    <div
-      data-testid={dataTestId}
-      data-phase={active}
-      aria-live="polite"
-      style={wrapperStyle}
-    >
+    <div data-testid={dataTestId} data-phase={active} aria-live="polite" style={wrapperStyle}>
       <PulseDot color={brand.accent_color} />
       <h2
         style={{
@@ -128,14 +120,22 @@ export function TransitionOverlay({
           margin: 0,
         }}
       >
-        {subline ?? (active === 'connecting'
-          ? 'Bringing the session up on stage'
-          : 'Resolving presenter connection')}
+        {subline ??
+          (active === 'connecting'
+            ? 'Bringing the session up on stage'
+            : 'Resolving presenter connection')}
       </p>
       <style jsx>{`
         @keyframes transition-pulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.6); opacity: 0.4; }
+          0%,
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.6);
+            opacity: 0.4;
+          }
         }
       `}</style>
     </div>
@@ -188,9 +188,7 @@ export function overlayOpacityFor(phase: TransitionPhase): number {
 
 /** Map a "from" → "to" phase transition to the horizontal translation. */
 export function overlayTranslateFor(phase: TransitionPhase): string {
-  return phase === 'handoff' || phase === 'done'
-    ? 'translateX(100%)'
-    : 'translateX(0)';
+  return phase === 'handoff' || phase === 'done' ? 'translateX(100%)' : 'translateX(0)';
 }
 
 /** Brand-tinted transition background. */

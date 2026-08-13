@@ -15,9 +15,7 @@ const SAMPLE_STATE: ShareStateButtonCurrentState = {
   slide_id: '01H000000000000000000000S7',
   path_stack: ['01H000000000000000000000S1', '01H000000000000000000000S7'],
   overlay_stack: ['01H000000000000000000000O1'],
-  var_snapshot: [
-    { name: 'TIER', value: 'bear', visibility: 'deck_public', scope: 'deck' },
-  ],
+  var_snapshot: [{ name: 'TIER', value: 'bear', visibility: 'deck_public', scope: 'deck' }],
   device_frame_state: { kind: 'iphone', orientation: 'portrait' },
   scenario: 'bear',
   form_drafts: { 'form-1': { email: 'a@b.c' } },

@@ -10,10 +10,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLocale } from '@/hooks/useLocale';
-import {
-  listFeaturedCreators,
-  type FeaturedCreator,
-} from '@/lib/creator-service';
+import { listFeaturedCreators, type FeaturedCreator } from '@/lib/creator-service';
 import { CreatorCard, StatStrip } from '@/components/marketplace';
 import { marketplaceWeb, creatorConsole, localUrl } from '@domio/ui/routing';
 
@@ -154,10 +151,7 @@ export default function SellersPage() {
         </h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {TESTIMONIALS.map((tq) => (
-            <figure
-              key={tq.author}
-              className="rounded-2xl border border-border bg-panel p-6"
-            >
+            <figure key={tq.author} className="rounded-2xl border border-border bg-panel p-6">
               <blockquote className="font-display text-base leading-relaxed text-fg">
                 “{tq.quote}”
               </blockquote>
@@ -233,9 +227,7 @@ function TimelineStep({ step, title, body }: TimelineStepProps) {
       >
         {step}
       </span>
-      <h3 className="mt-2 font-display text-base font-semibold text-fg">
-        {title}
-      </h3>
+      <h3 className="mt-2 font-display text-base font-semibold text-fg">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">{body}</p>
     </li>
   );

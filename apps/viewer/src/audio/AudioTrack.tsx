@@ -60,10 +60,7 @@ export function AudioTrack({ layer, dataTestId = 'audio-track' }: AudioTrackProp
   const url = `https://media.domio.app/${layer.assetId}`;
 
   return (
-    <div
-      data-testid={dataTestId}
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
-    >
+    <div data-testid={dataTestId} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       <audio
         ref={audioRef}
         src={url}

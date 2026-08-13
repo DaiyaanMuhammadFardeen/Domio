@@ -62,18 +62,9 @@ interface KnowledgeGraphWire {
   edges?: GraphEdgeWire[];
 }
 
-const VALID_KINDS: ReadonlyArray<GraphNodeKind> = [
-  'claim',
-  'slide',
-  'citation',
-  'deck',
-];
+const VALID_KINDS: ReadonlyArray<GraphNodeKind> = ['claim', 'slide', 'citation', 'deck'];
 
-const VALID_EDGE_KINDS: ReadonlyArray<GraphEdge['kind']> = [
-  'source_slide',
-  'cites',
-  'cross_deck',
-];
+const VALID_EDGE_KINDS: ReadonlyArray<GraphEdge['kind']> = ['source_slide', 'cites', 'cross_deck'];
 
 function asNodeKind(value: string | undefined): GraphNodeKind {
   return (VALID_KINDS as readonly string[]).includes(value ?? '')
@@ -195,16 +186,26 @@ const ALL_ENTITY_TYPES: ReadonlyArray<EntityType> = [
 const VALID_ENTITY_TYPES: ReadonlySet<EntityType> = new Set(ALL_ENTITY_TYPES);
 
 function asEntityType(value: string | undefined): EntityType {
-  return value && VALID_ENTITY_TYPES.has(value as EntityType)
-    ? (value as EntityType)
-    : 'metric';
+  return value && VALID_ENTITY_TYPES.has(value as EntityType) ? (value as EntityType) : 'metric';
 }
 
 const SEED_ENTITIES: ReadonlyArray<Entity> = [
   { id: 'ent-acme', name: 'Acme Corp', type: 'company', reference_count: 18, team: 'sales' },
-  { id: 'ent-globex', name: 'Globex Industries', type: 'company', reference_count: 9, team: 'sales' },
+  {
+    id: 'ent-globex',
+    name: 'Globex Industries',
+    type: 'company',
+    reference_count: 9,
+    team: 'sales',
+  },
   { id: 'ent-initech', name: 'Initech', type: 'company', reference_count: 6, team: 'partnerships' },
-  { id: 'ent-orion', name: 'Orion Analytics', type: 'product', reference_count: 22, team: 'product' },
+  {
+    id: 'ent-orion',
+    name: 'Orion Analytics',
+    type: 'product',
+    reference_count: 22,
+    team: 'product',
+  },
   { id: 'ent-pulsar', name: 'Pulsar CRM', type: 'product', reference_count: 14, team: 'product' },
   { id: 'ent-quasar', name: 'Quasar BI', type: 'product', reference_count: 11, team: 'data' },
   { id: 'ent-nova', name: 'Nova Engine', type: 'product', reference_count: 8, team: 'engineering' },
@@ -213,14 +214,44 @@ const SEED_ENTITIES: ReadonlyArray<Entity> = [
   { id: 'ent-carol', name: 'Carol Chen', type: 'person', reference_count: 10, team: 'data' },
   { id: 'ent-david', name: 'David Park', type: 'person', reference_count: 7, team: 'engineering' },
   { id: 'ent-erin', name: 'Erin Walsh', type: 'person', reference_count: 5, team: 'partnerships' },
-  { id: 'ent-arr', name: 'Annual Recurring Revenue', type: 'kpi', reference_count: 24, team: 'finance' },
+  {
+    id: 'ent-arr',
+    name: 'Annual Recurring Revenue',
+    type: 'kpi',
+    reference_count: 24,
+    team: 'finance',
+  },
   { id: 'ent-nrr', name: 'Net Retention', type: 'kpi', reference_count: 17, team: 'finance' },
   { id: 'ent-csat', name: 'CSAT Score', type: 'kpi', reference_count: 13, team: 'support' },
   { id: 'ent-churn', name: 'Logo Churn', type: 'kpi', reference_count: 11, team: 'support' },
-  { id: 'ent-pipeline', name: 'Sales Pipeline Value', type: 'metric', reference_count: 15, team: 'sales' },
-  { id: 'ent-ctr', name: 'Click-through Rate', type: 'metric', reference_count: 9, team: 'marketing' },
-  { id: 'ent-conversion', name: 'Conversion Rate', type: 'metric', reference_count: 12, team: 'marketing' },
-  { id: 'ent-mau', name: 'Monthly Active Users', type: 'metric', reference_count: 8, team: 'product' },
+  {
+    id: 'ent-pipeline',
+    name: 'Sales Pipeline Value',
+    type: 'metric',
+    reference_count: 15,
+    team: 'sales',
+  },
+  {
+    id: 'ent-ctr',
+    name: 'Click-through Rate',
+    type: 'metric',
+    reference_count: 9,
+    team: 'marketing',
+  },
+  {
+    id: 'ent-conversion',
+    name: 'Conversion Rate',
+    type: 'metric',
+    reference_count: 12,
+    team: 'marketing',
+  },
+  {
+    id: 'ent-mau',
+    name: 'Monthly Active Users',
+    type: 'metric',
+    reference_count: 8,
+    team: 'product',
+  },
 ];
 
 const SEED_EDGES: ReadonlyArray<GraphEdgeEntity> = [
@@ -294,9 +325,7 @@ function entityFromWire(wire: NonNullable<GraphViewWire['entities']>[number]): E
   };
 }
 
-function edgeEntityFromWire(
-  wire: NonNullable<GraphViewWire['edges']>[number],
-): GraphEdgeEntity {
+function edgeEntityFromWire(wire: NonNullable<GraphViewWire['edges']>[number]): GraphEdgeEntity {
   const rel = wire.relation;
   const relation: GraphEdgeEntity['relation'] =
     rel === 'derived_from' || rel === 'updates' ? rel : 'references';
@@ -323,9 +352,7 @@ export interface GetGraphOpts {
  * is applied client-side so the seed data yields a useful preview
  * without a live API.
  */
-export async function getGraph(
-  opts: GetGraphOpts = {},
-): Promise<GraphView> {
+export async function getGraph(opts: GetGraphOpts = {}): Promise<GraphView> {
   const baseUrl = opts.baseUrl ?? DEFAULT_BASE;
   let rawEntities: Entity[] = [];
   let rawEdges: GraphEdgeEntity[] = [];
@@ -348,9 +375,8 @@ export async function getGraph(
     rawEdges = SEED_EDGES.map((e) => ({ ...e }));
   }
 
-  const typeFilter = opts.entityTypes && opts.entityTypes.length > 0
-    ? new Set(opts.entityTypes)
-    : null;
+  const typeFilter =
+    opts.entityTypes && opts.entityTypes.length > 0 ? new Set(opts.entityTypes) : null;
   const teamFilter = opts.team && opts.team !== 'all' ? opts.team : null;
   const filteredEntities = rawEntities.filter((e) => {
     if (typeFilter && !typeFilter.has(e.type)) return false;
@@ -372,19 +398,82 @@ export async function getGraph(
 
 const SEED_REFERENCES: Record<string, ReadonlyArray<EntityReference>> = {
   'ent-orion': [
-    { deck_id: 'deck-qbr', deck_title: 'Q3 QBR', slide_id: 'sl-qbr-1', slide_title: 'Product adoption', freshness: 'fresh', last_referenced_at_ms: Date.UTC(2026, 7, 11) },
-    { deck_id: 'deck-board', deck_title: 'Board update', slide_id: 'sl-board-3', slide_title: 'Engineering roadmap', freshness: 'stale', last_referenced_at_ms: Date.UTC(2026, 6, 28) },
-    { deck_id: 'deck-investor', deck_title: 'Investor update', slide_id: 'sl-inv-2', slide_title: 'Growth metrics', freshness: 'outdated', last_referenced_at_ms: Date.UTC(2026, 5, 14) },
+    {
+      deck_id: 'deck-qbr',
+      deck_title: 'Q3 QBR',
+      slide_id: 'sl-qbr-1',
+      slide_title: 'Product adoption',
+      freshness: 'fresh',
+      last_referenced_at_ms: Date.UTC(2026, 7, 11),
+    },
+    {
+      deck_id: 'deck-board',
+      deck_title: 'Board update',
+      slide_id: 'sl-board-3',
+      slide_title: 'Engineering roadmap',
+      freshness: 'stale',
+      last_referenced_at_ms: Date.UTC(2026, 6, 28),
+    },
+    {
+      deck_id: 'deck-investor',
+      deck_title: 'Investor update',
+      slide_id: 'sl-inv-2',
+      slide_title: 'Growth metrics',
+      freshness: 'outdated',
+      last_referenced_at_ms: Date.UTC(2026, 5, 14),
+    },
   ],
   'ent-acme': [
-    { deck_id: 'deck-qbr', deck_title: 'Q3 QBR', slide_id: 'sl-qbr-2', slide_title: 'Top accounts', freshness: 'fresh', last_referenced_at_ms: Date.UTC(2026, 7, 9) },
-    { deck_id: 'deck-pipe', deck_title: 'Pipeline review', slide_id: 'sl-pipe-1', slide_title: 'Account list', freshness: 'fresh', last_referenced_at_ms: Date.UTC(2026, 7, 12) },
-    { deck_id: 'deck-board', deck_title: 'Board update', slide_id: 'sl-board-1', slide_title: 'Enterprise wins', freshness: 'stale', last_referenced_at_ms: Date.UTC(2026, 6, 25) },
+    {
+      deck_id: 'deck-qbr',
+      deck_title: 'Q3 QBR',
+      slide_id: 'sl-qbr-2',
+      slide_title: 'Top accounts',
+      freshness: 'fresh',
+      last_referenced_at_ms: Date.UTC(2026, 7, 9),
+    },
+    {
+      deck_id: 'deck-pipe',
+      deck_title: 'Pipeline review',
+      slide_id: 'sl-pipe-1',
+      slide_title: 'Account list',
+      freshness: 'fresh',
+      last_referenced_at_ms: Date.UTC(2026, 7, 12),
+    },
+    {
+      deck_id: 'deck-board',
+      deck_title: 'Board update',
+      slide_id: 'sl-board-1',
+      slide_title: 'Enterprise wins',
+      freshness: 'stale',
+      last_referenced_at_ms: Date.UTC(2026, 6, 25),
+    },
   ],
   'ent-arr': [
-    { deck_id: 'deck-qbr', deck_title: 'Q3 QBR', slide_id: 'sl-qbr-3', slide_title: 'ARR waterfall', freshness: 'fresh', last_referenced_at_ms: Date.UTC(2026, 7, 11) },
-    { deck_id: 'deck-board', deck_title: 'Board update', slide_id: 'sl-board-2', slide_title: 'Financial highlights', freshness: 'fresh', last_referenced_at_ms: Date.UTC(2026, 7, 5) },
-    { deck_id: 'deck-investor', deck_title: 'Investor update', slide_id: 'sl-inv-1', slide_title: 'KPIs', freshness: 'stale', last_referenced_at_ms: Date.UTC(2026, 6, 18) },
+    {
+      deck_id: 'deck-qbr',
+      deck_title: 'Q3 QBR',
+      slide_id: 'sl-qbr-3',
+      slide_title: 'ARR waterfall',
+      freshness: 'fresh',
+      last_referenced_at_ms: Date.UTC(2026, 7, 11),
+    },
+    {
+      deck_id: 'deck-board',
+      deck_title: 'Board update',
+      slide_id: 'sl-board-2',
+      slide_title: 'Financial highlights',
+      freshness: 'fresh',
+      last_referenced_at_ms: Date.UTC(2026, 7, 5),
+    },
+    {
+      deck_id: 'deck-investor',
+      deck_title: 'Investor update',
+      slide_id: 'sl-inv-1',
+      slide_title: 'KPIs',
+      freshness: 'stale',
+      last_referenced_at_ms: Date.UTC(2026, 6, 18),
+    },
   ],
 };
 
@@ -422,10 +511,8 @@ function deterministicReference(entityId: string, index: number): EntityReferenc
 export async function getEntityReferences(entityId: string): Promise<EntityReference[]> {
   const curated = SEED_REFERENCES[entityId];
   if (curated) return curated.map((r) => ({ ...r }));
-  const seedCount = ((entityId.length % 2) + 2);
-  return Array.from({ length: seedCount }, (_, i) =>
-    deterministicReference(entityId, i),
-  );
+  const seedCount = (entityId.length % 2) + 2;
+  return Array.from({ length: seedCount }, (_, i) => deterministicReference(entityId, i));
 }
 
 export {}; // (was: __unused re-export — removed)

@@ -99,9 +99,7 @@ export function RedesignPanel({
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-slate-700/60 px-4 py-3">
         <RefreshCw size={16} className="text-blue-400" />
-        <h2 className="text-sm font-semibold text-slate-100">
-          {t('s63.redesign.title')}
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-100">{t('s63.redesign.title')}</h2>
         {result?.brandLocked && (
           <span
             className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-400"
@@ -123,9 +121,7 @@ export function RedesignPanel({
             <div className="text-[10px] uppercase tracking-wide text-slate-500">
               {t('s63.redesign.selectedLabel')}
             </div>
-            <div className="mt-1 text-sm font-medium text-slate-100">
-              {selectedSlide.title}
-            </div>
+            <div className="mt-1 text-sm font-medium text-slate-100">{selectedSlide.title}</div>
             {selectedSlide.blocks && selectedSlide.blocks.length > 0 && (
               <ul className="mt-2 space-y-0.5 text-[11px] text-slate-400">
                 {selectedSlide.blocks.slice(0, 4).map((b, i) => (

@@ -63,18 +63,9 @@ const DEMO_TIMELINE: Timeline = {
   triggers: [],
 };
 
-const CYCLE_MODES: readonly ReducedMotionMode[] = [
-  'follow_os',
-  'always_reduced',
-  'always_full',
-];
+const CYCLE_MODES: readonly ReducedMotionMode[] = ['follow_os', 'always_reduced', 'always_full'];
 
-const CYCLE_KINDS: readonly DemoTransitionKind[] = [
-  'slide',
-  'fade',
-  'wipe',
-  'zoom',
-];
+const CYCLE_KINDS: readonly DemoTransitionKind[] = ['slide', 'fade', 'wipe', 'zoom'];
 
 // ─── Styles ─────────────────────────────────────────────────────
 
@@ -181,12 +172,7 @@ export default function DemoPage() {
     };
   }, []);
 
-  const scrollState = computeScrollDemoState(
-    scrollY,
-    SCROLL_BINDING,
-    cacheRef.current,
-    isReduced,
-  );
+  const scrollState = computeScrollDemoState(scrollY, SCROLL_BINDING, cacheRef.current, isReduced);
 
   // ── Playback engine ─────────────────────────────────────
   const engineRef = useRef<TimelineEngine | null>(null);
@@ -297,9 +283,7 @@ export default function DemoPage() {
         <h1 style={{ fontSize: 32, fontWeight: 700, margin: '0 0 8px' }}>
           Phase 09 · Animation Demo
         </h1>
-        <p style={{ ...mono, margin: 0 }}>
-          Smoke surface for viewer animation modules
-        </p>
+        <p style={{ ...mono, margin: 0 }}>Smoke surface for viewer animation modules</p>
       </header>
 
       {/* ── Scroll-linked ──────────────────────────────── */}
@@ -328,9 +312,7 @@ export default function DemoPage() {
       {/* ── Reduced-motion guard ───────────────────────── */}
       <section style={card}>
         <h2 style={heading}>Reduced Motion Guard</h2>
-        <p style={muted}>
-          Cycle modes to see durations clamp and scroll-linked collapse.
-        </p>
+        <p style={muted}>Cycle modes to see durations clamp and scroll-linked collapse.</p>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
           {CYCLE_MODES.map((m, i) => (
             <button
@@ -377,12 +359,12 @@ export default function DemoPage() {
           </button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <div style={{ ...box, ...playbackStyle, transition: 'none' }}>
-            box
-          </div>
+          <div style={{ ...box, ...playbackStyle, transition: 'none' }}>box</div>
           <div style={mono}>
-            opacity: {playbackOpacity.toFixed(2)}<br />
-            translateY: {playbackTranslateY.toFixed(0)}px<br />
+            opacity: {playbackOpacity.toFixed(2)}
+            <br />
+            translateY: {playbackTranslateY.toFixed(0)}px
+            <br />
             playing: {String(playing)}
           </div>
         </div>
@@ -392,24 +374,26 @@ export default function DemoPage() {
       <section style={card}>
         <h2 style={heading}>Transition Preview</h2>
         <p style={muted}>
-          Click &ldquo;Next Slide&rdquo; to cycle transition kinds and see
-          resolved CSS props applied.
+          Click &ldquo;Next Slide&rdquo; to cycle transition kinds and see resolved CSS props
+          applied.
         </p>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 16 }}>
           <button onClick={handleNextSlide} style={btn}>
             Next Slide →
           </button>
           <span style={mono}>
-            kind: <strong style={{ color: 'var(--fg)' }}>{currentKind}</strong> &middot;{' '}
-            duration: {clampedDuration}ms
+            kind: <strong style={{ color: 'var(--fg)' }}>{currentKind}</strong> &middot; duration:{' '}
+            {clampedDuration}ms
           </span>
         </div>
         <div style={transitionCardStyle}>
           <div style={{ padding: 24 }}>
             <p style={{ margin: 0, fontWeight: 600 }}>Slide content</p>
             <p style={{ ...mono, marginTop: 8 }}>
-              transform: {resolvedProps.transform ?? 'none'}<br />
-              opacity: {resolvedProps.opacity ? `[${resolvedProps.opacity.join(', ')}]` : 'n/a'}<br />
+              transform: {resolvedProps.transform ?? 'none'}
+              <br />
+              opacity: {resolvedProps.opacity ? `[${resolvedProps.opacity.join(', ')}]` : 'n/a'}
+              <br />
               motionHeavy: {currentKind === 'flip' || currentKind === 'cube' ? 'yes' : 'no'}
             </p>
           </div>

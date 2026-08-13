@@ -7,9 +7,30 @@ import {
 } from './test-sessions-panel';
 
 const SAMPLE_EVENTS = [
-  { id: 'e1', seq: 1, eventType: 'session_start' as const, createdAt: 1_700_000_000_000, region: 'us-east', consent: 'opt_in' as const },
-  { id: 'e2', seq: 2, eventType: 'slide_enter' as const, createdAt: 1_700_000_001_000, region: 'us-east', consent: 'opt_in' as const },
-  { id: 'e3', seq: 3, eventType: 'click' as const, createdAt: 1_700_000_002_000, region: 'us-east', consent: 'opt_in' as const },
+  {
+    id: 'e1',
+    seq: 1,
+    eventType: 'session_start' as const,
+    createdAt: 1_700_000_000_000,
+    region: 'us-east',
+    consent: 'opt_in' as const,
+  },
+  {
+    id: 'e2',
+    seq: 2,
+    eventType: 'slide_enter' as const,
+    createdAt: 1_700_000_001_000,
+    region: 'us-east',
+    consent: 'opt_in' as const,
+  },
+  {
+    id: 'e3',
+    seq: 3,
+    eventType: 'click' as const,
+    createdAt: 1_700_000_002_000,
+    region: 'us-east',
+    consent: 'opt_in' as const,
+  },
 ];
 
 const SAMPLE_SESSIONS: TestSessionRow[] = [
@@ -35,7 +56,9 @@ const SAMPLE_SESSIONS: TestSessionRow[] = [
 
 const SNAP: ReplaySnapshotView = { atEvent: 1, atMs: 1_700_000_000_000, variables: { TOTAL: 42 } };
 
-function defaultProps(overrides: Partial<React.ComponentProps<typeof TestSessionsPanel>> = {}): React.ComponentProps<typeof TestSessionsPanel> {
+function defaultProps(
+  overrides: Partial<React.ComponentProps<typeof TestSessionsPanel>> = {},
+): React.ComponentProps<typeof TestSessionsPanel> {
   return {
     sessions: SAMPLE_SESSIONS,
     selectedSessionId: 's1',

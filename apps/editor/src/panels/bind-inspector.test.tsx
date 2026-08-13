@@ -25,7 +25,13 @@ describe('BindInspector', () => {
   });
 
   it('shows field mapping when a source is selected', () => {
-    render(<BindInspector binding={{ ...emptyBinding, queryId: 'ds-revenue' }} onChange={vi.fn()} chartType="bar" />);
+    render(
+      <BindInspector
+        binding={{ ...emptyBinding, queryId: 'ds-revenue' }}
+        onChange={vi.fn()}
+        chartType="bar"
+      />,
+    );
     expect(screen.getByText('Field Mapping')).toBeInTheDocument();
     expect(screen.getByTestId('p08-bind-field-x')).toBeInTheDocument();
     expect(screen.getByTestId('p08-bind-field-y')).toBeInTheDocument();

@@ -97,10 +97,7 @@ export function OutlineTree(props: OutlineTreeProps): ReactElement {
         }}
         data-element-id={node.element.id}
       >
-        <div
-          className="outline-tree__row"
-          style={{ paddingLeft: depth * 12 + 8 } as CSSProperties}
-        >
+        <div className="outline-tree__row" style={{ paddingLeft: depth * 12 + 8 } as CSSProperties}>
           {isGroup ? (
             <button
               type="button"
@@ -117,9 +114,7 @@ export function OutlineTree(props: OutlineTreeProps): ReactElement {
           <button
             type="button"
             className="outline-tree__label"
-            onClick={(e) =>
-              onSelect(node.element.id, { shift: e.shiftKey, alt: e.altKey })
-            }
+            onClick={(e) => onSelect(node.element.id, { shift: e.shiftKey, alt: e.altKey })}
           >
             <span className={`outline-tree__type outline-tree__type--${node.element.type}`}>
               {node.element.type}

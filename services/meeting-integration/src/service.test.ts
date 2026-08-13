@@ -26,12 +26,17 @@ function createService(opts?: {
   if (opts?.now !== undefined) serviceOpts.now = opts.now;
   if (opts?.idGen !== undefined) serviceOpts.idGen = opts.idGen;
   return {
-    service: new MeetingIntegrationService(serviceOpts as unknown as import('./service.js').MeetingIntegrationServiceOptions),
+    service: new MeetingIntegrationService(
+      serviceOpts as unknown as import('./service.js').MeetingIntegrationServiceOptions,
+    ),
     store,
   };
 }
 
-function createEvents(): { events: Array<{ subject: string; payload: Record<string, unknown> }>; emitter: MeetingEventEmitter } {
+function createEvents(): {
+  events: Array<{ subject: string; payload: Record<string, unknown> }>;
+  emitter: MeetingEventEmitter;
+} {
   const events: Array<{ subject: string; payload: Record<string, unknown> }> = [];
   const emitter: MeetingEventEmitter = {
     async publish(subject, payload) {
@@ -93,19 +98,24 @@ describe('MeetingIntegrationService', () => {
       const { events, emitter } = createEvents();
       const { service } = createService({ emitter });
 
-      await service.connect({
-        workspace_id: 'ws1',
-        vendor: 'zoom',
-        auth: { access_token: 'tok123' },
-        connected_by: 'user1',
-      }, 'deck-1');
+      await service.connect(
+        {
+          workspace_id: 'ws1',
+          vendor: 'zoom',
+          auth: { access_token: 'tok123' },
+          connected_by: 'user1',
+        },
+        'deck-1',
+      );
 
-      const sessionEvent = events.find(e => e.subject === 'meeting.session_started');
+      const sessionEvent = events.find((e) => e.subject === 'meeting.session_started');
       expect(sessionEvent).toBeTruthy();
-      expect(sessionEvent!.payload['payload']).toEqual(expect.objectContaining({
-        vendor: 'zoom',
-        presenter_id: 'user1',
-      }));
+      expect(sessionEvent!.payload['payload']).toEqual(
+        expect.objectContaining({
+          vendor: 'zoom',
+          presenter_id: 'user1',
+        }),
+      );
     });
 
     it('disconnect sets status to disconnected', async () => {
@@ -137,12 +147,14 @@ describe('MeetingIntegrationService', () => {
 
       await service.disconnect('ws1', 'zoom');
 
-      const endEvent = events.find(e => e.subject === 'meeting.session_ended');
+      const endEvent = events.find((e) => e.subject === 'meeting.session_ended');
       expect(endEvent).toBeTruthy();
-      expect(endEvent!.payload['payload']).toEqual(expect.objectContaining({
-        vendor: 'zoom',
-        presenter_id: 'user1',
-      }));
+      expect(endEvent!.payload['payload']).toEqual(
+        expect.objectContaining({
+          vendor: 'zoom',
+          presenter_id: 'user1',
+        }),
+      );
     });
 
     it('disconnect throws IntegrationNotFoundError if not connected', async () => {
@@ -187,9 +199,9 @@ describe('MeetingIntegrationService', () => {
 
       const all = await service.getStatusAll('ws1');
       expect(all).toHaveLength(3);
-      expect(all.find(v => v.vendor === 'zoom')!.status).toBe('connected');
-      expect(all.find(v => v.vendor === 'meet')!.status).toBe('disconnected');
-      expect(all.find(v => v.vendor === 'teams')!.status).toBe('disconnected');
+      expect(all.find((v) => v.vendor === 'zoom')!.status).toBe('connected');
+      expect(all.find((v) => v.vendor === 'meet')!.status).toBe('disconnected');
+      expect(all.find((v) => v.vendor === 'teams')!.status).toBe('disconnected');
     });
 
     it('listActive returns only connected integrations', async () => {
@@ -227,7 +239,11 @@ describe('MeetingIntegrationService', () => {
       });
 
       const token = await service.issueToken(
-        'ws1', 'zoom', 'meet-1', 'presenter-1', 'deck-1',
+        'ws1',
+        'zoom',
+        'meet-1',
+        'presenter-1',
+        'deck-1',
         new Date('2025-06-01T11:00:00Z'),
       );
 
@@ -307,11 +323,13 @@ describe('MeetingIntegrationService', () => {
         transitioned_at: new Date('2025-06-01T10:00:00Z'),
       });
 
-      const sessionEvent = events.find(e => e.subject === 'meeting.session_started');
+      const sessionEvent = events.find((e) => e.subject === 'meeting.session_started');
       expect(sessionEvent).toBeTruthy();
-      expect(sessionEvent!.payload['payload']).toEqual(expect.objectContaining({
-        meeting_id: 'meet-1',
-      }));
+      expect(sessionEvent!.payload['payload']).toEqual(
+        expect.objectContaining({
+          meeting_id: 'meet-1',
+        }),
+      );
     });
 
     it('subsequent markers do not emit meeting.session_started', async () => {
@@ -332,7 +350,7 @@ describe('MeetingIntegrationService', () => {
         transitioned_at: new Date('2025-06-01T10:01:00Z'),
       });
 
-      const sessionEvent = events.find(e => e.subject === 'meeting.session_started');
+      const sessionEvent = events.find((e) => e.subject === 'meeting.session_started');
       expect(sessionEvent).toBeFalsy();
     });
 

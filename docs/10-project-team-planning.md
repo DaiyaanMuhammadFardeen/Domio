@@ -12,23 +12,23 @@ Domio should be built by durable, capability-aligned teams rather than temporary
 
 ### 10.0.1 Teams
 
-| Team | Owns | Primary feature ranges | Suggested initial staffing |
-|---|---|---|---|
-| **Canvas & Editor** | renderer, layout, selection, layers, history, keyboard | #1–22 | 1 lead, 4 frontend/graphics, 1 QA |
-| **Design Systems & Ecosystem** | components, templates, themes, brand kits, marketplace | #23–47 | 1 PM, 3 frontend, 2 platform, 1 content/QA |
-| **Data & Visualization** | connectors, formula engine, charts, scenarios, provenance | #48–64, #215 | 1 lead, 3 backend/data, 2 frontend, 1 QA |
-| **Media & Runtime** | 3D, video, animation, embeds, code sandboxes | #65–95 | 1 lead, 3 graphics/media, 1 backend, 1 QA |
-| **Prototype & Interaction** | variables, interactions, games, user testing | #96–107 | 2 frontend, 2 backend, 1 QA |
-| **AI & Agents** | copilot, AI eval, MCP, CLI, deck-as-code, agent safety | #108–125, #221–240 | 1 lead, 4 applied AI/backend, 2 frontend, 1 eval/security |
-| **Presenter & Audience** | presenter, remote, live sessions, audience, meeting integrations | #126–154, #205–214, #217–218 | 1 PM, 3 realtime/backend, 3 frontend, 1 QA |
-| **Publishing & Analytics** | web viewer, publishing, exports, analytics, CRM | #155–178, #204 | 1 lead, 3 frontend/backend, 1 data, 1 QA |
-| **Collaboration & Workflow** | comments, reviews, branch/merge, libraries, tasks | #179–192 | 1 PM, 3 full-stack, 1 QA |
-| **Enterprise & Trust** | SSO/SCIM, DLP, audit, residency, retention, legal hold | #193–204 | 1 PM, 2 backend, 1 security, 1 compliance |
-| **Platform Infrastructure** | API gateway, Postgres, event bus, storage, workers, CI/CD | cross-cutting | 1 principal, 4 platform/SRE, 1 DBA |
-| **Security & Privacy** | threat model, secure SDLC, incident response | cross-cutting | 1 security lead, 1 appsec, 1 privacy |
-| **Design & Research** | design system, UX research, accessibility, localization | cross-cutting | 1 design director, 3 product designers, 1 researcher, 1 content/i18n |
-| **Developer Relations** | SDK docs, plugins, marketplace creators, MCP adoption | #200–204, #221–240 | 1 lead, 2 DX engineers, 1 technical writer |
-| **Support & Reliability** | support, SRE on-call, customer education | cross-cutting | 1 support lead, 2 support, shared SRE |
+| Team                           | Owns                                                             | Primary feature ranges       | Suggested initial staffing                                           |
+| ------------------------------ | ---------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------- |
+| **Canvas & Editor**            | renderer, layout, selection, layers, history, keyboard           | #1–22                        | 1 lead, 4 frontend/graphics, 1 QA                                    |
+| **Design Systems & Ecosystem** | components, templates, themes, brand kits, marketplace           | #23–47                       | 1 PM, 3 frontend, 2 platform, 1 content/QA                           |
+| **Data & Visualization**       | connectors, formula engine, charts, scenarios, provenance        | #48–64, #215                 | 1 lead, 3 backend/data, 2 frontend, 1 QA                             |
+| **Media & Runtime**            | 3D, video, animation, embeds, code sandboxes                     | #65–95                       | 1 lead, 3 graphics/media, 1 backend, 1 QA                            |
+| **Prototype & Interaction**    | variables, interactions, games, user testing                     | #96–107                      | 2 frontend, 2 backend, 1 QA                                          |
+| **AI & Agents**                | copilot, AI eval, MCP, CLI, deck-as-code, agent safety           | #108–125, #221–240           | 1 lead, 4 applied AI/backend, 2 frontend, 1 eval/security            |
+| **Presenter & Audience**       | presenter, remote, live sessions, audience, meeting integrations | #126–154, #205–214, #217–218 | 1 PM, 3 realtime/backend, 3 frontend, 1 QA                           |
+| **Publishing & Analytics**     | web viewer, publishing, exports, analytics, CRM                  | #155–178, #204               | 1 lead, 3 frontend/backend, 1 data, 1 QA                             |
+| **Collaboration & Workflow**   | comments, reviews, branch/merge, libraries, tasks                | #179–192                     | 1 PM, 3 full-stack, 1 QA                                             |
+| **Enterprise & Trust**         | SSO/SCIM, DLP, audit, residency, retention, legal hold           | #193–204                     | 1 PM, 2 backend, 1 security, 1 compliance                            |
+| **Platform Infrastructure**    | API gateway, Postgres, event bus, storage, workers, CI/CD        | cross-cutting                | 1 principal, 4 platform/SRE, 1 DBA                                   |
+| **Security & Privacy**         | threat model, secure SDLC, incident response                     | cross-cutting                | 1 security lead, 1 appsec, 1 privacy                                 |
+| **Design & Research**          | design system, UX research, accessibility, localization          | cross-cutting                | 1 design director, 3 product designers, 1 researcher, 1 content/i18n |
+| **Developer Relations**        | SDK docs, plugins, marketplace creators, MCP adoption            | #200–204, #221–240           | 1 lead, 2 DX engineers, 1 technical writer                           |
+| **Support & Reliability**      | support, SRE on-call, customer education                         | cross-cutting                | 1 support lead, 2 support, shared SRE                                |
 
 ### 10.0.2 Durable ownership rules
 
@@ -41,50 +41,50 @@ Domio should be built by durable, capability-aligned teams rather than temporary
 
 ## 10.1 Roles
 
-| Role | Accountability |
-|---|---|
-| Product director | product thesis, sequencing, success metrics |
-| Domain PM | requirements, acceptance criteria, customer discovery |
-| Principal architect | architecture invariants, ADR process, system seams |
-| Tech lead | implementation design, code quality, delivery |
-| Product designer | interaction/design decisions, prototypes |
-| UX researcher | usability evidence and persona validation |
-| Frontend engineer | surface behavior, performance, a11y |
-| Graphics engineer | renderer, GPU, scene graph |
-| Backend engineer (TS/Node) | control-plane modules in TypeScript/Node, MCP, REST/gRPC, AI orchestration |
-| Backend engineer (Go) | realtime gateway, CPU workers, export pipeline, infrastructure services |
-| Systems engineer (Rust, optional) | hot-path CPU workers introduced via ADR when profile data justifies |
-| Data engineer | connectors, analytics, graph projections |
-| Applied AI engineer | model adapters, eval, prompts, confidence |
-| ML engineer (Python) | eval harness, dataset prep, ML pipelines (AI/data workers) |
-| Security engineer | threat model, secure SDLC, pen tests |
-| SRE | production reliability, DR, capacity, on-call |
-| DBA/data platform | Postgres, ClickHouse, migrations, backup |
-| QA/SDET | automated tests, E2E, load, fixtures |
-| Technical writer | API/docs/runbooks, information architecture |
-| Localization lead | Bangla and tier-1 locale quality |
-| Developer advocate | SDK/MCP/plugin ecosystem |
-| Support engineer | customer triage, escalation, self-host support |
-| Compliance counsel | PDPA, Cyber Security Ordinance, DPA, contracts |
+| Role                              | Accountability                                                             |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| Product director                  | product thesis, sequencing, success metrics                                |
+| Domain PM                         | requirements, acceptance criteria, customer discovery                      |
+| Principal architect               | architecture invariants, ADR process, system seams                         |
+| Tech lead                         | implementation design, code quality, delivery                              |
+| Product designer                  | interaction/design decisions, prototypes                                   |
+| UX researcher                     | usability evidence and persona validation                                  |
+| Frontend engineer                 | surface behavior, performance, a11y                                        |
+| Graphics engineer                 | renderer, GPU, scene graph                                                 |
+| Backend engineer (TS/Node)        | control-plane modules in TypeScript/Node, MCP, REST/gRPC, AI orchestration |
+| Backend engineer (Go)             | realtime gateway, CPU workers, export pipeline, infrastructure services    |
+| Systems engineer (Rust, optional) | hot-path CPU workers introduced via ADR when profile data justifies        |
+| Data engineer                     | connectors, analytics, graph projections                                   |
+| Applied AI engineer               | model adapters, eval, prompts, confidence                                  |
+| ML engineer (Python)              | eval harness, dataset prep, ML pipelines (AI/data workers)                 |
+| Security engineer                 | threat model, secure SDLC, pen tests                                       |
+| SRE                               | production reliability, DR, capacity, on-call                              |
+| DBA/data platform                 | Postgres, ClickHouse, migrations, backup                                   |
+| QA/SDET                           | automated tests, E2E, load, fixtures                                       |
+| Technical writer                  | API/docs/runbooks, information architecture                                |
+| Localization lead                 | Bangla and tier-1 locale quality                                           |
+| Developer advocate                | SDK/MCP/plugin ecosystem                                                   |
+| Support engineer                  | customer triage, escalation, self-host support                             |
+| Compliance counsel                | PDPA, Cyber Security Ordinance, DPA, contracts                             |
 
 ---
 
 ## 10.2 RACI
 
-| Decision / deliverable | Product | Design | Eng lead | Security | SRE | Legal | QA | DX |
-|---|---|---|---|---|---|---|---|---|
-| Product thesis / scope | A | C | C | C | C | C | I | I |
-| FR acceptance criteria | A | C | R | C | I | C | R | I |
-| UX flows | C | A/R | C | C | I | I | C | I |
-| Schema source of truth | C | C | A/R | C | C | I | C | C |
-| Architecture ADR | C | I | A/R | C | C | I | I | C |
-| Threat model | I | C | C | A/R | C | C | C | I |
-| Residency policy | C | I | R | C | R | A/R | I | I |
-| Release gate | A | C | R | R | R | C | R | I |
-| Incident comms | I | I | C | C | A/R | A | I | I |
-| API/MCP versioning | C | I | A | C | C | I | C | R |
-| Marketplace payout | A | I | R | C | I | A | C | R |
-| Bangla localization | C | A | R | I | I | C | R | I |
+| Decision / deliverable | Product | Design | Eng lead | Security | SRE | Legal | QA  | DX  |
+| ---------------------- | ------- | ------ | -------- | -------- | --- | ----- | --- | --- |
+| Product thesis / scope | A       | C      | C        | C        | C   | C     | I   | I   |
+| FR acceptance criteria | A       | C      | R        | C        | I   | C     | R   | I   |
+| UX flows               | C       | A/R    | C        | C        | I   | I     | C   | I   |
+| Schema source of truth | C       | C      | A/R      | C        | C   | I     | C   | C   |
+| Architecture ADR       | C       | I      | A/R      | C        | C   | I     | I   | C   |
+| Threat model           | I       | C      | C        | A/R      | C   | C     | C   | I   |
+| Residency policy       | C       | I      | R        | C        | R   | A/R   | I   | I   |
+| Release gate           | A       | C      | R        | R        | R   | C     | R   | I   |
+| Incident comms         | I       | I      | C        | C        | A/R | A     | I   | I   |
+| API/MCP versioning     | C       | I      | A        | C        | C   | I     | C   | R   |
+| Marketplace payout     | A       | I      | R        | C        | I   | A     | C   | R   |
+| Bangla localization    | C       | A      | R        | I        | I   | C     | R   | I   |
 
 Legend: **R** Responsible, **A** Accountable, **C** Consulted, **I** Informed.
 
@@ -105,13 +105,21 @@ Legend: **R** Responsible, **A** Accountable, **C** Consulted, **I** Informed.
 # ADR-YYYY-NNN: <title>
 
 ## Context
+
 ## Decision
+
 ## Alternatives considered
+
 ## Consequences
+
 ## Security / privacy
+
 ## Data migration / rollback
+
 ## Verification
+
 ## Owners
+
 ## Status
 ```
 
@@ -343,16 +351,16 @@ flowchart LR
 
 ## 10.10 Vendor Evaluation
 
-| Capability | Build | Buy/managed | Decision criteria |
-|---|---|---|---|
-| Auth/SSO | core policy | WorkOS/Auth0 | SAML/SCIM, BD data, export, price |
-| Realtime | gateway | Ably/Liveblocks | 10k audience, residency, SLA, egress |
-| Payments | billing logic | SSLCommerz/ShurjoPay + bKash/Nagad; Stripe Connect | Bangladesh Bank approval, webhooks, payouts |
-| AI | orchestration | model providers | data retention, residency, quality, rate limits |
-| Email | templates/events | Postmark/SES | deliverability, BD support, DPA |
-| Search | query semantics | OpenSearch managed | vector, export, residency |
-| Object storage | abstraction | S3/R2/MinIO | egress, locality, portability |
-| Observability | OTel + dashboards | Grafana Cloud/Datadog | cost, self-host, PII controls |
+| Capability     | Build             | Buy/managed                                        | Decision criteria                               |
+| -------------- | ----------------- | -------------------------------------------------- | ----------------------------------------------- |
+| Auth/SSO       | core policy       | WorkOS/Auth0                                       | SAML/SCIM, BD data, export, price               |
+| Realtime       | gateway           | Ably/Liveblocks                                    | 10k audience, residency, SLA, egress            |
+| Payments       | billing logic     | SSLCommerz/ShurjoPay + bKash/Nagad; Stripe Connect | Bangladesh Bank approval, webhooks, payouts     |
+| AI             | orchestration     | model providers                                    | data retention, residency, quality, rate limits |
+| Email          | templates/events  | Postmark/SES                                       | deliverability, BD support, DPA                 |
+| Search         | query semantics   | OpenSearch managed                                 | vector, export, residency                       |
+| Object storage | abstraction       | S3/R2/MinIO                                        | egress, locality, portability                   |
+| Observability  | OTel + dashboards | Grafana Cloud/Datadog                              | cost, self-host, PII controls                   |
 
 Evaluation rubric: 30% functional fit, 20% reliability/SLA, 20% security/compliance, 15% cost at scale, 10% portability, 5% support.
 
@@ -371,16 +379,16 @@ Evaluation rubric: 30% functional fit, 20% reliability/SLA, 20% security/complia
 
 ## 10.12 Incident Responsibilities
 
-| Role | Incident responsibility |
-|---|---|
-| Incident commander | owns incident timeline and decisions |
-| Ops lead | mitigation/deployment/rollback |
-| Comms lead | internal/customer updates |
-| Security lead | exposure scope, containment, forensics |
-| Product lead | user impact and prioritization |
-| Scribe | timeline, actions, evidence |
-| Legal/privacy | regulator/customer obligations |
-| Support lead | ticket triage and customer status |
+| Role               | Incident responsibility                |
+| ------------------ | -------------------------------------- |
+| Incident commander | owns incident timeline and decisions   |
+| Ops lead           | mitigation/deployment/rollback         |
+| Comms lead         | internal/customer updates              |
+| Security lead      | exposure scope, containment, forensics |
+| Product lead       | user impact and prioritization         |
+| Scribe             | timeline, actions, evidence            |
+| Legal/privacy      | regulator/customer obligations         |
+| Support lead       | ticket triage and customer status      |
 
 Every incident results in a postmortem, action items, and a test/runbook update.
 
@@ -388,18 +396,18 @@ Every incident results in a postmortem, action items, and a test/runbook update.
 
 ## 10.13 Risk Register
 
-| ID | Risk | Probability | Impact | Owner | Mitigation |
-|---|---|---|---|---|---|
-| PRJ-01 | Renderer schedule slips | M | H | Canvas lead | M0 benchmark; hire specialist; fallback renderer |
-| PRJ-02 | CRDT scale failure | M | H | Editor lead | shard; benchmark; compact |
-| PRJ-03 | Audience 10k not met | L | H | Realtime lead | load weekly; managed fallback |
-| PRJ-04 | AI quality insufficient | M | H | AI lead | eval harness; citations; human gates |
-| PRJ-05 | PDPA changes | M | H | Legal | quarterly verification; portable architecture |
-| PRJ-06 | Marketplace licensing abuse | M | M | Ecosystem | review + takedown + provenance |
-| PRJ-07 | BD payment API instability | M | M | Billing | aggregator adapter |
-| PRJ-08 | Staffing scarce skills | H | H | People | early hiring + specialist contractors |
-| PRJ-09 | Cost exceeds plan | M | H | Finance/SRE | monthly unit-cost review |
-| PRJ-10 | Scope creates coordination overload | H | M | Product director | capability teams + dependency graph |
+| ID     | Risk                                | Probability | Impact | Owner            | Mitigation                                       |
+| ------ | ----------------------------------- | ----------- | ------ | ---------------- | ------------------------------------------------ |
+| PRJ-01 | Renderer schedule slips             | M           | H      | Canvas lead      | M0 benchmark; hire specialist; fallback renderer |
+| PRJ-02 | CRDT scale failure                  | M           | H      | Editor lead      | shard; benchmark; compact                        |
+| PRJ-03 | Audience 10k not met                | L           | H      | Realtime lead    | load weekly; managed fallback                    |
+| PRJ-04 | AI quality insufficient             | M           | H      | AI lead          | eval harness; citations; human gates             |
+| PRJ-05 | PDPA changes                        | M           | H      | Legal            | quarterly verification; portable architecture    |
+| PRJ-06 | Marketplace licensing abuse         | M           | M      | Ecosystem        | review + takedown + provenance                   |
+| PRJ-07 | BD payment API instability          | M           | M      | Billing          | aggregator adapter                               |
+| PRJ-08 | Staffing scarce skills              | H           | H      | People           | early hiring + specialist contractors            |
+| PRJ-09 | Cost exceeds plan                   | M           | H      | Finance/SRE      | monthly unit-cost review                         |
+| PRJ-10 | Scope creates coordination overload | H           | M      | Product director | capability teams + dependency graph              |
 
 ---
 
@@ -415,13 +423,13 @@ Every incident results in a postmortem, action items, and a test/runbook update.
 
 ## 10.15 Open Decisions
 
-| ID | Decision | Owner | Deadline |
-|---|---|---|---|
-| OD-TEAM-01 | Initial team budget / exact headcount. | Founders + Finance | Before hiring |
-| OD-TEAM-02 | Whether to hire graphics specialists locally, globally, or both. | Engineering | M0 |
-| OD-TEAM-03 | Public marketplace launch vs invited creators first. | Product | M9 |
-| OD-TEAM-04 | Self-host enterprise support model (professional services vs productized). | GTM + SRE | M9 |
-| OD-TEAM-05 | Formal Architecture Council membership. | CTO/Principal architect | M0 |
+| ID         | Decision                                                                   | Owner                   | Deadline      |
+| ---------- | -------------------------------------------------------------------------- | ----------------------- | ------------- |
+| OD-TEAM-01 | Initial team budget / exact headcount.                                     | Founders + Finance      | Before hiring |
+| OD-TEAM-02 | Whether to hire graphics specialists locally, globally, or both.           | Engineering             | M0            |
+| OD-TEAM-03 | Public marketplace launch vs invited creators first.                       | Product                 | M9            |
+| OD-TEAM-04 | Self-host enterprise support model (professional services vs productized). | GTM + SRE               | M9            |
+| OD-TEAM-05 | Formal Architecture Council membership.                                    | CTO/Principal architect | M0            |
 
 ---
 

@@ -84,7 +84,10 @@ export default async function EditorHomePage() {
         <p className="editor-home__workspace">
           Workspace <code>{WORKSPACE_ID}</code>
           {!live && (
-            <span className="editor-home__badge" title="API unreachable; showing fallback deck list">
+            <span
+              className="editor-home__badge"
+              title="API unreachable; showing fallback deck list"
+            >
               offline
             </span>
           )}

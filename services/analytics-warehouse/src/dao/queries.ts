@@ -12,13 +12,7 @@
  */
 
 import type { ClickHouseClient } from '../client/clickhouse.js';
-import type {
-  QueryScope,
-  DeckSummary,
-  SlideBreakdown,
-  FunnelStep,
-  HeatmapTile,
-} from '../types.js';
+import type { QueryScope, DeckSummary, SlideBreakdown, FunnelStep, HeatmapTile } from '../types.js';
 
 export interface AnalyticsDao {
   deckSummary(scope: QueryScope & { deck_id?: string }): Promise<DeckSummary[]>;

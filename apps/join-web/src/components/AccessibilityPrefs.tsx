@@ -36,7 +36,9 @@ export const DEFAULT_A11Y_PREFS: AccessibilityPrefsState = {
   reducedMotion: false,
 };
 
-export function loadA11yPrefs(storageKey: string = A11Y_PREFS_STORAGE_KEY): AccessibilityPrefsState {
+export function loadA11yPrefs(
+  storageKey: string = A11Y_PREFS_STORAGE_KEY,
+): AccessibilityPrefsState {
   if (typeof window === 'undefined') return DEFAULT_A11Y_PREFS;
   try {
     const raw = window.localStorage.getItem(storageKey);
@@ -53,7 +55,10 @@ export function loadA11yPrefs(storageKey: string = A11Y_PREFS_STORAGE_KEY): Acce
   }
 }
 
-export function saveA11yPrefs(prefs: AccessibilityPrefsState, storageKey: string = A11Y_PREFS_STORAGE_KEY): void {
+export function saveA11yPrefs(
+  prefs: AccessibilityPrefsState,
+  storageKey: string = A11Y_PREFS_STORAGE_KEY,
+): void {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(storageKey, JSON.stringify(prefs));
 }
@@ -62,9 +67,7 @@ const FONT_SIZES: readonly CaptionFontSize[] = ['small', 'medium', 'large', 'xl'
 const POSITIONS: readonly CaptionPosition[] = ['top', 'bottom'];
 
 export function AccessibilityPrefs(props: AccessibilityPrefsProps) {
-  const [prefs, setPrefs] = useState<AccessibilityPrefsState>(
-    props.initial ?? DEFAULT_A11Y_PREFS,
-  );
+  const [prefs, setPrefs] = useState<AccessibilityPrefsState>(props.initial ?? DEFAULT_A11Y_PREFS);
   const [hydrated, setHydrated] = useState(false);
 
   // Hydrate from localStorage on mount.

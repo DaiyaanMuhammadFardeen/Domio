@@ -12,7 +12,11 @@ export type { LibraryServiceOptions } from './service.js';
 export { handlers } from './handlers.js';
 export type { HttpRequest, HttpResponse, LibraryHandlerContext } from './handlers.js';
 export { InMemoryLibraryStore } from './store/mem_store.js';
-export { PgLibraryStore, StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
+export {
+  PgLibraryStore,
+  StoreNotConfiguredError,
+  StoreNotImplementedError,
+} from './store/pg_store.js';
 export type { LibraryStore } from './store/store.js';
 export { FEATURE_FLAGS, checkFeature } from './feature_flags.js';
 export type { FeatureFlag } from './feature_flags.js';

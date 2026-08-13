@@ -5,7 +5,17 @@ import { uuid } from '../crypto/index.js';
 import type { Review } from '../store/types.js';
 
 const PROFANITY: readonly string[] = [
-  'scam', 'fraud', 'fuck', 'shit', 'asshole', 'bastard', 'bitch', 'idiot', 'stupid', 'terrible', 'useless',
+  'scam',
+  'fraud',
+  'fuck',
+  'shit',
+  'asshole',
+  'bastard',
+  'bitch',
+  'idiot',
+  'stupid',
+  'terrible',
+  'useless',
 ];
 
 export type ModerationVerdict = 'approved' | 'auto_flagged' | 'rejected';

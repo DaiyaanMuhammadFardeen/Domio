@@ -23,10 +23,11 @@ export interface MarketplaceAuditRecorder {
 export class InMemoryMarketplaceAuditRecorder implements MarketplaceAuditRecorder {
   private events: MarketplaceAuditEvent[] = [];
   private counter = 0;
-  constructor(_idGen: () => string, private readonly clock: () => Date = () => new Date()) {}
-  async record(
-    event: Omit<MarketplaceAuditEvent, 'eventId' | 'createdAt'>,
-  ): Promise<void> {
+  constructor(
+    _idGen: () => string,
+    private readonly clock: () => Date = () => new Date(),
+  ) {}
+  async record(event: Omit<MarketplaceAuditEvent, 'eventId' | 'createdAt'>): Promise<void> {
     this.counter++;
     const stripDash = (n: number) => n.toString().padStart(4, '0');
     this.events.push({

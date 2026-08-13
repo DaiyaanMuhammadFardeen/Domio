@@ -41,7 +41,10 @@ export class FontValidationError extends Error {
 
 export class FontLicenseBlockedError extends Error {
   readonly code = 'FONT_LICENSE_BLOCKED' as const;
-  constructor(public readonly fontId: string, public readonly reason: string) {
+  constructor(
+    public readonly fontId: string,
+    public readonly reason: string,
+  ) {
     super(`Font ${fontId} blocked by license: ${reason}`);
     this.name = 'FontLicenseBlockedError';
   }
@@ -59,7 +62,9 @@ export interface FontServiceOptions {
 
 const defaultId: () => ULID = () =>
   asULID(
-    `01H0000000000000000000000${Math.floor(Math.random() * 1e6).toString().padStart(6, '0')}`
+    `01H0000000000000000000000${Math.floor(Math.random() * 1e6)
+      .toString()
+      .padStart(6, '0')}`
       .slice(0, 26)
       .padEnd(26, '0'),
   );
@@ -98,7 +103,11 @@ export class FontService {
     if (input.antiPiracyScore >= 0.8) {
       throw new FontLicenseBlockedError(input.sha256, 'anti-piracy score too high');
     }
-    if (input.licenseStatus === 'restricted' && input.licenseExpiresAt && input.licenseExpiresAt.getTime() < this.clock().getTime()) {
+    if (
+      input.licenseStatus === 'restricted' &&
+      input.licenseExpiresAt &&
+      input.licenseExpiresAt.getTime() < this.clock().getTime()
+    ) {
       throw new FontLicenseBlockedError(input.sha256, 'license expired');
     }
     const record: FontAssetRecord = {
@@ -140,7 +149,11 @@ export class FontService {
   async updateLicense(
     fontId: string,
     orgId: string,
-    patch: { licenseStatus?: FontLicenseStatus; licenseUrl?: string; licenseExpiresAt?: Date | null },
+    patch: {
+      licenseStatus?: FontLicenseStatus;
+      licenseUrl?: string;
+      licenseExpiresAt?: Date | null;
+    },
   ): Promise<FontAssetRecord> {
     const existing = await this.fonts.findById(fontId, orgId);
     if (!existing) throw new FontNotFoundError(fontId);

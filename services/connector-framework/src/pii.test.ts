@@ -10,7 +10,10 @@ import type { CanonicalColumn } from './types.js';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function col(name: string, type: 'string' | 'number' | 'boolean' | 'date' | 'currency' | 'percent' = 'string'): CanonicalColumn {
+function col(
+  name: string,
+  type: 'string' | 'number' | 'boolean' | 'date' | 'currency' | 'percent' = 'string',
+): CanonicalColumn {
   return { name, type, semantic_role: 'dimension' };
 }
 
@@ -53,36 +56,30 @@ describe('classifyPii', () => {
 describe('scanColumnPii', () => {
   it('detects email addresses', () => {
     const values = [
-      'alice@example.com', 'bob@test.org', 'charlie@company.net',
-      'dave@domain.io', 'eve@startup.co',
+      'alice@example.com',
+      'bob@test.org',
+      'charlie@company.net',
+      'dave@domain.io',
+      'eve@startup.co',
     ];
     const found = scanColumnPii(values);
     expect(found).toContain('email');
   });
 
   it('detects phone numbers', () => {
-    const values = [
-      '+1234567890', '+9876543210', '+1112223333',
-      '+4445556666', '+7778889999',
-    ];
+    const values = ['+1234567890', '+9876543210', '+1112223333', '+4445556666', '+7778889999'];
     const found = scanColumnPii(values);
     expect(found).toContain('phone');
   });
 
   it('detects SSNs', () => {
-    const values = [
-      '123-45-6789', '987-65-4321', '111-22-3333',
-      '444-55-6666', '777-88-9999',
-    ];
+    const values = ['123-45-6789', '987-65-4321', '111-22-3333', '444-55-6666', '777-88-9999'];
     const found = scanColumnPii(values);
     expect(found).toContain('ssn');
   });
 
   it('detects IP addresses', () => {
-    const values = [
-      '192.168.1.1', '10.0.0.1', '172.16.0.1',
-      '8.8.8.8', '1.1.1.1',
-    ];
+    const values = ['192.168.1.1', '10.0.0.1', '172.16.0.1', '8.8.8.8', '1.1.1.1'];
     const found = scanColumnPii(values);
     expect(found).toContain('ip');
   });
@@ -109,17 +106,53 @@ describe('detectPiiColumns — email recall', () => {
   it('achieves recall >= 0.99 on a labeled email corpus', () => {
     // Generate labeled corpus: 200 emails, 20 non-emails
     const emailSamples = Array.from({ length: 200 }, (_, i) => {
-      const names = ['alice', 'bob', 'charlie', 'dave', 'eve', 'frank', 'grace', 'heidi', 'ivan', 'judy'];
-      const domains = ['example.com', 'test.org', 'company.net', 'domain.io', 'startup.co', 'mail.com', 'inbox.net', 'work.dev'];
+      const names = [
+        'alice',
+        'bob',
+        'charlie',
+        'dave',
+        'eve',
+        'frank',
+        'grace',
+        'heidi',
+        'ivan',
+        'judy',
+      ];
+      const domains = [
+        'example.com',
+        'test.org',
+        'company.net',
+        'domain.io',
+        'startup.co',
+        'mail.com',
+        'inbox.net',
+        'work.dev',
+      ];
       const name = names[i % names.length]!;
       const domain = domains[i % domains.length]!;
       return `${name}${i}@${domain}`;
     });
     const nonEmailSamples = [
-      'hello world', 'no email here', 'just text', '12345', 'test',
-      'lorem ipsum', 'dolor sit amet', 'consectetur', 'adipiscing', 'elit',
-      'sed do', 'eiusmod', 'tempor', 'incididunt', 'ut labore',
-      'dolore magna', 'aliqua', 'enim ad', 'minim', 'veniam',
+      'hello world',
+      'no email here',
+      'just text',
+      '12345',
+      'test',
+      'lorem ipsum',
+      'dolor sit amet',
+      'consectetur',
+      'adipiscing',
+      'elit',
+      'sed do',
+      'eiusmod',
+      'tempor',
+      'incididunt',
+      'ut labore',
+      'dolore magna',
+      'aliqua',
+      'enim ad',
+      'minim',
+      'veniam',
     ];
 
     const rows: unknown[][] = [];
@@ -155,10 +188,7 @@ describe('detectPiiColumns — email recall', () => {
 
 describe('detectPiiColumns — classification mapping', () => {
   it('maps SSN-only column to restricted', () => {
-    const ssns = [
-      '123-45-6789', '987-65-4321', '111-22-3333',
-      '444-55-6666', '777-88-9999',
-    ];
+    const ssns = ['123-45-6789', '987-65-4321', '111-22-3333', '444-55-6666', '777-88-9999'];
     const rows = ssns.map((s) => [s]);
     const columns = [col('ssn_col')];
     const piiMap = detectPiiColumns(columns, rows);
@@ -167,10 +197,7 @@ describe('detectPiiColumns — classification mapping', () => {
   });
 
   it('maps IP-only column to low', () => {
-    const ips = [
-      '192.168.1.1', '10.0.0.1', '172.16.0.1',
-      '8.8.8.8', '1.1.1.1',
-    ];
+    const ips = ['192.168.1.1', '10.0.0.1', '172.16.0.1', '8.8.8.8', '1.1.1.1'];
     const rows = ips.map((i) => [i]);
     const columns = [col('ip_col')];
     const piiMap = detectPiiColumns(columns, rows);
@@ -179,7 +206,9 @@ describe('detectPiiColumns — classification mapping', () => {
   });
 
   it('maps non-string columns to none', () => {
-    const columns: CanonicalColumn[] = [{ name: 'num_col', type: 'number', semantic_role: 'measure' }];
+    const columns: CanonicalColumn[] = [
+      { name: 'num_col', type: 'number', semantic_role: 'measure' },
+    ];
     const rows = [[1], [2], [3], [4], [5]];
     const piiMap = detectPiiColumns(columns, rows);
 

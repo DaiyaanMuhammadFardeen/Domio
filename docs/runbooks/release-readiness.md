@@ -108,12 +108,12 @@ boxes below must be ticked before the on-call team flips
 
 ## 11. Sign-off
 
-| Role | Name | Date | Notes |
-|---|---|---|---|
-| Eng lead (E2) | | | |
-| Eng lead (F) | | | |
-| Eng lead (D) | | | |
-| Eng lead (A) | | | |
-| PM | | | |
-| QA | | | |
-| Platform on-call | | | |
+| Role             | Name | Date | Notes |
+| ---------------- | ---- | ---- | ----- |
+| Eng lead (E2)    |      |      |       |
+| Eng lead (F)     |      |      |       |
+| Eng lead (D)     |      |      |       |
+| Eng lead (A)     |      |      |       |
+| PM               |      |      |       |
+| QA               |      |      |       |
+| Platform on-call |      |      |       |

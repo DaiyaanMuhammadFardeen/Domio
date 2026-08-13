@@ -1,13 +1,13 @@
 # Phase 06 — Components & Templates Ecosystem
 
-| Field | Value |
-|---|---|
-| **Phase number** | 06 |
-| **Name** | Components & Templates Ecosystem |
-| **Owner(s)** | Stream A lead (registry-service), Designer/UX (panel + marketplace UX), Frontend lead (prop panel + render integration) |
-| **Critical path?** | No (deepening) |
-| **Parallel stream** | **Stream A — Ecosystem** (runs parallel with P07, P08, P09, P10, P11, P12, P13 after P05 ships) |
-| **Unblocks** | P14 (Sharing), P15 (Presenter), P19 (Marketplace — billing/payout layer), P20 (lock-region enforcement reads brand_lock_region) |
+| Field               | Value                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Phase number**    | 06                                                                                                                              |
+| **Name**            | Components & Templates Ecosystem                                                                                                |
+| **Owner(s)**        | Stream A lead (registry-service), Designer/UX (panel + marketplace UX), Frontend lead (prop panel + render integration)         |
+| **Critical path?**  | No (deepening)                                                                                                                  |
+| **Parallel stream** | **Stream A — Ecosystem** (runs parallel with P07, P08, P09, P10, P11, P12, P13 after P05 ships)                                 |
+| **Unblocks**        | P14 (Sharing), P15 (Presenter), P19 (Marketplace — billing/payout layer), P20 (lock-region enforcement reads brand_lock_region) |
 
 **Intent.** Turn the canvas into a Canva-scale authoring surface by delivering the component registry, smart components with JSON-Schema-driven editable props, variants, the promote-to-component flow, user/team component libraries with publish/subscribe semantics, the full-deck and section template engines, the icon/media/animation/sticker libraries, and brand-locked templates. The phase lands the structural machinery that every later "deepening" and "surface" phase builds on: #25's prop schema becomes the canonical contract for the AI copilot (P12) and the MCP tool surface (P13); #27's library sync model is reused for theme libraries in P07; #28's marketplace plumbing provides the foundation for P19's billing/payout layer. Marketplace billing and payout specifically land in P19; this phase delivers listings, install, license grants, and the revenue-share event ledger but stops short of payout execution.
 
@@ -16,15 +16,16 @@
 > (Fast-Check tested); `@domio/components` curated catalog (25 components with props
 > schemas, light/dark variants, SVG builders); `PropEditOp`/`VariantChangeOp` CRDT ops;
 > `ElementSvg` renderer upgrade; Magic UI chrome (Tailwind + `motion`, adapted `MagicCard`
-> + `Marquee`); Insert → Components panel and schema-driven PropsPanel wired into the
-> editor. Sub-phase 2: `services/registry` (Hono) with content-addressed bundle store
-> (SHA-256 verified), signed URLs, catalog + pins + variants, install round-trip, license
-> module (JWS + offline grace + seats), team libraries (event log + replay + policies +
-> webhooks), marketplace (listings lifecycle, reviews + moderation, revenue ledger, search),
-> templates (engine + sections + brand locks + SVG poster renderer), media (icons + stock +
-> Lottie/GIF + stickers), 7 workers, HTTP transport (7 route groups), MCP tool surface
-> (13 tools + agent audit). Migrations 0011–0016, 7 protos, 2 JSON schemas, ADRs 0005–0008,
-> i18n (7 locales), axe a11y, Playwright E2E smoke. 542 registry tests at 84% line coverage.
+>
+> - `Marquee`); Insert → Components panel and schema-driven PropsPanel wired into the
+>   editor. Sub-phase 2: `services/registry` (Hono) with content-addressed bundle store
+>   (SHA-256 verified), signed URLs, catalog + pins + variants, install round-trip, license
+>   module (JWS + offline grace + seats), team libraries (event log + replay + policies +
+>   webhooks), marketplace (listings lifecycle, reviews + moderation, revenue ledger, search),
+>   templates (engine + sections + brand locks + SVG poster renderer), media (icons + stock +
+>   Lottie/GIF + stickers), 7 workers, HTTP transport (7 route groups), MCP tool surface
+>   (13 tools + agent audit). Migrations 0011–0016, 7 protos, 2 JSON schemas, ADRs 0005–0008,
+>   i18n (7 locales), axe a11y, Playwright E2E smoke. 542 registry tests at 84% line coverage.
 
 ---
 
@@ -43,22 +44,22 @@
 
 ### 2.1 In scope (feature numbers)
 
-| # | Feature |
-|---:|---|
-| 23 | 10,000+ pre-built components (cards, stats, timelines, org charts, quotes, agendas, comparison tables, roadmaps, and more) |
-| 24 | Component variants — light/dark, sizes, states — switchable in one click |
-| 25 | Smart components with editable props panel (JSON Schema) |
-| 26 | User-created components (create-component flow, master/instance model, prop inference) |
-| 27 | Shared team component libraries (publish/subscribe, version pinning, update notifications) |
-| 28 | **Marketplace plumbing** — listings, install, license grants, revenue-share events, refunds (billing/payout execution deferred to P19) |
-| 29 | Template gallery by use case (pitch, board, QBR, all-hands, classroom, keynote, product demo) |
-| 30 | Full deck templates with placeholder logic and guided fill-in |
-| 31 | Section templates (team slide, financials section, spreadable sections) |
-| 32 | Icon library — ≥ 100 k icons, multiple styles, recolorable, perceptual-hash search |
-| 33 | Stock photo/video/illustration integrations (Unsplash, Pexels, plugin interface) |
-| 34 | GIF and Lottie animation library |
-| 35 | Sticker / annotation packs |
-| 36 | Brand-locked templates — enforced client + server, agent-aware |
+|   # | Feature                                                                                                                                |
+| --: | -------------------------------------------------------------------------------------------------------------------------------------- |
+|  23 | 10,000+ pre-built components (cards, stats, timelines, org charts, quotes, agendas, comparison tables, roadmaps, and more)             |
+|  24 | Component variants — light/dark, sizes, states — switchable in one click                                                               |
+|  25 | Smart components with editable props panel (JSON Schema)                                                                               |
+|  26 | User-created components (create-component flow, master/instance model, prop inference)                                                 |
+|  27 | Shared team component libraries (publish/subscribe, version pinning, update notifications)                                             |
+|  28 | **Marketplace plumbing** — listings, install, license grants, revenue-share events, refunds (billing/payout execution deferred to P19) |
+|  29 | Template gallery by use case (pitch, board, QBR, all-hands, classroom, keynote, product demo)                                          |
+|  30 | Full deck templates with placeholder logic and guided fill-in                                                                          |
+|  31 | Section templates (team slide, financials section, spreadable sections)                                                                |
+|  32 | Icon library — ≥ 100 k icons, multiple styles, recolorable, perceptual-hash search                                                     |
+|  33 | Stock photo/video/illustration integrations (Unsplash, Pexels, plugin interface)                                                       |
+|  34 | GIF and Lottie animation library                                                                                                       |
+|  35 | Sticker / annotation packs                                                                                                             |
+|  36 | Brand-locked templates — enforced client + server, agent-aware                                                                         |
 
 ### 2.2 Out of scope
 
@@ -105,18 +106,21 @@ The phase is organized into six workstreams. Tasks within each are ordered; the 
 **Tasks (ordered):**
 
 1. **Component package schema (`contracts/schema/component-package-v1.schema.json`).**
+
    - Files: `contracts/schema/component-package-v1.schema.json`, `contracts/proto/domio/v1/component_registry.proto`.
    - Contract added: `ComponentManifest` (catalog_id, version semver, license_id, deps[], package_hash, signing_key_id, signature).
    - Tests: AJV validation suite — valid + boundary cases for each `kind` (`component | icon | sticker | animation`); tampered-hash rejection.
    - **DoD:** schema validates 10 hand-authored packages; CI runs AJV in `contracts/`.
 
 2. **`registry-service` skeleton.**
+
    - Files: `services/registry/src/main.rs` (or Node), `services/registry/src/{catalog,bundles,props,sync,marketplace,moderation,analytics}/mod.rs`.
    - Tables: `component`, `component_variant`, `smart_component_prop`, `user_library`, `team_library`, `team_library_event` (see §5).
    - Tests: unit ≥ 80 % line coverage on `catalog` and `props` modules; integration test for install round-trip with content-hash verification.
    - **DoD:** `POST /v1/components/{catalog_id}/install` returns a license grant; tampered hash returns 409.
 
 3. **JSON Schema prop engine (`packages/schema-prop`).**
+
    - Files: `packages/schema-prop/src/{index,format,resolver,validator}.ts`.
    - Contract consumed: `ComponentManifest.props_schema`.
    - Tests: Fast-Check property tests — randomly generated schemas × values round-trip; UI snapshot test for the prop panel on the canonical stat-card.
@@ -133,18 +137,21 @@ The phase is organized into six workstreams. Tasks within each are ordered; the 
 **Tasks:**
 
 1. **Prop panel UI (`apps/canvas/src/panels/PropsPanel.tsx`).**
+
    - Consumes: `ComponentManifest.props_schema`, `smart_component_prop` rows (pre-indexed for control hints).
    - Controls per JSON-Schema type: `string → text/number`, `boolean → toggle`, `enum → segmented`, `array → repeatable`, `object → nested`, `oneOf/anyOf → discriminated union`.
    - Tests: Storybook stories for each control type; a Playwright test renders the stat-card prop panel in < 50 ms p95.
    - **DoD:** panel renders for any schema up to 40 props within 50 ms p95; required props marked with asterisk; pagination kicks in past 40.
 
 2. **Variant engine.**
+
    - Files: `services/registry/src/catalog/variants.rs`, `apps/canvas/src/render/variantResolver.ts`.
    - Variant switching emits a single CRDT op `component.variant_changed` (no new CRDT type).
    - Tests: variant remap precedence (instance override > variant matrix > master defaults); missing-prop warning on old schema versions.
    - **DoD:** switch variant on a 200-slide deck in < 100 ms p95; lint warns on deprecated variant remaps.
 
 3. **Create-component flow (promote to component).**
+
    - Files: `apps/canvas/src/actions/createComponent.ts`, `services/registry/src/catalog/promote.ts`.
    - Prop inference walks selected subtrees: text → string, image → asset, color → color, number → number; asks "keep data binding on instance or move to prop?" when a data widget is selected.
    - Tests: snapshot of inferred props on 6 fixture selections; unit tests on the inference heuristics; integration test blocks promotion crossing a brand-locked region.
@@ -161,12 +168,14 @@ The phase is organized into six workstreams. Tasks within each are ordered; the 
 **Tasks:**
 
 1. **Library event log + sync worker.**
+
    - Files: `services/registry/src/sync/libraryLog.ts`, `workers/library-sync/src/index.ts`.
    - Schema: `team_library_event` (`{ id, library_id, seq, kind, component_id, version, payload_ref, actor_id, created_at }`).
    - Tests: multi-subscriber concurrent apply is deterministic; offline replay idempotent on `(library_id, seq)`; two publishers bumping incompatible versions resolve by workspace policy.
    - **DoD:** an update propagates to subscribers within 60 s; offline clients queue and apply on reconnect with a "pending library sync" badge.
 
 2. **Library policy modes.**
+
    - Modes: `latest`, `patch`, `minor`, `pinned`; admin-configurable per workspace.
    - Tests: minor policy updates within minor range, blocks major; pinned mode rejects install of newer versions.
    - **DoD:** admin UI exposes policy per team library; a workspace-scoped policy update emits an audit row.
@@ -182,30 +191,35 @@ The phase is organized into six workstreams. Tasks within each are ordered; the 
 **Tasks:**
 
 1. **Listing schema + lifecycle.**
+
    - Files: `services/registry/src/marketplace/listings.ts`, `contracts/schema/marketplace-listing-v1.schema.json`.
    - States: `draft → in_review → published → deprecated → removed`; review moderation pipeline triggered on transition to `in_review`.
    - Tests: state transitions rejected out of order; `removed` listing keeps installed instances rendering.
    - **DoD:** a creator can draft, submit, and publish a listing; status transitions write audit rows.
 
 2. **License grant issuance + verification.**
+
    - Files: `services/registry/src/license/{signer,verifier}.ts`, `workers/license-signer/`.
    - License token = JWT signed by the license service, claims `{ sub, listing_id, license_id, seats, exp, iat, jti, device_fp }`.
    - Tests: expired token rejected; revoked token rejected; seat-count enforcement on enterprise grants; tampered signature rejected.
    - **DoD:** every render of a paid component hits `POST /v1/license/verify`; offline grace period is 30 days (NFR-COM-11); re-verification surfaces a non-blocking warning after 30 days.
 
 3. **Revenue-share ledger (deferred payout).**
+
    - Files: `services/registry/src/marketplace/revenueShare.ts`, `workers/payout-ledger-writer/`.
    - Writes `revenue_share_event` rows on every paid install; payout execution deferred to P19 (the worker that turns `payout_status='eligible'` into actual transfers ships later).
    - Tests: ledger append-only; refund decrements pending payout; currency stored as integer cents per §5.7 of `/docs/pre-development-planning-guide.md`.
    - **DoD:** every install writes one ledger row in a single Postgres transaction with the install; refund flow decrements the row's `payout_status` to `refunded`.
 
 4. **Reviews + moderation pipeline.**
+
    - Files: `services/registry/src/moderation/{reviews,profanity,spam}.ts`, `workers/review-moderator/`.
    - Pipeline: profanity → spam heuristics → trust score → sentiment; auto-flag queue for human review (24 h SLA).
    - Tests: synthetic spam corpus blocked; verified-buyer badge attaches only when `license_grant` exists.
    - **DoD:** review submit returns 201 + queued status; auto-flag triggers within 30 s (NFR-COM-8).
 
 5. **Marketplace search (read-side).**
+
    - Files: `services/registry/src/marketplace/search.ts`, `services/registry/src/search/{indexer,query}.ts`.
    - OpenSearch index, sharded per locale; Redis read-through cache for top 1 % queries.
    - Tests: cold query < 1.2 s p95; warm query < 400 ms p95; indexing lag < 60 s.
@@ -222,18 +236,21 @@ The phase is organized into six workstreams. Tasks within each are ordered; the 
 **Tasks:**
 
 1. **Template engine.**
+
    - Files: `services/registry/src/templates/{engine,installer,placeholders}.ts`.
    - Templates are structured `deck.json` documents (the same `DeckSchema` from P02) plus a `manifest` block and `placeholders[]` array.
    - Tests: malformed template rejected at upload; placeholder validation confirms each resolves to a real element.
    - **DoD:** install deep-copies the template, replacing `placeholder` elements with their `default_value`; "Guided fill-in" mode walks placeholders in narrative order.
 
 2. **Section templates + spreadable insertion.**
+
    - Files: `services/registry/src/templates/section.ts`, `apps/canvas/src/actions/insertSection.ts`.
    - A section template is a `template` row with `kind = 'section'` and a `slides[]` array; spreadable sections can be inserted multiple times.
    - Tests: insert into deck with conflicting theme ships with explicit overrides + diff dialog; missing component from a removed team library surfaces a "Missing components — partial render" warning.
    - **DoD:** a "Team" section template can be inserted into any deck and parameterized by team member list.
 
 3. **Brand-locked regions (`brand_lock_region`).**
+
    - Files: `services/registry/src/templates/locks.ts`, `apps/canvas/src/crdt/lockEnforcement.ts`, `services/registry/src/marketplace/lockGate.ts`.
    - Lock scopes: `slide | element | region`; strictness: `strict | color-only | text-only`; allowed_overrides per scope.
    - Tests: every (scope, strictness, allowed_overrides) combination; MCP agent attempting to edit a locked region returns `ERR_BRAND_LOCK` (forward-compatible with #225).
@@ -250,17 +267,20 @@ The phase is organized into six workstreams. Tasks within each are ordered; the 
 **Tasks:**
 
 1. **Icon library ingestion.**
+
    - Files: `workers/icon-importer/`, `services/registry/src/icons/{index,search}.ts`.
    - Ingest ≥ 100 k icons from a curated source set (e.g., Phosphor, Lucide, Tabler, Iconoir); each stored as compact SVG path data + metadata (styles, synonyms).
    - Tests: trigram search on names and synonyms returns in < 100 ms; perceptual-hash similarity search for "find an icon that looks like…" returns in < 600 ms p95.
    - **DoD:** a designer can search "trend up arrow," see results across 4 styles, recolor via token, and insert.
 
 2. **Stock media plugins (Unsplash + Pexels).**
+
    - Files: `services/registry/src/plugins/stock/{unsplash,pexels}.ts` (uses WS-COM-4 task 6).
    - Tests: attribution metadata populated; mirrored-to-CDN path follows `s3://domio-assets/media/{asset_uuid}/{ext}`.
    - **DoD:** inserting an Unsplash image records `credits[]` and the license; offline render works for ≥ 30 days (NFR-COM-11).
 
 3. **Lottie + GIF library.**
+
    - Files: `services/registry/src/animations/{validate,ingest,index}.ts`, `apps/canvas/src/render/lottie/{runtime,recolor}.ts`.
    - Lottie files validated server-side: license + author + malware scan (forbid `ks` script features regardless).
    - Tests: recoloring respects design tokens; reduced-motion mode honored at runtime; GIF transcoded to MP4/WebM on upload.
@@ -277,6 +297,7 @@ The phase is organized into six workstreams. Tasks within each are ordered; the 
 **Tasks:**
 
 1. **MCP tools for registry + marketplace.**
+
    - Files: `services/registry/src/mcp/{tools,handlers}.ts`, `packages/mcp-tools/src/components.ts`.
    - Tools: `list_components`, `describe_component`, `install_component`, `uninstall_component`, `search_marketplace`, `get_listing`, `purchase_listing`, `pin_component_version`, `get_component_props_schema`, `apply_template`.
    - Tests: tool schemas validate; MCP errors map to documented codes (`ERR_BRAND_LOCK`, `ERR_LICENSE_MISSING`, `ERR_PIN_UNAVAILABLE`); dry-run flag returns diff without mutation.
@@ -359,28 +380,28 @@ All tables use `id uuid primary key default gen_random_uuid()` and `created_at/u
 
 ## 6. Verification matrix
 
-| Feature | Test | Expected result | Owner |
-|---:|---|---|---|
-| 23 | Browse "Insert → Components," filter category Card, insert a stat-card | Catalog returns ≥ 10 k components; insert produces a live, themed instance within 1 s | Frontend lead |
-| 24 | Switch a stat-card variant from `light` to `dark` | Render updates in < 100 ms p95; no other instances affected; one CRDT op emitted | Frontend lead |
-| 25 | Edit the KPI value on a stat-card via the Props panel; bind a prop to a Sheets source | Prop field shows a binding chip; value updates live; canvas re-renders within one frame; binding survives a component version bump | Frontend lead + Data lead (P08 unblocks binder) |
-| 26 | Select 4 elements (icon + number + label + background) → "Create component" | Inference dialog proposes 3 props (icon, value, label); user accepts; new component in My library; second deck inserts an instance with overrides preserved | Frontend lead |
-| 27 | Workspace admin publishes a component v1.1.0; two subscribers' decks are open | Within 60 s, both decks show "Update available" badge; bulk update applied; offline replay is deterministic | Registry-service lead |
-| 28 | Creator publishes a free listing; another user installs it | Listing visible in search within 60 s; install completes within 1.5 s for ≤ 5 MB; license_grant row + revenue_share_event row written; audit row created | Marketplace lead |
-| 28 | Paid listing purchased | Stripe test charge succeeds; license JWT issued; render verifies token online + offline (30-day grace) | Marketplace lead |
-| 29 | Open Insert → Marketplace → Templates → Pitch decks | 14 results render; faceted filters work; preview video/poster load; "Use this template" copies to workspace | Designer/UX |
-| 30 | Install a 12-slide full deck template; run "Guided fill-in" | Placeholders highlighted in narrative order; binding a placeholder to a data source converts it to a `dataBinding` prop | Frontend lead |
-| 31 | Insert a "Team" section template into a deck with conflicting theme | Section installs with explicit overrides; user sees a diff dialog; accepting applies overrides | Frontend lead |
-| 32 | Search icons "trend up arrow" | Results across ≥ 4 styles; perceptual-hash similarity search returns in < 600 ms p95; recolor via token persists across theme swap | Frontend lead |
-| 33 | Search Unsplash for "office"; insert a photo | Asset downloads; attribution recorded in `credits[]`; license metadata persisted; offline render works for ≥ 30 days | Marketplace lead |
-| 34 | Insert a Lottie animation; recolor to brand accent | Animation respects token; reduced-motion preference auto-honors; bundle size warning at > 250 KB gzipped | Frontend lead |
-| 35 | Insert a sticker from an "informal-only" pack in a strict-governance workspace | Soft warning + brand lint finding on insertion | Designer/UX + Frontend lead |
-| 36 | Drag a logo inside a brand-locked region | Drag rejected client-side; server returns `ERR_BRAND_LOCK` on CRDT write; audit row created with `actor_kind = 'human'` | Registry-service lead |
-| 222 | MCP test agent runs `install_component` then `describe_component` against a sealed workspace | Both tools return structured JSON; agent's edits visible in version history with `actor_kind = 'agent'` | MCP/agentic lead |
-| 233 | Agent emits `KPI value = 42` against a stat-card's prop schema via structured output | Prop engine validates; canvas reflects the value; identical validation in editor, server, and headless render | AI lead (forward-pointer to P12) |
-| 225 | Agent token lacks `brand_lock_bypass`; agent tries to edit a locked region | API returns `ERR_BRAND_LOCK`; agent cannot bypass | Registry-service lead |
-| 196 | Workspace admin opens the audit log for a deck | Every component install, update, license check, brand-lock violation is visible with trace_id | Platform lead |
-| 47 (cross-cite) | Theme override exists on slide 7; user installs a component onto slide 7 | Component inherits the override correctly; per-slide overrides survive the install | Frontend lead (with P07 cross-check) |
+|         Feature | Test                                                                                         | Expected result                                                                                                                                             | Owner                                           |
+| --------------: | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+|              23 | Browse "Insert → Components," filter category Card, insert a stat-card                       | Catalog returns ≥ 10 k components; insert produces a live, themed instance within 1 s                                                                       | Frontend lead                                   |
+|              24 | Switch a stat-card variant from `light` to `dark`                                            | Render updates in < 100 ms p95; no other instances affected; one CRDT op emitted                                                                            | Frontend lead                                   |
+|              25 | Edit the KPI value on a stat-card via the Props panel; bind a prop to a Sheets source        | Prop field shows a binding chip; value updates live; canvas re-renders within one frame; binding survives a component version bump                          | Frontend lead + Data lead (P08 unblocks binder) |
+|              26 | Select 4 elements (icon + number + label + background) → "Create component"                  | Inference dialog proposes 3 props (icon, value, label); user accepts; new component in My library; second deck inserts an instance with overrides preserved | Frontend lead                                   |
+|              27 | Workspace admin publishes a component v1.1.0; two subscribers' decks are open                | Within 60 s, both decks show "Update available" badge; bulk update applied; offline replay is deterministic                                                 | Registry-service lead                           |
+|              28 | Creator publishes a free listing; another user installs it                                   | Listing visible in search within 60 s; install completes within 1.5 s for ≤ 5 MB; license_grant row + revenue_share_event row written; audit row created    | Marketplace lead                                |
+|              28 | Paid listing purchased                                                                       | Stripe test charge succeeds; license JWT issued; render verifies token online + offline (30-day grace)                                                      | Marketplace lead                                |
+|              29 | Open Insert → Marketplace → Templates → Pitch decks                                          | 14 results render; faceted filters work; preview video/poster load; "Use this template" copies to workspace                                                 | Designer/UX                                     |
+|              30 | Install a 12-slide full deck template; run "Guided fill-in"                                  | Placeholders highlighted in narrative order; binding a placeholder to a data source converts it to a `dataBinding` prop                                     | Frontend lead                                   |
+|              31 | Insert a "Team" section template into a deck with conflicting theme                          | Section installs with explicit overrides; user sees a diff dialog; accepting applies overrides                                                              | Frontend lead                                   |
+|              32 | Search icons "trend up arrow"                                                                | Results across ≥ 4 styles; perceptual-hash similarity search returns in < 600 ms p95; recolor via token persists across theme swap                          | Frontend lead                                   |
+|              33 | Search Unsplash for "office"; insert a photo                                                 | Asset downloads; attribution recorded in `credits[]`; license metadata persisted; offline render works for ≥ 30 days                                        | Marketplace lead                                |
+|              34 | Insert a Lottie animation; recolor to brand accent                                           | Animation respects token; reduced-motion preference auto-honors; bundle size warning at > 250 KB gzipped                                                    | Frontend lead                                   |
+|              35 | Insert a sticker from an "informal-only" pack in a strict-governance workspace               | Soft warning + brand lint finding on insertion                                                                                                              | Designer/UX + Frontend lead                     |
+|              36 | Drag a logo inside a brand-locked region                                                     | Drag rejected client-side; server returns `ERR_BRAND_LOCK` on CRDT write; audit row created with `actor_kind = 'human'`                                     | Registry-service lead                           |
+|             222 | MCP test agent runs `install_component` then `describe_component` against a sealed workspace | Both tools return structured JSON; agent's edits visible in version history with `actor_kind = 'agent'`                                                     | MCP/agentic lead                                |
+|             233 | Agent emits `KPI value = 42` against a stat-card's prop schema via structured output         | Prop engine validates; canvas reflects the value; identical validation in editor, server, and headless render                                               | AI lead (forward-pointer to P12)                |
+|             225 | Agent token lacks `brand_lock_bypass`; agent tries to edit a locked region                   | API returns `ERR_BRAND_LOCK`; agent cannot bypass                                                                                                           | Registry-service lead                           |
+|             196 | Workspace admin opens the audit log for a deck                                               | Every component install, update, license check, brand-lock violation is visible with trace_id                                                               | Platform lead                                   |
+| 47 (cross-cite) | Theme override exists on slide 7; user installs a component onto slide 7                     | Component inherits the override correctly; per-slide overrides survive the install                                                                          | Frontend lead (with P07 cross-check)            |
 
 ---
 

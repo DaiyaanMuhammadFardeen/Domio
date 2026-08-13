@@ -8,7 +8,9 @@ function makeDeps(): ServiceDeps {
   return defaultDeps(new InMemoryStore());
 }
 
-function makePkg(overrides: Partial<ComponentPackage> & { catalogId: string; version: string }): ComponentPackage {
+function makePkg(
+  overrides: Partial<ComponentPackage> & { catalogId: string; version: string },
+): ComponentPackage {
   return {
     id: `${overrides.catalogId}:${overrides.version}`,
     kind: 'component',
@@ -70,7 +72,12 @@ describe('variants', () => {
     it('variant matrix matches when conditions', () => {
       const variants: ComponentVariant[] = [
         { id: 'v1', label: 'Default', tokens: { color: 'blue' } } as ComponentVariant,
-        { id: 'v2', label: 'Compact', tokens: { color: 'red' }, when: { size: 'compact' } } as ComponentVariant,
+        {
+          id: 'v2',
+          label: 'Compact',
+          tokens: { color: 'red' },
+          when: { size: 'compact' },
+        } as ComponentVariant,
       ];
       const pkg = makePkg({ catalogId: 'a.b', version: '1.0.0', variants });
       const result = resolveVariant(makeDeps(), { pkg, props: { size: 'compact' } });
@@ -80,7 +87,12 @@ describe('variants', () => {
     it('variant matrix ignores non-matching conditions', () => {
       const variants: ComponentVariant[] = [
         { id: 'v1', label: 'Default', tokens: { color: 'blue' } } as ComponentVariant,
-        { id: 'v2', label: 'Compact', tokens: { color: 'red' }, when: { size: 'compact' } } as ComponentVariant,
+        {
+          id: 'v2',
+          label: 'Compact',
+          tokens: { color: 'red' },
+          when: { size: 'compact' },
+        } as ComponentVariant,
       ];
       const pkg = makePkg({ catalogId: 'a.b', version: '1.0.0', variants });
       const result = resolveVariant(makeDeps(), { pkg, props: { size: 'large' } });
@@ -93,7 +105,11 @@ describe('variants', () => {
         { id: 'v2', label: 'Compact', tokens: {}, when: { size: 'compact' } } as ComponentVariant,
       ];
       const pkg = makePkg({ catalogId: 'a.b', version: '1.0.0', variants });
-      const result = resolveVariant(makeDeps(), { pkg, requestedVariantId: 'v1', props: { size: 'compact' } });
+      const result = resolveVariant(makeDeps(), {
+        pkg,
+        requestedVariantId: 'v1',
+        props: { size: 'compact' },
+      });
       expect(result.variantId).toBe('v1');
     });
 
@@ -114,7 +130,11 @@ describe('variants', () => {
     });
 
     it('returns empty tokens when no matching variant', () => {
-      const pkg = makePkg({ catalogId: 'a.b', version: '1.0.0', variants: [{ id: 'v1', label: 'V1', tokens: {} }] });
+      const pkg = makePkg({
+        catalogId: 'a.b',
+        version: '1.0.0',
+        variants: [{ id: 'v1', label: 'V1', tokens: {} }],
+      });
       const result = resolveVariant(makeDeps(), { pkg });
       expect(result.tokens).toEqual({});
     });

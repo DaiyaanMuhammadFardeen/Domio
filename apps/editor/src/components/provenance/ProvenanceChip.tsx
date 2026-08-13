@@ -108,7 +108,7 @@ export function ProvenanceChip({
           (childProps['className'] as string | undefined) ?? '',
           'provenance-chip-target',
         ),
-    } as Partial<typeof children.props>)
+      } as Partial<typeof children.props>)
     : children;
 
   return (
@@ -153,11 +153,7 @@ export function ProvenanceChip({
         <Info size={11} aria-hidden />
       </button>
 
-      <ProvenanceDrawer
-        open={open}
-        elementId={elementId}
-        onClose={handleClose}
-      />
+      <ProvenanceDrawer open={open} elementId={elementId} onClose={handleClose} />
     </span>
   );
 }

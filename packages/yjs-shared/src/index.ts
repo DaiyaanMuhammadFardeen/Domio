@@ -14,12 +14,7 @@
  */
 
 // Sub-document registry & schema projection
-export {
-  SubDocRegistry,
-  ensureSlide,
-  serializeSlide,
-  createDeckDocs,
-} from './subdocs.js';
+export { SubDocRegistry, ensureSlide, serializeSlide, createDeckDocs } from './subdocs.js';
 
 // Awareness / presence protocol helpers
 export {

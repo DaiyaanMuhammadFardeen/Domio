@@ -60,13 +60,21 @@ describe('TimeBudgetAlerts', () => {
 
   it('respects custom soft/hard thresholds', () => {
     const { rerender } = render(
-      <TimeBudgetAlerts dwellMs={30_000} budgetMs={60_000} thresholds={{ softPct: 0.4, hardPct: 0.6 }} />,
+      <TimeBudgetAlerts
+        dwellMs={30_000}
+        budgetMs={60_000}
+        thresholds={{ softPct: 0.4, hardPct: 0.6 }}
+      />,
     );
     // 30s/60s = 0.5 → soft per override (above 40% but below 60%).
     expect(screen.getByTestId('time-budget-alerts')).toHaveAttribute('data-level', 'soft');
 
     rerender(
-      <TimeBudgetAlerts dwellMs={40_000} budgetMs={60_000} thresholds={{ softPct: 0.4, hardPct: 0.6 }} />,
+      <TimeBudgetAlerts
+        dwellMs={40_000}
+        budgetMs={60_000}
+        thresholds={{ softPct: 0.4, hardPct: 0.6 }}
+      />,
     );
     expect(screen.getByTestId('time-budget-alerts')).toHaveAttribute('data-level', 'hard');
   });

@@ -19,19 +19,27 @@ describe('startKycSessionBody', () => {
   });
 
   it('throws for kyc_required state', () => {
-    expect(() => startKycSessionBody('kyc_required')).toThrow('Cannot start KYC from state: kyc_required');
+    expect(() => startKycSessionBody('kyc_required')).toThrow(
+      'Cannot start KYC from state: kyc_required',
+    );
   });
 
   it('throws for kyc_submitted state', () => {
-    expect(() => startKycSessionBody('kyc_submitted')).toThrow('Cannot start KYC from state: kyc_submitted');
+    expect(() => startKycSessionBody('kyc_submitted')).toThrow(
+      'Cannot start KYC from state: kyc_submitted',
+    );
   });
 
   it('throws for kyc_approved state', () => {
-    expect(() => startKycSessionBody('kyc_approved')).toThrow('Cannot start KYC from state: kyc_approved');
+    expect(() => startKycSessionBody('kyc_approved')).toThrow(
+      'Cannot start KYC from state: kyc_approved',
+    );
   });
 
   it('throws for payout_ready state', () => {
-    expect(() => startKycSessionBody('payout_ready')).toThrow('Cannot start KYC from state: payout_ready');
+    expect(() => startKycSessionBody('payout_ready')).toThrow(
+      'Cannot start KYC from state: payout_ready',
+    );
   });
 
   it('throws for active state', () => {

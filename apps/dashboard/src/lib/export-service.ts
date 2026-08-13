@@ -261,10 +261,7 @@ export async function cancelScheduledReport(
   scheduleId: string,
   baseUrl: string = DEFAULT_BASE,
 ): Promise<boolean> {
-  const url = new URL(
-    `/v1/exports/schedules/${encodeURIComponent(scheduleId)}`,
-    baseUrl,
-  );
+  const url = new URL(`/v1/exports/schedules/${encodeURIComponent(scheduleId)}`, baseUrl);
   url.searchParams.set('workspace_id', workspaceId);
   try {
     const res = await fetch(url.toString(), {

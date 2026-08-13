@@ -41,7 +41,10 @@ export class Dispatcher {
    * resulting notifications. Returns the list of audit rows
    * written so the caller can log them.
    */
-  async dispatch(rules: NotificationRule[], event: CRMSyncEvent): Promise<AuditEntryWithRedaction[]> {
+  async dispatch(
+    rules: NotificationRule[],
+    event: CRMSyncEvent,
+  ): Promise<AuditEntryWithRedaction[]> {
     const notifs = evaluateAll(rules, event);
     const rows: AuditEntryWithRedaction[] = [];
     for (const n of notifs) {
@@ -73,7 +76,10 @@ export class Dispatcher {
     return rows;
   }
 
-  private async process(n: Notification, rules: NotificationRule[]): Promise<AuditEntryWithRedaction> {
+  private async process(
+    n: Notification,
+    rules: NotificationRule[],
+  ): Promise<AuditEntryWithRedaction> {
     const cap = this.capFor(n.rule_id, rules);
     const allowed = await this.deps.caps.allowAndIncr(n.recipient, cap);
     if (!allowed) {
@@ -117,7 +123,10 @@ export class Dispatcher {
    * instead of looking it up from the rules list. Used by the
    * collaboration event path.
    */
-  private async processWithCap(n: Notification, dailyCap: number): Promise<AuditEntryWithRedaction> {
+  private async processWithCap(
+    n: Notification,
+    dailyCap: number,
+  ): Promise<AuditEntryWithRedaction> {
     const allowed = await this.deps.caps.allowAndIncr(n.recipient, dailyCap);
     if (!allowed) {
       const entry = buildAuditEntryWithRedaction(n, 'suppressed', 'daily_cap_exceeded');

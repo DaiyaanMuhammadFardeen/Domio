@@ -31,13 +31,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Brand kit details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BrandKit"
-        "404":
+                $ref: '#/components/schemas/BrandKit'
+        '404':
           description: Brand kit not found.
     put:
       tags: [brands]
@@ -54,15 +54,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/BrandKit"
+              $ref: '#/components/schemas/BrandKit'
       responses:
-        "200":
+        '200':
           description: Brand kit updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BrandKit"
-        "404":
+                $ref: '#/components/schemas/BrandKit'
+        '404':
           description: Brand kit not found.
   /v1/brands:
     get:
@@ -86,12 +86,12 @@ paths:
             type: integer
             default: 50
       responses:
-        "200":
+        '200':
           description: List of brand kits.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListBrandKitsResponse"
+                $ref: '#/components/schemas/ListBrandKitsResponse'
     post:
       tags: [brands]
       operationId: createBrandKit
@@ -101,14 +101,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/BrandKit"
+              $ref: '#/components/schemas/BrandKit'
       responses:
-        "201":
+        '201':
           description: Brand kit created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BrandKit"
+                $ref: '#/components/schemas/BrandKit'
   /v1/brands/extraction:
     post:
       tags: [extraction]
@@ -128,12 +128,12 @@ paths:
                   type: string
                   format: uri
       responses:
-        "202":
+        '202':
           description: Extraction job started.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BrandExtractionJob"
+                $ref: '#/components/schemas/BrandExtractionJob'
 components:
   securitySchemes:
     bearerAuth:
@@ -159,11 +159,11 @@ components:
         logos:
           type: array
           items:
-            $ref: "#/components/schemas/LogoAsset"
+            $ref: '#/components/schemas/LogoAsset'
         palettes:
           type: array
           items:
-            $ref: "#/components/schemas/Palette"
+            $ref: '#/components/schemas/Palette'
     LogoAsset:
       type: object
       properties:
@@ -221,7 +221,7 @@ components:
         brandKits:
           type: array
           items:
-            $ref: "#/components/schemas/BrandKit"
+            $ref: '#/components/schemas/BrandKit'
         pageInfo:
           type: object
           properties:

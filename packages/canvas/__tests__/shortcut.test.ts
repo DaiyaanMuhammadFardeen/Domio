@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { ShortcutRegistry, isChord, isChordSequence, platformChord } from '../src/keyboard/registry.js';
+import {
+  ShortcutRegistry,
+  isChord,
+  isChordSequence,
+  platformChord,
+} from '../src/keyboard/registry.js';
 import { ChordMatcher, createChordState } from '../src/keyboard/chord.js';
 
 describe('ShortcutRegistry', () => {
@@ -54,7 +59,10 @@ describe('ShortcutRegistry', () => {
 
 describe('ChordMatcher', () => {
   it('matches a two-key sequence within the window', () => {
-    const matcher = new ChordMatcher([{ sequence: ['G', 'G'], actionId: 'goto-slide' }], { now: () => 0, windowMs: 1000 });
+    const matcher = new ChordMatcher([{ sequence: ['G', 'G'], actionId: 'goto-slide' }], {
+      now: () => 0,
+      windowMs: 1000,
+    });
     matcher.feed('G');
     const result = matcher.feed('G');
     expect(result.matched).toBe(true);
@@ -63,7 +71,10 @@ describe('ChordMatcher', () => {
 
   it('resets the timer after the window expires', () => {
     let now = 0;
-    const matcher = new ChordMatcher([{ sequence: ['G', 'G'], actionId: 'goto-slide' }], { now: () => now, windowMs: 1000 });
+    const matcher = new ChordMatcher([{ sequence: ['G', 'G'], actionId: 'goto-slide' }], {
+      now: () => now,
+      windowMs: 1000,
+    });
     matcher.feed('G');
     now = 2000;
     const result = matcher.feed('G');

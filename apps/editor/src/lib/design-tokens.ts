@@ -146,7 +146,11 @@ export function parseHex(hex: string): { r: number; g: number; b: number } | nul
   const m = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.exec(hex.trim());
   if (!m) return null;
   let h = m[1]!;
-  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  if (h.length === 3)
+    h = h
+      .split('')
+      .map((c) => c + c)
+      .join('');
   if (h.length === 8) h = h.slice(0, 6);
   return {
     r: parseInt(h.slice(0, 2), 16),
@@ -197,7 +201,10 @@ export function resolveToken(kit: BrandKitDetail, path: TokenPath): string | nul
  * List every override path that's missing from a kit (used when
  * reviewing a newly-installed theme).
  */
-export function missingTokens(kit: BrandKitDetail, paths: readonly TokenPath[]): readonly TokenPath[] {
+export function missingTokens(
+  kit: BrandKitDetail,
+  paths: readonly TokenPath[],
+): readonly TokenPath[] {
   const lookup = flattenKitTokens(kit);
   return paths.filter((p) => !(p in lookup));
 }
@@ -223,7 +230,10 @@ export function kitToCssVars(kit: BrandKitDetail): Record<string, string> {
 
 /** Convert a dot.notation.id into a kebab-case id. */
 function kebab(s: string): string {
-  return s.replace(/[._]/g, '-').replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  return s
+    .replace(/[._]/g, '-')
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
 }
 
 /**

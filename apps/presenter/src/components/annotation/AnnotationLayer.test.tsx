@@ -32,7 +32,9 @@ describe('AnnotationLayer', () => {
 
   it('marks the active tool as pressed', () => {
     render(<AnnotationLayer active="highlighter" onToolChange={vi.fn()} />);
-    expect(screen.getByTestId('annotation-tool-highlighter').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByTestId('annotation-tool-highlighter').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
     expect(screen.getByTestId('annotation-tool-pen').getAttribute('aria-pressed')).toBe('false');
   });
 

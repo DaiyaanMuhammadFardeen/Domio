@@ -15,9 +15,10 @@ interface RecordedCall {
   readonly body?: unknown;
 }
 
-function makeTransport(
-  responses: ReadonlyArray<{ ok: boolean; status: number; body: unknown }>,
-): { transport: HttpLikeTransport; calls: RecordedCall[] } {
+function makeTransport(responses: ReadonlyArray<{ ok: boolean; status: number; body: unknown }>): {
+  transport: HttpLikeTransport;
+  calls: RecordedCall[];
+} {
   const calls: RecordedCall[] = [];
   let i = 0;
   const transport: HttpLikeTransport = {
@@ -36,7 +37,23 @@ function makeTransport(
 describe('HttpThemeServiceClient', () => {
   it('lists themes for an org', async () => {
     const { transport, calls } = makeTransport([
-      { ok: true, status: 200, body: { themes: [{ themeId: 't1', orgId: 'o1', name: 'Light', kind: 'light', tokens: {}, createdAt: 0, createdBy: 'u1' }] } },
+      {
+        ok: true,
+        status: 200,
+        body: {
+          themes: [
+            {
+              themeId: 't1',
+              orgId: 'o1',
+              name: 'Light',
+              kind: 'light',
+              tokens: {},
+              createdAt: 0,
+              createdBy: 'u1',
+            },
+          ],
+        },
+      },
     ]);
     const client = new HttpThemeServiceClient('https://api.example.test', transport);
     const themes = await client.listThemes('o1');
@@ -48,10 +65,26 @@ describe('HttpThemeServiceClient', () => {
 
   it('creates a brand kit', async () => {
     const { transport, calls } = makeTransport([
-      { ok: true, status: 201, body: { brandKitId: 'b1', orgId: 'o1', name: 'Acme', primaryHex: '#000', accentHex: '#fff', createdAt: 0 } },
+      {
+        ok: true,
+        status: 201,
+        body: {
+          brandKitId: 'b1',
+          orgId: 'o1',
+          name: 'Acme',
+          primaryHex: '#000',
+          accentHex: '#fff',
+          createdAt: 0,
+        },
+      },
     ]);
     const client = new HttpThemeServiceClient('https://api.example.test', transport);
-    const kit = await client.createBrandKit({ orgId: 'o1', name: 'Acme', primaryHex: '#000', accentHex: '#fff' });
+    const kit = await client.createBrandKit({
+      orgId: 'o1',
+      name: 'Acme',
+      primaryHex: '#000',
+      accentHex: '#fff',
+    });
     expect(kit.brandKitId).toBe('b1');
     expect(calls[0]?.method).toBe('POST');
     expect(calls[0]?.url).toBe('https://api.example.test/v1/orgs/o1/brand-kits');
@@ -59,10 +92,27 @@ describe('HttpThemeServiceClient', () => {
 
   it('audits a11y for a brand kit', async () => {
     const { transport, calls } = makeTransport([
-      { ok: true, status: 200, body: { findings: [{ severity: 'WARN', tokenId: 'color.text', issue: 'low contrast', suggestion: 'use white' }] } },
+      {
+        ok: true,
+        status: 200,
+        body: {
+          findings: [
+            {
+              severity: 'WARN',
+              tokenId: 'color.text',
+              issue: 'low contrast',
+              suggestion: 'use white',
+            },
+          ],
+        },
+      },
     ]);
     const client = new HttpThemeServiceClient('https://api.example.test', transport);
-    const findings = await client.auditA11y({ orgId: 'o1', brandKitId: 'b1', tokens: { 'color.text': '#aaa' } });
+    const findings = await client.auditA11y({
+      orgId: 'o1',
+      brandKitId: 'b1',
+      tokens: { 'color.text': '#aaa' },
+    });
     expect(findings).toHaveLength(1);
     expect(calls[0]?.url).toBe('https://api.example.test/v1/orgs/o1/brand-kits/b1/audit-a11y');
   });
@@ -79,9 +129,7 @@ describe('HttpThemeServiceClient', () => {
   });
 
   it('maps unknown status codes to NETWORK', async () => {
-    const { transport } = makeTransport([
-      { ok: false, status: 503, body: null },
-    ]);
+    const { transport } = makeTransport([{ ok: false, status: 503, body: null }]);
     const client = new HttpThemeServiceClient('https://api.example.test', transport);
     await expect(client.listThemes('o1')).rejects.toMatchObject({ code: 'NETWORK' });
   });

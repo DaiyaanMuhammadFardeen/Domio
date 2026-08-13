@@ -37,16 +37,16 @@ describe('icons', () => {
 
     it('rejects empty name', async () => {
       const deps = makeDeps();
-      await expect(
-        ingestIcon(deps, { name: '', pathData: SAMPLE_PATH }),
-      ).rejects.toThrow('Icon name is required');
+      await expect(ingestIcon(deps, { name: '', pathData: SAMPLE_PATH })).rejects.toThrow(
+        'Icon name is required',
+      );
     });
 
     it('rejects empty pathData', async () => {
       const deps = makeDeps();
-      await expect(
-        ingestIcon(deps, { name: 'test', pathData: '' }),
-      ).rejects.toThrow('Icon pathData is required');
+      await expect(ingestIcon(deps, { name: 'test', pathData: '' })).rejects.toThrow(
+        'Icon pathData is required',
+      );
     });
 
     it('allows duplicate names (no uniqueness constraint on name)', async () => {
@@ -91,9 +91,7 @@ describe('icons', () => {
 
     it('throws for non-existent icon', async () => {
       const deps = makeDeps();
-      await expect(findSimilarIcons(deps, 'nonexistent')).rejects.toThrow(
-        'not found',
-      );
+      await expect(findSimilarIcons(deps, 'nonexistent')).rejects.toThrow('not found');
     });
   });
 

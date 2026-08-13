@@ -77,7 +77,13 @@ describe('AnimationsPanel', () => {
 
   it('calls onTimelineChange when adding a track', () => {
     const onTimelineChange = vi.fn();
-    render(<AnimationsPanel {...defaultProps()} timeline={sampleTimeline} onTimelineChange={onTimelineChange} />);
+    render(
+      <AnimationsPanel
+        {...defaultProps()}
+        timeline={sampleTimeline}
+        onTimelineChange={onTimelineChange}
+      />,
+    );
     fireEvent.click(screen.getByTestId('p09-add-track'));
     expect(onTimelineChange).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -98,7 +104,9 @@ describe('AnimationsPanel', () => {
 
   it('calls onPaste when clicking paste', () => {
     const onPaste = vi.fn();
-    render(<AnimationsPanel {...defaultProps()} copiedAnimation={sampleTimeline} onPaste={onPaste} />);
+    render(
+      <AnimationsPanel {...defaultProps()} copiedAnimation={sampleTimeline} onPaste={onPaste} />,
+    );
     fireEvent.click(screen.getByTestId('p09-paste-anim'));
     expect(onPaste).toHaveBeenCalled();
   });
@@ -185,7 +193,13 @@ describe('AnimationsPanel', () => {
 
   it('allows clearing timeline', () => {
     const onTimelineChange = vi.fn();
-    render(<AnimationsPanel {...defaultProps()} timeline={sampleTimeline} onTimelineChange={onTimelineChange} />);
+    render(
+      <AnimationsPanel
+        {...defaultProps()}
+        timeline={sampleTimeline}
+        onTimelineChange={onTimelineChange}
+      />,
+    );
     fireEvent.click(screen.getByTestId('p09-clear-timeline'));
     expect(onTimelineChange).toHaveBeenCalledWith(null);
   });
@@ -236,9 +250,17 @@ describe('AnimationsPanel', () => {
 
   it('commits easing string when the per-keyframe easing dropdown switches to bezier', () => {
     const onTimelineChange = vi.fn();
-    render(<AnimationsPanel {...defaultProps()} timeline={sampleTimeline} onTimelineChange={onTimelineChange} />);
+    render(
+      <AnimationsPanel
+        {...defaultProps()}
+        timeline={sampleTimeline}
+        onTimelineChange={onTimelineChange}
+      />,
+    );
     fireEvent.click(screen.getByTestId('p09-keyframe-bezier-toggle-0-0'));
-    fireEvent.change(screen.getByTestId('p09-keyframe-easing-select-0-0'), { target: { value: '__bezier' } });
+    fireEvent.change(screen.getByTestId('p09-keyframe-easing-select-0-0'), {
+      target: { value: '__bezier' },
+    });
     expect(onTimelineChange).toHaveBeenCalledWith(
       expect.objectContaining({
         tracks: expect.arrayContaining([

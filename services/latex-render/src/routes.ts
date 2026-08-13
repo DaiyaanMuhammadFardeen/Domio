@@ -92,10 +92,13 @@ export function createLatexRoutes(ctx: RouteContext): Hono {
       // Cache the result
       ctx.cache.set(result.cache_key, result.html, result.rendered_at);
 
-      return c.json({
-        rendered: result.html,
-        cacheKey: result.cache_key,
-      }, 200);
+      return c.json(
+        {
+          rendered: result.html,
+          cacheKey: result.cache_key,
+        },
+        200,
+      );
     } catch (err) {
       if (err instanceof RenderError) {
         return c.json({ error: err.message }, 422);
@@ -113,12 +116,15 @@ export function createLatexRoutes(ctx: RouteContext): Hono {
     if (!entry) {
       return c.json({ error: 'Not found or expired' }, 404);
     }
-    return c.json({
-      rendered: entry.html,
-      cacheKey,
-      renderedAt: entry.rendered_at,
-      expiresAt: entry.expires_at,
-    }, 200);
+    return c.json(
+      {
+        rendered: entry.html,
+        cacheKey,
+        renderedAt: entry.rendered_at,
+        expiresAt: entry.expires_at,
+      },
+      200,
+    );
   });
 
   return app;

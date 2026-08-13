@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { moveDelta, resizeDelta, rotateDelta, makeTransformDelta } from '../src/commands/transform.js';
+import {
+  moveDelta,
+  resizeDelta,
+  rotateDelta,
+  makeTransformDelta,
+} from '../src/commands/transform.js';
 import { asULID, type Transform2D } from '@domio/schema';
 
 describe('transform commands', () => {
@@ -23,12 +28,7 @@ describe('transform commands', () => {
   });
 
   it('makeTransformDelta captures the from/to pair', () => {
-    const delta = makeTransformDelta(
-      id,
-      base,
-      { ...base, x: 10, y: 20 },
-      'move',
-    );
+    const delta = makeTransformDelta(id, base, { ...base, x: 10, y: 20 }, 'move');
     expect(delta.kind).toBe('move');
     expect(delta.from.x).toBe(0);
     expect(delta.to.x).toBe(10);

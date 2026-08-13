@@ -18,16 +18,20 @@
  * optional fields default to a sensible empty value.
  */
 
+import type { DeckDocument, Element, Slide, ULID } from '@domio/schema/generated/scene-graph';
 import type {
-  DeckDocument,
-  Element,
-  Slide,
-  ULID,
-} from '@domio/schema/generated/scene-graph';
-import type { CrossFilter, LayerTimeline, SlideTransition, ReducedMotionPolicy } from '@domio/canvas';
+  CrossFilter,
+  LayerTimeline,
+  SlideTransition,
+  ReducedMotionPolicy,
+} from '@domio/canvas';
 import type { ComponentType, ReactElement } from 'react';
 import type { PaletteOverride, ColorScheme } from './theme-brand-panel';
-import type { ConnectionsPanelEdge, ConnectionsPanelHotspot, ConnectionsPanelOverlay } from './connections-panel';
+import type {
+  ConnectionsPanelEdge,
+  ConnectionsPanelHotspot,
+  ConnectionsPanelOverlay,
+} from './connections-panel';
 import type { VariablesPanelRule, VariablesPanelVariable } from './variables-panel';
 import type { StateInspectorMachine, StateMachineEventKind } from './state-inspector-panel';
 import type { DeepLinkRecord } from './deep-links-panel';
@@ -84,7 +88,10 @@ export interface PanelHandlers {
   /** Apply a style-lint fix to an element. */
   onLintFix?: (elementId: string, issue: LintIssue) => void;
   /** Update a brand kit (rename / recolor). */
-  onUpdateKit?: (kitId: string, patch: { name?: string; primaryHex?: string; accentHex?: string }) => void;
+  onUpdateKit?: (
+    kitId: string,
+    patch: { name?: string; primaryHex?: string; accentHex?: string },
+  ) => void;
 
   // Animation
   onTimelineChange?: (timeline: LayerTimeline | null) => void;
@@ -139,7 +146,9 @@ export interface PanelHandlers {
     slide_id: string;
     scenario: string;
   }) => Promise<{ id: string; token: string }>;
-  onResolveDeepLink?: (id: string) => Promise<{ slide_id: string; scenario: string; exp: number } | null>;
+  onResolveDeepLink?: (
+    id: string,
+  ) => Promise<{ slide_id: string; scenario: string; exp: number } | null>;
   onDeleteDeepLink?: (id: string) => Promise<boolean>;
 
   // Agent (M8)

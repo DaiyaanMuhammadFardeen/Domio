@@ -29,7 +29,9 @@ export async function generateMetadata({ params }: AutoplayPageProps): Promise<M
   };
 }
 
-export default async function AutoplayDeckPage({ params }: AutoplayPageProps): Promise<ReactElement> {
+export default async function AutoplayDeckPage({
+  params,
+}: AutoplayPageProps): Promise<ReactElement> {
   const { deckId } = await params;
   const { deck } = await fetchViewerDeck(deckId);
   return (

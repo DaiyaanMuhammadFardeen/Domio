@@ -13,11 +13,7 @@ import { Download } from 'lucide-react';
 import { FilterBar } from '../../components/audit/FilterBar';
 import { LogTable } from '../../components/audit/LogTable';
 import { DetailDrawer } from '../../components/audit/DetailDrawer';
-import {
-  listAuditEvents,
-  getAuditEvent,
-  exportAuditEventsCSV,
-} from '../../lib/audit-service';
+import { listAuditEvents, getAuditEvent, exportAuditEventsCSV } from '../../lib/audit-service';
 import type { AuditEvent, AuditFilter } from '../../lib/types';
 
 const EMPTY_FILTER: AuditFilter = {};

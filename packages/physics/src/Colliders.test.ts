@@ -37,12 +37,7 @@ describe('Collider factory', () => {
 
   it('convexHull creates a convex-hull from positions', () => {
     // A simple tetrahedron: 4 vertices
-    const positions = new Float32Array([
-      0, 0, 0,
-      1, 0, 0,
-      0, 1, 0,
-      0, 0, 1,
-    ]);
+    const positions = new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]);
     const desc = convexHull(positions);
     expect(desc).toBeTruthy();
     expect(typeof desc).toBe('object');
@@ -50,11 +45,7 @@ describe('Collider factory', () => {
 
   it('trimesh creates a triangle-mesh from vertices and indices', () => {
     // A simple triangle: 3 vertices, 1 face
-    const vertices = new Float32Array([
-      0, 0, 0,
-      1, 0, 0,
-      0, 1, 0,
-    ]);
+    const vertices = new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]);
     const indices = new Uint32Array([0, 1, 2]);
     const desc = trimesh(vertices, indices);
     expect(desc).toBeTruthy();
@@ -63,14 +54,7 @@ describe('Collider factory', () => {
 
   it('convexHull with a box-like shape (8 vertices)', () => {
     const positions = new Float32Array([
-      -1, -1, -1,
-       1, -1, -1,
-       1,  1, -1,
-      -1,  1, -1,
-      -1, -1,  1,
-       1, -1,  1,
-       1,  1,  1,
-      -1,  1,  1,
+      -1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1,
     ]);
     const desc = convexHull(positions);
     expect(desc).toBeTruthy();

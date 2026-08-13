@@ -53,8 +53,8 @@ mypy src/              # Type check
 
 ## Optional Dependencies
 
-| Extra | Purpose |
-|-------|---------|
+| Extra   | Purpose                                          |
+| ------- | ------------------------------------------------ |
 | `scipy` | Enables p-values for correlation and trend tests |
 
 Pure-Python fallbacks are always available — scipy is optional.

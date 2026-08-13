@@ -37,7 +37,9 @@ export interface SignedRequest extends SigV4Request {
 const ALG = 'AWS4-HMAC-SHA256';
 
 export function sha256Hex(body: Uint8Array | undefined): string {
-  return createHash('sha256').update(body ?? new Uint8Array(0)).digest('hex');
+  return createHash('sha256')
+    .update(body ?? new Uint8Array(0))
+    .digest('hex');
 }
 
 export function hmac(key: Uint8Array | string, data: string): Buffer {
@@ -48,14 +50,23 @@ export function hex(buf: Buffer): string {
   return buf.toString('hex');
 }
 
-export function deriveSigningKey(secret: string, date: string, region: string, service: string): Buffer {
+export function deriveSigningKey(
+  secret: string,
+  date: string,
+  region: string,
+  service: string,
+): Buffer {
   const kDate = hmac(`AWS4${secret}`, date);
   const kRegion = hmac(kDate, region);
   const kService = hmac(kRegion, service);
   return hmac(kService, 'aws4_request');
 }
 
-export function signRequest(req: SigV4Request, credentials: SigV4Credentials, now?: Date): SignedRequest {
+export function signRequest(
+  req: SigV4Request,
+  credentials: SigV4Credentials,
+  now?: Date,
+): SignedRequest {
   const t = now ?? new Date();
   const amzDate = t.toISOString().replace(/[:-]|\.\d{3}/g, '');
   const dateStamp = amzDate.slice(0, 8);
@@ -69,11 +80,15 @@ export function signRequest(req: SigV4Request, credentials: SigV4Credentials, no
     'x-amz-content-sha256': payloadHash,
   };
 
-  const sortedHeaderKeys = Object.keys(headers).map((k) => k.toLowerCase()).sort();
-  const canonicalHeaders = sortedHeaderKeys.map((k) => {
-    const orig = Object.keys(headers).find((h) => h.toLowerCase() === k);
-    return `${k}:${headers[orig!]?.trim() ?? ''}\n`;
-  }).join('');
+  const sortedHeaderKeys = Object.keys(headers)
+    .map((k) => k.toLowerCase())
+    .sort();
+  const canonicalHeaders = sortedHeaderKeys
+    .map((k) => {
+      const orig = Object.keys(headers).find((h) => h.toLowerCase() === k);
+      return `${k}:${headers[orig!]?.trim() ?? ''}\n`;
+    })
+    .join('');
 
   const signedHeaders = sortedHeaderKeys.join(';');
 
@@ -93,7 +108,12 @@ export function signRequest(req: SigV4Request, credentials: SigV4Credentials, no
   ].join('\n');
 
   const credentialScope = `${dateStamp}/${req.region}/${req.service}/aws4_request`;
-  const stringToSign = [ALG, amzDate, credentialScope, sha256Hex(new TextEncoder().encode(canonicalRequest))].join('\n');
+  const stringToSign = [
+    ALG,
+    amzDate,
+    credentialScope,
+    sha256Hex(new TextEncoder().encode(canonicalRequest)),
+  ].join('\n');
 
   const signingKey = deriveSigningKey(credentials.secretKey, dateStamp, req.region, req.service);
   const signature = hex(hmac(signingKey, stringToSign));
@@ -108,7 +128,12 @@ export function signRequest(req: SigV4Request, credentials: SigV4Credentials, no
  * signed-headers list is fixed at "host", and the signature covers the full
  * URL including the X-Amz-* query parameters.
  */
-export function presignUrl(req: SigV4Request, credentials: SigV4Credentials, expiresInSeconds: number, now?: Date): { url: string; signature: string } {
+export function presignUrl(
+  req: SigV4Request,
+  credentials: SigV4Credentials,
+  expiresInSeconds: number,
+  now?: Date,
+): { url: string; signature: string } {
   const t = now ?? new Date();
   const amzDate = t.toISOString().replace(/[:-]|\.\d{3}/g, '');
   const dateStamp = amzDate.slice(0, 8);
@@ -123,11 +148,25 @@ export function presignUrl(req: SigV4Request, credentials: SigV4Credentials, exp
   };
 
   const sortedKeys = Object.keys(query).sort();
-  const canonicalQuery = sortedKeys.map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(query[k] ?? '')}`).join('&');
-  const canonicalRequest = [req.method, req.path, canonicalQuery, `host:${req.host}\n`, 'host', 'UNSIGNED-PAYLOAD'].join('\n');
+  const canonicalQuery = sortedKeys
+    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(query[k] ?? '')}`)
+    .join('&');
+  const canonicalRequest = [
+    req.method,
+    req.path,
+    canonicalQuery,
+    `host:${req.host}\n`,
+    'host',
+    'UNSIGNED-PAYLOAD',
+  ].join('\n');
 
   const credentialScope = `${dateStamp}/${req.region}/s3/aws4_request`;
-  const stringToSign = [ALG, amzDate, credentialScope, sha256Hex(new TextEncoder().encode(canonicalRequest))].join('\n');
+  const stringToSign = [
+    ALG,
+    amzDate,
+    credentialScope,
+    sha256Hex(new TextEncoder().encode(canonicalRequest)),
+  ].join('\n');
 
   const signingKey = deriveSigningKey(credentials.secretKey, dateStamp, req.region, 's3');
   const signature = hex(hmac(signingKey, stringToSign));

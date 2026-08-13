@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "recording-orchestrator"
-  ],
+  "tags": ["tier-2", "domio", "recording-orchestrator"],
   "panels": [
     {
       "id": 1,

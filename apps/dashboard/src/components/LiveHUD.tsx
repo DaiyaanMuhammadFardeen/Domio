@@ -77,10 +77,7 @@ export function LiveHUD({
   useEffect(() => {
     const options: Parameters<typeof subscribeLive>[1] = { sessionId };
     if (transport) options.transport = transport;
-    const sub = subscribe(
-      { onEvent, onStatus },
-      options,
-    );
+    const sub = subscribe({ onEvent, onStatus }, options);
     return () => {
       sub.close();
     };
@@ -154,8 +151,7 @@ export function LiveHUD({
           Workspace <code className="font-mono">{workspaceId}</code>
         </span>
         <span className="inline-flex items-center gap-1">
-          <EyeOff className="h-3 w-3" aria-hidden /> Overlay toggles the
-          audience-display HUD.
+          <EyeOff className="h-3 w-3" aria-hidden /> Overlay toggles the audience-display HUD.
         </span>
       </footer>
     </div>

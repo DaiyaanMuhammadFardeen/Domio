@@ -29,11 +29,7 @@ export function hitTest(
     const cy = el.y + el.height / 2;
 
     // Check if point is inside element (bounding box)
-    const inside =
-      x >= el.x &&
-      x <= el.x + el.width &&
-      y >= el.y &&
-      y <= el.y + el.height;
+    const inside = x >= el.x && x <= el.x + el.width && y >= el.y && y <= el.y + el.height;
 
     const dist = inside ? 0 : distance(x, y, cx, cy);
 
@@ -48,11 +44,7 @@ export function hitTest(
 /**
  * Find the nearest bar element by index from a set of bar_* elements.
  */
-export function hitTestBar(
-  elements: SvgElement[],
-  x: number,
-  y: number,
-): number | null {
+export function hitTestBar(elements: SvgElement[], x: number, y: number): number | null {
   const bars = elements.filter((el) => el.semanticId.startsWith('bar_'));
   const target = hitTest(bars, x, y, 50);
 
@@ -67,11 +59,7 @@ export function hitTestBar(
 /**
  * Find the nearest point element by index from a set of point_* elements.
  */
-export function hitTestPoint(
-  elements: SvgElement[],
-  x: number,
-  y: number,
-): number | null {
+export function hitTestPoint(elements: SvgElement[], x: number, y: number): number | null {
   const points = elements.filter((el) => el.semanticId.startsWith('point_'));
   const target = hitTest(points, x, y, 20);
 

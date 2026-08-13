@@ -10,12 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  reduceTransition,
-  InMemoryJobStore,
-  buildJob,
-  createJobId,
-} from './jobs.js';
+import { reduceTransition, InMemoryJobStore, buildJob, createJobId } from './jobs.js';
 import { InvalidJobTransitionError, JobNotFoundError } from './types.js';
 import type { VideoJob } from './types.js';
 
@@ -72,10 +67,7 @@ describe('buildJob', () => {
   const clock = () => now;
 
   it('creates a queued job with defaults', () => {
-    const { job } = buildJob(
-      { videoAssetId: 'asset-1', renditions: ['720p'] },
-      { clock },
-    );
+    const { job } = buildJob({ videoAssetId: 'asset-1', renditions: ['720p'] }, { clock });
     expect(job.status).toBe('queued');
     expect(job.priority).toBe('normal');
     expect(job.extractCaptions).toBe(false);

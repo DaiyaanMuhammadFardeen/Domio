@@ -17,7 +17,10 @@ export interface DeckDiffEntry {
 
 export interface DeckDiffPanelProps {
   readonly defaultDeckId?: string;
-  readonly onCompare: (deckIdA: string, deckIdB: string) => Promise<{
+  readonly onCompare: (
+    deckIdA: string,
+    deckIdB: string,
+  ) => Promise<{
     added: readonly DeckDiffEntry[];
     removed: readonly DeckDiffEntry[];
     changed: readonly DeckDiffEntry[];

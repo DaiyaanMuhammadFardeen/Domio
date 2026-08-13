@@ -11,11 +11,7 @@
  * interaction_kind controlled vocabulary.
  */
 
-import type {
-  InteractionEvent,
-  InteractionKind,
-  AnalyticsClient,
-} from '@domio/analytics-sdk';
+import type { InteractionEvent, InteractionKind, AnalyticsClient } from '@domio/analytics-sdk';
 
 export interface JoinEmitContext {
   client?: AnalyticsClient;
@@ -93,8 +89,7 @@ export const joinEmitHelpers = {
     }),
   sentimentInput: (ctx: JoinEmitContext, value: number) =>
     emitJoinInteraction(ctx, 'sentiment_input', { value_numeric: value }),
-  raiseHand: (ctx: JoinEmitContext) =>
-    emitJoinInteraction(ctx, 'raise_hand'),
+  raiseHand: (ctx: JoinEmitContext) => emitJoinInteraction(ctx, 'raise_hand'),
   quizAttempt: (ctx: JoinEmitContext, quizId: string, choiceId: string, correct: boolean) =>
     emitJoinInteraction(ctx, 'quiz_attempt', {
       interaction_data: JSON.stringify({ quiz_id: quizId, choice_id: choiceId, correct }),

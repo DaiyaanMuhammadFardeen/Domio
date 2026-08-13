@@ -17,11 +17,7 @@ import {
   backToDraftBody,
 } from './logic.js';
 import type { ApprovalRequest } from './types.js';
-import {
-  InvalidTransitionError,
-  ApprovalNotPendingError,
-  FeatureDisabledError,
-} from '../types.js';
+import { InvalidTransitionError, ApprovalNotPendingError, FeatureDisabledError } from '../types.js';
 
 describe('Approval state machine transitions', () => {
   it('allows draft → pending', () => {
@@ -65,13 +61,12 @@ describe('Approval state machine transitions', () => {
 describe('Record decision only while pending', () => {
   it('throws when request is not pending', () => {
     const request = makeRequest({ status: 'draft' });
-    expect(() => recordApprovalDecisionBody(
-      request,
-      { lane: 'legal', decision: 'approved' },
-      'user1',
-      'v1',
-      { now: () => new Date(), idGen: () => 'd1' },
-    )).toThrow(ApprovalNotPendingError);
+    expect(() =>
+      recordApprovalDecisionBody(request, { lane: 'legal', decision: 'approved' }, 'user1', 'v1', {
+        now: () => new Date(),
+        idGen: () => 'd1',
+      }),
+    ).toThrow(ApprovalNotPendingError);
   });
 
   it('succeeds when request is pending', () => {
@@ -102,14 +97,34 @@ describe('Parallel lanes', () => {
 
     // Only legal approved
     const decisions1 = [
-      { requestId: 'r1', lane: 'legal', decision: 'approved' as const, decidedAt: new Date(), versionId: 'v1', id: 'd1', workspaceId: 'ws1', approverId: 'u1', justification: null },
+      {
+        requestId: 'r1',
+        lane: 'legal',
+        decision: 'approved' as const,
+        decidedAt: new Date(),
+        versionId: 'v1',
+        id: 'd1',
+        workspaceId: 'ws1',
+        approverId: 'u1',
+        justification: null,
+      },
     ];
     expect(recomputeStatus(request, decisions1 as any)).toBe('pending');
 
     // Both approved
     const decisions2 = [
       ...decisions1,
-      { requestId: 'r1', lane: 'brand', decision: 'approved' as const, decidedAt: new Date(), versionId: 'v1', id: 'd2', workspaceId: 'ws1', approverId: 'u2', justification: null },
+      {
+        requestId: 'r1',
+        lane: 'brand',
+        decision: 'approved' as const,
+        decidedAt: new Date(),
+        versionId: 'v1',
+        id: 'd2',
+        workspaceId: 'ws1',
+        approverId: 'u2',
+        justification: null,
+      },
     ];
     expect(recomputeStatus(request, decisions2 as any)).toBe('approved');
   });
@@ -125,8 +140,28 @@ describe('Parallel lanes', () => {
     });
 
     const decisions = [
-      { requestId: 'r1', lane: 'legal', decision: 'approved' as const, decidedAt: new Date(), versionId: 'v1', id: 'd1', workspaceId: 'ws1', approverId: 'u1', justification: null },
-      { requestId: 'r1', lane: 'brand', decision: 'rejected' as const, decidedAt: new Date(), versionId: 'v1', id: 'd2', workspaceId: 'ws1', approverId: 'u2', justification: 'No' },
+      {
+        requestId: 'r1',
+        lane: 'legal',
+        decision: 'approved' as const,
+        decidedAt: new Date(),
+        versionId: 'v1',
+        id: 'd1',
+        workspaceId: 'ws1',
+        approverId: 'u1',
+        justification: null,
+      },
+      {
+        requestId: 'r1',
+        lane: 'brand',
+        decision: 'rejected' as const,
+        decidedAt: new Date(),
+        versionId: 'v1',
+        id: 'd2',
+        workspaceId: 'ws1',
+        approverId: 'u2',
+        justification: 'No',
+      },
     ];
     expect(recomputeStatus(request, decisions as any)).toBe('rejected');
   });
@@ -134,14 +169,22 @@ describe('Parallel lanes', () => {
   it('changes_requested without reject → changes_requested', () => {
     const request = makeRequest({
       policy: {
-        lanes: [
-          { lane: 'legal', role: 'legal-reviewer', required: true, slaHours: 24 },
-        ],
+        lanes: [{ lane: 'legal', role: 'legal-reviewer', required: true, slaHours: 24 }],
       },
     });
 
     const decisions = [
-      { requestId: 'r1', lane: 'legal', decision: 'changes_requested' as const, decidedAt: new Date(), versionId: 'v1', id: 'd1', workspaceId: 'ws1', approverId: 'u1', justification: 'Need edits' },
+      {
+        requestId: 'r1',
+        lane: 'legal',
+        decision: 'changes_requested' as const,
+        decidedAt: new Date(),
+        versionId: 'v1',
+        id: 'd1',
+        workspaceId: 'ws1',
+        approverId: 'u1',
+        justification: 'Need edits',
+      },
     ];
     expect(recomputeStatus(request, decisions as any)).toBe('changes_requested');
   });
@@ -158,7 +201,17 @@ describe('Parallel lanes', () => {
 
     // Only required lane approved; optional lane has no decision
     const decisions = [
-      { requestId: 'r1', lane: 'legal', decision: 'approved' as const, decidedAt: new Date(), versionId: 'v1', id: 'd1', workspaceId: 'ws1', approverId: 'u1', justification: null },
+      {
+        requestId: 'r1',
+        lane: 'legal',
+        decision: 'approved' as const,
+        decidedAt: new Date(),
+        versionId: 'v1',
+        id: 'd1',
+        workspaceId: 'ws1',
+        approverId: 'u1',
+        justification: null,
+      },
     ];
     expect(recomputeStatus(request, decisions as any)).toBe('approved');
   });
@@ -197,9 +250,7 @@ describe('overdueLanes', () => {
       status: 'pending',
       requestedAt: new Date('2026-01-01T00:00:00Z'),
       policy: {
-        lanes: [
-          { lane: 'legal', role: 'legal-reviewer', required: true, slaHours: 24 },
-        ],
+        lanes: [{ lane: 'legal', role: 'legal-reviewer', required: true, slaHours: 24 }],
       },
     });
 
@@ -224,7 +275,9 @@ describe('Back to draft', () => {
     expect(() => backToDraftBody(request, 'user1', new Date())).not.toThrow();
     // draft → draft is not a valid transition (not in VALID_TRANSITIONS)
     const draftRequest = makeRequest({ status: 'draft' });
-    expect(() => backToDraftBody(draftRequest, 'user1', new Date())).toThrow(InvalidTransitionError);
+    expect(() => backToDraftBody(draftRequest, 'user1', new Date())).toThrow(
+      InvalidTransitionError,
+    );
   });
 });
 

@@ -26,28 +26,28 @@
 
 **Feature numbers in scope (per `feature-list.md`):**
 
-| Feature | Name | Notes |
-|---|---|---|
-| #65 | Native 3D model embedding (glTF/GLB/USDZ) | Drop, orbit, pan, zoom; IBL; LOD; CDN cache |
-| #66 | 3D scene editor | Lights, cameras, materials, environment maps; non-modal side panel |
-| #67 | Camera keyframes between slides | 7-DOF keyframes; cubic bezier easing; magic-move fallback |
-| #68 | 3D data visualizations | Globe plots, 3D bars, point clouds, network graphs |
-| #69 | Exploded-view animations | Per-part centroid axes; 0.6 s ease-out cubic default |
-| #70 | CAD file import (STEP/IGES/FBX → glTF) | Server-side conversion pipeline; tessellation/decimation params |
-| #71 | Physics-enabled elements | rapier WASM primary; ammo fallback; fixed-step 1/60s |
-| #72 | Particle systems and shader backgrounds | GPU compute; WGSL/GLSL; brand-tinted presets |
-| #73 | Scroll/click-driven 3D storytelling | Camera keyframes triggered by scroll or click |
-| #74 | AR handoff (QR viewer) | WebXR (Android) + AR Quick Look (iOS); 30-min tokens |
-| #75 | Video with in-editor trimming, captions, chaptering | Metadata-only trims; WebVTT captions; chapters |
-| #76 | Video segments per click | First-class segments on the timeline |
-| #77 | Background video with smart text-contrast protection | Per-region contrast map every N frames |
-| #78 | Audio tracks, voiceover, ambient | Web Audio mixer; per-track volume/pan/fade |
-| #79 | Lottie/Rive with state machines | lottie-web + @rive-app/canvas; variable scrub |
-| #80 | Screen-recording capture | `getDisplayMedia`; VP9 WebM or H.264 MP4 |
-| #81 | Live app embedding (sandboxed iframe) | Per-org allowlist; auth passthrough; CSP `frame-ancestors` |
-| #82 | Code blocks with syntax highlighting + runnable JS | Shiki highlighter; Web Worker + QuickJS sandbox |
-| #83 | Math/LaTeX rendering | Edge-rendered KaTeX; 30-day CDN cache |
-| #84 | Interactive maps | Mapbox/Google/MapLibre adapters; live data refresh |
+| Feature | Name                                                 | Notes                                                              |
+| ------- | ---------------------------------------------------- | ------------------------------------------------------------------ |
+| #65     | Native 3D model embedding (glTF/GLB/USDZ)            | Drop, orbit, pan, zoom; IBL; LOD; CDN cache                        |
+| #66     | 3D scene editor                                      | Lights, cameras, materials, environment maps; non-modal side panel |
+| #67     | Camera keyframes between slides                      | 7-DOF keyframes; cubic bezier easing; magic-move fallback          |
+| #68     | 3D data visualizations                               | Globe plots, 3D bars, point clouds, network graphs                 |
+| #69     | Exploded-view animations                             | Per-part centroid axes; 0.6 s ease-out cubic default               |
+| #70     | CAD file import (STEP/IGES/FBX → glTF)               | Server-side conversion pipeline; tessellation/decimation params    |
+| #71     | Physics-enabled elements                             | rapier WASM primary; ammo fallback; fixed-step 1/60s               |
+| #72     | Particle systems and shader backgrounds              | GPU compute; WGSL/GLSL; brand-tinted presets                       |
+| #73     | Scroll/click-driven 3D storytelling                  | Camera keyframes triggered by scroll or click                      |
+| #74     | AR handoff (QR viewer)                               | WebXR (Android) + AR Quick Look (iOS); 30-min tokens               |
+| #75     | Video with in-editor trimming, captions, chaptering  | Metadata-only trims; WebVTT captions; chapters                     |
+| #76     | Video segments per click                             | First-class segments on the timeline                               |
+| #77     | Background video with smart text-contrast protection | Per-region contrast map every N frames                             |
+| #78     | Audio tracks, voiceover, ambient                     | Web Audio mixer; per-track volume/pan/fade                         |
+| #79     | Lottie/Rive with state machines                      | lottie-web + @rive-app/canvas; variable scrub                      |
+| #80     | Screen-recording capture                             | `getDisplayMedia`; VP9 WebM or H.264 MP4                           |
+| #81     | Live app embedding (sandboxed iframe)                | Per-org allowlist; auth passthrough; CSP `frame-ancestors`         |
+| #82     | Code blocks with syntax highlighting + runnable JS   | Shiki highlighter; Web Worker + QuickJS sandbox                    |
+| #83     | Math/LaTeX rendering                                 | Edge-rendered KaTeX; 30-day CDN cache                              |
+| #84     | Interactive maps                                     | Mapbox/Google/MapLibre adapters; live data refresh                 |
 
 **Out of scope (deferred):**
 
@@ -590,88 +590,88 @@ Exactly per `/docs/3d-motion-media.md` §5.1–§5.13:
 
 ## 6. Verification
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #65 | Drop `.glb` 1.5M tris on a slide | Viewport appears with model centered; orbit/pan/zoom work | Editor FE |
-| #65 | Invalid GLB | Placeholder card "Could not load 3D model"; no crash | Runtime |
-| #65 | Geometry > 4.2M tris | Auto-decimation with "Reduced from 4.2M to 1.5M tris for performance — restore original" toast | Editor FE / Runtime |
-| #66 | Add a directional light; drag gizmo | Light position updates from real-time gizmo | Editor FE |
-| #66 | 9th light added | "Scene lights add GPU cost; consider baking" warning | Editor FE |
-| #67 | Author marks 3D model on slides 4 and 5 as matched | Camera keyframes interpolated in transition | Runtime |
-| #67 | Author changes model between slides | Fallback to crossfade | Runtime |
-| #68 | Globe plot with 10K lat/lon points; arcs | Arcs animate on enter; arc drawing ≤ 16 ms / frame | Runtime |
-| #68 | 1M-point point cloud at 5 fps | Drops to 2D fallback with banner | Runtime |
-| #69 | Explode tool on multi-part assembly | Parts animate outward 0.6s ease-out cubic | Runtime |
-| #70 | Upload `.step` AP214 100-part assembly | Parsing → Meshing → Optimizing progress; GLB at 1.5M tris | CAD worker |
-| #70 | Tessellation chord 0.1 mm, angle 15° | Defaults honored; user override respected | CAD worker |
-| #70 | Conversion failure | Original CAD file kept; error surfaced clearly | CAD worker / FE |
-| #71 | Mark a 3D element physics-enabled | Gravity + friction simulated; settle at fixed-step 1/60s | Physics |
-| #71 | 200+ physics objects | Spatial-hash broadphase with user warning | Physics |
-| #72 | Snow particle system at 250k particles | 60 fps in WebGL2; brand-tinted via theme token | Runtime |
-| #72 | Custom WGSL fragment shader compile error | Falls back to safe-default shader; user sees error | Shader registry |
-| #73 | Scroll-driven keyframes | `[0,1]` normalized timeline mapped to scroll position | Runtime |
-| #73 | Scroll past last keyframe | Halts at end (or wraps per author choice) | Runtime |
-| #74 | Presenter clicks AR handoff on a 3D slide | QR in audience view; viewer scans; WebXR session opens | AR |
-| #74 | iOS phone without WebXR | AR Quick Look via `rel="ar"` | AR |
-| #74 | Phone doesn't support AR | Falls back to 3D web viewer | AR |
-| #74 | AR session token expired (30 min) | Session invalidated; new token required | AR |
-| #75 | Trim a video element | Metadata-only in/out points; no re-encoding | Video pipeline |
-| #75 | HEVC source + Safari | Transcoded to H.264 on upload | Video pipeline |
-| #75 | Chapter markers | Clickable scrub points on the timeline | Editor FE |
-| #76 | Video with 3 named segments; click advances | Segments respect animation triggers (Phase 09 #88) | Runtime |
-| #77 | Background video with overlay text | Text contrast auto-styled per frame | Runtime |
-| #77 | "Use worst-case frame" toggle | Style based on lowest-contrast frame | Runtime |
-| #78 | Voiceover + music + ambient | Web Audio mix; per-track volume/pan/fade; export to AAC stereo | Audio |
-| #78 | Drift > 40 ms mid-playback | Re-sync triggers automatically | Audio |
-| #79 | Drop `.riv` state machine; click trigger | State transition fires; animation plays | Lottie / Rive |
-| #79 | Lottie bound to variable `$progress = 0.5` | Animation scrubs to 50% | Lottie |
-| #80 | Screen recording with mic | `getDisplayMedia` produces WebM/VP9 + mic AAC; pause/resume; trim handles | Recording |
-| #80 | Recording interrupted | Draft saved; user can resume | Recording |
-| #81 | Embed `https://app.example.com` | iframe sandbox + CSP `frame-ancestors`; origin allowlist enforced | Embed proxy |
-| #81 | Per-org policy; org-admin override | Per-deck override requires admin | Embed |
-| #82 | Run `console.log(1+1)` in a code block | Output `2\n`; ≤ 100 ms total | Code sandbox |
-| #82 | Code with infinite loop | Worker terminates after 8 s; "Killed (8s timeout)" notice | Code sandbox |
-| #82 | Code attempts `fetch('https://evil.example')` | Rejected by sandbox; no network | Code sandbox |
-| #83 | LaTeX block `$\nabla \cdot E = \rho / \epsilon_0$` | Renders inline; cache hit on second render | LaTeX |
-| #83 | Untrusted LaTeX with `\input{...}` | Rejected; safe-subset enforced | LaTeX |
-| #84 | Map with 100 markers; live data refresh | Markers update without re-mount | Maps |
-| #84 | Mapbox quota reached | Fallback to degraded style with banner | Maps |
-| #84 | Invalid Mapbox API key | Falls back to MapLibre + OSM | Maps |
-| MCP | Agent invokes `create_camera_keyframe` for `slide[3].camera_path[keyframe_2]` | Keyframe created; deck re-renders | MCP |
-| MCP | Agent without `manage_policies` calls `create_embed_policy` | Rejected with `403` | MCP / Auth |
-| License | Insert expired-license asset into published deck | Blocked; user must confirm | License / Compliance |
-| License | License expires in 14 days | Banner surfaces in License Dashboard | License / FE |
-| Performance | Hero scene 1.5M tris, 4 lights, 1 camera path, 250k particles | 60 fps on CI reference machine | Perf |
-| Performance | Video transcoding queue depth > 50 for 10 min | On-call alert fires | Perf / Ops |
-| Performance | Audio drift budget | < 40 ms; re-sync on exceed | Audio |
-| Performance | LaTeX render p50 | ≤ 80 ms; cache hit ≤ 5 ms | Perf |
-| Performance | Code sandbox cold start | ≤ 200 ms | Perf |
-| Performance | Map tile pre-fetch | Current + 3 next slides in presenter mode | Maps |
-| A11y | Live captions/transcripts on every video with audio | Manual QA pass per release | A11y |
+| Feature     | Test                                                                          | Expected result                                                                                | Owner                |
+| ----------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------- |
+| #65         | Drop `.glb` 1.5M tris on a slide                                              | Viewport appears with model centered; orbit/pan/zoom work                                      | Editor FE            |
+| #65         | Invalid GLB                                                                   | Placeholder card "Could not load 3D model"; no crash                                           | Runtime              |
+| #65         | Geometry > 4.2M tris                                                          | Auto-decimation with "Reduced from 4.2M to 1.5M tris for performance — restore original" toast | Editor FE / Runtime  |
+| #66         | Add a directional light; drag gizmo                                           | Light position updates from real-time gizmo                                                    | Editor FE            |
+| #66         | 9th light added                                                               | "Scene lights add GPU cost; consider baking" warning                                           | Editor FE            |
+| #67         | Author marks 3D model on slides 4 and 5 as matched                            | Camera keyframes interpolated in transition                                                    | Runtime              |
+| #67         | Author changes model between slides                                           | Fallback to crossfade                                                                          | Runtime              |
+| #68         | Globe plot with 10K lat/lon points; arcs                                      | Arcs animate on enter; arc drawing ≤ 16 ms / frame                                             | Runtime              |
+| #68         | 1M-point point cloud at 5 fps                                                 | Drops to 2D fallback with banner                                                               | Runtime              |
+| #69         | Explode tool on multi-part assembly                                           | Parts animate outward 0.6s ease-out cubic                                                      | Runtime              |
+| #70         | Upload `.step` AP214 100-part assembly                                        | Parsing → Meshing → Optimizing progress; GLB at 1.5M tris                                      | CAD worker           |
+| #70         | Tessellation chord 0.1 mm, angle 15°                                          | Defaults honored; user override respected                                                      | CAD worker           |
+| #70         | Conversion failure                                                            | Original CAD file kept; error surfaced clearly                                                 | CAD worker / FE      |
+| #71         | Mark a 3D element physics-enabled                                             | Gravity + friction simulated; settle at fixed-step 1/60s                                       | Physics              |
+| #71         | 200+ physics objects                                                          | Spatial-hash broadphase with user warning                                                      | Physics              |
+| #72         | Snow particle system at 250k particles                                        | 60 fps in WebGL2; brand-tinted via theme token                                                 | Runtime              |
+| #72         | Custom WGSL fragment shader compile error                                     | Falls back to safe-default shader; user sees error                                             | Shader registry      |
+| #73         | Scroll-driven keyframes                                                       | `[0,1]` normalized timeline mapped to scroll position                                          | Runtime              |
+| #73         | Scroll past last keyframe                                                     | Halts at end (or wraps per author choice)                                                      | Runtime              |
+| #74         | Presenter clicks AR handoff on a 3D slide                                     | QR in audience view; viewer scans; WebXR session opens                                         | AR                   |
+| #74         | iOS phone without WebXR                                                       | AR Quick Look via `rel="ar"`                                                                   | AR                   |
+| #74         | Phone doesn't support AR                                                      | Falls back to 3D web viewer                                                                    | AR                   |
+| #74         | AR session token expired (30 min)                                             | Session invalidated; new token required                                                        | AR                   |
+| #75         | Trim a video element                                                          | Metadata-only in/out points; no re-encoding                                                    | Video pipeline       |
+| #75         | HEVC source + Safari                                                          | Transcoded to H.264 on upload                                                                  | Video pipeline       |
+| #75         | Chapter markers                                                               | Clickable scrub points on the timeline                                                         | Editor FE            |
+| #76         | Video with 3 named segments; click advances                                   | Segments respect animation triggers (Phase 09 #88)                                             | Runtime              |
+| #77         | Background video with overlay text                                            | Text contrast auto-styled per frame                                                            | Runtime              |
+| #77         | "Use worst-case frame" toggle                                                 | Style based on lowest-contrast frame                                                           | Runtime              |
+| #78         | Voiceover + music + ambient                                                   | Web Audio mix; per-track volume/pan/fade; export to AAC stereo                                 | Audio                |
+| #78         | Drift > 40 ms mid-playback                                                    | Re-sync triggers automatically                                                                 | Audio                |
+| #79         | Drop `.riv` state machine; click trigger                                      | State transition fires; animation plays                                                        | Lottie / Rive        |
+| #79         | Lottie bound to variable `$progress = 0.5`                                    | Animation scrubs to 50%                                                                        | Lottie               |
+| #80         | Screen recording with mic                                                     | `getDisplayMedia` produces WebM/VP9 + mic AAC; pause/resume; trim handles                      | Recording            |
+| #80         | Recording interrupted                                                         | Draft saved; user can resume                                                                   | Recording            |
+| #81         | Embed `https://app.example.com`                                               | iframe sandbox + CSP `frame-ancestors`; origin allowlist enforced                              | Embed proxy          |
+| #81         | Per-org policy; org-admin override                                            | Per-deck override requires admin                                                               | Embed                |
+| #82         | Run `console.log(1+1)` in a code block                                        | Output `2\n`; ≤ 100 ms total                                                                   | Code sandbox         |
+| #82         | Code with infinite loop                                                       | Worker terminates after 8 s; "Killed (8s timeout)" notice                                      | Code sandbox         |
+| #82         | Code attempts `fetch('https://evil.example')`                                 | Rejected by sandbox; no network                                                                | Code sandbox         |
+| #83         | LaTeX block `$\nabla \cdot E = \rho / \epsilon_0$`                            | Renders inline; cache hit on second render                                                     | LaTeX                |
+| #83         | Untrusted LaTeX with `\input{...}`                                            | Rejected; safe-subset enforced                                                                 | LaTeX                |
+| #84         | Map with 100 markers; live data refresh                                       | Markers update without re-mount                                                                | Maps                 |
+| #84         | Mapbox quota reached                                                          | Fallback to degraded style with banner                                                         | Maps                 |
+| #84         | Invalid Mapbox API key                                                        | Falls back to MapLibre + OSM                                                                   | Maps                 |
+| MCP         | Agent invokes `create_camera_keyframe` for `slide[3].camera_path[keyframe_2]` | Keyframe created; deck re-renders                                                              | MCP                  |
+| MCP         | Agent without `manage_policies` calls `create_embed_policy`                   | Rejected with `403`                                                                            | MCP / Auth           |
+| License     | Insert expired-license asset into published deck                              | Blocked; user must confirm                                                                     | License / Compliance |
+| License     | License expires in 14 days                                                    | Banner surfaces in License Dashboard                                                           | License / FE         |
+| Performance | Hero scene 1.5M tris, 4 lights, 1 camera path, 250k particles                 | 60 fps on CI reference machine                                                                 | Perf                 |
+| Performance | Video transcoding queue depth > 50 for 10 min                                 | On-call alert fires                                                                            | Perf / Ops           |
+| Performance | Audio drift budget                                                            | < 40 ms; re-sync on exceed                                                                     | Audio                |
+| Performance | LaTeX render p50                                                              | ≤ 80 ms; cache hit ≤ 5 ms                                                                      | Perf                 |
+| Performance | Code sandbox cold start                                                       | ≤ 200 ms                                                                                       | Perf                 |
+| Performance | Map tile pre-fetch                                                            | Current + 3 next slides in presenter mode                                                      | Maps                 |
+| A11y        | Live captions/transcripts on every video with audio                           | Manual QA pass per release                                                                     | A11y                 |
 
 ---
 
 ## 7. Risks & Open Decisions
 
-| Risk | Mitigation |
-|---|---|
-| WebGPU maturity on Safari ≤ 17 | Dual-render in editor; pick better frame; fall back to WebGL2; report context loss |
-| CAD conversion cost is CPU-heavy | Throttle free tier (e.g., 5 CAD imports/day); priority queue; tiered pricing |
-| QuickJS sandbox escape CVEs | Pin known-good version; external fuzzing vendor in Phase 22; update cadence |
-| AR session QR screenshots in the audience | Accepted risk; session tied to presenting session anyway |
-| Map provider cost (Mapbox / Google) at scale | Quota UX ("X% used"); degraded-style fallback; org-level config |
-| License tracking drift | No-license state blocks publish; expiry banner; license scheduler |
-| Shader compile failures on some GPU drivers | Safe-default fallback; error surfaced inline; CSP-capable |
-| Video transcode backlog during peak | BullMQ priority queue (live > scheduled > background); autoscaling worker pool |
-| Iframe `postMessage` payload mutation | Origin-pinned validation; JSON Schema payload validation; rate limit |
-| Code sandbox DoS via large output | 1 MB stdout cap per run; rate-limit per workspace; abort after 8 s |
-| Asset license expiry mid-presentation | Editor banner; license scheduler publishes event; embedded asset continues to render but flagged |
-| Open question: shader registry governance | Open — org admin can publish to shared library; global marketplace in Phase 19 |
-| Open question: AR handoff on Linux desktop browsers | Best-effort via `<model-viewer>`; WebXR if available; else 3D web viewer fallback |
-| Open question: AR Quick Look on iPadOS Safari | Use `rel="ar"`; same path as iOS; fallback to web viewer if unsupported |
-| Open question: LaTeX on dark/light theme switching | Cache keyed by `theme_hash`; re-render on theme change; consider precomputing common expressions per theme |
-| Open question: Mapbox/Google licensing tiers | MapLibre + OSM as default for self-host/orgs wanting control |
-| Open question: 3D model provenance chips (#215) | Defer to Phase 21; this phase captures `model_asset.license_id` and `cad_source_url` |
+| Risk                                                | Mitigation                                                                                                 |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| WebGPU maturity on Safari ≤ 17                      | Dual-render in editor; pick better frame; fall back to WebGL2; report context loss                         |
+| CAD conversion cost is CPU-heavy                    | Throttle free tier (e.g., 5 CAD imports/day); priority queue; tiered pricing                               |
+| QuickJS sandbox escape CVEs                         | Pin known-good version; external fuzzing vendor in Phase 22; update cadence                                |
+| AR session QR screenshots in the audience           | Accepted risk; session tied to presenting session anyway                                                   |
+| Map provider cost (Mapbox / Google) at scale        | Quota UX ("X% used"); degraded-style fallback; org-level config                                            |
+| License tracking drift                              | No-license state blocks publish; expiry banner; license scheduler                                          |
+| Shader compile failures on some GPU drivers         | Safe-default fallback; error surfaced inline; CSP-capable                                                  |
+| Video transcode backlog during peak                 | BullMQ priority queue (live > scheduled > background); autoscaling worker pool                             |
+| Iframe `postMessage` payload mutation               | Origin-pinned validation; JSON Schema payload validation; rate limit                                       |
+| Code sandbox DoS via large output                   | 1 MB stdout cap per run; rate-limit per workspace; abort after 8 s                                         |
+| Asset license expiry mid-presentation               | Editor banner; license scheduler publishes event; embedded asset continues to render but flagged           |
+| Open question: shader registry governance           | Open — org admin can publish to shared library; global marketplace in Phase 19                             |
+| Open question: AR handoff on Linux desktop browsers | Best-effort via `<model-viewer>`; WebXR if available; else 3D web viewer fallback                          |
+| Open question: AR Quick Look on iPadOS Safari       | Use `rel="ar"`; same path as iOS; fallback to web viewer if unsupported                                    |
+| Open question: LaTeX on dark/light theme switching  | Cache keyed by `theme_hash`; re-render on theme change; consider precomputing common expressions per theme |
+| Open question: Mapbox/Google licensing tiers        | MapLibre + OSM as default for self-host/orgs wanting control                                               |
+| Open question: 3D model provenance chips (#215)     | Defer to Phase 21; this phase captures `model_asset.license_id` and `cad_source_url`                       |
 
 ---
 

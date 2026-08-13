@@ -10,7 +10,12 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ComponentLayer } from '@domio/schema';
 import { getComponent } from '@domio/components';
-import { inferControl, resolveSchemaDefaults, type PropControlDescriptor, type PropSchemaFragment } from '@domio/schema-prop';
+import {
+  inferControl,
+  resolveSchemaDefaults,
+  type PropControlDescriptor,
+  type PropSchemaFragment,
+} from '@domio/schema-prop';
 import { BindInspector, catalogIdToChartType } from './bind-inspector';
 import { ThresholdPanel } from './threshold-panel';
 import type { LiveDataBinding, ThresholdRule } from '../lib/live-data-store';
@@ -23,7 +28,11 @@ interface PropsPanelProps {
   onVariantChange: (from: string, to: string) => void;
 }
 
-export function PropsPanel({ element, onPropEdit, onVariantChange }: PropsPanelProps): ReactElement {
+export function PropsPanel({
+  element,
+  onPropEdit,
+  onVariantChange,
+}: PropsPanelProps): ReactElement {
   const def = getComponent(element.component.catalogId);
   const props = element.component.props ?? {};
   const variant = element.component.variant ?? def?.defaultVariant ?? 'light';
@@ -39,11 +48,20 @@ export function PropsPanel({ element, onPropEdit, onVariantChange }: PropsPanelP
   const schema = def.propsSchema;
   const isLiveChart = element.component.catalogId.startsWith('domio.live-');
   const chartType = isLiveChart ? catalogIdToChartType(element.component.catalogId) : undefined;
-  const currentBinding = (props['x-domio:binding'] ?? { queryId: null, fieldMap: {}, listenToFilters: [] }) as LiveDataBinding;
+  const currentBinding = (props['x-domio:binding'] ?? {
+    queryId: null,
+    fieldMap: {},
+    listenToFilters: [],
+  }) as LiveDataBinding;
   const currentThresholds = (props['x-domio:thresholds'] ?? []) as ThresholdRule[];
 
   const descriptors = useMemo(() => {
-    const out: Array<{ key: string; fragment: PropSchemaFragment; descriptor: PropControlDescriptor; required: boolean }> = [];
+    const out: Array<{
+      key: string;
+      fragment: PropSchemaFragment;
+      descriptor: PropControlDescriptor;
+      required: boolean;
+    }> = [];
     const required = new Set(schema.required ?? []);
     // Skip x-domio:binding and x-domio:thresholds from standard descriptors — rendered separately
     for (const [key, fragment] of Object.entries(schema.properties ?? {})) {
@@ -82,7 +100,9 @@ export function PropsPanel({ element, onPropEdit, onVariantChange }: PropsPanelP
     <section className="props-panel" data-testid="props-panel">
       <header className="props-panel__header">
         <div className="props-panel__title">{def.name}</div>
-        <div className="props-panel__sub">{def.catalogId} · v{def.version}</div>
+        <div className="props-panel__sub">
+          {def.catalogId} · v{def.version}
+        </div>
       </header>
 
       {def.variants.length > 1 ? (
@@ -141,7 +161,9 @@ export function PropsPanel({ element, onPropEdit, onVariantChange }: PropsPanelP
                 value={props[key] ?? fragment.default}
                 onChange={(next) => commit(key, fragment, next)}
               />
-              {fragment.description ? <div className="prop-field__hint">{fragment.description}</div> : null}
+              {fragment.description ? (
+                <div className="prop-field__hint">{fragment.description}</div>
+              ) : null}
             </div>
           ))}
         </div>
@@ -159,7 +181,14 @@ interface FragmentEditorProps {
   onChange: (next: unknown) => void;
 }
 
-function FragmentEditorInner({ id, label, fragment, descriptor, value, onChange }: FragmentEditorProps): ReactElement {
+function FragmentEditorInner({
+  id,
+  label,
+  fragment,
+  descriptor,
+  value,
+  onChange,
+}: FragmentEditorProps): ReactElement {
   switch (descriptor.kind) {
     case 'text':
       return (
@@ -190,7 +219,11 @@ function FragmentEditorInner({ id, label, fragment, descriptor, value, onChange 
       const num = typeof value === 'number' ? value : Number(fragment.default ?? 0);
       return (
         <div className="prop-control prop-control--stepper">
-          <button type="button" aria-label="Decrease" onClick={() => onChange(clamp(num - (descriptor.step ?? 1), descriptor))}>
+          <button
+            type="button"
+            aria-label="Decrease"
+            onClick={() => onChange(clamp(num - (descriptor.step ?? 1), descriptor))}
+          >
             −
           </button>
           <input
@@ -210,7 +243,11 @@ function FragmentEditorInner({ id, label, fragment, descriptor, value, onChange 
               if (!Number.isNaN(parsed)) onChange(clamp(parsed, descriptor));
             }}
           />
-          <button type="button" aria-label="Increase" onClick={() => onChange(clamp(num + (descriptor.step ?? 1), descriptor))}>
+          <button
+            type="button"
+            aria-label="Increase"
+            onClick={() => onChange(clamp(num + (descriptor.step ?? 1), descriptor))}
+          >
             +
           </button>
           {descriptor.unit ? <span className="prop-control__unit">{descriptor.unit}</span> : null}
@@ -320,11 +357,7 @@ function FragmentEditorInner({ id, label, fragment, descriptor, value, onChange 
         </select>
       );
     case 'asset':
-      return (
-        <div className="prop-control prop-control--readonly">
-          Asset picker (P08)
-        </div>
-      );
+      return <div className="prop-control prop-control--readonly">Asset picker (P08)</div>;
     case 'data-binding':
       return (
         <div className="prop-control prop-control--readonly">
@@ -332,9 +365,19 @@ function FragmentEditorInner({ id, label, fragment, descriptor, value, onChange 
         </div>
       );
     case 'repeatable':
-      return <ArrayEditor id={id} label={label} fragment={fragment} value={value} onChange={onChange} />;
+      return (
+        <ArrayEditor id={id} label={label} fragment={fragment} value={value} onChange={onChange} />
+      );
     case 'union':
-      return <UnionEditor id={id} descriptor={descriptor} fragment={fragment} value={value} onChange={onChange} />;
+      return (
+        <UnionEditor
+          id={id}
+          descriptor={descriptor}
+          fragment={fragment}
+          value={value}
+          onChange={onChange}
+        />
+      );
     case 'nested-object':
       return <NestedEditor id={id} fragment={fragment} value={value} onChange={onChange} />;
     default:
@@ -370,7 +413,8 @@ function ArrayEditor({
   onChange: (next: unknown) => void;
 }): ReactElement {
   const items = Array.isArray(value) ? value : [];
-  const itemSchema = fragment.items ?? (fragment.prefixItems?.[0] as PropSchemaFragment | undefined) ?? { type: 'string' as const };
+  const itemSchema = fragment.items ??
+    (fragment.prefixItems?.[0] as PropSchemaFragment | undefined) ?? { type: 'string' as const };
   const push = () => {
     const def = resolveSchemaDefaults(itemSchema);
     onChange([...items, def]);
@@ -420,7 +464,16 @@ function ArrayItemEditor({
   if (itemSchema.type === 'object' || descriptor.kind === 'nested-object') {
     return <NestedEditor id={id} fragment={itemSchema} value={value} onChange={onChange} />;
   }
-  return <FragmentEditor id={id} label={label} fragment={itemSchema} descriptor={descriptor} value={value} onChange={onChange} />;
+  return (
+    <FragmentEditor
+      id={id}
+      label={label}
+      fragment={itemSchema}
+      descriptor={descriptor}
+      value={value}
+      onChange={onChange}
+    />
+  );
 }
 
 function NestedEditor({
@@ -437,22 +490,24 @@ function NestedEditor({
   const obj = (value ?? {}) as Record<string, unknown>;
   return (
     <div className="prop-control prop-control--nested">
-      {Object.entries(fragment.properties ?? {} as Record<string, PropSchemaFragment>).map(([key, sub]) => {
-        const subDescriptor = inferControl(key, sub);
-        return (
-          <div key={key} className="prop-field prop-field--nested">
-            <label className="prop-field__label">{sub.title ?? key}</label>
-            <FragmentEditor
-              id={`${id}-${key}`}
-              label={sub.title ?? key}
-              fragment={sub}
-              descriptor={subDescriptor}
-              value={obj[key] ?? sub.default}
-              onChange={(next) => onChange({ ...obj, [key]: next })}
-            />
-          </div>
-        );
-      })}
+      {Object.entries(fragment.properties ?? ({} as Record<string, PropSchemaFragment>)).map(
+        ([key, sub]) => {
+          const subDescriptor = inferControl(key, sub);
+          return (
+            <div key={key} className="prop-field prop-field--nested">
+              <label className="prop-field__label">{sub.title ?? key}</label>
+              <FragmentEditor
+                id={`${id}-${key}`}
+                label={sub.title ?? key}
+                fragment={sub}
+                descriptor={subDescriptor}
+                value={obj[key] ?? sub.default}
+                onChange={(next) => onChange({ ...obj, [key]: next })}
+              />
+            </div>
+          );
+        },
+      )}
     </div>
   );
 }
@@ -471,11 +526,13 @@ function UnionEditor({
   onChange: (next: unknown) => void;
 }): ReactElement {
   const branches = descriptor.branches ?? [];
-  const active = branches.findIndex((b) => b.schema === (fragment.oneOf?.[0] ?? fragment.anyOf?.[0])) ?? 0;
+  const active =
+    branches.findIndex((b) => b.schema === (fragment.oneOf?.[0] ?? fragment.anyOf?.[0])) ?? 0;
   const [branchIndex, setBranchIndex] = useState(active);
   const branch = branches[branchIndex];
   if (!branch) return <div className="prop-control prop-control--readonly">Union</div>;
-  const branchValue = typeof value === 'object' && value !== null ? value : resolveSchemaDefaults(branch.schema);
+  const branchValue =
+    typeof value === 'object' && value !== null ? value : resolveSchemaDefaults(branch.schema);
   return (
     <div className="prop-control prop-control--union">
       <select

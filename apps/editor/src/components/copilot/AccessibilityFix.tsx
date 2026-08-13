@@ -42,9 +42,12 @@ const KIND_LABEL: Record<AccessibilityIssue['kind'], string> = {
 
 function severityClass(sev: AccessibilityIssue['severity']): string {
   switch (sev) {
-    case 'high': return 'bg-red-500/15 text-red-400';
-    case 'medium': return 'bg-amber-500/15 text-amber-400';
-    default: return 'bg-slate-500/15 text-slate-400';
+    case 'high':
+      return 'bg-red-500/15 text-red-400';
+    case 'medium':
+      return 'bg-amber-500/15 text-amber-400';
+    default:
+      return 'bg-slate-500/15 text-slate-400';
   }
 }
 
@@ -78,18 +81,21 @@ export function AccessibilityFix({
     }
   }, [deckId, baseUrl]);
 
-  const fixOne = useCallback(async (issue: AccessibilityIssue) => {
-    setFixingId(issue.id);
-    setError(null);
-    try {
-      const res = await fixAccessibilityIssue(deckId, { issueId: issue.id }, baseUrl);
-      setPatch(res);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'fix failed');
-    } finally {
-      setFixingId(null);
-    }
-  }, [deckId, baseUrl]);
+  const fixOne = useCallback(
+    async (issue: AccessibilityIssue) => {
+      setFixingId(issue.id);
+      setError(null);
+      try {
+        const res = await fixAccessibilityIssue(deckId, { issueId: issue.id }, baseUrl);
+        setPatch(res);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'fix failed');
+      } finally {
+        setFixingId(null);
+      }
+    },
+    [deckId, baseUrl],
+  );
 
   const accept = useCallback(() => {
     if (!patch) return;
@@ -106,9 +112,7 @@ export function AccessibilityFix({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Eye size={16} className="text-emerald-400" />
-          <h2 className="text-sm font-semibold text-slate-100">
-            Accessibility Fix
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-100">Accessibility Fix</h2>
         </div>
         <button
           type="button"
@@ -167,9 +171,7 @@ export function AccessibilityFix({
                 <p className="truncate text-xs font-medium text-slate-200">
                   {KIND_LABEL[issue.kind]}
                 </p>
-                <p className="truncate text-[11px] text-slate-500">
-                  {issue.message}
-                </p>
+                <p className="truncate text-[11px] text-slate-500">{issue.message}</p>
               </div>
               <button
                 type="button"
@@ -197,13 +199,19 @@ export function AccessibilityFix({
           <div className="mt-1.5 grid grid-cols-2 gap-2 text-[11px]">
             <div>
               <p className="text-[10px] uppercase text-slate-500">Before</p>
-              <p className="rounded bg-slate-800/60 p-1.5 text-slate-400" data-testid="a11y-fix-patch-before">
+              <p
+                className="rounded bg-slate-800/60 p-1.5 text-slate-400"
+                data-testid="a11y-fix-patch-before"
+              >
                 {patch.before}
               </p>
             </div>
             <div>
               <p className="text-[10px] uppercase text-slate-500">After</p>
-              <p className="rounded bg-slate-800/60 p-1.5 text-slate-200" data-testid="a11y-fix-patch-after">
+              <p
+                className="rounded bg-slate-800/60 p-1.5 text-slate-200"
+                data-testid="a11y-fix-patch-after"
+              >
                 {patch.after}
               </p>
             </div>

@@ -112,7 +112,9 @@ export class PermissionDeniedError extends Error {
     public readonly resourceType: ResourceType,
     public readonly resourceId: string,
   ) {
-    super(`Permission denied: principal ${principalId} cannot ${capability} on ${resourceType}:${resourceId}`);
+    super(
+      `Permission denied: principal ${principalId} cannot ${capability} on ${resourceType}:${resourceId}`,
+    );
     this.name = 'PermissionDeniedError';
   }
 }

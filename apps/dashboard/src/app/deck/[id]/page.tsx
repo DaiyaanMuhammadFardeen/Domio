@@ -12,16 +12,9 @@ import { notFound } from 'next/navigation';
 import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { DeckSummaryCard } from './DeckSummaryCard';
 import { SlideBreakdownTable } from './SlideBreakdownTable';
-import {
-  fetchDeckSummary,
-  fetchSlideBreakdown,
-} from '../../../lib/deck-service';
+import { fetchDeckSummary, fetchSlideBreakdown } from '../../../lib/deck-service';
 
-export default async function DeckDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function DeckDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const workspaceId = process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
   const summary = await fetchDeckSummary(workspaceId, id);
@@ -36,7 +29,8 @@ export default async function DeckDetailPage({
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Deck {id}</h1>
         <p className="text-sm text-slate-500">
-          30-day window · workspace <code className="rounded bg-slate-100 px-1.5 py-0.5">{workspaceId}</code>
+          30-day window · workspace{' '}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5">{workspaceId}</code>
         </p>
       </header>
       <SuspenseBoundary>

@@ -94,9 +94,9 @@ describe('Creator Module', () => {
     });
 
     it('throws if not profile_complete', async () => {
-      await expect(
-        service.startKycSession('user-1', 'US'),
-      ).rejects.toThrow(OnboardingTransitionError);
+      await expect(service.startKycSession('user-1', 'US')).rejects.toThrow(
+        OnboardingTransitionError,
+      );
     });
 
     it('throws KycInProgressError if session already exists', async () => {
@@ -109,9 +109,9 @@ describe('Creator Module', () => {
       await service.startKycSession('user-1', 'US');
 
       // Try to start another KYC session - should throw because state is kyc_submitted
-      await expect(
-        service.startKycSession('user-1', 'US'),
-      ).rejects.toThrow(OnboardingTransitionError);
+      await expect(service.startKycSession('user-1', 'US')).rejects.toThrow(
+        OnboardingTransitionError,
+      );
     });
   });
 
@@ -182,9 +182,9 @@ describe('Creator Module', () => {
     });
 
     it('throws for pending state', async () => {
-      await expect(
-        service.getPayoutConnectLink('user-1', 'stripe_connect'),
-      ).rejects.toThrow('Cannot get payout connect link from state');
+      await expect(service.getPayoutConnectLink('user-1', 'stripe_connect')).rejects.toThrow(
+        'Cannot get payout connect link from state',
+      );
     });
   });
 
@@ -194,7 +194,17 @@ describe('Creator Module', () => {
 
   describe('SandboxKycProvider', () => {
     it('returns pending on first poll', async () => {
-      const kycProvider = (service as unknown as { kycProvider: { pollStatus: (input: { creator_id: string; kyc_session_id: string; vendor: string }) => Promise<string> } }).kycProvider;
+      const kycProvider = (
+        service as unknown as {
+          kycProvider: {
+            pollStatus: (input: {
+              creator_id: string;
+              kyc_session_id: string;
+              vendor: string;
+            }) => Promise<string>;
+          };
+        }
+      ).kycProvider;
       const result = await kycProvider.pollStatus({
         creator_id: 'c1',
         kyc_session_id: 's1',
@@ -204,7 +214,17 @@ describe('Creator Module', () => {
     });
 
     it('returns approved on second poll', async () => {
-      const kycProvider = (service as unknown as { kycProvider: { pollStatus: (input: { creator_id: string; kyc_session_id: string; vendor: string }) => Promise<string> } }).kycProvider;
+      const kycProvider = (
+        service as unknown as {
+          kycProvider: {
+            pollStatus: (input: {
+              creator_id: string;
+              kyc_session_id: string;
+              vendor: string;
+            }) => Promise<string>;
+          };
+        }
+      ).kycProvider;
       await kycProvider.pollStatus({
         creator_id: 'c1',
         kyc_session_id: 's1',
@@ -227,9 +247,7 @@ describe('Creator Module', () => {
     it('throws FeatureDisabledError when kyc flag is disabled', async () => {
       process.env.FEATURE_MARKETPLACE_KYC_DISABLED = 'true';
       try {
-        await expect(
-          service.getCreatorProfile('user-1'),
-        ).rejects.toThrow('Feature disabled');
+        await expect(service.getCreatorProfile('user-1')).rejects.toThrow('Feature disabled');
       } finally {
         delete process.env.FEATURE_MARKETPLACE_KYC_DISABLED;
       }
@@ -238,9 +256,7 @@ describe('Creator Module', () => {
     it('throws FeatureDisabledError when payout flag is disabled', async () => {
       process.env.FEATURE_MARKETPLACE_PAYOUT_DISABLED = 'true';
       try {
-        await expect(
-          service.listPayoutMethods('user-1'),
-        ).rejects.toThrow('Feature disabled');
+        await expect(service.listPayoutMethods('user-1')).rejects.toThrow('Feature disabled');
       } finally {
         delete process.env.FEATURE_MARKETPLACE_PAYOUT_DISABLED;
       }
@@ -263,18 +279,22 @@ describe('creator handlers integration', () => {
     ctx = { service };
   });
 
-  function makeReq<P = Record<string, never>, B = Record<string, never>, Q = Record<string, string | undefined>>(
-    params: P, body: B, query: Q = {} as Q, headers: Record<string, string | undefined> = {},
+  function makeReq<
+    P = Record<string, never>,
+    B = Record<string, never>,
+    Q = Record<string, string | undefined>,
+  >(
+    params: P,
+    body: B,
+    query: Q = {} as Q,
+    headers: Record<string, string | undefined> = {},
   ): HttpRequest<P, B, Q> {
     return { method: 'GET', path: '/', params, body, query, headers };
   }
 
   describe('getCreatorProfile', () => {
     it('returns 200 with profile', async () => {
-      const res = await handlers.getCreatorProfile(
-        makeReq({ user_id: 'user-1' }, {}),
-        ctx,
-      );
+      const res = await handlers.getCreatorProfile(makeReq({ user_id: 'user-1' }, {}), ctx);
       expect(res.status).toBe(200);
       const body = res.body as { profile: { userId: string } };
       expect(body.profile.userId).toBe('user-1');
@@ -338,10 +358,7 @@ describe('creator handlers integration', () => {
 
   describe('getKycStatus', () => {
     it('returns 200 with status', async () => {
-      const res = await handlers.getKycStatus(
-        makeReq({ user_id: 'user-1' }, {}),
-        ctx,
-      );
+      const res = await handlers.getKycStatus(makeReq({ user_id: 'user-1' }, {}), ctx);
       expect(res.status).toBe(200);
     });
   });
@@ -378,10 +395,7 @@ describe('creator handlers integration', () => {
 
   describe('listCreatorPayoutMethods', () => {
     it('returns 200 with empty array', async () => {
-      const res = await handlers.listCreatorPayoutMethods(
-        makeReq({ user_id: 'user-1' }, {}),
-        ctx,
-      );
+      const res = await handlers.listCreatorPayoutMethods(makeReq({ user_id: 'user-1' }, {}), ctx);
       expect(res.status).toBe(200);
       const body = res.body as { methods: unknown[] };
       expect(body.methods).toHaveLength(0);

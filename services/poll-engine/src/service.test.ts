@@ -33,7 +33,9 @@ describe('poll-engine', () => {
 
   it('opens, votes, closes', async () => {
     const poll = await engine.create({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
       question: 'Pick one',
       options: [{ label: 'A' }, { label: 'B' }, { label: 'C' }],
       created_by: 'p1',
@@ -41,16 +43,25 @@ describe('poll-engine', () => {
     const opened = await engine.open(poll.id, 1, 'p1');
     expect(opened.status).toBe('open');
     await engine.castVote({
-      workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-1',
-      option_index: 0, idempotency_key: 'k1',
+      workspace_id: 'w1',
+      poll_id: poll.id,
+      participant_id: 'u-1',
+      option_index: 0,
+      idempotency_key: 'k1',
     });
     await engine.castVote({
-      workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-2',
-      option_index: 0, idempotency_key: 'k2',
+      workspace_id: 'w1',
+      poll_id: poll.id,
+      participant_id: 'u-2',
+      option_index: 0,
+      idempotency_key: 'k2',
     });
     await engine.castVote({
-      workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-3',
-      option_index: 2, idempotency_key: 'k3',
+      workspace_id: 'w1',
+      poll_id: poll.id,
+      participant_id: 'u-3',
+      option_index: 2,
+      idempotency_key: 'k3',
     });
     const agg = await engine.aggregate(poll.id);
     expect(agg.total).toBe(3);
@@ -62,27 +73,37 @@ describe('poll-engine', () => {
 
   it('rejects duplicate votes from the same participant', async () => {
     const poll = await engine.create({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
       question: 'Pick one',
       options: [{ label: 'A' }, { label: 'B' }],
       created_by: 'p1',
     });
     await engine.open(poll.id, 1, 'p1');
     await engine.castVote({
-      workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-1',
-      option_index: 0, idempotency_key: 'k1',
+      workspace_id: 'w1',
+      poll_id: poll.id,
+      participant_id: 'u-1',
+      option_index: 0,
+      idempotency_key: 'k1',
     });
     await expect(
       engine.castVote({
-        workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-1',
-        option_index: 1, idempotency_key: 'k2',
+        workspace_id: 'w1',
+        poll_id: poll.id,
+        participant_id: 'u-1',
+        option_index: 1,
+        idempotency_key: 'k2',
       }),
     ).rejects.toThrow(/already voted/);
   });
 
   it('rejects votes on closed polls', async () => {
     const poll = await engine.create({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
       question: 'Pick one',
       options: [{ label: 'A' }, { label: 'B' }],
       created_by: 'p1',
@@ -92,23 +113,31 @@ describe('poll-engine', () => {
     expect(closed.status).toBe('closed');
     await expect(
       engine.castVote({
-        workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-1',
-        option_index: 0, idempotency_key: 'k1',
+        workspace_id: 'w1',
+        poll_id: poll.id,
+        participant_id: 'u-1',
+        option_index: 0,
+        idempotency_key: 'k1',
       }),
     ).rejects.toThrow(/not open/);
   });
 
   it('emits a verifiable audit chain', async () => {
     const poll = await engine.create({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
       question: 'Pick one',
       options: [{ label: 'A' }, { label: 'B' }],
       created_by: 'p1',
     });
     await engine.open(poll.id, 1, 'p1');
     await engine.castVote({
-      workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-1',
-      option_index: 0, idempotency_key: 'k1',
+      workspace_id: 'w1',
+      poll_id: poll.id,
+      participant_id: 'u-1',
+      option_index: 0,
+      idempotency_key: 'k1',
     });
     const v = await audit.verify();
     expect(v.ok).toBe(true);
@@ -118,19 +147,27 @@ describe('poll-engine', () => {
 
   it('idempotent vote replays return the same row', async () => {
     const poll = await engine.create({
-      workspace_id: 'w1', session_id: 's1', widget_id: 'w-1',
+      workspace_id: 'w1',
+      session_id: 's1',
+      widget_id: 'w-1',
       question: 'Pick one',
       options: [{ label: 'A' }, { label: 'B' }],
       created_by: 'p1',
     });
     await engine.open(poll.id, 1, 'p1');
     const v1 = await engine.castVote({
-      workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-1',
-      option_index: 0, idempotency_key: 'k1',
+      workspace_id: 'w1',
+      poll_id: poll.id,
+      participant_id: 'u-1',
+      option_index: 0,
+      idempotency_key: 'k1',
     });
     const v2 = await engine.castVote({
-      workspace_id: 'w1', poll_id: poll.id, participant_id: 'u-1',
-      option_index: 0, idempotency_key: 'k1',
+      workspace_id: 'w1',
+      poll_id: poll.id,
+      participant_id: 'u-1',
+      option_index: 0,
+      idempotency_key: 'k1',
     });
     expect(v1.id).toBe(v2.id);
     const agg = await engine.aggregate(poll.id);

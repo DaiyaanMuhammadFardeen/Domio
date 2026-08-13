@@ -18,14 +18,14 @@ implemented|STUB_|STUB_EXPERIMENTS" apps/` returning zero hits.
 
 User-visible replacements:
 
-| File | Replaced |
-|---|---|
-| `apps/admin-console/src/app/trust/page.tsx` | Removed 3 stub paragraphs. Trust status now read from real `trust-service` rows. "About Trust Scores" card states the heuristic is the **current algorithm**. |
-| `apps/viewer/src/app/page.tsx` | Replaced "Phase 0 stub" block with real viewer surface (title + `<EmptyState>`). |
-| `apps/landing/src/app/page.tsx` | Replaced "Phase 0 stub · Marketing site ships later" / "Coming soon" with hero + feature cards + footer. |
-| `apps/editor/src/panels/data-source-panel.tsx` | Deleted "Add mock dataset" UI; empty state now links to docs. |
-| `apps/editor/src/panels/data-source-panel.test.tsx` | Updated 2 test names + assertions to the empty-state behaviour. |
-| `apps/dashboard/src/app/ab/page.tsx` | Deleted `STUB_EXPERIMENTS`; empty list now renders `<EmptyState>`. |
+| File                                                | Replaced                                                                                                                                                      |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/admin-console/src/app/trust/page.tsx`         | Removed 3 stub paragraphs. Trust status now read from real `trust-service` rows. "About Trust Scores" card states the heuristic is the **current algorithm**. |
+| `apps/viewer/src/app/page.tsx`                      | Replaced "Phase 0 stub" block with real viewer surface (title + `<EmptyState>`).                                                                              |
+| `apps/landing/src/app/page.tsx`                     | Replaced "Phase 0 stub · Marketing site ships later" / "Coming soon" with hero + feature cards + footer.                                                      |
+| `apps/editor/src/panels/data-source-panel.tsx`      | Deleted "Add mock dataset" UI; empty state now links to docs.                                                                                                 |
+| `apps/editor/src/panels/data-source-panel.test.tsx` | Updated 2 test names + assertions to the empty-state behaviour.                                                                                               |
+| `apps/dashboard/src/app/ab/page.tsx`                | Deleted `STUB_EXPERIMENTS`; empty list now renders `<EmptyState>`.                                                                                            |
 
 Per-app `package.json` `.description` and per-app `README.md` opening
 lines rewritten for: `landing`, `editor`, `viewer`, `api`, `presenter`.
@@ -36,17 +36,17 @@ lines rewritten for: `landing`, `editor`, `viewer`, `api`, `presenter`.
 consumed by the original call site and ships with a vitest test next
 to it.
 
-| New service file | Replaces |
-|---|---|
-| `apps/editor/src/lib/marketplace-service.ts` | `apps/editor/src/panels/marketplace-panel.tsx:83` |
-| `apps/dashboard/src/lib/analytics-service.ts` | `apps/dashboard/src/app/overview/page.tsx:21`, `/deck/page.tsx:32`, `/deck/[id]/page.tsx:38,67` |
-| `apps/dashboard/src/lib/heatmap-service.ts` | `apps/dashboard/src/app/heatmap/page.tsx:34` |
-| `apps/dashboard/src/lib/ab-service.ts` | `apps/dashboard/src/app/ab/page.tsx:89` |
-| `apps/dashboard/src/lib/crm-service.ts` | `apps/dashboard/src/app/crm/page.tsx:43` |
-| `apps/presenter/src/lib/session-service.ts` | `apps/presenter/src/components/PresenterView.tsx:175`, `/app/session/[id]/page.tsx:14,25` |
-| `apps/join-web/src/lib/pairing-service.ts` | (companion to `session-service.ts`) |
-| `apps/join-web/src/lib/handout-service.ts` | `apps/join-web/src/app/h/[token]/page.tsx:16` |
-| `apps/join-web/src/lib/feedback-service.ts` | `apps/join-web/src/app/feedback/[session_id]/page.tsx:28` |
+| New service file                              | Replaces                                                                                                            |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `apps/editor/src/lib/marketplace-service.ts`  | `apps/editor/src/panels/marketplace-panel.tsx:83`                                                                   |
+| `apps/dashboard/src/lib/analytics-service.ts` | `apps/dashboard/src/app/overview/page.tsx:21`, `/deck/page.tsx:32`, `/deck/[id]/page.tsx:38,67`                     |
+| `apps/dashboard/src/lib/heatmap-service.ts`   | `apps/dashboard/src/app/heatmap/page.tsx:34`                                                                        |
+| `apps/dashboard/src/lib/ab-service.ts`        | `apps/dashboard/src/app/ab/page.tsx:89`                                                                             |
+| `apps/dashboard/src/lib/crm-service.ts`       | `apps/dashboard/src/app/crm/page.tsx:43`                                                                            |
+| `apps/presenter/src/lib/session-service.ts`   | `apps/presenter/src/components/PresenterView.tsx:175`, `/app/session/[id]/page.tsx:14,25`                           |
+| `apps/join-web/src/lib/pairing-service.ts`    | (companion to `session-service.ts`)                                                                                 |
+| `apps/join-web/src/lib/handout-service.ts`    | `apps/join-web/src/app/h/[token]/page.tsx:16`                                                                       |
+| `apps/join-web/src/lib/feedback-service.ts`   | `apps/join-web/src/app/feedback/[session_id]/page.tsx:28`                                                           |
 | `apps/join-web/src/lib/magic-link-service.ts` | `apps/magic-link-landing/src/app/page.tsx:95` (consumed via cross-app tsconfig alias per Wave 1 placement decision) |
 
 **Bootstrap seams (~30 files)** — every `apps/<app>/src/lib/<feature>-service.ts`
@@ -132,14 +132,14 @@ import via `@domio/ui/routing`.
 
 ## Verification
 
-| Step | Result |
-|---|---|
-| `pnpm i18n:check` | ✅ `i18n-check: all referenced keys resolve` |
-| `grep -rn "Phase 0 stub\|will be implemented\|STUB_" apps/**/src/` | ✅ zero hits |
-| `grep -rn "Phase 0 stub" apps/**/{package.json,README.md}` | ✅ zero hits |
-| `pnpm -r run lint` (10 apps) | ✅ clean |
-| `pnpm -r run typecheck` (10 apps I touched) | ✅ clean for `admin-console`, `dashboard`, `landing`, `magic-link-landing`; see residual failures below |
-| `pnpm -r run test` (10 apps I touched) | ✅ green (editor 406, viewer 176, marketplace-web 1, landing 1; the rest cached from prior runs). All 14 join-web tests + 6 presenter session-loader tests pass. |
+| Step                                                               | Result                                                                                                                                                           |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm i18n:check`                                                  | ✅ `i18n-check: all referenced keys resolve`                                                                                                                     |
+| `grep -rn "Phase 0 stub\|will be implemented\|STUB_" apps/**/src/` | ✅ zero hits                                                                                                                                                     |
+| `grep -rn "Phase 0 stub" apps/**/{package.json,README.md}`         | ✅ zero hits                                                                                                                                                     |
+| `pnpm -r run lint` (10 apps)                                       | ✅ clean                                                                                                                                                         |
+| `pnpm -r run typecheck` (10 apps I touched)                        | ✅ clean for `admin-console`, `dashboard`, `landing`, `magic-link-landing`; see residual failures below                                                          |
+| `pnpm -r run test` (10 apps I touched)                             | ✅ green (editor 406, viewer 176, marketplace-web 1, landing 1; the rest cached from prior runs). All 14 join-web tests + 6 presenter session-loader tests pass. |
 
 ### Residual pre-existing failures (unrelated to Wave 1)
 
@@ -174,7 +174,7 @@ backlog.
 These rules survived the close-out and every subsequent wave must
 respect them.
 
-1. **No raw `fetch(` in `apps/**/src/components/**` or `apps/**/src/panels/**`.** Enforced by `domio/no-raw-fetch`.
+1. **No raw `fetch(` in `apps/**/src/components/**`or`apps/**/src/panels/**`.** Enforced by `domio/no-raw-fetch`.
 2. **No raw `<Link href="…string literal…">`.** Enforced by `domio/no-raw-href`. API endpoints (`/api/...`) need an inline `eslint-disable-next-line` with a comment.
 3. **No raw hex colors in component CSS.** Enforced by `domio/no-raw-hex`.
 4. **Every `apps/<app>/src/lib/<feature>-service.ts`** is the only place that talks to the SDK or raw fetch. Components call services.
@@ -189,8 +189,8 @@ respect them.
 
 ## Deferred to Wave 2
 
-| Item | Where it lives |
-|---|---|
-| Lighthouse CI baseline run (collect + assert + upload) | `wave-1-baseline-lighthouse.md` |
-| Bundle analyzer baseline chunk manifests | `wave-1-baseline-bundle.md` |
-| Pre-existing typecheck failures (`analytics-sdk`, `widget-defs`, `i18n ar/ur`) | residual failures list above |
+| Item                                                                           | Where it lives                  |
+| ------------------------------------------------------------------------------ | ------------------------------- |
+| Lighthouse CI baseline run (collect + assert + upload)                         | `wave-1-baseline-lighthouse.md` |
+| Bundle analyzer baseline chunk manifests                                       | `wave-1-baseline-bundle.md`     |
+| Pre-existing typecheck failures (`analytics-sdk`, `widget-defs`, `i18n ar/ur`) | residual failures list above    |

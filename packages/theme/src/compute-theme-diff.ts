@@ -5,11 +5,7 @@
  * Used by the theme swap UI to show a preview of what will change.
  */
 
-import type {
-  TokenRef,
-  TokenValue,
-  ThemeDiffEntry,
-} from './types.js';
+import type { TokenRef, TokenValue, ThemeDiffEntry } from './types.js';
 
 /**
  * Compute the diff between two theme token maps.

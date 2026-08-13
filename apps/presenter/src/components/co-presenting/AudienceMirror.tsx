@@ -54,7 +54,7 @@ const DEFAULT_LABELS: Required<NonNullable<AudienceMirrorProps['labels']>> = {
 
 function tileColor(slideIndex: number): string {
   // Deterministic pastel so tiles have a bit of visual variety.
-  const hue = ((slideIndex * 47) % 360 + 360) % 360;
+  const hue = (((slideIndex * 47) % 360) + 360) % 360;
   return `hsl(${hue} 70% 45%)`;
 }
 
@@ -108,10 +108,14 @@ export function AudienceMirror({
     <section className="audience-mirror" aria-label={t.heading} data-testid={dataTestId}>
       <header className="audience-mirror__header">
         <h3 className="audience-mirror__title">{t.heading}</h3>
-        <span className="audience-mirror__count" data-testid={`${dataTestId}-count`}>{tiles.length}</span>
+        <span className="audience-mirror__count" data-testid={`${dataTestId}-count`}>
+          {tiles.length}
+        </span>
       </header>
       {tiles.length === 0 ? (
-        <p className="audience-mirror__empty" data-testid={`${dataTestId}-empty`}>{t.empty}</p>
+        <p className="audience-mirror__empty" data-testid={`${dataTestId}-empty`}>
+          {t.empty}
+        </p>
       ) : (
         <div className="audience-mirror__grid">
           {tiles.map((v) => {

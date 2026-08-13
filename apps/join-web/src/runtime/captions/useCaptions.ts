@@ -176,6 +176,17 @@ export function useCaptions(input: UseCaptionsInput = {}): UseCaptionsResult {
       disconnect,
       isConnected,
     }),
-    [currentText, interimText, isFinal, mode, setMode, locale, setLocale, connect, disconnect, isConnected],
+    [
+      currentText,
+      interimText,
+      isFinal,
+      mode,
+      setMode,
+      locale,
+      setLocale,
+      connect,
+      disconnect,
+      isConnected,
+    ],
   );
 }

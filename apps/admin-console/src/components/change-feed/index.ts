@@ -3,8 +3,5 @@
  */
 
 export { OpDetail, type OpDetailProps } from './OpDetail';
-export {
-  OpKindFilter,
-  type OpKindFilterProps,
-} from './OpKindFilter';
+export { OpKindFilter, type OpKindFilterProps } from './OpKindFilter';
 export { OpStream, type OpStreamProps } from './OpStream';

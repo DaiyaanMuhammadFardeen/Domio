@@ -127,16 +127,12 @@ export class InMemoryAuditStore implements AuditStore {
 
   async deleteOlderThan(tenantId: string, cutoff: Date): Promise<number> {
     const before = this.events.length;
-    this.events = this.events.filter(
-      (e) => !(e.tenantId === tenantId && e.createdAt < cutoff),
-    );
+    this.events = this.events.filter((e) => !(e.tenantId === tenantId && e.createdAt < cutoff));
     return before - this.events.length;
   }
 
   async countOlderThan(tenantId: string, cutoff: Date): Promise<number> {
-    return this.events.filter(
-      (e) => e.tenantId === tenantId && e.createdAt < cutoff,
-    ).length;
+    return this.events.filter((e) => e.tenantId === tenantId && e.createdAt < cutoff).length;
   }
 
   /** Test-only: snapshot the store. */

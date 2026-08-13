@@ -21,11 +21,13 @@
 **Features:** #126, #119.
 
 **Files to modify:**
+
 - `apps/presenter/src/components/PresenterView.tsx`
 - `apps/presenter/src/components/MultiMonitorSelector.tsx`
 - `apps/presenter/src/components/PresenterHUD.tsx`
 
 **Build instructions:**
+
 1. Presenter view shows: current slide, next slide preview, notes pane, timer, audience view preview, on any second screen or phone.
 2. Multi-monitor selector lists detected displays; user picks which one is the audience screen.
 3. Audience-screen output renders to the chosen display via `window.open` or Presentation API.
@@ -33,10 +35,12 @@
 5. All controls keyboard-accessible (A = annotate, T = timer, P = plan, H = handoff).
 
 **SOLID notes:**
+
 - **S:** `PresenterView` is composition only; child components own their state.
 - **D:** presenter view depends on `SessionService` interface; tests use a mock service.
 
 **Acceptance:**
+
 - Two-monitor setup: changing slides on laptop updates audience display within 50 ms.
 - Confidence monitor stays visible even when audience display is fullscreen.
 
@@ -47,18 +51,21 @@
 **Features:** #127, #140.
 
 **Files to create:**
+
 - `apps/presenter/src/components/PhoneRemote.tsx`
 - `apps/presenter/src/components/PhonePairingPanel.tsx`
 - `apps/presenter/src/components/WhisperInbox.tsx`
 - `apps/presenter/src/app/pair/[token]/page.tsx`
 
 **Build instructions:**
+
 1. QR in presenter view; on scan, opens `/pair/[token]` in the user's phone browser.
 2. Phone surface: clicker (advance/back), laser pointer (tap = pointer at current slide coordinates), notes viewer, teleprompter overlay.
 3. Whisper channel: a teammate visiting `/whisper/[token]` types a private message; presenter sees it in `WhisperInbox` as a non-blocking toast.
 4. Haptic on phone (vibrate API) at configured pacing checkpoints (#217).
 
 **Acceptance:**
+
 - Phone clicker + desktop slide advance are in sync at sub-second.
 - Whisper message delivered while presenter is mid-sentence.
 
@@ -69,10 +76,12 @@
 **Features:** #128.
 
 **Files to create/modify:**
+
 - `apps/presenter/src/components/annotation/{Pen,Highlighter,Spotlight,ZoomLens,Blur}.tsx`
 - `apps/presenter/src/components/annotation/AnnotationLayer.tsx`
 
 **Build instructions:**
+
 1. Toggle annotation mode with `A`. Pen + highlighter are stroke tools.
 2. Spotlight: dim everything except a circular region around the cursor.
 3. Zoom lens: magnifier that follows the cursor.
@@ -80,6 +89,7 @@
 5. Annotations persist as an annotation layer on the slide; presenter can save and re-show on next advance.
 
 **Acceptance:**
+
 - Annotations render on both audience display and confidence monitor.
 - Eraser deletes strokes within a hit radius.
 
@@ -90,9 +100,11 @@
 **Features:** #129, #133, #130.
 
 **Files to create:**
+
 - `apps/presenter/src/components/plan/{LivePlanEditor,ParkingLot}.tsx`
 
 **Build instructions:**
+
 1. Slide plan editor shows the upcoming deck with drag-reorder; reorder persists as session-scoped state (not on the deck itself).
 2. Hide slides from presenter view; audience never sees them.
 3. "Jump to slide" grid with thumbnail search.
@@ -105,9 +117,11 @@
 **Features:** #131, #132.
 
 **Files to create:**
+
 - `apps/presenter/src/components/rehearsal/{PacingConfig,RehearsalRecorder}.tsx`
 
 **Build instructions:**
+
 1. Set per-slide target time; rehearsal tracks actual vs. target.
 2. After rehearsal, show a heatmap of time per slide.
 3. Teleprompter overlay at adjustable scroll speed (existing; ensure wired to real notes).
@@ -119,15 +133,18 @@
 **Features:** #134, #207.
 
 **Files to create:**
+
 - `apps/presenter/src/components/pip/{PiPBubble,VirtualBackgroundSelector}.tsx`
 - `apps/presenter/src/components/pip/GazeHighlight.tsx`
 
 **Build instructions:**
+
 1. PiP bubble: webcam feed overlaid on the slide; position draggable; size adjustable.
 2. Virtual background via canvas+MediaPipe segmentation.
 3. Gaze-guided highlighting (opt-in): WebGazer.js tracks presenter's eye position; a subtle spotlight follows on the slide.
 
 **Acceptance:**
+
 - PiP bubble renders on both displays.
 - Gaze highlighting does not drift when presenter looks away from camera.
 
@@ -138,9 +155,11 @@
 **Features:** #135, #125.
 
 **Files to create:**
+
 - `apps/presenter/src/components/handoff/{HandoffDialog,HandoffTokenInput}.tsx`
 
 **Build instructions:**
+
 1. Presenter A clicks "Hand off" → generates a handoff token; Presenter B enters token on their device.
 2. On accept: state (slide idx, scenario, variables) transfers atomically; audience display stays on the same slide during transition.
 3. Handoff log captured for audit.
@@ -152,9 +171,11 @@
 **Features:** #136.
 
 **Files to create:**
+
 - `apps/presenter/src/components/failover/{FailoverBanner,ResumeFromPhone}.tsx`
 
 **Build instructions:**
+
 1. If presenter laptop loses session, audience display shows "Resuming…" placeholder.
 2. Phone-as-remote detects the dropout and offers "Resume from here"; on click, session resumes with the same slide + state.
 3. Resume token lives in `services/presenter-session/src/failover`.
@@ -166,9 +187,11 @@
 **Features:** #137.
 
 **Files to create:**
+
 - `apps/presenter/src/runtime/offline/{OfflineCache,SnapshotFallback}.tsx`
 
 **Build instructions:**
+
 1. On session start, all slides + assets cached to IndexedDB.
 2. Live charts: data snapshot taken at last successful refresh; displayed with a "stale" badge if offline.
 3. Connection-loss banner with "Reconnect" button.
@@ -180,9 +203,11 @@
 **Features:** #138.
 
 **Files to create:**
+
 - `apps/presenter/src/components/display-profile/{ProfilePicker,OutputMirrorControls}.tsx`
 
 **Build instructions:**
+
 1. Profile picker: presets for 1080p, 4K, ultrawide 21:9, LED-wall custom resolution.
 2. Dual-screen mirroring controls (mirror / extend / audience-only).
 3. Resolution auto-detected from display; manual override.
@@ -194,9 +219,11 @@
 **Features:** #139, #132.
 
 **Files to create:**
+
 - `apps/presenter/src/components/timer/{AgendaTimer,SoftHardAlerts}.tsx`
 
 **Build instructions:**
+
 1. Per-segment agenda timer (e.g. "5 min intro, 15 min demo, 5 min Q&A").
 2. Soft alert (yellow) at 80% of segment, hard alert (red) at 100%.
 3. Toggle to show timer to audience or to presenter only.
@@ -208,9 +235,11 @@
 **Features:** #141, #162.
 
 **Files to create:**
+
 - `apps/presenter/src/components/recap/{RecapPage,RecordingExportButton}.tsx`
 
 **Build instructions:**
+
 1. After session, recap page shows: slides shown, slides skipped, annotations, time per slide, audience participation events.
 2. Recording export button submits to `services/recording-orchestrator`; progress tracked; download link on completion.
 
@@ -221,11 +250,13 @@
 **Features:** #124, #132, #133, #134.
 
 **Files to modify:**
+
 - `apps/presenter/src/components/timer/TimeBudgetAlerts.tsx` (new)
 - `apps/presenter/src/components/AutoFollowPresenter.tsx` (new)
 - `apps/presenter/src/components/Rewind30s.tsx` (new)
 
 **Build instructions:**
+
 1. Configurable soft/hard thresholds per slide.
 2. Rewind-30s: button + keyboard shortcut `Cmd+[`.
 3. Auto-follow presenter: when presenter is on the same screen as the audience display, follow their cursor onto slides.
@@ -237,10 +268,12 @@
 **Features:** #135, #126.
 
 **Files to modify:**
+
 - `apps/presenter/src/components/QuietMode.tsx`
 - `apps/presenter/src/components/AudienceHeatmapOverlay.tsx`
 
 **Build instructions:**
+
 1. Quiet mode toggle silences all toasts + whispers during sensitive moments.
 2. Audience heatmap overlays participation events on the current slide.
 
@@ -249,6 +282,7 @@
 ## 3. SOLID injection
 
 ### Presenter module map
+
 ```
 apps/presenter/src/
 ├── app/
@@ -264,6 +298,7 @@ apps/presenter/src/
 ```
 
 ### Rule: presenter is live-only
+
 The presenter app is read+command for live state; it never edits deck content. All scene-graph edits go through CRDT commands sent to the realtime gateway, not direct DOM manipulation. This ensures presenter actions are recorded.
 
 ---

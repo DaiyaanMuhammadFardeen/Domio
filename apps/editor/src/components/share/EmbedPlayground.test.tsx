@@ -29,9 +29,7 @@ vi.mock('@domio/ui', async () => {
   const React = await import('react');
   return {
     ...actual,
-    FormattedMessage: function MockFormattedMessage(props: {
-      id: string;
-    }): React.ReactElement {
+    FormattedMessage: function MockFormattedMessage(props: { id: string }): React.ReactElement {
       const catalogue = React.useContext(FormattedMessageContext);
       const resolved = catalogue[props.id] ?? props.id;
       return <span>{resolved}</span>;
@@ -41,9 +39,7 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 

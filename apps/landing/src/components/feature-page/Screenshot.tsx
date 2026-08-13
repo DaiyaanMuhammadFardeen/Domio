@@ -21,17 +21,8 @@ export interface ScreenshotProps {
 export function Screenshot({ alt, step, slug }: ScreenshotProps): JSX.Element {
   const label = `Step ${step}`;
   return (
-    <figure
-      className="fp-screenshot"
-      data-testid="fp-screenshot"
-      data-step={step}
-      data-slug={slug}
-    >
-      <div
-        className="fp-screenshot__frame"
-        role="img"
-        aria-label={alt}
-      >
+    <figure className="fp-screenshot" data-testid="fp-screenshot" data-step={step} data-slug={slug}>
+      <div className="fp-screenshot__frame" role="img" aria-label={alt}>
         <div className="fp-screenshot__chrome" aria-hidden="true">
           <span className="fp-screenshot__dot" />
           <span className="fp-screenshot__dot" />

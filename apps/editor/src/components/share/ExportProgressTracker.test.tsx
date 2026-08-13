@@ -43,9 +43,7 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
@@ -100,7 +98,7 @@ describe('ExportProgressTracker', () => {
   it('polls onPoll while the job is running and updates the bar', async () => {
     let n = 0;
     const onPoll = vi.fn(async () => ({
-      job: makeJob({ status: 'running', percent: 25 * (++n), remainingSlides: 4 - n }),
+      job: makeJob({ status: 'running', percent: 25 * ++n, remainingSlides: 4 - n }),
     }));
     render(withLocale(<ExportProgressTracker job={makeJob({ percent: 0 })} onPoll={onPoll} />));
     await act(async () => {
@@ -117,7 +115,11 @@ describe('ExportProgressTracker', () => {
     const onComplete = vi.fn();
     render(
       withLocale(
-        <ExportProgressTracker job={makeJob({ status: 'running' })} onPoll={onPoll} onComplete={onComplete} />,
+        <ExportProgressTracker
+          job={makeJob({ status: 'running' })}
+          onPoll={onPoll}
+          onComplete={onComplete}
+        />,
       ),
     );
     await act(async () => {
@@ -132,7 +134,11 @@ describe('ExportProgressTracker', () => {
     const onProgress = vi.fn();
     render(
       withLocale(
-        <ExportProgressTracker job={makeJob({ status: 'running' })} onPoll={onPoll} onProgress={onProgress} />,
+        <ExportProgressTracker
+          job={makeJob({ status: 'running' })}
+          onPoll={onPoll}
+          onProgress={onProgress}
+        />,
       ),
     );
     await act(async () => {

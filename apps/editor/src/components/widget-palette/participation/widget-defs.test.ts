@@ -32,8 +32,14 @@ describe('participation widget palette', () => {
 
   it('every widget type matches an audience type', () => {
     const valid = new Set([
-      'poll', 'word_cloud', 'qa', 'quiz',
-      'reaction', 'nav_vote', 'sentiment', 'raise_hand',
+      'poll',
+      'word_cloud',
+      'qa',
+      'quiz',
+      'reaction',
+      'nav_vote',
+      'sentiment',
+      'raise_hand',
     ]);
     for (const w of PARTICIPATION_WIDGETS) {
       expect(valid.has(w.type)).toBe(true);

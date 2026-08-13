@@ -58,9 +58,7 @@ export function CreatorProfileHeader({ creator }: CreatorProfileHeaderProps) {
       <div className="min-w-0 flex-1 space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="font-display text-3xl font-bold text-fg">
-              {creator.display_name}
-            </h1>
+            <h1 className="font-display text-3xl font-bold text-fg">{creator.display_name}</h1>
             <p className="mt-1 text-sm text-muted">@{creator.handle}</p>
           </div>
 
@@ -78,15 +76,11 @@ export function CreatorProfileHeader({ creator }: CreatorProfileHeaderProps) {
           </button>
         </div>
 
-        <p className="max-w-2xl text-sm leading-relaxed text-fg/80">
-          {creator.bio}
-        </p>
+        <p className="max-w-2xl text-sm leading-relaxed text-fg/80">{creator.bio}</p>
 
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
           <span>{creator.location}</span>
-          <span>
-            {t('market.creator.joined', { date: joinedDate })}
-          </span>
+          <span>{t('market.creator.joined', { date: joinedDate })}</span>
         </div>
       </div>
     </header>

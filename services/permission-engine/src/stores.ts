@@ -8,11 +8,7 @@
  *   4. ResourceHierarchyStore — parent resolution for the resource tree
  */
 
-import type {
-  ResourceType,
-  PermissionGrant,
-  WorkspaceMember,
-} from './types.js';
+import type { ResourceType, PermissionGrant, WorkspaceMember } from './types.js';
 
 // ---------------------------------------------------------------------------
 // PermissionGrantStore
@@ -100,7 +96,10 @@ export class InMemoryWorkspaceMemberStore implements WorkspaceMemberStore {
     this.store.set(this.key(member.workspaceId, member.userId), member);
   }
 
-  async findByWorkspaceAndUser(workspaceId: string, userId: string): Promise<WorkspaceMember | null> {
+  async findByWorkspaceAndUser(
+    workspaceId: string,
+    userId: string,
+  ): Promise<WorkspaceMember | null> {
     return this.store.get(this.key(workspaceId, userId)) ?? null;
   }
 }

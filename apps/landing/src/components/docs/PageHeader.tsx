@@ -49,11 +49,7 @@ export function PageHeader({ section, page }: PageHeaderProps): JSX.Element {
 
   return (
     <header className="docs-page-header" data-testid="docs-page-header">
-      <Breadcrumbs
-        items={chain}
-        className="docs-breadcrumbs"
-        testId="docs-breadcrumbs"
-      />
+      <Breadcrumbs items={chain} className="docs-breadcrumbs" testId="docs-breadcrumbs" />
       <h1 className="docs-page-header__title">{page.title}</h1>
       <p className="docs-page-header__section-eyebrow">{section.title}</p>
     </header>

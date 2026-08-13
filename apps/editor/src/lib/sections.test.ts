@@ -7,11 +7,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  SECTION_TEMPLATES,
-  getSectionTemplate,
-  searchSections,
-} from './sections';
+import { SECTION_TEMPLATES, getSectionTemplate, searchSections } from './sections';
 
 describe('sections', () => {
   it('ships a curated catalog of 3-5 slide sections', () => {

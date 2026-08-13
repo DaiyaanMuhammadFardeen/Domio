@@ -34,19 +34,19 @@ Kafka is added for the analytics ingest pipeline specifically because:
 
 ## Topic ownership
 
-| Topic | Producer | Consumer |
-|---|---|---|
-| `events.ingest.raw` | `services/event-ingest` | columnar-loader, sessionization, crm-sync, notification-dispatcher |
-| `events.ingest.normalized` | columnar-loader (post-sessionize) | analytics-warehouse, ab-measurement |
-| `session.events` | sessionization | analytics-warehouse |
-| `crm.sync.queued` | crm-sync (adapter-level) | crm-sync worker |
-| `crm.sync.sent` / `crm.sync.failed` / `crm.dlq` | crm-sync worker | analytics-warehouse (DLQ admin view) |
-| `notification.triggered` / `.sent` / `.failed` | notification-dispatcher | analytics-warehouse |
-| `experiment.concluded` | ab-statistics | analytics-warehouse |
-| `heatmap.refreshed` | heatmap-generator | analytics-warehouse |
-| `live_session_summary.generated` | live-analytics | analytics-warehouse |
-| `team_analytics.refreshed` | team-analytics | analytics-warehouse |
-| `consent.events` | viewer-identity | event-ingest (consent gate) |
+| Topic                                           | Producer                          | Consumer                                                           |
+| ----------------------------------------------- | --------------------------------- | ------------------------------------------------------------------ |
+| `events.ingest.raw`                             | `services/event-ingest`           | columnar-loader, sessionization, crm-sync, notification-dispatcher |
+| `events.ingest.normalized`                      | columnar-loader (post-sessionize) | analytics-warehouse, ab-measurement                                |
+| `session.events`                                | sessionization                    | analytics-warehouse                                                |
+| `crm.sync.queued`                               | crm-sync (adapter-level)          | crm-sync worker                                                    |
+| `crm.sync.sent` / `crm.sync.failed` / `crm.dlq` | crm-sync worker                   | analytics-warehouse (DLQ admin view)                               |
+| `notification.triggered` / `.sent` / `.failed`  | notification-dispatcher           | analytics-warehouse                                                |
+| `experiment.concluded`                          | ab-statistics                     | analytics-warehouse                                                |
+| `heatmap.refreshed`                             | heatmap-generator                 | analytics-warehouse                                                |
+| `live_session_summary.generated`                | live-analytics                    | analytics-warehouse                                                |
+| `team_analytics.refreshed`                      | team-analytics                    | analytics-warehouse                                                |
+| `consent.events`                                | viewer-identity                   | event-ingest (consent gate)                                        |
 
 ## Partition keys
 

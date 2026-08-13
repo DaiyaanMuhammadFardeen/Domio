@@ -27,7 +27,13 @@ export interface HeroProps {
   readonly feature: FeatureDetail;
 }
 
-function IllustrationPlaceholder({ icon, slug }: { readonly icon: string; readonly slug: string }): JSX.Element {
+function IllustrationPlaceholder({
+  icon,
+  slug,
+}: {
+  readonly icon: string;
+  readonly slug: string;
+}): JSX.Element {
   // Decorative placeholder — the real artwork is delivered by the
   // design team. The glyph uses the first two letters of the icon
   // id, mirroring the FeatureGrid pattern.
@@ -54,11 +60,15 @@ export function Hero({ feature }: HeroProps): JSX.Element {
   return (
     <section className="fp-hero" aria-labelledby="fp-hero-heading" data-testid="fp-hero">
       <div className="fp-hero__inner">
-        <p className="fp-hero__eyebrow" data-testid="fp-hero-eyebrow">{eyebrow}</p>
+        <p className="fp-hero__eyebrow" data-testid="fp-hero-eyebrow">
+          {eyebrow}
+        </p>
         <h1 id="fp-hero-heading" className="fp-hero__title" data-testid="fp-hero-title">
           {feature.title}
         </h1>
-        <p className="fp-hero__subtitle" data-testid="fp-hero-tagline">{feature.tagline}</p>
+        <p className="fp-hero__subtitle" data-testid="fp-hero-tagline">
+          {feature.tagline}
+        </p>
         <p className="fp-hero__description" data-testid="fp-hero-description">
           {feature.hero_description}
         </p>

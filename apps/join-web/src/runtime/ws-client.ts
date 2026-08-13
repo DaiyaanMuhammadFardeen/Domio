@@ -44,15 +44,17 @@ export function connect(opts: WSClientOptions): WSClient {
     ws.onopen = () => {
       state = 'open';
       opts.onOpen?.();
-      ws?.send(JSON.stringify({
-        kind: 'hello',
-        session_code: opts.sessionCode,
-        workspace_id: opts.workspaceId,
-        participant_id: opts.participantId,
-        locale: opts.locale,
-        ts_ms: Date.now(),
-        idempotency_key: crypto.randomUUID(),
-      }));
+      ws?.send(
+        JSON.stringify({
+          kind: 'hello',
+          session_code: opts.sessionCode,
+          workspace_id: opts.workspaceId,
+          participant_id: opts.participantId,
+          locale: opts.locale,
+          ts_ms: Date.now(),
+          idempotency_key: crypto.randomUUID(),
+        }),
+      );
     };
     ws.onmessage = (event) => {
       try {
@@ -87,6 +89,8 @@ export function connect(opts: WSClientOptions): WSClient {
       ws?.close();
       state = 'closed';
     },
-    get state() { return state; },
+    get state() {
+      return state;
+    },
   };
 }

@@ -33,11 +33,7 @@ export class InMemoryGuestStore implements GuestStore {
     email: string,
   ): Promise<GuestAccess | null> {
     for (const ga of this.guestAccesses.values()) {
-      if (
-        ga.scope_type === scopeType &&
-        ga.scope_id === scopeId &&
-        ga.guest_email === email
-      ) {
+      if (ga.scope_type === scopeType && ga.scope_id === scopeId && ga.guest_email === email) {
         return ga;
       }
     }

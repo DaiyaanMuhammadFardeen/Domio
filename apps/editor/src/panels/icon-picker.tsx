@@ -12,8 +12,16 @@ import { cn } from '../lib/cn';
 import { useT } from '../lib/locale';
 
 const PRESET_COLORS = [
-  '#E6EDF3', '#58a6ff', '#3fb950', '#f0883e', '#f778ba',
-  '#bc8cff', '#ff7b72', '#d2a8ff', '#79c0ff', '#ffa657',
+  '#E6EDF3',
+  '#58a6ff',
+  '#3fb950',
+  '#f0883e',
+  '#f778ba',
+  '#bc8cff',
+  '#ff7b72',
+  '#d2a8ff',
+  '#79c0ff',
+  '#ffa657',
 ];
 
 interface IconPickerProps {
@@ -85,12 +93,7 @@ function IconCard({
   onInsert: () => void;
 }): ReactElement {
   return (
-    <button
-      type="button"
-      className="icon-card"
-      onClick={onInsert}
-      title={icon.name}
-    >
+    <button type="button" className="icon-card" onClick={onInsert} title={icon.name}>
       <svg
         viewBox="0 0 24 24"
         className="icon-card__svg"

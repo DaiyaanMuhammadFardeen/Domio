@@ -22,13 +22,7 @@ interface DeckSummaryRow {
   completionRate: number;
 }
 
-const HEADER = [
-  'deck_id',
-  'session_count',
-  'viewer_count',
-  'avg_session_ms',
-  'completion_rate',
-];
+const HEADER = ['deck_id', 'session_count', 'viewer_count', 'avg_session_ms', 'completion_rate'];
 
 function escapeCsv(value: unknown): string {
   const s = value === null || value === undefined ? '' : String(value);
@@ -39,8 +33,7 @@ function escapeCsv(value: unknown): string {
 }
 
 async function streamCsv(_req: NextRequest): Promise<Response> {
-  const workspaceId =
-    process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
+  const workspaceId = process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
   const url = new URL('/v1/decks/summary', WAREHOUSE_URL);
   url.searchParams.set('workspace_id', workspaceId);
   url.searchParams.set('from_ms', String(Date.now() - 30 * 24 * 60 * 60 * 1000));
@@ -56,7 +49,8 @@ async function streamCsv(_req: NextRequest): Promise<Response> {
     });
   }
 
-  const rows = ((await upstream.json().catch(() => ({ rows: [] }))) as { rows?: DeckSummaryRow[] }).rows ?? [];
+  const rows =
+    ((await upstream.json().catch(() => ({ rows: [] }))) as { rows?: DeckSummaryRow[] }).rows ?? [];
 
   // ReadableStream with backpressure-friendly chunking.
   const encoder = new TextEncoder();

@@ -41,10 +41,7 @@ export class PhoneRemoteService {
     try {
       res = await fetch(url);
     } catch (e) {
-      throw new PhoneRemoteServiceError(
-        e instanceof Error ? e.message : 'Network error',
-        0,
-      );
+      throw new PhoneRemoteServiceError(e instanceof Error ? e.message : 'Network error', 0);
     }
     if (res.status === 404) return [];
     if (!res.ok) {

@@ -23,12 +23,7 @@ describe('PerSlideRating', () => {
 
   it('clears the rating when the same thumb is clicked again', () => {
     const onChange = vi.fn();
-    render(
-      <PerSlideRating
-        ratings={{ 'slide-1': 1 }}
-        onChange={onChange}
-      />,
-    );
+    render(<PerSlideRating ratings={{ 'slide-1': 1 }} onChange={onChange} />);
     fireEvent.click(screen.getByTestId('per-slide-rating-up-slide-1'));
     expect(onChange).toHaveBeenCalledWith('slide-1', 0);
   });

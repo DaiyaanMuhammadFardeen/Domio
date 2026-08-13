@@ -37,7 +37,11 @@ export class InMemoryMeetingStore implements MeetingStore {
   async updateIntegrationStatus(id: string, status: string, updatedAt: Date): Promise<void> {
     for (const i of this.integrations.values()) {
       if (i.id === id) {
-        const updated: MeetingIntegration = { ...i, status: status as MeetingIntegration['status'], updated_at: updatedAt };
+        const updated: MeetingIntegration = {
+          ...i,
+          status: status as MeetingIntegration['status'],
+          updated_at: updatedAt,
+        };
         const key = `${i.workspace_id}:${i.vendor}`;
         this.integrations.set(key, updated);
         return;

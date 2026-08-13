@@ -99,7 +99,12 @@ const SEED_OPS: ReadonlyArray<SeedOp> = [
     kind: 'element_update',
     actor_id: 'u-bob',
     summary: 'Updated text on element el-2041',
-    payload: { element_id: 'el-2041', field: 'text', before: 'Q3 metrics', after: 'Q3 metrics — by region' },
+    payload: {
+      element_id: 'el-2041',
+      field: 'text',
+      before: 'Q3 metrics',
+      after: 'Q3 metrics — by region',
+    },
   },
   {
     minutes_ago: 0.4,
@@ -183,14 +188,24 @@ const SEED_OPS: ReadonlyArray<SeedOp> = [
     kind: 'brand_lock_check',
     actor_id: 'agent-style',
     summary: 'Brand-lock check flagged 2 violations on s-02',
-    payload: { slide_id: 's-02', violations: 2, kit_id: 'kit-acme', details: ['contrast', 'logo-size'] },
+    payload: {
+      slide_id: 's-02',
+      violations: 2,
+      kit_id: 'kit-acme',
+      details: ['contrast', 'logo-size'],
+    },
   },
   {
     minutes_ago: 3.5,
     kind: 'element_update',
     actor_id: 'u-dave',
     summary: 'Updated image alt text',
-    payload: { element_id: 'el-1500', field: 'alt', before: 'image', after: 'product hero shot showing the X-200' },
+    payload: {
+      element_id: 'el-1500',
+      field: 'alt',
+      before: 'image',
+      after: 'product hero shot showing the X-200',
+    },
   },
   {
     minutes_ago: 3.7,
@@ -204,7 +219,11 @@ const SEED_OPS: ReadonlyArray<SeedOp> = [
     kind: 'ai_suggest',
     actor_id: 'agent-narrator',
     summary: 'Suggested narrative for slide s-01',
-    payload: { slide_id: 's-01', suggestion: 'Open with the headline result, then walk the audience through the three supporting data points.' },
+    payload: {
+      slide_id: 's-01',
+      suggestion:
+        'Open with the headline result, then walk the audience through the three supporting data points.',
+    },
   },
   {
     minutes_ago: 4.1,
@@ -289,9 +308,7 @@ export async function listChangeFeed(opts: {
       params.set('since_ms', String(opts.sinceMs));
     }
     const qs = params.toString();
-    const path = `/v1/decks/${encodeURIComponent(deckId)}/change-feed${
-      qs ? `?${qs}` : ''
-    }`;
+    const path = `/v1/decks/${encodeURIComponent(deckId)}/change-feed${qs ? `?${qs}` : ''}`;
     const json = await fetcher<{ ops?: ChangeFeedOp[] } | ChangeFeedOp[]>(path);
     const ops = Array.isArray(json) ? json : (json.ops ?? []);
     if (ops.length > 0) {
@@ -323,9 +340,7 @@ export async function replayChangeFeed(
   if (!(toMs > fromMs)) return [];
   try {
     const params = new URLSearchParams({ from_ms: String(fromMs), to_ms: String(toMs) });
-    const path = `/v1/decks/${encodeURIComponent(
-      deckId,
-    )}/change-feed/replay?${params.toString()}`;
+    const path = `/v1/decks/${encodeURIComponent(deckId)}/change-feed/replay?${params.toString()}`;
     const json = await fetcher<{ ops?: ChangeFeedOp[] } | ChangeFeedOp[]>(path);
     const ops = Array.isArray(json) ? json : (json.ops ?? []);
     return ops

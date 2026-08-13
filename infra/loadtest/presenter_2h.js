@@ -52,20 +52,14 @@ const HEADERS = { 'Content-Type': 'application/json' };
 export default function () {
   // Create session once (idempotent at VU level).
   if (__ITER === 0) {
-    const create = http.post(
-      `${BASE}/v1/sessions`,
-      JSON.stringify({ deck: 'deck-loadtest-001' }),
-      { headers: HEADERS },
-    );
+    const create = http.post(`${BASE}/v1/sessions`, JSON.stringify({ deck: 'deck-loadtest-001' }), {
+      headers: HEADERS,
+    });
     check(create, { 'session created': (r) => r.status === 201 });
   }
 
   // Advance slide every 120 s (60 slides over 2 hours).
-  const advance = http.post(
-    `${BASE}/v1/sessions/current/advance`,
-    null,
-    { headers: HEADERS },
-  );
+  const advance = http.post(`${BASE}/v1/sessions/current/advance`, null, { headers: HEADERS });
   actionLatencyMs.add(advance.timings.duration);
   if (advance.status !== 200) sessionErrorRate.add(1);
   else slidesAdvanced.add(1);

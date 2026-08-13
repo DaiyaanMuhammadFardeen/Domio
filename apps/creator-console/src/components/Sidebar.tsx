@@ -53,9 +53,7 @@ export function Sidebar() {
                       href={item.href}
                       className={clsx(
                         'block rounded-md px-2 py-1.5 text-sm font-medium transition',
-                        active
-                          ? 'bg-brand-50 text-brand-700'
-                          : 'text-slate-700 hover:bg-slate-100',
+                        active ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-100',
                       )}
                     >
                       {item.label}

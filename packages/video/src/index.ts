@@ -8,12 +8,7 @@
  */
 
 // Playback — segment selection for HLS/DASH
-export {
-  getSegmentInfo,
-  clipTrimToSource,
-  type TrimWindow,
-  type SegmentInfo,
-} from './playback.js';
+export { getSegmentInfo, clipTrimToSource, type TrimWindow, type SegmentInfo } from './playback.js';
 
 // Captions — WebVTT parser and generator
 export {
@@ -25,12 +20,7 @@ export {
 } from './captions.js';
 
 // Chapters — chapter list from title markers
-export {
-  createChapterList,
-  getChapterAt,
-  type Chapter,
-  type ChapterList,
-} from './chapters.js';
+export { createChapterList, getChapterAt, type Chapter, type ChapterList } from './chapters.js';
 
 // Transcode — state machine model
 export {
@@ -42,14 +32,7 @@ export {
 } from './transcode.js';
 
 // Contrast — WCAG-Accessible text-contrast protection
-export {
-  analyzeContrast,
-  type ContrastResult,
-} from './contrast.js';
+export { analyzeContrast, type ContrastResult } from './contrast.js';
 
 // Waveform — audio waveform bar computation
-export {
-  computeWaveform,
-  type WaveformBar,
-  type WaveformResult,
-} from './waveform.js';
+export { computeWaveform, type WaveformBar, type WaveformResult } from './waveform.js';

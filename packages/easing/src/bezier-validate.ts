@@ -27,12 +27,7 @@ export type BezierValidation = BezierOk | BezierFail;
  * @param y2 - y of second control point (may overshoot)
  * @returns `{ ok: true }` or `{ ok: false, reason }`
  */
-export function validateBezier(
-  x1: number,
-  _y1: number,
-  x2: number,
-  _y2: number,
-): BezierValidation {
+export function validateBezier(x1: number, _y1: number, x2: number, _y2: number): BezierValidation {
   // x must be in [0, 1]
   if (x1 < 0 || x1 > 1) {
     return { ok: false, reason: `x1 must be in [0, 1], got ${x1}` };

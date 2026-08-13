@@ -29,18 +29,28 @@ async function encodeGif(frames: ExportFrame[], fps: number): Promise<Uint8Array
   try {
     const gifenc = await import('gifenc');
     const mod = (gifenc as Record<string, unknown>).default ?? gifenc;
-    const GIFEncoderCtor = (mod as Record<string, unknown>).GIFEncoder as
-      new (opts: { width: number; height: number }) => {
-        writeHeader(): void;
-        writeFrame(pixels: Uint8Array, opts: { palette: Uint8Array; delay?: number }): void;
-        finish(): Uint8Array;
-      };
-    const quantizeFn = (mod as Record<string, unknown>).quantize as
-      (data: Uint8Array, opts: { colors: number }) => Uint8Array[];
-    const applyPaletteFn = (mod as Record<string, unknown>).applyPalette as
-      (data: Uint8Array, palette: Uint8Array) => Uint8Array;
+    const GIFEncoderCtor = (mod as Record<string, unknown>).GIFEncoder as new (opts: {
+      width: number;
+      height: number;
+    }) => {
+      writeHeader(): void;
+      writeFrame(pixels: Uint8Array, opts: { palette: Uint8Array; delay?: number }): void;
+      finish(): Uint8Array;
+    };
+    const quantizeFn = (mod as Record<string, unknown>).quantize as (
+      data: Uint8Array,
+      opts: { colors: number },
+    ) => Uint8Array[];
+    const applyPaletteFn = (mod as Record<string, unknown>).applyPalette as (
+      data: Uint8Array,
+      palette: Uint8Array,
+    ) => Uint8Array;
 
-    if (typeof GIFEncoderCtor !== 'function' || typeof quantizeFn !== 'function' || typeof applyPaletteFn !== 'function') {
+    if (
+      typeof GIFEncoderCtor !== 'function' ||
+      typeof quantizeFn !== 'function' ||
+      typeof applyPaletteFn !== 'function'
+    ) {
       return encodeGifMinimal(frames, fps);
     }
 
@@ -104,9 +114,8 @@ function encodeGifMinimal(frames: ExportFrame[], fps: number): Uint8Array {
 
   // Netscape extension for looping (2 bytes: 0x21 0xff, then 11 bytes "NETSCAPE2.0", then 3 bytes data)
   const netscape = new Uint8Array([
-    0x21, 0xff, 0x0b,
-    0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30,
-    0x03, 0x01, 0x00, 0x00,
+    0x21, 0xff, 0x0b, 0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30, 0x03, 0x01,
+    0x00, 0x00,
   ]);
   parts.push(netscape);
 
@@ -132,14 +141,16 @@ function encodeGifMinimal(frames: ExportFrame[], fps: number): Uint8Array {
       const g = frame.data[i * 4 + 1]!;
       const b = frame.data[i * 4 + 2]!;
       // Simple luminance to palette index
-      pixels[i] = Math.round((r * 0.299 + g * 0.587 + b * 0.114)) & 0xff;
+      pixels[i] = Math.round(r * 0.299 + g * 0.587 + b * 0.114) & 0xff;
     }
 
     // Image Descriptor (10 bytes)
     const imgDesc = new Uint8Array(10);
     imgDesc[0] = 0x2c; // Image Separator
-    imgDesc[1] = 0x00; imgDesc[2] = 0x00; // Left
-    imgDesc[3] = 0x00; imgDesc[4] = 0x00; // Top
+    imgDesc[1] = 0x00;
+    imgDesc[2] = 0x00; // Left
+    imgDesc[3] = 0x00;
+    imgDesc[4] = 0x00; // Top
     imgDesc[5] = w & 0xff;
     imgDesc[6] = (w >> 8) & 0xff;
     imgDesc[7] = h & 0xff;
@@ -209,7 +220,7 @@ function lzwCompress(pixels: Uint8Array, minCodeSize: number): Uint8Array {
       emitCode(codeTable.get(buffer)!);
       if (nextCode < 4096) {
         codeTable.set(combined, nextCode++);
-        if (nextCode > (1 << codeSize) && codeSize < 12) {
+        if (nextCode > 1 << codeSize && codeSize < 12) {
           codeSize++;
         }
       } else {
@@ -240,7 +251,7 @@ function lzwCompress(pixels: Uint8Array, minCodeSize: number): Uint8Array {
   for (let i = 0; i < bytes.length; i++) {
     let val = 0;
     for (let b = 0; b < 8; b++) {
-      val |= (outBits[i * 8 + b]! << b);
+      val |= outBits[i * 8 + b]! << b;
     }
     bytes[i] = val;
   }
@@ -312,12 +323,18 @@ async function encodeWithFfmpeg(
 
   const args = [
     '-y',
-    '-f', 'rawvideo',
-    '-pix_fmt', 'rgba',
-    '-s', `${w}x${h}`,
-    '-r', String(fps),
-    '-i', 'pipe:0',
-    '-vf', 'format=yuv420p',
+    '-f',
+    'rawvideo',
+    '-pix_fmt',
+    'rgba',
+    '-s',
+    `${w}x${h}`,
+    '-r',
+    String(fps),
+    '-i',
+    'pipe:0',
+    '-vf',
+    'format=yuv420p',
     `/tmp/export-output.${ext}`,
   ];
 
@@ -328,7 +345,9 @@ async function encodeWithFfmpeg(
     child.stdin!.write(raw);
     child.stdin!.end();
     await new Promise<void>((resolve, reject) => {
-      child.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited ${code}`))));
+      child.on('close', (code) =>
+        code === 0 ? resolve() : reject(new Error(`ffmpeg exited ${code}`)),
+      );
       child.on('error', reject);
     });
     const { readFile } = await import('node:fs/promises');
@@ -345,7 +364,10 @@ async function encodeWithFfmpeg(
 
 export function createEncoder(): Encoder {
   return {
-    async encodeVideo(frames: ExportFrame[], options: EncodeOptions): Promise<Uint8Array | { unsupported: true }> {
+    async encodeVideo(
+      frames: ExportFrame[],
+      options: EncodeOptions,
+    ): Promise<Uint8Array | { unsupported: true }> {
       if (frames.length === 0) {
         throw new ValidationError('No frames to encode');
       }

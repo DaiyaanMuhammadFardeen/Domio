@@ -34,10 +34,7 @@ import {
   FeatureDisabledError,
   MarketplaceValidationError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-  StoreNotImplementedError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
 import type { ChargebackEventType } from './types.js';
 import type { PayoutMethodKind } from './creator/types.js';
 import {
@@ -114,7 +111,9 @@ function problemDetail(title: string, status: number, detail: string, type?: str
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -174,7 +173,12 @@ function mapError(e: unknown): HttpResponse {
     return problemDetail('Brand Lock Not Found', 404, e.message);
   }
   if (e instanceof InvalidTakedownTransitionError) {
-    return problemDetail('Invalid Takedown Transition', 409, e.message, 'invalid_takedown_transition');
+    return problemDetail(
+      'Invalid Takedown Transition',
+      409,
+      e.message,
+      'invalid_takedown_transition',
+    );
   }
   if (e instanceof TakedownNotFoundError) {
     return problemDetail('Takedown Not Found', 404, e.message);
@@ -193,17 +197,20 @@ function mapError(e: unknown): HttpResponse {
 // ---------------------------------------------------------------------------
 
 export async function createMarketplaceListingHandler(
-  req: HttpRequest<Record<string, never>, {
-    catalogId: string;
-    sellerId: string;
-    title: string;
-    description?: string;
-    tags?: string[];
-    priceCents?: number;
-    currency?: string;
-    isFree?: boolean;
-    preview?: Record<string, unknown>;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      catalogId: string;
+      sellerId: string;
+      title: string;
+      description?: string;
+      tags?: string[];
+      priceCents?: number;
+      currency?: string;
+      isFree?: boolean;
+      preview?: Record<string, unknown>;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -219,11 +226,15 @@ export async function createMarketplaceListingHandler(
 // ---------------------------------------------------------------------------
 
 export async function listMarketplaceListingsHandler(
-  req: HttpRequest<Record<string, never>, undefined, {
-    status?: string;
-    sellerId?: string;
-    limit?: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    undefined,
+    {
+      status?: string;
+      sellerId?: string;
+      limit?: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -259,14 +270,17 @@ export async function getMarketplaceListingHandler(
 // ---------------------------------------------------------------------------
 
 export async function updateMarketplaceListingHandler(
-  req: HttpRequest<{ listing_id: string }, {
-    title?: string;
-    description?: string;
-    priceCents?: number;
-    currency?: string;
-    tags?: string[];
-    preview?: Record<string, unknown>;
-  }>,
+  req: HttpRequest<
+    { listing_id: string },
+    {
+      title?: string;
+      description?: string;
+      priceCents?: number;
+      currency?: string;
+      tags?: string[];
+      preview?: Record<string, unknown>;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -330,10 +344,13 @@ export async function deprecateMarketplaceListingHandler(
 // ---------------------------------------------------------------------------
 
 export async function addMarketplaceListingVersionHandler(
-  req: HttpRequest<{ listing_id: string }, {
-    catalogId: string;
-    version: string;
-  }>,
+  req: HttpRequest<
+    { listing_id: string },
+    {
+      catalogId: string;
+      version: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -370,11 +387,14 @@ export async function getMarketplaceListingChangelogHandler(
 // ---------------------------------------------------------------------------
 
 export async function calculateMarketplacePriceHandler(
-  req: HttpRequest<Record<string, never>, {
-    priceCents: number;
-    currency: string;
-    model: PricingModel;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      priceCents: number;
+      currency: string;
+      model: PricingModel;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -410,16 +430,25 @@ export async function getPayoutPolicyHandler(
 // ---------------------------------------------------------------------------
 
 export async function submitMarketplaceReviewHandler(
-  req: HttpRequest<{ listing_id: string }, {
-    rating: number;
-    body?: string;
-    verifiedBuyer?: boolean;
-  }>,
+  req: HttpRequest<
+    { listing_id: string },
+    {
+      rating: number;
+      body?: string;
+      verifiedBuyer?: boolean;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
     const actorId = getActorId(req);
-    const reviewBody: { listingId: string; reviewerId: string; rating: number; body?: string; verifiedBuyer?: boolean } = {
+    const reviewBody: {
+      listingId: string;
+      reviewerId: string;
+      rating: number;
+      body?: string;
+      verifiedBuyer?: boolean;
+    } = {
       listingId: req.params.listing_id,
       reviewerId: actorId,
       rating: req.body.rating,
@@ -502,15 +531,18 @@ export async function getCuratedMarketplaceListingsHandler(
 // ---------------------------------------------------------------------------
 
 export async function createPurchaseHandler(
-  req: HttpRequest<Record<string, never>, {
-    listing_id: string;
-    provider: string;
-    currency: string;
-    idempotency_key: string;
-    quantity?: number;
-    success_url?: string;
-    cancel_url?: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      listing_id: string;
+      provider: string;
+      currency: string;
+      idempotency_key: string;
+      quantity?: number;
+      success_url?: string;
+      cancel_url?: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -545,10 +577,13 @@ export async function createPurchaseHandler(
 // ---------------------------------------------------------------------------
 
 export async function requestRefundHandler(
-  req: HttpRequest<Record<string, never>, {
-    purchase_id: string;
-    reason: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      purchase_id: string;
+      reason: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -631,11 +666,14 @@ export async function receiveNagadWebhookHandler(
 // ---------------------------------------------------------------------------
 
 export async function handleChargebackHandler(
-  req: HttpRequest<Record<string, never>, {
-    provider: string;
-    event_type: ChargebackEventType;
-    purchase_id: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      provider: string;
+      event_type: ChargebackEventType;
+      purchase_id: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -671,13 +709,16 @@ export async function getCreatorProfileHandler(
 // ---------------------------------------------------------------------------
 
 export async function updateCreatorProfileHandler(
-  req: HttpRequest<{ user_id: string }, {
-    displayName?: string;
-    slug?: string;
-    bio?: string;
-    countryCode?: string;
-    payoutMethod?: string;
-  }>,
+  req: HttpRequest<
+    { user_id: string },
+    {
+      displayName?: string;
+      slug?: string;
+      bio?: string;
+      countryCode?: string;
+      payoutMethod?: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -725,10 +766,13 @@ export async function getKycStatusHandler(
 // ---------------------------------------------------------------------------
 
 export async function createCreatorPayoutMethodHandler(
-  req: HttpRequest<{ user_id: string }, {
-    kind: string;
-    external_account_id: string;
-  }>,
+  req: HttpRequest<
+    { user_id: string },
+    {
+      kind: string;
+      external_account_id: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -780,15 +824,18 @@ export async function getPayoutConnectLinkHandler(
 // ---------------------------------------------------------------------------
 
 export async function createBrandLockHandler(
-  req: HttpRequest<Record<string, never>, {
-    workspace_id: string;
-    brand_kit_id: string;
-    marketplace_listing_id: string;
-    state: BrandLockState;
-    override_price_cents?: number | null;
-    notes?: string | null;
-    audit_actor_id?: string | null;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      workspace_id: string;
+      brand_kit_id: string;
+      marketplace_listing_id: string;
+      state: BrandLockState;
+      override_price_cents?: number | null;
+      notes?: string | null;
+      audit_actor_id?: string | null;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -812,10 +859,14 @@ export async function createBrandLockHandler(
 // ---------------------------------------------------------------------------
 
 export async function listBrandLocksHandler(
-  req: HttpRequest<Record<string, never>, undefined, {
-    workspace_id: string;
-    brand_kit_id: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    undefined,
+    {
+      workspace_id: string;
+      brand_kit_id: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -834,11 +885,15 @@ export async function listBrandLocksHandler(
 // ---------------------------------------------------------------------------
 
 export async function getBrandLockHandler(
-  req: HttpRequest<{ lock_id: string }, undefined, {
-    workspace_id: string;
-    brand_kit_id: string;
-    marketplace_listing_id: string;
-  }>,
+  req: HttpRequest<
+    { lock_id: string },
+    undefined,
+    {
+      workspace_id: string;
+      brand_kit_id: string;
+      marketplace_listing_id: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -858,21 +913,28 @@ export async function getBrandLockHandler(
 // ---------------------------------------------------------------------------
 
 export async function updateBrandLockHandler(
-  req: HttpRequest<{ lock_id: string }, {
-    state?: BrandLockState;
-    override_price_cents?: number | null;
-    notes?: string | null;
-    audit_actor_id?: string | null;
-  }>,
+  req: HttpRequest<
+    { lock_id: string },
+    {
+      state?: BrandLockState;
+      override_price_cents?: number | null;
+      notes?: string | null;
+      audit_actor_id?: string | null;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
     const patch: Record<string, unknown> = {};
     if (req.body.state !== undefined) patch.state = req.body.state;
-    if (req.body.override_price_cents !== undefined) patch.overridePriceCents = req.body.override_price_cents;
+    if (req.body.override_price_cents !== undefined)
+      patch.overridePriceCents = req.body.override_price_cents;
     if (req.body.notes !== undefined) patch.notes = req.body.notes;
     if (req.body.audit_actor_id !== undefined) patch.auditActorId = req.body.audit_actor_id;
-    const lock = await ctx.service.updateBrandLock(req.params.lock_id, patch as Parameters<MarketplaceService['updateBrandLock']>[1]);
+    const lock = await ctx.service.updateBrandLock(
+      req.params.lock_id,
+      patch as Parameters<MarketplaceService['updateBrandLock']>[1],
+    );
     return ok({ lock });
   } catch (e) {
     return mapError(e);
@@ -900,14 +962,17 @@ export async function deleteBrandLockHandler(
 // ---------------------------------------------------------------------------
 
 export async function fileTakedownHandler(
-  req: HttpRequest<Record<string, never>, {
-    workspace_id: string;
-    listing_id: string;
-    claimant_id: string;
-    kind: TakedownKind;
-    evidence_url?: string | null;
-    statement: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      workspace_id: string;
+      listing_id: string;
+      claimant_id: string;
+      kind: TakedownKind;
+      evidence_url?: string | null;
+      statement: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -946,17 +1011,23 @@ export async function getTakedownRequestHandler(
 // ---------------------------------------------------------------------------
 
 export async function listTakedownRequestsHandler(
-  req: HttpRequest<Record<string, never>, undefined, {
-    status?: string;
-    kind?: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    undefined,
+    {
+      status?: string;
+      kind?: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
     const opts: { status?: string; kind?: string } = {};
     if (req.query.status) opts.status = req.query.status;
     if (req.query.kind) opts.kind = req.query.kind;
-    const requests = await ctx.service.listTakedownRequests(opts as Parameters<MarketplaceService['listTakedownRequests']>[0]);
+    const requests = await ctx.service.listTakedownRequests(
+      opts as Parameters<MarketplaceService['listTakedownRequests']>[0],
+    );
     return ok({ requests });
   } catch (e) {
     return mapError(e);
@@ -1038,21 +1109,18 @@ export async function submitCounterNoticeHandler(
 // ---------------------------------------------------------------------------
 
 export async function resolveTakedownRequestHandler(
-  req: HttpRequest<{ request_id: string }, { decision: 'confirmed' | 'dismissed'; resolution_notes?: string }>,
+  req: HttpRequest<
+    { request_id: string },
+    { decision: 'confirmed' | 'dismissed'; resolution_notes?: string }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
     let request;
     if (req.body.decision === 'confirmed') {
-      request = await ctx.service.confirmTakedown(
-        req.params.request_id,
-        req.body.resolution_notes,
-      );
+      request = await ctx.service.confirmTakedown(req.params.request_id, req.body.resolution_notes);
     } else {
-      request = await ctx.service.dismissTakedown(
-        req.params.request_id,
-        req.body.resolution_notes,
-      );
+      request = await ctx.service.dismissTakedown(req.params.request_id, req.body.resolution_notes);
     }
     return ok({ request });
   } catch (e) {
@@ -1065,10 +1133,13 @@ export async function resolveTakedownRequestHandler(
 // ---------------------------------------------------------------------------
 
 export async function computeTrustScoreHandler(
-  req: HttpRequest<Record<string, never>, {
-    listing_id: string;
-    signals: Record<string, unknown>;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      listing_id: string;
+      signals: Record<string, unknown>;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -1103,15 +1174,23 @@ export async function getTrustScoreHandler(
 // ---------------------------------------------------------------------------
 
 export async function getFxRateHandler(
-  req: HttpRequest<Record<string, never>, undefined, {
-    base?: string;
-    quote?: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    undefined,
+    {
+      base?: string;
+      quote?: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {
     if (!req.query.base || !req.query.quote) {
-      return problemDetail('Missing Required Parameters', 400, 'base and quote query parameters are required');
+      return problemDetail(
+        'Missing Required Parameters',
+        400,
+        'base and quote query parameters are required',
+      );
     }
     const rate = await ctx.service.getFxRate(req.query.base, req.query.quote);
     return ok({ rate });
@@ -1125,9 +1204,13 @@ export async function getFxRateHandler(
 // ---------------------------------------------------------------------------
 
 export async function listPayoutRunsHandler(
-  req: HttpRequest<Record<string, never>, undefined, {
-    period_month?: string;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    undefined,
+    {
+      period_month?: string;
+    }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   try {

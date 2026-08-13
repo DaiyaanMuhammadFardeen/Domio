@@ -69,7 +69,10 @@ const createModelSchema = {
     workspaceId: { type: 'string', minLength: 1 },
     uploaderId: { type: 'string' },
     name: { type: 'string', minLength: 1, maxLength: 256 },
-    format: { type: 'string', enum: ['glb', 'gltf', 'usdz', 'step', 'stp', 'iges', 'igs', 'fbx', 'obj'] },
+    format: {
+      type: 'string',
+      enum: ['glb', 'gltf', 'usdz', 'step', 'stp', 'iges', 'igs', 'fbx', 'obj'],
+    },
     sourceUrl: { type: 'string', format: 'uri' },
     derivedUrl: { type: 'string', format: 'uri' },
     thumbnailUrl: { type: 'string', format: 'uri' },
@@ -295,7 +298,16 @@ const audioTrackSchema = {
 
 const createAudioAssetSchema = {
   type: 'object',
-  required: ['workspaceId', 'name', 'format', 'sourceUrl', 'derivedUrl', 'durationMs', 'sampleRate', 'channels'],
+  required: [
+    'workspaceId',
+    'name',
+    'format',
+    'sourceUrl',
+    'derivedUrl',
+    'durationMs',
+    'sampleRate',
+    'channels',
+  ],
   additionalProperties: false,
   properties: {
     workspaceId: { type: 'string', minLength: 1 },
@@ -357,7 +369,17 @@ const videoCaptionTrackSchema = {
 
 const createVideoAssetSchema = {
   type: 'object',
-  required: ['workspaceId', 'name', 'format', 'sourceUrl', 'derivedUrl', 'durationMs', 'width', 'height', 'fps'],
+  required: [
+    'workspaceId',
+    'name',
+    'format',
+    'sourceUrl',
+    'derivedUrl',
+    'durationMs',
+    'width',
+    'height',
+    'fps',
+  ],
   additionalProperties: false,
   properties: {
     workspaceId: { type: 'string', minLength: 1 },
@@ -411,7 +433,18 @@ const lottieLayerSchema = {
 
 const createLottieAssetSchema = {
   type: 'object',
-  required: ['workspaceId', 'name', 'format', 'sourceUrl', 'derivedUrl', 'durationMs', 'fps', 'width', 'height', 'layerCount'],
+  required: [
+    'workspaceId',
+    'name',
+    'format',
+    'sourceUrl',
+    'derivedUrl',
+    'durationMs',
+    'fps',
+    'width',
+    'height',
+    'layerCount',
+  ],
   additionalProperties: false,
   properties: {
     workspaceId: { type: 'string', minLength: 1 },
@@ -476,8 +509,13 @@ const compiledPatchLottieAsset = ajv.compile(patchLottieAssetSchema);
 function runValidation(validate: (data: unknown) => boolean, body: unknown): ValidationResult {
   const valid = validate(body);
   if (valid) return { valid: true, errors: [] };
-  const errs = (validate as unknown as { errors?: Array<{ instancePath?: string; message?: string; keyword?: string }> }).errors ?? [];
-  const errors: ValidationError[] = errs.map(e => ({
+  const errs =
+    (
+      validate as unknown as {
+        errors?: Array<{ instancePath?: string; message?: string; keyword?: string }>;
+      }
+    ).errors ?? [];
+  const errors: ValidationError[] = errs.map((e) => ({
     path: e.instancePath || '/',
     message: e.message ?? 'unknown error',
     code: e.keyword ?? 'UNKNOWN',

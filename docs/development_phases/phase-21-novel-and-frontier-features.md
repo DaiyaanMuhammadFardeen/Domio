@@ -24,35 +24,35 @@
 
 ### 2.1 In scope (features)
 
-| Feature | Title | Squad | Primary services / packages |
-|---:|---|---|---|
-| #205 | Presentation state timeline (record & replay) | Timeline & Living | `services/timeline-svc/`, `packages/timeline-rs/`, `apps/presenter-app/src/recorder/` |
-| #206 | Living documents | Timeline & Living | `services/living-svc/`, `workers/living-refresh/`, `packages/living-log/` |
-| #207 | Gaze-guided highlighting | Sensor | `services/sensor-svc/`, `packages/gaze-wasm/`, `apps/presenter-app/src/sensor/` |
-| #208 | Gesture control | Sensor | `packages/handpose-wasm/`, `packages/gesture-fsm/`, `apps/presenter-app/src/sensor/` |
-| #209 | Voice-triggered slide states | Sensor | `packages/voice-asr-wasm/`, `packages/voice-trigger/`, `apps/presenter-app/src/sensor/` |
-| #210 | Ambient boardroom mode | Presenter | `apps/presenter-app/src/ambient/`, `services/ambient-composer/`, `apps/room-display-app/` |
-| #211 | Two-way slides | Knowledge & Provenance | `services/negotiation-svc/`, `packages/negotiation-widget/`, `apps/audience-app/src/two-way/` |
-| #212 | Deck inheritance trees | Knowledge & Provenance | `services/inheritance-svc/`, `packages/inheritance-graph/`, `apps/editor-canvas/src/inheritance/` |
-| #213 | Real-time co-presenting (synced audience) | Presenter | `services/broadcast-svc/`, `packages/audience-rs/`, `apps/audience-app/`, edge plan in `infra/edge/` |
-| #214 | AI meeting listener | Sensor | `services/listener-svc/` (sandboxed), `packages/listener-runtime/`, `packages/slide-embeddings/` |
-| #215 | Component provenance chips | Knowledge & Provenance | `services/provenance-svc/`, `packages/provenance-ui/`, `apps/editor-canvas/src/provenance/` |
-| #216 | Deck-to-podcast | Knowledge & Provenance | `services/podcast-svc/`, `packages/podcast-script/`, `workers/podcast-tts/`, `apps/editor-canvas/src/podcast/` |
-| #217 | Haptic remote feedback | Presenter | `apps/remote-app/src/haptics/`, `packages/haptic-patterns/` |
-| #218 | Kiosk mode | Presenter | `apps/kiosk-runtime/`, `services/kiosk-mgmt-svc/`, `infra/kiosk/` |
-| #219 | Cross-deck knowledge graph | Knowledge & Provenance | `services/knowledge-graph-svc/`, `workers/kg-extract/`, `packages/kg-client/`, Memgraph cluster in `infra/kg/` |
+| Feature | Title                                         | Squad                  | Primary services / packages                                                                                    |
+| ------: | --------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+|    #205 | Presentation state timeline (record & replay) | Timeline & Living      | `services/timeline-svc/`, `packages/timeline-rs/`, `apps/presenter-app/src/recorder/`                          |
+|    #206 | Living documents                              | Timeline & Living      | `services/living-svc/`, `workers/living-refresh/`, `packages/living-log/`                                      |
+|    #207 | Gaze-guided highlighting                      | Sensor                 | `services/sensor-svc/`, `packages/gaze-wasm/`, `apps/presenter-app/src/sensor/`                                |
+|    #208 | Gesture control                               | Sensor                 | `packages/handpose-wasm/`, `packages/gesture-fsm/`, `apps/presenter-app/src/sensor/`                           |
+|    #209 | Voice-triggered slide states                  | Sensor                 | `packages/voice-asr-wasm/`, `packages/voice-trigger/`, `apps/presenter-app/src/sensor/`                        |
+|    #210 | Ambient boardroom mode                        | Presenter              | `apps/presenter-app/src/ambient/`, `services/ambient-composer/`, `apps/room-display-app/`                      |
+|    #211 | Two-way slides                                | Knowledge & Provenance | `services/negotiation-svc/`, `packages/negotiation-widget/`, `apps/audience-app/src/two-way/`                  |
+|    #212 | Deck inheritance trees                        | Knowledge & Provenance | `services/inheritance-svc/`, `packages/inheritance-graph/`, `apps/editor-canvas/src/inheritance/`              |
+|    #213 | Real-time co-presenting (synced audience)     | Presenter              | `services/broadcast-svc/`, `packages/audience-rs/`, `apps/audience-app/`, edge plan in `infra/edge/`           |
+|    #214 | AI meeting listener                           | Sensor                 | `services/listener-svc/` (sandboxed), `packages/listener-runtime/`, `packages/slide-embeddings/`               |
+|    #215 | Component provenance chips                    | Knowledge & Provenance | `services/provenance-svc/`, `packages/provenance-ui/`, `apps/editor-canvas/src/provenance/`                    |
+|    #216 | Deck-to-podcast                               | Knowledge & Provenance | `services/podcast-svc/`, `packages/podcast-script/`, `workers/podcast-tts/`, `apps/editor-canvas/src/podcast/` |
+|    #217 | Haptic remote feedback                        | Presenter              | `apps/remote-app/src/haptics/`, `packages/haptic-patterns/`                                                    |
+|    #218 | Kiosk mode                                    | Presenter              | `apps/kiosk-runtime/`, `services/kiosk-mgmt-svc/`, `infra/kiosk/`                                              |
+|    #219 | Cross-deck knowledge graph                    | Knowledge & Provenance | `services/knowledge-graph-svc/`, `workers/kg-extract/`, `packages/kg-client/`, Memgraph cluster in `infra/kg/` |
 
 ### 2.2 Out of scope (explicit)
 
 - **Anything not in #205–#219.** This phase is bounded by feature-list.md §15; no creep into §1–§14 or §16 (agentic).
-- **Editor-side drawing tools** (#128 live annotations in presenter mode). P15 already shipped annotations; P21 only *records* annotations into the F205 timeline and *broadcasts* them via F213.
+- **Editor-side drawing tools** (#128 live annotations in presenter mode). P15 already shipped annotations; P21 only _records_ annotations into the F205 timeline and _broadcasts_ them via F213.
 - **AI features that were scoped to #108–#125.** P12 already shipped them; P21 only reuses the embedding pipeline (#219 extraction) and the orchestrator pattern (#214 listener). No new copilot features here.
 - **MCP tools for these features.** P13 ships the MCP server; P21 only consumes MCP-style inputs from agents where natural (e.g., `knowledge_graph_search` works through the existing P13 MCP surface). P21 does not add new MCP tools.
 - **New sharing/publishing surface.** P14 owns share controls; P21's replays (#205) inherit the existing share-link policy from P14 — no new share-link primitive.
 - **Analytics dashboards for frontier features.** F169–F178 from P17 already consume event streams; P21 emits events but does not build analyst dashboards. Replay-funnel analytics surfaces live in P22.
-- **Local-first SDK for novel features.** P13 owns the local-first SDK (#232). The kiosk runtime (#218) is local-only for the trade-show case but is a *product surface*, not the platform SDK.
+- **Local-first SDK for novel features.** P13 owns the local-first SDK (#232). The kiosk runtime (#218) is local-only for the trade-show case but is a _product surface_, not the platform SDK.
 - **Compliance certifications.** P20 owns the SOC 2 / GDPR / PDPA evidence locker. P21 emits the consent records and audit events P20 stores; P21 does not write the certification binder.
-- **New schema primitives.** P02 deck schema and the F48 data-binding shape are stable. P21 only *attaches* provenance records, lineage edges, and inheritance edges to existing structures.
+- **New schema primitives.** P02 deck schema and the F48 data-binding shape are stable. P21 only _attaches_ provenance records, lineage edges, and inheritance edges to existing structures.
 
 ### 2.3 Deliberate non-feature note
 
@@ -222,20 +222,20 @@ This section focuses on the **new** architecture introduced by P21; every existi
 
 ### 5.1 New services (all referenced from `/docs/04-system-architecture.md`)
 
-| Service | Language | Persistence | Topology | New in P21 |
-|---|---|---|---|---|
-| `services/timeline-svc` | Rust / axum | Postgres + Kafka | Multi-region via Kafka mirror-maker; append-only | yes |
-| `services/living-svc` | Go | Postgres (statement_timeout=5s) | Single primary + read replicas; `workers/living-compact` cron | yes |
-| `services/sensor-svc` (consent envelope) | Rust / axum | Postgres + append-only revocation log | Single region; jurisdictional routing in app | yes |
-| `services/listener-svc` | Rust / axum | None (sandboxed; in-memory only) | Sandboxed worker pool; dedicated network namespace | yes |
-| `services/negotiation-svc` | Rust / axum | Postgres + Redis Streams per negotiation | Coordinator per negotiation; stateless broker | yes |
-| `services/inheritance-svc` | Go | Postgres recursive CTEs (small orgs) **or** Memgraph (≥10k descendants) | Primary + read replica | yes |
-| `services/provenance-svc` | Go | Postgres | Primary + read replica; per-binding records | yes |
-| `services/podcast-svc` | Go | Postgres + object store (mp3) | Job queue via NATS JetStream | yes |
-| `services/knowledge-graph-svc` | Rust / axum | Memgraph primary + Postgres control plane mirror | Cluster with read replicas | yes |
-| `services/broadcast-svc` | Go + Pion (WebRTC SFU) | Stateless + Redis (room state) | Coordinator + N edge nodes (anycast) | yes |
-| `services/ambient-composer` | Go | Postgres | Single region; hooks calendar + data refresh | yes |
-| `services/kiosk-mgmt-svc` | Go | Postgres | Single region; per-kiosk heartbeat table | yes |
+| Service                                  | Language               | Persistence                                                             | Topology                                                      | New in P21 |
+| ---------------------------------------- | ---------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------- | ---------- |
+| `services/timeline-svc`                  | Rust / axum            | Postgres + Kafka                                                        | Multi-region via Kafka mirror-maker; append-only              | yes        |
+| `services/living-svc`                    | Go                     | Postgres (statement_timeout=5s)                                         | Single primary + read replicas; `workers/living-compact` cron | yes        |
+| `services/sensor-svc` (consent envelope) | Rust / axum            | Postgres + append-only revocation log                                   | Single region; jurisdictional routing in app                  | yes        |
+| `services/listener-svc`                  | Rust / axum            | None (sandboxed; in-memory only)                                        | Sandboxed worker pool; dedicated network namespace            | yes        |
+| `services/negotiation-svc`               | Rust / axum            | Postgres + Redis Streams per negotiation                                | Coordinator per negotiation; stateless broker                 | yes        |
+| `services/inheritance-svc`               | Go                     | Postgres recursive CTEs (small orgs) **or** Memgraph (≥10k descendants) | Primary + read replica                                        | yes        |
+| `services/provenance-svc`                | Go                     | Postgres                                                                | Primary + read replica; per-binding records                   | yes        |
+| `services/podcast-svc`                   | Go                     | Postgres + object store (mp3)                                           | Job queue via NATS JetStream                                  | yes        |
+| `services/knowledge-graph-svc`           | Rust / axum            | Memgraph primary + Postgres control plane mirror                        | Cluster with read replicas                                    | yes        |
+| `services/broadcast-svc`                 | Go + Pion (WebRTC SFU) | Stateless + Redis (room state)                                          | Coordinator + N edge nodes (anycast)                          | yes        |
+| `services/ambient-composer`              | Go                     | Postgres                                                                | Single region; hooks calendar + data refresh                  | yes        |
+| `services/kiosk-mgmt-svc`                | Go                     | Postgres                                                                | Single region; per-kiosk heartbeat table                      | yes        |
 
 ### 5.2 New tables / migrations (all reference `/docs/05-data-database-design.md`)
 
@@ -288,58 +288,58 @@ All contracts follow the versioning policy from `/docs/04-system-architecture.md
 
 ### 6.1 Master matrix
 
-| Feature | Test | Expected result | Owner | Master doc reference |
-|---|---|---|---|---|
-| #205 | Determinism harness — record a synthetic 30-min session, replay on two machines | Output bytes identical within ±1 px | TL | novel-frontier §3.1, §8.1 |
-| #205 | Recorder CPU/RAM benchmark on a 2-hour synthetic session (F141) | CPU <3% p95, RAM <50 MB | TL | §3.1 |
-| #205 | Replay startup time | First frame painted ≤1.5 s after opening URL | TL | §3.1 |
-| #205 | Replay URL gating | Replay of confidential deck is unopenable without P14 share-link permission | TL | §7 |
-| #206 | Living-deck refresh latency | Data update → all viewers see within 10 s p95 | TL | §3.2 |
-| #206 | Freeze-during-meeting | Frozen state shows banner; auto-unfreeze at session end | TL | §2.2 |
-| #206 | Subscription fan-out | Change event ≥ threshold fires webhook within 30 s | TL | §6 |
-| #207 | Consent refusal | Without `gaze_consent`, module is inert (no inference, no broadcast) | S | §7.1 |
-| #207 | Revocation latency | Toggling off stops inference <100 ms in benchmark | S | §3.3 |
-| #207 | Egress privacy | Packet capture during active gaze shows no raw frames, no raw coordinates; broadcast ≤500 B/s and 32×24 quantized | SEC | §7.2 |
-| #207 | Accuracy | ±50 px on 1920×1080 from 60 cm, 720p, 300 lux, ≥80% of trials in eval set | S | §3.3 |
-| #208 | End-to-end latency | Gesture onset → action fired <200 ms p95 | S | §3.4 |
-| #208 | False positive | ≤1 per 100 gestures at confidence 0.85 in normal lighting | S | §3.4 |
-| #208 | Per-gesture disable | Disabling "push left" stops firing; "push right" still works | S | §2.4 |
-| #209 | Confirmation guard | "show bear case" alone does not fire; repeated within 2 s OR "confirmed" OR Enter does fire | S | §2.5 |
-| #209 | ASR WER | <8% on labelled English office-noise set; <15% with moderate accent | S | §3.5 |
-| #209 | Audio privacy | No audio recorded or persisted unless explicit opt-in; raw audio never on disk | SEC | §7.2 |
-| #210 | Ambient takeover | Tap → presenter view within 1 s | P | §2.6 |
-| #210 | Calendar trigger | Calendar event <15 min away triggers ambient automatically | P | §2.6 |
-| #210 | Privacy policy | Confidential decks never auto-ambient on org-policy blocklist | P + SEC | §2.6 |
-| #211 | Convergence latency | Input → all parties see within 500 ms p95 across 3 continents | KP | §3.7 |
-| #211 | Recording fidelity | Recorded path captures full proposal sequence with no lossy compression | KP | §2.7 |
-| #211 | Observer role | Observers see state; their inputs not counted toward convergence | KP | §2.7 |
-| #212 | Tree traversal | 10k-deck forest traversed in ≤1 s (cached 60 s) | KP | §3.8 |
-| #212 | Push-to-1000 descendants | Completes within 5 min p95; per-descendant progress visible | KP | §3.8 |
-| #212 | Push held on conflict | Descendant with conflicting local changes is held; auto-merged when non-conflicting | KP | §2.8 |
-| #213 | Sync budget | 800 ms p95 / 400 ms p50 from presenter commit to all audience viewers (3-continent test rig) | P | §3.9 |
-| #213 | Scale | 10k concurrent audience members per session | P + DSN | §3.9 |
-| #213 | Network degradation | On simulated 200ms RTT + 5% loss, still applies within budget; on >600 ms RTT, snapshot-only mode | P | §8.6 |
-| #214 | Consent posture | Listener refuses activation without explicit, separate consent distinct from F209 | S | §7.1 |
-| #214 | Detection latency | Question detected → slide surfaced <1.5 s p95 | S | §3.10 |
-| #214 | Quiet surface | Only presenter private view; never audience view | S | §2.10 |
-| #214 | Dismissal logging | Presenter dismiss → negative training signal; no PII exfiltration | S + SEC | §2.10 |
-| #215 | Chip render | Hovering any bound or AI-generated stat shows chip within 100 ms | KP | §2.11 |
-| #215 | Permissioned query | User without source access sees redacted fallback (no query leakage) | KP + SEC | §7.3 |
-| #215 | Lineage query | Full lineage traversal <500 ms p95 | KP | §3.11 |
-| #216 | Generation | 30-slide deck podcast ready in ≤6 min; ≤$2 TTS cost | KP | §3.12 |
-| #216 | Script edit-and-rerender | Editing one segment re-renders only that segment | KP | §2.12 |
-| #216 | Voice MOS | ≥4.0 on labelled eval set | KP | §3.12 |
-| #217 | Haptic fire latency | Cue event → vibration motor <50 ms | P | §3.13 |
-| #217 | Active presenter only | In multi-presenter session, only active presenter's phone vibrates | P | §2.13 |
-| #218 | Reset reliability | 99.99% reset on scheduled / idle / hard-timeout triggers (1-week soak test) | P + DSN | §3.14 |
-| #218 | Watchdog | Kiosk unreactive >5 s → force reload; reload logged with reason | P | §3.14 |
-| #218 | Offline operation | Cached deck serves loop ≥7 days without network | P | §8 |
-| #219 | Extraction precision/recall | ≥90% precision / ≥85% recall on labelled eval set for standard entity types | KP | §3.15 |
-| #219 | Query latency | Entity lookup <1 s p95; all-citations <3 s p95 | KP | §3.15 |
-| #219 | PII redaction | Person entity query returns initials for non-PII users; full name requires PII access; audit logged | KP + SEC | §7.5 |
-| ALL | Privacy E2E | "What leaves this device?" packet-capture test passes for F207, F208, F209, F214 | SEC | §7 |
-| ALL | Accessibility | WCAG 2.2 AA spot-check on chips, ambient, kiosk, haptics settings, podcast UI | QA | `/docs/09-testing-strategy.md` §9 |
-| ALL | Compliance binder | PDPA / GDPR consent text rendering + revocation lifecycle validated; edge node location audit | COMPL | `/docs/11-legal-compliance-bangladesh.md` §11.7 |
+| Feature | Test                                                                            | Expected result                                                                                                   | Owner    | Master doc reference                            |
+| ------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------- |
+| #205    | Determinism harness — record a synthetic 30-min session, replay on two machines | Output bytes identical within ±1 px                                                                               | TL       | novel-frontier §3.1, §8.1                       |
+| #205    | Recorder CPU/RAM benchmark on a 2-hour synthetic session (F141)                 | CPU <3% p95, RAM <50 MB                                                                                           | TL       | §3.1                                            |
+| #205    | Replay startup time                                                             | First frame painted ≤1.5 s after opening URL                                                                      | TL       | §3.1                                            |
+| #205    | Replay URL gating                                                               | Replay of confidential deck is unopenable without P14 share-link permission                                       | TL       | §7                                              |
+| #206    | Living-deck refresh latency                                                     | Data update → all viewers see within 10 s p95                                                                     | TL       | §3.2                                            |
+| #206    | Freeze-during-meeting                                                           | Frozen state shows banner; auto-unfreeze at session end                                                           | TL       | §2.2                                            |
+| #206    | Subscription fan-out                                                            | Change event ≥ threshold fires webhook within 30 s                                                                | TL       | §6                                              |
+| #207    | Consent refusal                                                                 | Without `gaze_consent`, module is inert (no inference, no broadcast)                                              | S        | §7.1                                            |
+| #207    | Revocation latency                                                              | Toggling off stops inference <100 ms in benchmark                                                                 | S        | §3.3                                            |
+| #207    | Egress privacy                                                                  | Packet capture during active gaze shows no raw frames, no raw coordinates; broadcast ≤500 B/s and 32×24 quantized | SEC      | §7.2                                            |
+| #207    | Accuracy                                                                        | ±50 px on 1920×1080 from 60 cm, 720p, 300 lux, ≥80% of trials in eval set                                         | S        | §3.3                                            |
+| #208    | End-to-end latency                                                              | Gesture onset → action fired <200 ms p95                                                                          | S        | §3.4                                            |
+| #208    | False positive                                                                  | ≤1 per 100 gestures at confidence 0.85 in normal lighting                                                         | S        | §3.4                                            |
+| #208    | Per-gesture disable                                                             | Disabling "push left" stops firing; "push right" still works                                                      | S        | §2.4                                            |
+| #209    | Confirmation guard                                                              | "show bear case" alone does not fire; repeated within 2 s OR "confirmed" OR Enter does fire                       | S        | §2.5                                            |
+| #209    | ASR WER                                                                         | <8% on labelled English office-noise set; <15% with moderate accent                                               | S        | §3.5                                            |
+| #209    | Audio privacy                                                                   | No audio recorded or persisted unless explicit opt-in; raw audio never on disk                                    | SEC      | §7.2                                            |
+| #210    | Ambient takeover                                                                | Tap → presenter view within 1 s                                                                                   | P        | §2.6                                            |
+| #210    | Calendar trigger                                                                | Calendar event <15 min away triggers ambient automatically                                                        | P        | §2.6                                            |
+| #210    | Privacy policy                                                                  | Confidential decks never auto-ambient on org-policy blocklist                                                     | P + SEC  | §2.6                                            |
+| #211    | Convergence latency                                                             | Input → all parties see within 500 ms p95 across 3 continents                                                     | KP       | §3.7                                            |
+| #211    | Recording fidelity                                                              | Recorded path captures full proposal sequence with no lossy compression                                           | KP       | §2.7                                            |
+| #211    | Observer role                                                                   | Observers see state; their inputs not counted toward convergence                                                  | KP       | §2.7                                            |
+| #212    | Tree traversal                                                                  | 10k-deck forest traversed in ≤1 s (cached 60 s)                                                                   | KP       | §3.8                                            |
+| #212    | Push-to-1000 descendants                                                        | Completes within 5 min p95; per-descendant progress visible                                                       | KP       | §3.8                                            |
+| #212    | Push held on conflict                                                           | Descendant with conflicting local changes is held; auto-merged when non-conflicting                               | KP       | §2.8                                            |
+| #213    | Sync budget                                                                     | 800 ms p95 / 400 ms p50 from presenter commit to all audience viewers (3-continent test rig)                      | P        | §3.9                                            |
+| #213    | Scale                                                                           | 10k concurrent audience members per session                                                                       | P + DSN  | §3.9                                            |
+| #213    | Network degradation                                                             | On simulated 200ms RTT + 5% loss, still applies within budget; on >600 ms RTT, snapshot-only mode                 | P        | §8.6                                            |
+| #214    | Consent posture                                                                 | Listener refuses activation without explicit, separate consent distinct from F209                                 | S        | §7.1                                            |
+| #214    | Detection latency                                                               | Question detected → slide surfaced <1.5 s p95                                                                     | S        | §3.10                                           |
+| #214    | Quiet surface                                                                   | Only presenter private view; never audience view                                                                  | S        | §2.10                                           |
+| #214    | Dismissal logging                                                               | Presenter dismiss → negative training signal; no PII exfiltration                                                 | S + SEC  | §2.10                                           |
+| #215    | Chip render                                                                     | Hovering any bound or AI-generated stat shows chip within 100 ms                                                  | KP       | §2.11                                           |
+| #215    | Permissioned query                                                              | User without source access sees redacted fallback (no query leakage)                                              | KP + SEC | §7.3                                            |
+| #215    | Lineage query                                                                   | Full lineage traversal <500 ms p95                                                                                | KP       | §3.11                                           |
+| #216    | Generation                                                                      | 30-slide deck podcast ready in ≤6 min; ≤$2 TTS cost                                                               | KP       | §3.12                                           |
+| #216    | Script edit-and-rerender                                                        | Editing one segment re-renders only that segment                                                                  | KP       | §2.12                                           |
+| #216    | Voice MOS                                                                       | ≥4.0 on labelled eval set                                                                                         | KP       | §3.12                                           |
+| #217    | Haptic fire latency                                                             | Cue event → vibration motor <50 ms                                                                                | P        | §3.13                                           |
+| #217    | Active presenter only                                                           | In multi-presenter session, only active presenter's phone vibrates                                                | P        | §2.13                                           |
+| #218    | Reset reliability                                                               | 99.99% reset on scheduled / idle / hard-timeout triggers (1-week soak test)                                       | P + DSN  | §3.14                                           |
+| #218    | Watchdog                                                                        | Kiosk unreactive >5 s → force reload; reload logged with reason                                                   | P        | §3.14                                           |
+| #218    | Offline operation                                                               | Cached deck serves loop ≥7 days without network                                                                   | P        | §8                                              |
+| #219    | Extraction precision/recall                                                     | ≥90% precision / ≥85% recall on labelled eval set for standard entity types                                       | KP       | §3.15                                           |
+| #219    | Query latency                                                                   | Entity lookup <1 s p95; all-citations <3 s p95                                                                    | KP       | §3.15                                           |
+| #219    | PII redaction                                                                   | Person entity query returns initials for non-PII users; full name requires PII access; audit logged               | KP + SEC | §7.5                                            |
+| ALL     | Privacy E2E                                                                     | "What leaves this device?" packet-capture test passes for F207, F208, F209, F214                                  | SEC      | §7                                              |
+| ALL     | Accessibility                                                                   | WCAG 2.2 AA spot-check on chips, ambient, kiosk, haptics settings, podcast UI                                     | QA       | `/docs/09-testing-strategy.md` §9               |
+| ALL     | Compliance binder                                                               | PDPA / GDPR consent text rendering + revocation lifecycle validated; edge node location audit                     | COMPL    | `/docs/11-legal-compliance-bangladesh.md` §11.7 |
 
 ### 6.2 Soak / load gates (run in P22, but seeded here)
 
@@ -352,20 +352,20 @@ All contracts follow the versioning policy from `/docs/04-system-architecture.md
 
 ## 7. Risks & open decisions
 
-1. **R1 — Biometric features and PDPA.** Gaze / gesture / voice / listener are sensitive under PDPA 2026 and GDPR. Even with on-device default and prominent consent, jurisdictions may push back. *Mitigation:* jurisdictional routing; jurisdiction-default "no cloud path" toggle baked into the UI; legal review of consent text before any design-partner rollout; documented audit trail as evidence for the SOC 2 / ISO binder.
-2. **R2 — Replay determinism under browser upgrades.** Replay determinism assumes the canvas, font rendering, and animation engine are stable across the player's browser. A web platform change can break determinism. *Mitigation:* replay determinism harness in CI on every release; designated replay-engine browser version; alert on determinism-regression flakes.
-3. **R3 — Real-time broadcaster at 10k+ audience.** WebRTC SFU at 10k participants per session is at the edge of what a single coordinator can do. *Mitigation:* edge fanout + per-room partitioning; bandwidth-adaptive degradation to snapshot-only mode already specified; explicit scaling test before design-partner expansion.
-4. **R4 — Knowledge-graph extraction quality.** LLM-based extraction will hallucinate. *Mitigation:* confidence-score gating keeps low-confidence entities out of user queries; weekly full re-extraction refreshes; labelled eval set with precision/recall tracking; alert on precision regression >5% WoW.
-5. **R5 — Two-way negotiation CRDT complexity.** Diamond merges across multi-party negotiations could conflict with snapshot replay (F205). *Mitigation:* CRDT invariants tested under property-based tests; negotiation path recorded as discrete events into F205; explicit `actor_id` separation.
-6. **R6 — Kiosk device fleet management.** Trade-show devices are stolen, broken, or network-isolated. *Mitigation:* remote revocation by serial number; heartbeat detection with 2-min admin alert; offline cache with `cached_for` field shown to viewers.
-7. **R7 — Podcast TTS cost.** A 100-slide deck could cost $5+ in TTS compute and take >20 min to generate. *Mitigation:* explicit per-tenant generation budget; chunked generation for very large decks with section intros; pre-render preview TTS (lower quality) so authors iterate cheaply.
-8. **R8 — Provenance permissions.** Permissioned query display requires the source-system permission check on every chip render, which can fan out to N systems on a single page. *Mitigation:* batched permission resolver; per-deck permission cache with 60 s TTL; explicit PII redaction at query time, not at storage.
-9. **R9 — Haptic reliability on iOS Safari.** Web Vibration API support varies; the F127 remote app may need fallback. *Mitigation:* platform-specific pattern library with audio fallback if vibration unsupported.
-10. **R10 — Inheritance push to 100k+ descendants.** Beyond 1000 descendants, push becomes a serious background job. *Mitigation:* incremental push with progress; per-descendant failure reporting; tenant-level soft quota.
-11. **R11 — Cross-cutting: consent UX consistency.** Four biometric features × multiple consent scopes (transient vs. recorded) is a UX risk. *Mitigation:* one consent component (`packages/consent-prompt/` in the Sensor pod) renders every feature; UX writer in all three pods; copy review by DPO and Bangladeshi counsel.
-12. **R12 — Edge node location and PDPA.** F213 edge nodes may sit outside `bd-dhaka` for non-residency-pinned tenants; PDPA rules restrict data flow. *Mitigation:* residency awareness in `infra/edge/coordinator/zone-routing.tf`; no biometric data ever leaves the device regardless of edge choice.
-13. **R13 — Open decision: depth of MCP surface for knowledge graph.** Do we expose `kg_search` and `kg_get_citations`, or also a `kg_export_deck_lineage`? *Decision owner:* Stream D + KP pod lead. *Default:* ship the two read endpoints first; defer `kg_export_deck_lineage` to P22 if needed.
-14. **R14 — Open decision: voice trigger language coverage.** Whisper-tiny supports a limited language set. *Decision owner:* S pod lead with DPO. *Default:* English-only for F209 in v1; multilingual expansion in P22.
+1. **R1 — Biometric features and PDPA.** Gaze / gesture / voice / listener are sensitive under PDPA 2026 and GDPR. Even with on-device default and prominent consent, jurisdictions may push back. _Mitigation:_ jurisdictional routing; jurisdiction-default "no cloud path" toggle baked into the UI; legal review of consent text before any design-partner rollout; documented audit trail as evidence for the SOC 2 / ISO binder.
+2. **R2 — Replay determinism under browser upgrades.** Replay determinism assumes the canvas, font rendering, and animation engine are stable across the player's browser. A web platform change can break determinism. _Mitigation:_ replay determinism harness in CI on every release; designated replay-engine browser version; alert on determinism-regression flakes.
+3. **R3 — Real-time broadcaster at 10k+ audience.** WebRTC SFU at 10k participants per session is at the edge of what a single coordinator can do. _Mitigation:_ edge fanout + per-room partitioning; bandwidth-adaptive degradation to snapshot-only mode already specified; explicit scaling test before design-partner expansion.
+4. **R4 — Knowledge-graph extraction quality.** LLM-based extraction will hallucinate. _Mitigation:_ confidence-score gating keeps low-confidence entities out of user queries; weekly full re-extraction refreshes; labelled eval set with precision/recall tracking; alert on precision regression >5% WoW.
+5. **R5 — Two-way negotiation CRDT complexity.** Diamond merges across multi-party negotiations could conflict with snapshot replay (F205). _Mitigation:_ CRDT invariants tested under property-based tests; negotiation path recorded as discrete events into F205; explicit `actor_id` separation.
+6. **R6 — Kiosk device fleet management.** Trade-show devices are stolen, broken, or network-isolated. _Mitigation:_ remote revocation by serial number; heartbeat detection with 2-min admin alert; offline cache with `cached_for` field shown to viewers.
+7. **R7 — Podcast TTS cost.** A 100-slide deck could cost $5+ in TTS compute and take >20 min to generate. _Mitigation:_ explicit per-tenant generation budget; chunked generation for very large decks with section intros; pre-render preview TTS (lower quality) so authors iterate cheaply.
+8. **R8 — Provenance permissions.** Permissioned query display requires the source-system permission check on every chip render, which can fan out to N systems on a single page. _Mitigation:_ batched permission resolver; per-deck permission cache with 60 s TTL; explicit PII redaction at query time, not at storage.
+9. **R9 — Haptic reliability on iOS Safari.** Web Vibration API support varies; the F127 remote app may need fallback. _Mitigation:_ platform-specific pattern library with audio fallback if vibration unsupported.
+10. **R10 — Inheritance push to 100k+ descendants.** Beyond 1000 descendants, push becomes a serious background job. _Mitigation:_ incremental push with progress; per-descendant failure reporting; tenant-level soft quota.
+11. **R11 — Cross-cutting: consent UX consistency.** Four biometric features × multiple consent scopes (transient vs. recorded) is a UX risk. _Mitigation:_ one consent component (`packages/consent-prompt/` in the Sensor pod) renders every feature; UX writer in all three pods; copy review by DPO and Bangladeshi counsel.
+12. **R12 — Edge node location and PDPA.** F213 edge nodes may sit outside `bd-dhaka` for non-residency-pinned tenants; PDPA rules restrict data flow. _Mitigation:_ residency awareness in `infra/edge/coordinator/zone-routing.tf`; no biometric data ever leaves the device regardless of edge choice.
+13. **R13 — Open decision: depth of MCP surface for knowledge graph.** Do we expose `kg_search` and `kg_get_citations`, or also a `kg_export_deck_lineage`? _Decision owner:_ Stream D + KP pod lead. _Default:_ ship the two read endpoints first; defer `kg_export_deck_lineage` to P22 if needed.
+14. **R14 — Open decision: voice trigger language coverage.** Whisper-tiny supports a limited language set. _Decision owner:_ S pod lead with DPO. _Default:_ English-only for F209 in v1; multilingual expansion in P22.
 
 ---
 
@@ -460,7 +460,7 @@ All contracts follow the versioning policy from `/docs/04-system-architecture.md
 
 ## 9. Definition of Done
 
-P21 is **done** when *every* box below is checked. The list is the gate for the P22 GA work to start on a frontier-feature-complete base.
+P21 is **done** when _every_ box below is checked. The list is the gate for the P22 GA work to start on a frontier-feature-complete base.
 
 - [ ] **All 15 features (#205–#219) ship behind their own feature flag** (default off unless tenant is opted in).
 - [ ] **Code merged.** Every WS-F1..WS-F4 task has a merged PR with the listed files / packages / contracts / tests committed.

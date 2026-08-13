@@ -23,18 +23,18 @@ All contributors are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md
 
 [Conventional Commits](https://www.conventionalcommits.org/). Required types:
 
-| Type | When to use |
-|---|---|
-| `feat` | New user-visible feature. |
-| `fix` | Bug fix. |
-| `docs` | Documentation only. |
+| Type       | When to use                                              |
+| ---------- | -------------------------------------------------------- |
+| `feat`     | New user-visible feature.                                |
+| `fix`      | Bug fix.                                                 |
+| `docs`     | Documentation only.                                      |
 | `refactor` | Code change that neither fixes a bug nor adds a feature. |
-| `perf` | Performance improvement. |
-| `test` | Adding or refining tests. |
-| `build` | Build system / dependency changes. |
-| `ci` | CI configuration. |
-| `chore` | Other changes that don't modify src or test files. |
-| `revert` | Revert a previous commit. |
+| `perf`     | Performance improvement.                                 |
+| `test`     | Adding or refining tests.                                |
+| `build`    | Build system / dependency changes.                       |
+| `ci`       | CI configuration.                                        |
+| `chore`    | Other changes that don't modify src or test files.       |
+| `revert`   | Revert a previous commit.                                |
 
 Format: `<type>(<scope>): <subject>`. Scope is the package or service name (e.g., `feat(editor): add pen-tool Bezier handles`). Subject is imperative, ≤ 72 chars, no period.
 

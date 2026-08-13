@@ -67,7 +67,7 @@ permissions:
 
 concurrency:
   group: deploy-${{ github.ref }}-${{ inputs.environment }}
-  cancel-in-progress: false  # never cancel a deploy mid-rollout
+  cancel-in-progress: false # never cancel a deploy mid-rollout
 
 jobs:
   build-apps:

@@ -19,10 +19,10 @@ paths:
       operationId: listQuizzes
       summary: List quizzes for a deck
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Quizzes.
           content:
             application/json:
@@ -32,156 +32,156 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/Quiz" }
+                    items: { $ref: '#/components/schemas/Quiz' }
     post:
       tags: [quizzes]
       operationId: createQuiz
       summary: Create a quiz
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreateQuizRequest" }
+            schema: { $ref: '#/components/schemas/CreateQuizRequest' }
       responses:
-        "201":
+        '201':
           description: Quiz created.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Quiz" }
-        "422": { description: Validation error. }
+              schema: { $ref: '#/components/schemas/Quiz' }
+        '422': { description: Validation error. }
   /v1/quizzes/{id}:
     get:
       tags: [quizzes]
       operationId: getQuiz
       summary: Get a quiz
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Quiz details.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Quiz" }
-        "404": { description: Quiz not found. }
+              schema: { $ref: '#/components/schemas/Quiz' }
+        '404': { description: Quiz not found. }
     patch:
       tags: [quizzes]
       operationId: patchQuiz
       summary: Update a quiz
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PatchQuizRequest" }
+            schema: { $ref: '#/components/schemas/PatchQuizRequest' }
       responses:
-        "200":
+        '200':
           description: Quiz updated.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Quiz" }
-        "404": { description: Quiz not found. }
-        "409": { description: Version conflict. }
+              schema: { $ref: '#/components/schemas/Quiz' }
+        '404': { description: Quiz not found. }
+        '409': { description: Version conflict. }
     delete:
       tags: [quizzes]
       operationId: deleteQuiz
       summary: Delete a quiz
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "204": { description: Quiz deleted. }
-        "404": { description: Quiz not found. }
+        '204': { description: Quiz deleted. }
+        '404': { description: Quiz not found. }
   /v1/decks/{deck_id}/quizzes/{quiz_id}/attempts:
     post:
       tags: [attempts]
       operationId: startAttempt
       summary: Start a viewer attempt at a quiz
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/QuizId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/QuizId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/StartAttemptRequest" }
+            schema: { $ref: '#/components/schemas/StartAttemptRequest' }
       responses:
-        "201":
+        '201':
           description: Attempt created.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/QuizAttempt" }
-        "400": { description: Missing viewerId. }
+              schema: { $ref: '#/components/schemas/QuizAttempt' }
+        '400': { description: Missing viewerId. }
   /v1/quiz-attempts/{attempt_id}/answers:
     post:
       tags: [attempts]
       operationId: submitAnswer
       summary: Submit an answer for one question of an attempt
       parameters:
-        - $ref: "#/components/parameters/AttemptId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/AttemptId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/QuizAnswer" }
+            schema: { $ref: '#/components/schemas/QuizAnswer' }
       responses:
-        "200":
+        '200':
           description: Answer recorded.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/QuizAnswer" }
-        "400": { description: Validation error. }
-        "404": { description: Attempt not found. }
+              schema: { $ref: '#/components/schemas/QuizAnswer' }
+        '400': { description: Validation error. }
+        '404': { description: Attempt not found. }
   /v1/quiz-attempts/{attempt_id}/complete:
     post:
       tags: [attempts]
       operationId: completeAttempt
       summary: Finalize an attempt and produce a result
       parameters:
-        - $ref: "#/components/parameters/AttemptId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/AttemptId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Result.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/QuizResult" }
-        "404": { description: Attempt not found. }
+              schema: { $ref: '#/components/schemas/QuizResult' }
+        '404': { description: Attempt not found. }
   /v1/quiz-attempts/{attempt_id}:
     get:
       tags: [attempts]
       operationId: getAttemptResult
       summary: Get the result of a completed attempt
       parameters:
-        - $ref: "#/components/parameters/AttemptId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/AttemptId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Result.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/QuizResult" }
-        "404": { description: Result not found. }
+              schema: { $ref: '#/components/schemas/QuizResult' }
+        '404': { description: Result not found. }
   /v1/llm-review-queue:
     get:
       tags: [llm-review]
       operationId: listLlmReviewQueue
       summary: List LLM review queue items
       parameters:
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/TenantId'
         - in: query
           name: status
           required: false
           schema: { enum: [pending, approved, rejected, overridden] }
       responses:
-        "200":
+        '200':
           description: Queue items.
           content:
             application/json:
@@ -191,27 +191,27 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/LlmReviewQueueItem" }
+                    items: { $ref: '#/components/schemas/LlmReviewQueueItem' }
   /v1/llm-review-queue/{id}:
     patch:
       tags: [llm-review]
       operationId: updateLlmReviewItem
       summary: Update a review queue item (override / approve / reject)
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PatchLlmReviewRequest" }
+            schema: { $ref: '#/components/schemas/PatchLlmReviewRequest' }
       responses:
-        "200":
+        '200':
           description: Item updated.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/LlmReviewQueueItem" }
-        "404": { description: Item not found. }
+              schema: { $ref: '#/components/schemas/LlmReviewQueueItem' }
+        '404': { description: Item not found. }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer }
@@ -254,7 +254,7 @@ components:
         questions:
           type: array
           items: { type: object }
-        passThreshold: { type: [number, "null"] }
+        passThreshold: { type: [number, 'null'] }
         version: { type: integer }
         createdAt: { type: integer }
         updatedAt: { type: integer }
@@ -283,7 +283,21 @@ components:
     QuizAttempt:
       type: object
       additionalProperties: false
-      required: [id, tenantId, deckId, quizId, seed, viewerId, startedAt, completedAt, status, currentQuestionId, score, passed]
+      required:
+        [
+          id,
+          tenantId,
+          deckId,
+          quizId,
+          seed,
+          viewerId,
+          startedAt,
+          completedAt,
+          status,
+          currentQuestionId,
+          score,
+          passed,
+        ]
       properties:
         id: { type: string }
         tenantId: { type: string }
@@ -292,11 +306,11 @@ components:
         seed: { type: string }
         viewerId: { type: string }
         startedAt: { type: integer }
-        completedAt: { type: ["integer", "null"] }
+        completedAt: { type: ['integer', 'null'] }
         status: { enum: [in_progress, completed, abandoned] }
-        currentQuestionId: { type: ["string", "null"] }
+        currentQuestionId: { type: ['string', 'null'] }
         score: { type: number }
-        passed: { type: ["boolean", "null"] }
+        passed: { type: ['boolean', 'null'] }
     StartAttemptRequest:
       type: object
       additionalProperties: false
@@ -307,7 +321,8 @@ components:
     QuizAnswer:
       type: object
       additionalProperties: false
-      required: [id, tenantId, attemptId, questionId, value, correct, score, needsHumanReview, submittedAt]
+      required:
+        [id, tenantId, attemptId, questionId, value, correct, score, needsHumanReview, submittedAt]
       properties:
         id: { type: string }
         tenantId: { type: string }
@@ -322,7 +337,19 @@ components:
     QuizResult:
       type: object
       additionalProperties: false
-      required: [id, tenantId, attemptId, quizId, totalScore, maxScore, percentage, passed, answers, completedAt]
+      required:
+        [
+          id,
+          tenantId,
+          attemptId,
+          quizId,
+          totalScore,
+          maxScore,
+          percentage,
+          passed,
+          answers,
+          completedAt,
+        ]
       properties:
         id: { type: string }
         tenantId: { type: string }
@@ -334,12 +361,28 @@ components:
         passed: { type: boolean }
         answers:
           type: array
-          items: { $ref: "#/components/schemas/QuizAnswer" }
+          items: { $ref: '#/components/schemas/QuizAnswer' }
         completedAt: { type: integer }
     LlmReviewQueueItem:
       type: object
       additionalProperties: false
-      required: [id, tenantId, deckId, quizId, attemptId, questionId, submittedAnswer, llmConfidence, llmReason, status, reviewerId, overrideScore, createdAt, updatedAt]
+      required:
+        [
+          id,
+          tenantId,
+          deckId,
+          quizId,
+          attemptId,
+          questionId,
+          submittedAnswer,
+          llmConfidence,
+          llmReason,
+          status,
+          reviewerId,
+          overrideScore,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id: { type: string }
         tenantId: { type: string }
@@ -351,8 +394,8 @@ components:
         llmConfidence: { type: number }
         llmReason: { type: string }
         status: { enum: [pending, approved, rejected, overridden] }
-        reviewerId: { type: ["string", "null"] }
-        overrideScore: { type: ["number", "null"] }
+        reviewerId: { type: ['string', 'null'] }
+        overrideScore: { type: ['number', 'null'] }
         createdAt: { type: integer }
         updatedAt: { type: integer }
     PatchLlmReviewRequest:
@@ -360,5 +403,5 @@ components:
       additionalProperties: false
       properties:
         status: { enum: [pending, approved, rejected, overridden] }
-        reviewerId: { type: ["string", "null"] }
-        overrideScore: { type: ["number", "null"] }
+        reviewerId: { type: ['string', 'null'] }
+        overrideScore: { type: ['number', 'null'] }

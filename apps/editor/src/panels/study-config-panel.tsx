@@ -164,11 +164,7 @@ export function StudyConfigPanel({ config, onChange }: StudyConfigPanelProps): R
             onChange={(e) => setDraftField(e.target.value)}
             placeholder="email"
           />
-          <button
-            type="button"
-            data-testid="m5-study-redaction-add"
-            onClick={handleAddField}
-          >
+          <button type="button" data-testid="m5-study-redaction-add" onClick={handleAddField}>
             Add
           </button>
         </div>
@@ -195,8 +191,8 @@ export function StudyConfigPanel({ config, onChange }: StudyConfigPanelProps): R
             data-testid="m5-study-anonymous-ips-toggle"
             checked={config.anonymousIps}
             onChange={(e) => handleAnonymousIps(e.target.checked)}
-          />
-          {' '}Anonymise IP addresses
+          />{' '}
+          Anonymise IP addresses
         </label>
       </div>
 

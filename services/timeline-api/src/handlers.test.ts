@@ -65,7 +65,12 @@ function makeCtx() {
   const svc = makeService();
   const metrics = new TimelineMetrics();
   const audit = new InMemoryTimelineAuditRecorder(() => 'unused');
-  return { svc, ctx: { service: svc, metrics, audit, resolveActorId: () => ACTOR } as const, metrics, audit };
+  return {
+    svc,
+    ctx: { service: svc, metrics, audit, resolveActorId: () => ACTOR } as const,
+    metrics,
+    audit,
+  };
 }
 
 // =========================================================================
@@ -76,11 +81,17 @@ describe('timeline handlers — CRUD', () => {
   it('POST /v1/decks/:deck_id/timelines creates a timeline', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createTimeline(
-      req('POST', '/v1/decks/:deck_id/timelines', { deck_id: DECK }, {
-        slideId: SLIDE,
-        elementId: ELEMENT,
-        durationMs: 1000,
-      }, { tenant_id: TENANT }),
+      req(
+        'POST',
+        '/v1/decks/:deck_id/timelines',
+        { deck_id: DECK },
+        {
+          slideId: SLIDE,
+          elementId: ELEMENT,
+          durationMs: 1000,
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -92,10 +103,16 @@ describe('timeline handlers — CRUD', () => {
   it('POST /v1/decks/:deck_id/timelines returns 400 on invalid body', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createTimeline(
-      req('POST', '/v1/decks/:deck_id/timelines', { deck_id: DECK }, {
-        // missing required fields
-        durationMs: -1,
-      }, { tenant_id: TENANT }),
+      req(
+        'POST',
+        '/v1/decks/:deck_id/timelines',
+        { deck_id: DECK },
+        {
+          // missing required fields
+          durationMs: -1,
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -109,11 +126,16 @@ describe('timeline handlers — CRUD', () => {
     const audit = new InMemoryTimelineAuditRecorder(() => 'unused');
     const ctxNoAuth = { service: svc, metrics, audit } as const;
     const res = await handlers.createTimeline(
-      req('POST', '/v1/decks/:deck_id/timelines', { deck_id: DECK }, {
-        slideId: SLIDE,
-        elementId: ELEMENT,
-        durationMs: 1000,
-      }),
+      req(
+        'POST',
+        '/v1/decks/:deck_id/timelines',
+        { deck_id: DECK },
+        {
+          slideId: SLIDE,
+          elementId: ELEMENT,
+          durationMs: 1000,
+        },
+      ),
       ctxNoAuth,
     );
     expect(res.status).toBe(401);
@@ -122,7 +144,11 @@ describe('timeline handlers — CRUD', () => {
   it('GET /v1/timelines/:id returns the timeline', async () => {
     const { ctx, svc } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
     });
     const res = await handlers.getTimeline(
       req('GET', '/v1/timelines/:id', { id: created.id }, undefined, { tenant_id: TENANT }),
@@ -145,13 +171,23 @@ describe('timeline handlers — CRUD', () => {
   it('PATCH /v1/timelines/:id updates with valid version', async () => {
     const { ctx, svc } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
     });
     const res = await handlers.patchTimeline(
-      req('PATCH', '/v1/timelines/:id', { id: created.id }, {
-        version: 1,
-        durationMs: 2000,
-      }, { tenant_id: TENANT }),
+      req(
+        'PATCH',
+        '/v1/timelines/:id',
+        { id: created.id },
+        {
+          version: 1,
+          durationMs: 2000,
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -163,16 +199,26 @@ describe('timeline handlers — CRUD', () => {
   it('PATCH /v1/timelines/:id returns 409 on stale version with etag', async () => {
     const { ctx, svc } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
     });
     // First patch succeeds
     await svc.patchTimeline(created.id, TENANT, { version: 1, durationMs: 1000 });
     // Second patch with stale version
     const res = await handlers.patchTimeline(
-      req('PATCH', '/v1/timelines/:id', { id: created.id }, {
-        version: 1,
-        durationMs: 3000,
-      }, { tenant_id: TENANT }),
+      req(
+        'PATCH',
+        '/v1/timelines/:id',
+        { id: created.id },
+        {
+          version: 1,
+          durationMs: 3000,
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     expect(res.status).toBe(409);
@@ -185,7 +231,11 @@ describe('timeline handlers — CRUD', () => {
   it('DELETE /v1/timelines/:id deletes the timeline', async () => {
     const { ctx, svc } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
     });
     const res = await handlers.deleteTimeline(
       req('DELETE', '/v1/timelines/:id', { id: created.id }, undefined, { tenant_id: TENANT }),
@@ -203,14 +253,27 @@ describe('timeline handlers — tracks, keyframes, triggers', () => {
   it('POST /v1/timelines/:id/tracks creates a track', async () => {
     const { ctx, svc } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
     });
     const res = await handlers.createTrack(
-      req('POST', '/v1/timelines/:id/tracks', { id: created.id }, {
-        property: 'opacity',
-        keyframes: [{ timeMs: 0, value: 0 }, { timeMs: 500, value: 1 }],
-        easing: 'linear',
-      }, { tenant_id: TENANT }),
+      req(
+        'POST',
+        '/v1/timelines/:id/tracks',
+        { id: created.id },
+        {
+          property: 'opacity',
+          keyframes: [
+            { timeMs: 0, value: 0 },
+            { timeMs: 500, value: 1 },
+          ],
+          easing: 'linear',
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -222,14 +285,24 @@ describe('timeline handlers — tracks, keyframes, triggers', () => {
   it('POST /v1/timelines/:id/tracks returns 400 on invalid body', async () => {
     const { ctx, svc } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
     });
     const res = await handlers.createTrack(
-      req('POST', '/v1/timelines/:id/tracks', { id: created.id }, {
-        // missing required 'easing'
-        property: 'opacity',
-        keyframes: [],
-      }, { tenant_id: TENANT }),
+      req(
+        'POST',
+        '/v1/timelines/:id/tracks',
+        { id: created.id },
+        {
+          // missing required 'easing'
+          property: 'opacity',
+          keyframes: [],
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -238,15 +311,24 @@ describe('timeline handlers — tracks, keyframes, triggers', () => {
   it('POST /v1/tracks/:id/keyframes creates a keyframe', async () => {
     const { ctx, svc } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
       tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 0 }], easing: 'linear' }],
     });
     const trackId = created.tracks[0]!.id;
     const res = await handlers.createKeyframe(
-      req('POST', '/v1/tracks/:id/keyframes', { id: trackId }, {
-        timeMs: 250,
-        value: 0.5,
-      }),
+      req(
+        'POST',
+        '/v1/tracks/:id/keyframes',
+        { id: trackId },
+        {
+          timeMs: 250,
+          value: 0.5,
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -258,10 +340,15 @@ describe('timeline handlers — tracks, keyframes, triggers', () => {
   it('POST /v1/tracks/:id/keyframes returns 404 for unknown track', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createKeyframe(
-      req('POST', '/v1/tracks/:id/keyframes', { id: 'nonexistent' }, {
-        timeMs: 0,
-        value: 0,
-      }),
+      req(
+        'POST',
+        '/v1/tracks/:id/keyframes',
+        { id: 'nonexistent' },
+        {
+          timeMs: 0,
+          value: 0,
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(404);
@@ -270,12 +357,22 @@ describe('timeline handlers — tracks, keyframes, triggers', () => {
   it('POST /v1/timelines/:id/triggers creates a trigger', async () => {
     const { ctx, svc } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
     });
     const res = await handlers.createTrigger(
-      req('POST', '/v1/timelines/:id/triggers', { id: created.id }, {
-        kind: 'on_click',
-      }, { tenant_id: TENANT }),
+      req(
+        'POST',
+        '/v1/timelines/:id/triggers',
+        { id: created.id },
+        {
+          kind: 'on_click',
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -292,11 +389,16 @@ describe('timeline handlers — easing curves', () => {
   it('POST /v1/workspaces/:workspace_id/easing-curves creates a curve', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createEasingCurve(
-      req('POST', '/v1/workspaces/:workspace_id/easing-curves', { workspace_id: WORKSPACE }, {
-        name: 'Ease In',
-        type: 'cubic_bezier',
-        params: { bezier: [0.42, 0, 1, 1] },
-      }),
+      req(
+        'POST',
+        '/v1/workspaces/:workspace_id/easing-curves',
+        { workspace_id: WORKSPACE },
+        {
+          name: 'Ease In',
+          type: 'cubic_bezier',
+          params: { bezier: [0.42, 0, 1, 1] },
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -308,11 +410,16 @@ describe('timeline handlers — easing curves', () => {
   it('POST /v1/workspaces/:workspace_id/easing-curves returns 422 for non-monotonic Bezier', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createEasingCurve(
-      req('POST', '/v1/workspaces/:workspace_id/easing-curves', { workspace_id: WORKSPACE }, {
-        name: 'Bad Curve',
-        type: 'cubic_bezier',
-        params: { bezier: [0.8, 0, 0.2, 1] }, // x1=0.8 > x2=0.2
-      }),
+      req(
+        'POST',
+        '/v1/workspaces/:workspace_id/easing-curves',
+        { workspace_id: WORKSPACE },
+        {
+          name: 'Bad Curve',
+          type: 'cubic_bezier',
+          params: { bezier: [0.8, 0, 0.2, 1] }, // x1=0.8 > x2=0.2
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(422);
@@ -323,11 +430,16 @@ describe('timeline handlers — easing curves', () => {
   it('POST /v1/workspaces/:workspace_id/easing-curves returns 422 for out-of-bounds spring params', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createEasingCurve(
-      req('POST', '/v1/workspaces/:workspace_id/easing-curves', { workspace_id: WORKSPACE }, {
-        name: 'Bad Spring',
-        type: 'spring',
-        params: { spring: { mass: 0.01, stiffness: 5, damping: 0.5 } }, // all out of bounds
-      }),
+      req(
+        'POST',
+        '/v1/workspaces/:workspace_id/easing-curves',
+        { workspace_id: WORKSPACE },
+        {
+          name: 'Bad Spring',
+          type: 'spring',
+          params: { spring: { mass: 0.01, stiffness: 5, damping: 0.5 } }, // all out of bounds
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(422);
@@ -343,7 +455,12 @@ describe('timeline handlers — easing curves', () => {
       params: {},
     });
     const res = await handlers.listEasingCurves(
-      req('GET', '/v1/workspaces/:workspace_id/easing-curves', { workspace_id: WORKSPACE }, undefined),
+      req(
+        'GET',
+        '/v1/workspaces/:workspace_id/easing-curves',
+        { workspace_id: WORKSPACE },
+        undefined,
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -359,9 +476,15 @@ describe('timeline handlers — easing curves', () => {
       params: { bezier: [0, 0, 0.58, 1] },
     });
     const res = await handlers.patchEasingCurve(
-      req('PATCH', '/v1/easing-curves/:id', { id: created.id }, {
-        name: 'Ease Out Updated',
-      }, { workspace_id: WORKSPACE }),
+      req(
+        'PATCH',
+        '/v1/easing-curves/:id',
+        { id: created.id },
+        {
+          name: 'Ease Out Updated',
+        },
+        { workspace_id: WORKSPACE },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -377,7 +500,9 @@ describe('timeline handlers — easing curves', () => {
       params: {},
     });
     const res = await handlers.deleteEasingCurve(
-      req('DELETE', '/v1/easing-curves/:id', { id: created.id }, undefined, { workspace_id: WORKSPACE }),
+      req('DELETE', '/v1/easing-curves/:id', { id: created.id }, undefined, {
+        workspace_id: WORKSPACE,
+      }),
       ctx,
     );
     expect(res.status).toBe(204);
@@ -386,7 +511,9 @@ describe('timeline handlers — easing curves', () => {
   it('GET /v1/easing-curves/:id returns 404 for unknown', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.getEasingCurve(
-      req('GET', '/v1/easing-curves/:id', { id: 'nonexistent' }, undefined, { workspace_id: WORKSPACE }),
+      req('GET', '/v1/easing-curves/:id', { id: 'nonexistent' }, undefined, {
+        workspace_id: WORKSPACE,
+      }),
       ctx,
     );
     expect(res.status).toBe(404);
@@ -401,15 +528,29 @@ describe('timeline handlers — animation presets', () => {
   it('POST /v1/workspaces/:workspace_id/animation-presets creates a preset', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createAnimationPreset(
-      req('POST', '/v1/workspaces/:workspace_id/animation-presets', { workspace_id: WORKSPACE }, {
-        name: 'Fade In',
-        category: 'entrance',
-        tags: ['opacity', 'fade'],
-        definition: {
-          durationMs: 500,
-          tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 0 }, { timeMs: 500, value: 1 }], easing: 'linear' }],
+      req(
+        'POST',
+        '/v1/workspaces/:workspace_id/animation-presets',
+        { workspace_id: WORKSPACE },
+        {
+          name: 'Fade In',
+          category: 'entrance',
+          tags: ['opacity', 'fade'],
+          definition: {
+            durationMs: 500,
+            tracks: [
+              {
+                property: 'opacity',
+                keyframes: [
+                  { timeMs: 0, value: 0 },
+                  { timeMs: 500, value: 1 },
+                ],
+                easing: 'linear',
+              },
+            ],
+          },
         },
-      }),
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -424,16 +565,28 @@ describe('timeline handlers — animation presets', () => {
       name: 'Fade In',
       category: 'entrance',
       tags: [],
-      definition: { durationMs: 500, tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 0 }], easing: 'linear' }] },
+      definition: {
+        durationMs: 500,
+        tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 0 }], easing: 'linear' }],
+      },
     });
     await svc.createAnimationPreset(WORKSPACE, {
       name: 'Fade Out',
       category: 'exit',
       tags: [],
-      definition: { durationMs: 500, tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 1 }], easing: 'linear' }] },
+      definition: {
+        durationMs: 500,
+        tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 1 }], easing: 'linear' }],
+      },
     });
     const res = await handlers.listAnimationPresets(
-      req('GET', '/v1/workspaces/:workspace_id/animation-presets', { workspace_id: WORKSPACE }, undefined, { category: 'entrance' }),
+      req(
+        'GET',
+        '/v1/workspaces/:workspace_id/animation-presets',
+        { workspace_id: WORKSPACE },
+        undefined,
+        { category: 'entrance' },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -448,16 +601,30 @@ describe('timeline handlers — animation presets', () => {
       name: 'Fade In',
       category: 'entrance',
       tags: ['opacity', 'fade'],
-      definition: { durationMs: 500, tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 0 }], easing: 'linear' }] },
+      definition: {
+        durationMs: 500,
+        tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 0 }], easing: 'linear' }],
+      },
     });
     await svc.createAnimationPreset(WORKSPACE, {
       name: 'Bounce',
       category: 'emphasis',
       tags: ['position'],
-      definition: { durationMs: 300, tracks: [{ property: 'translateY', keyframes: [{ timeMs: 0, value: 0 }], easing: 'linear' }] },
+      definition: {
+        durationMs: 300,
+        tracks: [
+          { property: 'translateY', keyframes: [{ timeMs: 0, value: 0 }], easing: 'linear' },
+        ],
+      },
     });
     const res = await handlers.listAnimationPresets(
-      req('GET', '/v1/workspaces/:workspace_id/animation-presets', { workspace_id: WORKSPACE }, undefined, { tag: 'fade' }),
+      req(
+        'GET',
+        '/v1/workspaces/:workspace_id/animation-presets',
+        { workspace_id: WORKSPACE },
+        undefined,
+        { tag: 'fade' },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -478,17 +645,19 @@ describe('timeline handlers — animation presets', () => {
         requiredProperties: ['rotate'],
       },
     });
-    const res = await svc.applyPreset({
-      presetId: preset.id,
-      workspaceId: WORKSPACE,
-      tenantId: TENANT,
-      deckId: DECK,
-      slideId: SLIDE,
-      elementId: ELEMENT,
-      elementProperties: ['opacity', 'scale'], // missing 'rotate'
-      slideIds: [SLIDE],
-      isLastSlide: false,
-    }).catch(e => e);
+    const res = await svc
+      .applyPreset({
+        presetId: preset.id,
+        workspaceId: WORKSPACE,
+        tenantId: TENANT,
+        deckId: DECK,
+        slideId: SLIDE,
+        elementId: ELEMENT,
+        elementProperties: ['opacity', 'scale'], // missing 'rotate'
+        slideIds: [SLIDE],
+        isLastSlide: false,
+      })
+      .catch((e) => e);
     expect(res.code).toBe('PRESET_MISSING_PROPERTY');
     expect(res.missingProperty).toBe('rotate');
   });
@@ -501,7 +670,16 @@ describe('timeline handlers — animation presets', () => {
       tags: [],
       definition: {
         durationMs: 400,
-        tracks: [{ property: 'opacity', keyframes: [{ timeMs: 0, value: 0 }, { timeMs: 400, value: 1 }], easing: 'linear' }],
+        tracks: [
+          {
+            property: 'opacity',
+            keyframes: [
+              { timeMs: 0, value: 0 },
+              { timeMs: 400, value: 1 },
+            ],
+            easing: 'linear',
+          },
+        ],
         triggers: [{ kind: 'on_enter' }],
       },
     });
@@ -529,11 +707,16 @@ describe('timeline handlers — transitions', () => {
   it('POST /v1/decks/:deck_id/transitions creates a transition', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createTransition(
-      req('POST', '/v1/decks/:deck_id/transitions', { deck_id: DECK }, {
-        fromSlideId: 's1',
-        toSlideId: 's2',
-        type: 'fade',
-      }),
+      req(
+        'POST',
+        '/v1/decks/:deck_id/transitions',
+        { deck_id: DECK },
+        {
+          fromSlideId: 's1',
+          toSlideId: 's2',
+          type: 'fade',
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -545,10 +728,15 @@ describe('timeline handlers — transitions', () => {
   it('POST /v1/decks/:deck_id/transitions returns 400 on invalid body', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createTransition(
-      req('POST', '/v1/decks/:deck_id/transitions', { deck_id: DECK }, {
-        fromSlideId: 's1',
-        // missing toSlideId and type
-      }),
+      req(
+        'POST',
+        '/v1/decks/:deck_id/transitions',
+        { deck_id: DECK },
+        {
+          fromSlideId: 's1',
+          // missing toSlideId and type
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -590,9 +778,14 @@ describe('timeline handlers — reduced motion', () => {
   it('PUT /v1/decks/:deck_id/reduced-motion updates mode', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.putReducedMotion(
-      req('PUT', '/v1/decks/:deck_id/reduced-motion', { deck_id: DECK }, {
-        mode: 'always_reduced',
-      }),
+      req(
+        'PUT',
+        '/v1/decks/:deck_id/reduced-motion',
+        { deck_id: DECK },
+        {
+          mode: 'always_reduced',
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -603,9 +796,14 @@ describe('timeline handlers — reduced motion', () => {
   it('PUT /v1/decks/:deck_id/reduced-motion returns 400 on invalid mode', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.putReducedMotion(
-      req('PUT', '/v1/decks/:deck_id/reduced-motion', { deck_id: DECK }, {
-        mode: 'invalid_mode',
-      }),
+      req(
+        'PUT',
+        '/v1/decks/:deck_id/reduced-motion',
+        { deck_id: DECK },
+        {
+          mode: 'invalid_mode',
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -620,11 +818,17 @@ describe('timeline handlers — metrics', () => {
   it('records creation metrics', async () => {
     const { ctx, metrics } = makeCtx();
     await handlers.createTimeline(
-      req('POST', '/v1/decks/:deck_id/timelines', { deck_id: DECK }, {
-        slideId: SLIDE,
-        elementId: ELEMENT,
-        durationMs: 1000,
-      }, { tenant_id: TENANT }),
+      req(
+        'POST',
+        '/v1/decks/:deck_id/timelines',
+        { deck_id: DECK },
+        {
+          slideId: SLIDE,
+          elementId: ELEMENT,
+          durationMs: 1000,
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     const snap = metrics.snapshot();
@@ -634,14 +838,24 @@ describe('timeline handlers — metrics', () => {
   it('records version conflict metrics', async () => {
     const { ctx, svc, metrics } = makeCtx();
     const created = await svc.createTimeline({
-      tenantId: TENANT, deckId: DECK, slideId: SLIDE, elementId: ELEMENT, durationMs: 500,
+      tenantId: TENANT,
+      deckId: DECK,
+      slideId: SLIDE,
+      elementId: ELEMENT,
+      durationMs: 500,
     });
     await svc.patchTimeline(created.id, TENANT, { version: 1, durationMs: 1000 });
     await handlers.patchTimeline(
-      req('PATCH', '/v1/timelines/:id', { id: created.id }, {
-        version: 1,
-        durationMs: 3000,
-      }, { tenant_id: TENANT }),
+      req(
+        'PATCH',
+        '/v1/timelines/:id',
+        { id: created.id },
+        {
+          version: 1,
+          durationMs: 3000,
+        },
+        { tenant_id: TENANT },
+      ),
       ctx,
     );
     const snap = metrics.snapshot();

@@ -44,23 +44,29 @@ export function renderScatter(
   const theme = opts.theme ?? 'light';
 
   // Axes
-  elements.push(svgLine(padL, padT, padL, padT + plotH, 'y_axis', {
-    stroke: theme === 'dark' ? '#475569' : '#cbd5e1',
-    strokeWidth: 1,
-  }));
-  elements.push(svgLine(padL, padT + plotH, padL + plotW, padT + plotH, 'x_axis', {
-    stroke: theme === 'dark' ? '#475569' : '#cbd5e1',
-    strokeWidth: 1,
-  }));
+  elements.push(
+    svgLine(padL, padT, padL, padT + plotH, 'y_axis', {
+      stroke: theme === 'dark' ? '#475569' : '#cbd5e1',
+      strokeWidth: 1,
+    }),
+  );
+  elements.push(
+    svgLine(padL, padT + plotH, padL + plotW, padT + plotH, 'x_axis', {
+      stroke: theme === 'dark' ? '#475569' : '#cbd5e1',
+      strokeWidth: 1,
+    }),
+  );
 
   // Points
   xVals.forEach((x, i) => {
     const px = padL + ((x - xMin) / (xMax - xMin || 1)) * plotW;
     const py = padT + plotH - ((yVals[i]! - yMin) / (yMax - yMin || 1)) * plotH;
-    elements.push(rect(px - 4, py - 4, 8, 8, `point_${i}`, {
-      fill: '#4F46E5',
-      rx: 4,
-    }));
+    elements.push(
+      rect(px - 4, py - 4, 8, 8, `point_${i}`, {
+        fill: '#4F46E5',
+        rx: 4,
+      }),
+    );
   });
 
   return elements;

@@ -20,10 +20,7 @@ import {
   ValidationError,
   FeatureDisabledError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-  StoreNotImplementedError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -78,7 +75,9 @@ function serviceUnavailable(message: string, code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -102,15 +101,18 @@ function mapError(e: unknown): HttpResponse {
 // ---------------------------------------------------------------------------
 
 export async function createTaskLinkHandler(
-  req: HttpRequest<Record<string, never>, {
-    workspace_id: string;
-    assignment_id: string;
-    vendor: TaskVendor;
-    external_task_id: string;
-    external_project_id: string;
-    field_map?: FieldMap;
-    sync_mode?: SyncMode;
-  }>,
+  req: HttpRequest<
+    Record<string, never>,
+    {
+      workspace_id: string;
+      assignment_id: string;
+      vendor: TaskVendor;
+      external_task_id: string;
+      external_project_id: string;
+      field_map?: FieldMap;
+      sync_mode?: SyncMode;
+    }
+  >,
   ctx: TaskManagerHandlerContext,
 ): Promise<HttpResponse> {
   try {
@@ -143,10 +145,13 @@ export async function listTaskLinksHandler(
 // ---------------------------------------------------------------------------
 
 export async function updateTaskLinkHandler(
-  req: HttpRequest<{ id: string }, {
-    field_map?: FieldMap;
-    sync_mode?: SyncMode;
-  }>,
+  req: HttpRequest<
+    { id: string },
+    {
+      field_map?: FieldMap;
+      sync_mode?: SyncMode;
+    }
+  >,
   ctx: TaskManagerHandlerContext,
 ): Promise<HttpResponse> {
   try {

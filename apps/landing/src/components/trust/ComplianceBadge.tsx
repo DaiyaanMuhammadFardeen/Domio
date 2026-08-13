@@ -37,11 +37,7 @@ export function ComplianceBadge({ badge }: ComplianceBadgeProps): JSX.Element {
       aria-label={`${badge.name} — ${STATUS_LABEL[badge.status]}`}
     >
       <header className="trust-badge__head">
-        <span
-          className="trust-badge__dot"
-          aria-hidden="true"
-          data-status={badge.status}
-        />
+        <span className="trust-badge__dot" aria-hidden="true" data-status={badge.status} />
         <h3 className="trust-badge__name">{badge.name}</h3>
       </header>
       <p className="trust-badge__description">{badge.description}</p>

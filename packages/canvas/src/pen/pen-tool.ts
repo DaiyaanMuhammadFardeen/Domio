@@ -34,7 +34,11 @@ export function feedPenTool(state: PenToolState, event: PenToolEvent): PenToolRe
     return { state: { path: emptyPath(), isDrawing: false }, closed: false, cancelled: true };
   }
   if (event.type === 'double-click') {
-    return { state: { path: closePath(state.path), isDrawing: false }, closed: true, cancelled: false };
+    return {
+      state: { path: closePath(state.path), isDrawing: false },
+      closed: true,
+      cancelled: false,
+    };
   }
   if (event.type === 'pointer' && event.pointer) {
     const p = event.pointer;
@@ -47,7 +51,10 @@ export function feedPenTool(state: PenToolState, event: PenToolEvent): PenToolRe
       outY: 0,
     };
     return {
-      state: { path: appendAnchor(state.path, breakHandle(anchor, { alt: p.modifiers?.alt ?? false })), isDrawing: true },
+      state: {
+        path: appendAnchor(state.path, breakHandle(anchor, { alt: p.modifiers?.alt ?? false })),
+        isDrawing: true,
+      },
       closed: false,
       cancelled: false,
     };

@@ -47,11 +47,7 @@ function toneForKind(kind: CrmTimelineEvent['kind']) {
  * The adapter retry row is rendered separately so operators can
  * re-trigger a failed run without leaving the page.
  */
-export function CRMTimeline({
-  workspaceId,
-  initialEvents = [],
-  adapters = [],
-}: CRMTimelineProps) {
+export function CRMTimeline({ workspaceId, initialEvents = [], adapters = [] }: CRMTimelineProps) {
   const [events, setEvents] = useState<ReadonlyArray<CrmTimelineEvent>>(initialEvents);
   const [retryState, setRetryState] = useState<Record<string, 'idle' | 'pending' | 'ok' | 'fail'>>(
     {},
@@ -95,7 +91,11 @@ export function CRMTimeline({
                 >
                   <div className="flex items-center gap-3">
                     <span className="font-medium text-slate-900">{a.provider}</span>
-                    <Badge tone={a.status === 'healthy' ? 'green' : a.status === 'degraded' ? 'amber' : 'red'}>
+                    <Badge
+                      tone={
+                        a.status === 'healthy' ? 'green' : a.status === 'degraded' ? 'amber' : 'red'
+                      }
+                    >
                       {a.status}
                     </Badge>
                   </div>
@@ -130,10 +130,7 @@ export function CRMTimeline({
             No CRM events yet. Once contacts sync to Salesforce/HubSpot, events will appear here.
           </div>
         ) : (
-          <ol
-            className="divide-y divide-slate-100"
-            data-testid="crm-event-list"
-          >
+          <ol className="divide-y divide-slate-100" data-testid="crm-event-list">
             {events.map((event) => (
               <li
                 key={event.id}

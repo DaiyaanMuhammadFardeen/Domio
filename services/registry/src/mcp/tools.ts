@@ -37,7 +37,11 @@ export interface MCPTool {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
-  run: (deps: ServiceDeps, input: Record<string, unknown>, ctx: MCPToolContext) => Promise<MCPToolResult>;
+  run: (
+    deps: ServiceDeps,
+    input: Record<string, unknown>,
+    ctx: MCPToolContext,
+  ) => Promise<MCPToolResult>;
 }
 
 /** Map a thrown error to an MCPToolResult (never throws). */
@@ -45,7 +49,13 @@ function toResult(err: unknown): MCPToolResult {
   if (err instanceof RegistryError) {
     return { ok: false, error: { code: err.code, message: err.message } };
   }
-  return { ok: false, error: { code: 'ERR_VALIDATION', message: err instanceof Error ? err.message : 'Unknown error' } };
+  return {
+    ok: false,
+    error: {
+      code: 'ERR_VALIDATION',
+      message: err instanceof Error ? err.message : 'Unknown error',
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -60,7 +70,10 @@ const component_list: MCPTool = {
     properties: {
       catalogId: { type: 'string', description: 'Filter by catalogId (exact match via search).' },
       category: { type: 'string', description: 'Filter by category.' },
-      query: { type: 'string', description: 'Full-text search across name, catalogId, description.' },
+      query: {
+        type: 'string',
+        description: 'Full-text search across name, catalogId, description.',
+      },
       kind: { type: 'string', description: 'Filter by component kind.' },
       limit: { type: 'number', description: 'Max results (default 50).' },
     },
@@ -92,7 +105,8 @@ const component_list: MCPTool = {
 
 const component_describe: MCPTool = {
   name: 'component_describe',
-  description: 'Get full manifest including props schema, variants, and deprecation info for a component.',
+  description:
+    'Get full manifest including props schema, variants, and deprecation info for a component.',
   inputSchema: {
     type: 'object',
     required: ['catalogId'],
@@ -117,16 +131,24 @@ const component_describe: MCPTool = {
 
 const component_install: MCPTool = {
   name: 'component_install',
-  description: 'Install or update a component in a workspace library. Returns bundle URLs and license info.',
+  description:
+    'Install or update a component in a workspace library. Returns bundle URLs and license info.',
   inputSchema: {
     type: 'object',
     required: ['catalogId'],
     properties: {
       catalogId: { type: 'string', description: 'Component catalog ID to install.' },
       version: { type: 'string', description: 'Specific version (omit to follow pin).' },
-      pinMode: { type: 'string', enum: ['track-latest', 'pin-version', 'pin-range', 'workspace-managed'], description: 'Pin mode.' },
+      pinMode: {
+        type: 'string',
+        enum: ['track-latest', 'pin-version', 'pin-range', 'workspace-managed'],
+        description: 'Pin mode.',
+      },
       pinValue: { type: 'string', description: 'Pin value for pin-version or pin-range.' },
-      workspaceId: { type: 'string', description: 'Target workspace (falls back to ctx.workspaceId).' },
+      workspaceId: {
+        type: 'string',
+        description: 'Target workspace (falls back to ctx.workspaceId).',
+      },
       seats: { type: 'number', description: 'License seats (default 1).' },
     },
   },
@@ -160,7 +182,10 @@ const component_uninstall: MCPTool = {
     required: ['catalogId'],
     properties: {
       catalogId: { type: 'string', description: 'Component catalog ID to uninstall.' },
-      workspaceId: { type: 'string', description: 'Target workspace (falls back to ctx.workspaceId).' },
+      workspaceId: {
+        type: 'string',
+        description: 'Target workspace (falls back to ctx.workspaceId).',
+      },
     },
   },
   async run(deps, input, ctx) {
@@ -185,9 +210,16 @@ const component_pin: MCPTool = {
     required: ['catalogId', 'pinMode'],
     properties: {
       catalogId: { type: 'string', description: 'Component catalog ID.' },
-      pinMode: { type: 'string', enum: ['track-latest', 'pin-version', 'pin-range', 'workspace-managed'], description: 'New pin mode.' },
+      pinMode: {
+        type: 'string',
+        enum: ['track-latest', 'pin-version', 'pin-range', 'workspace-managed'],
+        description: 'New pin mode.',
+      },
       pinValue: { type: 'string', description: 'Pin value for pin-version or pin-range.' },
-      workspaceId: { type: 'string', description: 'Target workspace (falls back to ctx.workspaceId).' },
+      workspaceId: {
+        type: 'string',
+        description: 'Target workspace (falls back to ctx.workspaceId).',
+      },
     },
   },
   async run(deps, input, ctx) {
@@ -198,12 +230,17 @@ const component_pin: MCPTool = {
 
       // Verify the item exists
       const existing = await deps.store.getLibraryItem(ctx.agentId, workspaceId, catalogId);
-      if (!existing) throw Errors.notFound(`installed component ${catalogId} in workspace ${workspaceId}`);
+      if (!existing)
+        throw Errors.notFound(`installed component ${catalogId} in workspace ${workspaceId}`);
 
       // Validate pin mode
       const versions = await listVersions(deps, catalogId);
       const available = versions.map((v) => v.version);
-      await resolvePinTarget(deps, { pinMode, ...(input.pinValue ? { pinValue: String(input.pinValue) } : {}) }, available);
+      await resolvePinTarget(
+        deps,
+        { pinMode, ...(input.pinValue ? { pinValue: String(input.pinValue) } : {}) },
+        available,
+      );
 
       const updated = {
         ...existing,
@@ -250,7 +287,8 @@ const component_get_props_schema: MCPTool = {
 
 const component_apply_props: MCPTool = {
   name: 'component_apply_props',
-  description: 'Apply defaults and validate props against a component schema. Returns the merged and validated props.',
+  description:
+    'Apply defaults and validate props against a component schema. Returns the merged and validated props.',
   inputSchema: {
     type: 'object',
     required: ['catalogId', 'props'],
@@ -293,7 +331,11 @@ const marketplace_search: MCPTool = {
       category: { type: 'string', description: 'Filter by tag/category.' },
       minPrice: { type: 'number', description: 'Minimum price in cents.' },
       maxPrice: { type: 'number', description: 'Maximum price in cents.' },
-      sort: { type: 'string', enum: ['relevance', 'newest', 'price-asc', 'price-desc', 'rating'], description: 'Sort mode.' },
+      sort: {
+        type: 'string',
+        enum: ['relevance', 'newest', 'price-asc', 'price-desc', 'rating'],
+        description: 'Sort mode.',
+      },
       page: { type: 'number', description: 'Page number (default 1).' },
       pageSize: { type: 'number', description: 'Results per page (default 20).' },
     },
@@ -306,7 +348,16 @@ const marketplace_search: MCPTool = {
         ...(input.category ? { category: String(input.category) } : {}),
         ...(input.minPrice !== undefined ? { minPrice: Number(input.minPrice) } : {}),
         ...(input.maxPrice !== undefined ? { maxPrice: Number(input.maxPrice) } : {}),
-        ...(input.sort ? { sort: String(input.sort) as 'relevance' | 'newest' | 'price-asc' | 'price-desc' | 'rating' } : {}),
+        ...(input.sort
+          ? {
+              sort: String(input.sort) as
+                | 'relevance'
+                | 'newest'
+                | 'price-asc'
+                | 'price-desc'
+                | 'rating',
+            }
+          : {}),
         ...(input.page ? { page: Number(input.page) } : {}),
         ...(input.pageSize ? { pageSize: Number(input.pageSize) } : {}),
       });
@@ -336,7 +387,8 @@ const marketplace_get_listing: MCPTool = {
       if (input.catalogId) {
         const listing = await deps.store.getListingByCatalogId(String(input.catalogId));
         if (!listing) throw Errors.notFound(`listing for catalogId ${input.catalogId}`);
-        if (listing.status === 'removed') throw Errors.gone(`listing for ${input.catalogId} was removed`);
+        if (listing.status === 'removed')
+          throw Errors.gone(`listing for ${input.catalogId} was removed`);
         return { ok: true, data: listing };
       }
       throw Errors.validation('Provide either listingId or catalogId');
@@ -355,7 +407,10 @@ const marketplace_purchase: MCPTool = {
     properties: {
       listingId: { type: 'string', description: 'Listing ID to purchase.' },
       seats: { type: 'number', description: 'Number of seats (default 1).' },
-      workspaceId: { type: 'string', description: 'Target workspace (falls back to ctx.workspaceId).' },
+      workspaceId: {
+        type: 'string',
+        description: 'Target workspace (falls back to ctx.workspaceId).',
+      },
     },
   },
   async run(deps, input, ctx) {
@@ -396,14 +451,18 @@ const marketplace_purchase: MCPTool = {
 
 const template_apply: MCPTool = {
   name: 'template_apply',
-  description: 'Apply a template: deep-copies the deck JSON and replaces placeholders with provided values (or defaults).',
+  description:
+    'Apply a template: deep-copies the deck JSON and replaces placeholders with provided values (or defaults).',
   inputSchema: {
     type: 'object',
     required: ['templateId'],
     properties: {
       templateId: { type: 'string', description: 'Template ID.' },
       values: { type: 'object', description: 'Map of placeholder key → value overrides.' },
-      workspaceId: { type: 'string', description: 'Target workspace (falls back to ctx.workspaceId).' },
+      workspaceId: {
+        type: 'string',
+        description: 'Target workspace (falls back to ctx.workspaceId).',
+      },
     },
   },
   async run(deps, input, ctx) {
@@ -443,7 +502,7 @@ const media_search_icons: MCPTool = {
     try {
       const results = await searchIcons(deps, {
         q: String(input.query),
-        ...(input.styles ? { styles: (input.styles as string[]) } : {}),
+        ...(input.styles ? { styles: input.styles as string[] } : {}),
         ...(input.limit ? { limit: Number(input.limit) } : {}),
       });
 
@@ -472,7 +531,8 @@ const media_search_icons: MCPTool = {
 
 const media_validate_animation: MCPTool = {
   name: 'media_validate_animation',
-  description: 'Validate a Lottie JSON or GIF bytes for safety (expressions, prototype pollution, layer limits).',
+  description:
+    'Validate a Lottie JSON or GIF bytes for safety (expressions, prototype pollution, layer limits).',
   inputSchema: {
     type: 'object',
     properties: {
@@ -489,7 +549,10 @@ const media_validate_animation: MCPTool = {
         if (result.valid) {
           return { ok: true as const, data: result };
         }
-        return { ok: false as const, error: { code: 'ERR_VALIDATION', message: result.errors.join('; ') } };
+        return {
+          ok: false as const,
+          error: { code: 'ERR_VALIDATION', message: result.errors.join('; ') },
+        };
       }
       if (input.gifBytes !== undefined) {
         const budgetBytes = deps.limits.gifBudgetKb * 1024;
@@ -497,7 +560,10 @@ const media_validate_animation: MCPTool = {
         if (size > budgetBytes) {
           return {
             ok: false,
-            error: { code: 'ERR_VALIDATION', message: `GIF size ${size} bytes exceeds budget ${budgetBytes} bytes` },
+            error: {
+              code: 'ERR_VALIDATION',
+              message: `GIF size ${size} bytes exceeds budget ${budgetBytes} bytes`,
+            },
           };
         }
         return { ok: true, data: { size, budget: budgetBytes, valid: true } };

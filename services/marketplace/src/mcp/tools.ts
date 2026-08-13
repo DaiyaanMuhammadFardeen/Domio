@@ -21,11 +21,14 @@ import { checkMcpCapability } from './access.js';
 // MCP Tool Definitions
 // ---------------------------------------------------------------------------
 
-export const MCP_TOOL_DEFINITIONS: Record<string, {
-  name: string;
-  requiredCapability: string;
-  description: string;
-}> = {
+export const MCP_TOOL_DEFINITIONS: Record<
+  string,
+  {
+    name: string;
+    requiredCapability: string;
+    description: string;
+  }
+> = {
   get_listing: {
     name: 'get_listing',
     requiredCapability: 'marketplace:read',
@@ -101,7 +104,11 @@ export function executeMcpTool(
 
   // Check capability
   try {
-    checkMcpCapability(input.workspaceId, toolDef.requiredCapability as any, input.grantedCapabilities);
+    checkMcpCapability(
+      input.workspaceId,
+      toolDef.requiredCapability as any,
+      input.grantedCapabilities,
+    );
     extraCapabilityCheck?.(toolDef.requiredCapability);
   } catch (e) {
     if (e instanceof Error) {
@@ -127,7 +134,9 @@ async function dispatchTool(
       return { ok: true, data: listing as unknown as Record<string, unknown> };
     }
     case 'search_listings': {
-      const listings = await _service.listListings(input.params as { status?: string; sellerId?: string; limit?: number });
+      const listings = await _service.listListings(
+        input.params as { status?: string; sellerId?: string; limit?: number },
+      );
       return { ok: true, data: { items: listings, total: listings.length } };
     }
     case 'install_listing': {

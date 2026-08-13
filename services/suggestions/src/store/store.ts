@@ -20,7 +20,9 @@ export interface SuggestionsStore {
   listSuggestionsByWorkspace(workspaceId: string): Promise<Suggestion[]>;
   updateSuggestion(
     suggestionId: string,
-    patch: Partial<Pick<Suggestion, 'status' | 'resolved_at' | 'resolved_by' | 'updated_at' | 'updated_by'>>,
+    patch: Partial<
+      Pick<Suggestion, 'status' | 'resolved_at' | 'resolved_by' | 'updated_at' | 'updated_by'>
+    >,
   ): Promise<Suggestion>;
   listOpenSuggestions(): Promise<Suggestion[]>;
 }

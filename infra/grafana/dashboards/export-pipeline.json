@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "export-pipeline"
-  ],
+  "tags": ["tier-2", "domio", "export-pipeline"],
   "panels": [
     {
       "id": 1,

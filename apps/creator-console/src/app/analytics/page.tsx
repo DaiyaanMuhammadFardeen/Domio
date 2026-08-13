@@ -68,10 +68,7 @@ export default function AnalyticsPage() {
     () => revenue.reduce((sum, p) => sum + p.revenue_cents, 0),
     [revenue],
   );
-  const totalInstalls = useMemo(
-    () => geo.reduce((sum, g) => sum + g.installs, 0),
-    [geo],
-  );
+  const totalInstalls = useMemo(() => geo.reduce((sum, g) => sum + g.installs, 0), [geo]);
   const totalUnits = useMemo(
     () => topListings.reduce((sum, l) => sum + l.units_sold, 0),
     [topListings],
@@ -79,9 +76,7 @@ export default function AnalyticsPage() {
   // Avg rating: synthetic — 4.2 .. 4.8 based on top-listing performance.
   const avgRating = useMemo(() => {
     if (topListings.length === 0) return 0;
-    const meanConv =
-      topListings.reduce((s, l) => s + l.conversion_rate, 0) /
-      topListings.length;
+    const meanConv = topListings.reduce((s, l) => s + l.conversion_rate, 0) / topListings.length;
     return Math.min(4.9, 4.0 + meanConv * 8).toFixed(1);
   }, [topListings]);
 
@@ -96,38 +91,21 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">
             {t('creator.analytics.heading')}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {t('creator.analytics.subheading')}
-          </p>
+          <p className="mt-1 text-sm text-slate-500">{t('creator.analytics.subheading')}</p>
         </div>
         <PeriodPicker period={period} onChange={setPeriod} />
       </div>
 
       {/* KPI tiles */}
-      <div
-        data-testid="analytics-row-kpis"
-        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        <KpiTile
-          title="Revenue"
-          value={formatRevenueCents(totalRevenueCents)}
-          tone="success"
-        />
-        <KpiTile
-          title="Installs"
-          value={totalInstalls.toLocaleString()}
-          tone="brand"
-        />
+      <div data-testid="analytics-row-kpis" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiTile title="Revenue" value={formatRevenueCents(totalRevenueCents)} tone="success" />
+        <KpiTile title="Installs" value={totalInstalls.toLocaleString()} tone="brand" />
         <KpiTile
           title="Conversion"
           value={funnel ? formatRate(funnel.overall_conversion_rate) : '—'}
           tone="brand"
         />
-        <KpiTile
-          title="Avg rating"
-          value={avgRating || '—'}
-          tone="brand"
-        />
+        <KpiTile title="Avg rating" value={avgRating || '—'} tone="brand" />
       </div>
 
       {/* Revenue chart */}
@@ -156,10 +134,7 @@ export default function AnalyticsPage() {
       </section>
 
       {/* Top listings + conversion funnel */}
-      <div
-        data-testid="analytics-row-listings-funnel"
-        className="grid gap-4 lg:grid-cols-2"
-      >
+      <div data-testid="analytics-row-listings-funnel" className="grid gap-4 lg:grid-cols-2">
         <section
           data-testid="analytics-top-listings"
           className="rounded-xl border border-slate-200 bg-white p-4"

@@ -32,7 +32,11 @@ export interface TemplateDao {
   topTemplates(scope: QueryScope, limit: number): Promise<TemplateRow[]>;
   topComponents(scope: QueryScope, limit: number): Promise<ComponentRow[]>;
   brandHealth(workspace_id: string, now_ms: number): Promise<BrandHealthBadge[]>;
-  retentionCohorts(workspace_id: string, weeks: number, now_ms: number): Promise<CohortRetentionCell[]>;
+  retentionCohorts(
+    workspace_id: string,
+    weeks: number,
+    now_ms: number,
+  ): Promise<CohortRetentionCell[]>;
   funnel(scope: QueryScope, steps: string[]): Promise<FunnelStepRow[]>;
 }
 

@@ -5,8 +5,16 @@
   "description": "A typed variable scoped to one of the five prototype-runtime scope ladders. Phase 10 M2.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "name", "scope", "type",
-    "default_value", "visibility", "read_only", "version"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "name",
+    "scope",
+    "type",
+    "default_value",
+    "visibility",
+    "read_only",
+    "version"
   ],
   "additionalProperties": false,
   "properties": {

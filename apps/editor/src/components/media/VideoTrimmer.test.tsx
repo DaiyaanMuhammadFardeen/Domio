@@ -9,11 +9,7 @@ import { VideoTrimmer } from './VideoTrimmer';
 describe('VideoTrimmer', () => {
   it('renders the timeline', () => {
     render(
-      <VideoTrimmer
-        durationMs={10000}
-        value={{ startMs: 0, endMs: 10000 }}
-        onChange={vi.fn()}
-      />,
+      <VideoTrimmer durationMs={10000} value={{ startMs: 0, endMs: 10000 }} onChange={vi.fn()} />,
     );
     expect(screen.getByTestId('video-trimmer')).toBeInTheDocument();
     expect(screen.getByTestId('video-trimmer-selection')).toBeInTheDocument();
@@ -22,11 +18,7 @@ describe('VideoTrimmer', () => {
   it('emits onChange when start changes', () => {
     const onChange = vi.fn();
     render(
-      <VideoTrimmer
-        durationMs={10000}
-        value={{ startMs: 0, endMs: 10000 }}
-        onChange={onChange}
-      />,
+      <VideoTrimmer durationMs={10000} value={{ startMs: 0, endMs: 10000 }} onChange={onChange} />,
     );
     fireEvent.change(screen.getByTestId('video-trimmer-start'), { target: { value: '1000' } });
     expect(onChange).toHaveBeenCalled();
@@ -37,11 +29,7 @@ describe('VideoTrimmer', () => {
   it('emits onChange when end changes', () => {
     const onChange = vi.fn();
     render(
-      <VideoTrimmer
-        durationMs={10000}
-        value={{ startMs: 0, endMs: 10000 }}
-        onChange={onChange}
-      />,
+      <VideoTrimmer durationMs={10000} value={{ startMs: 0, endMs: 10000 }} onChange={onChange} />,
     );
     fireEvent.change(screen.getByTestId('video-trimmer-end'), { target: { value: '9000' } });
     expect(onChange).toHaveBeenCalled();

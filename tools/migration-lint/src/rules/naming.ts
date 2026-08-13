@@ -35,7 +35,11 @@ export const namingConventionRule: Rule = {
     }
     // Only check reserved slugs for up migrations
     if (isUp) {
-      const slug = migration.file.split('_').slice(1).join('_').replace(/\.up\.sql$/, '');
+      const slug = migration.file
+        .split('_')
+        .slice(1)
+        .join('_')
+        .replace(/\.up\.sql$/, '');
       if (RESERVED_SLUGS.has(slug)) {
         out.push({
           rule: 'enforce-naming-convention',

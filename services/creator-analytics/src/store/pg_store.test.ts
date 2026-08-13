@@ -33,9 +33,9 @@ describe('PgAnalyticsStore', () => {
     });
 
     it('getPaymentIntents throws StoreNotConfiguredError', async () => {
-      await expect(
-        store.getPaymentIntents({ buyer_id: 'b1' }),
-      ).rejects.toThrow(StoreNotConfiguredError);
+      await expect(store.getPaymentIntents({ buyer_id: 'b1' })).rejects.toThrow(
+        StoreNotConfiguredError,
+      );
     });
 
     it('getLicenseGrants throws StoreNotConfiguredError', async () => {
@@ -43,9 +43,9 @@ describe('PgAnalyticsStore', () => {
     });
 
     it('listStatements throws StoreNotConfiguredError', async () => {
-      await expect(
-        store.listStatements({ creator_id: 'c1' }),
-      ).rejects.toThrow(StoreNotConfiguredError);
+      await expect(store.listStatements({ creator_id: 'c1' })).rejects.toThrow(
+        StoreNotConfiguredError,
+      );
     });
 
     it('getStatement throws StoreNotConfiguredError', async () => {
@@ -53,17 +53,19 @@ describe('PgAnalyticsStore', () => {
     });
 
     it('insertStatement throws StoreNotConfiguredError', async () => {
-      await expect(store.insertStatement({
-        statement_id: 's1',
-        creator_id: 'c1',
-        period_month: '2025-06',
-        kind: 'monthly',
-        total_gross_cents: 0,
-        total_fee_cents: 0,
-        total_net_cents: 0,
-        currency: 'USD',
-        generated_at: Date.now(),
-      })).rejects.toThrow(StoreNotConfiguredError);
+      await expect(
+        store.insertStatement({
+          statement_id: 's1',
+          creator_id: 'c1',
+          period_month: '2025-06',
+          kind: 'monthly',
+          total_gross_cents: 0,
+          total_fee_cents: 0,
+          total_net_cents: 0,
+          currency: 'USD',
+          generated_at: Date.now(),
+        }),
+      ).rejects.toThrow(StoreNotConfiguredError);
     });
 
     it('withTransaction throws StoreNotConfiguredError', async () => {
@@ -79,19 +81,21 @@ describe('PgAnalyticsStore', () => {
     it('getRevenueEvents queries revenue_share_event with correct params', async () => {
       const pool = createFakePool();
       pool.query.mockResolvedValue({
-        rows: [{
-          id: 'rev-1',
-          listing_id: 'list-1',
-          seller_id: 'c1',
-          workspace_id: 'ws-1',
-          currency: 'USD',
-          gross_cents: 1000,
-          fee_cents: 300,
-          net_cents: 700,
-          payout_status: 'eligible',
-          period_month: '2025-06',
-          event_type: 'purchase',
-        }],
+        rows: [
+          {
+            id: 'rev-1',
+            listing_id: 'list-1',
+            seller_id: 'c1',
+            workspace_id: 'ws-1',
+            currency: 'USD',
+            gross_cents: 1000,
+            fee_cents: 300,
+            net_cents: 700,
+            payout_status: 'eligible',
+            period_month: '2025-06',
+            event_type: 'purchase',
+          },
+        ],
       });
 
       const store = new PgAnalyticsStore(pool as never);
@@ -100,10 +104,10 @@ describe('PgAnalyticsStore', () => {
         period_month: '2025-06',
       });
 
-      expect(pool.query).toHaveBeenCalledWith(
-        expect.stringContaining('FROM revenue_share_event'),
-        ['c1', '2025-06'],
-      );
+      expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('FROM revenue_share_event'), [
+        'c1',
+        '2025-06',
+      ]);
       expect(result).toHaveLength(1);
       expect(result[0]!.seller_id).toBe('c1');
     });
@@ -115,10 +119,9 @@ describe('PgAnalyticsStore', () => {
       const store = new PgAnalyticsStore(pool as never);
       await store.getPaymentIntents({ buyer_id: 'b1' });
 
-      expect(pool.query).toHaveBeenCalledWith(
-        expect.stringContaining('FROM payment_intent'),
-        ['b1'],
-      );
+      expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('FROM payment_intent'), [
+        'b1',
+      ]);
     });
 
     it('getPaymentIntents with creator_id joins via marketplace_listing', async () => {
@@ -128,10 +131,9 @@ describe('PgAnalyticsStore', () => {
       const store = new PgAnalyticsStore(pool as never);
       await store.getPaymentIntents({ creator_id: 'c1' });
 
-      expect(pool.query).toHaveBeenCalledWith(
-        expect.stringContaining('JOIN marketplace_listing'),
-        ['c1'],
-      );
+      expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('JOIN marketplace_listing'), [
+        'c1',
+      ]);
     });
 
     it('getLicenseGrants joins via marketplace_listing', async () => {
@@ -141,10 +143,9 @@ describe('PgAnalyticsStore', () => {
       const store = new PgAnalyticsStore(pool as never);
       await store.getLicenseGrants('c1');
 
-      expect(pool.query).toHaveBeenCalledWith(
-        expect.stringContaining('JOIN marketplace_listing'),
-        ['c1'],
-      );
+      expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('JOIN marketplace_listing'), [
+        'c1',
+      ]);
     });
 
     it('listStatements queries statement_record with optional kind filter', async () => {
@@ -154,10 +155,10 @@ describe('PgAnalyticsStore', () => {
       const store = new PgAnalyticsStore(pool as never);
       await store.listStatements({ creator_id: 'c1', kind: 'monthly' });
 
-      expect(pool.query).toHaveBeenCalledWith(
-        expect.stringContaining('AND kind = $2'),
-        ['c1', 'monthly'],
-      );
+      expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('AND kind = $2'), [
+        'c1',
+        'monthly',
+      ]);
     });
 
     it('getStatement queries by id', async () => {
@@ -167,10 +168,7 @@ describe('PgAnalyticsStore', () => {
       const store = new PgAnalyticsStore(pool as never);
       await store.getStatement('stmt-1');
 
-      expect(pool.query).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE id = $1'),
-        ['stmt-1'],
-      );
+      expect(pool.query).toHaveBeenCalledWith(expect.stringContaining('WHERE id = $1'), ['stmt-1']);
     });
 
     it('insertStatement inserts into statement_record', async () => {
@@ -223,7 +221,9 @@ describe('PgAnalyticsStore', () => {
 
       const store = new PgAnalyticsStore(pool as never);
       await expect(
-        store.withTransaction(async () => { throw new Error('fail'); }),
+        store.withTransaction(async () => {
+          throw new Error('fail');
+        }),
       ).rejects.toThrow('fail');
 
       expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');

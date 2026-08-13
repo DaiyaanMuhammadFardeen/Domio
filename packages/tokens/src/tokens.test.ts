@@ -260,7 +260,14 @@ describe('TokenValue exhaustive narrowing', () => {
           color: { space: 'srgb', channels: [0, 0, 0], alpha: 0.1 },
         },
       },
-      { type: 'motion', value: { duration: { value: 300, unit: 'ms' }, easing: 'ease-in-out', delay: { value: 0, unit: 'ms' } } },
+      {
+        type: 'motion',
+        value: {
+          duration: { value: 300, unit: 'ms' },
+          easing: 'ease-in-out',
+          delay: { value: 0, unit: 'ms' },
+        },
+      },
       { type: 'content', value: { contentType: 'svg', data: '<svg/>' } },
     ];
 

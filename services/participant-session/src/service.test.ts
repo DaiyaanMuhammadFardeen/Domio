@@ -24,7 +24,10 @@ function snapshotFor(): AudienceSnapshot {
   };
 }
 
-function snapshotLookup(_input: { session_code: unknown; workspace_id: string }): Promise<AudienceSnapshot> {
+function snapshotLookup(_input: {
+  session_code: unknown;
+  workspace_id: string;
+}): Promise<AudienceSnapshot> {
   return Promise.resolve(snapshotFor());
 }
 

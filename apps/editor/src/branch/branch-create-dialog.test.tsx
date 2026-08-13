@@ -8,7 +8,9 @@ const DECK = 'd1';
 describe('BranchCreateDialog', () => {
   it('does not render when closed', () => {
     const client = new InMemoryBranchClient(DECK);
-    const { container } = render(<BranchCreateDialog deckId={DECK} client={client} open={false} onClose={() => undefined} />);
+    const { container } = render(
+      <BranchCreateDialog deckId={DECK} client={client} open={false} onClose={() => undefined} />,
+    );
     expect(container).toBeEmptyDOMElement();
   });
 
@@ -16,7 +18,16 @@ describe('BranchCreateDialog', () => {
     const client = new InMemoryBranchClient(DECK);
     const onCreated = vi.fn();
     const onClose = vi.fn();
-    render(<BranchCreateDialog deckId={DECK} client={client} open={true} onClose={onClose} onCreated={onCreated} baseCheckpoints={[{ id: 'cp1', name: 'v1' }]} />);
+    render(
+      <BranchCreateDialog
+        deckId={DECK}
+        client={client}
+        open={true}
+        onClose={onClose}
+        onCreated={onCreated}
+        baseCheckpoints={[{ id: 'cp1', name: 'v1' }]}
+      />,
+    );
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'feature/x' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
     await waitFor(() => expect(onCreated).toHaveBeenCalled());
@@ -25,7 +36,9 @@ describe('BranchCreateDialog', () => {
 
   it('rejects names with invalid characters', async () => {
     const client = new InMemoryBranchClient(DECK);
-    render(<BranchCreateDialog deckId={DECK} client={client} open={true} onClose={() => undefined} />);
+    render(
+      <BranchCreateDialog deckId={DECK} client={client} open={true} onClose={() => undefined} />,
+    );
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'bad!name' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/letters, numbers/);

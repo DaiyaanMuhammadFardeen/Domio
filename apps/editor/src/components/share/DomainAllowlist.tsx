@@ -52,10 +52,23 @@ export function DomainAllowlist({
       <textarea
         aria-label="domain-list-editor"
         value={value.join('\n')}
-        onChange={(e) => onChange(e.target.value.split(/\n+/).map((d) => d.trim()).filter(Boolean))}
+        onChange={(e) =>
+          onChange(
+            e.target.value
+              .split(/\n+/)
+              .map((d) => d.trim())
+              .filter(Boolean),
+          )
+        }
         rows={Math.max(3, value.length + 1)}
         data-testid={`${dataTestId}-textarea`}
-        style={{ padding: '6px 8px', fontFamily: 'monospace', fontSize: 12, border: '1px solid rgba(0,0,0,0.2)', borderRadius: 4 }}
+        style={{
+          padding: '6px 8px',
+          fontFamily: 'monospace',
+          fontSize: 12,
+          border: '1px solid rgba(0,0,0,0.2)',
+          borderRadius: 4,
+        }}
       />
       <div style={{ display: 'flex', gap: 6 }}>
         <input
@@ -64,18 +77,40 @@ export function DomainAllowlist({
           onChange={(e) => setDraft(e.target.value)}
           placeholder="example.com"
           data-testid={`${dataTestId}-draft`}
-          style={{ flex: 1, padding: '6px 8px', border: '1px solid rgba(0,0,0,0.2)', borderRadius: 4 }}
+          style={{
+            flex: 1,
+            padding: '6px 8px',
+            border: '1px solid rgba(0,0,0,0.2)',
+            borderRadius: 4,
+          }}
         />
         <button
           type="button"
           onClick={onAdd}
           data-testid={`${dataTestId}-add`}
-          style={{ padding: '6px 12px', borderRadius: 4, border: 'none', background: '#3b82f6', color: '#fff', cursor: 'pointer' }}
+          style={{
+            padding: '6px 12px',
+            borderRadius: 4,
+            border: 'none',
+            background: '#3b82f6',
+            color: '#fff',
+            cursor: 'pointer',
+          }}
         >
           <FormattedMessage id="editor.share.domainAllowlist.add" />
         </button>
       </div>
-      <ul data-testid={`${dataTestId}-list`} style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      <ul
+        data-testid={`${dataTestId}-list`}
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 6,
+        }}
+      >
         {value.map((d) => (
           <li
             key={d}
@@ -95,7 +130,12 @@ export function DomainAllowlist({
               type="button"
               onClick={() => onRemove(d)}
               aria-label={`remove ${d}`}
-              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#dc2626' }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#dc2626',
+              }}
             >
               ×
             </button>

@@ -132,8 +132,13 @@ paths:
               type: object
               required: [workspace_id]
               properties:
-                workspace_id: { type: string, minLength: 1, description: "Target workspace identifier." }
-                target_deck_id: { type: string, description: "Optional target deck for component/template installations." }
+                workspace_id:
+                  { type: string, minLength: 1, description: 'Target workspace identifier.' }
+                target_deck_id:
+                  {
+                    type: string,
+                    description: 'Optional target deck for component/template installations.',
+                  }
       responses:
         '200':
           description: Installation result
@@ -174,10 +179,22 @@ paths:
               type: object
               required: [workspace_id, idempotency_key]
               properties:
-                workspace_id: { type: string, minLength: 1, description: "Target workspace identifier." }
-                idempotency_key: { type: string, minLength: 1, description: "Client-generated idempotency key (UUID v4/v7). Prevents duplicate charges." }
-                success_url: { type: string, format: uri, description: "Redirect URL after successful payment." }
-                cancel_url: { type: string, format: uri, description: "Redirect URL if the buyer cancels." }
+                workspace_id:
+                  { type: string, minLength: 1, description: 'Target workspace identifier.' }
+                idempotency_key:
+                  {
+                    type: string,
+                    minLength: 1,
+                    description: 'Client-generated idempotency key (UUID v4/v7). Prevents duplicate charges.',
+                  }
+                success_url:
+                  {
+                    type: string,
+                    format: uri,
+                    description: 'Redirect URL after successful payment.',
+                  }
+                cancel_url:
+                  { type: string, format: uri, description: 'Redirect URL if the buyer cancels.' }
       responses:
         '200':
           description: Purchase initiated
@@ -230,11 +247,11 @@ components:
           type: string
           format: uri
           description: URI reference identifying the problem type.
-          example: "https://domio.example/problems/not-found"
+          example: 'https://domio.example/problems/not-found'
         title:
           type: string
           description: Short human-readable summary.
-          example: "Resource not found"
+          example: 'Resource not found'
         status:
           type: integer
           description: HTTP status code.
@@ -247,26 +264,33 @@ components:
           type: string
           format: uri
           description: URI reference identifying the specific occurrence.
-          example: "https://api.domio.example.com/v1/partner/listings/my-template"
+          example: 'https://api.domio.example.com/v1/partner/listings/my-template'
 
     # ── Partner Listing ───────────────────────────────────────────────────
     PartnerListing:
       type: object
       required: [title, slug, kind, is_free, price_cents, currency, published_at_ms]
       properties:
-        title: { type: string, description: "Listing title." }
-        slug: { type: string, description: "URL-safe listing slug." }
-        kind: { type: string, enum: [component, template, theme, sticker_pack, icon_pack], description: "Listing type." }
-        is_free: { type: boolean, description: "Whether the listing is free." }
-        price_cents: { type: integer, description: "Listing price in integer cents (0 for free listings)." }
-        currency: { type: string, pattern: '^[A-Z]{3}$', description: "ISO 4217 currency code." }
+        title: { type: string, description: 'Listing title.' }
+        slug: { type: string, description: 'URL-safe listing slug.' }
+        kind:
+          {
+            type: string,
+            enum: [component, template, theme, sticker_pack, icon_pack],
+            description: 'Listing type.',
+          }
+        is_free: { type: boolean, description: 'Whether the listing is free.' }
+        price_cents:
+          { type: integer, description: 'Listing price in integer cents (0 for free listings).' }
+        currency: { type: string, pattern: '^[A-Z]{3}$', description: 'ISO 4217 currency code.' }
         preview:
           type: object
           nullable: true
           properties:
-            poster_ref: { type: string, description: "Reference to the poster preview asset." }
-            loop_ref: { type: string, description: "Reference to the loop preview asset." }
-        published_at_ms: { type: integer, description: "Epoch milliseconds when the listing was published." }
+            poster_ref: { type: string, description: 'Reference to the poster preview asset.' }
+            loop_ref: { type: string, description: 'Reference to the loop preview asset.' }
+        published_at_ms:
+          { type: integer, description: 'Epoch milliseconds when the listing was published.' }
 
     PartnerListingPage:
       type: object
@@ -275,28 +299,42 @@ components:
         items:
           type: array
           items: { $ref: '#/components/schemas/PartnerListing' }
-          description: "List of marketplace listings."
-        total: { type: integer, description: "Total number of matching listings." }
-        limit: { type: integer, description: "Page size." }
-        offset: { type: integer, description: "Number of results skipped." }
+          description: 'List of marketplace listings.'
+        total: { type: integer, description: 'Total number of matching listings.' }
+        limit: { type: integer, description: 'Page size.' }
+        offset: { type: integer, description: 'Number of results skipped.' }
 
     PartnerInstallResult:
       type: object
       required: [license_grant_id, status]
       properties:
-        license_grant_id: { type: string, description: "Identifier of the granted license." }
-        status: { type: string, enum: [installed, pending], description: "Installation status." }
+        license_grant_id: { type: string, description: 'Identifier of the granted license.' }
+        status: { type: string, enum: [installed, pending], description: 'Installation status.' }
 
     PurchaseInitiation:
       type: object
       required: [purchase_id, provider, status, expires_at]
       properties:
-        purchase_id: { type: string, description: "Application-level purchase identifier." }
-        provider: { type: string, enum: [stripe, bkash, nagad], description: "Payment provider used." }
-        provider_intent_id: { type: string, description: "Provider-side payment intent identifier." }
-        checkout_url: { type: string, format: uri, nullable: true, description: "Provider checkout URL. Null for redirect-less flows." }
-        status: { type: string, enum: [pending, processing, succeeded, failed, expired], description: "Current purchase status." }
-        expires_at: { type: integer, description: "Epoch milliseconds when this purchase intent expires." }
+        purchase_id: { type: string, description: 'Application-level purchase identifier.' }
+        provider:
+          { type: string, enum: [stripe, bkash, nagad], description: 'Payment provider used.' }
+        provider_intent_id:
+          { type: string, description: 'Provider-side payment intent identifier.' }
+        checkout_url:
+          {
+            type: string,
+            format: uri,
+            nullable: true,
+            description: 'Provider checkout URL. Null for redirect-less flows.',
+          }
+        status:
+          {
+            type: string,
+            enum: [pending, processing, succeeded, failed, expired],
+            description: 'Current purchase status.',
+          }
+        expires_at:
+          { type: integer, description: 'Epoch milliseconds when this purchase intent expires.' }
 
     PartnerRateLimitError:
       type: object
@@ -306,11 +344,11 @@ components:
           type: string
           format: uri
           description: URI reference identifying the problem type.
-          example: "https://domio.example/problems/rate-limited"
+          example: 'https://domio.example/problems/rate-limited'
         title:
           type: string
           description: Short human-readable summary.
-          example: "Rate limit exceeded"
+          example: 'Rate limit exceeded'
         status:
           type: integer
           description: HTTP status code.
@@ -318,9 +356,9 @@ components:
         detail:
           type: string
           description: Human-readable explanation specific to this occurrence.
-          example: "Rate limit of 600 requests per minute exceeded. Retry after 42 seconds."
+          example: 'Rate limit of 600 requests per minute exceeded. Retry after 42 seconds.'
         instance:
           type: string
           format: uri
           description: URI reference identifying the specific occurrence.
-          example: "https://api.domio.example.com/v1/partner/listings"
+          example: 'https://api.domio.example.com/v1/partner/listings'

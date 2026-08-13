@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "embed-proxy"
-  ],
+  "tags": ["tier-2", "domio", "embed-proxy"],
   "panels": [
     {
       "id": 1,

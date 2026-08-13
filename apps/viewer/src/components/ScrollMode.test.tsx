@@ -39,7 +39,14 @@ describe('ScrollMode', () => {
 
   it('emits onActiveSlideChange for the initial slide', () => {
     const onActive = vi.fn();
-    render(<ScrollMode deck={deck} reducedMotion={false} initialIdx={2} onActiveSlideChange={onActive} />);
+    render(
+      <ScrollMode
+        deck={deck}
+        reducedMotion={false}
+        initialIdx={2}
+        onActiveSlideChange={onActive}
+      />,
+    );
     expect(onActive).toHaveBeenCalledWith(2);
   });
 });
@@ -47,7 +54,14 @@ describe('ScrollMode', () => {
 describe('ScrollSlide', () => {
   it('renders the slide with a stage', () => {
     const slide = deck.slides[0]!;
-    render(<ScrollSlide slide={slide} slideIdx={0} fallbackAspect={deck.settings.defaultSlideRatio} reducedMotion={false} />);
+    render(
+      <ScrollSlide
+        slide={slide}
+        slideIdx={0}
+        fallbackAspect={deck.settings.defaultSlideRatio}
+        reducedMotion={false}
+      />,
+    );
     expect(screen.getByTestId('scroll-slide')).toBeInTheDocument();
     expect(screen.getByTestId('scroll-slide-stage')).toBeInTheDocument();
   });
@@ -72,13 +86,32 @@ describe('ScrollSlide', () => {
       thresholds: ReadonlyArray<number> = [];
     }
 
-    const Original = (globalThis as unknown as { IntersectionObserver: unknown }).IntersectionObserver;
+    const Original = (globalThis as unknown as { IntersectionObserver: unknown })
+      .IntersectionObserver;
     (globalThis as unknown as { IntersectionObserver: unknown }).IntersectionObserver = MockIO;
 
-    render(<ScrollSlide slide={slide} slideIdx={0} fallbackAspect={deck.settings.defaultSlideRatio} reducedMotion={false} onSlideVisible={onVisible} />);
+    render(
+      <ScrollSlide
+        slide={slide}
+        slideIdx={0}
+        fallbackAspect={deck.settings.defaultSlideRatio}
+        reducedMotion={false}
+        onSlideVisible={onVisible}
+      />,
+    );
 
     const el = document.querySelector('[data-slide-idx="0"]') as Element;
-    observed[0]!([{ isIntersecting: true, target: el, boundingClientRect: {} as DOMRectReadOnly, intersectionRatio: 1, intersectionRect: {} as DOMRectReadOnly, rootBounds: null, time: 0 }]);
+    observed[0]!([
+      {
+        isIntersecting: true,
+        target: el,
+        boundingClientRect: {} as DOMRectReadOnly,
+        intersectionRatio: 1,
+        intersectionRect: {} as DOMRectReadOnly,
+        rootBounds: null,
+        time: 0,
+      },
+    ]);
 
     expect(onVisible).toHaveBeenCalledWith(0);
     (globalThis as unknown as { IntersectionObserver: unknown }).IntersectionObserver = Original;

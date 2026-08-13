@@ -19,7 +19,15 @@ describe('LocalePicker', () => {
   });
 
   it('re-formats the preview when the locale changes', () => {
-    render(<LocalePicker value="de-DE" onChange={vi.fn()} sampleValue={1234.56} withCurrency currency="EUR" />);
+    render(
+      <LocalePicker
+        value="de-DE"
+        onChange={vi.fn()}
+        sampleValue={1234.56}
+        withCurrency
+        currency="EUR"
+      />,
+    );
     const preview = screen.getByTestId('locale-picker-preview');
     // German locale uses '.' as thousands separator.
     expect(preview.textContent).toContain('1.234');

@@ -11,13 +11,7 @@
  * first paint.
  */
 
-import {
-  DEFAULT_LOCALE,
-  isLocaleId,
-  toHtmlDir,
-  toHtmlLang,
-  type LocaleId,
-} from '@domio/i18n';
+import { DEFAULT_LOCALE, isLocaleId, toHtmlDir, toHtmlLang, type LocaleId } from '@domio/i18n';
 
 export interface ResolveLocaleHeaders {
   readonly cookie?: string | null | undefined;
@@ -37,9 +31,7 @@ const LOCALE_COOKIE = 'domio-locale';
  * headers. The cookie takes precedence; accept-language is a
  * best-effort fallback.
  */
-export function resolveLocaleFromHeaders(
-  headers: ResolveLocaleHeaders,
-): ResolvedLocale {
+export function resolveLocaleFromHeaders(headers: ResolveLocaleHeaders): ResolvedLocale {
   const cookieHeader = headers.cookie ?? null;
   let resolved: LocaleId | null = null;
   if (cookieHeader) {

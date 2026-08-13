@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { McpContext, McpTool } from '@domio/agent-schema';
-import {
-  create_hotspot,
-  validateHotspotCreate,
-  validateHotspotUpdate,
-} from './hotspots.js';
+import { create_hotspot, validateHotspotCreate, validateHotspotUpdate } from './hotspots.js';
 import { create_overlay, list_overlays, validateOverlayCreate } from './overlays.js';
 import { set_state_machine, transition_state } from './state-machines.js';
 import { create_variable, set_variable } from './variables.js';
@@ -20,10 +16,7 @@ import { nl_patch_tool, nlDecompose, nlPatch } from './nl-patch.js';
 import { simulate_sweep, sweep } from './simulate.js';
 import { deck_diff, diffDecks } from './diff.js';
 import { globalAuditTrail, MCPError } from './types.js';
-import {
-  grantCapability,
-  resetRouter,
-} from '../../router.js';
+import { grantCapability, resetRouter } from '../../router.js';
 
 const ctx: McpContext = { agentId: 'agent-1', tenantId: 'tenant-1' };
 const deniedCtx: McpContext = { agentId: 'no-perms', tenantId: 'tenant-1' };
@@ -89,12 +82,22 @@ beforeEach(() => {
 describe('invalid inputs', () => {
   it('rejects create_hotspot with missing rect', async () => {
     await expect(
-      asAny(create_hotspot).handler(ctx, { deckId: 'd1', slideId: 's1', kind: 'cta', rect: { x: 1, y: 1, w: 1 } }),
+      asAny(create_hotspot).handler(ctx, {
+        deckId: 'd1',
+        slideId: 's1',
+        kind: 'cta',
+        rect: { x: 1, y: 1, w: 1 },
+      }),
     ).rejects.toThrow(/INVALID_INPUT/);
   });
   it('rejects create_hotspot with bad kind', async () => {
     await expect(
-      asAny(create_hotspot).handler(ctx, { deckId: 'd1', slideId: 's1', kind: 'bogus', rect: { x: 1, y: 1, w: 1, h: 1 } }),
+      asAny(create_hotspot).handler(ctx, {
+        deckId: 'd1',
+        slideId: 's1',
+        kind: 'bogus',
+        rect: { x: 1, y: 1, w: 1, h: 1 },
+      }),
     ).rejects.toThrow(/INVALID_INPUT/);
   });
   it('rejects create_overlay with bad kind', async () => {
@@ -128,27 +131,29 @@ describe('invalid inputs', () => {
     ).rejects.toThrow(/INVALID_INPUT/);
   });
   it('rejects create_rule without then', async () => {
-    await expect(
-      asAny(create_rule).handler(ctx, { deckId: 'd', when: 'true' }),
-    ).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(create_rule).handler(ctx, { deckId: 'd', when: 'true' })).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
   it('rejects test_rule without context', async () => {
-    await expect(
-      asAny(test_rule).handler(ctx, { deckId: 'd', ruleId: 'r' }),
-    ).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(test_rule).handler(ctx, { deckId: 'd', ruleId: 'r' })).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
   it('rejects create_binding without target', async () => {
-    await expect(
-      asAny(create_binding).handler(ctx, { deckId: 'd', source: 'a' }),
-    ).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(create_binding).handler(ctx, { deckId: 'd', source: 'a' })).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
   it('rejects list_bindings without deckId', async () => {
-    await expect(asAny(list_bindings).handler(ctx, {} as Record<string, unknown>)).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(list_bindings).handler(ctx, {} as Record<string, unknown>)).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
   it('rejects create_form without fields', async () => {
-    await expect(
-      asAny(create_form).handler(ctx, { deckId: 'd', title: 't' }),
-    ).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(create_form).handler(ctx, { deckId: 'd', title: 't' })).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
   it('rejects submit_form with non-object values', async () => {
     await expect(
@@ -167,13 +172,18 @@ describe('invalid inputs', () => {
   });
   it('rejects create_device_frame with non-numeric width', async () => {
     await expect(
-      asAny(create_device_frame).handler(ctx, { deckId: 'd', name: 'n', width: 'wide', height: 100 }),
+      asAny(create_device_frame).handler(ctx, {
+        deckId: 'd',
+        name: 'n',
+        width: 'wide',
+        height: 100,
+      }),
     ).rejects.toThrow(/INVALID_INPUT/);
   });
   it('rejects create_quiz without questions', async () => {
-    await expect(
-      asAny(create_quiz).handler(ctx, { deckId: 'd', title: 't' }),
-    ).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(create_quiz).handler(ctx, { deckId: 'd', title: 't' })).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
   it('rejects submit_answer without answers', async () => {
     await expect(
@@ -186,35 +196,39 @@ describe('invalid inputs', () => {
     ).rejects.toThrow(/INVALID_INPUT/);
   });
   it('rejects start_sequence without sequenceId', async () => {
-    await expect(
-      asAny(start_sequence).handler(ctx, { deckId: 'd' }),
-    ).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(start_sequence).handler(ctx, { deckId: 'd' })).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
   it('rejects shorten_deep_link without target', async () => {
-    await expect(
-      asAny(shorten_deep_link).handler(ctx, { deckId: 'd' }),
-    ).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(shorten_deep_link).handler(ctx, { deckId: 'd' })).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
   it('rejects resolve_deep_link without slug', async () => {
-    await expect(
-      asAny(resolve_deep_link).handler(ctx, { deckId: 'd' }),
-    ).rejects.toThrow(/INVALID_INPUT/);
+    await expect(asAny(resolve_deep_link).handler(ctx, { deckId: 'd' })).rejects.toThrow(
+      /INVALID_INPUT/,
+    );
   });
 });
 
 describe('permission denied', () => {
   it('denies hotspot create for agent with no capability', async () => {
     await expect(
-      asAny(create_hotspot).handler(
-        deniedCtx,
-        { deckId: 'd', slideId: 's', kind: 'cta', rect: { x: 0, y: 0, w: 1, h: 1 } },
-      ),
+      asAny(create_hotspot).handler(deniedCtx, {
+        deckId: 'd',
+        slideId: 's',
+        kind: 'cta',
+        rect: { x: 0, y: 0, w: 1, h: 1 },
+      }),
     ).rejects.toThrow(MCPError);
     await expect(
-      asAny(create_hotspot).handler(
-        deniedCtx,
-        { deckId: 'd', slideId: 's', kind: 'cta', rect: { x: 0, y: 0, w: 1, h: 1 } },
-      ),
+      asAny(create_hotspot).handler(deniedCtx, {
+        deckId: 'd',
+        slideId: 's',
+        kind: 'cta',
+        rect: { x: 0, y: 0, w: 1, h: 1 },
+      }),
     ).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
   });
   it('denies overlay write', async () => {
@@ -227,20 +241,32 @@ describe('permission denied', () => {
       asAny(create_rule).handler(deniedCtx, { deckId: 'd', when: 'true', then: 'noop' }),
     ).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
     const fetchMock = setupGlobalFetch([]);
-    const result = await asAny(list_rules).handler({ ...deniedCtx, agentId: 'agent-2' }, { deckId: 'd' });
+    const result = await asAny(list_rules).handler(
+      { ...deniedCtx, agentId: 'agent-2' },
+      { deckId: 'd' },
+    );
     expect(result).toEqual([]);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   it('denies calculator compute', async () => {
     await expect(
-      asAny(compute_calculator).handler(deniedCtx, { deckId: 'd', calculatorId: 'c', values: { x: 1 } }),
+      asAny(compute_calculator).handler(deniedCtx, {
+        deckId: 'd',
+        calculatorId: 'c',
+        values: { x: 1 },
+      }),
     ).rejects.toMatchObject({ code: 'PERMISSION_DENIED' });
   });
 });
 
 describe('successful calls with mocked fetch', () => {
   it('create_hotspot returns hotspot', async () => {
-    const fetchMock = setupGlobalFetch({ id: 'hs1', slideId: 's1', kind: 'cta', rect: { x: 0, y: 0, w: 10, h: 10 } });
+    const fetchMock = setupGlobalFetch({
+      id: 'hs1',
+      slideId: 's1',
+      kind: 'cta',
+      rect: { x: 0, y: 0, w: 10, h: 10 },
+    });
     const out = await asAny(create_hotspot).handler(ctx, {
       deckId: 'd',
       slideId: 's1',
@@ -252,19 +278,31 @@ describe('successful calls with mocked fetch', () => {
   });
   it('list_overlays calls GET and returns array', async () => {
     const fetchMock = setupGlobalFetch([{ id: 'o1', kind: 'modal', content: 'x' }]);
-    const out = (await asAny(list_overlays).handler(ctx, { deckId: 'd' })) as ReadonlyArray<Record<string, unknown>>;
+    const out = (await asAny(list_overlays).handler(ctx, { deckId: 'd' })) as ReadonlyArray<
+      Record<string, unknown>
+    >;
     expect(out.length).toBe(1);
     expect(out[0]).toMatchObject({ id: 'o1' });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   it('create_variable POSTs and returns variable', async () => {
     const fetchMock = setupGlobalFetch({ name: 'count', type: 'number', value: 0 });
-    const out = await asAny(create_variable).handler(ctx, { deckId: 'd', name: 'count', type: 'number', default: 0 });
+    const out = await asAny(create_variable).handler(ctx, {
+      deckId: 'd',
+      name: 'count',
+      type: 'number',
+      default: 0,
+    });
     expect(out).toMatchObject({ name: 'count' });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
   it('create_calculator returns calculator', async () => {
-    const fetchMock = setupGlobalFetch({ id: 'c1', name: 'loan', inputs: [], expression: 'x*1.05' });
+    const fetchMock = setupGlobalFetch({
+      id: 'c1',
+      name: 'loan',
+      inputs: [],
+      expression: 'x*1.05',
+    });
     const out = await asAny(create_calculator).handler(ctx, {
       deckId: 'd',
       name: 'loan',
@@ -290,10 +328,19 @@ describe('successful calls with mocked fetch', () => {
 
 describe('validators', () => {
   it('validateHotspotCreate ok', () => {
-    expect(validateHotspotCreate({ deckId: 'd', slideId: 's', kind: 'cta', rect: { x: 1, y: 1, w: 1, h: 1 } }).ok).toBe(true);
+    expect(
+      validateHotspotCreate({
+        deckId: 'd',
+        slideId: 's',
+        kind: 'cta',
+        rect: { x: 1, y: 1, w: 1, h: 1 },
+      }).ok,
+    ).toBe(true);
   });
   it('validateHotspotUpdate ok', () => {
-    expect(validateHotspotUpdate({ deckId: 'd', hotspotId: 'h', patch: { label: 'x' } }).ok).toBe(true);
+    expect(validateHotspotUpdate({ deckId: 'd', hotspotId: 'h', patch: { label: 'x' } }).ok).toBe(
+      true,
+    );
   });
   it('validateOverlayCreate rejects empty', () => {
     expect(validateOverlayCreate({ deckId: 'd', kind: 'modal' }).ok).toBe(false);
@@ -354,12 +401,21 @@ describe('simulate', () => {
   });
   it('simulate_sweep rejects negative steps', async () => {
     await expect(
-      asAny(simulate_sweep).handler(ctx, { deckId: 'd', calculatorId: 'c', inputName: 'x', from: 0, to: 1, steps: 0 }),
+      asAny(simulate_sweep).handler(ctx, {
+        deckId: 'd',
+        calculatorId: 'c',
+        inputName: 'x',
+        from: 0,
+        to: 1,
+        steps: 0,
+      }),
     ).rejects.toThrow(/INVALID_INPUT/);
   });
   it('simulate_sweep rejects missing fields', async () => {
     await expect(
-      asAny(simulate_sweep).handler(ctx, { deckId: 'd' } as unknown as Parameters<typeof simulate_sweep.handler>[1]),
+      asAny(simulate_sweep).handler(ctx, { deckId: 'd' } as unknown as Parameters<
+        typeof simulate_sweep.handler
+      >[1]),
     ).rejects.toThrow(/INVALID_INPUT/);
   });
   it('sweep caps steps at 1024', async () => {
@@ -394,7 +450,12 @@ describe('diff', () => {
       n += 1;
       // Even calls are deckB; deckB has more items than deckA.
       const body = n % 2 === 0 ? [{ id: 'h1' }, { id: 'h2' }] : [{ id: 'h1' }];
-      return { ok: true, status: 200, text: async () => JSON.stringify(body), json: async () => body } as unknown as Response;
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify(body),
+        json: async () => body,
+      } as unknown as Response;
     }) as unknown as typeof fetch;
     const out = await diffDecks(ctx, 'a', 'b');
     expect(out.added.length).toBeGreaterThan(0);
@@ -405,7 +466,12 @@ describe('diff', () => {
       n += 1;
       // Odd calls are deckA; deckA has more items than deckB.
       const body = n % 2 === 1 ? [{ id: 'h1' }, { id: 'h2' }] : [{ id: 'h1' }];
-      return { ok: true, status: 200, text: async () => JSON.stringify(body), json: async () => body } as unknown as Response;
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify(body),
+        json: async () => body,
+      } as unknown as Response;
     }) as unknown as typeof fetch;
     const out = await diffDecks(ctx, 'a', 'b');
     expect(out.removed.length).toBeGreaterThan(0);
@@ -416,7 +482,12 @@ describe('diff', () => {
       n += 1;
       // Both decks have h1 with different labels.
       const body = n % 2 === 1 ? [{ id: 'h1', label: 'a' }] : [{ id: 'h1', label: 'b' }];
-      return { ok: true, status: 200, text: async () => JSON.stringify(body), json: async () => body } as unknown as Response;
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify(body),
+        json: async () => body,
+      } as unknown as Response;
     }) as unknown as typeof fetch;
     const out = await diffDecks(ctx, 'a', 'b');
     expect(out.changed.length).toBeGreaterThan(0);

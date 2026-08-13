@@ -13,11 +13,7 @@
 import type { Metadata } from 'next';
 import type { JSX } from 'react';
 import { landing, localUrl } from '@domio/ui';
-import {
-  InstallInstructions,
-  CommandList,
-  ExamplesGallery,
-} from '../../components/cli';
+import { InstallInstructions, CommandList, ExamplesGallery } from '../../components/cli';
 import { COMMANDS, INSTALLS, EXAMPLES } from '../../lib/cli-data';
 import { PageShell } from '../../components/layout/PageShell';
 
@@ -42,17 +38,12 @@ export default function CliLandingPage(): JSX.Element {
               deckctl — Domio&rsquo;s CLI
             </h1>
             <p className="cli-hero__subtitle">
-              Drive Domio from the terminal. Create decks, push drafts, diff
-              changes, export renders, and patch slides — all without opening a
-              browser.
+              Drive Domio from the terminal. Create decks, push drafts, diff changes, export
+              renders, and patch slides — all without opening a browser.
             </p>
             <div className="cli-hero__meta">
               <span className="cli-hero__badge">v0.9.2 · stable</span>
-              <a
-                className="cli-hero__stars"
-                href={githubHref}
-                aria-label="deckctl on GitHub"
-              >
+              <a className="cli-hero__stars" href={githubHref} aria-label="deckctl on GitHub">
                 ★ 1.2k · GitHub
               </a>
             </div>

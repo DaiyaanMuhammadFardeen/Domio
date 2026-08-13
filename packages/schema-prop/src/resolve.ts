@@ -36,7 +36,9 @@ export function resolveFragmentDefault(fragment: PropSchemaFragment): unknown {
 }
 
 /** Builds a full props value from the schema's defaults. */
-export function resolveSchemaDefaults(schema: DomioPropsSchema | PropSchemaFragment): Record<string, unknown> {
+export function resolveSchemaDefaults(
+  schema: DomioPropsSchema | PropSchemaFragment,
+): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [key, fragment] of Object.entries(schema.properties ?? {})) {
     out[key] = resolveFragmentDefault(fragment);
@@ -45,7 +47,10 @@ export function resolveSchemaDefaults(schema: DomioPropsSchema | PropSchemaFragm
 }
 
 /** Merges defaults under any value, preferring the provided keys. */
-export function applyDefaults(schema: DomioPropsSchema, value: Record<string, unknown>): Record<string, unknown> {
+export function applyDefaults(
+  schema: DomioPropsSchema,
+  value: Record<string, unknown>,
+): Record<string, unknown> {
   return { ...resolveSchemaDefaults(schema), ...value };
 }
 

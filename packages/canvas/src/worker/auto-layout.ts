@@ -10,12 +10,7 @@
  * "drop into auto-layout container reflows" demo step.
  */
 
-import type {
-  AutoLayoutLayer,
-  AutoLayoutSpec,
-  Element,
-  Transform2D,
-} from '@domio/schema';
+import type { AutoLayoutLayer, AutoLayoutSpec, Element, Transform2D } from '@domio/schema';
 
 export interface AutoLayoutInput {
   parent: AutoLayoutLayer;
@@ -50,15 +45,13 @@ export function autoLayout(input: AutoLayoutInput): AutoLayoutOutput {
   let cursor = startMain;
   flow.entries.forEach((entry, idx) => {
     const mainSize = flow.mainSizes[idx] ?? 0;
-    const crossOffset = align(spec, entry.crossSize, spec.direction === 'horizontal' ? innerH : innerW);
-    const x =
-      spec.direction === 'horizontal'
-        ? padding.left + cursor
-        : padding.left + crossOffset;
-    const y =
-      spec.direction === 'vertical'
-        ? padding.top + cursor
-        : padding.top + crossOffset;
+    const crossOffset = align(
+      spec,
+      entry.crossSize,
+      spec.direction === 'horizontal' ? innerH : innerW,
+    );
+    const x = spec.direction === 'horizontal' ? padding.left + cursor : padding.left + crossOffset;
+    const y = spec.direction === 'vertical' ? padding.top + cursor : padding.top + crossOffset;
     const w = spec.direction === 'horizontal' ? mainSize : entry.crossSize;
     const h = spec.direction === 'vertical' ? mainSize : entry.crossSize;
     out.set(entry.id, {

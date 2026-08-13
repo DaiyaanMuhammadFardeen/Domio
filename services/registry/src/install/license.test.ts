@@ -1,7 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { InMemoryStore } from '../store/memory.js';
 import { defaultDeps } from '../deps.js';
-import { issueLicenseGrant, verifyLicense, enforceSeats, revokeLicense, isPaidListing } from './license.js';
+import {
+  issueLicenseGrant,
+  verifyLicense,
+  enforceSeats,
+  revokeLicense,
+  isPaidListing,
+} from './license.js';
 import type { MarketplaceListing } from '../store/types.js';
 
 function makeListing(overrides: Partial<MarketplaceListing> & { id: string }): MarketplaceListing {
@@ -79,10 +85,15 @@ describe('license', () => {
     });
 
     it('throws when listing not found', async () => {
-      await expect(issueLicenseGrant(deps, {
-        workspaceId: 'ws-1', catalogId: 'comp.btn', version: '1.0.0',
-        listingId: 'missing', seats: 1,
-      })).rejects.toThrow('not found');
+      await expect(
+        issueLicenseGrant(deps, {
+          workspaceId: 'ws-1',
+          catalogId: 'comp.btn',
+          version: '1.0.0',
+          listingId: 'missing',
+          seats: 1,
+        }),
+      ).rejects.toThrow('not found');
     });
   });
 
@@ -116,9 +127,16 @@ describe('license', () => {
     it('rejects when catalogId mismatches', async () => {
       await store.putListing(makeListing({ id: 'l1' }));
       const grant = await issueLicenseGrant(deps, {
-        workspaceId: 'ws-1', catalogId: 'comp.btn', version: '1.0.0', listingId: 'l1', seats: 1,
+        workspaceId: 'ws-1',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        listingId: 'l1',
+        seats: 1,
       });
-      const result = await verifyLicense(deps, { token: grant.signedToken, catalogId: 'comp.other' });
+      const result = await verifyLicense(deps, {
+        token: grant.signedToken,
+        catalogId: 'comp.other',
+      });
       expect(result.valid).toBe(false);
       expect(result.reason).toBe('catalog-mismatch');
     });
@@ -126,7 +144,11 @@ describe('license', () => {
     it('rejects when version mismatches', async () => {
       await store.putListing(makeListing({ id: 'l1' }));
       const grant = await issueLicenseGrant(deps, {
-        workspaceId: 'ws-1', catalogId: 'comp.btn', version: '1.0.0', listingId: 'l1', seats: 1,
+        workspaceId: 'ws-1',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        listingId: 'l1',
+        seats: 1,
       });
       const result = await verifyLicense(deps, { token: grant.signedToken, version: '2.0.0' });
       expect(result.valid).toBe(false);
@@ -135,7 +157,17 @@ describe('license', () => {
 
     it('rejects when grant not in store', async () => {
       const { signJws } = await import('../crypto/index.js');
-      const token = signJws({ sub: 'fake-id', catalog_id: 'c', version: '1', iat: 1, exp: 9999999999, offline_grace_until: 9999999999 }, deps.licenseSecret);
+      const token = signJws(
+        {
+          sub: 'fake-id',
+          catalog_id: 'c',
+          version: '1',
+          iat: 1,
+          exp: 9999999999,
+          offline_grace_until: 9999999999,
+        },
+        deps.licenseSecret,
+      );
       const result = await verifyLicense(deps, { token });
       expect(result.valid).toBe(false);
       expect(result.reason).toBe('unknown-license');
@@ -144,7 +176,11 @@ describe('license', () => {
     it('rejects revoked license', async () => {
       await store.putListing(makeListing({ id: 'l1' }));
       const grant = await issueLicenseGrant(deps, {
-        workspaceId: 'ws-1', catalogId: 'comp.btn', version: '1.0.0', listingId: 'l1', seats: 1,
+        workspaceId: 'ws-1',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        listingId: 'l1',
+        seats: 1,
       });
       await revokeLicense(deps, grant.id);
       const result = await verifyLicense(deps, { token: grant.signedToken });
@@ -155,7 +191,12 @@ describe('license', () => {
     it('rejects when offline grace expired', async () => {
       await store.putListing(makeListing({ id: 'l1' }));
       const grant = await issueLicenseGrant(deps, {
-        workspaceId: 'ws-1', catalogId: 'comp.btn', version: '1.0.0', listingId: 'l1', seats: 1, now: 1000,
+        workspaceId: 'ws-1',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        listingId: 'l1',
+        seats: 1,
+        now: 1000,
       });
       const farFuture = grant.offlineGraceUntil! + 1000;
       const result = await verifyLicense(deps, { token: grant.signedToken, now: farFuture });
@@ -168,7 +209,11 @@ describe('license', () => {
     it('does not throw when under seat cap', async () => {
       await store.putListing(makeListing({ id: 'l1' }));
       const grant = await issueLicenseGrant(deps, {
-        workspaceId: 'ws-1', catalogId: 'comp.btn', version: '1.0.0', listingId: 'l1', seats: 5,
+        workspaceId: 'ws-1',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        listingId: 'l1',
+        seats: 5,
       });
       await expect(enforceSeats(deps, 'ws-1', 'comp.btn', grant)).resolves.toBeUndefined();
     });

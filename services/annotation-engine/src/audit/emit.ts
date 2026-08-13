@@ -5,11 +5,7 @@
  * pattern. Mirrors services/presenter-session/src/audit/emit.ts.
  */
 
-import {
-  Chain,
-  type Event as AuditEvent,
-  type JsonObject,
-} from '@domio/audit-ts';
+import { Chain, type Event as AuditEvent, type JsonObject } from '@domio/audit-ts';
 import { createHmac } from 'node:crypto';
 import type { AnnotationLayerRecord } from '../types.js';
 

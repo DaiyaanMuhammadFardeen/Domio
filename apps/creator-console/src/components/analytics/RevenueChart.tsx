@@ -17,11 +17,7 @@ export interface RevenueChartProps {
  * derived from the maximum `revenue_cents` value so empty periods
  * never crash rendering.
  */
-export function RevenueChart({
-  points,
-  width = 720,
-  height = 240,
-}: RevenueChartProps) {
+export function RevenueChart({ points, width = 720, height = 240 }: RevenueChartProps) {
   const reactId = useId();
   const titleId = `revenue-chart-title-${reactId.replace(/:/g, '_')}`;
 
@@ -29,10 +25,7 @@ export function RevenueChart({
     const padding = { top: 16, right: 16, bottom: 28, left: 48 };
     const innerW = Math.max(0, width - padding.left - padding.right);
     const innerH = Math.max(0, height - padding.top - padding.bottom);
-    const maxRevenue = points.reduce(
-      (m, p) => Math.max(m, p.revenue_cents),
-      1,
-    );
+    const maxRevenue = points.reduce((m, p) => Math.max(m, p.revenue_cents), 1);
     const n = Math.max(1, points.length);
     const slot = innerW / n;
     const barW = Math.max(2, Math.min(28, slot * 0.7));

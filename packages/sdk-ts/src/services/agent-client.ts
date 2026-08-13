@@ -68,7 +68,7 @@ export class HttpAgentServiceClient implements AgentServiceClient {
       prompt,
     });
     if (!res.ok) throw this.toError(res);
-    return ((res.body as { calls: NlToolCallSummary[] }).calls) ?? [];
+    return (res.body as { calls: NlToolCallSummary[] }).calls ?? [];
   }
 
   async applyNl(deckId: string, calls: readonly NlToolCallSummary[]): Promise<void> {
@@ -101,7 +101,7 @@ export class HttpAgentServiceClient implements AgentServiceClient {
       `${this.baseUrl}/v1/decks/${encodeURIComponent(deckId)}/audit`,
     );
     if (!res.ok) throw this.toError(res);
-    return ((res.body as { entries: AuditEntryDTO[] }).entries) ?? [];
+    return (res.body as { entries: AuditEntryDTO[] }).entries ?? [];
   }
 
   private toError(res: { status: number; body: unknown }): AgentServiceError {

@@ -105,7 +105,18 @@ export function PromoteDialog({
     } finally {
       setPublishing(false);
     }
-  }, [previewDef, replaceSelection, onPromote, catalogId, name, version, scope, teamId, brandLocked, onClose]);
+  }, [
+    previewDef,
+    replaceSelection,
+    onPromote,
+    catalogId,
+    name,
+    version,
+    scope,
+    teamId,
+    brandLocked,
+    onClose,
+  ]);
 
   if (!open || elements.length === 0) return null;
 
@@ -119,7 +130,9 @@ export function PromoteDialog({
 
         <div className="promote-dialog__body">
           <div className="promote-dialog__field">
-            <label className="promote-dialog__label" htmlFor="promote-name">{t('promote.name')}</label>
+            <label className="promote-dialog__label" htmlFor="promote-name">
+              {t('promote.name')}
+            </label>
             <input
               id="promote-name"
               type="text"
@@ -143,7 +156,9 @@ export function PromoteDialog({
           </div>
 
           <div className="promote-dialog__field">
-            <label className="promote-dialog__label" htmlFor="promote-version">Version</label>
+            <label className="promote-dialog__label" htmlFor="promote-version">
+              Version
+            </label>
             <input
               id="promote-version"
               type="text"
@@ -214,7 +229,11 @@ export function PromoteDialog({
         </div>
 
         <footer className="promote-dialog__footer">
-          <button type="button" className="promote-dialog__btn promote-dialog__btn--cancel" onClick={onClose}>
+          <button
+            type="button"
+            className="promote-dialog__btn promote-dialog__btn--cancel"
+            onClick={onClose}
+          >
             {t('app.cancel')}
           </button>
           <button

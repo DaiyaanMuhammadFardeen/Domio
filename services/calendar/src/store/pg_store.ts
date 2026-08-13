@@ -88,10 +88,7 @@ export class PgCalendarStore implements CalendarStore {
 
   async getLink(id: string): Promise<CalendarLink | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getLink');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM calendar_link WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM calendar_link WHERE id = $1', [id]);
     if (rows.length === 0) return null;
     return calendarLinkRowToDomain(rows[0]!);
   }
@@ -128,10 +125,7 @@ export class PgCalendarStore implements CalendarStore {
 
   async deleteLink(id: string): Promise<void> {
     if (!this.pool) throw new StoreNotConfiguredError('deleteLink');
-    await this.pool.query(
-      'DELETE FROM calendar_link WHERE id = $1',
-      [id],
-    );
+    await this.pool.query('DELETE FROM calendar_link WHERE id = $1', [id]);
   }
 
   // -------------------------------------------------------------------------
@@ -199,7 +193,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

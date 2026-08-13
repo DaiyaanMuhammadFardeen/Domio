@@ -131,7 +131,11 @@ export function buildInMemorySpool(): Spool {
  * Periodically drain the spool back to Kafka. Returns a stop() function
  * that cancels the interval.
  */
-export function buildFlusher(spool: Spool, publisher: KafkaPublisher, intervalMs = 10_000): () => void {
+export function buildFlusher(
+  spool: Spool,
+  publisher: KafkaPublisher,
+  intervalMs = 10_000,
+): () => void {
   let timer: ReturnType<typeof setInterval> | null = null;
   let running = false;
 

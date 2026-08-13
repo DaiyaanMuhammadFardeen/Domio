@@ -8,22 +8,22 @@
 import { FeatureDisabledError } from './types.js';
 
 export const FEATURE_FLAGS = {
-  storefront:  'marketplace.storefront',
-  creator:     'marketplace.creator',
-  reviews:     'marketplace.reviews',
-  pricing:     'marketplace.pricing',
-  subscription:'marketplace.subscription',
-  refund:      'marketplace.refund',
-  chargeback:  'marketplace.chargeback',
-  curated:     'marketplace.curated',
-  kyc:         'marketplace.kyc',
-  payout:      'marketplace.payout',
-  analytics:   'marketplace.analytics',
-  takedown:    'marketplace.takedown',
-  partnerApi:  'marketplace.partner_api',
-  mcp:         'marketplace.mcp',
-  webhooks:    'marketplace.webhooks',
-  audit:       'marketplace.audit',
+  storefront: 'marketplace.storefront',
+  creator: 'marketplace.creator',
+  reviews: 'marketplace.reviews',
+  pricing: 'marketplace.pricing',
+  subscription: 'marketplace.subscription',
+  refund: 'marketplace.refund',
+  chargeback: 'marketplace.chargeback',
+  curated: 'marketplace.curated',
+  kyc: 'marketplace.kyc',
+  payout: 'marketplace.payout',
+  analytics: 'marketplace.analytics',
+  takedown: 'marketplace.takedown',
+  partnerApi: 'marketplace.partner_api',
+  mcp: 'marketplace.mcp',
+  webhooks: 'marketplace.webhooks',
+  audit: 'marketplace.audit',
 } as const;
 
 export type FeatureFlag = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];

@@ -124,7 +124,9 @@ describe('Chain — multi-event chain', () => {
     chain.loadKey(makeKey());
     const events: Event[] = [];
     for (let i = 0; i < 100; i++) {
-      events.push(await chain.build({ ...makeBuildInput(i), payload: { ...makeBuildInput(i).payload, i } }));
+      events.push(
+        await chain.build({ ...makeBuildInput(i), payload: { ...makeBuildInput(i).payload, i } }),
+      );
     }
     await expect(chain.verifyChain(events)).resolves.toBeUndefined();
   });

@@ -105,18 +105,23 @@ const SEED_REGIONS: ReadonlyArray<{
   base_loss_pct: number;
   base_status: RegionSyncStatus;
 }> = [
-  { region: 'US-East',      base_latency_ms: 42,  base_loss_pct: 0.1, base_status: 'synced' },
-  { region: 'US-West',      base_latency_ms: 78,  base_loss_pct: 0.4, base_status: 'synced' },
-  { region: 'EU-Central',   base_latency_ms: 165, base_loss_pct: 1.2, base_status: 'lagging' },
-  { region: 'AP-South',     base_latency_ms: 240, base_loss_pct: 2.4, base_status: 'lagging' },
-  { region: 'AP-Northeast', base_latency_ms: 9999, base_loss_pct: 100, base_status: 'disconnected' },
+  { region: 'US-East', base_latency_ms: 42, base_loss_pct: 0.1, base_status: 'synced' },
+  { region: 'US-West', base_latency_ms: 78, base_loss_pct: 0.4, base_status: 'synced' },
+  { region: 'EU-Central', base_latency_ms: 165, base_loss_pct: 1.2, base_status: 'lagging' },
+  { region: 'AP-South', base_latency_ms: 240, base_loss_pct: 2.4, base_status: 'lagging' },
+  {
+    region: 'AP-Northeast',
+    base_latency_ms: 9999,
+    base_loss_pct: 100,
+    base_status: 'disconnected',
+  },
 ];
 
 const SEED_VIEWPORTS: ReadonlyArray<AudienceViewport> = [
-  { region: 'US-East',      slide_index: 5, updated_at_ms: 1_730_000_120_000 },
-  { region: 'US-West',      slide_index: 5, updated_at_ms: 1_730_000_119_000 },
-  { region: 'EU-Central',   slide_index: 4, updated_at_ms: 1_730_000_118_000 },
-  { region: 'AP-South',     slide_index: 4, updated_at_ms: 1_730_000_117_000 },
+  { region: 'US-East', slide_index: 5, updated_at_ms: 1_730_000_120_000 },
+  { region: 'US-West', slide_index: 5, updated_at_ms: 1_730_000_119_000 },
+  { region: 'EU-Central', slide_index: 4, updated_at_ms: 1_730_000_118_000 },
+  { region: 'AP-South', slide_index: 4, updated_at_ms: 1_730_000_117_000 },
 ];
 
 // ─── In-memory state ────────────────────────────────────────────────────────
@@ -131,7 +136,10 @@ const viewportsBySession = new Map<string, AudienceViewport[]>();
 
 function ensureSeed(sessionId: string): void {
   if (!presentersBySession.has(sessionId)) {
-    presentersBySession.set(sessionId, SEED_PRESENTERS.map((p) => ({ ...p })));
+    presentersBySession.set(
+      sessionId,
+      SEED_PRESENTERS.map((p) => ({ ...p })),
+    );
     activePresenterIdBySession.set(
       sessionId,
       SEED_PRESENTERS.find((p) => p.is_active)?.id ?? SEED_PRESENTERS[0]!.id,
@@ -305,7 +313,10 @@ export function __resetCoPresentingState(): void {
 
 /** Inject a custom presenter list for tests. */
 export function __setPresentersForTest(sessionId: string, list: Presenter[]): void {
-  presentersBySession.set(sessionId, list.map((p) => ({ ...p })));
+  presentersBySession.set(
+    sessionId,
+    list.map((p) => ({ ...p })),
+  );
   const active = list.find((p) => p.is_active);
   activePresenterIdBySession.set(sessionId, active?.id ?? list[0]!.id);
 }

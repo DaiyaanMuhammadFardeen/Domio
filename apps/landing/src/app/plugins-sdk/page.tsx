@@ -154,7 +154,11 @@ export default function PluginsSdkPage(): ReactElement {
               </header>
               <p>{TUTORIAL_BODY[tutorial.slug]}</p>
               <p>
-                <a href={`${SAMPLE_PLUGIN_REPO_URL}#${tutorial.slug}`} rel="noopener noreferrer" target="_blank">
+                <a
+                  href={`${SAMPLE_PLUGIN_REPO_URL}#${tutorial.slug}`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
                   Open the full guide on GitHub ↗
                 </a>
               </p>

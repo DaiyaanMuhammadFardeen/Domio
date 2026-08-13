@@ -49,7 +49,12 @@ function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
 }
 
-function eventToSvg(svg: SVGSVGElement, clientX: number, clientY: number, fallbackSize = 200): { x: number; y: number } {
+function eventToSvg(
+  svg: SVGSVGElement,
+  clientX: number,
+  clientY: number,
+  fallbackSize = 200,
+): { x: number; y: number } {
   const rect = svg.getBoundingClientRect();
   const width = rect.width || svg.clientWidth || fallbackSize;
   const height = rect.height || svg.clientHeight || fallbackSize;
@@ -107,9 +112,10 @@ export function EasingBezierEditor(props: EasingBezierEditorProps): ReactElement
       const { x: svgX, y: svgY } = eventToSvg(svg, e.clientX, e.clientY);
       const newX = svgX;
       const newY = svgYToBezierY(svgY);
-      const next: [number, number, number, number] = dragIdxRef.current === 0
-        ? [newX, newY, current[2], current[3]]
-        : [current[0], current[1], newX, newY];
+      const next: [number, number, number, number] =
+        dragIdxRef.current === 0
+          ? [newX, newY, current[2], current[3]]
+          : [current[0], current[1], newX, newY];
       liveValueRef.current = next;
       setLiveValue(next);
       props.onLiveChange?.(next);
@@ -147,7 +153,13 @@ export function EasingBezierEditor(props: EasingBezierEditorProps): ReactElement
       const y = 3 * u * u * t * current[1] + 3 * u * t * t * current[3] + t * t * t;
       pts.push(`${(x * size).toFixed(2)},${((1 - y) * size).toFixed(2)}`);
     }
-    return `M ${pts[0]} ` + pts.slice(1).map((p) => `L ${p}`).join(' ');
+    return (
+      `M ${pts[0]} ` +
+      pts
+        .slice(1)
+        .map((p) => `L ${p}`)
+        .join(' ')
+    );
   }, [current, size]);
 
   const toSvgX = (bx: number) => bx * size;
@@ -189,8 +201,12 @@ export function EasingBezierEditor(props: EasingBezierEditorProps): ReactElement
           strokeWidth={0.5}
         />
         {/* Time + progress axis labels */}
-        <text x={4} y={size - 4} fontSize={9} fill="var(--muted, #888)">0</text>
-        <text x={size - 8} y={12} fontSize={9} fill="var(--muted, #888)">1</text>
+        <text x={4} y={size - 4} fontSize={9} fill="var(--muted, #888)">
+          0
+        </text>
+        <text x={size - 8} y={12} fontSize={9} fill="var(--muted, #888)">
+          1
+        </text>
 
         {/* Bezier handle lines */}
         <line
@@ -218,8 +234,20 @@ export function EasingBezierEditor(props: EasingBezierEditorProps): ReactElement
         <path d={curvePath} fill="none" stroke="var(--accent, #58a6ff)" strokeWidth={2} />
 
         {/* Anchor points (fixed) */}
-        <circle cx={0} cy={size} r={3} fill="var(--muted, #888)" data-testid="easing-bezier-anchor-0" />
-        <circle cx={size} cy={0} r={3} fill="var(--muted, #888)" data-testid="easing-bezier-anchor-1" />
+        <circle
+          cx={0}
+          cy={size}
+          r={3}
+          fill="var(--muted, #888)"
+          data-testid="easing-bezier-anchor-0"
+        />
+        <circle
+          cx={size}
+          cy={0}
+          r={3}
+          fill="var(--muted, #888)"
+          data-testid="easing-bezier-anchor-1"
+        />
 
         {/* Control points (draggable) */}
         <circle
@@ -247,7 +275,10 @@ export function EasingBezierEditor(props: EasingBezierEditorProps): ReactElement
       </svg>
 
       <div className="easing-bezier-editor__readout" data-testid="easing-bezier-readout">
-        <span>cubic-bezier({formatNum(current[0])}, {formatNum(current[1])}, {formatNum(current[2])}, {formatNum(current[3])})</span>
+        <span>
+          cubic-bezier({formatNum(current[0])}, {formatNum(current[1])}, {formatNum(current[2])},{' '}
+          {formatNum(current[3])})
+        </span>
       </div>
     </div>
   );
@@ -260,7 +291,10 @@ function formatNum(n: number): string {
 
 /** Parse a cubic-bezier control point tuple from a string. */
 export function parseBezierTuple(value: string): [number, number, number, number] | null {
-  const match = /^cubic-bezier\(\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*\)$/.exec(value);
+  const match =
+    /^cubic-bezier\(\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*,\s*([\d.\-eE]+)\s*\)$/.exec(
+      value,
+    );
   if (!match) return null;
   return [Number(match[1]), Number(match[2]), Number(match[3]), Number(match[4])];
 }

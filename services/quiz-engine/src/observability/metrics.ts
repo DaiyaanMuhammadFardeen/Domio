@@ -2,8 +2,12 @@
  * @domio/quiz-engine — observability.
  */
 
-export interface CounterLike { inc(by?: number, attrs?: Record<string, string>): void; }
-export interface HistogramLike { observe(value_ms: number, attrs?: Record<string, string>): void; }
+export interface CounterLike {
+  inc(by?: number, attrs?: Record<string, string>): void;
+}
+export interface HistogramLike {
+  observe(value_ms: number, attrs?: Record<string, string>): void;
+}
 export interface QuizEngineMetrics {
   quizzes_created: CounterLike;
   answers: CounterLike;
@@ -14,5 +18,9 @@ export class NullQuizEngineMetrics implements QuizEngineMetrics {
   answers = makeCounter();
   answer_latency_ms = makeHistogram();
 }
-function makeCounter(): CounterLike { return { inc: () => undefined }; }
-function makeHistogram(): HistogramLike { return { observe: () => undefined }; }
+function makeCounter(): CounterLike {
+  return { inc: () => undefined };
+}
+function makeHistogram(): HistogramLike {
+  return { observe: () => undefined };
+}

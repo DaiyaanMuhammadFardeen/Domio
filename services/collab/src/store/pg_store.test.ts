@@ -151,7 +151,7 @@ function commentToRow(c: Comment): Record<string, unknown> {
     body_md: c.bodyMd,
     target_type: c.targetType,
     target_id: c.targetId,
-    anchor: c.anchor,  // node-pg returns parsed jsonb
+    anchor: c.anchor, // node-pg returns parsed jsonb
     status: c.status,
     is_orphaned: c.isOrphaned,
     emoji_reactions: c.emojiReactions,
@@ -422,8 +422,9 @@ describe('PgCollabStore — updateComment', () => {
   it('throws CommentNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgCollabStore(pool as any);
-    await expect(store.updateComment('nonexistent', { bodyMd: 'x' }))
-      .rejects.toThrow(CommentNotFoundError);
+    await expect(store.updateComment('nonexistent', { bodyMd: 'x' })).rejects.toThrow(
+      CommentNotFoundError,
+    );
   });
 
   it('skips update when patch is empty and returns existing', async () => {
@@ -531,7 +532,12 @@ describe('PgCollabStore — getApprovalRequest', () => {
 describe('PgCollabStore — updateApprovalRequest', () => {
   it('builds dynamic SET clause', async () => {
     const request = makeApprovalRequest();
-    const updated = { ...request, status: 'approved' as const, closedAt: new Date(), updatedAt: new Date() };
+    const updated = {
+      ...request,
+      status: 'approved' as const,
+      closedAt: new Date(),
+      updatedAt: new Date(),
+    };
     const captured: { sql: string; params: unknown[] }[] = [];
     const pool = createFakePool((sql, params) => {
       captured.push({ sql, params: params ?? [] });
@@ -553,8 +559,9 @@ describe('PgCollabStore — updateApprovalRequest', () => {
   it('throws ApprovalRequestNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgCollabStore(pool as any);
-    await expect(store.updateApprovalRequest('x', { status: 'approved' }))
-      .rejects.toThrow(ApprovalRequestNotFoundError);
+    await expect(store.updateApprovalRequest('x', { status: 'approved' })).rejects.toThrow(
+      ApprovalRequestNotFoundError,
+    );
   });
 });
 
@@ -631,8 +638,8 @@ describe('PgCollabStore — insertAssignment', () => {
 
     const q = captured[0]!;
     expect(q.sql).toContain('int4range($4, $5)');
-    expect(q.params[3]).toBe(3);  // start
-    expect(q.params[4]).toBe(8);  // end + 1 = 7 + 1
+    expect(q.params[3]).toBe(3); // start
+    expect(q.params[4]).toBe(8); // end + 1 = 7 + 1
     // watchers as uuid[]
     expect(q.sql).toContain('$7::uuid[]');
     expect(q.params[6]).toEqual(['user-002', 'user-003']);
@@ -650,8 +657,8 @@ describe('PgCollabStore — insertAssignment', () => {
     await store.insertAssignment(assignment);
 
     const q = captured[0]!;
-    expect(q.params[3]).toBe(5);  // start
-    expect(q.params[4]).toBe(6);  // end + 1
+    expect(q.params[3]).toBe(5); // start
+    expect(q.params[4]).toBe(6); // end + 1
   });
 });
 
@@ -706,7 +713,12 @@ describe('PgCollabStore — updateAssignment', () => {
 
   it('handles status + blockedReason update', async () => {
     const assignment = makeAssignment();
-    const updated = { ...assignment, status: 'blocked' as const, blockedReason: 'Waiting', updatedAt: new Date() };
+    const updated = {
+      ...assignment,
+      status: 'blocked' as const,
+      blockedReason: 'Waiting',
+      updatedAt: new Date(),
+    };
     const captured: { sql: string; params: unknown[] }[] = [];
     const pool = createFakePool((sql, params) => {
       captured.push({ sql, params: params ?? [] });
@@ -726,8 +738,9 @@ describe('PgCollabStore — updateAssignment', () => {
   it('throws CommentNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgCollabStore(pool as any);
-    await expect(store.updateAssignment('x', { status: 'done' }))
-      .rejects.toThrow(CommentNotFoundError);
+    await expect(store.updateAssignment('x', { status: 'done' })).rejects.toThrow(
+      CommentNotFoundError,
+    );
   });
 });
 

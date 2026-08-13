@@ -354,31 +354,51 @@ const TOKENS = [
     tokenId: 'motion.duration.instant',
     group: 'motion',
     type: 'motion',
-    value: { duration: { value: 0, unit: 'ms' }, easing: 'linear', delay: { value: 0, unit: 'ms' } },
+    value: {
+      duration: { value: 0, unit: 'ms' },
+      easing: 'linear',
+      delay: { value: 0, unit: 'ms' },
+    },
   },
   {
     tokenId: 'motion.duration.fast',
     group: 'motion',
     type: 'motion',
-    value: { duration: { value: 100, unit: 'ms' }, easing: 'ease-out', delay: { value: 0, unit: 'ms' } },
+    value: {
+      duration: { value: 100, unit: 'ms' },
+      easing: 'ease-out',
+      delay: { value: 0, unit: 'ms' },
+    },
   },
   {
     tokenId: 'motion.duration.normal',
     group: 'motion',
     type: 'motion',
-    value: { duration: { value: 200, unit: 'ms' }, easing: 'ease-in-out', delay: { value: 0, unit: 'ms' } },
+    value: {
+      duration: { value: 200, unit: 'ms' },
+      easing: 'ease-in-out',
+      delay: { value: 0, unit: 'ms' },
+    },
   },
   {
     tokenId: 'motion.duration.slow',
     group: 'motion',
     type: 'motion',
-    value: { duration: { value: 400, unit: 'ms' }, easing: 'ease-in-out', delay: { value: 0, unit: 'ms' } },
+    value: {
+      duration: { value: 400, unit: 'ms' },
+      easing: 'ease-in-out',
+      delay: { value: 0, unit: 'ms' },
+    },
   },
   {
     tokenId: 'motion.spring.bounce',
     group: 'motion',
     type: 'motion',
-    value: { duration: { value: 500, unit: 'ms' }, easing: 'spring', delay: { value: 50, unit: 'ms' } },
+    value: {
+      duration: { value: 500, unit: 'ms' },
+      easing: 'spring',
+      delay: { value: 50, unit: 'ms' },
+    },
     description: 'Bouncy spring animation',
   },
 
@@ -387,13 +407,19 @@ const TOKENS = [
     tokenId: 'content.icon.logo',
     group: 'content',
     type: 'content',
-    value: { contentType: 'svg', data: '<svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"/></svg>' },
+    value: {
+      contentType: 'svg',
+      data: '<svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2z"/></svg>',
+    },
   },
   {
     tokenId: 'content.icon.close',
     group: 'content',
     type: 'content',
-    value: { contentType: 'svg', data: '<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>' },
+    value: {
+      contentType: 'svg',
+      data: '<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+    },
   },
   {
     tokenId: 'content.icon.search',

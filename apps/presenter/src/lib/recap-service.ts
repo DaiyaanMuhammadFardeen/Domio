@@ -41,10 +41,13 @@ export class RecapClient {
 
   async fetch(sessionId: string): Promise<RecapSummary> {
     const fetchImpl = this.opts.fetchImpl ?? fetch;
-    const res = await fetchImpl(`${this.opts.baseUrl ?? ''}/v1/presenter/sessions/${sessionId}/recap`, {
-      method: 'GET',
-      credentials: 'same-origin',
-    });
+    const res = await fetchImpl(
+      `${this.opts.baseUrl ?? ''}/v1/presenter/sessions/${sessionId}/recap`,
+      {
+        method: 'GET',
+        credentials: 'same-origin',
+      },
+    );
     if (!res.ok) {
       throw new RecapClientError(res.status, `recap fetch failed (HTTP ${res.status})`);
     }
@@ -53,12 +56,15 @@ export class RecapClient {
 
   async submit(sessionId: string, summary: RecapSummary): Promise<void> {
     const fetchImpl = this.opts.fetchImpl ?? fetch;
-    const res = await fetchImpl(`${this.opts.baseUrl ?? ''}/v1/presenter/sessions/${sessionId}/recap`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(summary),
-      credentials: 'same-origin',
-    });
+    const res = await fetchImpl(
+      `${this.opts.baseUrl ?? ''}/v1/presenter/sessions/${sessionId}/recap`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(summary),
+        credentials: 'same-origin',
+      },
+    );
     if (!res.ok) {
       throw new RecapClientError(res.status, `recap submit failed (HTTP ${res.status})`);
     }

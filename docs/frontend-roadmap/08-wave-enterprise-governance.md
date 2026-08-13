@@ -19,11 +19,13 @@
 **Features:** #193.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/sso/page.tsx`
 - `apps/admin-console/src/app/scim/page.tsx`
 - `apps/admin-console/src/components/sso/{ProviderConfig,MetadataImport,TestLogin}.tsx`
 
 **Build instructions:**
+
 1. SSO provider list: SAML (Okta, Azure AD, OneLogin, custom), OIDC (Google, Microsoft, GitHub, custom).
 2. Provider config form: metadata URL or XML upload; ACS URL + Entity ID auto-generated; role mapping rules.
 3. SCIM token generation + endpoint URL; copy button.
@@ -31,9 +33,11 @@
 5. Per-provider status: connected, last sync, error count.
 
 **SOLID notes:**
+
 - **O:** adding a new SSO provider is one entry in `ssoProviders` registry + one metadata parser.
 
 **Acceptance:**
+
 - Test login completes in <5 s.
 - SCIM token works for provision + de-provision round-trips.
 
@@ -44,9 +48,11 @@
 **Features:** #194.
 
 **Files to modify:**
+
 - `apps/admin-console/src/app/brand-locks/page.tsx` (already exists; harden)
 
 **Build instructions:**
+
 1. Org-wide on-brand score (0–100), with trend chart.
 2. Violation report: decks + slides + elements that violate brand rules; click to open.
 3. CSV bulk import (real endpoint) + per-deck brand-lock enforcement status.
@@ -58,15 +64,18 @@
 **Features:** #195.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/dlp/page.tsx`
 - `apps/admin-console/src/components/dlp/{RuleBuilder,RuleList,TestRule}.tsx`
 
 **Build instructions:**
+
 1. Rule builder: pattern (regex / dictionary / entity), scope (deck title, slide content, comment, asset), action (block share, redact, notify).
 2. Test rule: input text → see which rules fire.
 3. Rule list: enable/disable, edit, delete.
 
 **Acceptance:**
+
 - Test rule returns match within 100 ms.
 
 ---
@@ -76,10 +85,12 @@
 **Features:** #196.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/audit/page.tsx`
 - `apps/admin-console/src/components/audit/{LogTable,FilterBar,DetailDrawer}.tsx`
 
 **Build instructions:**
+
 1. Log table: timestamp, actor, action, target, trace id.
 2. Filter by actor, action type, time range, target type.
 3. Detail drawer: full event JSON + diff if applicable.
@@ -92,10 +103,12 @@
 **Features:** #197.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/residency/page.tsx`
 - `apps/admin-console/src/components/residency/{RegionSelector,MigrationPlanner}.tsx`
 
 **Build instructions:**
+
 1. Region selector: pick a region per workspace.
 2. Migration planner: simulate moving data; preview cost + downtime.
 3. Run migration with progress tracker.
@@ -107,10 +120,12 @@
 **Features:** #198.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/legal-hold/page.tsx`
 - `apps/admin-console/src/app/retention/page.tsx`
 
 **Build instructions:**
+
 1. Legal hold: apply hold to a deck or workspace; immutable until released.
 2. Retention: configure time-based retention per content type; preview affected decks before applying.
 
@@ -121,9 +136,11 @@
 **Features:** #199.
 
 **Files to modify:**
+
 - `apps/admin-console/src/app/seats/page.tsx` (new)
 
 **Build instructions:**
+
 1. Seat usage chart over time.
 2. Per-user activity (last active, decks created, shares).
 3. License tier summary.
@@ -135,11 +152,13 @@
 **Features:** #200, #201.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/api-keys/page.tsx`
 - `apps/admin-console/src/app/webhooks/page.tsx`
 - `apps/admin-console/src/app/sdk/page.tsx`
 
 **Build instructions:**
+
 1. API key minting with scope (read-only, write, agent-only, etc.).
 2. Webhook subscriptions: per-event selection, retry policy, secret rotation.
 3. SDK download page (link to npm/maven/etc.).
@@ -151,10 +170,12 @@
 **Features:** #202, #235.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/plugins/page.tsx`
 - `apps/admin-console/src/app/plugins/[id]/page.tsx`
 
 **Build instructions:**
+
 1. Plugin list: installed, available, deprecated.
 2. Per-plugin: scopes, permissions requested, audit log, version, enable/disable.
 3. Approve/reject plugin publish requests (links to marketplace).
@@ -166,9 +187,11 @@
 **Features:** #203.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/component-sdk/page.tsx`
 
 **Build instructions:**
+
 1. Quickstart, docs link, sample component template (download as zip).
 2. Build + test pipeline links.
 3. Publish flow to org library.
@@ -180,9 +203,11 @@
 **Features:** #204.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/rendering/page.tsx`
 
 **Build instructions:**
+
 1. Queue status, throughput, error rate, sample renders.
 2. Configure max parallelism, retention.
 3. Per-tenant rate limits.
@@ -192,6 +217,7 @@
 ## 3. SOLID injection
 
 ### Admin-console module map
+
 ```
 apps/admin-console/src/
 ├── app/
@@ -220,6 +246,7 @@ apps/admin-console/src/
 ```
 
 ### Rule: every admin page is a CRUD page with audit
+
 Each page is `List + Create + Edit + Delete` (or `View + Action`). Every destructive action goes through an audit log entry that admins can review.
 
 ---

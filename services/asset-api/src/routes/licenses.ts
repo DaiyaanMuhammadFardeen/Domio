@@ -20,7 +20,10 @@ export function licenseRoutes(service: AssetService): Hono {
   app.get('/v1/licenses', async (c) => {
     const workspaceId = c.req.query('workspace_id');
     if (!workspaceId) {
-      return c.json({ error: 'Missing required query param: workspace_id', code: 'VALIDATION_ERROR' }, 400);
+      return c.json(
+        { error: 'Missing required query param: workspace_id', code: 'VALIDATION_ERROR' },
+        400,
+      );
     }
     const licenses = await service.listLicenses(workspaceId);
     return c.json({ items: licenses });
@@ -31,11 +34,14 @@ export function licenseRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validateCreateLicense(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
     const license = await service.createLicense(body);
     return c.json(license, 201);
@@ -47,7 +53,8 @@ export function licenseRoutes(service: AssetService): Hono {
       const license = await service.getLicense(c.req.param('id'));
       return c.json(license);
     } catch (e) {
-      if (e instanceof LicenseNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof LicenseNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -57,17 +64,21 @@ export function licenseRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validatePatchLicense(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
     try {
       const license = await service.patchLicense(c.req.param('id'), body);
       return c.json(license);
     } catch (e) {
-      if (e instanceof LicenseNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof LicenseNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -78,7 +89,8 @@ export function licenseRoutes(service: AssetService): Hono {
       await service.deleteLicense(c.req.param('id'));
       return c.body(null, 204);
     } catch (e) {
-      if (e instanceof LicenseNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof LicenseNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       if (e instanceof LicenseReferencedError) {
         return c.json({ error: e.message, code: 'LICENSE_REFERENCED' }, 400);
       }

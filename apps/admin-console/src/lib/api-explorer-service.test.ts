@@ -20,14 +20,7 @@ describe('listEndpoints', () => {
   it('groups endpoints by Decks/Sessions/Analytics/Marketplace/MCP/Webhooks', async () => {
     const eps = await listEndpoints();
     const groups = new Set(eps.map((e) => e.group));
-    for (const g of [
-      'Decks',
-      'Sessions',
-      'Analytics',
-      'Marketplace',
-      'MCP',
-      'Webhooks',
-    ]) {
+    for (const g of ['Decks', 'Sessions', 'Analytics', 'Marketplace', 'MCP', 'Webhooks']) {
       expect(groups.has(g)).toBe(true);
     }
   });
@@ -171,7 +164,7 @@ describe('formatAsCurl', () => {
       url: 'https://api.domio.app/v1/decks',
       headers: { accept: 'application/json' },
     });
-    expect(out).toContain("curl -X GET");
+    expect(out).toContain('curl -X GET');
     expect(out).toContain('https://api.domio.app/v1/decks');
     expect(out).toContain('accept: application/json');
   });

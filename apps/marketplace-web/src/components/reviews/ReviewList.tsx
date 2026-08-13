@@ -84,10 +84,7 @@ export function ReviewList({
               <div className="flex items-center gap-2">
                 <div className="flex gap-0.5" aria-label={`${review.rating} of 5 stars`}>
                   {Array.from({ length: 5 }).map((_star, i) => (
-                    <StarIcon
-                      key={`star-${review.id}-${i}`}
-                      filled={i < review.rating}
-                    />
+                    <StarIcon key={`star-${review.id}-${i}`} filled={i < review.rating} />
                   ))}
                 </div>
                 {review.verified_buyer && (

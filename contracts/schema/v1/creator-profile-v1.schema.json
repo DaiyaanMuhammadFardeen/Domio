@@ -9,7 +9,18 @@
     "CreatorProfile": {
       "type": "object",
       "description": "Creator identity, KYC state, and running balance. Keyed by user_id.",
-      "required": ["id", "user_id", "display_name", "slug", "bio", "payout_method", "payout_ready", "kyc_status", "balance_cents", "currency"],
+      "required": [
+        "id",
+        "user_id",
+        "display_name",
+        "slug",
+        "bio",
+        "payout_method",
+        "payout_ready",
+        "kyc_status",
+        "balance_cents",
+        "currency"
+      ],
       "properties": {
         "id": {
           "type": "string",

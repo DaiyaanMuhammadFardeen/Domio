@@ -70,10 +70,7 @@ export function createBatchRoutes(cache?: EasingLruCache): Hono {
     const lutEntries = Math.ceil((totalDurationMs / 1000) * SAMPLE_RATE_HZ) + 1;
 
     if (lutEntries > MAX_LUT_ENTRIES) {
-      return c.json(
-        { error: 'Keyframe timeline exceeds 600-frame LUT limit' },
-        413,
-      );
+      return c.json({ error: 'Keyframe timeline exceeds 600-frame LUT limit' }, 413);
     }
 
     // Build LUT at 60Hz

@@ -24,10 +24,7 @@
 import type { Event } from '@domio/audit-ts';
 import type { Chain } from '@domio/audit-ts';
 import type { JsonObject } from '@domio/audit-ts';
-import type {
-  LinkPolicy,
-  ShareLink,
-} from '../types.js';
+import type { LinkPolicy, ShareLink } from '../types.js';
 import type { ShareLinkSnapshot } from '../store/store.js';
 
 // ---------------------------------------------------------------------------

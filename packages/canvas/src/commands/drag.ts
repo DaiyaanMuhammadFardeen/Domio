@@ -42,11 +42,7 @@ export class DragController {
    * Returns an empty map if first frame has not yet been emitted.
    */
   update(current: { x: number; y: number }): Map<ULID, Transform2D> {
-    const raw = constrainToAxis(
-      this.init.startPointer,
-      current,
-      this.init.shift ?? false,
-    );
+    const raw = constrainToAxis(this.init.startPointer, current, this.init.shift ?? false);
     // Treat sub-pixel motion as a no-op so snap doesn't teleport the layer
     // back onto its grid step when the user hasn't actually moved yet.
     if (Math.hypot(raw.dx, raw.dy) < 1) {
@@ -91,11 +87,7 @@ export class DragController {
    * True when the drag did not move (within the pixel threshold).
    */
   isNoop(current: { x: number; y: number }): boolean {
-    const raw = constrainToAxis(
-      this.init.startPointer,
-      current,
-      this.init.shift ?? false,
-    );
+    const raw = constrainToAxis(this.init.startPointer, current, this.init.shift ?? false);
     return Math.hypot(raw.dx, raw.dy) < 1;
   }
 }

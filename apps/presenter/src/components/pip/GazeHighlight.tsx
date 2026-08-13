@@ -22,20 +22,9 @@
  * model is available so it stays useful in dev / test environments.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
-import {
-  getGazeCalibration,
-  recordGazeEvent,
-  saveGazeCalibration,
-} from '../../lib/gaze-service';
+import { getGazeCalibration, recordGazeEvent, saveGazeCalibration } from '../../lib/gaze-service';
 
 import { GazePrivacyNotice } from './GazePrivacyNotice';
 import { GazeCalibration } from './GazeCalibration';
@@ -79,12 +68,7 @@ const DEFAULT_LABELS: Required<NonNullable<GazeHighlightProps['labels']>> = {
   disable: 'Disable gaze tracking',
 };
 
-function clampPoint(
-  nx: number,
-  ny: number,
-  slideW: number,
-  slideH: number,
-): ClampedPoint {
+function clampPoint(nx: number, ny: number, slideW: number, slideH: number): ClampedPoint {
   const px = Math.max(0, Math.min(slideW, nx * slideW));
   const py = Math.max(0, Math.min(slideH, ny * slideH));
   return {

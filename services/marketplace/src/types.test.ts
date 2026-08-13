@@ -5,10 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  LISTING_TRANSITIONS,
-  type ListingStatus,
-} from './types.js';
+import { LISTING_TRANSITIONS, type ListingStatus } from './types.js';
 
 describe('LISTING_TRANSITIONS', () => {
   // ---------------------------------------------------------------------------

@@ -42,14 +42,14 @@ export interface PrototypeRecorderContext {
 
 // ── Response helpers ───────────────────────────────────────────────────
 
-function ok<T>(body: T): HttpResponse { return { status: 200, body }; }
-function created<T>(body: T): HttpResponse { return { status: 201, body }; }
-function noContent(): HttpResponse { return { status: 204, body: null }; }
+function ok<T>(body: T): HttpResponse {
+  return { status: 200, body };
+}
+function created<T>(body: T): HttpResponse {
+  return { status: 201, body };
+}
 function badRequest(message: string, code: string): HttpResponse {
   return { status: 400, body: { error: message, code } };
-}
-function unauthorized(): HttpResponse {
-  return { status: 401, body: { error: 'Unauthorized', code: 'UNAUTHORIZED' } };
 }
 function forbidden(): HttpResponse {
   return { status: 403, body: { error: 'Forbidden', code: 'FORBIDDEN' } };
@@ -61,13 +61,20 @@ function conflict(message: string, code: string, extra?: Record<string, unknown>
   return { status: 409, body: { error: message, code, ...(extra ?? {}) } };
 }
 function unprocessable(message: string, code: string, details?: unknown): HttpResponse {
-  return { status: 422, body: { error: message, code, ...(details !== undefined ? { details } : {}) } };
+  return {
+    status: 422,
+    body: { error: message, code, ...(details !== undefined ? { details } : {}) },
+  };
 }
 
 // ── Session handlers ───────────────────────────────────────────────────
 
 export async function startSessionHandler(
-  req: HttpRequest<{ tenantId: string; deckId: string }, Record<string, unknown>, { subject_id?: string }>,
+  req: HttpRequest<
+    { tenantId: string; deckId: string },
+    Record<string, unknown>,
+    { subject_id?: string }
+  >,
   ctx: PrototypeRecorderContext,
 ): Promise<HttpResponse> {
   const tenantId = req.params.tenantId;
@@ -102,7 +109,11 @@ export async function listSessionsHandler(
 }
 
 export async function getSessionEventsHandler(
-  req: HttpRequest<{ tenantId: string; sessionId: string }, undefined, Record<string, string | undefined>>,
+  req: HttpRequest<
+    { tenantId: string; sessionId: string },
+    undefined,
+    Record<string, string | undefined>
+  >,
   ctx: PrototypeRecorderContext,
 ): Promise<HttpResponse> {
   const tenantId = req.params.tenantId;
@@ -118,7 +129,11 @@ export async function getSessionEventsHandler(
 // ── Bulk ingest ────────────────────────────────────────────────────────
 
 export async function ingestBatchHandler(
-  req: HttpRequest<{ tenantId: string }, Record<string, unknown>, Record<string, string | undefined>>,
+  req: HttpRequest<
+    { tenantId: string },
+    Record<string, unknown>,
+    Record<string, string | undefined>
+  >,
   ctx: PrototypeRecorderContext,
 ): Promise<HttpResponse> {
   const tenantId = req.params.tenantId;
@@ -137,7 +152,11 @@ export async function ingestBatchHandler(
 // ── Key rotation (operator-only) ───────────────────────────────────────
 
 export async function rotateKeyHandler(
-  req: HttpRequest<{ tenantId: string }, Record<string, unknown>, Record<string, string | undefined>>,
+  req: HttpRequest<
+    { tenantId: string },
+    Record<string, unknown>,
+    Record<string, string | undefined>
+  >,
   ctx: PrototypeRecorderContext,
 ): Promise<HttpResponse> {
   const tenantId = req.params.tenantId;
@@ -149,7 +168,13 @@ export async function rotateKeyHandler(
   }
   try {
     const key = await ctx.service.rotateOperatorKey(tenantId, v.value!.deckId);
-    return created({ id: key.id, kid: key.kid, rotatedAt: key.rotatedAt, expiresAt: key.expiresAt, overlapUntil: key.overlapUntil });
+    return created({
+      id: key.id,
+      kid: key.kid,
+      rotatedAt: key.rotatedAt,
+      expiresAt: key.expiresAt,
+      overlapUntil: key.overlapUntil,
+    });
   } catch (e) {
     return mapError(e);
   }
@@ -164,7 +189,15 @@ export async function listKeysHandler(
   if (!operatorId) return forbidden();
   if (!req.query.deck_id) return badRequest('deck_id required', 'VALIDATION_ERROR');
   const items = await ctx.service.listKeys(tenantId, req.query.deck_id);
-  return ok({ items: items.map((k) => ({ id: k.id, kid: k.kid, rotatedAt: k.rotatedAt, expiresAt: k.expiresAt, overlapUntil: k.overlapUntil })) });
+  return ok({
+    items: items.map((k) => ({
+      id: k.id,
+      kid: k.kid,
+      rotatedAt: k.rotatedAt,
+      expiresAt: k.expiresAt,
+      overlapUntil: k.overlapUntil,
+    })),
+  });
 }
 
 // ── Error mapping ───────────────────────────────────────────────────────

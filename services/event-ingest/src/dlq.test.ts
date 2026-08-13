@@ -9,7 +9,12 @@ describe('in-memory DLQ', () => {
   it('records and reads back', async () => {
     const dlq = buildInMemoryDlq();
     await dlq.write({ recorded_at_ms: 1, reason: 'schema', message: 'bad', raw: {} });
-    await dlq.write({ recorded_at_ms: 2, reason: 'pii', message: 'redacted', raw: { event_id: 'e-1' } });
+    await dlq.write({
+      recorded_at_ms: 2,
+      reason: 'pii',
+      message: 'redacted',
+      raw: { event_id: 'e-1' },
+    });
     const all = await dlq.readAll();
     expect(all.length).toBe(2);
   });

@@ -94,9 +94,7 @@ export function InstallInstructions({ installs }: InstallInstructionsProps): JSX
               aria-selected={selected}
               aria-controls={`cli-tabpanel-${tab.os}`}
               id={`cli-tab-${tab.os}`}
-              className={
-                'cli-tab' + (selected ? ' cli-tab--active' : '')
-              }
+              className={'cli-tab' + (selected ? ' cli-tab--active' : '')}
               onClick={() => setActive(tab.os)}
             >
               {tab.label}

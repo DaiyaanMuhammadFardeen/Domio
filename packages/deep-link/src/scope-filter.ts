@@ -43,9 +43,7 @@ export function scopeFilter(
       if (opts.viewer_scope === 'public') continue;
       // For tenant / private scopes, only the authoring viewer may
       // round-trip session/viewer-scoped values.
-      if (
-        opts.requesting_viewer_id !== opts.authoring_viewer_id
-      ) {
+      if (opts.requesting_viewer_id !== opts.authoring_viewer_id) {
         continue;
       }
     }

@@ -57,9 +57,18 @@ function readDefault(opts: ResourceOptions): ResourceAttributes {
     );
   }
 
-  const version = safeEnv(opts.serviceVersion, process.env['DOMIO_SERVICE_VERSION'] ?? '0.0.0+unknown');
-  const env = safeEnv(opts.environment, process.env['DOMIO_ENV'] ?? process.env['NODE_ENV'] ?? 'development');
-  const gitSha = safeEnv(opts.gitSha, process.env['GIT_SHA'] ?? process.env['GITHUB_SHA'] ?? 'unknown');
+  const version = safeEnv(
+    opts.serviceVersion,
+    process.env['DOMIO_SERVICE_VERSION'] ?? '0.0.0+unknown',
+  );
+  const env = safeEnv(
+    opts.environment,
+    process.env['DOMIO_ENV'] ?? process.env['NODE_ENV'] ?? 'development',
+  );
+  const gitSha = safeEnv(
+    opts.gitSha,
+    process.env['GIT_SHA'] ?? process.env['GITHUB_SHA'] ?? 'unknown',
+  );
 
   if (!SHA_RE.test(gitSha) && gitSha !== 'unknown') {
     throw new ResourceError(

@@ -1,9 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import {
-  LicenseDashboard,
-  type LicenseGrantView,
-} from './license-dashboard';
+import { LicenseDashboard, type LicenseGrantView } from './license-dashboard';
 
 // Reference "now" anchored to the running test clock — never hardcoded
 // so the dashboard's internal Date.now() classifies grants correctly.
@@ -28,9 +25,7 @@ describe('LicenseDashboard', () => {
     const fetch = vi.fn(async () => [makeGrant({ id: 'lic_1' })]);
     render(<LicenseDashboard workspaceId="ws_1" fetchGrants={fetch} />);
     await waitFor(() => {
-      expect(screen.getByTestId('license-dashboard-summary').textContent).toContain(
-        '1 active',
-      );
+      expect(screen.getByTestId('license-dashboard-summary').textContent).toContain('1 active');
     });
   });
 
@@ -51,7 +46,9 @@ describe('LicenseDashboard', () => {
     await waitFor(() => {
       expect(screen.getByTestId('license-grant-lic_exp')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('license-grant-lic_exp').getAttribute('data-status')).toBe('expiring');
+    expect(screen.getByTestId('license-grant-lic_exp').getAttribute('data-status')).toBe(
+      'expiring',
+    );
   });
 
   it('classifies an expired grant when past its expiry', async () => {
@@ -60,7 +57,9 @@ describe('LicenseDashboard', () => {
     await waitFor(() => {
       expect(screen.getByTestId('license-grant-lic_past')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('license-grant-lic_past').getAttribute('data-status')).toBe('expired');
+    expect(screen.getByTestId('license-grant-lic_past').getAttribute('data-status')).toBe(
+      'expired',
+    );
   });
 
   it('classifies a revoked grant when revokedAt is set', async () => {
@@ -81,7 +80,9 @@ describe('LicenseDashboard', () => {
   });
 
   it('shows the error state when fetcher rejects', async () => {
-    const fetch = vi.fn(async () => { throw new Error('Network down'); });
+    const fetch = vi.fn(async () => {
+      throw new Error('Network down');
+    });
     render(<LicenseDashboard workspaceId="ws_1" fetchGrants={fetch} />);
     await waitFor(() => {
       expect(screen.getByTestId('license-dashboard-error').textContent).toContain('Network down');

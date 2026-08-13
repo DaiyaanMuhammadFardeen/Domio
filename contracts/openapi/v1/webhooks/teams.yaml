@@ -76,11 +76,11 @@ components:
           type: string
           format: uri
           description: URI reference identifying the problem type.
-          example: "https://domio.example/problems/not-found"
+          example: 'https://domio.example/problems/not-found'
         title:
           type: string
           description: Short human-readable summary.
-          example: "Resource not found"
+          example: 'Resource not found'
         status:
           type: integer
           description: HTTP status code.
@@ -93,7 +93,7 @@ components:
           type: string
           format: uri
           description: URI reference identifying the specific occurrence.
-          example: "https://api.domio.example.com/webhooks/teams/actions"
+          example: 'https://api.domio.example.com/webhooks/teams/actions'
     TeamsActionInput:
       type: object
       required: [action]

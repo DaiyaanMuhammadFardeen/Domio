@@ -63,14 +63,16 @@ export class AirtableAdapter implements ConnectorAdapter {
 
   async discover(_ctx: AdapterContext, _spec: DiscoverSpec): Promise<DiscoverResult> {
     return {
-      tables: [{
-        name: 'tbl1',
-        columns: [
-          { name: 'Name', type: 'string', semantic_role: 'dimension' },
-          { name: 'Revenue', type: 'number', semantic_role: 'measure' },
-        ],
-        row_count_estimate: 200,
-      }],
+      tables: [
+        {
+          name: 'tbl1',
+          columns: [
+            { name: 'Name', type: 'string', semantic_role: 'dimension' },
+            { name: 'Revenue', type: 'number', semantic_role: 'measure' },
+          ],
+          row_count_estimate: 200,
+        },
+      ],
     };
   }
 
@@ -83,7 +85,11 @@ export class AirtableAdapter implements ConnectorAdapter {
     const body = resp.body as { records?: Array<{ fields: Record<string, unknown> }> };
     const records = body.records ?? [];
     if (records.length === 0) {
-      return { rows: [], columns: [], stats: { duration_ms: Date.now() - t0, row_count: 0, source: 'live' } };
+      return {
+        rows: [],
+        columns: [],
+        stats: { duration_ms: Date.now() - t0, row_count: 0, source: 'live' },
+      };
     }
     const headers = Object.keys(records[0]!.fields);
     const dataRows = records.map((r) => headers.map((h) => r.fields[h]));

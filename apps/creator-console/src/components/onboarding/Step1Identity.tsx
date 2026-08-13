@@ -38,8 +38,7 @@ export function Step1Identity({ defaultValues, onSubmit }: Step1IdentityProps) {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isValid =
-    legalName.trim().length > 0 && dob.trim().length > 0 && country.length > 0;
+  const isValid = legalName.trim().length > 0 && dob.trim().length > 0 && country.length > 0;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -74,10 +73,7 @@ export function Step1Identity({ defaultValues, onSubmit }: Step1IdentityProps) {
       </h2>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label
-            htmlFor="identity-legal-name"
-            className="block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="identity-legal-name" className="block text-sm font-medium text-slate-700">
             {t('creator.onboarding.identity.legalName')}
           </label>
           <input
@@ -91,10 +87,7 @@ export function Step1Identity({ defaultValues, onSubmit }: Step1IdentityProps) {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label
-              htmlFor="identity-dob"
-              className="block text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="identity-dob" className="block text-sm font-medium text-slate-700">
               {t('creator.onboarding.identity.dob')}
             </label>
             <input
@@ -107,10 +100,7 @@ export function Step1Identity({ defaultValues, onSubmit }: Step1IdentityProps) {
             />
           </div>
           <div>
-            <label
-              htmlFor="identity-country"
-              className="block text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="identity-country" className="block text-sm font-medium text-slate-700">
               {t('creator.onboarding.identity.country')}
             </label>
             <select
@@ -128,10 +118,7 @@ export function Step1Identity({ defaultValues, onSubmit }: Step1IdentityProps) {
           </div>
         </div>
         <div>
-          <label
-            htmlFor="identity-id-type"
-            className="block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="identity-id-type" className="block text-sm font-medium text-slate-700">
             {t('creator.onboarding.identity.idType')}
           </label>
           <select

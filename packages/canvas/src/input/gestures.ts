@@ -11,9 +11,9 @@ export interface GestureState {
   isPinching(): boolean;
 }
 
-export function classifyIntent(intent: Intent):
-  | { kind: 'drag' | 'marquee' | 'pinch' | 'textEdit' | 'commit' | 'cancel' }
-  | null {
+export function classifyIntent(
+  intent: Intent,
+): { kind: 'drag' | 'marquee' | 'pinch' | 'textEdit' | 'commit' | 'cancel' } | null {
   switch (intent.kind) {
     case 'beginDrag':
     case 'updateDrag':

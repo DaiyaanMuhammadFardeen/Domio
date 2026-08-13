@@ -23,9 +23,9 @@ import {
 // ─── Fixtures ─────────────────────────────────────────────────────────
 
 const KF: readonly ScrollCameraKeyframe[] = [
-  { progress: 0,   position: { x: 0, y: 0, z: 10 }, target: { x: 0, y: 0, z: 0 }, fov: 60 },
-  { progress: 0.5, position: { x: 5, y: 2, z: 8  }, target: { x: 1, y: 0, z: 0 }, fov: 50 },
-  { progress: 1,   position: { x: 0, y: 0, z: 5  }, target: { x: 0, y: 0, z: 0 }, fov: 40 },
+  { progress: 0, position: { x: 0, y: 0, z: 10 }, target: { x: 0, y: 0, z: 0 }, fov: 60 },
+  { progress: 0.5, position: { x: 5, y: 2, z: 8 }, target: { x: 1, y: 0, z: 0 }, fov: 50 },
+  { progress: 1, position: { x: 0, y: 0, z: 5 }, target: { x: 0, y: 0, z: 0 }, fov: 40 },
 ];
 
 const baseConfig: ScrollDriverConfig = {
@@ -85,19 +85,27 @@ describe('computeScrollState — easing', () => {
 
   it('applies a cubic-bezier curve', () => {
     // ease-in: slow start, fast end. At t=0.25 the eased value should be < 0.25.
-    const s = computeScrollState(250, {
-      ...baseConfig,
-      easing: [0.42, 0, 1, 1],
-    }, KF);
+    const s = computeScrollState(
+      250,
+      {
+        ...baseConfig,
+        easing: [0.42, 0, 1, 1],
+      },
+      KF,
+    );
     expect(s.eased).toBeLessThan(s.progress);
     expect(s.eased).toBeGreaterThanOrEqual(0);
   });
 
   it('produces eased=1 at the end regardless of curve', () => {
-    const s = computeScrollState(1000, {
-      ...baseConfig,
-      easing: [0.42, 0, 0.58, 1],
-    }, KF);
+    const s = computeScrollState(
+      1000,
+      {
+        ...baseConfig,
+        easing: [0.42, 0, 0.58, 1],
+      },
+      KF,
+    );
     expect(s.eased).toBeCloseTo(1, 5);
   });
 });
@@ -163,7 +171,7 @@ describe('reducedMotionFallback', () => {
 
   it('still picks the midpoint when keyframes are weighted heavily elsewhere', () => {
     const weighted: ScrollCameraKeyframe[] = [
-      { progress: 0,   position: { x: 0, y: 0, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 60 },
+      { progress: 0, position: { x: 0, y: 0, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 60 },
       { progress: 0.1, position: { x: 0, y: 0, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 60 },
       { progress: 0.9, position: { x: 0, y: 0, z: 0 }, target: { x: 0, y: 0, z: 0 }, fov: 60 },
     ];

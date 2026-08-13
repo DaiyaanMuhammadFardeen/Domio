@@ -68,18 +68,12 @@ export function ResponseViewer({ result, emptyMessage }: ResponseViewerProps) {
     >
       <div className="flex flex-wrap items-center gap-3">
         <Badge tone={toneForStatus(result.status_code)}>
-          <FormattedMessage
-            id="admin.webhooks.tester.status"
-            catalogue={CATALOGUE}
-          />
-          : {result.status_code}
+          <FormattedMessage id="admin.webhooks.tester.status" catalogue={CATALOGUE} />:{' '}
+          {result.status_code}
         </Badge>
         <Badge tone="grey">
-          <FormattedMessage
-            id="admin.webhooks.tester.latency"
-            catalogue={CATALOGUE}
-          />
-          : {result.latency_ms}ms
+          <FormattedMessage id="admin.webhooks.tester.latency" catalogue={CATALOGUE} />:{' '}
+          {result.latency_ms}ms
         </Badge>
         <span className="ml-auto font-mono text-[11px] text-slate-500">
           {new Date(result.sent_at_ms).toISOString()}
@@ -94,10 +88,7 @@ export function ResponseViewer({ result, emptyMessage }: ResponseViewerProps) {
           className="flex w-full items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100"
         >
           <span>
-            <FormattedMessage
-              id="admin.webhooks.tester.headers"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.webhooks.tester.headers" catalogue={CATALOGUE} />
             {` (${headerEntries.length})`}
           </span>
           {headersOpen ? (
@@ -137,10 +128,7 @@ export function ResponseViewer({ result, emptyMessage }: ResponseViewerProps) {
           className="flex w-full items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:bg-slate-100"
         >
           <span>
-            <FormattedMessage
-              id="admin.webhooks.tester.body"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.webhooks.tester.body" catalogue={CATALOGUE} />
             {isJson ? ' (json)' : ' (text)'}
           </span>
           {bodyOpen ? (

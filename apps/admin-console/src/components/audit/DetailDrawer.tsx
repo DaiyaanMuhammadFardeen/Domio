@@ -85,10 +85,14 @@ export function DetailDrawer({ event, open, onClose }: DetailDrawerProps) {
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <dl className="grid grid-cols-3 gap-y-2 text-sm">
-            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">When</dt>
+            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              When
+            </dt>
             <dd className="col-span-2 text-slate-800">{fmtDate(event.timestamp_ms)}</dd>
 
-            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">Actor</dt>
+            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              Actor
+            </dt>
             <dd className="col-span-2 text-slate-800">
               {event.actor.email ?? event.actor.id}{' '}
               <span className="ml-1 inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
@@ -96,19 +100,29 @@ export function DetailDrawer({ event, open, onClose }: DetailDrawerProps) {
               </span>
             </dd>
 
-            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">Action</dt>
+            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              Action
+            </dt>
             <dd className="col-span-2 font-mono text-xs text-slate-800">{event.action}</dd>
 
-            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">Target</dt>
+            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              Target
+            </dt>
             <dd className="col-span-2 text-slate-800">
               <span className="font-mono text-xs text-slate-500">{event.target_type}</span>
               <span className="ml-2 font-mono text-xs text-slate-800">{event.target_id}</span>
             </dd>
 
-            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">Trace</dt>
-            <dd className="col-span-2 break-all font-mono text-[11px] text-slate-500">{event.trace_id}</dd>
+            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              Trace
+            </dt>
+            <dd className="col-span-2 break-all font-mono text-[11px] text-slate-500">
+              {event.trace_id}
+            </dd>
 
-            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">Metadata</dt>
+            <dt className="col-span-1 text-xs font-medium uppercase tracking-wider text-slate-500">
+              Metadata
+            </dt>
             <dd className="col-span-2">
               {Object.keys(event.metadata).length === 0 ? (
                 <span className="text-xs text-slate-400">—</span>
@@ -122,7 +136,9 @@ export function DetailDrawer({ event, open, onClose }: DetailDrawerProps) {
 
           {event.diff && (
             <section className="mt-6">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Diff</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Diff
+              </h3>
               <div className="mt-2 grid grid-cols-2 gap-3">
                 <div>
                   <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-rose-600">
@@ -151,7 +167,9 @@ export function DetailDrawer({ event, open, onClose }: DetailDrawerProps) {
           )}
 
           <section className="mt-6">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Raw event</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Raw event
+            </h3>
             <pre
               data-testid="audit-detail-json"
               className="mt-2 overflow-x-auto rounded-md border border-slate-200 bg-slate-900 p-3 font-mono text-[11px] leading-relaxed text-slate-100"

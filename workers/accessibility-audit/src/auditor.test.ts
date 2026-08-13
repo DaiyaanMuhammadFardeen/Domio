@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  auditAccessibility,
-  simulateCvd,
-  suggestCvSafePalette,
-} from './auditor.js';
+import { auditAccessibility, simulateCvd, suggestCvSafePalette } from './auditor.js';
 
 const PASSING_PALETTE = [
   { tokenId: 'color.bg.surface', hex: '#ffffff', role: 'background' as const },

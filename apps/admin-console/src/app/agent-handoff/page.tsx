@@ -166,8 +166,7 @@ export default function AgentHandoffPage() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
             {detail ? (
               <span>
-                Pipeline{' '}
-                <span className="font-mono text-xs text-slate-700">{detail.run_id}</span>
+                Pipeline <span className="font-mono text-xs text-slate-700">{detail.run_id}</span>
               </span>
             ) : (
               'Pipeline detail'
@@ -182,8 +181,8 @@ export default function AgentHandoffPage() {
           >
             <Play className="h-3 w-3" aria-hidden />
             {replaying
-              ? CATALOGUE['admin.agentHandoff.replaying'] ?? 'Replaying…'
-              : CATALOGUE['admin.agentHandoff.replay'] ?? 'Replay'}
+              ? (CATALOGUE['admin.agentHandoff.replaying'] ?? 'Replaying…')
+              : (CATALOGUE['admin.agentHandoff.replay'] ?? 'Replay')}
           </button>
         </div>
 

@@ -115,7 +115,10 @@ const DEFAULT_BACKOFF_CONFIG: BackoffConfig = {
  * Uses exponential backoff: base * 2^attempt, capped at maxMs.
  * Adds jitter: delay ± (delay * jitterFactor * random).
  */
-export function backoffDelay(attempt: number, config: BackoffConfig = DEFAULT_BACKOFF_CONFIG): number {
+export function backoffDelay(
+  attempt: number,
+  config: BackoffConfig = DEFAULT_BACKOFF_CONFIG,
+): number {
   const exp = Math.min(Math.pow(2, attempt), config.maxMs / config.baseMs);
   const base = config.baseMs * exp;
   const maxJitter = base * config.jitterFactor;

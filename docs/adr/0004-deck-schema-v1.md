@@ -66,7 +66,7 @@ We adopt the following shape for the canonical Domio `DeckDocument`:
   per `docs/06-technology-stack.md` §6.4. Protobuf remains the
   RPC surface.
 - **Component master/runtime in P02.** Rejected: per the phase scope
-  the *slot* for `componentInstanceId` and `overrides` is defined
+  the _slot_ for `componentInstanceId` and `overrides` is defined
   here, but the master/runtime lands in P06.
 - **Yjs CRDT substrate in P02.** Rejected: per the phase scope the
   schema is JSONB now; CRDT semantics land in P04.
@@ -86,7 +86,7 @@ We adopt the following shape for the canonical Domio `DeckDocument`:
 ## Security / privacy
 
 - All `decks`-rooted tables are RLS-protected by `tenant_id =
-  current_setting('app.tenant_id', true)` with a `app.bypass_rls` escape
+current_setting('app.tenant_id', true)` with a `app.bypass_rls` escape
   hatch for the migration runner and admin tooling.
 - `version` / `revision` are immutable and surfaced via `current_revision`
   so the editor and viewer cannot overwrite each other.
@@ -107,11 +107,11 @@ We adopt the following shape for the canonical Domio `DeckDocument`:
   every `contracts/schema/v1/*.schema.json` in CI.
 - `ajv validate` against `fixtures/example-deck.json`.
 - `pnpm --filter @domio/schema test` and `pnpm --filter @domio/schema
-  typecheck` in CI.
+typecheck` in CI.
 - `pnpm --filter @domio/sdk test` and `pnpm --filter @domio/sdk
-  typecheck` in CI.
+typecheck` in CI.
 - `pnpm --filter @domio/control-plane test` and `pnpm --filter
-  @domio/control-plane typecheck` in CI.
+@domio/control-plane typecheck` in CI.
 - `VITEST_WORKSPACE=1 pnpm exec vitest run fixtures/__tests__` exercises
   the example fixture end-to-end through `validate` and `migrate`.
 

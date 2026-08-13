@@ -61,7 +61,9 @@ function renderText(el: Element & { type: 'text' }): ReactElement | null {
 function renderFrame(el: Element & { type: 'frame' | 'autoLayout' }): ReactElement | null {
   const t = el.transform;
   if (!t) return null;
-  const radius = (el.style as Record<string, unknown> | undefined)?.borderRadius as number | undefined;
+  const radius = (el.style as Record<string, unknown> | undefined)?.borderRadius as
+    | number
+    | undefined;
   const fill = el.fill?.color ? rgbaToCss(el.fill.color) : undefined;
   const strokeColor = el.stroke?.color ? rgbaToCss(el.stroke.color) : undefined;
   return (
@@ -83,7 +85,9 @@ function renderVector(el: Element & { type: 'vector' }): ReactElement {
   const fill = el.fill?.color ? rgbaToCss(el.fill.color) : 'none';
   const strokeColor = el.stroke?.color ? rgbaToCss(el.stroke.color) : undefined;
   const strokeWidth = el.stroke?.width ?? 1;
-  const dash = (el.style as Record<string, unknown> | undefined)?.strokeDasharray as string | undefined;
+  const dash = (el.style as Record<string, unknown> | undefined)?.strokeDasharray as
+    | string
+    | undefined;
   return (
     <path
       d={d}

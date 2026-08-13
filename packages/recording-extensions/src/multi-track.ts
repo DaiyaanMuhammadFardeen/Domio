@@ -11,7 +11,15 @@
  */
 
 import { createHash } from 'node:crypto';
-import type { ChunkUploader, RecorderConfig, RecorderHandle, RecordingSummary, TrackState, TrackStateEvent, ChunkProgressEvent } from './types.js';
+import type {
+  ChunkUploader,
+  RecorderConfig,
+  RecorderHandle,
+  RecordingSummary,
+  TrackState,
+  TrackStateEvent,
+  ChunkProgressEvent,
+} from './types.js';
 import type { TrackKind } from '@domio/object-store';
 
 export interface MediaSourceFactory {
@@ -34,7 +42,9 @@ export interface MultiTrackRecorderOptions {
 
 const TRACKS: readonly TrackKind[] = ['screen', 'camera', 'microphone', 'system_audio'] as const;
 
-export async function startMultiTrackRecorder(opts: MultiTrackRecorderOptions): Promise<RecorderHandle> {
+export async function startMultiTrackRecorder(
+  opts: MultiTrackRecorderOptions,
+): Promise<RecorderHandle> {
   const cfg = opts.config;
   const trackStates = new Map<TrackKind, TrackState>();
   const chunkCounts = new Map<TrackKind, number>();
@@ -47,9 +57,10 @@ export async function startMultiTrackRecorder(opts: MultiTrackRecorderOptions): 
 
   const emit = (track: TrackKind, state: TrackState, error?: string) => {
     trackStates.set(track, state);
-    const event: TrackStateEvent = error !== undefined
-      ? { track_kind: track, state, error, occurred_at_ms: Date.now() }
-      : { track_kind: track, state, occurred_at_ms: Date.now() };
+    const event: TrackStateEvent =
+      error !== undefined
+        ? { track_kind: track, state, error, occurred_at_ms: Date.now() }
+        : { track_kind: track, state, occurred_at_ms: Date.now() };
     cfg.on_track_state?.(event);
   };
 
@@ -65,7 +76,8 @@ export async function startMultiTrackRecorder(opts: MultiTrackRecorderOptions): 
     }
     emit(track, 'ready');
     const mime = cfg.mime_type ?? 'video/webm';
-    const Recorder = opts.mediaRecorderCtor ?? (typeof MediaRecorder !== 'undefined' ? MediaRecorder : null);
+    const Recorder =
+      opts.mediaRecorderCtor ?? (typeof MediaRecorder !== 'undefined' ? MediaRecorder : null);
     if (!Recorder) {
       emit(track, 'errored', 'MediaRecorder is not available');
       continue;
@@ -134,7 +146,9 @@ export async function startMultiTrackRecorder(opts: MultiTrackRecorderOptions): 
         return {
           workspace_id: cfg.workspace_id,
           recording_session_id: cfg.recording_session_id,
-          tracks: recorders.map(({ track }) => trackSummary(track, mimeTypes, chunkCounts, totalBytes, totalDurationMs)),
+          tracks: recorders.map(({ track }) =>
+            trackSummary(track, mimeTypes, chunkCounts, totalBytes, totalDurationMs),
+          ),
           started_at_ms: startedAtMs,
           ended_at_ms: Date.now(),
         };
@@ -152,7 +166,9 @@ export async function startMultiTrackRecorder(opts: MultiTrackRecorderOptions): 
       return {
         workspace_id: cfg.workspace_id,
         recording_session_id: cfg.recording_session_id,
-        tracks: recorders.map(({ track }) => trackSummary(track, mimeTypes, chunkCounts, totalBytes, totalDurationMs)),
+        tracks: recorders.map(({ track }) =>
+          trackSummary(track, mimeTypes, chunkCounts, totalBytes, totalDurationMs),
+        ),
         started_at_ms: startedAtMs,
         ended_at_ms: Date.now(),
       };
@@ -195,10 +211,16 @@ export class BrowserMediaSourceFactory implements MediaSourceFactory {
       return navigator.mediaDevices.getUserMedia({ video: true, audio: false });
     }
     if (track === 'microphone') {
-      return navigator.mediaDevices.getUserMedia({ video: false, audio: { echoCancellation: true, noiseSuppression: true } });
+      return navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
     }
     if (track === 'system_audio') {
-      return navigator.mediaDevices.getUserMedia({ video: false, audio: { echoCancellation: false, noiseSuppression: false } });
+      return navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: { echoCancellation: false, noiseSuppression: false },
+      });
     }
     throw new Error(`Unsupported track kind: ${track}`);
   }

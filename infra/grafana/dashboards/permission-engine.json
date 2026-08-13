@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-1",
-    "domio",
-    "permission-engine"
-  ],
+  "tags": ["tier-1", "domio", "permission-engine"],
   "panels": [
     {
       "id": 1,

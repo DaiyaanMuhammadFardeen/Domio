@@ -26,7 +26,13 @@ export default function JoinPage() {
   const [widgets, setWidgets] = useState<ReadonlyArray<AudienceWidgetDescriptor>>([]);
 
   const apiBase = useMemo(() => (typeof window !== 'undefined' ? window.location.origin : ''), []);
-  const wsUrl = useMemo(() => (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/v1/audience/ws` : ''), []);
+  const wsUrl = useMemo(
+    () =>
+      typeof window !== 'undefined'
+        ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/v1/audience/ws`
+        : '',
+    [],
+  );
 
   useEffect(() => {
     setForm((f) => ({ ...f, code }));
@@ -67,7 +73,9 @@ export default function JoinPage() {
   const onEnvelope = (msg: AudienceEnvelope): void => {
     if (!isAudienceEnvelope(msg)) return;
     if (msg.kind === 'welcome') {
-      const meta = msg.session_metadata as { widgets?: ReadonlyArray<AudienceWidgetDescriptor> } | undefined;
+      const meta = msg.session_metadata as
+        | { widgets?: ReadonlyArray<AudienceWidgetDescriptor> }
+        | undefined;
       const w = meta?.widgets;
       if (Array.isArray(w)) setWidgets(w);
     }
@@ -76,11 +84,7 @@ export default function JoinPage() {
   if (stage === 'collect') {
     return (
       <MobileShell title="Join" connectionStatus="closed">
-        <JoinForm
-          initialCode={form.code}
-          onSubmit={onSubmit}
-          {...(error ? { error } : {})}
-        />
+        <JoinForm initialCode={form.code} onSubmit={onSubmit} {...(error ? { error } : {})} />
       </MobileShell>
     );
   }

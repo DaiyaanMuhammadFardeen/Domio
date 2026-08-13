@@ -189,7 +189,7 @@ describe('CopilotHub', () => {
       constructor() {
         // Track the most-recent recorder instance via an arrow-property
         // capture (avoids aliasing `this` to a local variable).
-        lastRecorder = (this as unknown) as MockRecorder;
+        lastRecorder = this as unknown as MockRecorder;
       }
     }
     Object.defineProperty(window, 'MediaRecorder', {

@@ -24,8 +24,13 @@ export class InMemoryPresenterSessionStore implements PresenterSessionStore {
   private async withLock<T>(id: string, fn: () => Promise<T>): Promise<T> {
     const prev = this.locks.get(id) ?? Promise.resolve();
     let release: (() => void) | undefined;
-    const next = new Promise<void>((r) => { release = r; });
-    this.locks.set(id, prev.then(() => next));
+    const next = new Promise<void>((r) => {
+      release = r;
+    });
+    this.locks.set(
+      id,
+      prev.then(() => next),
+    );
     try {
       await prev;
       return await fn();
@@ -51,7 +56,10 @@ export class InMemoryPresenterSessionStore implements PresenterSessionStore {
     return this.rows.get(id) ?? null;
   }
 
-  async getActiveByPresenter(workspaceId: string, presenterId: string): Promise<PresenterSession | null> {
+  async getActiveByPresenter(
+    workspaceId: string,
+    presenterId: string,
+  ): Promise<PresenterSession | null> {
     for (const row of this.rows.values()) {
       if (row.workspace_id === workspaceId && row.presenter_id === presenterId && !row.ended_at) {
         return row;

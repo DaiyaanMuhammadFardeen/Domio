@@ -368,7 +368,7 @@ export const DOCS_TREE: ReadonlyArray<DocsSection> = [
       page(
         'protocol',
         'Agent protocol',
-        'The agent protocol is a JSON-RPC 2.0 surface that mirrors the editor\'s command model. Every operation has a stable name, an input schema, and an output schema — so agents can plan, propose, and verify.',
+        "The agent protocol is a JSON-RPC 2.0 surface that mirrors the editor's command model. Every operation has a stable name, an input schema, and an output schema — so agents can plan, propose, and verify.",
       ),
       page(
         'auth',

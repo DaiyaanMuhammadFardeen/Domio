@@ -49,10 +49,7 @@ export type {
 
 // ── NATS subscription manager ──────────────────────────────────
 export { NatsSubscriptionManager, connectWithRetry } from './nats_manager.js';
-export type {
-  NatsManagerDeps,
-  NatsManagerHandlers,
-} from './nats_manager.js';
+export type { NatsManagerDeps, NatsManagerHandlers } from './nats_manager.js';
 
 // ── HMAC signing + verification ────────────────────────────────
 export { signPayload, verifySignature } from './webhooks/hmac.js';
@@ -101,28 +98,14 @@ export {
   receiveTeamsAction,
   receiveTeamsCommand,
 } from './webhooks/handlers.js';
-export type {
-  WebhookDeps,
-  WebhookResponse,
-} from './webhooks/handlers.js';
+export type { WebhookDeps, WebhookResponse } from './webhooks/handlers.js';
 
 // ── Quiet hours / DND digests ──────────────────────────────────
-export {
-  isQuietHour,
-  buildDigest,
-  defaultOffsetMinutes,
-} from './quiet_hours.js';
-export type {
-  QuietHours,
-  DigestItem,
-  DigestPayload,
-} from './quiet_hours.js';
+export { isQuietHour, buildDigest, defaultOffsetMinutes } from './quiet_hours.js';
+export type { QuietHours, DigestItem, DigestPayload } from './quiet_hours.js';
 
 // ── Subscription-based routing ─────────────────────────────────
-export {
-  routeBySubscription,
-  InMemorySubscriptionProvider,
-} from './routing.js';
+export { routeBySubscription, InMemorySubscriptionProvider } from './routing.js';
 export type {
   NotificationSubscription,
   ResolvedDelivery,

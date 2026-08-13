@@ -10,7 +10,10 @@
     "id": { "type": "string", "format": "uuid" },
     "chart_widget_id": { "type": "string", "format": "uuid" },
     "scenario_id": { "type": ["string", "null"], "format": "uuid" },
-    "measure": { "type": "string", "description": "'revenue', 'churn', ... the evaluated measure name." },
+    "measure": {
+      "type": "string",
+      "description": "'revenue', 'churn', ... the evaluated measure name."
+    },
     "comparator": {
       "type": "string",
       "enum": ["lt", "lte", "gt", "gte", "eq", "between", "outside"]

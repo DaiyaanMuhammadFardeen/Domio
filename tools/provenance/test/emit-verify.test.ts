@@ -33,16 +33,8 @@ describe('emit', () => {
 
   it('produces stable signed payload for identical inputs', () => {
     const opts = { signingKey: KEY, keyId: KEY_ID, builderId: 'test' };
-    const a = emit(
-      [{ uri: 'a', digest: { sha256: 'h1' } }],
-      [],
-      opts,
-    );
-    const b = emit(
-      [{ uri: 'a', digest: { sha256: 'h1' } }],
-      [],
-      opts,
-    );
+    const a = emit([{ uri: 'a', digest: { sha256: 'h1' } }], [], opts);
+    const b = emit([{ uri: 'a', digest: { sha256: 'h1' } }], [], opts);
     // canonicalize is key-order-insensitive; payload should be deterministic
     const stmt = JSON.parse(Buffer.from(a.payload, 'base64').toString('utf8'));
     const stmt2 = JSON.parse(Buffer.from(b.payload, 'base64').toString('utf8'));
@@ -50,9 +42,7 @@ describe('emit', () => {
   });
 
   it('rejects empty subjects', () => {
-    expect(() =>
-      emit([], [], { signingKey: KEY, keyId: KEY_ID, builderId: 'test' }),
-    ).toThrow();
+    expect(() => emit([], [], { signingKey: KEY, keyId: KEY_ID, builderId: 'test' })).toThrow();
   });
 
   it('rejects empty digest', () => {
@@ -63,11 +53,11 @@ describe('emit', () => {
 
   it('rejects missing builderId', () => {
     expect(() =>
-      emit(
-        [{ uri: 'x', digest: { sha256: 'a' } }],
-        [],
-        { signingKey: KEY, keyId: KEY_ID, builderId: '' },
-      ),
+      emit([{ uri: 'x', digest: { sha256: 'a' } }], [], {
+        signingKey: KEY,
+        keyId: KEY_ID,
+        builderId: '',
+      }),
     ).toThrow();
   });
 
@@ -77,17 +67,13 @@ describe('emit', () => {
   });
 
   it('buildStatement surfaces externalParameters and runDetails metadata', () => {
-    const stmt = buildStatement(
-      [{ uri: 'a', digest: { sha256: 'h' } }],
-      [],
-      {
-        signingKey: KEY,
-        keyId: KEY_ID,
-        builderId: 'b',
-        externalParameters: { foo: 'bar' },
-        environment: { node: 'v22' },
-      },
-    );
+    const stmt = buildStatement([{ uri: 'a', digest: { sha256: 'h' } }], [], {
+      signingKey: KEY,
+      keyId: KEY_ID,
+      builderId: 'b',
+      externalParameters: { foo: 'bar' },
+      environment: { node: 'v22' },
+    });
     expect(stmt.predicate.buildDefinition.externalParameters).toEqual({ foo: 'bar' });
     expect(stmt.predicate.runDetails.builder?.id).toBe('b');
   });
@@ -118,7 +104,12 @@ describe('verify', () => {
 
   it('rejects a tampered payload (signature mismatch)', () => {
     const env = makeEnv();
-    const tampered = { ...env, payload: Buffer.from('{"predicateType":"https://slsa.dev/provenance/v1","subject":[],"predicate":{}}').toString('base64') };
+    const tampered = {
+      ...env,
+      payload: Buffer.from(
+        '{"predicateType":"https://slsa.dev/provenance/v1","subject":[],"predicate":{}}',
+      ).toString('base64'),
+    };
     const r = verify(tampered, { keys: { [KEY_ID]: KEY } });
     expect(r.ok).toBe(false);
     expect(r.reason).toMatch(/signature mismatch|payload decode|keyid/);

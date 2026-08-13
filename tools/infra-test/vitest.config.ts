@@ -1,14 +1,14 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ["**/*.spec.ts"],
-    environment: "node",
+    include: ['**/*.spec.ts'],
+    environment: 'node',
     testTimeout: 20_000,
-    reporters: ["default"],
-    pool: "forks",
+    reporters: ['default'],
+    pool: 'forks',
     poolOptions: {
-      forks: { singleFork: true }
-    }
-  }
+      forks: { singleFork: true },
+    },
+  },
 });

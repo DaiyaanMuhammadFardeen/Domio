@@ -55,10 +55,7 @@ export async function fetchSentiment(
   const url = new URL('/v1/analytics/sentiment', baseUrl);
   url.searchParams.set('workspace_id', workspaceId);
   url.searchParams.set('deck_id', deckId);
-  url.searchParams.set(
-    'from_ms',
-    String(opts.fromMs ?? Date.now() - 14 * 24 * 60 * 60 * 1000),
-  );
+  url.searchParams.set('from_ms', String(opts.fromMs ?? Date.now() - 14 * 24 * 60 * 60 * 1000));
   url.searchParams.set('to_ms', String(opts.toMs ?? Date.now()));
   try {
     const res = await fetch(url.toString(), { cache: 'no-store' });
@@ -96,7 +93,12 @@ export interface CsatBreakdown {
   /** CSAT percentage (promoter + passive) ÷ total × 100. */
   readonly csatPct: number;
   /** Per-slide rollups so the dashboard can chart per-slide NPS. */
-  readonly perSlide: ReadonlyArray<{ slideId: string; nps: number; csatPct: number; count: number }>;
+  readonly perSlide: ReadonlyArray<{
+    slideId: string;
+    nps: number;
+    csatPct: number;
+    count: number;
+  }>;
   /** The raw rows, in case the caller wants the full breakdown. */
   readonly rows: ReadonlyArray<CsatRow>;
 }
@@ -182,15 +184,14 @@ export async function fetchCsat(
   url.searchParams.set('workspace_id', workspaceId);
   if (opts.deckId) url.searchParams.set('deck_id', opts.deckId);
   if (opts.slideId) url.searchParams.set('slide_id', opts.slideId);
-  url.searchParams.set(
-    'from_ms',
-    String(opts.fromMs ?? Date.now() - 30 * 24 * 60 * 60 * 1000),
-  );
+  url.searchParams.set('from_ms', String(opts.fromMs ?? Date.now() - 30 * 24 * 60 * 60 * 1000));
   url.searchParams.set('to_ms', String(opts.toMs ?? Date.now()));
   try {
     const res = await fetch(url.toString(), { cache: 'no-store' });
     if (!res.ok) return rollup([]);
-    const json = (await res.json()) as { rows?: Array<{ slideId?: string; sessionId?: string; score?: number }> };
+    const json = (await res.json()) as {
+      rows?: Array<{ slideId?: string; sessionId?: string; score?: number }>;
+    };
     const rows: CsatRow[] = (json.rows ?? [])
       .map((r) => {
         const score = Number(r.score ?? 0);

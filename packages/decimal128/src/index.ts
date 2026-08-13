@@ -22,4 +22,9 @@ export {
 
 export { round, type RoundingMode } from './rounding.js';
 export { parseDecimal } from './parse.js';
-export { formatNumber, formatCurrency, type SupportedLocale, type FormatOptions } from './format.js';
+export {
+  formatNumber,
+  formatCurrency,
+  type SupportedLocale,
+  type FormatOptions,
+} from './format.js';

@@ -13,10 +13,7 @@ import type {
   SuggestionStatus,
   BrandLockProvider,
 } from './types.js';
-import {
-  SuggestionNotFoundError,
-  BrandLockError,
-} from './types.js';
+import { SuggestionNotFoundError, BrandLockError } from './types.js';
 import { validateOp } from './suggestion/ops.js';
 import {
   createSuggestionBody,
@@ -75,16 +72,19 @@ export class SuggestionsService {
   // Create suggestion
   // -------------------------------------------------------------------------
 
-  async createSuggestion(input: {
-    workspace_id: string;
-    deck_id: string;
-    session_id: string;
-    author_id: string;
-    target_type: string;
-    target_id: string;
-    operation: SuggestionOperation;
-    thread_id?: string;
-  }, actorId: string): Promise<Suggestion> {
+  async createSuggestion(
+    input: {
+      workspace_id: string;
+      deck_id: string;
+      session_id: string;
+      author_id: string;
+      target_type: string;
+      target_id: string;
+      operation: SuggestionOperation;
+      thread_id?: string;
+    },
+    actorId: string,
+  ): Promise<Suggestion> {
     checkFeature(FEATURE_FLAGS.suggestions);
 
     // Validate the operation structure
@@ -160,7 +160,10 @@ export class SuggestionsService {
 
     // Brand-lock check (author creating is always ok; accept needs override)
     if (!breakBrandLock) {
-      const isLocked = this.brandLockProvider.isBrandLocked(suggestion.target_id, suggestion.operation);
+      const isLocked = this.brandLockProvider.isBrandLocked(
+        suggestion.target_id,
+        suggestion.operation,
+      );
       if (isLocked) {
         throw new BrandLockError(suggestion.target_id);
       }
@@ -322,7 +325,10 @@ export class SuggestionsService {
   // Pure helpers exposed for testing
   // -------------------------------------------------------------------------
 
-  applyOpToDeck(deck: { elements: Record<string, Record<string, unknown>> }, op: SuggestionOperation) {
+  applyOpToDeck(
+    deck: { elements: Record<string, Record<string, unknown>> },
+    op: SuggestionOperation,
+  ) {
     return applyOp(deck, op);
   }
 }

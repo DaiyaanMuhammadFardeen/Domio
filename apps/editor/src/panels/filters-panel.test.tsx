@@ -48,26 +48,22 @@ describe('FiltersPanel', () => {
     fireEvent.change(screen.getByTestId('p08-filter-value'), { target: { value: 'Europe' } });
     fireEvent.click(screen.getByTestId('p08-filter-add'));
     expect(onChange).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ dimension: 'region', value: 'Europe' }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ dimension: 'region', value: 'Europe' })]),
     );
   });
 
   it('calls onChange without the removed filter when removing', () => {
     const onChange = vi.fn();
     render(<FiltersPanel filters={sampleFilters} onChange={onChange} />);
-    const removeBtn = screen.getByTestId('p08-filter-row-f1').querySelector('[title="Remove filter"]')!;
+    const removeBtn = screen
+      .getByTestId('p08-filter-row-f1')
+      .querySelector('[title="Remove filter"]')!;
     fireEvent.click(removeBtn);
     expect(onChange).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ id: 'f2' }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ id: 'f2' })]),
     );
     expect(onChange).toHaveBeenCalledWith(
-      expect.not.arrayContaining([
-        expect.objectContaining({ id: 'f1' }),
-      ]),
+      expect.not.arrayContaining([expect.objectContaining({ id: 'f1' })]),
     );
   });
 

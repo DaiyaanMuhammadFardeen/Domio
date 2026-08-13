@@ -151,7 +151,12 @@ export interface ReducedMotionSettings {
 
 export interface TimelineRepository {
   insert(record: Timeline): Promise<void>;
-  update(id: string, tenantId: string, patch: Partial<Omit<Timeline, 'id' | 'tenantId' | 'createdAt'>>, version: number): Promise<Timeline>;
+  update(
+    id: string,
+    tenantId: string,
+    patch: Partial<Omit<Timeline, 'id' | 'tenantId' | 'createdAt'>>,
+    version: number,
+  ): Promise<Timeline>;
   findById(id: string, tenantId: string): Promise<Timeline | null>;
   listByDeck(deckId: string, tenantId: string): Promise<Timeline[]>;
   delete(id: string, tenantId: string): Promise<void>;
@@ -181,7 +186,11 @@ export interface TriggerRepository {
 
 export interface EasingCurveRepository {
   insert(record: EasingCurve): Promise<void>;
-  update(id: string, workspaceId: string, patch: Partial<Omit<EasingCurve, 'id' | 'workspaceId'>>): Promise<EasingCurve>;
+  update(
+    id: string,
+    workspaceId: string,
+    patch: Partial<Omit<EasingCurve, 'id' | 'workspaceId'>>,
+  ): Promise<EasingCurve>;
   findById(id: string, workspaceId: string): Promise<EasingCurve | null>;
   listByWorkspace(workspaceId: string): Promise<EasingCurve[]>;
   delete(id: string, workspaceId: string): Promise<void>;
@@ -190,7 +199,10 @@ export interface EasingCurveRepository {
 export interface AnimationPresetRepository {
   insert(record: AnimationPreset): Promise<void>;
   findById(id: string, workspaceId: string): Promise<AnimationPreset | null>;
-  listByWorkspace(workspaceId: string, filters?: { category?: AnimationPresetCategory; tag?: string }): Promise<AnimationPreset[]>;
+  listByWorkspace(
+    workspaceId: string,
+    filters?: { category?: AnimationPresetCategory; tag?: string },
+  ): Promise<AnimationPreset[]>;
   delete(id: string, workspaceId: string): Promise<void>;
 }
 
@@ -213,13 +225,20 @@ export interface ReducedMotionRepository {
 
 export class InMemoryTimelineRepository implements TimelineRepository {
   private store = new Map<string, Timeline>();
-  private k(r: Timeline): string { return `${r.tenantId}::${r.id}`; }
+  private k(r: Timeline): string {
+    return `${r.tenantId}::${r.id}`;
+  }
 
   async insert(record: Timeline): Promise<void> {
     this.store.set(this.k(record), record);
   }
 
-  async update(id: string, tenantId: string, patch: Partial<Omit<Timeline, 'id' | 'tenantId' | 'createdAt'>>, version: number): Promise<Timeline> {
+  async update(
+    id: string,
+    tenantId: string,
+    patch: Partial<Omit<Timeline, 'id' | 'tenantId' | 'createdAt'>>,
+    version: number,
+  ): Promise<Timeline> {
     const existing = await this.findById(id, tenantId);
     if (!existing) throw new TimelineNotFoundError(id);
     if (existing.version !== version) {
@@ -259,8 +278,12 @@ export class InMemoryTimelineRepository implements TimelineRepository {
 
 export class InMemoryTrackRepository implements TrackRepository {
   private store = new Map<string, Track>();
-  async insert(record: Track): Promise<void> { this.store.set(record.id, record); }
-  async findById(id: string): Promise<Track | null> { return this.store.get(id) ?? null; }
+  async insert(record: Track): Promise<void> {
+    this.store.set(record.id, record);
+  }
+  async findById(id: string): Promise<Track | null> {
+    return this.store.get(id) ?? null;
+  }
   async listByTimeline(timelineId: string): Promise<Track[]> {
     const out: Track[] = [];
     for (const r of this.store.values()) {
@@ -268,13 +291,19 @@ export class InMemoryTrackRepository implements TrackRepository {
     }
     return out;
   }
-  async delete(id: string): Promise<void> { this.store.delete(id); }
+  async delete(id: string): Promise<void> {
+    this.store.delete(id);
+  }
 }
 
 export class InMemoryKeyframeRepository implements KeyframeRepository {
   private store = new Map<string, Keyframe>();
-  async insert(record: Keyframe): Promise<void> { this.store.set(record.id, record); }
-  async findById(id: string): Promise<Keyframe | null> { return this.store.get(id) ?? null; }
+  async insert(record: Keyframe): Promise<void> {
+    this.store.set(record.id, record);
+  }
+  async findById(id: string): Promise<Keyframe | null> {
+    return this.store.get(id) ?? null;
+  }
   async listByTrack(trackId: string): Promise<Keyframe[]> {
     const out: Keyframe[] = [];
     for (const r of this.store.values()) {
@@ -282,13 +311,19 @@ export class InMemoryKeyframeRepository implements KeyframeRepository {
     }
     return out;
   }
-  async delete(id: string): Promise<void> { this.store.delete(id); }
+  async delete(id: string): Promise<void> {
+    this.store.delete(id);
+  }
 }
 
 export class InMemoryTriggerRepository implements TriggerRepository {
   private store = new Map<string, Trigger>();
-  async insert(record: Trigger): Promise<void> { this.store.set(record.id, record); }
-  async findById(id: string): Promise<Trigger | null> { return this.store.get(id) ?? null; }
+  async insert(record: Trigger): Promise<void> {
+    this.store.set(record.id, record);
+  }
+  async findById(id: string): Promise<Trigger | null> {
+    return this.store.get(id) ?? null;
+  }
   async listByTimeline(timelineId: string): Promise<Trigger[]> {
     const out: Trigger[] = [];
     for (const r of this.store.values()) {
@@ -296,18 +331,26 @@ export class InMemoryTriggerRepository implements TriggerRepository {
     }
     return out;
   }
-  async delete(id: string): Promise<void> { this.store.delete(id); }
+  async delete(id: string): Promise<void> {
+    this.store.delete(id);
+  }
 }
 
 export class InMemoryEasingCurveRepository implements EasingCurveRepository {
   private store = new Map<string, EasingCurve>();
-  private k(r: EasingCurve): string { return `${r.workspaceId}::${r.id}`; }
+  private k(r: EasingCurve): string {
+    return `${r.workspaceId}::${r.id}`;
+  }
 
   async insert(record: EasingCurve): Promise<void> {
     this.store.set(this.k(record), record);
   }
 
-  async update(id: string, workspaceId: string, patch: Partial<Omit<EasingCurve, 'id' | 'workspaceId'>>): Promise<EasingCurve> {
+  async update(
+    id: string,
+    workspaceId: string,
+    patch: Partial<Omit<EasingCurve, 'id' | 'workspaceId'>>,
+  ): Promise<EasingCurve> {
     const existing = await this.findById(id, workspaceId);
     if (!existing) throw new EasingCurveNotFoundError(id);
     const updated: EasingCurve = { ...existing, ...patch };
@@ -334,7 +377,9 @@ export class InMemoryEasingCurveRepository implements EasingCurveRepository {
 
 export class InMemoryAnimationPresetRepository implements AnimationPresetRepository {
   private store = new Map<string, AnimationPreset>();
-  private k(r: AnimationPreset): string { return `${r.workspaceId}::${r.id}`; }
+  private k(r: AnimationPreset): string {
+    return `${r.workspaceId}::${r.id}`;
+  }
 
   async insert(record: AnimationPreset): Promise<void> {
     this.store.set(this.k(record), record);
@@ -344,7 +389,10 @@ export class InMemoryAnimationPresetRepository implements AnimationPresetReposit
     return this.store.get(`${workspaceId}::${id}`) ?? null;
   }
 
-  async listByWorkspace(workspaceId: string, filters?: { category?: AnimationPresetCategory; tag?: string }): Promise<AnimationPreset[]> {
+  async listByWorkspace(
+    workspaceId: string,
+    filters?: { category?: AnimationPresetCategory; tag?: string },
+  ): Promise<AnimationPreset[]> {
     const out: AnimationPreset[] = [];
     for (const r of this.store.values()) {
       if (r.workspaceId !== workspaceId) continue;
@@ -423,7 +471,9 @@ export class VersionConflictError extends Error {
     public readonly resourceId: string,
     public readonly currentVersion: number,
   ) {
-    super(`Version conflict on ${resourceId}: expected different version, current is ${currentVersion}`);
+    super(
+      `Version conflict on ${resourceId}: expected different version, current is ${currentVersion}`,
+    );
     this.name = 'VersionConflictError';
   }
 }

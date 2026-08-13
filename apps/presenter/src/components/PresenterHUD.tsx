@@ -25,7 +25,11 @@ export interface PresenterHUDProps {
     readonly mode: 'live' | 'rehearsal' | 'paused';
     readonly last_heartbeat_at: string;
     readonly plan: { readonly hidden: readonly string[]; readonly order: readonly string[] };
-    readonly agenda_timers: ReadonlyArray<{ readonly id: string; readonly label: string; readonly duration_ms: number }>;
+    readonly agenda_timers: ReadonlyArray<{
+      readonly id: string;
+      readonly label: string;
+      readonly duration_ms: number;
+    }>;
   };
   readonly activeSlide: SlideSnapshot | null;
   readonly nextSlide: SlideSnapshot | null;
@@ -62,7 +66,8 @@ export function PresenterHUD({
     return Date.now() - startedMs;
   }, [state.started_at]);
 
-  const pct = totalDurationMs > 0 ? Math.min(100, Math.round((elapsedMs / totalDurationMs) * 100)) : 0;
+  const pct =
+    totalDurationMs > 0 ? Math.min(100, Math.round((elapsedMs / totalDurationMs) * 100)) : 0;
 
   const onCopyPair = useCallback(() => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -91,11 +96,12 @@ export function PresenterHUD({
           style={{
             padding: '1px 6px',
             borderRadius: 4,
-            background: state.mode === 'live'
-              ? 'var(--success)'
-              : state.mode === 'rehearsal'
-              ? 'var(--info)'
-              : 'var(--warning)',
+            background:
+              state.mode === 'live'
+                ? 'var(--success)'
+                : state.mode === 'rehearsal'
+                  ? 'var(--info)'
+                  : 'var(--warning)',
             color: 'var(--content-inverse)',
             fontSize: 10,
             textTransform: 'uppercase',
@@ -153,9 +159,7 @@ export function PresenterHUD({
         <span data-testid={`${dataTestId}-whispers`}>
           📨 {whisperCount} whisper{whisperCount === 1 ? '' : 's'}
         </span>
-        <span data-testid={`${dataTestId}-audience`}>
-          👥 {audienceParticipationCount} audience
-        </span>
+        <span data-testid={`${dataTestId}-audience`}>👥 {audienceParticipationCount} audience</span>
         <span
           data-testid={`${dataTestId}-heartbeat`}
           style={{
@@ -185,9 +189,7 @@ export function PresenterHUD({
         </button>
       </div>
 
-      <footer style={{ fontSize: 10, color: 'rgba(0,0,0,0.4)' }}>
-        session {sessionId}
-      </footer>
+      <footer style={{ fontSize: 10, color: 'rgba(0,0,0,0.4)' }}>session {sessionId}</footer>
     </section>
   );
 }

@@ -6,7 +6,7 @@
 **Critical-path:** No (surface phase, parallelizable)
 **Parallel stream tag:** Stream F — Insights & Workflow (sibling to P17 analytics & engagement intelligence)
 
-**Intent:** Turn Domio from a single-author canvas into a team-operated production system for presentations. Comments pin to *elements*, not just slides. Approvals are workflow-enforced, not advisory. Suggestion mode is a CRDT-isolated branch, not raw text suggestions. Merge requests produce a *visual* diff of the deck as a rendered object. The slide library is a governed source of truth with auto-update propagation across every consumer. Meeting tools, chat tools, calendars, and task managers are first-class collaborators, not afterthoughts. Guest collaborators are scoped and expiring. The phase delivers fourteen services, a permission engine, a diff engine, a notification fan-out, and integrations to Slack / Teams / Asana / Jira / Linear / Zoom / Google Meet / Teams Meetings / Google Calendar / Outlook.
+**Intent:** Turn Domio from a single-author canvas into a team-operated production system for presentations. Comments pin to _elements_, not just slides. Approvals are workflow-enforced, not advisory. Suggestion mode is a CRDT-isolated branch, not raw text suggestions. Merge requests produce a _visual_ diff of the deck as a rendered object. The slide library is a governed source of truth with auto-update propagation across every consumer. Meeting tools, chat tools, calendars, and task managers are first-class collaborators, not afterthoughts. Guest collaborators are scoped and expiring. The phase delivers fourteen services, a permission engine, a diff engine, a notification fan-out, and integrations to Slack / Teams / Asana / Jira / Linear / Zoom / Google Meet / Teams Meetings / Google Calendar / Outlook.
 
 ---
 
@@ -33,22 +33,22 @@
 
 ### In scope (feature numbers)
 
-| Feature | Description |
-|---|---|
-| #179 | Element-pinned comments with threads, mentions, resolve, reactions, attachments |
-| #180 | Review/approval workflows with state machine, parallel lanes, SLA escalation |
-| #181 | Slide-level assignments with status workflow, multi-assignee, reason-on-blocked |
-| #182 | Suggestion mode (CRDT-isolated parallel branch, semantic diff, conflict detection) |
-| #183 | Deck merge requests with visual diff at slide/element/data-binding granularities |
-| #184 | Workspaces with hierarchical folders, typed permissions, deny-first, historical queries |
-| #185 | Shared slide library with versioned entries, supersedes chain, governance |
-| #186 | Auto-updating shared slides (hybrid write-through + lazy, per-reference schedule) |
-| #187 | Content expiry policies with three escalation tiers + AI freshness check |
-| #188 | Meeting-tool integrations (Zoom, Meet, Teams) — in-meeting app + deep-link fallback |
-| #189 | Slack / Teams notifications with deep links, action buttons, slash commands |
-| #190 | Calendar integration (Google, Outlook, iCloud) with pre-meeting prompt |
-| #191 | Task-manager integrations (Asana, Jira, Linear) with two-way sync |
-| #192 | Guest collaborators with scoped, expiring access |
+| Feature | Description                                                                             |
+| ------- | --------------------------------------------------------------------------------------- |
+| #179    | Element-pinned comments with threads, mentions, resolve, reactions, attachments         |
+| #180    | Review/approval workflows with state machine, parallel lanes, SLA escalation            |
+| #181    | Slide-level assignments with status workflow, multi-assignee, reason-on-blocked         |
+| #182    | Suggestion mode (CRDT-isolated parallel branch, semantic diff, conflict detection)      |
+| #183    | Deck merge requests with visual diff at slide/element/data-binding granularities        |
+| #184    | Workspaces with hierarchical folders, typed permissions, deny-first, historical queries |
+| #185    | Shared slide library with versioned entries, supersedes chain, governance               |
+| #186    | Auto-updating shared slides (hybrid write-through + lazy, per-reference schedule)       |
+| #187    | Content expiry policies with three escalation tiers + AI freshness check                |
+| #188    | Meeting-tool integrations (Zoom, Meet, Teams) — in-meeting app + deep-link fallback     |
+| #189    | Slack / Teams notifications with deep links, action buttons, slash commands             |
+| #190    | Calendar integration (Google, Outlook, iCloud) with pre-meeting prompt                  |
+| #191    | Task-manager integrations (Asana, Jira, Linear) with two-way sync                       |
+| #192    | Guest collaborators with scoped, expiring access                                        |
 
 ### Out of scope (deferred to later phases)
 
@@ -103,6 +103,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Typed permission resolution with deny-first, hierarchical inheritance, historical (point-in-time) queries.
 
 **Tasks.**
+
 1. Build `services/permission-engine` — the central authorization engine.
 2. Implement typed capabilities: `read`, `comment`, `suggest`, `edit`, `share_internal`, `share_external`, `manage_members`, `manage_billing`, `invite_guest`, `publish_to_library`, `manage_library`, `break_brand_lock`.
 3. Implement the resolution algorithm: principal → groups → role → resource hierarchy → effective capabilities with **deny-first** (deny rules override allow rules).
@@ -112,6 +113,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 7. Wire the engine into the API gateway as middleware so every `/api/v1/...` route is checked.
 
 **Files / packages touched.**
+
 - `/services/permission-engine/` (new)
 - `/services/permission-engine/internal/resolver/deny_first.go` (new)
 - `/services/permission-engine/internal/cache/redis.go` (new)
@@ -119,18 +121,21 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/packages/contracts/middleware/auth.go` (new — gateway middleware)
 
 **Contracts added.**
+
 - `GET /api/v1/resources/{type}/{id}/effective-permissions` REST.
 - `permission.granted`, `permission.revoked` events on Kafka.
 
 **Contracts consumed.** P00 / P01 infra, P14 share-link API.
 
 **Tests written.**
+
 - Unit: deny-first resolution across all capability combinations.
 - Property: no combination of grants can escalate beyond the union of granted capabilities.
 - Integration: every API endpoint returns 403 on missing capability.
 - Performance: 1k req/s cached, p95 < 50 ms.
 
 **Definition of Done.**
+
 - Permission evaluation p95 < 50 ms cached, < 200 ms cold.
 - Historical query (`at_time=...`) returns the period-correct effective set.
 - Deny-first invariant verified by exhaustive property test.
@@ -143,6 +148,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Element-pinned comments with threads, mentions, reactions, attachments, orphan handling.
 
 **Tasks.**
+
 1. Build `services/comment-service` — CRUD on `comment`, `comment_thread`, `mention`, with element-relative anchor storage.
 2. Implement anchor math: pin coordinates are fractional offsets (0..1) within the element's bounding box + fallback slide-relative offset.
 3. Implement element-motion survival: when an element moves, the pin translates; when an element is deleted, the pin promotes to its parent slide with `orphaned=true`.
@@ -155,6 +161,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 10. Wire the notification fan-out for mentions — p95 ≤ 5 s for first delivery.
 
 **Files / packages touched.**
+
 - `/services/comment-service/` (new)
 - `/services/comment-service/internal/anchor/element_relative.go` (new)
 - `/db/postgres/migrations/<ts>_comment.sql` (new — `comment`, `comment_thread`, `mention`)
@@ -162,6 +169,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/apps/editor/canvas/layers-panel/comments-tab/` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/decks/{deck_id}/comments` REST.
 - `GET /api/v1/decks/{deck_id}/comments?status=...` REST.
 - `PATCH /api/v1/comments/{id}` REST.
@@ -172,12 +180,14 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Contracts consumed.** P05 deck / element IDs; P14 share-link identity for mention routing.
 
 **Tests written.**
+
 - Unit: anchor math; orphan promotion; PII regex.
 - Integration: end-to-end pin → mention → Slack notification in 5 s.
 - Property: pin survives element drag at 60 fps.
 - Permission: read-only user can read but not reply / resolve.
 
 **Definition of Done.**
+
 - Comment write p95 ≤ 200 ms; mention notification p95 ≤ 5 s.
 - Pin survives element motion at 60 fps.
 - Thread with 5,000 comments / 200 slides loads in p95 ≤ 1 s.
@@ -190,6 +200,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Stateful approval workflow with multi-lane parallel approvals, immutable version snapshots, SLA escalation.
 
 **Tasks.**
+
 1. Build `services/approval-engine` — owns `approval_request`, `approval_decision`, the strict state machine.
 2. Implement the state machine: `draft → pending → approved | changes_requested | rejected → (back to draft on edit) → pending → ...`. Illegal transitions rejected at the API with `409 Conflict`.
 3. Implement parallel lanes: a single approval can have multiple lanes (legal, brand, finance) each with its own decision.
@@ -200,6 +211,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 8. Implement the audit trail: every state transition (actor, timestamp, justification, version_id) is recorded.
 
 **Files / packages touched.**
+
 - `/services/approval-engine/` (new)
 - `/services/approval-engine/internal/state_machine/transitions.go` (new)
 - `/services/approval-engine/internal/sla/escalator.go` (new)
@@ -208,17 +220,20 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/apps/editor/canvas/approval-dialog/` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/decks/{deck_id}/approval-requests` REST.
 - `POST /api/v1/approval-requests/{id}/decisions` REST.
 - `GET /api/v1/decks/{deck_id}/approval-status` REST.
 - `approval.requested`, `approval.decided`, `approval.escalated` events on Kafka.
 
 **Tests written.**
+
 - Unit: full state-machine transition matrix; idempotent approval; escalation on overdue.
 - Integration: parallel lanes approve independently; external share blocked then unblocked.
 - Property: no illegal transition reachable via any sequence of valid API calls.
 
 **Definition of Done.**
+
 - State-machine verified against all transitions.
 - External share gate enforced at the API layer.
 - Auto-revoke on edit verified.
@@ -232,6 +247,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Slide-level assignments with status workflow, multi-assignee, reason-on-blocked, timeline view.
 
 **Tasks.**
+
 1. Build `services/assignment-service` — owns `assignment` table with `slide_range INT4RANGE`.
 2. Implement assignment scope: slide-level or section-level (continuous range).
 3. Implement multi-assignee (primary + watchers); only the primary's status counts toward "all done" rollups.
@@ -242,22 +258,26 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 8. Implement reassignment preserving the original in the audit log; new assignee notified.
 
 **Files / packages touched.**
+
 - `/services/assignment-service/` (new)
 - `/services/assignment-service/internal/timeline/gantt.go` (new)
 - `/db/postgres/migrations/<ts>_assignment.sql` (new)
 - `/apps/presenter-view/overlays/assignment-badge/` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/decks/{deck_id}/assignments` REST.
 - `PATCH /api/v1/assignments/{id}` REST.
 - `GET /api/v1/users/{user_id}/assignments` REST.
 - `assignment.created`, `assignment.status_changed` events on Kafka.
 
 **Tests written.**
+
 - Unit: range math; blocked-reason mandate; multi-assignee rollup.
 - Integration: end-to-end from PM assign → in_progress → review → done.
 
 **Definition of Done.**
+
 - Assignment write p95 ≤ 150 ms.
 - Timeline view renders for 1k assignments in p95 ≤ 300 ms.
 - Reassignment preserves audit log.
@@ -270,6 +290,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Propose edits without modifying the live deck, with semantic diff at the operation level.
 
 **Tasks.**
+
 1. Build `services/suggestion-service` — owns `suggestion` table; CRUD on per-session branch operations.
 2. Implement the CRDT-isolated parallel branch: each session can have its own sub-doc that **reads** the main branch but does not write to it.
 3. Implement suggestion operations as structured (CRDT) ops: element move, resize, restyle, content change, data-binding change, theme/token change — never raw text.
@@ -281,6 +302,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 9. Implement data-binding preview: a suggestion that changes a binding captures both the new binding and a sample-rendered preview.
 
 **Files / packages touched.**
+
 - `/services/suggestion-service/` (new)
 - `/services/suggestion-service/internal/branch/isolated.go` (new)
 - `/services/suggestion-service/internal/conflict/detector.go` (new)
@@ -289,6 +311,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/apps/editor/canvas/suggestion-panel/` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/decks/{deck_id}/suggestions` REST.
 - `GET /api/v1/decks/{deck_id}/suggestions?status=open` REST.
 - `POST /api/v1/suggestions/{id}/accept` REST.
@@ -296,11 +319,13 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `suggestion.created`, `suggestion.accepted`, `suggestion.rejected`, `suggestion.obsolete` events on Kafka.
 
 **Tests written.**
+
 - Unit: isolation guarantee (suggestion never touches main branch).
 - Property: structured op captured before/after state; conflict detection at op level.
 - Integration: parallel suggestions on the same element surface conflict; brand-lock blocks accept.
 
 **Definition of Done.**
+
 - A 100-slide suggestion set serializes to ≤ 50 KB.
 - Suggestion on a brand-locked region can be authored but accept is denied.
 - Obsolete auto-resolve on element-delete verified.
@@ -313,6 +338,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Branch / MR with three-granularity visual diff; 3-way merge UI; validation hooks.
 
 **Tasks.**
+
 1. Build `services/merge-request` — owns `merge_request`, `slide_diff`; CRUD on the MR lifecycle.
 2. Build a separate `workers/diff-engine` — the long-running diff computation worker (handles decks up to 500 slides).
 3. Compute three-level diffs: slide (added/removed/reordered), element (added/removed/moved/resized/restyled), data-binding (which source/field changed).
@@ -324,6 +350,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 9. Implement orphan MR handling: deleted branch surfaces "branch deleted"; deleted target branch auto-closes with reason.
 
 **Files / packages touched.**
+
 - `/services/merge-request/` (new)
 - `/workers/diff-engine/` (new)
 - `/workers/diff-engine/internal/visual/three_level.go` (new)
@@ -333,6 +360,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/apps/editor/canvas/merge-request/` (new — MR UI)
 
 **Contracts added.**
+
 - `POST /api/v1/decks/{deck_id}/merge-requests` REST.
 - `GET /api/v1/merge-requests/{id}/diffs?level=slide|element|data_binding` REST.
 - `POST /api/v1/merge-requests/{id}/resolve-conflict` REST.
@@ -340,12 +368,14 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `merge_request.opened`, `merge_request.merged`, `merge_request.conflict_detected` events on Kafka.
 
 **Tests written.**
+
 - Unit: three-level diff math; 3-way merge conflict UI states.
 - Integration: MR → diff → review → merge end-to-end.
 - Performance: 100-slide deck diff in p95 ≤ 3 s; 500-slide deck in p95 ≤ 15 s.
 - Property: validation hook failure blocks merge; no partial merge.
 
 **Definition of Done.**
+
 - Visual diff rendered at 60 fps for drag-to-compare slider.
 - Three-level diff data persisted server-side so MRs remain inspectable after branch deletion.
 - 3-way merge UI correctly handles brand-lock vs. normal edit conflict.
@@ -358,6 +388,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Governed slide library with versioned entries, reference vs. copy insert, and auto-update propagation.
 
 **Tasks.**
+
 1. Build `services/slide-library` — owns `slide_library_entry`, `library_version`, search/filter via OpenSearch/Elasticsearch index.
 2. Implement library scopes: workspace, team, org.
 3. Implement library publish workflow with approval gate (configurable per scope).
@@ -370,6 +401,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 10. Implement backpressure: sharded propagation so a 10k-binding consumer completes within p95 ≤ 60 s.
 
 **Files / packages touched.**
+
 - `/services/slide-library/` (new)
 - `/services/auto-update-bus/` (new)
 - `/services/auto-update-bus/internal/consumer/per_binding_worker.go` (new)
@@ -379,6 +411,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/apps/editor/canvas/library-browser/` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/library/entries` REST.
 - `GET /api/v1/library/entries?q=...&tag=...` REST.
 - `POST /api/v1/library/entries/{id}/retire` REST.
@@ -387,11 +420,13 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `auto_update.required`, `auto_update.applied`, `auto_update.conflict` events on Kafka.
 
 **Tests written.**
+
 - Unit: retired-head chain enforcement; reference vs. copy distinction.
 - Integration: library publish → 10k-binding propagation in p95 ≤ 60 s.
 - Performance: search + filter on 10k-entry library in p95 ≤ 300 ms.
 
 **Definition of Done.**
+
 - Library publish → propagate → consumer-update verified end-to-end.
 - Conflict UI surfaces on consumer side; propagation paused until resolved.
 - Mandatory updates prioritized over opt-in.
@@ -404,6 +439,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Daily scan with three-tier escalation; AI-assisted freshness verification.
 
 **Tasks.**
+
 1. Build `services/expiry-scheduler` — daily run scanning all resources for upcoming and overdue windows.
 2. Implement three escalation tiers: **gentle** (badge only), **moderate** (badge + notification), **strict** (badge + notification + auto-revoke external share).
 3. Implement the freshness dashboard `GET /api/v1/workspaces/{id}/expiry-dashboard`.
@@ -414,6 +450,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 8. Implement compliance: legal-hold on a resource pauses its retention clock.
 
 **Files / packages touched.**
+
 - `/services/expiry-scheduler/` (new)
 - `/services/expiry-scheduler/internal/scan/scheduler.go` (new)
 - `/services/expiry-scheduler/internal/escalation/tiers.go` (new)
@@ -421,17 +458,20 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/apps/dashboard/freshness/` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/resources/{type}/{id}/expiry-policy` REST.
 - `POST /api/v1/resources/{type}/{id}/confirm-freshness` REST.
 - `GET /api/v1/workspaces/{id}/expiry-dashboard` REST.
 - `expiry.policy_triggered`, `expiry.flag_applied`, `expiry.share_revoked` events on Kafka.
 
 **Tests written.**
+
 - Unit: tier logic; auto-revoke on overdue.
 - Integration: AI freshness auto-confirm verified on synthetic data-driven slide.
 - Performance: 100k-resource scan completes in ≤ 10 min.
 
 **Definition of Done.**
+
 - Scheduler run completes within 10 min for 100k resources.
 - Strict-mode auto-revoke verified within p95 ≤ 30 s.
 - Inheritance + override combined correctly.
@@ -444,6 +484,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Multi-channel routing, slash commands, action buttons, DND awareness, digest batching.
 
 **Tasks.**
+
 1. Build `services/notification-fanout` — subscribes to event bus; routes to in-app, email, Slack, Teams, meeting adapters.
 2. Build `services/slack-adapter` and `services/teams-adapter` — incoming webhook senders + slash command receivers + interactive payload handlers.
 3. Implement deep links in notifications (back to the deck / slide / comment).
@@ -455,6 +496,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 9. Implement HMAC-SHA256 signed payloads and signing-secret verification on inbound.
 
 **Files / packages touched.**
+
 - `/services/notification-fanout/` (new)
 - `/services/slack-adapter/` (new)
 - `/services/teams-adapter/` (new)
@@ -463,6 +505,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/apps/settings/integrations/` (new — admin OAuth connection UI)
 
 **Contracts added.**
+
 - `POST /api/v1/webhooks/slack/events` REST.
 - `POST /api/v1/webhooks/slack/commands` REST.
 - `POST /api/v1/webhooks/slack/interactivity` REST.
@@ -472,11 +515,13 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Contracts consumed.** All P18 events; P07 brand-locked region rules.
 
 **Tests written.**
+
 - Unit: digest batch math; DND check; idempotent action handlers.
 - Integration: end-to-end Slack/Teams sandbox test.
 - Security: unsigned requests rejected; > 5-min stale requests rejected.
 
 **Definition of Done.**
+
 - Mention-to-notification p95 ≤ 5 s.
 - DND awareness verified.
 - Rate-limit + retry tested on simulated Slack/Teams outage.
@@ -489,6 +534,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Native in-meeting apps with participation features intact; recording markers per slide.
 
 **Tasks.**
+
 1. Build `services/meeting-integration` — common framework + per-vendor adapters.
 2. Implement three integration patterns per vendor: in-meeting app SDK, deep-link fallback, OAuth-driven API.
 3. Implement OAuth flows for Zoom, Google Meet, Microsoft Teams.
@@ -500,6 +546,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 9. Implement presenter failover hook: vendor SDK deprecation falls back to deep-link with reduced feature set; banner in presenter view.
 
 **Files / packages touched.**
+
 - `/services/meeting-integration/` (new)
 - `/services/meeting-integration/adapters/zoom.go` (new)
 - `/services/meeting-integration/adapters/meet.go` (new)
@@ -507,17 +554,20 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/db/postgres/migrations/<ts>_meeting_integration.sql` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/webhooks/meetings/zoom` REST.
 - `POST /api/v1/webhooks/meetings/teams` REST.
 - `POST /api/v1/webhooks/meetings/google` REST.
 - `meeting.session_started`, `meeting.session_ended` events on Kafka.
 
 **Tests written.**
+
 - Unit: token scope; rate-limit math; vendor failure modes.
 - Integration: end-to-end Zoom / Meet / Teams sandbox test.
 - Edge: vendor SDK deprecation falls back to deep-link cleanly.
 
 **Definition of Done.**
+
 - All three vendors integrated with bidirectional chat sync.
 - Recording markers verified in vendor recording metadata.
 - Rate-limit handling verified under burst.
@@ -530,6 +580,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** OAuth calendar access; deck linked to event; pre-meeting prompt; bidirectional sync.
 
 **Tasks.**
+
 1. Build `services/calendar-integration` — owns `calendar_link`; OAuth flows for Google Calendar, Outlook, iCloud.
 2. Implement deck-to-event link: `POST /api/v1/calendar/links` and surfacing in event description.
 3. Implement pre-meeting prompt: 5 min before scheduled meeting (configurable per user), notification asks "Open in presenter mode?"
@@ -540,6 +591,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 8. Implement recording consent flow: if the meeting is recorded, presenter view prompts for attendee notification per vendor rules + GDPR / PDPA.
 
 **Files / packages touched.**
+
 - `/services/calendar-integration/` (new)
 - `/services/calendar-integration/adapters/google.go` (new)
 - `/services/calendar-integration/adapters/outlook.go` (new)
@@ -548,16 +600,19 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/apps/presenter-view/today/` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/webhooks/calendar/google` REST.
 - `POST /api/v1/webhooks/calendar/outlook` REST.
 - `calendar.event_linked`, `calendar.event_updated` events on Kafka.
 
 **Tests written.**
+
 - Unit: bidirectional sync math; recurring-meeting instance resolution.
 - Integration: end-to-end OAuth → link → pre-meeting prompt.
 - Edge: calendar access revoked → integration falls back cleanly.
 
 **Definition of Done.**
+
 - Bidirectional sync p95 ≤ 30 s vendor → Domio; ≤ 5 s Domio → vendor.
 - Pre-meeting prompt fires within 5 min of event start.
 - Recurring-meeting instance overrides work.
@@ -570,6 +625,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Two-way sync with declarative field mapping; project mapping; bulk operations.
 
 **Tasks.**
+
 1. Build `services/task-manager-integration` — per-vendor adapters + common framework.
 2. Implement OAuth (where available) or API-token auth for each vendor.
 3. Implement project mapping config: which Asana project / Jira project / Linear team maps to which Domio workspace/folder.
@@ -581,6 +637,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 9. Implement outbound webhook emitter for assignment events.
 
 **Files / packages touched.**
+
 - `/services/task-manager-integration/` (new)
 - `/services/task-manager-integration/adapters/asana.go` (new)
 - `/services/task-manager-integration/adapters/jira.go` (new)
@@ -588,17 +645,20 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 - `/db/postgres/migrations/<ts>_task_link.sql` (new)
 
 **Contracts added.**
+
 - `POST /api/v1/webhooks/tasks/asana` REST.
 - `POST /api/v1/webhooks/tasks/jira` REST.
 - `POST /api/v1/webhooks/tasks/linear` REST.
 - `task.sync_requested`, `task.sync_completed` events on Kafka.
 
 **Tests written.**
+
 - Unit: field mapping; conflict resolution modes.
 - Integration: end-to-end Asana / Jira / Linear sandbox sync.
 - Bulk: parent task status change cascades to 100 child assignments ≤ 30 s.
 
 **Definition of Done.**
+
 - Two-way sync p95 ≤ 10 s per change.
 - Bulk cascade verified within p95 ≤ 30 s.
 - Vendor rate-limit handling verified.
@@ -611,6 +671,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Scoped, expiring access for guests with magic-link auth and audit-distinct identity.
 
 **Tasks.**
+
 1. Build `services/guest-access` — owns `guest_access`; magic-link generation + verification.
 2. Implement invite flow: `POST /api/v1/guests` with `scope_type` (folder, project, deck), `scope_id`, `capabilities[]`, `expires_at`.
 3. Implement scoped permission enforcement: guests get only the union of granted capabilities; cross-resource access returns `403`.
@@ -622,22 +683,26 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 9. Implement download/export disabled by default; opt-in per invite.
 
 **Files / packages touched.**
+
 - `/services/guest-access/` (new)
 - `/services/guest-access/internal/magiclink/signer.go` (new)
 - `/db/postgres/migrations/<ts>_guest_access.sql` (new)
 - `/apps/magic-link-landing/` (new — single-use landing page)
 
 **Contracts added.**
+
 - `POST /api/v1/guests` REST.
 - `DELETE /api/v1/guests/{id}` REST.
 - `guest.access_granted`, `guest.access_revoked` events on Kafka.
 
 **Tests written.**
+
 - Unit: magic-link single-use; expiry math; scope enforcement.
 - Integration: invite → magic link → access → expire → revoke.
 - Security: cross-resource access returns 403.
 
 **Definition of Done.**
+
 - Magic-link single-use verified.
 - Expiry within p95 ≤ 5 s.
 - Audit log tags verified.
@@ -650,6 +715,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Goal:** Surface all P18 surfaces in the editor / dashboard UI with consistent UX.
 
 **Tasks.**
+
 1. Build `apps/editor/canvas/comment-side-panel/` — grouped by element/slide with filters (status / author / date / "mentioning me").
 2. Build `apps/editor/canvas/approval-dialog/` — multi-lane parallel approval UX.
 3. Build `apps/editor/canvas/assignment-overlay/` — slide panel chips + Gantt timeline view.
@@ -661,6 +727,7 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 9. Apply a11y pass: keyboard operable, ARIA-live where appropriate, screen-reader friendly.
 
 **Files / packages touched.**
+
 - Multiple paths under `/apps/editor/canvas/`.
 - `/apps/settings/integrations/` (new).
 - `/packages/ui-kit/comments/` (new).
@@ -668,12 +735,14 @@ The phase is split into fourteen ordered workstreams. W1–W3 are foundational (
 **Contracts consumed.** All W1–W13 APIs.
 
 **Tests written.**
+
 - Unit: keyboard nav; ARIA-live correctness.
 - Integration: end-to-end from comment to Slack notification.
 - Visual regression: each panel screenshot diffed.
 - A11y: axe-core 0 critical violations on every new route.
 
 **Definition of Done.**
+
 - All 9 surfaces rendering correctly.
 - axe-core 0 critical.
 - Manual screen-reader pass on every surface.
@@ -686,41 +755,41 @@ This phase introduces fourteen new services, one new worker package, and approxi
 
 ### New services
 
-| Service | Responsibility | Owns |
-|---|---|---|
-| `services/permission-engine` | Typed resolution, deny-first, historical queries | `workspace`, `workspace_member`, `group_member`, `permission_grant` |
-| `services/comment-service` | Element-pinned comments, threads, mentions | `comment`, `comment_thread`, `mention` |
-| `services/approval-engine` | Strict state machine, parallel lanes, SLA escalation | `approval_request`, `approval_decision` |
-| `services/assignment-service` | Slide-level scope, multi-assignee, status | `assignment` |
-| `services/suggestion-service` | CRDT-isolated parallel branch, semantic diff | `suggestion` |
-| `services/merge-request` | MR lifecycle, conflict UI | `merge_request`, `slide_diff` |
-| `services/slide-library` | Governed pool, search, versioning | `slide_library_entry`, `library_version` |
-| `services/auto-update-bus` | Write-through + lazy propagation | `auto_update_binding` |
-| `services/expiry-scheduler` | Daily scan, three tiers, AI freshness | `expiry_policy`, `freshness_flag` |
-| `services/notification-fanout` | Multi-channel routing | `notification_subscription` |
-| `services/slack-adapter` | Slack webhook + slash + interactivity | (consumes events) |
-| `services/teams-adapter` | Teams webhook + slash + adaptive cards | (consumes events) |
-| `services/meeting-integration` | Zoom / Meet / Teams in-meeting app | `meeting_integration` |
-| `services/calendar-integration` | Google / Outlook / iCloud OAuth | `calendar_link` |
-| `services/task-manager-integration` | Asana / Jira / Linear adapters | `task_link` |
-| `services/guest-access` | Magic-link, scoped, expiring | `guest_access` |
+| Service                             | Responsibility                                       | Owns                                                                |
+| ----------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------- |
+| `services/permission-engine`        | Typed resolution, deny-first, historical queries     | `workspace`, `workspace_member`, `group_member`, `permission_grant` |
+| `services/comment-service`          | Element-pinned comments, threads, mentions           | `comment`, `comment_thread`, `mention`                              |
+| `services/approval-engine`          | Strict state machine, parallel lanes, SLA escalation | `approval_request`, `approval_decision`                             |
+| `services/assignment-service`       | Slide-level scope, multi-assignee, status            | `assignment`                                                        |
+| `services/suggestion-service`       | CRDT-isolated parallel branch, semantic diff         | `suggestion`                                                        |
+| `services/merge-request`            | MR lifecycle, conflict UI                            | `merge_request`, `slide_diff`                                       |
+| `services/slide-library`            | Governed pool, search, versioning                    | `slide_library_entry`, `library_version`                            |
+| `services/auto-update-bus`          | Write-through + lazy propagation                     | `auto_update_binding`                                               |
+| `services/expiry-scheduler`         | Daily scan, three tiers, AI freshness                | `expiry_policy`, `freshness_flag`                                   |
+| `services/notification-fanout`      | Multi-channel routing                                | `notification_subscription`                                         |
+| `services/slack-adapter`            | Slack webhook + slash + interactivity                | (consumes events)                                                   |
+| `services/teams-adapter`            | Teams webhook + slash + adaptive cards               | (consumes events)                                                   |
+| `services/meeting-integration`      | Zoom / Meet / Teams in-meeting app                   | `meeting_integration`                                               |
+| `services/calendar-integration`     | Google / Outlook / iCloud OAuth                      | `calendar_link`                                                     |
+| `services/task-manager-integration` | Asana / Jira / Linear adapters                       | `task_link`                                                         |
+| `services/guest-access`             | Magic-link, scoped, expiring                         | `guest_access`                                                      |
 
 ### New workers
 
-| Worker | Trigger | Purpose |
-|---|---|---|
-| `workers/diff-engine` | MR open | compute three-level diff (long-running) |
-| `workers/library-propagator` | `library.entry_updated` | fan-out to consumer bindings |
-| `workers/expiry-scanner` | nightly | scan + flag + escalate |
-| `workers/bangladesh-residency-reconciler` | 1 h loop | enforce `apac` shard for BD viewers (per `/docs/11-legal-compliance-bangladesh.md` §11.2) |
+| Worker                                    | Trigger                 | Purpose                                                                                   |
+| ----------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------- |
+| `workers/diff-engine`                     | MR open                 | compute three-level diff (long-running)                                                   |
+| `workers/library-propagator`              | `library.entry_updated` | fan-out to consumer bindings                                                              |
+| `workers/expiry-scanner`                  | nightly                 | scan + flag + escalate                                                                    |
+| `workers/bangladesh-residency-reconciler` | 1 h loop                | enforce `apac` shard for BD viewers (per `/docs/11-legal-compliance-bangladesh.md` §11.2) |
 
 ### New apps
 
-| App | Type | Purpose |
-|---|---|---|
-| `apps/magic-link-landing` | Web (React) | single-use guest landing page |
-| `apps/settings/integrations` | Web (React) | admin OAuth connection UI |
-| `apps/editor/canvas/{comments,approval,assignment,suggestion,merge-request,library-browser,integrations,guest-invite}` | Web components | in-editor surfaces |
+| App                                                                                                                    | Type           | Purpose                       |
+| ---------------------------------------------------------------------------------------------------------------------- | -------------- | ----------------------------- |
+| `apps/magic-link-landing`                                                                                              | Web (React)    | single-use guest landing page |
+| `apps/settings/integrations`                                                                                           | Web (React)    | admin OAuth connection UI     |
+| `apps/editor/canvas/{comments,approval,assignment,suggestion,merge-request,library-browser,integrations,guest-invite}` | Web components | in-editor surfaces            |
 
 ### New tables (Postgres, consolidated into migration files)
 
@@ -740,6 +809,7 @@ This phase introduces fourteen new services, one new worker package, and approxi
 - **`<ts>_guest_access.sql`**: `guest_access`.
 
 Detailed DDL is in `/docs/collaboration-workflow.md` §5 (verbatim). Key columns to call out:
+
 - `comment.anchor` — JSONB element-relative + slide-relative fractional offsets.
 - `suggestion.operation` — JSONB structured CRDT op (not raw text).
 - `slide_diff.{slide_diffs, binding_diffs}` — JSONB three-level diff payload.
@@ -751,7 +821,7 @@ Detailed DDL is in `/docs/collaboration-workflow.md` §5 (verbatim). Key columns
 
 - `contracts/openapi/v1/collaboration.yaml` — REST surface for all 14 services (comments, approval, assignments, suggestions, MR, library, expiry, integrations).
 - `contracts/proto/domio/v1/collaboration.proto` — gRPC interface for cross-service calls.
-- `contracts/events/collaboration/*.json` — JSON schemas for every event topic (comment.*, approval.*, assignment.*, suggestion.*, merge_request.*, library.*, auto_update.*, expiry.*, guest.*).
+- `contracts/events/collaboration/*.json` — JSON schemas for every event topic (comment._, approval._, assignment._, suggestion._, merge_request._, library._, auto_update._, expiry._, guest.\*).
 - `contracts/openapi/v1/webhooks/{slack,teams,calendar,tasks,meetings}.yaml` — inbound webhook contracts.
 
 ### Cross-cutting considerations
@@ -769,78 +839,78 @@ Detailed DDL is in `/docs/collaboration-workflow.md` §5 (verbatim). Key columns
 
 ## 6. Verification matrix
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #179 comments | Pin comment to element, drag element 100px | Pin translates with element; no jitter at 60 fps | Comments lead |
-| #179 comments | Delete element with 5 comments | Pins promote to slide with `orphaned=true`; threads remain | Comments lead |
-| #179 comments | Mention 5 users in <30 s | Single digest delivered p95 ≤ 5 s | Comments lead |
-| #179 comments | 5,000 comments / 200 slides | Panel loads in p95 ≤ 1 s (pagination + lazy) | Comments lead |
-| #180 approval | Submit for review with 3 parallel lanes | All 3 approvers notified; each decides independently | Approval lead |
-| #180 approval | Edit deck after approval | New version; previous approval auto-revokes if external share existed | Approval lead |
-| #180 approval | Approve SLA overdue | Escalation to fallback approver within SLA window | Approval lead |
-| #180 approval | External share attempted while pending | `403 external_share_requires_approval` | Approval lead |
-| #181 assignments | Assign slides 4–7 to Priya with 2 watchers | Primary + watchers see assignment; status rollup uses primary | Assignments lead |
-| #181 assignments | Set status to `blocked` without reason | Rejected with `reason_required` | Assignments lead |
-| #181 assignments | Reassign mid-flow | Original preserved in audit; new assignee notified | Assignments lead |
-| #182 suggestions | Reviewer in suggestion mode moves chart 40px right | Suggestion captured as CRDT op, not raw text | Suggestions lead |
-| #182 suggestions | Suggestion on brand-locked region | Authored; accept denied | Suggestions lead |
-| #182 suggestions | 2 suggestions on same element | Conflict detected on second accept; merge / override / abort UI | Suggestions lead |
-| #182 suggestions | Element deleted before accept | Suggestion auto-resolves as `obsolete` | Suggestions lead |
-| #183 MR | Open MR with 3 slides added, 1 removed, 5 modified | Three-level diff rendered; visual diff at 60 fps | MR lead |
-| #183 MR | Run linting hook on MR with off-brand color | Validation failure; merge blocked | MR lead |
-| #183 MR | Target branch has moved on since branch | 3-way merge conflict UI; resolve → re-run hooks | MR lead |
-| #183 MR | 500-slide deck open MR | Diff computed in p95 ≤ 15 s | MR lead |
-| #184 permissions | Workspace editor + project deny `share_external` | User cannot share externally from that project | Permissions lead |
-| #184 permissions | Historical query `at_time=2026-06-01` | Returns period-correct effective set | Permissions lead |
-| #184 permissions | 1k req/s cached | p95 < 50 ms; cache hit rate > 90% | Permissions lead |
-| #185 library | Publish slide to library with one approver | Approval gate; published after approval | Library lead |
-| #185 library | Insert library slide as reference | `auto_update_binding` row created; library badge shown | Library lead |
-| #185 library | Search 10k-entry library with filters | p95 ≤ 300 ms | Library lead |
-| #186 auto-update | Update library master; 400 consumer decks | All receive within p95 ≤ 60 s (write-through) | Auto-update lead |
-| #186 auto-update | Mandatory update with consumer-local conflict | Conflict UI surfaces immediately; propagation paused | Auto-update lead |
-| #186 auto-update | Freeze reference | Slide panel shows "frozen as of <date>" | Auto-update lead |
-| #187 expiry | Set interval=90 days, tier=strict on a slide | After 90 days, badge + notification + auto-revoke share | Expiry lead |
-| #187 expiry | AI freshness auto-confirm on data-driven slide | Auto-confirmed; no manual review needed | Expiry lead |
-| #187 expiry | 100k-resource scan | Completes within 10 min | Expiry lead |
-| #188 meeting | Present in Teams meeting | In-meeting app opens; presenter controls work | Meeting lead |
-| #188 meeting | Audience polls in Teams | Results surface in Domio presenter view | Meeting lead |
-| #188 meeting | Vendor SDK deprecation | Falls back to deep-link with banner | Meeting lead |
-| #189 notifications | Comment with `@priya` mention | Slack/Teams notification within 5 s with deep link | Notifications lead |
-| #189 notifications | Slack/Teams outage | Events queue; flush on recovery; fallback to email | Notifications lead |
-| #189 notifications | Action button click "Approve" | Idempotent: 2 clicks → 1 approval | Notifications lead |
-| #190 calendar | OAuth Google → link deck to event | Link visible in event description | Calendar lead |
-| #190 calendar | Move event in Google Calendar | Domio reminder updated within p95 ≤ 30 s | Calendar lead |
-| #190 calendar | 5 min before meeting | Pre-meeting prompt fires | Calendar lead |
-| #191 tasks | Asana task status → Domio assignment | Two-way sync within p95 ≤ 10 s | Tasks lead |
-| #191 tasks | Bulk: parent status change cascades to 100 children | All updated within p95 ≤ 30 s | Tasks lead |
-| #191 tasks | Sync conflict (both updated same minute) | Configurable resolution; default last-write-wins | Tasks lead |
-| #192 guests | Invite guest with scope=deck, expires_at=7d | Magic link sent; access expires within 5 s of expiry | Guest lead |
-| #192 guests | Guest attempts cross-resource access | `403 out_of_scope` | Guest lead |
-| #192 guests | Guest edit action | Audit log entry: `actor_type=guest`, `inviter_id=<id>` | Guest lead |
-| Cross-cutting | axe-core scan of every P18 route | 0 critical violations | a11y reviewer |
-| Cross-cutting | Manual screen-reader pass on all 14 surfaces | All flows keyboard-operable, ARIA-live where expected | a11y reviewer |
-| Security | Forge magic-link token | Rejected | Security reviewer |
-| Security | DLP scan on comment with flagged term | Warning surfaced; user confirms or edits | Security reviewer |
-| Compliance | PDPA right-to-erasure on a guest | Guest `guest_access` soft-deleted; comment anonymized | Compliance reviewer |
-| Scale | **1,000-deck workspace load test** — 1k decks, 5k comments, 100 MRs open, 50 guests invite, all 14 features active | All latency targets met; no service OOM | SRE lead |
+| Feature            | Test                                                                                                               | Expected result                                                       | Owner               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ------------------- |
+| #179 comments      | Pin comment to element, drag element 100px                                                                         | Pin translates with element; no jitter at 60 fps                      | Comments lead       |
+| #179 comments      | Delete element with 5 comments                                                                                     | Pins promote to slide with `orphaned=true`; threads remain            | Comments lead       |
+| #179 comments      | Mention 5 users in <30 s                                                                                           | Single digest delivered p95 ≤ 5 s                                     | Comments lead       |
+| #179 comments      | 5,000 comments / 200 slides                                                                                        | Panel loads in p95 ≤ 1 s (pagination + lazy)                          | Comments lead       |
+| #180 approval      | Submit for review with 3 parallel lanes                                                                            | All 3 approvers notified; each decides independently                  | Approval lead       |
+| #180 approval      | Edit deck after approval                                                                                           | New version; previous approval auto-revokes if external share existed | Approval lead       |
+| #180 approval      | Approve SLA overdue                                                                                                | Escalation to fallback approver within SLA window                     | Approval lead       |
+| #180 approval      | External share attempted while pending                                                                             | `403 external_share_requires_approval`                                | Approval lead       |
+| #181 assignments   | Assign slides 4–7 to Priya with 2 watchers                                                                         | Primary + watchers see assignment; status rollup uses primary         | Assignments lead    |
+| #181 assignments   | Set status to `blocked` without reason                                                                             | Rejected with `reason_required`                                       | Assignments lead    |
+| #181 assignments   | Reassign mid-flow                                                                                                  | Original preserved in audit; new assignee notified                    | Assignments lead    |
+| #182 suggestions   | Reviewer in suggestion mode moves chart 40px right                                                                 | Suggestion captured as CRDT op, not raw text                          | Suggestions lead    |
+| #182 suggestions   | Suggestion on brand-locked region                                                                                  | Authored; accept denied                                               | Suggestions lead    |
+| #182 suggestions   | 2 suggestions on same element                                                                                      | Conflict detected on second accept; merge / override / abort UI       | Suggestions lead    |
+| #182 suggestions   | Element deleted before accept                                                                                      | Suggestion auto-resolves as `obsolete`                                | Suggestions lead    |
+| #183 MR            | Open MR with 3 slides added, 1 removed, 5 modified                                                                 | Three-level diff rendered; visual diff at 60 fps                      | MR lead             |
+| #183 MR            | Run linting hook on MR with off-brand color                                                                        | Validation failure; merge blocked                                     | MR lead             |
+| #183 MR            | Target branch has moved on since branch                                                                            | 3-way merge conflict UI; resolve → re-run hooks                       | MR lead             |
+| #183 MR            | 500-slide deck open MR                                                                                             | Diff computed in p95 ≤ 15 s                                           | MR lead             |
+| #184 permissions   | Workspace editor + project deny `share_external`                                                                   | User cannot share externally from that project                        | Permissions lead    |
+| #184 permissions   | Historical query `at_time=2026-06-01`                                                                              | Returns period-correct effective set                                  | Permissions lead    |
+| #184 permissions   | 1k req/s cached                                                                                                    | p95 < 50 ms; cache hit rate > 90%                                     | Permissions lead    |
+| #185 library       | Publish slide to library with one approver                                                                         | Approval gate; published after approval                               | Library lead        |
+| #185 library       | Insert library slide as reference                                                                                  | `auto_update_binding` row created; library badge shown                | Library lead        |
+| #185 library       | Search 10k-entry library with filters                                                                              | p95 ≤ 300 ms                                                          | Library lead        |
+| #186 auto-update   | Update library master; 400 consumer decks                                                                          | All receive within p95 ≤ 60 s (write-through)                         | Auto-update lead    |
+| #186 auto-update   | Mandatory update with consumer-local conflict                                                                      | Conflict UI surfaces immediately; propagation paused                  | Auto-update lead    |
+| #186 auto-update   | Freeze reference                                                                                                   | Slide panel shows "frozen as of <date>"                               | Auto-update lead    |
+| #187 expiry        | Set interval=90 days, tier=strict on a slide                                                                       | After 90 days, badge + notification + auto-revoke share               | Expiry lead         |
+| #187 expiry        | AI freshness auto-confirm on data-driven slide                                                                     | Auto-confirmed; no manual review needed                               | Expiry lead         |
+| #187 expiry        | 100k-resource scan                                                                                                 | Completes within 10 min                                               | Expiry lead         |
+| #188 meeting       | Present in Teams meeting                                                                                           | In-meeting app opens; presenter controls work                         | Meeting lead        |
+| #188 meeting       | Audience polls in Teams                                                                                            | Results surface in Domio presenter view                               | Meeting lead        |
+| #188 meeting       | Vendor SDK deprecation                                                                                             | Falls back to deep-link with banner                                   | Meeting lead        |
+| #189 notifications | Comment with `@priya` mention                                                                                      | Slack/Teams notification within 5 s with deep link                    | Notifications lead  |
+| #189 notifications | Slack/Teams outage                                                                                                 | Events queue; flush on recovery; fallback to email                    | Notifications lead  |
+| #189 notifications | Action button click "Approve"                                                                                      | Idempotent: 2 clicks → 1 approval                                     | Notifications lead  |
+| #190 calendar      | OAuth Google → link deck to event                                                                                  | Link visible in event description                                     | Calendar lead       |
+| #190 calendar      | Move event in Google Calendar                                                                                      | Domio reminder updated within p95 ≤ 30 s                              | Calendar lead       |
+| #190 calendar      | 5 min before meeting                                                                                               | Pre-meeting prompt fires                                              | Calendar lead       |
+| #191 tasks         | Asana task status → Domio assignment                                                                               | Two-way sync within p95 ≤ 10 s                                        | Tasks lead          |
+| #191 tasks         | Bulk: parent status change cascades to 100 children                                                                | All updated within p95 ≤ 30 s                                         | Tasks lead          |
+| #191 tasks         | Sync conflict (both updated same minute)                                                                           | Configurable resolution; default last-write-wins                      | Tasks lead          |
+| #192 guests        | Invite guest with scope=deck, expires_at=7d                                                                        | Magic link sent; access expires within 5 s of expiry                  | Guest lead          |
+| #192 guests        | Guest attempts cross-resource access                                                                               | `403 out_of_scope`                                                    | Guest lead          |
+| #192 guests        | Guest edit action                                                                                                  | Audit log entry: `actor_type=guest`, `inviter_id=<id>`                | Guest lead          |
+| Cross-cutting      | axe-core scan of every P18 route                                                                                   | 0 critical violations                                                 | a11y reviewer       |
+| Cross-cutting      | Manual screen-reader pass on all 14 surfaces                                                                       | All flows keyboard-operable, ARIA-live where expected                 | a11y reviewer       |
+| Security           | Forge magic-link token                                                                                             | Rejected                                                              | Security reviewer   |
+| Security           | DLP scan on comment with flagged term                                                                              | Warning surfaced; user confirms or edits                              | Security reviewer   |
+| Compliance         | PDPA right-to-erasure on a guest                                                                                   | Guest `guest_access` soft-deleted; comment anonymized                 | Compliance reviewer |
+| Scale              | **1,000-deck workspace load test** — 1k decks, 5k comments, 100 MRs open, 50 guests invite, all 14 features active | All latency targets met; no service OOM                               | SRE lead            |
 
 ---
 
 ## 7. Risks & open decisions
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Slack/Teams API rate limits during burst moments | Med | Med | Token bucket + exponential backoff per adapter; queue with persisted backlog |
-| Library propagation at 10k bindings breaches p95 ≤ 60 s | Med | High | Sharded fan-out workers; pre-aggregate per-shard metrics; benchmark in W7 |
-| MR diff for 500-slide deck in p95 ≤ 15 s | Med | High | Background diff worker; pre-cache tile renders; pre-compute element-level diff incrementally |
-| Calendar bidirectional sync races (vendor push vs. Domio push) | Med | Med | Conflict-resolution policy: vendor-wins after a max-wait window; UI surfaces last-writer |
-| Suggestion-mode isolation accidentally affects main branch | Low | High | Strict CRDT sub-doc; pre-merge validation that suggestion ops target only isolated sub-doc |
-| Permission engine cache staleness on revoke | Med | High | Invalidate-on-write + TTL ≤ 60s; audit log of cache invalidations |
-| Guest magic-link replay | Low | High | Single-use TTL (15 min); server-side consumed-token store |
-| Bangladesh residency for click-to-comment from a foreign IP | Med | Med | Region-pinned write path; cross-region replication disabled for residency-locked viewers |
-| Browser-based in-meeting app SDK gaps | Med | Med | Deep-link fallback path; feature-detect at runtime; banner in presenter view |
-| Approval state-machine invariant violations via race | Low | High | Postgres row-level lock on `approval_request`; optimistic concurrency `version` column |
-| Task-manager API rate limits during bulk | Med | Med | Batched sync; back-off; rate-limit per vendor token bucket |
+| Risk                                                           | Likelihood | Impact | Mitigation                                                                                   |
+| -------------------------------------------------------------- | ---------- | ------ | -------------------------------------------------------------------------------------------- |
+| Slack/Teams API rate limits during burst moments               | Med        | Med    | Token bucket + exponential backoff per adapter; queue with persisted backlog                 |
+| Library propagation at 10k bindings breaches p95 ≤ 60 s        | Med        | High   | Sharded fan-out workers; pre-aggregate per-shard metrics; benchmark in W7                    |
+| MR diff for 500-slide deck in p95 ≤ 15 s                       | Med        | High   | Background diff worker; pre-cache tile renders; pre-compute element-level diff incrementally |
+| Calendar bidirectional sync races (vendor push vs. Domio push) | Med        | Med    | Conflict-resolution policy: vendor-wins after a max-wait window; UI surfaces last-writer     |
+| Suggestion-mode isolation accidentally affects main branch     | Low        | High   | Strict CRDT sub-doc; pre-merge validation that suggestion ops target only isolated sub-doc   |
+| Permission engine cache staleness on revoke                    | Med        | High   | Invalidate-on-write + TTL ≤ 60s; audit log of cache invalidations                            |
+| Guest magic-link replay                                        | Low        | High   | Single-use TTL (15 min); server-side consumed-token store                                    |
+| Bangladesh residency for click-to-comment from a foreign IP    | Med        | Med    | Region-pinned write path; cross-region replication disabled for residency-locked viewers     |
+| Browser-based in-meeting app SDK gaps                          | Med        | Med    | Deep-link fallback path; feature-detect at runtime; banner in presenter view                 |
+| Approval state-machine invariant violations via race           | Low        | High   | Postgres row-level lock on `approval_request`; optimistic concurrency `version` column       |
+| Task-manager API rate limits during bulk                       | Med        | Med    | Batched sync; back-off; rate-limit per vendor token bucket                                   |
 
 Open decisions (with proposed default):
 
@@ -857,6 +927,7 @@ Open decisions (with proposed default):
 The internal demo proves all fourteen features end-to-end on a 1,000-deck workspace simulation plus one live meeting. Demo script:
 
 **Pre-demo (T-30 min).**
+
 1. Reset staging; deploy `phase-18-internal` tag to all services.
 2. Seed one workspace with five decks:
    - **"Q3 Board Update"** — 12 slides, requires `legal_required + brand_required` approval.
@@ -870,32 +941,32 @@ The internal demo proves all fourteen features end-to-end on a 1,000-deck worksp
 
 **Live demo script (T-0).**
 
-| T+ | Action | What we watch |
-|---|---|---|
-| 0:00 | Alice opens Q3 Board Update in editor | Permission panel shows Alice's capabilities |
-| 0:30 | Bob right-clicks a chart on slide 4 → "Add comment" | Pin appears anchored to element; comment composer opens |
-| 1:00 | Bob types `@priya @designers` and a PII-pattern email | PII warning surfaces; mention autocomplete resolves |
-| 1:30 | Priya receives Slack notification with deep link | p95 ≤ 5 s; action button "Open" included |
-| 2:00 | Alice assigns slides 4–7 to Priya with due date | Status chip on slide panel; Gantt timeline updates |
-| 2:30 | Priya opens in suggestion mode (`Cmd+I`) | Suggestion indicator; cursor style changes |
-| 3:00 | Priya moves chart 40px right → suggestion | Suggestion captured as CRDT op; not applied to live deck |
-| 3:30 | Alice accepts suggestion | Element moves; audit log entry: "Accepted from Priya's suggestion" |
-| 4:00 | Bob opens "Present in Teams" → joins next Teams meeting | In-meeting app opens inside Teams chrome |
-| 4:30 | Alice opens MR from `priya/experiment-pricing` → `main` | Three-level diff computed in 3 s; visual diff rendered |
-| 5:00 | Alice approves MR | Linting hooks pass; merge atomic; new version on main |
-| 5:30 | Alice submits Q3 Board Update for review | Approval request created; legal + brand notified |
-| 6:00 | Legal approves; brand still pending | Approval status: `partial`; external share blocked |
-| 6:30 | Carol inserts library slide "Standard Pricing" as reference | Auto-update binding created; library badge shown |
-| 6:45 | Library owner updates "Standard Pricing" | Consumer's slide update propagates within 8 s (write-through) |
-| 7:00 | Training Compliance crosses 90-day expiry | Badge + notification; strict mode auto-revokes external share |
-| 7:30 | Priya opens calendar "Today" view | Linked decks appear with meeting attendees |
-| 8:00 | 5 min before scheduled meeting | Pre-meeting prompt fires: "Open in presenter mode?" |
-| 8:30 | Carol opens Asana task → status changes to "In Progress" | Domio assignment status syncs within 6 s |
-| 9:00 | Guest access expires mid-session | Active session invalidated within 5 s; "session expired" page shown |
-| 9:30 | Compliance test: erasure request for guest | Guest access soft-deleted; comment anonymized; audit log entry preserved |
-| 10:00 | Guest attempt cross-resource access | `403 out_of_scope`; logged |
-| 10:30 | Security test: forge magic-link token | Rejected; security alert fires |
-| 11:00 | All 14 features exercised; metrics dashboard reviewed | All latency targets met |
+| T+    | Action                                                      | What we watch                                                            |
+| ----- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 0:00  | Alice opens Q3 Board Update in editor                       | Permission panel shows Alice's capabilities                              |
+| 0:30  | Bob right-clicks a chart on slide 4 → "Add comment"         | Pin appears anchored to element; comment composer opens                  |
+| 1:00  | Bob types `@priya @designers` and a PII-pattern email       | PII warning surfaces; mention autocomplete resolves                      |
+| 1:30  | Priya receives Slack notification with deep link            | p95 ≤ 5 s; action button "Open" included                                 |
+| 2:00  | Alice assigns slides 4–7 to Priya with due date             | Status chip on slide panel; Gantt timeline updates                       |
+| 2:30  | Priya opens in suggestion mode (`Cmd+I`)                    | Suggestion indicator; cursor style changes                               |
+| 3:00  | Priya moves chart 40px right → suggestion                   | Suggestion captured as CRDT op; not applied to live deck                 |
+| 3:30  | Alice accepts suggestion                                    | Element moves; audit log entry: "Accepted from Priya's suggestion"       |
+| 4:00  | Bob opens "Present in Teams" → joins next Teams meeting     | In-meeting app opens inside Teams chrome                                 |
+| 4:30  | Alice opens MR from `priya/experiment-pricing` → `main`     | Three-level diff computed in 3 s; visual diff rendered                   |
+| 5:00  | Alice approves MR                                           | Linting hooks pass; merge atomic; new version on main                    |
+| 5:30  | Alice submits Q3 Board Update for review                    | Approval request created; legal + brand notified                         |
+| 6:00  | Legal approves; brand still pending                         | Approval status: `partial`; external share blocked                       |
+| 6:30  | Carol inserts library slide "Standard Pricing" as reference | Auto-update binding created; library badge shown                         |
+| 6:45  | Library owner updates "Standard Pricing"                    | Consumer's slide update propagates within 8 s (write-through)            |
+| 7:00  | Training Compliance crosses 90-day expiry                   | Badge + notification; strict mode auto-revokes external share            |
+| 7:30  | Priya opens calendar "Today" view                           | Linked decks appear with meeting attendees                               |
+| 8:00  | 5 min before scheduled meeting                              | Pre-meeting prompt fires: "Open in presenter mode?"                      |
+| 8:30  | Carol opens Asana task → status changes to "In Progress"    | Domio assignment status syncs within 6 s                                 |
+| 9:00  | Guest access expires mid-session                            | Active session invalidated within 5 s; "session expired" page shown      |
+| 9:30  | Compliance test: erasure request for guest                  | Guest access soft-deleted; comment anonymized; audit log entry preserved |
+| 10:00 | Guest attempt cross-resource access                         | `403 out_of_scope`; logged                                               |
+| 10:30 | Security test: forge magic-link token                       | Rejected; security alert fires                                           |
+| 11:00 | All 14 features exercised; metrics dashboard reviewed       | All latency targets met                                                  |
 
 **Pass criteria for "internal demo passed":**
 

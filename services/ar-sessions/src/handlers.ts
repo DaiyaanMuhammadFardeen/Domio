@@ -9,9 +9,7 @@
  */
 
 import { Hono } from 'hono';
-import type {
-  SessionService,
-} from './service.js';
+import type { SessionService } from './service.js';
 import {
   SessionNotFoundError,
   SessionExpiredError,
@@ -81,10 +79,18 @@ export function createArSessionRoutes(ctx: RouteContext): Hono {
     }
 
     if (typeof b['slideId'] !== 'string' || b['slideId'].length === 0) {
-      return jsonError(400, 'VALIDATION_ERROR', 'slideId is required and must be a non-empty string');
+      return jsonError(
+        400,
+        'VALIDATION_ERROR',
+        'slideId is required and must be a non-empty string',
+      );
     }
     if (typeof b['modelAssetId'] !== 'string' || b['modelAssetId'].length === 0) {
-      return jsonError(400, 'VALIDATION_ERROR', 'modelAssetId is required and must be a non-empty string');
+      return jsonError(
+        400,
+        'VALIDATION_ERROR',
+        'modelAssetId is required and must be a non-empty string',
+      );
     }
 
     try {

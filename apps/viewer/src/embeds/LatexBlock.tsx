@@ -44,7 +44,10 @@ export function LatexBlock({ layer, dataTestId = 'latex-block' }: LatexBlockProp
   }, [layer]);
 
   const display = layer.displayMode === 'inline' ? 'inline-block' : 'block';
-  const sizing = useMemo(() => ({ fontSize: layer.displayMode === 'inline' ? 14 : 24 }), [layer.displayMode]);
+  const sizing = useMemo(
+    () => ({ fontSize: layer.displayMode === 'inline' ? 14 : 24 }),
+    [layer.displayMode],
+  );
 
   return (
     <div
@@ -69,7 +72,13 @@ export function LatexBlock({ layer, dataTestId = 'latex-block' }: LatexBlockProp
       ) : (
         <code
           data-testid={`${dataTestId}-placeholder`}
-          style={{ display, ...sizing, fontFamily: 'serif', whiteSpace: 'pre-wrap', textAlign: 'center' }}
+          style={{
+            display,
+            ...sizing,
+            fontFamily: 'serif',
+            whiteSpace: 'pre-wrap',
+            textAlign: 'center',
+          }}
         >
           {layer.source}
         </code>

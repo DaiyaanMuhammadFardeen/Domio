@@ -47,7 +47,21 @@ export class InMemoryCollabStore implements CollabStore {
 
   async updateComment(
     commentId: string,
-    patch: Partial<Pick<Comment, 'bodyMd' | 'status' | 'resolvedAt' | 'resolvedBy' | 'isOrphaned' | 'targetType' | 'targetId' | 'anchor' | 'emojiReactions' | 'updatedAt'>>,
+    patch: Partial<
+      Pick<
+        Comment,
+        | 'bodyMd'
+        | 'status'
+        | 'resolvedAt'
+        | 'resolvedBy'
+        | 'isOrphaned'
+        | 'targetType'
+        | 'targetId'
+        | 'anchor'
+        | 'emojiReactions'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<Comment> {
     const existing = this.comments.get(commentId);
     if (!existing) throw new CommentNotFoundError(commentId);
@@ -76,7 +90,9 @@ export class InMemoryCollabStore implements CollabStore {
 
   async updateApprovalRequest(
     requestId: string,
-    patch: Partial<Pick<ApprovalRequest, 'status' | 'requestedAt' | 'closedAt' | 'updatedAt' | 'updatedBy'>>,
+    patch: Partial<
+      Pick<ApprovalRequest, 'status' | 'requestedAt' | 'closedAt' | 'updatedAt' | 'updatedBy'>
+    >,
   ): Promise<ApprovalRequest> {
     const existing = this.approvalRequests.get(requestId);
     if (!existing) throw new ApprovalRequestNotFoundError(requestId);
@@ -124,7 +140,18 @@ export class InMemoryCollabStore implements CollabStore {
 
   async updateAssignment(
     assignmentId: string,
-    patch: Partial<Pick<Assignment, 'status' | 'blockedReason' | 'dueAt' | 'watchers' | 'primaryId' | 'completedAt' | 'updatedAt'>>,
+    patch: Partial<
+      Pick<
+        Assignment,
+        | 'status'
+        | 'blockedReason'
+        | 'dueAt'
+        | 'watchers'
+        | 'primaryId'
+        | 'completedAt'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<Assignment> {
     const existing = this.assignments.get(assignmentId);
     if (!existing) throw new CommentNotFoundError(assignmentId);

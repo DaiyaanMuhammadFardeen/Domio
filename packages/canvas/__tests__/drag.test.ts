@@ -23,20 +23,12 @@ describe('DragController', () => {
   });
 
   it('snap mode = grid snaps to the nearest step', () => {
-    const out = snapDelta(
-      { dx: 13, dy: 0 },
-      { x: 0, y: 0 },
-      { mode: 'grid', gridStep: 8 },
-    );
+    const out = snapDelta({ dx: 13, dy: 0 }, { x: 0, y: 0 }, { mode: 'grid', gridStep: 8 });
     expect(out.dx).toBe(16); // 0 + 16 = 16 (closest 8 multiple to 13)
   });
 
   it('snap mode = pixel rounds to integers', () => {
-    const out = snapDelta(
-      { dx: 1.4, dy: 1.6 },
-      { x: 0, y: 0 },
-      { mode: 'pixel' },
-    );
+    const out = snapDelta({ dx: 1.4, dy: 1.6 }, { x: 0, y: 0 }, { mode: 'pixel' });
     expect(out.dx).toBe(1);
     expect(out.dy).toBe(2);
   });
@@ -47,7 +39,11 @@ describe('DragController', () => {
   });
 
   it('altOverride disables snap', () => {
-    const out = snapDelta({ dx: 13, dy: 0 }, { x: 0, y: 0 }, { mode: 'grid', gridStep: 8, altOverride: true });
+    const out = snapDelta(
+      { dx: 13, dy: 0 },
+      { x: 0, y: 0 },
+      { mode: 'grid', gridStep: 8, altOverride: true },
+    );
     expect(out.dx).toBe(13);
   });
 

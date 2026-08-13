@@ -45,9 +45,7 @@ export function Tabs({ tabs, initialIndex = 0 }: TabsProps): JSX.Element {
               aria-selected={selected}
               aria-controls={`docs-tabpanel-${index}`}
               id={`docs-tab-${index}`}
-              className={
-                'docs-tabs__tab' + (selected ? ' docs-tabs__tab--active' : '')
-              }
+              className={'docs-tabs__tab' + (selected ? ' docs-tabs__tab--active' : '')}
               onClick={() => setActive(index)}
               data-testid="docs-tab-button"
             >

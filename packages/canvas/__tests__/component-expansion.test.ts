@@ -37,7 +37,9 @@ describe('elementToCommand for component elements', () => {
       // Every expanded child is a concrete draw command positioned in
       // the layer box (offset by the component transform).
       const kinds = cmd.children.map((c) => c.kind);
-      expect(kinds.every((k) => ['drawRect', 'drawText', 'drawPath', 'drawImage'].includes(k))).toBe(true);
+      expect(
+        kinds.every((k) => ['drawRect', 'drawText', 'drawPath', 'drawImage'].includes(k)),
+      ).toBe(true);
       for (const child of cmd.children) {
         if (child.kind === 'drawRect' || child.kind === 'drawText') {
           expect(child.x).toBeGreaterThanOrEqual(40);
@@ -48,7 +50,11 @@ describe('elementToCommand for component elements', () => {
   });
 
   it('returns an empty drawGroup for unknown catalog ids (renderers fall back)', () => {
-    const cmd = elementToCommand(componentLayer({ component: { catalogId: 'domio.missing', version: '1.0.0', props: {} } }) as never);
+    const cmd = elementToCommand(
+      componentLayer({
+        component: { catalogId: 'domio.missing', version: '1.0.0', props: {} },
+      }) as never,
+    );
     expect(cmd?.kind).toBe('drawGroup');
     if (cmd?.kind === 'drawGroup') {
       expect(cmd.children).toEqual([]);

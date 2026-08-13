@@ -5,9 +5,18 @@
   "description": "The signed payload carried by a Domio deep link. Phase 10 M7. HMAC-SHA256 over the canonical JSON of every field except `sig`.",
   "type": "object",
   "required": [
-    "v", "exp", "deck_id", "slide_id", "path_stack", "overlay_stack",
-    "var_snapshot", "device_frame_state", "scenario", "form_drafts",
-    "aud", "sig"
+    "v",
+    "exp",
+    "deck_id",
+    "slide_id",
+    "path_stack",
+    "overlay_stack",
+    "var_snapshot",
+    "device_frame_state",
+    "scenario",
+    "form_drafts",
+    "aud",
+    "sig"
   ],
   "additionalProperties": false,
   "properties": {

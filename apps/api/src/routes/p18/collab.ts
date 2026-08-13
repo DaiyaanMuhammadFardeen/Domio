@@ -11,7 +11,8 @@ import { adaptHandler, type P18Handler } from '../p18_adapter.js';
 
 export function collabRoutes(service: CollabService): Hono {
   const r = new Hono();
-  const h = (name: string) => adaptHandler(handlers[name as keyof typeof handlers] as unknown as P18Handler, service);
+  const h = (name: string) =>
+    adaptHandler(handlers[name as keyof typeof handlers] as unknown as P18Handler, service);
 
   // Comments
   r.post('/v1/decks/:deck_id/comments', h('createComment'));

@@ -30,11 +30,7 @@ export interface PagerProps {
 export function Pager({ prev, next, testId = 'nav-pager' }: PagerProps): JSX.Element | null {
   if (!prev && !next) return null;
   return (
-    <nav
-      className="nav-pager"
-      aria-label="Pager"
-      data-testid={testId}
-    >
+    <nav className="nav-pager" aria-label="Pager" data-testid={testId}>
       <div className="nav-pager__inner">
         <div
           className={`nav-pager__item nav-pager__item--prev${prev ? '' : ' nav-pager__placeholder'}`}

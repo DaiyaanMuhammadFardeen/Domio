@@ -19,10 +19,7 @@
 
 import { useMemo } from 'react';
 
-import type {
-  Entity,
-  GraphEdgeEntity,
-} from '../../lib/knowledge-graph-service';
+import type { Entity, GraphEdgeEntity } from '../../lib/knowledge-graph-service';
 
 import { EntityNode } from './EntityNode';
 
@@ -85,8 +82,7 @@ function forceLayout(
   // circle, with deterministic per-node angle so reloads look the same.
   const positions = new Map<string, { x: number; y: number }>();
   entities.forEach((entity, i) => {
-    const angle = (i / Math.max(1, N)) * Math.PI * 2 +
-      deterministicHash(entity.id) * Math.PI * 2;
+    const angle = (i / Math.max(1, N)) * Math.PI * 2 + deterministicHash(entity.id) * Math.PI * 2;
     positions.set(entity.id, {
       x: cx + Math.cos(angle) * radius,
       y: cy + Math.sin(angle) * radius,
@@ -177,12 +173,7 @@ function forceLayout(
   });
 }
 
-export function GraphCanvas({
-  entities,
-  edges,
-  selectedId,
-  onSelect,
-}: GraphCanvasProps) {
+export function GraphCanvas({ entities, edges, selectedId, onSelect }: GraphCanvasProps) {
   const positioned = useMemo(() => forceLayout(entities, edges), [entities, edges]);
 
   const positionedById = useMemo(() => {

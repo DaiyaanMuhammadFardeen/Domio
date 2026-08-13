@@ -135,7 +135,10 @@ describe('RefreshScheduler — on_interval scheduling', () => {
     const scheduler = new RefreshScheduler(callbacks, { tickIntervalMs: 200, maxDriftMs: 300 });
 
     vi.setSystemTime(new Date('2026-08-04T12:00:00.000Z'));
-    const q = makeQuery({ queryId: 'q2', freshnessPolicy: { type: 'on_interval', intervalMs: 100 } });
+    const q = makeQuery({
+      queryId: 'q2',
+      freshnessPolicy: { type: 'on_interval', intervalMs: 100 },
+    });
     scheduler.addQuery(q);
     // nextTickMs = Date.now() + 100 = 12:00:00.100
 
@@ -184,7 +187,10 @@ describe('RefreshScheduler — lifecycle', () => {
     const callbacks = makeCallbacks();
     const scheduler = new RefreshScheduler(callbacks);
 
-    const q1 = makeQuery({ queryId: 'q1', freshnessPolicy: { type: 'on_interval', intervalMs: 1000 } });
+    const q1 = makeQuery({
+      queryId: 'q1',
+      freshnessPolicy: { type: 'on_interval', intervalMs: 1000 },
+    });
     const q2 = makeQuery({ queryId: 'q2', freshnessPolicy: { type: 'eager' } });
     scheduler.addQuery(q1);
     scheduler.addQuery(q2);

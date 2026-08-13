@@ -24,10 +24,9 @@ export function Hero(): JSX.Element {
             Decks that react, present, and ship themselves.
           </h1>
           <p className="hero__subtitle">
-            Domio is the presentation platform for teams that ship every
-            week. Build reactive decks with live data, present them with a
-            clicker in your pocket, and let your audience join from any
-            phone.
+            Domio is the presentation platform for teams that ship every week. Build reactive decks
+            with live data, present them with a clicker in your pocket, and let your audience join
+            from any phone.
           </p>
           <div className="hero__actions">
             <a className="hero__cta hero__cta--primary" href={signupHref}>

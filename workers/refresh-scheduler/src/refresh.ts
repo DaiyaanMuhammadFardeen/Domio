@@ -37,7 +37,10 @@ export interface FreshnessRecord {
 
 export interface RefreshCallbacks {
   /** Execute a query and return the result. */
-  executeQuery(queryId: string, orgId: string): Promise<{ columns: string[]; rows: readonly (readonly unknown[])[] }>;
+  executeQuery(
+    queryId: string,
+    orgId: string,
+  ): Promise<{ columns: string[]; rows: readonly (readonly unknown[])[] }>;
   /** Write a dataset snapshot. */
   writeSnapshot(snapshot: DatasetSnapshot): Promise<void>;
   /** Write a freshness record. */

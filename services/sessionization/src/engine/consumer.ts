@@ -89,19 +89,27 @@ export interface ConsumerDeps {
 }
 
 export function buildPartitionConsumer(deps: ConsumerDeps) {
-  const engine = deps.engine ?? buildSessionEngine({ inactivityMs: 30 * 60 * 1000, maxSessionMs: 4 * 60 * 60 * 1000 });
+  const engine =
+    deps.engine ??
+    buildSessionEngine({ inactivityMs: 30 * 60 * 1000, maxSessionMs: 4 * 60 * 60 * 1000 });
   return {
     engine,
     async run(events: readonly AnalyticsEvent[]): Promise<PartitionConsumeResult> {
       return consumePartition(
-        { engine, flush: async (out) => {
+        {
+          engine,
+          flush: async (out) => {
             for (const u of out.upserted) await deps.onUpsert(u);
             for (const c of out.closed) {
-              const ev = out.emitted.find((e): e is Extract<SessionEvent, { type: 'session.ended' }> => e.type === 'session.ended' && e.session.session_id === c.session_id);
+              const ev = out.emitted.find(
+                (e): e is Extract<SessionEvent, { type: 'session.ended' }> =>
+                  e.type === 'session.ended' && e.session.session_id === c.session_id,
+              );
               if (ev) await deps.onClose(c, ev.reason);
             }
             for (const e of out.emitted) await deps.onEmit(e);
-        } },
+          },
+        },
         events,
       );
     },

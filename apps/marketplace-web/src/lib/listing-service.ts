@@ -32,13 +32,9 @@ export async function listMarketplaceListings(params?: {
   if (params?.status) qs.set('status', params.status);
   if (params?.seller_id) qs.set('seller_id', params.seller_id);
   const query = qs.toString();
-  return apiFetch<ListingListResponse>(
-    `/v1/marketplace/listings${query ? `?${query}` : ''}`,
-  );
+  return apiFetch<ListingListResponse>(`/v1/marketplace/listings${query ? `?${query}` : ''}`);
 }
 
 export async function getMarketplaceListing(listingId: string): Promise<MarketplaceListing> {
-  return apiFetch<MarketplaceListing>(
-    `/v1/marketplace/listings/${encodeURIComponent(listingId)}`,
-  );
+  return apiFetch<MarketplaceListing>(`/v1/marketplace/listings/${encodeURIComponent(listingId)}`);
 }

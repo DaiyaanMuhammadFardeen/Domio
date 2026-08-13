@@ -23,14 +23,18 @@ describe('selectRenderer', () => {
 describe('renderWithEscalation', () => {
   it('returns svg for small data', () => {
     const backends: string[] = [];
-    const backend = renderWithEscalation(500, (b) => { backends.push(b); });
+    const backend = renderWithEscalation(500, (b) => {
+      backends.push(b);
+    });
     expect(backend).toBe('svg');
     expect(backends).toEqual(['svg']);
   });
 
   it('returns canvas2d for large data', () => {
     const backends: string[] = [];
-    const backend = renderWithEscalation(20000, (b) => { backends.push(b); });
+    const backend = renderWithEscalation(20000, (b) => {
+      backends.push(b);
+    });
     expect(backend).toBe('canvas2d');
     expect(backends).toEqual(['canvas2d']);
   });
@@ -38,7 +42,9 @@ describe('renderWithEscalation', () => {
   it('snapshot of dispatched backends at thresholds', () => {
     const results = [100, 999, 1000, 5000, 10000, 10001, 50000].map((n) => {
       let dispatched = '';
-      renderWithEscalation(n, (b) => { dispatched = b; });
+      renderWithEscalation(n, (b) => {
+        dispatched = b;
+      });
       return dispatched;
     });
     expect(results).toEqual(['svg', 'svg', 'svg', 'svg', 'svg', 'canvas2d', 'canvas2d']);

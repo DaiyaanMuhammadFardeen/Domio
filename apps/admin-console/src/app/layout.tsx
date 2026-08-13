@@ -18,11 +18,7 @@ export const metadata: Metadata = {
  *
  * Per Wave 1 §S1.8 of docs/frontend-roadmap/01-wave-productionization.md.
  */
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const h = await headers();
   const cookie = h.get('cookie');
   const acceptLanguage = h.get('accept-language');

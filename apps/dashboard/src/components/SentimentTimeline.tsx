@@ -72,7 +72,12 @@ export function SentimentTimeline({ series }: SentimentTimelineProps) {
         <text x={padL - 24} y={padT + 4} className="fill-slate-500 text-[10px]" fontSize={10}>
           1.0
         </text>
-        <text x={padL - 24} y={padT + plotH / 2 + 4} className="fill-slate-500 text-[10px]" fontSize={10}>
+        <text
+          x={padL - 24}
+          y={padT + plotH / 2 + 4}
+          className="fill-slate-500 text-[10px]"
+          fontSize={10}
+        >
           0
         </text>
         <text x={padL - 28} y={H - padB} className="fill-slate-500 text-[10px]" fontSize={10}>
@@ -113,17 +118,20 @@ export function SentimentTimeline({ series }: SentimentTimelineProps) {
             <g key={s.slideId} data-testid="sentiment-series" data-slide-id={s.slideId}>
               <path d={dStr} fill="none" className={stroke} strokeWidth={2} />
               {coords.map((c, k) => (
-                <circle key={k} cx={c.x} cy={c.y} r={2.5} className={stroke.replace('stroke', 'fill')} />
+                <circle
+                  key={k}
+                  cx={c.x}
+                  cy={c.y}
+                  r={2.5}
+                  className={stroke.replace('stroke', 'fill')}
+                />
               ))}
             </g>
           );
         })}
       </svg>
 
-      <ul
-        className="mt-3 flex flex-wrap gap-3 text-xs"
-        data-testid="sentiment-legend"
-      >
+      <ul className="mt-3 flex flex-wrap gap-3 text-xs" data-testid="sentiment-legend">
         {series.map((s, i) => {
           const c = PALETTE[i % PALETTE.length] ?? PALETTE[0];
           return (

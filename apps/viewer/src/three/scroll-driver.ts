@@ -115,9 +115,7 @@ export function computeScrollState(
 ): ScrollDriverState {
   const { start, end, easing, overshoot = 'halt' } = config;
   const range = end - start;
-  let raw = range === 0
-    ? scrollY >= start ? 1 : 0
-    : (scrollY - start) / range;
+  let raw = range === 0 ? (scrollY >= start ? 1 : 0) : (scrollY - start) / range;
   if (overshoot === 'halt') {
     raw = clamp01(raw);
   } else {
@@ -173,15 +171,16 @@ export function attachScrollDriver(
   let frame = 0;
   const handler = () => {
     if (frame !== 0) return;
-    frame = (typeof window !== 'undefined' && window.requestAnimationFrame)
-      ? window.requestAnimationFrame(() => {
-          frame = 0;
-          onState(computeScrollState(window.scrollY, config, keyframes));
-        })
-      : (setTimeout(() => {
-          frame = 0;
-          onState(computeScrollState(window.scrollY, config, keyframes));
-        }, 16) as unknown as number);
+    frame =
+      typeof window !== 'undefined' && window.requestAnimationFrame
+        ? window.requestAnimationFrame(() => {
+            frame = 0;
+            onState(computeScrollState(window.scrollY, config, keyframes));
+          })
+        : (setTimeout(() => {
+            frame = 0;
+            onState(computeScrollState(window.scrollY, config, keyframes));
+          }, 16) as unknown as number);
   };
   if (typeof window !== 'undefined') {
     window.addEventListener('scroll', handler, { passive: true });

@@ -8,11 +8,7 @@ import type { DeckDocument, ULID } from '@domio/schema';
 
 export type LockHideFlag = 'locked' | 'hidden';
 
-export function toggleFlag(
-  doc: DeckDocument,
-  id: ULID,
-  flag: LockHideFlag,
-): DeckDocument {
+export function toggleFlag(doc: DeckDocument, id: ULID, flag: LockHideFlag): DeckDocument {
   return {
     ...doc,
     slides: doc.slides.map((slide) => ({

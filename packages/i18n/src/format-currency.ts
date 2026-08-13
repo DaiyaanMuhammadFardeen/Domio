@@ -55,9 +55,7 @@ export function formatCurrency(
   locale: LocaleId,
 ): string {
   if (!Number.isInteger(amountCents) || amountCents < 0) {
-    throw new RangeError(
-      `amountCents must be a non-negative integer, got ${amountCents}`,
-    );
+    throw new RangeError(`amountCents must be a non-negative integer, got ${amountCents}`);
   }
 
   const config = CURRENCIES[currency];
@@ -71,8 +69,7 @@ export function formatCurrency(
   const numeric = needsDecimal ? `${wholeStr}.${fracStr}` : wholeStr;
 
   // Bengali locale → substitute ASCII digits with Bengali glyphs.
-  const rendered =
-    locale === 'bn' ? toBengaliDigits(numeric) : numeric;
+  const rendered = locale === 'bn' ? toBengaliDigits(numeric) : numeric;
 
   return `${config.symbol}${rendered}`;
 }

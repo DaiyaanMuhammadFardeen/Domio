@@ -57,7 +57,11 @@ describe('Kafka contract — event-ingest', () => {
 
   it('publishMany returns one recordMetadata per event in order', async () => {
     const pub = buildInMemoryKafkaPublisher();
-    const events = [mkEvent({ event_id: 'a' }), mkEvent({ event_id: 'b' }), mkEvent({ event_id: 'c' })];
+    const events = [
+      mkEvent({ event_id: 'a' }),
+      mkEvent({ event_id: 'b' }),
+      mkEvent({ event_id: 'c' }),
+    ];
     const results = await pub.publishMany(events);
     expect(results).toHaveLength(3);
     expect(results.map((r) => r.offset)).toEqual(['0', '1', '2']);
@@ -66,7 +70,9 @@ describe('Kafka contract — event-ingest', () => {
 
   it('DLQ publishes the raw payload plus reason header', async () => {
     const pub = buildInMemoryKafkaPublisher();
-    const payload = new TextEncoder().encode(JSON.stringify({ reason: 'schema', event_id: 'e-bad' }));
+    const payload = new TextEncoder().encode(
+      JSON.stringify({ reason: 'schema', event_id: 'e-bad' }),
+    );
     await pub.publishRaw(KAFKA_TOPIC_DLQ, 'e-bad', payload);
     expect(pub.publishRawCalls).toHaveLength(1);
     const call = pub.publishRawCalls[0]!;
@@ -83,11 +89,13 @@ describe('Kafka contract — event-ingest', () => {
     // surfaces events to KafkaJS in the order they were appended.
     const pub = buildInMemoryKafkaPublisher();
     const viewerId = 'v-1';
-    const events = Array.from({ length: 25 }, (_, i) => mkEvent({
-      event_id: `e-${i}`,
-      viewer_id_key: viewerId,
-      ts_ms: 1_000 + i,
-    }));
+    const events = Array.from({ length: 25 }, (_, i) =>
+      mkEvent({
+        event_id: `e-${i}`,
+        viewer_id_key: viewerId,
+        ts_ms: 1_000 + i,
+      }),
+    );
     await pub.publishMany(events);
     expect(pub.published.map((e) => e.event_id)).toEqual(events.map((e) => e.event_id));
   });

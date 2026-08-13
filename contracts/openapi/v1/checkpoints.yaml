@@ -36,7 +36,7 @@ paths:
         Creates a new named checkpoint pinning the current revision.
         The checkpoint name must be unique per deck per branch.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -50,32 +50,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateCheckpointRequest"
+              $ref: '#/components/schemas/CreateCheckpointRequest'
       responses:
-        "201":
+        '201':
           description: Checkpoint created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CheckpointResponse"
-        "400":
+                $ref: '#/components/schemas/CheckpointResponse'
+        '400':
           description: Invalid request (e.g. duplicate name).
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "401":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
     get:
       tags: [checkpoints]
       operationId: listCheckpoints
@@ -108,24 +108,24 @@ paths:
             enum: [named, auto]
           description: Filter by checkpoint kind.
       responses:
-        "200":
+        '200':
           description: Checkpoint list returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListCheckpointsResponse"
-        "401":
+                $ref: '#/components/schemas/ListCheckpointsResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/decks/{deckId}/checkpoints/{checkpointId}:
     patch:
       tags: [checkpoints]
@@ -135,7 +135,7 @@ paths:
         Renames an existing checkpoint. A history entry is recorded
         for the rename operation.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -157,32 +157,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RenameCheckpointRequest"
+              $ref: '#/components/schemas/RenameCheckpointRequest'
       responses:
-        "200":
+        '200':
           description: Checkpoint renamed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CheckpointResponse"
-        "400":
+                $ref: '#/components/schemas/CheckpointResponse'
+        '400':
           description: Invalid request (e.g. duplicate name).
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "401":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck or checkpoint not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/decks/{deckId}/checkpoints/{checkpointId}/restore:
     post:
       tags: [checkpoints]
@@ -193,7 +193,7 @@ paths:
         edge in history rather than rewinding the branch. Returns the
         new revision created by the restore.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -211,24 +211,24 @@ paths:
             maxLength: 128
           description: Checkpoint identifier.
       responses:
-        "200":
+        '200':
           description: Restore successful.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RestoreCheckpointResponse"
-        "401":
+                $ref: '#/components/schemas/RestoreCheckpointResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck or checkpoint not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
 components:
   securitySchemes:
     bearerAuth:
@@ -323,7 +323,7 @@ components:
       required: [checkpoint]
       properties:
         checkpoint:
-          $ref: "#/components/schemas/Checkpoint"
+          $ref: '#/components/schemas/Checkpoint'
         traceId:
           type: string
     ListCheckpointsResponse:
@@ -333,7 +333,7 @@ components:
         checkpoints:
           type: array
           items:
-            $ref: "#/components/schemas/Checkpoint"
+            $ref: '#/components/schemas/Checkpoint'
         traceId:
           type: string
     RestoreCheckpointResponse:

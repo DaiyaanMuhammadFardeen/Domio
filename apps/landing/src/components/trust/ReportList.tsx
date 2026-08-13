@@ -21,8 +21,8 @@ export function ReportList({ reports }: ReportListProps): JSX.Element {
         Reports &amp; attestations
       </h2>
       <p className="trust-reports__lede">
-        Request audit reports, certifications, and policy templates. Items
-        marked NDA require a signed agreement before the file is released.
+        Request audit reports, certifications, and policy templates. Items marked NDA require a
+        signed agreement before the file is released.
       </p>
 
       <ul className="trust-reports__list">

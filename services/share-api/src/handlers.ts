@@ -31,12 +31,8 @@ import {
   ShareRevokedError,
   ShareValidationError,
 } from './types.js';
-import type {
-  ShareLinkSnapshot} from './store/store.js';
-import {
-  ConcurrentModificationError,
-  ShortIdCollisionError,
-} from './store/store.js';
+import type { ShareLinkSnapshot } from './store/store.js';
+import { ConcurrentModificationError, ShortIdCollisionError } from './store/store.js';
 import type { ShareService } from './service.js';
 
 // ---------------------------------------------------------------------------
@@ -387,7 +383,9 @@ export async function putPolicyHandler(
       ...(req.body.allowDownload !== undefined ? { allowDownload: req.body.allowDownload } : {}),
       ...(req.body.allowPrint !== undefined ? { allowPrint: req.body.allowPrint } : {}),
       ...(req.body.allowEmbed !== undefined ? { allowEmbed: req.body.allowEmbed } : {}),
-      ...(req.body.requirePasscode !== undefined ? { requirePasscode: req.body.requirePasscode } : {}),
+      ...(req.body.requirePasscode !== undefined
+        ? { requirePasscode: req.body.requirePasscode }
+        : {}),
     };
     const snap = await ctx.service.updateShare(
       req.body.workspaceId,
@@ -420,7 +418,11 @@ export async function shareIntrospectHandler(
   ctx: ShareHandlerContext,
 ): Promise<HttpResponse> {
   try {
-    const result = await ctx.service.introspect(req.body.workspaceId, req.body.shortId, req.body.token);
+    const result = await ctx.service.introspect(
+      req.body.workspaceId,
+      req.body.shortId,
+      req.body.token,
+    );
     return ok({
       short_id: result.claims.short_id,
       link_id: result.claims.link_id,

@@ -34,11 +34,19 @@ if (typeof window !== 'undefined' && window.localStorage === undefined) {
   Object.defineProperty(window, 'localStorage', {
     value: {
       getItem: (k: string) => (store.has(k) ? store.get(k)! : null),
-      setItem: (k: string, v: string) => { store.set(k, v); },
-      removeItem: (k: string) => { store.delete(k); },
-      clear: () => { store.clear(); },
+      setItem: (k: string, v: string) => {
+        store.set(k, v);
+      },
+      removeItem: (k: string) => {
+        store.delete(k);
+      },
+      clear: () => {
+        store.clear();
+      },
       key: (i: number) => Array.from(store.keys())[i] ?? null,
-      get length() { return store.size; },
+      get length() {
+        return store.size;
+      },
     },
     writable: true,
     configurable: true,
@@ -50,11 +58,19 @@ if (typeof window !== 'undefined' && window.sessionStorage === undefined) {
   Object.defineProperty(window, 'sessionStorage', {
     value: {
       getItem: (k: string) => (session.has(k) ? session.get(k)! : null),
-      setItem: (k: string, v: string) => { session.set(k, v); },
-      removeItem: (k: string) => { session.delete(k); },
-      clear: () => { session.clear(); },
+      setItem: (k: string, v: string) => {
+        session.set(k, v);
+      },
+      removeItem: (k: string) => {
+        session.delete(k);
+      },
+      clear: () => {
+        session.clear();
+      },
       key: (i: number) => Array.from(session.keys())[i] ?? null,
-      get length() { return session.size; },
+      get length() {
+        return session.size;
+      },
     },
     writable: true,
     configurable: true,

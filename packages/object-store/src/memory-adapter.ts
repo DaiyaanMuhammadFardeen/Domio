@@ -29,7 +29,11 @@ export class MemoryObjectStore implements ObjectStore {
 
   constructor(private readonly env: Pick<ObjectStoreEnv, 'OBJECT_STORE_BUCKET'>) {}
 
-  async put(key: string, body: Uint8Array, opts: { contentType?: string; metadata?: Readonly<Record<string, string>> } = {}): Promise<void> {
+  async put(
+    key: string,
+    body: Uint8Array,
+    opts: { contentType?: string; metadata?: Readonly<Record<string, string>> } = {},
+  ): Promise<void> {
     const entry: MemoryEntry = {
       body: new Uint8Array(body),
       contentType: opts.contentType ?? 'application/octet-stream',
@@ -87,7 +91,10 @@ export class MemoryObjectStore implements ObjectStore {
     return `data:application/octet-stream;base64,#mock-put-key=${encodeURIComponent(key)}&expires=${expires}`;
   }
 
-  async list(prefix: string, opts: { maxKeys?: number; cursor?: string } = {}): Promise<{ keys: readonly string[]; nextCursor: string | null }> {
+  async list(
+    prefix: string,
+    opts: { maxKeys?: number; cursor?: string } = {},
+  ): Promise<{ keys: readonly string[]; nextCursor: string | null }> {
     const all = [...this.entries.keys()].filter((k) => k.startsWith(prefix)).sort();
     const start = opts.cursor ? Number.parseInt(opts.cursor, 10) : 0;
     const limit = opts.maxKeys ?? 1000;
@@ -98,7 +105,10 @@ export class MemoryObjectStore implements ObjectStore {
 }
 
 export class ObjectStoreKeyError extends Error {
-  constructor(public readonly key: string, public readonly code: 'NoSuchKey' | 'AccessDenied') {
+  constructor(
+    public readonly key: string,
+    public readonly code: 'NoSuchKey' | 'AccessDenied',
+  ) {
     super(`ObjectStore ${code}: ${key}`);
     this.name = 'ObjectStoreKeyError';
   }

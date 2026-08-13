@@ -208,12 +208,7 @@ export interface ProblemDetail {
 // Until those land we fall back to deterministic local seed data so
 // the admin console UI and tests have something to render.
 
-export type RenderJobStatus =
-  | 'queued'
-  | 'running'
-  | 'succeeded'
-  | 'failed'
-  | 'cancelled';
+export type RenderJobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
 
 export interface RenderThroughputPoint {
   readonly timestamp_ms: number;
@@ -377,12 +372,7 @@ export interface MigrationPlanRequest {
 // endpoint contracts land we expose deterministic local seed data so the
 // admin-console UI and tests have something to render.
 
-export type APIKeyScope =
-  | 'read-only'
-  | 'read-write'
-  | 'agent-only'
-  | 'admin'
-  | 'export';
+export type APIKeyScope = 'read-only' | 'read-write' | 'agent-only' | 'admin' | 'export';
 
 export interface APIKey {
   readonly id: string;
@@ -757,4 +747,3 @@ export interface AuditFilter {
   readonly from_ms?: number;
   readonly to_ms?: number;
 }
-

@@ -34,7 +34,14 @@ export interface VoiceTriggerEditorProps {
   readonly onChange?: (config: VoiceTriggerConfig) => void;
 }
 
-const DEFAULT_LOCALES: readonly VoiceTriggerLocale[] = ['en-US', 'en-GB', 'de-DE', 'fr-FR', 'es-ES', 'ja-JP'];
+const DEFAULT_LOCALES: readonly VoiceTriggerLocale[] = [
+  'en-US',
+  'en-GB',
+  'de-DE',
+  'fr-FR',
+  'es-ES',
+  'ja-JP',
+];
 
 let _phraseCounter = 0;
 function nextPhraseId(): string {
@@ -42,15 +49,14 @@ function nextPhraseId(): string {
   return `phrase-${Date.now()}-${_phraseCounter}`;
 }
 
-export function VoiceTriggerEditor({
-  initial,
-  onChange,
-}: VoiceTriggerEditorProps): ReactElement {
+export function VoiceTriggerEditor({ initial, onChange }: VoiceTriggerEditorProps): ReactElement {
   const [label, setLabel] = useState(initial?.label ?? 'Voice trigger');
   const [locale, setLocale] = useState<VoiceTriggerLocale>(initial?.locale ?? 'en-US');
   const [confidence, setConfidence] = useState(initial?.confidence ?? 0.7);
   const [phrases, setPhrases] = useState<VoiceTriggerPhrase[]>(
-    initial?.phrases ? [...initial.phrases] : [{ id: nextPhraseId(), phrase: 'next slide', wakeWord: false }],
+    initial?.phrases
+      ? [...initial.phrases]
+      : [{ id: nextPhraseId(), phrase: 'next slide', wakeWord: false }],
   );
 
   // Emit onChange whenever config changes.
@@ -120,7 +126,9 @@ export function VoiceTriggerEditor({
             }}
           >
             {DEFAULT_LOCALES.map((l) => (
-              <option key={l} value={l}>{l}</option>
+              <option key={l} value={l}>
+                {l}
+              </option>
             ))}
           </select>
         </div>
@@ -172,7 +180,13 @@ export function VoiceTriggerEditor({
               />
               <label
                 title="Wake word (priority)"
-                style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, color: 'var(--muted, #888)' }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  fontSize: 10,
+                  color: 'var(--muted, #888)',
+                }}
               >
                 <input
                   type="checkbox"

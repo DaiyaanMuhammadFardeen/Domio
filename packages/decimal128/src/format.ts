@@ -24,8 +24,12 @@ export function formatNumber(value: DecInput, opts: FormatOptions = {}): string 
   if (!Number.isFinite(n)) return n > 0 ? '∞' : '-∞';
   try {
     return new Intl.NumberFormat(locale, {
-      ...(opts.minimumFractionDigits !== undefined ? { minimumFractionDigits: opts.minimumFractionDigits } : {}),
-      ...(opts.maximumFractionDigits !== undefined ? { maximumFractionDigits: opts.maximumFractionDigits } : {}),
+      ...(opts.minimumFractionDigits !== undefined
+        ? { minimumFractionDigits: opts.minimumFractionDigits }
+        : {}),
+      ...(opts.maximumFractionDigits !== undefined
+        ? { maximumFractionDigits: opts.maximumFractionDigits }
+        : {}),
     }).format(n);
   } catch {
     return String(n);
@@ -33,7 +37,11 @@ export function formatNumber(value: DecInput, opts: FormatOptions = {}): string 
 }
 
 /** Format as currency. */
-export function formatCurrency(value: DecInput, currency = 'USD', locale: SupportedLocale | string = 'en-US'): string {
+export function formatCurrency(
+  value: DecInput,
+  currency = 'USD',
+  locale: SupportedLocale | string = 'en-US',
+): string {
   const n = Number(toString(value));
   if (Number.isNaN(n)) return 'NaN';
   try {

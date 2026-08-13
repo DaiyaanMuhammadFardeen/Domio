@@ -16,16 +16,16 @@
 import type { AnnotationLayerRecord } from '../types.js';
 export type StoreErrorCode = 'NOT_FOUND' | 'CONFLICT' | 'ENDED' | 'IMMUTABLE';
 export interface StoreError extends Error {
-    readonly code: StoreErrorCode;
+  readonly code: StoreErrorCode;
 }
 export interface AnnotationStore {
-    create(row: AnnotationLayerRecord): Promise<AnnotationLayerRecord>;
-    getById(id: string): Promise<AnnotationLayerRecord | null>;
-    listForSession(session_id: string, ephemeral: boolean): Promise<AnnotationLayerRecord[]>;
-    listSavedForSlide(slide_id: string): Promise<AnnotationLayerRecord[]>;
-    rollback(id: string, workspace_id: string): Promise<void>;
-    promote(id: string, workspace_id: string, by: string): Promise<AnnotationLayerRecord>;
-    clearEphemeral(session_id: string, workspace_id: string): Promise<void>;
+  create(row: AnnotationLayerRecord): Promise<AnnotationLayerRecord>;
+  getById(id: string): Promise<AnnotationLayerRecord | null>;
+  listForSession(session_id: string, ephemeral: boolean): Promise<AnnotationLayerRecord[]>;
+  listSavedForSlide(slide_id: string): Promise<AnnotationLayerRecord[]>;
+  rollback(id: string, workspace_id: string): Promise<void>;
+  promote(id: string, workspace_id: string, by: string): Promise<AnnotationLayerRecord>;
+  clearEphemeral(session_id: string, workspace_id: string): Promise<void>;
 }
 export declare function makeStoreError(code: StoreErrorCode, message: string): StoreError;
 export declare function isStore(x: unknown): x is AnnotationStore;

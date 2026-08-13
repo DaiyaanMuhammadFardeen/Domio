@@ -26,10 +26,7 @@ export interface HelpClientProps {
   readonly initialArticles: ReadonlyArray<KbArticle>;
 }
 
-export function HelpClient({
-  initialCategories,
-  initialArticles,
-}: HelpClientProps): JSX.Element {
+export function HelpClient({ initialCategories, initialArticles }: HelpClientProps): JSX.Element {
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -62,8 +59,8 @@ export function HelpClient({
         <header className="help-shell__intro">
           <h1 className="help-shell__title">Help center</h1>
           <p className="help-shell__lede">
-            {KB_ARTICLES.length} searchable articles across {KB_CATEGORIES.length} categories.
-            Pick a topic or use search to jump straight to the answer.
+            {KB_ARTICLES.length} searchable articles across {KB_CATEGORIES.length} categories. Pick
+            a topic or use search to jump straight to the answer.
           </p>
         </header>
         {filtered.length === 0 ? (
@@ -75,11 +72,7 @@ export function HelpClient({
             </p>
           </div>
         ) : (
-          <section
-            className="help-grid"
-            data-testid="help-grid"
-            aria-label="Help articles"
-          >
+          <section className="help-grid" data-testid="help-grid" aria-label="Help articles">
             {filtered.map((article) => (
               <ArticleCard
                 key={article.slug}

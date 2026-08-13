@@ -15,8 +15,6 @@ export default defineConfig({
       '@domio/audio': resolve(here, '../../packages/audio/src/index.ts'),
       '@domio/video': resolve(here, '../../packages/video/src/index.ts'),
       '@domio/physics': resolve(here, '../../packages/physics/src/index.ts'),
-      '@domio/lottie': resolve(here, '../../packages/lottie/src/index.ts'),
-      '@domio/maps': resolve(here, '../../packages/maps/src/index.ts'),
       '@domio/embed-proxy': resolve(here, '../../services/embed-proxy/src/index.ts'),
     },
   },

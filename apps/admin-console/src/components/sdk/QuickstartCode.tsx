@@ -19,11 +19,7 @@ export interface QuickstartCodeProps {
   readonly label?: string;
 }
 
-export function QuickstartCode({
-  code,
-  language,
-  label,
-}: QuickstartCodeProps): ReactElement {
+export function QuickstartCode({ code, language, label }: QuickstartCodeProps): ReactElement {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {

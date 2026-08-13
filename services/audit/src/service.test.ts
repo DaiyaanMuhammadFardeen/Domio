@@ -100,10 +100,34 @@ describe('AuditService — query', () => {
   let service: AuditService;
   beforeEach(async () => {
     service = new AuditService({ clock: () => new Date('2026-08-01T12:00:00Z') });
-    await service.emit({ tenantId: 't1', actorId: 'alice', action: 'deck.created', targetKind: 'deck', targetId: 'd1' });
-    await service.emit({ tenantId: 't1', actorId: 'alice', action: 'deck.edited', targetKind: 'deck', targetId: 'd1' });
-    await service.emit({ tenantId: 't1', actorId: 'bob', action: 'deck.shared', targetKind: 'deck', targetId: 'd1' });
-    await service.emit({ tenantId: 't2', actorId: 'carol', action: 'deck.created', targetKind: 'deck', targetId: 'd2' });
+    await service.emit({
+      tenantId: 't1',
+      actorId: 'alice',
+      action: 'deck.created',
+      targetKind: 'deck',
+      targetId: 'd1',
+    });
+    await service.emit({
+      tenantId: 't1',
+      actorId: 'alice',
+      action: 'deck.edited',
+      targetKind: 'deck',
+      targetId: 'd1',
+    });
+    await service.emit({
+      tenantId: 't1',
+      actorId: 'bob',
+      action: 'deck.shared',
+      targetKind: 'deck',
+      targetId: 'd1',
+    });
+    await service.emit({
+      tenantId: 't2',
+      actorId: 'carol',
+      action: 'deck.created',
+      targetKind: 'deck',
+      targetId: 'd2',
+    });
   });
 
   it('scopes to tenant', async () => {
@@ -206,7 +230,9 @@ describe('AuditService — CSV export', () => {
 
     const csv = await svc.exportCsv({ tenantId: 't1' });
     const lines = csv.split('\n').filter(Boolean);
-    expect(lines[0]).toBe('id,tenant_id,actor_id,actor_kind,action,target_kind,target_id,ip,user_agent,created_at,metadata');
+    expect(lines[0]).toBe(
+      'id,tenant_id,actor_id,actor_kind,action,target_kind,target_id,ip,user_agent,created_at,metadata',
+    );
     expect(lines).toHaveLength(3); // 1 header + 2 events
     expect(lines[1]).toContain('deck.created');
     expect(lines[2]).toContain('deck.edited');
@@ -226,7 +252,7 @@ describe('AuditService — CSV export', () => {
     expect(csv).toContain('Hello,');
     expect(csv).toContain('world');
     // Field must be quoted because of the comma (RFC 4180)
-    expect(csv).toMatch(/"\{/);   // opens with "{
-    expect(csv).toMatch(/\}"/);   // closes with }"
+    expect(csv).toMatch(/"\{/); // opens with "{
+    expect(csv).toMatch(/\}"/); // closes with }"
   });
 });

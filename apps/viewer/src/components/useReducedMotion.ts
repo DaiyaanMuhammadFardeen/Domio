@@ -11,7 +11,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createReducedMotionGuard, type ReducedMotionGuard, type ReducedMotionMode } from '../animation/reduced-motion';
+import {
+  createReducedMotionGuard,
+  type ReducedMotionGuard,
+  type ReducedMotionMode,
+} from '../animation/reduced-motion';
 
 export interface UseReducedMotionResult {
   readonly reduced: boolean;
@@ -19,7 +23,9 @@ export interface UseReducedMotionResult {
   readonly setMode: (mode: ReducedMotionMode) => void;
 }
 
-export function useReducedMotion(initialMode: ReducedMotionMode = 'follow_os'): UseReducedMotionResult {
+export function useReducedMotion(
+  initialMode: ReducedMotionMode = 'follow_os',
+): UseReducedMotionResult {
   const [reduced, setReduced] = useState(false);
   const [mode, setMode] = useState<ReducedMotionMode>(initialMode);
   const [guard, setGuard] = useState<ReducedMotionGuard | null>(null);

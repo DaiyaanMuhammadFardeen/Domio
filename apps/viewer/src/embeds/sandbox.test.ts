@@ -3,10 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  createViewerEmbedRuntime,
-  type ViewerEmbedRuntimeConfig,
-} from './sandbox.js';
+import { createViewerEmbedRuntime, type ViewerEmbedRuntimeConfig } from './sandbox.js';
 import { EmbedPolicyService } from '@domio/embed-proxy';
 
 function makeConfig(viewerOrigin = 'https://viewer.domio.app'): ViewerEmbedRuntimeConfig {

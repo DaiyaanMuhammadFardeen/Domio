@@ -47,7 +47,12 @@ export function validateUrl(urlString: string): void {
   }
 
   // IPv4 loopback
-  if (hostname === '127.0.0.0' || hostname === '127.0.0.1' || hostname === '127.255.255.255' || hostname.startsWith('127.')) {
+  if (
+    hostname === '127.0.0.0' ||
+    hostname === '127.0.0.1' ||
+    hostname === '127.255.255.255' ||
+    hostname.startsWith('127.')
+  ) {
     throw new SsrfBlockError('IPv4 loopback', urlString);
   }
 
@@ -62,7 +67,11 @@ export function validateUrl(urlString: string): void {
   }
 
   // Cloud metadata endpoints
-  if (hostname === '169.254.169.254' || hostname === 'metadata.google.internal' || hostname === 'metadata.azure.com') {
+  if (
+    hostname === '169.254.169.254' ||
+    hostname === 'metadata.google.internal' ||
+    hostname === 'metadata.azure.com'
+  ) {
     throw new SsrfBlockError('cloud metadata endpoint', urlString);
   }
 

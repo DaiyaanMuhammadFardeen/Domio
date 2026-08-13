@@ -11,7 +11,11 @@ describe('consumeMagicLink', () => {
       ok: true,
       json: async () => ({ scope_type: 'deck', scope_id: 'd1', guest_email: 'a@b.test' }),
     });
-    const result = await consumeMagicLink('tok', 'http://api.test', fetchMock as unknown as typeof fetch);
+    const result = await consumeMagicLink(
+      'tok',
+      'http://api.test',
+      fetchMock as unknown as typeof fetch,
+    );
     expect(result.scope_id).toBe('d1');
     expect(result.guest_email).toBe('a@b.test');
     expect(fetchMock).toHaveBeenCalledWith(

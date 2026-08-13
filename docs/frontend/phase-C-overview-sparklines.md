@@ -13,7 +13,7 @@ const perDay = (total: number): number[] =>
 That's a uniform distribution pretending to be a 7-day trend. The KPI tiles
 look real but the trend line is invented.
 
-The data the warehouse aggregates into `session_agg` *does* include
+The data the warehouse aggregates into `session_agg` _does_ include
 `bucket_ts_ms` (5-minute buckets), so we can roll it up to days server-side.
 
 ## Files to change

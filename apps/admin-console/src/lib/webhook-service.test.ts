@@ -202,8 +202,8 @@ describe('webhook-service subscriptions (Wave 10 §S10.2)', () => {
   });
 
   it('testWebhook rejects an unknown subscription id', async () => {
-    await expect(
-      testWebhook('sub-does-not-exist', { hello: 'world' }),
-    ).rejects.toThrow(/not found/i);
+    await expect(testWebhook('sub-does-not-exist', { hello: 'world' })).rejects.toThrow(
+      /not found/i,
+    );
   });
 });

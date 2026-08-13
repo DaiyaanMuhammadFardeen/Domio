@@ -17,7 +17,12 @@ import { CameraKeyframeNotFoundError } from '../dal.js';
 // Easing validation: monotonicity check for cubic bezier
 // ---------------------------------------------------------------------------
 
-function validateEasing(easing: { p1x: number; p1y: number; p2x: number; p2y: number }): string | null {
+function validateEasing(easing: {
+  p1x: number;
+  p1y: number;
+  p2x: number;
+  p2y: number;
+}): string | null {
   if (easing.p1x > easing.p2x) {
     return `Non-monotonic easing: p1x (${easing.p1x}) must be <= p2x (${easing.p2x})`;
   }
@@ -40,11 +45,14 @@ export function cameraKeyframeRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validateCreateCameraKeyframe(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
 
     // Easing monotonicity check
@@ -65,7 +73,8 @@ export function cameraKeyframeRoutes(service: AssetService): Hono {
       const keyframe = await service.getCameraKeyframe(c.req.param('id'));
       return c.json(keyframe);
     } catch (e) {
-      if (e instanceof CameraKeyframeNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof CameraKeyframeNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -75,11 +84,14 @@ export function cameraKeyframeRoutes(service: AssetService): Hono {
     const body = await c.req.json();
     const validation = validatePatchCameraKeyframe(body);
     if (!validation.valid) {
-      return c.json({
-        error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`,
-        code: 'VALIDATION_ERROR',
-        details: validation.errors,
-      }, 400);
+      return c.json(
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+          details: validation.errors,
+        },
+        400,
+      );
     }
 
     if (body.easing) {
@@ -93,7 +105,8 @@ export function cameraKeyframeRoutes(service: AssetService): Hono {
       const keyframe = await service.patchCameraKeyframe(c.req.param('id'), body);
       return c.json(keyframe);
     } catch (e) {
-      if (e instanceof CameraKeyframeNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof CameraKeyframeNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });
@@ -104,7 +117,8 @@ export function cameraKeyframeRoutes(service: AssetService): Hono {
       await service.deleteCameraKeyframe(c.req.param('id'));
       return c.body(null, 204);
     } catch (e) {
-      if (e instanceof CameraKeyframeNotFoundError) return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
+      if (e instanceof CameraKeyframeNotFoundError)
+        return c.json({ error: e.message, code: 'NOT_FOUND' }, 404);
       throw e;
     }
   });

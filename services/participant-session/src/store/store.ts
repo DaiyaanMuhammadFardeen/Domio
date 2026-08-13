@@ -42,9 +42,10 @@ export interface ParticipantSessionStore {
   /** Optimistic-concurrency update. */
   update(input: UpdateParticipantInput): Promise<ParticipantSession>;
   /** Soft-delete by transitioning the state. */
-  transition(
-    input: { expected_version: number; next: ParticipantSession },
-  ): Promise<ParticipantSession>;
+  transition(input: {
+    expected_version: number;
+    next: ParticipantSession;
+  }): Promise<ParticipantSession>;
   listActive(input: ListActiveInput): Promise<ListActiveResult>;
 }
 

@@ -24,9 +24,7 @@ vi.mock('@domio/ui', async () => {
   const React = await import('react');
   return {
     ...actual,
-    FormattedMessage: function MockFormattedMessage(props: {
-      id: string;
-    }): React.ReactElement {
+    FormattedMessage: function MockFormattedMessage(props: { id: string }): React.ReactElement {
       const catalogue = React.useContext(FormattedMessageContext);
       const resolved = catalogue[props.id] ?? props.id;
       return <span>{resolved}</span>;
@@ -36,9 +34,7 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
@@ -58,7 +54,11 @@ describe('buildHandoutRequest', () => {
 
 describe('HandoutLayoutPicker', () => {
   it('renders all four layout buttons', () => {
-    render(withLocale(<HandoutLayoutPicker slideCount={10} value={DEFAULT_HANDOUT} onChange={vi.fn()} />));
+    render(
+      withLocale(
+        <HandoutLayoutPicker slideCount={10} value={DEFAULT_HANDOUT} onChange={vi.fn()} />,
+      ),
+    );
     expect(screen.getByTestId('handout-layout-picker-notes')).toBeInTheDocument();
     expect(screen.getByTestId('handout-layout-picker-grid-4')).toBeInTheDocument();
     expect(screen.getByTestId('handout-layout-picker-grid-6')).toBeInTheDocument();
@@ -67,26 +67,40 @@ describe('HandoutLayoutPicker', () => {
 
   it('emits onChange when a layout is selected', () => {
     const onChange = vi.fn();
-    render(withLocale(<HandoutLayoutPicker slideCount={10} value={DEFAULT_HANDOUT} onChange={onChange} />));
+    render(
+      withLocale(
+        <HandoutLayoutPicker slideCount={10} value={DEFAULT_HANDOUT} onChange={onChange} />,
+      ),
+    );
     fireEvent.click(screen.getByTestId('handout-layout-picker-grid-6'));
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ layout: 'grid-6' }));
   });
 
   it('falls back to defaults when value is undefined', () => {
-    render(withLocale(<HandoutLayoutPicker slideCount={10} value={undefined} onChange={vi.fn()} />));
+    render(
+      withLocale(<HandoutLayoutPicker slideCount={10} value={undefined} onChange={vi.fn()} />),
+    );
     const notesCheckbox = screen.getByTestId('handout-layout-picker-opt-notes') as HTMLInputElement;
     expect(notesCheckbox.checked).toBe(true);
   });
 
   it('emits onChange when opt-notes is toggled', () => {
     const onChange = vi.fn();
-    render(withLocale(<HandoutLayoutPicker slideCount={10} value={DEFAULT_HANDOUT} onChange={onChange} />));
+    render(
+      withLocale(
+        <HandoutLayoutPicker slideCount={10} value={DEFAULT_HANDOUT} onChange={onChange} />,
+      ),
+    );
     fireEvent.click(screen.getByTestId('handout-layout-picker-opt-notes'));
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ includeNotes: false }));
   });
 
   it('renders the preview section', () => {
-    render(withLocale(<HandoutLayoutPicker slideCount={10} value={DEFAULT_HANDOUT} onChange={vi.fn()} />));
+    render(
+      withLocale(
+        <HandoutLayoutPicker slideCount={10} value={DEFAULT_HANDOUT} onChange={vi.fn()} />,
+      ),
+    );
     expect(screen.getByTestId('handout-layout-picker-preview')).toBeInTheDocument();
   });
 });

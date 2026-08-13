@@ -2,7 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { mapCollabEvent } from './mapper.js';
 import type { CollabEventEnvelope } from './types.js';
 
-function env(event_type: string, payload: Record<string, unknown>, workspace_id = 'w-1'): CollabEventEnvelope {
+function env(
+  event_type: string,
+  payload: Record<string, unknown>,
+  workspace_id = 'w-1',
+): CollabEventEnvelope {
   return { event_type, workspace_id, timestamp: 1700000000000, payload };
 }
 
@@ -10,13 +14,15 @@ function env(event_type: string, payload: Record<string, unknown>, workspace_id 
 
 describe('mapCollabEvent — comment.mentioned', () => {
   it('maps a user mention to in_app + slack notifications', () => {
-    const notifs = mapCollabEvent(env('comment.mentioned', {
-      comment_id: 'c-1',
-      deck_id: 'd-1',
-      body_md: '**Hello** world',
-      mentioned_type: 'user',
-      mentioned_id: 'u-1',
-    }));
+    const notifs = mapCollabEvent(
+      env('comment.mentioned', {
+        comment_id: 'c-1',
+        deck_id: 'd-1',
+        body_md: '**Hello** world',
+        mentioned_type: 'user',
+        mentioned_id: 'u-1',
+      }),
+    );
     expect(notifs).toHaveLength(2);
     expect(notifs.map((n) => n.channel).sort()).toEqual(['in_app', 'slack']);
     expect(notifs[0]?.rule_id).toBe('collab-comment.mentioned');
@@ -28,59 +34,69 @@ describe('mapCollabEvent — comment.mentioned', () => {
   });
 
   it('returns [] for group mentions', () => {
-    const notifs = mapCollabEvent(env('comment.mentioned', {
-      comment_id: 'c-1',
-      deck_id: 'd-1',
-      body_md: 'hi',
-      mentioned_type: 'group',
-      mentioned_id: 'g-1',
-    }));
+    const notifs = mapCollabEvent(
+      env('comment.mentioned', {
+        comment_id: 'c-1',
+        deck_id: 'd-1',
+        body_md: 'hi',
+        mentioned_type: 'group',
+        mentioned_id: 'g-1',
+      }),
+    );
     expect(notifs).toEqual([]);
   });
 
   it('returns [] for role mentions', () => {
-    const notifs = mapCollabEvent(env('comment.mentioned', {
-      comment_id: 'c-1',
-      deck_id: 'd-1',
-      body_md: 'hi',
-      mentioned_type: 'role',
-      mentioned_id: 'r-1',
-    }));
+    const notifs = mapCollabEvent(
+      env('comment.mentioned', {
+        comment_id: 'c-1',
+        deck_id: 'd-1',
+        body_md: 'hi',
+        mentioned_type: 'role',
+        mentioned_id: 'r-1',
+      }),
+    );
     expect(notifs).toEqual([]);
   });
 
   it('returns [] when mentioned_id is missing', () => {
-    const notifs = mapCollabEvent(env('comment.mentioned', {
-      comment_id: 'c-1',
-      deck_id: 'd-1',
-      body_md: 'hi',
-      mentioned_type: 'user',
-      mentioned_id: '',
-    }));
+    const notifs = mapCollabEvent(
+      env('comment.mentioned', {
+        comment_id: 'c-1',
+        deck_id: 'd-1',
+        body_md: 'hi',
+        mentioned_type: 'user',
+        mentioned_id: '',
+      }),
+    );
     expect(notifs).toEqual([]);
   });
 
   it('truncates body_md to 120 chars', () => {
     const long = 'a'.repeat(200);
-    const notifs = mapCollabEvent(env('comment.mentioned', {
-      comment_id: 'c-1',
-      deck_id: 'd-1',
-      body_md: long,
-      mentioned_type: 'user',
-      mentioned_id: 'u-1',
-    }));
+    const notifs = mapCollabEvent(
+      env('comment.mentioned', {
+        comment_id: 'c-1',
+        deck_id: 'd-1',
+        body_md: long,
+        mentioned_type: 'user',
+        mentioned_id: 'u-1',
+      }),
+    );
     expect(notifs[0]?.payload.body.length).toBeLessThanOrEqual(121); // 120 + ellipsis
     expect(notifs[0]?.payload.body).toContain('…');
   });
 
   it('strips markdown images and links', () => {
-    const notifs = mapCollabEvent(env('comment.mentioned', {
-      comment_id: 'c-1',
-      deck_id: 'd-1',
-      body_md: 'Check [this](https://example.com) and ![img](https://img.png)',
-      mentioned_type: 'user',
-      mentioned_id: 'u-1',
-    }));
+    const notifs = mapCollabEvent(
+      env('comment.mentioned', {
+        comment_id: 'c-1',
+        deck_id: 'd-1',
+        body_md: 'Check [this](https://example.com) and ![img](https://img.png)',
+        mentioned_type: 'user',
+        mentioned_id: 'u-1',
+      }),
+    );
     expect(notifs[0]?.payload.body).toBe('Check this and');
   });
 });
@@ -89,11 +105,13 @@ describe('mapCollabEvent — comment.mentioned', () => {
 
 describe('mapCollabEvent — approval.requested', () => {
   it('maps an approval request to in_app + slack', () => {
-    const notifs = mapCollabEvent(env('approval.requested', {
-      request_id: 'ar-1',
-      deck_id: 'd-2',
-      approver_id: 'u-2',
-    }));
+    const notifs = mapCollabEvent(
+      env('approval.requested', {
+        request_id: 'ar-1',
+        deck_id: 'd-2',
+        approver_id: 'u-2',
+      }),
+    );
     expect(notifs).toHaveLength(2);
     expect(notifs.map((n) => n.channel).sort()).toEqual(['in_app', 'slack']);
     expect(notifs[0]?.rule_id).toBe('collab-approval.requested');
@@ -104,20 +122,24 @@ describe('mapCollabEvent — approval.requested', () => {
   });
 
   it('returns [] when approver_id is missing', () => {
-    const notifs = mapCollabEvent(env('approval.requested', {
-      request_id: 'ar-1',
-      deck_id: 'd-2',
-      approver_id: '',
-    }));
+    const notifs = mapCollabEvent(
+      env('approval.requested', {
+        request_id: 'ar-1',
+        deck_id: 'd-2',
+        approver_id: '',
+      }),
+    );
     expect(notifs).toEqual([]);
   });
 
   it('returns [] when request_id is missing', () => {
-    const notifs = mapCollabEvent(env('approval.requested', {
-      request_id: '',
-      deck_id: 'd-2',
-      approver_id: 'u-2',
-    }));
+    const notifs = mapCollabEvent(
+      env('approval.requested', {
+        request_id: '',
+        deck_id: 'd-2',
+        approver_id: 'u-2',
+      }),
+    );
     expect(notifs).toEqual([]);
   });
 });
@@ -126,14 +148,16 @@ describe('mapCollabEvent — approval.requested', () => {
 
 describe('mapCollabEvent — assignment.created', () => {
   it('notifies primary + watchers with correct title and link', () => {
-    const notifs = mapCollabEvent(env('assignment.created', {
-      assignment_id: 'as-1',
-      deck_id: 'd-3',
-      slide_range: '3–7',
-      primary_id: 'u-3',
-      watchers: ['u-4', 'u-5'],
-      status: 'pending',
-    }));
+    const notifs = mapCollabEvent(
+      env('assignment.created', {
+        assignment_id: 'as-1',
+        deck_id: 'd-3',
+        slide_range: '3–7',
+        primary_id: 'u-3',
+        watchers: ['u-4', 'u-5'],
+        status: 'pending',
+      }),
+    );
     // primary(2) + watcher1(2) + watcher2(2) = 6
     expect(notifs).toHaveLength(6);
 
@@ -152,66 +176,76 @@ describe('mapCollabEvent — assignment.created', () => {
   });
 
   it('includes blocked_reason when status is blocked', () => {
-    const notifs = mapCollabEvent(env('assignment.created', {
-      assignment_id: 'as-2',
-      deck_id: 'd-4',
-      slide_range: '1–2',
-      primary_id: 'u-6',
-      watchers: [],
-      status: 'blocked',
-      blocked_reason: 'Reviewer unavailable',
-    }));
+    const notifs = mapCollabEvent(
+      env('assignment.created', {
+        assignment_id: 'as-2',
+        deck_id: 'd-4',
+        slide_range: '1–2',
+        primary_id: 'u-6',
+        watchers: [],
+        status: 'blocked',
+        blocked_reason: 'Reviewer unavailable',
+      }),
+    );
     expect(notifs).toHaveLength(2);
     expect(notifs[0]?.payload.body).toBe('Assignment status: blocked — Reviewer unavailable');
   });
 
   it('does not include blocked_reason for non-blocked status', () => {
-    const notifs = mapCollabEvent(env('assignment.created', {
-      assignment_id: 'as-3',
-      deck_id: 'd-5',
-      slide_range: '1–3',
-      primary_id: 'u-7',
-      watchers: [],
-      status: 'approved',
-      blocked_reason: 'This should not appear',
-    }));
+    const notifs = mapCollabEvent(
+      env('assignment.created', {
+        assignment_id: 'as-3',
+        deck_id: 'd-5',
+        slide_range: '1–3',
+        primary_id: 'u-7',
+        watchers: [],
+        status: 'approved',
+        blocked_reason: 'This should not appear',
+      }),
+    );
     expect(notifs[0]?.payload.body).toBe('Assignment status: approved');
   });
 
   it('returns [] when primary_id is missing', () => {
-    const notifs = mapCollabEvent(env('assignment.created', {
-      assignment_id: 'as-4',
-      deck_id: 'd-6',
-      slide_range: '1–2',
-      primary_id: '',
-      watchers: [],
-      status: 'pending',
-    }));
+    const notifs = mapCollabEvent(
+      env('assignment.created', {
+        assignment_id: 'as-4',
+        deck_id: 'd-6',
+        slide_range: '1–2',
+        primary_id: '',
+        watchers: [],
+        status: 'pending',
+      }),
+    );
     expect(notifs).toEqual([]);
   });
 
   it('returns [] when slide_range is missing', () => {
-    const notifs = mapCollabEvent(env('assignment.created', {
-      assignment_id: 'as-5',
-      deck_id: 'd-7',
-      slide_range: '',
-      primary_id: 'u-8',
-      watchers: [],
-      status: 'pending',
-    }));
+    const notifs = mapCollabEvent(
+      env('assignment.created', {
+        assignment_id: 'as-5',
+        deck_id: 'd-7',
+        slide_range: '',
+        primary_id: 'u-8',
+        watchers: [],
+        status: 'pending',
+      }),
+    );
     expect(notifs).toEqual([]);
   });
 
   it('deduplicates primary from watchers set', () => {
     // If primary_id is also in watchers, they should not get double notifications.
-    const notifs = mapCollabEvent(env('assignment.created', {
-      assignment_id: 'as-6',
-      deck_id: 'd-8',
-      slide_range: '1–5',
-      primary_id: 'u-9',
-      watchers: ['u-9'],
-      status: 'pending',
-    }));
+    const notifs = mapCollabEvent(
+      env('assignment.created', {
+        assignment_id: 'as-6',
+        deck_id: 'd-8',
+        slide_range: '1–5',
+        primary_id: 'u-9',
+        watchers: ['u-9'],
+        status: 'pending',
+      }),
+    );
     expect(notifs).toHaveLength(2); // Only 2 (in_app + slack), not 4
   });
 });

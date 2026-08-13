@@ -26,15 +26,16 @@ export class InMemoryThumbnailCache implements ThumbnailCache {
     return `${deck_version_id}::${slide_id}::${size}`;
   }
 
-  async get(args: { deck_version_id: string; slide_id: string; size: string }): Promise<ThumbnailRecord | null> {
+  async get(args: {
+    deck_version_id: string;
+    slide_id: string;
+    size: string;
+  }): Promise<ThumbnailRecord | null> {
     return this.entries.get(this.key(args.deck_version_id, args.slide_id, args.size)) ?? null;
   }
 
   async put(record: ThumbnailRecord): Promise<void> {
-    this.entries.set(
-      this.key(record.deck_version_id, record.slide_id, record.size),
-      record,
-    );
+    this.entries.set(this.key(record.deck_version_id, record.slide_id, record.size), record);
   }
 
   async invalidate(args: { deck_version_id?: string; deck_id?: string }): Promise<void> {
@@ -58,7 +59,13 @@ export class InMemoryThumbnailCache implements ThumbnailCache {
 
 /** A null cache — every render is forced. */
 export class NullThumbnailCache implements ThumbnailCache {
-  async get(): Promise<ThumbnailRecord | null> { return null; }
-  async put(): Promise<void> { /* no-op */ }
-  async invalidate(): Promise<void> { /* no-op */ }
+  async get(): Promise<ThumbnailRecord | null> {
+    return null;
+  }
+  async put(): Promise<void> {
+    /* no-op */
+  }
+  async invalidate(): Promise<void> {
+    /* no-op */
+  }
 }

@@ -61,9 +61,7 @@ const REQUIRED_BINDINGS: Record<ChartType, Array<{ role: string; columnType: Col
     { role: 'x', columnType: 'string' },
     { role: 'y', columnType: 'number' },
   ],
-  gauge: [
-    { role: 'value', columnType: 'number' },
-  ],
+  gauge: [{ role: 'value', columnType: 'number' }],
   radar: [
     { role: 'label', columnType: 'string' },
     { role: 'value', columnType: 'number' },
@@ -89,10 +87,7 @@ export function requiredBindings(type: ChartType): Array<{ role: string; columnT
  * Validate that a dataset satisfies a binding schema.
  * Returns array of validation errors (empty = valid).
  */
-export function validateBinding(
-  schema: BindingSchema,
-  dataset: Dataset,
-): BindingValidationError[] {
+export function validateBinding(schema: BindingSchema, dataset: Dataset): BindingValidationError[] {
   const errors: BindingValidationError[] = [];
   const colMap = new Map<string, ColumnDef>();
   for (const col of dataset.columns) {
@@ -131,9 +126,6 @@ export function validateBinding(
 /**
  * Check if a binding is compatible (no errors).
  */
-export function bindingCompatible(
-  schema: BindingSchema,
-  dataset: Dataset,
-): boolean {
+export function bindingCompatible(schema: BindingSchema, dataset: Dataset): boolean {
   return validateBinding(schema, dataset).length === 0;
 }

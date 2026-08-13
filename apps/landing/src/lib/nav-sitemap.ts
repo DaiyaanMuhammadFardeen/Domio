@@ -438,9 +438,7 @@ export function footerColumns(): ReadonlyArray<FooterColumn> {
     landingNodeById('community')!,
     landingNodeById('services-index')!,
   ];
-  const companyNodes: NavNode[] = [
-    landingNodeById('careers')!,
-  ];
+  const companyNodes: NavNode[] = [landingNodeById('careers')!];
   const legalNodes: NavNode[] = [
     /* terms / privacy / dpa are pure-marketing pages — not graph nodes
        (they have no related links, breadcrumbs, etc.). The SiteFooter

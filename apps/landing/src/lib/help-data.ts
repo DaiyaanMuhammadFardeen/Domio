@@ -174,8 +174,7 @@ Teammates you invite get a magic link to sign in; nothing to install. You can re
   {
     slug: 'canvas-overview',
     title: 'Canvas overview',
-    summary:
-      'Pan, zoom, multi-select, and the difference between Scenes, Layers, and Frames.',
+    summary: 'Pan, zoom, multi-select, and the difference between Scenes, Layers, and Frames.',
     category_id: 'editor-basics',
     related_slugs: ['inspector-panel', 'keyboard-shortcuts'],
     updated_at_iso: '2026-07-30T14:15:00Z',
@@ -202,8 +201,7 @@ The Animation section turns the Inspector into a timeline. Add triggers tied to 
   {
     slug: 'keyboard-shortcuts',
     title: 'Keyboard shortcuts',
-    summary:
-      'The 30 most-used shortcuts across the editor, presenter console, and viewer.',
+    summary: 'The 30 most-used shortcuts across the editor, presenter console, and viewer.',
     category_id: 'editor-basics',
     related_slugs: ['canvas-overview', 'inspector-panel'],
     updated_at_iso: '2026-08-01T08:00:00Z',
@@ -276,8 +274,7 @@ The four private channels are: Moderator chat (presenters + co-presenters), Q&A 
   {
     slug: 'audience-qa-setup',
     title: 'Set up audience Q&A',
-    summary:
-      'Turn on Q&A, pin questions, moderate, and surface answers back to the audience.',
+    summary: 'Turn on Q&A, pin questions, moderate, and surface answers back to the audience.',
     category_id: 'presenter-setup',
     related_slugs: ['presenter-console-tour', 'engagement-heatmap'],
     updated_at_iso: '2026-05-18T16:10:00Z',
@@ -400,8 +397,7 @@ The fastest fix is usually to reproduce the issue on a fresh incognito window; t
   {
     slug: 'sync-conflict-resolution',
     title: 'Resolve sync conflicts',
-    summary:
-      'How the editor merges concurrent edits and how to recover when the merge goes wrong.',
+    summary: 'How the editor merges concurrent edits and how to recover when the merge goes wrong.',
     category_id: 'troubleshooting',
     related_slugs: ['rendering-issues', 'offline-playback'],
     updated_at_iso: '2026-08-02T09:10:00Z',
@@ -416,8 +412,7 @@ If a merge goes wrong, undo (Cmd/Ctrl + Z) restores the prior committed state. T
   {
     slug: 'manage-seats-and-billing',
     title: 'Manage seats and billing',
-    summary:
-      'Add and remove seats, update your payment method, and switch plans mid-cycle.',
+    summary: 'Add and remove seats, update your payment method, and switch plans mid-cycle.',
     category_id: 'billing',
     related_slugs: ['download-invoices', 'invite-teammates'],
     updated_at_iso: '2026-07-22T11:00:00Z',

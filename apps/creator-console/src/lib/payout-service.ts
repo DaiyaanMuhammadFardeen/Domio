@@ -96,9 +96,7 @@ export async function updatePayoutSettings(
         ? (input.stripe_connect_id ?? current.stripe_connect_id ?? null)
         : null,
     paypal_email:
-      input.method === 'paypal'
-        ? (input.paypal_email ?? current.paypal_email ?? null)
-        : null,
+      input.method === 'paypal' ? (input.paypal_email ?? current.paypal_email ?? null) : null,
     min_payout_cents: input.min_payout_cents,
     updated_at_ms: now,
   };

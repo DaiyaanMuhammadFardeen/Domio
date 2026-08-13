@@ -41,8 +41,16 @@ const DECODE_TABLE: Record<string, number> = (() => {
     // Case-insensitive decode: lowercase + the four ambiguous glyphs
     // map to the same index.
     table[char.toLowerCase()] = i;
-    if (char === '0') { table['O'] = 0; table['o'] = 0; }
-    if (char === '1') { table['I'] = 1; table['i'] = 1; table['L'] = 1; table['l'] = 1; }
+    if (char === '0') {
+      table['O'] = 0;
+      table['o'] = 0;
+    }
+    if (char === '1') {
+      table['I'] = 1;
+      table['i'] = 1;
+      table['L'] = 1;
+      table['l'] = 1;
+    }
   }
   return table;
 })();
@@ -74,9 +82,7 @@ const CHECKSUM_INDEX = SHORT_ID_LENGTH - 1;
  */
 export function encodeShortId(bytes: Uint8Array): string {
   if (bytes.length !== SHORT_ID_PAYLOAD_BYTES) {
-    throw new Error(
-      `encodeShortId expects ${SHORT_ID_PAYLOAD_BYTES} bytes, got ${bytes.length}`,
-    );
+    throw new Error(`encodeShortId expects ${SHORT_ID_PAYLOAD_BYTES} bytes, got ${bytes.length}`);
   }
 
   // Pack the 5 input bytes into a 40-bit unsigned value.

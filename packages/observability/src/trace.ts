@@ -85,7 +85,11 @@ interface InternalSpanData {
   endMs?: number;
   kind: SpanOptions['kind'];
   attributes: Record<string, string | number | boolean>;
-  events: Array<{ timeMs: number; name: string; attributes: Record<string, string | number | boolean> }>;
+  events: Array<{
+    timeMs: number;
+    name: string;
+    attributes: Record<string, string | number | boolean>;
+  }>;
   status: { code: 'unset' | 'ok' | 'error'; message?: string | undefined };
   ended: boolean;
 }
@@ -201,7 +205,12 @@ export function createTracer(cfg: TracerConfig): Tracer {
           return otlp;
         });
         const payload = {
-          resourceSpans: [{ resource, scopeSpans: [{ scope: { name: '@domio/observability' }, spans: otlpSpans }] }],
+          resourceSpans: [
+            {
+              resource,
+              scopeSpans: [{ scope: { name: '@domio/observability' }, spans: otlpSpans }],
+            },
+          ],
         };
         await cfg.exporter.exportJson('traces', payload);
       } finally {
@@ -215,13 +224,16 @@ export function createTracer(cfg: TracerConfig): Tracer {
   };
 }
 
-function attrToOtlp(attrs: Record<string, string | number | boolean>): Array<{ key: string; value: unknown }> {
+function attrToOtlp(
+  attrs: Record<string, string | number | boolean>,
+): Array<{ key: string; value: unknown }> {
   return Object.entries(attrs).map(([key, value]) => ({ key, value: scalarToOtlp(value) }));
 }
 
 function scalarToOtlp(v: string | number | boolean): unknown {
   if (typeof v === 'string') return { stringValue: v };
-  if (typeof v === 'number') return Number.isInteger(v) ? { intValue: String(v) } : { doubleValue: v };
+  if (typeof v === 'number')
+    return Number.isInteger(v) ? { intValue: String(v) } : { doubleValue: v };
   return { boolValue: v };
 }
 

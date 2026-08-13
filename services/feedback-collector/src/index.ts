@@ -40,12 +40,22 @@ export class InMemoryFeedbackStore {
   private readonly rows = new Map<string, FeedbackResponse>();
   private readonly participantIndex = new Map<string, string>(); // w::s::p -> id
 
-  private key(w: string, s: string, p: string): string { return `${w}::${s}::${p}`; }
+  private key(w: string, s: string, p: string): string {
+    return `${w}::${s}::${p}`;
+  }
 
-  async submit(input: Omit<FeedbackResponse, 'id' | 'submitted_at_ms'> & { id?: string; submitted_at_ms?: number }): Promise<FeedbackResponse> {
+  async submit(
+    input: Omit<FeedbackResponse, 'id' | 'submitted_at_ms'> & {
+      id?: string;
+      submitted_at_ms?: number;
+    },
+  ): Promise<FeedbackResponse> {
     const k = this.key(input.workspace_id, input.session_id, input.participant_id);
     if (this.participantIndex.has(k)) {
-      throw new FeedbackError('DUPLICATE', `participant ${input.participant_id} already submitted feedback`);
+      throw new FeedbackError(
+        'DUPLICATE',
+        `participant ${input.participant_id} already submitted feedback`,
+      );
     }
     const id = input.id ?? cryptoRandomId();
     const response: FeedbackResponse = {
@@ -63,7 +73,10 @@ export class InMemoryFeedbackStore {
     return response;
   }
 
-  async list(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<FeedbackResponse>> {
+  async list(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<FeedbackResponse>> {
     const out: FeedbackResponse[] = [];
     for (const r of this.rows.values()) {
       if (r.workspace_id === input.workspace_id && r.session_id === input.session_id) out.push(r);
@@ -73,7 +86,9 @@ export class InMemoryFeedbackStore {
 
   async aggregate(input: { workspace_id: string; session_id: string }): Promise<RecapAggregation> {
     const list = await this.list(input);
-    let promoters = 0, passives = 0, detractors = 0;
+    let promoters = 0,
+      passives = 0,
+      detractors = 0;
     let starSum = 0;
     let starCount = 0;
     let free_text_count = 0;

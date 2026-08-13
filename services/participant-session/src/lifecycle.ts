@@ -86,7 +86,14 @@ export class LifecycleBroadcaster {
     const nowMs = this.now();
     const sessions = this.opts.activeSessions();
     for (const s of sessions) {
-      await this.processSession(s.workspace_id, s.session_id, s.active_count, s.idle_count, nowMs, s.last_seen_at_ms);
+      await this.processSession(
+        s.workspace_id,
+        s.session_id,
+        s.active_count,
+        s.idle_count,
+        nowMs,
+        s.last_seen_at_ms,
+      );
     }
   }
 
@@ -101,14 +108,35 @@ export class LifecycleBroadcaster {
     const key = `${workspace_id}::${session_id}`;
     if (!this.startedSessions.has(key)) {
       this.startedSessions.add(key);
-      await this.emit({ workspace_id, session_id, phase: 'started', ts_ms: nowMs, active_count, idle_count });
+      await this.emit({
+        workspace_id,
+        session_id,
+        phase: 'started',
+        ts_ms: nowMs,
+        active_count,
+        idle_count,
+      });
     }
     if (nowMs - last_seen_at_ms > this.softTtlMs && !this.warnedSessions.has(key)) {
       this.warnedSessions.add(key);
-      await this.emit({ workspace_id, session_id, phase: 'idle_warning', ts_ms: nowMs, active_count, idle_count });
+      await this.emit({
+        workspace_id,
+        session_id,
+        phase: 'idle_warning',
+        ts_ms: nowMs,
+        active_count,
+        idle_count,
+      });
     }
     if (nowMs - last_seen_at_ms > this.hardTtlMs) {
-      await this.emit({ workspace_id, session_id, phase: 'ended', ts_ms: nowMs, active_count, idle_count });
+      await this.emit({
+        workspace_id,
+        session_id,
+        phase: 'ended',
+        ts_ms: nowMs,
+        active_count,
+        idle_count,
+      });
       this.startedSessions.delete(key);
       this.warnedSessions.delete(key);
     }

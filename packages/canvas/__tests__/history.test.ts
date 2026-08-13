@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { HistoryEngine } from '../src/history/engine.js';
-import { moveOp, resizeOp, lockHideOp, textEditOp, reorderOp, addElementOp } from '../src/history/ops.js';
+import {
+  moveOp,
+  resizeOp,
+  lockHideOp,
+  textEditOp,
+  reorderOp,
+  addElementOp,
+} from '../src/history/ops.js';
 import { asULID, type DeckDocument, type Element } from '@domio/schema';
 
 const DECK_ID = asULID('01H00000000000000000000000');
@@ -55,16 +62,34 @@ describe('HistoryEngine', () => {
   it('unbounded depth — many ops do not crash', () => {
     const engine = new HistoryEngine(buildDoc(), { now: () => 0 });
     for (let i = 0; i < 1000; i++) {
-      engine.apply(moveOp([{ id: A, from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 }, to: { x: i, y: i, w: 100, h: 100, rotation: 0, scale: 1 } }], i));
+      engine.apply(
+        moveOp(
+          [
+            {
+              id: A,
+              from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+              to: { x: i, y: i, w: 100, h: 100, rotation: 0, scale: 1 },
+            },
+          ],
+          i,
+        ),
+      );
     }
     expect(engine.size()).toBe(1000);
   });
 
   it('undo / redo are symmetric for MoveOp', () => {
     const engine = new HistoryEngine(buildDoc(), { now: () => 0 });
-    const op = moveOp([
-      { id: A, from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 }, to: { x: 50, y: 50, w: 100, h: 100, rotation: 0, scale: 1 } },
-    ], 0);
+    const op = moveOp(
+      [
+        {
+          id: A,
+          from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+          to: { x: 50, y: 50, w: 100, h: 100, rotation: 0, scale: 1 },
+        },
+      ],
+      0,
+    );
     engine.apply(op);
     expect(engine.current().slides[0]!.elements.find((el) => el.id === A)!.transform!.x).toBe(50);
     engine.undo();
@@ -96,9 +121,18 @@ describe('HistoryEngine', () => {
 
   it('ResizeOp inverts correctly', () => {
     const engine = new HistoryEngine(buildDoc(), { now: () => 0 });
-    engine.apply(resizeOp([
-      { id: A, from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 }, to: { x: 0, y: 0, w: 200, h: 200, rotation: 0, scale: 1 } },
-    ], 0));
+    engine.apply(
+      resizeOp(
+        [
+          {
+            id: A,
+            from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+            to: { x: 0, y: 0, w: 200, h: 200, rotation: 0, scale: 1 },
+          },
+        ],
+        0,
+      ),
+    );
     expect(engine.current().slides[0]!.elements.find((el) => el.id === A)!.transform!.w).toBe(200);
     engine.undo();
     expect(engine.current().slides[0]!.elements.find((el) => el.id === A)!.transform!.w).toBe(100);
@@ -124,12 +158,30 @@ describe('HistoryEngine', () => {
 
   it('previewAt returns the state at a target index', () => {
     const engine = new HistoryEngine(buildDoc(), { now: () => 0 });
-    engine.apply(moveOp([
-      { id: A, from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 }, to: { x: 10, y: 10, w: 100, h: 100, rotation: 0, scale: 1 } },
-    ], 0));
-    engine.apply(moveOp([
-      { id: A, from: { x: 10, y: 10, w: 100, h: 100, rotation: 0, scale: 1 }, to: { x: 20, y: 20, w: 100, h: 100, rotation: 0, scale: 1 } },
-    ], 1));
+    engine.apply(
+      moveOp(
+        [
+          {
+            id: A,
+            from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+            to: { x: 10, y: 10, w: 100, h: 100, rotation: 0, scale: 1 },
+          },
+        ],
+        0,
+      ),
+    );
+    engine.apply(
+      moveOp(
+        [
+          {
+            id: A,
+            from: { x: 10, y: 10, w: 100, h: 100, rotation: 0, scale: 1 },
+            to: { x: 20, y: 20, w: 100, h: 100, rotation: 0, scale: 1 },
+          },
+        ],
+        1,
+      ),
+    );
     const atOne = engine.previewAt(1);
     expect(atOne!.slides[0]!.elements.find((el) => el.id === A)!.transform!.x).toBe(10);
     const atZero = engine.previewAt(0);
@@ -137,21 +189,42 @@ describe('HistoryEngine', () => {
   });
 
   it('opId is a non-empty token', () => {
-    const op = moveOp([
-      { id: A, from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 }, to: { x: 1, y: 0, w: 100, h: 100, rotation: 0, scale: 1 } },
-    ], 0);
+    const op = moveOp(
+      [
+        {
+          id: A,
+          from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+          to: { x: 1, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+        },
+      ],
+      0,
+    );
     expect(op.id.length).toBeGreaterThan(0);
     expect(op.id).toMatch(/^[A-Za-z0-9_-]+$/);
   });
 
   it('pruneUpTo removes ops up to and including the given id', () => {
     const engine = new HistoryEngine(buildDoc(), { now: () => 0 });
-    const op1 = moveOp([
-      { id: A, from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 }, to: { x: 1, y: 0, w: 100, h: 100, rotation: 0, scale: 1 } },
-    ], 0);
-    const op2 = moveOp([
-      { id: A, from: { x: 1, y: 0, w: 100, h: 100, rotation: 0, scale: 1 }, to: { x: 2, y: 0, w: 100, h: 100, rotation: 0, scale: 1 } },
-    ], 1);
+    const op1 = moveOp(
+      [
+        {
+          id: A,
+          from: { x: 0, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+          to: { x: 1, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+        },
+      ],
+      0,
+    );
+    const op2 = moveOp(
+      [
+        {
+          id: A,
+          from: { x: 1, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+          to: { x: 2, y: 0, w: 100, h: 100, rotation: 0, scale: 1 },
+        },
+      ],
+      1,
+    );
     engine.apply(op1);
     engine.apply(op2);
     expect(engine.pruneUpTo(op1.id)).toBe(1);

@@ -103,7 +103,17 @@ export class TeamsSender implements ChannelSender {
       themeColor: '0076D7',
       title: n.payload.title,
       text: n.payload.body,
-      ...(n.payload.link ? { potentialAction: [{ '@type': 'OpenUri', name: 'Open', targets: [{ os: 'default', uri: n.payload.link }] }] } : {}),
+      ...(n.payload.link
+        ? {
+            potentialAction: [
+              {
+                '@type': 'OpenUri',
+                name: 'Open',
+                targets: [{ os: 'default', uri: n.payload.link }],
+              },
+            ],
+          }
+        : {}),
     };
     const bodyStr = JSON.stringify(body);
     const headers: Record<string, string> = { 'content-type': 'application/json' };
@@ -137,7 +147,11 @@ export class TeamsSender implements ChannelSender {
  * the test harness uses an in-memory transport that captures messages.
  */
 export interface EmailTransport {
-  send(opts: { to: string; subject: string; body: string }): Promise<{ ok: boolean; error?: string }>;
+  send(opts: {
+    to: string;
+    subject: string;
+    body: string;
+  }): Promise<{ ok: boolean; error?: string }>;
 }
 
 export class EmailSender implements ChannelSender {

@@ -48,7 +48,10 @@ export function LiveAppEmbed({ initialUrl, onChange }: LiveAppEmbedProps): React
   const cfg = useMemo<LiveAppEmbedConfig>(
     () => ({
       url,
-      allowedOrigins: originsText.split(',').map((s) => s.trim()).filter(Boolean),
+      allowedOrigins: originsText
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
       allowedPermissions: permissions,
       jwt,
     }),
@@ -115,7 +118,12 @@ export function LiveAppEmbed({ initialUrl, onChange }: LiveAppEmbedProps): React
           Regenerate
         </button>
       </div>
-      <button type="button" onClick={handleSubmit} className="live-app-embed__apply" data-testid="embed-apply">
+      <button
+        type="button"
+        onClick={handleSubmit}
+        className="live-app-embed__apply"
+        data-testid="embed-apply"
+      >
         Apply
       </button>
     </div>

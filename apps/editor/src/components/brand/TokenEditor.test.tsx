@@ -23,23 +23,33 @@ const KIT: BrandKitDetail = {
     },
   ],
   typography: [
-    { id: 'type.heading', label: 'Heading', fontFamily: 'Inter', fontSizePx: 32, lineHeight: 1.2, fontWeight: 700, letterSpacingEm: -0.01 },
+    {
+      id: 'type.heading',
+      label: 'Heading',
+      fontFamily: 'Inter',
+      fontSizePx: 32,
+      lineHeight: 1.2,
+      fontWeight: 700,
+      letterSpacingEm: -0.01,
+    },
   ],
   spacing: [
-    { id: 'space', label: 'Spacing', stops: [
-      { id: '1', label: '1×', value: '4px' },
-      { id: '4', label: '4×', value: '16px' },
-    ] },
+    {
+      id: 'space',
+      label: 'Spacing',
+      stops: [
+        { id: '1', label: '1×', value: '4px' },
+        { id: '4', label: '4×', value: '16px' },
+      ],
+    },
   ],
-  radius: [
-    { id: 'radius', label: 'Radius', stops: [
-      { id: 'md', label: 'MD', value: '8px' },
-    ] },
-  ],
+  radius: [{ id: 'radius', label: 'Radius', stops: [{ id: 'md', label: 'MD', value: '8px' }] }],
   shadows: [
-    { id: 'shadow', label: 'Shadow', stops: [
-      { id: 'md', label: 'MD', value: '0 4px 8px rgba(0,0,0,0.15)' },
-    ] },
+    {
+      id: 'shadow',
+      label: 'Shadow',
+      stops: [{ id: 'md', label: 'MD', value: '0 4px 8px rgba(0,0,0,0.15)' }],
+    },
   ],
 };
 
@@ -99,7 +109,9 @@ describe('TokenEditor', () => {
   it('forwards a shadow change', () => {
     const onChange = vi.fn();
     render(<TokenEditor kit={KIT} onChange={onChange} />);
-    fireEvent.change(screen.getByTestId('token-editor-shadow-md'), { target: { value: '0 8px 16px rgba(0,0,0,0.2)' } });
+    fireEvent.change(screen.getByTestId('token-editor-shadow-md'), {
+      target: { value: '0 8px 16px rgba(0,0,0,0.2)' },
+    });
     expect(onChange).toHaveBeenCalled();
     const next = onChange.mock.calls[0]?.[0] as BrandKitDetail;
     expect(next.shadows[0]?.stops[0]?.value).toBe('0 8px 16px rgba(0,0,0,0.2)');

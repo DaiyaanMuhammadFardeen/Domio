@@ -42,8 +42,19 @@ const TOOLS: Array<{ kind: AnnotationKind | null; label: string; icon: string }>
 const COLORS = ['#f85149', '#f0883e', '#3fb950', '#58a6ff', '#d2a8ff', '#e6edf3'];
 
 export function InkToolbar(props: InkToolbarProps) {
-  const { tool, color, strokeWidth, onToolChange, onColorChange, onStrokeWidthChange,
-    onUndo, onSave, canUndo, canSave, disabled } = props;
+  const {
+    tool,
+    color,
+    strokeWidth,
+    onToolChange,
+    onColorChange,
+    onStrokeWidthChange,
+    onUndo,
+    onSave,
+    canUndo,
+    canSave,
+    disabled,
+  } = props;
   return (
     <div className="ink-toolbar" role="toolbar" aria-label="Annotation toolbar">
       <div className="ink-toolbar__group">
@@ -57,7 +68,8 @@ export function InkToolbar(props: InkToolbarProps) {
             aria-label={t.label}
             title={t.label}
           >
-            <span aria-hidden>{true}</span>{t.icon}
+            <span aria-hidden>{true}</span>
+            {t.icon}
           </button>
         ))}
       </div>
@@ -75,7 +87,9 @@ export function InkToolbar(props: InkToolbarProps) {
         ))}
       </div>
       <div className="ink-toolbar__group ink-toolbar__group--slider">
-        <label htmlFor="ink-width" className="ink-toolbar__label">Width</label>
+        <label htmlFor="ink-width" className="ink-toolbar__label">
+          Width
+        </label>
         <input
           id="ink-width"
           type="range"
@@ -88,10 +102,20 @@ export function InkToolbar(props: InkToolbarProps) {
         <span className="ink-toolbar__value">{strokeWidth}px</span>
       </div>
       <div className="ink-toolbar__group ink-toolbar__group--actions">
-        <button type="button" onClick={onUndo} disabled={disabled || !canUndo} aria-label="Undo last stroke">
+        <button
+          type="button"
+          onClick={onUndo}
+          disabled={disabled || !canUndo}
+          aria-label="Undo last stroke"
+        >
           ↶ Undo
         </button>
-        <button type="button" onClick={onSave} disabled={disabled || !canSave} aria-label="Save to slide">
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={disabled || !canSave}
+          aria-label="Save to slide"
+        >
           ⭐ Save to slide
         </button>
       </div>

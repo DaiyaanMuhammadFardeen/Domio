@@ -18,10 +18,7 @@
 import { createHash, randomUUID } from 'crypto';
 import { parseSessionCode } from '@domio/session-code';
 import type { SessionCode } from '@domio/audience-service';
-import {
-  AudienceSessionNotFoundError,
-  type AudienceSnapshot,
-} from './presenter-lookup.js';
+import { AudienceSessionNotFoundError, type AudienceSnapshot } from './presenter-lookup.js';
 import type {
   HeartbeatInput,
   JoinInput,
@@ -38,20 +35,13 @@ import {
   ParticipantValidationError,
   validateJoinInput,
 } from './types.js';
-import {
-  type ParticipantSessionStore,
-  isStore,
-  defaultRateBucket,
-} from './store/store.js';
+import { type ParticipantSessionStore, isStore, defaultRateBucket } from './store/store.js';
 import { asStoreError } from './store/mem_store.js';
 void asStoreError; // reserved for future optimistic-concurrency error mapping
 import type { AudienceAuditEmitter, ParticipantAuditEvent } from './audit/emit.js';
 import type { IdempotencyStore } from './idempotency/index.js';
 import { NullIdempotencyStore } from './idempotency/index.js';
-import {
-  type ParticipantMetrics,
-  nullParticipantMetrics,
-} from './observability/metrics.js';
+import { type ParticipantMetrics, nullParticipantMetrics } from './observability/metrics.js';
 
 export interface ParticipantSessionServiceOptions {
   readonly store: ParticipantSessionStore;
@@ -67,7 +57,10 @@ export interface ParticipantSessionServiceOptions {
   readonly metrics?: ParticipantMetrics | undefined;
 }
 
-export type PresenterLookup = (input: { session_code: SessionCode; workspace_id: string }) => Promise<AudienceSnapshot>;
+export type PresenterLookup = (input: {
+  session_code: SessionCode;
+  workspace_id: string;
+}) => Promise<AudienceSnapshot>;
 
 export interface ParticipantSessionServiceDeps {
   readonly store: ParticipantSessionStore;
@@ -116,12 +109,21 @@ export class ParticipantSessionService {
     // Idempotency replay.
     if (input.idempotency_key) {
       const prior = await this.idempotency.get(
-        input.idempotency_key, input.workspace_id, input.session_code,
+        input.idempotency_key,
+        input.workspace_id,
+        input.session_code,
       );
       if (prior && prior.response && (prior.response as ParticipantSession).id) {
         const bundle = await this.snapshotFor(input.session_code, input.workspace_id);
-        this.metrics.joinMs.record(this.clock() - startedAt, { workspace_id: input.workspace_id, phase: 'replay' });
-        return { session: prior.response as ParticipantSession, bundle, idempotent_replay: prior.response as ParticipantSession };
+        this.metrics.joinMs.record(this.clock() - startedAt, {
+          workspace_id: input.workspace_id,
+          phase: 'replay',
+        });
+        return {
+          session: prior.response as ParticipantSession,
+          bundle,
+          idempotent_replay: prior.response as ParticipantSession,
+        };
       }
       const reservation = await this.idempotency.reserve({
         key: input.idempotency_key,
@@ -130,13 +132,25 @@ export class ParticipantSessionService {
         recorded_at_ms: this.clock(),
         ttl_ms: this.idempotencyTtlMs,
       });
-      if (reservation.exists && reservation.prior && reservation.prior.response && (reservation.prior.response as ParticipantSession).id) {
+      if (
+        reservation.exists &&
+        reservation.prior &&
+        reservation.prior.response &&
+        (reservation.prior.response as ParticipantSession).id
+      ) {
         const bundle = await this.snapshotFor(input.session_code, input.workspace_id);
-        return { session: reservation.prior.response as ParticipantSession, bundle, idempotent_replay: reservation.prior.response as ParticipantSession };
+        return {
+          session: reservation.prior.response as ParticipantSession,
+          bundle,
+          idempotent_replay: reservation.prior.response as ParticipantSession,
+        };
       }
     }
 
-    const snapshot = await this.presenterLookup({ session_code: input.session_code, workspace_id: input.workspace_id });
+    const snapshot = await this.presenterLookup({
+      session_code: input.session_code,
+      workspace_id: input.workspace_id,
+    });
 
     const parsed = parseSessionCode(input.session_code as unknown as string);
     const shard = parsed.shardIndex;
@@ -155,7 +169,9 @@ export class ParticipantSessionService {
           state: 'active',
           display_name: input.display_name,
           locale: input.locale,
-          ...(input.fingerprint_hash !== undefined ? { fingerprint_hash: input.fingerprint_hash } : {}),
+          ...(input.fingerprint_hash !== undefined
+            ? { fingerprint_hash: input.fingerprint_hash }
+            : {}),
           version: existing.version + 1,
           joined_at: new Date(this.clock()).toISOString(),
           last_seen_at: new Date(this.clock()).toISOString(),
@@ -171,7 +187,10 @@ export class ParticipantSessionService {
           after: { session_id: updated.id, state: updated.state },
         });
         this.metrics.activeGaugeAdd(1, { workspace_id: input.workspace_id });
-        this.metrics.joinMs.record(this.clock() - startedAt, { workspace_id: input.workspace_id, phase: 'rejoin' });
+        this.metrics.joinMs.record(this.clock() - startedAt, {
+          workspace_id: input.workspace_id,
+          phase: 'rejoin',
+        });
         return { session: updated, bundle: snapshot, idempotent_replay: null };
       }
       throw new ParticipantAlreadyJoinedError(existing.id);
@@ -224,7 +243,10 @@ export class ParticipantSessionService {
     }
 
     this.metrics.activeGaugeAdd(1, { workspace_id: input.workspace_id });
-    this.metrics.joinMs.record(this.clock() - startedAt, { workspace_id: input.workspace_id, phase: 'fresh' });
+    this.metrics.joinMs.record(this.clock() - startedAt, {
+      workspace_id: input.workspace_id,
+      phase: 'fresh',
+    });
 
     return { session: created, bundle: snapshot, idempotent_replay: null };
   }

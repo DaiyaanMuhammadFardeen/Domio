@@ -27,7 +27,19 @@ describe('expression/lexer', () => {
     const toks = tokenize(`$x + 42 == "yes" && foo(1, 'two')`);
     const kinds = toks.map((t) => t.kind);
     expect(kinds).toEqual([
-      'var', 'op', 'num', 'op', 'str', 'op', 'ident', 'lparen', 'num', 'comma', 'str', 'rparen', 'eof',
+      'var',
+      'op',
+      'num',
+      'op',
+      'str',
+      'op',
+      'ident',
+      'lparen',
+      'num',
+      'comma',
+      'str',
+      'rparen',
+      'eof',
     ]);
   });
 
@@ -127,9 +139,9 @@ describe('expression/compiler', () => {
   });
 
   it('rejects unknown functions when allowed list is set', () => {
-    expect(() =>
-      compileExpression('foo(1)', { allowedFunctions: ['IF', 'COALESCE'] }),
-    ).toThrow(NameError);
+    expect(() => compileExpression('foo(1)', { allowedFunctions: ['IF', 'COALESCE'] })).toThrow(
+      NameError,
+    );
   });
 
   it('accepts allow-listed functions', () => {
@@ -155,8 +167,22 @@ describe('expression/compiler', () => {
   });
 
   it('builtins registry includes the spec set', () => {
-    const required = ['ROUND', 'FLOOR', 'CEIL', 'ABS', 'MIN', 'MAX', 'CLAMP',
-      'IF', 'COALESCE', 'LENGTH', 'MATCH', 'FORMATNUMBER', 'FORMATCURRENCY', 'FORMATDATE'];
+    const required = [
+      'ROUND',
+      'FLOOR',
+      'CEIL',
+      'ABS',
+      'MIN',
+      'MAX',
+      'CLAMP',
+      'IF',
+      'COALESCE',
+      'LENGTH',
+      'MATCH',
+      'FORMATNUMBER',
+      'FORMATCURRENCY',
+      'FORMATDATE',
+    ];
     for (const name of required) expect(BUILTINS[name]).toBeDefined();
   });
 });
@@ -179,13 +205,19 @@ describe('expression/evaluator', () => {
   });
 
   it('evaluates logical && and ||', () => {
-    expect(evaluateExpression(compileExpression('$a && $b').ast, { vars: { A: true, B: false } })).toBe(false);
-    expect(evaluateExpression(compileExpression('$a || $b').ast, { vars: { A: false, B: true } })).toBe(true);
+    expect(
+      evaluateExpression(compileExpression('$a && $b').ast, { vars: { A: true, B: false } }),
+    ).toBe(false);
+    expect(
+      evaluateExpression(compileExpression('$a || $b').ast, { vars: { A: false, B: true } }),
+    ).toBe(true);
   });
 
   it('short-circuit && returns right operand (matches JS truthy semantics)', () => {
     // The evaluator follows JS: a && b returns b when a is truthy, otherwise a.
-    expect(evaluateExpression(compileExpression('$a && $b').ast, { vars: { A: 1, B: 'yes' } })).toBe('yes');
+    expect(
+      evaluateExpression(compileExpression('$a && $b').ast, { vars: { A: 1, B: 'yes' } }),
+    ).toBe('yes');
   });
 
   it('evaluates equality with Object.is semantics (NaN === NaN)', () => {
@@ -200,13 +232,20 @@ describe('expression/evaluator', () => {
     expect(evaluateExpression(compileExpression('MIN(3, 1, 2)').ast, { vars: {} })).toBe(1);
     expect(evaluateExpression(compileExpression('MAX(1, 2, 3)').ast, { vars: {} })).toBe(3);
     expect(evaluateExpression(compileExpression('CLAMP(15, 0, 10)').ast, { vars: {} })).toBe(10);
-    expect(evaluateExpression(compileExpression('IF($x > 0, "pos", "neg")').ast, { vars: { X: 1 } })).toBe('pos');
-    expect(evaluateExpression(compileExpression('COALESCE(null, null, "fallback")').ast, { vars: {} })).toBe('fallback');
+    expect(
+      evaluateExpression(compileExpression('IF($x > 0, "pos", "neg")').ast, { vars: { X: 1 } }),
+    ).toBe('pos');
+    expect(
+      evaluateExpression(compileExpression('COALESCE(null, null, "fallback")').ast, { vars: {} }),
+    ).toBe('fallback');
     expect(evaluateExpression(compileExpression('LENGTH("hello")').ast, { vars: {} })).toBe(5);
   });
 
   it('evaluates formatCurrency with locale', () => {
-    const result = evaluateExpression(compileExpression('FORMATCURRENCY(1234.5, "USD", "en-US")').ast, { vars: {} });
+    const result = evaluateExpression(
+      compileExpression('FORMATCURRENCY(1234.5, "USD", "en-US")').ast,
+      { vars: {} },
+    );
     expect(result).toContain('1,234');
   });
 
@@ -215,24 +254,21 @@ describe('expression/evaluator', () => {
   });
 
   it('throws DivisionByZeroError on /0', () => {
-    expect(() =>
-      evaluateExpression(compileExpression('1 / 0').ast, { vars: {} }),
-    ).toThrow(DivisionByZeroError);
+    expect(() => evaluateExpression(compileExpression('1 / 0').ast, { vars: {} })).toThrow(
+      DivisionByZeroError,
+    );
   });
 
   it('throws ValueError on bad number conversion', () => {
-    expect(() =>
-      evaluateExpression(compileExpression('ROUND("abc")').ast, { vars: {} }),
-    ).toThrow(ValueError);
+    expect(() => evaluateExpression(compileExpression('ROUND("abc")').ast, { vars: {} })).toThrow(
+      ValueError,
+    );
   });
 
   it('throws NameError on unknown function at evaluate time (defense in depth)', () => {
     // Even if compiler were bypassed, the evaluator must reject.
     expect(() => {
-      evaluateExpressionWithMetrics(
-        { kind: 'call', name: 'EVAL', args: [] },
-        { vars: {} },
-      );
+      evaluateExpressionWithMetrics({ kind: 'call', name: 'EVAL', args: [] }, { vars: {} });
     }).toThrow();
   });
 
@@ -264,7 +300,10 @@ describe('expression/evaluator', () => {
   it('throws TimeoutError when step cap exceeded', () => {
     const ast = compileExpression('1 + 1 + 1 + 1 + 1').ast;
     expect(() =>
-      evaluateExpression(ast, { vars: {}, caps: { maxSteps: 2, maxDepth: 64, maxRuntimeMs: 5_000 } }),
+      evaluateExpression(ast, {
+        vars: {},
+        caps: { maxSteps: 2, maxDepth: 64, maxRuntimeMs: 5_000 },
+      }),
     ).toThrow();
   });
 

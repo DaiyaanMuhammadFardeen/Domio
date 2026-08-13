@@ -78,9 +78,7 @@ export function resolveScrollBinding(
 
   // ── Progress calculation ──────────────────────────────────────
   const range = end - start;
-  const rawProgress = range === 0
-    ? (scrollY >= start ? 1 : 0)
-    : (scrollY - start) / range;
+  const rawProgress = range === 0 ? (scrollY >= start ? 1 : 0) : (scrollY - start) / range;
   const progress = Math.max(0, Math.min(1, rawProgress));
 
   // ── Bucket quantisation ──────────────────────────────────────
@@ -120,9 +118,7 @@ export function resolveScrollBinding(
 
   // For opacity: interpolate 0→1 range
   // For transform/translateY: the caller gets the eased progress as a number
-  const value: number | string = property === 'opacity'
-    ? easedProgress
-    : easedProgress;
+  const value: number | string = property === 'opacity' ? easedProgress : easedProgress;
 
   progressCache.set(cacheKey, value);
   return value;

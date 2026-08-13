@@ -16,7 +16,11 @@ describe('resolveHandoutToken', () => {
       ok: true,
       json: async () => ({ session_code: 'S-123' }),
     });
-    const result = await resolveHandoutToken('tok', 'http://api.test', fetchMock as unknown as typeof fetch);
+    const result = await resolveHandoutToken(
+      'tok',
+      'http://api.test',
+      fetchMock as unknown as typeof fetch,
+    );
     expect(result.session_code).toBe('S-123');
     expect(fetchMock).toHaveBeenCalledWith(
       'http://api.test/api/handout/tok/resolve',
@@ -26,8 +30,9 @@ describe('resolveHandoutToken', () => {
 
   it('throws HandoutResolveError on non-2xx', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 404 });
-    await expect(resolveHandoutToken('tok', 'http://api.test', fetchMock as unknown as typeof fetch))
-      .rejects.toBeInstanceOf(HandoutResolveError);
+    await expect(
+      resolveHandoutToken('tok', 'http://api.test', fetchMock as unknown as typeof fetch),
+    ).rejects.toBeInstanceOf(HandoutResolveError);
   });
 
   it('encodes the token in the URL', async () => {
@@ -61,7 +66,11 @@ describe('fetchHandout', () => {
       ok: true,
       json: async () => sample,
     });
-    const result = await fetchHandout('tok', 'http://api.test', fetchMock as unknown as typeof fetch);
+    const result = await fetchHandout(
+      'tok',
+      'http://api.test',
+      fetchMock as unknown as typeof fetch,
+    );
     expect(result.session_id).toBe('s1');
     expect(result.attended_slides[0]?.title).toBe('Intro');
     expect(fetchMock).toHaveBeenCalledWith(
@@ -72,8 +81,9 @@ describe('fetchHandout', () => {
 
   it('throws HandoutResolveError on non-2xx', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 500 });
-    await expect(fetchHandout('tok', 'http://api.test', fetchMock as unknown as typeof fetch))
-      .rejects.toBeInstanceOf(HandoutResolveError);
+    await expect(
+      fetchHandout('tok', 'http://api.test', fetchMock as unknown as typeof fetch),
+    ).rejects.toBeInstanceOf(HandoutResolveError);
   });
 
   it('encodes the token in the URL', async () => {

@@ -230,16 +230,26 @@ function ShapeView({
   style,
   dataTestId,
 }: {
-  readonly layer: FrameLayer | GroupLayer | AutoLayoutLayer | VectorLayer | BooleanShapeLayer | ComponentLayer;
+  readonly layer:
+    | FrameLayer
+    | GroupLayer
+    | AutoLayoutLayer
+    | VectorLayer
+    | BooleanShapeLayer
+    | ComponentLayer;
   readonly style: CSSProperties;
   readonly dataTestId: string;
 }): ReactElement {
   const isBoolean = layer.type === 'boolean';
   const isVector = layer.type === 'vector';
-  const fillBg = layer.fill?.type === 'solid' && layer.fill.color ? rgbaCss(layer.fill.color) : 'rgba(255,255,255,0.05)';
-  const strokeCss = layer.stroke && layer.stroke.color
-    ? `${layer.stroke.width ?? 1}px ${rgbaCss(layer.stroke.color)}`
-    : '1px dashed rgba(255,255,255,0.18)';
+  const fillBg =
+    layer.fill?.type === 'solid' && layer.fill.color
+      ? rgbaCss(layer.fill.color)
+      : 'rgba(255,255,255,0.05)';
+  const strokeCss =
+    layer.stroke && layer.stroke.color
+      ? `${layer.stroke.width ?? 1}px ${rgbaCss(layer.stroke.color)}`
+      : '1px dashed rgba(255,255,255,0.18)';
   return (
     <div
       data-testid={dataTestId}

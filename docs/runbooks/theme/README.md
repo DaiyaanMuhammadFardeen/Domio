@@ -8,9 +8,9 @@ Theme service; theming tokens + dark/light variants.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-theme` | availability | 99.9% | 30d |
+| SLO           | Kind         | Target | Window |
+| ------------- | ------------ | ------ | ------ |
+| `avail-theme` | availability | 99.9%  | 30d    |
 
 ## Triage
 

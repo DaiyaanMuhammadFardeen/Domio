@@ -18,11 +18,7 @@ export const metadata: Metadata = {
  * Server-component because Next.js requires `<html>` to render in a
  * server context (no client-side useState).
  */
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieHeader = (await headers()).get('cookie') ?? '';
   const match = /(?:^|;\s*)domio-locale=([^;]+)/.exec(cookieHeader);
   const raw = match ? decodeURIComponent(match[1] ?? '') : '';

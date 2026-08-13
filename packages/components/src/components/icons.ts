@@ -53,7 +53,11 @@ export const ICON: DomioComponentDef = {
         type: 'string',
         title: 'Label',
         default: '',
-        'x-domio-prop': { category: 'Content', control: 'text', placeholder: 'Optional label below icon' },
+        'x-domio-prop': {
+          category: 'Content',
+          control: 'text',
+          placeholder: 'Optional label below icon',
+        },
       },
     },
   },
@@ -70,7 +74,10 @@ export const ICON: DomioComponentDef = {
     // Background hit area
     elements.push(
       rect(ctx, {
-        x: 0, y: 0, w: W, h: H,
+        x: 0,
+        y: 0,
+        w: W,
+        h: H,
         fill: 'transparent',
         semanticId: 'hit-area',
       }),

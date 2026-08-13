@@ -11,15 +11,8 @@
  *   DELETE /v1/video_jobs/:id      cancelJob   (204/409)
  */
 
-import type {
-  CreateVideoJobInput,
-  Rendition,
-  VideoJobPriority,
-} from './types.js';
-import {
-  InvalidJobTransitionError,
-  ValidationError,
-} from './types.js';
+import type { CreateVideoJobInput, Rendition, VideoJobPriority } from './types.js';
+import { InvalidJobTransitionError, ValidationError } from './types.js';
 import type { VideoJobStore } from './jobs.js';
 import { buildJob, reduceTransition } from './jobs.js';
 import type { TranscodeBackend } from './transcoder.js';
@@ -28,7 +21,11 @@ import type { TranscodeBackend } from './transcoder.js';
 // HTTP types
 // ---------------------------------------------------------------------------
 
-export interface HttpRequest<P = Record<string, string>, B = unknown, Q = Record<string, string | undefined>> {
+export interface HttpRequest<
+  P = Record<string, string>,
+  B = unknown,
+  Q = Record<string, string | undefined>,
+> {
   readonly method: string;
   readonly path: string;
   readonly params: P;
@@ -84,7 +81,10 @@ function validateCreateInput(body: Record<string, unknown>): CreateVideoJobInput
     throw new ValidationError('Request body must be a JSON object');
   }
 
-  const { videoAssetId, renditions, extractCaptions, extractWaveform, priority } = body as Record<string, unknown>;
+  const { videoAssetId, renditions, extractCaptions, extractWaveform, priority } = body as Record<
+    string,
+    unknown
+  >;
 
   if (typeof videoAssetId !== 'string' || videoAssetId.length === 0) {
     throw new ValidationError('videoAssetId is required and must be a non-empty string');
@@ -96,7 +96,9 @@ function validateCreateInput(body: Record<string, unknown>): CreateVideoJobInput
 
   for (const r of renditions) {
     if (!VALID_RENDITIONS.includes(r as Rendition)) {
-      throw new ValidationError(`Invalid rendition: ${String(r)}. Must be one of: ${VALID_RENDITIONS.join(', ')}`);
+      throw new ValidationError(
+        `Invalid rendition: ${String(r)}. Must be one of: ${VALID_RENDITIONS.join(', ')}`,
+      );
     }
   }
 
@@ -110,7 +112,9 @@ function validateCreateInput(body: Record<string, unknown>): CreateVideoJobInput
 
   if (priority !== undefined) {
     if (!VALID_PRIORITIES.includes(priority as VideoJobPriority)) {
-      throw new ValidationError(`Invalid priority: ${String(priority)}. Must be one of: ${VALID_PRIORITIES.join(', ')}`);
+      throw new ValidationError(
+        `Invalid priority: ${String(priority)}. Must be one of: ${VALID_PRIORITIES.join(', ')}`,
+      );
     }
   }
 
@@ -210,16 +214,10 @@ export async function cancelJobHandler(
 
   // Cannot cancel terminal states
   if (job.status === 'ready') {
-    return conflict(
-      `Cannot cancel job in status "${job.status}"`,
-      'CANCEL_CONFLICT',
-    );
+    return conflict(`Cannot cancel job in status "${job.status}"`, 'CANCEL_CONFLICT');
   }
   if (job.status === 'failed') {
-    return conflict(
-      `Cannot cancel job in status "${job.status}"`,
-      'CANCEL_CONFLICT',
-    );
+    return conflict(`Cannot cancel job in status "${job.status}"`, 'CANCEL_CONFLICT');
   }
 
   // queued or processing → failed with cancellation message

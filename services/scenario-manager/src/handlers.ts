@@ -20,10 +20,7 @@ import {
   ScenarioCycleError,
   ScenarioDepthExceededError,
 } from './service.js';
-import type {
-  ScenarioService,
-  CreateScenarioInput,
-} from './service.js';
+import type { ScenarioService, CreateScenarioInput } from './service.js';
 import type { ScenarioMetrics } from './metrics.js';
 import type { AuditRecorder } from './audit.js';
 import type { CreateOverlayInput } from './service.js';
@@ -82,7 +79,11 @@ function notFound(message: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 export async function createScenarioHandler(
-  req: HttpRequest<{ tenantId: string }, Omit<CreateScenarioInput, 'tenantId' | 'createdBy'> & { createdBy?: string }, { actorId?: string }>,
+  req: HttpRequest<
+    { tenantId: string },
+    Omit<CreateScenarioInput, 'tenantId' | 'createdBy'> & { createdBy?: string },
+    { actorId?: string }
+  >,
   ctx: ScenarioHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.createdBy ?? req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -91,7 +92,11 @@ export async function createScenarioHandler(
   const { createdBy: _ignored, ...rest } = req.body;
   void _ignored;
   try {
-    const record = await ctx.service.createScenario({ ...rest, tenantId: req.params.tenantId, createdBy: actorId });
+    const record = await ctx.service.createScenario({
+      ...rest,
+      tenantId: req.params.tenantId,
+      createdBy: actorId,
+    });
     ctx.metrics?.recordScenarioCreated();
     ctx.audit?.record({
       tenantId: req.params.tenantId,
@@ -136,14 +141,23 @@ export async function listByDeckHandler(
 }
 
 export async function updateScenarioHandler(
-  req: HttpRequest<{ tenantId: string; id: string }, { name?: string; description?: string; parentId?: string | null }, { actorId?: string }>,
+  req: HttpRequest<
+    { tenantId: string; id: string },
+    { name?: string; description?: string; parentId?: string | null },
+    { actorId?: string }
+  >,
   ctx: ScenarioHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);
   if (!actorId) return unauthorized();
   ctx.authorize?.({ actorId, action: 'write' });
   try {
-    const updated = await ctx.service.updateScenario(req.params.id, req.params.tenantId, req.body, actorId);
+    const updated = await ctx.service.updateScenario(
+      req.params.id,
+      req.params.tenantId,
+      req.body,
+      actorId,
+    );
     ctx.audit?.record({
       tenantId: req.params.tenantId,
       actorId,
@@ -186,7 +200,13 @@ export async function deleteScenarioHandler(
 // ---------------------------------------------------------------------------
 
 export async function upsertOverlayHandler(
-  req: HttpRequest<{ tenantId: string; id: string }, CreateOverlayInput['tenantId'] extends never ? never : Omit<CreateOverlayInput, 'tenantId' | 'scenarioId'>, { actorId?: string }>,
+  req: HttpRequest<
+    { tenantId: string; id: string },
+    CreateOverlayInput['tenantId'] extends never
+      ? never
+      : Omit<CreateOverlayInput, 'tenantId' | 'scenarioId'>,
+    { actorId?: string }
+  >,
   ctx: ScenarioHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -222,7 +242,11 @@ export async function upsertOverlayHandler(
 }
 
 export async function diffScenariosHandler(
-  req: HttpRequest<{ tenantId: string; id: string }, undefined, { base?: string; actorId?: string }>,
+  req: HttpRequest<
+    { tenantId: string; id: string },
+    undefined,
+    { base?: string; actorId?: string }
+  >,
   ctx: ScenarioHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);

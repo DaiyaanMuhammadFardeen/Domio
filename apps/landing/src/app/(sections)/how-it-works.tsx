@@ -35,11 +35,7 @@ const STEPS: ReadonlyArray<HowStep> = [
 
 export function HowItWorks(): JSX.Element {
   return (
-    <section
-      className="how-section"
-      aria-labelledby="how-heading"
-      data-testid="how-it-works"
-    >
+    <section className="how-section" aria-labelledby="how-heading" data-testid="how-it-works">
       <header className="how-section__header">
         <p className="how-section__eyebrow">How it works</p>
         <h2 id="how-heading" className="how-section__title">

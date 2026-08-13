@@ -28,6 +28,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Decompose every viewer session into slide-level engagement: who opened the deck, when, on which device, how long on each slide, where they dropped off, and what they clicked.
 
 **Acceptance Criteria:**
+
 - **AC-169.1** Every public/shared/embedded deck view produces a `session` row and ≥1 `viewer` record (anonymous by default, identified when consent/auth enables it).
 - **AC-169.2** Per-slide `dwell_ms` is captured with start/end timestamps accurate to ±250 ms at the client, reconciled against server `session_heartbeat` for drift correction.
 - **AC-169.3** Drop-off is computed as the last slide index reached before the session ended (or 30 minutes of inactivity).
@@ -36,6 +37,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-169.6** Per-viewer views are exportable as CSV/JSON by deck owners and admins; export is itself audited.
 
 **Behavioral Details:**
+
 - A session is established at deck open, terminated on close/tab-hide + 30 min idle, or on explicit `session.end` from the runtime.
 - A session is "anonymous" if the viewer is not authenticated through a share-link identity, SSO, or known CRM contact.
 - A session is "identified" when matched to a `viewer` row via `viewer_id_key` (email hash, CRM ID, share-link token).
@@ -43,6 +45,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - Click recording captures `element_id`, `element_role`, `slide_index`, and a contextual payload (e.g., `{"scenario": "bear"}`, `{"roi_inputs": {...}}`).
 
 **Edge Cases:**
+
 - **Concurrent tabs:** Two tabs on the same deck produce two sessions unless explicitly merged by share-link identity; the UI shows both with a "this viewer also has another tab" badge.
 - **Network offline:** Events are buffered in IndexedDB with a 24 h TTL and flushed on reconnect; if offline past TTL, events are dropped and the client emits a `lost_events` self-telemetry record (never the actual events).
 - **Bot filtering:** Known user-agents (Googlebot, AhrefsBot, etc.) are tagged `is_bot=true` and excluded from human metrics by default (toggleable).
@@ -57,6 +60,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Quantify how viewers interact with interactive elements: which scenario they toggled to, whether they used the ROI calculator, hotspots clicked, branching paths taken, form fields completed, variables modified.
 
 **Acceptance Criteria:**
+
 - **AC-170.1** Every interactive element with a stable `element_id` records a `interaction` event per meaningful user action (toggle, input, submit, click).
 - **AC-170.2** Scenario toggles (#57) emit `event_name=scenario_switched` with `{from, to, slide_index, ts}`; the first switch per session is attributed to "first engagement."
 - **AC-170.3** ROI calculator (#102) usage emits a `calculator_started` and `calculator_completed` (or `calculator_abandoned`) pair; the inputs are snapshotted only if the user opts in to share them (see §7.2).
@@ -65,11 +69,13 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-170.6** Interactive element analytics are visible on the slide-level drilldown with a per-element breakdown ranked by interaction count.
 
 **Behavioral Details:**
+
 - Interaction events carry an `element_role` from a controlled vocabulary (`scenario_toggle`, `roi_calculator`, `hotspot`, `branch_choice`, `form_input`, `poll`, `quiz`, `variable_modifier`).
 - Element schema is resolved via the **semantic addressing** system (#226) so that reorders or renames don't break the analytics join.
 - A "first interaction" is the earliest non-`view` event in a session; "depth of interaction" is the unique-element count reached.
 
 **Edge Cases:**
+
 - **Spam interactions:** If a user clicks the same toggle >20 times in 10 s, events are coalesced and flagged as `coalesced=true`.
 - **Calculator inputs with sensitive numbers:** Numbers are stored as bucketed ranges (e.g., $10k–$50k) by default; raw values only if explicitly opted-in.
 - **Branching from a hotspot that is later removed:** Past events still resolve via `element_id` (immutable), with `element_status=retired` annotated in the dashboard.
@@ -81,6 +87,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Generate per-deck, per-section attention heatmaps for the scroll-mode web rendering (#156), showing where viewers scroll, pause, and abandon.
 
 **Acceptance Criteria:**
+
 - **AC-171.1** Scroll-mode renders emit `scroll_progress` pings every 250 ms while the user is scrolling and `scroll_pause` events after 1.5 s of stillness.
 - **AC-171.2** A per-deck heatmap tile grid is generated (default 64×N tiles) where each tile's color intensity represents normalized dwell.
 - **AC-171.3** Heatmaps are segmented by audience (e.g., "all viewers", "identified investors", "internal team") via saved segments.
@@ -88,11 +95,13 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-171.5** Heatmaps refresh within 60 s of a new session ending (near-real-time in the dashboard).
 
 **Behavioral Details:**
+
 - Heatmap generation runs in the **heatmap generator** service (§4.6) on a 5-minute batched job + on-demand trigger after a session ends.
 - Tiles are bucketed by `viewport_height` so a phone viewer and a desktop viewer produce comparable tile densities (normalized per row).
 - "Hot tiles" are those in the top quartile of dwell; "cold tiles" are those in the bottom quartile with ≥10 impressions (filtering noise).
 
 **Edge Cases:**
+
 - **Very fast scrollers:** Sessions with median scroll velocity >5,000 px/s are flagged and excluded from heatmap generation (not real reading).
 - **Long decks (>50 slides):** Tile resolution increases to 128×N to preserve positional granularity.
 - **Reduced-motion viewers:** Heatmap still generated but weighted by their scroll progress (which may be the only signal they emit).
@@ -105,6 +114,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Push real-time notifications to deck owners when high-value viewers re-engage with the deck — "Acme Corp just reopened your proposal — slide 9, pricing, third time this week."
 
 **Acceptance Criteria:**
+
 - **AC-172.1** Notification triggers fire within 10 s of a qualifying event (session start on a hot deck, repeat visit, long dwell, specific slide touch).
 - **AC-172.2** Triggers are configurable per-deck or per-folder: rules like `viewer.tier=="hot" AND slide.section=="pricing" AND revisit_count >= 3`.
 - **AC-172.3** Notifications are delivered to channels the user has linked: email, Slack, Teams, mobile push, webhook URL.
@@ -113,12 +123,14 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-172.6** Notifications respect viewer opt-out: if a viewer disabled tracking, the notification says "anonymous viewer" without identity fields.
 
 **Behavioral Details:**
+
 - The notification dispatcher (§4.10) consumes a `notification.triggered` Kafka topic produced by a CEP (complex event processing) rules engine on top of the event stream.
 - "Hot deck" is computed as a heuristic: decks shared with ≥3 high-tier contacts in the last 30 days, or decks tagged `sales-critical=true`.
 - "Reopened" requires a session gap of ≥1 hour (configurable) to distinguish a continuation from a reload.
 - Notifications are templated with viewer-context (name, company, prior touchpoints) drawn from the `viewer` + `crm_sync_record` join.
 
 **Edge Cases:**
+
 - **Bot sessions:** Always excluded.
 - **Self-views by the deck owner:** Excluded by default; toggleable for debugging.
 - **Recipient channel outage:** Fallback to email with exponential backoff; surface failure in the audit log.
@@ -131,6 +143,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Split traffic between two deck variants (A/B) or multiple variants (A/B/n) and measure engagement lift on predefined primary metrics.
 
 **Acceptance Criteria:**
+
 - **AC-173.1** An owner can mark a deck as an `ab_test` with 2–n variants, each with a traffic split summing to 100%.
 - **AC-173.2** Variants are real decks (linked via `ab_variant_deck_id`) or branches (#19); assignment is sticky per `viewer_id_key`.
 - **AC-173.3** The owner selects a **primary metric** (e.g., completion %, time on pricing slide, CTA clicks) and up to 5 secondary metrics.
@@ -139,12 +152,14 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-173.6** A/B assignments are exposed via an endpoint so external tools (websites, emails) can deterministically assign viewers to variants.
 
 **Behavioral Details:**
+
 - Assignment uses a **deterministic hash** of `viewer_id_key + experiment_id` so the same viewer always sees the same variant — even across devices, browsers, and sessions.
 - The A/B framework (§4.7) separates `assignment` (control plane, OLTP) from `measurement` (analytics plane, OLAP).
 - Minimum sample size guidance is shown in the UI before launch (e.g., "you'll need ~1,200 sessions per variant to detect a 5 pp lift at 80% power").
 - Mid-test peeking is allowed but flagged as "exploratory" until the configured test horizon is reached.
 
 **Edge Cases:**
+
 - **Unbalanced traffic:** If a variant receives <10% of planned traffic after 24 h, a warning is shown.
 - **Crossover effects:** If a viewer was previously assigned to a different experiment, the framework respects the older assignment (unless explicitly overridden).
 - **Premature stopping:** Stopping a test early logs the decision reason and marks the result as "inconclusive" rather than "winner."
@@ -157,6 +172,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Workspace-level analytics showing which templates, components, and themes drive the most engagement across the org, with the goal of identifying what to invest in.
 
 **Acceptance Criteria:**
+
 - **AC-174.1** The team analytics dashboard ranks templates and components by composite engagement score = weighted sum of (uses, views generated, completion %, conversion events).
 - **AC-174.2** Filters: time window, brand, audience tier, deck category (pitch, board report, training).
 - **AC-174.3** A "library health" section flags underused but high-engagement templates (signal to promote) and overused but low-engagement templates (signal to retire).
@@ -164,11 +180,13 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-174.5** Drill-down per template shows which decks use it and their median metrics vs. workspace average.
 
 **Behavioral Details:**
+
 - Computed nightly as a `materialized_view` over the deck_metric rollup; materialized for query performance.
 - Each `deck_metric` row records the template_id(s) and component_id(s) used; engagement is denormalized for fast aggregation.
 - A "trending" badge is awarded to templates with engagement growth >2× the workspace median over 30 days.
 
 **Edge Cases:**
+
 - **New templates:** Templates <14 days old are shown in a separate "incubating" section to avoid drowning them in low-traffic noise.
 - **Single-use templates:** Excluded from rankings (need ≥5 distinct decks for statistical relevance).
 - **Cross-workspace sharing:** If a template is shared from another workspace, attribution goes to the source workspace (per #186 provenance rules).
@@ -180,6 +198,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Real-time and post-session metrics for live presentations: attendance, poll participation, question volume, drop-off, side-channel activity (Q&A, reactions).
 
 **Acceptance Criteria:**
+
 - **AC-175.1** When a presenter starts presenter mode (#126), a `live_session` is opened with `session_kind=live`.
 - **AC-175.2** Attendance (unique viewers via QR/join link) is updated every 5 s in the presenter's HUD and every 30 s on the public dashboard.
 - **AC-175.3** Poll participation is broken down by poll: participants, response rate, time-to-first-vote, drop-off after a poll.
@@ -188,11 +207,13 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-175.6** After the session ends, a `live_session_summary` is generated within 5 min with engagement scores and replay links.
 
 **Behavioral Details:**
+
 - Live session events flow through the same ingestion pipeline (§4.1) with a `realtime=true` flag for low-latency fan-out to the presenter's HUD via WebSocket.
 - The post-session summary joins live session events with the deck's normal metrics for a unified view (avoid double-counting viewers present in both live and replay modes).
 - Question volume tracks **distinct viewers** asking, not raw count, to discourage one viewer gaming the metric.
 
 **Edge Cases:**
+
 - **Hybrid attendance (in-room + remote):** In-room attendance is recorded via QR check-in or presenter mark; merged with remote attendance for the live count.
 - **Late joins:** Counted from the slide they joined on; retroactive completion rate is computed on a per-viewer basis.
 - **Drop-off during Q&A:** Treated as a neutral signal (not a negative engagement mark) unless the viewer also had low live dwell.
@@ -204,6 +225,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Write viewer engagement events back to the CRM contact timeline so AEs and CSMs see deck activity alongside email/call history.
 
 **Acceptance Criteria:**
+
 - **AC-176.1** When a viewer is identified via CRM ID (matched email hash), engagement events are pushed to the corresponding `Contact` timeline via the CRM's official API.
 - **AC-176.2** Events are batched and debounced (default: 5-min flush, or immediately on "high-signal" events like pricing-slide revisit).
 - **AC-176.3** A mapping table controls which Domio event types map to which CRM activity types (e.g., `view` → `Email opened`, `pricing_slide_revisit` → `Web activity`).
@@ -212,11 +234,13 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-176.6** Field-level PII is configurable: the sync payload can exclude email, name, or company per CRM config.
 
 **Behavioral Details:**
+
 - The **CRM sync adapter** (§4.8) is a per-provider module (Salesforce, HubSpot, Pipedrive, Dynamics) implementing a common `push(events)`, `pull(contact_id)`, `health()` interface.
 - Each CRM has rate limits; the adapter maintains a token bucket and queues accordingly.
 - Sync is logged in `crm_sync_record` for auditability (#196), including raw event payloads for 30 days (then purged per retention policy).
 
 **Edge Cases:**
+
 - **CRM outage:** Events are queued up to 24 h; beyond that, they're archived locally and a reconciliation job re-attempts on recovery.
 - **Email mismatch:** If the viewer's email doesn't match any CRM contact, the event is held in an "unmatched" bucket for manual review.
 - **GDPR erasure request:** If a CRM contact is deleted due to a data subject request, the related Domio viewer records are anonymized and CRM sync is severed (see §7.3).
@@ -229,6 +253,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Render a sales funnel — `sent → opened → completed → replied` — with breakdowns by viewer, segment, and time period.
 
 **Acceptance Criteria:**
+
 - **AC-177.1** Funnel stages are computed deterministically: `sent` (link generated/sent), `opened` (first session with ≥1 slide dwell), `completed` (≥80% slides viewed OR final slide viewed), `replied` (reply recorded via email reply tracking or manual mark).
 - **AC-177.2** Each stage shows count, conversion rate (from previous), and drop-off count.
 - **AC-177.3** Funnel is segmentable by viewer tier, campaign tag, time sent, deck variant, A/B test assignment.
@@ -236,11 +261,13 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-177.5** Funnel is exportable as CSV and shareable as a read-only snapshot URL.
 
 **Behavioral Details:**
+
 - The **funnel computation** runs as a streaming aggregation on the event stream, materialized into `funnel_step` rows per deck × time window × segment.
 - A deck owner can override the completion threshold per deck (default 80%) for non-linear decks where the last slide isn't always the goal.
 - "Replied" requires email reply tracking integration (per workspace) or a manual flag; if neither, the stage is greyed out.
 
 **Edge Cases:**
+
 - **Anonymous viewers:** Counted in `opened` and `completed` but not in `replied` (since reply requires identity).
 - **Multi-deck sequences:** Funnels can be chained across decks in a campaign (#190) — the funnel becomes `sent → deck1_opened → deck1_completed → deck2_opened → ...`.
 - **Reply attribution:** If a viewer replies but to a different email thread, attribution is by domain match + fuzzy name match; unmatched replies are flagged for review.
@@ -253,6 +280,7 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 **Scope:** Compare a deck's metrics against the distribution of similar decks ("decks like yours average 62% completion — yours is at 78%").
 
 **Acceptance Criteria:**
+
 - **AC-178.1** Benchmarks are computed across the cohort of "similar decks" — same category (pitch, QBR, training), same audience tier (investor, internal, customer), same duration (slide count bucket).
 - **AC-178.2** Each benchmark metric shows: your value, cohort median (p50), 25th percentile, 75th percentile, and your percentile rank.
 - **AC-178.3** Benchmarks are updated daily and have a 7-day freshness window; stale benchmarks are flagged.
@@ -260,11 +288,13 @@ Each feature decomposes into **acceptance criteria**, **behavioral details**, an
 - **AC-178.5** Org-internal benchmarks can be computed for paid tiers: "your team's decks vs. all decks in your workspace" without exposing to the global pool.
 
 **Behavioral Details:**
+
 - The **benchmark service** (§4.9) computes percentile distributions nightly and stores them as `benchmark_snapshot` rows.
 - The cohort definition is parameterized: `category`, `audience_tier`, `slide_count_bucket`, `duration_bucket`, and optional `industry` (if available).
 - For privacy, only decks with ≥10 sessions contribute to a cohort; a deck with <10 sessions is excluded from benchmarks but can still query benchmarks.
 
 **Edge Cases:**
+
 - **Cold-start categories:** New categories (<30 eligible decks) display "insufficient data" rather than misleading percentiles.
 - **Outliers:** A deck with >3× the cohort's p99 is excluded from the cohort's percentile calculation (otherwise the benchmark becomes self-referential).
 - **Time-of-day effects:** Benchmarks can be sliced by weekday/hour for sensitive comparisons (e.g., "investor pitch decks sent on Friday have 12% lower completion").
@@ -365,17 +395,20 @@ Deck owner → Deck analytics → "Benchmark" panel
 ### 3.1 Per-Viewer Identification (with Privacy Modes)
 
 **Identification modes** (configured per workspace, per deck, or per share link):
+
 1. **Full identification:** Viewer email + CRM ID + name captured; per-viewer history retained.
 2. **Pseudonymous:** Email hashed (HMAC-SHA256 with workspace salt); CRM ID stored as token; reversibility only with workspace admin key.
 3. **Anonymous with consent:** No identity captured; per-session pseudonymous ID rotates every 30 days.
 4. **Anonymous no-track:** Aggregate only; per-viewer records are not created.
 
 **Identification signals:**
+
 - Email match (from share link, SSO, or CRM reverse-lookup).
 - IP + UA fingerprint (best-effort, fallback).
 - Share-link token (always created for every shared link).
 
 **Privacy mode selection:**
+
 - Per-workspace default in settings.
 - Per-deck override.
 - Per-share-link override (the link can declare a stricter mode than the deck default).
@@ -427,12 +460,12 @@ Deck owner → Deck analytics → "Benchmark" panel
 
 ### 3.7 Real-Time vs Batch Analytics Split
 
-| Layer | Latency target | Use cases |
-|---|---|---|
-| **Real-time stream** | p95 < 5 s end-to-end | Presenter HUD live attendance, sales notifications, drop-off alerts |
-| **Near-real-time batch** | p95 < 60 s | Per-viewer session detail, dashboard refresh |
-| **Hourly batch** | p95 < 5 min | Funnel rollups, per-deck aggregates |
-| **Daily batch** | by 04:00 UTC | Benchmarks, team analytics, A/B test analysis |
+| Layer                    | Latency target       | Use cases                                                           |
+| ------------------------ | -------------------- | ------------------------------------------------------------------- |
+| **Real-time stream**     | p95 < 5 s end-to-end | Presenter HUD live attendance, sales notifications, drop-off alerts |
+| **Near-real-time batch** | p95 < 60 s           | Per-viewer session detail, dashboard refresh                        |
+| **Hourly batch**         | p95 < 5 min          | Funnel rollups, per-deck aggregates                                 |
+| **Daily batch**          | by 04:00 UTC         | Benchmarks, team analytics, A/B test analysis                       |
 
 ---
 
@@ -841,7 +874,11 @@ Response 401: signature invalid.
 type Query {
   deckAnalytics(deckId: ID!, range: DateRange!): DeckAnalytics!
   viewerEngagement(viewerId: ID!, deckId: ID): ViewerEngagement!
-  slideBreakdown(deckId: ID!, slideIndex: Int!, range: DateRange!): SlideBreakdown!
+  slideBreakdown(
+    deckId: ID!
+    slideIndex: Int!
+    range: DateRange!
+  ): SlideBreakdown!
   funnel(deckId: ID!, segments: [SegmentFilter!]): Funnel!
   heatmap(deckId: ID!, segmentation: SegmentFilter): Heatmap!
   benchmarks(deckId: ID!, cohort: CohortSpec): [Benchmark!]!
@@ -948,14 +985,14 @@ Response 200: { "handled": true }
 
 ### 7.5 Retention Policy
 
-| Data class | Hot retention | Cold retention | After |
-|---|---|---|---|
-| Raw events | 13 months (columnar) | 7 years (Parquet, object storage) | Purged |
-| Session metadata | 13 months | n/a | Purged |
-| Aggregated deck/slide metrics | 5 years (Postgres + columnar) | n/a | Anonymized |
-| CRM sync records | 13 months | n/a | Purged |
-| Audit logs | 13 months online | 7 years cold | n/a |
-| Anonymized viewer rows | Permanent tombstone | n/a | n/a |
+| Data class                    | Hot retention                 | Cold retention                    | After      |
+| ----------------------------- | ----------------------------- | --------------------------------- | ---------- |
+| Raw events                    | 13 months (columnar)          | 7 years (Parquet, object storage) | Purged     |
+| Session metadata              | 13 months                     | n/a                               | Purged     |
+| Aggregated deck/slide metrics | 5 years (Postgres + columnar) | n/a                               | Anonymized |
+| CRM sync records              | 13 months                     | n/a                               | Purged     |
+| Audit logs                    | 13 months online              | 7 years cold                      | n/a        |
+| Anonymized viewer rows        | Permanent tombstone           | n/a                               | n/a        |
 
 ### 7.6 Viewer Opt-Out
 
@@ -1032,17 +1069,17 @@ The analytics pipeline must be **deterministic** for a given event log. Testing 
 
 ## 10. Cross-Section Ties
 
-| Source feature | Tie-in |
-|---|---|
-| **#1 (Editor & canvas)** | Analytics is enabled by default for shared decks; the editor exposes an "Analytics preview" panel for owners to see their own viewing behavior. (#1) |
-| **#4 (Live data interactions)** | Scenario toggles (#57), ROI calculators (#102), and what-if sliders (#53) emit `interaction` events; chart drill-downs (#52) emit `drilldown` events with the filter context. (#4) |
-| **#7 (Prototyping)** | Branching choices (#97), form inputs (#101), device-frame interactions (#103), prototype user-testing (#104), and mini-games (#105) all contribute to interactive element analytics (#170) and funnel steps (#177). |
-| **#8 (AI meeting listener)** | When the listener (#214) surfaces an appendix slide during a live Q&A, the audience's dwell on that slide is attributed to the listener trigger — a new event type `listener_surfaced` with `trigger_question_id`. (#8) |
-| **#9 (Presenter mode)** | Live session analytics (#175) and presenter rehearsal metrics (#117, #131) share a presenter analytics dashboard; post-presentation recap (#141) is the per-session view of #175. |
-| **#10 (Audience participation)** | Polls (#143), Q&A (#145), quizzes (#146), emoji reactions (#147), audience navigation votes (#148), sentiment sliders (#149), raise-hand (#150), and post-session feedback (#154) feed into both live and aggregate analytics. |
-| **#11 (Share links)** | Per-link content control (#159), expiring links (#158), per-viewer watermarking (#158), and custom domains (#160) all carry their own share-link identity; analytics respects the strictest privacy mode among the link's overrides. |
-| **#14 (Enterprise governance)** | Audit logs (#196) include every analytics access and export; brand governance (#194) uses engagement signals to compute on-brand score; data residency (#197) is enforced at the ingestion POP level. |
-| **#16 (Agentic / MCP)** | The MCP server (#221) exposes analytics tools: `get_deck_analytics(deck_id, range)`, `get_viewer_engagement(viewer_id)`, `list_ab_tests()`, `get_benchmark(deck_id)`, `query_funnel(deck_id, segments)`. Tool-call transcripts (#227) record analytics queries as agent actions. Cross-deck semantic search (#124/#292) extends to "find all decks where viewer X spent >2 min on slide Y." Cross-deck knowledge graph (#219) is queryable via the benchmark service. |
+| Source feature                   | Tie-in                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **#1 (Editor & canvas)**         | Analytics is enabled by default for shared decks; the editor exposes an "Analytics preview" panel for owners to see their own viewing behavior. (#1)                                                                                                                                                                                                                                                                                                                  |
+| **#4 (Live data interactions)**  | Scenario toggles (#57), ROI calculators (#102), and what-if sliders (#53) emit `interaction` events; chart drill-downs (#52) emit `drilldown` events with the filter context. (#4)                                                                                                                                                                                                                                                                                    |
+| **#7 (Prototyping)**             | Branching choices (#97), form inputs (#101), device-frame interactions (#103), prototype user-testing (#104), and mini-games (#105) all contribute to interactive element analytics (#170) and funnel steps (#177).                                                                                                                                                                                                                                                   |
+| **#8 (AI meeting listener)**     | When the listener (#214) surfaces an appendix slide during a live Q&A, the audience's dwell on that slide is attributed to the listener trigger — a new event type `listener_surfaced` with `trigger_question_id`. (#8)                                                                                                                                                                                                                                               |
+| **#9 (Presenter mode)**          | Live session analytics (#175) and presenter rehearsal metrics (#117, #131) share a presenter analytics dashboard; post-presentation recap (#141) is the per-session view of #175.                                                                                                                                                                                                                                                                                     |
+| **#10 (Audience participation)** | Polls (#143), Q&A (#145), quizzes (#146), emoji reactions (#147), audience navigation votes (#148), sentiment sliders (#149), raise-hand (#150), and post-session feedback (#154) feed into both live and aggregate analytics.                                                                                                                                                                                                                                        |
+| **#11 (Share links)**            | Per-link content control (#159), expiring links (#158), per-viewer watermarking (#158), and custom domains (#160) all carry their own share-link identity; analytics respects the strictest privacy mode among the link's overrides.                                                                                                                                                                                                                                  |
+| **#14 (Enterprise governance)**  | Audit logs (#196) include every analytics access and export; brand governance (#194) uses engagement signals to compute on-brand score; data residency (#197) is enforced at the ingestion POP level.                                                                                                                                                                                                                                                                 |
+| **#16 (Agentic / MCP)**          | The MCP server (#221) exposes analytics tools: `get_deck_analytics(deck_id, range)`, `get_viewer_engagement(viewer_id)`, `list_ab_tests()`, `get_benchmark(deck_id)`, `query_funnel(deck_id, segments)`. Tool-call transcripts (#227) record analytics queries as agent actions. Cross-deck semantic search (#124/#292) extends to "find all decks where viewer X spent >2 min on slide Y." Cross-deck knowledge graph (#219) is queryable via the benchmark service. |
 
 ---
 

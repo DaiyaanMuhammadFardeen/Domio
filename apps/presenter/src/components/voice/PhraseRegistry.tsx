@@ -71,9 +71,7 @@ export function PhraseRegistry({
   }, []);
 
   const updateRow = useCallback((id: string, patch: Partial<VoicePhrase>) => {
-    setRows((current) =>
-      current.map((row) => (row.id === id ? { ...row, ...patch } : row)),
-    );
+    setRows((current) => current.map((row) => (row.id === id ? { ...row, ...patch } : row)));
   }, []);
 
   const addRow = useCallback(() => {
@@ -177,7 +175,14 @@ export function PhraseRegistry({
           fontSize: 12,
         }}
       >
-        <div role="row" style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', padding: '4px 0' }}>
+        <div
+          role="row"
+          style={{
+            display: 'flex',
+            borderBottom: '1px solid var(--border-subtle)',
+            padding: '4px 0',
+          }}
+        >
           {columns.map((c) => (
             <div
               role="columnheader"
@@ -206,7 +211,12 @@ export function PhraseRegistry({
               key={rowKey}
               data-testid={`${dataTestId}-row`}
               data-row-key={rowKey}
-              style={{ display: 'flex', alignItems: 'center', padding: '4px 0', borderBottom: '1px dashed var(--border-subtle)' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px 0',
+                borderBottom: '1px dashed var(--border-subtle)',
+              }}
             >
               <input
                 type="text"

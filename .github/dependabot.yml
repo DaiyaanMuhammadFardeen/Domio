@@ -33,75 +33,75 @@ registries:
     password: ${{ secrets.DEPENDABOT_DOCKER_TOKEN }}
 
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    registries: ["npm-bd"]
+  - package-ecosystem: 'npm'
+    directory: '/'
+    registries: ['npm-bd']
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "07:00"
-      timezone: "Asia/Dhaka"
+      interval: 'weekly'
+      day: 'monday'
+      time: '07:00'
+      timezone: 'Asia/Dhaka'
     open-pull-requests-limit: 10
     groups:
       minor-and-patch:
-        patterns: ["*"]
-        update-types: ["minor", "patch"]
+        patterns: ['*']
+        update-types: ['minor', 'patch']
     ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
     labels:
-      - "deps"
-      - "npm"
+      - 'deps'
+      - 'npm'
 
-  - package-ecosystem: "gomod"
-    directory: "/"
+  - package-ecosystem: 'gomod'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "tuesday"
-      time: "07:00"
-      timezone: "Asia/Dhaka"
+      interval: 'weekly'
+      day: 'tuesday'
+      time: '07:00'
+      timezone: 'Asia/Dhaka'
     open-pull-requests-limit: 10
     labels:
-      - "deps"
-      - "go"
+      - 'deps'
+      - 'go'
 
-  - package-ecosystem: "pip"
-    directory: "/"
-    registries: ["pypi-bd"]
+  - package-ecosystem: 'pip'
+    directory: '/'
+    registries: ['pypi-bd']
     schedule:
-      interval: "weekly"
-      day: "wednesday"
-      time: "07:00"
-      timezone: "Asia/Dhaka"
+      interval: 'weekly'
+      day: 'wednesday'
+      time: '07:00'
+      timezone: 'Asia/Dhaka'
     open-pull-requests-limit: 10
     labels:
-      - "deps"
-      - "python"
+      - 'deps'
+      - 'python'
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "thursday"
-      time: "07:00"
-      timezone: "Asia/Dhaka"
+      interval: 'weekly'
+      day: 'thursday'
+      time: '07:00'
+      timezone: 'Asia/Dhaka'
     open-pull-requests-limit: 20
     groups:
       github-actions:
-        patterns: ["*"]
+        patterns: ['*']
     labels:
-      - "deps"
-      - "github-actions"
+      - 'deps'
+      - 'github-actions'
 
-  - package-ecosystem: "docker"
-    directory: "/"
-    registries: ["docker-bd"]
+  - package-ecosystem: 'docker'
+    directory: '/'
+    registries: ['docker-bd']
     schedule:
-      interval: "weekly"
-      day: "friday"
-      time: "07:00"
-      timezone: "Asia/Dhaka"
+      interval: 'weekly'
+      day: 'friday'
+      time: '07:00'
+      timezone: 'Asia/Dhaka'
     open-pull-requests-limit: 10
     labels:
-      - "deps"
-      - "docker"
+      - 'deps'
+      - 'docker'

@@ -268,11 +268,7 @@ const suggestPaletteTool: BrandTool = {
 // Public registry
 // ---------------------------------------------------------------------------
 
-export const brandTools: readonly BrandTool[] = [
-  applyThemeTool,
-  auditA11yTool,
-  suggestPaletteTool,
-];
+export const brandTools: readonly BrandTool[] = [applyThemeTool, auditA11yTool, suggestPaletteTool];
 
 export function findBrandTool(name: string): BrandTool | undefined {
   return brandTools.find((t) => t.name === name);

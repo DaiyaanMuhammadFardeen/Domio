@@ -83,9 +83,7 @@ export function tokenize(normalized: string): string[] {
     // Bengali mark characters (virama + vowel signs) are not matched
     // by \p{L} alone — treat any code point in the Bengali block as
     // part of the current token.
-    const isBengaliMark =
-      (code >= 0x0980 && code <= 0x09ff) ||
-      (code >= 0x0900 && code <= 0x097f);
+    const isBengaliMark = (code >= 0x0980 && code <= 0x09ff) || (code >= 0x0900 && code <= 0x097f);
     if (/\p{L}|\p{N}/u.test(ch) || isBengaliMark) {
       buf += ch;
     } else if (buf) {
@@ -103,7 +101,5 @@ export function bucketKey(normalized: string): string {
   if (!normalized) return '';
   const tokens = tokenize(normalized);
   if (tokens.length === 0) return '';
-  return tokens
-    .map((t) => (t.length === 0 ? '' : t.charAt(0).toUpperCase() + t.slice(1)))
-    .join('');
+  return tokens.map((t) => (t.length === 0 ? '' : t.charAt(0).toUpperCase() + t.slice(1))).join('');
 }

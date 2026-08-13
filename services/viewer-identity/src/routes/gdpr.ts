@@ -32,22 +32,23 @@ export function gdprRoutes(deps: RouteDeps): Hono {
   const app = new Hono();
 
   app.post('/v1/viewers', async (c) => {
-    const body = (await c.req.json().catch(() => null)) as
-      | {
-          workspace_id?: unknown;
-          raw_identifier?: unknown;
-          privacy_mode?: unknown;
-          region_pinned?: unknown;
-          ip?: unknown;
-          user_agent?: unknown;
-          email_hash?: unknown;
-        }
-      | null;
+    const body = (await c.req.json().catch(() => null)) as {
+      workspace_id?: unknown;
+      raw_identifier?: unknown;
+      privacy_mode?: unknown;
+      region_pinned?: unknown;
+      ip?: unknown;
+      user_agent?: unknown;
+      email_hash?: unknown;
+    } | null;
     if (!body || typeof body.workspace_id !== 'string' || typeof body.raw_identifier !== 'string') {
-      return c.json({ error: { code: 'bad_request', message: 'workspace_id and raw_identifier required' } }, 400);
+      return c.json(
+        { error: { code: 'bad_request', message: 'workspace_id and raw_identifier required' } },
+        400,
+      );
     }
     if (typeof body.privacy_mode !== 'string') {
-      return c.json({ error: { code: 'bad_request', message: 'privacy_mode required' } } , 400);
+      return c.json({ error: { code: 'bad_request', message: 'privacy_mode required' } }, 400);
     }
     const mode = body.privacy_mode as PrivacyMode;
     const decision = evaluateMode(mode, deps.acceptedModes(body.workspace_id));
@@ -62,7 +63,11 @@ export function gdprRoutes(deps: RouteDeps): Hono {
     const ipClassOrNull = ipClass === 'unknown' ? null : ipClass;
     const regionInput = typeof body.region_pinned === 'string' ? body.region_pinned : null;
     const region: Region | null =
-      regionInput === 'us' || regionInput === 'eu' || regionInput === 'bd' || regionInput === 'sg' || regionInput === 'au'
+      regionInput === 'us' ||
+      regionInput === 'eu' ||
+      regionInput === 'bd' ||
+      regionInput === 'sg' ||
+      regionInput === 'au'
         ? regionInput
         : null;
     const updated = await deps.store.upsertViewer({
@@ -85,7 +90,11 @@ export function gdprRoutes(deps: RouteDeps): Hono {
     // written to the store regardless.
     const workspaceId: string = body.workspace_id;
     void (async () => {
-      const candidates = await deps.store.recentViewers(workspaceId, now - 7 * 24 * 3600 * 1000, 200);
+      const candidates = await deps.store.recentViewers(
+        workspaceId,
+        now - 7 * 24 * 3600 * 1000,
+        200,
+      );
       const out = stitchViewer({
         workspace_id: workspaceId,
         viewer: updated,
@@ -106,11 +115,24 @@ export function gdprRoutes(deps: RouteDeps): Hono {
 
   app.post('/v1/viewers/:id/consent', async (c) => {
     const id = c.req.param('id');
-    const body = (await c.req.json().catch(() => null)) as
-      | { workspace_id?: unknown; privacy_mode?: unknown; action?: unknown; source?: unknown; user_agent?: unknown; ip?: unknown }
-      | null;
-    if (!body || typeof body.workspace_id !== 'string' || typeof body.privacy_mode !== 'string' || typeof body.action !== 'string') {
-      return c.json({ error: { code: 'bad_request', message: 'workspace_id, privacy_mode, action required' } }, 400);
+    const body = (await c.req.json().catch(() => null)) as {
+      workspace_id?: unknown;
+      privacy_mode?: unknown;
+      action?: unknown;
+      source?: unknown;
+      user_agent?: unknown;
+      ip?: unknown;
+    } | null;
+    if (
+      !body ||
+      typeof body.workspace_id !== 'string' ||
+      typeof body.privacy_mode !== 'string' ||
+      typeof body.action !== 'string'
+    ) {
+      return c.json(
+        { error: { code: 'bad_request', message: 'workspace_id, privacy_mode, action required' } },
+        400,
+      );
     }
     const viewer = await deps.store.getViewerById(id);
     if (!viewer || viewer.workspace_id !== body.workspace_id) {
@@ -135,7 +157,10 @@ export function gdprRoutes(deps: RouteDeps): Hono {
     const id = c.req.param('id');
     const workspaceId = c.req.query('workspace_id');
     if (!workspaceId) {
-      return c.json({ error: { code: 'bad_request', message: 'workspace_id query required' } }, 400);
+      return c.json(
+        { error: { code: 'bad_request', message: 'workspace_id query required' } },
+        400,
+      );
     }
     const viewer = await deps.store.getViewerById(id);
     if (!viewer || viewer.workspace_id !== workspaceId) {
@@ -148,7 +173,10 @@ export function gdprRoutes(deps: RouteDeps): Hono {
     const id = c.req.param('id');
     const workspaceId = c.req.query('workspace_id');
     if (!workspaceId) {
-      return c.json({ error: { code: 'bad_request', message: 'workspace_id query required' } }, 400);
+      return c.json(
+        { error: { code: 'bad_request', message: 'workspace_id query required' } },
+        400,
+      );
     }
     try {
       const out = await eraseViewer(deps.store, workspaceId, id);
@@ -165,7 +193,10 @@ export function gdprRoutes(deps: RouteDeps): Hono {
     const id = c.req.param('id');
     const workspaceId = c.req.query('workspace_id');
     if (!workspaceId) {
-      return c.json({ error: { code: 'bad_request', message: 'workspace_id query required' } }, 400);
+      return c.json(
+        { error: { code: 'bad_request', message: 'workspace_id query required' } },
+        400,
+      );
     }
     try {
       const lines = await exportViewer(deps.store, workspaceId, id);
@@ -187,7 +218,10 @@ export function gdprRoutes(deps: RouteDeps): Hono {
     const workspaceId = c.req.query('workspace_id');
     const source = c.req.query('source') ?? 'api';
     if (!workspaceId) {
-      return c.json({ error: { code: 'bad_request', message: 'workspace_id query required' } }, 400);
+      return c.json(
+        { error: { code: 'bad_request', message: 'workspace_id query required' } },
+        400,
+      );
     }
     try {
       const out = await objectToTracking(deps.store, workspaceId, id, source);
@@ -207,16 +241,26 @@ export function gdprRoutes(deps: RouteDeps): Hono {
   });
 
   app.post('/v1/identity-links', async (c) => {
-    const body = (await c.req.json().catch(() => null)) as
-      | { workspace_id?: unknown; canonical_id?: unknown; alternate_id?: unknown }
-      | null;
+    const body = (await c.req.json().catch(() => null)) as {
+      workspace_id?: unknown;
+      canonical_id?: unknown;
+      alternate_id?: unknown;
+    } | null;
     if (
       !body ||
       typeof body.workspace_id !== 'string' ||
       typeof body.canonical_id !== 'string' ||
       typeof body.alternate_id !== 'string'
     ) {
-      return c.json({ error: { code: 'bad_request', message: 'workspace_id, canonical_id, alternate_id required' } }, 400);
+      return c.json(
+        {
+          error: {
+            code: 'bad_request',
+            message: 'workspace_id, canonical_id, alternate_id required',
+          },
+        },
+        400,
+      );
     }
     const link = await deps.store.insertLink({
       link_id: '',

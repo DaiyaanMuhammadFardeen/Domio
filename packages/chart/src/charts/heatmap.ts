@@ -42,27 +42,33 @@ export function renderHeatmap(
 
   // Column labels
   xLabels.forEach((label, i) => {
-    elements.push(text(padL + i * cellW + cellW / 2 - 20, H - padB + 16, label, `col_${i}`, {
-      width: 40,
-      height: 14,
-      fontSize: (opts.fontSize ?? 11) - 1,
-      fill: theme === 'dark' ? '#94a3b8' : '#64748b',
-      textAnchor: 'middle',
-    }));
+    elements.push(
+      text(padL + i * cellW + cellW / 2 - 20, H - padB + 16, label, `col_${i}`, {
+        width: 40,
+        height: 14,
+        fontSize: (opts.fontSize ?? 11) - 1,
+        fill: theme === 'dark' ? '#94a3b8' : '#64748b',
+        textAnchor: 'middle',
+      }),
+    );
   });
 
   // Row labels + cells
   yLabels.forEach((yLabel, yi) => {
-    elements.push(text(4, padT + yi * cellH + cellH / 2 - 6, yLabel, `row_${yi}`, {
-      width: padL - 8,
-      height: 14,
-      fontSize: (opts.fontSize ?? 11) - 1,
-      fill: theme === 'dark' ? '#94a3b8' : '#64748b',
-    }));
+    elements.push(
+      text(4, padT + yi * cellH + cellH / 2 - 6, yLabel, `row_${yi}`, {
+        width: padL - 8,
+        height: 14,
+        fontSize: (opts.fontSize ?? 11) - 1,
+        fill: theme === 'dark' ? '#94a3b8' : '#64748b',
+      }),
+    );
 
     xLabels.forEach((xLabel, xi) => {
       const row = dataset.rows.find(
-        (r) => String(r[xBinding.column] ?? '') === xLabel && String(r[yBinding.column] ?? '') === yLabel,
+        (r) =>
+          String(r[xBinding.column] ?? '') === xLabel &&
+          String(r[yBinding.column] ?? '') === yLabel,
       );
       const v = row ? Number(row[valueBinding.column]) : 0;
       const norm = maxVal === minVal ? 0.5 : (v - minVal) / (maxVal - minVal);
@@ -73,10 +79,12 @@ export function renderHeatmap(
       const b = Math.round(246 - norm * 200);
       const color = `rgb(${r},${g},${b})`;
 
-      elements.push(rect(padL + xi * cellW, padT + yi * cellH, cellW - 2, cellH - 2, `cell_${yi}_${xi}`, {
-        fill: color,
-        rx: 2,
-      }));
+      elements.push(
+        rect(padL + xi * cellW, padT + yi * cellH, cellW - 2, cellH - 2, `cell_${yi}_${xi}`, {
+          fill: color,
+          rx: 2,
+        }),
+      );
     });
   });
 

@@ -21,12 +21,7 @@ export type RoleLocation = 'remote' | 'sf' | 'nyc' | 'berlin' | 'singapore';
 
 export type EmploymentType = 'full_time' | 'contract' | 'intern';
 
-export type RoleLevel =
-  | 'junior'
-  | 'mid'
-  | 'senior'
-  | 'staff'
-  | 'principal';
+export type RoleLevel = 'junior' | 'mid' | 'senior' | 'staff' | 'principal';
 
 export interface Role {
   readonly id: string;

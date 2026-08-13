@@ -24,28 +24,28 @@
 
 ### 2.1 In scope (features)
 
-| Feature | Title | Notes |
-|---:|---|---|
-| #221 | MCP server (first-class) | stdio + streaming-HTTP, SSE, capability negotiation |
-| #222 | Full MCP tool surface | Granular, one tool per subsystem; idempotent |
-| #223 | Structured deck schema (JSON / YAML / Protobuf) | Canonical contract; round-trip stable |
-| #224 | Deck-as-code mode | YAML, two-way sync with canvas, git-friendly |
-| #225 | Agent-scoped permissions | Deny-by-default, composable scopes, per-deck |
-| #226 | Semantic element addressing | Stable across reorders, renames log |
-| #227 | Tool-call transcript / agent audit trail | Hash-chained, agent-vs-human distinguished |
-| #228 | Dry-run / preview mode | Atomic patches with TTL |
-| #229 | Webhooks → agent triggers | Signed payloads, idempotent dispatch |
-| #230 | Agent-to-agent handoff pipeline | First-class `agent_pipeline_run` object |
-| #231 | `deckctl` CLI | Go binary; JSON by default; stable exit codes |
-| #232 | Local-first / offline SDK | Embeddable, deterministic renderer |
-| #233 | Function-calling-ready component props | JSON Schema 2020-12 per component |
-| #234 | NL patch API | Dry-run by default; prompt-injection defended |
-| #235 | Agent-readable deck comprehension endpoint | Structured, multi-depth, PII-redacted |
-| #236 | Capability discovery | `tools/list`, `resources/list`, `prompts/list`, `describe_schema` |
-| #237 | Deck linting for agents | `lint_deck` MCP tool; rule-set versioned |
-| #238 | Confidence / uncertainty surfacing | Per-claim `uncertainty_flag` |
-| #239 | Simulation mode for scenario testing | Deterministic sweeps, streaming |
-| #240 | Deck diffing API for agents | Semantic-address diff; bulk-aware; reverse-applicable |
+| Feature | Title                                           | Notes                                                             |
+| ------: | ----------------------------------------------- | ----------------------------------------------------------------- |
+|    #221 | MCP server (first-class)                        | stdio + streaming-HTTP, SSE, capability negotiation               |
+|    #222 | Full MCP tool surface                           | Granular, one tool per subsystem; idempotent                      |
+|    #223 | Structured deck schema (JSON / YAML / Protobuf) | Canonical contract; round-trip stable                             |
+|    #224 | Deck-as-code mode                               | YAML, two-way sync with canvas, git-friendly                      |
+|    #225 | Agent-scoped permissions                        | Deny-by-default, composable scopes, per-deck                      |
+|    #226 | Semantic element addressing                     | Stable across reorders, renames log                               |
+|    #227 | Tool-call transcript / agent audit trail        | Hash-chained, agent-vs-human distinguished                        |
+|    #228 | Dry-run / preview mode                          | Atomic patches with TTL                                           |
+|    #229 | Webhooks → agent triggers                       | Signed payloads, idempotent dispatch                              |
+|    #230 | Agent-to-agent handoff pipeline                 | First-class `agent_pipeline_run` object                           |
+|    #231 | `deckctl` CLI                                   | Go binary; JSON by default; stable exit codes                     |
+|    #232 | Local-first / offline SDK                       | Embeddable, deterministic renderer                                |
+|    #233 | Function-calling-ready component props          | JSON Schema 2020-12 per component                                 |
+|    #234 | NL patch API                                    | Dry-run by default; prompt-injection defended                     |
+|    #235 | Agent-readable deck comprehension endpoint      | Structured, multi-depth, PII-redacted                             |
+|    #236 | Capability discovery                            | `tools/list`, `resources/list`, `prompts/list`, `describe_schema` |
+|    #237 | Deck linting for agents                         | `lint_deck` MCP tool; rule-set versioned                          |
+|    #238 | Confidence / uncertainty surfacing              | Per-claim `uncertainty_flag`                                      |
+|    #239 | Simulation mode for scenario testing            | Deterministic sweeps, streaming                                   |
+|    #240 | Deck diffing API for agents                     | Semantic-address diff; bulk-aware; reverse-applicable             |
 
 ### 2.2 Out of scope (explicit)
 
@@ -363,23 +363,23 @@
 
 All tables inherit `created_at`, `updated_at`, `created_by`, `updated_by`, `ai_run_id`, `agent_session_id`. Full JSON examples are in `/docs/agentic-interfaces.md` §5.
 
-| Table | Purpose | Migrations file |
-|---|---|---|
-| `mcp_session` | Short-lived agent session with scopes | `migrations/2026_08_mcp_session.sql` |
-| `mcp_tool_call` | One tool invocation, idempotency-keyed | `migrations/2026_08_mcp_tool_call.sql` |
-| `agent_audit_event` | Hash-chained, append-only audit; agent-vs-human | `migrations/2026_08_agent_audit.sql` |
-| `dry_run_patch` | Pending atomic patch with TTL | `migrations/2026_08_dry_run_patch.sql` |
-| `webhook_trigger` | Source-event → agent-workflow mapping | `migrations/2026_08_webhook_trigger.sql` |
-| `agent_pipeline_run` | DAG of handoffs with replayable steps | `migrations/2026_08_agent_pipeline.sql` |
-| `cli_invocation` | CLI call record for audit + telemetry | `migrations/2026_08_cli_invocation.sql` |
-| `semantic_address_registry` | Persistent id ↔ element mapping | `migrations/2026_08_semantic_addr.sql` |
-| `component_prop_schema` | Versioned JSON Schema per component | `migrations/2026_08_component_prop.sql` |
-| `agent_lint_result` | Lint runs with rule-set version + result hash | `migrations/2026_08_agent_lint.sql` |
-| `simulation_run` | Deterministic parameter-sweep records | `migrations/2026_08_simulation.sql` |
-| `deck_diff` | Cached diffs by version pair | `migrations/2026_08_deck_diff.sql` |
-| `local_engine_state` | Per-SDK engine identity for sync | `migrations/2026_08_local_engine.sql` |
-| `uncertainty_flag` | Per-claim confidence + basis | `migrations/2026_08_uncertainty.sql` |
-| `nl_patch_request` | NL patch audit with chain and verdict | `migrations/2026_08_nl_patch.sql` |
+| Table                       | Purpose                                         | Migrations file                          |
+| --------------------------- | ----------------------------------------------- | ---------------------------------------- |
+| `mcp_session`               | Short-lived agent session with scopes           | `migrations/2026_08_mcp_session.sql`     |
+| `mcp_tool_call`             | One tool invocation, idempotency-keyed          | `migrations/2026_08_mcp_tool_call.sql`   |
+| `agent_audit_event`         | Hash-chained, append-only audit; agent-vs-human | `migrations/2026_08_agent_audit.sql`     |
+| `dry_run_patch`             | Pending atomic patch with TTL                   | `migrations/2026_08_dry_run_patch.sql`   |
+| `webhook_trigger`           | Source-event → agent-workflow mapping           | `migrations/2026_08_webhook_trigger.sql` |
+| `agent_pipeline_run`        | DAG of handoffs with replayable steps           | `migrations/2026_08_agent_pipeline.sql`  |
+| `cli_invocation`            | CLI call record for audit + telemetry           | `migrations/2026_08_cli_invocation.sql`  |
+| `semantic_address_registry` | Persistent id ↔ element mapping                | `migrations/2026_08_semantic_addr.sql`   |
+| `component_prop_schema`     | Versioned JSON Schema per component             | `migrations/2026_08_component_prop.sql`  |
+| `agent_lint_result`         | Lint runs with rule-set version + result hash   | `migrations/2026_08_agent_lint.sql`      |
+| `simulation_run`            | Deterministic parameter-sweep records           | `migrations/2026_08_simulation.sql`      |
+| `deck_diff`                 | Cached diffs by version pair                    | `migrations/2026_08_deck_diff.sql`       |
+| `local_engine_state`        | Per-SDK engine identity for sync                | `migrations/2026_08_local_engine.sql`    |
+| `uncertainty_flag`          | Per-claim confidence + basis                    | `migrations/2026_08_uncertainty.sql`     |
+| `nl_patch_request`          | NL patch audit with chain and verdict           | `migrations/2026_08_nl_patch.sql`        |
 
 ### 5.2 New services
 
@@ -424,70 +424,70 @@ All tables inherit `created_at`, `updated_at`, `created_by`, `updated_by`, `ai_r
 
 ## 6. Verification
 
-| Feature | Test | Expected result | Owner |
-|---:|---|---|---|
-| #221 | Run MCP conformance suite in CI | 100% pass | WS-D8 |
-| #221 | Initialize over stdio and streaming-HTTP | Capabilities returned; resources subscribed | WS-D8 |
-| #221 | Resume after server restart | Prior subscriptions re-established; in-flight calls return `request_cancelled` | WS-D8 |
-| #222 | Call `tools/list` and `tools/call edit_element` on a deck | All 20 initial tools reachable; idempotency under retry | WS-D8 |
-| #223 | Round-trip `deck → JSON → deck` on a 50-slide fixture | Byte-identical | WS-D7 |
-| #223 | Round-trip `deck → YAML → deck` on the same fixture | Byte-identical | WS-D7 |
-| #223 | `migrate_deck_schema(target=1.4.0)` on a 1.3.x deck | Migration runs without loss; dry-run-capable | WS-D7 |
-| #224 | Edit a deck in canvas and `deckctl pull` | Pulled YAML reflects the canvas change | WS-D7 |
-| #224 | Edit the YAML and `deckctl push`; canvas is open | Canvas subscribes to schema change and updates | WS-D7 |
-| #224 | Concurrent canvas + YAML edit | CRDT resolves deterministically; resolved state replayable | WS-D7 |
-| #225 | Session with no scopes | All mutating tools return `permission_denied` | WS-D9 |
-| #225 | Session with `deck:{id1}:read` writing to `{id2}` | `permission_denied`; audit records denial | WS-D9 |
-| #225 | Brand-locked write without `brand:lock_aware` | `permission_denied` | WS-D9 |
-| #226 | 100 reorderings of a 100-slide deck | 100% of original semantic addresses still resolve | WS-D10 |
-| #226 | Two elements share a semantic id | `address_ambiguous` with both candidates | WS-D10 |
-| #226 | Late edit within 7 days of deletion | `element_pending_creation` | WS-D10 |
-| #227 | Audit hash chain | Tampering with one event breaks verification on subsequent events | WS-D9 |
-| #227 | Version history shows agent edits distinctly | Different icon/color; agent identity in summary | WS-D9 |
-| #228 | Apply a stale `dry_run_patch` | `patch_stale` with fresh diff | WS-D9 |
-| #228 | Atomic apply of a multi-op patch | Either all ops applied or none | WS-D9 |
-| #229 | Webhook replay within idempotency window | Cached result returned | WS-D9 |
-| #229 | Workflow with `feedback_loop_allowed: false` mutating the source | Dispatcher refuses to invoke | WS-D9 |
-| #230 | Run a 3-step pipeline (research → deck-builder → compliance) | DAG inspector shows all 3 steps with inputs/outputs/intent | WS-D11 |
-| #230 | Replay the pipeline | Same outputs (modulo declared non-determinism) | WS-D11 |
-| #231 | `deckctl --help` exits in ≤ 50ms | Pass | WS-D11 |
-| #231 | Stable exit codes exercised (0, 1, 2, 3, 4, 5, 6) | Each code returns as expected | WS-D11 |
-| #231 | `deckctl lint deck.yaml --format json` on a deck with 5 seeded issues | JSON output with each issue, address, severity | WS-D11 |
-| #232 | Embed SDK in a sandboxed runner with no network | Renders a deck deterministically | WS-D7 |
-| #232 | Same schema + same engine version ⇒ byte-identical PNG/PDF across Linux/macOS/Windows | Pass | WS-D7 |
-| #233 | Update a component prop with a bad type | `validation_failed` with JSON Pointer location | WS-D10 |
-| #234 | `POST /v1/decks/{id}/patch` with an instruction | Returns a `dry_run_patch` + chain; does not apply by default | WS-D11 |
-| #234 | NL patch prompt-injection attempt | Refused; logged | WS-D11 |
-| #234 | Ambiguous instruction | `instruction_ambiguous` with ≥ 2 candidate interpretations | WS-D11 |
-| #235 | `GET /v1/decks/{id}/summary?depth=full` | Per-slide intent, content blocks, bindings, components, animations | WS-D10 |
-| #235 | Comprehension of a deck containing PII | PII redacted; redaction recorded in audit | WS-D10 |
-| #236 | `tools/list` + `resources/list` + `prompts/list` + `describe_schema` in one round-trip | Full surface returned; no external docs required | WS-D8 |
-| #237 | `lint_deck` on a deck with 50 seeded issues | All issues reported; run ≤ 2s for a 50-slide deck | WS-D12 |
-| #237 | Lint with a custom org rule | Result includes the rule source | WS-D12 |
-| #238 | Narrative claim backed by stale data | Confidence auto-degraded; flag visible | WS-D12 |
-| #238 | Human marks a claim as verified | Audit updated; lint no longer flags | WS-D12 |
-| #239 | `simulate` with a 1-parameter 50-sample sweep | Deterministic streamed CSV; ≥ 1,000 samples/s on reference hardware | WS-D12 |
-| #239 | Sweep exceeding bound | `simulation_too_large` with suggested reduction | WS-D12 |
-| #240 | `diff_decks` between two versions | Semantic-address diff; bulk reorder reported as bulk | WS-D12 |
-| #240 | `diff → apply` round-trip | Identity for non-modified decks | WS-D12 |
+| Feature | Test                                                                                   | Expected result                                                                | Owner  |
+| ------: | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------ |
+|    #221 | Run MCP conformance suite in CI                                                        | 100% pass                                                                      | WS-D8  |
+|    #221 | Initialize over stdio and streaming-HTTP                                               | Capabilities returned; resources subscribed                                    | WS-D8  |
+|    #221 | Resume after server restart                                                            | Prior subscriptions re-established; in-flight calls return `request_cancelled` | WS-D8  |
+|    #222 | Call `tools/list` and `tools/call edit_element` on a deck                              | All 20 initial tools reachable; idempotency under retry                        | WS-D8  |
+|    #223 | Round-trip `deck → JSON → deck` on a 50-slide fixture                                  | Byte-identical                                                                 | WS-D7  |
+|    #223 | Round-trip `deck → YAML → deck` on the same fixture                                    | Byte-identical                                                                 | WS-D7  |
+|    #223 | `migrate_deck_schema(target=1.4.0)` on a 1.3.x deck                                    | Migration runs without loss; dry-run-capable                                   | WS-D7  |
+|    #224 | Edit a deck in canvas and `deckctl pull`                                               | Pulled YAML reflects the canvas change                                         | WS-D7  |
+|    #224 | Edit the YAML and `deckctl push`; canvas is open                                       | Canvas subscribes to schema change and updates                                 | WS-D7  |
+|    #224 | Concurrent canvas + YAML edit                                                          | CRDT resolves deterministically; resolved state replayable                     | WS-D7  |
+|    #225 | Session with no scopes                                                                 | All mutating tools return `permission_denied`                                  | WS-D9  |
+|    #225 | Session with `deck:{id1}:read` writing to `{id2}`                                      | `permission_denied`; audit records denial                                      | WS-D9  |
+|    #225 | Brand-locked write without `brand:lock_aware`                                          | `permission_denied`                                                            | WS-D9  |
+|    #226 | 100 reorderings of a 100-slide deck                                                    | 100% of original semantic addresses still resolve                              | WS-D10 |
+|    #226 | Two elements share a semantic id                                                       | `address_ambiguous` with both candidates                                       | WS-D10 |
+|    #226 | Late edit within 7 days of deletion                                                    | `element_pending_creation`                                                     | WS-D10 |
+|    #227 | Audit hash chain                                                                       | Tampering with one event breaks verification on subsequent events              | WS-D9  |
+|    #227 | Version history shows agent edits distinctly                                           | Different icon/color; agent identity in summary                                | WS-D9  |
+|    #228 | Apply a stale `dry_run_patch`                                                          | `patch_stale` with fresh diff                                                  | WS-D9  |
+|    #228 | Atomic apply of a multi-op patch                                                       | Either all ops applied or none                                                 | WS-D9  |
+|    #229 | Webhook replay within idempotency window                                               | Cached result returned                                                         | WS-D9  |
+|    #229 | Workflow with `feedback_loop_allowed: false` mutating the source                       | Dispatcher refuses to invoke                                                   | WS-D9  |
+|    #230 | Run a 3-step pipeline (research → deck-builder → compliance)                           | DAG inspector shows all 3 steps with inputs/outputs/intent                     | WS-D11 |
+|    #230 | Replay the pipeline                                                                    | Same outputs (modulo declared non-determinism)                                 | WS-D11 |
+|    #231 | `deckctl --help` exits in ≤ 50ms                                                       | Pass                                                                           | WS-D11 |
+|    #231 | Stable exit codes exercised (0, 1, 2, 3, 4, 5, 6)                                      | Each code returns as expected                                                  | WS-D11 |
+|    #231 | `deckctl lint deck.yaml --format json` on a deck with 5 seeded issues                  | JSON output with each issue, address, severity                                 | WS-D11 |
+|    #232 | Embed SDK in a sandboxed runner with no network                                        | Renders a deck deterministically                                               | WS-D7  |
+|    #232 | Same schema + same engine version ⇒ byte-identical PNG/PDF across Linux/macOS/Windows  | Pass                                                                           | WS-D7  |
+|    #233 | Update a component prop with a bad type                                                | `validation_failed` with JSON Pointer location                                 | WS-D10 |
+|    #234 | `POST /v1/decks/{id}/patch` with an instruction                                        | Returns a `dry_run_patch` + chain; does not apply by default                   | WS-D11 |
+|    #234 | NL patch prompt-injection attempt                                                      | Refused; logged                                                                | WS-D11 |
+|    #234 | Ambiguous instruction                                                                  | `instruction_ambiguous` with ≥ 2 candidate interpretations                     | WS-D11 |
+|    #235 | `GET /v1/decks/{id}/summary?depth=full`                                                | Per-slide intent, content blocks, bindings, components, animations             | WS-D10 |
+|    #235 | Comprehension of a deck containing PII                                                 | PII redacted; redaction recorded in audit                                      | WS-D10 |
+|    #236 | `tools/list` + `resources/list` + `prompts/list` + `describe_schema` in one round-trip | Full surface returned; no external docs required                               | WS-D8  |
+|    #237 | `lint_deck` on a deck with 50 seeded issues                                            | All issues reported; run ≤ 2s for a 50-slide deck                              | WS-D12 |
+|    #237 | Lint with a custom org rule                                                            | Result includes the rule source                                                | WS-D12 |
+|    #238 | Narrative claim backed by stale data                                                   | Confidence auto-degraded; flag visible                                         | WS-D12 |
+|    #238 | Human marks a claim as verified                                                        | Audit updated; lint no longer flags                                            | WS-D12 |
+|    #239 | `simulate` with a 1-parameter 50-sample sweep                                          | Deterministic streamed CSV; ≥ 1,000 samples/s on reference hardware            | WS-D12 |
+|    #239 | Sweep exceeding bound                                                                  | `simulation_too_large` with suggested reduction                                | WS-D12 |
+|    #240 | `diff_decks` between two versions                                                      | Semantic-address diff; bulk reorder reported as bulk                           | WS-D12 |
+|    #240 | `diff → apply` round-trip                                                              | Identity for non-modified decks                                                | WS-D12 |
 
 ---
 
 ## 7. Risks & Open Decisions
 
-| Risk | Mitigation |
-|---|---|
-| MCP spec evolution between phases | Conformance suite pinned to a known-good revision; CI re-runs the suite on each spec update; a "spec freeze" tag is required before cutting a release |
-| Drift between JSON Schema and Protobuf | CI codegen step that fails when the two representations diverge; both are checked in to a single source-of-truth file |
-| Audit chain tampering | Constant-time verification; signing key in vault; tamper-evident logging; verification is a CI gate on every release |
-| Scope explosion (too many fine-grained scopes) | Start with the documented minimum scope set; allow extensions but require a documented rationale; scopes appear in capability discovery so agents can self-evaluate |
-| NL patch prompt injection | System prompt isolated and fixed; instruction rate-limited + length-limited; tool calls restricted to scope and validated against schema; refusal logged |
-| Determinism regressions in the local SDK | Cross-platform determinism tests in CI on Linux/macOS/Windows; any divergence blocks the release; `local_engine_state` is part of the cache key |
-| Brand-lock bypass via agent scope | Even with `brand:lock_aware`, only specific override roles can pass; brand-locked regions are visible in the schema so comprehension can flag violations |
-| Webhook replay storms | Per-source rate limiting; throttled events coalesce into a single "since-X" trigger; dead-letter budget configurable per workspace |
-| Diff churn on bulk reorders | Bulk-move semantics in the diff service; non-bulk reorders still reported individually; the diff is reverse-applicable for rollback |
-| CLI artifact supply-chain | Signed releases; install verifies signatures; SHA-256 pinned in CI consumers |
-| Bangladesh PDPA for agent audit retention | Default 90-day retention; configurable per enterprise; PII redaction at log time; audit hashes are recorded but plaintext payloads are not retained beyond the workspace's policy |
+| Risk                                           | Mitigation                                                                                                                                                                        |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MCP spec evolution between phases              | Conformance suite pinned to a known-good revision; CI re-runs the suite on each spec update; a "spec freeze" tag is required before cutting a release                             |
+| Drift between JSON Schema and Protobuf         | CI codegen step that fails when the two representations diverge; both are checked in to a single source-of-truth file                                                             |
+| Audit chain tampering                          | Constant-time verification; signing key in vault; tamper-evident logging; verification is a CI gate on every release                                                              |
+| Scope explosion (too many fine-grained scopes) | Start with the documented minimum scope set; allow extensions but require a documented rationale; scopes appear in capability discovery so agents can self-evaluate               |
+| NL patch prompt injection                      | System prompt isolated and fixed; instruction rate-limited + length-limited; tool calls restricted to scope and validated against schema; refusal logged                          |
+| Determinism regressions in the local SDK       | Cross-platform determinism tests in CI on Linux/macOS/Windows; any divergence blocks the release; `local_engine_state` is part of the cache key                                   |
+| Brand-lock bypass via agent scope              | Even with `brand:lock_aware`, only specific override roles can pass; brand-locked regions are visible in the schema so comprehension can flag violations                          |
+| Webhook replay storms                          | Per-source rate limiting; throttled events coalesce into a single "since-X" trigger; dead-letter budget configurable per workspace                                                |
+| Diff churn on bulk reorders                    | Bulk-move semantics in the diff service; non-bulk reorders still reported individually; the diff is reverse-applicable for rollback                                               |
+| CLI artifact supply-chain                      | Signed releases; install verifies signatures; SHA-256 pinned in CI consumers                                                                                                      |
+| Bangladesh PDPA for agent audit retention      | Default 90-day retention; configurable per enterprise; PII redaction at log time; audit hashes are recorded but plaintext payloads are not retained beyond the workspace's policy |
 
 **Open decisions to close before P13 starts:**
 

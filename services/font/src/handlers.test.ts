@@ -116,7 +116,12 @@ describe('font-service handlers — read', () => {
   it('GET /v1/fonts/:fontId 404s when missing', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.getFont(
-      req('GET', '/v1/fonts/:fontId', { orgId: ORG, fontId: '01H0000000000000000000000AB' }, undefined),
+      req(
+        'GET',
+        '/v1/fonts/:fontId',
+        { orgId: ORG, fontId: '01H0000000000000000000000AB' },
+        undefined,
+      ),
       ctx,
     );
     expect(res.status).toBe(404);
@@ -132,7 +137,13 @@ describe('font-service handlers — license + delete', () => {
     );
     const fontId = (create.body as { fontId: string }).fontId;
     const res = await handlers.updateLicense(
-      req('PATCH', '/v1/fonts/:fontId/license', { orgId: ORG, fontId }, { licenseStatus: 'restricted' }, { actorId: ACTOR }),
+      req(
+        'PATCH',
+        '/v1/fonts/:fontId/license',
+        { orgId: ORG, fontId },
+        { licenseStatus: 'restricted' },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);

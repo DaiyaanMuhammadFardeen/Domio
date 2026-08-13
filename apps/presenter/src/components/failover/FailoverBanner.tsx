@@ -44,9 +44,7 @@ export function FailoverBanner({
 
   const isReconnecting = state === 'reconnecting';
   const secs = Math.ceil(remainingMs / 1000);
-  const headline = isReconnecting
-    ? 'Presenter reconnecting…'
-    : 'Session lost';
+  const headline = isReconnecting ? 'Presenter reconnecting…' : 'Session lost';
   const detail = isReconnecting
     ? `The presenter’s laptop dropped. Slides stay put — they’ll be back in ${secs}s.`
     : 'The presenter couldn’t reconnect in time. The session is in read-only mode.';

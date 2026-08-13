@@ -86,7 +86,12 @@ describe('createLogger — positive coverage', () => {
     await child.flush();
     const body = JSON.parse(new TextDecoder().decode(calls[0]!.body));
     const attrs = body.resourceLogs[0].scopeLogs[0].logRecords[0].attributes;
-    const map = Object.fromEntries(attrs.map((a: { key: string; value: { stringValue: string } }) => [a.key, a.value.stringValue]));
+    const map = Object.fromEntries(
+      attrs.map((a: { key: string; value: { stringValue: string } }) => [
+        a.key,
+        a.value.stringValue,
+      ]),
+    );
     expect(map['app']).toBe('web');
     expect(map['component']).toBe('editor');
   });
@@ -122,7 +127,12 @@ describe('createLogger — positive coverage', () => {
     await l.flush();
     const body = JSON.parse(new TextDecoder().decode(calls[0]!.body));
     const attrs = body.resourceLogs[0].scopeLogs[0].logRecords[0].attributes;
-    const map = Object.fromEntries(attrs.map((a: { key: string; value: { stringValue: string } }) => [a.key, a.value.stringValue]));
+    const map = Object.fromEntries(
+      attrs.map((a: { key: string; value: { stringValue: string } }) => [
+        a.key,
+        a.value.stringValue,
+      ]),
+    );
     // Emails in attribute values are redacted with a `[redacted:...]`
     // marker; the exact category depends on the key/value matchers.
     expect(map['user_email']).toMatch(/\[redacted:/);

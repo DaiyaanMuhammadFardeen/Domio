@@ -14,17 +14,20 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 155. Every deck is a responsive web page with its own URL
 
 **Acceptance criteria**
+
 - A `POST /shares` on any deck returns a stable URL of the form `https://{host}/{workspace}/{deck-slug}-{8char}` (slug is editable; 8-char token is the immutable id).
 - The URL resolves on **mobile (≥360px), tablet (≥768px), and desktop (≥1280px)** with no horizontal scroll, no overflow, and a max 100ms first input delay.
 - Loading the URL does **not** require any plugin, browser extension, app install, or login by default.
 - Lighthouse mobile score ≥ 90; LCP ≤ 2.0s on a Moto G4 / Slow 4G profile.
 
 **Behavioral details**
+
 - URL is owned by the **share service**, not the editor. The editor's `deck_id` and the share's `link_id` are decoupled — deleting a deck does not break the URL until the share itself is revoked.
 - Routing is edge-routed: `/d/{link_id}/...` is the canonical share route; `/decks/{deck_id}` is the editor route.
 - The renderer is a **single-page web app** that hydrates the minimal frame, then lazy-loads per-slide bundles by chunk.
 
 **Edge cases**
+
 - Deck renamed after share → URL stable; title in `<title>` and OG tags update on next render (cache-busted on `version_id`).
 - Workspace deleted with active shares → links fall back to a 410 Gone page that explains the deletion and offers a cached snapshot if `retain_snapshot_on_workspace_delete=true`.
 - Brand contains an emoji that breaks certain OS font stacks → render with a `<picture>` fallback to a stable webfont.
@@ -34,18 +37,21 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 156. Scroll mode (scrollytelling async reading)
 
 **Acceptance criteria**
+
 - A toggle on the share dialog renders the deck as a vertical scrollytelling page: each slide is a full-width section, sticky scrollytelling components where configured, with scroll progress driving animations defined in section 6 (#90).
 - Scroll FPS ≥ 55 on a 2020-era MacBook Air, ≥ 30 on mid-tier Android.
 - Slide state persists in the URL hash (`#s=4&t=12s`) so a reader can deep-link to a moment.
 - Reduced-motion preference (`prefers-reduced-motion`) auto-disables scroll-linked animations per #93.
 
 **Behavioral details**
+
 - The editor annotates each slide with an optional `scroll_choreography` (scroll-pinned elements, parallax layers, sticky captions) authored in the timeline editor (#85–#90).
 - The renderer uses an **IntersectionObserver-driven stage**: only the active slide and its ±1 neighbors are mounted; the rest are detached and held in memory as serialized state.
 - A **reading progress bar** and **TOC rail** (auto-generated from slide titles) are rendered as accessibility aids.
 - Code-split per slide; total JS for a 50-slide deck on first paint ≤ 180 KB gzipped.
 
 **Edge cases**
+
 - Slide contains a 3D model (#65–#69) → in scroll mode, falls back to a poster image + click-to-load; the 3D model only hydrates on intent (avoids 3D context exhaustion on mobile).
 - Slide contains an interactive form (#101) → in scroll mode, the form renders inline but is gated by "Submit requires opening the interactive view" so its parent state isn't lost.
 - Long deck (>200 slides) → virtualized rendering, lazy chunk load; browser back/forward restores prior scroll position via sessionStorage.
@@ -55,17 +61,20 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 157. Password / domain-restricted / SSO / public sharing levels
 
 **Acceptance criteria**
+
 - Sharing levels: `public`, `password`, `domain_restricted` (email domain allowlist), `sso` (workspace SSO or external IdP), `request_access` (email gate with owner approval).
 - Level is set per link; same deck can have multiple links at different levels.
 - A `POST /shares/{id}/policy` changes the level with no URL change for `link_id`; the signed-token rotates and is re-issued.
 
 **Behavioral details**
+
 - The **access policy engine** evaluates a request as: `link_status==active && policy.allows(claims) && expiry>now && quota_within_budget && geo_allowlist(if set)`.
 - For `domain_restricted`: the viewer's email is captured at first contact (passwordless magic link if needed) and re-asserted via signed session cookie (15-min sliding window).
 - For `sso`: an OIDC redirect dance through the workspace's configured IdP; for external IdP, an `OIDC_TRUST` config on the link.
 - The owner sees a live "who has access" panel listing effective policies + a count of currently valid sessions.
 
 **Edge cases**
+
 - A viewer arrives at a `password`-protected link, types wrong password 5× → soft lockout (1 min) and an email to owner; rate limit is per-IP AND per-email-cookie.
 - A `domain_restricted` link shared with `acme.com`, viewer signs in with `joe@acme.com` → access granted; later claims from `joe@gmail.com` on same browser → denied, prompt to sign in with allowed domain.
 - SSO IdP outage → link degrades to a friendly "identity provider unavailable, try again" page with exponential backoff; never silently fails open.
@@ -75,12 +84,14 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 158. Expiring links and per-viewer watermarking for confidential decks
 
 **Acceptance criteria**
+
 - Links can have an `expires_at` (absolute) or `max_views` or both. Once either is exhausted, the URL returns 410 Gone with an explanatory page.
 - Watermarking is configurable per link: **none**, **visible-only**, **forensic-only**, **both**.
 - Visible watermark shows the viewer's email + IP-derived short label + timestamp, tiled at ~15° rotation, ~8% opacity.
 - Forensic watermark is invisible to the viewer but survives screenshots, screen-recording, and re-encoding (for at-rest exports too).
 
 **Behavioral details**
+
 - **Visible watermark** is a DOM/CSS overlay layer; resistant to "save as PDF" because it's rendered server-side into the per-viewer HTML response.
 - **Forensic watermark** uses two channels:
   1. A **steganographic payload** embedded in rasterized asset responses (a per-viewer LSB pattern on images; a per-viewer DCT-modulation on video frames).
@@ -89,6 +100,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Watermark profile (`watermark_profile`) is reusable across multiple links.
 
 **Edge cases**
+
 - Viewer disables JavaScript → visible watermark degrades to a server-rendered text overlay; forensic watermark still works (server-rendered variant is unique).
 - Screen recording → forensic watermark survives; visible watermark survives unless the recorder does aggressive cropping (we mitigate by spreading watermark tiles outside the 95% central viewport).
 - Expiry reached mid-session → 60s warning banner; then graceful termination to "this share has ended" page, preserving any in-flight form state in localStorage for 30s.
@@ -98,17 +110,20 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 159. Per-link content control — investor version vs internal version from one deck
 
 **Acceptance criteria**
+
 - The deck author can attach **slide-level visibility rules** to a specific link: `{slide_id: visible|hidden|watermarked_only}`, with optional `{default_visible: false}` to make the link explicit-include.
 - Author previews the link exactly as a recipient will see it (with watermark if configured) before sending.
 - Same link URL across revisions; visibility rules update atomically with no URL change.
 
 **Behavioral details**
+
 - The `link_visibility_rule` is part of the **link policy**, evaluated by the access policy engine at render time.
 - "Hidden" slides are not shipped to the viewer's browser at all (zero footprint in HTML/JS); this matters for confidential internal financial slides that must not be inferable from payload size.
 - "Watermarked_only" slides are shipped but rendered with the watermark profile front-and-center (e.g., watermark covers 35% of the slide) for "you shouldn't be reading this, but if you do, we'll know."
 - The editor shows a small **"this slide is hidden from link X"** badge on each slide, so authors don't accidentally overshare when revising.
 
 **Edge cases**
+
 - A `link_visibility_rule` references a slide that has since been deleted → rule is marked `orphaned`, surfaces in the owner dashboard, but is silently ignored at render time (no error to viewer).
 - A recipient forwards a `password`-protected link with `default_visible: false` → recipient still has to enter password AND will not see slides the forwarder never explicitly included.
 - A link is configured to hide slide 4, but a `magic_jump` deep link to slide 4 is opened → 404 from inside the renderer; the URL is intercepted and the viewer is rerouted to the nearest visible slide with a friendly notice.
@@ -118,18 +133,21 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 160. Custom domains (deck.yourcompany.com) and white-label viewer
 
 **Acceptance criteria**
+
 - Owner can add a custom domain via a verification flow (DNS TXT or HTTP file challenge).
 - Once verified, the domain serves the deck with full TLS (auto-issued via ACME, auto-renewed).
 - White-label viewer: **logo, primary/secondary/accent colors, font family, favicon, loading copy, footer text** all customizable.
 - Multiple domains can point to the same workspace with different themes.
 
 **Behavioral details**
+
 - **Custom domain manager** handles: domain verification, ACME DNS-01 challenge (via the workspace's DNS provider API, e.g., Cloudflare, Route53, or manual), certificate issuance, renewal at 30 days before expiry, and graceful re-issuance on private key compromise.
 - **White-label theme** is a set of **design tokens** (CSS custom properties + a tiny bootstrap stylesheet) injected at viewer boot, overriding defaults.
 - White-label tokens **cannot** alter structural layout (no layout-shift to other workspaces, no content re-ordering) — only color, type, logo, and copy.
 - The share dialog previews the white-label viewer live in an iframe sandbox before the link is generated.
 
 **Edge cases**
+
 - ACME rate limit hit on a bulk-issued batch → exponential backoff per-domain; owner notified; manual intervention possible via dashboard.
 - Custom domain DNS misconfigured → dashboard surfaces the exact missing record; viewer never serves a broken certificate (we don't proceed until ACME succeeds).
 - White-label theme uses a font that fails to load → fallback to the workspace-default webfont; banner for the viewer ("This brand uses a custom font that couldn't load").
@@ -140,12 +158,14 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 161. Embeds anywhere (Notion, websites, docs) with live interactivity preserved
 
 **Acceptance criteria**
+
 - Owner can copy an **embed snippet**: `<iframe src="..." width="..." height="..." allow="..." sandbox="..."></iframe>`.
 - The embed supports **live interactivity** — embedded viewers can click, filter, scroll, and toggle scenarios; the parent page does not have to handle any of it.
 - A `?embed=1` URL flag activates embed-optimized chrome (no nav, no download buttons by default, etc.).
 - Embeds work inside Notion, Confluence, Google Docs (via published-web iframe), WordPress, Ghost, Substack, Webflow, and arbitrary CMSes.
 
 **Behavioral details**
+
 - The **embed proxy** rewrites the renderer for embed context: minimal chrome, no top-nav, no export menu unless `&controls=1`.
 - CSP is strict by default: `frame-ancestors` restricted to the workspace's allowlist OR an explicit `allowed_parents` list on the link.
 - The iframe uses `sandbox="allow-scripts allow-same-origin allow-popups allow-forms"` (and `allow-popups-to-escape-sandbox` for scenarios that need a new window).
@@ -153,6 +173,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - A **Notion-specific deep-link helper** (`notion://...`) is provided, plus a bookmarklet for sites that strip iframes.
 
 **Edge cases**
+
 - Embed host strips iframes (some Markdown renderers) → fallback to a `<noscript>` link + a JS-less image snapshot of slide 1.
 - Parent page is on a denied domain → embed returns a 403 with a "this domain is not allowed to embed this deck" page (no leakage of the underlying deck).
 - Interactive scenario causes an external popup → only allowed if the link's policy has `allow_external_links: true`; otherwise link is rewritten as a warning dialog.
@@ -162,12 +183,14 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 162. Narrated auto-play — recorded voiceover plays the deck like a video, but it stays interactive
 
 **Acceptance criteria**
+
 - Author records a `narration_track` per slide (or uploads pre-recorded audio).
 - A viewer with autoplay enabled sees the deck advance automatically in sync with the voiceover.
 - Interactivity is preserved: viewers can pause, scrub, click hotspots, and toggle scenarios without losing narration sync.
 - Honors `prefers-reduced-motion` and the browser's autoplay policy (muted-only autoplay by default).
 
 **Behavioral details**
+
 - The **narration runner** is a state machine: `playing | paused | scrubbing | interactive-pause | ended`. Slide transitions are time-anchored to narration cues; scrubbing snaps to nearest cue.
 - Audio is streamed (HLS or DASH with chunked delivery) so large decks don't preload hundreds of MB.
 - An **optional auto-generated waveform / chapter strip** is rendered along the bottom for navigation.
@@ -175,6 +198,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 - Multiple language tracks supported (#113/#153); language selection is automatic based on `navigator.language` or explicit.
 
 **Edge cases**
+
 - Viewer mutes tab → narration continues; a muted banner is shown ("Narration playing — click to unmute").
 - Scrubbing past cues → scrub-snaps to nearest cue; in-between playback continues normally after a 200ms resume guard to avoid audio glitching.
 - Network stutter → runner buffers 5s ahead; if buffer underruns, switches to "narrated but paused" with re-sync on resume.
@@ -185,18 +209,21 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 163. Video export (MP4 with animations and narration)
 
 **Acceptance criteria**
+
 - Owner can request `POST /exports` with `{format: mp4, deck_id, options}` and get a job back.
 - Job renders the deck as an MP4 with all section 6 animations baked in, optional narration track(s) mixed in, and a chosen resolution (720p / 1080p / 4K).
 - Job status is observable via polling or webhook; final artifact is downloadable and storable on the owner's drive.
 - MP4 honors the deck's `slide_timing` configuration (per-slide duration defaults) or an explicit timeline override.
 
 **Behavioral details**
+
 - The **export service** spins up a headless renderer (Chromium-based, parallelized per slide) that plays the deck on a virtual timeline, frames each animation key, captures frames via `MediaRecorder` or ffmpeg pipeline.
 - Long exports (>5 min video, or 4K) go to a queue with priority lanes (`fast` / `standard` / `bulk`).
 - Optional chapter markers (per-slide) and burned-in captions are supported.
 - A **two-pass** render is used when narration is involved: first pass produces a dry-run timeline; second pass muxes audio with frame-accurate sync.
 
 **Edge cases**
+
 - 3D model on a slide → the renderer switches to a software-WebGL fallback (SwiftShader or angle-backend) so 3D still renders headlessly; cost: ~3× render time per 3D-heavy slide.
 - Embed slide (#81) → embeds are replaced with a "click to view live" card snapshot at the slide's first frame; flagged in the export job's `degraded_slides` list.
 - Author requests 4K but plan caps at 1080p → job is rejected with a clear `plan_limit_exceeded` error and an upsell CTA.
@@ -206,17 +233,20 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 164. PDF / PPTX export with graceful degradation
 
 **Acceptance criteria**
+
 - `POST /exports` with `{format: pdf|pptx, deck_id, options}` returns a job.
 - Interactive elements (forms, calculators, hotspots, scenarios) become **static snapshots** in the export, with a **QR code or link back to the live interactive version** printed at the bottom-right of each affected slide.
 - Charts, animations, and live data are flattened to a "snapshot at export time" with a timestamp footer (`Snapshot taken YYYY-MM-DD HH:MM UTC`).
 
 **Behavioral details**
+
 - **PDF** export uses a vector-first pipeline (deck slides are SVG-native, so most text/shapes export losslessly), with images rasterized at 2× DPI.
 - **PPTX** export uses OOXML shapes for vector and embeds high-DPI PNGs for rasterized parts; animations become slide-build order, not keyframes (PowerPoint limitation), with a "this animation is best viewed in the live version" notice on slides where degradation is severe.
 - Both formats support a `print_handout` companion template (#167) bundled into the same export job.
 - Both formats include a **metadata footer** on each slide: deck title, page number, optional confidentiality watermark, and the live link.
 
 **Edge cases**
+
 - Slide has an unresolvable external data binding (#48–#62) → exporter captures the **stale-data indicator** state (#63) and the snapshot timestamp, plus a note "data was unavailable at export time."
 - Slide has a 3D model → flattened to a poster image; export job's `degraded_slides` list includes the slide.
 - PPTX import in older PowerPoint versions → exporter runs a compatibility downgrade pass (no modern gradients, no SVG, no live video).
@@ -226,16 +256,19 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 165. SEO-ready public decks (a conference talk that ranks on Google)
 
 **Acceptance criteria**
+
 - Each public deck generates a server-rendered HTML snapshot for crawlers with semantic markup: `<h1>` per slide title, structured JSON-LD `PresentationDigitalDocument` schema, `<meta>` and OG tags.
 - A `sitemap.xml` is auto-generated per workspace, listing public decks with `<lastmod>` reflecting deck update time.
 - A `robots.txt` allows crawling of public links and disallows private ones.
 
 **Behavioral details**
+
 - The **SEO service** listens to share-link creation/update events and pushes a server-rendered HTML artifact to a CDN edge keyed by URL.
 - Internal links between slides within a deck are real `<a>` tags, not JS-only — crawlers can walk the deck.
 - For non-public decks, the SEO service **never** ingests content; only a stub meta is served.
 
 **Edge cases**
+
 - Deck contains an interactive form (#101) → form is rendered as a static HTML form with `method=get` and an explanatory note; server-rendered snapshot respects no-JS.
 - Author toggles a deck from public to password-protected → SEO snapshot is purged from CDN within 60s; sitemap updated; `noindex` meta emitted if a stale snapshot is requested before purge.
 - A slide contains a private customer's name → the author can mark "exclude from SEO snapshot" on individual slides; those slides get `<meta name="robots" content="noindex">` per-slide.
@@ -245,16 +278,19 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 166. Social preview cards auto-generated per deck and per slide
 
 **Acceptance criteria**
+
 - Each public deck has a 1200×630 OG card auto-generated from a meaningful composition of slides (title slide + chart or quote).
 - Each slide has a per-slide OG card available at `/d/{link_id}/s/{slide_id}/og.png`, useful when a viewer shares a deep link.
 - Twitter `summary_large_image`, LinkedIn, and Slack unfurl previews all render correctly.
 
 **Behavioral details**
+
 - The **social card generator** is a service that takes a deck + a target slide id and renders a 1200×630 PNG via the same headless renderer as exports (#163).
 - Composition rules: pull the title slide if at deck level; pull the slide's main hero element (chart, quote, image) at slide level; apply brand color background; overlay title at 60% font size of card height.
 - Cache the result on CDN keyed by `deck_version_id + slide_id + theme_id`; invalidation piggybacks on the export/CDN cache strategy.
 
 **Edge cases**
+
 - Slide is entirely blank → generator falls back to title-slide composition with the slide number.
 - Brand contains a custom font that fails to load → falls back to workspace-default font; never produces broken text.
 - Card generation is rate-limited per workspace to avoid abuse.
@@ -264,16 +300,19 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 167. Print-optimized handout layouts (notes pages, 4-up grids)
 
 **Acceptance criteria**
+
 - Export dialog offers **handout layouts**: 1-up (one slide per page), 2-up (slides + notes per page), 3-up, 4-up, 6-up, 9-up, with optional lines for handwritten notes.
 - Speaker notes auto-flow to the right of each slide in 2-up; below in 4-up; omitted in 6/9-up.
 - Print profile respects printer color profile (CMYK-friendly palette conversion option for offset printing).
 
 **Behavioral details**
+
 - The **print layout service** uses CSS `@page` rules and a per-page handout template (`handout_template`) to compose slides into PDF.
 - Per-slide notes are pulled from `#116` (AI-generated notes) or the author's manual notes; the export dialog lets the author preview before commit.
 - A per-page QR code linking back to the live, interactive slide is optional but on by default.
 
 **Edge cases**
+
 - Speaker notes exceed page space → truncate with a "full notes at {live-link}" footer; never silently cut off mid-sentence.
 - Slide is non-16:9 → handout layout centers the slide on a 16:9 page; whitespace balanced top/bottom.
 
@@ -282,18 +321,21 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 168. Deck update propagation — fix a typo once, every shared link is already correct
 
 **Acceptance criteria**
+
 - Editing a deck that has N active share links does **not** require re-sending any link.
 - Viewers who reload a shared link see the updated deck (subject to their `version_pin` setting on the link).
 - A new `deck_version_id` is created on each edit; share links reference the deck id but the renderer reads `latest_version` by default.
 - Links can optionally pin to a specific version (useful for "as-of-this-quarter" board snapshots).
 
 **Behavioral details**
+
 - The **update propagation event bus** emits `deck.updated` on every save (autosave is per-keystroke per #22, but version-bumps are debounced at ~2s of inactivity to coalesce).
 - The renderer subscribes to `deck.updated` via a long-poll / SSE channel scoped to `(workspace_id, deck_id)`; on receipt, the active view re-fetches the slide's serialized state and re-hydrates.
 - CDN-cached SEO snapshots (#165) and social cards (#166) are invalidated within 5s of `deck.updated`.
 - The export service (#163/#164) is **not** affected — exports always pin to the version they were triggered against.
 
 **Edge cases**
+
 - Viewer is mid-interaction (filling a form, toggling a scenario) → the rehydration is queued until interaction completes; UI shows a subtle "deck updated, refresh to view" pill.
 - Edit is incompatible with the live renderer's contract (e.g., a removed slide the viewer is on) → viewer is gracefully bounced to the nearest valid slide with an info notice.
 - Many edits in rapid succession → debounced; the active viewer sees a single rehydration, not N thrashes.
@@ -324,6 +366,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 **Empty state:** No prior shares → big CTA "Share your deck"; tooltip "Every deck gets its own URL — pick who can see it."
 
 **Error states:**
+
 - Watermark profile missing required asset → red banner, "Watermark can't be applied because…"
 - Custom domain not yet verified → yellow banner, link generation allowed but flag badge: "Live on custom domain when verification completes."
 - SSO IdP not configured → level option disabled with tooltip.
@@ -343,6 +386,7 @@ Each entry has: **acceptance criteria**, **behavioral details**, and **edge case
 ### 2.3 Applying per-slide visibility rules per link
 
 The visibility editor is a slide-list sidebar. Each row has:
+
 - Slide thumbnail
 - Title
 - Toggle: `Visible | Hidden | Watermarked-only`
@@ -352,6 +396,7 @@ The visibility editor is a slide-list sidebar. Each row has:
 A **Preview as recipient** button opens a sandboxed tab rendering the exact experience (including watermark), without leaving a trace in analytics.
 
 **Conflict warnings:**
+
 - A slide that's `watermarked_only` but the link has no watermark profile → "this rule needs a watermark profile to mean anything."
 - A slide that's `hidden` but is the target of a `magic_jump` URL elsewhere → "this URL won't work for this link."
 
@@ -360,10 +405,12 @@ A **Preview as recipient** button opens a sandboxed tab rendering the exact expe
 ### 2.4 Scroll mode preview
 
 The editor's **Share → Preview** tab offers two modes:
+
 1. **Standard** (slide-by-slide, presenter-style)
 2. **Scroll mode** (vertical scroll, scrollytelling)
 
 Preview reflects all per-link rules, watermarks, and white-label theming. A toggle "Scroll progress in URL hash" controls deep-linking. Preview includes a top toolbar:
+
 - `[S] Standard mode` `[L] Scroll mode` `[↻] Reset scroll` `[⛶] Fullscreen`
 - `[?] Keyboard shortcuts` (e.g., `j/k` to next/prev slide, `g g` to top, `?` for help).
 
@@ -384,6 +431,7 @@ Preview reflects all per-link rules, watermarks, and white-label theming. A togg
 ### 2.6 Narrating autoplay
 
 In the editor: slide → "Record narration" → microphone permission → record per-slide. Or upload pre-recorded audio and add cue points in the timeline editor. The share dialog exposes:
+
 - **Autoplay** toggle (on by default for narrated links; off for un-narrated)
 - **Caption language** dropdown (auto = `navigator.language`)
 - **Reduced-motion respect** toggle (on by default)
@@ -422,15 +470,15 @@ The viewer, when narration is present, shows a small audio-player chrome (play/p
 
 ### 3.1 Deck-as-website renderer
 
-| Aspect | Requirement |
-|---|---|
-| First-party responsive | Mobile-first, breakpoints at 360/768/1024/1280/1920 |
-| Low-bandwidth | Total JS for first paint ≤ 90 KB gzipped; per-slide bundle ≤ 25 KB gzipped average |
-| Mobile-first | Touch-friendly (44px tap targets), gestures (swipe between slides), no hover-only affordances |
-| Reduced data | Image lazy-load, AVIF/WebP with JPEG fallback, `loading="lazy"` |
-| Browser support | Last 2 versions of Chrome/Safari/Edge/Firefox; iOS Safari 16+, Android Chrome 110+; graceful degradation for older |
-| Accessibility | WCAG 2.1 AA target; full keyboard nav; ARIA landmarks per slide |
-| Offline (read-only) | Service Worker caches the active deck's HTML + assets for 30 days; refreshed on each new view |
+| Aspect                 | Requirement                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| First-party responsive | Mobile-first, breakpoints at 360/768/1024/1280/1920                                                                |
+| Low-bandwidth          | Total JS for first paint ≤ 90 KB gzipped; per-slide bundle ≤ 25 KB gzipped average                                 |
+| Mobile-first           | Touch-friendly (44px tap targets), gestures (swipe between slides), no hover-only affordances                      |
+| Reduced data           | Image lazy-load, AVIF/WebP with JPEG fallback, `loading="lazy"`                                                    |
+| Browser support        | Last 2 versions of Chrome/Safari/Edge/Firefox; iOS Safari 16+, Android Chrome 110+; graceful degradation for older |
+| Accessibility          | WCAG 2.1 AA target; full keyboard nav; ARIA landmarks per slide                                                    |
+| Offline (read-only)    | Service Worker caches the active deck's HTML + assets for 30 days; refreshed on each new view                      |
 
 ### 3.2 Scroll-mode rendering performance
 
@@ -441,13 +489,13 @@ The viewer, when narration is present, shows a small audio-player chrome (play/p
 
 ### 3.3 Access control
 
-| Level | Mechanism | Token TTL |
-|---|---|---|
-| public | signed URL only | 24h refresh on access |
-| password | signed URL + bcrypt-hashed password cookie | 30d session |
-| domain_restricted | email-capture + domain-claim cookie | 15m sliding |
-| sso | OIDC assertion → short-lived session cookie | 60m |
-| request_access | owner-approved allowlist | 90d |
+| Level             | Mechanism                                   | Token TTL             |
+| ----------------- | ------------------------------------------- | --------------------- |
+| public            | signed URL only                             | 24h refresh on access |
+| password          | signed URL + bcrypt-hashed password cookie  | 30d session           |
+| domain_restricted | email-capture + domain-claim cookie         | 15m sliding           |
+| sso               | OIDC assertion → short-lived session cookie | 60m                   |
+| request_access    | owner-approved allowlist                    | 90d                   |
 
 ### 3.4 Expiring link generation
 
@@ -579,21 +627,21 @@ The viewer, when narration is present, shows a small audio-player chrome (play/p
 
 ### 4.2 Service responsibilities
 
-| Service | Responsibilities |
-|---|---|
-| **Share Service** | CRUD on `share_link`; orchestrates policy, watermark, domain, theme on link creation; audit-logged |
-| **Link Generator** | Mint signed tokens (HMAC-SHA256 over `link_id + expiry + viewer_claims`); produces short ids; supports QR generation |
-| **Access Policy Engine** | Single decision point: `evaluate(request) → allow|deny|challenge`; handles all five access levels; idempotent |
-| **Watermark Service** | Generates per-viewer asset variants; embeds steg + DCT-mod; visible overlay text |
-| **Custom Domain Manager** | DNS verification, ACME DNS-01, cert issuance/renewal, TLS provisioning, monitoring |
-| **White-label Theme Pipeline** | Token validation, sanitization, CSS generation, theme bundling per link |
-| **Embed Proxy** | Edge-routed embed rendering with strict CSP, sandbox, allowed-parents enforcement |
-| **Narration Runner** | Client-side state machine; audio streaming; cue-point anchoring; chapter UI |
-| **Export Service** | Job queue, headless render, MP4/PDF/PPTX generation, graceful degradation pass, artifact storage |
-| **SEO Service** | Server-rendered HTML snapshots, sitemap, robots.txt, schema.org JSON-LD |
-| **Social Card Generator** | PNG composition for OG cards (deck and per-slide), CDN cached |
-| **Print Layout Service** | PDF handout composition with per-page QR codes |
-| **Update Propagation Event Bus** | Publishes `deck.updated`, `link.updated`, `domain.verified`, etc.; CDN invalidation hooks; renderer SSE |
+| Service                          | Responsibilities                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---- | ------------------------------------------------------ |
+| **Share Service**                | CRUD on `share_link`; orchestrates policy, watermark, domain, theme on link creation; audit-logged                   |
+| **Link Generator**               | Mint signed tokens (HMAC-SHA256 over `link_id + expiry + viewer_claims`); produces short ids; supports QR generation |
+| **Access Policy Engine**         | Single decision point: `evaluate(request) → allow                                                                    | deny | challenge`; handles all five access levels; idempotent |
+| **Watermark Service**            | Generates per-viewer asset variants; embeds steg + DCT-mod; visible overlay text                                     |
+| **Custom Domain Manager**        | DNS verification, ACME DNS-01, cert issuance/renewal, TLS provisioning, monitoring                                   |
+| **White-label Theme Pipeline**   | Token validation, sanitization, CSS generation, theme bundling per link                                              |
+| **Embed Proxy**                  | Edge-routed embed rendering with strict CSP, sandbox, allowed-parents enforcement                                    |
+| **Narration Runner**             | Client-side state machine; audio streaming; cue-point anchoring; chapter UI                                          |
+| **Export Service**               | Job queue, headless render, MP4/PDF/PPTX generation, graceful degradation pass, artifact storage                     |
+| **SEO Service**                  | Server-rendered HTML snapshots, sitemap, robots.txt, schema.org JSON-LD                                              |
+| **Social Card Generator**        | PNG composition for OG cards (deck and per-slide), CDN cached                                                        |
+| **Print Layout Service**         | PDF handout composition with per-page QR codes                                                                       |
+| **Update Propagation Event Bus** | Publishes `deck.updated`, `link.updated`, `domain.verified`, etc.; CDN invalidation hooks; renderer SSE              |
 
 ### 4.3 Module boundaries (if monolith-first)
 
@@ -615,15 +663,15 @@ This shape makes it trivial to peel services off later if scaling or compliance 
 
 ### 4.4 Communication patterns
 
-| Interaction | Pattern | Rationale |
-|---|---|---|
-| Editor → Share Service | Sync REST | Editor needs immediate confirmation |
-| Renderer → Access Policy Engine | Sync (edge-local) | Sub-50ms decision; cache hot |
-| Watermark Service ↔ Asset Service | Async via queue | Heavy CPU; backpressure-aware |
-| Export Service ↔ Headless Renderer | Async via queue | Long-running, retries needed |
-| Renderer ← Update Propagation | SSE / WebSocket | Push model, low-latency |
-| Export Service → CDN | Async via event bus | Decoupled invalidation |
-| Custom Domain Manager ↔ ACME | Sync per-domain (parallelized) | Bounded by LE rate limits |
+| Interaction                         | Pattern                        | Rationale                           |
+| ----------------------------------- | ------------------------------ | ----------------------------------- |
+| Editor → Share Service              | Sync REST                      | Editor needs immediate confirmation |
+| Renderer → Access Policy Engine     | Sync (edge-local)              | Sub-50ms decision; cache hot        |
+| Watermark Service ↔ Asset Service  | Async via queue                | Heavy CPU; backpressure-aware       |
+| Export Service ↔ Headless Renderer | Async via queue                | Long-running, retries needed        |
+| Renderer ← Update Propagation       | SSE / WebSocket                | Push model, low-latency             |
+| Export Service → CDN                | Async via event bus            | Decoupled invalidation              |
+| Custom Domain Manager ↔ ACME       | Sync per-domain (parallelized) | Bounded by LE rate limits           |
 
 ### 4.5 Storage choice
 
@@ -1009,11 +1057,13 @@ The embed code is rendered as a copyable `<iframe>` snippet:
 ```html
 <iframe
   src="https://cdn.domio.io/d/abc12345?embed=1"
-  width="960" height="540"
+  width="960"
+  height="540"
   allow="fullscreen; clipboard-write"
   sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
   style="border:0"
-  referrerpolicy="strict-origin-when-cross-origin">
+  referrerpolicy="strict-origin-when-cross-origin"
+>
 </iframe>
 ```
 
@@ -1091,18 +1141,18 @@ mcp.tool.list_share_links(deck_id) → [link]
 
 ### 7.8 Threat-model crosswalk (OWASP Top 10 highlights)
 
-| Risk | Mitigation |
-|---|---|
-| Broken Access Control | Access policy engine is the single decision point; verified per request |
-| Cryptographic Failures | TLS everywhere; signed tokens; AES-at-rest for certs and forensic assets |
-| Injection | CSP on embeds; sanitized white-label tokens; parameterized SQL via ORM |
-| Insecure Design | Threat-model per service; pen-test before GA; red team annually |
-| Security Misconfiguration | IaC-managed config; drift detection; secrets in vault, never env-vars in prod |
-| Vulnerable Components | Dependabot + SBOM; quarterly SCA; AGPL avoidance per pre-dev §11.7 |
-| Auth Failures | MFA on workspace admin; SSO optional; rate-limited login; session rotation |
-| Software/Data Integrity | Signed URLs for assets; versioned schema migrations; immutable audit log |
-| Logging/Monitoring Failures | Structured logs; per-service dashboards; alert thresholds |
-| SSRF | Embed proxy blocks internal IP ranges; ACME has dedicated egress |
+| Risk                        | Mitigation                                                                    |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| Broken Access Control       | Access policy engine is the single decision point; verified per request       |
+| Cryptographic Failures      | TLS everywhere; signed tokens; AES-at-rest for certs and forensic assets      |
+| Injection                   | CSP on embeds; sanitized white-label tokens; parameterized SQL via ORM        |
+| Insecure Design             | Threat-model per service; pen-test before GA; red team annually               |
+| Security Misconfiguration   | IaC-managed config; drift detection; secrets in vault, never env-vars in prod |
+| Vulnerable Components       | Dependabot + SBOM; quarterly SCA; AGPL avoidance per pre-dev §11.7            |
+| Auth Failures               | MFA on workspace admin; SSO optional; rate-limited login; session rotation    |
+| Software/Data Integrity     | Signed URLs for assets; versioned schema migrations; immutable audit log      |
+| Logging/Monitoring Failures | Structured logs; per-service dashboards; alert thresholds                     |
+| SSRF                        | Embed proxy blocks internal IP ranges; ACME has dedicated egress              |
 
 ---
 
@@ -1150,13 +1200,13 @@ mcp.tool.list_share_links(deck_id) → [link]
 
 ### 9.1 Observability
 
-| Signal | What we capture |
-|---|---|
-| **Logs** | Structured JSON per service; correlation id flows from editor → share service → renderer; per-request access-policy decision logged |
-| **Metrics** | Renderer p50/p95/p99 TTFB, scroll FPS (sampled), export queue depth, watermark generation throughput, ACME renewal success rate, custom-domain DNS verification latency, embed CSP violation count, forensic watermark cache hit rate |
-| **Traces** | OpenTelemetry across all services; trace_id flows from editor session → renderer session → analytics event |
-| **Audit log** | Every share-link create/update/delete, every policy change, every watermark generation, every domain add/verify/renew, every export job submit/complete, every embed render — immutable, queryable by workspace admin |
-| **Alerting** | Pager: TTFB p95 > 500ms for 5 min, queue depth > 1000, cert renewal failure, ACME rate-limit warnings, security events (CSRF, brute-force), CDN error rate spike |
+| Signal        | What we capture                                                                                                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Logs**      | Structured JSON per service; correlation id flows from editor → share service → renderer; per-request access-policy decision logged                                                                                                   |
+| **Metrics**   | Renderer p50/p95/p99 TTFB, scroll FPS (sampled), export queue depth, watermark generation throughput, ACME renewal success rate, custom-domain DNS verification latency, embed CSP violation count, forensic watermark cache hit rate |
+| **Traces**    | OpenTelemetry across all services; trace_id flows from editor session → renderer session → analytics event                                                                                                                            |
+| **Audit log** | Every share-link create/update/delete, every policy change, every watermark generation, every domain add/verify/renew, every export job submit/complete, every embed render — immutable, queryable by workspace admin                 |
+| **Alerting**  | Pager: TTFB p95 > 500ms for 5 min, queue depth > 1000, cert renewal failure, ACME rate-limit warnings, security events (CSRF, brute-force), CDN error rate spike                                                                      |
 
 ### 9.2 Testing strategy (test pyramid)
 
@@ -1185,22 +1235,22 @@ mcp.tool.list_share_links(deck_id) → [link]
 
 ## 10. Cross-Section Ties
 
-| Section 11 feature | Tied to | What's reused / shared |
-|---|---|---|
-| **#155 Deck-as-website** | §1 editor (#22 autosave, #21 CRDT sync) | The renderer's source of truth is the deck state from §1; viewer subscribes via the same `deck.updated` event bus |
-| **#156 Scroll mode** | §6 animations (#90 scroll-linked, #93 reduced-motion, #95 GIF export) | Scroll choreography authored in the timeline editor (§6) drives the scroll-mode renderer; reduced-motion preference is read from the OS via the same media-query system |
-| **#157–#158 Access + expiry + watermark** | §4 live data (#64 data source access control) | Viewers never see raw credentials; the same proxy pattern applies to data sources accessed from inside the renderer |
-| **#159 Per-link visibility** | §4 live data (#51 data refresh on stage, #57 scenario switcher, #63 stale-data indicator) | A viewer's scenario state is part of the link's session; per-link visibility can scope scenarios too |
-| **#160 Custom domains + white-label** | §3 theming (#37 design tokens, #40 brand extraction, #44 accessibility theming) | White-label tokens reuse the §3 design-token schema; brand-extracted tokens can pre-fill a white-label theme |
-| **#161 Embeds** | §10 audience participation (#142 audience QR, #143 polls, #153 captions) | Embed retains audience features inside a parent page; the embed proxy whitelists the §10 participation feature flags per-link |
-| **#162 Narrated autoplay** | §8 AI (#113 translation, #116 AI notes, #153 live captions) | Narration tracks are auto-generated from notes (#116) and translated (#113); caption sidecar reuses §10 caption infrastructure |
-| **#163 Video export** | §6 animation (#95 GIF/video export of any animated slide), §8 AI (#116 notes → narration) | The headless renderer used by export is the same one used by §6 GIF export; narration from #162 flows into #163 |
-| **#164 PDF/PPTX export** | §4 live data (#63 stale-data), §13 collaboration (#180 approval before share) | Export snapshots the live-data state and timestamps it; pre-share approval workflow can gate export of high-stakes decks |
-| **#165 SEO** | §12 analytics (#169 per-viewer, #171 attention heatmaps) | SEO traffic is the top-of-funnel signal for §12; the SEO service emits `deck.viewed` events the analytics plane ingests |
-| **#166 Social cards** | §13 (#187 content expiry policies) | A social card captures the deck's state at a moment in time; expiry policy can regenerate cards on a schedule |
-| **#167 Print handout** | §9 presenter (#141 post-presentation recap) | Handout is the natural "takeaway" complement to the recap; both are export-style artifacts in the post-meeting flow |
-| **#168 Update propagation** | §4 (#51 data refresh), §12 (#172 sales-mode notifications), §13 (#186 auto-updating shared slides) | Update propagation is the unifying event: data refresh (§4), notification (§12), and shared-slide updates (§13) all flow through the same `deck.updated` bus |
-| **Custom domains (§14 #193)** | §14 enterprise (#193 SSO, #194 brand governance, #196 audit logs, #197 residency) | Custom-domain provisioning is gated by enterprise SSO; per-region residency constraints affect where TLS certs/ACME accounts live |
+| Section 11 feature                        | Tied to                                                                                            | What's reused / shared                                                                                                                                                  |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **#155 Deck-as-website**                  | §1 editor (#22 autosave, #21 CRDT sync)                                                            | The renderer's source of truth is the deck state from §1; viewer subscribes via the same `deck.updated` event bus                                                       |
+| **#156 Scroll mode**                      | §6 animations (#90 scroll-linked, #93 reduced-motion, #95 GIF export)                              | Scroll choreography authored in the timeline editor (§6) drives the scroll-mode renderer; reduced-motion preference is read from the OS via the same media-query system |
+| **#157–#158 Access + expiry + watermark** | §4 live data (#64 data source access control)                                                      | Viewers never see raw credentials; the same proxy pattern applies to data sources accessed from inside the renderer                                                     |
+| **#159 Per-link visibility**              | §4 live data (#51 data refresh on stage, #57 scenario switcher, #63 stale-data indicator)          | A viewer's scenario state is part of the link's session; per-link visibility can scope scenarios too                                                                    |
+| **#160 Custom domains + white-label**     | §3 theming (#37 design tokens, #40 brand extraction, #44 accessibility theming)                    | White-label tokens reuse the §3 design-token schema; brand-extracted tokens can pre-fill a white-label theme                                                            |
+| **#161 Embeds**                           | §10 audience participation (#142 audience QR, #143 polls, #153 captions)                           | Embed retains audience features inside a parent page; the embed proxy whitelists the §10 participation feature flags per-link                                           |
+| **#162 Narrated autoplay**                | §8 AI (#113 translation, #116 AI notes, #153 live captions)                                        | Narration tracks are auto-generated from notes (#116) and translated (#113); caption sidecar reuses §10 caption infrastructure                                          |
+| **#163 Video export**                     | §6 animation (#95 GIF/video export of any animated slide), §8 AI (#116 notes → narration)          | The headless renderer used by export is the same one used by §6 GIF export; narration from #162 flows into #163                                                         |
+| **#164 PDF/PPTX export**                  | §4 live data (#63 stale-data), §13 collaboration (#180 approval before share)                      | Export snapshots the live-data state and timestamps it; pre-share approval workflow can gate export of high-stakes decks                                                |
+| **#165 SEO**                              | §12 analytics (#169 per-viewer, #171 attention heatmaps)                                           | SEO traffic is the top-of-funnel signal for §12; the SEO service emits `deck.viewed` events the analytics plane ingests                                                 |
+| **#166 Social cards**                     | §13 (#187 content expiry policies)                                                                 | A social card captures the deck's state at a moment in time; expiry policy can regenerate cards on a schedule                                                           |
+| **#167 Print handout**                    | §9 presenter (#141 post-presentation recap)                                                        | Handout is the natural "takeaway" complement to the recap; both are export-style artifacts in the post-meeting flow                                                     |
+| **#168 Update propagation**               | §4 (#51 data refresh), §12 (#172 sales-mode notifications), §13 (#186 auto-updating shared slides) | Update propagation is the unifying event: data refresh (§4), notification (§12), and shared-slide updates (§13) all flow through the same `deck.updated` bus            |
+| **Custom domains (§14 #193)**             | §14 enterprise (#193 SSO, #194 brand governance, #196 audit logs, #197 residency)                  | Custom-domain provisioning is gated by enterprise SSO; per-region residency constraints affect where TLS certs/ACME accounts live                                       |
 
 ---
 
@@ -1217,7 +1267,7 @@ mcp.tool.list_share_links(deck_id) → [link]
 ## 12. Open Questions
 
 1. **Per-viewer asset variant caching cost** — at 1M viewers × 50 slides, variant cache is large. Need a retention policy (LRU 30d? LRU on first-non-view?). To resolve with storage team.
-2. **Forensic watermark claims leakage** — if a viewer screenshots and posts publicly, the claim is recoverable, but the *legal* chain of custody needs legal counsel review (per pre-dev §11.6).
+2. **Forensic watermark claims leakage** — if a viewer screenshots and posts publicly, the claim is recoverable, but the _legal_ chain of custody needs legal counsel review (per pre-dev §11.6).
 3. **Custom-domain rate limits** — LE has a 50 cert/week per-domain cap; bulk enterprise onboardings need a multi-CAA strategy or LE account pooling.
 4. **PDF/UA full compliance** — PDF/UA is a deep spec; v1 targets structural conformance with manual remediation for edge cases.
 
@@ -1230,6 +1280,7 @@ Section 11 elevates a deck from a file to a **versioned, addressable, governed s
 **File path:** `/home/daiyaan2002/Desktop/Projects/domio/docs/sharing-publishing.md`
 
 **Coverage:**
+
 - Features 155–168: all 14 features covered with acceptance criteria, behavior, and edge cases.
 - UX flows: link generation, access-level config, per-slide visibility, scroll preview, Notion embed, narrated autoplay, video/PDF/PPTX export — all 7 flows covered.
 - Functional + non-functional: all 15 sub-areas (renderer, scroll perf, access control, expiring links, watermarking, custom domain + TLS, white-label, embed sandboxing, narrated autoplay, video export, PDF/PPTX, SEO, social cards, handouts, update propagation).

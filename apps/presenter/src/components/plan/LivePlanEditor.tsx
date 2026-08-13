@@ -78,7 +78,14 @@ export function LivePlanEditor({
     <ul
       data-testid={dataTestId}
       role="list"
-      style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}
+      style={{
+        listStyle: 'none',
+        padding: 0,
+        margin: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+      }}
     >
       {order.map((id, index) => {
         const slide = slides.find((s) => s.slide_id === id);
@@ -106,10 +113,7 @@ export function LivePlanEditor({
             >
               {index + 1}.
             </span>
-            <span
-              data-testid={`${dataTestId}-title-${id}`}
-              style={{ flex: 1, fontSize: 12 }}
-            >
+            <span data-testid={`${dataTestId}-title-${id}`} style={{ flex: 1, fontSize: 12 }}>
               {slide?.title ?? id}
             </span>
             <button

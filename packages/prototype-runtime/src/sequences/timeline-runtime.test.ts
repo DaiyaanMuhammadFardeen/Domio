@@ -204,7 +204,9 @@ class FakeVisibility implements VisibilityLike {
   constructor(public initial = false) {
     this.hiddenVal = initial;
   }
-  get hidden() { return this.hiddenVal; }
+  get hidden() {
+    return this.hiddenVal;
+  }
   setHidden(v: boolean) {
     this.hiddenVal = v;
     for (const l of this.listeners) l();
@@ -232,7 +234,8 @@ describe('VisibilityListener', () => {
       clock: () => clock,
       onChange: (visible) => {
         states.push(visible ? 'visible' : 'hidden');
-        if (visible) r.resume(); else r.pause();
+        if (visible) r.resume();
+        else r.pause();
       },
     });
     l.attach();
@@ -260,7 +263,8 @@ describe('VisibilityListener', () => {
       document: doc,
       clock: () => clock,
       onChange: (visible) => {
-        if (visible) r.resume(); else r.pause();
+        if (visible) r.resume();
+        else r.pause();
       },
     });
     l.attach();

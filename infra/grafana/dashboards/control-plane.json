@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "control-plane"
-  ],
+  "tags": ["tier-2", "domio", "control-plane"],
   "panels": [
     {
       "id": 1,

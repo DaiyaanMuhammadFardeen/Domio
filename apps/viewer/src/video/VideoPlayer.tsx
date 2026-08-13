@@ -22,7 +22,11 @@ export interface VideoPlayerProps {
   readonly dataTestId?: string;
 }
 
-export function VideoPlayer({ layer, reducedMotion, dataTestId = 'video-player' }: VideoPlayerProps): ReactElement {
+export function VideoPlayer({
+  layer,
+  reducedMotion,
+  dataTestId = 'video-player',
+}: VideoPlayerProps): ReactElement {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Construct the runtime once per (assetId, chapters) pair so the
@@ -53,10 +57,7 @@ export function VideoPlayer({ layer, reducedMotion, dataTestId = 'video-player' 
   const posterMs = layer.posterFrameMs ?? 0;
 
   return (
-    <div
-      data-testid={dataTestId}
-      style={{ position: 'absolute', inset: 0, background: '#000' }}
-    >
+    <div data-testid={dataTestId} style={{ position: 'absolute', inset: 0, background: '#000' }}>
       <video
         ref={videoRef}
         src={url}

@@ -65,12 +65,18 @@ describe('theme-service handlers — tokens', () => {
   it('POST /v1/tokens creates a token', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createToken(
-      req('POST', '/v1/tokens', { orgId: ORG }, {
-        tokenId: 'color.brand.primary',
-        group: 'color' as never,
-        type: 'color',
-        value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/tokens',
+        { orgId: ORG },
+        {
+          tokenId: 'color.brand.primary',
+          group: 'color' as never,
+          type: 'color',
+          value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -79,12 +85,18 @@ describe('theme-service handlers — tokens', () => {
   it('POST /v1/tokens 400s on invalid format', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createToken(
-      req('POST', '/v1/tokens', { orgId: ORG }, {
-        tokenId: 'Invalid-Format',
-        group: 'color' as never,
-        type: 'color',
-        value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/tokens',
+        { orgId: ORG },
+        {
+          tokenId: 'Invalid-Format',
+          group: 'color' as never,
+          type: 'color',
+          value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -93,12 +105,18 @@ describe('theme-service handlers — tokens', () => {
   it('GET /v1/tokens lists tokens', async () => {
     const { ctx } = makeCtx();
     await handlers.createToken(
-      req('POST', '/v1/tokens', { orgId: ORG }, {
-        tokenId: 'color.brand.primary',
-        group: 'color' as never,
-        type: 'color',
-        value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/tokens',
+        { orgId: ORG },
+        {
+          tokenId: 'color.brand.primary',
+          group: 'color' as never,
+          type: 'color',
+          value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     const res = await handlers.listTokens(
@@ -123,11 +141,18 @@ describe('theme-service handlers — tokens', () => {
       orgId: ORG,
       deckId: 'd',
       scope: { kind: 'slide', slideId: 's1' },
-      tokensPartial: new Map([['color.brand.primary', { type: 'color', value: { space: 'srgb', channels: [0.9, 0.1, 0.1], alpha: 1 } }]]),
+      tokensPartial: new Map([
+        [
+          'color.brand.primary',
+          { type: 'color', value: { space: 'srgb', channels: [0.9, 0.1, 0.1], alpha: 1 } },
+        ],
+      ]),
       createdBy: ACTOR,
     });
     const res = await handlers.deleteToken(
-      req('DELETE', '/v1/tokens/:id', { orgId: ORG, tokenId: 'color.brand.primary' }, undefined, { actorId: ACTOR }),
+      req('DELETE', '/v1/tokens/:id', { orgId: ORG, tokenId: 'color.brand.primary' }, undefined, {
+        actorId: ACTOR,
+      }),
       ctx,
     );
     expect(res.status).toBe(409);
@@ -145,7 +170,9 @@ describe('theme-service handlers — tokens', () => {
       createdBy: ACTOR,
     });
     const res = await handlers.deleteToken(
-      req('DELETE', '/v1/tokens/:id', { orgId: ORG, tokenId: 'color.unused' }, undefined, { actorId: ACTOR }),
+      req('DELETE', '/v1/tokens/:id', { orgId: ORG, tokenId: 'color.unused' }, undefined, {
+        actorId: ACTOR,
+      }),
       ctx,
     );
     expect(res.status).toBe(204);
@@ -156,11 +183,23 @@ describe('theme-service handlers — aliases', () => {
   it('POST /v1/aliases 409s on cycle', async () => {
     const { ctx } = makeCtx();
     await handlers.createAlias(
-      req('POST', '/v1/aliases', { orgId: ORG }, { aliasTokenId: 'a', targetTokenId: 'b' }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/aliases',
+        { orgId: ORG },
+        { aliasTokenId: 'a', targetTokenId: 'b' },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     const res = await handlers.createAlias(
-      req('POST', '/v1/aliases', { orgId: ORG }, { aliasTokenId: 'b', targetTokenId: 'a' }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/aliases',
+        { orgId: ORG },
+        { aliasTokenId: 'b', targetTokenId: 'a' },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(409);
@@ -172,11 +211,22 @@ describe('theme-service handlers — themes + apply', () => {
   it('POST /v1/themes creates a theme', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.createTheme(
-      req('POST', '/v1/themes', { orgId: ORG }, {
-        name: 'Sunrise',
-        kind: 'user',
-        tokens: new Map([['color.brand.primary', { type: 'color', value: { space: 'srgb', channels: [1, 0.5, 0], alpha: 1 } }]]),
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/themes',
+        { orgId: ORG },
+        {
+          name: 'Sunrise',
+          kind: 'user',
+          tokens: new Map([
+            [
+              'color.brand.primary',
+              { type: 'color', value: { space: 'srgb', channels: [1, 0.5, 0], alpha: 1 } },
+            ],
+          ]),
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(res.status).toBe(201);
@@ -185,22 +235,43 @@ describe('theme-service handlers — themes + apply', () => {
   it('POST /v1/themes/:id/apply produces ops + records latency metric', async () => {
     const { ctx, metrics } = makeCtx();
     const createRes = await handlers.createTheme(
-      req('POST', '/v1/themes', { orgId: ORG }, {
-        name: 'Sunrise',
-        kind: 'user',
-        tokens: new Map([['color.brand.primary', { type: 'color', value: { space: 'srgb', channels: [1, 0.5, 0], alpha: 1 } }]]),
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/themes',
+        { orgId: ORG },
+        {
+          name: 'Sunrise',
+          kind: 'user',
+          tokens: new Map([
+            [
+              'color.brand.primary',
+              { type: 'color', value: { space: 'srgb', channels: [1, 0.5, 0], alpha: 1 } },
+            ],
+          ]),
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     const themeId = (createRes.body as { themeId: string }).themeId;
     const res = await handlers.applyTheme(
-      req('POST', '/v1/themes/:id/apply', { orgId: ORG, themeId }, {
-        deckId: 'deck-1',
-        actorId: ACTOR,
-        deckElements: [
-          { slideId: 's1', elementId: 'e1', tokenRef: 'color.brand.primary', currentResolved: null },
-        ],
-      }),
+      req(
+        'POST',
+        '/v1/themes/:id/apply',
+        { orgId: ORG, themeId },
+        {
+          deckId: 'deck-1',
+          actorId: ACTOR,
+          deckElements: [
+            {
+              slideId: 's1',
+              elementId: 'e1',
+              tokenRef: 'color.brand.primary',
+              currentResolved: null,
+            },
+          ],
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -213,11 +284,17 @@ describe('theme-service handlers — overrides', () => {
   it('POST /v1/overrides + GET /v1/overrides', async () => {
     const { ctx } = makeCtx();
     const create = await handlers.createOverride(
-      req('POST', '/v1/overrides', { orgId: ORG }, {
-        deckId: 'deck-1',
-        scope: { kind: 'slide', slideId: 'slide-4' },
-        tokensPartial: new Map(),
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/overrides',
+        { orgId: ORG },
+        {
+          deckId: 'deck-1',
+          scope: { kind: 'slide', slideId: 'slide-4' },
+          tokensPartial: new Map(),
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     expect(create.status).toBe(201);
@@ -239,12 +316,18 @@ describe('theme-service handlers — ACL + audit', () => {
     };
     await expect(
       handlers.createToken(
-        req('POST', '/v1/tokens', { orgId: ORG }, {
-          tokenId: 'color.brand.primary',
-          group: 'color' as never,
-          type: 'color',
-          value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
-        }, { actorId: ACTOR }),
+        req(
+          'POST',
+          '/v1/tokens',
+          { orgId: ORG },
+          {
+            tokenId: 'color.brand.primary',
+            group: 'color' as never,
+            type: 'color',
+            value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
+          },
+          { actorId: ACTOR },
+        ),
         ctx,
       ),
     ).rejects.toThrow('Forbidden');
@@ -253,12 +336,18 @@ describe('theme-service handlers — ACL + audit', () => {
   it('records audit events on writes', async () => {
     const { ctx, audit } = makeCtx();
     await handlers.createToken(
-      req('POST', '/v1/tokens', { orgId: ORG }, {
-        tokenId: 'color.brand.primary',
-        group: 'color' as never,
-        type: 'color',
-        value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
-      }, { actorId: ACTOR }),
+      req(
+        'POST',
+        '/v1/tokens',
+        { orgId: ORG },
+        {
+          tokenId: 'color.brand.primary',
+          group: 'color' as never,
+          type: 'color',
+          value: { type: 'color', value: { space: 'srgb', channels: [0.5, 0.5, 0.5], alpha: 1 } },
+        },
+        { actorId: ACTOR },
+      ),
       ctx,
     );
     const events = await audit.listByOrg(ORG);

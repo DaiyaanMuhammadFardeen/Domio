@@ -4,12 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  COMMANDS,
-  INSTALLS,
-  EXAMPLES,
-  type CliOs,
-} from './cli-data';
+import { COMMANDS, INSTALLS, EXAMPLES, type CliOs } from './cli-data';
 
 describe('cli-data', () => {
   it('exports a non-empty COMMANDS list', () => {

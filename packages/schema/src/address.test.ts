@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  DefaultAddressResolver,
-  isValidSemanticAddress,
-  type AddressSegment,
-} from './address.js';
+import { DefaultAddressResolver, isValidSemanticAddress, type AddressSegment } from './address.js';
 import { validate } from './validate.js';
 import type { DeckDocument } from './generated/scene-graph.js';
 import { asULID } from './generated/scene-graph.js';
@@ -137,9 +133,7 @@ describe('DefaultAddressResolver', () => {
   });
 
   it('returns null for missing slides', () => {
-    expect(
-      new DefaultAddressResolver().resolve(minimalDeck, 'slide[missing]'),
-    ).toBeNull();
+    expect(new DefaultAddressResolver().resolve(minimalDeck, 'slide[missing]')).toBeNull();
   });
 
   it('returns null for missing elements on existing slide', () => {
@@ -154,10 +148,7 @@ describe('DefaultAddressResolver', () => {
       slides: [
         {
           ...minimalDeck.slides[0]!,
-          elements: [
-            minimalDeck.slides[0]!.elements[0]!,
-            minimalDeck.slides[0]!.elements[0]!,
-          ],
+          elements: [minimalDeck.slides[0]!.elements[0]!, minimalDeck.slides[0]!.elements[0]!],
         },
       ],
     };
@@ -219,8 +210,8 @@ describe('AddressResolver API surface', () => {
     const resolver = new DefaultAddressResolver();
     expect(resolver.parse('slide[intro]')).toHaveLength(1);
     expect(resolver.resolve(minimalDeck, 'slide[intro]')).not.toBeNull();
-    expect(
-      resolver.addressOf(minimalDeck, { slideIndex: 0, elementIndex: 2 }),
-    ).toBe('slide[intro].text[title]');
+    expect(resolver.addressOf(minimalDeck, { slideIndex: 0, elementIndex: 2 })).toBe(
+      'slide[intro].text[title]',
+    );
   });
 });

@@ -39,15 +39,7 @@ export interface GroupTransformHandleProps {
   onRotateStart?: () => void;
 }
 
-export type ResizeEdge =
-  | 'nw'
-  | 'n'
-  | 'ne'
-  | 'w'
-  | 'e'
-  | 'sw'
-  | 's'
-  | 'se';
+export type ResizeEdge = 'nw' | 'n' | 'ne' | 'w' | 'e' | 'sw' | 's' | 'se';
 
 const HANDLE_SIZE_SLIDE = 8;
 
@@ -77,9 +69,7 @@ function unionAabb(elements: ReadonlyArray<Element>): Aabb | null {
   return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
 }
 
-export function GroupTransformHandle(
-  props: GroupTransformHandleProps,
-): ReactElement | null {
+export function GroupTransformHandle(props: GroupTransformHandleProps): ReactElement | null {
   const { elements, slideWidth, slideHeight, onResizeStart, onRotateStart } = props;
   const { zoom, pan } = useViewport();
 

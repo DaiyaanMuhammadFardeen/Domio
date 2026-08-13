@@ -25,10 +25,7 @@ import {
   outOfRangeError,
 } from './store.js';
 import { type IdempotencyStore, InMemoryIdempotencyStore } from './idempotency/index.js';
-import {
-  type QuizAuditEmitter,
-  type QuizAuditEvent,
-} from './audit/emit.js';
+import { type QuizAuditEmitter, type QuizAuditEvent } from './audit/emit.js';
 import { type QuizEngineMetrics, NullQuizEngineMetrics } from './observability/metrics.js';
 
 export interface QuizEngineOptions {
@@ -134,7 +131,12 @@ export class QuizEngine {
     if (!current) throw notFoundError(quiz_id);
     if (current.status !== 'draft') throw closedError(quiz_id);
     const ts = this.now_ms();
-    const next: Quiz = { ...current, status: 'open', updated_at_ms: ts, version: current.version + 1 };
+    const next: Quiz = {
+      ...current,
+      status: 'open',
+      updated_at_ms: ts,
+      version: current.version + 1,
+    };
     const updated = await this.store.update({ quiz_id, expected_version, next });
     await this.emitAudit({
       actor_id,
@@ -155,7 +157,12 @@ export class QuizEngine {
     if (!current) throw notFoundError(quiz_id);
     if (current.status !== 'open') throw closedError(quiz_id);
     const ts = this.now_ms();
-    const next: Quiz = { ...current, status: 'closed', updated_at_ms: ts, version: current.version + 1 };
+    const next: Quiz = {
+      ...current,
+      status: 'closed',
+      updated_at_ms: ts,
+      version: current.version + 1,
+    };
     const updated = await this.store.update({ quiz_id, expected_version, next });
     await this.emitAudit({
       actor_id,
@@ -176,7 +183,10 @@ export class QuizEngine {
     if (!quiz) throw notFoundError(input.quiz_id);
     const existing = await this.store.listQuestions(input.quiz_id);
     const choices: QuizChoice[] = input.choices.map((c, i) => ({ index: i, label: c.label }));
-    if (input.correct_index !== null && (input.correct_index < 0 || input.correct_index >= choices.length)) {
+    if (
+      input.correct_index !== null &&
+      (input.correct_index < 0 || input.correct_index >= choices.length)
+    ) {
       throw outOfRangeError(input.correct_index, choices.length);
     }
     const question: QuizQuestion = {
@@ -223,7 +233,8 @@ export class QuizEngine {
     if (input.choice_index < 0 || input.choice_index >= question.choices.length) {
       throw outOfRangeError(input.choice_index, question.choices.length);
     }
-    const is_correct = question.correct_index !== null && input.choice_index === question.correct_index;
+    const is_correct =
+      question.correct_index !== null && input.choice_index === question.correct_index;
     const points_awarded = is_correct ? question.points : 0;
     const server_offset_ms = input.participant_claimed_at_ms
       ? this.now_ms() - input.participant_claimed_at_ms
@@ -262,7 +273,9 @@ export class QuizEngine {
       after: { choice_index: ans.choice_index, is_correct, points_awarded },
     });
     this.metrics.answers.inc(1, { workspace_id: input.workspace_id });
-    this.metrics.answer_latency_ms.observe(this.now_ms() - start, { workspace_id: input.workspace_id });
+    this.metrics.answer_latency_ms.observe(this.now_ms() - start, {
+      workspace_id: input.workspace_id,
+    });
     await this.bus.publish({
       session_id: quiz.session_id,
       topic: 'quiz',

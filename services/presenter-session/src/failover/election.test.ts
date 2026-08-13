@@ -17,15 +17,23 @@ function fixedClock(start = 1_000_000) {
   let now = start;
   return {
     fn: () => now,
-    advance: (ms: number) => { now += ms; },
-    set: (ms: number) => { now = ms; },
+    advance: (ms: number) => {
+      now += ms;
+    },
+    set: (ms: number) => {
+      now = ms;
+    },
   };
 }
 
 describe('election', () => {
   it('claims primary when no primary is alive', async () => {
     const ck = fixedClock();
-    const e = new Election({ candidateId: 'pod_a', store: new InMemoryElectionStore(), clock: ck.fn });
+    const e = new Election({
+      candidateId: 'pod_a',
+      store: new InMemoryElectionStore(),
+      clock: ck.fn,
+    });
     const res = await e.tryClaim();
     expect(res.claimed).toBe(true);
     if (!res.claimed) return;

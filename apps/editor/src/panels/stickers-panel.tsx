@@ -79,12 +79,7 @@ function StickerCard({
 }): ReactElement {
   const def = getComponent(catalogId);
   return (
-    <button
-      type="button"
-      className="sticker-card"
-      onClick={onInsert}
-      disabled={!def}
-    >
+    <button type="button" className="sticker-card" onClick={onInsert} disabled={!def}>
       <span className="sticker-card__label">{label}</span>
       <span className="sticker-card__catalog">{catalogId}</span>
     </button>

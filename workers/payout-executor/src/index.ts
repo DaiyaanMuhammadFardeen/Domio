@@ -2,10 +2,7 @@
  * @domio/payout-executor-worker — barrel export.
  */
 
-export {
-  PayoutExecutorWorker,
-  InMemoryPayoutProvider,
-} from './payout.js';
+export { PayoutExecutorWorker, InMemoryPayoutProvider } from './payout.js';
 
 export type {
   PayoutPolicy,

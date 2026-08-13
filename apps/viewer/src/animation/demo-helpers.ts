@@ -28,7 +28,14 @@ export interface ScrollDemoState {
 // ─── Transition kind cycle ──────────────────────────────────────
 
 export const DEMO_TRANSITION_KINDS = [
-  'slide', 'fade', 'wipe', 'zoom', 'flip', 'bubble', 'cube', 'shutter',
+  'slide',
+  'fade',
+  'wipe',
+  'zoom',
+  'flip',
+  'bubble',
+  'cube',
+  'shutter',
 ] as const;
 
 export type DemoTransitionKind = (typeof DEMO_TRANSITION_KINDS)[number];

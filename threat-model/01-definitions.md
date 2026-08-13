@@ -3,7 +3,7 @@
 Each file in `threat-model/components/<unit>.md` follows this shape:
 
 ```yaml
-unit: api-gateway  # matches the binary name + the file basename
+unit: api-gateway # matches the binary name + the file basename
 owner: editor-platform@example.com
 stride:
   S:

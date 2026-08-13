@@ -177,9 +177,7 @@ function buildLayout(id: string, kind: LayoutKind, prompt: string): LayoutDescri
  * today returns deterministic offline fallbacks; the request shape
  * matches the live endpoint.
  */
-export async function generateLayouts(
-  req: GenerateLayoutsRequest,
-): Promise<GenerateLayoutsResult> {
+export async function generateLayouts(req: GenerateLayoutsRequest): Promise<GenerateLayoutsResult> {
   const prompt = req.prompt.trim() || 'Untitled deck';
   const seed = hash(prompt) + (req.themeId?.length ?? 0);
   const kinds = pickKinds(seed);
@@ -187,8 +185,8 @@ export async function generateLayouts(
     buildLayout(`layout-${seed.toString(36)}-${i}`, kind, prompt),
   );
 
-  const theme: ThemeBootstrap = BOOTSTRAP_THEMES.find((t) => t.id === req.themeId)
-    ?? firstAvailableTheme();
+  const theme: ThemeBootstrap =
+    BOOTSTRAP_THEMES.find((t) => t.id === req.themeId) ?? firstAvailableTheme();
 
   return { layouts, theme, live: false };
 }
@@ -202,33 +200,34 @@ export async function generateLayouts(
  * preserves the slide's existing content (typography + density only);
  * full mode can re-suggest titles while keeping brand constraints.
  */
-export async function redesignSlide(
-  req: RedesignRequest,
-): Promise<RedesignResult> {
+export async function redesignSlide(req: RedesignRequest): Promise<RedesignResult> {
   const seed = hash(req.slideId + req.mode);
   const kind = KINDS[seed % KINDS.length]!;
   const preservedContent = req.currentContent ?? [];
 
-  const blocks = req.mode === 'light'
-    ? preservedContent.length > 0
-      ? preservedContent
-      : KIND_BLOCKS[kind]
-    : KIND_BLOCKS[kind];
+  const blocks =
+    req.mode === 'light'
+      ? preservedContent.length > 0
+        ? preservedContent
+        : KIND_BLOCKS[kind]
+      : KIND_BLOCKS[kind];
 
   const redesign: RedesignSlide = {
     id: `redesign-${req.slideId}-${seed.toString(36)}`,
     kind,
-    title: req.mode === 'light'
-      ? preservedContent[0] ?? 'Untitled slide'
-      : `${KIND_TITLES[kind]} — refined`,
-    caption: req.mode === 'light'
-      ? 'Density + typography adjusted to brand tokens.'
-      : 'Rebuilt with current brand-kit palette + spacing scale.',
+    title:
+      req.mode === 'light'
+        ? (preservedContent[0] ?? 'Untitled slide')
+        : `${KIND_TITLES[kind]} — refined`,
+    caption:
+      req.mode === 'light'
+        ? 'Density + typography adjusted to brand tokens.'
+        : 'Rebuilt with current brand-kit palette + spacing scale.',
     blocks,
   };
 
-  const theme: ThemeBootstrap = BOOTSTRAP_THEMES.find((t) => t.id === req.themeId)
-    ?? firstAvailableTheme();
+  const theme: ThemeBootstrap =
+    BOOTSTRAP_THEMES.find((t) => t.id === req.themeId) ?? firstAvailableTheme();
 
   return {
     originalSlideId: req.slideId,
@@ -245,6 +244,6 @@ export async function redesignSlide(
 // been run yet but the user wants to see what options look like.
 // ---------------------------------------------------------------------------
 
-export const BOOTSTRAP_LAYOUTS: readonly LayoutDescriptor[] = KINDS.slice(0, 4).map(
-  (kind, i) => buildLayout(`bootstrap-${i}`, kind, 'Bootstrap preview'),
+export const BOOTSTRAP_LAYOUTS: readonly LayoutDescriptor[] = KINDS.slice(0, 4).map((kind, i) =>
+  buildLayout(`bootstrap-${i}`, kind, 'Bootstrap preview'),
 );

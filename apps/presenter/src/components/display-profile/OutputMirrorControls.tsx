@@ -40,7 +40,11 @@ export interface OutputMirrorControlsProps {
 const MODES: ReadonlyArray<{ id: MirrorMode; label: string; hint: string }> = [
   { id: 'extend', label: 'Extend', hint: 'Confidence monitor on laptop, slide on audience.' },
   { id: 'clone', label: 'Clone', hint: 'Both screens show the same content.' },
-  { id: 'audience_only', label: 'Audience only', hint: 'Laptop dark; only the audience screen renders.' },
+  {
+    id: 'audience_only',
+    label: 'Audience only',
+    hint: 'Laptop dark; only the audience screen renders.',
+  },
 ];
 
 export function OutputMirrorControls({
@@ -76,8 +80,8 @@ export function OutputMirrorControls({
           {
             id: 'laptop',
             label: 'Built-in laptop screen',
-            width: typeof window !== 'undefined' ? window.screen?.width ?? 1920 : 1920,
-            height: typeof window !== 'undefined' ? window.screen?.height ?? 1080 : 1080,
+            width: typeof window !== 'undefined' ? (window.screen?.width ?? 1920) : 1920,
+            height: typeof window !== 'undefined' ? (window.screen?.height ?? 1080) : 1080,
           },
         ];
 
@@ -132,7 +136,15 @@ export function OutputMirrorControls({
         })}
       </div>
 
-      <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 11, color: 'var(--content-secondary)' }}>
+      <label
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+          fontSize: 11,
+          color: 'var(--content-secondary)',
+        }}
+      >
         Audience display
         <select
           value={internalTarget ?? ''}

@@ -42,8 +42,8 @@ describe('FillerWordCounter', () => {
       />,
     );
     const list = screen.getByTestId('filler-counter-list');
-    const items = Array.from(list.querySelectorAll('li')).map(
-      (li) => li.getAttribute('data-testid'),
+    const items = Array.from(list.querySelectorAll('li')).map((li) =>
+      li.getAttribute('data-testid'),
     );
     expect(items).toEqual([
       'filler-counter-row-um',
@@ -53,12 +53,7 @@ describe('FillerWordCounter', () => {
   });
 
   it('flags High band when rate is above 5/min', () => {
-    render(
-      <FillerWordCounter
-        counts={[{ phrase: 'um', count: 12 }]}
-        elapsedMs={60_000}
-      />,
-    );
+    render(<FillerWordCounter counts={[{ phrase: 'um', count: 12 }]} elapsedMs={60_000} />);
     expect(screen.getByTestId('filler-counter-band').textContent).toBe('High');
   });
 });

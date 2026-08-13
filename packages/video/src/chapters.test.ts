@@ -8,8 +8,8 @@ describe('createChapterList', () => {
       { title: 'A', startMs: 1000 },
       { title: 'B', startMs: 2000 },
     ]);
-    expect(list.chapters.map(c => c.title)).toEqual(['A', 'B', 'C']);
-    expect(list.chapters.map(c => c.startMs)).toEqual([1000, 2000, 3000]);
+    expect(list.chapters.map((c) => c.title)).toEqual(['A', 'B', 'C']);
+    expect(list.chapters.map((c) => c.startMs)).toEqual([1000, 2000, 3000]);
   });
 
   it('returns empty list for empty input', () => {

@@ -31,7 +31,11 @@ export interface KeyRotationStore {
   /** Active key for a (tenant, deck) pair. */
   findActive(tenant_id: string, deck_id: string, now: number): Promise<DeepLinkSigningKey | null>;
   /** All keys valid at `now` for a (tenant, deck) pair (active + retiring). */
-  findValid(tenant_id: string, deck_id: string, now: number): Promise<readonly DeepLinkSigningKey[]>;
+  findValid(
+    tenant_id: string,
+    deck_id: string,
+    now: number,
+  ): Promise<readonly DeepLinkSigningKey[]>;
   /** Mark all keys as retired past their `not_after`. */
   retireExpired(now: number): Promise<number>;
 }
@@ -102,12 +106,13 @@ export class KeyRotator {
    * The decoder tries each in order; the first that HMAC-verifies
    * wins.
    */
-  async verificationKeys(tenant_id: string, deck_id: string): Promise<readonly DeepLinkSigningKey[]> {
+  async verificationKeys(
+    tenant_id: string,
+    deck_id: string,
+  ): Promise<readonly DeepLinkSigningKey[]> {
     const now = this.clock();
     const all = await this.store.findValid(tenant_id, deck_id, now);
-    return all.filter(
-      (k) => k.not_before <= now && now <= k.not_after + OVERLAP_MS,
-    );
+    return all.filter((k) => k.not_before <= now && now <= k.not_after + OVERLAP_MS);
   }
 
   /** Sweep expired keys; returns the count of retired rows. */

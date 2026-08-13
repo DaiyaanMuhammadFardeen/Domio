@@ -62,18 +62,21 @@ export function FreshnessChecker({
     }
   }, [deckId, baseUrl]);
 
-  const openUpdate = useCallback(async (claim: FreshnessClaim) => {
-    setLoadingId(claim.id);
-    setError(null);
-    try {
-      const res = await suggestFreshnessUpdate(deckId, { claimId: claim.id }, baseUrl);
-      setUpdate(res);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'update failed');
-    } finally {
-      setLoadingId(null);
-    }
-  }, [deckId, baseUrl]);
+  const openUpdate = useCallback(
+    async (claim: FreshnessClaim) => {
+      setLoadingId(claim.id);
+      setError(null);
+      try {
+        const res = await suggestFreshnessUpdate(deckId, { claimId: claim.id }, baseUrl);
+        setUpdate(res);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'update failed');
+      } finally {
+        setLoadingId(null);
+      }
+    },
+    [deckId, baseUrl],
+  );
 
   const accept = useCallback(() => {
     if (!update) return;
@@ -90,9 +93,7 @@ export function FreshnessChecker({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <CalendarClock size={16} className="text-amber-400" />
-          <h2 className="text-sm font-semibold text-slate-100">
-            Freshness
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-100">Freshness</h2>
         </div>
         <button
           type="button"
@@ -178,10 +179,11 @@ export function FreshnessChecker({
           className="rounded-md border border-amber-500/40 bg-amber-500/5 p-2.5"
           data-testid="freshness-update"
         >
-          <p className="text-[11px] font-semibold text-amber-300">
-            Suggested update
-          </p>
-          <p className="mt-1 rounded bg-slate-800/60 p-1.5 text-[11px] text-slate-200" data-testid="freshness-update-replacement">
+          <p className="text-[11px] font-semibold text-amber-300">Suggested update</p>
+          <p
+            className="mt-1 rounded bg-slate-800/60 p-1.5 text-[11px] text-slate-200"
+            data-testid="freshness-update-replacement"
+          >
             {update.replacement}
           </p>
           {update.rationale ? (

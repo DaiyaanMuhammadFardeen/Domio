@@ -11,10 +11,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  NAV_GRAPH,
-  SURFACE_ROOTS,
-} from './nav-graph.js';
+import { NAV_GRAPH, SURFACE_ROOTS } from './nav-graph.js';
 import {
   nodeById,
   nodeByHref,

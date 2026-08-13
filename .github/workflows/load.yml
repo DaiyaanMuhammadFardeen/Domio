@@ -23,7 +23,7 @@ permissions:
 
 concurrency:
   group: load-${{ github.ref }}
-  cancel-in-progress: false  # never cancel a nightly load run
+  cancel-in-progress: false # never cancel a nightly load run
 
 jobs:
   setup:

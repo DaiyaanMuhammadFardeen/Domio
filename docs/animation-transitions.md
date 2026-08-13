@@ -581,7 +581,7 @@ CREATE INDEX idx_export_jobs_status ON export_jobs (status);
     "easing_curve_id": "ec_out_cubic",
     "is_scroll_linked": false,
     "keyframes": [
-      { "time_ms": 0,   "value": 100, "hold": false },
+      { "time_ms": 0, "value": 100, "hold": false },
       { "time_ms": 600, "value": 240, "hold": false }
     ]
   },
@@ -592,8 +592,8 @@ CREATE INDEX idx_export_jobs_status ON export_jobs (status);
     "easing_curve_id": "ec_in_out_quad",
     "is_scroll_linked": false,
     "keyframes": [
-      { "time_ms": 0,   "value": 0,   "hold": false },
-      { "time_ms": 400, "value": 1,   "hold": false }
+      { "time_ms": 0, "value": 0, "hold": false },
+      { "time_ms": 400, "value": 1, "hold": false }
     ]
   }
 ]
@@ -635,6 +635,7 @@ CREATE INDEX idx_export_jobs_status ON export_jobs (status);
 ```
 
 `value` is JSON-typed to match `property_type`:
+
 - `number` → JSON number
 - `color` → `{"r": 1, "g": 0.5, "b": 0, "a": 1}` (linear-space) or CSS string
 - `length` → `{"value": 24, "unit": "px"}`
@@ -667,9 +668,9 @@ CREATE INDEX idx_export_jobs_status ON export_jobs (status);
 [
   {
     "from_element_id": "el_abc",
-    "to_element_id":   "el_def",
-    "element_role":    "title",
-    "similarity":      0.94,
+    "to_element_id": "el_def",
+    "element_role": "title",
+    "similarity": 0.94,
     "signals": {
       "shape_similarity": 0.97,
       "position_distance_norm": 0.18,
@@ -678,10 +679,10 @@ CREATE INDEX idx_export_jobs_status ON export_jobs (status);
     },
     "diffs": {
       "transform": { "tx": 500, "ty": -100, "sx": 1, "sy": 1, "r": 0 },
-      "size":      { "w": 0, "h": 0 },
-      "fill":      { "from": "#1F2937", "to": "#0F172A" },
-      "opacity":   { "from": 1, "to": 1 },
-      "text":      { "font_size": 0, "weight_delta": 0 }
+      "size": { "w": 0, "h": 0 },
+      "fill": { "from": "#1F2937", "to": "#0F172A" },
+      "opacity": { "from": 1, "to": 1 },
+      "text": { "font_size": 0, "weight_delta": 0 }
     }
   }
 ]
@@ -725,10 +726,10 @@ DELETE /v1/timelines/{timeline_id}
 // TypeScript-flavored shapes (server is Postgres; client treats as canonical).
 type TimelineCreate = {
   element_id: string;
-  duration_ms: number;            // 1..600000
+  duration_ms: number; // 1..600000
   loop: boolean;
   play_count: number | null;
-  start_offset_ms: number;        // >= 0
+  start_offset_ms: number; // >= 0
   tracks: Track[];
   triggers: Trigger[];
   preset_id?: string | null;
@@ -737,7 +738,7 @@ type TimelineCreate = {
 type Track = {
   id?: string;
   property_path: string;
-  property_type: "number" | "color" | "length" | "transform" | "string";
+  property_type: 'number' | 'color' | 'length' | 'transform' | 'string';
   easing_curve_id: string;
   is_scroll_linked: boolean;
   keyframes: Keyframe[];
@@ -745,16 +746,25 @@ type Track = {
 
 type Keyframe = {
   time_ms: number;
-  value: unknown;                 // typed per property_type
+  value: unknown; // typed per property_type
   hold?: boolean;
 };
 
 type Trigger =
-  | { kind: "on_click"; config: {} }
-  | { kind: "on_enter"; config: {} }
-  | { kind: "on_hover"; config: {} }
-  | { kind: "on_data_change"; config: { source_id: string; field_path: string } }
-  | { kind: "on_timer"; config: { offset_ms: number; from: "slide_enter" | "prior_animation_end" } };
+  | { kind: 'on_click'; config: {} }
+  | { kind: 'on_enter'; config: {} }
+  | { kind: 'on_hover'; config: {} }
+  | {
+      kind: 'on_data_change';
+      config: { source_id: string; field_path: string };
+    }
+  | {
+      kind: 'on_timer';
+      config: {
+        offset_ms: number;
+        from: 'slide_enter' | 'prior_animation_end';
+      };
+    };
 ```
 
 Error responses: 400 invalid body, 404 deck/slide/timeline not found, 409 optimistic-lock conflict (response includes `current_etag`), 422 type mismatch (e.g., keyframe on incompatible property), 429 rate limited.
@@ -871,7 +881,7 @@ User-defined cubic-bezier and spring curves are pure data; they are evaluated in
 Per-user and per-workspace caps protect the render pool:
 
 | Tier       | Per-user daily | Per-workspace daily | Concurrent jobs | Max resolution |
-|------------|----------------|---------------------|-----------------|----------------|
+| ---------- | -------------- | ------------------- | --------------- | -------------- |
 | Free       | 5              | 20                  | 1               | 480p           |
 | Pro        | 50             | 200                 | 3               | 1080p          |
 | Enterprise | 500            | (negotiated)        | 10              | 1080p          |
@@ -912,12 +922,12 @@ Rate-limit responses are HTTP 429 with `Retry-After` and `X-RateLimit-Remaining`
 ### 8.3 GIF / video export budget per slide
 
 | Format | Resolution | FPS | Duration | Budget (wall) | Output cap |
-|--------|------------|-----|----------|---------------|-----------:|
-| GIF    | 480p       | 15  | 6 s      | ≤ 12 s        | 8 MB       |
-| GIF    | 480p       | 15  | 10 s     | ≤ 22 s        | 12 MB      |
-| MP4    | 720p       | 30  | 10 s     | ≤ 30 s        | 25 MB      |
-| MP4    | 1080p      | 30  | 10 s     | ≤ 60 s        | 60 MB      |
-| WebM   | 720p       | 30  | 10 s     | ≤ 30 s        | 20 MB      |
+| ------ | ---------- | --- | -------- | ------------- | ---------: |
+| GIF    | 480p       | 15  | 6 s      | ≤ 12 s        |       8 MB |
+| GIF    | 480p       | 15  | 10 s     | ≤ 22 s        |      12 MB |
+| MP4    | 720p       | 30  | 10 s     | ≤ 30 s        |      25 MB |
+| MP4    | 1080p      | 30  | 10 s     | ≤ 60 s        |      60 MB |
+| WebM   | 720p       | 30  | 10 s     | ≤ 30 s        |      20 MB |
 
 Per-job budget: a 50-slide MP4 export at 720p must complete ≤ 25 min wall time. Above that, the worker marks the job `failed` with `error_message = "wall_budget_exceeded"` and the client offers a lower-resolution retry.
 
@@ -965,16 +975,16 @@ Events of interest: `timeline.created`, `timeline.updated`, `timeline.deleted`, 
 
 ### 9.2 Metrics
 
-| Metric | Type | Labels | Use |
-|--------|------|--------|-----|
-| `animation.frame_time_ms` | histogram | deck_id, slide_id | NFR-1 budget alerting |
-| `animation.active_tracks` | gauge | deck_id | Detect hot decks |
-| `magic_move.compute_ms` | histogram | cached | NFR-2 budget alerting |
-| `magic_move.cache_hit_ratio` | gauge | — | Cache effectiveness |
-| `export.wall_time_ms` | histogram | format, resolution | NFR-3 budget alerting |
-| `export.queue_depth` | gauge | — | Backpressure detection |
-| `reduced_motion.viewer_count` | gauge | mode | Product analytics |
-| `bezier.rejected_total` | counter | reason | Detect authoring friction |
+| Metric                        | Type      | Labels             | Use                       |
+| ----------------------------- | --------- | ------------------ | ------------------------- |
+| `animation.frame_time_ms`     | histogram | deck_id, slide_id  | NFR-1 budget alerting     |
+| `animation.active_tracks`     | gauge     | deck_id            | Detect hot decks          |
+| `magic_move.compute_ms`       | histogram | cached             | NFR-2 budget alerting     |
+| `magic_move.cache_hit_ratio`  | gauge     | —                  | Cache effectiveness       |
+| `export.wall_time_ms`         | histogram | format, resolution | NFR-3 budget alerting     |
+| `export.queue_depth`          | gauge     | —                  | Backpressure detection    |
+| `reduced_motion.viewer_count` | gauge     | mode               | Product analytics         |
+| `bezier.rejected_total`       | counter   | reason             | Detect authoring friction |
 
 Alerts fire on:
 
@@ -1007,6 +1017,7 @@ magic_move.compute
 ### 9.4 Test plan
 
 - **Unit (≥ 80% coverage in `animation/`, `magic_move/`, `easing/`):**
+
   - Bezier solver monotonicity and LUT clamping.
   - Spring solver determinism across N=10,000 randomized inputs.
   - Stagger direction ordering (`forward | reverse | center-out | random`).
@@ -1014,21 +1025,25 @@ magic_move.compute
   - Reduced-motion clamping logic.
 
 - **Integration:**
+
   - Timeline CRUD round-trips preserve every field including JSONB tracks.
   - Magic-move cache invalidation fires on slide edits.
   - Export job submission → completion with a 5-slide GIF fixture.
 
 - **End-to-end (Playwright):**
+
   - "Author a keyframe, preview, save, reload" → state is identical.
   - "Toggle OS reduced-motion preference" → player switches modes.
   - "Submit GIF export" → job completes within budget and the file plays.
 
 - **Performance benchmarks (CI gate):**
+
   - 64 active tracks at 60 fps on a reference headless browser.
   - Magic-move cold compute ≤ 250 ms (p95) on 200-element slides.
   - GIF export at 480p/15 fps/6 s ≤ 12 s.
 
 - **Determinism test (CI gate):**
+
   - Frame-by-frame compare of two runs of the same deck on the same input — must be byte-identical for the first 600 frames.
 
 - **Accessibility test:**
@@ -1051,7 +1066,7 @@ This section depends on and influences the following sections. Each tie lists th
 
 - **#37 Design tokens.** A keyframe on `fill.color` stores a token reference (`token://brand.primary`) rather than a literal value, so a theme swap (feature #38) re-tints the animation in real time.
 - **#38 One-click theme swap.** Magic-move style tween recomputes against the new theme token values; cached `magic_move_pairs` are invalidated when a theme swap commits.
-- **#47 Per-slide theme overrides.** Slide-local tokens override deck-wide tokens during a transition; the interpolation uses the *target* slide's token, not the source's, to avoid mid-transition color flicker.
+- **#47 Per-slide theme overrides.** Slide-local tokens override deck-wide tokens during a transition; the interpolation uses the _target_ slide's token, not the source's, to avoid mid-transition color flicker.
 
 ### 10.3 Chart ticker animations (section 4)
 

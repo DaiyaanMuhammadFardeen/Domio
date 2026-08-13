@@ -24,9 +24,15 @@ export interface Logger {
 }
 
 const defaultLogger: Logger = {
-  info(): void { /* noop */ },
-  warn(): void { /* noop */ },
-  error(): void { /* noop */ },
+  info(): void {
+    /* noop */
+  },
+  warn(): void {
+    /* noop */
+  },
+  error(): void {
+    /* noop */
+  },
 };
 
 // ---------------------------------------------------------------------------

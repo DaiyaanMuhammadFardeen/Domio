@@ -62,10 +62,7 @@ interface AttachedConnection {
   close: () => void;
 }
 
-export async function attachWebSocket(
-  server: Server,
-  orch: Orchestrator,
-): Promise<void> {
+export async function attachWebSocket(server: Server, orch: Orchestrator): Promise<void> {
   // Lazy-import so the module is optional in non-WS environments.
   let wss;
   try {

@@ -75,9 +75,7 @@ export class InMemoryKycSessionProvider implements KycSessionProvider {
   }
 
   async listPendingSessions(): Promise<readonly KycSessionRecord[]> {
-    return this.sessions.filter(
-      s => s.status === 'submitted' || s.status === 'pending',
-    );
+    return this.sessions.filter((s) => s.status === 'submitted' || s.status === 'pending');
   }
 
   async updateSessionStatus(kyc_session_id: string, status: KycSessionStatus): Promise<void> {
@@ -126,9 +124,15 @@ export class KycPollerWorker {
     this.kycClient = opts.kycClient;
     this.tickMs = opts.tickMs ?? Number(process.env['WORKER_TICK_MS'] ?? '60000');
     this.logger = opts.logger ?? {
-      info: () => { /* noop */ },
-      error: () => { /* noop */ },
-      warn: () => { /* noop */ },
+      info: () => {
+        /* noop */
+      },
+      error: () => {
+        /* noop */
+      },
+      warn: () => {
+        /* noop */
+      },
     };
   }
 

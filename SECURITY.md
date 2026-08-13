@@ -6,11 +6,11 @@
 
 ## Supported versions
 
-| Version | Supported |
-|---|---|
-| `main` | ✅ Active development |
+| Version               | Supported                       |
+| --------------------- | ------------------------------- |
+| `main`                | ✅ Active development           |
 | Latest tagged release | ✅ Security fixes for 12 months |
-| Older than the latest | ⚠️ Best-effort, no SLA |
+| Older than the latest | ⚠️ Best-effort, no SLA          |
 
 ---
 
@@ -36,12 +36,12 @@ If you would like encrypted communication, request the PGP key in your initial e
 
 ### Severity framework
 
-| Severity | Examples | Patch target |
-|---|---|---|
-| **Critical** | RCE, auth bypass, data exfiltration, tenancy isolation break | 24 hours |
-| **High** | Privilege escalation, persistent XSS, SSRF to internal, secret disclosure | 7 days |
-| **Medium** | CSRF on state-changing endpoints, stored XSS without auth, broken access control on a non-critical surface | 30 days |
-| **Low** | Information leakage (error messages), missing rate limiting on a non-critical endpoint, missing security headers | Next release |
+| Severity     | Examples                                                                                                         | Patch target |
+| ------------ | ---------------------------------------------------------------------------------------------------------------- | ------------ |
+| **Critical** | RCE, auth bypass, data exfiltration, tenancy isolation break                                                     | 24 hours     |
+| **High**     | Privilege escalation, persistent XSS, SSRF to internal, secret disclosure                                        | 7 days       |
+| **Medium**   | CSRF on state-changing endpoints, stored XSS without auth, broken access control on a non-critical surface       | 30 days      |
+| **Low**      | Information leakage (error messages), missing rate limiting on a non-critical endpoint, missing security headers | Next release |
 
 ---
 

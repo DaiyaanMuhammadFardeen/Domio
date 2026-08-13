@@ -72,8 +72,8 @@ the start of every quarter and file the resulting report in the
 
 ## 9. Sign-off
 
-| Reviewer | Role | Date |
-|---|---|---|
-| DevOps/SRE Lead | primary |  |
-| Security Lead | secondary |  |
-| Platform Foundations | tertiary |  |
+| Reviewer             | Role      | Date |
+| -------------------- | --------- | ---- |
+| DevOps/SRE Lead      | primary   |      |
+| Security Lead        | secondary |      |
+| Platform Foundations | tertiary  |      |

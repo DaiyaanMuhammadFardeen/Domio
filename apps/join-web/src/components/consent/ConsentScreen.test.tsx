@@ -78,8 +78,8 @@ describe('ConsentScreen', () => {
     };
     expect(parsed.policy_version).toBe('v1');
     expect(parsed.accepted).toContain('engagement'); // required
-    expect(parsed.accepted).toContain('analytics');  // toggled on
-    expect(parsed.declined).toContain('feedback');   // left off
+    expect(parsed.accepted).toContain('analytics'); // toggled on
+    expect(parsed.declined).toContain('feedback'); // left off
   });
 
   it('accepts all on Accept all', () => {
@@ -87,7 +87,9 @@ describe('ConsentScreen', () => {
     fireEvent.click(screen.getByTestId('consent-accept-all'));
     const raw = sessionStorage.getItem('domio.consent.v1');
     const parsed = JSON.parse(raw as string) as { accepted: ReadonlyArray<string> };
-    expect(parsed.accepted).toEqual(expect.arrayContaining(['engagement', 'feedback', 'analytics']));
+    expect(parsed.accepted).toEqual(
+      expect.arrayContaining(['engagement', 'feedback', 'analytics']),
+    );
   });
 
   it('fires onPersist with the choice', () => {

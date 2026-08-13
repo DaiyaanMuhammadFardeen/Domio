@@ -33,10 +33,7 @@ export function ResolveForm({
 
   return (
     <div className="space-y-3">
-      <label
-        htmlFor="resolve-notes"
-        className="text-xs font-medium text-slate-600"
-      >
+      <label htmlFor="resolve-notes" className="text-xs font-medium text-slate-600">
         {notesLabel}
       </label>
       <textarea

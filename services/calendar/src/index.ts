@@ -12,7 +12,11 @@ export type { CalendarServiceOptions } from './service.js';
 export { handlers } from './handlers.js';
 export type { HttpRequest, HttpResponse, CalendarHandlerContext } from './handlers.js';
 export { InMemoryCalendarStore } from './store/mem_store.js';
-export { PgCalendarStore, StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
+export {
+  PgCalendarStore,
+  StoreNotConfiguredError,
+  StoreNotImplementedError,
+} from './store/pg_store.js';
 export type { CalendarStore } from './store/store.js';
 export { FEATURE_FLAGS, checkFeature } from './feature_flags.js';
 export type { FeatureFlag } from './feature_flags.js';

@@ -13,7 +13,10 @@ import { describe, it, expect, afterAll } from 'vitest';
 // yjs-shared's node_modules.  If vitest resolves 'yjs' natively you
 // can switch back to the bare specifier.
 import * as Y from '../../packages/yjs-shared/node_modules/yjs';
-import { encodeAwarenessUpdate, applyAwarenessUpdate } from '../../packages/yjs-shared/node_modules/y-protocols/awareness.js';
+import {
+  encodeAwarenessUpdate,
+  applyAwarenessUpdate,
+} from '../../packages/yjs-shared/node_modules/y-protocols/awareness.js';
 import {
   SubDocRegistry,
   ensureSlide,
@@ -112,11 +115,7 @@ function makeSlideDoc(
 }
 
 /** Create a minimal slide doc from explicit element ids. */
-function makeSlideDocFromIds(
-  doc: Y.Doc,
-  semanticId: string,
-  elIds: string[],
-): void {
+function makeSlideDocFromIds(doc: Y.Doc, semanticId: string, elIds: string[]): void {
   const elements: Element[] = elIds.map((id, i) => ({
     id: ulid(id),
     semanticId: `el-${i}`,
@@ -810,7 +809,9 @@ function testPresenceMerge(): void {
 
   // Verify Alice sees Bob's updated cursor
   const peersB2 = getPeers(awarenessB);
-  const aliceEntry = peersB2.find((p: { userState: PresenceState }) => p.userState.name === 'Alice');
+  const aliceEntry = peersB2.find(
+    (p: { userState: PresenceState }) => p.userState.name === 'Alice',
+  );
   expect(aliceEntry).toBeDefined();
   expect(aliceEntry!.userState.cursor).toEqual({ x: 500, y: 600 });
 

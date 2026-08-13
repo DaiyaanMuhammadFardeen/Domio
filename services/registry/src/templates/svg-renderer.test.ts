@@ -11,7 +11,9 @@ import { asULID } from '@domio/schema';
 // Helpers — use asULID to satisfy the branded ULID type
 // ---------------------------------------------------------------------------
 
-function makeSlide(overrides: Partial<Omit<Slide, 'id' | 'elements'>> & { id: string; elements?: Slide['elements'] }): Slide {
+function makeSlide(
+  overrides: Partial<Omit<Slide, 'id' | 'elements'>> & { id: string; elements?: Slide['elements'] },
+): Slide {
   return {
     semanticId: `slide[${overrides.id}]`,
     position: 0,
@@ -67,9 +69,7 @@ function makeDeckJson(slides: Slide[]): Record<string, unknown> {
 
 describe('renderDeckPoster', () => {
   it('returns a valid SVG with expected dimensions', () => {
-    const deck = makeDeckJson([
-      makeSlide({ id: 's1', elements: [makeTextLayer({ id: 't1' })] }),
-    ]);
+    const deck = makeDeckJson([makeSlide({ id: 's1', elements: [makeTextLayer({ id: 't1' })] })]);
 
     const result = renderDeckPoster(deck);
 
@@ -115,10 +115,7 @@ describe('renderDeckPoster', () => {
     const deck = makeDeckJson([
       makeSlide({
         id: 's1',
-        elements: [
-          makeTextLayer({ id: 't1' }),
-          makeFrameLayer({ id: 'f1' }),
-        ],
+        elements: [makeTextLayer({ id: 't1' }), makeFrameLayer({ id: 'f1' })],
       }),
     ]);
 
@@ -141,9 +138,7 @@ describe('renderDeckPoster', () => {
   });
 
   it('handles slides with no elements', () => {
-    const deck = makeDeckJson([
-      makeSlide({ id: 's1', elements: [] }),
-    ]);
+    const deck = makeDeckJson([makeSlide({ id: 's1', elements: [] })]);
 
     const result = renderDeckPoster(deck);
 
@@ -182,9 +177,7 @@ describe('renderSlidePreviews', () => {
   });
 
   it('filters out-of-range indexes', () => {
-    const deck = makeDeckJson([
-      makeSlide({ id: 's1', elements: [makeTextLayer({ id: 't1' })] }),
-    ]);
+    const deck = makeDeckJson([makeSlide({ id: 's1', elements: [makeTextLayer({ id: 't1' })] })]);
 
     const svgs = renderSlidePreviews(deck, [0, 5, 10]);
 
@@ -193,7 +186,10 @@ describe('renderSlidePreviews', () => {
 
   it('each SVG is well-formed', () => {
     const deck = makeDeckJson([
-      makeSlide({ id: 's1', elements: [makeTextLayer({ id: 't1' }), makeFrameLayer({ id: 'f1' })] }),
+      makeSlide({
+        id: 's1',
+        elements: [makeTextLayer({ id: 't1' }), makeFrameLayer({ id: 'f1' })],
+      }),
     ]);
 
     const svgs = renderSlidePreviews(deck);

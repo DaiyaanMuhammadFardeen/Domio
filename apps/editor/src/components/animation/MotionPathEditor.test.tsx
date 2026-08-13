@@ -21,13 +21,7 @@ function samplePath(): MotionPath {
 
 describe('MotionPathEditor', () => {
   it('renders the canvas, keyframe list, and trigger selector', () => {
-    render(
-      <MotionPathEditor
-        value={samplePath()}
-        durationMs={1000}
-        onChange={vi.fn()}
-      />,
-    );
+    render(<MotionPathEditor value={samplePath()} durationMs={1000} onChange={vi.fn()} />);
     expect(screen.getByTestId('motion-path-editor')).toBeInTheDocument();
     expect(screen.getByTestId('motion-path-canvas')).toBeInTheDocument();
     expect(screen.getByTestId('motion-path-trigger')).toBeInTheDocument();
@@ -112,14 +106,7 @@ describe('MotionPathEditor', () => {
   });
 
   it('read-only mode disables editing affordances', () => {
-    render(
-      <MotionPathEditor
-        value={samplePath()}
-        durationMs={1000}
-        onChange={vi.fn()}
-        readOnly
-      />,
-    );
+    render(<MotionPathEditor value={samplePath()} durationMs={1000} onChange={vi.fn()} readOnly />);
     expect(screen.getByTestId('motion-path-add-keyframe')).toBeDisabled();
     expect(screen.getByTestId('motion-path-clear')).toBeDisabled();
   });

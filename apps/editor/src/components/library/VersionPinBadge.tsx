@@ -64,11 +64,7 @@ export function VersionPinBadge(props: VersionPinBadgeProps): ReactElement {
       data-testid={props.id ?? `version-pin-badge-${testKind}`}
       data-pin-mode={pinMode}
     >
-      <span
-        className="version-pin-badge__dot"
-        aria-hidden
-        data-kind={indicator}
-      />
+      <span className="version-pin-badge__dot" aria-hidden data-kind={indicator} />
       <span className="version-pin-badge__label">{label}</span>
       {hasUpdate && !readOnly && onUpdate && (
         <button

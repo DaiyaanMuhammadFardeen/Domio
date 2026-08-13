@@ -40,7 +40,10 @@ export interface BranchHandlerContext {
   /** Optional audit sink for security/audit event emission. */
   audit?: import('./audit.js').AuditRecorder;
   /** Optional ACL guard; should reject viewers before data is read. */
-  authorize?: (args: { actorId?: string; action: 'read-mr' | 'write-branch' | 'write-merge' }) => void;
+  authorize?: (args: {
+    actorId?: string;
+    action: 'read-mr' | 'write-branch' | 'write-merge';
+  }) => void;
   merges: MergeService;
   /**
    * Lookup function for retrieving a deck at a specific branch +
@@ -48,7 +51,11 @@ export interface BranchHandlerContext {
    * via the {@link DocumentLoader}; for tests we hand the loader a
    * canned map keyed by `branchId`.
    */
-  fetchDeck: (args: { deckId: ULID; branchId: string; revision: number }) => Promise<DeckDocument | null>;
+  fetchDeck: (args: {
+    deckId: ULID;
+    branchId: string;
+    revision: number;
+  }) => Promise<DeckDocument | null>;
   /** Optional revision lookup.  Used by checkout. */
   headRevision?: (args: { deckId: ULID; branchId: string }) => Promise<number>;
 }
@@ -224,11 +231,7 @@ export async function getBranchLineage(
   branchId: ULID,
   traceId?: string,
 ): Promise<BranchLineageResponse> {
-  const lineage = await computeLineage(
-    ctx.branches.getRepository(),
-    deckId,
-    branchId,
-  );
+  const lineage = await computeLineage(ctx.branches.getRepository(), deckId, branchId);
   return { lineage, ...(traceId ? { traceId } : {}) };
 }
 
@@ -470,7 +473,14 @@ export async function getDiff(
   traceId?: string,
 ): Promise<GetDiffResponse> {
   const mr = await ctx.merges.getMergeRequest(deckId, mrId);
-  return { diffSummary: (mr.diffSummary ?? { slides: { added: [], removed: [], modified: [] }, elements: [], conflicts: [] }) as DiffSummary, ...(traceId ? { traceId } : {}) };
+  return {
+    diffSummary: (mr.diffSummary ?? {
+      slides: { added: [], removed: [], modified: [] },
+      elements: [],
+      conflicts: [],
+    }) as DiffSummary,
+    ...(traceId ? { traceId } : {}),
+  };
 }
 
 export { asULID };

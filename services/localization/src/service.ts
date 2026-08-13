@@ -5,10 +5,7 @@
  * wrap this service; the Postgres DAL is swapped in at composition time.
  */
 
-import type {
-  ExchangeRateRepository,
-  LocaleConfigRepository,
-} from './dal.js';
+import type { ExchangeRateRepository, LocaleConfigRepository } from './dal.js';
 import {
   formatNumber as fmtNumber,
   formatCurrency as fmtCurrency,
@@ -129,7 +126,11 @@ export class LocalizationService {
 
   formatDate(
     date: Date,
-    opts: { locale: string; dateStyle?: 'full' | 'long' | 'medium' | 'short'; timeStyle?: 'full' | 'long' | 'medium' | 'short' },
+    opts: {
+      locale: string;
+      dateStyle?: 'full' | 'long' | 'medium' | 'short';
+      timeStyle?: 'full' | 'long' | 'medium' | 'short';
+    },
   ): string {
     if (!this.isValidLocale(opts.locale)) {
       throw new InvalidLocaleError(opts.locale);

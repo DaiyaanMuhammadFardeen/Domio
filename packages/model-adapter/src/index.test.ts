@@ -179,7 +179,11 @@ describe('OpenAIAdapter generateText', () => {
       fetchImpl: mockFetch as unknown as typeof fetch,
     });
 
-    const deltas: Array<{ text: string; finishReason?: string; usage?: { inputTokens: number; outputTokens: number } }> = [];
+    const deltas: Array<{
+      text: string;
+      finishReason?: string;
+      usage?: { inputTokens: number; outputTokens: number };
+    }> = [];
     for await (const delta of adapter.generateText({
       model: 'openai/gpt-5.2',
       messages: [{ role: 'user', content: 'Go' }],
@@ -292,29 +296,25 @@ describe('UnsupportedCapabilityError', () => {
 describe('Unsupported capabilities', () => {
   it('OpenAI adapter throws for unsupported generateSpeech', async () => {
     const adapter = createAdapter('openai/gpt-5.2');
-    expect(() => adapter.generateSpeech?.({ text: 'hello' })).toThrow(
-      UnsupportedCapabilityError,
-    );
+    expect(() => adapter.generateSpeech?.({ text: 'hello' })).toThrow(UnsupportedCapabilityError);
   });
 
   it('Anthropic adapter throws for image generation', async () => {
     const adapter = createAdapter('anthropic/claude-sonnet-4.5');
-    await expect(
-      adapter.generateImage({ prompt: 'test' }),
-    ).rejects.toThrow(UnsupportedCapabilityError);
+    await expect(adapter.generateImage({ prompt: 'test' })).rejects.toThrow(
+      UnsupportedCapabilityError,
+    );
   });
 
   it('Google adapter throws for embed', async () => {
     const adapter = createAdapter('google/gemini-2.5-pro');
-    await expect(
-      adapter.embed({ input: 'test' }),
-    ).rejects.toThrow(UnsupportedCapabilityError);
+    await expect(adapter.embed({ input: 'test' })).rejects.toThrow(UnsupportedCapabilityError);
   });
 
   it('VLLM adapter throws for image generation', async () => {
     const adapter = createAdapter('vllm/qwen2.5-72b');
-    await expect(
-      adapter.generateImage({ prompt: 'test' }),
-    ).rejects.toThrow(UnsupportedCapabilityError);
+    await expect(adapter.generateImage({ prompt: 'test' })).rejects.toThrow(
+      UnsupportedCapabilityError,
+    );
   });
 });

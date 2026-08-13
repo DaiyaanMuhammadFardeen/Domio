@@ -20,7 +20,13 @@ function makeCallbacks(overrides: Partial<RefreshCallbacks> = {}): RefreshCallba
   return {
     ...state,
     executeQuery: async (_queryId: string, _orgId: string) => {
-      return { columns: ['id', 'name', 'value'], rows: [[1, 'alice', 100], [2, 'bob', 200]] };
+      return {
+        columns: ['id', 'name', 'value'],
+        rows: [
+          [1, 'alice', 100],
+          [2, 'bob', 200],
+        ],
+      };
     },
     writeSnapshot: async (snapshot: DatasetSnapshot) => {
       state.snapshots.push(snapshot);
@@ -71,7 +77,9 @@ describe('refreshQuery — happy path', () => {
 describe('refreshQuery — error path', () => {
   it('writes freshness record with status error on failure', async () => {
     const cb = makeCallbacks({
-      executeQuery: async () => { throw new Error('Query execution failed'); },
+      executeQuery: async () => {
+        throw new Error('Query execution failed');
+      },
     });
     const result = await refreshQuery('q1', 'org-1', cb);
 
@@ -87,7 +95,9 @@ describe('refreshQuery — error path', () => {
 
   it('handles non-Error exceptions', async () => {
     const cb = makeCallbacks({
-      executeQuery: async () => { throw 'string error'; },
+      executeQuery: async () => {
+        throw 'string error';
+      },
     });
     const result = await refreshQuery('q1', 'org-1', cb);
 

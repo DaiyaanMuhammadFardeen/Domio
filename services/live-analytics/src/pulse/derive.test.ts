@@ -9,11 +9,7 @@ import { describe, it, expect } from 'vitest';
 import { derivePulse, deriveSummary } from './derive.js';
 import type { LiveEvent } from '../types.js';
 
-function ev(
-  seq: number,
-  kind: LiveEvent['kind'],
-  opts: Partial<LiveEvent> = {},
-): LiveEvent {
+function ev(seq: number, kind: LiveEvent['kind'], opts: Partial<LiveEvent> = {}): LiveEvent {
   return {
     seq,
     ts_ms: opts.ts_ms ?? 1_700_000_000_000 + seq * 1000,

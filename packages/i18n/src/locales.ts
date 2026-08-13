@@ -6,16 +6,7 @@
  * and Urdu (`ur`) round out the RTL set; the frontend flips the
  * document direction when an RTL locale is active.
  */
-export type LocaleId =
-  | 'en'
-  | 'bn'
-  | 'es'
-  | 'fr'
-  | 'de'
-  | 'ja'
-  | 'zh-CN'
-  | 'ar'
-  | 'ur';
+export type LocaleId = 'en' | 'bn' | 'es' | 'fr' | 'de' | 'ja' | 'zh-CN' | 'ar' | 'ur';
 
 /** Ordered list of all supported locales. */
 export const SUPPORTED_LOCALES: readonly LocaleId[] = [

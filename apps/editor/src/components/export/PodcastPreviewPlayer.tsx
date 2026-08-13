@@ -97,10 +97,7 @@ export function PodcastPreviewPlayer({
   }, []);
 
   const status = isPlaying ? 'editor.podcast.player.playing' : 'editor.podcast.player.paused';
-  const seekMax = useMemo(
-    () => (duration > 0 ? duration : 0),
-    [duration],
-  );
+  const seekMax = useMemo(() => (duration > 0 ? duration : 0), [duration]);
 
   return (
     <section

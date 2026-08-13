@@ -27,7 +27,13 @@
  *   PATCH  /v1/brands/extraction/:id   updateExtractionJob (worker)
  */
 
-import type { BrandKitLogoRecord, BrandKitPaletteRecord, BrandKitFontRecord, BrandKitImageryRuleRecord, BrandKitRecord } from './dal.js';
+import type {
+  BrandKitLogoRecord,
+  BrandKitPaletteRecord,
+  BrandKitFontRecord,
+  BrandKitImageryRuleRecord,
+  BrandKitRecord,
+} from './dal.js';
 import {
   BrandService,
   type CreateBrandKitInput,
@@ -79,10 +85,18 @@ export interface BrandHandlerContext {
 // Response helpers
 // ---------------------------------------------------------------------------
 
-function ok<T>(body: T): HttpResponse { return { status: 200, body }; }
-function created<T>(body: T): HttpResponse { return { status: 201, body }; }
-function accepted<T>(body: T): HttpResponse { return { status: 202, body }; }
-function noContent(): HttpResponse { return { status: 204, body: null }; }
+function ok<T>(body: T): HttpResponse {
+  return { status: 200, body };
+}
+function created<T>(body: T): HttpResponse {
+  return { status: 201, body };
+}
+function accepted<T>(body: T): HttpResponse {
+  return { status: 202, body };
+}
+function noContent(): HttpResponse {
+  return { status: 204, body: null };
+}
 function badRequest(message: string, code: string, extra?: Record<string, unknown>): HttpResponse {
   return { status: 400, body: { error: message, code, ...(extra ?? {}) } };
 }
@@ -101,7 +115,10 @@ function conflict(message: string, code: string, extra?: Record<string, unknown>
 // ---------------------------------------------------------------------------
 
 export async function createBrandKitHandler(
-  req: HttpRequest<{ orgId: string }, Omit<CreateBrandKitInput, 'orgId' | 'createdBy'> & { createdBy?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    Omit<CreateBrandKitInput, 'orgId' | 'createdBy'> & { createdBy?: string }
+  >,
   ctx: BrandHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.createdBy ?? ctx.resolveActorId?.(req);
@@ -110,7 +127,11 @@ export async function createBrandKitHandler(
   const { createdBy: _ignored, ...rest } = req.body;
   void _ignored;
   try {
-    const record = await ctx.service.createBrandKit({ ...rest, orgId: req.params.orgId, createdBy: actorId });
+    const record = await ctx.service.createBrandKit({
+      ...rest,
+      orgId: req.params.orgId,
+      createdBy: actorId,
+    });
     ctx.metrics?.recordKitCreate();
     ctx.audit?.record({
       orgId: req.params.orgId,
@@ -121,7 +142,8 @@ export async function createBrandKitHandler(
     });
     return created(record);
   } catch (e) {
-    if (e instanceof BrandKitValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof BrandKitValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     throw e;
   }
 }
@@ -171,7 +193,8 @@ export async function updateBrandKitHandler(
   } catch (e) {
     if (e instanceof BrandKitNotFoundError) return notFound(e.message, e.code);
     if (e instanceof BrandKitImmutableError) return conflict(e.message, e.code);
-    if (e instanceof BrandKitValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof BrandKitValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     throw e;
   }
 }
@@ -196,7 +219,8 @@ export async function publishBrandKitHandler(
     return ok(kit);
   } catch (e) {
     if (e instanceof BrandKitNotFoundError) return notFound(e.message, e.code);
-    if (e instanceof BrandKitValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof BrandKitValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     throw e;
   }
 }
@@ -228,7 +252,9 @@ export async function archiveBrandKitHandler(
   req: HttpRequest<{ orgId: string; kitId: string }, { reason?: string }, { actorId?: string }>,
   ctx: BrandHandlerContext,
 ): Promise<HttpResponse> {
-  const actorId = req.body ? req.query.actorId ?? ctx.resolveActorId?.(req) : ctx.resolveActorId?.(req);
+  const actorId = req.body
+    ? (req.query.actorId ?? ctx.resolveActorId?.(req))
+    : ctx.resolveActorId?.(req);
   if (!actorId) return unauthorized();
   ctx.authorize?.({ actorId, action: 'write-kit' });
   try {
@@ -281,7 +307,11 @@ export async function attestExtractionHandler(
 // ---------------------------------------------------------------------------
 
 export async function addSubBrandHandler(
-  req: HttpRequest<{ orgId: string }, { parentKitId: string; childKitId: string; inheritanceType: 'extend' | 'override' }, { actorId?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    { parentKitId: string; childKitId: string; inheritanceType: 'extend' | 'override' },
+    { actorId?: string }
+  >,
   ctx: BrandHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.query.actorId ?? ctx.resolveActorId?.(req);
@@ -293,7 +323,11 @@ export async function addSubBrandHandler(
       orgId: req.params.orgId,
       actorId,
       action: 'brand.subbrand.add',
-      payload: { parentKitId: record.parentKitId, childKitId: record.childKitId, inheritanceType: record.inheritanceType },
+      payload: {
+        parentKitId: record.parentKitId,
+        childKitId: record.childKitId,
+        inheritanceType: record.inheritanceType,
+      },
     });
     return created(record);
   } catch (e) {
@@ -321,7 +355,10 @@ export async function listSubBrandsHandler(
 // ---------------------------------------------------------------------------
 
 export async function createBrandContextHandler(
-  req: HttpRequest<{ orgId: string }, Omit<CreateBrandContextInput, 'orgId' | 'createdBy'> & { createdBy?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    Omit<CreateBrandContextInput, 'orgId' | 'createdBy'> & { createdBy?: string }
+  >,
   ctx: BrandHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.createdBy ?? ctx.resolveActorId?.(req);
@@ -329,7 +366,11 @@ export async function createBrandContextHandler(
   ctx.authorize?.({ actorId, action: 'write-context' });
   const { createdBy: _ignored, ...rest } = req.body;
   void _ignored;
-  const ctx2 = await ctx.service.createBrandContext({ ...rest, orgId: req.params.orgId, createdBy: actorId });
+  const ctx2 = await ctx.service.createBrandContext({
+    ...rest,
+    orgId: req.params.orgId,
+    createdBy: actorId,
+  });
   ctx.audit?.record({
     orgId: req.params.orgId,
     actorId,
@@ -372,7 +413,12 @@ export async function setActiveBrandKitHandler(
   if (!actorId) return unauthorized();
   ctx.authorize?.({ actorId, action: 'write-context' });
   try {
-    const updated = await ctx.service.setActiveBrandKit(req.params.contextId, req.params.orgId, req.body.kitId, actorId);
+    const updated = await ctx.service.setActiveBrandKit(
+      req.params.contextId,
+      req.params.orgId,
+      req.body.kitId,
+      actorId,
+    );
     ctx.metrics?.recordContextSwitch();
     ctx.audit?.record({
       orgId: req.params.orgId,
@@ -410,7 +456,10 @@ export async function archiveBrandContextHandler(
 // ---------------------------------------------------------------------------
 
 export async function startExtractionHandler(
-  req: HttpRequest<{ orgId: string }, Omit<StartExtractionInput, 'orgId' | 'createdBy'> & { createdBy?: string }>,
+  req: HttpRequest<
+    { orgId: string },
+    Omit<StartExtractionInput, 'orgId' | 'createdBy'> & { createdBy?: string }
+  >,
   ctx: BrandHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.createdBy ?? ctx.resolveActorId?.(req);
@@ -418,7 +467,11 @@ export async function startExtractionHandler(
   ctx.authorize?.({ actorId, action: 'write-extraction' });
   const { createdBy: _ignored, ...rest } = req.body;
   void _ignored;
-  const job = await ctx.service.startExtraction({ ...rest, orgId: req.params.orgId, createdBy: actorId });
+  const job = await ctx.service.startExtraction({
+    ...rest,
+    orgId: req.params.orgId,
+    createdBy: actorId,
+  });
   ctx.metrics?.recordExtractionStart();
   ctx.audit?.record({
     orgId: req.params.orgId,
@@ -438,7 +491,10 @@ export async function getExtractionHandler(
   try {
     const job = await ctx.service.getExtractionJob(req.params.jobId);
     if (job.orgId !== req.params.orgId) {
-      return notFound(`Extraction job ${req.params.jobId} not found`, 'BRAND_EXTRACTION_JOB_NOT_FOUND');
+      return notFound(
+        `Extraction job ${req.params.jobId} not found`,
+        'BRAND_EXTRACTION_JOB_NOT_FOUND',
+      );
     }
     return ok(job);
   } catch (e) {
@@ -457,12 +513,13 @@ export async function updateExtractionHandler(
   try {
     const job = await ctx.service.updateExtractionJob(req.params.jobId, req.body);
     if (job.orgId !== req.params.orgId) {
-      return notFound(`Extraction job ${req.params.jobId} not found`, 'BRAND_EXTRACTION_JOB_NOT_FOUND');
+      return notFound(
+        `Extraction job ${req.params.jobId} not found`,
+        'BRAND_EXTRACTION_JOB_NOT_FOUND',
+      );
     }
     if (job.status === 'completed' || job.status === 'failed') {
-      ctx.metrics?.recordExtractionLatency(
-        job.updatedAt.getTime() - job.createdAt.getTime(),
-      );
+      ctx.metrics?.recordExtractionLatency(job.updatedAt.getTime() - job.createdAt.getTime());
     }
     ctx.audit?.record({
       orgId: req.params.orgId,

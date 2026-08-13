@@ -44,20 +44,11 @@ export function tickStepForZoom(zoom: number, targetPx = 80): number {
   if (!Number.isFinite(zoom) || zoom <= 0) return 100;
   const candidates = [10, 25, 50, 100, 200, 500, 1000];
   const step = targetPx / zoom;
-  return (
-    candidates.find((c) => c >= step) ??
-    candidates[candidates.length - 1] ?? 100
-  );
+  return candidates.find((c) => c >= step) ?? candidates[candidates.length - 1] ?? 100;
 }
 
 export function Rulers(props: RulersProps): ReactElement {
-  const {
-    slideWidth,
-    slideHeight,
-    viewportWidth,
-    viewportHeight,
-    className,
-  } = props;
+  const { slideWidth, slideHeight, viewportWidth, viewportHeight, className } = props;
   const zoom = useEditorStore((s) => s.zoom);
   const pan = useEditorStore((s) => s.pan);
   const guides = useEditorStore((s) => s.guides);
@@ -98,7 +89,7 @@ export function Rulers(props: RulersProps): ReactElement {
       const x = event.clientX - rect.left + (pan.x ?? 0);
       // Slide x for the guide (post-zoom). Rounded to the nearest step
       // so the guide line lands on a grid intersection.
-      const slideX = Math.round((x / zoom) / step) * step;
+      const slideX = Math.round(x / zoom / step) * step;
       // Avoid duplicates near an existing vertical guide.
       const dup = guides.find(
         (g) => g.orientation === 'vertical' && Math.abs(g.position - slideX) < step / 2,
@@ -116,7 +107,7 @@ export function Rulers(props: RulersProps): ReactElement {
     (event: React.MouseEvent<HTMLDivElement>) => {
       const rect = event.currentTarget.getBoundingClientRect();
       const y = event.clientY - rect.top + (pan.y ?? 0);
-      const slideY = Math.round((y / zoom) / step) * step;
+      const slideY = Math.round(y / zoom / step) * step;
       const dup = guides.find(
         (g) => g.orientation === 'horizontal' && Math.abs(g.position - slideY) < step / 2,
       );

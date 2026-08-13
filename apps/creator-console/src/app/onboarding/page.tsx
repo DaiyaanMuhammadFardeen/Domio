@@ -29,12 +29,7 @@ const STEP_LABELS: Record<OnboardingStep, string> = {
   listing: 'creator.onboarding.step.listing',
 };
 
-const STEP_ORDER: ReadonlyArray<OnboardingStep> = [
-  'identity',
-  'payout',
-  'tax',
-  'listing',
-];
+const STEP_ORDER: ReadonlyArray<OnboardingStep> = ['identity', 'payout', 'tax', 'listing'];
 
 const STEP_DESCRIPTORS = STEP_ORDER.map((key) => ({
   key,
@@ -154,12 +149,8 @@ export default function OnboardingPage() {
   return (
     <div className="space-y-6" data-testid="onboarding-page">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-900">
-          {t('creator.onboarding.heading')}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {t('creator.onboarding.subheading')}
-        </p>
+        <h1 className="text-2xl font-semibold text-slate-900">{t('creator.onboarding.heading')}</h1>
+        <p className="mt-1 text-sm text-slate-500">{t('creator.onboarding.subheading')}</p>
       </header>
 
       <div className="rounded-lg border border-slate-200 bg-white p-5">
@@ -184,12 +175,8 @@ export default function OnboardingPage() {
         {activeStep === 'identity' && (
           <Step1Identity
             defaultValues={{
-              ...(state.identity.legal_name
-                ? { legal_name: state.identity.legal_name }
-                : {}),
-              ...(state.identity.country
-                ? { country: state.identity.country }
-                : {}),
+              ...(state.identity.legal_name ? { legal_name: state.identity.legal_name } : {}),
+              ...(state.identity.country ? { country: state.identity.country } : {}),
             }}
             onSubmit={handleIdentity}
           />
@@ -199,12 +186,8 @@ export default function OnboardingPage() {
             defaultValues={{
               method: state.payout.method,
               ...(state.payout.last4 ? { last4: state.payout.last4 } : {}),
-              ...(state.payout.stripe_id
-                ? { stripe_id: state.payout.stripe_id }
-                : {}),
-              ...(state.payout.paypal_email
-                ? { paypal_email: state.payout.paypal_email }
-                : {}),
+              ...(state.payout.stripe_id ? { stripe_id: state.payout.stripe_id } : {}),
+              ...(state.payout.paypal_email ? { paypal_email: state.payout.paypal_email } : {}),
             }}
             onSubmit={handlePayout}
           />
@@ -237,11 +220,7 @@ export default function OnboardingPage() {
               type="button"
               onClick={goNext}
               disabled={!stepIsComplete}
-              title={
-                stepIsComplete
-                  ? undefined
-                  : t('creator.onboarding.required')
-              }
+              title={stepIsComplete ? undefined : t('creator.onboarding.required')}
               className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-300"
               data-testid="onboarding-next"
             >

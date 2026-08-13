@@ -135,16 +135,20 @@ describe('FormRegistry', () => {
 
   it('rejects blank / oversized names', () => {
     const reg = new FormRegistry();
-    expect(() => reg.define('x', { name: '', inputs: [{ name: 'a', label: 'A', type: 'text' }] })).toThrow();
+    expect(() =>
+      reg.define('x', { name: '', inputs: [{ name: 'a', label: 'A', type: 'text' }] }),
+    ).toThrow();
   });
 
   it('rejects oversized submitLabel', () => {
     const reg = new FormRegistry();
-    expect(() => reg.define('x', {
-      name: 'X',
-      inputs: [{ name: 'a', label: 'A', type: 'text' }],
-      submitLabel: 'a'.repeat(65),
-    })).toThrow();
+    expect(() =>
+      reg.define('x', {
+        name: 'X',
+        inputs: [{ name: 'a', label: 'A', type: 'text' }],
+        submitLabel: 'a'.repeat(65),
+      }),
+    ).toThrow();
   });
 
   it('validate() returns errors for unknown form', () => {
@@ -184,9 +188,26 @@ describe('FormRegistry', () => {
   it('supports all 20 input types', () => {
     const reg = new FormRegistry();
     const inputs = [
-      'text', 'number', 'email', 'url', 'tel', 'password', 'textarea',
-      'select', 'multiselect', 'checkbox', 'radio', 'date', 'time',
-      'datetime', 'range', 'slider', 'file', 'signature', 'richtext', 'color',
+      'text',
+      'number',
+      'email',
+      'url',
+      'tel',
+      'password',
+      'textarea',
+      'select',
+      'multiselect',
+      'checkbox',
+      'radio',
+      'date',
+      'time',
+      'datetime',
+      'range',
+      'slider',
+      'file',
+      'signature',
+      'richtext',
+      'color',
     ] as const;
     const def: FormDefinition = {
       name: 'All',
@@ -203,19 +224,28 @@ describe('validateForm()', () => {
   const def: FormDefinition = {
     name: 'Signup',
     inputs: [
-      { name: 'pw', label: 'Password', type: 'password', validators: [
-        { kind: 'minLength', value: 8 },
-        { kind: 'pattern', value: '[A-Z]', flags: 'i' },
-      ]},
-      { name: 'pw2', label: 'Repeat', type: 'password', validators: [
-        { kind: 'crossField', field: 'pw', rule: 'equals' },
-      ]},
-      { name: 'age', label: 'Age', type: 'number', validators: [
-        { kind: 'max', value: 120 },
-      ]},
-      { name: 'username', label: 'Handle', type: 'text', validators: [
-        { kind: 'maxLength', value: 24 },
-      ]},
+      {
+        name: 'pw',
+        label: 'Password',
+        type: 'password',
+        validators: [
+          { kind: 'minLength', value: 8 },
+          { kind: 'pattern', value: '[A-Z]', flags: 'i' },
+        ],
+      },
+      {
+        name: 'pw2',
+        label: 'Repeat',
+        type: 'password',
+        validators: [{ kind: 'crossField', field: 'pw', rule: 'equals' }],
+      },
+      { name: 'age', label: 'Age', type: 'number', validators: [{ kind: 'max', value: 120 }] },
+      {
+        name: 'username',
+        label: 'Handle',
+        type: 'text',
+        validators: [{ kind: 'maxLength', value: 24 }],
+      },
       { name: 'color', label: 'Color', type: 'color' },
     ],
   };
@@ -233,7 +263,13 @@ describe('validateForm()', () => {
   });
 
   it('succeeds when all rules pass', () => {
-    const r = validateForm(def, { pw: 'longerpw', pw2: 'longerpw', age: 30, username: 'alice', color: '#fff' });
+    const r = validateForm(def, {
+      pw: 'longerpw',
+      pw2: 'longerpw',
+      age: 30,
+      username: 'alice',
+      color: '#fff',
+    });
     expect(r.ok).toBe(true);
   });
 
@@ -251,7 +287,14 @@ describe('validateForm()', () => {
   it('handles malformed patterns gracefully (does not throw)', () => {
     const bad: FormDefinition = {
       name: 'X',
-      inputs: [{ name: 'a', label: 'A', type: 'text', validators: [{ kind: 'pattern', value: '[unclosed' }] }],
+      inputs: [
+        {
+          name: 'a',
+          label: 'A',
+          type: 'text',
+          validators: [{ kind: 'pattern', value: '[unclosed' }],
+        },
+      ],
     };
     const r = validateForm(bad, { a: 'anything' });
     expect(r.ok).toBe(true);
@@ -262,7 +305,12 @@ describe('validateForm()', () => {
       name: 'Range',
       inputs: [
         { name: 'a', label: 'A', type: 'number' },
-        { name: 'b', label: 'B', type: 'number', validators: [{ kind: 'crossField', field: 'a', rule: 'greaterThan' }] },
+        {
+          name: 'b',
+          label: 'B',
+          type: 'number',
+          validators: [{ kind: 'crossField', field: 'a', rule: 'greaterThan' }],
+        },
       ],
     };
     expect(validateForm(d, { a: 5, b: 6 }).ok).toBe(true);
@@ -330,7 +378,12 @@ describe('AutosavePolicy', () => {
     const policy = new AutosavePolicy({ save: vi.fn() });
     await policy.flush('a', { x: 1 });
     await policy.flush('b', { x: 2 });
-    expect(policy.listDrafts().map((d) => d.formId).sort()).toEqual(['a', 'b']);
+    expect(
+      policy
+        .listDrafts()
+        .map((d) => d.formId)
+        .sort(),
+    ).toEqual(['a', 'b']);
   });
 });
 

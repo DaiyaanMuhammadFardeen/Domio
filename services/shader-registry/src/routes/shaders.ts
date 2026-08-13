@@ -77,7 +77,10 @@ export function createShaderRoutes(deps: ShaderDeps): Hono {
     const validation = validateCreateShader(body);
     if (!validation.valid) {
       return c.json(
-        { error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`, code: 'VALIDATION_ERROR' },
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+        },
         400,
       );
     }
@@ -144,7 +147,10 @@ export function createShaderRoutes(deps: ShaderDeps): Hono {
     const validation = validateUpdateShader(body);
     if (!validation.valid) {
       return c.json(
-        { error: `Validation failed: ${validation.errors.map(e => e.message).join('; ')}`, code: 'VALIDATION_ERROR' },
+        {
+          error: `Validation failed: ${validation.errors.map((e) => e.message).join('; ')}`,
+          code: 'VALIDATION_ERROR',
+        },
         400,
       );
     }
@@ -211,11 +217,14 @@ export function createShaderRoutes(deps: ShaderDeps): Hono {
       const buildResult = buildShader(shader, deps.build);
 
       if (!buildResult.compiled) {
-        return c.json({
-          compiled: false,
-          error: buildResult.error,
-          fallback: buildResult.fallback,
-        }, 400);
+        return c.json(
+          {
+            compiled: false,
+            error: buildResult.error,
+            fallback: buildResult.fallback,
+          },
+          400,
+        );
       }
 
       // Extension detection

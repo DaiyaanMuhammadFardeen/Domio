@@ -28,8 +28,18 @@ function clampPct(value: number): number {
 }
 
 function band(score: number): { label: string; className: string; barClass: string } {
-  if (score >= 70) return { label: 'Strong', className: 'bg-emerald-500/15 text-emerald-300', barClass: 'bg-emerald-400' };
-  if (score >= 40) return { label: 'Mixed', className: 'bg-amber-500/15 text-amber-300', barClass: 'bg-amber-400' };
+  if (score >= 70)
+    return {
+      label: 'Strong',
+      className: 'bg-emerald-500/15 text-emerald-300',
+      barClass: 'bg-emerald-400',
+    };
+  if (score >= 40)
+    return {
+      label: 'Mixed',
+      className: 'bg-amber-500/15 text-amber-300',
+      barClass: 'bg-amber-400',
+    };
   return { label: 'Low', className: 'bg-rose-500/15 text-rose-300', barClass: 'bg-rose-400' };
 }
 
@@ -78,10 +88,7 @@ export function EyeContactMeter({
         />
       </div>
 
-      <p
-        className="text-[10px] leading-snug text-slate-500"
-        data-testid={`${dataTestId}-note`}
-      >
+      <p className="text-[10px] leading-snug text-slate-500" data-testid={`${dataTestId}-note`}>
         {/* TODO: integrate MediaPipe face mesh via WebAssembly. */}
         Face-mesh detection stubbed; the score is supplied by the rehearsal coach.
       </p>

@@ -37,17 +37,20 @@ export interface LayoutRepairProps {
 
 const KIND_LABEL: Record<LayoutIssue['kind'], string> = {
   'overflow-text': 'Overflow text',
-  'misalignment': 'Misaligned',
+  misalignment: 'Misaligned',
   'orphaned-element': 'Orphaned element',
   'off-canvas': 'Off canvas',
-  'overlap': 'Overlapping',
+  overlap: 'Overlapping',
 };
 
 function severityClass(sev: LayoutIssue['severity']): string {
   switch (sev) {
-    case 'high': return 'bg-red-500/15 text-red-400';
-    case 'medium': return 'bg-amber-500/15 text-amber-400';
-    default: return 'bg-slate-500/15 text-slate-400';
+    case 'high':
+      return 'bg-red-500/15 text-red-400';
+    case 'medium':
+      return 'bg-amber-500/15 text-amber-400';
+    default:
+      return 'bg-slate-500/15 text-slate-400';
   }
 }
 
@@ -81,18 +84,21 @@ export function LayoutRepair({
     }
   }, [deckId, baseUrl]);
 
-  const fixOne = useCallback(async (issue: LayoutIssue) => {
-    setFixingId(issue.id);
-    setError(null);
-    try {
-      const res = await fixLayoutIssue(deckId, { issueId: issue.id }, baseUrl);
-      setPatch(res);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'fix failed');
-    } finally {
-      setFixingId(null);
-    }
-  }, [deckId, baseUrl]);
+  const fixOne = useCallback(
+    async (issue: LayoutIssue) => {
+      setFixingId(issue.id);
+      setError(null);
+      try {
+        const res = await fixLayoutIssue(deckId, { issueId: issue.id }, baseUrl);
+        setPatch(res);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'fix failed');
+      } finally {
+        setFixingId(null);
+      }
+    },
+    [deckId, baseUrl],
+  );
 
   const accept = useCallback(() => {
     if (!patch) return;
@@ -109,9 +115,7 @@ export function LayoutRepair({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Wrench size={16} className="text-blue-400" />
-          <h2 className="text-sm font-semibold text-slate-100">
-            Layout Repair
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-100">Layout Repair</h2>
         </div>
         <button
           type="button"
@@ -169,9 +173,7 @@ export function LayoutRepair({
                 <p className="truncate text-xs font-medium text-slate-200">
                   {KIND_LABEL[issue.kind]}
                 </p>
-                <p className="truncate text-[11px] text-slate-500">
-                  {issue.message}
-                </p>
+                <p className="truncate text-[11px] text-slate-500">{issue.message}</p>
               </div>
               <button
                 type="button"
@@ -199,13 +201,19 @@ export function LayoutRepair({
           <div className="mt-1.5 grid grid-cols-2 gap-2 text-[11px]">
             <div>
               <p className="text-[10px] uppercase text-slate-500">Before</p>
-              <p className="rounded bg-slate-800/60 p-1.5 text-slate-400" data-testid="layout-repair-patch-before">
+              <p
+                className="rounded bg-slate-800/60 p-1.5 text-slate-400"
+                data-testid="layout-repair-patch-before"
+              >
                 {patch.before}
               </p>
             </div>
             <div>
               <p className="text-[10px] uppercase text-slate-500">After</p>
-              <p className="rounded bg-slate-800/60 p-1.5 text-slate-200" data-testid="layout-repair-patch-after">
+              <p
+                className="rounded bg-slate-800/60 p-1.5 text-slate-200"
+                data-testid="layout-repair-patch-after"
+              >
                 {patch.after}
               </p>
             </div>

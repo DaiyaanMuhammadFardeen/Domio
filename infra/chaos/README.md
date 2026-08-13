@@ -6,13 +6,13 @@ script drives the failure mode and asserts the budget is held.
 
 ## Drills
 
-| Drill | Budget | Source |
-|-------|--------|--------|
-| `postgres_failover` | RTO ≤ 60 s, RPO = 0 | [`postgres_failover.tf`](postgres_failover.tf) |
-| `nats_partition`    | consumer lag ≤ 300 s | [`nats_partition.tf`](nats_partition.tf) |
-| `ai_provider_fail`  | degradation ≤ 5 s | [`ai_provider_fail.tf`](ai_provider_fail.tf) |
-| `cdn_outage`        | core render ≤ 5000 ms; status page ≤ 120 s | [`cdn_outage.tf`](cdn_outage.tf) |
-| `region_isolation`  | traffic shift ≤ 30 s | [`region_isolation.tf`](region_isolation.tf) |
+| Drill               | Budget                                     | Source                                         |
+| ------------------- | ------------------------------------------ | ---------------------------------------------- |
+| `postgres_failover` | RTO ≤ 60 s, RPO = 0                        | [`postgres_failover.tf`](postgres_failover.tf) |
+| `nats_partition`    | consumer lag ≤ 300 s                       | [`nats_partition.tf`](nats_partition.tf)       |
+| `ai_provider_fail`  | degradation ≤ 5 s                          | [`ai_provider_fail.tf`](ai_provider_fail.tf)   |
+| `cdn_outage`        | core render ≤ 5000 ms; status page ≤ 120 s | [`cdn_outage.tf`](cdn_outage.tf)               |
+| `region_isolation`  | traffic shift ≤ 30 s                       | [`region_isolation.tf`](region_isolation.tf)   |
 
 ## How a drill is wired
 

@@ -35,10 +35,7 @@ import {
   FeatureDisabledError,
   ApprovalNotPendingError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-  StoreNotImplementedError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -90,7 +87,9 @@ function serviceUnavailable(message: string, code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -214,7 +213,11 @@ export async function removeReactionHandler(
 ): Promise<HttpResponse> {
   try {
     const actorId = getActorId(req);
-    const comment = await ctx.service.removeReaction(req.params.comment_id, req.params.emoji, actorId);
+    const comment = await ctx.service.removeReaction(
+      req.params.comment_id,
+      req.params.emoji,
+      actorId,
+    );
     return ok({ comment });
   } catch (e) {
     return mapError(e);
@@ -341,10 +344,13 @@ export async function createAssignmentHandler(
 ): Promise<HttpResponse> {
   try {
     const actorId = getActorId(req);
-    const assignment = await ctx.service.createAssignment({
-      ...req.body,
-      deckId: req.params.deck_id,
-    }, actorId);
+    const assignment = await ctx.service.createAssignment(
+      {
+        ...req.body,
+        deckId: req.params.deck_id,
+      },
+      actorId,
+    );
     return created({ assignment });
   } catch (e) {
     return mapError(e);

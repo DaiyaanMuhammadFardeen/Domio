@@ -47,7 +47,7 @@ Chunks are stored in `source.ref` JSONB under the key `chunks`:
 ```json
 {
   "chunks": [
-    {"chunk_index": 0, "section": "Intro", "text": "...", "token_count": 450}
+    { "chunk_index": 0, "section": "Intro", "text": "...", "token_count": 450 }
   ]
 }
 ```
@@ -65,14 +65,14 @@ mypy src/              # Type check
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | No | Postgres connection string. If unset, CLI prints JSON only. |
+| Variable       | Required | Description                                                 |
+| -------------- | -------- | ----------------------------------------------------------- |
+| `DATABASE_URL` | No       | Postgres connection string. If unset, CLI prints JSON only. |
 
 ## Optional Dependencies
 
-| Extra | Purpose |
-|-------|---------|
-| `pdf` | PyMuPDF for PDF extraction |
+| Extra  | Purpose                         |
+| ------ | ------------------------------- |
+| `pdf`  | PyMuPDF for PDF extraction      |
 | `docx` | python-docx for DOCX extraction |
-| `ocr` | pytesseract for scanned PDF OCR |
+| `ocr`  | pytesseract for scanned PDF OCR |

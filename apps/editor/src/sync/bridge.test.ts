@@ -14,17 +14,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import * as Y from 'yjs';
 import type { DeckDocument, Slide } from '@domio/schema/generated/scene-graph';
 import { HistoryEngine, type HistoryOp } from '@domio/canvas';
-import {
-  createDeckDocs,
-  SubDocRegistry,
-} from '@domio/yjs-shared';
+import { createDeckDocs, SubDocRegistry } from '@domio/yjs-shared';
 import { newToken } from '@domio/common';
-import {
-  Op,
-  OpAck,
-  OpType,
-  HLC,
-} from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
+import { Op, OpAck, OpType, HLC } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
 
 // ----- In-memory message bus (simulates gateway fan-out) -----
 
@@ -129,7 +121,9 @@ class InMemorySyncProvider {
   on(event: string, cb: (...args: unknown[]) => void): () => void {
     if (!this.events.has(event)) this.events.set(event, new Set());
     this.events.get(event)!.add(cb);
-    return () => { this.events.get(event)?.delete(cb); };
+    return () => {
+      this.events.get(event)?.delete(cb);
+    };
   }
 
   emit(event: string, ...args: unknown[]): void {

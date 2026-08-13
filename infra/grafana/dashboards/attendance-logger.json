@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-3",
-    "domio",
-    "attendance-logger"
-  ],
+  "tags": ["tier-3", "domio", "attendance-logger"],
   "panels": [
     {
       "id": 1,

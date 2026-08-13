@@ -4,7 +4,13 @@
  * No side effects; all functions are pure and testable in isolation.
  */
 
-import type { CalendarLink, SyncPlanResult, SyncChangeType, CalendarEventState, OverrideProvider } from './types.js';
+import type {
+  CalendarLink,
+  SyncPlanResult,
+  SyncChangeType,
+  CalendarEventState,
+  OverrideProvider,
+} from './types.js';
 import { noopOverrideProvider } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -26,10 +32,7 @@ const SYNC_REFRESH_MS = 5 * 60 * 1000;
  *  - is_recurring_instance: true when is_recurring AND recurrence_id is set
  *    (sync touches the current instance via recurrence_id, not the whole series)
  */
-export function syncPlan(
-  link: CalendarLink,
-  now: Date,
-): SyncPlanResult {
+export function syncPlan(link: CalendarLink, now: Date): SyncPlanResult {
   const elapsed = now.getTime() - link.last_synced_at.getTime();
   const is_due = elapsed >= SYNC_REFRESH_MS;
   const is_recurring_instance = link.is_recurring && link.recurrence_id != null;

@@ -35,19 +35,12 @@ export function PrivacyNotice({ open, onConfirm, onCancel }: PrivacyNoticeProps)
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
     >
       <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
-        <h2
-          id="ai-listener-privacy-title"
-          className="text-base font-semibold text-zinc-900"
-        >
+        <h2 id="ai-listener-privacy-title" className="text-base font-semibold text-zinc-900">
           Privacy notice
         </h2>
-        <p
-          data-testid="privacy-notice-body"
-          className="mt-3 text-sm leading-relaxed text-zinc-700"
-        >
-          Listener captures presenter audio entirely in your browser. No audio
-          is sent to any server. The matcher works against on-device question
-          patterns.
+        <p data-testid="privacy-notice-body" className="mt-3 text-sm leading-relaxed text-zinc-700">
+          Listener captures presenter audio entirely in your browser. No audio is sent to any
+          server. The matcher works against on-device question patterns.
         </p>
         <div className="mt-5 flex items-center justify-end gap-2">
           <button

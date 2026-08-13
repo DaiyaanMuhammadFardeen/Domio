@@ -56,68 +56,82 @@ describe('validateBrandLockState', () => {
 
 describe('validateBrandLockInput', () => {
   it('accepts valid input', () => {
-    expect(() => validateBrandLockInput({
-      workspaceId: 'ws-1',
-      brandKitId: 'brand-1',
-      marketplaceListingId: 'listing-1',
-      state: 'allow',
-    })).not.toThrow();
+    expect(() =>
+      validateBrandLockInput({
+        workspaceId: 'ws-1',
+        brandKitId: 'brand-1',
+        marketplaceListingId: 'listing-1',
+        state: 'allow',
+      }),
+    ).not.toThrow();
   });
 
   it('throws for missing workspaceId', () => {
-    expect(() => validateBrandLockInput({
-      workspaceId: '',
-      brandKitId: 'brand-1',
-      marketplaceListingId: 'listing-1',
-      state: 'allow',
-    })).toThrow('workspaceId is required');
+    expect(() =>
+      validateBrandLockInput({
+        workspaceId: '',
+        brandKitId: 'brand-1',
+        marketplaceListingId: 'listing-1',
+        state: 'allow',
+      }),
+    ).toThrow('workspaceId is required');
   });
 
   it('throws for missing brandKitId', () => {
-    expect(() => validateBrandLockInput({
-      workspaceId: 'ws-1',
-      brandKitId: '',
-      marketplaceListingId: 'listing-1',
-      state: 'allow',
-    })).toThrow('brandKitId is required');
+    expect(() =>
+      validateBrandLockInput({
+        workspaceId: 'ws-1',
+        brandKitId: '',
+        marketplaceListingId: 'listing-1',
+        state: 'allow',
+      }),
+    ).toThrow('brandKitId is required');
   });
 
   it('throws for missing marketplaceListingId', () => {
-    expect(() => validateBrandLockInput({
-      workspaceId: 'ws-1',
-      brandKitId: 'brand-1',
-      marketplaceListingId: '',
-      state: 'allow',
-    })).toThrow('marketplaceListingId is required');
+    expect(() =>
+      validateBrandLockInput({
+        workspaceId: 'ws-1',
+        brandKitId: 'brand-1',
+        marketplaceListingId: '',
+        state: 'allow',
+      }),
+    ).toThrow('marketplaceListingId is required');
   });
 
   it('throws for invalid state', () => {
-    expect(() => validateBrandLockInput({
-      workspaceId: 'ws-1',
-      brandKitId: 'brand-1',
-      marketplaceListingId: 'listing-1',
-      state: 'invalid',
-    })).toThrow(InvalidBrandLockError);
+    expect(() =>
+      validateBrandLockInput({
+        workspaceId: 'ws-1',
+        brandKitId: 'brand-1',
+        marketplaceListingId: 'listing-1',
+        state: 'invalid',
+      }),
+    ).toThrow(InvalidBrandLockError);
   });
 
   it('throws for negative overridePriceCents', () => {
-    expect(() => validateBrandLockInput({
-      workspaceId: 'ws-1',
-      brandKitId: 'brand-1',
-      marketplaceListingId: 'listing-1',
-      state: 'override',
-      overridePriceCents: -100,
-    })).toThrow('overridePriceCents must be a non-negative number');
+    expect(() =>
+      validateBrandLockInput({
+        workspaceId: 'ws-1',
+        brandKitId: 'brand-1',
+        marketplaceListingId: 'listing-1',
+        state: 'override',
+        overridePriceCents: -100,
+      }),
+    ).toThrow('overridePriceCents must be a non-negative number');
   });
 
   it('accepts null overridePriceCents', () => {
-    expect(() => validateBrandLockInput({
-      workspaceId: 'ws-1',
-      brandKitId: 'brand-1',
-      marketplaceListingId: 'listing-1',
-      state: 'allow',
-      overridePriceCents: null,
-    })).not.toThrow();
+    expect(() =>
+      validateBrandLockInput({
+        workspaceId: 'ws-1',
+        brandKitId: 'brand-1',
+        marketplaceListingId: 'listing-1',
+        state: 'allow',
+        overridePriceCents: null,
+      }),
+    ).not.toThrow();
   });
 });
 
@@ -138,7 +152,9 @@ describe('assertNotDenied', () => {
 
   it('throws BrandLockDeniedError when lock is deny', () => {
     const locks = [makeBrandLock({ state: 'deny' })];
-    expect(() => assertNotDenied(locks, 'ws-1', 'brand-1', 'listing-1')).toThrow(BrandLockDeniedError);
+    expect(() => assertNotDenied(locks, 'ws-1', 'brand-1', 'listing-1')).toThrow(
+      BrandLockDeniedError,
+    );
   });
 
   it('does nothing for different workspace', () => {
@@ -159,9 +175,7 @@ describe('resolveVisibleListingIds', () => {
   });
 
   it('returns empty array for all deny locks', () => {
-    const locks = [
-      makeBrandLock({ marketplaceListingId: 'l1', state: 'deny' }),
-    ];
+    const locks = [makeBrandLock({ marketplaceListingId: 'l1', state: 'deny' })];
     const visible = resolveVisibleListingIds(locks);
     expect(visible).toEqual([]);
   });
@@ -181,9 +195,7 @@ describe('getOverridePrice', () => {
   });
 
   it('returns null for allow lock', () => {
-    const locks = [
-      makeBrandLock({ marketplaceListingId: 'l1', state: 'allow' }),
-    ];
+    const locks = [makeBrandLock({ marketplaceListingId: 'l1', state: 'allow' })];
     expect(getOverridePrice(locks, 'l1')).toBeNull();
   });
 

@@ -9,9 +9,7 @@ import { resetStore, getState } from '../../lib/p12-store';
 import type * as AiService from '../../lib/ai-service';
 
 vi.mock('../../lib/ai-service', async () => {
-  const actual = await vi.importActual<typeof AiService>(
-    '../../lib/ai-service',
-  );
+  const actual = await vi.importActual<typeof AiService>('../../lib/ai-service');
   return {
     ...actual,
     approveOutline: vi.fn().mockResolvedValue({
@@ -110,9 +108,7 @@ describe('OutlineApproval (Wave 6 S6.2)', () => {
     fireEvent.click(screen.getByTestId('p12-generate-btn'));
 
     const firstSlideId = getState().outline!.slides[0]!.id;
-    await waitFor(() =>
-      screen.getByTestId(`p12-slide-citations-${firstSlideId}`),
-    );
+    await waitFor(() => screen.getByTestId(`p12-slide-citations-${firstSlideId}`));
 
     // The first slide carries a citation row; clicking it dispatches
     // through the SourceCitation chip which uses onActivate (none

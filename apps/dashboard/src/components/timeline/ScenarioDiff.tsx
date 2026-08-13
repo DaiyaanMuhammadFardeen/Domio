@@ -100,17 +100,13 @@ export function ScenarioDiff({
 
       <div className="grid grid-cols-2 gap-3 text-xs">
         <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-          <div className="font-semibold uppercase tracking-wide text-slate-500">
-            {fromLabel}
-          </div>
+          <div className="font-semibold uppercase tracking-wide text-slate-500">{fromLabel}</div>
           <div className="mt-1 text-slate-700" data-testid="diff-from-summary">
             {fromSummary ?? '—'}
           </div>
         </div>
         <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
-          <div className="font-semibold uppercase tracking-wide text-slate-500">
-            {toLabel}
-          </div>
+          <div className="font-semibold uppercase tracking-wide text-slate-500">{toLabel}</div>
           <div className="mt-1 text-slate-700" data-testid="diff-to-summary">
             {toSummary ?? '—'}
           </div>
@@ -118,19 +114,11 @@ export function ScenarioDiff({
       </div>
 
       {changes.length === 0 ? (
-        <p
-          data-testid="scenario-diff-empty"
-          className="text-xs text-slate-500"
-        >
-          {fromSummary === null || toSummary === null
-            ? selectBothLabel
-            : emptyLabel}
+        <p data-testid="scenario-diff-empty" className="text-xs text-slate-500">
+          {fromSummary === null || toSummary === null ? selectBothLabel : emptyLabel}
         </p>
       ) : (
-        <ul
-          className="space-y-1 text-xs"
-          data-testid="scenario-diff-changes"
-        >
+        <ul className="space-y-1 text-xs" data-testid="scenario-diff-changes">
           {changes.map((change, idx) => {
             const description = describeDelta(change);
             if (!description) return null;

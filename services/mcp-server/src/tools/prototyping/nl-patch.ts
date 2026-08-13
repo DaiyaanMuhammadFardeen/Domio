@@ -122,7 +122,11 @@ function validateArgs(input: unknown): ValidationResult<NlPatchArgs> {
   return { ok: true, value: { deckId, prompt } };
 }
 
-async function dispatch(ctx: McpContext, tool: McpTool<unknown, unknown>, input: unknown): Promise<unknown> {
+async function dispatch(
+  ctx: McpContext,
+  tool: McpTool<unknown, unknown>,
+  input: unknown,
+): Promise<unknown> {
   const t = tool as unknown as { handler: (ctx: McpContext, input: unknown) => Promise<unknown> };
   switch (tool.name) {
     case 'create_hotspot':

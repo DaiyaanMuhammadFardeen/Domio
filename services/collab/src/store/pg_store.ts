@@ -135,17 +135,28 @@ export class PgCollabStore implements CollabStore {
 
   async getComment(commentId: string): Promise<Comment | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getComment');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM comment WHERE id = $1',
-      [commentId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM comment WHERE id = $1', [commentId]);
     if (rows.length === 0) return null;
     return commentRowToDomain(rows[0]!);
   }
 
   async updateComment(
     commentId: string,
-    patch: Partial<Pick<Comment, 'bodyMd' | 'status' | 'resolvedAt' | 'resolvedBy' | 'isOrphaned' | 'targetType' | 'targetId' | 'anchor' | 'emojiReactions' | 'updatedAt'>>,
+    patch: Partial<
+      Pick<
+        Comment,
+        | 'bodyMd'
+        | 'status'
+        | 'resolvedAt'
+        | 'resolvedBy'
+        | 'isOrphaned'
+        | 'targetType'
+        | 'targetId'
+        | 'anchor'
+        | 'emojiReactions'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<Comment> {
     if (!this.pool) throw new StoreNotConfiguredError('updateComment');
 
@@ -220,8 +231,14 @@ export class PgCollabStore implements CollabStore {
     //   mentioned_type, notified_at, read_at, created_at)
     // VALUES ($1..$8), ($9..$16), ...
     const cols = [
-      'id', 'workspace_id', 'comment_id', 'mentioned_id',
-      'mentioned_type', 'notified_at', 'read_at', 'created_at',
+      'id',
+      'workspace_id',
+      'comment_id',
+      'mentioned_id',
+      'mentioned_type',
+      'notified_at',
+      'read_at',
+      'created_at',
     ];
     const rows: string[] = [];
     const params: unknown[] = [];
@@ -280,17 +297,18 @@ export class PgCollabStore implements CollabStore {
 
   async getApprovalRequest(requestId: string): Promise<ApprovalRequest | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getApprovalRequest');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM approval_request WHERE id = $1',
-      [requestId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM approval_request WHERE id = $1', [
+      requestId,
+    ]);
     if (rows.length === 0) return null;
     return approvalRequestRowToDomain(rows[0]!);
   }
 
   async updateApprovalRequest(
     requestId: string,
-    patch: Partial<Pick<ApprovalRequest, 'status' | 'requestedAt' | 'closedAt' | 'updatedAt' | 'updatedBy'>>,
+    patch: Partial<
+      Pick<ApprovalRequest, 'status' | 'requestedAt' | 'closedAt' | 'updatedAt' | 'updatedBy'>
+    >,
   ): Promise<ApprovalRequest> {
     if (!this.pool) throw new StoreNotConfiguredError('updateApprovalRequest');
 
@@ -363,10 +381,10 @@ export class PgCollabStore implements CollabStore {
         decision.justification,
         decision.decidedAt,
         decision.versionId,
-        new Date(),  // created_at
-        new Date(),  // updated_at
-        decision.approverId,  // created_by = approver
-        null,                // updated_by
+        new Date(), // created_at
+        new Date(), // updated_at
+        decision.approverId, // created_by = approver
+        null, // updated_by
       ],
     );
   }
@@ -440,17 +458,27 @@ export class PgCollabStore implements CollabStore {
 
   async getAssignment(assignmentId: string): Promise<Assignment | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getAssignment');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM assignment WHERE id = $1',
-      [assignmentId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM assignment WHERE id = $1', [
+      assignmentId,
+    ]);
     if (rows.length === 0) return null;
     return assignmentRowToDomain(rows[0]!);
   }
 
   async updateAssignment(
     assignmentId: string,
-    patch: Partial<Pick<Assignment, 'status' | 'blockedReason' | 'dueAt' | 'watchers' | 'primaryId' | 'completedAt' | 'updatedAt'>>,
+    patch: Partial<
+      Pick<
+        Assignment,
+        | 'status'
+        | 'blockedReason'
+        | 'dueAt'
+        | 'watchers'
+        | 'primaryId'
+        | 'completedAt'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<Assignment> {
     if (!this.pool) throw new StoreNotConfiguredError('updateAssignment');
 
@@ -591,15 +619,17 @@ function commentRowToDomain(row: Record<string, unknown>): Comment {
     bodyMd: row.body_md as string,
     targetType: row.target_type as Comment['targetType'],
     targetId: row.target_id as string,
-    anchor: row.anchor != null ? parseJsonb(row.anchor) as CommentAnchor : null,
+    anchor: row.anchor != null ? (parseJsonb(row.anchor) as CommentAnchor) : null,
     status: row.status as Comment['status'],
     isOrphaned: row.is_orphaned as boolean,
-    emojiReactions: row.emoji_reactions != null
-      ? parseJsonb(row.emoji_reactions) as Record<string, readonly string[]>
-      : {},
-    attachments: row.attachments != null
-      ? parseJsonb(row.attachments) as readonly Record<string, unknown>[]
-      : [],
+    emojiReactions:
+      row.emoji_reactions != null
+        ? (parseJsonb(row.emoji_reactions) as Record<string, readonly string[]>)
+        : {},
+    attachments:
+      row.attachments != null
+        ? (parseJsonb(row.attachments) as readonly Record<string, unknown>[])
+        : [],
     createdAt: toDate(row.created_at),
     updatedAt: toDate(row.updated_at),
     resolvedAt: row.resolved_at != null ? toDate(row.resolved_at) : null,
@@ -692,7 +722,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

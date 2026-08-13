@@ -99,9 +99,7 @@ export default function RenderingPage() {
     setActionBusy(id);
     try {
       const updated = await cancelRender(id);
-      setSamples((prev) =>
-        prev.map((s) => (s.id === id ? updated : s)),
-      );
+      setSamples((prev) => prev.map((s) => (s.id === id ? updated : s)));
     } finally {
       setActionBusy(null);
     }
@@ -118,10 +116,7 @@ export default function RenderingPage() {
         <FormattedMessage id="admin.rendering.heading" catalogue={CATALOGUE} />
       </h1>
       <p className="mb-6 text-sm text-slate-500">
-        <FormattedMessage
-          id="admin.rendering.subheading"
-          catalogue={CATALOGUE}
-        />
+        <FormattedMessage id="admin.rendering.subheading" catalogue={CATALOGUE} />
       </p>
 
       {loading ? (
@@ -147,16 +142,12 @@ export default function RenderingPage() {
           className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
           role="alert"
         >
-          <strong className="font-semibold">Could not load rendering data.</strong>{' '}
-          {error}
+          <strong className="font-semibold">Could not load rendering data.</strong> {error}
         </div>
       ) : null}
 
       {status ? (
-        <div
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          data-testid="rendering-kpis"
-        >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-testid="rendering-kpis">
           <KpiTile
             title={t('admin.rendering.kpi.queued')}
             value={String(status.queued)}
@@ -196,20 +187,14 @@ export default function RenderingPage() {
           data-testid="rendering-throughput"
         >
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            <FormattedMessage
-              id="admin.rendering.throughput.heading"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.rendering.throughput.heading" catalogue={CATALOGUE} />
           </h2>
           <div className="text-slate-700">
             <ThroughputChart points={status.throughput} />
           </div>
           <div className="mt-2 flex gap-4 text-xs text-slate-500">
             <span className="flex items-center gap-1">
-              <span
-                aria-hidden
-                className="inline-block h-1 w-4 rounded bg-current opacity-80"
-              />
+              <span aria-hidden className="inline-block h-1 w-4 rounded bg-current opacity-80" />
               jobs/min
             </span>
             <span className="flex items-center gap-1">
@@ -229,46 +214,26 @@ export default function RenderingPage() {
       >
         <div className="border-b border-slate-200 px-5 py-3">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            <FormattedMessage
-              id="admin.rendering.samples.heading"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.rendering.samples.heading" catalogue={CATALOGUE} />
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-4 py-2">
-                  {t('admin.rendering.col.id')}
-                </th>
-                <th className="px-4 py-2">
-                  {t('admin.rendering.col.deck')}
-                </th>
-                <th className="px-4 py-2">
-                  {t('admin.rendering.col.status')}
-                </th>
-                <th className="px-4 py-2">
-                  {t('admin.rendering.col.started')}
-                </th>
-                <th className="px-4 py-2">
-                  {t('admin.rendering.col.duration')}
-                </th>
-                <th className="px-4 py-2">
-                  {t('admin.rendering.col.format')}
-                </th>
-                <th className="px-4 py-2">
-                  {t('admin.rendering.col.action')}
-                </th>
+                <th className="px-4 py-2">{t('admin.rendering.col.id')}</th>
+                <th className="px-4 py-2">{t('admin.rendering.col.deck')}</th>
+                <th className="px-4 py-2">{t('admin.rendering.col.status')}</th>
+                <th className="px-4 py-2">{t('admin.rendering.col.started')}</th>
+                <th className="px-4 py-2">{t('admin.rendering.col.duration')}</th>
+                <th className="px-4 py-2">{t('admin.rendering.col.format')}</th>
+                <th className="px-4 py-2">{t('admin.rendering.col.action')}</th>
               </tr>
             </thead>
             <tbody>
               {samples.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={7}
-                    className="px-4 py-6 text-center text-slate-400"
-                  >
+                  <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
                     No renders yet.
                   </td>
                 </tr>
@@ -279,16 +244,10 @@ export default function RenderingPage() {
                     data-testid={`rendering-sample-row-${s.id}`}
                     className="border-t border-slate-100"
                   >
-                    <td className="px-4 py-2 font-mono text-xs text-slate-700">
-                      {s.id}
-                    </td>
-                    <td className="px-4 py-2 text-slate-700">
-                      {s.deck_id}
-                    </td>
+                    <td className="px-4 py-2 font-mono text-xs text-slate-700">{s.id}</td>
+                    <td className="px-4 py-2 text-slate-700">{s.deck_id}</td>
                     <td className="px-4 py-2">
-                      <Badge tone={toneForRenderStatus(s.status)}>
-                        {s.status}
-                      </Badge>
+                      <Badge tone={toneForRenderStatus(s.status)}>{s.status}</Badge>
                     </td>
                     <td className="px-4 py-2 text-slate-600 tabular-nums">
                       {formatTime(s.started_at_ms)}
@@ -323,10 +282,7 @@ export default function RenderingPage() {
       {config ? (
         <section className="mt-6" data-testid="rendering-config-section">
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            <FormattedMessage
-              id="admin.rendering.config.heading"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.rendering.config.heading" catalogue={CATALOGUE} />
           </h2>
           <ConfigForm config={config} onSave={handleSave} />
         </section>

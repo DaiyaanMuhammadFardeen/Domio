@@ -4,16 +4,16 @@
 
 ### Data categories
 
-| Data                       | Stored                        | Retention     | Purpose                |
-|----------------------------|-------------------------------|---------------|------------------------|
-| `participant_id`           | yes (UUID)                    | 90 days       | session replay + audit |
-| `session_code`             | yes (Crockford base32)        | 90 days       | join routing           |
-| `display_name`             | yes (optional)                | 90 days       | recap                  |
-| `votes/submits/reactions`  | yes (per-engagement table)    | 90 days       | recap                  |
-| `attendance_record`        | yes (hash-chained)            | 7 years       | SCORM 2004 4th Ed     |
-| `feedback_response`        | yes (nps + stars + free text) | 90 days       | recap                  |
-| `device_id` (cookie/local) | yes (UUID)                    | 365 days      | rate-limit + dedup     |
-| `idempotency_key`          | yes (24h TTL)                 | 24 hours      | retry safety           |
+| Data                       | Stored                        | Retention | Purpose                |
+| -------------------------- | ----------------------------- | --------- | ---------------------- |
+| `participant_id`           | yes (UUID)                    | 90 days   | session replay + audit |
+| `session_code`             | yes (Crockford base32)        | 90 days   | join routing           |
+| `display_name`             | yes (optional)                | 90 days   | recap                  |
+| `votes/submits/reactions`  | yes (per-engagement table)    | 90 days   | recap                  |
+| `attendance_record`        | yes (hash-chained)            | 7 years   | SCORM 2004 4th Ed      |
+| `feedback_response`        | yes (nps + stars + free text) | 90 days   | recap                  |
+| `device_id` (cookie/local) | yes (UUID)                    | 365 days  | rate-limit + dedup     |
+| `idempotency_key`          | yes (24h TTL)                 | 24 hours  | retry safety           |
 
 ### Consent flow
 
@@ -91,8 +91,7 @@ for new workspaces, off for grandfathered).
 
 - [x] PDPA consent panel on `/j/[code]` join page
 - [x] Subject access request + delete endpoints
-- [x] Workspace-scoped RLS on every new table (migrations 0055, 0056,
-      0057)
+- [x] Workspace-scoped RLS on every new table (migrations 0055, 0056, 0057)
 - [x] Hash-chained attendance log + Postgres trigger
 - [x] Anonymous-identified toggle on workspace config
 - [x] Cloudflare Turnstile CAPTCHA behind feature flag

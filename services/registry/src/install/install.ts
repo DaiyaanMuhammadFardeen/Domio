@@ -1,4 +1,4 @@
-import type { ServiceDeps, } from '../deps.js';
+import type { ServiceDeps } from '../deps.js';
 import { nowMs } from '../deps.js';
 import { Errors } from '../errors.js';
 import { sha256Hex, signUrl } from '../crypto/index.js';
@@ -44,7 +44,10 @@ export interface InstallResult {
  *  5. Produce bundle URLs — signed (5-min TTL) for private/paid, immutable
  *     long-lived for free packages.
  */
-export async function installPackage(deps: ServiceDeps, input: InstallInput): Promise<InstallResult> {
+export async function installPackage(
+  deps: ServiceDeps,
+  input: InstallInput,
+): Promise<InstallResult> {
   const store = deps.store;
   const now = nowMs(deps);
 
@@ -54,7 +57,11 @@ export async function installPackage(deps: ServiceDeps, input: InstallInput): Pr
   const available = versions.map((v) => v.version);
   let version = input.version;
   if (!version) {
-    const resolved = await resolvePinTarget(deps, { pinMode: input.pinMode ?? 'track-latest' }, available);
+    const resolved = await resolvePinTarget(
+      deps,
+      { pinMode: input.pinMode ?? 'track-latest' },
+      available,
+    );
     version = resolved.version;
   }
   const pkg = await getPackageOrNull(deps, input.catalogId, version);
@@ -67,7 +74,8 @@ export async function installPackage(deps: ServiceDeps, input: InstallInput): Pr
   for (const [name, hash] of Object.entries(pkg.files)) {
     const blob = await store.getBlob(hash);
     if (!blob) throw Errors.tampered(`Bundle blob "${name}" missing from store`);
-    if (sha256Hex(blob.bytes) !== hash) throw Errors.tampered(`Bundle blob "${name}" failed hash verification`);
+    if (sha256Hex(blob.bytes) !== hash)
+      throw Errors.tampered(`Bundle blob "${name}" failed hash verification`);
   }
 
   // 3. License for paid listings.
@@ -95,8 +103,16 @@ export async function installPackage(deps: ServiceDeps, input: InstallInput): Pr
     catalogId: input.catalogId,
     installedVersion: version,
     pinMode,
-    ...(input.pinValue ? { pinValue: input.pinValue } : existing?.pinValue ? { pinValue: existing.pinValue } : {}),
-    ...(licenseGrant ? { licenseGrantId: licenseGrant.id } : existing?.licenseGrantId ? { licenseGrantId: existing.licenseGrantId } : {}),
+    ...(input.pinValue
+      ? { pinValue: input.pinValue }
+      : existing?.pinValue
+        ? { pinValue: existing.pinValue }
+        : {}),
+    ...(licenseGrant
+      ? { licenseGrantId: licenseGrant.id }
+      : existing?.licenseGrantId
+        ? { licenseGrantId: existing.licenseGrantId }
+        : {}),
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   };
@@ -127,7 +143,13 @@ export async function installPackage(deps: ServiceDeps, input: InstallInput): Pr
     }
   }
 
-  return { item, version, bundleUrls, ...(licenseGrant ? { licenseGrant } : {}), updated: Boolean(existing) };
+  return {
+    item,
+    version,
+    bundleUrls,
+    ...(licenseGrant ? { licenseGrant } : {}),
+    updated: Boolean(existing),
+  };
 }
 
 export async function uninstallPackage(
@@ -152,7 +174,10 @@ export interface UpdateInfo {
   pinned: boolean;
 }
 
-export async function checkForUpdates(deps: ServiceDeps, input: CheckForUpdatesInput): Promise<UpdateInfo[]> {
+export async function checkForUpdates(
+  deps: ServiceDeps,
+  input: CheckForUpdatesInput,
+): Promise<UpdateInfo[]> {
   const items = await deps.store.listLibraryItems(input.userId, input.workspaceId);
   const out: UpdateInfo[] = [];
   for (const item of items) {

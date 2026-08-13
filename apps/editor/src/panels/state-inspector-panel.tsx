@@ -11,12 +11,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 
-export type StateMachineEventKind =
-  | 'focus'
-  | 'press'
-  | 'click'
-  | 'hover'
-  | 'default';
+export type StateMachineEventKind = 'focus' | 'press' | 'click' | 'hover' | 'default';
 
 export interface StateInspectorTransition {
   readonly from: string;
@@ -76,13 +71,7 @@ const SCOPE_OPTIONS: StateInspectorMachine['scope'][] = [
   'persistent_session',
 ];
 
-const EVENT_OPTIONS: StateMachineEventKind[] = [
-  'focus',
-  'press',
-  'click',
-  'hover',
-  'default',
-];
+const EVENT_OPTIONS: StateMachineEventKind[] = ['focus', 'press', 'click', 'hover', 'default'];
 
 export function StateInspectorPanel({
   machines,
@@ -157,7 +146,9 @@ export function StateInspectorPanel({
           onChange={(e) => setScope(e.target.value as StateInspectorMachine['scope'])}
         >
           {SCOPE_OPTIONS.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>
+              {s}
+            </option>
           ))}
         </select>
         <button type="button" data-testid="m3-add-machine" onClick={handleAdd}>
@@ -173,8 +164,8 @@ export function StateInspectorPanel({
             type="checkbox"
             checked={pauseAndInspect}
             onChange={(e) => setPauseAndInspect(e.target.checked)}
-          />
-          {' '}Pause and inspect
+          />{' '}
+          Pause and inspect
         </label>
       </div>
 
@@ -187,7 +178,9 @@ export function StateInspectorPanel({
           onChange={(e) => setPendingEvent(e.target.value as StateMachineEventKind)}
         >
           {EVENT_OPTIONS.map((ev) => (
-            <option key={ev} value={ev}>{ev}</option>
+            <option key={ev} value={ev}>
+              {ev}
+            </option>
           ))}
         </select>
         <button
@@ -218,7 +211,9 @@ export function StateInspectorPanel({
                   onClick={() => setSelectedId(m.id)}
                 >
                   <strong>{m.instanceId}</strong>
-                  <small>{m.stateMachine.initial} → {m.currentState}</small>
+                  <small>
+                    {m.stateMachine.initial} → {m.currentState}
+                  </small>
                 </button>
                 <label>
                   <input
@@ -226,8 +221,8 @@ export function StateInspectorPanel({
                     data-testid="m3-persist-toggle"
                     checked={m.persistInstanceState}
                     onChange={(e) => onTogglePersistInstanceState(m.id, e.target.checked)}
-                  />
-                  {' '}persist
+                  />{' '}
+                  persist
                 </label>
                 <button
                   type="button"
@@ -247,10 +242,12 @@ export function StateInspectorPanel({
         {active ? (
           <>
             <p className="state-inspector-panel__current" data-testid="m3-current-state">
-              Current: <strong>{pauseAndInspect ? active.stateMachine.initial : active.currentState}</strong>
+              Current:{' '}
+              <strong>{pauseAndInspect ? active.stateMachine.initial : active.currentState}</strong>
               {pauseAndInspect ? (
                 <span className="state-inspector-panel__current-flag" data-testid="m3-paused-flag">
-                  {' '}(paused — initial)
+                  {' '}
+                  (paused — initial)
                 </span>
               ) : null}
             </p>

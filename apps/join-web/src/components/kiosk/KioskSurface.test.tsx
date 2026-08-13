@@ -18,7 +18,9 @@ describe('KioskSurface', () => {
   });
 
   it('renders the surface + PIN pad when locked', () => {
-    render(<KioskSurface sessionId="sess-1" adminPin="1234" idleMs={30_000} autoResetMs={300_000} />);
+    render(
+      <KioskSurface sessionId="sess-1" adminPin="1234" idleMs={30_000} autoResetMs={300_000} />,
+    );
     expect(screen.getByTestId('kiosk-surface')).toHaveAttribute('data-unlocked', 'false');
     expect(screen.getByTestId('kiosk-pin-input')).toBeInTheDocument();
     expect(screen.getByTestId('kiosk-pin-submit')).toBeInTheDocument();
@@ -60,7 +62,9 @@ describe('KioskSurface', () => {
   });
 
   it('shows the IdleScreen overlay after 30 s of inactivity', () => {
-    render(<KioskSurface sessionId="sess-1" adminPin="1234" idleMs={30_000} autoResetMs={300_000} />);
+    render(
+      <KioskSurface sessionId="sess-1" adminPin="1234" idleMs={30_000} autoResetMs={300_000} />,
+    );
     // Unlock first so we can see the idle overlay on top of children.
     fireEvent.change(screen.getByTestId('kiosk-pin-input'), { target: { value: '1234' } });
     fireEvent.click(screen.getByTestId('kiosk-pin-submit'));
@@ -72,7 +76,9 @@ describe('KioskSurface', () => {
   });
 
   it('clicking the IdleScreen hides the overlay', () => {
-    render(<KioskSurface sessionId="sess-1" adminPin="1234" idleMs={30_000} autoResetMs={300_000} />);
+    render(
+      <KioskSurface sessionId="sess-1" adminPin="1234" idleMs={30_000} autoResetMs={300_000} />,
+    );
     fireEvent.change(screen.getByTestId('kiosk-pin-input'), { target: { value: '1234' } });
     fireEvent.click(screen.getByTestId('kiosk-pin-submit'));
     act(() => {

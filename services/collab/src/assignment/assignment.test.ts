@@ -9,11 +9,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { InMemoryCollabStore } from '../store/mem_store.js';
 import { CollabService } from '../service.js';
 import { FEATURE_FLAGS, checkFeature } from '../feature_flags.js';
-import {
-  validateSlideRange,
-  validateAssignmentTransition,
-  updateAssignmentBody,
-} from './logic.js';
+import { validateSlideRange, validateAssignmentTransition, updateAssignmentBody } from './logic.js';
 import type { Assignment } from './types.js';
 import {
   InvalidSlideRangeError,
@@ -71,19 +67,18 @@ describe('Assignment status transitions', () => {
   });
 
   it.each(INVALID)('rejects %s → %s', (from, to) => {
-    expect(() => validateAssignmentTransition(from as any, to as any)).toThrow(InvalidTransitionError);
+    expect(() => validateAssignmentTransition(from as any, to as any)).toThrow(
+      InvalidTransitionError,
+    );
   });
 });
 
 describe('Blocked requires blocked_reason', () => {
   it('throws when transitioning to blocked without reason', () => {
     const assignment = makeAssignment({ status: 'in_progress', blockedReason: null });
-    expect(() => updateAssignmentBody(
-      assignment,
-      { status: 'blocked' },
-      'user1',
-      new Date(),
-    )).toThrow(CollabValidationError);
+    expect(() =>
+      updateAssignmentBody(assignment, { status: 'blocked' }, 'user1', new Date()),
+    ).toThrow(CollabValidationError);
   });
 
   it('succeeds with blocked_reason', () => {
@@ -183,14 +178,17 @@ describe('CollabService assignment integration', () => {
   });
 
   it('creates an assignment and retrieves by user', async () => {
-    const assignment = await service.createAssignment({
-      workspaceId: 'ws1',
-      deckId: 'deck1',
-      slideRange: { start: 1, end: 5 },
-      primaryId: 'user1',
-      watchers: ['user2', 'user3'],
-      dueAt: new Date('2026-01-15'),
-    }, 'user1');
+    const assignment = await service.createAssignment(
+      {
+        workspaceId: 'ws1',
+        deckId: 'deck1',
+        slideRange: { start: 1, end: 5 },
+        primaryId: 'user1',
+        watchers: ['user2', 'user3'],
+        dueAt: new Date('2026-01-15'),
+      },
+      'user1',
+    );
 
     expect(assignment.id).toBeTruthy();
     expect(assignment.status).toBe('not_started');
@@ -202,26 +200,32 @@ describe('CollabService assignment integration', () => {
   });
 
   it('listUserAssignments includes watchers', async () => {
-    await service.createAssignment({
-      workspaceId: 'ws1',
-      deckId: 'deck1',
-      slideRange: { start: 1, end: 5 },
-      primaryId: 'user1',
-      watchers: ['user2'],
-    }, 'user1');
+    await service.createAssignment(
+      {
+        workspaceId: 'ws1',
+        deckId: 'deck1',
+        slideRange: { start: 1, end: 5 },
+        primaryId: 'user1',
+        watchers: ['user2'],
+      },
+      'user1',
+    );
 
     const assignments = await service.listUserAssignments('user2');
     expect(assignments).toHaveLength(1);
   });
 
   it('updates assignment status', async () => {
-    const assignment = await service.createAssignment({
-      workspaceId: 'ws1',
-      deckId: 'deck1',
-      slideRange: { start: 1, end: 5 },
-      primaryId: 'user1',
-      watchers: [],
-    }, 'user1');
+    const assignment = await service.createAssignment(
+      {
+        workspaceId: 'ws1',
+        deckId: 'deck1',
+        slideRange: { start: 1, end: 5 },
+        primaryId: 'user1',
+        watchers: [],
+      },
+      'user1',
+    );
 
     const { assignment: updated } = await service.updateAssignment(
       assignment.id,
@@ -232,13 +236,18 @@ describe('CollabService assignment integration', () => {
   });
 
   it('rejects invalid slide range', async () => {
-    await expect(service.createAssignment({
-      workspaceId: 'ws1',
-      deckId: 'deck1',
-      slideRange: { start: 0, end: 5 },
-      primaryId: 'user1',
-      watchers: [],
-    }, 'user1')).rejects.toThrow(InvalidSlideRangeError);
+    await expect(
+      service.createAssignment(
+        {
+          workspaceId: 'ws1',
+          deckId: 'deck1',
+          slideRange: { start: 0, end: 5 },
+          primaryId: 'user1',
+          watchers: [],
+        },
+        'user1',
+      ),
+    ).rejects.toThrow(InvalidSlideRangeError);
   });
 });
 

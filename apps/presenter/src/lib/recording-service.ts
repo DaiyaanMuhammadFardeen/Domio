@@ -65,7 +65,11 @@ export class RecordingService {
     this.pollIntervalMs = opts.pollIntervalMs ?? 2000;
   }
 
-  async requestExport(sessionId: string, format: ExportJob['format'], watermark: boolean): Promise<ExportJob> {
+  async requestExport(
+    sessionId: string,
+    format: ExportJob['format'],
+    watermark: boolean,
+  ): Promise<ExportJob> {
     const res = await this.fetchImpl(
       `${this.baseUrl}/v1/presenter/sessions/${encodeURIComponent(sessionId)}/recording/export`,
       {

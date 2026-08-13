@@ -82,16 +82,55 @@ const teamSection: SectionTemplate = {
   `,
   buildSlides: (aspect, baseId) => {
     return [
-      makeSlide(`${baseId}-team-1`, 0, aspect, [
-        makeText({ id: `${baseId}-team-1-eyebrow`, text: 'TEAM', x: 120, y: 100, w: 600, h: 30 }),
-        makeText({ id: `${baseId}-team-1-title`, text: 'Who we are', x: 120, y: 140, w: 1300, h: 80 }),
-      ], 'Team · Overview'),
-      makeSlide(`${baseId}-team-2`, 1, aspect, [
-        makeText({ id: `${baseId}-team-2-title`, text: 'Leadership', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Team · Leadership'),
-      makeSlide(`${baseId}-team-3`, 2, aspect, [
-        makeText({ id: `${baseId}-team-3-title`, text: 'Members', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Team · Members'),
+      makeSlide(
+        `${baseId}-team-1`,
+        0,
+        aspect,
+        [
+          makeText({ id: `${baseId}-team-1-eyebrow`, text: 'TEAM', x: 120, y: 100, w: 600, h: 30 }),
+          makeText({
+            id: `${baseId}-team-1-title`,
+            text: 'Who we are',
+            x: 120,
+            y: 140,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Team · Overview',
+      ),
+      makeSlide(
+        `${baseId}-team-2`,
+        1,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-team-2-title`,
+            text: 'Leadership',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Team · Leadership',
+      ),
+      makeSlide(
+        `${baseId}-team-3`,
+        2,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-team-3-title`,
+            text: 'Members',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Team · Members',
+      ),
     ];
   },
 };
@@ -117,18 +156,61 @@ const financialsSection: SectionTemplate = {
   `,
   buildSlides: (aspect, baseId) => {
     return [
-      makeSlide(`${baseId}-fin-1`, 0, aspect, [
-        makeText({ id: `${baseId}-fin-1-title`, text: 'Financials', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Financials · Cover'),
-      makeSlide(`${baseId}-fin-2`, 1, aspect, [
-        makeText({ id: `${baseId}-fin-2-title`, text: 'P&L summary', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Financials · P&L'),
-      makeSlide(`${baseId}-fin-3`, 2, aspect, [
-        makeText({ id: `${baseId}-fin-3-title`, text: 'Revenue mix', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Financials · Mix'),
-      makeSlide(`${baseId}-fin-4`, 3, aspect, [
-        makeText({ id: `${baseId}-fin-4-title`, text: 'Runway', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Financials · Runway'),
+      makeSlide(
+        `${baseId}-fin-1`,
+        0,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-fin-1-title`,
+            text: 'Financials',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Financials · Cover',
+      ),
+      makeSlide(
+        `${baseId}-fin-2`,
+        1,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-fin-2-title`,
+            text: 'P&L summary',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Financials · P&L',
+      ),
+      makeSlide(
+        `${baseId}-fin-3`,
+        2,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-fin-3-title`,
+            text: 'Revenue mix',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Financials · Mix',
+      ),
+      makeSlide(
+        `${baseId}-fin-4`,
+        3,
+        aspect,
+        [makeText({ id: `${baseId}-fin-4-title`, text: 'Runway', x: 120, y: 100, w: 1300, h: 80 })],
+        'Financials · Runway',
+      ),
     ];
   },
 };
@@ -153,15 +235,27 @@ const roadmapSection: SectionTemplate = {
   `,
   buildSlides: (aspect, baseId) => {
     return [
-      makeSlide(`${baseId}-rm-1`, 0, aspect, [
-        makeText({ id: `${baseId}-rm-1-title`, text: 'Q1', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Roadmap · Q1'),
-      makeSlide(`${baseId}-rm-2`, 1, aspect, [
-        makeText({ id: `${baseId}-rm-2-title`, text: 'Q2', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Roadmap · Q2'),
-      makeSlide(`${baseId}-rm-3`, 2, aspect, [
-        makeText({ id: `${baseId}-rm-3-title`, text: 'Q3', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Roadmap · Q3'),
+      makeSlide(
+        `${baseId}-rm-1`,
+        0,
+        aspect,
+        [makeText({ id: `${baseId}-rm-1-title`, text: 'Q1', x: 120, y: 100, w: 1300, h: 80 })],
+        'Roadmap · Q1',
+      ),
+      makeSlide(
+        `${baseId}-rm-2`,
+        1,
+        aspect,
+        [makeText({ id: `${baseId}-rm-2-title`, text: 'Q2', x: 120, y: 100, w: 1300, h: 80 })],
+        'Roadmap · Q2',
+      ),
+      makeSlide(
+        `${baseId}-rm-3`,
+        2,
+        aspect,
+        [makeText({ id: `${baseId}-rm-3-title`, text: 'Q3', x: 120, y: 100, w: 1300, h: 80 })],
+        'Roadmap · Q3',
+      ),
     ];
   },
 };
@@ -187,21 +281,77 @@ const storiesSection: SectionTemplate = {
   `,
   buildSlides: (aspect, baseId) => {
     return [
-      makeSlide(`${baseId}-cs-1`, 0, aspect, [
-        makeText({ id: `${baseId}-cs-1-title`, text: 'Customer story', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Case study · Intro'),
-      makeSlide(`${baseId}-cs-2`, 1, aspect, [
-        makeText({ id: `${baseId}-cs-2-title`, text: 'The challenge', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Case study · Challenge'),
-      makeSlide(`${baseId}-cs-3`, 2, aspect, [
-        makeText({ id: `${baseId}-cs-3-title`, text: 'Our approach', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Case study · Approach'),
-      makeSlide(`${baseId}-cs-4`, 3, aspect, [
-        makeText({ id: `${baseId}-cs-4-title`, text: 'Results', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Case study · Results'),
-      makeSlide(`${baseId}-cs-5`, 4, aspect, [
-        makeText({ id: `${baseId}-cs-5-title`, text: 'In their words', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Case study · Quote'),
+      makeSlide(
+        `${baseId}-cs-1`,
+        0,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-cs-1-title`,
+            text: 'Customer story',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Case study · Intro',
+      ),
+      makeSlide(
+        `${baseId}-cs-2`,
+        1,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-cs-2-title`,
+            text: 'The challenge',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Case study · Challenge',
+      ),
+      makeSlide(
+        `${baseId}-cs-3`,
+        2,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-cs-3-title`,
+            text: 'Our approach',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Case study · Approach',
+      ),
+      makeSlide(
+        `${baseId}-cs-4`,
+        3,
+        aspect,
+        [makeText({ id: `${baseId}-cs-4-title`, text: 'Results', x: 120, y: 100, w: 1300, h: 80 })],
+        'Case study · Results',
+      ),
+      makeSlide(
+        `${baseId}-cs-5`,
+        4,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-cs-5-title`,
+            text: 'In their words',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Case study · Quote',
+      ),
     ];
   },
 };
@@ -228,15 +378,45 @@ const appendixSection: SectionTemplate = {
   `,
   buildSlides: (aspect, baseId) => {
     return [
-      makeSlide(`${baseId}-ap-1`, 0, aspect, [
-        makeText({ id: `${baseId}-ap-1-title`, text: 'Appendix', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Appendix · Cover'),
-      makeSlide(`${baseId}-ap-2`, 1, aspect, [
-        makeText({ id: `${baseId}-ap-2-title`, text: 'Glossary', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Appendix · Glossary'),
-      makeSlide(`${baseId}-ap-3`, 2, aspect, [
-        makeText({ id: `${baseId}-ap-3-title`, text: 'Contact', x: 120, y: 100, w: 1300, h: 80 }),
-      ], 'Appendix · Contact'),
+      makeSlide(
+        `${baseId}-ap-1`,
+        0,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-ap-1-title`,
+            text: 'Appendix',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Appendix · Cover',
+      ),
+      makeSlide(
+        `${baseId}-ap-2`,
+        1,
+        aspect,
+        [
+          makeText({
+            id: `${baseId}-ap-2-title`,
+            text: 'Glossary',
+            x: 120,
+            y: 100,
+            w: 1300,
+            h: 80,
+          }),
+        ],
+        'Appendix · Glossary',
+      ),
+      makeSlide(
+        `${baseId}-ap-3`,
+        2,
+        aspect,
+        [makeText({ id: `${baseId}-ap-3-title`, text: 'Contact', x: 120, y: 100, w: 1300, h: 80 })],
+        'Appendix · Contact',
+      ),
     ];
   },
 };

@@ -20,10 +20,7 @@ export function ProgressBar({ current, steps, completed, onJump }: ProgressBarPr
   const currentIdx = steps.findIndex((s) => s.key === current);
 
   return (
-    <ol
-      className="flex items-center gap-2 overflow-x-auto pb-2"
-      data-testid="onboarding-progress"
-    >
+    <ol className="flex items-center gap-2 overflow-x-auto pb-2" data-testid="onboarding-progress">
       {steps.map((step, i) => {
         const isCompleted = completed.includes(step.key);
         const isActive = step.key === current;

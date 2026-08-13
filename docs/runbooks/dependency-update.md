@@ -4,7 +4,7 @@ phase: 01
 stream: E
 audience: maintainers, release engineers
 last_reviewed: 2026-07-29
-tags: ["#dependencies", "#renovate", "#dependabot", "#security"]
+tags: ['#dependencies', '#renovate', '#dependabot', '#security']
 ---
 
 # Dependency Update Runbook
@@ -15,10 +15,10 @@ tags: ["#dependencies", "#renovate", "#dependabot", "#security"]
 
 ## 1. Sources of dependency PRs
 
-| Source      | Normal cadence                        | Security cadence             | Role |
-|-------------|---------------------------------------|------------------------------|------|
-| Renovate    | Monday–Friday before 07:00 Asia/Dhaka | Immediate (`at any time`)    | Primary updater and grouping engine |
-| Dependabot  | Weekly, one ecosystem per weekday     | GitHub security alerts       | Redundant security channel |
+| Source     | Normal cadence                        | Security cadence          | Role                                |
+| ---------- | ------------------------------------- | ------------------------- | ----------------------------------- |
+| Renovate   | Monday–Friday before 07:00 Asia/Dhaka | Immediate (`at any time`) | Primary updater and grouping engine |
+| Dependabot | Weekly, one ecosystem per weekday     | GitHub security alerts    | Redundant security channel          |
 
 Both systems cover npm, Go modules, Python, GitHub Actions, and Docker.
 Renovate additionally scans Cargo and Bun files when those appear.
@@ -81,12 +81,12 @@ Security patches are **immediate and separate** from the weekly batch:
 
 ## 5. When an update fails CI
 
-| Failure | First action | Escalation |
-|---------|--------------|------------|
-| Lockfile conflict | Rebase the PR; let Renovate regenerate lockfiles | Close/reopen if regeneration loops |
-| Type error | Read dependency release notes for breaking API changes | Split out the incompatible package |
-| Test failure | Reproduce locally using the same lockfile | Pin previous version with expiry TODO |
-| Download timeout | Run mirror healthcheck; retry after mirror recovers | Use upstream fallback per Bangladesh runbook |
+| Failure                     | First action                                           | Escalation                                    |
+| --------------------------- | ------------------------------------------------------ | --------------------------------------------- |
+| Lockfile conflict           | Rebase the PR; let Renovate regenerate lockfiles       | Close/reopen if regeneration loops            |
+| Type error                  | Read dependency release notes for breaking API changes | Split out the incompatible package            |
+| Test failure                | Reproduce locally using the same lockfile              | Pin previous version with expiry TODO         |
+| Download timeout            | Run mirror healthcheck; retry after mirror recovers    | Use upstream fallback per Bangladesh runbook  |
 | Integrity/checksum mismatch | **Stop. Do not retry blindly.** Verify upstream digest | Page Security; possible supply-chain incident |
 
 ## 6. Upstream fallback during update windows

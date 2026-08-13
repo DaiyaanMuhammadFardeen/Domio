@@ -23,7 +23,10 @@ export interface TimelineAuditRecorder {
 export class InMemoryTimelineAuditRecorder implements TimelineAuditRecorder {
   private events: TimelineAuditEvent[] = [];
   private counter = 0;
-  constructor(_idGen: () => string, private readonly clock: () => Date = () => new Date()) {
+  constructor(
+    _idGen: () => string,
+    private readonly clock: () => Date = () => new Date(),
+  ) {
     void _idGen;
   }
 
@@ -38,6 +41,6 @@ export class InMemoryTimelineAuditRecorder implements TimelineAuditRecorder {
   }
 
   async listByTenant(tenantId: string, limit = 100): Promise<TimelineAuditEvent[]> {
-    return this.events.filter(e => e.tenantId === tenantId).slice(-limit);
+    return this.events.filter((e) => e.tenantId === tenantId).slice(-limit);
   }
 }

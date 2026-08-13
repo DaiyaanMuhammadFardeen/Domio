@@ -9,46 +9,46 @@
  *   TTL defaults to 24h.
  */
 export interface IdempotencyKey {
-    key: string;
-    workspace_id: string;
-    session_id: string;
-    ttl_ms: number;
+  key: string;
+  workspace_id: string;
+  session_id: string;
+  ttl_ms: number;
 }
 export interface IdempotencyReservation {
-    exists: boolean;
-    prior?: IdempotencyRecord;
+  exists: boolean;
+  prior?: IdempotencyRecord;
 }
 export interface IdempotencyRecord {
-    key: string;
-    workspace_id: string;
-    session_id: string;
-    response: unknown;
-    recorded_at_ms: number;
-    ttl_ms: number;
+  key: string;
+  workspace_id: string;
+  session_id: string;
+  response: unknown;
+  recorded_at_ms: number;
+  ttl_ms: number;
 }
 export interface IdempotencyCommit {
-    key: string;
-    workspace_id: string;
-    session_id: string;
-    response: unknown;
-    recorded_at_ms: number;
-    ttl_ms: number;
+  key: string;
+  workspace_id: string;
+  session_id: string;
+  response: unknown;
+  recorded_at_ms: number;
+  ttl_ms: number;
 }
 export interface IdempotencyStore {
-    reserve(req: IdempotencyKey): Promise<IdempotencyReservation>;
-    commit(commit: IdempotencyCommit): Promise<void>;
-    get(key: string, workspace_id: string, session_id: string): Promise<IdempotencyRecord | null>;
+  reserve(req: IdempotencyKey): Promise<IdempotencyReservation>;
+  commit(commit: IdempotencyCommit): Promise<void>;
+  get(key: string, workspace_id: string, session_id: string): Promise<IdempotencyRecord | null>;
 }
 export declare class NullIdempotencyStore implements IdempotencyStore {
-    reserve(): Promise<IdempotencyReservation>;
-    commit(): Promise<void>;
-    get(): Promise<IdempotencyRecord | null>;
+  reserve(): Promise<IdempotencyReservation>;
+  commit(): Promise<void>;
+  get(): Promise<IdempotencyRecord | null>;
 }
 export declare class InMemoryIdempotencyStore implements IdempotencyStore {
-    private readonly map;
-    private fqkey;
-    reserve(req: IdempotencyKey): Promise<IdempotencyReservation>;
-    commit(c: IdempotencyCommit): Promise<void>;
-    get(key: string, workspace_id: string, session_id: string): Promise<IdempotencyRecord | null>;
+  private readonly map;
+  private fqkey;
+  reserve(req: IdempotencyKey): Promise<IdempotencyReservation>;
+  commit(c: IdempotencyCommit): Promise<void>;
+  get(key: string, workspace_id: string, session_id: string): Promise<IdempotencyRecord | null>;
 }
 //# sourceMappingURL=index.d.ts.map

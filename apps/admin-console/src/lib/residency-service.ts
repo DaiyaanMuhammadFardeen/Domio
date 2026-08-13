@@ -10,12 +10,7 @@
  */
 
 import { fetcher } from './fetcher';
-import type {
-  MigrationPlan,
-  MigrationPlanRequest,
-  RegionInfo,
-  WorkspaceResidency,
-} from './types';
+import type { MigrationPlan, MigrationPlanRequest, RegionInfo, WorkspaceResidency } from './types';
 
 const NOW = Date.UTC(2026, 6, 1);
 const DAY_MS = 1000 * 60 * 60 * 24;
@@ -157,9 +152,7 @@ export async function listRegions(): Promise<ReadonlyArray<RegionInfo>> {
 
 export async function listWorkspaceResidency(): Promise<ReadonlyArray<WorkspaceResidency>> {
   try {
-    const json = await fetcher<{ items?: WorkspaceResidency[] }>(
-      '/v1/admin/residency/workspaces',
-    );
+    const json = await fetcher<{ items?: WorkspaceResidency[] }>('/v1/admin/residency/workspaces');
     const items = json.items ?? [];
     if (items.length > 0) return items;
   } catch {
@@ -183,9 +176,7 @@ function estimate(storage_gb: number): { cost_cents: number; downtime_minutes: n
  * and progress_pct=0 — nothing has been queued yet. Callers can show the
  * estimate to the user, then call `applyMigration(plan.id)` to commit.
  */
-export async function previewMigration(
-  req: MigrationPlanRequest,
-): Promise<MigrationPlan> {
+export async function previewMigration(req: MigrationPlanRequest): Promise<MigrationPlan> {
   const ws = findWorkspace(req.workspace_id);
   if (!ws) {
     throw new Error(`Workspace ${req.workspace_id} not found`);
@@ -245,8 +236,9 @@ export async function applyMigration(planId: string): Promise<MigrationPlan> {
     PLANS[idx] = next;
     return clonePlan(next);
   }
-  const started = prev.status === 'preview' ? NOW : prev.started_at_ms ?? NOW;
-  const initialPct = prev.status === 'preview' ? 10 + Math.floor(Math.random() * 30) : prev.progress_pct;
+  const started = prev.status === 'preview' ? NOW : (prev.started_at_ms ?? NOW);
+  const initialPct =
+    prev.status === 'preview' ? 10 + Math.floor(Math.random() * 30) : prev.progress_pct;
   const next: MigrationPlan = {
     ...prev,
     status: 'in_progress',

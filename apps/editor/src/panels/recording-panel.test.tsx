@@ -16,10 +16,7 @@ import type { SupportMatrix } from '@domio/recording';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function renderPanel(opts?: {
-  supportMatrix?: () => SupportMatrix;
-  onFinalize?: Mock;
-}) {
+function renderPanel(opts?: { supportMatrix?: () => SupportMatrix; onFinalize?: Mock }) {
   return render(
     <RecordingPanel
       viewportWidth={1920}
@@ -125,7 +122,9 @@ describe('RecordingPanel', () => {
     fireEvent.click(screen.getByTestId('recording-panel-start'));
     fireEvent.click(screen.getByTestId('recording-panel-stop'));
     expect(screen.getByTestId('recording-panel-finalized')).toBeDefined();
-    expect(screen.getByTestId('recording-panel-finalized-chunks').textContent).toMatch(/Chunks: \d+/);
+    expect(screen.getByTestId('recording-panel-finalized-chunks').textContent).toMatch(
+      /Chunks: \d+/,
+    );
   });
 
   it('does not crash with no finalize callback', () => {

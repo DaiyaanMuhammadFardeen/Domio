@@ -9,12 +9,7 @@
  */
 
 import { fetcher } from './fetcher';
-import type {
-  APIKey,
-  APIKeyCreateResult,
-  APIKeyInput,
-  APIKeyScope,
-} from './types';
+import type { APIKey, APIKeyCreateResult, APIKeyInput, APIKeyScope } from './types';
 
 const NOW = Date.UTC(2026, 6, 1);
 const DAY_MS = 1000 * 60 * 60 * 24;
@@ -130,9 +125,7 @@ export async function listAPIKeys(
 
 export async function getAPIKey(id: string): Promise<APIKey | undefined> {
   try {
-    return await fetcher<APIKey>(
-      `/v1/admin/api-keys/${encodeURIComponent(id)}`,
-    );
+    return await fetcher<APIKey>(`/v1/admin/api-keys/${encodeURIComponent(id)}`);
   } catch {
     const found = STORE.find((k) => k.id === id);
     return found ? clone(found) : undefined;
@@ -202,10 +195,9 @@ export async function revokeAPIKey(id: string): Promise<APIKey> {
   const next: APIKey = { ...prev, revoked: true };
   STORE[idx] = next;
   try {
-    return await fetcher<APIKey>(
-      `/v1/admin/api-keys/${encodeURIComponent(id)}/revoke`,
-      { method: 'POST' },
-    );
+    return await fetcher<APIKey>(`/v1/admin/api-keys/${encodeURIComponent(id)}/revoke`, {
+      method: 'POST',
+    });
   } catch {
     return clone(next);
   }

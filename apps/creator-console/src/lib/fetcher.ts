@@ -40,10 +40,7 @@ export async function fetcher<T>(
     'content-type': 'application/json',
     ...(opts.headers ?? {}),
   };
-  const workspaceId =
-    opts.workspaceId ??
-    process.env['NEXT_PUBLIC_WORKSPACE_ID'] ??
-    'ws-demo';
+  const workspaceId = opts.workspaceId ?? process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
   if (workspaceId) headers['x-workspace-id'] = workspaceId;
 
   const init: RequestInit = {

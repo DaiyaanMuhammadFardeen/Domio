@@ -15,12 +15,18 @@ import { FIELD_MAP_KEYS } from './mapping.js';
 
 function readField(state: TaskState, key: string): string {
   switch (key) {
-    case 'status': return state.status;
-    case 'priority': return state.priority;
-    case 'assignee': return state.assignee;
-    case 'due_date': return state.due_date;
-    case 'title': return state.title;
-    default: return '';
+    case 'status':
+      return state.status;
+    case 'priority':
+      return state.priority;
+    case 'assignee':
+      return state.assignee;
+    case 'due_date':
+      return state.due_date;
+    case 'title':
+      return state.title;
+    default:
+      return '';
   }
 }
 
@@ -38,7 +44,7 @@ export function detectConflict(
 ): boolean {
   const keys = Object.keys(fieldMap);
   for (const key of keys) {
-    if (!FIELD_MAP_KEYS.includes(key as typeof FIELD_MAP_KEYS[number])) continue;
+    if (!FIELD_MAP_KEYS.includes(key as (typeof FIELD_MAP_KEYS)[number])) continue;
     const domVal = readField(domioState, key);
     const taskVal = readField(taskState, key);
     if (domVal !== taskVal) return true;
@@ -79,21 +85,30 @@ export function resolveSyncConflict(opts: {
   const winner = domioNewer ? 'domio' : 'task';
 
   const mappedKeys = Object.keys(fieldMap);
-  const mergedStatus = mappedKeys.includes('status') && readField(domioState, 'status') !== readField(taskState, 'status')
-    ? readField(domioNewer ? domioState : taskState, 'status')
-    : base.status;
-  const mergedPriority = mappedKeys.includes('priority') && readField(domioState, 'priority') !== readField(taskState, 'priority')
-    ? readField(domioNewer ? domioState : taskState, 'priority')
-    : base.priority;
-  const mergedAssignee = mappedKeys.includes('assignee') && readField(domioState, 'assignee') !== readField(taskState, 'assignee')
-    ? readField(domioNewer ? domioState : taskState, 'assignee')
-    : base.assignee;
-  const mergedDueDate = mappedKeys.includes('due_date') && readField(domioState, 'due_date') !== readField(taskState, 'due_date')
-    ? readField(domioNewer ? domioState : taskState, 'due_date')
-    : base.due_date;
-  const mergedTitle = mappedKeys.includes('title') && readField(domioState, 'title') !== readField(taskState, 'title')
-    ? readField(domioNewer ? domioState : taskState, 'title')
-    : base.title;
+  const mergedStatus =
+    mappedKeys.includes('status') &&
+    readField(domioState, 'status') !== readField(taskState, 'status')
+      ? readField(domioNewer ? domioState : taskState, 'status')
+      : base.status;
+  const mergedPriority =
+    mappedKeys.includes('priority') &&
+    readField(domioState, 'priority') !== readField(taskState, 'priority')
+      ? readField(domioNewer ? domioState : taskState, 'priority')
+      : base.priority;
+  const mergedAssignee =
+    mappedKeys.includes('assignee') &&
+    readField(domioState, 'assignee') !== readField(taskState, 'assignee')
+      ? readField(domioNewer ? domioState : taskState, 'assignee')
+      : base.assignee;
+  const mergedDueDate =
+    mappedKeys.includes('due_date') &&
+    readField(domioState, 'due_date') !== readField(taskState, 'due_date')
+      ? readField(domioNewer ? domioState : taskState, 'due_date')
+      : base.due_date;
+  const mergedTitle =
+    mappedKeys.includes('title') && readField(domioState, 'title') !== readField(taskState, 'title')
+      ? readField(domioNewer ? domioState : taskState, 'title')
+      : base.title;
 
   const merged: TaskState = {
     status: mergedStatus,

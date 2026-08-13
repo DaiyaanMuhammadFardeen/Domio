@@ -5,11 +5,7 @@
  * Powers the 409 TOKEN_REFERENCED deletion blocker.
  */
 
-import type {
-  TokenRef,
-  DeckTokenState,
-  FindReferrersResult,
-} from './types.js';
+import type { TokenRef, DeckTokenState, FindReferrersResult } from './types.js';
 
 const MAX_SAMPLE_REFERRERS = 10;
 
@@ -25,10 +21,7 @@ const MAX_SAMPLE_REFERRERS = 10;
  * - orgDefaultTheme
  * - aliasEdges (source references target)
  */
-export function findReferrers(
-  tokenRef: TokenRef,
-  deckState: DeckTokenState,
-): FindReferrersResult {
+export function findReferrers(tokenRef: TokenRef, deckState: DeckTokenState): FindReferrersResult {
   const referrers: string[] = [];
 
   // Scan slide elements

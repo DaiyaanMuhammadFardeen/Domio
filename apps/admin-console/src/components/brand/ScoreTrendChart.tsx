@@ -15,11 +15,7 @@ export interface ScoreTrendChartProps {
   readonly height?: number;
 }
 
-export function ScoreTrendChart({
-  points,
-  width = 240,
-  height = 60,
-}: ScoreTrendChartProps) {
+export function ScoreTrendChart({ points, width = 240, height = 60 }: ScoreTrendChartProps) {
   if (points.length === 0) {
     return (
       <svg

@@ -45,7 +45,9 @@ export default function LegalHoldPage() {
   const [showForm, setShowForm] = useState(false);
   const [releaseNotesById, setReleaseNotesById] = useState<Readonly<Record<string, string>>>({});
   const [confirmingReleaseId, setConfirmingReleaseId] = useState<string | null>(null);
-  const [affectedById, setAffectedById] = useState<Readonly<Record<string, ReadonlyArray<AffectedItem>>>>({});
+  const [affectedById, setAffectedById] = useState<
+    Readonly<Record<string, ReadonlyArray<AffectedItem>>>
+  >({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -192,9 +194,7 @@ export default function LegalHoldPage() {
               <input
                 type="text"
                 value={form.target_id}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, target_id: e.target.value }))
-                }
+                onChange={(e) => setForm((prev) => ({ ...prev, target_id: e.target.value }))}
                 placeholder="e.g. deck-prospectus-q3"
                 className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
@@ -207,9 +207,7 @@ export default function LegalHoldPage() {
                 type="text"
                 data-testid="legal-hold-form-reason"
                 value={form.reason}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, reason: e.target.value }))
-                }
+                onChange={(e) => setForm((prev) => ({ ...prev, reason: e.target.value }))}
                 placeholder="Describe the legal or compliance basis for this hold"
                 className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm transition focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               />
@@ -237,30 +235,25 @@ export default function LegalHoldPage() {
 
       <section className="flex items-center gap-2 text-xs text-slate-600">
         <span className="font-semibold uppercase tracking-wide">Filter</span>
-        {(['all', 'active', 'released'] as ReadonlyArray<StatusFilter>).map(
-          (option) => (
-            <button
-              key={option}
-              type="button"
-              data-testid={`legal-hold-filter-${option}`}
-              onClick={() => setFilter(option)}
-              className={
-                'rounded-full px-3 py-1 text-xs font-medium transition ' +
-                (filter === option
-                  ? 'bg-brand-600 text-white'
-                  : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100')
-              }
-            >
-              {option}
-            </button>
-          ),
-        )}
+        {(['all', 'active', 'released'] as ReadonlyArray<StatusFilter>).map((option) => (
+          <button
+            key={option}
+            type="button"
+            data-testid={`legal-hold-filter-${option}`}
+            onClick={() => setFilter(option)}
+            className={
+              'rounded-full px-3 py-1 text-xs font-medium transition ' +
+              (filter === option
+                ? 'bg-brand-600 text-white'
+                : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100')
+            }
+          >
+            {option}
+          </button>
+        ))}
       </section>
 
-      <section
-        data-testid="legal-hold-list"
-        className="space-y-3"
-      >
+      <section data-testid="legal-hold-list" className="space-y-3">
         {loading && holds.length === 0 ? (
           <div className="space-y-2" aria-busy>
             {[0, 1, 2].map((i) => (
@@ -290,9 +283,7 @@ export default function LegalHoldPage() {
                 <header className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-900">
-                        {h.target_label}
-                      </span>
+                      <span className="text-sm font-semibold text-slate-900">{h.target_label}</span>
                       <Badge tone={isActive ? 'green' : 'grey'}>
                         <FormattedMessage
                           id={`admin.legalHold.status.${h.status}`}
@@ -304,10 +295,11 @@ export default function LegalHoldPage() {
                       </span>
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px]">{h.target_id}</code>
+                      <code className="rounded bg-slate-100 px-1 py-0.5 text-[11px]">
+                        {h.target_id}
+                      </code>
                       <span className="mx-2">·</span>
-                      Applied {new Date(h.applied_at_ms).toLocaleDateString()} by{' '}
-                      {h.applied_by}
+                      Applied {new Date(h.applied_at_ms).toLocaleDateString()} by {h.applied_by}
                     </div>
                   </div>
                   {isActive && (
@@ -337,8 +329,7 @@ export default function LegalHoldPage() {
                 )}
                 {!isActive && h.released_at_ms && (
                   <div className="mt-3 rounded-md bg-slate-100 p-2 text-xs text-slate-600">
-                    Released {new Date(h.released_at_ms).toLocaleDateString()} by{' '}
-                    {h.released_by}:{' '}
+                    Released {new Date(h.released_at_ms).toLocaleDateString()} by {h.released_by}:{' '}
                     <span className="text-slate-700">{h.release_notes}</span>
                   </div>
                 )}
@@ -349,10 +340,7 @@ export default function LegalHoldPage() {
                   >
                     <label className="block text-xs">
                       <span className="mb-1 block font-semibold uppercase tracking-wide text-rose-700">
-                        <FormattedMessage
-                          id="admin.legalHold.releaseNotes"
-                          catalogue={CATALOGUE}
-                        />
+                        <FormattedMessage id="admin.legalHold.releaseNotes" catalogue={CATALOGUE} />
                       </span>
                       <textarea
                         data-testid={`legal-hold-release-notes-${h.id}`}

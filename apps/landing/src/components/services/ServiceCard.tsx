@@ -17,17 +17,10 @@ export function ServiceCard({ service }: ServiceCardProps): JSX.Element {
   const detailHref = `/services/${encodeURIComponent(service.id)}`;
   const docsHref = `/docs/${service.docsSlug}`;
   return (
-    <article
-      className="service-card"
-      data-testid="service-card"
-      data-service-id={service.id}
-    >
+    <article className="service-card" data-testid="service-card" data-service-id={service.id}>
       <header className="service-card__header">
         <h3 className="service-card__name">{service.name}</h3>
-        <span
-          className="service-card__port"
-          aria-label={`Dev port ${service.port}`}
-        >
+        <span className="service-card__port" aria-label={`Dev port ${service.port}`}>
           :{service.port}
         </span>
       </header>

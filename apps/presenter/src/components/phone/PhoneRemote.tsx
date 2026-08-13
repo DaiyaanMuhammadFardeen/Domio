@@ -30,21 +30,11 @@
  * on/off toggle and the per-slide advance pattern picker.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
 
 import type { PairingInfo } from '../../runtime/types';
-import {
-  PhoneRemoteService,
-  type PairedDevice,
-} from '../../lib/phone-remote-service';
+import { PhoneRemoteService, type PairedDevice } from '../../lib/phone-remote-service';
 import {
   type PacingCheckpoint,
   type VibrationPattern,
@@ -73,11 +63,7 @@ export interface PhoneRemoteProps {
 }
 
 export type { PairedDevice } from '../../lib/phone-remote-service';
-export type {
-  PacingCheckpoint,
-  VibrationPattern,
-  VibrationPulse,
-} from '../../lib/haptics-service';
+export type { PacingCheckpoint, VibrationPattern, VibrationPulse } from '../../lib/haptics-service';
 
 const POLL_INTERVAL_MS = 5_000;
 
@@ -93,20 +79,13 @@ export function PhoneRemote({
   const [error, setError] = useState<string | null>(null);
   const [laserEnabled, setLaserEnabled] = useState(false);
   const [hapticsEnabled, setHapticsEnabled] = useState(true);
-  const [advancePattern, setAdvancePattern] = useState<VibrationPattern>(
-    SHORT_PATTERN,
-  );
+  const [advancePattern, setAdvancePattern] = useState<VibrationPattern>(SHORT_PATTERN);
   const [patterns, setPatterns] = useState<readonly VibrationPattern[]>([]);
-  const [checkpoints, setCheckpoints] = useState<readonly PacingCheckpoint[]>(
-    [],
-  );
+  const [checkpoints, setCheckpoints] = useState<readonly PacingCheckpoint[]>([]);
   const lastSlideIndexRef = useRef<number | undefined>(undefined);
   const firedRef = useRef<Set<string>>(new Set());
 
-  const service = useMemo(
-    () => new PhoneRemoteService({ apiBaseUrl }),
-    [apiBaseUrl],
-  );
+  const service = useMemo(() => new PhoneRemoteService({ apiBaseUrl }), [apiBaseUrl]);
 
   const refresh = useCallback(async () => {
     try {
@@ -267,16 +246,22 @@ export function PhoneRemote({
           {qrUrl}
         </div>
         <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--content-secondary)' }}>
-          Scan with a phone camera to use it as a clicker, laser pointer,
-          whisper channel, and notes viewer. The phone stays connected
-          while this tab is open.
+          Scan with a phone camera to use it as a clicker, laser pointer, whisper channel, and notes
+          viewer. The phone stays connected while this tab is open.
         </div>
       </div>
 
       {devices.length > 0 && (
         <ul
           data-testid={`${dataTestId}-device-list`}
-          style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}
+          style={{
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+          }}
         >
           {devices.map((d) => (
             <li
@@ -335,9 +320,7 @@ export function PhoneRemote({
         >
           <FormattedMessage id="presenter.haptics.description" />
         </p>
-        <label
-          style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12 }}
-        >
+        <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12 }}>
           <input
             type="checkbox"
             checked={hapticsEnabled}
@@ -350,9 +333,7 @@ export function PhoneRemote({
             <FormattedMessage id="presenter.haptics.toggle.disable" />
           )}
         </label>
-        <label
-          style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12 }}
-        >
+        <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 12 }}>
           <span style={{ flexShrink: 0 }}>Advance buzz:</span>
           <select
             value={advancePattern.id}

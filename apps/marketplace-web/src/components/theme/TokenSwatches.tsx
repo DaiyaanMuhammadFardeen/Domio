@@ -69,11 +69,9 @@ export function TokenSwatches({ tokens }: TokenSwatchesProps) {
           >
             Subheading · {tokens.fontFamily.heading.split(',')[0]}
           </p>
-          <p
-            className="text-sm text-fg/80"
-            style={{ fontFamily: tokens.fontFamily.body }}
-          >
-            Body copy set in {tokens.fontFamily.body.split(',')[0]} — the calm, readable face used across paragraphs and bullet lists.
+          <p className="text-sm text-fg/80" style={{ fontFamily: tokens.fontFamily.body }}>
+            Body copy set in {tokens.fontFamily.body.split(',')[0]} — the calm, readable face used
+            across paragraphs and bullet lists.
           </p>
           <p
             className="font-mono text-xs text-muted"
@@ -96,9 +94,7 @@ export function TokenSwatches({ tokens }: TokenSwatchesProps) {
             const widthPx = Math.max(numericPx, 8);
             return (
               <div key={key} className="flex items-center gap-4">
-                <span className="w-8 font-mono text-[11px] uppercase text-muted">
-                  {key}
-                </span>
+                <span className="w-8 font-mono text-[11px] uppercase text-muted">{key}</span>
                 <div
                   className="h-3 rounded-sm bg-accent/70"
                   style={{ width: `${widthPx}px` }}

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Domio MCP Embed Tools
-  version: "1.0.0"
+  version: '1.0.0'
   description: |
     MCP HTTP transport for embed tools introduced in Phase 11.
     Bearer token authentication; every tool accepts a JSON object `{ deckId, ... }`
@@ -71,16 +71,16 @@ paths:
                 jwtAudience: { type: string }
                 trapFocus: { type: boolean }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/update_embed_policy:
     post:
       operationId: mcp_update_embed_policy
@@ -99,16 +99,16 @@ paths:
                 policyId: { type: string }
                 patch: { type: object }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_embed_policy:
     post:
       operationId: mcp_delete_embed_policy
@@ -126,13 +126,13 @@ paths:
                 deckId: { type: string }
                 policyId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/list_embed_policies:
     post:
       operationId: mcp_list_embed_policies
@@ -149,7 +149,7 @@ paths:
               properties:
                 deckId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -157,11 +157,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/create_sandbox_policy:
     post:
       operationId: mcp_create_sandbox_policy
@@ -186,16 +186,16 @@ paths:
                 allowImport: { type: boolean }
                 moduleAllowlist: { type: array, items: { type: string } }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/update_sandbox_policy:
     post:
       operationId: mcp_update_sandbox_policy
@@ -214,16 +214,16 @@ paths:
                 policyId: { type: string }
                 patch: { type: object }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_sandbox_policy:
     post:
       operationId: mcp_delete_sandbox_policy
@@ -241,13 +241,13 @@ paths:
                 deckId: { type: string }
                 policyId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/list_sandbox_policies:
     post:
       operationId: mcp_list_sandbox_policies
@@ -264,7 +264,7 @@ paths:
               properties:
                 deckId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -272,11 +272,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/run_sandbox_code:
     post:
       operationId: mcp_run_sandbox_code
@@ -296,16 +296,16 @@ paths:
                 code: { type: string }
                 language: { type: string, enum: [js] }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/render_latex:
     post:
       operationId: mcp_render_latex
@@ -325,16 +325,16 @@ paths:
                 format: { type: string, enum: [html, svg, png] }
                 themeHash: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/list_map_styles:
     post:
       operationId: mcp_list_map_styles
@@ -351,7 +351,7 @@ paths:
               properties:
                 deckId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -359,11 +359,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/create_map_style:
     post:
       operationId: mcp_create_map_style
@@ -387,16 +387,16 @@ paths:
                 defaultLng: { type: number }
                 defaultLat: { type: number }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/update_map_style:
     post:
       operationId: mcp_update_map_style
@@ -415,16 +415,16 @@ paths:
                 styleId: { type: string }
                 patch: { type: object }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_map_style:
     post:
       operationId: mcp_delete_map_style
@@ -442,10 +442,10 @@ paths:
                 deckId: { type: string }
                 styleId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }

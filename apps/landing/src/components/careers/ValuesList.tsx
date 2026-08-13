@@ -16,10 +16,7 @@ export interface ValuesListProps {
 
 export function ValuesList({ values }: ValuesListProps): JSX.Element {
   return (
-    <section
-      className="careers-values"
-      aria-labelledby="careers-values-heading"
-    >
+    <section className="careers-values" aria-labelledby="careers-values-heading">
       <h2 id="careers-values-heading" className="careers-section-heading">
         How we work
       </h2>

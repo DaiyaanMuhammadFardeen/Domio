@@ -24,7 +24,10 @@ export function WidgetConfigPanel(props: WidgetConfigPanelProps) {
 
 function GenericConfig(props: WidgetConfigPanelProps) {
   return (
-    <div className="p-3 border rounded bg-slate-50 text-sm text-slate-600" data-testid="widget-config">
+    <div
+      className="p-3 border rounded bg-slate-50 text-sm text-slate-600"
+      data-testid="widget-config"
+    >
       No configuration options for {props.descriptor.type}.
     </div>
   );
@@ -37,9 +40,7 @@ function asString(v: unknown, fallback: string): string {
 }
 
 function asStringArray(v: unknown, fallback: string[]): string[] {
-  return Array.isArray(v) && v.every((x) => typeof x === 'string')
-    ? (v as string[])
-    : fallback;
+  return Array.isArray(v) && v.every((x) => typeof x === 'string') ? (v as string[]) : fallback;
 }
 
 function asNumber(v: unknown, fallback: number): number {
@@ -56,9 +57,16 @@ function update(props: ConfigProps, key: string, value: unknown): void {
 }
 
 function PollConfig(props: ConfigProps) {
-  const p = props.descriptor.payload as { question?: string; options?: string[]; allow_multiple?: boolean };
+  const p = props.descriptor.payload as {
+    question?: string;
+    options?: string[];
+    allow_multiple?: boolean;
+  };
   return (
-    <div className="flex flex-col gap-2 p-3 border rounded bg-white" data-testid="widget-config-poll">
+    <div
+      className="flex flex-col gap-2 p-3 border rounded bg-white"
+      data-testid="widget-config-poll"
+    >
       <label className="flex flex-col gap-1">
         <span className="text-xs font-medium">Question</span>
         <input
@@ -73,7 +81,13 @@ function PollConfig(props: ConfigProps) {
           className="border rounded p-2 font-mono"
           rows={4}
           value={asStringArray(p.options, []).join('\n')}
-          onChange={(e) => update(props, 'options', e.target.value.split('\n').filter((s) => s.length > 0))}
+          onChange={(e) =>
+            update(
+              props,
+              'options',
+              e.target.value.split('\n').filter((s) => s.length > 0),
+            )
+          }
         />
       </label>
       <label className="flex items-center gap-2 text-xs">
@@ -91,7 +105,10 @@ function PollConfig(props: ConfigProps) {
 function WordCloudConfig(props: ConfigProps) {
   const p = props.descriptor.payload as { prompt?: string; max_chars?: number; min_chars?: number };
   return (
-    <div className="flex flex-col gap-2 p-3 border rounded bg-white" data-testid="widget-config-word-cloud">
+    <div
+      className="flex flex-col gap-2 p-3 border rounded bg-white"
+      data-testid="widget-config-word-cloud"
+    >
       <label className="flex flex-col gap-1">
         <span className="text-xs font-medium">Prompt</span>
         <input
@@ -127,7 +144,11 @@ function WordCloudConfig(props: ConfigProps) {
 }
 
 function QAConfig(props: ConfigProps) {
-  const p = props.descriptor.payload as { anonymous?: boolean; max_question_length?: number; upvote_enabled?: boolean };
+  const p = props.descriptor.payload as {
+    anonymous?: boolean;
+    max_question_length?: number;
+    upvote_enabled?: boolean;
+  };
   return (
     <div className="flex flex-col gap-2 p-3 border rounded bg-white" data-testid="widget-config-qa">
       <label className="flex items-center gap-2 text-xs">
@@ -162,9 +183,17 @@ function QAConfig(props: ConfigProps) {
 }
 
 function QuizConfig(props: ConfigProps) {
-  const p = props.descriptor.payload as { question?: string; choices?: string[]; correct_index?: number; time_limit_ms?: number };
+  const p = props.descriptor.payload as {
+    question?: string;
+    choices?: string[];
+    correct_index?: number;
+    time_limit_ms?: number;
+  };
   return (
-    <div className="flex flex-col gap-2 p-3 border rounded bg-white" data-testid="widget-config-quiz">
+    <div
+      className="flex flex-col gap-2 p-3 border rounded bg-white"
+      data-testid="widget-config-quiz"
+    >
       <label className="flex flex-col gap-1">
         <span className="text-xs font-medium">Question</span>
         <input
@@ -179,7 +208,13 @@ function QuizConfig(props: ConfigProps) {
           className="border rounded p-2 font-mono"
           rows={4}
           value={asStringArray(p.choices, []).join('\n')}
-          onChange={(e) => update(props, 'choices', e.target.value.split('\n').filter((s) => s.length > 0))}
+          onChange={(e) =>
+            update(
+              props,
+              'choices',
+              e.target.value.split('\n').filter((s) => s.length > 0),
+            )
+          }
         />
       </label>
       <label className="flex flex-col gap-1">

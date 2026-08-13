@@ -30,13 +30,13 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: List of licenses.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LicenseList"
-        "401":
+                $ref: '#/components/schemas/LicenseList'
+        '401':
           description: Unauthenticated.
     post:
       tags: [licenses]
@@ -47,21 +47,21 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateLicenseRequest"
+              $ref: '#/components/schemas/CreateLicenseRequest'
       responses:
-        "201":
+        '201':
           description: License created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/License"
-        "400":
+                $ref: '#/components/schemas/License'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
   /v1/licenses/{id}:
     get:
@@ -75,15 +75,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: License details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/License"
-        "401":
+                $ref: '#/components/schemas/License'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: License not found.
     patch:
       tags: [licenses]
@@ -100,23 +100,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchLicenseRequest"
+              $ref: '#/components/schemas/PatchLicenseRequest'
       responses:
-        "200":
+        '200':
           description: License updated.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/License"
-        "400":
+                $ref: '#/components/schemas/License'
+        '400':
           description: Validation error.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-        "401":
+                $ref: '#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: License not found.
     delete:
       tags: [licenses]
@@ -129,11 +129,11 @@ paths:
           schema:
             type: string
       responses:
-        "204":
+        '204':
           description: License deleted.
-        "401":
+        '401':
           description: Unauthenticated.
-        "404":
+        '404':
           description: License not found.
 components:
   securitySchemes:
@@ -180,7 +180,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/License"
+            $ref: '#/components/schemas/License'
     CreateLicenseRequest:
       type: object
       required: [workspaceId, name, source]

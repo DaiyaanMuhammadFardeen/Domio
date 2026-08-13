@@ -113,7 +113,12 @@ describe('checkTracingCoverage', () => {
   });
 
   it('emits a warn (not an error) when tier-2 service is missing the dep', () => {
-    const tier2: SloEntry = { ...SAMPLE_SLO, service: '@domio/lower', slo: 'avail-lower', tier: 'tier-2' };
+    const tier2: SloEntry = {
+      ...SAMPLE_SLO,
+      service: '@domio/lower',
+      slo: 'avail-lower',
+      tier: 'tier-2',
+    };
     const dir = tmpTree({
       'services/lower/package.json': JSON.stringify({ name: '@domio/lower' }),
     });

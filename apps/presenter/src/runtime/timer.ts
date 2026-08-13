@@ -37,10 +37,10 @@ export class SessionTimer {
   constructor(opts: SessionTimerOptions) {
     this.anchorPerfMs = performance.now();
     this.budgetMs = opts.budgetMs ?? 60 * 60 * 1000;
-    this.reducedMotion = opts.reducedMotion ?? (
-      typeof window !== 'undefined'
-      && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    );
+    this.reducedMotion =
+      opts.reducedMotion ??
+      (typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
 
   start(): void {

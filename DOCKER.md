@@ -28,35 +28,35 @@ cp .env.example .env
 
 ## What you get
 
-| URL                       | What                          | Profile |
-|---------------------------|-------------------------------|---------|
-| `http://localhost:3000`   | Dashboard                     | apps / full |
-| `http://localhost:3100`   | Editor                        | apps / full |
-| `http://localhost:3010`   | Presenter session service     | services / full |
-| `http://localhost:3020`   | Event ingest (Phase 17)       | services / full |
-| `http://localhost:3030`   | Analytics warehouse           | services / full |
-| `http://localhost:3040`   | Clickhouse loader (health)    | services / full |
-| `localhost:5432`          | Postgres 16 (pgvector)        | core / services / apps / full |
-| `localhost:6379`          | Redis 7                       | core / services / apps / full |
-| `localhost:4222`          | NATS JetStream                | core / services / full |
-| `localhost:9000` / `9001` | MinIO S3 API / console        | core / services / full |
-| `localhost:8123` / `9002` | ClickHouse HTTP / native      | core / services / full |
-| `localhost:9200`          | OpenSearch                    | core |
-| `localhost:8025`          | MailHog (SMTP UI)             | core |
-| `localhost:4317` / `4318` | OTel collector gRPC / HTTP    | obs / full |
-| `localhost:9090`          | Prometheus                    | obs / full |
-| `http://localhost:3001`   | Grafana (admin/admin)         | obs / full |
-| `http://localhost:16686`  | Jaeger                        | obs / full |
+| URL                       | What                       | Profile                       |
+| ------------------------- | -------------------------- | ----------------------------- |
+| `http://localhost:3000`   | Dashboard                  | apps / full                   |
+| `http://localhost:3100`   | Editor                     | apps / full                   |
+| `http://localhost:3010`   | Presenter session service  | services / full               |
+| `http://localhost:3020`   | Event ingest (Phase 17)    | services / full               |
+| `http://localhost:3030`   | Analytics warehouse        | services / full               |
+| `http://localhost:3040`   | Clickhouse loader (health) | services / full               |
+| `localhost:5432`          | Postgres 16 (pgvector)     | core / services / apps / full |
+| `localhost:6379`          | Redis 7                    | core / services / apps / full |
+| `localhost:4222`          | NATS JetStream             | core / services / full        |
+| `localhost:9000` / `9001` | MinIO S3 API / console     | core / services / full        |
+| `localhost:8123` / `9002` | ClickHouse HTTP / native   | core / services / full        |
+| `localhost:9200`          | OpenSearch                 | core                          |
+| `localhost:8025`          | MailHog (SMTP UI)          | core                          |
+| `localhost:4317` / `4318` | OTel collector gRPC / HTTP | obs / full                    |
+| `localhost:9090`          | Prometheus                 | obs / full                    |
+| `http://localhost:3001`   | Grafana (admin/admin)      | obs / full                    |
+| `http://localhost:16686`  | Jaeger                     | obs / full                    |
 
 ## Profile matrix
 
-| Profile        | Postgres / Redis / NATS | MinIO / ClickHouse / OpenSearch / MailHog | OTel / Prometheus / Grafana / Jaeger | editor / dashboard | event-ingest / warehouse / loader / presenter-session |
-|----------------|:-----------------------:|:------------------------------------------:|:-----------------------------------:|:-------------------:|:------------------------------------------------------:|
-| `core`         |           ✓             |                     ✓                      |                  —                  |          —          |                            —                           |
-| `services`     |           ✓             |                     ✓                      |                  —                  |          —          |                            ✓                           |
-| `apps`         |           ✓             |                     ✓                      |                  —                  |          ✓          |                            —                           |
-| `obs`          |           ✓             |                     ✓                      |                  ✓                  |          —          |                            —                           |
-| `full`         |           ✓             |                     ✓                      |                  ✓                  |          ✓          |                            ✓                           |
+| Profile    | Postgres / Redis / NATS | MinIO / ClickHouse / OpenSearch / MailHog | OTel / Prometheus / Grafana / Jaeger | editor / dashboard | event-ingest / warehouse / loader / presenter-session |
+| ---------- | :---------------------: | :---------------------------------------: | :----------------------------------: | :----------------: | :---------------------------------------------------: |
+| `core`     |            ✓            |                     ✓                     |                  —                   |         —          |                           —                           |
+| `services` |            ✓            |                     ✓                     |                  —                   |         —          |                           ✓                           |
+| `apps`     |            ✓            |                     ✓                     |                  —                   |         ✓          |                           —                           |
+| `obs`      |            ✓            |                     ✓                     |                  ✓                   |         —          |                           —                           |
+| `full`     |            ✓            |                     ✓                     |                  ✓                   |         ✓          |                           ✓                           |
 
 ## Manual docker compose
 
@@ -169,14 +169,14 @@ for the release-cut checklist.
 
 ## Troubleshooting
 
-| Symptom | Fix |
-|---|---|
-| `bind: address already in use` on `:5432` etc. | Another service on the host owns the port. Either stop it or override `POSTGRES_PORT` etc. in `.env`. |
-| Containers exit immediately with `permission denied` on `/data` | SELinux / AppArmor blocking volume mounts. Add `:z` to volume mounts, or disable for dev. |
-| OOM kill on `clickhouse` | Reduce `OPENSEARCH_JAVA_OPTS` (already `-Xms512m -Xmx512m`) and lower the `--memory` knob for ClickHouse. |
-| `docker compose` not found | Install Docker Desktop (macOS/Windows) or `docker-compose-plugin` (Linux). |
-| `podman-compose` not found | `brew install podman-compose` (macOS) or `pip install podman-compose` (Linux). |
-| Editor 500 errors at startup | Postgres isn't healthy yet — wait 10–20 s and refresh. |
+| Symptom                                                         | Fix                                                                                                       |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `bind: address already in use` on `:5432` etc.                  | Another service on the host owns the port. Either stop it or override `POSTGRES_PORT` etc. in `.env`.     |
+| Containers exit immediately with `permission denied` on `/data` | SELinux / AppArmor blocking volume mounts. Add `:z` to volume mounts, or disable for dev.                 |
+| OOM kill on `clickhouse`                                        | Reduce `OPENSEARCH_JAVA_OPTS` (already `-Xms512m -Xmx512m`) and lower the `--memory` knob for ClickHouse. |
+| `docker compose` not found                                      | Install Docker Desktop (macOS/Windows) or `docker-compose-plugin` (Linux).                                |
+| `podman-compose` not found                                      | `brew install podman-compose` (macOS) or `pip install podman-compose` (Linux).                            |
+| Editor 500 errors at startup                                    | Postgres isn't healthy yet — wait 10–20 s and refresh.                                                    |
 
 ## See also
 

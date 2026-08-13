@@ -33,24 +33,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ExecuteQueryRequest"
+              $ref: '#/components/schemas/ExecuteQueryRequest'
       responses:
-        "200":
+        '200':
           description: Query executed successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ExecuteQueryResponse"
-        "401":
+                $ref: '#/components/schemas/ExecuteQueryResponse'
+        '401':
           description: Unauthenticated or ACL denied.
-        "404":
+        '404':
           description: Query not found.
-        "429":
+        '429':
           description: Rate limit exceeded.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RateLimitResponse"
+                $ref: '#/components/schemas/RateLimitResponse'
   /v1/queries/webhook:
     post:
       tags: [queries]
@@ -65,17 +65,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WebhookRequest"
+              $ref: '#/components/schemas/WebhookRequest'
       responses:
-        "200":
+        '200':
           description: Webhook processed (or deduplicated).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WebhookResponse"
-        "400":
+                $ref: '#/components/schemas/WebhookResponse'
+        '400':
           description: Invalid HMAC signature.
-        "401":
+        '401':
           description: Unauthenticated or ACL denied.
   /v1/queries/invalidate:
     post:
@@ -90,13 +90,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/InvalidateRequest"
+              $ref: '#/components/schemas/InvalidateRequest'
       responses:
-        "204":
+        '204':
           description: Cache invalidated successfully.
-        "401":
+        '401':
           description: Unauthenticated or ACL denied.
-        "404":
+        '404':
           description: Query not found.
   /v1/queries/{queryId}:
     get:
@@ -117,15 +117,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Query details.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/QueryStatusResponse"
-        "401":
+                $ref: '#/components/schemas/QueryStatusResponse'
+        '401':
           description: Unauthenticated or ACL denied.
-        "404":
+        '404':
           description: Query not found.
   /v1/viewer-tokens:
     post:
@@ -140,17 +140,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ViewerTokenRequest"
+              $ref: '#/components/schemas/ViewerTokenRequest'
       responses:
-        "201":
+        '201':
           description: Viewer token issued.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ViewerTokenResponse"
-        "401":
+                $ref: '#/components/schemas/ViewerTokenResponse'
+        '401':
           description: Unauthenticated or ACL denied.
-        "404":
+        '404':
           description: Query not found.
 components:
   securitySchemes:
@@ -170,9 +170,9 @@ components:
       type: object
       properties:
         snapshot:
-          $ref: "#/components/schemas/DatasetSnapshot"
+          $ref: '#/components/schemas/DatasetSnapshot'
         freshness:
-          $ref: "#/components/schemas/FreshnessRecord"
+          $ref: '#/components/schemas/FreshnessRecord'
         fromCache:
           type: boolean
         cacheTier:
@@ -196,7 +196,7 @@ components:
       type: object
       properties:
         snapshot:
-          $ref: "#/components/schemas/DatasetSnapshot"
+          $ref: '#/components/schemas/DatasetSnapshot'
         deduped:
           type: boolean
     InvalidateRequest:
@@ -294,11 +294,11 @@ components:
       type: object
       properties:
         query:
-          $ref: "#/components/schemas/QueryDefinition"
+          $ref: '#/components/schemas/QueryDefinition'
         latestSnapshot:
-          $ref: "#/components/schemas/DatasetSnapshot"
+          $ref: '#/components/schemas/DatasetSnapshot'
         latestFreshness:
-          $ref: "#/components/schemas/FreshnessRecord"
+          $ref: '#/components/schemas/FreshnessRecord'
     QueryDefinition:
       type: object
       properties:
@@ -313,7 +313,7 @@ components:
         params:
           type: array
         freshnessPolicy:
-          $ref: "#/components/schemas/FreshnessPolicy"
+          $ref: '#/components/schemas/FreshnessPolicy'
         createdBy:
           type: string
         createdAt:

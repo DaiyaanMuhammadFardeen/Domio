@@ -83,9 +83,7 @@ export function ChartRecommender({
     <div className="flex flex-col gap-3" data-testid="p6-chart-recommender">
       <div className="flex items-center gap-2">
         <Sparkles size={14} className="text-blue-400" />
-        <span className="text-xs font-medium text-slate-200">
-          {t('p6.copilot.chart.title')}
-        </span>
+        <span className="text-xs font-medium text-slate-200">{t('p6.copilot.chart.title')}</span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -106,7 +104,10 @@ export function ChartRecommender({
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] text-red-300" data-testid="p6-chart-error">
+        <div
+          className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] text-red-300"
+          data-testid="p6-chart-error"
+        >
           {error}
         </div>
       )}
@@ -126,7 +127,10 @@ export function ChartRecommender({
                     <span className="rounded bg-slate-700/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-slate-300">
                       {CHART_LABELS[rec.chartType]}
                     </span>
-                    <span className="text-[10px] text-slate-500" data-testid={`${OPTION_TESTID_PREFIX}-${i}-confidence`}>
+                    <span
+                      className="text-[10px] text-slate-500"
+                      data-testid={`${OPTION_TESTID_PREFIX}-${i}-confidence`}
+                    >
                       {Math.round(rec.confidence * 100)}%
                     </span>
                     {isCurrent && (
@@ -145,7 +149,10 @@ export function ChartRecommender({
                     {isCurrent ? t('p6.copilot.chart.applied') : t('p6.copilot.chart.apply')}
                   </button>
                 </div>
-                <p className="mt-1.5 text-[11px] leading-snug text-slate-400" data-testid={`${OPTION_TESTID_PREFIX}-${i}-rationale`}>
+                <p
+                  className="mt-1.5 text-[11px] leading-snug text-slate-400"
+                  data-testid={`${OPTION_TESTID_PREFIX}-${i}-rationale`}
+                >
                   {rec.rationale}
                 </p>
               </li>

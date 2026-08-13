@@ -25,11 +25,7 @@
  * Node 22.
  */
 
-import type {
-  DeckDocument,
-  Slide,
-  Element,
-} from '@domio/schema';
+import type { DeckDocument, Slide, Element } from '@domio/schema';
 
 /** Minimal view of a deck at a specific revision; only the bits the
  *  diff cares about. */
@@ -266,12 +262,7 @@ function diffSlideElements(
   }
 }
 
-type PathEmitter = (
-  path: string,
-  base: unknown,
-  source: unknown,
-  target: unknown,
-) => void;
+type PathEmitter = (path: string, base: unknown, source: unknown, target: unknown) => void;
 
 /**
  * Walk the `base / source / target` triple in step and invoke the

@@ -74,13 +74,17 @@ describe('TrackStatus', () => {
       ['screen', 4],
       ['camera', 0],
     ]);
-    render(
-      <TrackStatus tracks={tracks} trackStates={trackStates} progress={progress} />,
+    render(<TrackStatus tracks={tracks} trackStates={trackStates} progress={progress} />);
+    expect(screen.getByTestId('recording-track-row-screen').getAttribute('data-state')).toBe(
+      'recording',
     );
-    expect(screen.getByTestId('recording-track-row-screen').getAttribute('data-state')).toBe('recording');
     expect(screen.getByTestId('recording-track-row-screen').textContent).toContain('4 chunks');
-    expect(screen.getByTestId('recording-track-row-camera').getAttribute('data-state')).toBe('ready');
-    expect(screen.getByTestId('recording-track-row-microphone').getAttribute('data-state')).toBe('pending');
+    expect(screen.getByTestId('recording-track-row-camera').getAttribute('data-state')).toBe(
+      'ready',
+    );
+    expect(screen.getByTestId('recording-track-row-microphone').getAttribute('data-state')).toBe(
+      'pending',
+    );
   });
 });
 

@@ -22,9 +22,7 @@ describe('Model3DEditor', () => {
   });
 
   it('renders existing hotspots', () => {
-    const hotspots = [
-      { id: 'h-1', x: 0.5, y: 0.5, action: 'goto:slide-2' },
-    ];
+    const hotspots = [{ id: 'h-1', x: 0.5, y: 0.5, action: 'goto:slide-2' }];
     render(
       <Model3DEditor
         src="model.glb"

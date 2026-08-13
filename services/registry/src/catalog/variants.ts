@@ -26,7 +26,10 @@ export function resolveVariant(_deps: ServiceDeps, input: ResolveVariantInput): 
   const { pkg, requestedVariantId, props } = input;
   const variants = pkg.variants ?? [];
   const master = variants[0];
-  const propsWithDefaults = applyDefaults(pkg.propsSchema as unknown as DomioPropsSchema, props ?? {});
+  const propsWithDefaults = applyDefaults(
+    pkg.propsSchema as unknown as DomioPropsSchema,
+    props ?? {},
+  );
 
   // 3. master defaults
   let chosen: ComponentVariant | undefined = master;

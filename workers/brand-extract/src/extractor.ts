@@ -85,7 +85,9 @@ const STAGE_LOGO = 'logo';
 
 const HEX_FROM_SRGB = (r: number, g: number, b: number): string => {
   const toHex = (v: number) =>
-    Math.max(0, Math.min(255, Math.round(v * 255))).toString(16).padStart(2, '0');
+    Math.max(0, Math.min(255, Math.round(v * 255)))
+      .toString(16)
+      .padStart(2, '0');
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 };
 
@@ -159,7 +161,11 @@ function extractColors(html: string): Map<string, { source: string; count: numbe
   return out;
 }
 
-function addColor(out: Map<string, { source: string; count: number }>, raw: string, source: string): void {
+function addColor(
+  out: Map<string, { source: string; count: number }>,
+  raw: string,
+  source: string,
+): void {
   const hex = parseHex(raw) ? raw.trim().toLowerCase() : null;
   const rgb = hex ? null : parseRgb(raw);
   if (!hex && !rgb) return;
@@ -188,7 +194,8 @@ function extractFonts(html: string): Map<string, number> {
 
 function extractLogos(html: string, baseUrl: string): ExtractedLogo[] {
   const out: ExtractedLogo[] = [];
-  const linkRe = /<link[^>]+rel=["'](?:icon|apple-touch-icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/gi;
+  const linkRe =
+    /<link[^>]+rel=["'](?:icon|apple-touch-icon|shortcut icon)["'][^>]*href=["']([^"']+)["']/gi;
   let m: RegExpExecArray | null;
   while ((m = linkRe.exec(html)) !== null) {
     const url = resolveUrl(m[1]!, baseUrl);
@@ -263,7 +270,9 @@ function buildPaletteTokens(
   return out;
 }
 
-export function paletteTokensToTokenIds(palette: readonly ExtractedPaletteColor[]): readonly { tokenId: string; hex: string }[] {
+export function paletteTokensToTokenIds(
+  palette: readonly ExtractedPaletteColor[],
+): readonly { tokenId: string; hex: string }[] {
   return buildPaletteTokens(palette);
 }
 
@@ -314,8 +323,12 @@ export function extractBrandKit(input: ExtractionInput): BrandExtractionResult {
 
   const confidenceScores = {
     logos: logos.length > 0 ? logos.reduce((acc, l) => acc + l.confidence, 0) / logos.length : 0,
-    palette: palette.length > 0 ? palette.reduce((acc, c) => acc + c.confidence, 0) / palette.length : 0,
-    fonts: extractedFonts.length > 0 ? extractedFonts.reduce((acc, f) => acc + f.confidence, 0) / extractedFonts.length : 0,
+    palette:
+      palette.length > 0 ? palette.reduce((acc, c) => acc + c.confidence, 0) / palette.length : 0,
+    fonts:
+      extractedFonts.length > 0
+        ? extractedFonts.reduce((acc, f) => acc + f.confidence, 0) / extractedFonts.length
+        : 0,
   };
 
   return {

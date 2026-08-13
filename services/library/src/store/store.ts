@@ -22,7 +22,15 @@ export interface LibraryStore {
   insertEntry(entry: SlideLibraryEntry): Promise<void>;
   getEntry(entryId: string): Promise<SlideLibraryEntry | null>;
   listEntriesByWorkspace(workspaceId: string): Promise<SlideLibraryEntry[]>;
-  updateEntry(entryId: string, patch: Partial<Pick<SlideLibraryEntry, 'status' | 'version_id' | 'superseded_by' | 'last_reviewed_at' | 'updated_at' | 'updated_by'>>): Promise<SlideLibraryEntry>;
+  updateEntry(
+    entryId: string,
+    patch: Partial<
+      Pick<
+        SlideLibraryEntry,
+        'status' | 'version_id' | 'superseded_by' | 'last_reviewed_at' | 'updated_at' | 'updated_by'
+      >
+    >,
+  ): Promise<SlideLibraryEntry>;
 
   // -------------------------------------------------------------------------
   // Versions
@@ -41,7 +49,22 @@ export interface LibraryStore {
   getBinding(bindingId: string): Promise<AutoUpdateBinding | null>;
   listBindingsByWorkspace(workspaceId: string): Promise<AutoUpdateBinding[]>;
   listBindingsByEntry(libraryEntryId: string): Promise<AutoUpdateBinding[]>;
-  updateBinding(bindingId: string, patch: Partial<Pick<AutoUpdateBinding, 'pinned_version_id' | 'mode' | 'schedule' | 'is_mandatory' | 'last_synced_at' | 'last_sync_status' | 'updated_at' | 'updated_by'>>): Promise<AutoUpdateBinding>;
+  updateBinding(
+    bindingId: string,
+    patch: Partial<
+      Pick<
+        AutoUpdateBinding,
+        | 'pinned_version_id'
+        | 'mode'
+        | 'schedule'
+        | 'is_mandatory'
+        | 'last_synced_at'
+        | 'last_sync_status'
+        | 'updated_at'
+        | 'updated_by'
+      >
+    >,
+  ): Promise<AutoUpdateBinding>;
   deleteBinding(bindingId: string): Promise<void>;
   listAllBindings(): Promise<AutoUpdateBinding[]>;
 }

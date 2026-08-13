@@ -170,16 +170,35 @@ export async function runStatus(
   client: ClickHouseClient,
   database: string,
   files: readonly MigrationFile[],
-): Promise<Array<{ ordinal: string; slug: string; checksum: string; status: Applied | Pending | Drift }>> {
+): Promise<
+  Array<{ ordinal: string; slug: string; checksum: string; status: Applied | Pending | Drift }>
+> {
   await ensureTrackerTable(client, database);
   const applied = await fetchAppliedMigrations(client, database);
   const drift = detectDrift(applied, files);
   const driftOrds = new Set(drift.map((d) => d.file.ordinal));
   return files.map((f) => {
     const a = applied.get(f.ordinal);
-    if (!a) return { ordinal: f.ordinal, slug: f.slug, checksum: shortChecksum(f.checksum), status: 'pending' as const };
-    if (driftOrds.has(f.ordinal)) return { ordinal: f.ordinal, slug: f.slug, checksum: shortChecksum(f.checksum), status: 'drift' as const };
-    return { ordinal: f.ordinal, slug: f.slug, checksum: shortChecksum(f.checksum), status: 'applied' as const };
+    if (!a)
+      return {
+        ordinal: f.ordinal,
+        slug: f.slug,
+        checksum: shortChecksum(f.checksum),
+        status: 'pending' as const,
+      };
+    if (driftOrds.has(f.ordinal))
+      return {
+        ordinal: f.ordinal,
+        slug: f.slug,
+        checksum: shortChecksum(f.checksum),
+        status: 'drift' as const,
+      };
+    return {
+      ordinal: f.ordinal,
+      slug: f.slug,
+      checksum: shortChecksum(f.checksum),
+      status: 'applied' as const,
+    };
   });
 }
 

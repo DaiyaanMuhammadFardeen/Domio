@@ -88,9 +88,7 @@ const CONNECTORS: readonly ConnectorDescriptor[] = [
     description: 'Sync a database query.',
     glyph: '📝',
     authType: 'oauth',
-    fields: [
-      { key: 'databaseId', label: 'Database ID', secret: false, required: true },
-    ],
+    fields: [{ key: 'databaseId', label: 'Database ID', secret: false, required: true }],
     requiresOAuth: true,
   },
   {
@@ -100,7 +98,13 @@ const CONNECTORS: readonly ConnectorDescriptor[] = [
     glyph: '🐘',
     authType: 'connection-string',
     fields: [
-      { key: 'connectionString', label: 'Connection string', secret: true, required: true, placeholder: 'postgres://user:pass@host:5432/db' },
+      {
+        key: 'connectionString',
+        label: 'Connection string',
+        secret: true,
+        required: true,
+        placeholder: 'postgres://user:pass@host:5432/db',
+      },
     ],
   },
   {
@@ -110,7 +114,13 @@ const CONNECTORS: readonly ConnectorDescriptor[] = [
     glyph: '🐬',
     authType: 'connection-string',
     fields: [
-      { key: 'connectionString', label: 'Connection string', secret: true, required: true, placeholder: 'mysql://user:pass@host:3306/db' },
+      {
+        key: 'connectionString',
+        label: 'Connection string',
+        secret: true,
+        required: true,
+        placeholder: 'mysql://user:pass@host:3306/db',
+      },
     ],
   },
   {
@@ -169,7 +179,13 @@ const CONNECTORS: readonly ConnectorDescriptor[] = [
     glyph: '🧪',
     authType: 'none',
     fields: [
-      { key: 'rows', label: 'Row count', secret: false, required: true, options: ['10', '50', '100', '500'] },
+      {
+        key: 'rows',
+        label: 'Row count',
+        secret: false,
+        required: true,
+        options: ['10', '50', '100', '500'],
+      },
       { key: 'seed', label: 'Seed', secret: false, required: false },
     ],
   },
@@ -232,10 +248,7 @@ export async function registerSource(
   baseUrl: string = DEFAULT_API_BASE,
 ): Promise<RemoteSource> {
   try {
-    return await postJson<RemoteSource>(
-      `${baseUrl}/v1/connector-framework/sources`,
-      req,
-    );
+    return await postJson<RemoteSource>(`${baseUrl}/v1/connector-framework/sources`, req);
   } catch {
     return bootstrapSource(req);
   }
@@ -291,9 +304,21 @@ function bootstrapSource(req: RegisterSourceRequest): RemoteSource {
       seed: Number(req.credentials['seed'] ?? '42') || 42,
       n: Math.min(Number(req.credentials['rows'] ?? '50') || 50, 500),
       fields: [
-        { name: 'label', type: 'string', categories: ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta'] },
+        {
+          name: 'label',
+          type: 'string',
+          categories: ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta'],
+        },
         { name: 'value', type: 'number', min: 10, max: 990, distribution: 'uniform' },
-        { name: 'metric', type: 'number', min: 0, max: 100, distribution: 'normal', mean: 50, stddev: 20 },
+        {
+          name: 'metric',
+          type: 'number',
+          min: 0,
+          max: 100,
+          distribution: 'normal',
+          mean: 50,
+          stddev: 20,
+        },
       ],
     };
     const out = generate(spec);

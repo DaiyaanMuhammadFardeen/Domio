@@ -16,8 +16,6 @@ export interface WidgetDescriptor {
 
 export const BOOTSTRAP_WIDGETS: ReadonlyArray<WidgetDescriptor> = [];
 
-export async function listWidgets(
-  _sessionId: string,
-): Promise<ReadonlyArray<WidgetDescriptor>> {
+export async function listWidgets(_sessionId: string): Promise<ReadonlyArray<WidgetDescriptor>> {
   return BOOTSTRAP_WIDGETS;
 }

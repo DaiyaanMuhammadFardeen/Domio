@@ -11,8 +11,8 @@ forces the reviewer to put eyes on every category once per release.
 ## How to use
 
 1. Open a new issue: `security/owasp-review-yyyy-mm-dd`.
-2. Walk every row top to bottom. Don't skip — the goal is *no unchecked
-   rows*, not "no findings".
+2. Walk every row top to bottom. Don't skip — the goal is _no unchecked
+   rows_, not "no findings".
 3. For each row, link the code paths, tickets, or test IDs that prove the
    control exists.
 4. If you find a P0/P1, file a fix PR and re-run `security.yml` before the
@@ -25,7 +25,7 @@ forces the reviewer to put eyes on every category once per release.
 ## A01 — Broken Access Control
 
 - [ ] **IDOR check.** Every `GET /v1/resource/:id` and `DELETE /v1/resource/:id`
-      verifies the caller has a grant for *that* resource (not just the
+      verifies the caller has a grant for _that_ resource (not just the
       resource kind). Walk a tenant A trying to read tenant B's ids.
 - [ ] **Workspace role escalation.** Editor cannot promote themselves to
       admin by editing their own membership row. Test in `permission-engine`.
@@ -156,6 +156,6 @@ These land in **Phase 20** proper (not P20.5):
 
 ## Last completed review
 
-| Date | Reviewer | Result | Issue link |
-|---|---|---|---|
-| _TBD_ | _Security lead_ | _TBD_ | _TBD_ |
+| Date  | Reviewer        | Result | Issue link |
+| ----- | --------------- | ------ | ---------- |
+| _TBD_ | _Security lead_ | _TBD_  | _TBD_      |

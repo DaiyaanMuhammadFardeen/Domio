@@ -20,9 +20,9 @@ export interface CreatorAnalytics {
   readonly installs: number;
   readonly mrr_cents: number;
   readonly conversion_rate: number; // 0..1
-  readonly refund_rate: number;     // 0..1
+  readonly refund_rate: number; // 0..1
   readonly top_geos: readonly GeoCount[];
-  readonly computed_at: number;     // ts_ms
+  readonly computed_at: number; // ts_ms
 }
 
 // ---------------------------------------------------------------------------

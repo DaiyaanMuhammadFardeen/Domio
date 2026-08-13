@@ -37,7 +37,10 @@ export function createSandboxRoutes(deps: SandboxRouteDeps): Hono {
   app.get('/v1/sandbox_policies', async (c) => {
     const workspaceId = c.req.query('workspace_id');
     if (!workspaceId) {
-      return c.json({ code: 'VALIDATION_ERROR', message: 'workspace_id query parameter is required' }, 400);
+      return c.json(
+        { code: 'VALIDATION_ERROR', message: 'workspace_id query parameter is required' },
+        400,
+      );
     }
     const policies = await policyService.listPolicies(workspaceId);
     return c.json({ items: policies });
@@ -56,7 +59,10 @@ export function createSandboxRoutes(deps: SandboxRouteDeps): Hono {
     const { policy, validation: createValidation } = await policyService.createPolicy(body);
     if (!createValidation.valid) {
       return c.json(
-        { code: 'VALIDATION_ERROR', message: createValidation.errors.map((e) => e.message).join('; ') },
+        {
+          code: 'VALIDATION_ERROR',
+          message: createValidation.errors.map((e) => e.message).join('; '),
+        },
         400,
       );
     }
@@ -92,7 +98,10 @@ export function createSandboxRoutes(deps: SandboxRouteDeps): Hono {
       const { policy, validation: updateValidation } = await policyService.updatePolicy(id, body);
       if (!updateValidation.valid) {
         return c.json(
-          { code: 'VALIDATION_ERROR', message: updateValidation.errors.map((e) => e.message).join('; ') },
+          {
+            code: 'VALIDATION_ERROR',
+            message: updateValidation.errors.map((e) => e.message).join('; '),
+          },
           400,
         );
       }

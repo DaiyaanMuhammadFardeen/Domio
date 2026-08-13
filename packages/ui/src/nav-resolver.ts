@@ -64,18 +64,14 @@ export function nodesBySurface(surface: NavSurface): ReadonlyArray<NavNode> {
  */
 export function primaryNav(surface: NavSurface): ReadonlyArray<NavNode> {
   const list = nodesBySurface(surface).filter((node) => node.primary === true);
-  return Object.freeze(
-    [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
-  );
+  return Object.freeze([...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
 }
 
 /**
  * The cross-app switcher roots, sorted by their `order` field.
  */
-export function surfaceRoots(): ReadonlyArray<typeof SURFACE_ROOTS[number]> {
-  return Object.freeze(
-    [...SURFACE_ROOTS].sort((a, b) => a.order - b.order),
-  );
+export function surfaceRoots(): ReadonlyArray<(typeof SURFACE_ROOTS)[number]> {
+  return Object.freeze([...SURFACE_ROOTS].sort((a, b) => a.order - b.order));
 }
 
 /**

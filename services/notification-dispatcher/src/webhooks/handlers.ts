@@ -204,11 +204,12 @@ export async function receiveTeamsAction(
     callback_id: payload.callback_id ?? action?.['id'],
     action: {
       action_id: action?.['id'] ?? payload.actionId ?? '',
-      value: typeof actionData === 'object' && actionData !== null
-        ? JSON.stringify(actionData)
-        : typeof payload === 'object'
-          ? JSON.stringify(payload)
-          : String(payload),
+      value:
+        typeof actionData === 'object' && actionData !== null
+          ? JSON.stringify(actionData)
+          : typeof payload === 'object'
+            ? JSON.stringify(payload)
+            : String(payload),
     },
     user: from ?? payload.from,
     response_url: payload.responseUrl ?? payload.response_url,

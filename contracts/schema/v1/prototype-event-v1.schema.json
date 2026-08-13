@@ -5,9 +5,19 @@
   "description": "An append-only event in a prototype session's telemetry ledger. Phase 10 M5. Each event is part of a chained HMAC with explicit `prev_hash` → `event_hash` linkage.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "session_id", "seq", "event_type",
-    "payload", "prev_hash", "event_hash", "kid", "client_fingerprint",
-    "region", "created_at"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "session_id",
+    "seq",
+    "event_type",
+    "payload",
+    "prev_hash",
+    "event_hash",
+    "kid",
+    "client_fingerprint",
+    "region",
+    "created_at"
   ],
   "additionalProperties": false,
   "properties": {
@@ -18,9 +28,18 @@
     "seq": { "type": "integer", "minimum": 1 },
     "event_type": {
       "enum": [
-        "session_start", "session_end", "slide_enter", "slide_exit",
-        "click", "hover", "form_submit", "calculator_change",
-        "rage_click", "error", "device_frame_change", "consent_change"
+        "session_start",
+        "session_end",
+        "slide_enter",
+        "slide_exit",
+        "click",
+        "hover",
+        "form_submit",
+        "calculator_change",
+        "rage_click",
+        "error",
+        "device_frame_change",
+        "consent_change"
       ]
     },
     "payload": { "type": "object" },

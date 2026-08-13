@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  isAudienceEnvelope,
-  narrowEnvelope,
-  type AudienceEnvelope,
-} from './index.js';
+import { isAudienceEnvelope, narrowEnvelope, type AudienceEnvelope } from './index.js';
 
 function makeEnvelope(overrides: Partial<AudienceEnvelope> = {}): AudienceEnvelope {
   return {
@@ -35,7 +31,9 @@ describe('audience-envelope', () => {
   });
 
   it('narrowEnvelope returns the narrowed frame when matches', () => {
-    const env = makeEnvelope({ kind: 'poll_vote' } as Partial<AudienceEnvelope>) as AudienceEnvelope;
+    const env = makeEnvelope({
+      kind: 'poll_vote',
+    } as Partial<AudienceEnvelope>) as AudienceEnvelope;
     const narrowed = narrowEnvelope(env, 'poll_vote');
     expect(narrowed).not.toBeNull();
     expect(narrowed?.kind).toBe('poll_vote');

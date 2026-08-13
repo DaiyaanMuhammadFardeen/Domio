@@ -35,7 +35,10 @@ export interface MultiBrandSwitcherProps {
   /** Called when the slide override changes (null = inherit). */
   onSlideKitChange: (kitId: string | null) => void;
   /** Called when a kit is renamed / recolored. */
-  onUpdateKit: (kitId: string, patch: { name?: string; primaryHex?: string; accentHex?: string }) => void;
+  onUpdateKit: (
+    kitId: string,
+    patch: { name?: string; primaryHex?: string; accentHex?: string },
+  ) => void;
   /** Optional test id. */
   id?: string | undefined;
   /** Read-only mode. */
@@ -55,7 +58,11 @@ export function MultiBrandSwitcher(props: MultiBrandSwitcherProps): ReactElement
   } = props;
 
   const [selectedKitId, setSelectedKitId] = useState<string>(activeSlideKitId ?? deckKitId);
-  const [editingDraft, setEditingDraft] = useState<{ name: string; primary: string; accent: string } | null>(null);
+  const [editingDraft, setEditingDraft] = useState<{
+    name: string;
+    primary: string;
+    accent: string;
+  } | null>(null);
 
   useEffect(() => {
     setSelectedKitId(activeSlideKitId ?? deckKitId);
@@ -100,7 +107,9 @@ export function MultiBrandSwitcher(props: MultiBrandSwitcherProps): ReactElement
             data-testid="multi-brand-deck-select"
           >
             {kits.map((k) => (
-              <option key={k.id} value={k.id}>{k.name}</option>
+              <option key={k.id} value={k.id}>
+                {k.name}
+              </option>
             ))}
           </select>
         </fieldset>
@@ -114,7 +123,9 @@ export function MultiBrandSwitcher(props: MultiBrandSwitcherProps): ReactElement
           >
             <option value="">Inherit from deck</option>
             {kits.map((k) => (
-              <option key={k.id} value={k.id}>{k.name}</option>
+              <option key={k.id} value={k.id}>
+                {k.name}
+              </option>
             ))}
           </select>
         </fieldset>
@@ -146,7 +157,11 @@ export function MultiBrandSwitcher(props: MultiBrandSwitcherProps): ReactElement
             <span className="multi-brand-switcher__name">
               {kit.name}
               {kit.id === deckKitId && <span className="multi-brand-switcher__badge">deck</span>}
-              {kit.id === activeSlideKitId && <span className="multi-brand-switcher__badge multi-brand-switcher__badge--slide">slide</span>}
+              {kit.id === activeSlideKitId && (
+                <span className="multi-brand-switcher__badge multi-brand-switcher__badge--slide">
+                  slide
+                </span>
+              )}
             </span>
           </button>
         ))}
@@ -175,7 +190,10 @@ export function MultiBrandSwitcher(props: MultiBrandSwitcherProps): ReactElement
 
       {editingDraft && selectedKit && (
         <div className="multi-brand-switcher__dialog" role="dialog" aria-modal="true">
-          <div className="multi-brand-switcher__dialog-backdrop" onClick={() => setEditingDraft(null)} />
+          <div
+            className="multi-brand-switcher__dialog-backdrop"
+            onClick={() => setEditingDraft(null)}
+          />
           <div className="multi-brand-switcher__dialog-panel">
             <h4>Edit {selectedKit.name}</h4>
             <label>
@@ -206,7 +224,9 @@ export function MultiBrandSwitcher(props: MultiBrandSwitcherProps): ReactElement
               />
             </label>
             <div className="multi-brand-switcher__dialog-actions">
-              <button type="button" onClick={() => setEditingDraft(null)}>Cancel</button>
+              <button type="button" onClick={() => setEditingDraft(null)}>
+                Cancel
+              </button>
               <button type="button" onClick={handleSaveEdit} data-testid="multi-brand-edit-save">
                 Save
               </button>
@@ -224,7 +244,9 @@ export function MultiBrandSwitcher(props: MultiBrandSwitcherProps): ReactElement
 export function useBrandKitsList(): { kits: readonly BrandKitDetail[]; reload: () => void } {
   const [kits, setKits] = useState<readonly BrandKitDetail[]>([]);
   const reload = useCallback(() => {
-    fetchBrandKits().then(setKits).catch(() => setKits([]));
+    fetchBrandKits()
+      .then(setKits)
+      .catch(() => setKits([]));
   }, []);
   useEffect(() => {
     reload();

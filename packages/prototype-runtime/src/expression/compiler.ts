@@ -95,12 +95,16 @@ export function validateAst(ast: Expression, opts: CompileOptions = {}): void {
         switch (builtin.arity.kind) {
           case 'exact':
             if (argc !== builtin.arity.n) {
-              throw new CompileError(`${node.name} expects ${builtin.arity.n} argument(s), got ${argc}`);
+              throw new CompileError(
+                `${node.name} expects ${builtin.arity.n} argument(s), got ${argc}`,
+              );
             }
             break;
           case 'min':
             if (argc < builtin.arity.n) {
-              throw new CompileError(`${node.name} expects at least ${builtin.arity.n} argument(s), got ${argc}`);
+              throw new CompileError(
+                `${node.name} expects at least ${builtin.arity.n} argument(s), got ${argc}`,
+              );
             }
             break;
           case 'range':

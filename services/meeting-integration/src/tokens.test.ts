@@ -3,12 +3,17 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { issueMeetingToken, verifyMeetingToken, validateMeetingTokenScope, setTokenSecret } from './tokens.js';
+import {
+  issueMeetingToken,
+  verifyMeetingToken,
+  validateMeetingTokenScope,
+  setTokenSecret,
+} from './tokens.js';
 import { TokenInvalidError } from './types.js';
 
 describe('Meeting tokens', () => {
   const testSecret = 'test-secret-key-for-meeting-tokens';
-  
+
   beforeEach(() => {
     setTokenSecret(testSecret);
   });
@@ -18,13 +23,16 @@ describe('Meeting tokens', () => {
       const now = new Date('2025-06-01T10:00:00Z');
       const meetingEndAt = new Date('2025-06-01T11:00:00Z');
 
-      const token = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-1',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret: Buffer.from(testSecret) });
+      const token = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
+        { now: () => now, secret: Buffer.from(testSecret) },
+      );
 
       expect(token.token).toBeTruthy();
       expect(token.meeting_id).toBe('meet-1');
@@ -38,13 +46,16 @@ describe('Meeting tokens', () => {
       const now = new Date('2025-06-01T10:00:00Z');
       const meetingEndAt = new Date('2025-06-02T10:00:00Z'); // 24h meeting
 
-      const token = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-2',
-        presenter_id: 'presenter-2',
-        deck_id: 'deck-2',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret: Buffer.from(testSecret) });
+      const token = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-2',
+          presenter_id: 'presenter-2',
+          deck_id: 'deck-2',
+          meeting_end_at: meetingEndAt,
+        },
+        { now: () => now, secret: Buffer.from(testSecret) },
+      );
 
       // now + 4h = 14:00 (capped)
       expect(token.expires_at.toISOString()).toBe('2025-06-01T14:00:00.000Z');
@@ -54,21 +65,27 @@ describe('Meeting tokens', () => {
       const now = new Date('2025-06-01T10:00:00Z');
       const meetingEndAt = new Date('2025-06-01T11:00:00Z');
 
-      const token1 = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-1',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret: Buffer.from(testSecret) });
+      const token1 = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
+        { now: () => now, secret: Buffer.from(testSecret) },
+      );
 
-      const token2 = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-2',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret: Buffer.from(testSecret) });
+      const token2 = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-2',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
+        { now: () => now, secret: Buffer.from(testSecret) },
+      );
 
       expect(token1.token).not.toBe(token2.token);
     });
@@ -80,16 +97,24 @@ describe('Meeting tokens', () => {
       const meetingEndAt = new Date('2025-06-01T11:00:00Z');
       const secret = Buffer.from(testSecret);
 
-      const token = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-1',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret });
+      const token = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
+        { now: () => now, secret },
+      );
 
       const result = verifyMeetingToken(
-        { token: token.token, meeting_id: 'meet-1', presenter_id: 'presenter-1', deck_id: 'deck-1' },
+        {
+          token: token.token,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+        },
         token.expires_at.getTime(),
         { now: () => now, secret },
       );
@@ -102,19 +127,29 @@ describe('Meeting tokens', () => {
       const meetingEndAt = new Date('2025-06-01T11:00:00Z');
       const secret = Buffer.from(testSecret);
 
-      const token = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-1',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => new Date('2025-06-01T10:00:00Z'), secret });
+      const token = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
+        { now: () => new Date('2025-06-01T10:00:00Z'), secret },
+      );
 
-      expect(() => verifyMeetingToken(
-        { token: token.token, meeting_id: 'meet-1', presenter_id: 'presenter-1', deck_id: 'deck-1' },
-        token.expires_at.getTime(),
-        { now: () => now, secret },
-      )).toThrow(TokenInvalidError);
+      expect(() =>
+        verifyMeetingToken(
+          {
+            token: token.token,
+            meeting_id: 'meet-1',
+            presenter_id: 'presenter-1',
+            deck_id: 'deck-1',
+          },
+          token.expires_at.getTime(),
+          { now: () => now, secret },
+        ),
+      ).toThrow(TokenInvalidError);
     });
 
     it('throws TokenInvalidError for signature mismatch', () => {
@@ -122,19 +157,29 @@ describe('Meeting tokens', () => {
       const meetingEndAt = new Date('2025-06-01T11:00:00Z');
       const secret = Buffer.from(testSecret);
 
-      const token = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-1',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret });
-
-      expect(() => verifyMeetingToken(
-        { token: token.token, meeting_id: 'meet-2', presenter_id: 'presenter-1', deck_id: 'deck-1' },
-        token.expires_at.getTime(),
+      const token = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
         { now: () => now, secret },
-      )).toThrow(TokenInvalidError);
+      );
+
+      expect(() =>
+        verifyMeetingToken(
+          {
+            token: token.token,
+            meeting_id: 'meet-2',
+            presenter_id: 'presenter-1',
+            deck_id: 'deck-1',
+          },
+          token.expires_at.getTime(),
+          { now: () => now, secret },
+        ),
+      ).toThrow(TokenInvalidError);
     });
 
     it('throws TokenInvalidError for wrong secret', () => {
@@ -143,19 +188,29 @@ describe('Meeting tokens', () => {
       const secret = Buffer.from(testSecret);
       const wrongSecret = Buffer.from('wrong-secret');
 
-      const token = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-1',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret });
+      const token = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
+        { now: () => now, secret },
+      );
 
-      expect(() => verifyMeetingToken(
-        { token: token.token, meeting_id: 'meet-1', presenter_id: 'presenter-1', deck_id: 'deck-1' },
-        token.expires_at.getTime(),
-        { now: () => now, secret: wrongSecret },
-      )).toThrow(TokenInvalidError);
+      expect(() =>
+        verifyMeetingToken(
+          {
+            token: token.token,
+            meeting_id: 'meet-1',
+            presenter_id: 'presenter-1',
+            deck_id: 'deck-1',
+          },
+          token.expires_at.getTime(),
+          { now: () => now, secret: wrongSecret },
+        ),
+      ).toThrow(TokenInvalidError);
     });
   });
 
@@ -165,16 +220,22 @@ describe('Meeting tokens', () => {
       const meetingEndAt = new Date('2025-06-01T11:00:00Z');
       const secret = Buffer.from(testSecret);
 
-      const token = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-1',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret });
+      const token = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
+        { now: () => now, secret },
+      );
 
       const result = validateMeetingTokenScope(
-        token.token, 'meet-1', 'presenter-1', 'deck-1',
+        token.token,
+        'meet-1',
+        'presenter-1',
+        'deck-1',
         token.expires_at.getTime(),
         { now: () => now, secret },
       );
@@ -187,19 +248,27 @@ describe('Meeting tokens', () => {
       const meetingEndAt = new Date('2025-06-01T11:00:00Z');
       const secret = Buffer.from(testSecret);
 
-      const token = issueMeetingToken({
-        integration: {} as any,
-        meeting_id: 'meet-1',
-        presenter_id: 'presenter-1',
-        deck_id: 'deck-1',
-        meeting_end_at: meetingEndAt,
-      }, { now: () => now, secret });
-
-      expect(() => validateMeetingTokenScope(
-        token.token, 'meet-1', 'presenter-2', 'deck-1',
-        token.expires_at.getTime(),
+      const token = issueMeetingToken(
+        {
+          integration: {} as any,
+          meeting_id: 'meet-1',
+          presenter_id: 'presenter-1',
+          deck_id: 'deck-1',
+          meeting_end_at: meetingEndAt,
+        },
         { now: () => now, secret },
-      )).toThrow(TokenInvalidError);
+      );
+
+      expect(() =>
+        validateMeetingTokenScope(
+          token.token,
+          'meet-1',
+          'presenter-2',
+          'deck-1',
+          token.expires_at.getTime(),
+          { now: () => now, secret },
+        ),
+      ).toThrow(TokenInvalidError);
     });
   });
 });

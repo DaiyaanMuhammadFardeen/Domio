@@ -48,19 +48,13 @@ export function DiscordWidget({
       <dl className="community-discord__stats" data-testid="community-discord-stats">
         <div className="community-discord__stat">
           <dt className="community-discord__stat-label">Members</dt>
-          <dd
-            className="community-discord__stat-value"
-            data-testid="community-discord-members"
-          >
+          <dd className="community-discord__stat-value" data-testid="community-discord-members">
             {formatThousands(memberCount)}
           </dd>
         </div>
         <div className="community-discord__stat">
           <dt className="community-discord__stat-label">Online now</dt>
-          <dd
-            className="community-discord__stat-value"
-            data-testid="community-discord-online"
-          >
+          <dd className="community-discord__stat-value" data-testid="community-discord-online">
             {formatThousands(onlineCount)}
           </dd>
         </div>

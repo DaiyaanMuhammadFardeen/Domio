@@ -42,8 +42,15 @@ export function parseSloCatalogue(markdown: string): SloEntry[] {
 
 /** Parse a single row's cells into an `SloEntry`. */
 function parseRow(cells: string[]): SloEntry {
-  const [serviceCell, sloCell, targetCell, windowCell, tierCell, ownerCell, alertCell] =
-    cells as [string, string, string, string, string, string, string];
+  const [serviceCell, sloCell, targetCell, windowCell, tierCell, ownerCell, alertCell] = cells as [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+  ];
 
   const service = stripBackticks(serviceCell);
   const slo = sloCell;
@@ -77,7 +84,10 @@ function parseRow(cells: string[]): SloEntry {
 
 /** Strip backticks and trailing italic annotations like `*(packages)*` from a Markdown cell. */
 function stripBackticks(s: string): string {
-  return s.replace(/`/g, '').replace(/\s*\*\([^)]*\)\*\s*$/, '').trim();
+  return s
+    .replace(/`/g, '')
+    .replace(/\s*\*\([^)]*\)\*\s*$/, '')
+    .trim();
 }
 
 /** Parse a target string like `99.9%` or `< 200 ms` into a probability. */
@@ -100,12 +110,18 @@ function parseWindow(window: string): number {
   if (!m) throw new SloParseError(`Cannot parse window "${window}"`);
   const n = Number(m[1]);
   switch (m[2]) {
-    case 's': return n;
-    case 'm': return n * 60;
-    case 'h': return n * 3600;
-    case 'd': return n * 86_400;
-    case 'w': return n * 604_800;
-    default: throw new SloParseError(`Unknown window unit "${m[2]}"`);
+    case 's':
+      return n;
+    case 'm':
+      return n * 60;
+    case 'h':
+      return n * 3600;
+    case 'd':
+      return n * 86_400;
+    case 'w':
+      return n * 604_800;
+    default:
+      throw new SloParseError(`Unknown window unit "${m[2]}"`);
   }
 }
 

@@ -90,15 +90,11 @@ export function SortableTable<T extends Record<string, unknown>>({
                     )}
                   >
                     {c.header}
-                    {active && sort?.dir === 'asc' && (
-                      <ArrowUp className="h-3 w-3" aria-hidden />
-                    )}
+                    {active && sort?.dir === 'asc' && <ArrowUp className="h-3 w-3" aria-hidden />}
                     {active && sort?.dir === 'desc' && (
                       <ArrowDown className="h-3 w-3" aria-hidden />
                     )}
-                    {!active && (
-                      <ArrowUpDown className="h-3 w-3 opacity-30" aria-hidden />
-                    )}
+                    {!active && <ArrowUpDown className="h-3 w-3 opacity-30" aria-hidden />}
                   </button>
                 </th>
               );
@@ -108,10 +104,7 @@ export function SortableTable<T extends Record<string, unknown>>({
         <tbody className="divide-y divide-slate-100">
           {sorted.length === 0 ? (
             <tr>
-              <td
-                colSpan={columns.length}
-                className="px-4 py-6 text-center text-sm text-slate-500"
-              >
+              <td colSpan={columns.length} className="px-4 py-6 text-center text-sm text-slate-500">
                 {emptyMessage}
               </td>
             </tr>

@@ -19,10 +19,7 @@ import {
   publishComponentToOrg,
   SDK_STATUS_TONES,
 } from '../../lib/component-sdk-service';
-import type {
-  ComponentTemplate,
-  SDKPackageInfo,
-} from '../../lib/types';
+import type { ComponentTemplate, SDKPackageInfo } from '../../lib/types';
 
 const QUICKSTART_NPM = `npm install @domio/component-sdk`;
 
@@ -69,10 +66,7 @@ export default function ComponentSDKPage() {
     setLoading(true);
     setError(null);
     try {
-      const [pkgs, tpls] = await Promise.all([
-        listSDKPackages(),
-        listComponentTemplates(),
-      ]);
+      const [pkgs, tpls] = await Promise.all([listSDKPackages(), listComponentTemplates()]);
       setPackages(pkgs);
       setTemplates(tpls);
     } catch (e) {
@@ -89,8 +83,7 @@ export default function ComponentSDKPage() {
   const packageCount = packages.length;
   const templateCount = templates.length;
   const subtitle = useMemo(
-    () =>
-      `${packageCount} packages · ${templateCount} templates · Published from your CI`,
+    () => `${packageCount} packages · ${templateCount} templates · Published from your CI`,
     [packageCount, templateCount],
   );
 
@@ -150,13 +143,10 @@ export default function ComponentSDKPage() {
           <Package className="h-3.5 w-3.5" aria-hidden />
           Wave 8 · Developer
         </div>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Build Domio Components
-        </h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Build Domio Components</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-200">
-          Build custom components that integrate with the Domio editor.
-          Install the SDK, scaffold a starter, and publish to your org
-          library so every workspace can use it.
+          Build custom components that integrate with the Domio editor. Install the SDK, scaffold a
+          starter, and publish to your org library so every workspace can use it.
         </p>
         <div className="mt-4 text-xs text-slate-300">{subtitle}</div>
       </section>
@@ -185,16 +175,8 @@ export default function ComponentSDKPage() {
             Quickstart
           </h2>
           <div className="grid gap-4 lg:grid-cols-2">
-            <QuickstartCode
-              code={QUICKSTART_NPM}
-              language="bash"
-              label="install"
-            />
-            <QuickstartCode
-              code={QUICKSTART_TS}
-              language="typescript"
-              label="hello-world.ts"
-            />
+            <QuickstartCode code={QUICKSTART_NPM} language="bash" label="install" />
+            <QuickstartCode code={QUICKSTART_TS} language="typescript" label="hello-world.ts" />
           </div>
         </section>
       )}
@@ -205,10 +187,7 @@ export default function ComponentSDKPage() {
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
             SDK packages
           </h2>
-          <div
-            data-testid="sdk-packages"
-            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
-          >
+          <div data-testid="sdk-packages" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {packages.map((pkg) => (
               <a
                 key={pkg.id}
@@ -222,16 +201,10 @@ export default function ComponentSDKPage() {
                     <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-600">
                       {pkg.package}
                     </span>
-                    <Badge tone={SDK_STATUS_TONES[pkg.status]}>
-                      {pkg.status}
-                    </Badge>
+                    <Badge tone={SDK_STATUS_TONES[pkg.status]}>{pkg.status}</Badge>
                   </div>
-                  <div className="mt-2 font-mono text-sm text-slate-900">
-                    {pkg.package_name}
-                  </div>
-                  <div className="mt-1 text-xs text-slate-500">
-                    v{pkg.version}
-                  </div>
+                  <div className="mt-2 font-mono text-sm text-slate-900">{pkg.package_name}</div>
+                  <div className="mt-1 text-xs text-slate-500">v{pkg.version}</div>
                 </div>
                 <div className="mt-3 flex items-center justify-end gap-1 text-xs font-medium text-brand-700 opacity-0 transition group-hover:opacity-100">
                   Docs <ExternalLink className="h-3 w-3" aria-hidden />
@@ -251,11 +224,7 @@ export default function ComponentSDKPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {templates.map((tpl) => (
               <div key={tpl.id} data-testid={`sdk-template-${tpl.id}`}>
-                <TemplateCard
-                  template={tpl}
-                  onDownload={handleDownload}
-                  downloadLabel="Download"
-                />
+                <TemplateCard template={tpl} onDownload={handleDownload} downloadLabel="Download" />
               </div>
             ))}
           </div>
@@ -268,8 +237,8 @@ export default function ComponentSDKPage() {
           Publish to org library
         </h2>
         <p className="mb-4 text-xs text-slate-500">
-          Push a built component to your org&apos;s component library. Visible to
-          every workspace in the org immediately after publishing.
+          Push a built component to your org&apos;s component library. Visible to every workspace in
+          the org immediately after publishing.
         </p>
 
         <form
@@ -278,10 +247,7 @@ export default function ComponentSDKPage() {
           className="grid gap-4 sm:grid-cols-2"
         >
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="sdk-publish-name"
-              className="text-xs font-medium text-slate-700"
-            >
+            <label htmlFor="sdk-publish-name" className="text-xs font-medium text-slate-700">
               Component name
             </label>
             <input
@@ -297,10 +263,7 @@ export default function ComponentSDKPage() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="sdk-publish-version"
-              className="text-xs font-medium text-slate-700"
-            >
+            <label htmlFor="sdk-publish-version" className="text-xs font-medium text-slate-700">
               Version
             </label>
             <input
@@ -315,10 +278,7 @@ export default function ComponentSDKPage() {
           </div>
 
           <div className="flex flex-col gap-1 sm:col-span-2">
-            <label
-              htmlFor="sdk-publish-description"
-              className="text-xs font-medium text-slate-700"
-            >
+            <label htmlFor="sdk-publish-description" className="text-xs font-medium text-slate-700">
               Description
             </label>
             <textarea
@@ -332,10 +292,7 @@ export default function ComponentSDKPage() {
           </div>
 
           <div className="flex flex-col gap-1 sm:col-span-2">
-            <label
-              htmlFor="sdk-publish-tags"
-              className="text-xs font-medium text-slate-700"
-            >
+            <label htmlFor="sdk-publish-tags" className="text-xs font-medium text-slate-700">
               Tags (comma-separated)
             </label>
             <input
@@ -350,10 +307,7 @@ export default function ComponentSDKPage() {
 
           <div className="flex items-center justify-end gap-3 sm:col-span-2">
             {publishSuccess && (
-              <span
-                className="text-xs font-medium text-emerald-700"
-                role="status"
-              >
+              <span className="text-xs font-medium text-emerald-700" role="status">
                 {publishSuccess}
               </span>
             )}
@@ -393,7 +347,10 @@ export default function ComponentSDKPage() {
             rel="noreferrer"
             className="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition hover:border-brand-300 hover:shadow-md"
           >
-            <FlaskConical className="h-5 w-5 text-slate-500 group-hover:text-brand-600" aria-hidden />
+            <FlaskConical
+              className="h-5 w-5 text-slate-500 group-hover:text-brand-600"
+              aria-hidden
+            />
             <div>
               <div className="text-sm font-semibold text-slate-900">Run tests</div>
               <div className="text-xs text-slate-500">Vitest + Playwright suite.</div>

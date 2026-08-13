@@ -14,7 +14,6 @@ import {
   type DemoTransitionKind,
 } from './demo-helpers.js';
 
-
 // ─── nextTransitionKind ─────────────────────────────────────────
 
 describe('nextTransitionKind', () => {

@@ -34,11 +34,11 @@ The schema-first pattern wins on polyglot stacks because:
 
 We adopt **schema-first** for all cross-service wire formats:
 
-| Format | Source | Consumers |
-|---|---|---|
-| Protobuf | `contracts/proto/domio/v1/*.proto` | All Go, Python, Rust services + TS services via grpc-js. |
-| OpenAPI | `contracts/openapi/v1/*.yaml` | External REST clients + TypeScript via `openapi-typescript`. |
-| JSON Schema | `contracts/schema/v1/*.json` | Document-shaped data: deck schema, theme schema, plugin manifest. |
+| Format      | Source                             | Consumers                                                         |
+| ----------- | ---------------------------------- | ----------------------------------------------------------------- |
+| Protobuf    | `contracts/proto/domio/v1/*.proto` | All Go, Python, Rust services + TS services via grpc-js.          |
+| OpenAPI     | `contracts/openapi/v1/*.yaml`      | External REST clients + TypeScript via `openapi-typescript`.      |
+| JSON Schema | `contracts/schema/v1/*.json`       | Document-shaped data: deck schema, theme schema, plugin manifest. |
 
 **Generated clients are committed**, not generated on demand:
 

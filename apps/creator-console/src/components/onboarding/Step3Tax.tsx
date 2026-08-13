@@ -65,20 +65,13 @@ export function Step3Tax({ defaultValues, onSubmit }: Step3TaxProps) {
   }
 
   return (
-    <section
-      aria-labelledby={headingId}
-      className="space-y-4"
-      data-testid="onboarding-step3-tax"
-    >
+    <section aria-labelledby={headingId} className="space-y-4" data-testid="onboarding-step3-tax">
       <h2 id={headingId} className="text-lg font-semibold text-slate-900">
         {t('creator.onboarding.tax.heading')}
       </h2>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label
-            htmlFor="tax-country"
-            className="block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="tax-country" className="block text-sm font-medium text-slate-700">
             {t('creator.onboarding.tax.country')}
           </label>
           <select
@@ -96,10 +89,7 @@ export function Step3Tax({ defaultValues, onSubmit }: Step3TaxProps) {
         </div>
 
         <div>
-          <label
-            htmlFor="tax-id-type"
-            className="block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="tax-id-type" className="block text-sm font-medium text-slate-700">
             {t('creator.onboarding.tax.idType')}
           </label>
           <select
@@ -118,10 +108,7 @@ export function Step3Tax({ defaultValues, onSubmit }: Step3TaxProps) {
 
         {idType !== 'none' && (
           <div>
-            <label
-              htmlFor="tax-id-value"
-              className="block text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="tax-id-value" className="block text-sm font-medium text-slate-700">
               {t('creator.onboarding.tax.idValue')}
             </label>
             <input

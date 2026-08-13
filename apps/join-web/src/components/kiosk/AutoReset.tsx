@@ -21,10 +21,7 @@ export interface UseAutoResetResult {
   readonly reset: () => void;
 }
 
-export function useAutoReset(
-  timeoutMs: number,
-  onIdle: () => void,
-): UseAutoResetResult {
+export function useAutoReset(timeoutMs: number, onIdle: () => void): UseAutoResetResult {
   const [lastActivity, setLastActivity] = useState<number>(() => Date.now());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onIdleRef = useRef(onIdle);

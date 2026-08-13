@@ -65,7 +65,10 @@ export function removeFromLibrary(catalogId: string): void {
   writeLibrary(items);
 }
 
-export function updateLibraryItem(catalogId: string, updates: Partial<Pick<LibraryItem, 'version' | 'pinMode' | 'pinValue'>>): LibraryItem | undefined {
+export function updateLibraryItem(
+  catalogId: string,
+  updates: Partial<Pick<LibraryItem, 'version' | 'pinMode' | 'pinValue'>>,
+): LibraryItem | undefined {
   const items = readLibrary();
   const item = items.find((i) => i.catalogId === catalogId);
   if (!item) return undefined;

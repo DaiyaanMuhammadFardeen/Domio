@@ -141,7 +141,10 @@ export function KioskSurface({
         data-reset-fired="false"
         className="w-full h-full"
       >
-        <div className="absolute top-3 right-3 text-xs text-slate-400" data-testid="kiosk-session-label">
+        <div
+          className="absolute top-3 right-3 text-xs text-slate-400"
+          data-testid="kiosk-session-label"
+        >
           {sessionLabel}
         </div>
         <div className="flex items-center justify-center h-full text-center p-6">

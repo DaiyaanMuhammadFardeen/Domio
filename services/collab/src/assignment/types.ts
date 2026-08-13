@@ -8,12 +8,7 @@
 // Assignment
 // ---------------------------------------------------------------------------
 
-export type AssignmentStatus =
-  | 'not_started'
-  | 'in_progress'
-  | 'blocked'
-  | 'review'
-  | 'done';
+export type AssignmentStatus = 'not_started' | 'in_progress' | 'blocked' | 'review' | 'done';
 
 export interface Assignment {
   readonly id: string;

@@ -26,10 +26,7 @@ export function ArticleCard({ article, category, href }: ArticleCardProps): JSX.
   return (
     <article className="help-card" data-testid={`help-article-${article.slug}`}>
       {category ? (
-        <span
-          className="help-card__category"
-          data-testid={`help-article-category-${article.slug}`}
-        >
+        <span className="help-card__category" data-testid={`help-article-category-${article.slug}`}>
           {category.title}
         </span>
       ) : null}

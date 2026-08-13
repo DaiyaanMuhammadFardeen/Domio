@@ -52,7 +52,10 @@ export interface ObjectStore {
   exists(key: string): Promise<boolean>;
   presignGet(key: string, opts?: PresignedUrlOptions): Promise<string>;
   presignPut(key: string, opts?: PresignedUrlOptions): Promise<string>;
-  list(prefix: string, opts?: { readonly maxKeys?: number; readonly cursor?: string }): Promise<{
+  list(
+    prefix: string,
+    opts?: { readonly maxKeys?: number; readonly cursor?: string },
+  ): Promise<{
     readonly keys: readonly string[];
     readonly nextCursor: string | null;
   }>;

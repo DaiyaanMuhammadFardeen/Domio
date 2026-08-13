@@ -16,11 +16,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  handlers,
-  type HttpRequest,
-  type VideoPipelineContext,
-} from './handlers.js';
+import { handlers, type HttpRequest, type VideoPipelineContext } from './handlers.js';
 import { InMemoryJobStore } from './jobs.js';
 import { NoFfmpegBackend } from './transcoder.js';
 import type { VideoJob } from './types.js';
@@ -62,10 +58,7 @@ const DEFAULT_BODY = {
 describe('handlers — createJob', () => {
   it('POST /v1/video_jobs creates a job (202)', async () => {
     const ctx = makeCtx();
-    const res = await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const res = await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     expect(res.status).toBe(202);
     const job = res.body as VideoJob;
     expect(job.status).toBe('ready'); // NoFfmpegBackend → unsupported → ready
@@ -124,11 +117,16 @@ describe('handlers — createJob', () => {
   it('accepts extractCaptions and extractWaveform flags', async () => {
     const ctx = makeCtx();
     const res = await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, {
-        ...DEFAULT_BODY,
-        extractCaptions: true,
-        extractWaveform: true,
-      }),
+      req(
+        'POST',
+        '/v1/video_jobs',
+        {},
+        {
+          ...DEFAULT_BODY,
+          extractCaptions: true,
+          extractWaveform: true,
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(202);
@@ -139,10 +137,7 @@ describe('handlers — createJob', () => {
 
   it('returns 400 when body is not an object', async () => {
     const ctx = makeCtx();
-    const res = await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, 'not an object'),
-      ctx,
-    );
+    const res = await handlers.createJob(req('POST', '/v1/video_jobs', {}, 'not an object'), ctx);
     expect(res.status).toBe(400);
   });
 });
@@ -154,10 +149,7 @@ describe('handlers — createJob', () => {
 describe('handlers — getJob', () => {
   it('GET /v1/video_jobs/:id returns job (200)', async () => {
     const ctx = makeCtx();
-    const created = await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const created = await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     const jobId = (created.body as VideoJob).id;
     const res = await handlers.getJob(
       req('GET', '/v1/video_jobs/:id', { id: jobId }, undefined),
@@ -185,10 +177,7 @@ describe('handlers — getJob', () => {
 describe('handlers — listJobs', () => {
   it('GET /v1/video_jobs returns job list (200)', async () => {
     const ctx = makeCtx();
-    await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     const res = await handlers.listJobs(
       req('GET', '/v1/video_jobs', {}, undefined, { workspace_id: 'ws-test' }),
       ctx,
@@ -199,23 +188,14 @@ describe('handlers — listJobs', () => {
 
   it('returns 400 when workspace_id is missing and no default', async () => {
     const ctx = makeCtx({ defaultWorkspaceId: undefined });
-    const res = await handlers.listJobs(
-      req('GET', '/v1/video_jobs', {}, undefined, {}),
-      ctx,
-    );
+    const res = await handlers.listJobs(req('GET', '/v1/video_jobs', {}, undefined, {}), ctx);
     expect(res.status).toBe(400);
   });
 
   it('uses defaultWorkspaceId when query param absent', async () => {
     const ctx = makeCtx();
-    await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
-    const res = await handlers.listJobs(
-      req('GET', '/v1/video_jobs', {}, undefined, {}),
-      ctx,
-    );
+    await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
+    const res = await handlers.listJobs(req('GET', '/v1/video_jobs', {}, undefined, {}), ctx);
     expect(res.status).toBe(200);
     expect((res.body as { items: VideoJob[] }).items).toHaveLength(1);
   });
@@ -223,10 +203,7 @@ describe('handlers — listJobs', () => {
   it('filters by workspace', async () => {
     const ctx = makeCtx();
     // Create in ws-test
-    await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     // List different workspace
     const res = await handlers.listJobs(
       req('GET', '/v1/video_jobs', {}, undefined, { workspace_id: 'ws-other' }),
@@ -244,10 +221,7 @@ describe('handlers — listJobs', () => {
 describe('handlers — cancelJob', () => {
   it('DELETE /v1/video_jobs/:id cancels a job (204)', async () => {
     const ctx = makeCtx({ backend: new NoFfmpegBackend() });
-    const created = await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const created = await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     // Reset job to queued for cancel test
     const jobId = (created.body as VideoJob).id;
     ctx.store.update(jobId, { status: 'queued' });
@@ -270,10 +244,7 @@ describe('handlers — cancelJob', () => {
 
   it('returns 409 when cancelling a ready job', async () => {
     const ctx = makeCtx();
-    const created = await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const created = await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     const jobId = (created.body as VideoJob).id;
     // Job is already ready after createJob with NoFfmpegBackend
 
@@ -287,10 +258,7 @@ describe('handlers — cancelJob', () => {
 
   it('returns 409 when cancelling a failed job', async () => {
     const ctx = makeCtx();
-    const created = await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const created = await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     const jobId = (created.body as VideoJob).id;
     ctx.store.update(jobId, { status: 'failed' });
 
@@ -309,10 +277,7 @@ describe('handlers — cancelJob', () => {
 describe('handlers — full lifecycle', () => {
   it('create → get → verify status', async () => {
     const ctx = makeCtx();
-    const created = await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    const created = await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     const jobId = (created.body as VideoJob).id;
 
     const fetched = await handlers.getJob(
@@ -326,10 +291,7 @@ describe('handlers — full lifecycle', () => {
 
   it('create multiple → list → correct count', async () => {
     const ctx = makeCtx();
-    await handlers.createJob(
-      req('POST', '/v1/video_jobs', {}, DEFAULT_BODY),
-      ctx,
-    );
+    await handlers.createJob(req('POST', '/v1/video_jobs', {}, DEFAULT_BODY), ctx);
     await handlers.createJob(
       req('POST', '/v1/video_jobs', {}, { ...DEFAULT_BODY, videoAssetId: 'asset-2' }),
       ctx,
@@ -355,17 +317,27 @@ describe('handlers — priority integration', () => {
     // Insert jobs manually with different priorities
     const { job: lowJob } = {
       job: {
-        id: 'low-1', videoAssetId: 'a', renditions: ['720p'] as const,
-        extractCaptions: false, extractWaveform: false, priority: 'low' as const,
-        status: 'queued' as const, statusUrl: '/v1/video_jobs/low-1',
+        id: 'low-1',
+        videoAssetId: 'a',
+        renditions: ['720p'] as const,
+        extractCaptions: false,
+        extractWaveform: false,
+        priority: 'low' as const,
+        status: 'queued' as const,
+        statusUrl: '/v1/video_jobs/low-1',
         createdAt: now.toISOString(),
       },
     };
     const { job: highJob } = {
       job: {
-        id: 'high-1', videoAssetId: 'a', renditions: ['1080p'] as const,
-        extractCaptions: false, extractWaveform: false, priority: 'high' as const,
-        status: 'queued' as const, statusUrl: '/v1/video_jobs/high-1',
+        id: 'high-1',
+        videoAssetId: 'a',
+        renditions: ['1080p'] as const,
+        extractCaptions: false,
+        extractWaveform: false,
+        priority: 'high' as const,
+        status: 'queued' as const,
+        statusUrl: '/v1/video_jobs/high-1',
         createdAt: now.toISOString(),
       },
     };

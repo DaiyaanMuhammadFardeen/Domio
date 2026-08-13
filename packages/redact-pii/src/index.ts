@@ -1,4 +1,11 @@
-import { PATTERNS, REDACTED_TOKEN_RE, redactString, looksLikeSecretKey, luhnValid, isPublicIPv4 } from './patterns.js';
+import {
+  PATTERNS,
+  REDACTED_TOKEN_RE,
+  redactString,
+  looksLikeSecretKey,
+  luhnValid,
+  isPublicIPv4,
+} from './patterns.js';
 
 const MAX_DEPTH = 32;
 const MAX_STRING = 100 * 1024;
@@ -16,7 +23,12 @@ export function redactPII<T>(input: T, opts: { allIPs?: boolean } = {}): T {
   return redact(input, new WeakSet(), 0, opts) as T;
 }
 
-function redact(value: unknown, seen: WeakSet<object>, depth: number, opts: { allIPs?: boolean }): unknown {
+function redact(
+  value: unknown,
+  seen: WeakSet<object>,
+  depth: number,
+  opts: { allIPs?: boolean },
+): unknown {
   if (depth > MAX_DEPTH) return '[redacted:depth]';
   if (value === null || value === undefined) return value;
   const t = typeof value;
@@ -25,7 +37,8 @@ function redact(value: unknown, seen: WeakSet<object>, depth: number, opts: { al
     if (s.length > MAX_STRING) return redactString(s.slice(0, MAX_STRING), opts) + '…[truncated]';
     return redactString(s, opts);
   }
-  if (t === 'number' || t === 'boolean' || t === 'bigint' || t === 'symbol' || t === 'function') return value;
+  if (t === 'number' || t === 'boolean' || t === 'bigint' || t === 'symbol' || t === 'function')
+    return value;
   if (value instanceof Date) return new Date(value.getTime());
   if (value instanceof Error) {
     const e = new Error(redactString(value.message, opts));
@@ -56,13 +69,6 @@ function redact(value: unknown, seen: WeakSet<object>, depth: number, opts: { al
   return value;
 }
 
-export {
-  PATTERNS,
-  REDACTED_TOKEN_RE,
-  redactString,
-  looksLikeSecretKey,
-  luhnValid,
-  isPublicIPv4,
-};
+export { PATTERNS, REDACTED_TOKEN_RE, redactString, looksLikeSecretKey, luhnValid, isPublicIPv4 };
 
 export type { Pattern } from './patterns.js';

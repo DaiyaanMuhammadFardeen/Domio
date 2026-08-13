@@ -47,11 +47,7 @@ const noRawHref: Rule.RuleModule = {
           value?: { type: string; value?: unknown };
         };
         const value = attr.value;
-        if (
-          value &&
-          value.type === 'Literal' &&
-          typeof value.value === 'string'
-        ) {
+        if (value && value.type === 'Literal' && typeof value.value === 'string') {
           context.report({
             node,
             messageId: 'noRawHref',
@@ -79,10 +75,7 @@ const noRawFetch: Rule.RuleModule = {
     return {
       // Match `fetch("...")` and `fetch(\`...\`)` in component files.
       CallExpression(node) {
-        if (
-          node.callee.type === 'Identifier' &&
-          node.callee.name === 'fetch'
-        ) {
+        if (node.callee.type === 'Identifier' && node.callee.name === 'fetch') {
           context.report({ node, messageId: 'noRawFetch' });
         }
       },
@@ -101,8 +94,7 @@ const noRawHex: Rule.RuleModule = {
     },
     schema: [],
     messages: {
-      noRawHex:
-        'Use a design token (e.g. var(--surface-base)) instead of a raw hex literal.',
+      noRawHex: 'Use a design token (e.g. var(--surface-base)) instead of a raw hex literal.',
     },
   },
   create(context) {

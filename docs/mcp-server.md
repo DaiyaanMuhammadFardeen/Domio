@@ -32,12 +32,12 @@ dispatched through `/mcp`; `POST /healthz` returns liveness.
 
 ## Environment
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `PORT` | no | `8086` | TCP port the gateway listens on |
-| `DATABASE_URL` | no | unset | Postgres DSN; falls back to `MemStore` when unset (dev only) |
-| `AUDIT_HMAC_KEY` | **yes** | — | 32-byte hex-encoded HMAC key for audit-chain signing |
-| `MCP_STATIC_TOKENS` | no | unset | `token:subject:workspace:scope1,scope2;…` (dev convenience) |
+| Variable            | Required | Default | Description                                                  |
+| ------------------- | -------- | ------- | ------------------------------------------------------------ |
+| `PORT`              | no       | `8086`  | TCP port the gateway listens on                              |
+| `DATABASE_URL`      | no       | unset   | Postgres DSN; falls back to `MemStore` when unset (dev only) |
+| `AUDIT_HMAC_KEY`    | **yes**  | —       | 32-byte hex-encoded HMAC key for audit-chain signing         |
+| `MCP_STATIC_TOKENS` | no       | unset   | `token:subject:workspace:scope1,scope2;…` (dev convenience)  |
 
 Generate an `AUDIT_HMAC_KEY`:
 
@@ -58,7 +58,12 @@ Content-Type: application/json
 ```
 
 ```json
-{"jsonrpc":"2.0","id":"1","method":"lint_deck","params":{"deck_id":"…"}}
+{
+  "jsonrpc": "2.0",
+  "id": "1",
+  "method": "lint_deck",
+  "params": { "deck_id": "…" }
+}
 ```
 
 ### Success
@@ -78,7 +83,7 @@ JSON-RPC error with an RFC-7807-style `data` field:
   "error": {
     "code": -32002,
     "message": "missing required capability",
-    "data": {"required_scope": "lint:deck", "principal": "u1"}
+    "data": { "required_scope": "lint:deck", "principal": "u1" }
   }
 }
 ```
@@ -105,21 +110,21 @@ tool but returns `204 No Content` and writes no response body.
 
 ## The six M1 tools
 
-| Tool | Required scopes | Description |
-|------|-----------------|-------------|
-| `lint_deck` | `read:deck`, `lint:deck` | Run layout/content lint rules over a deck JSON |
-| `get_provenance` | `audit:read` | Return the universal audit quartet for a deck or slide |
-| `semantic_search` | `read:deck`, `search:deck` | Top-K slides matching a query (token overlap in M1) |
-| `get_claim_confidence` | `read:deck`, `claim:read` | Confidence score + evidence IDs for a citation claim |
-| `accessibility_audit` | `read:deck`, `a11y:run` | WCAG-style a11y rules over a deck JSON |
-| `check_freshness` | `claim:read` | Reports whether a data binding is stale |
+| Tool                   | Required scopes            | Description                                            |
+| ---------------------- | -------------------------- | ------------------------------------------------------ |
+| `lint_deck`            | `read:deck`, `lint:deck`   | Run layout/content lint rules over a deck JSON         |
+| `get_provenance`       | `audit:read`               | Return the universal audit quartet for a deck or slide |
+| `semantic_search`      | `read:deck`, `search:deck` | Top-K slides matching a query (token overlap in M1)    |
+| `get_claim_confidence` | `read:deck`, `claim:read`  | Confidence score + evidence IDs for a citation claim   |
+| `accessibility_audit`  | `read:deck`, `a11y:run`    | WCAG-style a11y rules over a deck JSON                 |
+| `check_freshness`      | `claim:read`               | Reports whether a data binding is stale                |
 
 Every successful result has a `tool_version: "p13-m1-v1"` field.
 Inputs and outputs are JSON-Schema'd in
 `contracts/mcp/tools/<tool>.input.schema.json` and
 `contracts/mcp/tools/<tool>.output.schema.json`.
 
-In M1 the four tools that *would* query the database
+In M1 the four tools that _would_ query the database
 (`get_provenance`, `semantic_search`, `get_claim_confidence`,
 `check_freshness`) return deterministic stubs. They exercise the
 wire format end-to-end so the gateway, audit chain, and tool

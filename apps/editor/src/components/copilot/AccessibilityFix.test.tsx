@@ -174,7 +174,9 @@ describe('AccessibilityFix', () => {
     await waitFor(() => {
       expect(screen.getByTestId('a11y-fix-patch')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('a11y-fix-patch-after')).toHaveTextContent('A bar chart of Q4 revenue');
+    expect(screen.getByTestId('a11y-fix-patch-after')).toHaveTextContent(
+      'A bar chart of Q4 revenue',
+    );
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/v1/ai/accessibility-audit/fix'),
       expect.objectContaining({ method: 'POST' }),

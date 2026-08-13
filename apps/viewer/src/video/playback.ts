@@ -70,10 +70,7 @@ export interface CaptionParseOutput {
 
 export interface ViewerVideoRuntime {
   /** Compute segment metadata for a playhead position. */
-  segmentAt(
-    segmentIndex: number,
-    playheadMs: number,
-  ): SegmentInfo;
+  segmentAt(segmentIndex: number, playheadMs: number): SegmentInfo;
   /** Clip a trim window to the source duration. */
   clipTrim(trim: TrimWindow): TrimWindow | undefined;
   /** Parse a WebVTT caption file into cues + warnings. */
@@ -89,10 +86,7 @@ export interface ViewerVideoRuntime {
   /** Decide whether to autoplay given the asset state machine. */
   readiness(asset: VideoAsset): CanPlayResult;
   /** Reduce a transcode event into the next state. */
-  step(
-    state: TranscodeState,
-    event: 'start' | 'complete' | 'error',
-  ): TranscodeState;
+  step(state: TranscodeState, event: 'start' | 'complete' | 'error'): TranscodeState;
   /** Compute waveform bars for the scrubbing UI. */
   waveform(samples: Float32Array | readonly number[]): WaveformResult;
   /** Tear down internal caches. */
@@ -103,9 +97,7 @@ export interface ViewerVideoRuntime {
 
 const DEFAULT_SEGMENT_DURATION_MS = 4_000;
 
-export function createViewerVideoRuntime(
-  config: ViewerVideoRuntimeConfig,
-): ViewerVideoRuntime {
+export function createViewerVideoRuntime(config: ViewerVideoRuntimeConfig): ViewerVideoRuntime {
   let chapters: ChapterList | null = null;
   const parsedCueCache = new Map<string, CaptionParseOutput>();
   const segmentDurationMs = (i: number): number =>
@@ -124,11 +116,7 @@ export function createViewerVideoRuntime(
 
   return {
     segmentAt(segmentIndex: number, playheadMs: number): SegmentInfo {
-      return getSegmentInfo(
-        config.sourceDurationMs,
-        segmentDurationMs(segmentIndex),
-        playheadMs,
-      );
+      return getSegmentInfo(config.sourceDurationMs, segmentDurationMs(segmentIndex), playheadMs);
     },
 
     clipTrim(trim: TrimWindow): TrimWindow | undefined {
@@ -174,10 +162,7 @@ export function createViewerVideoRuntime(
       return canPlay(asset);
     },
 
-    step(
-      state: TranscodeState,
-      event: 'start' | 'complete' | 'error',
-    ): TranscodeState {
+    step(state: TranscodeState, event: 'start' | 'complete' | 'error'): TranscodeState {
       return reduceTranscodeState(state, event);
     },
 

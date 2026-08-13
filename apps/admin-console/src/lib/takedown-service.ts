@@ -34,9 +34,7 @@ export interface TakedownEvent {
 export async function getTakedown(id: string): Promise<TakedownRequest | null> {
   if (!id) return null;
   try {
-    return await fetcher<TakedownRequest>(
-      `/v1/takedowns/${encodeURIComponent(id)}`,
-    );
+    return await fetcher<TakedownRequest>(`/v1/takedowns/${encodeURIComponent(id)}`);
   } catch {
     return null;
   }
@@ -47,9 +45,7 @@ export async function getTakedown(id: string): Promise<TakedownRequest | null> {
  * in any order, so callers can rely on this returning them sorted by
  * ascending `timestamp_ms`.
  */
-export async function listTakedownEvents(
-  id: string,
-): Promise<ReadonlyArray<TakedownEvent>> {
+export async function listTakedownEvents(id: string): Promise<ReadonlyArray<TakedownEvent>> {
   if (!id) return [];
   try {
     const json = await fetcher<{ events?: TakedownEvent[] }>(

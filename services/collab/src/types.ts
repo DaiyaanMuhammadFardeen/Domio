@@ -28,7 +28,9 @@ export interface CollabEventEmitter {
 }
 
 export const noopEmitter: CollabEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------

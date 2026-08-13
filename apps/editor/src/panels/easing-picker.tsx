@@ -23,7 +23,8 @@ export const EASING_PRESETS: EasingOption[] = [
   { value: 'bounce', label: 'Bounce' },
 ];
 
-const BEZIER_REGEX = /^cubic-bezier\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/;
+const BEZIER_REGEX =
+  /^cubic-bezier\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*\)$/;
 
 export function validateBezier(value: string): boolean {
   return BEZIER_REGEX.test(value);
@@ -47,7 +48,13 @@ function curvePath(p1x: number, p1y: number, p2x: number, p2y: number, size = 40
     const y = 3 * u * u * t * p1y + 3 * u * t * t * p2y + t * t * t;
     points.push(`${(x * size).toFixed(1)},${((1 - y) * size).toFixed(1)}`);
   }
-  return `M ${points[0]} ` + points.slice(1).map((p) => `L ${p}`).join(' ');
+  return (
+    `M ${points[0]} ` +
+    points
+      .slice(1)
+      .map((p) => `L ${p}`)
+      .join(' ')
+  );
 }
 
 interface EasingPickerProps {
@@ -63,10 +70,10 @@ export function EasingPicker({
   presets = EASING_PRESETS,
   className = 'data-panel__add-input',
 }: EasingPickerProps): ReactElement {
-  const [customInput, setCustomInput] = useState(
-    value.startsWith('cubic-bezier') ? value : '',
+  const [customInput, setCustomInput] = useState(value.startsWith('cubic-bezier') ? value : '');
+  const [isCustom, setIsCustom] = useState(
+    () => !presets.some((p) => p.value === value) && value !== '',
   );
-  const [isCustom, setIsCustom] = useState(() => !presets.some((p) => p.value === value) && value !== '');
   const [error, setError] = useState<string | null>(null);
 
   const handlePresetChange = useCallback(
@@ -108,31 +115,53 @@ export function EasingPicker({
           style={{ flex: 1 }}
         >
           {presets.map((p) => (
-            <option key={p.value} value={p.value}>{p.label}</option>
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
           ))}
           <option value="__custom">Custom (cubic-bezier)</option>
         </select>
         {/* Mini curve preview */}
-        <svg width={40} height={40} viewBox="0 0 40 40" style={{ flexShrink: 0, border: '1px solid var(--border, #333)', borderRadius: 4, background: 'var(--bg-secondary, #1a1a1a)' }}>
+        <svg
+          width={40}
+          height={40}
+          viewBox="0 0 40 40"
+          style={{
+            flexShrink: 0,
+            border: '1px solid var(--border, #333)',
+            borderRadius: 4,
+            background: 'var(--bg-secondary, #1a1a1a)',
+          }}
+        >
           <path
-            d={bezier
-              ? curvePath(bezier[0], bezier[1], bezier[2], bezier[3])
-              : value === 'spring'
-                ? 'M 0,40 C 10,40 15,0 20,5 C 25,10 30,0 35,2 L 40,0'
-                : value === 'bounce'
-                  ? 'M 0,40 L 15,5 L 20,35 L 28,10 L 32,30 L 40,0'
-                  : value === 'linear'
-                    ? 'M 0,40 L 40,0'
-                    : value === 'ease-in'
-                      ? 'M 0,40 C 20,40 30,20 40,0'
-                      : value === 'ease-out'
-                        ? 'M 0,40 C 10,30 20,0 40,0'
-                        : 'M 0,40 C 10,40 30,0 40,0'}
+            d={
+              bezier
+                ? curvePath(bezier[0], bezier[1], bezier[2], bezier[3])
+                : value === 'spring'
+                  ? 'M 0,40 C 10,40 15,0 20,5 C 25,10 30,0 35,2 L 40,0'
+                  : value === 'bounce'
+                    ? 'M 0,40 L 15,5 L 20,35 L 28,10 L 32,30 L 40,0'
+                    : value === 'linear'
+                      ? 'M 0,40 L 40,0'
+                      : value === 'ease-in'
+                        ? 'M 0,40 C 20,40 30,20 40,0'
+                        : value === 'ease-out'
+                          ? 'M 0,40 C 10,30 20,0 40,0'
+                          : 'M 0,40 C 10,40 30,0 40,0'
+            }
             fill="none"
             stroke="var(--accent, #58a6ff)"
             strokeWidth={2}
           />
-          <line x1={0} y1={40} x2={40} y2={0} stroke="var(--muted, #666)" strokeWidth={0.5} strokeDasharray="2,2" />
+          <line
+            x1={0}
+            y1={40}
+            x2={40}
+            y2={0}
+            stroke="var(--muted, #666)"
+            strokeWidth={0.5}
+            strokeDasharray="2,2"
+          />
         </svg>
       </div>
       {isCustom && (

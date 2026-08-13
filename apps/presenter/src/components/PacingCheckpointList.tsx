@@ -46,38 +46,30 @@ export function PacingCheckpointList({
   const [rows, setRows] = useState<PacingCheckpoint[]>([]);
   const [patterns, setPatterns] = useState<VibrationPattern[]>([]);
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState<
-    { kind: 'idle' | 'saved' | 'error'; message?: string }
-  >({ kind: 'idle' });
+  const [status, setStatus] = useState<{ kind: 'idle' | 'saved' | 'error'; message?: string }>({
+    kind: 'idle',
+  });
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([listPacingCheckpoints(deckId), listPatterns()]).then(
-      ([cps, pats]) => {
-        if (cancelled) return;
-        setRows(cps);
-        setPatterns(pats);
-        setLoading(false);
-      },
-    );
+    Promise.all([listPacingCheckpoints(deckId), listPatterns()]).then(([cps, pats]) => {
+      if (cancelled) return;
+      setRows(cps);
+      setPatterns(pats);
+      setLoading(false);
+    });
     return () => {
       cancelled = true;
     };
   }, [deckId]);
 
-  const updateRow = useCallback(
-    (id: string, patch: Partial<PacingCheckpoint>) => {
-      setRows((current) =>
-        current.map((row) => (row.id === id ? { ...row, ...patch } : row)),
-      );
-      setStatus({ kind: 'idle' });
-    },
-    [],
-  );
+  const updateRow = useCallback((id: string, patch: Partial<PacingCheckpoint>) => {
+    setRows((current) => current.map((row) => (row.id === id ? { ...row, ...patch } : row)));
+    setStatus({ kind: 'idle' });
+  }, []);
 
   const addRow = useCallback(() => {
-    const defaultSlide =
-      slideIds && slideIds.length > 0 ? (slideIds[0] ?? '') : '';
+    const defaultSlide = slideIds && slideIds.length > 0 ? (slideIds[0] ?? '') : '';
     setRows((current) => [...current, blankCheckpoint(deckId, defaultSlide)]);
     setStatus({ kind: 'idle' });
   }, [deckId, slideIds]);
@@ -202,10 +194,7 @@ export function PacingCheckpointList({
           </div>
         )}
         {!loading && rows.length === 0 && (
-          <div
-            role="row"
-            style={{ padding: '8px 0', opacity: 0.7, fontStyle: 'italic' }}
-          >
+          <div role="row" style={{ padding: '8px 0', opacity: 0.7, fontStyle: 'italic' }}>
             No pacing checkpoints — add one above.
           </div>
         )}
@@ -230,9 +219,7 @@ export function PacingCheckpointList({
                   aria-label="Slide"
                   data-testid={`${dataTestId}-slide`}
                   value={row.slide_id}
-                  onChange={(e) =>
-                    updateRow(row.id, { slide_id: e.target.value })
-                  }
+                  onChange={(e) => updateRow(row.id, { slide_id: e.target.value })}
                   style={{
                     width: '22%',
                     padding: '4px 6px',
@@ -257,9 +244,7 @@ export function PacingCheckpointList({
                   aria-label="Slide"
                   data-testid={`${dataTestId}-slide`}
                   value={row.slide_id}
-                  onChange={(e) =>
-                    updateRow(row.id, { slide_id: e.target.value })
-                  }
+                  onChange={(e) => updateRow(row.id, { slide_id: e.target.value })}
                   placeholder="slide-id"
                   style={{
                     width: '22%',
@@ -320,9 +305,7 @@ export function PacingCheckpointList({
                 aria-label="Pattern"
                 data-testid={`${dataTestId}-pattern`}
                 value={row.pattern_id}
-                onChange={(e) =>
-                  updateRow(row.id, { pattern_id: e.target.value })
-                }
+                onChange={(e) => updateRow(row.id, { pattern_id: e.target.value })}
                 style={{
                   width: '24%',
                   marginLeft: 4,
@@ -334,9 +317,7 @@ export function PacingCheckpointList({
                   color: 'var(--content-primary, #1a1a1a)',
                 }}
               >
-                {patterns.length === 0 && (
-                  <option value={row.pattern_id}>{row.pattern_id}</option>
-                )}
+                {patterns.length === 0 && <option value={row.pattern_id}>{row.pattern_id}</option>}
                 {patterns.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}

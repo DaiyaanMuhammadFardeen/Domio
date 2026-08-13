@@ -55,15 +55,15 @@ describe('EmbedPolicyService', () => {
     });
 
     it('throws PolicyValidationError when workspaceId is missing', () => {
-      expect(() =>
-        service.create({ workspaceId: '', name: 'Test' }),
-      ).toThrow(PolicyValidationError);
+      expect(() => service.create({ workspaceId: '', name: 'Test' })).toThrow(
+        PolicyValidationError,
+      );
     });
 
     it('throws PolicyValidationError when name is missing', () => {
-      expect(() =>
-        service.create({ workspaceId: 'ws-1', name: '' }),
-      ).toThrow(PolicyValidationError);
+      expect(() => service.create({ workspaceId: 'ws-1', name: '' })).toThrow(
+        PolicyValidationError,
+      );
     });
 
     it('throws PolicyValidationError for invalid sandbox flags', () => {
@@ -156,9 +156,9 @@ describe('EmbedPolicyService', () => {
 
     it('throws PolicyValidationError for invalid sandbox flags', () => {
       const created = service.create({ workspaceId: 'ws-1', name: 'Test' });
-      expect(() =>
-        service.update(created.id, { sandboxFlags: 'bad-flag' }),
-      ).toThrow(PolicyValidationError);
+      expect(() => service.update(created.id, { sandboxFlags: 'bad-flag' })).toThrow(
+        PolicyValidationError,
+      );
     });
   });
 

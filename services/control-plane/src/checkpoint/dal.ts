@@ -30,11 +30,7 @@ export interface CheckpointRepository {
   insert(record: CheckpointRecord): Promise<void>;
   update(record: CheckpointRecord): Promise<void>;
   findById(deckId: ULID, checkpointId: ULID): Promise<CheckpointRecord | null>;
-  findByName(
-    deckId: ULID,
-    branchId: string,
-    name: string,
-  ): Promise<CheckpointRecord | null>;
+  findByName(deckId: ULID, branchId: string, name: string): Promise<CheckpointRecord | null>;
   listByDeck(
     deckId: ULID,
     filter?: { branchId?: string; kind?: CheckpointKind },
@@ -42,7 +38,10 @@ export interface CheckpointRepository {
 }
 
 export class CheckpointNotFoundError extends Error {
-  constructor(public readonly deckId: ULID, public readonly checkpointId: ULID) {
+  constructor(
+    public readonly deckId: ULID,
+    public readonly checkpointId: ULID,
+  ) {
     super(`Checkpoint ${checkpointId} not found on deck ${deckId}.`);
     this.name = 'CheckpointNotFoundError';
   }
@@ -76,11 +75,7 @@ export class InMemoryCheckpointRepository implements CheckpointRepository {
   async findById(deckId: ULID, id: ULID): Promise<CheckpointRecord | null> {
     return this.bucket(deckId).get(id) ?? null;
   }
-  async findByName(
-    deckId: ULID,
-    branchId: string,
-    name: string,
-  ): Promise<CheckpointRecord | null> {
+  async findByName(deckId: ULID, branchId: string, name: string): Promise<CheckpointRecord | null> {
     const bucket = this.bucket(deckId);
     const id = bucket.byName.get(`${branchId}|${name}`);
     return id ? (bucket.get(id) ?? null) : null;

@@ -8,10 +8,7 @@
 'use client';
 
 import { useId, type ChangeEvent, type JSX } from 'react';
-import type {
-  Department,
-  RoleLocation,
-} from '../../lib/careers-data';
+import type { Department, RoleLocation } from '../../lib/careers-data';
 
 export interface RoleFilterValue {
   readonly department: Department | 'all';
@@ -52,11 +49,7 @@ const LOCATION_OPTIONS: ReadonlyArray<{
   { value: 'singapore', label: 'Singapore' },
 ];
 
-export function RoleFilter({
-  value,
-  onChange,
-  counts,
-}: RoleFilterProps): JSX.Element {
+export function RoleFilter({ value, onChange, counts }: RoleFilterProps): JSX.Element {
   const deptId = useId();
   const locId = useId();
 
@@ -71,10 +64,7 @@ export function RoleFilter({
   return (
     <div className="careers-filter" data-testid="role-filter">
       <div className="careers-filter__field">
-        <label
-          className="careers-filter__label"
-          htmlFor={`${deptId}-department`}
-        >
+        <label className="careers-filter__label" htmlFor={`${deptId}-department`}>
           Department
         </label>
         <select
@@ -92,10 +82,7 @@ export function RoleFilter({
         </select>
       </div>
       <div className="careers-filter__field">
-        <label
-          className="careers-filter__label"
-          htmlFor={`${locId}-location`}
-        >
+        <label className="careers-filter__label" htmlFor={`${locId}-location`}>
           Location
         </label>
         <select

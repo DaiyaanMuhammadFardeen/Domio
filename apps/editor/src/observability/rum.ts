@@ -194,11 +194,13 @@ let _sdk: RumSdk | null = null;
  *
  * Call once at app startup; subsequent calls return the same instance.
  */
-export function initRum(options: {
-  serviceName?: string;
-  /** Extra attributes attached to every structured log. */
-  defaultAttributes?: Record<string, string | number | boolean>;
-} = {}): RumSdk {
+export function initRum(
+  options: {
+    serviceName?: string;
+    /** Extra attributes attached to every structured log. */
+    defaultAttributes?: Record<string, string | number | boolean>;
+  } = {},
+): RumSdk {
   if (_sdk) return _sdk;
 
   const serviceName = options.serviceName ?? 'domio-editor';
@@ -220,7 +222,9 @@ export function initRum(options: {
       const otelMeter = otel.metrics.getMeter(serviceName) as Record<string, unknown>;
       meter = {
         createCounter(name: string): RumCounter {
-          const c = (otelMeter as { createCounter?: (n: string) => unknown }).createCounter?.(name) as Record<string, unknown> | undefined;
+          const c = (otelMeter as { createCounter?: (n: string) => unknown }).createCounter?.(
+            name,
+          ) as Record<string, unknown> | undefined;
           if (!c) return noopCounter;
           return {
             add(value: number, attrs?: Record<string, string | number | boolean>) {
@@ -229,7 +233,9 @@ export function initRum(options: {
           };
         },
         createHistogram(name: string): RumHistogram {
-          const h = (otelMeter as { createHistogram?: (n: string) => unknown }).createHistogram?.(name) as Record<string, unknown> | undefined;
+          const h = (otelMeter as { createHistogram?: (n: string) => unknown }).createHistogram?.(
+            name,
+          ) as Record<string, unknown> | undefined;
           if (!h) return noopHistogram;
           return {
             record(value: number, attrs?: Record<string, string | number | boolean>) {
@@ -282,9 +288,7 @@ export function recordSyncOpRoundTrip(
 }
 
 /** Set active sync connections count. */
-export function setActiveSyncConnections(
-  count: number,
-): void {
+export function setActiveSyncConnections(count: number): void {
   const { meter } = getRum();
   const counter = meter.createCounter(METRIC_SYNC_ACTIVE_CONNECTIONS);
   counter.add(count);
@@ -301,9 +305,7 @@ export function recordCrdtConvergence(
 }
 
 /** Set active presence sessions count. */
-export function setActivePresenceSessions(
-  count: number,
-): void {
+export function setActivePresenceSessions(count: number): void {
   const { meter } = getRum();
   const counter = meter.createCounter(METRIC_PRESENCE_ACTIVE_SESSIONS);
   counter.add(count);

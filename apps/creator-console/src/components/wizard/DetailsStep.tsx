@@ -104,10 +104,7 @@ export function DetailsStep({ details, onSave }: DetailsStepProps) {
       </div>
 
       <div>
-        <label
-          htmlFor="wizard-description"
-          className="block text-sm font-medium text-slate-700"
-        >
+        <label htmlFor="wizard-description" className="block text-sm font-medium text-slate-700">
           {t('creator.wizard.details.description')}
         </label>
         <textarea

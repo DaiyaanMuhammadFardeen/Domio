@@ -30,7 +30,12 @@ import type {
   KycStatus,
 } from '../creator/types.js';
 import type { BrandLockedListing } from '../curated/types.js';
-import type { TakedownRequest, TrustScore, TakedownStatus, TakedownKind } from '../takedown/types.js';
+import type {
+  TakedownRequest,
+  TrustScore,
+  TakedownStatus,
+  TakedownKind,
+} from '../takedown/types.js';
 
 // ---------------------------------------------------------------------------
 // Store interface
@@ -44,13 +49,29 @@ export interface MarketplaceStore {
   insertListing(listing: MarketplaceListing): Promise<void>;
   getListing(listingId: string): Promise<MarketplaceListing | null>;
   getListingByCatalogId(catalogId: string): Promise<MarketplaceListing | null>;
-  listListings(opts?: { status?: string; sellerId?: string; limit?: number }): Promise<MarketplaceListing[]>;
+  listListings(opts?: {
+    status?: string;
+    sellerId?: string;
+    limit?: number;
+  }): Promise<MarketplaceListing[]>;
   updateListing(
     listingId: string,
-    patch: Partial<Pick<MarketplaceListing,
-      'title' | 'description' | 'status' | 'isFree' | 'priceCents' | 'currency' |
-      'tags' | 'preview' | 'publishedAtMs' | 'deprecatedAtMs' | 'updatedAt'
-    >>,
+    patch: Partial<
+      Pick<
+        MarketplaceListing,
+        | 'title'
+        | 'description'
+        | 'status'
+        | 'isFree'
+        | 'priceCents'
+        | 'currency'
+        | 'tags'
+        | 'preview'
+        | 'publishedAtMs'
+        | 'deprecatedAtMs'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<MarketplaceListing>;
 
   // -------------------------------------------------------------------------
@@ -94,15 +115,30 @@ export interface MarketplaceStore {
   insertPaymentIntent(intent: PaymentIntent): Promise<void>;
   getPaymentIntentByPurchaseId(purchaseId: string): Promise<PaymentIntent | null>;
   getPaymentIntentByProviderIntentId(providerIntentId: string): Promise<PaymentIntent | null>;
-  getPaymentIntentByIdempotencyKey(workspaceId: string, idempotencyKey: string): Promise<PaymentIntent | null>;
-  updatePaymentIntentStatus(purchaseId: string, status: PaymentIntent['status'], patch?: Partial<Pick<PaymentIntent, 'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'>>): Promise<PaymentIntent>;
+  getPaymentIntentByIdempotencyKey(
+    workspaceId: string,
+    idempotencyKey: string,
+  ): Promise<PaymentIntent | null>;
+  updatePaymentIntentStatus(
+    purchaseId: string,
+    status: PaymentIntent['status'],
+    patch?: Partial<
+      Pick<
+        PaymentIntent,
+        'providerIntentId' | 'disputeStatus' | 'refundStatus' | 'refundedAt' | 'refundReason'
+      >
+    >,
+  ): Promise<PaymentIntent>;
 
   // -------------------------------------------------------------------------
   // License Grants (Phase 19 Wave 2)
   // -------------------------------------------------------------------------
 
   insertLicenseGrant(grant: LicenseGrant): Promise<void>;
-  getLicenseGrantByListingAndBuyer(listingId: string, buyerId: string): Promise<LicenseGrant | null>;
+  getLicenseGrantByListingAndBuyer(
+    listingId: string,
+    buyerId: string,
+  ): Promise<LicenseGrant | null>;
 
   // -------------------------------------------------------------------------
   // Revenue Share Events (Phase 19 Wave 2)
@@ -132,10 +168,22 @@ export interface MarketplaceStore {
   getCreatorProfile(userId: string): Promise<CreatorProfile | null>;
   updateCreatorProfile(
     userId: string,
-    patch: Partial<Pick<CreatorProfile,
-      'displayName' | 'slug' | 'bio' | 'countryCode' | 'payoutMethod' |
-      'payoutReady' | 'kycStatus' | 'onboardingState' | 'balanceCents' | 'currency' | 'updatedAt'
-    >>,
+    patch: Partial<
+      Pick<
+        CreatorProfile,
+        | 'displayName'
+        | 'slug'
+        | 'bio'
+        | 'countryCode'
+        | 'payoutMethod'
+        | 'payoutReady'
+        | 'kycStatus'
+        | 'onboardingState'
+        | 'balanceCents'
+        | 'currency'
+        | 'updatedAt'
+      >
+    >,
   ): Promise<CreatorProfile>;
   getCreatorByUserId(userId: string): Promise<CreatorProfile | null>;
 
@@ -157,10 +205,7 @@ export interface MarketplaceStore {
 
   createPayoutMethod(method: CreatorPayoutMethod): Promise<void>;
   listPayoutMethodsByCreator(creatorId: string): Promise<CreatorPayoutMethod[]>;
-  updatePayoutMethodVerified(
-    methodId: string,
-    verified: boolean,
-  ): Promise<CreatorPayoutMethod>;
+  updatePayoutMethodVerified(methodId: string, verified: boolean): Promise<CreatorPayoutMethod>;
 
   // -------------------------------------------------------------------------
   // Transaction support
@@ -173,12 +218,21 @@ export interface MarketplaceStore {
   // -------------------------------------------------------------------------
 
   insertBrandLock(lock: BrandLockedListing): Promise<void>;
-  getBrandLock(workspaceId: string, brandKitId: string, marketplaceListingId: string): Promise<BrandLockedListing | null>;
+  getBrandLock(
+    workspaceId: string,
+    brandKitId: string,
+    marketplaceListingId: string,
+  ): Promise<BrandLockedListing | null>;
   listBrandLocksByBrand(workspaceId: string, brandKitId: string): Promise<BrandLockedListing[]>;
   listBrandLocksByListing(marketplaceListingId: string): Promise<BrandLockedListing[]>;
   updateBrandLock(
     lockId: string,
-    patch: Partial<Pick<BrandLockedListing, 'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'>>,
+    patch: Partial<
+      Pick<
+        BrandLockedListing,
+        'state' | 'overridePriceCents' | 'notes' | 'auditActorId' | 'updatedBy'
+      >
+    >,
   ): Promise<BrandLockedListing>;
   deleteBrandLock(lockId: string): Promise<void>;
 
@@ -188,7 +242,10 @@ export interface MarketplaceStore {
 
   insertTakedownRequest(request: TakedownRequest): Promise<void>;
   getTakedownRequest(takedownId: string): Promise<TakedownRequest | null>;
-  listTakedownRequests(opts?: { status?: TakedownStatus; kind?: TakedownKind }): Promise<TakedownRequest[]>;
+  listTakedownRequests(opts?: {
+    status?: TakedownStatus;
+    kind?: TakedownKind;
+  }): Promise<TakedownRequest[]>;
   listTakedownRequestsByListing(listingId: string): Promise<TakedownRequest[]>;
   updateTakedownStatus(
     takedownId: string,
@@ -222,7 +279,13 @@ export interface MarketplaceStore {
 
   createWebhookDelivery(delivery: WebhookDelivery): Promise<void>;
   getWebhookDelivery(deliveryId: string): Promise<WebhookDelivery | null>;
-  updateWebhookDeliveryStatus(deliveryId: string, status: WebhookDelivery['status'], patch?: Partial<Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>>): Promise<WebhookDelivery>;
+  updateWebhookDeliveryStatus(
+    deliveryId: string,
+    status: WebhookDelivery['status'],
+    patch?: Partial<
+      Pick<WebhookDelivery, 'lastError' | 'attempts' | 'deliveredAt' | 'nextRetryAt'>
+    >,
+  ): Promise<WebhookDelivery>;
   listWebhookDeliveriesDue(nextRetryAt: Date): Promise<WebhookDelivery[]>;
 
   // -------------------------------------------------------------------------

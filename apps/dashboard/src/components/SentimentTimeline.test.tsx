@@ -62,9 +62,7 @@ describe('SentimentTimeline', () => {
       },
       {
         slideId: 'b',
-        points: [
-          { date: '2025-08-02', score: -0.2, responses: 3 },
-        ],
+        points: [{ date: '2025-08-02', score: -0.2, responses: 3 }],
       },
     ];
     render(<SentimentTimeline series={base} />);
@@ -75,8 +73,6 @@ describe('SentimentTimeline', () => {
     const path = groupA?.querySelector('path');
     expect(path).not.toBeNull();
     // Series `a` should now have 3 vertices on its polyline.
-    expect(path?.getAttribute('d')).toMatch(
-      /^M [\d.]+ [\d.]+ L [\d.]+ [\d.]+ L [\d.]+ [\d.]+$/,
-    );
+    expect(path?.getAttribute('d')).toMatch(/^M [\d.]+ [\d.]+ L [\d.]+ [\d.]+ L [\d.]+ [\d.]+$/);
   });
 });

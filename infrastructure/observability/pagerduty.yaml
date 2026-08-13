@@ -90,12 +90,12 @@ suppressions:
     match:
       label: maintenance
     during:
-      crontab: "0 2 * * 0"  # Sundays 2 UTC
+      crontab: '0 2 * * 0' # Sundays 2 UTC
     duration_minutes: 60
-    reason: "weekly handshake key rotation"
+    reason: 'weekly handshake key rotation'
 
 # Pager test cadence — fire a synthetic alert every Friday at 16 UTC.
 test_pager:
-  schedule: "0 16 * * 5"
+  schedule: '0 16 * * 5'
   target: presenter-oncall
-  message: "Synthetic P15 alert — verify pager end-to-end."
+  message: 'Synthetic P15 alert — verify pager end-to-end.'

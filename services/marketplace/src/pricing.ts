@@ -54,9 +54,7 @@ export function calculatePrice(
 
   // Standard split: creator gets splitCreatorBps / 10000 of price
   // Platform fee = price - creator share (ensures no cents lost to rounding)
-  const creatorShareCents = Math.floor(
-    (priceCents * policy.splitCreatorBps) / 10000,
-  );
+  const creatorShareCents = Math.floor((priceCents * policy.splitCreatorBps) / 10000);
   const platformFeeCents = priceCents - creatorShareCents;
 
   return {

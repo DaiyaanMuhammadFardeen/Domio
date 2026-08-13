@@ -38,10 +38,7 @@ function formatTimestamp(ms: number): string {
   return `${hh}:${mm}:${ss} UTC`;
 }
 
-function labelForType(
-  type: SessionEvent['type'],
-  labels: SessionTimelineLabels,
-): string {
+function labelForType(type: SessionEvent['type'], labels: SessionTimelineLabels): string {
   switch (type) {
     case 'slide_advance':
       return labels.slideAdvance;
@@ -109,11 +106,7 @@ export function SessionTimeline({
   }
 
   return (
-    <ol
-      className="space-y-2"
-      data-testid="session-timeline"
-      aria-label="Session timeline"
-    >
+    <ol className="space-y-2" data-testid="session-timeline" aria-label="Session timeline">
       {events.map((event) => {
         const isSelected = event.id === selectedId;
         const isFrom = event.id === diffFromId;
@@ -141,15 +134,10 @@ export function SessionTimeline({
                   <time className="text-xs tabular-nums text-slate-500">
                     {formatTimestamp(event.timestamp_ms)}
                   </time>
-                  <EventTypeBadge
-                    type={event.type}
-                    label={labelForType(event.type, labels)}
-                  />
+                  <EventTypeBadge type={event.type} label={labelForType(event.type, labels)} />
                   <span className="text-xs text-slate-500">
                     {roleLabel(event.actor.type, labels)} ·{' '}
-                    <span className="font-medium text-slate-700">
-                      {event.actor.name}
-                    </span>
+                    <span className="font-medium text-slate-700">{event.actor.name}</span>
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-slate-800">{event.summary}</p>

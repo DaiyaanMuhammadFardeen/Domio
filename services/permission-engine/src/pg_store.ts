@@ -185,10 +185,7 @@ export class PgPermissionGrantStore implements PermissionGrantStore {
 
   async delete(id: string): Promise<void> {
     await this.withClient(async (c) => {
-      await c.query(
-        `DELETE FROM permission_grant WHERE id = $1`,
-        [id],
-      );
+      await c.query(`DELETE FROM permission_grant WHERE id = $1`, [id]);
     });
   }
 }
@@ -224,7 +221,10 @@ export class PgWorkspaceMemberStore implements WorkspaceMemberStore {
     return fn(assertPool(this.pool));
   }
 
-  async findByWorkspaceAndUser(workspaceId: string, userId: string): Promise<WorkspaceMember | null> {
+  async findByWorkspaceAndUser(
+    workspaceId: string,
+    userId: string,
+  ): Promise<WorkspaceMember | null> {
     return this.withClient(async (c) => {
       const res = await c.query(
         `SELECT id, workspace_id, user_id, role, capabilities, effective_from, effective_to
@@ -300,10 +300,7 @@ export class PgGroupMembershipStore implements GroupMembershipStore {
 
   async findGroupsForUser(userId: string): Promise<string[]> {
     return this.withClient(async (c) => {
-      const res = await c.query(
-        `SELECT group_id FROM group_member WHERE user_id = $1`,
-        [userId],
-      );
+      const res = await c.query(`SELECT group_id FROM group_member WHERE user_id = $1`, [userId]);
       return res.rows.map((row) => row['group_id'] as string);
     });
   }

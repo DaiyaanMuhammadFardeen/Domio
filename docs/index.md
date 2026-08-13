@@ -14,39 +14,39 @@
 
 ## Source-of-truth rules
 
-| Concern | Canonical document | Rule |
-|---|---|---|
-| Feature scope and testable FR/NFR requirements | [02 — Requirements Engineering](02-requirements-engineering.md) | New behavior receives a stable FR/NFR identifier and feature-number mapping. |
-| Product purpose, personas, scope boundaries | [01 — Problem & Product Definition](01-problem-product-definition.md) | Architecture and roadmap decisions must trace back to a product principle or user job. |
-| User behavior and UI states | [03 — UX & Interface Planning](03-ux-interface-planning.md) | Loading, error, offline, conflict, keyboard, and screen-reader behavior are part of the feature contract. |
-| Runtime/module boundaries and contracts | [04 — System Architecture](04-system-architecture.md) | Changes to module ownership, events, consistency, or deployment boundaries require an ADR. |
-| Persistent entities and storage ownership | [05 — Data & Database Design](05-data-database-design.md) | Postgres is the control-plane source of truth; derived stores are rebuildable projections. |
-| Security controls and threat treatment | [07 — Security Planning](07-security-planning.md) | No feature is complete until its abuse cases and security verification are documented. |
-| Feature-specific detailed design | Domain docs below | These own implementation detail, schemas, interaction semantics, APIs, and domain acceptance criteria. |
-| Evolving legal interpretation | [11 — Legal & Compliance (Bangladesh)](11-legal-compliance-bangladesh.md) | Treat claims as provisional until confirmed by official sources and counsel. |
+| Concern                                        | Canonical document                                                        | Rule                                                                                                      |
+| ---------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Feature scope and testable FR/NFR requirements | [02 — Requirements Engineering](02-requirements-engineering.md)           | New behavior receives a stable FR/NFR identifier and feature-number mapping.                              |
+| Product purpose, personas, scope boundaries    | [01 — Problem & Product Definition](01-problem-product-definition.md)     | Architecture and roadmap decisions must trace back to a product principle or user job.                    |
+| User behavior and UI states                    | [03 — UX & Interface Planning](03-ux-interface-planning.md)               | Loading, error, offline, conflict, keyboard, and screen-reader behavior are part of the feature contract. |
+| Runtime/module boundaries and contracts        | [04 — System Architecture](04-system-architecture.md)                     | Changes to module ownership, events, consistency, or deployment boundaries require an ADR.                |
+| Persistent entities and storage ownership      | [05 — Data & Database Design](05-data-database-design.md)                 | Postgres is the control-plane source of truth; derived stores are rebuildable projections.                |
+| Security controls and threat treatment         | [07 — Security Planning](07-security-planning.md)                         | No feature is complete until its abuse cases and security verification are documented.                    |
+| Feature-specific detailed design               | Domain docs below                                                         | These own implementation detail, schemas, interaction semantics, APIs, and domain acceptance criteria.    |
+| Evolving legal interpretation                  | [11 — Legal & Compliance (Bangladesh)](11-legal-compliance-bangladesh.md) | Treat claims as provisional until confirmed by official sources and counsel.                              |
 
 ## Feature-range coverage
 
 Every numbered item in `feature-list.md` is represented in the corresponding domain document and traceable in [02 — Requirements Engineering](02-requirements-engineering.md).
 
-| Feature range | Domain | Detailed design |
-|---:|---|---|
-| 1–22 | Core Editor & Canvas | [editor-canvas.md](editor-canvas.md) |
-| 23–36 | Components & Template Ecosystem | [components-templates.md](components-templates.md) |
-| 37–47 | Theming, Branding & Design Systems | [theming-branding.md](theming-branding.md) |
-| 48–64 | Live Data & Interactive Charts | [live-data-charts.md](live-data-charts.md) |
-| 65–84 | 3D, Motion & Rich Media | [3d-motion-media.md](3d-motion-media.md) |
-| 85–95 | Animation & Transition System | [animation-transitions.md](animation-transitions.md) |
-| 96–107 | Prototyping & Interactivity | [prototyping-interactivity.md](prototyping-interactivity.md) |
-| 108–125 | AI Copilot | [ai-copilot.md](ai-copilot.md) |
-| 126–141 | Presenter Experience | [presenter-experience.md](presenter-experience.md) |
-| 142–154 | Audience Participation | [audience-participation.md](audience-participation.md) |
-| 155–168 | Sharing, Publishing & Deck-as-Website | [sharing-publishing.md](sharing-publishing.md) |
-| 169–178 | Analytics & Engagement Intelligence | [analytics.md](analytics.md) |
-| 179–192 | Collaboration & Workflow | [collaboration-workflow.md](collaboration-workflow.md) |
-| 193–204 | Enterprise, Governance & Platform | [enterprise-governance.md](enterprise-governance.md) |
-| 205–219 | Novel & Frontier Features | [novel-frontier.md](novel-frontier.md) |
-| 221–240 | Agentic & Programmable Interfaces | [agentic-interfaces.md](agentic-interfaces.md) |
+| Feature range | Domain                                | Detailed design                                              |
+| ------------: | ------------------------------------- | ------------------------------------------------------------ |
+|          1–22 | Core Editor & Canvas                  | [editor-canvas.md](editor-canvas.md)                         |
+|         23–36 | Components & Template Ecosystem       | [components-templates.md](components-templates.md)           |
+|         37–47 | Theming, Branding & Design Systems    | [theming-branding.md](theming-branding.md)                   |
+|         48–64 | Live Data & Interactive Charts        | [live-data-charts.md](live-data-charts.md)                   |
+|         65–84 | 3D, Motion & Rich Media               | [3d-motion-media.md](3d-motion-media.md)                     |
+|         85–95 | Animation & Transition System         | [animation-transitions.md](animation-transitions.md)         |
+|        96–107 | Prototyping & Interactivity           | [prototyping-interactivity.md](prototyping-interactivity.md) |
+|       108–125 | AI Copilot                            | [ai-copilot.md](ai-copilot.md)                               |
+|       126–141 | Presenter Experience                  | [presenter-experience.md](presenter-experience.md)           |
+|       142–154 | Audience Participation                | [audience-participation.md](audience-participation.md)       |
+|       155–168 | Sharing, Publishing & Deck-as-Website | [sharing-publishing.md](sharing-publishing.md)               |
+|       169–178 | Analytics & Engagement Intelligence   | [analytics.md](analytics.md)                                 |
+|       179–192 | Collaboration & Workflow              | [collaboration-workflow.md](collaboration-workflow.md)       |
+|       193–204 | Enterprise, Governance & Platform     | [enterprise-governance.md](enterprise-governance.md)         |
+|       205–219 | Novel & Frontier Features             | [novel-frontier.md](novel-frontier.md)                       |
+|       221–240 | Agentic & Programmable Interfaces     | [agentic-interfaces.md](agentic-interfaces.md)               |
 
 The source list has no item numbered 220; the documentation preserves that numbering so external references remain stable.
 

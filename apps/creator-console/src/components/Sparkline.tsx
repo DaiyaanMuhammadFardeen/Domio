@@ -13,12 +13,7 @@ export interface SparklineProps {
  * viewBox and a slate stroke default. Renders the resulting SVG
  * elements inline as `<svg>` so callers can drop it into KPI tiles.
  */
-export function Sparkline({
-  values,
-  color = '#475569',
-  width = 80,
-  height = 24,
-}: SparklineProps) {
+export function Sparkline({ values, color = '#475569', width = 80, height = 24 }: SparklineProps) {
   const reactId = useId();
   const semanticId = `spark_${reactId.replace(/:/g, '_')}`;
   const elements: SvgElement[] = sparkline([...values], semanticId, {
@@ -67,13 +62,7 @@ export function Sparkline({
             const pts = el.points ?? [];
             const pointsStr = pts.map((p) => `${p.x},${p.y}`).join(' ');
             return (
-              <polyline
-                key={idx}
-                points={pointsStr}
-                fill="none"
-                stroke={stroke}
-                strokeWidth={sw}
-              />
+              <polyline key={idx} points={pointsStr} fill="none" stroke={stroke} strokeWidth={sw} />
             );
           }
           case 'text':

@@ -20,18 +20,38 @@ function stubAdapter(
     connector_id,
     version,
     auth_kind,
-    async authStart() { return { redirect_url: '', state: '', scope: '' }; },
-    async authCallback() { return { credential_ref: { vault: '', path: '' } }; },
-    async ping() { return { ok: true, latency_ms: 0 }; },
-    async discover() { return { tables: [] }; },
-    async query() { return { rows: [], columns: [], stats: { duration_ms: 0, row_count: 0, source: 'live' } }; },
-    async write() { return { affected_rows: 0, source: 'live' }; },
+    async authStart() {
+      return { redirect_url: '', state: '', scope: '' };
+    },
+    async authCallback() {
+      return { credential_ref: { vault: '', path: '' } };
+    },
+    async ping() {
+      return { ok: true, latency_ms: 0 };
+    },
+    async discover() {
+      return { tables: [] };
+    },
+    async query() {
+      return { rows: [], columns: [], stats: { duration_ms: 0, row_count: 0, source: 'live' } };
+    },
+    async write() {
+      return { affected_rows: 0, source: 'live' };
+    },
   };
 }
 
 const ALL_CONNECTORS: ConnectorId[] = [
-  'google_sheets', 'excel', 'airtable', 'notion',
-  'postgres', 'mysql', 'bigquery', 'snowflake', 'rest', 'graphql',
+  'google_sheets',
+  'excel',
+  'airtable',
+  'notion',
+  'postgres',
+  'mysql',
+  'bigquery',
+  'snowflake',
+  'rest',
+  'graphql',
 ];
 
 // ---------------------------------------------------------------------------

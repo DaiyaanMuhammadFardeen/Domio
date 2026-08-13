@@ -43,14 +43,7 @@ describe('StyleLintPanel', () => {
       scannedElementCount: 0,
       scannedAtMs: 0,
     });
-    render(
-      <StyleLintPanel
-        brandKitId="brand-acme"
-        elements={[]}
-        onFix={vi.fn()}
-        lint={lint}
-      />,
-    );
+    render(<StyleLintPanel brandKitId="brand-acme" elements={[]} onFix={vi.fn()} lint={lint} />);
     await waitFor(() => {
       expect(screen.getByTestId('style-lint-empty')).toBeInTheDocument();
     });
@@ -58,14 +51,7 @@ describe('StyleLintPanel', () => {
 
   it('lists issues from the linter', async () => {
     const lint = vi.fn().mockResolvedValue(reportWithIssues());
-    render(
-      <StyleLintPanel
-        brandKitId="brand-acme"
-        elements={[]}
-        onFix={vi.fn()}
-        lint={lint}
-      />,
-    );
+    render(<StyleLintPanel brandKitId="brand-acme" elements={[]} onFix={vi.fn()} lint={lint} />);
     await waitFor(() => {
       expect(screen.getByTestId('style-lint-row-el-1')).toBeInTheDocument();
     });
@@ -75,14 +61,7 @@ describe('StyleLintPanel', () => {
   it('emits onFix with the right element id + issue', async () => {
     const lint = vi.fn().mockResolvedValue(reportWithIssues());
     const onFix = vi.fn();
-    render(
-      <StyleLintPanel
-        brandKitId="brand-acme"
-        elements={[]}
-        onFix={onFix}
-        lint={lint}
-      />,
-    );
+    render(<StyleLintPanel brandKitId="brand-acme" elements={[]} onFix={onFix} lint={lint} />);
     await waitFor(() => {
       expect(screen.getByTestId('style-lint-fix-el-1')).toBeInTheDocument();
     });
@@ -92,14 +71,7 @@ describe('StyleLintPanel', () => {
 
   it('disables the Fix button after a fix', async () => {
     const lint = vi.fn().mockResolvedValue(reportWithIssues());
-    render(
-      <StyleLintPanel
-        brandKitId="brand-acme"
-        elements={[]}
-        onFix={vi.fn()}
-        lint={lint}
-      />,
-    );
+    render(<StyleLintPanel brandKitId="brand-acme" elements={[]} onFix={vi.fn()} lint={lint} />);
     await waitFor(() => {
       expect(screen.getByTestId('style-lint-fix-el-1')).toBeInTheDocument();
     });
@@ -109,14 +81,7 @@ describe('StyleLintPanel', () => {
 
   it('shows the summary line after a lint run', async () => {
     const lint = vi.fn().mockResolvedValue(reportWithIssues());
-    render(
-      <StyleLintPanel
-        brandKitId="brand-acme"
-        elements={[]}
-        onFix={vi.fn()}
-        lint={lint}
-      />,
-    );
+    render(<StyleLintPanel brandKitId="brand-acme" elements={[]} onFix={vi.fn()} lint={lint} />);
     await waitFor(() => {
       expect(screen.getByTestId('style-lint-summary')).toHaveTextContent('1 issue · 2 scanned');
     });

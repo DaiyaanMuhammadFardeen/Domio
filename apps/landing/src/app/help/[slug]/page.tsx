@@ -40,9 +40,7 @@ function resolveRelated(slugs: ReadonlyArray<string>): ReadonlyArray<KbArticle> 
   return out;
 }
 
-export async function generateMetadata({
-  params,
-}: ArticlePageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const resolved = await params;
   const article = articleBySlug(resolved.slug);
   if (!article) {
@@ -63,9 +61,7 @@ export function generateStaticParams(): Array<ArticleRouteParams> {
   return KB_ARTICLES.map((article) => ({ slug: article.slug }));
 }
 
-export default async function HelpArticlePage({
-  params,
-}: ArticlePageProps): Promise<JSX.Element> {
+export default async function HelpArticlePage({ params }: ArticlePageProps): Promise<JSX.Element> {
   const resolved = await params;
   const article = articleBySlug(resolved.slug);
   if (!article) {

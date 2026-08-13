@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  listAuditEvents,
-  getAuditEvent,
-  exportAuditEventsCSV,
-} from './audit-service';
+import { listAuditEvents, getAuditEvent, exportAuditEventsCSV } from './audit-service';
 import type { AuditFilter } from './types';
 
 describe('audit-service', () => {
@@ -78,7 +74,9 @@ describe('audit-service', () => {
       target_type: 'plugin',
     };
     const list = await listAuditEvents(filter);
-    expect(list.items.every((e) => e.actor.id === 'u-bob' && e.target_type === 'plugin')).toBe(true);
+    expect(list.items.every((e) => e.actor.id === 'u-bob' && e.target_type === 'plugin')).toBe(
+      true,
+    );
   });
 
   it('returns empty list when filters exclude everything', async () => {

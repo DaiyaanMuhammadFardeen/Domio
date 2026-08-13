@@ -65,7 +65,9 @@ export default async function AlertsPage() {
                 <span>
                   {r.metric} {r.comparator} {r.threshold}
                 </span>
-                <span className="text-xs text-slate-500">{r.channel} · {r.target}</span>
+                <span className="text-xs text-slate-500">
+                  {r.channel} · {r.target}
+                </span>
               </li>
             ))}
           </ul>

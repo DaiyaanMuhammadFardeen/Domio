@@ -46,28 +46,20 @@ export function CreatorCard({ creator }: CreatorCardProps) {
 
       <div className="grid grid-cols-3 gap-2 border-t border-border pt-3">
         <div>
-          <p className="font-display text-sm font-semibold text-fg">
-            {creator.listing_count}
-          </p>
-          <p className="text-[10px] uppercase tracking-wider text-muted">
-            Listings
-          </p>
+          <p className="font-display text-sm font-semibold text-fg">{creator.listing_count}</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted">Listings</p>
         </div>
         <div>
           <p className="font-display text-sm font-semibold text-fg">
             {creator.total_sales.toLocaleString('en-US')}
           </p>
-          <p className="text-[10px] uppercase tracking-wider text-muted">
-            Sales
-          </p>
+          <p className="text-[10px] uppercase tracking-wider text-muted">Sales</p>
         </div>
         <div>
           <p className="font-display text-sm font-semibold text-gold">
             {creator.avg_rating.toFixed(1)}★
           </p>
-          <p className="text-[10px] uppercase tracking-wider text-muted">
-            Rating
-          </p>
+          <p className="text-[10px] uppercase tracking-wider text-muted">Rating</p>
         </div>
       </div>
     </Link>

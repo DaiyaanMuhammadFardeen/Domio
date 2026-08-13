@@ -7,13 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import type {
-  TokenValue,
-  TokenRef,
-  TokenAlias,
-  DeckTokenState,
-  SlideElementRef,
-} from './types.js';
+import type { TokenValue, TokenRef, TokenAlias, DeckTokenState, SlideElementRef } from './types.js';
 import { resolve, resolveWithCache, invalidateCache } from './resolve.js';
 import { resolveMany } from './batch.js';
 import { findReferrers } from './find-referrers.js';
@@ -59,12 +53,15 @@ function makeDeckState(overrides?: Partial<DeckTokenState>): DeckTokenState {
     perSlideOverrides: overrides?.perSlideOverrides ?? new Map(),
     sectionOverrides: overrides?.sectionOverrides ?? new Map(),
     deckTheme: overrides?.deckTheme ?? new Map([['color.brand.primary', COLOR_PRIMARY]]),
-    brandContextTheme: overrides?.brandContextTheme ?? new Map([['color.brand.secondary', COLOR_SECONDARY]]),
+    brandContextTheme:
+      overrides?.brandContextTheme ?? new Map([['color.brand.secondary', COLOR_SECONDARY]]),
     orgDefaultTheme: overrides?.orgDefaultTheme ?? new Map([['color.brand.org', COLOR_ORG]]),
     aliasEdges: overrides?.aliasEdges ?? [],
     systemAliases: overrides?.systemAliases ?? { prefersColorScheme: 'light', forcedColors: false },
-    platformFallbackTheme: overrides?.platformFallbackTheme ?? new Map([['color.platform.fallback', COLOR_PLATFORM]]),
-    companionFallbackTheme: overrides?.companionFallbackTheme ?? new Map([['color.companion', COLOR_COMPANION]]),
+    platformFallbackTheme:
+      overrides?.platformFallbackTheme ?? new Map([['color.platform.fallback', COLOR_PLATFORM]]),
+    companionFallbackTheme:
+      overrides?.companionFallbackTheme ?? new Map([['color.companion', COLOR_COMPANION]]),
     evaluateCondition: overrides?.evaluateCondition ?? (() => false),
     slideElements: overrides?.slideElements ?? new Map(),
   };
@@ -76,11 +73,12 @@ function makeDeckState(overrides?: Partial<DeckTokenState>): DeckTokenState {
 
 describe('resolve — per-slide override', () => {
   it('returns per-slide override when slide scope and override exists', () => {
-    const overrideVal: TokenValue = { type: 'color', value: { space: 'srgb', channels: [1, 1, 0], alpha: 1 } };
+    const overrideVal: TokenValue = {
+      type: 'color',
+      value: { space: 'srgb', channels: [1, 1, 0], alpha: 1 },
+    };
     const deckState = makeDeckState({
-      perSlideOverrides: new Map([
-        ['slide-1', new Map([['color.brand.primary', overrideVal]])],
-      ]),
+      perSlideOverrides: new Map([['slide-1', new Map([['color.brand.primary', overrideVal]])]]),
     });
     const result = resolve('color.brand.primary', { kind: 'slide', slideId: 'slide-1' }, deckState);
     expect(result.value).toEqual(overrideVal);
@@ -90,7 +88,11 @@ describe('resolve — per-slide override', () => {
 
   it('falls through to deck theme when no per-slide override exists', () => {
     const deckState = makeDeckState();
-    const result = resolve('color.brand.primary', { kind: 'slide', slideId: 'slide-99' }, deckState);
+    const result = resolve(
+      'color.brand.primary',
+      { kind: 'slide', slideId: 'slide-99' },
+      deckState,
+    );
     expect(result.value).toEqual(COLOR_PRIMARY);
     expect(result.source).toBe('theme');
   });
@@ -141,7 +143,9 @@ describe('resolve — org default theme', () => {
 
 describe('resolve — alias chain', () => {
   it('resolves a single alias to its target value', () => {
-    const aliasEdges: TokenAlias[] = [{ aliasTokenId: 'color.alias', targetTokenId: 'color.brand.primary' }];
+    const aliasEdges: TokenAlias[] = [
+      { aliasTokenId: 'color.alias', targetTokenId: 'color.brand.primary' },
+    ];
     const deckState = makeDeckState({ aliasEdges });
     const result = resolve('color.alias', { kind: 'deck' }, deckState);
     expect(result.value).toEqual(COLOR_PRIMARY);
@@ -309,7 +313,10 @@ describe('resolve — state-conditional override', () => {
     };
     const deckState = makeDeckState({
       perSlideOverrides: new Map([
-        ['slide-1', new Map([['color.brand.primary', overrideWithCondition as unknown as TokenValue]])],
+        [
+          'slide-1',
+          new Map([['color.brand.primary', overrideWithCondition as unknown as TokenValue]]),
+        ],
       ]),
       evaluateCondition: condTrue,
     });
@@ -327,7 +334,10 @@ describe('resolve — state-conditional override', () => {
     };
     const deckState = makeDeckState({
       perSlideOverrides: new Map([
-        ['slide-1', new Map([['color.brand.primary', overrideWithCondition as unknown as TokenValue]])],
+        [
+          'slide-1',
+          new Map([['color.brand.primary', overrideWithCondition as unknown as TokenValue]]),
+        ],
       ]),
       evaluateCondition: condFalse,
     });
@@ -344,13 +354,18 @@ describe('resolve — state-conditional override', () => {
 
 describe('resolve — section override', () => {
   it('returns section override when section scope and override exists', () => {
-    const overrideVal: TokenValue = { type: 'color', value: { space: 'srgb', channels: [0.1, 0.2, 0.3], alpha: 1 } };
+    const overrideVal: TokenValue = {
+      type: 'color',
+      value: { space: 'srgb', channels: [0.1, 0.2, 0.3], alpha: 1 },
+    };
     const deckState = makeDeckState({
-      sectionOverrides: new Map([
-        ['section-1', new Map([['color.brand.primary', overrideVal]])],
-      ]),
+      sectionOverrides: new Map([['section-1', new Map([['color.brand.primary', overrideVal]])]]),
     });
-    const result = resolve('color.brand.primary', { kind: 'section', sectionId: 'section-1' }, deckState);
+    const result = resolve(
+      'color.brand.primary',
+      { kind: 'section', sectionId: 'section-1' },
+      deckState,
+    );
     expect(result.value).toEqual(overrideVal);
     expect(result.source).toBe('override');
   });
@@ -377,11 +392,7 @@ describe('resolveMany', () => {
 
   it('returns empty warnings when all tokens resolve cleanly', () => {
     const deckState = makeDeckState();
-    const result = resolveMany(
-      ['color.brand.primary'],
-      { kind: 'deck' },
-      deckState,
-    );
+    const result = resolveMany(['color.brand.primary'], { kind: 'deck' }, deckState);
     expect(result.count).toBe(1);
     expect(result.warnings.length).toBe(0);
   });
@@ -394,7 +405,10 @@ describe('resolveMany', () => {
 describe('findReferrers', () => {
   it('counts slide element references', () => {
     const slideElements = new Map<string, readonly SlideElementRef[]>([
-      ['slide-1', [{ elementId: 'el-1', tokenRefs: ['color.brand.primary', 'color.brand.secondary'] }]],
+      [
+        'slide-1',
+        [{ elementId: 'el-1', tokenRefs: ['color.brand.primary', 'color.brand.secondary'] }],
+      ],
       ['slide-2', [{ elementId: 'el-2', tokenRefs: ['color.brand.primary'] }]],
       ['slide-3', [{ elementId: 'el-3', tokenRefs: ['color.brand.secondary'] }]],
     ]);
@@ -435,7 +449,9 @@ describe('findReferrers', () => {
   it('limits sampleReferrers to 10', () => {
     const slideElements = new Map<string, readonly SlideElementRef[]>();
     for (let i = 0; i < 15; i++) {
-      slideElements.set(`slide-${i}`, [{ elementId: `el-${i}`, tokenRefs: ['color.brand.primary'] }]);
+      slideElements.set(`slide-${i}`, [
+        { elementId: `el-${i}`, tokenRefs: ['color.brand.primary'] },
+      ]);
     }
     const deckState = makeDeckState({ slideElements });
     const result = findReferrers('color.brand.primary', deckState);
@@ -477,11 +493,12 @@ describe('computeInheritanceChain', () => {
   });
 
   it('shows per-slide override value when override exists', () => {
-    const overrideVal: TokenValue = { type: 'color', value: { space: 'srgb', channels: [1, 1, 1], alpha: 1 } };
+    const overrideVal: TokenValue = {
+      type: 'color',
+      value: { space: 'srgb', channels: [1, 1, 1], alpha: 1 },
+    };
     const deckState = makeDeckState({
-      perSlideOverrides: new Map([
-        ['slide-1', new Map([['color.brand.primary', overrideVal]])],
-      ]),
+      perSlideOverrides: new Map([['slide-1', new Map([['color.brand.primary', overrideVal]])]]),
     });
     const chain = computeInheritanceChain('color.brand.primary', deckState, 'slide-1');
     const slideEntry = chain.find((e) => e.level === 'per-slide override');
@@ -502,7 +519,7 @@ describe('computeThemeDiff', () => {
     ]);
     const themeB = new Map<TokenRef, TokenValue>([
       ['color.a', COLOR_PRIMARY], // unchanged
-      ['color.b', COLOR_BRAND],   // changed
+      ['color.b', COLOR_BRAND], // changed
     ]);
     const diff = computeThemeDiff(themeA, themeB);
     expect(diff.length).toBe(2);

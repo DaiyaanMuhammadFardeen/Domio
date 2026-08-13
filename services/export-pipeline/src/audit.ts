@@ -24,9 +24,7 @@ export class InMemoryExportAuditRecorder implements ExportAuditRecorder {
   private events: ExportAuditEvent[] = [];
   private eventCounter = 0;
 
-  constructor(
-    private readonly clock: () => Date = () => new Date(),
-  ) {}
+  constructor(private readonly clock: () => Date = () => new Date()) {}
 
   async record(event: Omit<ExportAuditEvent, 'eventId' | 'createdAt'>): Promise<void> {
     this.eventCounter++;

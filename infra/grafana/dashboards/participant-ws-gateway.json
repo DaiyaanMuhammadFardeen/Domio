@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-1",
-    "domio",
-    "participant-ws-gateway"
-  ],
+  "tags": ["tier-1", "domio", "participant-ws-gateway"],
   "panels": [
     {
       "id": 1,

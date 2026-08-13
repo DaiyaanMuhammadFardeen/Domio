@@ -11,12 +11,7 @@
  * sequence monotonicity.
  */
 
-import type {
-  EdgeBus,
-  EdgeMessage,
-  EdgeSubscribeHandle,
-  EdgeSubscribeOptions,
-} from './bus.js';
+import type { EdgeBus, EdgeMessage, EdgeSubscribeHandle, EdgeSubscribeOptions } from './bus.js';
 import { topicFor } from './topics.js';
 
 interface Subscriber {

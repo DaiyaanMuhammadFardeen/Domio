@@ -20,10 +20,7 @@ export interface ExportJob {
 
 export const BOOTSTRAP_EXPORT_JOBS: ReadonlyArray<ExportJob> = [];
 
-export async function queueExport(
-  deckId: string,
-  format: ExportFormat,
-): Promise<ExportJob> {
+export async function queueExport(deckId: string, format: ExportFormat): Promise<ExportJob> {
   return {
     id: `export-${deckId}-${format}-${Date.now()}`,
     deckId,

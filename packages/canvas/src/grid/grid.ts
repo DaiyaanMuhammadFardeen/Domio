@@ -29,6 +29,9 @@ export function snapToGrid(value: number, spec: GridSpec = DEFAULT_GRID): number
   return value;
 }
 
-export function columnPosition(column: number, spec: GridSpec & { columns: number; size: number }): number {
+export function columnPosition(
+  column: number,
+  spec: GridSpec & { columns: number; size: number },
+): number {
   return Math.floor(column * (spec.size * 2));
 }

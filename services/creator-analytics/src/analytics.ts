@@ -5,12 +5,7 @@
  * and validate period strings.
  */
 
-import type {
-  CreatorAnalytics,
-  GeoCount,
-  RevenueEventRow,
-  PaymentIntentRow,
-} from './types.js';
+import type { CreatorAnalytics, GeoCount, RevenueEventRow, PaymentIntentRow } from './types.js';
 import { InvalidPeriodError } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -71,16 +66,14 @@ export function computeAnalyticsBody(
   }
 
   // Conversion rate: how many payments succeeded vs installs
-  const successfulPayments = input.payments.filter(p => p.status === 'succeeded').length;
+  const successfulPayments = input.payments.filter((p) => p.status === 'succeeded').length;
   const conversion_rate = installs > 0 ? successfulPayments / installs : 0;
 
   // Refund rate
   const refund_rate = installs > 0 ? input.refunds / installs : 0;
 
   // Top geos: sorted descending by count, take top 5
-  const top_geos = [...input.geos]
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
+  const top_geos = [...input.geos].sort((a, b) => b.count - a.count).slice(0, 5);
 
   return {
     creator_id: creatorId,

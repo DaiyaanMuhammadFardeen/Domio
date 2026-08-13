@@ -31,7 +31,11 @@ export function ListingGridSkeleton() {
 
 export function ListingDetailSkeleton() {
   return (
-    <div className="mx-auto max-w-5xl space-y-8 px-4 py-12" role="status" aria-label="Loading listing details">
+    <div
+      className="mx-auto max-w-5xl space-y-8 px-4 py-12"
+      role="status"
+      aria-label="Loading listing details"
+    >
       <div className="grid gap-8 lg:grid-cols-[1fr,360px]">
         <div className="aspect-video w-full skeleton rounded-2xl" />
         <div className="space-y-4">

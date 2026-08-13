@@ -27,5 +27,8 @@ they can be replayed identically across presenters.
 ```ts
 import { AnnotationService } from '@domio/annotation-engine';
 const svc = new AnnotationService({ store, audit, idempotency });
-await svc.commit({ session_id, slide_id, kind: 'pen', geometry, drawn_by }, ctx);
+await svc.commit(
+  { session_id, slide_id, kind: 'pen', geometry, drawn_by },
+  ctx,
+);
 ```

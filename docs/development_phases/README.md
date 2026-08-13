@@ -10,33 +10,33 @@
 
 ## Phase index
 
-| # | Phase | Critical path? | Parallelizable? | Domain docs depended on | Feature ranges |
-|---:|---|---|---|---|---|
-| 00 | Repository, contracts, dev environment | yes | no (foundation) | `04`, `05`, `06` | cross-cutting |
-| 01 | Observability, CI/CD, infra baseline | yes | partial (with 00) | `06`, `07`, `08` | cross-cutting |
-| 02 | Deck schema & scene-graph foundation | yes | no (foundation) | `05`, `06`, `editor-canvas` | #1, #22 |
-| 03 | Canvas editor — minimum viable editor | yes | no (critical path) | `editor-canvas` | #2–#16, #18, #22 |
-| 04 | Real-time collaboration & CRDT sync | yes | no (critical path) | `editor-canvas`, `04` | #17, #19, #21 |
-| 05 | Persistence, versioning, branches | yes | no (critical path) | `editor-canvas`, `05` | #19, #20 |
-| 06 | Components & templates ecosystem | deepening | **yes (Stream A)** | `components-templates` | #23–#36 |
-| 07 | Theming, brand & design tokens | deepening | **yes (Stream A)** | `theming-branding` | #37–#47 |
-| 08 | Live data & interactive charts | deepening | **yes (Stream B)** | `live-data-charts` | #48–#64 |
-| 09 | Animation & transition system | deepening | **yes (Stream B)** | `animation-transitions` | #85–#95 |
-| 10 | Prototyping & interactivity | deepening | **yes (Stream C)** | `prototyping-interactivity` | #96–#107 |
-| 11 | 3D, motion & rich media | deepening | **yes (Stream C)** | `3d-motion-media` | #65–#84 |
-| 12 | AI copilot foundation | deepening | **yes (Stream D)** | `ai-copilot` | #108–#125 |
-| 13 | Agentic & programmable interfaces (MCP, deck-as-code) | deepening | **yes (Stream D)** | `agentic-interfaces` | #221–#240 |
-| 14 | Sharing, publishing & deck-as-website | surface | **yes (Stream E)** | `sharing-publishing` | #155–#168 |
-| 15 | Presenter experience | surface | **yes (Stream E)** | `presenter-experience` | #126–#141 |
-| 16 | Audience participation | surface | **yes (Stream E)** | `audience-participation` | #142–#154 |
-| 17 | Analytics & engagement intelligence | surface | **yes (Stream F)** | `analytics` | #169–#178 |
-| 18 | Collaboration & workflow | surface | **yes (Stream F)** | `collaboration-workflow` | #179–#192 |
-| 19 | Marketplace & creator economy | cross-cutting | **yes (Stream A)** | `components-templates`, `theming-branding`, `enterprise-governance` | parts of #28, #41 |
-| 20 | Security, governance, enterprise | cross-cutting | continuous | `07`, `enterprise-governance`, `11` | #193–#204 |
-| 20.5 | Beta security hardening (app-only subset of P20) | beta-launch gate | yes (gates public beta) | `07` | #193a–c, #195a, #196a |
-| 21 | Novel & frontier features | frontier | late | `novel-frontier` | #205–#219 |
-| 22-beta | Beta → Public-beta hardening (P21-independent subset of P22) | public-beta gate | yes (gates public-beta) | `07`, `08`, `09`, `11` | #1–#204 + infra |
-| 22 | Polish, scale, hardening, GA | frontier | last | all | all gaps |
+|       # | Phase                                                        | Critical path?   | Parallelizable?         | Domain docs depended on                                             | Feature ranges        |
+| ------: | ------------------------------------------------------------ | ---------------- | ----------------------- | ------------------------------------------------------------------- | --------------------- |
+|      00 | Repository, contracts, dev environment                       | yes              | no (foundation)         | `04`, `05`, `06`                                                    | cross-cutting         |
+|      01 | Observability, CI/CD, infra baseline                         | yes              | partial (with 00)       | `06`, `07`, `08`                                                    | cross-cutting         |
+|      02 | Deck schema & scene-graph foundation                         | yes              | no (foundation)         | `05`, `06`, `editor-canvas`                                         | #1, #22               |
+|      03 | Canvas editor — minimum viable editor                        | yes              | no (critical path)      | `editor-canvas`                                                     | #2–#16, #18, #22      |
+|      04 | Real-time collaboration & CRDT sync                          | yes              | no (critical path)      | `editor-canvas`, `04`                                               | #17, #19, #21         |
+|      05 | Persistence, versioning, branches                            | yes              | no (critical path)      | `editor-canvas`, `05`                                               | #19, #20              |
+|      06 | Components & templates ecosystem                             | deepening        | **yes (Stream A)**      | `components-templates`                                              | #23–#36               |
+|      07 | Theming, brand & design tokens                               | deepening        | **yes (Stream A)**      | `theming-branding`                                                  | #37–#47               |
+|      08 | Live data & interactive charts                               | deepening        | **yes (Stream B)**      | `live-data-charts`                                                  | #48–#64               |
+|      09 | Animation & transition system                                | deepening        | **yes (Stream B)**      | `animation-transitions`                                             | #85–#95               |
+|      10 | Prototyping & interactivity                                  | deepening        | **yes (Stream C)**      | `prototyping-interactivity`                                         | #96–#107              |
+|      11 | 3D, motion & rich media                                      | deepening        | **yes (Stream C)**      | `3d-motion-media`                                                   | #65–#84               |
+|      12 | AI copilot foundation                                        | deepening        | **yes (Stream D)**      | `ai-copilot`                                                        | #108–#125             |
+|      13 | Agentic & programmable interfaces (MCP, deck-as-code)        | deepening        | **yes (Stream D)**      | `agentic-interfaces`                                                | #221–#240             |
+|      14 | Sharing, publishing & deck-as-website                        | surface          | **yes (Stream E)**      | `sharing-publishing`                                                | #155–#168             |
+|      15 | Presenter experience                                         | surface          | **yes (Stream E)**      | `presenter-experience`                                              | #126–#141             |
+|      16 | Audience participation                                       | surface          | **yes (Stream E)**      | `audience-participation`                                            | #142–#154             |
+|      17 | Analytics & engagement intelligence                          | surface          | **yes (Stream F)**      | `analytics`                                                         | #169–#178             |
+|      18 | Collaboration & workflow                                     | surface          | **yes (Stream F)**      | `collaboration-workflow`                                            | #179–#192             |
+|      19 | Marketplace & creator economy                                | cross-cutting    | **yes (Stream A)**      | `components-templates`, `theming-branding`, `enterprise-governance` | parts of #28, #41     |
+|      20 | Security, governance, enterprise                             | cross-cutting    | continuous              | `07`, `enterprise-governance`, `11`                                 | #193–#204             |
+|    20.5 | Beta security hardening (app-only subset of P20)             | beta-launch gate | yes (gates public beta) | `07`                                                                | #193a–c, #195a, #196a |
+|      21 | Novel & frontier features                                    | frontier         | late                    | `novel-frontier`                                                    | #205–#219             |
+| 22-beta | Beta → Public-beta hardening (P21-independent subset of P22) | public-beta gate | yes (gates public-beta) | `07`, `08`, `09`, `11`                                              | #1–#204 + infra       |
+|      22 | Polish, scale, hardening, GA                                 | frontier         | last                    | all                                                                 | all gaps              |
 
 The full dependency graph is in `phase-graph.md`.
 

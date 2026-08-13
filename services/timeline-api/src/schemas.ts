@@ -39,12 +39,16 @@ function validateType(value: unknown, expected: string): string | null {
     return Array.isArray(value) ? null : `Expected array, got ${typeOf(value)}`;
   }
   if (expected === 'object') {
-    return (typeof value === 'object' && value !== null && !Array.isArray(value)) ? null : `Expected object, got ${typeOf(value)}`;
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
+      ? null
+      : `Expected object, got ${typeOf(value)}`;
   }
   if (expected === 'integer') {
-    return (typeof value === 'number' && Number.isInteger(value)) ? null : `Expected integer, got ${typeOf(value)}`;
+    return typeof value === 'number' && Number.isInteger(value)
+      ? null
+      : `Expected integer, got ${typeOf(value)}`;
   }
-  return (typeof value === expected) ? null : `Expected ${expected}, got ${typeOf(value)}`;
+  return typeof value === expected ? null : `Expected ${expected}, got ${typeOf(value)}`;
 }
 
 function validateSchema(value: unknown, schema: SchemaDef, path: string): ValidationError[] {
@@ -61,7 +65,11 @@ function validateSchema(value: unknown, schema: SchemaDef, path: string): Valida
 
   // Enum
   if (schema.enum && !schema.enum.includes(value as never)) {
-    errors.push({ path, message: `Value must be one of: ${schema.enum.join(', ')}`, code: 'INVALID_ENUM' });
+    errors.push({
+      path,
+      message: `Value must be one of: ${schema.enum.join(', ')}`,
+      code: 'INVALID_ENUM',
+    });
   }
 
   // Number constraints
@@ -77,20 +85,36 @@ function validateSchema(value: unknown, schema: SchemaDef, path: string): Valida
   // String constraints
   if (typeof value === 'string') {
     if (schema.minLength !== undefined && value.length < schema.minLength) {
-      errors.push({ path, message: `String length must be >= ${schema.minLength}`, code: 'TOO_SHORT' });
+      errors.push({
+        path,
+        message: `String length must be >= ${schema.minLength}`,
+        code: 'TOO_SHORT',
+      });
     }
     if (schema.maxLength !== undefined && value.length > schema.maxLength) {
-      errors.push({ path, message: `String length must be <= ${schema.maxLength}`, code: 'TOO_LONG' });
+      errors.push({
+        path,
+        message: `String length must be <= ${schema.maxLength}`,
+        code: 'TOO_LONG',
+      });
     }
     if (schema.pattern !== undefined && !new RegExp(schema.pattern).test(value)) {
-      errors.push({ path, message: `String must match pattern: ${schema.pattern}`, code: 'PATTERN_MISMATCH' });
+      errors.push({
+        path,
+        message: `String must match pattern: ${schema.pattern}`,
+        code: 'PATTERN_MISMATCH',
+      });
     }
   }
 
   // Array constraints
   if (Array.isArray(value)) {
     if (schema.minItems !== undefined && value.length < schema.minItems) {
-      errors.push({ path, message: `Array must have >= ${schema.minItems} items`, code: 'TOO_FEW_ITEMS' });
+      errors.push({
+        path,
+        message: `Array must have >= ${schema.minItems} items`,
+        code: 'TOO_FEW_ITEMS',
+      });
     }
     if (schema.items) {
       for (let i = 0; i < value.length; i++) {
@@ -105,7 +129,11 @@ function validateSchema(value: unknown, schema: SchemaDef, path: string): Valida
     if (schema.required) {
       for (const key of schema.required) {
         if (!(key in obj)) {
-          errors.push({ path: `${path}.${key}`, message: `Required property "${key}" is missing`, code: 'REQUIRED' });
+          errors.push({
+            path: `${path}.${key}`,
+            message: `Required property "${key}" is missing`,
+            code: 'REQUIRED',
+          });
         }
       }
     }
@@ -120,9 +148,15 @@ function validateSchema(value: unknown, schema: SchemaDef, path: string): Valida
 
   // OneOf
   if (schema.oneOf) {
-    const matchCount = schema.oneOf.filter(sub => validateSchema(value, sub, path).length === 0).length;
+    const matchCount = schema.oneOf.filter(
+      (sub) => validateSchema(value, sub, path).length === 0,
+    ).length;
     if (matchCount !== 1) {
-      errors.push({ path, message: 'Value must match exactly one of the given schemas', code: 'ONE_OF_MISMATCH' });
+      errors.push({
+        path,
+        message: 'Value must match exactly one of the given schemas',
+        code: 'ONE_OF_MISMATCH',
+      });
     }
   }
 
@@ -176,7 +210,10 @@ const triggerSchema: SchemaDef = {
   type: 'object',
   required: ['kind'],
   properties: {
-    kind: { type: 'string', enum: ['on_click', 'on_enter', 'on_hover', 'on_data_change', 'on_timer'] },
+    kind: {
+      type: 'string',
+      enum: ['on_click', 'on_enter', 'on_hover', 'on_data_change', 'on_timer'],
+    },
     sourceId: { type: 'string' },
     fieldPath: { type: 'string' },
     offsetMs: { type: 'number' },
@@ -251,7 +288,10 @@ export const createTriggerSchema: SchemaDef = {
   type: 'object',
   required: ['kind'],
   properties: {
-    kind: { type: 'string', enum: ['on_click', 'on_enter', 'on_hover', 'on_data_change', 'on_timer'] },
+    kind: {
+      type: 'string',
+      enum: ['on_click', 'on_enter', 'on_hover', 'on_data_change', 'on_timer'],
+    },
     sourceId: { type: 'string' },
     fieldPath: { type: 'string' },
     offsetMs: { type: 'number' },
@@ -360,7 +400,10 @@ export const createAnimationPresetSchema: SchemaDef = {
           items: {
             type: 'object',
             properties: {
-              kind: { type: 'string', enum: ['on_click', 'on_enter', 'on_hover', 'on_data_change', 'on_timer'] },
+              kind: {
+                type: 'string',
+                enum: ['on_click', 'on_enter', 'on_hover', 'on_data_change', 'on_timer'],
+              },
               offsetMs: { type: 'number' },
             },
           },
@@ -472,7 +515,10 @@ export interface EasingValidationError {
  */
 export function validateEasingCurveRules(
   type: string,
-  params: { bezier?: readonly number[]; spring?: { mass: number; stiffness: number; damping: number } },
+  params: {
+    bezier?: readonly number[];
+    spring?: { mass: number; stiffness: number; damping: number };
+  },
 ): EasingValidationError[] {
   const errors: EasingValidationError[] = [];
 

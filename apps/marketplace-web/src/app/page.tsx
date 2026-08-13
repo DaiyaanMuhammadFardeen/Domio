@@ -71,23 +71,11 @@ export default function HomePage() {
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8" data-testid="home-page">
       <Hero />
 
-      <Section
-        id="home-section-featured"
-        title={t('market.home.featured')}
-        items={featured}
-      />
+      <Section id="home-section-featured" title={t('market.home.featured')} items={featured} />
 
-      <Section
-        id="home-section-top-rated"
-        title={t('market.home.topRated')}
-        items={topRated}
-      />
+      <Section id="home-section-top-rated" title={t('market.home.topRated')} items={topRated} />
 
-      <Section
-        id="home-section-recent"
-        title={t('market.home.recentlyAdded')}
-        items={recent}
-      />
+      <Section id="home-section-recent" title={t('market.home.recentlyAdded')} items={recent} />
 
       <section className="mt-12" data-testid="home-section-category">
         <h2 className="mb-6 font-display text-2xl font-bold text-fg">
@@ -95,11 +83,7 @@ export default function HomePage() {
         </h2>
         <div className="space-y-12">
           {categories.map(({ kind, items }) => (
-            <div
-              key={kind}
-              data-testid={`home-section-category-${kind}`}
-              className="space-y-4"
-            >
+            <div key={kind} data-testid={`home-section-category-${kind}`} className="space-y-4">
               <h3 className="font-display text-base font-semibold uppercase tracking-wider text-muted">
                 {KIND_LABEL_KEY[kind] ? t('market.home.featured') : kind}
                 {' · '}
@@ -125,9 +109,7 @@ function Hero() {
       <h1 className="font-display text-3xl font-bold tracking-tight text-fg text-balance sm:text-4xl lg:text-5xl">
         {t('hero.title')}
       </h1>
-      <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg">
-        {t('hero.subtitle')}
-      </p>
+      <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg">{t('hero.subtitle')}</p>
     </section>
   );
 }

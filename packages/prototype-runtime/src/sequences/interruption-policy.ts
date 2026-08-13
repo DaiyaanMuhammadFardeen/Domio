@@ -55,12 +55,16 @@ export function applyInterruption(
 }
 
 /** Drain the next interruption off the queue (or null). */
-export function dequeueInterruption(
-  state: InterruptionPolicyState,
-): { state: InterruptionPolicyState; next: Interruption | null } {
+export function dequeueInterruption(state: InterruptionPolicyState): {
+  state: InterruptionPolicyState;
+  next: Interruption | null;
+} {
   if (state.queue.length === 0) return { state, next: null };
   const next = state.queue[0]!;
-  return { state: { ...state, queue: state.queue.slice(1), processedCount: state.processedCount + 1 }, next };
+  return {
+    state: { ...state, queue: state.queue.slice(1), processedCount: state.processedCount + 1 },
+    next,
+  };
 }
 
 export function initialInterruptionState(policy: InterruptionPolicyName): InterruptionPolicyState {

@@ -14,7 +14,12 @@ export function middleware(request: NextRequest) {
   const isProd = process.env['NODE_ENV'] === 'production';
   const connectAllowlist = isProd
     ? ['https://*.domio.example.com', 'wss://*.domio.example.com']
-    : ['https://*.domio.example.com', 'wss://*.domio.example.com', 'ws://localhost:*', 'wss://localhost:*'];
+    : [
+        'https://*.domio.example.com',
+        'wss://*.domio.example.com',
+        'ws://localhost:*',
+        'wss://localhost:*',
+      ];
 
   const cspHeader = buildCsp({
     https: isProd,

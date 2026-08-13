@@ -188,7 +188,8 @@ export function GazeCalibration({
             width: 32,
             height: 32,
             borderRadius: '50%',
-            background: 'radial-gradient(circle, var(--gaze-dot-inner) 0%, var(--gaze-dot-outer) 70%, transparent 100%)',
+            background:
+              'radial-gradient(circle, var(--gaze-dot-inner) 0%, var(--gaze-dot-outer) 70%, transparent 100%)',
             boxShadow: '0 0 24px 4px rgba(255,80,80,0.4)',
             pointerEvents: 'none',
           }}

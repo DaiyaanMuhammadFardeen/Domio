@@ -9,26 +9,26 @@ working in lock-step.
 
 ## 1. Environment matrix
 
-| Concern | dev | staging | prod |
-|---|---|---|---|
-| Cluster | `domio-dev` | `domio-staging` | `domio-prod` |
-| Region | southeastasia | southeastasia | southeastasia |
-| K8s version | 1.30.x | 1.30.x | 1.30.x |
-| Node min/max | 1 / 3 | 3 / 6 | 5 / 20 |
-| Postgres HA | no | yes (1 replica) | yes (1 replica) |
-| Postgres storage | 64 GiB | 256 GiB | 1024 GiB |
-| Postgres retention | 7 days | 14 days | 30 days |
-| NATS replicas | 1 | 3 | 5 |
-| MinIO replicas | 2 | 4 | 4 |
-| MinIO storage/node | 200 GiB | 500 GiB | 2 TiB |
-| Valkey mode | standalone | sentinel | cluster (6 shards) |
-| OTel collector replicas | 1 | 2 | 3 |
-| Prometheus retention | 7 d | 30 d | 90 d |
-| Loki/Tempo retention | 7 d | 30 d | 60 d |
-| Vault mode | dev | unsealed | external (P20) |
-| GitOps sync | automated | manual | manual |
-| External Secrets | yes | yes | yes |
-| Image registry | ghcr.io/domio | ghcr.io/domio | ghcr.io/domio |
+| Concern                 | dev           | staging         | prod               |
+| ----------------------- | ------------- | --------------- | ------------------ |
+| Cluster                 | `domio-dev`   | `domio-staging` | `domio-prod`       |
+| Region                  | southeastasia | southeastasia   | southeastasia      |
+| K8s version             | 1.30.x        | 1.30.x          | 1.30.x             |
+| Node min/max            | 1 / 3         | 3 / 6           | 5 / 20             |
+| Postgres HA             | no            | yes (1 replica) | yes (1 replica)    |
+| Postgres storage        | 64 GiB        | 256 GiB         | 1024 GiB           |
+| Postgres retention      | 7 days        | 14 days         | 30 days            |
+| NATS replicas           | 1             | 3               | 5                  |
+| MinIO replicas          | 2             | 4               | 4                  |
+| MinIO storage/node      | 200 GiB       | 500 GiB         | 2 TiB              |
+| Valkey mode             | standalone    | sentinel        | cluster (6 shards) |
+| OTel collector replicas | 1             | 2               | 3                  |
+| Prometheus retention    | 7 d           | 30 d            | 90 d               |
+| Loki/Tempo retention    | 7 d           | 30 d            | 60 d               |
+| Vault mode              | dev           | unsealed        | external (P20)     |
+| GitOps sync             | automated     | manual          | manual             |
+| External Secrets        | yes           | yes             | yes                |
+| Image registry          | ghcr.io/domio | ghcr.io/domio   | ghcr.io/domio      |
 
 ## 2. What is the same across environments
 
@@ -93,14 +93,14 @@ The CI pipeline (Stream A) wires these as required-to-merge:
 
 ## 8. Owner matrix
 
-| Domain | Primary | Secondary |
-|---|---|---|
-| Terraform | DevOps/SRE Lead | Platform Foundations |
-| Helm | DevOps/SRE Lead | Platform Foundations |
-| ArgoCD | DevOps/SRE Lead | Security Lead |
-| Vault / secrets | Security Lead | DevOps/SRE Lead |
-| Observability | DevOps/SRE Lead | SRE on-call |
-| On-call | SRE Lead | Security Lead |
+| Domain          | Primary         | Secondary            |
+| --------------- | --------------- | -------------------- |
+| Terraform       | DevOps/SRE Lead | Platform Foundations |
+| Helm            | DevOps/SRE Lead | Platform Foundations |
+| ArgoCD          | DevOps/SRE Lead | Security Lead        |
+| Vault / secrets | Security Lead   | DevOps/SRE Lead      |
+| Observability   | DevOps/SRE Lead | SRE on-call          |
+| On-call         | SRE Lead        | Security Lead        |
 
 ## 9. How to roll a change
 

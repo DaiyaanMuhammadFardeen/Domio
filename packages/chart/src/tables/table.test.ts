@@ -12,7 +12,10 @@ import { sparkline } from '../tables/sparkline.js';
 // ---------------------------------------------------------------------------
 describe('sortDataset', () => {
   const ds: Dataset = {
-    columns: [{ name: 'name', type: 'string' }, { name: 'val', type: 'number' }],
+    columns: [
+      { name: 'name', type: 'string' },
+      { name: 'val', type: 'number' },
+    ],
     rows: [
       { name: 'Charlie', val: 30 },
       { name: 'Alice', val: 10 },
@@ -160,7 +163,12 @@ describe('formatCell', () => {
 describe('conditional format', () => {
   const rules: ConditionalFormatRule[] = [
     { column: 'score', operator: 'lt', threshold: 50, style: { backgroundColor: '#ff0000' } },
-    { column: 'score', operator: 'gte', threshold: 90, style: { backgroundColor: '#00ff00', fontWeight: 700 } },
+    {
+      column: 'score',
+      operator: 'gte',
+      threshold: 90,
+      style: { backgroundColor: '#00ff00', fontWeight: 700 },
+    },
     { column: 'name', operator: 'contains', value: 'test', style: { color: 'red' } },
   ];
 

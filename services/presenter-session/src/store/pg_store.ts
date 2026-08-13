@@ -40,7 +40,11 @@ function rowToSession(row: any): PresenterSession {
     presenter_id: row.presenter_id,
     state: row.state as StageState,
     agenda_timers: row.agenda_timers ?? [],
-    parking_lot: (row.parking_lot ?? { pinned_count: 0, open_count: 0, pinned_ids: [] }) as ParkingLotDigest,
+    parking_lot: (row.parking_lot ?? {
+      pinned_count: 0,
+      open_count: 0,
+      pinned_ids: [],
+    }) as ParkingLotDigest,
     display_profile: (row.display_profile ?? {}) as DisplayProfileSnapshot,
     pip_config: (row.pip_config ?? {
       position: 'corner',
@@ -53,10 +57,18 @@ function rowToSession(row: any): PresenterSession {
     }) as PipConfig,
     mode: row.mode as SessionMode,
     version: Number(row.version),
-    started_at: (row.started_at instanceof Date ? row.started_at : new Date(row.started_at)).toISOString(),
-    ended_at: row.ended_at ? (row.ended_at instanceof Date ? row.ended_at : new Date(row.ended_at)).toISOString() : null,
+    started_at: (row.started_at instanceof Date
+      ? row.started_at
+      : new Date(row.started_at)
+    ).toISOString(),
+    ended_at: row.ended_at
+      ? (row.ended_at instanceof Date ? row.ended_at : new Date(row.ended_at)).toISOString()
+      : null,
     last_heartbeat_at: row.last_heartbeat_at
-      ? (row.last_heartbeat_at instanceof Date ? row.last_heartbeat_at : new Date(row.last_heartbeat_at)).toISOString()
+      ? (row.last_heartbeat_at instanceof Date
+          ? row.last_heartbeat_at
+          : new Date(row.last_heartbeat_at)
+        ).toISOString()
       : null,
   };
 }
@@ -97,15 +109,17 @@ export class PgPresenterSessionStore implements PresenterSessionStore {
   }
 
   async getById(id: string): Promise<PresenterSession | null> {
-    const result = await this.pg.query(
-      `SELECT * FROM presenter_session WHERE id = $1 LIMIT 1`,
-      [id],
-    );
+    const result = await this.pg.query(`SELECT * FROM presenter_session WHERE id = $1 LIMIT 1`, [
+      id,
+    ]);
     if (result.rows.length === 0) return null;
     return rowToSession(result.rows[0]);
   }
 
-  async getActiveByPresenter(workspaceId: string, presenterId: string): Promise<PresenterSession | null> {
+  async getActiveByPresenter(
+    workspaceId: string,
+    presenterId: string,
+  ): Promise<PresenterSession | null> {
     const result = await this.pg.query(
       `SELECT * FROM presenter_session
         WHERE workspace_id = $1 AND presenter_id = $2 AND ended_at IS NULL
@@ -186,7 +200,11 @@ export class PgPresenterSessionStore implements PresenterSessionStore {
 
 /** Adapter: a `pg.Pool` wrapped in a `PgClient`. */
 export class PoolPgClient implements PgClient {
-  constructor(private readonly pool: { query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[] }> }) {}
+  constructor(
+    private readonly pool: {
+      query: (sql: string, params?: unknown[]) => Promise<{ rows: unknown[] }>;
+    },
+  ) {}
 
   async query<T>(sql: string, params?: unknown[]): Promise<{ rows: T[] }> {
     const result = await this.pool.query(sql, params);

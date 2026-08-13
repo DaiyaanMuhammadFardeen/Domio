@@ -132,10 +132,7 @@ export function validateParent(
  * Return the ancestor chain from `id` up to the root (inclusive of id).
  * The first element is `id`, the last is the root.
  */
-export function ancestors(
-  id: string,
-  allScenarios: readonly ScenarioRecord[],
-): readonly string[] {
+export function ancestors(id: string, allScenarios: readonly ScenarioRecord[]): readonly string[] {
   const parentMap = buildParentMap(allScenarios);
   const chain: string[] = [id];
   let current = id;

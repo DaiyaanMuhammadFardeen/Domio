@@ -9,7 +9,8 @@ import { adaptHandler, type P18Handler } from '../p18_adapter.js';
 
 export function meetingRoutes(service: MeetingIntegrationService): Hono {
   const r = new Hono();
-  const h = (name: string) => adaptHandler(handlers[name as keyof typeof handlers] as unknown as P18Handler, service);
+  const h = (name: string) =>
+    adaptHandler(handlers[name as keyof typeof handlers] as unknown as P18Handler, service);
 
   r.get('/v1/meeting-integrations/:vendor/status', h('getMeetingIntegrationStatus'));
   r.post('/v1/meeting-integrations/:vendor/connect', h('connectMeetingIntegration'));

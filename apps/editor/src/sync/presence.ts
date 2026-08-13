@@ -6,9 +6,7 @@
  * Presence messages and the internal PresenceState type.
  */
 
-import {
-  PresenceKind,
-} from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
+import { PresenceKind } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
 import type {
   Presence as PresenceMsg,
   PeerJoined,
@@ -99,7 +97,8 @@ export class RemotePresenceProvider {
     if (state.cursor !== undefined) stateMap.set('cursor', JSON.stringify(state.cursor));
     if (state.selection !== undefined) stateMap.set('selection', JSON.stringify(state.selection));
     if (state.viewport !== undefined) stateMap.set('viewport', JSON.stringify(state.viewport));
-    if (state.activeSlide !== undefined && state.activeSlide !== null) stateMap.set('activeSlide', state.activeSlide);
+    if (state.activeSlide !== undefined && state.activeSlide !== null)
+      stateMap.set('activeSlide', state.activeSlide);
     this.provider.sendPresence(stateMap, PresenceKind.UPDATE);
   }
 
@@ -127,10 +126,7 @@ export class RemotePresenceProvider {
   }
 
   /** Subscribe to presence events. */
-  on<K extends keyof PresenceEvents>(
-    _event: K,
-    cb: PresenceEvents[K],
-  ): () => void {
+  on<K extends keyof PresenceEvents>(_event: K, cb: PresenceEvents[K]): () => void {
     const wrapped = cb as (...args: unknown[]) => void;
     this.listeners.add(wrapped);
     return () => {
@@ -157,18 +153,28 @@ export class RemotePresenceProvider {
       try {
         const parsed = JSON.parse(rawState['cursor'] as string) as { x: number; y: number } | null;
         state.cursor = parsed ?? null;
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
     if (rawState['selection']) {
       try {
         state.selection = JSON.parse(rawState['selection'] as string) as string[];
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
     if (rawState['viewport']) {
       try {
-        const parsed = JSON.parse(rawState['viewport'] as string) as { x: number; y: number; zoom: number } | null;
+        const parsed = JSON.parse(rawState['viewport'] as string) as {
+          x: number;
+          y: number;
+          zoom: number;
+        } | null;
         state.viewport = parsed ?? null;
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
     if (rawState['activeSlide']) state.activeSlide = rawState['activeSlide'];
 

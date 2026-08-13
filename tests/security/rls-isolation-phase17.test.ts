@@ -67,20 +67,34 @@ interface Row {
 }
 
 const STORAGE: Record<string, Row[]> = {
-  viewer:            [{ workspace_id: 'ws-A', id: 'v1', payload: 'a-viewer' },
-                      { workspace_id: 'ws-B', id: 'v2', payload: 'b-viewer' }],
-  identity_link:     [{ workspace_id: 'ws-A', id: 'il1', payload: 'a-link'  },
-                      { workspace_id: 'ws-B', id: 'il2', payload: 'b-link'  }],
-  consent_event:     [{ workspace_id: 'ws-A', id: 'ce1', payload: 'a-cons'  },
-                      { workspace_id: 'ws-B', id: 'ce2', payload: 'b-cons'  }],
-  event_index:       [{ workspace_id: 'ws-A', id: 'ei1', payload: 'a-event' },
-                      { workspace_id: 'ws-B', id: 'ei2', payload: 'b-event' }],
-  session:           [{ workspace_id: 'ws-A', id: 's1',  payload: 'a-sess'  },
-                      { workspace_id: 'ws-B', id: 's2',  payload: 'b-sess'  }],
-  benchmark_metric:  [{ workspace_id: 'ws-A', id: 'bm1', payload: 'a-bm'    },
-                      { workspace_id: 'ws-B', id: 'bm2', payload: 'b-bm'    }],
-  benchmark_snapshot:[{ workspace_id: 'ws-A', id: 'bs1', payload: 'a-snap'  },
-                      { workspace_id: 'ws-B', id: 'bs2', payload: 'b-snap'  }],
+  viewer: [
+    { workspace_id: 'ws-A', id: 'v1', payload: 'a-viewer' },
+    { workspace_id: 'ws-B', id: 'v2', payload: 'b-viewer' },
+  ],
+  identity_link: [
+    { workspace_id: 'ws-A', id: 'il1', payload: 'a-link' },
+    { workspace_id: 'ws-B', id: 'il2', payload: 'b-link' },
+  ],
+  consent_event: [
+    { workspace_id: 'ws-A', id: 'ce1', payload: 'a-cons' },
+    { workspace_id: 'ws-B', id: 'ce2', payload: 'b-cons' },
+  ],
+  event_index: [
+    { workspace_id: 'ws-A', id: 'ei1', payload: 'a-event' },
+    { workspace_id: 'ws-B', id: 'ei2', payload: 'b-event' },
+  ],
+  session: [
+    { workspace_id: 'ws-A', id: 's1', payload: 'a-sess' },
+    { workspace_id: 'ws-B', id: 's2', payload: 'b-sess' },
+  ],
+  benchmark_metric: [
+    { workspace_id: 'ws-A', id: 'bm1', payload: 'a-bm' },
+    { workspace_id: 'ws-B', id: 'bm2', payload: 'b-bm' },
+  ],
+  benchmark_snapshot: [
+    { workspace_id: 'ws-A', id: 'bs1', payload: 'a-snap' },
+    { workspace_id: 'ws-B', id: 'bs2', payload: 'b-snap' },
+  ],
 };
 
 let CURRENT_TENANT = 'ws-A';
@@ -94,9 +108,7 @@ function stubQuery(sql: string): Promise<{ rows: unknown[] }> {
   const fromMatch = sql.match(/FROM\s+(\w+)/i);
   if (fromMatch) {
     const table = fromMatch[1]!;
-    const rows = (STORAGE[table] ?? []).filter(
-      (r) => r.workspace_id === CURRENT_TENANT,
-    );
+    const rows = (STORAGE[table] ?? []).filter((r) => r.workspace_id === CURRENT_TENANT);
     return Promise.resolve({ rows });
   }
   return Promise.resolve({ rows: [] });
@@ -128,9 +140,7 @@ describe('Phase 17 RLS isolation', () => {
     ];
     for (const table of tables) {
       const res = await client.query(`SELECT id, workspace_id FROM ${table}`);
-      const allFromA = res.rows.every(
-        (r) => (r as Row).workspace_id === 'ws-A',
-      );
+      const allFromA = res.rows.every((r) => (r as Row).workspace_id === 'ws-A');
       expect(allFromA).toBe(true);
       expect(res.rows.length).toBeGreaterThanOrEqual(1);
     }

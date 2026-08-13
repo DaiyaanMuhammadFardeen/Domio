@@ -23,7 +23,11 @@ export interface Orchestrator {
   /** Replay the trailing window to a newly-attached subscriber. */
   replay(workspace_id: string, session_id: string): LiveEvent[];
   /** Flush one session into a summary row. */
-  flush(workspace_id: string, session_id: string, deck_id: string): Promise<LiveSessionSummary | null>;
+  flush(
+    workspace_id: string,
+    session_id: string,
+    deck_id: string,
+  ): Promise<LiveSessionSummary | null>;
   /** Number of sessions currently buffered. */
   sessionCount(): number;
   hub(): Hub;
@@ -42,7 +46,11 @@ export function buildOrchestrator(deps: OrchestratorDeps): Orchestrator {
 
   async function ingest(event: LiveEvent): Promise<void> {
     buffer.push(event);
-    const pulse = derivePulse(event.workspace_id, event.session_id, buffer.snapshot(event.workspace_id, event.session_id));
+    const pulse = derivePulse(
+      event.workspace_id,
+      event.session_id,
+      buffer.snapshot(event.workspace_id, event.session_id),
+    );
     hub.broadcast(event.workspace_id, event.session_id, pulse);
   }
 

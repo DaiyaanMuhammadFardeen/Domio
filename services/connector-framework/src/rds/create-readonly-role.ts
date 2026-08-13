@@ -46,7 +46,9 @@ function createPostgresReadonlyRole(opts: ReadonlyRoleOpts): string {
   }
 
   // ALTER DEFAULT PRIVILEGES so future tables are also readable
-  lines.push(`ALTER DEFAULT PRIVILEGES IN SCHEMA ${quoteIdent(schema)} GRANT SELECT ON TABLES TO ${role};`);
+  lines.push(
+    `ALTER DEFAULT PRIVILEGES IN SCHEMA ${quoteIdent(schema)} GRANT SELECT ON TABLES TO ${role};`,
+  );
 
   return lines.join('\n');
 }

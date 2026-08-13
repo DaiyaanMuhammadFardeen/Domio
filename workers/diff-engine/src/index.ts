@@ -87,19 +87,16 @@ function createDefaultDiffRunner(
           const existingDiff = await service.getMergeRequestDiffs(mr.id);
 
           // Replay to get current snapshots
-          await replayProvider.replayToSnapshot(
-            mr.workspace_id, mr.deck_id, mr.source_branch,
-          );
-          await replayProvider.replayToSnapshot(
-            mr.workspace_id, mr.deck_id, mr.target_branch,
-          );
+          await replayProvider.replayToSnapshot(mr.workspace_id, mr.deck_id, mr.source_branch);
+          await replayProvider.replayToSnapshot(mr.workspace_id, mr.deck_id, mr.target_branch);
 
           // Check if recompute needed (simplified: always process)
           processed++;
 
           // Check for conflicts in existing diff
-          const hasConflicts = existingDiff.slide_diffs.some((sd: { element_diffs: Array<{ is_conflict: boolean }> }) =>
-            sd.element_diffs.some((ed: { is_conflict: boolean }) => ed.is_conflict),
+          const hasConflicts = existingDiff.slide_diffs.some(
+            (sd: { element_diffs: Array<{ is_conflict: boolean }> }) =>
+              sd.element_diffs.some((ed: { is_conflict: boolean }) => ed.is_conflict),
           );
 
           if (hasConflicts) {
@@ -110,7 +107,10 @@ function createDefaultDiffRunner(
             if (mrRecord.status !== 'conflict') {
               // Emit conflict_detected event
               const conflictingSlideIds = existingDiff.slide_diffs
-                .filter((sd: { element_diffs: Array<{ is_conflict: boolean }>; slide_id: string }) => sd.element_diffs.some((ed: { is_conflict: boolean }) => ed.is_conflict))
+                .filter(
+                  (sd: { element_diffs: Array<{ is_conflict: boolean }>; slide_id: string }) =>
+                    sd.element_diffs.some((ed: { is_conflict: boolean }) => ed.is_conflict),
+                )
                 .map((sd: { slide_id: string }) => sd.slide_id);
 
               await eventEmitter.publish('merge_request.conflict_detected', {
@@ -173,20 +173,23 @@ export class DiffEngineWorker {
     const mrProvider = opts.mrProvider ?? { getOpenMergeRequests: async () => [] };
     const replayProvider = opts.replayProvider ?? InMemoryReplayProvider;
     const eventEmitter = opts.eventEmitter ?? {
-      async publish(): Promise<void> { /* drop */ },
+      async publish(): Promise<void> {
+        /* drop */
+      },
     };
 
-    this.runner = createDefaultDiffRunner(
-      opts.service,
-      mrProvider,
-      replayProvider,
-      eventEmitter,
-    );
+    this.runner = createDefaultDiffRunner(opts.service, mrProvider, replayProvider, eventEmitter);
     this.tickMs = opts.tickMs ?? Number(process.env['WORKER_TICK_MS'] ?? '60000');
     this.logger = opts.logger ?? {
-      info: () => { /* noop */ },
-      error: () => { /* noop */ },
-      warn: () => { /* noop */ },
+      info: () => {
+        /* noop */
+      },
+      error: () => {
+        /* noop */
+      },
+      warn: () => {
+        /* noop */
+      },
     };
   }
 

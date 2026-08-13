@@ -86,7 +86,9 @@ export async function buildNatsSubscriber(url: string): Promise<NatsSubscriber> 
           // Iterator errors (NATS disconnect, protocol error, etc.)
           // must not crash the process — log and let the rest of the
           // service keep running.
-          process.stderr.write(`live-analytics: nats iterator ended: ${err instanceof Error ? err.message : String(err)}\n`);
+          process.stderr.write(
+            `live-analytics: nats iterator ended: ${err instanceof Error ? err.message : String(err)}\n`,
+          );
         }
       })();
     },

@@ -1,7 +1,6 @@
 # 11 — Legal & Compliance — Bangladesh Context
 
-> **Status note:** Bangladesh's data-protection regime is newly enacted and being amended. Treat the specifics below as current-but-verify against official sources and Bangladeshi counsel before binding architecture or contract decisions. **This document flags where verification is required.**
-> **Cross-references:** `02` (NFR-SEC, NFR-PRIV), `04` (residency), `05` (PII, retention, offboarding), `07` (security/privacy controls), `08` (regional infra), `12` (BD context).
+> **Status note:** Bangladesh's data-protection regime is newly enacted and being amended. Treat the specifics below as current-but-verify against official sources and Bangladeshi counsel before binding architecture or contract decisions. **This document flags where verification is required.** > **Cross-references:** `02` (NFR-SEC, NFR-PRIV), `04` (residency), `05` (PII, retention, offboarding), `07` (security/privacy controls), `08` (regional infra), `12` (BD context).
 
 ---
 
@@ -50,6 +49,7 @@ Every section marked **VERIFY** must be re-validated before each milestone that 
 ### 11.1.4 Data subject rights
 
 We support:
+
 - Right to access (subject access request).
 - Right to correction.
 - Right to erasure (with legal-hold carve-out).
@@ -83,6 +83,7 @@ DSR workflow is implemented in `04` (DSR service) and `05` (export/offboarding).
 ### 11.1.8 Significant data fiduciary obligations
 
 If triggered:
+
 - Appoint a Chief Data Officer (resident or designated).
 - Annual data protection impact assessment (DPIA).
 - Records of processing activities (RoPA).
@@ -110,6 +111,7 @@ We plan for these obligations even if not initially required.
 ### 11.2.3 Verification
 
 **VERIFY** before launch:
+
 - Definition of "restricted personal data" tiers and sector mapping.
 - Sector-specific CII list (defense, finance, healthcare, telecom, government, etc.).
 - Synchronized copy semantics (RPO, write consistency, encryption).
@@ -363,42 +365,42 @@ flowchart LR
 
 ## 11.16 Compliance Roadmap
 
-| Phase | Activity |
-|---|---|
-| Pre-M0 | Counsel engaged; baseline PDPA review; data map drafted |
-| M0–M2 | Consent flows; DSR; breach runbook; data classification |
-| M3–M5 | Sub-processor list; DPIA for live data; BD-region proof |
-| M6–M8 | RoPA finalized; CII assessment; audit pack v1 |
-| M9–M10 | Annual DPIA; significant fiduciary readiness; cross-border DPA |
-| M11–M12 | External audit; certifications (ISO 27001/SOC 2) on roadmap |
+| Phase   | Activity                                                       |
+| ------- | -------------------------------------------------------------- |
+| Pre-M0  | Counsel engaged; baseline PDPA review; data map drafted        |
+| M0–M2   | Consent flows; DSR; breach runbook; data classification        |
+| M3–M5   | Sub-processor list; DPIA for live data; BD-region proof        |
+| M6–M8   | RoPA finalized; CII assessment; audit pack v1                  |
+| M9–M10  | Annual DPIA; significant fiduciary readiness; cross-border DPA |
+| M11–M12 | External audit; certifications (ISO 27001/SOC 2) on roadmap    |
 
 ---
 
 ## 11.17 Decisions Log
 
-| ID | Decision | Rationale | Alternative |
-|---|---|---|---|
-| D-LEG-01 | Treat Domio as data fiduciary for account-holder data; data processor for customer content | Aligned with PDPA | Single role — rejected |
-| D-LEG-02 | BD-region tenant home available from M3 | Localization agility | SaaS-only — rejected |
-| D-LEG-03 | Sub-processor changes notified 30 days | Customer trust | Implicit — rejected |
-| D-LEG-04 | Default to PCI-DSS-via-aggregator for BD payments | Faster, lower risk | Direct integration at launch — rejected |
-| D-LEG-05 | AI training opt-out is default | Privacy posture | Opt-in — rejected |
-| D-LEG-06 | Children's minimum age 16 | Conservative under PDPA | Lower — rejected |
-| D-LEG-07 | AI features disclosed with badges and footer | Transparency | Hidden — rejected |
-| D-LEG-08 | Marketplace DMCA-style takedown with counter-notice | Standard IP remedy | Custom — rejected |
+| ID       | Decision                                                                                   | Rationale               | Alternative                             |
+| -------- | ------------------------------------------------------------------------------------------ | ----------------------- | --------------------------------------- |
+| D-LEG-01 | Treat Domio as data fiduciary for account-holder data; data processor for customer content | Aligned with PDPA       | Single role — rejected                  |
+| D-LEG-02 | BD-region tenant home available from M3                                                    | Localization agility    | SaaS-only — rejected                    |
+| D-LEG-03 | Sub-processor changes notified 30 days                                                     | Customer trust          | Implicit — rejected                     |
+| D-LEG-04 | Default to PCI-DSS-via-aggregator for BD payments                                          | Faster, lower risk      | Direct integration at launch — rejected |
+| D-LEG-05 | AI training opt-out is default                                                             | Privacy posture         | Opt-in — rejected                       |
+| D-LEG-06 | Children's minimum age 16                                                                  | Conservative under PDPA | Lower — rejected                        |
+| D-LEG-07 | AI features disclosed with badges and footer                                               | Transparency            | Hidden — rejected                       |
+| D-LEG-08 | Marketplace DMCA-style takedown with counter-notice                                        | Standard IP remedy      | Custom — rejected                       |
 
 ---
 
 ## 11.18 Open Decisions
 
-| ID | Decision | Owner |
-|---|---|---|
-| OD-LEG-01 | Engagement of Bangladeshi counsel and counsel firm. | Founders |
+| ID        | Decision                                                         | Owner           |
+| --------- | ---------------------------------------------------------------- | --------------- |
+| OD-LEG-01 | Engagement of Bangladeshi counsel and counsel firm.              | Founders        |
 | OD-LEG-02 | Whether to establish a local BD entity before commercial launch. | Finance + Legal |
-| OD-LEG-03 | Significant fiduciary assessment and threshold analysis. | DPO + Legal |
-| OD-LEG-04 | Final list of approved payment aggregators. | BD ops + Legal |
-| OD-LEG-05 | Final residency policy defaults per tenant tier. | Product + DPO |
-| OD-LEG-06 | AI-on-device vs cloud-by-default for webcam features. | Privacy + AI |
+| OD-LEG-03 | Significant fiduciary assessment and threshold analysis.         | DPO + Legal     |
+| OD-LEG-04 | Final list of approved payment aggregators.                      | BD ops + Legal  |
+| OD-LEG-05 | Final residency policy defaults per tenant tier.                 | Product + DPO   |
+| OD-LEG-06 | AI-on-device vs cloud-by-default for webcam features.            | Privacy + AI    |
 
 ---
 

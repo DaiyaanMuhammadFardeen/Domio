@@ -16,10 +16,7 @@
  */
 
 import type { InteractionEvent, InteractionEventKind } from './transition-evaluator.js';
-import {
-  TransitionEvaluator,
-  EVENT_PRECEDENCE,
-} from './transition-evaluator.js';
+import { TransitionEvaluator, EVENT_PRECEDENCE } from './transition-evaluator.js';
 import type { StateTransitionEvent } from './event-bus.js';
 
 export interface StateMachineDef {
@@ -57,9 +54,7 @@ export interface StateTransitionResult {
   readonly changed: boolean;
 }
 
-export type StateMachineTransitionHandler = (
-  event: StateTransitionEvent,
-) => void;
+export type StateMachineTransitionHandler = (event: StateTransitionEvent) => void;
 
 export class StateMachine {
   readonly instanceId: string;
@@ -84,7 +79,8 @@ export class StateMachine {
     this.instanceId = instanceId;
     this.validate(def);
     this.def = def;
-    this.evaluator = opts.evaluator ?? new TransitionEvaluator({ ...(opts.now ? { now: opts.now } : {}) });
+    this.evaluator =
+      opts.evaluator ?? new TransitionEvaluator({ ...(opts.now ? { now: opts.now } : {}) });
     this._current = opts.currentState ?? null;
     if (this.onTransition !== null) {
       // No-op — kept for readability of the explicit assignment below.
@@ -113,14 +109,20 @@ export class StateMachine {
   /** Apply a single event. Returns the new state and whether it changed. */
   transition(event: InteractionEvent | InteractionEventKind): StateTransitionResult {
     const kind: InteractionEventKind = typeof event === 'string' ? event : event.kind;
-    const at = typeof event === 'string' ? Date.now() : event.at ?? Date.now();
+    const at = typeof event === 'string' ? Date.now() : (event.at ?? Date.now());
     const previous = this.getCurrentState();
     const next = this.applyEvent(previous, kind);
     const changed = next !== previous;
     if (changed) {
       this._previous = previous;
       this._current = next;
-      this.fireTransition({ instanceId: this.instanceId, previous, current: next, event: kind, at: at });
+      this.fireTransition({
+        instanceId: this.instanceId,
+        previous,
+        current: next,
+        event: kind,
+        at: at,
+      });
     }
     return { previous, current: next, event: kind, at, changed };
   }
@@ -145,7 +147,13 @@ export class StateMachine {
     this._previous = previous;
     this._current = target;
     if (target !== previous) {
-      this.fireTransition({ instanceId: this.instanceId, previous, current: target, event: 'default', at: Date.now() });
+      this.fireTransition({
+        instanceId: this.instanceId,
+        previous,
+        current: target,
+        event: 'default',
+        at: Date.now(),
+      });
     }
     return target;
   }
@@ -166,7 +174,11 @@ export class StateMachine {
   }
 
   /** Compact transition-graph rows: `{ from, event, to }`. */
-  graphRows(): ReadonlyArray<{ readonly from: string; readonly event: string; readonly to: string }> {
+  graphRows(): ReadonlyArray<{
+    readonly from: string;
+    readonly event: string;
+    readonly to: string;
+  }> {
     return this.def.transitions.map((t) => ({ from: t.from, event: t.event, to: t.to }));
   }
 
@@ -175,19 +187,21 @@ export class StateMachine {
   private applyInitial(): void {
     const target = this.def.initial;
     if (!this.def.states[target]) {
-      throw new Error(
-        `StateMachine(${this.instanceId}): initial state "${target}" not in states`,
-      );
+      throw new Error(`StateMachine(${this.instanceId}): initial state "${target}" not in states`);
     }
     this._previous = null;
     this._current = target;
-    this.fireTransition({ instanceId: this.instanceId, previous: '', current: target, event: 'default', at: Date.now() });
+    this.fireTransition({
+      instanceId: this.instanceId,
+      previous: '',
+      current: target,
+      event: 'default',
+      at: Date.now(),
+    });
   }
 
   private applyEvent(current: string, kind: InteractionEventKind): string {
-    const matches = this.def.transitions.filter(
-      (t) => t.from === current && t.event === kind,
-    );
+    const matches = this.def.transitions.filter((t) => t.from === current && t.event === kind);
     if (matches.length === 0) {
       // No matching transition — fall back to `default` event. If that also
       // doesn't match, stay put.
@@ -246,14 +260,10 @@ export class StateMachine {
     }
     for (const t of def.transitions) {
       if (!def.states[t.from]) {
-        throw new Error(
-          `StateMachine: transition from "${t.from}" references unknown state`,
-        );
+        throw new Error(`StateMachine: transition from "${t.from}" references unknown state`);
       }
       if (!def.states[t.to]) {
-        throw new Error(
-          `StateMachine: transition to "${t.to}" references unknown state`,
-        );
+        throw new Error(`StateMachine: transition to "${t.to}" references unknown state`);
       }
       if (typeof t.event !== 'string' || t.event.length === 0) {
         throw new Error('StateMachine: transition `event` must be a non-empty string');

@@ -19,11 +19,7 @@ import type {
   DeckDocument,
   ULID,
 } from './generated/scene-graph.js';
-import type {
-  DeckSchemaValidator,
-  SchemaValidateResult,
-  ValidationWarning,
-} from './registry.js';
+import type { DeckSchemaValidator, SchemaValidateResult, ValidationWarning } from './registry.js';
 import { DECK_SCHEMA_VERSION } from './version.js';
 
 const LAYER_TYPES = [
@@ -182,11 +178,7 @@ export class StructuralValidator implements DeckSchemaValidator {
     return { valid: errors.length === 0, errors };
   }
 
-  private validateElement(
-    element: Element,
-    basePath: string,
-    errors: ValidationWarning[],
-  ): void {
+  private validateElement(element: Element, basePath: string, errors: ValidationWarning[]): void {
     if (!isULID(element.id)) {
       errors.push({
         code: 'invalid_argument',
@@ -382,11 +374,7 @@ export class StructuralValidator implements DeckSchemaValidator {
         message: 'Model3DLayer.modelAssetId is required.',
       });
     }
-    if (
-      layer.upAxis !== undefined &&
-      layer.upAxis !== 'y-up' &&
-      layer.upAxis !== 'z-up'
-    ) {
+    if (layer.upAxis !== undefined && layer.upAxis !== 'y-up' && layer.upAxis !== 'z-up') {
       errors.push({
         code: 'invalid_argument',
         path: `${basePath}.upAxis`,
@@ -395,11 +383,7 @@ export class StructuralValidator implements DeckSchemaValidator {
     }
   }
 
-  private validateVideo(
-    layer: VideoLayer,
-    basePath: string,
-    errors: ValidationWarning[],
-  ): void {
+  private validateVideo(layer: VideoLayer, basePath: string, errors: ValidationWarning[]): void {
     if (!layer.assetId || typeof layer.assetId !== 'string') {
       errors.push({
         code: 'required',
@@ -428,10 +412,7 @@ export class StructuralValidator implements DeckSchemaValidator {
         message: 'VideoLayer.trimOutMs must be >= trimInMs.',
       });
     }
-    if (
-      layer.speed !== undefined &&
-      (layer.speed < 0.25 || layer.speed > 4)
-    ) {
+    if (layer.speed !== undefined && (layer.speed < 0.25 || layer.speed > 4)) {
       errors.push({
         code: 'invalid_argument',
         path: `${basePath}.speed`,
@@ -440,11 +421,7 @@ export class StructuralValidator implements DeckSchemaValidator {
     }
   }
 
-  private validateAudio(
-    layer: AudioLayer,
-    basePath: string,
-    errors: ValidationWarning[],
-  ): void {
+  private validateAudio(layer: AudioLayer, basePath: string, errors: ValidationWarning[]): void {
     if (!layer.assetId || typeof layer.assetId !== 'string') {
       errors.push({
         code: 'required',
@@ -452,10 +429,7 @@ export class StructuralValidator implements DeckSchemaValidator {
         message: 'AudioLayer.assetId is required.',
       });
     }
-    if (
-      layer.volume !== undefined &&
-      (layer.volume < 0 || layer.volume > 1)
-    ) {
+    if (layer.volume !== undefined && (layer.volume < 0 || layer.volume > 1)) {
       errors.push({
         code: 'invalid_argument',
         path: `${basePath}.volume`,
@@ -471,11 +445,7 @@ export class StructuralValidator implements DeckSchemaValidator {
     }
   }
 
-  private validateLottie(
-    layer: LottieLayer,
-    basePath: string,
-    errors: ValidationWarning[],
-  ): void {
+  private validateLottie(layer: LottieLayer, basePath: string, errors: ValidationWarning[]): void {
     if (!layer.assetId || typeof layer.assetId !== 'string') {
       errors.push({
         code: 'required',
@@ -485,11 +455,7 @@ export class StructuralValidator implements DeckSchemaValidator {
     }
   }
 
-  private validateEmbed(
-    layer: EmbedLayer,
-    basePath: string,
-    errors: ValidationWarning[],
-  ): void {
+  private validateEmbed(layer: EmbedLayer, basePath: string, errors: ValidationWarning[]): void {
     if (!layer.url || typeof layer.url !== 'string') {
       errors.push({
         code: 'required',
@@ -513,11 +479,7 @@ export class StructuralValidator implements DeckSchemaValidator {
     }
   }
 
-  private validateLatex(
-    layer: LatexLayer,
-    basePath: string,
-    errors: ValidationWarning[],
-  ): void {
+  private validateLatex(layer: LatexLayer, basePath: string, errors: ValidationWarning[]): void {
     if (typeof layer.source !== 'string' || layer.source.length === 0) {
       errors.push({
         code: 'required',
@@ -538,11 +500,7 @@ export class StructuralValidator implements DeckSchemaValidator {
     }
   }
 
-  private validateMap(
-    layer: MapLayer,
-    basePath: string,
-    errors: ValidationWarning[],
-  ): void {
+  private validateMap(layer: MapLayer, basePath: string, errors: ValidationWarning[]): void {
     if (!layer.styleId || typeof layer.styleId !== 'string') {
       errors.push({
         code: 'required',
@@ -552,8 +510,7 @@ export class StructuralValidator implements DeckSchemaValidator {
     }
     if (
       layer.center !== undefined &&
-      (typeof layer.center.lng !== 'number' ||
-        typeof layer.center.lat !== 'number')
+      (typeof layer.center.lng !== 'number' || typeof layer.center.lat !== 'number')
     ) {
       errors.push({
         code: 'invalid_argument',

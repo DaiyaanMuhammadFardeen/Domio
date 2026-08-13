@@ -46,11 +46,7 @@ const STATUSES: ReadonlyArray<RenderJobStatus> = [
   'failed',
   'cancelled',
 ];
-const FORMATS: ReadonlyArray<RenderSample['output_format']> = [
-  'pdf',
-  'png',
-  'mp4',
-];
+const FORMATS: ReadonlyArray<RenderSample['output_format']> = ['pdf', 'png', 'mp4'];
 const DECK_IDS: ReadonlyArray<string> = [
   'deck-q3-allhands',
   'deck-acme-launch',
@@ -64,18 +60,9 @@ function seededSamples(): RenderSample[] {
   const list: RenderSample[] = [];
   for (let i = 0; i < 20; i += 1) {
     // Mostly succeeded with a sprinkle of failed/running/queued.
-    const fallback: RenderJobStatus =
-      STATUSES[i % STATUSES.length] ?? 'succeeded';
+    const fallback: RenderJobStatus = STATUSES[i % STATUSES.length] ?? 'succeeded';
     const status: RenderJobStatus =
-      i < 2
-        ? 'running'
-        : i < 4
-        ? 'queued'
-        : i === 4
-        ? 'failed'
-        : i === 5
-        ? 'cancelled'
-        : fallback;
+      i < 2 ? 'running' : i < 4 ? 'queued' : i === 4 ? 'failed' : i === 5 ? 'cancelled' : fallback;
     const started = NOW - i * 1000 * 60 * 3;
     const duration =
       status === 'succeeded' || status === 'failed' || status === 'cancelled'
@@ -93,10 +80,7 @@ function seededSamples(): RenderSample[] {
       completed_at_ms: completed,
       duration_ms: duration,
       output_format: FORMATS[i % FORMATS.length] ?? 'pdf',
-      error:
-        status === 'failed'
-          ? `Render timed out after ${duration ?? 0}ms`
-          : null,
+      error: status === 'failed' ? `Render timed out after ${duration ?? 0}ms` : null,
     });
   }
   return list;
@@ -113,9 +97,7 @@ let CONFIG: RenderConfig = {
 
 export async function getRenderQueueStatus(): Promise<RenderQueueStatus> {
   try {
-    const json = await fetcher<RenderQueueStatus>(
-      '/v1/admin/rendering/queue',
-    );
+    const json = await fetcher<RenderQueueStatus>('/v1/admin/rendering/queue');
     if (json && Array.isArray(json.throughput)) return json;
   } catch {
     // fall through to seed
@@ -131,9 +113,7 @@ export async function getRenderQueueStatus(): Promise<RenderQueueStatus> {
   };
 }
 
-export async function listRenderSamples(
-  limit: number,
-): Promise<RenderSample[]> {
+export async function listRenderSamples(limit: number): Promise<RenderSample[]> {
   const capped = Math.max(1, Math.min(100, Math.floor(limit)));
   try {
     const json = await fetcher<{ items?: RenderSample[] }>(
@@ -162,21 +142,11 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-export async function updateRenderConfig(
-  input: Partial<RenderConfig>,
-): Promise<RenderConfig> {
+export async function updateRenderConfig(input: Partial<RenderConfig>): Promise<RenderConfig> {
   const next: RenderConfig = {
     tenant_id: input.tenant_id ?? CONFIG.tenant_id,
-    max_parallelism: clamp(
-      input.max_parallelism ?? CONFIG.max_parallelism,
-      1,
-      64,
-    ),
-    retention_days: clamp(
-      input.retention_days ?? CONFIG.retention_days,
-      1,
-      365,
-    ),
+    max_parallelism: clamp(input.max_parallelism ?? CONFIG.max_parallelism, 1, 64),
+    retention_days: clamp(input.retention_days ?? CONFIG.retention_days, 1, 365),
     rate_limit_per_tenant: clamp(
       input.rate_limit_per_tenant ?? CONFIG.rate_limit_per_tenant,
       1,
@@ -201,10 +171,9 @@ export async function updateRenderConfig(
 
 export async function cancelRender(id: string): Promise<RenderSample> {
   try {
-    await fetcher<void>(
-      `/v1/admin/rendering/samples/${encodeURIComponent(id)}/cancel`,
-      { method: 'POST' },
-    );
+    await fetcher<void>(`/v1/admin/rendering/samples/${encodeURIComponent(id)}/cancel`, {
+      method: 'POST',
+    });
   } catch {
     // fall through — we still update local state.
   }

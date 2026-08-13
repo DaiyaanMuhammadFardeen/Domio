@@ -86,10 +86,7 @@ export async function createDraft(): Promise<WizardDraft> {
   return draft;
 }
 
-export async function saveDetails(
-  draftId: string,
-  details: WizardDetails,
-): Promise<WizardDraft> {
+export async function saveDetails(draftId: string, details: WizardDetails): Promise<WizardDraft> {
   const draft = drafts.get(draftId) ?? null;
   if (!draft) {
     throw new Error(`Draft not found: ${draftId}`);
@@ -100,11 +97,7 @@ export async function saveDetails(
   return updated;
 }
 
-export async function addAsset(
-  draftId: string,
-  kind: AssetKind,
-  file: File,
-): Promise<AssetUpload> {
+export async function addAsset(draftId: string, kind: AssetKind, file: File): Promise<AssetUpload> {
   const upload: AssetUpload = {
     id: genId('upload'),
     kind,
@@ -164,15 +157,15 @@ export async function removeAsset(uploadId: string): Promise<void> {
   assets.delete(uploadId);
   for (const draft of drafts.values()) {
     if (draft.assets.some((a) => a.id === uploadId)) {
-      drafts.set(draft.id, update(draft, { assets: draft.assets.filter((a) => a.id !== uploadId) }));
+      drafts.set(
+        draft.id,
+        update(draft, { assets: draft.assets.filter((a) => a.id !== uploadId) }),
+      );
     }
   }
 }
 
-export async function savePricing(
-  draftId: string,
-  pricing: WizardPricing,
-): Promise<WizardDraft> {
+export async function savePricing(draftId: string, pricing: WizardPricing): Promise<WizardDraft> {
   const draft = drafts.get(draftId) ?? null;
   if (!draft) {
     throw new Error(`Draft not found: ${draftId}`);

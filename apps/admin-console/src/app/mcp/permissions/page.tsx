@@ -105,9 +105,7 @@ export default function MCPPermissionsPage() {
   async function handleSaveScopes(next: MCPAgentPermission) {
     // In a real deployment this would POST the updated scopes. For now
     // we mutate local state so the UI reflects the new selection.
-    setAgents((prev) =>
-      prev.map((a) => (a.agent_id === next.agent_id ? { ...next } : a)),
-    );
+    setAgents((prev) => prev.map((a) => (a.agent_id === next.agent_id ? { ...next } : a)));
     setExpandedId(null);
   }
 
@@ -115,14 +113,11 @@ export default function MCPPermissionsPage() {
     <div className="space-y-4" data-testid="mcp-permissions-page">
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          <FormattedMessage
-            id="admin.mcp.permissions.heading"
-            catalogue={CATALOGUE}
-          />
+          <FormattedMessage id="admin.mcp.permissions.heading" catalogue={CATALOGUE} />
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">
-          Per-agent scopes and token rotation. Revoked agents retain their
-          history but cannot make new tool calls.
+          Per-agent scopes and token rotation. Revoked agents retain their history but cannot make
+          new tool calls.
         </p>
       </header>
 
@@ -148,10 +143,7 @@ export default function MCPPermissionsPage() {
           className="rounded-xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500"
           data-testid="mcp-permissions-empty"
         >
-          <FormattedMessage
-            id="admin.mcp.permissions.empty"
-            catalogue={CATALOGUE}
-          />
+          <FormattedMessage id="admin.mcp.permissions.empty" catalogue={CATALOGUE} />
         </div>
       )}
 
@@ -162,16 +154,10 @@ export default function MCPPermissionsPage() {
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.mcp.permissions.col.agent"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.mcp.permissions.col.agent" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    <FormattedMessage
-                      id="admin.mcp.permissions.col.scopes"
-                      catalogue={CATALOGUE}
-                    />
+                    <FormattedMessage id="admin.mcp.permissions.col.scopes" catalogue={CATALOGUE} />
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
                     <FormattedMessage
@@ -196,25 +182,19 @@ export default function MCPPermissionsPage() {
                       >
                         <td className="px-4 py-2.5">
                           <div className="flex flex-col">
-                            <span className="font-medium text-slate-800">
-                              {agent.agent_name}
-                            </span>
+                            <span className="font-medium text-slate-800">{agent.agent_name}</span>
                             <span className="font-mono text-[11px] text-slate-500">
                               {agent.agent_id}
                             </span>
                           </div>
                           <div className="mt-1">
-                            <Badge tone={toneForAgentStatus(agent.status)}>
-                              {agent.status}
-                            </Badge>
+                            <Badge tone={toneForAgentStatus(agent.status)}>{agent.status}</Badge>
                           </div>
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="flex flex-wrap gap-1">
                             {agent.scopes.length === 0 ? (
-                              <span className="text-xs text-slate-400">
-                                (none)
-                              </span>
+                              <span className="text-xs text-slate-400">(none)</span>
                             ) : (
                               agent.scopes.map((scope) => (
                                 <Badge key={scope} tone={scopeTone(scope)}>
@@ -231,9 +211,7 @@ export default function MCPPermissionsPage() {
                           <div className="inline-flex items-center gap-2">
                             <button
                               type="button"
-                              onClick={() =>
-                                setExpandedId(expanded ? null : agent.agent_id)
-                              }
+                              onClick={() => setExpandedId(expanded ? null : agent.agent_id)}
                               className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
                             >
                               {expanded ? 'Hide editor' : 'Edit scopes'}
@@ -266,9 +244,7 @@ export default function MCPPermissionsPage() {
                         </td>
                       </tr>
                       {expanded && (
-                        <tr
-                          data-testid={`mcp-agent-editor-row-${agent.agent_id}`}
-                        >
+                        <tr data-testid={`mcp-agent-editor-row-${agent.agent_id}`}>
                           <td colSpan={4} className="bg-slate-50 px-4 py-3">
                             <PermissionEditor
                               agent={agent}

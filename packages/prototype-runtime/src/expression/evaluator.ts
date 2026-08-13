@@ -194,11 +194,7 @@ function eq(a: unknown, b: unknown): boolean {
 function cmp(a: unknown, b: unknown): number {
   if (typeof a === 'number' && typeof b === 'number') return a - b;
   if (typeof a === 'string' && typeof b === 'string') return a < b ? -1 : a > b ? 1 : 0;
-  return String(a ?? '') < String(b ?? '')
-    ? -1
-    : String(a ?? '') > String(b ?? '')
-      ? 1
-      : 0;
+  return String(a ?? '') < String(b ?? '') ? -1 : String(a ?? '') > String(b ?? '') ? 1 : 0;
 }
 
 function truthy(v: unknown): boolean {

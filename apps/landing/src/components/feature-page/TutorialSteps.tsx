@@ -29,9 +29,7 @@ export function TutorialSteps({ feature }: TutorialStepsProps): JSX.Element {
         <h2 id="fp-steps-heading" className="fp-steps__heading">
           How to use {feature.title}
         </h2>
-        <p className="fp-steps__sub">
-          {feature.steps.length} steps · under 5 minutes
-        </p>
+        <p className="fp-steps__sub">{feature.steps.length} steps · under 5 minutes</p>
       </header>
       <ol className="fp-steps__list">
         {feature.steps.map((step, index) => (
@@ -48,11 +46,7 @@ export function TutorialSteps({ feature }: TutorialStepsProps): JSX.Element {
               <h3 className="fp-steps__title">{step.title}</h3>
             </div>
             <p className="fp-steps__body">{step.description}</p>
-            <Screenshot
-              alt={step.screenshot_alt}
-              step={index + 1}
-              slug={feature.slug}
-            />
+            <Screenshot alt={step.screenshot_alt} step={index + 1} slug={feature.slug} />
           </li>
         ))}
       </ol>

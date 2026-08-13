@@ -3,12 +3,12 @@
 # manifest for a generic Domio workload so the GitOps pipeline has a concrete
 # target. Real workload manifests land in P02+.
 
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 
 image:
   repository: ghcr.io/domio/domio
-  tag: "0.1.0"
+  tag: '0.1.0'
   pullPolicy: IfNotPresent
 
 replicaCount: 1
@@ -70,7 +70,7 @@ envFromSecret: []
 
 serviceAccount:
   create: true
-  name: ""
+  name: ''
   annotations: {}
 
 configMap:

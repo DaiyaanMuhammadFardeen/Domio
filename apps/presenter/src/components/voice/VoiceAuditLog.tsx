@@ -8,11 +8,7 @@
  */
 
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import {
-  type VoiceMatch,
-  type VoiceMatchStatus,
-  listVoiceMatches,
-} from '../../lib/voice-service';
+import { type VoiceMatch, type VoiceMatchStatus, listVoiceMatches } from '../../lib/voice-service';
 
 export interface VoiceAuditLogProps {
   readonly sessionId: string;
@@ -98,17 +94,33 @@ export function VoiceAuditLog({
             padding: '4px 0',
           }}
         >
-          <div role="columnheader" style={{ width: '18%', fontWeight: 700, fontSize: 11 }}>Time</div>
-          <div role="columnheader" style={{ width: '34%', fontWeight: 700, fontSize: 11 }}>Phrase</div>
-          <div role="columnheader" style={{ width: '18%', fontWeight: 700, fontSize: 11 }}>Action</div>
-          <div role="columnheader" style={{ width: '14%', fontWeight: 700, fontSize: 11 }}>Confidence</div>
-          <div role="columnheader" style={{ width: '16%', fontWeight: 700, fontSize: 11 }}>Status</div>
+          <div role="columnheader" style={{ width: '18%', fontWeight: 700, fontSize: 11 }}>
+            Time
+          </div>
+          <div role="columnheader" style={{ width: '34%', fontWeight: 700, fontSize: 11 }}>
+            Phrase
+          </div>
+          <div role="columnheader" style={{ width: '18%', fontWeight: 700, fontSize: 11 }}>
+            Action
+          </div>
+          <div role="columnheader" style={{ width: '14%', fontWeight: 700, fontSize: 11 }}>
+            Confidence
+          </div>
+          <div role="columnheader" style={{ width: '16%', fontWeight: 700, fontSize: 11 }}>
+            Status
+          </div>
         </div>
         {loading && (
-          <div role="row" style={{ padding: '8px 0', opacity: 0.7 }}>Loading…</div>
+          <div role="row" style={{ padding: '8px 0', opacity: 0.7 }}>
+            Loading…
+          </div>
         )}
         {!loading && matches.length === 0 && (
-          <div role="row" data-testid={`${dataTestId}-empty`} style={{ padding: '8px 0', opacity: 0.7 }}>
+          <div
+            role="row"
+            data-testid={`${dataTestId}-empty`}
+            style={{ padding: '8px 0', opacity: 0.7 }}
+          >
             {emptyLabel}
           </div>
         )}

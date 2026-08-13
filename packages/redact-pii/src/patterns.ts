@@ -47,7 +47,8 @@ const ANTHROPIC_RE = /\bsk-ant-[A-Za-z0-9_-]{32,}\b/g;
 const GIT_SHA_RE = new RegExp(`\\b${HEX40}\\b`, 'g');
 
 const IPV4_RE = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
-const SECRET_KEY_NAMES = /(api[_-]?key|access[_-]?token|password|secret|token|auth|jwt|bearer|cookie|set-cookie|authorization)/i;
+const SECRET_KEY_NAMES =
+  /(api[_-]?key|access[_-]?token|password|secret|token|auth|jwt|bearer|cookie|set-cookie|authorization)/i;
 void GIT_SHA_RE; // reserved for future git-sha redaction
 
 export const PATTERNS: Pattern[] = [
@@ -151,7 +152,8 @@ function luhnValid(s: string): boolean {
 
 function isPublicIPv4(ip: string): boolean {
   const parts = ip.split('.').map(Number);
-  if (parts.length !== 4 || parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return false;
+  if (parts.length !== 4 || parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255))
+    return false;
   const a = parts[0]!;
   const b = parts[1]!;
   // Private, loopback, link-local, and unspecified ranges are not treated as

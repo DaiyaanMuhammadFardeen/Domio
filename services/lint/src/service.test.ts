@@ -54,7 +54,11 @@ describe('LintService — off-brand-color', () => {
       deckId: 'd-1',
       brandKit: KIT,
       elements: [
-        { elementRef: 'e1', tokenRef: 'color.accent.magenta', resolvedColor: color(1, 0, 1) } as LintElementInput,
+        {
+          elementRef: 'e1',
+          tokenRef: 'color.accent.magenta',
+          resolvedColor: color(1, 0, 1),
+        } as LintElementInput,
       ],
       actorId: 'alice',
     });

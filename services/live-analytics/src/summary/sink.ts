@@ -15,7 +15,11 @@ import type { LiveSessionSummary } from '../types.js';
 
 export interface SummarySink {
   /** Drain the buffer for one session and persist a summary row. Returns null if empty. */
-  flushOne(workspace_id: string, session_id: string, deck_id: string): Promise<LiveSessionSummary | null>;
+  flushOne(
+    workspace_id: string,
+    session_id: string,
+    deck_id: string,
+  ): Promise<LiveSessionSummary | null>;
 }
 
 export function buildSummarySink(ch: ClickHouseClient, buffer: RingBuffer): SummarySink {

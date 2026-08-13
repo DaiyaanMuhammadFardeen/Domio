@@ -24,7 +24,7 @@ const KIND_COLORS: Record<string, string> = {
   icon_pack: 'bg-rose-500/12 text-rose-400',
 };
 
-function StarIcon({ filled }: { filled: boolean; }) {
+function StarIcon({ filled }: { filled: boolean }) {
   return (
     <svg
       className={`h-3.5 w-3.5 ${filled ? 'text-gold' : 'text-border'}`}
@@ -68,14 +68,27 @@ export function ListingCard({ listing }: ListingCardProps) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <svg className="h-12 w-12 text-border" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <svg
+              className="h-12 w-12 text-border"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1}
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
             </svg>
           </div>
         )}
 
         {/* Kind badge */}
-        <span className={`absolute left-3 top-3 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${kindColor}`}>
+        <span
+          className={`absolute left-3 top-3 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${kindColor}`}
+        >
           {kindLabel}
         </span>
       </div>
@@ -86,17 +99,16 @@ export function ListingCard({ listing }: ListingCardProps) {
           {listing.title}
         </h3>
 
-        <p className="text-xs text-muted">
-          {listing.creator_name}
-        </p>
+        <p className="text-xs text-muted">{listing.creator_name}</p>
 
         {/* Bottom row — rating + price */}
         <div className="mt-auto flex items-center justify-between pt-2">
-          <div className="flex items-center gap-1.5" aria-label={`${listing.rating_avg.toFixed(1)} stars, ${listing.rating_count} reviews`}>
+          <div
+            className="flex items-center gap-1.5"
+            aria-label={`${listing.rating_avg.toFixed(1)} stars, ${listing.rating_count} reviews`}
+          >
             <div className="flex gap-0.5">{renderStars(listing.rating_avg)}</div>
-            <span className="text-[11px] text-muted">
-              ({listing.rating_count})
-            </span>
+            <span className="text-[11px] text-muted">({listing.rating_count})</span>
           </div>
 
           <span className={`text-sm font-semibold ${listing.is_free ? 'text-success' : 'text-fg'}`}>

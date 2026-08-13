@@ -28,11 +28,11 @@ import {
   tooLongError,
 } from './store.js';
 import { type IdempotencyStore, InMemoryIdempotencyStore } from './idempotency/index.js';
+import { type WordCloudAuditEmitter, type WordCloudAuditEvent } from './audit/emit.js';
 import {
-  type WordCloudAuditEmitter,
-  type WordCloudAuditEvent,
-} from './audit/emit.js';
-import { type WordCloudEngineMetrics, NullWordCloudEngineMetrics } from './observability/metrics.js';
+  type WordCloudEngineMetrics,
+  NullWordCloudEngineMetrics,
+} from './observability/metrics.js';
 import { tokenize } from './tokenize.js';
 
 export type Moderator = (input: {
@@ -134,7 +134,12 @@ export class WordCloudEngine {
     if (!current) throw notFoundError(cloud_id);
     if (current.status !== 'draft') throw closedError(cloud_id);
     const ts = this.now_ms();
-    const next: WordCloud = { ...current, status: 'open', updated_at_ms: ts, version: current.version + 1 };
+    const next: WordCloud = {
+      ...current,
+      status: 'open',
+      updated_at_ms: ts,
+      version: current.version + 1,
+    };
     const updated = await this.store.update({ cloud_id, expected_version, next });
     await this.emitAudit({
       actor_id,
@@ -155,7 +160,12 @@ export class WordCloudEngine {
     if (!current) throw notFoundError(cloud_id);
     if (current.status !== 'open') throw closedError(cloud_id);
     const ts = this.now_ms();
-    const next: WordCloud = { ...current, status: 'closed', updated_at_ms: ts, version: current.version + 1 };
+    const next: WordCloud = {
+      ...current,
+      status: 'closed',
+      updated_at_ms: ts,
+      version: current.version + 1,
+    };
     const updated = await this.store.update({ cloud_id, expected_version, next });
     await this.emitAudit({
       actor_id,
@@ -222,10 +232,15 @@ export class WordCloudEngine {
         recorded_at_ms: blockedSubmit.submitted_at_ms,
         ttl_ms: 24 * 60 * 60 * 1000,
       });
-      this.metrics.submit_latency_ms.observe(this.now_ms() - start, { workspace_id: input.workspace_id });
+      this.metrics.submit_latency_ms.observe(this.now_ms() - start, {
+        workspace_id: input.workspace_id,
+      });
       return stored;
     }
-    const tokens = tokenize(input.raw_text, { stopwords: cloud.stopwords, max_chars: cloud.max_chars });
+    const tokens = tokenize(input.raw_text, {
+      stopwords: cloud.stopwords,
+      max_chars: cloud.max_chars,
+    });
     const submit: WordCloudSubmit = {
       id: this.id_factory(),
       workspace_id: input.workspace_id,
@@ -257,7 +272,9 @@ export class WordCloudEngine {
       after: { tokens, moderation: moderation ?? 'allow' },
     });
     this.metrics.submits.inc(1, { workspace_id: input.workspace_id });
-    this.metrics.submit_latency_ms.observe(this.now_ms() - start, { workspace_id: input.workspace_id });
+    this.metrics.submit_latency_ms.observe(this.now_ms() - start, {
+      workspace_id: input.workspace_id,
+    });
     await this.bus.publish({
       session_id: cloud.session_id,
       topic: 'word_cloud',

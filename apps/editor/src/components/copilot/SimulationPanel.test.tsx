@@ -71,13 +71,19 @@ describe('SimulationPanel', () => {
   it('defaults to the Executive persona', () => {
     renderPanel();
     expect(screen.getByTestId('simulation-persona-exec')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('simulation-persona-analyst')).toHaveAttribute('aria-checked', 'false');
+    expect(screen.getByTestId('simulation-persona-analyst')).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
   });
 
   it('switching personas updates aria-checked', () => {
     renderPanel();
     fireEvent.click(screen.getByTestId('simulation-persona-skeptic'));
-    expect(screen.getByTestId('simulation-persona-skeptic')).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByTestId('simulation-persona-skeptic')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
     expect(screen.getByTestId('simulation-persona-exec')).toHaveAttribute('aria-checked', 'false');
   });
 
@@ -114,9 +120,11 @@ describe('SimulationPanel', () => {
       expect.objectContaining({ method: 'POST' }),
     );
 
-    const [, init] = (mockFetch as unknown as {
-      mock: { calls: Array<[string, RequestInit]> };
-    }).mock.calls[0]!;
+    const [, init] = (
+      mockFetch as unknown as {
+        mock: { calls: Array<[string, RequestInit]> };
+      }
+    ).mock.calls[0]!;
     expect(JSON.parse(String(init.body))).toMatchObject({
       persona: 'analyst',
       deckId: 'demo',
@@ -182,8 +190,12 @@ describe('SimulationPanel', () => {
     fireEvent.click(screen.getByTestId('simulation-slide-flags-toggle-s-2'));
 
     expect(screen.getByTestId('simulation-slide-flags-s-2')).toBeInTheDocument();
-    expect(screen.getByTestId('simulation-slide-flag-s-2-0')).toHaveTextContent('Too many stats on one slide');
-    expect(screen.getByTestId('simulation-slide-flag-s-2-1')).toHaveTextContent('Missing source citation');
+    expect(screen.getByTestId('simulation-slide-flag-s-2-0')).toHaveTextContent(
+      'Too many stats on one slide',
+    );
+    expect(screen.getByTestId('simulation-slide-flag-s-2-1')).toHaveTextContent(
+      'Missing source citation',
+    );
   });
 
   it('invokes onComplete with the simulation result', async () => {

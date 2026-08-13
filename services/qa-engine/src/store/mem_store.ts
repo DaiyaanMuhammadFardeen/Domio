@@ -67,7 +67,10 @@ export class InMemoryQaStore implements QaStore {
     return { upvote: row.upvote, submit: next };
   }
 
-  async listBySession(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<QaSubmit>> {
+  async listBySession(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<QaSubmit>> {
     const out: QaSubmit[] = [];
     for (const s of this.submits.values()) {
       if (s.workspace_id === input.workspace_id && s.session_id === input.session_id) out.push(s);

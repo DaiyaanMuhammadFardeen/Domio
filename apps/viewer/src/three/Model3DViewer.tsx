@@ -76,7 +76,11 @@ export function Model3DViewer({
           pointerEvents: 'none',
         }}
       >
-        <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.3 }} />
+        <img
+          src={url}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.3 }}
+        />
       </div>
     </div>
   );

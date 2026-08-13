@@ -90,11 +90,15 @@ function mapDomainError(e: unknown): HandlerResponse {
     return jsonResponse(409, { error: 'ENDED', message: e.message });
   }
   if (e instanceof PresenterSessionConflictError) {
-    return jsonResponse(409, {
-      error: 'CONFLICT',
-      message: e.message,
-      current: e.current,
-    }, toEtag(e.current.version));
+    return jsonResponse(
+      409,
+      {
+        error: 'CONFLICT',
+        message: e.message,
+        current: e.current,
+      },
+      toEtag(e.current.version),
+    );
   }
   if (e instanceof PresenterSessionValidationError) {
     return jsonResponse(400, { error: 'VALIDATION', message: e.message });
@@ -124,16 +128,22 @@ export interface PresenterSessionHandlers {
   get(req: HandlerRequest<unknown>): Promise<HandlerResponse>;
 }
 
-export function createHandlers(service: PresenterSessionService, metrics?: PresenterMetrics): PresenterSessionHandlers {
+export function createHandlers(
+  service: PresenterSessionService,
+  metrics?: PresenterMetrics,
+): PresenterSessionHandlers {
   const m = metrics ?? nullPresenterMetrics();
   return {
     async startSession(req) {
       try {
         const body = req.body ?? ({} as CreateSessionInput);
         const idempotencyKey = readHeader(req, HEADER_IDEMPOTENCY_KEY);
-        const result = await service.start({ ...body, idempotency_key: idempotencyKey }, {
-          actorId: req.actor.id,
-        });
+        const result = await service.start(
+          { ...body, idempotency_key: idempotencyKey },
+          {
+            actorId: req.actor.id,
+          },
+        );
         return sessionResponse(result.session);
       } catch (e) {
         return mapDomainError(e);
@@ -145,9 +155,13 @@ export function createHandlers(service: PresenterSessionService, metrics?: Prese
       if (!id) return jsonResponse(400, { error: 'VALIDATION', message: 'id is required' });
       const etag = readHeader(req, HEADER_IF_MATCH);
       const parsed = parseEtag(etag);
-      if (!parsed.ok) return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
+      if (!parsed.ok)
+        return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
       try {
-        const ended = await service.end(id, { actorId: req.actor.id, expectedVersion: parsed.version! });
+        const ended = await service.end(id, {
+          actorId: req.actor.id,
+          expectedVersion: parsed.version!,
+        });
         return sessionResponse(ended);
       } catch (e) {
         return mapDomainError(e);
@@ -159,14 +173,19 @@ export function createHandlers(service: PresenterSessionService, metrics?: Prese
       if (!id) return jsonResponse(400, { error: 'VALIDATION', message: 'id is required' });
       const etag = readHeader(req, HEADER_IF_MATCH);
       const parsed = parseEtag(etag);
-      if (!parsed.ok) return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
+      if (!parsed.ok)
+        return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
       const idempotencyKey = readHeader(req, HEADER_IDEMPOTENCY_KEY);
       try {
-        const next = await service.advance(id, {
-          ...(req.body ?? {}),
-          expected_version: parsed.version!,
-          idempotency_key: idempotencyKey,
-        }, { actorId: req.actor.id });
+        const next = await service.advance(
+          id,
+          {
+            ...(req.body ?? {}),
+            expected_version: parsed.version!,
+            idempotency_key: idempotencyKey,
+          },
+          { actorId: req.actor.id },
+        );
         return sessionResponse(next);
       } catch (e) {
         return mapDomainError(e);
@@ -178,12 +197,17 @@ export function createHandlers(service: PresenterSessionService, metrics?: Prese
       if (!id) return jsonResponse(400, { error: 'VALIDATION', message: 'id is required' });
       const etag = readHeader(req, HEADER_IF_MATCH);
       const parsed = parseEtag(etag);
-      if (!parsed.ok) return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
+      if (!parsed.ok)
+        return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
       try {
-        const { session } = await service.annotate(id, {
-          ...(req.body ?? {}),
-          expected_version: parsed.version!,
-        }, { actorId: req.actor.id });
+        const { session } = await service.annotate(
+          id,
+          {
+            ...(req.body ?? {}),
+            expected_version: parsed.version!,
+          },
+          { actorId: req.actor.id },
+        );
         return sessionResponse(session);
       } catch (e) {
         return mapDomainError(e);
@@ -195,12 +219,17 @@ export function createHandlers(service: PresenterSessionService, metrics?: Prese
       if (!id) return jsonResponse(400, { error: 'VALIDATION', message: 'id is required' });
       const etag = readHeader(req, HEADER_IF_MATCH);
       const parsed = parseEtag(etag);
-      if (!parsed.ok) return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
+      if (!parsed.ok)
+        return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
       try {
-        const next = await service.plan(id, {
-          ...(req.body ?? {}),
-          expected_version: parsed.version!,
-        }, { actorId: req.actor.id });
+        const next = await service.plan(
+          id,
+          {
+            ...(req.body ?? {}),
+            expected_version: parsed.version!,
+          },
+          { actorId: req.actor.id },
+        );
         return sessionResponse(next);
       } catch (e) {
         return mapDomainError(e);
@@ -212,12 +241,17 @@ export function createHandlers(service: PresenterSessionService, metrics?: Prese
       if (!id) return jsonResponse(400, { error: 'VALIDATION', message: 'id is required' });
       const etag = readHeader(req, HEADER_IF_MATCH);
       const parsed = parseEtag(etag);
-      if (!parsed.ok) return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
+      if (!parsed.ok)
+        return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
       try {
-        const next = await service.handover(id, {
-          ...(req.body ?? {}),
-          expected_version: parsed.version!,
-        }, { actorId: req.actor.id });
+        const next = await service.handover(
+          id,
+          {
+            ...(req.body ?? {}),
+            expected_version: parsed.version!,
+          },
+          { actorId: req.actor.id },
+        );
         return sessionResponse(next);
       } catch (e) {
         return mapDomainError(e);
@@ -229,12 +263,17 @@ export function createHandlers(service: PresenterSessionService, metrics?: Prese
       if (!id) return jsonResponse(400, { error: 'VALIDATION', message: 'id is required' });
       const etag = readHeader(req, HEADER_IF_MATCH);
       const parsed = parseEtag(etag);
-      if (!parsed.ok) return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
+      if (!parsed.ok)
+        return jsonResponse(428, { error: 'PRECONDITION_REQUIRED', message: parsed.error });
       try {
-        const next = await service.failover(id, {
-          ...(req.body ?? {}),
-          expected_version: parsed.version!,
-        }, { actorId: req.actor.id });
+        const next = await service.failover(
+          id,
+          {
+            ...(req.body ?? {}),
+            expected_version: parsed.version!,
+          },
+          { actorId: req.actor.id },
+        );
         return sessionResponse(next);
       } catch (e) {
         return mapDomainError(e);

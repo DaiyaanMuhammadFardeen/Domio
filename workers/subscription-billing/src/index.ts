@@ -2,10 +2,7 @@
  * @domio/subscription-billing-worker — barrel export.
  */
 
-export {
-  SubscriptionBillingWorker,
-  InMemorySubscriptionProvider,
-} from './billing.js';
+export { SubscriptionBillingWorker, InMemorySubscriptionProvider } from './billing.js';
 
 export type {
   SubscriptionRecord,

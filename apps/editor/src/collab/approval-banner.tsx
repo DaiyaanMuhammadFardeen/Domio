@@ -78,19 +78,14 @@ export function ApprovalBanner({
   }, [refresh]);
 
   const handleDecision = useCallback(
-    async (
-      requestId: string,
-      decision: 'approve' | 'reject' | 'changes_requested',
-    ) => {
+    async (requestId: string, decision: 'approve' | 'reject' | 'changes_requested') => {
       setBusy(true);
       setError(null);
       try {
         await postDecision(requestId, { decision });
         await refresh();
       } catch (cause) {
-        setError(
-          cause instanceof Error ? cause.message : 'Unable to submit decision.',
-        );
+        setError(cause instanceof Error ? cause.message : 'Unable to submit decision.');
       } finally {
         setBusy(false);
       }
@@ -103,13 +98,9 @@ export function ApprovalBanner({
   // Pick the most relevant request: pending first, then latest.
   const active =
     requests.find((r) => r.status === 'pending') ??
-    requests.reduce((a, b) =>
-      new Date(a.created_at) > new Date(b.created_at) ? a : b,
-    );
+    requests.reduce((a, b) => (new Date(a.created_at) > new Date(b.created_at) ? a : b));
 
-  const canAct =
-    active.status === 'pending' &&
-    active.requested_by !== currentActorId;
+  const canAct = active.status === 'pending' && active.requested_by !== currentActorId;
 
   return (
     <div className={`collab-banner ${statusClass(active.status)}`}>

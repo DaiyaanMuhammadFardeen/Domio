@@ -60,19 +60,21 @@ Phase 00 establishes the Domio monorepo, the contract-first publishing pipeline 
 
 ### Stream A — Monorepo bootstrap and tooling
 
-- **A.1 Repo init and workspace root** *(files: `.gitignore`, `.editorconfig`, `.gitattributes`, `.npmrc`, `.nvmrc`, `pnpm-workspace.yaml`, `turbo.json` or `nx.json` (TBD per §8), root `package.json`)*
+- **A.1 Repo init and workspace root** _(files: `.gitignore`, `.editorconfig`, `.gitattributes`, `.npmrc`, `.nvmrc`, `pnpm-workspace.yaml`, `turbo.json` or `nx.json` (TBD per §8), root `package.json`)_
+
   - Files touched: repo root only.
   - Contracts added/consumed: none.
   - Tests written: `pnpm-workspace.yaml` is fixture-validated by a unit test under `tests/repo/workspace.spec.ts` that asserts each declared workspace path exists.
   - DoD: `pnpm install` succeeds on a clean machine against the mirror; `pnpm -r --filter './packages/*' run typecheck` exits 0 against empty `packages/*/src/index.ts` shims.
 
-- **A.2 Apps/services/workers/packages skeletons** *(files: `apps/web/{package.json,tsconfig.json,src/main.tsx}`, `apps/mobile/.gitkeep`, `apps/desktop/.gitkeep`, `services/template/{README.md,service.yaml}`, `workers/.gitkeep`, `packages/contracts-runtime/{package.json,tsconfig.json,src/index.ts}`, `packages/observability/{package.json,tsconfig.json,src/index.ts}` one each for Node/Go/Python variants)*
+- **A.2 Apps/services/workers/packages skeletons** _(files: `apps/web/{package.json,tsconfig.json,src/main.tsx}`, `apps/mobile/.gitkeep`, `apps/desktop/.gitkeep`, `services/template/{README.md,service.yaml}`, `workers/.gitkeep`, `packages/contracts-runtime/{package.json,tsconfig.json,src/index.ts}`, `packages/observability/{package.json,tsconfig.json,src/index.ts}` one each for Node/Go/Python variants)_
+
   - Files touched: 4 new top-level workspace directories.
   - Contracts added/consumed: consume `contracts/proto/domio/v1/common.proto` in `packages/contracts-runtime/src/index.ts`.
   - Tests written: `packages/contracts-runtime/test/runtime.spec.ts` (round-trips `common.v1.UUID` and verifies buf-generated TS compiles); `packages/observability/test/noop.spec.ts` (verifies SDK initializes with no-op exporter and does not throw).
   - DoD: each skeleton has a CI green badge; `pnpm -r build` produces distributable artifacts for the three runtime SDKs.
 
-- **A.3 Tooling configs** *(files: `.eslintrc.cjs`, `.prettierrc`, `tsconfig.base.json`, `pyproject.toml`, `go.mod` for the `contracts/tools` helper module, `Makefile`, `mise.toml` or `.tool-versions`, `renovate.json`)*
+- **A.3 Tooling configs** _(files: `.eslintrc.cjs`, `.prettierrc`, `tsconfig.base.json`, `pyproject.toml`, `go.mod` for the `contracts/tools` helper module, `Makefile`, `mise.toml` or `.tool-versions`, `renovate.json`)_
   - Files touched: repo root.
   - Contracts added/consumed: none directly; lint rules pin contract artifact checksums via `engines` and Renovate schedules weekly dep updates.
   - Tests written: a snapshot test under `tests/tooling/lint-config.spec.ts` asserts all listed config files exist and parse.
@@ -80,31 +82,35 @@ Phase 00 establishes the Domio monorepo, the contract-first publishing pipeline 
 
 ### Stream B — Contracts directory and tooling
 
-- **B.1 Proto + Buf layout** *(files: `buf.yaml`, `buf.gen.yaml`, `contracts/proto/domio/v1/common.proto` (UUID v4/v7 wrapper, timestamp, page token, locale), `contracts/proto/domio/v1/errors.proto` (error envelope, error codes enum), `contracts/proto/domio/v1/health.proto` (HealthCheck, HealthCheckRequest, HealthCheckResponse))*
+- **B.1 Proto + Buf layout** _(files: `buf.yaml`, `buf.gen.yaml`, `contracts/proto/domio/v1/common.proto` (UUID v4/v7 wrapper, timestamp, page token, locale), `contracts/proto/domio/v1/errors.proto` (error envelope, error codes enum), `contracts/proto/domio/v1/health.proto` (HealthCheck, HealthCheckRequest, HealthCheckResponse))_
+
   - Files touched: new `contracts/proto/domio/v1/` tree.
   - Contracts added: 3 proto files committed under `contracts/proto/domio/v1/`.
   - Tests written: `tests/contracts/proto/buf-breaking.spec.ts` uses `@bufbuild/buf-migrate` and `buf breaking --against .git#branch=main` — must exit 0; `tests/contracts/proto/buf-lint.spec.ts` enforces `ENUM_ZERO_VALUE_SUFFIX`, `ENUM_VALUE_UPPER_SNAKE_CASE`, `PACKAGE_DIRECTORY_MATCH`, `RPC_REQUEST_STANDARD_NAME`, `RPC_RESPONSE_STANDARD_NAME`, `RPC_REQUEST_RESPONSE_UNIQUE`.
   - DoD: `buf lint contracts/proto` and `buf breaking contracts/proto --against .git#branch=main` both pass in CI.
 
-- **B.2 OpenAPI + Spectral layout** *(files: `contracts/openapi/v1/health.yaml`, `contracts/openapi/v1/errors.yaml`, `.spectral.yaml`, `contracts/openapi/.gitignore` excluding generated `node_modules/`)*
+- **B.2 OpenAPI + Spectral layout** _(files: `contracts/openapi/v1/health.yaml`, `contracts/openapi/v1/errors.yaml`, `.spectral.yaml`, `contracts/openapi/.gitignore` excluding generated `node_modules/`)_
+
   - Files touched: new `contracts/openapi/v1/` tree.
   - Contracts added: 2 OpenAPI 3.1 files.
   - Tests written: `tests/contracts/openapi/spectral.spec.ts` runs `spectral lint contracts/openapi/v1/*.yaml` and asserts zero errors, with custom ruleset enforcing `info-contact-required`, `operation-operationId`, `oas3-api-servers`, `operation-success-response`, `no-eval-in-markdown`.
   - DoD: `spectral lint` passes; `spectral oas contracts/openapi/v1/health.yaml` produces a valid document; a generated TS client under `packages/contracts-runtime/src/openapi/health.ts` round-trips a `GET /v1/health` response.
 
-- **B.3 JSON Schema layout** *(files: `contracts/schema/error.schema.json`, `contracts/schema/page.schema.json`, `contracts/schema/envelope.schema.json`, plus `contracts/schema/test/cases/*.json` for ajv fixture-based tests)*
+- **B.3 JSON Schema layout** _(files: `contracts/schema/error.schema.json`, `contracts/schema/page.schema.json`, `contracts/schema/envelope.schema.json`, plus `contracts/schema/test/cases/_.json` for ajv fixture-based tests)\*
+
   - Files touched: new `contracts/schema/` tree.
   - Contracts added: 3 JSON Schema 2020-12 files.
   - Tests written: `tests/contracts/schema/ajv.spec.ts` runs ajv with `strict: true`, `allErrors: true`, `Ajv2019`-style drafts (using `ajv/dist/2020`), validates each schema against positive and negative fixtures committed under `contracts/schema/test/cases/`.
   - DoD: ajv exits 0 across all fixtures; CI job posts a coverage matrix of which fixtures are exercised.
 
-- **B.4 Contract artifact publishing** *(files: `contracts/CHANGELOG.md`, `contracts/VERSION`, `contracts/scripts/publish.sh`, `.github/workflows/contract-publish.yml` skeleton that P01 finishes)*
+- **B.4 Contract artifact publishing** _(files: `contracts/CHANGELOG.md`, `contracts/VERSION`, `contracts/scripts/publish.sh`, `.github/workflows/contract-publish.yml` skeleton that P01 finishes)_
+
   - Files touched: `contracts/` plus a CI skeleton.
   - Contracts added/consumed: consumes every artifact produced by B.1–B.3.
   - Tests written: a hermetic test under `tests/contracts/publish.spec.ts` runs `contracts/scripts/publish.sh --dry-run` and asserts the artifact tarball contains every `*.proto`, `*.yaml`, `*.schema.json`, plus generated TS/Go/Python bindings.
   - DoD: `make contracts:publish-dry-run` succeeds locally; CI job is a skeleton that triggers on tag push `contract-v*.*.*`.
 
-- **B.5 Contract-test harness** *(files: `packages/contracts-runtime/src/testkit/{consumer,provider,compliance}.ts`, `apps/web/test/contracts/health.spec.ts` consumer probe, `services/template/test/contracts/health.spec.ts` provider probe)*
+- **B.5 Contract-test harness** _(files: `packages/contracts-runtime/src/testkit/{consumer,provider,compliance}.ts`, `apps/web/test/contracts/health.spec.ts` consumer probe, `services/template/test/contracts/health.spec.ts` provider probe)_
   - Files touched: `packages/contracts-runtime/` and one consumer/provider probe each.
   - Contracts added/consumed: consumes `contracts/openapi/v1/health.yaml` end-to-end.
   - Tests written: `consumer.spec.ts` uses Pact-style verification against a Pact broker running in Compose (`pact-broker` image); `provider.spec.ts` uses Pact's `Verifications.Provider` against the running web app's `/v1/health` endpoint.
@@ -112,19 +118,21 @@ Phase 00 establishes the Domio monorepo, the contract-first publishing pipeline 
 
 ### Stream C — Docker Compose local dev stack
 
-- **C.1 Core services compose** *(files: `docker-compose.yml`, `infrastructure/postgres/init/00-extensions.sql`, `infrastructure/postgres/init/01-roles.sql`, `infrastructure/postgres/seeds/00-health-check.sql`, `infrastructure/postgres/migrations/0001_health_check.up.sql`/`down.sql`, `infrastructure/nats/nats.conf`, `infrastructure/minio/policy.json`, `infrastructure/valkey/valkey.conf`)*
+- **C.1 Core services compose** _(files: `docker-compose.yml`, `infrastructure/postgres/init/00-extensions.sql`, `infrastructure/postgres/init/01-roles.sql`, `infrastructure/postgres/seeds/00-health-check.sql`, `infrastructure/postgres/migrations/0001_health_check.up.sql`/`down.sql`, `infrastructure/nats/nats.conf`, `infrastructure/minio/policy.json`, `infrastructure/valkey/valkey.conf`)_
+
   - Files touched: `infrastructure/postgres/`, `infrastructure/nats/`, `infrastructure/minio/`, `infrastructure/valkey/`.
   - Contracts added/consumed: none directly; the seeded `health_check` row is consumed by the `services/template` health probe.
   - Tests written: `tests/infrastructure/compose-up.spec.ts` runs `docker compose up -d` then executes `psql` and `nats` checks via short-lived container scripts; tears down with `docker compose down -v`. Asserts all 4 services report healthy within 90 s.
   - DoD: `make dev` brings all four services up clean on a fresh Docker daemon; `make dev-down` removes them; seed data is idempotent.
 
-- **C.2 OpenSearch profile (opt-in)** *(files: `docker-compose.opensearch.yml`, `infrastructure/opensearch/opensearch.yml`)*
+- **C.2 OpenSearch profile (opt-in)** _(files: `docker-compose.opensearch.yml`, `infrastructure/opensearch/opensearch.yml`)_
+
   - Files touched: opt-in profile.
   - Contracts added/consumed: none.
   - Tests written: `tests/infrastructure/opensearch.spec.ts` runs `docker compose --profile search up -d` and asserts the OpenSearch dashboard responds on `:9200`.
   - DoD: documented as opt-in (`COMPOSE_PROFILES=search make dev`); CI job tagged `infrastructure-search` runs weekly.
 
-- **C.3 Bandwidth-aware dependency mirrors** *(files: `infrastructure/mirrors/{npmrc,goproxy,pip.conf,cargo-config.toml}` template, `infrastructure/mirrors/README.md`)*
+- **C.3 Bandwidth-aware dependency mirrors** _(files: `infrastructure/mirrors/{npmrc,goproxy,pip.conf,cargo-config.toml}` template, `infrastructure/mirrors/README.md`)_
   - Files touched: new `infrastructure/mirrors/` tree.
   - Contracts added/consumed: none.
   - Tests written: `tests/infrastructure/mirrors.spec.ts` validates each config file's syntax (TOML/YAML/INI parses) and includes a "fallback to upstream" simulation test that points `MIRROR=upstream` and asserts the upstream URL is reachable from CI.
@@ -132,25 +140,28 @@ Phase 00 establishes the Domio monorepo, the contract-first publishing pipeline 
 
 ### Stream D — Dev environment, contribution, and ADR
 
-- **D.1 `.devcontainer/`** *(files: `.devcontainer/devcontainer.json`, `Dockerfile.dev`, `.devcontainer/post-create.sh`)*
+- **D.1 `.devcontainer/`** _(files: `.devcontainer/devcontainer.json`, `Dockerfile.dev`, `.devcontainer/post-create.sh`)_
+
   - Files touched: `.devcontainer/`.
   - Contracts added/consumed: none.
   - Tests written: post-create script's `make bootstrap && make dev-up && make smoke` invocation is captured under `tests/devcontainer/post-create.spec.ts` and runs in CI's Linux runner with a mocked Docker Compose driver.
   - DoD: devcontainer builds in Codespaces; `make smoke` exits 0 within 5 minutes; documented in `README.md` under "Getting Started".
 
-- **D.2 `CONTRIBUTING.md`, `CODEOWNERS`, `SECURITY.md`** *(files: `CONTRIBUTING.md`, `CODEOWNERS`, `SECURITY.md`, `README.md` updated with badges and a top-level "How to contribute" pointer)*
+- **D.2 `CONTRIBUTING.md`, `CODEOWNERS`, `SECURITY.md`** _(files: `CONTRIBUTING.md`, `CODEOWNERS`, `SECURITY.md`, `README.md` updated with badges and a top-level "How to contribute" pointer)_
+
   - Files touched: repo root + `README.md`.
   - Contracts added/consumed: none.
   - Tests written: `tests/repo/governance.spec.ts` asserts each required section heading exists (Semantic Versioning policy, branch protection rules, security disclosure email, codeowner mapping for the four domains).
   - DoD: CODEOWNERS resolves at least one owner per `/contracts`, `/infrastructure`, `/apps/web`, `/services`; `CONTRIBUTING.md` references the ADR process and the contract-test harness.
 
-- **D.3 ADR process and seed ADR** *(files: `docs/adr/README.md` (template + numbering policy), `docs/adr/0001-monorepo-and-contracts.md`, `docs/adr/0002-adr-process.md`)*
+- **D.3 ADR process and seed ADR** _(files: `docs/adr/README.md` (template + numbering policy), `docs/adr/0001-monorepo-and-contracts.md`, `docs/adr/0002-adr-process.md`)_
+
   - Files touched: `docs/adr/`.
   - Contracts added/consumed: none.
   - Tests written: `tests/adr/specfrontmatter.spec.ts` asserts every ADR under `docs/adr/*.md` begins with valid `<!-- markdownlint-disable -->` metadata including Status, Date, Deciders, Context, Decision, Consequences.
   - DoD: ADR 0001 captures the monorepo layout choice, the contract-first policy, the CI breaking-change gate, and the bandwidth-mirror default; ADR 0002 documents the process itself; CI job `adr-lint` fails on missing frontmatter.
 
-- **D.4 Make-driven developer workflow** *(files: `Makefile`, `scripts/bootstrap.sh`, `scripts/dev-up.sh`, `scripts/dev-down.sh`, `scripts/smoke.sh`)*
+- **D.4 Make-driven developer workflow** _(files: `Makefile`, `scripts/bootstrap.sh`, `scripts/dev-up.sh`, `scripts/dev-down.sh`, `scripts/smoke.sh`)_
   - Files touched: `Makefile`, `scripts/`.
   - Contracts added/consumed: none.
   - Tests written: a shell-spec test under `tests/makefile/spec.sh` runs each target on a clean checkout and asserts expected exit codes + log markers.
@@ -158,19 +169,21 @@ Phase 00 establishes the Domio monorepo, the contract-first publishing pipeline 
 
 ### Stream E — Observability SDK shells (no real backend yet)
 
-- **E.1 TypeScript observability shell** *(files: `packages/observability/src/{trace,metrics,logs,context}.ts`, `packages/observability/src/exporters/{noop,otlp-http}.ts` (no-op only, OTLP HTTP stubbed), `packages/observability/test/observability.spec.ts`)*
+- **E.1 TypeScript observability shell** _(files: `packages/observability/src/{trace,metrics,logs,context}.ts`, `packages/observability/src/exporters/{noop,otlp-http}.ts` (no-op only, OTLP HTTP stubbed), `packages/observability/test/observability.spec.ts`)_
+
   - Files touched: `packages/observability/`.
   - Contracts added/consumed: none.
   - Tests written: `observability.spec.ts` asserts the no-op exporter is selected when `OTEL_EXPORTER_OTLP_ENDPOINT` is unset, and that the OTLP HTTP exporter throws a clear "phase 01 not configured" error if set without a collector URL (the real wiring is P01).
   - DoD: SDK exports named functions `startSpan`, `recordMetric`, `emitLog`, `withContext`; default no-op behavior verified in CI.
 
-- **E.2 Go observability shell** *(files: `packages/observability-go/{go.mod,observe.go,noop.go}`, `packages/observability-go/observe_test.go`)*
+- **E.2 Go observability shell** _(files: `packages/observability-go/{go.mod,observe.go,noop.go}`, `packages/observability-go/observe_test.go`)_
+
   - Files touched: new Go module mirroring the TS shape.
   - Contracts added/consumed: none.
   - Tests written: `observe_test.go` asserts the no-op path and the documented "phase 01 not configured" error path.
   - DoD: `go test ./...` passes.
 
-- **E.3 Python observability shell** *(files: `packages/observability-py/{pyproject.toml,domio_obs/__init__.py,noop.py}`, `packages/observability-py/tests/test_obs.py`)*
+- **E.3 Python observability shell** _(files: `packages/observability-py/{pyproject.toml,domio_obs/__init__.py,noop.py}`, `packages/observability-py/tests/test_obs.py`)_
   - Files touched: new Python package mirroring the TS shape.
   - Contracts added/consumed: none.
   - Tests written: `test_obs.py` mirrors the TS test in Python.
@@ -178,7 +191,7 @@ Phase 00 establishes the Domio monorepo, the contract-first publishing pipeline 
 
 ### Cross-cutting: test infrastructure
 
-- **X.1 Test kit and CI gating** *(files: `packages/testkit/src/{factories,migrations,smoke}.ts`, `.github/workflows/{lint,type,unit,contract,axe,threat-model-diff,schema-migration-lint}.yml` as skeletons)*
+- **X.1 Test kit and CI gating** _(files: `packages/testkit/src/{factories,migrations,smoke}.ts`, `.github/workflows/{lint,type,unit,contract,axe,threat-model-diff,schema-migration-lint}.yml` as skeletons)_
   - Files touched: `packages/testkit/` plus CI skeletons.
   - Contracts added/consumed: consumes every contract under `contracts/` via the testkit's Pact/buf/ajv drivers.
   - Tests written: `packages/testkit/test/testkit.spec.ts` exposes a `describeContract` helper that's then exercised by the consumer/provider probes in B.5.
@@ -262,25 +275,25 @@ A single forward-only migration: `infrastructure/postgres/migrations/0001_health
 
 ## 7. Verification
 
-| Feature / acceptance item | Test (file / command) | Expected result | Owner |
-|---|---|---|---|
-| Fresh checkout succeeds on 4 Mbps link | `tests/devcontainer/post-create.spec.ts` (timed) | `make bootstrap && make dev-up && make smoke && make dev-down` exits 0 within 30 min wall clock | Platform Foundations |
-| Service template serves `/v1/health` JSON | `tests/infrastructure/smoke.sh` + Pact consumer in B.5 | 200, body matches `contracts/openapi/v1/health.yaml` | Contracts Lead |
-| Service template serves gRPC `Health.Check` | `packages/contracts-runtime/test/health-grpc.spec.ts` | `SERVING`; gRPC trailer empty | Contracts Lead |
-| Proto breaking-change gate holds | `.github/workflows/contract.yml` job `buf-breaking` | `buf breaking --against .git#branch=main` exits 0; intentional break in a feature branch fails CI | Contracts Lead |
-| Spectral lint clean | `.github/workflows/contract.yml` job `spectral-lint` | `spectral lint contracts/openapi/v1/*.yaml` exits 0 | Contracts Lead |
-| ajv strict-pass on JSON Schema fixtures | `tests/contracts/schema/ajv.spec.ts` | All fixtures classify as valid/invalid correctly | Contracts Lead |
-| Contract-test harness works | `apps/web/test/contracts/health.spec.ts` + `services/template/test/contracts/health.spec.ts` | Pact publish + verification succeed against docker-compose stack | Contracts Lead |
-| Postgres migration applies forward & rolls back | `tests/infrastructure/migrate.spec.ts` | `sqlx migrate run` and `sqlx migrate revert` both exit 0 | Platform Foundations |
-| Docker Compose stack comes up clean | `tests/infrastructure/compose-up.spec.ts` | 4 services `healthy`, `:5432`, `:4222`, `:9000`, `:6379` reachable | Platform Foundations |
-| OpenSearch opt-in profile works | `tests/infrastructure/opensearch.spec.ts` | `:9200` returns cluster health `green` | Platform Foundations |
-| Bandwidth-mirror config parses and routes | `tests/infrastructure/mirrors.spec.ts` | `MIRROR=local` & `MIRROR=upstream` both parse; CI reaches upstream | Platform Foundations |
-| Observability SDK shells compile & run no-op | per-runtime tests in E.1–E.3 | All three SDKs import, init, and produce no network calls by default | Platform Foundations |
-| ADR process and seed ADR exist | `tests/adr/specfrontmatter.spec.ts` + `adr-lint` GitHub Action | Required frontmatter present; ADR 0001 captures the contract decision | Platform Foundations |
-| `CODEOWNERS` valid and complete | `tests/repo/governance.spec.ts` | At least one owner per `/contracts`, `/infrastructure`, `/apps/web`, `/services` | Eng Productivity |
-| `make smoke` green from `main` | GitHub Actions `smoke.yml` | Single green check; logs show `domio P00 smoke: ok` | Platform Foundations |
-| Threat-model-diff placeholder exists | `.github/workflows/threat-model-diff.yml` lint | Workflow parses; runs against an empty `threat-model/` with a positive acknowledgment | Security Lead |
-| Schema-migration-lint placeholder exists | `.github/workflows/schema-migration-lint.yml` | Workflow parses; on the single migration in this phase it passes | Platform Foundations |
+| Feature / acceptance item                       | Test (file / command)                                                                        | Expected result                                                                                   | Owner                |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------- |
+| Fresh checkout succeeds on 4 Mbps link          | `tests/devcontainer/post-create.spec.ts` (timed)                                             | `make bootstrap && make dev-up && make smoke && make dev-down` exits 0 within 30 min wall clock   | Platform Foundations |
+| Service template serves `/v1/health` JSON       | `tests/infrastructure/smoke.sh` + Pact consumer in B.5                                       | 200, body matches `contracts/openapi/v1/health.yaml`                                              | Contracts Lead       |
+| Service template serves gRPC `Health.Check`     | `packages/contracts-runtime/test/health-grpc.spec.ts`                                        | `SERVING`; gRPC trailer empty                                                                     | Contracts Lead       |
+| Proto breaking-change gate holds                | `.github/workflows/contract.yml` job `buf-breaking`                                          | `buf breaking --against .git#branch=main` exits 0; intentional break in a feature branch fails CI | Contracts Lead       |
+| Spectral lint clean                             | `.github/workflows/contract.yml` job `spectral-lint`                                         | `spectral lint contracts/openapi/v1/*.yaml` exits 0                                               | Contracts Lead       |
+| ajv strict-pass on JSON Schema fixtures         | `tests/contracts/schema/ajv.spec.ts`                                                         | All fixtures classify as valid/invalid correctly                                                  | Contracts Lead       |
+| Contract-test harness works                     | `apps/web/test/contracts/health.spec.ts` + `services/template/test/contracts/health.spec.ts` | Pact publish + verification succeed against docker-compose stack                                  | Contracts Lead       |
+| Postgres migration applies forward & rolls back | `tests/infrastructure/migrate.spec.ts`                                                       | `sqlx migrate run` and `sqlx migrate revert` both exit 0                                          | Platform Foundations |
+| Docker Compose stack comes up clean             | `tests/infrastructure/compose-up.spec.ts`                                                    | 4 services `healthy`, `:5432`, `:4222`, `:9000`, `:6379` reachable                                | Platform Foundations |
+| OpenSearch opt-in profile works                 | `tests/infrastructure/opensearch.spec.ts`                                                    | `:9200` returns cluster health `green`                                                            | Platform Foundations |
+| Bandwidth-mirror config parses and routes       | `tests/infrastructure/mirrors.spec.ts`                                                       | `MIRROR=local` & `MIRROR=upstream` both parse; CI reaches upstream                                | Platform Foundations |
+| Observability SDK shells compile & run no-op    | per-runtime tests in E.1–E.3                                                                 | All three SDKs import, init, and produce no network calls by default                              | Platform Foundations |
+| ADR process and seed ADR exist                  | `tests/adr/specfrontmatter.spec.ts` + `adr-lint` GitHub Action                               | Required frontmatter present; ADR 0001 captures the contract decision                             | Platform Foundations |
+| `CODEOWNERS` valid and complete                 | `tests/repo/governance.spec.ts`                                                              | At least one owner per `/contracts`, `/infrastructure`, `/apps/web`, `/services`                  | Eng Productivity     |
+| `make smoke` green from `main`                  | GitHub Actions `smoke.yml`                                                                   | Single green check; logs show `domio P00 smoke: ok`                                               | Platform Foundations |
+| Threat-model-diff placeholder exists            | `.github/workflows/threat-model-diff.yml` lint                                               | Workflow parses; runs against an empty `threat-model/` with a positive acknowledgment             | Security Lead        |
+| Schema-migration-lint placeholder exists        | `.github/workflows/schema-migration-lint.yml`                                                | Workflow parses; on the single migration in this phase it passes                                  | Platform Foundations |
 
 ## 8. Risks & open decisions
 

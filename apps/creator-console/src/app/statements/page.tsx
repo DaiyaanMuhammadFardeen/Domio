@@ -4,11 +4,7 @@ import { useEffect, useState } from 'react';
 import { StatementTable } from '../../components/statements/StatementTable';
 import { StatementDetail } from '../../components/statements/StatementDetail';
 import { useI18n } from '../../lib/i18n';
-import {
-  generateStatement,
-  getStatement,
-  listStatements,
-} from '../../lib/statement-service';
+import { generateStatement, getStatement, listStatements } from '../../lib/statement-service';
 import type { Statement } from '../../lib/types';
 
 const CREATOR_ID = 'creator-demo';
@@ -46,21 +42,15 @@ export default function StatementsPage() {
   return (
     <div data-testid="statements-page" className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t('creator.statements.heading')}
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {t('creator.statements.subheading')}
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('creator.statements.heading')}</h1>
+        <p className="mt-1 text-sm text-slate-500">{t('creator.statements.subheading')}</p>
       </header>
 
       <section
         data-testid="statements-generate"
         className="rounded-xl border border-slate-200 bg-white p-4"
       >
-        <h2 className="text-sm font-semibold text-slate-900">
-          {t('creator.statements.generate')}
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-900">{t('creator.statements.generate')}</h2>
         <div className="mt-3 flex items-end gap-3">
           <div>
             <label

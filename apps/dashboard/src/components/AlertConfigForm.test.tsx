@@ -58,8 +58,6 @@ describe('AlertConfigForm', () => {
     await waitFor(() => {
       expect(onSave).not.toHaveBeenCalled();
     });
-    expect(
-      screen.getByText(/Channel target is required/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Channel target is required/)).toBeInTheDocument();
   });
 });

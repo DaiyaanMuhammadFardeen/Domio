@@ -107,7 +107,7 @@ function entryToRow(e: SlideLibraryEntry): Record<string, unknown> {
     description: e.description ?? null,
     tags: [...e.tags],
     owner_id: e.owner_id,
-    approval_chain: e.approval_chain,  // node-pg returns parsed jsonb
+    approval_chain: e.approval_chain, // node-pg returns parsed jsonb
     status: e.status,
     version_id: e.version_id,
     superseded_by: e.superseded_by ?? null,
@@ -203,7 +203,7 @@ describe('PgLibraryStore — insertEntry', () => {
     const q = captured[0]!;
     expect(q.sql).toContain('INSERT INTO slide_library_entry');
     expect(q.sql).toContain('$7::text[]'); // tags
-    expect(q.sql).toContain('$9::jsonb');  // approval_chain
+    expect(q.sql).toContain('$9::jsonb'); // approval_chain
     // Verify parameter values
     expect(q.params[0]).toBe('ent-001');
     expect(q.params[2]).toBe('workspace');
@@ -324,8 +324,9 @@ describe('PgLibraryStore — updateEntry', () => {
   it('throws EntryNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgLibraryStore(pool as any);
-    await expect(store.updateEntry('nonexistent', { status: 'approved' }))
-      .rejects.toThrow(EntryNotFoundError);
+    await expect(store.updateEntry('nonexistent', { status: 'approved' })).rejects.toThrow(
+      EntryNotFoundError,
+    );
   });
 
   it('skips update when patch is empty and returns existing', async () => {
@@ -560,15 +561,15 @@ describe('PgLibraryStore — bindings', () => {
   it('updateBinding throws BindingNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgLibraryStore(pool as any);
-    await expect(store.updateBinding('nonexistent', { mode: 'frozen' }))
-      .rejects.toThrow(BindingNotFoundError);
+    await expect(store.updateBinding('nonexistent', { mode: 'frozen' })).rejects.toThrow(
+      BindingNotFoundError,
+    );
   });
 
   it('deleteBinding issues DELETE and throws BindingNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgLibraryStore(pool as any);
-    await expect(store.deleteBinding('nonexistent'))
-      .rejects.toThrow(BindingNotFoundError);
+    await expect(store.deleteBinding('nonexistent')).rejects.toThrow(BindingNotFoundError);
   });
 
   it('deleteBinding succeeds when found', async () => {
@@ -647,7 +648,11 @@ describe('PgLibraryStore — withTransaction', () => {
     });
 
     expect(result).toBe('done');
-    expect(queries).toEqual(['BEGIN', 'INSERT INTO slide_library_entry (...) VALUES (...)', 'COMMIT']);
+    expect(queries).toEqual([
+      'BEGIN',
+      'INSERT INTO slide_library_entry (...) VALUES (...)',
+      'COMMIT',
+    ]);
     expect(fakeClient.release).toHaveBeenCalledOnce();
   });
 

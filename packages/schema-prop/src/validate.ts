@@ -5,9 +5,7 @@
  * dependency in the editor hot path.
  */
 
-import {
-  domioFormat,
-} from './format.js';
+import { domioFormat } from './format.js';
 import type {
   DomioPropsSchema,
   PropSchemaFragment,
@@ -121,7 +119,12 @@ export function validateFragment(
   path: string,
   coerce = false,
 ): FragmentResult {
-  const types = fragment.type === undefined ? null : Array.isArray(fragment.type) ? fragment.type : [fragment.type];
+  const types =
+    fragment.type === undefined
+      ? null
+      : Array.isArray(fragment.type)
+        ? fragment.type
+        : [fragment.type];
 
   // --- type check (with optional coercion) ---
   if (types) {
@@ -147,9 +150,15 @@ export function validateFragment(
     }
   }
   if (fragment.enum !== undefined) {
-    const matched = fragment.enum.some((candidate) => deepEqual(value, candidate) || looseEqual(value, candidate));
+    const matched = fragment.enum.some(
+      (candidate) => deepEqual(value, candidate) || looseEqual(value, candidate),
+    );
     if (!matched) {
-      return fail(path, 'enum', `Value must be one of ${fragment.enum.map((e) => JSON.stringify(e)).join(', ')}.`);
+      return fail(
+        path,
+        'enum',
+        `Value must be one of ${fragment.enum.map((e) => JSON.stringify(e)).join(', ')}.`,
+      );
     }
   }
 
@@ -212,7 +221,12 @@ export function validateFragment(
     }
     if (fragment.items) {
       value.forEach((item, i) => {
-        const r = validateFragment(fragment.items as PropSchemaFragment, item, `${path}[${i}]`, coerce);
+        const r = validateFragment(
+          fragment.items as PropSchemaFragment,
+          item,
+          `${path}[${i}]`,
+          coerce,
+        );
         if (!r.ok) {
           anyFailed = true;
           itemErrors.push(...r.errors);
@@ -235,7 +249,11 @@ export function validateFragment(
       for (const req of fragment.required) {
         if (record[req] === undefined) {
           anyFailed = true;
-          errors.push({ path: `${path}.${req}`, code: 'required', message: `Missing required property "${req}".` });
+          errors.push({
+            path: `${path}.${req}`,
+            code: 'required',
+            message: `Missing required property "${req}".`,
+          });
         }
       }
     }
@@ -275,11 +293,17 @@ export function validateFragment(
       return r.ok;
     });
     if (matches.length !== 1) {
-      return fail(path, 'one_of', `Value must match exactly one branch (matched ${matches.length}).`);
+      return fail(
+        path,
+        'one_of',
+        `Value must match exactly one branch (matched ${matches.length}).`,
+      );
     }
   }
   if (fragment.anyOf) {
-    const matched = fragment.anyOf.some((branch) => validateFragment(branch, value, path, false).ok);
+    const matched = fragment.anyOf.some(
+      (branch) => validateFragment(branch, value, path, false).ok,
+    );
     if (!matched) {
       return fail(path, 'any_of', 'Value must match at least one branch.');
     }
@@ -328,14 +352,23 @@ function coerceValue(types: string[], value: unknown): unknown {
 function isValidFormat(format: string, value: string): boolean {
   switch (format) {
     case 'color':
-      return /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value) ||
-        /^rgba?\(/.test(value) || /^hsla?\(/.test(value);
+      return (
+        /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value) ||
+        /^rgba?\(/.test(value) ||
+        /^hsla?\(/.test(value)
+      );
     case 'color-with-alpha':
-      return /^#(?:[0-9a-fA-F]{4}|[0-9a-fA-F]{8})$/.test(value) || /^rgba?\(/.test(value) || /^hsla?\(/.test(value);
+      return (
+        /^#(?:[0-9a-fA-F]{4}|[0-9a-fA-F]{8})$/.test(value) ||
+        /^rgba?\(/.test(value) ||
+        /^hsla?\(/.test(value)
+      );
     case 'font-family':
       return value.trim().length > 0 && value.trim().length <= 120;
     case 'asset-ref':
-      return /^[a-zA-Z0-9_-]+[/:][a-zA-Z0-9._-]+$/.test(value) || /^[0-9A-HJKMNP-TV-Z]{26}$/.test(value);
+      return (
+        /^[a-zA-Z0-9_-]+[/:][a-zA-Z0-9._-]+$/.test(value) || /^[0-9A-HJKMNP-TV-Z]{26}$/.test(value)
+      );
     case 'data-binding':
       return value.length > 0;
     case 'enum-friendly-name':
@@ -360,7 +393,8 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 
 function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
-  if (typeof a === 'number' && typeof b === 'number' && Number.isNaN(a) && Number.isNaN(b)) return true;
+  if (typeof a === 'number' && typeof b === 'number' && Number.isNaN(a) && Number.isNaN(b))
+    return true;
   if (isPlainObject(a) && isPlainObject(b)) {
     const ka = Object.keys(a);
     const kb = Object.keys(b);

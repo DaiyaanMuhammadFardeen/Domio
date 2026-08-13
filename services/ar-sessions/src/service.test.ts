@@ -29,11 +29,7 @@ const SLIDE_ID = '550e8400-e29b-41d4-a716-446655440000';
 const MODEL_ID = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 const NOW = 1700000000000;
 
-function makeService(opts?: {
-  clock?: () => number;
-  ttlMs?: number;
-  inactivityMs?: number;
-}) {
+function makeService(opts?: { clock?: () => number; ttlMs?: number; inactivityMs?: number }) {
   return new SessionService({
     clock: opts?.clock ?? (() => NOW),
     ttlMs: opts?.ttlMs ?? 30 * 60 * 1000,
@@ -66,18 +62,22 @@ describe('SessionService — createSession', () => {
 
   it('rejects missing slideId', async () => {
     const svc = makeService();
-    await expect(svc.createSession({
-      slideId: '',
-      modelAssetId: MODEL_ID,
-    })).rejects.toThrow(SessionValidationError);
+    await expect(
+      svc.createSession({
+        slideId: '',
+        modelAssetId: MODEL_ID,
+      }),
+    ).rejects.toThrow(SessionValidationError);
   });
 
   it('rejects missing modelAssetId', async () => {
     const svc = makeService();
-    await expect(svc.createSession({
-      slideId: SLIDE_ID,
-      modelAssetId: '',
-    })).rejects.toThrow(SessionValidationError);
+    await expect(
+      svc.createSession({
+        slideId: SLIDE_ID,
+        modelAssetId: '',
+      }),
+    ).rejects.toThrow(SessionValidationError);
   });
 
   it('respects custom TTL', async () => {
@@ -294,11 +294,13 @@ describe('SessionService — rotateKey', () => {
     // Old token should fail verification with new secret
     // (We need to get the new secret to test this properly)
     const updated = await svc.getSession(session.id);
-    expect(() => verifyToken({
-      token: oldToken,
-      secret: updated._secret,
-      kid: updated._kid,
-    })).toThrow();
+    expect(() =>
+      verifyToken({
+        token: oldToken,
+        secret: updated._secret,
+        kid: updated._kid,
+      }),
+    ).toThrow();
   });
 
   it('throws for unknown session', async () => {
@@ -346,7 +348,9 @@ describe('SessionService — verifySessionToken', () => {
 
   it('throws for unknown session', async () => {
     const svc = makeService();
-    await expect(svc.verifySessionToken('nonexistent', 'token')).rejects.toThrow(SessionNotFoundError);
+    await expect(svc.verifySessionToken('nonexistent', 'token')).rejects.toThrow(
+      SessionNotFoundError,
+    );
   });
 
   it('throws for invalidated session', async () => {
@@ -358,7 +362,9 @@ describe('SessionService — verifySessionToken', () => {
 
     await svc.invalidateSession(session.id);
 
-    await expect(svc.verifySessionToken(session.id, session.token)).rejects.toThrow(SessionInvalidatedError);
+    await expect(svc.verifySessionToken(session.id, session.token)).rejects.toThrow(
+      SessionInvalidatedError,
+    );
   });
 });
 

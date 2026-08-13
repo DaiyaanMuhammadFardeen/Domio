@@ -26,11 +26,22 @@ beforeEach(() => {
     state: 'inactive' | 'recording' | 'paused' = 'inactive';
     ondataavailable: ((ev: unknown) => void) | null = null;
     onstop: (() => void) | null = null;
-    constructor(_stream: MediaStream) { /* noop */ }
-    start() { this.state = 'recording'; }
-    pause() { this.state = 'paused'; }
-    resume() { this.state = 'recording'; }
-    stop() { this.state = 'inactive'; this.onstop?.(); }
+    constructor(_stream: MediaStream) {
+      /* noop */
+    }
+    start() {
+      this.state = 'recording';
+    }
+    pause() {
+      this.state = 'paused';
+    }
+    resume() {
+      this.state = 'recording';
+    }
+    stop() {
+      this.state = 'inactive';
+      this.onstop?.();
+    }
   }
   Object.defineProperty(globalThis, 'MediaRecorder', {
     configurable: true,
@@ -44,8 +55,9 @@ beforeEach(() => {
       value: { getUserMedia: vi.fn().mockRejectedValue(new Error('no camera')) },
     });
   } else {
-    (navigator.mediaDevices as unknown as { getUserMedia: typeof vi.fn }).getUserMedia =
-      vi.fn().mockRejectedValue(new Error('no camera'));
+    (navigator.mediaDevices as unknown as { getUserMedia: typeof vi.fn }).getUserMedia = vi
+      .fn()
+      .mockRejectedValue(new Error('no camera'));
   }
 });
 
@@ -56,26 +68,14 @@ afterEach(() => {
 
 describe('AICoach', () => {
   it('renders the header and idle state', () => {
-    render(
-      <AICoach
-        sessionId="sess-1"
-        deckId="deck-1"
-        slides={SLIDES}
-      />,
-    );
+    render(<AICoach sessionId="sess-1" deckId="deck-1" slides={SLIDES} />);
     expect(screen.getByTestId('ai-coach')).toBeInTheDocument();
     expect(screen.getByText('AI rehearsal coach')).toBeInTheDocument();
     expect(screen.getByTestId('ai-coach-start')).toBeInTheDocument();
   });
 
   it('shows the live metrics after starting', async () => {
-    render(
-      <AICoach
-        sessionId="sess-1"
-        deckId="deck-1"
-        slides={SLIDES}
-      />,
-    );
+    render(<AICoach sessionId="sess-1" deckId="deck-1" slides={SLIDES} />);
     fireEvent.click(screen.getByTestId('ai-coach-start'));
     await waitFor(() => {
       expect(screen.getByTestId('pace-tracker')).toBeInTheDocument();
@@ -85,13 +85,7 @@ describe('AICoach', () => {
   });
 
   it('marks "Slow" when WPM is below the target window', async () => {
-    render(
-      <AICoach
-        sessionId="sess-1"
-        deckId="deck-1"
-        slides={SLIDES}
-      />,
-    );
+    render(<AICoach sessionId="sess-1" deckId="deck-1" slides={SLIDES} />);
     fireEvent.click(screen.getByTestId('ai-coach-start'));
     await waitFor(() => {
       expect(screen.getByTestId('pace-tracker')).toBeInTheDocument();
@@ -119,13 +113,7 @@ describe('AICoach', () => {
       }),
     }) as unknown as typeof fetch;
 
-    render(
-      <AICoach
-        sessionId="sess-1"
-        deckId="deck-1"
-        slides={SLIDES}
-      />,
-    );
+    render(<AICoach sessionId="sess-1" deckId="deck-1" slides={SLIDES} />);
     fireEvent.click(screen.getByTestId('ai-coach-start'));
     await waitFor(() => {
       expect(screen.getByTestId('ai-coach-end')).toBeInTheDocument();
@@ -144,13 +132,7 @@ describe('AICoach', () => {
   it('falls back to offline feedback when the backend is unreachable', async () => {
     globalThis.fetch = vi.fn().mockRejectedValue(new Error('offline')) as unknown as typeof fetch;
 
-    render(
-      <AICoach
-        sessionId="sess-2"
-        deckId="deck-2"
-        slides={SLIDES}
-      />,
-    );
+    render(<AICoach sessionId="sess-2" deckId="deck-2" slides={SLIDES} />);
     fireEvent.click(screen.getByTestId('ai-coach-start'));
     await waitFor(() => {
       expect(screen.getByTestId('ai-coach-end')).toBeInTheDocument();

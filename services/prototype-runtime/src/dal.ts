@@ -83,7 +83,12 @@ export interface ConditionalRuleRepository {
   insert(record: ConditionalRule): Promise<void>;
   findById(id: string, tenantId: string): Promise<ConditionalRule | null>;
   listByDeck(deckId: string, tenantId: string): Promise<ConditionalRule[]>;
-  update(id: string, tenantId: string, patch: ConditionalRulePatch, version: number): Promise<ConditionalRule>;
+  update(
+    id: string,
+    tenantId: string,
+    patch: ConditionalRulePatch,
+    version: number,
+  ): Promise<ConditionalRule>;
   delete(id: string, tenantId: string): Promise<void>;
 }
 
@@ -116,11 +121,18 @@ export interface QuizResultRepository {
 
 export interface LlmReviewQueueRepository {
   insert(record: LlmReviewQueueItem): Promise<void>;
-  listByTenant(tenantId: string, status?: LlmReviewQueueItem['status']): Promise<LlmReviewQueueItem[]>;
+  listByTenant(
+    tenantId: string,
+    status?: LlmReviewQueueItem['status'],
+  ): Promise<LlmReviewQueueItem[]>;
   update(
     id: string,
     tenantId: string,
-    patch: { readonly status?: LlmReviewQueueItem['status']; readonly reviewerId?: string | null; readonly overrideScore?: number | null },
+    patch: {
+      readonly status?: LlmReviewQueueItem['status'];
+      readonly reviewerId?: string | null;
+      readonly overrideScore?: number | null;
+    },
   ): Promise<LlmReviewQueueItem>;
 }
 
@@ -130,7 +142,12 @@ export interface PresentationSequenceRepository {
   insert(record: PresentationSequence): Promise<void>;
   findById(id: string, tenantId: string): Promise<PresentationSequence | null>;
   listByDeck(deckId: string, tenantId: string): Promise<PresentationSequence[]>;
-  update(id: string, tenantId: string, patch: PresentationSequencePatch, version: number): Promise<PresentationSequence>;
+  update(
+    id: string,
+    tenantId: string,
+    patch: PresentationSequencePatch,
+    version: number,
+  ): Promise<PresentationSequence>;
   delete(id: string, tenantId: string): Promise<void>;
 }
 
@@ -141,44 +158,84 @@ export interface PresentationSequenceRepository {
 // gives the service a writable harness.
 type Writable<T> = { -readonly [K in keyof T]: T[K] };
 
-export type HotspotPatch = Partial<Writable<Pick<Hotspot,
-  'name' | 'geometry' | 'gestureMask' | 'zIndex' | 'targetType' | 'targetRef' | 'status'
->>>;
+export type HotspotPatch = Partial<
+  Writable<
+    Pick<
+      Hotspot,
+      'name' | 'geometry' | 'gestureMask' | 'zIndex' | 'targetType' | 'targetRef' | 'status'
+    >
+  >
+>;
 
-export type OverlayPatch = Partial<Writable<Pick<Overlay,
-  'name' | 'type' | 'sizeStrategy' | 'anchor' | 'openTrigger' | 'closeTrigger' | 'persistent' | 'schema'
->>>;
+export type OverlayPatch = Partial<
+  Writable<
+    Pick<
+      Overlay,
+      | 'name'
+      | 'type'
+      | 'sizeStrategy'
+      | 'anchor'
+      | 'openTrigger'
+      | 'closeTrigger'
+      | 'persistent'
+      | 'schema'
+    >
+  >
+>;
 
-export type BranchingEdgePatch = Partial<Writable<Pick<BranchingEdge,
-  'toSlideId' | 'name' | 'ruleId' | 'priority'
->>>;
+export type BranchingEdgePatch = Partial<
+  Writable<Pick<BranchingEdge, 'toSlideId' | 'name' | 'ruleId' | 'priority'>>
+>;
 
-export type VariablePatch = Partial<Writable<Pick<Variable,
-  'scope' | 'enumValues' | 'min' | 'max' | 'defaultValue' | 'visibility' | 'readOnly'
->>>;
+export type VariablePatch = Partial<
+  Writable<
+    Pick<
+      Variable,
+      'scope' | 'enumValues' | 'min' | 'max' | 'defaultValue' | 'visibility' | 'readOnly'
+    >
+  >
+>;
 
-export type ConditionalRulePatch = Partial<Writable<Pick<ConditionalRule,
-  'name' | 'priority' | 'condition' | 'conditionSource' | 'scopeSlideId' | 'action' | 'enabled'
->>>;
+export type ConditionalRulePatch = Partial<
+  Writable<
+    Pick<
+      ConditionalRule,
+      'name' | 'priority' | 'condition' | 'conditionSource' | 'scopeSlideId' | 'action' | 'enabled'
+    >
+  >
+>;
 
-export type QuizPatch = Partial<Writable<Pick<Quiz,
-  'name' | 'questions' | 'passThreshold'
->>>;
+export type QuizPatch = Partial<Writable<Pick<Quiz, 'name' | 'questions' | 'passThreshold'>>>;
 
-export type QuizAttemptPatch = Partial<Writable<Pick<QuizAttempt,
-  'currentQuestionId' | 'status' | 'completedAt' | 'score' | 'passed'
->>>;
+export type QuizAttemptPatch = Partial<
+  Writable<Pick<QuizAttempt, 'currentQuestionId' | 'status' | 'completedAt' | 'score' | 'passed'>>
+>;
 
-export type PresentationSequencePatch = Partial<Writable<Pick<PresentationSequence,
-  'name' | 'slides' | 'intervalMs' | 'pauseOnEvent' | 'loop' | 'count'
-  | 'interruptionPolicy' | 'reducedMotionDefaultOff' | 'pauseWarnAtMs'
->>>;
+export type PresentationSequencePatch = Partial<
+  Writable<
+    Pick<
+      PresentationSequence,
+      | 'name'
+      | 'slides'
+      | 'intervalMs'
+      | 'pauseOnEvent'
+      | 'loop'
+      | 'count'
+      | 'interruptionPolicy'
+      | 'reducedMotionDefaultOff'
+      | 'pauseWarnAtMs'
+    >
+  >
+>;
 
 // ── Errors ─────────────────────────────────────────────────────────────
 
 export class NotFoundError extends Error {
   readonly code = 'NOT_FOUND' as const;
-  constructor(public readonly resource: string, public readonly id: string) {
+  constructor(
+    public readonly resource: string,
+    public readonly id: string,
+  ) {
     super(`${resource} ${id} not found`);
     this.name = 'NotFoundError';
   }
@@ -198,7 +255,10 @@ export class VersionConflictError extends Error {
 
 export class DuplicateVariableNameError extends Error {
   readonly code = 'DUPLICATE_VARIABLE_NAME' as const;
-  constructor(public readonly deckId: string, public readonly name: string) {
+  constructor(
+    public readonly deckId: string,
+    public readonly name: string,
+  ) {
     super(`Variable "${name}" already exists in deck ${deckId}`);
     this.name = 'DuplicateVariableNameError';
   }
@@ -206,7 +266,10 @@ export class DuplicateVariableNameError extends Error {
 
 export class DuplicateBranchingEdgeError extends Error {
   readonly code = 'DUPLICATE_BRANCHING_EDGE' as const;
-  constructor(public readonly fromSlideId: string, public readonly toSlideId: string) {
+  constructor(
+    public readonly fromSlideId: string,
+    public readonly toSlideId: string,
+  ) {
     super(`Branching edge ${fromSlideId} → ${toSlideId} already exists`);
     this.name = 'DuplicateBranchingEdgeError';
   }
@@ -224,11 +287,15 @@ export class VariableValidationError extends Error {
 
 abstract class InMemoryRepo<R extends { readonly id: string; readonly tenantId: string }> {
   protected store = new Map<string, R>();
-  protected k(r: R): string { return `${r.tenantId}::${r.id}`; }
+  protected k(r: R): string {
+    return `${r.tenantId}::${r.id}`;
+  }
 }
 
 export class InMemoryHotspotRepository extends InMemoryRepo<Hotspot> implements HotspotRepository {
-  async insert(record: Hotspot): Promise<void> { this.store.set(this.k(record), record); }
+  async insert(record: Hotspot): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<Hotspot | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
@@ -245,10 +312,16 @@ export class InMemoryHotspotRepository extends InMemoryRepo<Hotspot> implements 
     return out;
   }
 
-  async update(id: string, tenantId: string, patch: HotspotPatch, version: number): Promise<Hotspot> {
+  async update(
+    id: string,
+    tenantId: string,
+    patch: HotspotPatch,
+    version: number,
+  ): Promise<Hotspot> {
     const existing = await this.findById(id, tenantId);
     if (!existing) throw new NotFoundError('Hotspot', id);
-    if (existing.version !== version) throw new VersionConflictError('Hotspot', id, existing.version);
+    if (existing.version !== version)
+      throw new VersionConflictError('Hotspot', id, existing.version);
     const updated: Hotspot = {
       ...existing,
       ...patch,
@@ -265,7 +338,9 @@ export class InMemoryHotspotRepository extends InMemoryRepo<Hotspot> implements 
 }
 
 export class InMemoryOverlayRepository extends InMemoryRepo<Overlay> implements OverlayRepository {
-  async insert(record: Overlay): Promise<void> { this.store.set(this.k(record), record); }
+  async insert(record: Overlay): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<Overlay | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
@@ -282,10 +357,16 @@ export class InMemoryOverlayRepository extends InMemoryRepo<Overlay> implements 
     return out;
   }
 
-  async update(id: string, tenantId: string, patch: OverlayPatch, version: number): Promise<Overlay> {
+  async update(
+    id: string,
+    tenantId: string,
+    patch: OverlayPatch,
+    version: number,
+  ): Promise<Overlay> {
     const existing = await this.findById(id, tenantId);
     if (!existing) throw new NotFoundError('Overlay', id);
-    if (existing.version !== version) throw new VersionConflictError('Overlay', id, existing.version);
+    if (existing.version !== version)
+      throw new VersionConflictError('Overlay', id, existing.version);
     const updated: Overlay = {
       ...existing,
       ...patch,
@@ -301,7 +382,10 @@ export class InMemoryOverlayRepository extends InMemoryRepo<Overlay> implements 
   }
 }
 
-export class InMemoryBranchingEdgeRepository extends InMemoryRepo<BranchingEdge> implements BranchingEdgeRepository {
+export class InMemoryBranchingEdgeRepository
+  extends InMemoryRepo<BranchingEdge>
+  implements BranchingEdgeRepository
+{
   async insert(record: BranchingEdge): Promise<void> {
     for (const existing of this.store.values()) {
       if (
@@ -341,8 +425,13 @@ export class InMemoryBranchingEdgeRepository extends InMemoryRepo<BranchingEdge>
   }
 }
 
-export class InMemoryInteractionStateRepository extends InMemoryRepo<InteractionState> implements InteractionStateRepository {
-  async insert(record: InteractionState): Promise<void> { this.store.set(this.k(record), record); }
+export class InMemoryInteractionStateRepository
+  extends InMemoryRepo<InteractionState>
+  implements InteractionStateRepository
+{
+  async insert(record: InteractionState): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<InteractionState | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
@@ -363,7 +452,11 @@ export class InMemoryInteractionStateRepository extends InMemoryRepo<Interaction
     return out;
   }
 
-  async update(id: string, tenantId: string, patch: Partial<InteractionState>): Promise<InteractionState> {
+  async update(
+    id: string,
+    tenantId: string,
+    patch: Partial<InteractionState>,
+  ): Promise<InteractionState> {
     const existing = await this.findById(id, tenantId);
     if (!existing) throw new NotFoundError('InteractionState', id);
     const updated: InteractionState = { ...existing, ...patch, updatedAt: Date.now() };
@@ -376,10 +469,17 @@ export class InMemoryInteractionStateRepository extends InMemoryRepo<Interaction
   }
 }
 
-export class InMemoryVariableRepository extends InMemoryRepo<Variable> implements VariableRepository {
+export class InMemoryVariableRepository
+  extends InMemoryRepo<Variable>
+  implements VariableRepository
+{
   async insert(record: Variable): Promise<void> {
     for (const existing of this.store.values()) {
-      if (existing.tenantId === record.tenantId && existing.deckId === record.deckId && existing.name === record.name) {
+      if (
+        existing.tenantId === record.tenantId &&
+        existing.deckId === record.deckId &&
+        existing.name === record.name
+      ) {
         throw new DuplicateVariableNameError(record.deckId, record.name);
       }
     }
@@ -405,10 +505,16 @@ export class InMemoryVariableRepository extends InMemoryRepo<Variable> implement
     return out;
   }
 
-  async update(id: string, tenantId: string, patch: VariablePatch, version: number): Promise<Variable> {
+  async update(
+    id: string,
+    tenantId: string,
+    patch: VariablePatch,
+    version: number,
+  ): Promise<Variable> {
     const existing = await this.findById(id, tenantId);
     if (!existing) throw new NotFoundError('Variable', id);
-    if (existing.version !== version) throw new VersionConflictError('Variable', id, existing.version);
+    if (existing.version !== version)
+      throw new VersionConflictError('Variable', id, existing.version);
     const updated: Variable = {
       ...existing,
       ...patch,
@@ -424,8 +530,13 @@ export class InMemoryVariableRepository extends InMemoryRepo<Variable> implement
   }
 }
 
-export class InMemoryVariableBindingRepository extends InMemoryRepo<VariableBinding> implements VariableBindingRepository {
-  async insert(record: VariableBinding): Promise<void> { this.store.set(this.k(record), record); }
+export class InMemoryVariableBindingRepository
+  extends InMemoryRepo<VariableBinding>
+  implements VariableBindingRepository
+{
+  async insert(record: VariableBinding): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<VariableBinding | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
@@ -444,8 +555,13 @@ export class InMemoryVariableBindingRepository extends InMemoryRepo<VariableBind
   }
 }
 
-export class InMemoryConditionalRuleRepository extends InMemoryRepo<ConditionalRule> implements ConditionalRuleRepository {
-  async insert(record: ConditionalRule): Promise<void> { this.store.set(this.k(record), record); }
+export class InMemoryConditionalRuleRepository
+  extends InMemoryRepo<ConditionalRule>
+  implements ConditionalRuleRepository
+{
+  async insert(record: ConditionalRule): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<ConditionalRule | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
@@ -462,10 +578,16 @@ export class InMemoryConditionalRuleRepository extends InMemoryRepo<ConditionalR
     });
   }
 
-  async update(id: string, tenantId: string, patch: ConditionalRulePatch, version: number): Promise<ConditionalRule> {
+  async update(
+    id: string,
+    tenantId: string,
+    patch: ConditionalRulePatch,
+    version: number,
+  ): Promise<ConditionalRule> {
     const existing = await this.findById(id, tenantId);
     if (!existing) throw new NotFoundError('ConditionalRule', id);
-    if (existing.version !== version) throw new VersionConflictError('ConditionalRule', id, existing.version);
+    if (existing.version !== version)
+      throw new VersionConflictError('ConditionalRule', id, existing.version);
     const updated: ConditionalRule = {
       ...existing,
       ...patch,
@@ -484,7 +606,9 @@ export class InMemoryConditionalRuleRepository extends InMemoryRepo<ConditionalR
 // ── Quiz in-memory implementations (M6.1) ──────────────────────────────
 
 export class InMemoryQuizRepository extends InMemoryRepo<Quiz> implements QuizRepository {
-  async insert(record: Quiz): Promise<void> { this.store.set(this.k(record), record); }
+  async insert(record: Quiz): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<Quiz | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
@@ -517,8 +641,13 @@ export class InMemoryQuizRepository extends InMemoryRepo<Quiz> implements QuizRe
   }
 }
 
-export class InMemoryQuizAttemptRepository extends InMemoryRepo<QuizAttempt> implements QuizAttemptRepository {
-  async insert(record: QuizAttempt): Promise<void> { this.store.set(this.k(record), record); }
+export class InMemoryQuizAttemptRepository
+  extends InMemoryRepo<QuizAttempt>
+  implements QuizAttemptRepository
+{
+  async insert(record: QuizAttempt): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<QuizAttempt | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
@@ -544,7 +673,9 @@ export class InMemoryQuizAttemptRepository extends InMemoryRepo<QuizAttempt> imp
 export class InMemoryQuizAnswerRepository implements QuizAnswerRepository {
   private store: QuizAnswer[] = [];
 
-  async insert(record: QuizAnswer): Promise<void> { this.store.push(record); }
+  async insert(record: QuizAnswer): Promise<void> {
+    this.store.push(record);
+  }
 
   async listByAttempt(attemptId: string, tenantId: string): Promise<QuizAnswer[]> {
     return this.store.filter((r) => r.tenantId === tenantId && r.attemptId === attemptId);
@@ -554,7 +685,9 @@ export class InMemoryQuizAnswerRepository implements QuizAnswerRepository {
 export class InMemoryQuizResultRepository implements QuizResultRepository {
   private store: QuizResult[] = [];
 
-  async insert(record: QuizResult): Promise<void> { this.store.push(record); }
+  async insert(record: QuizResult): Promise<void> {
+    this.store.push(record);
+  }
 
   async findByAttempt(attemptId: string, tenantId: string): Promise<QuizResult | null> {
     return this.store.find((r) => r.tenantId === tenantId && r.attemptId === attemptId) ?? null;
@@ -564,9 +697,14 @@ export class InMemoryQuizResultRepository implements QuizResultRepository {
 export class InMemoryLlmReviewQueueRepository implements LlmReviewQueueRepository {
   private store: LlmReviewQueueItem[] = [];
 
-  async insert(record: LlmReviewQueueItem): Promise<void> { this.store.push(record); }
+  async insert(record: LlmReviewQueueItem): Promise<void> {
+    this.store.push(record);
+  }
 
-  async listByTenant(tenantId: string, status?: LlmReviewQueueItem['status']): Promise<LlmReviewQueueItem[]> {
+  async listByTenant(
+    tenantId: string,
+    status?: LlmReviewQueueItem['status'],
+  ): Promise<LlmReviewQueueItem[]> {
     return this.store.filter((r) => {
       if (r.tenantId !== tenantId) return false;
       if (status && r.status !== status) return false;
@@ -577,7 +715,11 @@ export class InMemoryLlmReviewQueueRepository implements LlmReviewQueueRepositor
   async update(
     id: string,
     tenantId: string,
-    patch: { readonly status?: LlmReviewQueueItem['status']; readonly reviewerId?: string | null; readonly overrideScore?: number | null },
+    patch: {
+      readonly status?: LlmReviewQueueItem['status'];
+      readonly reviewerId?: string | null;
+      readonly overrideScore?: number | null;
+    },
   ): Promise<LlmReviewQueueItem> {
     const idx = this.store.findIndex((r) => r.tenantId === tenantId && r.id === id);
     if (idx < 0) throw new NotFoundError('LlmReviewQueueItem', id);
@@ -596,8 +738,13 @@ export class InMemoryLlmReviewQueueRepository implements LlmReviewQueueRepositor
 
 // ── Presentation sequence in-memory implementations (M6.2) ─────────────
 
-export class InMemoryPresentationSequenceRepository extends InMemoryRepo<PresentationSequence> implements PresentationSequenceRepository {
-  async insert(record: PresentationSequence): Promise<void> { this.store.set(this.k(record), record); }
+export class InMemoryPresentationSequenceRepository
+  extends InMemoryRepo<PresentationSequence>
+  implements PresentationSequenceRepository
+{
+  async insert(record: PresentationSequence): Promise<void> {
+    this.store.set(this.k(record), record);
+  }
 
   async findById(id: string, tenantId: string): Promise<PresentationSequence | null> {
     return this.store.get(`${tenantId}::${id}`) ?? null;
@@ -611,10 +758,16 @@ export class InMemoryPresentationSequenceRepository extends InMemoryRepo<Present
     return out;
   }
 
-  async update(id: string, tenantId: string, patch: PresentationSequencePatch, version: number): Promise<PresentationSequence> {
+  async update(
+    id: string,
+    tenantId: string,
+    patch: PresentationSequencePatch,
+    version: number,
+  ): Promise<PresentationSequence> {
     const existing = await this.findById(id, tenantId);
     if (!existing) throw new NotFoundError('PresentationSequence', id);
-    if (existing.version !== version) throw new VersionConflictError('PresentationSequence', id, existing.version);
+    if (existing.version !== version)
+      throw new VersionConflictError('PresentationSequence', id, existing.version);
     const updated: PresentationSequence = {
       ...existing,
       ...patch,

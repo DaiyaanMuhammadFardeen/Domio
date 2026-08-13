@@ -23,8 +23,7 @@ export function distributeEvenly(
   );
   const first = sorted[0]!.transform;
   const last = sorted[sorted.length - 1]!.transform;
-  const totalSpan =
-    mode === 'horizontal' ? last.x + last.w - first.x : last.y + last.h - first.y;
+  const totalSpan = mode === 'horizontal' ? last.x + last.w - first.x : last.y + last.h - first.y;
   const totalSize = sorted.reduce(
     (sum, t) => sum + (mode === 'horizontal' ? t.transform.w : t.transform.h),
     0,

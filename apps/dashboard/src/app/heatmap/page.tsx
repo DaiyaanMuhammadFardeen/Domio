@@ -36,7 +36,9 @@ export default async function HeatmapPage({
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Heatmap</h1>
         <p className="text-sm text-slate-500">
-          {COLS}×{ROWS} grid · deck <code className="rounded bg-slate-100 px-1.5 py-0.5">{deckId}</code> · slide <code className="rounded bg-slate-100 px-1.5 py-0.5">{slideId}</code>
+          {COLS}×{ROWS} grid · deck{' '}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5">{deckId}</code> · slide{' '}
+          <code className="rounded bg-slate-100 px-1.5 py-0.5">{slideId}</code>
         </p>
       </header>
 
@@ -76,13 +78,7 @@ export default async function HeatmapPage({
             description="The warehouse has no viewer-attention telemetry for this deck/slide. The canvas renders once the event-ingest pipeline records traffic."
           />
         ) : (
-          <HeatmapCanvas
-            deckId={deckId}
-            slideId={slideId}
-            cells={cells}
-            cols={COLS}
-            rows={ROWS}
-          />
+          <HeatmapCanvas deckId={deckId} slideId={slideId} cells={cells} cols={COLS} rows={ROWS} />
         )}
       </SuspenseBoundary>
       <CrossLinksFooter nodeId="doc.dashboard.heatmap" />

@@ -27,11 +27,7 @@ export function moveDelta(from: Transform2D, dx: number, dy: number): Transform2
   return { ...from, x: from.x + dx, y: from.y + dy };
 }
 
-export function resizeDelta(
-  from: Transform2D,
-  handle: ResizeHandle,
-  delta: number,
-): Transform2D {
+export function resizeDelta(from: Transform2D, handle: ResizeHandle, delta: number): Transform2D {
   switch (handle) {
     case 'n':
       return { ...from, y: from.y + delta, h: from.h - delta };
@@ -44,7 +40,13 @@ export function resizeDelta(
     case 'ne':
       return { ...from, y: from.y + delta, h: from.h - delta, w: from.w + delta };
     case 'nw':
-      return { ...from, x: from.x + delta, y: from.y + delta, w: from.w - delta, h: from.h - delta };
+      return {
+        ...from,
+        x: from.x + delta,
+        y: from.y + delta,
+        w: from.w - delta,
+        h: from.h - delta,
+      };
     case 'se':
       return { ...from, w: from.w + delta, h: from.h + delta };
     case 'sw':

@@ -12,6 +12,7 @@ sub-pages from the address bar.
 ### `apps/creator-console/src/app/page.tsx` (new)
 
 A landing dashboard that:
+
 1. Fetches overview stats (parallel calls to listings/analytics/statements).
 2. Shows KPI tiles: active listings, gross revenue (last 30d), pending
    statements.
@@ -24,7 +25,9 @@ import { useEffect, useState } from 'react';
 import { KpiTile } from '../components/KpiTile';
 import { fetcher } from '../lib/fetcher';
 
-export default function CreatorOverviewPage() { /* mirror admin-console */ }
+export default function CreatorOverviewPage() {
+  /* mirror admin-console */
+}
 ```
 
 ### `apps/creator-console/src/components/Header.tsx`

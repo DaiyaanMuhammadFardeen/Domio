@@ -24,11 +24,9 @@ export function FaqAccordion({ items }: FaqAccordionProps): JSX.Element {
 
   const expandAll = (): void => {
     if (typeof document === 'undefined') return;
-    document
-      .querySelectorAll<HTMLDetailsElement>('details.faq-item[open=""]')
-      .forEach((el) => {
-        el.open = true;
-      });
+    document.querySelectorAll<HTMLDetailsElement>('details.faq-item[open=""]').forEach((el) => {
+      el.open = true;
+    });
     document.querySelectorAll<HTMLDetailsElement>('details.faq-item').forEach((el) => {
       el.open = true;
     });
@@ -66,11 +64,7 @@ export function FaqAccordion({ items }: FaqAccordionProps): JSX.Element {
       <ul className="faq-accordion__list">
         {items.map((item, i) => (
           <li key={`${item.category}-${i}`} className="faq-accordion__item">
-            <details
-              className="faq-item"
-              data-testid="faq-item"
-              data-category={item.category}
-            >
+            <details className="faq-item" data-testid="faq-item" data-category={item.category}>
               <summary className="faq-item__question">
                 <span>{item.q}</span>
                 <span className="faq-item__chevron" aria-hidden="true">

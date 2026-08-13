@@ -39,7 +39,10 @@ describe('gaze-service', () => {
     });
 
     it('persists across calls via getGazeCalibration', async () => {
-      const points = [{ x: 0.2, y: 0.3 }, { x: 0.8, y: 0.7 }];
+      const points = [
+        { x: 0.2, y: 0.3 },
+        { x: 0.8, y: 0.7 },
+      ];
       const saved = await saveGazeCalibration(points);
       const loaded = await getGazeCalibration();
       expect(loaded).not.toBeNull();
@@ -58,7 +61,9 @@ describe('gaze-service', () => {
     });
 
     it('returns null when no calibration has been saved', async () => {
-      const loaded = await getGazeCalibration({ storageKey: `fresh-${Date.now()}-${Math.random()}` });
+      const loaded = await getGazeCalibration({
+        storageKey: `fresh-${Date.now()}-${Math.random()}`,
+      });
       expect(loaded).toBeNull();
     });
   });

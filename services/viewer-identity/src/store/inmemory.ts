@@ -19,7 +19,10 @@ export interface IdentityStore {
   insertLink(l: IdentityLink): Promise<IdentityLink>;
   listLinksFor(viewer_id: string): Promise<IdentityLink[]>;
   insertConsent(e: ConsentEvent): Promise<ConsentEvent>;
-  recentConsentFor(viewer_id: string, mode: ConsentEvent['privacy_mode']): Promise<ConsentEvent | null>;
+  recentConsentFor(
+    viewer_id: string,
+    mode: ConsentEvent['privacy_mode'],
+  ): Promise<ConsentEvent | null>;
   /** GDPR: erase all rows for a viewer. Returns the count of rows removed. */
   eraseViewer(viewer_id: string): Promise<number>;
   /** GDPR: dump every row that mentions this viewer. */

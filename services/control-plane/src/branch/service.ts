@@ -103,9 +103,7 @@ export class BranchService {
     const now = this.clock();
     const parent = args.parentBranchId ?? MAIN_BRANCH;
     const parentRecord =
-      parent === MAIN_BRANCH
-        ? null
-        : await this.repository.findById(args.deckId, parent as ULID);
+      parent === MAIN_BRANCH ? null : await this.repository.findById(args.deckId, parent as ULID);
     if (parent !== MAIN_BRANCH && !parentRecord) {
       throw new BranchNotFoundError(args.deckId, parent as ULID);
     }
@@ -131,10 +129,7 @@ export class BranchService {
     return found;
   }
 
-  async list(
-    deckId: ULID,
-    status?: BranchStatus,
-  ): Promise<BranchRecord[]> {
+  async list(deckId: ULID, status?: BranchStatus): Promise<BranchRecord[]> {
     return this.repository.listByDeck(deckId, status ? { status } : {});
   }
 
@@ -172,12 +167,7 @@ export class BranchService {
     if (!Number.isInteger(nextRevision) || nextRevision <= expectedRevision) {
       throw new InvalidRevisionError(nextRevision);
     }
-    return this.repository.advanceHead(
-      deckId,
-      branchId,
-      expectedRevision,
-      nextRevision,
-    );
+    return this.repository.advanceHead(deckId, branchId, expectedRevision, nextRevision);
   }
 
   /** Expose the underlying repository for read-only lineage walks. */

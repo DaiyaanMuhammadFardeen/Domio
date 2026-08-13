@@ -57,11 +57,7 @@ describe('interpolate', () => {
 
   describe('string-with-number', () => {
     it('interpolates numeric parts in translate()', () => {
-      const result = interpolate(
-        'translate(10px, 20px)',
-        'translate(50px, 80px)',
-        0.5,
-      ) as string;
+      const result = interpolate('translate(10px, 20px)', 'translate(50px, 80px)', 0.5) as string;
       expect(result).toBe('translate(30px, 50px)');
     });
 
@@ -71,11 +67,7 @@ describe('interpolate', () => {
     });
 
     it('handles negative numbers in strings', () => {
-      const result = interpolate(
-        'translate(-10px, 0px)',
-        'translate(10px, 0px)',
-        0.5,
-      ) as string;
+      const result = interpolate('translate(-10px, 0px)', 'translate(10px, 0px)', 0.5) as string;
       expect(result).toBe('translate(0px, 0px)');
     });
 

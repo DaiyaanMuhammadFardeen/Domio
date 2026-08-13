@@ -4,7 +4,17 @@
   "title": "RecordingStarted",
   "description": "Emitted by the recording-orchestrator when a recording session is created and transitioned from pending to recording. Subscribers include the engagement-graph (start replay window), the search-index-cursor (track new content), and the SCORM packager (init session record).",
   "type": "object",
-  "required": ["event_id", "ts_ms", "workspace_id", "recording_session_id", "session_id", "presenter_user_id", "storage_prefix", "title", "language"],
+  "required": [
+    "event_id",
+    "ts_ms",
+    "workspace_id",
+    "recording_session_id",
+    "session_id",
+    "presenter_user_id",
+    "storage_prefix",
+    "title",
+    "language"
+  ],
   "properties": {
     "event_id": { "type": "string", "description": "Globally-unique ULID." },
     "ts_ms": { "type": "integer", "format": "int64" },
@@ -17,7 +27,13 @@
     "description": { "type": "string", "nullable": true },
     "language": { "type": "string" },
     "expires_at": { "type": "string", "format": "date-time", "nullable": true },
-    "hash": { "type": "string", "description": "Hex-encoded SHA-256 hash of the event payload (chain link)." },
-    "prev_hash": { "type": "string", "description": "Hex-encoded SHA-256 hash of the previous event in the chain." }
+    "hash": {
+      "type": "string",
+      "description": "Hex-encoded SHA-256 hash of the event payload (chain link)."
+    },
+    "prev_hash": {
+      "type": "string",
+      "description": "Hex-encoded SHA-256 hash of the previous event in the chain."
+    }
   }
 }

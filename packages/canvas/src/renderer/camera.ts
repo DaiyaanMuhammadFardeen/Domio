@@ -73,10 +73,7 @@ export interface Aabb {
   h: number;
 }
 
-export function cameraBounds(
-  camera: CameraState,
-  viewport: ViewportSize,
-): Aabb {
+export function cameraBounds(camera: CameraState, viewport: ViewportSize): Aabb {
   const halfW = viewport.width / 2 / camera.zoom;
   const halfH = viewport.height / 2 / camera.zoom;
   return {

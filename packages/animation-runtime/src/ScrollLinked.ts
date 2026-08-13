@@ -35,10 +35,7 @@ export class ScrollLinked {
     // Check dependency: reject if this binding depends on another scroll-linked
     // (We check elementId — a binding on the same element is a dependency)
     for (const [, existing] of this.bindings) {
-      if (
-        existing.elementId === binding.elementId &&
-        existing.property !== binding.property
-      ) {
+      if (existing.elementId === binding.elementId && existing.property !== binding.property) {
         // Potential cross-property dependency on same element
         // We only reject explicit cycles (same element + different property)
         // For now, we allow same-element different-property
@@ -87,9 +84,10 @@ export class ScrollLinked {
 
     for (const [, binding] of this.bindings) {
       const [progressMin, progressMax] = binding.progressRange;
-      const t = progressMax === progressMin
-        ? 0
-        : Math.max(0, Math.min(1, (this.progress - progressMin) / (progressMax - progressMin)));
+      const t =
+        progressMax === progressMin
+          ? 0
+          : Math.max(0, Math.min(1, (this.progress - progressMin) / (progressMax - progressMin)));
       const [valA, valB] = binding.valueRange;
       results.set(`${binding.elementId}:${binding.property}`, interpolate(valA, valB, t));
     }

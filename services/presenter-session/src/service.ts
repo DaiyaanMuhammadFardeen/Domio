@@ -42,11 +42,7 @@ import {
   validateAdvanceInput,
   validateCreateSessionInput,
 } from './types.js';
-import {
-  type PresenterSessionStore,
-  type StoreError,
-  isStore,
-} from './store/store.js';
+import { type PresenterSessionStore, type StoreError, isStore } from './store/store.js';
 import type { AuditEmitter, PresenterAuditEvent } from './audit/emit.js';
 import { diffAdvance } from './audit/emit.js';
 import type { JsonObject, JsonValue } from '@domio/audit-ts';
@@ -71,10 +67,7 @@ import {
   mergeDynamicPlans,
   validateOrderAgainstCanonical,
 } from './dynamic_plan.js';
-import {
-  type PresenterMetrics,
-  nullPresenterMetrics,
-} from './observability/metrics.js';
+import { type PresenterMetrics, nullPresenterMetrics } from './observability/metrics.js';
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -172,19 +165,17 @@ export class PresenterSessionService {
   // -------------------------------------------------------------------------
   // Capability: presenter:start
   // -------------------------------------------------------------------------
-  async start(
-    input: CreateSessionInput,
-    ctx: { actorId: string },
-  ): Promise<CreateSessionResult> {
+  async start(input: CreateSessionInput, ctx: { actorId: string }): Promise<CreateSessionResult> {
     validateCreateSessionInput(input);
 
     // Idempotency check.
     if (input.idempotency_key) {
-      const prior = await this.idempotency.get(
-        input.idempotency_key, input.workspace_id, 'start',
-      );
+      const prior = await this.idempotency.get(input.idempotency_key, input.workspace_id, 'start');
       if (prior && prior.response) {
-        return { session: prior.response as PresenterSession, idempotentReplay: prior.response as PresenterSession };
+        return {
+          session: prior.response as PresenterSession,
+          idempotentReplay: prior.response as PresenterSession,
+        };
       }
       const reservation = await this.idempotency.reserve({
         key: input.idempotency_key,
@@ -306,9 +297,7 @@ export class PresenterSessionService {
     if (input.idempotency_key) {
       const session = await this.store.getById(id);
       if (session) {
-        const prior = await this.idempotency.get(
-          input.idempotency_key, session.workspace_id, id,
-        );
+        const prior = await this.idempotency.get(input.idempotency_key, session.workspace_id, id);
         if (prior && prior.response) {
           return prior.response as PresenterSession;
         }
@@ -450,10 +439,10 @@ export class PresenterSessionService {
     // approximate that with the total annotate() round-trip — the
     // stroke-by-stroke replay is owned by the annotation client which
     // emits the same histogram from `apps/presenter`.
-    this.metrics.annotationReplayMs.record(
-      Date.now() - annotation.created_at_ms,
-      { session_id: id, kind: annotation.kind },
-    );
+    this.metrics.annotationReplayMs.record(Date.now() - annotation.created_at_ms, {
+      session_id: id,
+      kind: annotation.kind,
+    });
 
     return { session: updated, annotation };
   }
@@ -470,7 +459,8 @@ export class PresenterSessionService {
     if (!current) throw new PresenterSessionNotFoundError(`session ${id} not found`);
     if (current.ended_at) throw new PresenterSessionEndedError(`session ${id} already ended`);
 
-    const canonical = ctx.canonicalOrder ??
+    const canonical =
+      ctx.canonicalOrder ??
       (this.canonicalSlides ? await this.canonicalSlides(current.deck_id) : []);
 
     if (input.order) {
@@ -481,7 +471,9 @@ export class PresenterSessionService {
       ? { type: 'reorder', order: input.order, by: ctx.actorId, ts_ms: this.clock() }
       : input.hidden
         ? { type: 'hide', slide_ids: input.hidden, by: ctx.actorId, ts_ms: this.clock() }
-        : (() => { throw new Error('plan: order or hidden required'); })();
+        : (() => {
+            throw new Error('plan: order or hidden required');
+          })();
 
     const prev: DynamicPlan = {
       order: canonical,
@@ -503,7 +495,10 @@ export class PresenterSessionService {
     };
     let updated: PresenterSession;
     try {
-      updated = await this.store.update({ expected_version: input.expected_version, next: nextSession });
+      updated = await this.store.update({
+        expected_version: input.expected_version,
+        next: nextSession,
+      });
     } catch (e) {
       throw mapStoreError(e, id);
     }
@@ -526,7 +521,12 @@ export class PresenterSessionService {
   async handover(
     id: string,
     input: HandoverInput,
-    ctx: { actorId: string; handoverKey?: Uint8Array; verifyHandoverToken?: typeof verifyHandoverToken; clientStartedAtMs?: number },
+    ctx: {
+      actorId: string;
+      handoverKey?: Uint8Array;
+      verifyHandoverToken?: typeof verifyHandoverToken;
+      clientStartedAtMs?: number;
+    },
   ): Promise<PresenterSession> {
     const current = await this.store.getById(id);
     if (!current) throw new PresenterSessionNotFoundError(`session ${id} not found`);
@@ -643,10 +643,7 @@ export class PresenterSessionService {
     // Epoch fencing: if the caller is not the primary of record, reject
     // the write. This is the defence against dual-primary split brain.
     if (typeof ctx.failoverEpoch === 'number' && ctx.failoverEpoch < 1) {
-      throw new PresenterSessionConflictError(
-        'failover epoch must be >= 1',
-        current,
-      );
+      throw new PresenterSessionConflictError('failover epoch must be >= 1', current);
     }
 
     const next: PresenterSession = {
@@ -781,7 +778,11 @@ export class PresenterSessionService {
 
   /** Agenda timer helper — adds an entry to the session's agenda_timers JSONB.
    *  This is a separate capability that ships here for W15 timing. */
-  async addAgendaTimer(id: string, timer: AgendaTimer, ctx: { actorId: string; expectedVersion: number }): Promise<PresenterSession> {
+  async addAgendaTimer(
+    id: string,
+    timer: AgendaTimer,
+    ctx: { actorId: string; expectedVersion: number },
+  ): Promise<PresenterSession> {
     const current = await this.store.getById(id);
     if (!current) throw new PresenterSessionNotFoundError(`session ${id} not found`);
     if (current.ended_at) throw new PresenterSessionEndedError(`session ${id} already ended`);
@@ -919,9 +920,13 @@ function cryptoRandomUUID(): string {
 
 /** Parse a `payload.expires.hmac` envelope into `{ token, expires_at_ms,
  *  expected_version }` so callers don't have to know the internal shape. */
-function parseTokenEnvelope(token: string, expectedVersion: number): { token: string; expires_at_ms: number; expected_version: number } {
+function parseTokenEnvelope(
+  token: string,
+  expectedVersion: number,
+): { token: string; expires_at_ms: number; expected_version: number } {
   const decoded = parseHandoverToken(token);
-  if (!decoded) throw new HandoverTokenError('BAD_FORMAT', 'could not decode handover token envelope');
+  if (!decoded)
+    throw new HandoverTokenError('BAD_FORMAT', 'could not decode handover token envelope');
   return {
     token,
     expires_at_ms: decoded.expires_at_ms,

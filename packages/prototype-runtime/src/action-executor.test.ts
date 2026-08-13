@@ -82,9 +82,16 @@ describe('ActionExecutor', () => {
   it('all 10 ActionKind handlers are present in defaults', () => {
     const handlers = defaultActionHandlers(new VarStore());
     const required: ActionKind[] = [
-      'show', 'hide', 'enable', 'disable', 'set_variable',
-      'navigate_to', 'play_animation', 'submit_form',
-      'open_overlay', 'close_overlay',
+      'show',
+      'hide',
+      'enable',
+      'disable',
+      'set_variable',
+      'navigate_to',
+      'play_animation',
+      'submit_form',
+      'open_overlay',
+      'close_overlay',
     ];
     for (const k of required) expect(handlers[k]).toBeDefined();
   });

@@ -27,11 +27,7 @@ import { cn } from '../../lib/cn';
 import { PromptInput, type PromptSubmission } from './PromptInput';
 import { JobProgress } from './JobProgress';
 import { History, type HistoryEntry } from './History';
-import {
-  createPlannerJob,
-  ingestFile,
-  type JobRecord,
-} from '../../lib/ai-service';
+import { createPlannerJob, ingestFile, type JobRecord } from '../../lib/ai-service';
 
 export interface CopilotHubProps {
   /** Default open state. Defaults to false. */
@@ -61,7 +57,8 @@ async function blobToBase64(blob: Blob): Promise<string> {
 function inferIngestKind(file: File): 'pdf' | 'doc' | 'transcript' {
   const lower = file.name.toLowerCase();
   if (file.type === 'application/pdf' || lower.endsWith('.pdf')) return 'pdf';
-  if (lower.endsWith('.doc') || lower.endsWith('.docx') || file.type.includes('msword')) return 'doc';
+  if (lower.endsWith('.doc') || lower.endsWith('.docx') || file.type.includes('msword'))
+    return 'doc';
   return 'transcript';
 }
 
@@ -167,12 +164,14 @@ export function CopilotHub({
     (entry: HistoryEntry) => {
       // Re-opening loads the prompt text into a fresh job (re-runs planner).
       setCurrentJob(null);
-      void createPlanner(entry.prompt).then((job) => {
-        setCurrentJob(job);
-        setRefreshHistoryKey((n) => n + 1);
-      }).catch((err: unknown) => {
-        setSubmitError(err instanceof Error ? err.message : String(err));
-      });
+      void createPlanner(entry.prompt)
+        .then((job) => {
+          setCurrentJob(job);
+          setRefreshHistoryKey((n) => n + 1);
+        })
+        .catch((err: unknown) => {
+          setSubmitError(err instanceof Error ? err.message : String(err));
+        });
     },
     [createPlanner],
   );
@@ -182,12 +181,14 @@ export function CopilotHub({
       // Branching starts a new job seeded with the prior prompt.
       const branchPrompt = `${entry.prompt} (branch)`;
       setCurrentJob(null);
-      void createPlanner(branchPrompt).then((job) => {
-        setCurrentJob(job);
-        setRefreshHistoryKey((n) => n + 1);
-      }).catch((err: unknown) => {
-        setSubmitError(err instanceof Error ? err.message : String(err));
-      });
+      void createPlanner(branchPrompt)
+        .then((job) => {
+          setCurrentJob(job);
+          setRefreshHistoryKey((n) => n + 1);
+        })
+        .catch((err: unknown) => {
+          setSubmitError(err instanceof Error ? err.message : String(err));
+        });
     },
     [createPlanner],
   );
@@ -259,18 +260,11 @@ export function CopilotHub({
             data-testid="copilot-hub-current-job"
           >
             <h3 className="text-xs font-semibold text-slate-300">Current job</h3>
-            <JobProgress
-              jobId={currentJob.id}
-              onComplete={handleJobComplete}
-            />
+            <JobProgress jobId={currentJob.id} onComplete={handleJobComplete} />
           </section>
         ) : null}
 
-        <History
-          key={refreshHistoryKey}
-          onReopen={handleReopen}
-          onBranch={handleBranch}
-        />
+        <History key={refreshHistoryKey} onReopen={handleReopen} onBranch={handleBranch} />
       </div>
     </aside>
   );

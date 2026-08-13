@@ -60,7 +60,11 @@ function colorFromHash(hash: string): { r: number; g: number; b: number } {
 /** Encode an N×M BMP filled with the supplied color. Uncompressed
  *  24-bit RGB. The BMP format includes a 14-byte file header and a
  *  40-byte DIB header; total file size = 54 + width*height*3. */
-function encodeBmp(width: number, height: number, color: { r: number; g: number; b: number }): Uint8Array {
+function encodeBmp(
+  width: number,
+  height: number,
+  color: { r: number; g: number; b: number },
+): Uint8Array {
   const stride = width * 3;
   // BMP rows are 4-byte aligned.
   const paddedStride = (stride + 3) & ~3;
@@ -69,23 +73,39 @@ function encodeBmp(width: number, height: number, color: { r: number; g: number;
   const buf = Buffer.alloc(fileSize);
   let o = 0;
   // File header
-  buf.write('BM', o); o += 2;
-  buf.writeUInt32LE(fileSize, o); o += 4;
-  buf.writeUInt16LE(0, o); o += 2;
-  buf.writeUInt16LE(0, o); o += 2;
-  buf.writeUInt32LE(54, o); o += 4;
+  buf.write('BM', o);
+  o += 2;
+  buf.writeUInt32LE(fileSize, o);
+  o += 4;
+  buf.writeUInt16LE(0, o);
+  o += 2;
+  buf.writeUInt16LE(0, o);
+  o += 2;
+  buf.writeUInt32LE(54, o);
+  o += 4;
   // DIB header (BITMAPINFOHEADER)
-  buf.writeUInt32LE(40, o); o += 4;
-  buf.writeInt32LE(width, o); o += 4;
-  buf.writeInt32LE(height, o); o += 4;
-  buf.writeUInt16LE(1, o); o += 2;
-  buf.writeUInt16LE(24, o); o += 2;
-  buf.writeUInt32LE(0, o); o += 4;
-  buf.writeUInt32LE(pixelDataSize, o); o += 4;
-  buf.writeInt32LE(2835, o); o += 4;
-  buf.writeInt32LE(2835, o); o += 4;
-  buf.writeUInt32LE(0, o); o += 4;
-  buf.writeUInt32LE(0, o); o += 4;
+  buf.writeUInt32LE(40, o);
+  o += 4;
+  buf.writeInt32LE(width, o);
+  o += 4;
+  buf.writeInt32LE(height, o);
+  o += 4;
+  buf.writeUInt16LE(1, o);
+  o += 2;
+  buf.writeUInt16LE(24, o);
+  o += 2;
+  buf.writeUInt32LE(0, o);
+  o += 4;
+  buf.writeUInt32LE(pixelDataSize, o);
+  o += 4;
+  buf.writeInt32LE(2835, o);
+  o += 4;
+  buf.writeInt32LE(2835, o);
+  o += 4;
+  buf.writeUInt32LE(0, o);
+  o += 4;
+  buf.writeUInt32LE(0, o);
+  o += 4;
   // Pixel data (BMP rows are bottom-up).
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {

@@ -33,9 +33,12 @@ export interface DeckDiffPanelProps {
 
 function diffIcon(diff: DeckDiffEntry['diff']): ReactElement {
   switch (diff) {
-    case 'added': return <Plus size={11} />;
-    case 'removed': return <Minus size={11} />;
-    case 'changed': return <Pencil size={11} />;
+    case 'added':
+      return <Plus size={11} />;
+    case 'removed':
+      return <Minus size={11} />;
+    case 'changed':
+      return <Pencil size={11} />;
   }
 }
 
@@ -76,9 +79,7 @@ export function DeckDiffPanel({
       {/* Header */}
       <div className="flex items-center gap-2">
         <GitCompare size={16} className="text-indigo-400" />
-        <h2 className="text-sm font-semibold text-slate-100">
-          Deck Diff
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-100">Deck Diff</h2>
       </div>
 
       {/* Inputs */}
@@ -140,7 +141,10 @@ export function DeckDiffPanel({
 
       {/* Summary pills */}
       {total > 0 ? (
-        <div className="flex flex-wrap items-center gap-1.5 text-[10px]" data-testid="deck-diff-summary">
+        <div
+          className="flex flex-wrap items-center gap-1.5 text-[10px]"
+          data-testid="deck-diff-summary"
+        >
           <span className="rounded-full bg-emerald-500/15 px-1.5 py-0.5 font-semibold text-emerald-400">
             +{grouped.added.length} added
           </span>
@@ -172,10 +176,7 @@ export function DeckDiffPanel({
 function DiffCard({ entry }: { entry: DeckDiffEntry }): ReactElement {
   return (
     <li
-      className={cn(
-        'rounded-md border bg-slate-800/40 px-2.5 py-1.5',
-        diffBorderClass(entry.diff),
-      )}
+      className={cn('rounded-md border bg-slate-800/40 px-2.5 py-1.5', diffBorderClass(entry.diff))}
       data-testid={`deck-diff-entry-${entry.id}`}
       data-diff={entry.diff}
     >
@@ -205,13 +206,11 @@ function DiffCard({ entry }: { entry: DeckDiffEntry }): ReactElement {
           </span>
         ) : null}
         {entry.slideIndex !== null ? (
-          <span className="ml-auto text-[10px] text-slate-500">
-            slide {entry.slideIndex + 1}
-          </span>
+          <span className="ml-auto text-[10px] text-slate-500">slide {entry.slideIndex + 1}</span>
         ) : null}
       </div>
 
-      {(entry.before !== undefined || entry.after !== undefined) ? (
+      {entry.before !== undefined || entry.after !== undefined ? (
         <div className="mt-1.5 grid grid-cols-2 gap-2 text-[11px]">
           <div>
             <p className="text-[10px] uppercase text-slate-500">Before</p>

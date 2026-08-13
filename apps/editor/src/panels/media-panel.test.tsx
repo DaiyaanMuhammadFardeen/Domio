@@ -50,7 +50,10 @@ describe('MediaPanel', () => {
     const onInsert = vi.fn();
     render(<MediaPanel {...defaultProps()} onInsert={onInsert} />);
     fireEvent.click(screen.getByTestId('p11-3d-model-model-demo-1'));
-    expect(onInsert).toHaveBeenCalledWith('model3d', expect.objectContaining({ name: 'Damaged Helmet' }));
+    expect(onInsert).toHaveBeenCalledWith(
+      'model3d',
+      expect.objectContaining({ name: 'Damaged Helmet' }),
+    );
   });
 
   it('switches to video tab and shows video assets', () => {
@@ -65,7 +68,10 @@ describe('MediaPanel', () => {
     render(<MediaPanel {...defaultProps()} onInsert={onInsert} />);
     fireEvent.click(screen.getByTestId('p11-tab-video'));
     fireEvent.click(screen.getByTestId('p11-video-asset-video-demo-1'));
-    expect(onInsert).toHaveBeenCalledWith('video', expect.objectContaining({ name: 'Product Reveal' }));
+    expect(onInsert).toHaveBeenCalledWith(
+      'video',
+      expect.objectContaining({ name: 'Product Reveal' }),
+    );
   });
 
   it('switches to audio tab and shows audio assets', () => {
@@ -93,9 +99,14 @@ describe('MediaPanel', () => {
     const onInsert = vi.fn();
     render(<MediaPanel {...defaultProps()} onInsert={onInsert} />);
     fireEvent.click(screen.getByTestId('p11-tab-embed'));
-    fireEvent.change(screen.getByTestId('p11-embed-url'), { target: { value: 'https://example.com' } });
+    fireEvent.change(screen.getByTestId('p11-embed-url'), {
+      target: { value: 'https://example.com' },
+    });
     fireEvent.click(screen.getByTestId('p11-embed-insert'));
-    expect(onInsert).toHaveBeenCalledWith('embed', expect.objectContaining({ url: 'https://example.com' }));
+    expect(onInsert).toHaveBeenCalledWith(
+      'embed',
+      expect.objectContaining({ url: 'https://example.com' }),
+    );
   });
 
   it('disables embed insert when URL is empty', () => {
@@ -116,12 +127,17 @@ describe('MediaPanel', () => {
     const onInsert = vi.fn();
     render(<MediaPanel {...defaultProps()} onInsert={onInsert} />);
     fireEvent.click(screen.getByTestId('p11-tab-codeBlock'));
-    fireEvent.change(screen.getByTestId('p11-code-source'), { target: { value: 'console.log("hello")' } });
+    fireEvent.change(screen.getByTestId('p11-code-source'), {
+      target: { value: 'console.log("hello")' },
+    });
     fireEvent.click(screen.getByTestId('p11-code-insert'));
-    expect(onInsert).toHaveBeenCalledWith('codeBlock', expect.objectContaining({
-      code: 'console.log("hello")',
-      language: 'javascript',
-    }));
+    expect(onInsert).toHaveBeenCalledWith(
+      'codeBlock',
+      expect.objectContaining({
+        code: 'console.log("hello")',
+        language: 'javascript',
+      }),
+    );
   });
 
   it('switches to LaTeX tab and shows source input', () => {
@@ -156,11 +172,14 @@ describe('MediaPanel', () => {
     render(<MediaPanel {...defaultProps()} onInsert={onInsert} />);
     fireEvent.click(screen.getByTestId('p11-tab-map'));
     fireEvent.click(screen.getByTestId('p11-map-insert'));
-    expect(onInsert).toHaveBeenCalledWith('map', expect.objectContaining({
-      styleId: 'mapbox-light',
-      zoom: 10,
-      center: expect.objectContaining({ lat: expect.any(Number), lng: expect.any(Number) }),
-    }));
+    expect(onInsert).toHaveBeenCalledWith(
+      'map',
+      expect.objectContaining({
+        styleId: 'mapbox-light',
+        zoom: 10,
+        center: expect.objectContaining({ lat: expect.any(Number), lng: expect.any(Number) }),
+      }),
+    );
   });
 
   it('renders 3D settings controls', () => {

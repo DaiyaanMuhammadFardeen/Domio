@@ -21,10 +21,7 @@ export interface ModerationResult {
 }
 
 export interface Moderator {
-  evaluate(input: {
-    workspace_id: string;
-    raw_text: string;
-  }): Promise<ModerationResult>;
+  evaluate(input: { workspace_id: string; raw_text: string }): Promise<ModerationResult>;
 }
 
 export class InMemoryBlocklistModerator implements Moderator {

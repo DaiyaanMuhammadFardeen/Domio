@@ -28,9 +28,7 @@ export function ChangelogTimeline({ entries }: ChangelogTimelineProps) {
 
   return (
     <div className="space-y-6">
-      <h3 className="font-display text-base font-semibold text-fg">
-        {t('detail.changelog')}
-      </h3>
+      <h3 className="font-display text-base font-semibold text-fg">{t('detail.changelog')}</h3>
 
       <div className="relative ml-3 border-l-2 border-border pl-6">
         {entries.map((entry, idx) => (
@@ -38,17 +36,13 @@ export function ChangelogTimeline({ entries }: ChangelogTimelineProps) {
             {/* Dot on timeline */}
             <div
               className={`absolute -left-[31px] top-1 h-3 w-3 rounded-full border-2 ${
-                idx === 0
-                  ? 'border-accent bg-accent'
-                  : 'border-border bg-panel'
+                idx === 0 ? 'border-accent bg-accent' : 'border-border bg-panel'
               }`}
               aria-hidden="true"
             />
 
             <div className="flex flex-wrap items-baseline gap-x-3">
-              <span className="font-mono text-sm font-semibold text-fg">
-                v{entry.version}
-              </span>
+              <span className="font-mono text-sm font-semibold text-fg">v{entry.version}</span>
               <time
                 className="text-xs text-muted"
                 dateTime={new Date(entry.created_at).toISOString()}
@@ -57,9 +51,7 @@ export function ChangelogTimeline({ entries }: ChangelogTimelineProps) {
               </time>
             </div>
 
-            <p className="mt-2 text-sm leading-relaxed text-fg/70">
-              {entry.changelog}
-            </p>
+            <p className="mt-2 text-sm leading-relaxed text-fg/70">{entry.changelog}</p>
           </div>
         ))}
       </div>

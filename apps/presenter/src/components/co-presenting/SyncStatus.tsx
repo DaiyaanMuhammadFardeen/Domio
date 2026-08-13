@@ -22,10 +22,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
-import {
-  getActivePresenter,
-  type Presenter,
-} from '../../lib/co-presenting-service';
+import { getActivePresenter, type Presenter } from '../../lib/co-presenting-service';
 
 export interface SyncStatusProps {
   /** Session whose active presenter we want to show. */
@@ -96,9 +93,7 @@ export function SyncStatus({
   }, [fetchActive, pollMs]);
 
   const slideLabel = format(t.slide, { n: Math.max(1, slideIndex) });
-  const presenterLabel = active
-    ? format(t.activePresenter, { name: active.name })
-    : '—';
+  const presenterLabel = active ? format(t.activePresenter, { name: active.name }) : '—';
 
   return (
     <div
@@ -115,7 +110,9 @@ export function SyncStatus({
       >
         {presenterLabel}
       </span>
-      <span className="sync-status__sep" aria-hidden="true">·</span>
+      <span className="sync-status__sep" aria-hidden="true">
+        ·
+      </span>
       <span className="sync-status__slide" data-testid={`${dataTestId}-slide`}>
         {slideLabel}
       </span>

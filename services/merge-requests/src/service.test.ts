@@ -17,7 +17,7 @@ import type { MergeRequestEventEmitter, MergeValidators, DeckSnapshot } from './
 
 function makeDeck(slides: Array<{ id: string; title: string }>): DeckSnapshot {
   return {
-    slides: slides.map(s => ({
+    slides: slides.map((s) => ({
       id: s.id,
       semantic_id: s.id,
       title: s.title,
@@ -27,7 +27,9 @@ function makeDeck(slides: Array<{ id: string; title: string }>): DeckSnapshot {
   };
 }
 
-function createEmitter(): MergeRequestEventEmitter & { events: Array<{ subject: string; payload: Record<string, unknown> }> } {
+function createEmitter(): MergeRequestEventEmitter & {
+  events: Array<{ subject: string; payload: Record<string, unknown> }>;
+} {
   const events: Array<{ subject: string; payload: Record<string, unknown> }> = [];
   return {
     events,
@@ -95,28 +97,32 @@ describe('MergeRequestService', () => {
 
     it('rejects same source and target branches', async () => {
       const deck = makeDeck([]);
-      await expect(service.createMergeRequest(
-        { source_branch: 'main', target_branch: 'main', title: 'Test' },
-        'user-1',
-        'ws-1',
-        'deck-1',
-        deck,
-        deck,
-        deck,
-      )).rejects.toThrow(MergeRequestValidationError);
+      await expect(
+        service.createMergeRequest(
+          { source_branch: 'main', target_branch: 'main', title: 'Test' },
+          'user-1',
+          'ws-1',
+          'deck-1',
+          deck,
+          deck,
+          deck,
+        ),
+      ).rejects.toThrow(MergeRequestValidationError);
     });
 
     it('rejects missing required fields', async () => {
       const deck = makeDeck([]);
-      await expect(service.createMergeRequest(
-        { source_branch: '', target_branch: 'main', title: '' },
-        'user-1',
-        'ws-1',
-        'deck-1',
-        deck,
-        deck,
-        deck,
-      )).rejects.toThrow(MergeRequestValidationError);
+      await expect(
+        service.createMergeRequest(
+          { source_branch: '', target_branch: 'main', title: '' },
+          'user-1',
+          'ws-1',
+          'deck-1',
+          deck,
+          deck,
+          deck,
+        ),
+      ).rejects.toThrow(MergeRequestValidationError);
     });
   });
 
@@ -141,8 +147,7 @@ describe('MergeRequestService', () => {
     });
 
     it('throws MergeRequestNotFoundError for missing id', async () => {
-      await expect(service.getMergeRequest('nonexistent'))
-        .rejects.toThrow('not found');
+      await expect(service.getMergeRequest('nonexistent')).rejects.toThrow('not found');
     });
   });
 
@@ -203,7 +208,7 @@ describe('MergeRequestService', () => {
       expect(merged.merged_by).toBe('user-1');
       expect(merged.merge_commit_id).toBeTruthy();
 
-      const mergeEvent = emitter.events.find(e => e.subject === 'merge_request.merged');
+      const mergeEvent = emitter.events.find((e) => e.subject === 'merge_request.merged');
       expect(mergeEvent).toBeTruthy();
       expect(mergeEvent!.payload.event_type).toBe('merge_request.merged');
     });
@@ -220,8 +225,9 @@ describe('MergeRequestService', () => {
         deck,
       );
       await service.mergeMergeRequest(created.id, 'user-1', 'ws-1');
-      await expect(service.mergeMergeRequest(created.id, 'user-1', 'ws-1'))
-        .rejects.toThrow(MergeRequestValidationError);
+      await expect(service.mergeMergeRequest(created.id, 'user-1', 'ws-1')).rejects.toThrow(
+        MergeRequestValidationError,
+      );
     });
   });
 
@@ -274,8 +280,9 @@ describe('MergeRequestService', () => {
         deck,
       );
 
-      await expect(svc.mergeMergeRequest(created.id, 'user-1', 'ws-1', deck))
-        .rejects.toThrow(MergeValidationFailedError);
+      await expect(svc.mergeMergeRequest(created.id, 'user-1', 'ws-1', deck)).rejects.toThrow(
+        MergeValidationFailedError,
+      );
     });
 
     it('passes merge when validators succeed', async () => {

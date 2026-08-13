@@ -34,7 +34,9 @@ export class GraphqlAdapter implements ConnectorAdapter {
   }
 
   async authCallback(_ctx: AdapterContext, _spec: AuthCallbackSpec): Promise<AuthCallbackResult> {
-    return { credential_ref: { vault: 'phase-01', path: `connectors/${_ctx.tenant_id}/gql_creds` } };
+    return {
+      credential_ref: { vault: 'phase-01', path: `connectors/${_ctx.tenant_id}/gql_creds` },
+    };
   }
 
   async ping(ctx: AdapterContext): Promise<{ ok: boolean; latency_ms: number }> {
@@ -49,14 +51,16 @@ export class GraphqlAdapter implements ConnectorAdapter {
 
   async discover(_ctx: AdapterContext, _spec: DiscoverSpec): Promise<DiscoverResult> {
     return {
-      tables: [{
-        name: 'query.items',
-        columns: [
-          { name: 'id', type: 'number', semantic_role: 'id' },
-          { name: 'name', type: 'string', semantic_role: 'dimension' },
-        ],
-        row_count_estimate: 0,
-      }],
+      tables: [
+        {
+          name: 'query.items',
+          columns: [
+            { name: 'id', type: 'number', semantic_role: 'id' },
+            { name: 'name', type: 'string', semantic_role: 'dimension' },
+          ],
+          row_count_estimate: 0,
+        },
+      ],
     };
   }
 
@@ -73,7 +77,11 @@ export class GraphqlAdapter implements ConnectorAdapter {
     const dataKey = Object.keys(body.data ?? {})[0] ?? '';
     const items = ((body.data as Record<string, unknown[]>)?.[dataKey] as unknown[]) ?? [];
     if (items.length === 0 || typeof items[0] !== 'object' || items[0] === null) {
-      return { rows: [], columns: [], stats: { duration_ms: Date.now() - t0, row_count: 0, source: 'live' } };
+      return {
+        rows: [],
+        columns: [],
+        stats: { duration_ms: Date.now() - t0, row_count: 0, source: 'live' },
+      };
     }
     const first = items[0] as Record<string, unknown>;
     const headers = Object.keys(first);

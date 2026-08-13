@@ -104,7 +104,16 @@ function flagValue(argv: string[], flag: string): string | undefined {
   return undefined;
 }
 
-function printResults(results: Array<{ ordinal: string; slug: string; status: string; statements: number; duration_ms: number; message?: string }>): void {
+function printResults(
+  results: Array<{
+    ordinal: string;
+    slug: string;
+    status: string;
+    statements: number;
+    duration_ms: number;
+    message?: string;
+  }>,
+): void {
   for (const r of results) {
     const tag = r.status.toUpperCase().padEnd(8);
     const stat = r.statements > 0 ? ` ${r.statements} stmts` : '';
@@ -114,7 +123,9 @@ function printResults(results: Array<{ ordinal: string; slug: string; status: st
   }
 }
 
-function printStatus(rows: Array<{ ordinal: string; slug: string; checksum: string; status: string }>): void {
+function printStatus(
+  rows: Array<{ ordinal: string; slug: string; checksum: string; status: string }>,
+): void {
   for (const r of rows) {
     process.stdout.write(`${r.status.padEnd(8)} ${r.ordinal} ${r.slug}  ${r.checksum}\n`);
   }

@@ -46,9 +46,7 @@ describe('rendering-service', () => {
     for (const s of samples) {
       expect(s.id.length).toBeGreaterThan(0);
       expect(s.deck_id.length).toBeGreaterThan(0);
-      expect(['queued', 'running', 'succeeded', 'failed', 'cancelled']).toContain(
-        s.status,
-      );
+      expect(['queued', 'running', 'succeeded', 'failed', 'cancelled']).toContain(s.status);
     }
   });
 

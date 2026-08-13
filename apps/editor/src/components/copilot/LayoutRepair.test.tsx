@@ -166,8 +166,12 @@ describe('LayoutRepair', () => {
     await waitFor(() => {
       expect(screen.getByTestId('layout-repair-patch')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('layout-repair-patch-before')).toHaveTextContent('Title overflows by 20px');
-    expect(screen.getByTestId('layout-repair-patch-after')).toHaveTextContent('Title fits within canvas');
+    expect(screen.getByTestId('layout-repair-patch-before')).toHaveTextContent(
+      'Title overflows by 20px',
+    );
+    expect(screen.getByTestId('layout-repair-patch-after')).toHaveTextContent(
+      'Title fits within canvas',
+    );
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/v1/ai/lint-layout/fix'),
       expect.objectContaining({ method: 'POST' }),

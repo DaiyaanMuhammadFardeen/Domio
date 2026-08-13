@@ -10,12 +10,7 @@
  * forget background job), `emitAsync()` is provided.
  */
 
-import type {
-  AuditEvent,
-  AuditEventInput,
-  AuditQuery,
-  AuditQueryResult,
-} from './types.js';
+import type { AuditEvent, AuditEventInput, AuditQuery, AuditQueryResult } from './types.js';
 import {
   AuditRetentionRunRecord,
   DEFAULT_RETENTION_DAYS,
@@ -243,4 +238,10 @@ function escapeCsv(v: unknown): string {
 // Re-exports for convenience
 // ---------------------------------------------------------------------------
 
-export { InMemoryAuditStore, PgAuditStore, validateEventInput, MAX_QUERY_LIMIT, DEFAULT_QUERY_LIMIT };
+export {
+  InMemoryAuditStore,
+  PgAuditStore,
+  validateEventInput,
+  MAX_QUERY_LIMIT,
+  DEFAULT_QUERY_LIMIT,
+};

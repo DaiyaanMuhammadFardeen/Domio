@@ -53,12 +53,12 @@ export interface ThemePair {
  * the relative lightness ordering of the original palette.
  */
 function invertLightness(L: number): number {
-  if (L < 0.05) return 0.10;
+  if (L < 0.05) return 0.1;
   if (L > 0.95) return 0.95;
   // L' = 1 - L is the simple inversion; bias the midpoint slightly
   // toward 0.5 so brand colors don't slide into pure greys.
   const inverted = 1 - L;
-  return Math.min(0.95, Math.max(0.10, inverted));
+  return Math.min(0.95, Math.max(0.1, inverted));
 }
 
 /**
@@ -151,7 +151,10 @@ export function generateLightTheme(
         light.set(tokenId, value);
         continue;
       }
-      light.set(tokenId, { type: 'color', value: { ...value.value, channels: [back.r, back.g, back.b] } });
+      light.set(tokenId, {
+        type: 'color',
+        value: { ...value.value, channels: [back.r, back.g, back.b] },
+      });
     } else {
       light.set(tokenId, value);
     }

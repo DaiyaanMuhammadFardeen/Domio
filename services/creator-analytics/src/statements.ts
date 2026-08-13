@@ -6,11 +6,7 @@
  * NO PDF generation — payload jsonb holds structured data.
  */
 
-import type {
-  StatementSummary,
-  StatementLineItem,
-  RevenueEventRow,
-} from './types.js';
+import type { StatementSummary, StatementLineItem, RevenueEventRow } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Statement ID generator (ULID-ish)
@@ -22,9 +18,9 @@ import type {
  */
 export function generateStatementId(): string {
   const ts = Date.now().toString(36).padStart(10, '0');
-  const rand = Array.from({ length: 16 }, () =>
-    Math.floor(Math.random() * 36).toString(36),
-  ).join('');
+  const rand = Array.from({ length: 16 }, () => Math.floor(Math.random() * 36).toString(36)).join(
+    '',
+  );
   return `stmt-${ts}${rand}`;
 }
 
@@ -134,9 +130,10 @@ export function buildYearly1099KBody(
   }
 
   // Derive year from the first statement's period_month
-  const year = monthlyStatements.length > 0
-    ? monthlyStatements[0]!.period_month.slice(0, 4)
-    : new Date().getFullYear().toString();
+  const year =
+    monthlyStatements.length > 0
+      ? monthlyStatements[0]!.period_month.slice(0, 4)
+      : new Date().getFullYear().toString();
 
   return {
     summary: {

@@ -58,6 +58,10 @@ describe('JoinForm', () => {
     fireEvent.change(screen.getByTestId('join-code'), { target: { value: '123456' } });
     fireEvent.change(screen.getByTestId('join-display-name'), { target: { value: 'Pat' } });
     fireEvent.click(screen.getByTestId('join-submit'));
-    expect(onSubmit).toHaveBeenCalledWith('123456', 'Pat', expect.objectContaining({ locale: 'es' }));
+    expect(onSubmit).toHaveBeenCalledWith(
+      '123456',
+      'Pat',
+      expect.objectContaining({ locale: 'es' }),
+    );
   });
 });

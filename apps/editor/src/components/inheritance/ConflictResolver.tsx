@@ -30,10 +30,7 @@ export interface ConflictResolverProps {
    * implementation calls `resolveConflict` from the service. Tests
    * can override to bypass network calls.
    */
-  readonly onResolve?: (
-    slideId: string,
-    resolution: ConflictResolution,
-  ) => Promise<void> | void;
+  readonly onResolve?: (slideId: string, resolution: ConflictResolution) => Promise<void> | void;
   readonly dataTestId?: string;
 }
 
@@ -53,7 +50,10 @@ function summarize(record: Record<string, unknown>): string {
   const keys = Object.keys(record);
   if (keys.length === 0) return '—';
   return keys
-    .map((k) => `${k}: ${typeof record[k] === 'object' ? JSON.stringify(record[k]) : String(record[k])}`)
+    .map(
+      (k) =>
+        `${k}: ${typeof record[k] === 'object' ? JSON.stringify(record[k]) : String(record[k])}`,
+    )
     .join('\n');
 }
 
@@ -113,7 +113,17 @@ export function ConflictResolver({
           <FormattedMessage id="editor.inheritance.conflicts.empty" />
         </p>
       ) : (
-        <ul role="list" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <ul
+          role="list"
+          style={{
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+          }}
+        >
           {visible.map((conflict) => {
             const isBusy = busyId === conflict.slide_id;
             return (
@@ -128,7 +138,14 @@ export function ConflictResolver({
                   background: 'white',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'baseline',
+                    gap: 8,
+                  }}
+                >
                   <strong>{conflict.slide_title}</strong>
                   <span
                     style={{
@@ -154,7 +171,9 @@ export function ConflictResolver({
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.7, marginBottom: 4 }}>MASTER</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.7, marginBottom: 4 }}>
+                      MASTER
+                    </div>
                     <pre
                       data-testid={`${dataTestId}-master-${conflict.slide_id}`}
                       style={{
@@ -171,7 +190,9 @@ export function ConflictResolver({
                     </pre>
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.7, marginBottom: 4 }}>DOWNSTREAM</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.7, marginBottom: 4 }}>
+                      DOWNSTREAM
+                    </div>
                     <pre
                       data-testid={`${dataTestId}-downstream-${conflict.slide_id}`}
                       style={{

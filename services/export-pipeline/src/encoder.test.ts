@@ -26,7 +26,7 @@ function makeSolidFrame(w: number, h: number, r: number, g: number, b: number): 
 
 function makeFrames(count: number, w = 4, h = 4): ExportFrame[] {
   return Array.from({ length: count }, (_, i) => {
-    const v = (i % 256);
+    const v = i % 256;
     return makeSolidFrame(w, h, v, v, v);
   });
 }
@@ -53,9 +53,9 @@ describe('encoder — GIF', () => {
     const fps = 10;
     const frameCount = GIF_MAX_SECONDS * fps + 1; // 121 frames at 10fps = 12.1s
     const frames = makeFrames(frameCount);
-    await expect(
-      encoder.encodeVideo(frames, { format: 'gif', fps }),
-    ).rejects.toBeInstanceOf(ExportBudgetError);
+    await expect(encoder.encodeVideo(frames, { format: 'gif', fps })).rejects.toBeInstanceOf(
+      ExportBudgetError,
+    );
   });
 
   it('accepts GIF at exactly 12s boundary', async () => {
@@ -96,17 +96,17 @@ describe('encoder — ffmpeg (MP4/WebM)', () => {
     const frames = makeFrames(frameCount);
     // This will throw ExportBudgetError regardless of ffmpeg presence
     // (budget check happens before ffmpeg invocation)
-    await expect(
-      encoder.encodeVideo(frames, { format: 'mp4', fps }),
-    ).rejects.toBeInstanceOf(ExportBudgetError);
+    await expect(encoder.encodeVideo(frames, { format: 'mp4', fps })).rejects.toBeInstanceOf(
+      ExportBudgetError,
+    );
   });
 });
 
 describe('encoder — edge cases', () => {
   it('throws ValidationError for empty frames', async () => {
     const encoder = createEncoder();
-    await expect(
-      encoder.encodeVideo([], { format: 'gif', fps: 10 }),
-    ).rejects.toThrow('No frames to encode');
+    await expect(encoder.encodeVideo([], { format: 'gif', fps: 10 })).rejects.toThrow(
+      'No frames to encode',
+    );
   });
 });

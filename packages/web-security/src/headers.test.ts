@@ -35,14 +35,16 @@ describe('buildCsp', () => {
 
   it('honours allowlist overrides for connect-src', () => {
     const csp = buildCsp({ allowlist: { connect: ['https://api.domio.example.com'] } });
-    expect(csp).toContain('connect-src \'self\' https://api.domio.example.com');
+    expect(csp).toContain("connect-src 'self' https://api.domio.example.com");
   });
 
   it('honours multiple img hosts', () => {
     const csp = buildCsp({
       allowlist: { img: ['https://cdn.domio.example.com', 'https://*.googleusercontent.com'] },
     });
-    expect(csp).toMatch(/img-src 'self' data: blob: https:\/\/cdn\.domio\.example\.com https:\/\/\*\.googleusercontent\.com/);
+    expect(csp).toMatch(
+      /img-src 'self' data: blob: https:\/\/cdn\.domio\.example\.com https:\/\/\*\.googleusercontent\.com/,
+    );
   });
 });
 

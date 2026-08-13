@@ -5,11 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  ONBOARDING_TRANSITIONS,
-  validateTransition,
-  canSellPaidListings,
-} from './onboarding.js';
+import { ONBOARDING_TRANSITIONS, validateTransition, canSellPaidListings } from './onboarding.js';
 import { OnboardingTransitionError } from './types.js';
 import type { OnboardingState } from './types.js';
 
@@ -88,8 +84,13 @@ describe('ONBOARDING_TRANSITIONS', () => {
 
   it('covers all 7 onboarding statuses', () => {
     const statuses: OnboardingState[] = [
-      'pending', 'profile_complete', 'kyc_required', 'kyc_submitted',
-      'kyc_approved', 'payout_ready', 'active',
+      'pending',
+      'profile_complete',
+      'kyc_required',
+      'kyc_submitted',
+      'kyc_approved',
+      'payout_ready',
+      'active',
     ];
     for (const status of statuses) {
       expect(ONBOARDING_TRANSITIONS).toHaveProperty(status);

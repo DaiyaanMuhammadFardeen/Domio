@@ -33,8 +33,8 @@ export default async function CsatPage({
           <code className="rounded bg-slate-100 px-1.5 py-0.5">{deckId}</code>
           {slideId ? (
             <>
-              {' '}· slide{' '}
-              <code className="rounded bg-slate-100 px-1.5 py-0.5">{slideId}</code>
+              {' '}
+              · slide <code className="rounded bg-slate-100 px-1.5 py-0.5">{slideId}</code>
             </>
           ) : null}
         </p>

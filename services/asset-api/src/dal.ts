@@ -35,7 +35,11 @@ export interface ModelAsset {
 // Domain: Scene
 // ---------------------------------------------------------------------------
 
-export interface Vec3 { readonly x: number; readonly y: number; readonly z: number; }
+export interface Vec3 {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+}
 
 export interface Light {
   readonly kind: 'directional' | 'point' | 'spot';
@@ -174,7 +178,10 @@ export interface SceneRepository {
 
 export interface CameraKeyframeRepository {
   insert(record: CameraKeyframe): Promise<void>;
-  update(id: string, patch: Partial<Omit<CameraKeyframe, 'id' | 'createdAt'>>): Promise<CameraKeyframe>;
+  update(
+    id: string,
+    patch: Partial<Omit<CameraKeyframe, 'id' | 'createdAt'>>,
+  ): Promise<CameraKeyframe>;
   findById(id: string): Promise<CameraKeyframe | null>;
   listBySlide(slideId: string): Promise<CameraKeyframe[]>;
   delete(id: string): Promise<void>;
@@ -210,7 +217,10 @@ export class InMemoryModelAssetRepository implements ModelAssetRepository {
     this.store.set(record.id, record);
   }
 
-  async update(id: string, patch: Partial<Omit<ModelAsset, 'id' | 'createdAt'>>): Promise<ModelAsset> {
+  async update(
+    id: string,
+    patch: Partial<Omit<ModelAsset, 'id' | 'createdAt'>>,
+  ): Promise<ModelAsset> {
     const existing = this.store.get(id);
     if (!existing) throw new ModelNotFoundError(id);
     const updated: ModelAsset = { ...existing, ...patch, updatedAt: new Date() };
@@ -224,7 +234,7 @@ export class InMemoryModelAssetRepository implements ModelAssetRepository {
 
   async listByWorkspace(workspaceId: string): Promise<ModelAsset[]> {
     if (workspaceId === '*') return [...this.store.values()];
-    return [...this.store.values()].filter(r => r.workspaceId === workspaceId);
+    return [...this.store.values()].filter((r) => r.workspaceId === workspaceId);
   }
 
   async delete(id: string): Promise<void> {
@@ -256,7 +266,7 @@ export class InMemorySceneRepository implements SceneRepository {
     // Scenes don't have workspaceId directly; they reference modelAssetId.
     // For simplicity, list all and optionally filter by modelAssetId.
     const scenes = [...this.store.values()];
-    if (modelAssetId) return scenes.filter(s => s.modelAssetId === modelAssetId);
+    if (modelAssetId) return scenes.filter((s) => s.modelAssetId === modelAssetId);
     return scenes;
   }
 
@@ -273,7 +283,10 @@ export class InMemoryCameraKeyframeRepository implements CameraKeyframeRepositor
     this.store.set(record.id, record);
   }
 
-  async update(id: string, patch: Partial<Omit<CameraKeyframe, 'id' | 'createdAt'>>): Promise<CameraKeyframe> {
+  async update(
+    id: string,
+    patch: Partial<Omit<CameraKeyframe, 'id' | 'createdAt'>>,
+  ): Promise<CameraKeyframe> {
     const existing = this.store.get(id);
     if (!existing) throw new CameraKeyframeNotFoundError(id);
     const updated: CameraKeyframe = { ...existing, ...patch };
@@ -287,7 +300,7 @@ export class InMemoryCameraKeyframeRepository implements CameraKeyframeRepositor
 
   async listBySlide(slideId: string): Promise<CameraKeyframe[]> {
     return [...this.store.values()]
-      .filter(k => k.slideId === slideId)
+      .filter((k) => k.slideId === slideId)
       .sort((a, b) => a.orderIndex - b.orderIndex);
   }
 
@@ -297,9 +310,9 @@ export class InMemoryCameraKeyframeRepository implements CameraKeyframeRepositor
   }
 
   async nextOrderIndex(slideId: string): Promise<number> {
-    const keys = [...this.store.values()].filter(k => k.slideId === slideId);
+    const keys = [...this.store.values()].filter((k) => k.slideId === slideId);
     if (keys.length === 0) return 0;
-    return Math.max(...keys.map(k => k.orderIndex)) + 1;
+    return Math.max(...keys.map((k) => k.orderIndex)) + 1;
   }
 }
 
@@ -323,8 +336,8 @@ export class InMemoryShaderRepository implements ShaderRepository {
   }
 
   async listByWorkspace(workspaceId: string, kind?: ShaderKind): Promise<Shader[]> {
-    let shaders = [...this.store.values()].filter(s => s.workspaceId === workspaceId);
-    if (kind) shaders = shaders.filter(s => s.kind === kind);
+    let shaders = [...this.store.values()].filter((s) => s.workspaceId === workspaceId);
+    if (kind) shaders = shaders.filter((s) => s.kind === kind);
     return shaders;
   }
 
@@ -364,7 +377,7 @@ export class InMemoryLicenseRepository implements LicenseRepository {
   }
 
   async listByWorkspace(workspaceId: string): Promise<License[]> {
-    return [...this.store.values()].filter(l => l.workspaceId === workspaceId);
+    return [...this.store.values()].filter((l) => l.workspaceId === workspaceId);
   }
 
   async delete(id: string): Promise<void> {
@@ -374,7 +387,7 @@ export class InMemoryLicenseRepository implements LicenseRepository {
 
   async isReferencedByModel(licenseId: string): Promise<boolean> {
     const models = await this.modelRepo.listByWorkspace('*');
-    return models.some(m => m.licenseId === licenseId);
+    return models.some((m) => m.licenseId === licenseId);
   }
 }
 
@@ -534,7 +547,10 @@ export class InMemoryAudioAssetRepository implements AudioAssetRepository {
     this.store.set(record.id, record);
   }
 
-  async update(id: string, patch: Partial<Omit<AudioAsset, 'id' | 'createdAt'>>): Promise<AudioAsset> {
+  async update(
+    id: string,
+    patch: Partial<Omit<AudioAsset, 'id' | 'createdAt'>>,
+  ): Promise<AudioAsset> {
     const existing = this.store.get(id);
     if (!existing) throw new AudioAssetNotFoundError(id);
     const updated: AudioAsset = { ...existing, ...patch, updatedAt: new Date() };
@@ -548,7 +564,7 @@ export class InMemoryAudioAssetRepository implements AudioAssetRepository {
 
   async listByWorkspace(workspaceId: string): Promise<AudioAsset[]> {
     if (workspaceId === '*') return [...this.store.values()];
-    return [...this.store.values()].filter(r => r.workspaceId === workspaceId);
+    return [...this.store.values()].filter((r) => r.workspaceId === workspaceId);
   }
 
   async delete(id: string): Promise<void> {
@@ -564,7 +580,10 @@ export class InMemoryVideoAssetRepository implements VideoAssetRepository {
     this.store.set(record.id, record);
   }
 
-  async update(id: string, patch: Partial<Omit<VideoAsset, 'id' | 'createdAt'>>): Promise<VideoAsset> {
+  async update(
+    id: string,
+    patch: Partial<Omit<VideoAsset, 'id' | 'createdAt'>>,
+  ): Promise<VideoAsset> {
     const existing = this.store.get(id);
     if (!existing) throw new VideoAssetNotFoundError(id);
     const updated: VideoAsset = { ...existing, ...patch, updatedAt: new Date() };
@@ -578,7 +597,7 @@ export class InMemoryVideoAssetRepository implements VideoAssetRepository {
 
   async listByWorkspace(workspaceId: string): Promise<VideoAsset[]> {
     if (workspaceId === '*') return [...this.store.values()];
-    return [...this.store.values()].filter(r => r.workspaceId === workspaceId);
+    return [...this.store.values()].filter((r) => r.workspaceId === workspaceId);
   }
 
   async delete(id: string): Promise<void> {
@@ -594,7 +613,10 @@ export class InMemoryLottieAssetRepository implements LottieAssetRepository {
     this.store.set(record.id, record);
   }
 
-  async update(id: string, patch: Partial<Omit<LottieAsset, 'id' | 'createdAt'>>): Promise<LottieAsset> {
+  async update(
+    id: string,
+    patch: Partial<Omit<LottieAsset, 'id' | 'createdAt'>>,
+  ): Promise<LottieAsset> {
     const existing = this.store.get(id);
     if (!existing) throw new LottieAssetNotFoundError(id);
     const updated: LottieAsset = { ...existing, ...patch, updatedAt: new Date() };
@@ -608,7 +630,7 @@ export class InMemoryLottieAssetRepository implements LottieAssetRepository {
 
   async listByWorkspace(workspaceId: string): Promise<LottieAsset[]> {
     if (workspaceId === '*') return [...this.store.values()];
-    return [...this.store.values()].filter(r => r.workspaceId === workspaceId);
+    return [...this.store.values()].filter((r) => r.workspaceId === workspaceId);
   }
 
   async delete(id: string): Promise<void> {

@@ -4,11 +4,7 @@ import { createPanelRegistry, type PanelDefinition } from './PanelRegistry.js';
 type Id = 'a' | 'b' | 'c';
 type Group = 'first' | 'second';
 
-const makePanel = (
-  id: Id,
-  group: Group,
-  order = 0,
-): PanelDefinition<Id, Group, unknown> => ({
+const makePanel = (id: Id, group: Group, order = 0): PanelDefinition<Id, Group, unknown> => ({
   id,
   label: id.toUpperCase(),
   group,
@@ -51,11 +47,7 @@ describe('createPanelRegistry', () => {
 
   it('groups returns unique groups in insertion order', () => {
     const reg = createPanelRegistry<Id, Group, unknown>();
-    reg.addAll([
-      makePanel('a', 'first'),
-      makePanel('b', 'second'),
-      makePanel('c', 'first'),
-    ]);
+    reg.addAll([makePanel('a', 'first'), makePanel('b', 'second'), makePanel('c', 'first')]);
     expect(reg.groups()).toEqual(['first', 'second']);
   });
 

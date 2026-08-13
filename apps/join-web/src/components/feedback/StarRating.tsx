@@ -21,11 +21,7 @@ export function StarRating(props: StarRatingProps) {
   const clamped = Math.max(0, Math.min(5, Math.round(props.value)));
   const stars: readonly number[] = [1, 2, 3, 4, 5];
   return (
-    <div
-      className="flex gap-1 text-3xl"
-      role="radiogroup"
-      data-testid={testId}
-    >
+    <div className="flex gap-1 text-3xl" role="radiogroup" data-testid={testId}>
       {stars.map((n) => {
         const filled = n <= clamped;
         const label = `${n} stars`;

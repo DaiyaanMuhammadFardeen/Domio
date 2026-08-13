@@ -8,7 +8,15 @@ function makeSpec(seed: number, n = 50): MockSpec {
       { name: 'id', type: 'number', min: 1, max: 1000 },
       { name: 'name', type: 'string', categories: ['Alice', 'Bob', 'Carol', 'Dave'] },
       { name: 'active', type: 'boolean' },
-      { name: 'score', type: 'number', min: 0, max: 100, distribution: 'normal', mean: 50, stddev: 15 },
+      {
+        name: 'score',
+        type: 'number',
+        min: 0,
+        max: 100,
+        distribution: 'normal',
+        mean: 50,
+        stddev: 15,
+      },
       { name: 'amount', type: 'currency', min: 10, max: 5000 },
       { name: 'ratio', type: 'percent', min: 0, max: 100 },
     ],
@@ -47,8 +55,22 @@ describe('deterministic generation', () => {
 
   it('columns match field definitions', () => {
     const result = generate(makeSpec(99));
-    expect(result.columns.map((c) => c.name)).toEqual(['id', 'name', 'active', 'score', 'amount', 'ratio']);
-    expect(result.columns.map((c) => c.type)).toEqual(['number', 'string', 'boolean', 'number', 'currency', 'percent']);
+    expect(result.columns.map((c) => c.name)).toEqual([
+      'id',
+      'name',
+      'active',
+      'score',
+      'amount',
+      'ratio',
+    ]);
+    expect(result.columns.map((c) => c.type)).toEqual([
+      'number',
+      'string',
+      'boolean',
+      'number',
+      'currency',
+      'percent',
+    ]);
   });
 });
 

@@ -21,7 +21,10 @@ const opts: RenderOptions = { width: 640, height: 320 };
 
 function barDataset(): Dataset {
   return {
-    columns: [{ name: 'label', type: 'string' }, { name: 'value', type: 'number' }],
+    columns: [
+      { name: 'label', type: 'string' },
+      { name: 'value', type: 'number' },
+    ],
     rows: [
       { label: 'A', value: 10 },
       { label: 'B', value: 20 },
@@ -32,7 +35,10 @@ function barDataset(): Dataset {
 
 function pieDataset(): Dataset {
   return {
-    columns: [{ name: 'cat', type: 'string' }, { name: 'val', type: 'number' }],
+    columns: [
+      { name: 'cat', type: 'string' },
+      { name: 'val', type: 'number' },
+    ],
     rows: [
       { cat: 'X', val: 40 },
       { cat: 'Y', val: 30 },
@@ -43,7 +49,10 @@ function pieDataset(): Dataset {
 
 function scatterDataset(): Dataset {
   return {
-    columns: [{ name: 'x', type: 'number' }, { name: 'y', type: 'number' }],
+    columns: [
+      { name: 'x', type: 'number' },
+      { name: 'y', type: 'number' },
+    ],
     rows: [
       { x: 1, y: 5 },
       { x: 2, y: 8 },
@@ -56,14 +65,35 @@ function bigDataset(n: number): Dataset {
   const rows: Record<string, unknown>[] = [];
   for (let i = 0; i < n; i++) rows.push({ label: `item_${i}`, value: i });
   return {
-    columns: [{ name: 'label', type: 'string' }, { name: 'value', type: 'number' }],
+    columns: [
+      { name: 'label', type: 'string' },
+      { name: 'value', type: 'number' },
+    ],
     rows,
   };
 }
 
-const barBinding: BindingSchema = { type: 'bar', columns: [{ role: 'x', column: 'label' }, { role: 'y', column: 'value' }] };
-const pieBinding: BindingSchema = { type: 'pie', columns: [{ role: 'label', column: 'cat' }, { role: 'value', column: 'val' }] };
-const scatterBinding: BindingSchema = { type: 'scatter', columns: [{ role: 'x', column: 'x' }, { role: 'y', column: 'y' }] };
+const barBinding: BindingSchema = {
+  type: 'bar',
+  columns: [
+    { role: 'x', column: 'label' },
+    { role: 'y', column: 'value' },
+  ],
+};
+const pieBinding: BindingSchema = {
+  type: 'pie',
+  columns: [
+    { role: 'label', column: 'cat' },
+    { role: 'value', column: 'val' },
+  ],
+};
+const scatterBinding: BindingSchema = {
+  type: 'scatter',
+  columns: [
+    { role: 'x', column: 'x' },
+    { role: 'y', column: 'y' },
+  ],
+};
 
 describe('empty state', () => {
   it('renders empty_state for empty dataset', () => {
@@ -134,10 +164,22 @@ describe('scatter chart', () => {
 describe('funnel chart', () => {
   it('renders', () => {
     const ds: Dataset = {
-      columns: [{ name: 'label', type: 'string' }, { name: 'value', type: 'number' }],
-      rows: [{ label: 'Step 1', value: 100 }, { label: 'Step 2', value: 60 }],
+      columns: [
+        { name: 'label', type: 'string' },
+        { name: 'value', type: 'number' },
+      ],
+      rows: [
+        { label: 'Step 1', value: 100 },
+        { label: 'Step 2', value: 60 },
+      ],
     };
-    const b: BindingSchema = { type: 'funnel', columns: [{ role: 'label', column: 'label' }, { role: 'value', column: 'value' }] };
+    const b: BindingSchema = {
+      type: 'funnel',
+      columns: [
+        { role: 'label', column: 'label' },
+        { role: 'value', column: 'value' },
+      ],
+    };
     const els = renderFunnel(ds, opts, b);
     expect(els.length).toBeGreaterThan(0);
   });
@@ -146,10 +188,21 @@ describe('funnel chart', () => {
 describe('sankey chart', () => {
   it('renders', () => {
     const ds: Dataset = {
-      columns: [{ name: 'src', type: 'string' }, { name: 'tgt', type: 'string' }, { name: 'flow', type: 'number' }],
+      columns: [
+        { name: 'src', type: 'string' },
+        { name: 'tgt', type: 'string' },
+        { name: 'flow', type: 'number' },
+      ],
       rows: [{ src: 'A', tgt: 'B', flow: 10 }],
     };
-    const b: BindingSchema = { type: 'sankey', columns: [{ role: 'x', column: 'src' }, { role: 'y', column: 'tgt' }, { role: 'value', column: 'flow' }] };
+    const b: BindingSchema = {
+      type: 'sankey',
+      columns: [
+        { role: 'x', column: 'src' },
+        { role: 'y', column: 'tgt' },
+        { role: 'value', column: 'flow' },
+      ],
+    };
     const els = renderSankey(ds, opts, b);
     expect(els.length).toBeGreaterThan(0);
   });
@@ -158,10 +211,22 @@ describe('sankey chart', () => {
 describe('treemap chart', () => {
   it('renders', () => {
     const ds: Dataset = {
-      columns: [{ name: 'name', type: 'string' }, { name: 'size', type: 'number' }],
-      rows: [{ name: 'A', size: 50 }, { name: 'B', size: 30 }],
+      columns: [
+        { name: 'name', type: 'string' },
+        { name: 'size', type: 'number' },
+      ],
+      rows: [
+        { name: 'A', size: 50 },
+        { name: 'B', size: 30 },
+      ],
     };
-    const b: BindingSchema = { type: 'treemap', columns: [{ role: 'label', column: 'name' }, { role: 'value', column: 'size' }] };
+    const b: BindingSchema = {
+      type: 'treemap',
+      columns: [
+        { role: 'label', column: 'name' },
+        { role: 'value', column: 'size' },
+      ],
+    };
     const els = renderTreemap(ds, opts, b);
     expect(els.length).toBeGreaterThan(0);
   });
@@ -170,10 +235,24 @@ describe('treemap chart', () => {
 describe('heatmap chart', () => {
   it('renders', () => {
     const ds: Dataset = {
-      columns: [{ name: 'col', type: 'string' }, { name: 'row', type: 'string' }, { name: 'v', type: 'number' }],
-      rows: [{ col: 'C1', row: 'R1', v: 10 }, { col: 'C2', row: 'R1', v: 20 }],
+      columns: [
+        { name: 'col', type: 'string' },
+        { name: 'row', type: 'string' },
+        { name: 'v', type: 'number' },
+      ],
+      rows: [
+        { col: 'C1', row: 'R1', v: 10 },
+        { col: 'C2', row: 'R1', v: 20 },
+      ],
     };
-    const b: BindingSchema = { type: 'heatmap', columns: [{ role: 'x', column: 'col' }, { role: 'y', column: 'row' }, { role: 'value', column: 'v' }] };
+    const b: BindingSchema = {
+      type: 'heatmap',
+      columns: [
+        { role: 'x', column: 'col' },
+        { role: 'y', column: 'row' },
+        { role: 'value', column: 'v' },
+      ],
+    };
     const els = renderHeatmap(ds, opts, b);
     expect(els.length).toBeGreaterThan(0);
   });
@@ -182,10 +261,22 @@ describe('heatmap chart', () => {
 describe('waterfall chart', () => {
   it('renders', () => {
     const ds: Dataset = {
-      columns: [{ name: 'label', type: 'string' }, { name: 'delta', type: 'number' }],
-      rows: [{ label: 'Start', delta: 100 }, { label: 'Cost', delta: -30 }],
+      columns: [
+        { name: 'label', type: 'string' },
+        { name: 'delta', type: 'number' },
+      ],
+      rows: [
+        { label: 'Start', delta: 100 },
+        { label: 'Cost', delta: -30 },
+      ],
     };
-    const b: BindingSchema = { type: 'waterfall', columns: [{ role: 'x', column: 'label' }, { role: 'y', column: 'delta' }] };
+    const b: BindingSchema = {
+      type: 'waterfall',
+      columns: [
+        { role: 'x', column: 'label' },
+        { role: 'y', column: 'delta' },
+      ],
+    };
     const els = renderWaterfall(ds, opts, b);
     expect(els.length).toBeGreaterThan(0);
   });
@@ -206,10 +297,23 @@ describe('gauge chart', () => {
 describe('radar chart', () => {
   it('renders', () => {
     const ds: Dataset = {
-      columns: [{ name: 'dim', type: 'string' }, { name: 'score', type: 'number' }],
-      rows: [{ dim: 'Speed', score: 80 }, { dim: 'Power', score: 60 }, { dim: 'Defense', score: 90 }],
+      columns: [
+        { name: 'dim', type: 'string' },
+        { name: 'score', type: 'number' },
+      ],
+      rows: [
+        { dim: 'Speed', score: 80 },
+        { dim: 'Power', score: 60 },
+        { dim: 'Defense', score: 90 },
+      ],
     };
-    const b: BindingSchema = { type: 'radar', columns: [{ role: 'label', column: 'dim' }, { role: 'value', column: 'score' }] };
+    const b: BindingSchema = {
+      type: 'radar',
+      columns: [
+        { role: 'label', column: 'dim' },
+        { role: 'value', column: 'score' },
+      ],
+    };
     const els = renderRadar(ds, opts, b);
     expect(els.length).toBeGreaterThan(0);
   });
@@ -218,10 +322,22 @@ describe('radar chart', () => {
 describe('candlestick chart', () => {
   it('renders', () => {
     const ds: Dataset = {
-      columns: [{ name: 'date', type: 'string' }, { name: 'close', type: 'number' }],
-      rows: [{ date: '2024-01', close: 100 }, { date: '2024-02', close: 110 }],
+      columns: [
+        { name: 'date', type: 'string' },
+        { name: 'close', type: 'number' },
+      ],
+      rows: [
+        { date: '2024-01', close: 100 },
+        { date: '2024-02', close: 110 },
+      ],
     };
-    const b: BindingSchema = { type: 'candlestick', columns: [{ role: 'x', column: 'date' }, { role: 'y', column: 'close' }] };
+    const b: BindingSchema = {
+      type: 'candlestick',
+      columns: [
+        { role: 'x', column: 'date' },
+        { role: 'y', column: 'close' },
+      ],
+    };
     const els = renderCandlestick(ds, opts, b);
     expect(els.length).toBeGreaterThan(0);
   });
@@ -230,10 +346,19 @@ describe('candlestick chart', () => {
 describe('bullet chart', () => {
   it('renders', () => {
     const ds: Dataset = {
-      columns: [{ name: 'item', type: 'string' }, { name: 'actual', type: 'number' }],
+      columns: [
+        { name: 'item', type: 'string' },
+        { name: 'actual', type: 'number' },
+      ],
       rows: [{ item: 'Revenue', actual: 85 }],
     };
-    const b: BindingSchema = { type: 'bullet', columns: [{ role: 'label', column: 'item' }, { role: 'value', column: 'actual' }] };
+    const b: BindingSchema = {
+      type: 'bullet',
+      columns: [
+        { role: 'label', column: 'item' },
+        { role: 'value', column: 'actual' },
+      ],
+    };
     const els = renderBullet(ds, opts, b);
     expect(els.length).toBeGreaterThan(0);
   });
@@ -261,7 +386,22 @@ describe('renderChart dispatch', () => {
   });
 
   it('handles all chart types', () => {
-    const types = ['bar', 'line', 'area', 'pie', 'scatter', 'funnel', 'sankey', 'treemap', 'heatmap', 'waterfall', 'gauge', 'radar', 'candlestick', 'bullet'] as const;
+    const types = [
+      'bar',
+      'line',
+      'area',
+      'pie',
+      'scatter',
+      'funnel',
+      'sankey',
+      'treemap',
+      'heatmap',
+      'waterfall',
+      'gauge',
+      'radar',
+      'candlestick',
+      'bullet',
+    ] as const;
     const bindings: Record<string, BindingSchema> = {
       bar: barBinding,
       line: barBinding,
@@ -269,9 +409,23 @@ describe('renderChart dispatch', () => {
       pie: pieBinding,
       scatter: scatterBinding,
       funnel: pieBinding,
-      sankey: { type: 'sankey', columns: [{ role: 'x', column: 'label' }, { role: 'y', column: 'value' }, { role: 'value', column: 'value' }] },
+      sankey: {
+        type: 'sankey',
+        columns: [
+          { role: 'x', column: 'label' },
+          { role: 'y', column: 'value' },
+          { role: 'value', column: 'value' },
+        ],
+      },
       treemap: pieBinding,
-      heatmap: { type: 'heatmap', columns: [{ role: 'x', column: 'label' }, { role: 'y', column: 'value' }, { role: 'value', column: 'value' }] },
+      heatmap: {
+        type: 'heatmap',
+        columns: [
+          { role: 'x', column: 'label' },
+          { role: 'y', column: 'value' },
+          { role: 'value', column: 'value' },
+        ],
+      },
       waterfall: barBinding,
       gauge: { type: 'gauge', columns: [{ role: 'value', column: 'value' }] },
       radar: pieBinding,

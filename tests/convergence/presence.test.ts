@@ -21,7 +21,10 @@ import { describe, it, expect } from 'vitest';
 // yjs is not hoisted to repo root by pnpm strict mode — import via
 // yjs-shared's node_modules.
 import * as Y from '../../packages/yjs-shared/node_modules/yjs';
-import { encodeAwarenessUpdate, applyAwarenessUpdate } from '../../packages/yjs-shared/node_modules/y-protocols/awareness.js';
+import {
+  encodeAwarenessUpdate,
+  applyAwarenessUpdate,
+} from '../../packages/yjs-shared/node_modules/y-protocols/awareness.js';
 import {
   createAwareness,
   updatePresence,
@@ -116,24 +119,11 @@ interface PresenceScenario {
     rng: () => number,
   ) => void;
   /** Apply concurrent presence updates to peer A. */
-  updateA: (
-    awarenessA: AwarenessType,
-    docA: Y.Doc,
-    rng: () => number,
-  ) => void;
+  updateA: (awarenessA: AwarenessType, docA: Y.Doc, rng: () => number) => void;
   /** Apply concurrent presence updates to peer B. */
-  updateB: (
-    awarenessB: AwarenessType,
-    docB: Y.Doc,
-    rng: () => number,
-  ) => void;
+  updateB: (awarenessB: AwarenessType, docB: Y.Doc, rng: () => number) => void;
   /** Optional assertion after sync. */
-  assert?: (
-    awarenessA: AwarenessType,
-    awarenessB: AwarenessType,
-    docA: Y.Doc,
-    docB: Y.Doc,
-  ) => void;
+  assert?: (awarenessA: AwarenessType, awarenessB: AwarenessType, docA: Y.Doc, docB: Y.Doc) => void;
 }
 
 // ─── Scenario Generators ─────────────────────────────────────────────
@@ -434,9 +424,7 @@ function generateScenarios(): PresenceScenario[] {
     updateB() {},
     assert(awarenessA, awarenessB, docA, docB) {
       const { peersA } = syncAndPeers(awarenessA, awarenessB, docA, docB);
-      const bobPeer = peersA.find(
-        (p: { userState: PresenceState }) => p.userState.name === 'Bob',
-      );
+      const bobPeer = peersA.find((p: { userState: PresenceState }) => p.userState.name === 'Bob');
       expect(bobPeer).toBeDefined();
     },
   });
@@ -524,9 +512,7 @@ function generateScenarios(): PresenceScenario[] {
     },
     assert(awarenessA, awarenessB, docA, docB) {
       const { peersA } = syncAndPeers(awarenessA, awarenessB, docA, docB);
-      const bobPeer = peersA.find(
-        (p: { userState: PresenceState }) => p.userState.name === 'Bob',
-      );
+      const bobPeer = peersA.find((p: { userState: PresenceState }) => p.userState.name === 'Bob');
       expect(bobPeer).toBeDefined();
       expect(bobPeer!.userState.activeSlide).toBe('slide-1');
     },

@@ -16,7 +16,9 @@ import type { MergeRequestEventEmitter } from '@domio/merge-request-service';
 function createMockService(overrides?: Partial<MergeRequestService>): MergeRequestService {
   return {
     createMergeRequest: vi.fn(),
-    getMergeRequest: vi.fn().mockResolvedValue({ id: 'mr-1', status: 'open', deck_id: 'deck-1', workspace_id: 'ws-1' }),
+    getMergeRequest: vi
+      .fn()
+      .mockResolvedValue({ id: 'mr-1', status: 'open', deck_id: 'deck-1', workspace_id: 'ws-1' }),
     listMergeRequests: vi.fn().mockResolvedValue([]),
     getMergeRequestDiffs: vi.fn().mockResolvedValue({
       id: 'sd-1',
@@ -34,13 +36,23 @@ function createMockService(overrides?: Partial<MergeRequestService>): MergeReque
 
 function createMockMrProvider() {
   return {
-    getOpenMergeRequests: vi.fn().mockResolvedValue([
-      { id: 'mr-1', workspace_id: 'ws-1', deck_id: 'deck-1', source_branch: 'feature', target_branch: 'main' },
-    ]),
+    getOpenMergeRequests: vi
+      .fn()
+      .mockResolvedValue([
+        {
+          id: 'mr-1',
+          workspace_id: 'ws-1',
+          deck_id: 'deck-1',
+          source_branch: 'feature',
+          target_branch: 'main',
+        },
+      ]),
   };
 }
 
-function createMockEmitter(): MergeRequestEventEmitter & { events: Array<{ subject: string; payload: Record<string, unknown> }> } {
+function createMockEmitter(): MergeRequestEventEmitter & {
+  events: Array<{ subject: string; payload: Record<string, unknown> }>;
+} {
   const events: Array<{ subject: string; payload: Record<string, unknown> }> = [];
   return {
     events,
@@ -127,14 +139,29 @@ describe('DiffEngineWorker', () => {
               before: null,
               after: null,
               element_diffs: [
-                { element_id: 'e1', path: 'elements[e1].style.x', change_type: 'modified', source_value: 10, target_value: 20, base_value: 0, is_conflict: true },
+                {
+                  element_id: 'e1',
+                  path: 'elements[e1].style.x',
+                  change_type: 'modified',
+                  source_value: 10,
+                  target_value: 20,
+                  base_value: 0,
+                  is_conflict: true,
+                },
               ],
             },
           ],
           binding_diffs: [],
           computed_at: new Date(),
         }),
-        getMergeRequest: vi.fn().mockResolvedValue({ id: 'mr-1', status: 'open', deck_id: 'deck-1', workspace_id: 'ws-1' }),
+        getMergeRequest: vi
+          .fn()
+          .mockResolvedValue({
+            id: 'mr-1',
+            status: 'open',
+            deck_id: 'deck-1',
+            workspace_id: 'ws-1',
+          }),
       });
 
       const worker = new DiffEngineWorker({

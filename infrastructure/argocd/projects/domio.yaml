@@ -22,16 +22,16 @@ spec:
     - namespace: observability
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-    - group: ""
+    - group: ''
       kind: Namespace
   namespaceResourceWhitelist:
-    - group: ""
+    - group: ''
       kind: ConfigMap
-    - group: ""
+    - group: ''
       kind: Secret
-    - group: ""
+    - group: ''
       kind: Service
-    - group: ""
+    - group: ''
       kind: ServiceAccount
     - group: apps
       kind: Deployment

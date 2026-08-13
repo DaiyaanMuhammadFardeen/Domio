@@ -26,19 +26,19 @@
 
 **Feature numbers in scope (per `feature-list.md`):**
 
-| Feature | Name | Notes |
-|---|---|---|
-| #85 | Timeline-based animation editor | Tracks, keyframes, easing curves, delays, undo |
-| #86 | Magic move between slides | Element-role matching, transform tween |
-| #87 | Entrance/exit/emphasis presets | 24+ presets, JSON-defined, hot-reloadable |
-| #88 | Per-element animation triggers | `on_click`, `on_enter`, `on_hover`, `on_data_change`, `on_timer` |
-| #89 | Staggered list/grid reveals | `forward / reverse / center-out / random` |
-| #90 | Scroll-linked animations | Web-shared deck only, ≤ 32 / screen |
-| #91 | Slide transitions | 8+ built-ins, magic-move-aware, GPU-accelerated |
-| #92 | Animation curve library + custom Bezier | Monotonicity enforced; LUT cache |
-| #93 | Reduced-motion mode | OS preference + per-deck override |
-| #94 | Animation copy/paste | `Cmd/Ctrl+C`, `Cmd/Ctrl+Alt+C` for easing-only |
-| #95 | GIF/MP4/WebM export of animated slide(s) | Server pipeline, watermarked for free tier |
+| Feature | Name                                     | Notes                                                            |
+| ------- | ---------------------------------------- | ---------------------------------------------------------------- |
+| #85     | Timeline-based animation editor          | Tracks, keyframes, easing curves, delays, undo                   |
+| #86     | Magic move between slides                | Element-role matching, transform tween                           |
+| #87     | Entrance/exit/emphasis presets           | 24+ presets, JSON-defined, hot-reloadable                        |
+| #88     | Per-element animation triggers           | `on_click`, `on_enter`, `on_hover`, `on_data_change`, `on_timer` |
+| #89     | Staggered list/grid reveals              | `forward / reverse / center-out / random`                        |
+| #90     | Scroll-linked animations                 | Web-shared deck only, ≤ 32 / screen                              |
+| #91     | Slide transitions                        | 8+ built-ins, magic-move-aware, GPU-accelerated                  |
+| #92     | Animation curve library + custom Bezier  | Monotonicity enforced; LUT cache                                 |
+| #93     | Reduced-motion mode                      | OS preference + per-deck override                                |
+| #94     | Animation copy/paste                     | `Cmd/Ctrl+C`, `Cmd/Ctrl+Alt+C` for easing-only                   |
+| #95     | GIF/MP4/WebM export of animated slide(s) | Server pipeline, watermarked for free tier                       |
 
 **Out of scope (deferred):**
 
@@ -46,7 +46,7 @@
 - **Lottie/Rive state-machine authoring** (#79) → Phase 11 (import-only here).
 - **AI-generated animations** (#112, #121) → Phase 12. The timeline data model is exposed via JSON Schema here so Phase 12 can wrap it.
 - **Code-block + runnable snippet animations** (#82) → Phase 11.
-- **MCP server exposure of animation tools** (#221, #222) → Phase 13. *However*, the timeline / transition / easing JSON Schemas are emitted as JSON Schema 2020-12 here so Phase 13 can read them.
+- **MCP server exposure of animation tools** (#221, #222) → Phase 13. _However_, the timeline / transition / easing JSON Schemas are emitted as JSON Schema 2020-12 here so Phase 13 can read them.
 - **Custom transitions authored in WebGL** → Phase 21 if at all.
 - **Voice/gesture-triggered animations** → Phase 21 (touched on with the trigger API remaining stable).
 - **Voice-triggered slide states** (#209) and AI rehearsal coach playback integration (#117) — Phase 21.
@@ -358,19 +358,19 @@ Full DDL: `/docs/animation-transitions.md` §5.1 (`timelines`, `tracks`, `keyfra
 
 ## 6. Verification
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #85 AC-85.1–AC-85.5 | Timeline panel E2E: select element, add two keyframes, scrub, undo | Scrubbing is stable ≥ 50 fps; `K` drops a snap-to-playhead keyframe; undo returns to a single keyframe | M2 lead |
-| #86 AC-86.1–AC-86.4 | Magic-move across 200-element slides A/B | Cold compute ≤ 250 ms p95; warm cache ≤ 50 ms; ambiguous matches flagged yellow; per-element override disables a pair | M3 lead |
-| #87 AC-87.1–AC-87.3 | 24 presets applied to 24 element types | Each preset produces editable keyframes; physics easing plays identically on two machines | M1 lead |
-| #88 AC-88.1–AC-88.4 | Trigger dropdown + `on_data_change` integration with Phase 08 stub | Each trigger fires correctly; sequence/stagger produces uniform offsets; `on_hover` suppressed in scroll-mode viewer | M2 lead |
-| #89 AC-89.1–AC-89.2 | Stagger direction `forward / reverse / center-out / random` on a 10-element group | Direction only reorders offsets; z-order preserved; single-element no-op | M2 lead |
-| #90 AC-90.1–AC-90.3 | 32 scroll-linked properties in scroll-mode viewer | 60 Hz scroll; ≤ 1 ms / frame; cap emits inline warning above 32 | M3 lead |
-| #91 AC-91.1–AC-91.3 | 8 transitions on adjacent fixture slides, snapshot diff | All GPU-accelerated except `morph` and `portal`; preview button plays 1-second clip | M2 lead |
-| #92 AC-92.1–AC-92.3 | Bezier editor + precomputed LUT | Non-monotonic handles snap back; LUT clamps `[-0.25, 1.25]`; preview swatch animates at 30 fps | M1 lead |
-| #93 AC-93.1–AC-93.3 | OS preference flipped + per-deck override | Mode switches on `change` event; `always_full` ignores OS; reduced-mode events appended to state timeline | M4 lead |
-| #94 AC-94.1–AC-94.3 | Copy/paste animation across compatible and incompatible elements | Incompatible tracks dropped with toast; cross-slide paste preserves timings; brand-locked region refuses paste | M3 lead |
-| #95 AC-95.1–AC-95.4 | GIF/MP4 export of 6-second animated fixture | Budgets met (480 p/15 fps GIF ≤ 12 s; 720 p MP4 ≤ 30 s); watermark on free tier; DLP-flagged deck export refused | M5 lead |
+| Feature             | Test                                                                              | Expected result                                                                                                       | Owner   |
+| ------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------- |
+| #85 AC-85.1–AC-85.5 | Timeline panel E2E: select element, add two keyframes, scrub, undo                | Scrubbing is stable ≥ 50 fps; `K` drops a snap-to-playhead keyframe; undo returns to a single keyframe                | M2 lead |
+| #86 AC-86.1–AC-86.4 | Magic-move across 200-element slides A/B                                          | Cold compute ≤ 250 ms p95; warm cache ≤ 50 ms; ambiguous matches flagged yellow; per-element override disables a pair | M3 lead |
+| #87 AC-87.1–AC-87.3 | 24 presets applied to 24 element types                                            | Each preset produces editable keyframes; physics easing plays identically on two machines                             | M1 lead |
+| #88 AC-88.1–AC-88.4 | Trigger dropdown + `on_data_change` integration with Phase 08 stub                | Each trigger fires correctly; sequence/stagger produces uniform offsets; `on_hover` suppressed in scroll-mode viewer  | M2 lead |
+| #89 AC-89.1–AC-89.2 | Stagger direction `forward / reverse / center-out / random` on a 10-element group | Direction only reorders offsets; z-order preserved; single-element no-op                                              | M2 lead |
+| #90 AC-90.1–AC-90.3 | 32 scroll-linked properties in scroll-mode viewer                                 | 60 Hz scroll; ≤ 1 ms / frame; cap emits inline warning above 32                                                       | M3 lead |
+| #91 AC-91.1–AC-91.3 | 8 transitions on adjacent fixture slides, snapshot diff                           | All GPU-accelerated except `morph` and `portal`; preview button plays 1-second clip                                   | M2 lead |
+| #92 AC-92.1–AC-92.3 | Bezier editor + precomputed LUT                                                   | Non-monotonic handles snap back; LUT clamps `[-0.25, 1.25]`; preview swatch animates at 30 fps                        | M1 lead |
+| #93 AC-93.1–AC-93.3 | OS preference flipped + per-deck override                                         | Mode switches on `change` event; `always_full` ignores OS; reduced-mode events appended to state timeline             | M4 lead |
+| #94 AC-94.1–AC-94.3 | Copy/paste animation across compatible and incompatible elements                  | Incompatible tracks dropped with toast; cross-slide paste preserves timings; brand-locked region refuses paste        | M3 lead |
+| #95 AC-95.1–AC-95.4 | GIF/MP4 export of 6-second animated fixture                                       | Budgets met (480 p/15 fps GIF ≤ 12 s; 720 p MP4 ≤ 30 s); watermark on free tier; DLP-flagged deck export refused      | M5 lead |
 
 **Performance benchmarks (CI gates):**
 
@@ -383,19 +383,19 @@ Full DDL: `/docs/animation-transitions.md` §5.1 (`timelines`, `tracks`, `keyfra
 
 ## 7. Risks & Open Decisions
 
-| # | Risk / decision | Mitigation |
-|---|---|---|
-| R-09-1 | **Bezier / spring edge-case values break determinism.** A user-defined curve overshoots into negative progress. | LUT clamp `[-0.25, 1.25]`; values outside the range trigger a 422 with "pick a built-in"; spring solver bounds enforced in the API (`mass ∈ [0.1, 10]`, `stiffness ∈ [10, 1000]`, `damping ∈ [1, 200]`). |
-| R-09-2 | **`morph` performance for many elements.** Geometry-attribute animation is heavier than transform. | Magic-move pairs are capped at 64 elements per transition; beyond that, the engine falls back to cross-fade. |
-| R-09-3 | **Export SSRF via embedded iframes.** A slide that contains a live iframe bound to an internal URL could exfiltrate during render. | The export renderer is a sandboxed Chromium with network blocked to `RFC1918`, `link-local`, `loopback`, and cloud-metadata endpoints; iframes that fail to render are recorded with a placeholder frame. |
-| R-09-4 | **GIF encoder determinism.** Two runs must produce the same GIF for the same input. | Fixed-step encoder + identical input frames; CI runs a byte-level comparison over 600 frames. |
-| R-09-5 | **Reduced-motion overrides silently downgrade.** A user with `always_full` should never get reduced motion. | Mode read from deck settings on each session start and on every `change` event; never inferred from `no-preference`. |
-| R-09-6 | **Trigger overload.** `on_data_change` firing every second replays an animation every second — distracting. | Per-binding trigger throttle (debounce 250 ms) and a per-slide cap on simultaneous triggers firing (16). |
-| R-09-7 | **Hot-reload of presets in prod.** A misconfigured preset could ship to live users. | Hot-reload is dev-only; production bundles presets at build time and addresses them by stable ID. |
-| R-09-8 | **Export queue starvation.** A single 50-slide enterprise export blocks the pool. | Per-tenant concurrency cap (10), priority for paid tiers, FIFO otherwise; `queue_depth` alert at 50. |
-| R-09-9 | **Open: scroll-linked + `always_reduced` interaction.** When reduced motion is forced, scroll-linked should collapse to end-state at full progress. | Default behavior is collapse; manual toggle per workspace (`collapse_scroll_linked BOOLEAN` in `reduced_motion_settings`). |
-| R-09-10 | **Open: `prefers-reduced-motion` telemetry aggregation.** Per-phase we want to know how many viewers experienced reduced motion. | Emit `reduced_motion.viewer_count` gauge per deck (already specced in §9.2); analytics dashboards in Phase 17. |
-| R-09-11 | **Open: voice-triggered slide state (#209) and gesture control (#208).** | Trigger API remains stable; Phase 21 wraps it with speech-recognition. |
+| #       | Risk / decision                                                                                                                                     | Mitigation                                                                                                                                                                                                |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-09-1  | **Bezier / spring edge-case values break determinism.** A user-defined curve overshoots into negative progress.                                     | LUT clamp `[-0.25, 1.25]`; values outside the range trigger a 422 with "pick a built-in"; spring solver bounds enforced in the API (`mass ∈ [0.1, 10]`, `stiffness ∈ [10, 1000]`, `damping ∈ [1, 200]`).  |
+| R-09-2  | **`morph` performance for many elements.** Geometry-attribute animation is heavier than transform.                                                  | Magic-move pairs are capped at 64 elements per transition; beyond that, the engine falls back to cross-fade.                                                                                              |
+| R-09-3  | **Export SSRF via embedded iframes.** A slide that contains a live iframe bound to an internal URL could exfiltrate during render.                  | The export renderer is a sandboxed Chromium with network blocked to `RFC1918`, `link-local`, `loopback`, and cloud-metadata endpoints; iframes that fail to render are recorded with a placeholder frame. |
+| R-09-4  | **GIF encoder determinism.** Two runs must produce the same GIF for the same input.                                                                 | Fixed-step encoder + identical input frames; CI runs a byte-level comparison over 600 frames.                                                                                                             |
+| R-09-5  | **Reduced-motion overrides silently downgrade.** A user with `always_full` should never get reduced motion.                                         | Mode read from deck settings on each session start and on every `change` event; never inferred from `no-preference`.                                                                                      |
+| R-09-6  | **Trigger overload.** `on_data_change` firing every second replays an animation every second — distracting.                                         | Per-binding trigger throttle (debounce 250 ms) and a per-slide cap on simultaneous triggers firing (16).                                                                                                  |
+| R-09-7  | **Hot-reload of presets in prod.** A misconfigured preset could ship to live users.                                                                 | Hot-reload is dev-only; production bundles presets at build time and addresses them by stable ID.                                                                                                         |
+| R-09-8  | **Export queue starvation.** A single 50-slide enterprise export blocks the pool.                                                                   | Per-tenant concurrency cap (10), priority for paid tiers, FIFO otherwise; `queue_depth` alert at 50.                                                                                                      |
+| R-09-9  | **Open: scroll-linked + `always_reduced` interaction.** When reduced motion is forced, scroll-linked should collapse to end-state at full progress. | Default behavior is collapse; manual toggle per workspace (`collapse_scroll_linked BOOLEAN` in `reduced_motion_settings`).                                                                                |
+| R-09-10 | **Open: `prefers-reduced-motion` telemetry aggregation.** Per-phase we want to know how many viewers experienced reduced motion.                    | Emit `reduced_motion.viewer_count` gauge per deck (already specced in §9.2); analytics dashboards in Phase 17.                                                                                            |
+| R-09-11 | **Open: voice-triggered slide state (#209) and gesture control (#208).**                                                                            | Trigger API remains stable; Phase 21 wraps it with speech-recognition.                                                                                                                                    |
 
 ---
 
@@ -416,17 +416,17 @@ Full DDL: `/docs/animation-transitions.md` §5.1 (`timelines`, `tracks`, `keyfra
 
 **Script (12 min):**
 
-1. **Open timeline.** Select the `<button>`. Add a `transform.x` track; press `K` at `t = 0`, then move playhead to `t = 800 ms`, press `K` again, choose `ease-out-cubic`. Scrub — interpolation is smooth at ≥ 50 fps. *(#85)*
-2. **Trigger reveal.** Set trigger to `on_click`. In presenter mode, click the button — animation fires. *(#88)*
-3. **Stagger.** Multi-select the 14 bars and apply "stagger 80 ms (forward)". Hit "play" — bars reveal in sequence. Switch direction to `center-out`. *(#89)*
-4. **Custom Bezier.** Open the easing chip, draw a Bezier curve with overshoot. Preview swatch animates 30 fps at the new curve. LUT precomputes in < 5 ms. *(#92)*
-5. **Magic move.** Navigate to the slide 1 → 2 transition inspector. Toggle "Magic move". The diff resolves: `unlock-screen.hero_title → app-home.hero_title` at similarity 0.94 (green dot). Play the transition — `hero_title` tweens position, size, and color across slides. *(#86)*
-6. **Presets.** Open the preset library. Apply `ken-burns zoom` to the hero image; `type-on typewriter` to the subtitle. Inspect the resulting tracks — they are editable keyframes, not a black-box. *(#87)*
-7. **Slide transitions.** Cycle through `push → fade → morph → cube → portal → cover → reveal → 3d-flip` on the deck by clicking between slides. Each plays within its 1-second preview. *(#91)*
-8. **Reduced motion.** The operator flips `prefers-reduced-motion: reduce` in the OS. On the next transition, animations collapse to ≤ 100 ms cross-fades. State timeline records `reduced_motion_observed: true`. Operator flips back; full motion returns. *(#93)*
-9. **Copy/paste.** Copy `hero_title`'s animation. Paste onto `subtitle`. Incompatible `font_size` track is silently dropped with a toast saying "1 track skipped". *(#94)*
-10. **Scroll-linked.** Switch to the published viewer in scroll mode. Scroll past slide 6 — `transform.x` interpolates against scroll progress, no forced reflow (DevTools shows zero layout). *(#90)*
-11. **Export.** Click "Share → Export motion". Pick slide 5, MP4, 720 p, watermark off. The job completes within 30 s and the download link is presented. *(#95)*
+1. **Open timeline.** Select the `<button>`. Add a `transform.x` track; press `K` at `t = 0`, then move playhead to `t = 800 ms`, press `K` again, choose `ease-out-cubic`. Scrub — interpolation is smooth at ≥ 50 fps. _(#85)_
+2. **Trigger reveal.** Set trigger to `on_click`. In presenter mode, click the button — animation fires. _(#88)_
+3. **Stagger.** Multi-select the 14 bars and apply "stagger 80 ms (forward)". Hit "play" — bars reveal in sequence. Switch direction to `center-out`. _(#89)_
+4. **Custom Bezier.** Open the easing chip, draw a Bezier curve with overshoot. Preview swatch animates 30 fps at the new curve. LUT precomputes in < 5 ms. _(#92)_
+5. **Magic move.** Navigate to the slide 1 → 2 transition inspector. Toggle "Magic move". The diff resolves: `unlock-screen.hero_title → app-home.hero_title` at similarity 0.94 (green dot). Play the transition — `hero_title` tweens position, size, and color across slides. _(#86)_
+6. **Presets.** Open the preset library. Apply `ken-burns zoom` to the hero image; `type-on typewriter` to the subtitle. Inspect the resulting tracks — they are editable keyframes, not a black-box. _(#87)_
+7. **Slide transitions.** Cycle through `push → fade → morph → cube → portal → cover → reveal → 3d-flip` on the deck by clicking between slides. Each plays within its 1-second preview. _(#91)_
+8. **Reduced motion.** The operator flips `prefers-reduced-motion: reduce` in the OS. On the next transition, animations collapse to ≤ 100 ms cross-fades. State timeline records `reduced_motion_observed: true`. Operator flips back; full motion returns. _(#93)_
+9. **Copy/paste.** Copy `hero_title`'s animation. Paste onto `subtitle`. Incompatible `font_size` track is silently dropped with a toast saying "1 track skipped". _(#94)_
+10. **Scroll-linked.** Switch to the published viewer in scroll mode. Scroll past slide 6 — `transform.x` interpolates against scroll progress, no forced reflow (DevTools shows zero layout). _(#90)_
+11. **Export.** Click "Share → Export motion". Pick slide 5, MP4, 720 p, watermark off. The job completes within 30 s and the download link is presented. _(#95)_
 12. **Determinism sanity.** Export the same slide again. The two MP4s hash-equal for the first 600 frames (CI gate).
 
 **Pass criteria.** All 11 acceptance groups (#85–#95) are exercised. A "Demo passed" GitHub check is set when the Playwright suite covering flows 1–12 is green and the CI performance gates (§6 above) succeed.

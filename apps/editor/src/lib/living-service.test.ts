@@ -93,12 +93,10 @@ describe('living-service: listUpdates / listUpdatesWithSource', () => {
     })) as unknown as typeof fetch;
     globalThis.fetch = mock;
 
-    await listUpdatesWithSource(
-      { deckId: 'd-1', sinceMs: 1_700_000_000_000 },
-      'http://api.test',
-    );
+    await listUpdatesWithSource({ deckId: 'd-1', sinceMs: 1_700_000_000_000 }, 'http://api.test');
 
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
     expect(calledUrl).toContain('since_ms=1700000000000');
     expect(calledUrl.startsWith('http://api.test/v1/decks/d-1/updates?')).toBe(true);
   });
@@ -113,7 +111,8 @@ describe('living-service: listUpdates / listUpdatesWithSource', () => {
     globalThis.fetch = mock;
 
     await listUpdatesWithSource({ deckId: 'd-1' }, 'http://api.test');
-    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[0] as string;
+    const calledUrl = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as string;
     expect(calledUrl).toBe('http://api.test/v1/decks/d-1/updates');
   });
 
@@ -298,10 +297,34 @@ describe('formatRelative', () => {
 describe('distinctKinds', () => {
   it('returns unique kinds preserving order', () => {
     const updates: LivingUpdate[] = [
-      { id: '1', timestamp_ms: 1, kind: 'data_refresh', actor: { type: 'user', id: 'a', name: 'A' }, summary: '' },
-      { id: '2', timestamp_ms: 2, kind: 'comment_added', actor: { type: 'user', id: 'a', name: 'A' }, summary: '' },
-      { id: '3', timestamp_ms: 3, kind: 'data_refresh', actor: { type: 'user', id: 'a', name: 'A' }, summary: '' },
-      { id: '4', timestamp_ms: 4, kind: 'auto_refresh', actor: { type: 'system', id: 's', name: 'S' }, summary: '' },
+      {
+        id: '1',
+        timestamp_ms: 1,
+        kind: 'data_refresh',
+        actor: { type: 'user', id: 'a', name: 'A' },
+        summary: '',
+      },
+      {
+        id: '2',
+        timestamp_ms: 2,
+        kind: 'comment_added',
+        actor: { type: 'user', id: 'a', name: 'A' },
+        summary: '',
+      },
+      {
+        id: '3',
+        timestamp_ms: 3,
+        kind: 'data_refresh',
+        actor: { type: 'user', id: 'a', name: 'A' },
+        summary: '',
+      },
+      {
+        id: '4',
+        timestamp_ms: 4,
+        kind: 'auto_refresh',
+        actor: { type: 'system', id: 's', name: 'S' },
+        summary: '',
+      },
     ];
     expect(distinctKinds(updates)).toEqual(['data_refresh', 'comment_added', 'auto_refresh']);
   });
@@ -313,9 +336,27 @@ describe('lastUpdateMs', () => {
   });
   it('returns the max timestamp_ms', () => {
     const updates: LivingUpdate[] = [
-      { id: '1', timestamp_ms: 100, kind: 'data_refresh', actor: { type: 'user', id: 'a', name: 'A' }, summary: '' },
-      { id: '2', timestamp_ms: 500, kind: 'comment_added', actor: { type: 'user', id: 'a', name: 'A' }, summary: '' },
-      { id: '3', timestamp_ms: 250, kind: 'data_refresh', actor: { type: 'user', id: 'a', name: 'A' }, summary: '' },
+      {
+        id: '1',
+        timestamp_ms: 100,
+        kind: 'data_refresh',
+        actor: { type: 'user', id: 'a', name: 'A' },
+        summary: '',
+      },
+      {
+        id: '2',
+        timestamp_ms: 500,
+        kind: 'comment_added',
+        actor: { type: 'user', id: 'a', name: 'A' },
+        summary: '',
+      },
+      {
+        id: '3',
+        timestamp_ms: 250,
+        kind: 'data_refresh',
+        actor: { type: 'user', id: 'a', name: 'A' },
+        summary: '',
+      },
     ];
     expect(lastUpdateMs(updates)).toBe(500);
   });

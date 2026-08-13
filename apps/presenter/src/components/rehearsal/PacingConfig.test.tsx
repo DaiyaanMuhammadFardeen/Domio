@@ -22,10 +22,7 @@ describe('PacingConfig', () => {
 
   it('uses initialTargets when provided', () => {
     render(
-      <PacingConfig
-        slides={SLIDES}
-        initialTargets={[{ slide_id: 's1', target_ms: 30_000 }]}
-      />,
+      <PacingConfig slides={SLIDES} initialTargets={[{ slide_id: 's1', target_ms: 30_000 }]} />,
     );
     expect((screen.getByTestId('pacing-config-input-s1') as HTMLInputElement).value).toBe('30');
     expect((screen.getByTestId('pacing-config-input-s2') as HTMLInputElement).value).toBe('60');
@@ -45,10 +42,7 @@ describe('PacingConfig', () => {
 
   it('renders the formatted preview', () => {
     render(
-      <PacingConfig
-        slides={SLIDES}
-        initialTargets={[{ slide_id: 's1', target_ms: 75_000 }]}
-      />,
+      <PacingConfig slides={SLIDES} initialTargets={[{ slide_id: 's1', target_ms: 75_000 }]} />,
     );
     expect(screen.getByTestId('pacing-config-preview-s1').textContent).toBe('1:15');
   });

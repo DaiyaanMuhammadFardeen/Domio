@@ -67,13 +67,22 @@ export class InMemoryAttendanceStore {
     return record;
   }
 
-  async list(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<AttendanceRecord>> {
+  async list(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<AttendanceRecord>> {
     const sk = this.sessionKey(input.workspace_id, input.session_id);
     return this.rows.get(sk) ?? [];
   }
 
-  async has(input: { workspace_id: string; session_id: string; participant_id: string }): Promise<boolean> {
-    return this.participantIndex.has(this.participantKey(input.workspace_id, input.session_id, input.participant_id));
+  async has(input: {
+    workspace_id: string;
+    session_id: string;
+    participant_id: string;
+  }): Promise<boolean> {
+    return this.participantIndex.has(
+      this.participantKey(input.workspace_id, input.session_id, input.participant_id),
+    );
   }
 }
 

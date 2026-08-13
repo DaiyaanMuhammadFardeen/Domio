@@ -198,7 +198,7 @@ export class PgAnalyticsStore implements AnalyticsStore {
       )`,
       [
         summary.statement_id,
-        '',  // workspace_id — not available in summary; set by caller
+        '', // workspace_id — not available in summary; set by caller
         summary.creator_id,
         summary.period_month,
         summary.kind,
@@ -276,11 +276,12 @@ function statementRowToDomain(row: Record<string, unknown>): StatementSummary {
     total_fee_cents: Number(row.total_fee_cents),
     total_net_cents: Number(row.total_net_cents),
     currency: row.currency as string,
-    generated_at: row.generated_at instanceof Date
-      ? row.generated_at.getTime()
-      : typeof row.generated_at === 'string'
-        ? new Date(row.generated_at).getTime()
-        : Number(row.generated_at),
+    generated_at:
+      row.generated_at instanceof Date
+        ? row.generated_at.getTime()
+        : typeof row.generated_at === 'string'
+          ? new Date(row.generated_at).getTime()
+          : Number(row.generated_at),
   };
 }
 

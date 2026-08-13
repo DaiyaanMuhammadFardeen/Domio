@@ -38,7 +38,11 @@ function req(
 describe('proxy — valid token forwards with auth_passthrough', () => {
   it('forwards request and returns upstream response', async () => {
     const ctx = makeCtx({
-      fetchFn: async () => new Response(JSON.stringify({ data: 'ok' }), { status: 200, headers: { 'content-type': 'application/json' } }),
+      fetchFn: async () =>
+        new Response(JSON.stringify({ data: 'ok' }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }),
     });
     ctx.tokenService.create('binding-1', 'https://api.example.com/data');
     const response = await proxyHandler(req('proxy-test-token'), ctx);
@@ -162,7 +166,14 @@ describe('proxy — SSRF-blocked returns 400', () => {
 
 const JWT_SECRET = 'test-proxy-jwt-secret';
 
-function makePolicy(overrides: Partial<Pick<EmbedPolicy, 'allowedOrigins' | 'jwtRequired' | 'jwtAudience' | 'trapFocus' | 'sandboxFlags'>> = {}): EmbedPolicy {
+function makePolicy(
+  overrides: Partial<
+    Pick<
+      EmbedPolicy,
+      'allowedOrigins' | 'jwtRequired' | 'jwtAudience' | 'trapFocus' | 'sandboxFlags'
+    >
+  > = {},
+): EmbedPolicy {
   return {
     ...DEFAULT_POLICY,
     ...overrides,
@@ -183,7 +194,9 @@ describe('proxy — Phase 11: CSP headers', () => {
     });
     ctx.tokenService.create('binding-1', 'https://api.example.com/data');
     await proxyHandler(req('proxy-test-token'), ctx);
-    expect(capturedHeaders['Content-Security-Policy']).toBe("frame-ancestors 'self' https://app.example.com");
+    expect(capturedHeaders['Content-Security-Policy']).toBe(
+      "frame-ancestors 'self' https://app.example.com",
+    );
   });
 
   it('adds frame-ancestors none when policy has empty allowedOrigins', async () => {
@@ -206,7 +219,11 @@ describe('proxy — Phase 11: CSP headers', () => {
 describe('proxy — Phase 11: trap-focus header', () => {
   it('adds Focus-Trap: enabled header when trapFocus is true', async () => {
     let capturedHeaders: Record<string, string> = {};
-    const policy = makePolicy({ trapFocus: true, allowedOrigins: ['https://example.com'], jwtRequired: false });
+    const policy = makePolicy({
+      trapFocus: true,
+      allowedOrigins: ['https://example.com'],
+      jwtRequired: false,
+    });
 
     const ctx = makeCtx({
       fetchFn: async (_url, init) => {
@@ -222,7 +239,11 @@ describe('proxy — Phase 11: trap-focus header', () => {
 
   it('does not add Focus-Trap header when trapFocus is false', async () => {
     let capturedHeaders: Record<string, string> = {};
-    const policy = makePolicy({ trapFocus: false, allowedOrigins: ['https://example.com'], jwtRequired: false });
+    const policy = makePolicy({
+      trapFocus: false,
+      allowedOrigins: ['https://example.com'],
+      jwtRequired: false,
+    });
 
     const ctx = makeCtx({
       fetchFn: async (_url, init) => {
@@ -259,7 +280,10 @@ describe('proxy — Phase 11: JWT passthrough', () => {
       jwtSecret: JWT_SECRET,
     });
     ctx.tokenService.create('binding-1', 'https://api.example.com/data');
-    const response = await proxyHandler(req('proxy-test-token', { authorization: 'Basic abc' }), ctx);
+    const response = await proxyHandler(
+      req('proxy-test-token', { authorization: 'Basic abc' }),
+      ctx,
+    );
     expect(response.status).toBe(401);
     expect((response.body as { code: string }).code).toBe('JWT_REQUIRED');
   });
@@ -326,7 +350,9 @@ describe('proxy — Phase 11: JWT passthrough', () => {
     );
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ data: 'ok' });
-    expect(capturedHeaders['Content-Security-Policy']).toBe("frame-ancestors 'self' https://example.com");
+    expect(capturedHeaders['Content-Security-Policy']).toBe(
+      "frame-ancestors 'self' https://example.com",
+    );
   });
 
   it('allows request when jwtRequired is false (no JWT needed)', async () => {
@@ -392,7 +418,9 @@ describe('proxy — Phase 11: policy resolution integration', () => {
     });
     ctx.tokenService.create('binding-1', 'https://api.example.com/data');
     await proxyHandler(req('proxy-test-token'), ctx);
-    expect(capturedHeaders['Content-Security-Policy']).toBe("frame-ancestors 'self' https://app.example.com");
+    expect(capturedHeaders['Content-Security-Policy']).toBe(
+      "frame-ancestors 'self' https://app.example.com",
+    );
     expect(capturedHeaders['Focus-Trap']).toBe('enabled');
   });
 });

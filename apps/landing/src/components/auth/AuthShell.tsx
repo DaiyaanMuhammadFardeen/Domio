@@ -24,21 +24,14 @@ const DEFAULT_FOOTER: ReadonlyArray<{ readonly href: string; readonly label: str
   { href: landing('forgot-password'), label: 'Forgot password' },
 ];
 
-export function AuthShell({
-  heading,
-  subtitle,
-  children,
-  footer,
-}: AuthShellProps): JSX.Element {
+export function AuthShell({ heading, subtitle, children, footer }: AuthShellProps): JSX.Element {
   return (
     <main className="auth-shell" data-testid="auth-shell">
       <section className="auth-shell__card" aria-labelledby="auth-shell-heading">
         <h1 id="auth-shell-heading" className="auth-shell__heading">
           {heading}
         </h1>
-        {subtitle !== undefined ? (
-          <p className="auth-shell__subtitle">{subtitle}</p>
-        ) : null}
+        {subtitle !== undefined ? <p className="auth-shell__subtitle">{subtitle}</p> : null}
         <div className="auth-shell__body">{children}</div>
         {footer !== undefined ? (
           <div className="auth-shell__footer">{footer}</div>

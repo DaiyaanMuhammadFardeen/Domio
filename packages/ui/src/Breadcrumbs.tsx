@@ -35,11 +35,7 @@ export function Breadcrumbs({
   const rootClass = className ? `nav-breadcrumbs ${className}` : 'nav-breadcrumbs';
 
   return (
-    <nav
-      className={rootClass}
-      aria-label="Breadcrumbs"
-      data-testid={testId}
-    >
+    <nav className={rootClass} aria-label="Breadcrumbs" data-testid={testId}>
       <ol className="nav-breadcrumbs__list">
         {items.map((node, index) => {
           const isLast = index === items.length - 1;
@@ -63,10 +59,7 @@ export function Breadcrumbs({
                 </a>
               )}
               {!isLast ? (
-                <span
-                  className="nav-breadcrumbs__sep"
-                  aria-hidden="true"
-                >
+                <span className="nav-breadcrumbs__sep" aria-hidden="true">
                   /
                 </span>
               ) : null}

@@ -19,22 +19,11 @@ import {
   RETENTION_CONTENT_TYPE_LABELS,
   RETENTION_PERIOD_LABELS,
 } from '../../lib/retention-service';
-import type {
-  RetentionPeriod,
-  RetentionPolicy,
-  RetentionPreview,
-} from '../../lib/types';
+import type { RetentionPeriod, RetentionPolicy, RetentionPreview } from '../../lib/types';
 
 const CATALOGUE = enMessages as Readonly<Record<string, string>>;
 
-const PERIODS: ReadonlyArray<RetentionPeriod> = [
-  '30d',
-  '90d',
-  '1y',
-  '3y',
-  '7y',
-  'indefinite',
-];
+const PERIODS: ReadonlyArray<RetentionPeriod> = ['30d', '90d', '1y', '3y', '7y', 'indefinite'];
 
 function formatDate(ms: number): string {
   return new Date(ms).toLocaleDateString('en-US', {
@@ -229,11 +218,7 @@ export default function RetentionPage() {
                           onClick={() => onSave(p.id)}
                           className="rounded-md bg-brand-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-brand-700 disabled:opacity-50"
                         >
-                          {savingId === p.id
-                            ? '…'
-                            : dirty
-                              ? 'Save'
-                              : 'Saved'}
+                          {savingId === p.id ? '…' : dirty ? 'Save' : 'Saved'}
                         </button>
                       </div>
                     </td>
@@ -259,10 +244,7 @@ export default function RetentionPage() {
           >
             <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                <FormattedMessage
-                  id="admin.retention.preview.heading"
-                  catalogue={CATALOGUE}
-                />
+                <FormattedMessage id="admin.retention.preview.heading" catalogue={CATALOGUE} />
               </h2>
               <button
                 type="button"
@@ -287,8 +269,7 @@ export default function RetentionPage() {
                       <div>
                         <div className="font-medium text-slate-900">{d.title}</div>
                         <div className="text-xs text-slate-500">
-                          <code>{d.id}</code> · last modified{' '}
-                          {formatDate(d.last_modified_ms)}
+                          <code>{d.id}</code> · last modified {formatDate(d.last_modified_ms)}
                         </div>
                       </div>
                       <div className="text-right">
@@ -308,9 +289,7 @@ export default function RetentionPage() {
             <footer className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
               <span>
                 Total affected:{' '}
-                <span className="font-semibold text-slate-900">
-                  {openPreview.total_affected}
-                </span>
+                <span className="font-semibold text-slate-900">{openPreview.total_affected}</span>
               </span>
               <button
                 type="button"

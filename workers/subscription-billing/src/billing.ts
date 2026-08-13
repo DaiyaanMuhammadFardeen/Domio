@@ -76,18 +76,17 @@ export class InMemorySubscriptionProvider implements SubscriptionProvider {
 
   async listDueForCancellation(now: Date): Promise<readonly SubscriptionRecord[]> {
     return this.subscriptions.filter(
-      s => s.cancelAtPeriodEnd
-        && s.status !== 'canceled'
-        && s.currentPeriodEnd !== null
-        && s.currentPeriodEnd <= now,
+      (s) =>
+        s.cancelAtPeriodEnd &&
+        s.status !== 'canceled' &&
+        s.currentPeriodEnd !== null &&
+        s.currentPeriodEnd <= now,
     );
   }
 
   async listGraceExpired(now: Date): Promise<readonly SubscriptionRecord[]> {
     return this.subscriptions.filter(
-      s => s.graceEndsAt !== null
-        && s.graceEndsAt <= now
-        && s.revokedAt === null,
+      (s) => s.graceEndsAt !== null && s.graceEndsAt <= now && s.revokedAt === null,
     );
   }
 
@@ -123,9 +122,15 @@ export class SubscriptionBillingWorker {
     this.nowFn = opts.now ?? (() => new Date());
     this.tickMs = opts.tickMs ?? Number(process.env['WORKER_TICK_MS'] ?? '60000');
     this.logger = opts.logger ?? {
-      info: () => { /* noop */ },
-      error: () => { /* noop */ },
-      warn: () => { /* noop */ },
+      info: () => {
+        /* noop */
+      },
+      error: () => {
+        /* noop */
+      },
+      warn: () => {
+        /* noop */
+      },
     };
   }
 

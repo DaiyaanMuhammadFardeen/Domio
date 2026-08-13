@@ -23,10 +23,12 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 ## 3. Scope
 
 **In scope (feature numbers):**
+
 - #19 — Branching & merging of decks (full UX: branch create, list, switch, merge request lifecycle, 3-way diff, conflict resolution UI).
 - #20 — Full version history with named checkpoints, diffs, restore.
 
 **Out of scope (handled in later phases):**
+
 - Suggestion mode (`#182`) — Phase 18.
 - Review/approval gates (`#180`) — Phase 18.
 - Per-slide assignments (`#181`) — Phase 18.
@@ -39,6 +41,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 ## 4. Dependencies
 
 **Upstream phases (must be complete):**
+
 - **Phase 00** — repo, contracts, generated clients, migration toolchain.
 - **Phase 01** — observability, CI/CD, NATS, Postgres, Redis, container images.
 - **Phase 02** — `decks`, `slides`, `elements`, schema version, deck canonical row.
@@ -46,6 +49,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 - **Phase 04** — CRDT log, sub-documents, branch ID plumbing on ops, presence, offline.
 
 **Downstream phases (this phase unblocks):**
+
 - **Phase 06** — components use the same CRDT history; per-component overrides ride branches.
 - **Phase 07** — themes are versioned on the same branch/sub-doc machinery.
 - **Phase 08** — data bindings bind to a specific revision; snapshot guarantees data is reproducible.
@@ -65,6 +69,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 **Owner:** Data platform lead + Editor lead. **Critical path.** Run in parallel with Stream B.
 
 **A.1 Durable op log writer**
+
 - Files: `/workers/sync/cmd/op-writer/main.go`, `/workers/sync/internal/materialize/op_writer.go`, `/workers/sync/internal/materialize/dedup.go`.
 - Consumes `realtime.deck.{deckId}.crdt` from JetStream; writes to `crdt_logs` (per Phase 04); promotes a `(deck_id, branch_id, hlc)` materialized view used by the snapshot worker.
 - Idempotency: `op_id` ULID is the primary key; duplicate writes are silently dropped.
@@ -73,6 +78,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 - DoD: a hard kill of the worker followed by a restart loses zero ops and converges to the same `current_revision` reported by the gateway.
 
 **A.2 Snapshotter and compaction**
+
 - Files: `/workers/sync/cmd/snapshotter/main.go`, `/workers/sync/internal/snapshot/{snapshot.go,throttle.go,object_store.go}`.
 - Triggers: every 5,000 ops on a deck, or every 10 min of no snapshot, whichever first.
 - Output: a Yjs binary update stored in `deck_schemas` (Phase 05 introduces new columns for `crdt_snapshot_yjs bytea`, `crdt_snapshot_object_key text`); also a JSON Schema projection for the renderer.
@@ -82,6 +88,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 - DoD: rebuilding a deck from snapshot + tail ops completes in <100 ms for a 200-slide deck.
 
 **A.3 Revision and schema versioning**
+
 - Files: `/services/control-plane/modules/deck/src/revisions.ts`, `/services/control-plane/modules/deck/src/schema-version.ts`, `/packages/schema/src/versioning.ts`.
 - Each successful op batch advances `current_revision` (`bigint`, monotonic per deck/branch). Each snapshot stores `revision`. `parent_revision` is the prior snapshot's revision.
 - Schema versioning (per `/docs/05-data-database-design.md` §5.3): snapshot stores `schema_version`; reads apply bidirectional migration on the fly.
@@ -92,6 +99,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 **Owner:** Editor lead. **Critical path.** Run in parallel with Stream A.
 
 **B.1 Branches API (REST + gRPC)**
+
 - Files: `/services/control-plane/modules/branch/src/handlers.ts`, `/services/control-plane/modules/branch/src/service.ts`, `/services/control-plane/modules/branch/src/lineage.ts`, `/services/control-plane/modules/branch/src/dal.ts`.
 - Endpoints:
   - `POST /v1/decks/{deckId}/branches` — body `{name, baseCheckpointId}`; creates branch with `parent_branch` derived from current branch; rejects duplicate names per deck.
@@ -103,6 +111,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 - DoD: `branch_id` is required on every CRDT op from this phase forward; legacy ops without `branch_id` are treated as `main`.
 
 **B.2 Merge requests — 3-way diff at slide/element granularity**
+
 - Files: `/services/control-plane/modules/branch/src/diff.ts`, `/services/control-plane/modules/branch/src/merge.ts`, `/services/control-plane/modules/branch/src/resolver.ts`.
 - Diff inputs: source branch base, source branch head, target branch head. Compute delta via Myers-style diff on the slide rail, per-slide diff on the element tree (add/modify/delete), per-property diff using JSON patch (RFC 6902) for scalars.
 - Output: a structured `diff_summary` JSON consumed by both the editor UI and the agentic layer:
@@ -123,6 +132,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 - DoD: a 200-slide deck with 50 divergent elements produces a `diff_summary` in <1.5 s.
 
 **B.3 Branch UI in the editor**
+
 - Files: `/apps/editor/src/branch/{branch-panel.tsx,branch-create-dialog.tsx,merge-request-view.tsx,conflict-resolver.tsx}`.
 - Branch panel: list, create, switch, archive. Switch requires user confirmation if there are unsynced local ops.
 - MR view: 3-pane diff (target / source / resolved). Conflict resolver allows per-element choice (`theirs`/`ours`/`manual`) with a preview.
@@ -133,6 +143,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 **Owner:** Editor lead. **Run in parallel with Stream A and B.**
 
 **C.1 Named checkpoints**
+
 - Files: `/services/control-plane/modules/checkpoint/src/handlers.ts`, `/services/control-plane/modules/checkpoint/src/service.ts`, `/apps/editor/src/history/checkpoints.tsx`.
 - Endpoints:
   - `POST /v1/decks/{deckId}/checkpoints` — body `{name, parentCheckpointId?}`; creates a checkpoint pinning the current revision.
@@ -143,6 +154,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 - DoD: a user can rename and restore checkpoints; the editor's history timeline shows checkpoints inline.
 
 **C.2 Visual diff and purge**
+
 - Files: `/services/control-plane/modules/diff/src/visual.ts`, `/services/control-plane/modules/diff/src/structural.ts`, `/workers/render/cmd/diff-renderer/main.go`.
 - Visual diff: server-rendered thumbnails at fixed zoom levels for fast scrub; client-computed thumbnails for live preview.
 - Structural diff: feed from `diff_summary` in §B.2; renders as slide rail + per-element tree diff.
@@ -150,6 +162,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 - DoD: a user can scrub a 200-slide deck's history at 200 ms per step and see structural plus visual diffs.
 
 **C.3 Unified history timeline**
+
 - Files: `/apps/editor/src/history/timeline.tsx`, `/apps/editor/src/history/remote-entry.tsx`.
 - The timeline shows: local undo/redo entries, named checkpoints, auto-checkpoints, branch switches, merge commits, agent edits.
 - Each entry has: timestamp, author (with avatar), preview thumbnail, "go to this state" button.
@@ -160,15 +173,18 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 **Owner:** Platform lead + Schema lead. **Run in parallel with Streams A–C.**
 
 **D.1 Proto contracts**
+
 - Files: `contracts/proto/domio/branch/v1/branch.proto`, `contracts/proto/domio/checkpoint/v1/checkpoint.proto`, `contracts/proto/domio/merge/v1/merge.proto`, `contracts/proto/domio/diff/v1/diff.proto`.
 - Generated clients commit to `services/control-plane/gen/`, `services/realtime-gateway/gen/`, `packages/sdk-go/branch/`, `packages/sdk-ts/branch/`.
 - CI: `buf breaking` against `main` must pass.
 
 **D.2 OpenAPI**
+
 - Files: `contracts/openapi/v1/branches.yaml`, `contracts/openapi/v1/checkpoints.yaml`, `contracts/openapi/v1/merge_requests.yaml`, `contracts/openapi/v1/diff.yaml`.
 - Spectral lint clean; CHANGELOG entry per breaking change.
 
 **D.3 Migrations and table changes**
+
 - New / changed tables (per `/docs/05-data-database-design.md`):
   - `decks` — extend with `current_revision bigint not null default 0`, `current_branch text not null default 'main'`, `crdt_snapshot_object_key text`.
   - `deck_versions` — extend with `branch_id uuid null` (nullable; `main` for legacy) and `diff_object_key text`; primary key already `(deck_id, revision)`.
@@ -180,12 +196,14 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 - Backfill: enumerate existing `crdt_logs` rows and assign `branch_id = 'main'`; backfill `current_revision` from max(op count) per deck.
 
 **D.4 Telemetry**
+
 - Files: `/services/control-plane/modules/branch/src/metrics.ts`, `/services/control-plane/modules/diff/src/metrics.ts`, `/workers/sync/internal/snapshot/metrics.go`.
 - Metrics: `branch_create_total`, `branch_diff_duration_ms`, `branch_merge_duration_ms`, `checkpoint_restore_total`, `snapshot_size_bytes`, `snapshot_duration_ms`.
 - Traces: spans for `branch.create`, `diff.compute`, `merge.commit`, `snapshot.materialize`.
 - Alerts: `branch_diff_duration_ms p95 > 2000 ms` (matches `/docs/editor-canvas.md` §3.2 latency budget); `snapshot_duration_ms p95 > 5000 ms`.
 
 **D.5 Security and audit**
+
 - Every merge request emits an `audit.event` of `action = 'merge.commit'` with `actor_id`, `source_branch_id`, `target_branch_id`, `revision`.
 - Branch create / archive / restore emit `audit.event` of `branch.create`, `branch.archive`, `checkpoint.restore`.
 - Diff and MR endpoints are ACL-checked (a viewer cannot read MR; only editor and admin).
@@ -204,6 +222,7 @@ Phase 05 turns the live CRDT stream from Phase 04 into a durable, addressable, v
 ### 6.2 New tables and migrations
 
 See Stream D.3 for the SQL. Subjects:
+
 - `decks` — `current_revision`, `current_branch`, `crdt_snapshot_object_key`.
 - `deck_versions` — `branch_id`, `diff_object_key`.
 - `crdt_logs` — `branch_id`, `op_kind`, `byte_size`.
@@ -243,45 +262,45 @@ Migrations are reversible; backfill is re-runnable; the `branch_id` column defau
 
 ## 7. Verification
 
-| Feature | Test | Expected result | Owner |
-|---------|------|-----------------|-------|
-| #19 branch create | POST /v1/decks/{id}/branches with valid base checkpoint | `branch` row created; subsequent ops carry `branch_id` | Editor lead |
-| #19 branch list | GET /v1/decks/{id}/branches | All branches with lineage; status fields populated | Editor lead |
-| #19 branch switch | POST /v1/decks/{id}/branches/{branchId}/checkout | Realtime gateway swaps sub-doc; cursor and selection state preserved | Editor lead |
-| #19 fast-forward merge | Target branch has no commits since base | MR auto-commits with no diff UI; new head on target | Editor lead |
-| #19 3-way diff | Source + target each diverge from base | `diff_summary` JSON returned with slide/element/path granularity | Editor lead |
-| #19 conflict resolution | Manual resolution per element | Resolved value applied; conflicts list shrinks | Editor lead |
-| #19 merge commit | Merge committed | New revision on target; `deck.branch.merged` audit event emitted | Editor lead |
-| #19 idempotent merge | Re-merge after partial resolve | Same final head hash; no duplicate ops | Editor lead |
-| #20 named checkpoint | POST /v1/decks/{id}/checkpoints | `checkpoint` row created; survives restart | Editor lead |
-| #20 auto-checkpoint | Synthesize 50 ops in 10 min | Auto-checkpoint created; expires after 30 days | Editor lead |
-| #20 rename | PATCH checkpoint | Name updated; history entry for the rename | Editor lead |
-| #20 restore | POST /v1/decks/{id}/checkpoints/{id}/restore | New forward edge; original checkpoint preserved | Editor lead |
-| #20 visual diff | Diff two revisions | Thumbnails render at ≤200 ms per step; structural diff overlay | Editor lead |
-| #20 unified timeline | Local + checkpoint + merge + agent entries | All entries shown in branch order | Editor lead |
-| History continuity | Switch branch, view timeline | Timeline swaps to branch-local history | Editor lead |
-| Snapshot determinism | Replay identical op sequence | Byte-identical snapshot | Data platform lead |
-| Snapshot retention | 50 snapshots inline; older object-store only | Inline count capped; older referenced by object key | Data platform lead |
-| Large-deck diff | 200 slides, 50 divergent elements | `diff_summary` in <1.5 s | Editor lead |
-| Load: 200 MRs | 200 concurrent MRs on a deck | All complete in <2 s; no cross-MR interference | SRE |
-| Mig backfill | 100k legacy `crdt_logs` rows | All backfilled with `branch_id = 'main'`; `current_revision` matches | Data platform lead |
-| Audit | Branch create + merge emit audit events | `audit_events` rows with `branch.*` and `merge.*` actions | Security lead |
-| Security gate | Threat model diff for branch/MR endpoints | All risks mitigated or accepted | Security lead |
-| Contract CI | `buf breaking` + Spectral | Pass on PR | Platform lead |
-| Schema migration | Forward and backout rehearsed in staging | No data loss; no downtime | Data platform lead |
+| Feature                 | Test                                                    | Expected result                                                      | Owner              |
+| ----------------------- | ------------------------------------------------------- | -------------------------------------------------------------------- | ------------------ |
+| #19 branch create       | POST /v1/decks/{id}/branches with valid base checkpoint | `branch` row created; subsequent ops carry `branch_id`               | Editor lead        |
+| #19 branch list         | GET /v1/decks/{id}/branches                             | All branches with lineage; status fields populated                   | Editor lead        |
+| #19 branch switch       | POST /v1/decks/{id}/branches/{branchId}/checkout        | Realtime gateway swaps sub-doc; cursor and selection state preserved | Editor lead        |
+| #19 fast-forward merge  | Target branch has no commits since base                 | MR auto-commits with no diff UI; new head on target                  | Editor lead        |
+| #19 3-way diff          | Source + target each diverge from base                  | `diff_summary` JSON returned with slide/element/path granularity     | Editor lead        |
+| #19 conflict resolution | Manual resolution per element                           | Resolved value applied; conflicts list shrinks                       | Editor lead        |
+| #19 merge commit        | Merge committed                                         | New revision on target; `deck.branch.merged` audit event emitted     | Editor lead        |
+| #19 idempotent merge    | Re-merge after partial resolve                          | Same final head hash; no duplicate ops                               | Editor lead        |
+| #20 named checkpoint    | POST /v1/decks/{id}/checkpoints                         | `checkpoint` row created; survives restart                           | Editor lead        |
+| #20 auto-checkpoint     | Synthesize 50 ops in 10 min                             | Auto-checkpoint created; expires after 30 days                       | Editor lead        |
+| #20 rename              | PATCH checkpoint                                        | Name updated; history entry for the rename                           | Editor lead        |
+| #20 restore             | POST /v1/decks/{id}/checkpoints/{id}/restore            | New forward edge; original checkpoint preserved                      | Editor lead        |
+| #20 visual diff         | Diff two revisions                                      | Thumbnails render at ≤200 ms per step; structural diff overlay       | Editor lead        |
+| #20 unified timeline    | Local + checkpoint + merge + agent entries              | All entries shown in branch order                                    | Editor lead        |
+| History continuity      | Switch branch, view timeline                            | Timeline swaps to branch-local history                               | Editor lead        |
+| Snapshot determinism    | Replay identical op sequence                            | Byte-identical snapshot                                              | Data platform lead |
+| Snapshot retention      | 50 snapshots inline; older object-store only            | Inline count capped; older referenced by object key                  | Data platform lead |
+| Large-deck diff         | 200 slides, 50 divergent elements                       | `diff_summary` in <1.5 s                                             | Editor lead        |
+| Load: 200 MRs           | 200 concurrent MRs on a deck                            | All complete in <2 s; no cross-MR interference                       | SRE                |
+| Mig backfill            | 100k legacy `crdt_logs` rows                            | All backfilled with `branch_id = 'main'`; `current_revision` matches | Data platform lead |
+| Audit                   | Branch create + merge emit audit events                 | `audit_events` rows with `branch.*` and `merge.*` actions            | Security lead      |
+| Security gate           | Threat model diff for branch/MR endpoints               | All risks mitigated or accepted                                      | Security lead      |
+| Contract CI             | `buf breaking` + Spectral                               | Pass on PR                                                           | Platform lead      |
+| Schema migration        | Forward and backout rehearsed in staging                | No data loss; no downtime                                            | Data platform lead |
 
 ## 8. Risks & open decisions
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| 3-way diff cost blows up on 1,000-slide decks | medium | high | Phase 02 schema review board already constrains deck shape; large-deck stress test in §D.5; lazy diff (only render changed slide rail positions) |
-| Branch storage cost grows unbounded | medium | medium | Object-storage snapshot retention per `/docs/05` §5.11; per-workspace quota enforced at branch-create |
-| Merge commit with conflicting data bindings | medium | medium | Diff classify per `/docs/05` §5.2.4; bindings diff into MR; user resolves; binding evaluator re-runs on merge |
-| Restore accidentally creates large forward history | low | medium | Restore is post-quantized at 50 ops per merge; idempotent |
-| Open: visual diff renders (Phase 13 vs Phase 15 hosting) | low | low | Defer to Phase 22 polish; this phase uses `/workers/render` |
-| Open: cross-deck branching | low | medium | Explicitly out of scope per §3; revisit in Phase 22 |
-| Open: agent-initiated merge resolution | medium | medium | Defer to Phase 12; MR endpoints accept `actor_kind = 'agent'` today |
-| Open: scraping / data export of branch history | low | low | `audit_events` covers; export tested in Phase 20 |
+| Risk                                                     | Likelihood | Impact | Mitigation                                                                                                                                       |
+| -------------------------------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 3-way diff cost blows up on 1,000-slide decks            | medium     | high   | Phase 02 schema review board already constrains deck shape; large-deck stress test in §D.5; lazy diff (only render changed slide rail positions) |
+| Branch storage cost grows unbounded                      | medium     | medium | Object-storage snapshot retention per `/docs/05` §5.11; per-workspace quota enforced at branch-create                                            |
+| Merge commit with conflicting data bindings              | medium     | medium | Diff classify per `/docs/05` §5.2.4; bindings diff into MR; user resolves; binding evaluator re-runs on merge                                    |
+| Restore accidentally creates large forward history       | low        | medium | Restore is post-quantized at 50 ops per merge; idempotent                                                                                        |
+| Open: visual diff renders (Phase 13 vs Phase 15 hosting) | low        | low    | Defer to Phase 22 polish; this phase uses `/workers/render`                                                                                      |
+| Open: cross-deck branching                               | low        | medium | Explicitly out of scope per §3; revisit in Phase 22                                                                                              |
+| Open: agent-initiated merge resolution                   | medium     | medium | Defer to Phase 12; MR endpoints accept `actor_kind = 'agent'` today                                                                              |
+| Open: scraping / data export of branch history           | low        | low    | `audit_events` covers; export tested in Phase 20                                                                                                 |
 
 ## 9. Demo
 

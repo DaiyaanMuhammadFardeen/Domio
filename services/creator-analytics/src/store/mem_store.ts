@@ -51,7 +51,7 @@ export class InMemoryAnalyticsStore implements AnalyticsStore {
     period_month: string;
   }): Promise<readonly RevenueEventRow[]> {
     return this.revenueEvents.filter(
-      e => e.seller_id === opts.creator_id && e.period_month === opts.period_month,
+      (e) => e.seller_id === opts.creator_id && e.period_month === opts.period_month,
     );
   }
 
@@ -60,7 +60,7 @@ export class InMemoryAnalyticsStore implements AnalyticsStore {
     creator_id?: string;
   }): Promise<readonly PaymentIntentRow[]> {
     if (opts.buyer_id) {
-      return this.paymentIntents.filter(p => p.buyer_id === opts.buyer_id);
+      return this.paymentIntents.filter((p) => p.buyer_id === opts.buyer_id);
     }
     // creator_id context: in-memory can't join via listing, so we'd need
     // listing→seller mapping. For simplicity, the mem_store returns all

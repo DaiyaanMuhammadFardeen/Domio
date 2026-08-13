@@ -10,13 +10,13 @@ Every Next.js app under `apps/*/next.config.{mjs,ts}` is now wrapped with
 `withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })` and
 has an `analyze` script in its `package.json`:
 
-| App | `next.config` | `analyze` script |
-|---|---|---|
-| `@domio/editor` | `apps/editor/next.config.mjs` | `pnpm --filter @domio/editor analyze` |
-| `@domio/dashboard` | `apps/dashboard/next.config.mjs` | `pnpm --filter @domio/dashboard analyze` |
-| `@domio/admin-console` | `apps/admin-console/next.config.mjs` | `pnpm --filter @domio/admin-console analyze` |
+| App                      | `next.config`                          | `analyze` script                               |
+| ------------------------ | -------------------------------------- | ---------------------------------------------- |
+| `@domio/editor`          | `apps/editor/next.config.mjs`          | `pnpm --filter @domio/editor analyze`          |
+| `@domio/dashboard`       | `apps/dashboard/next.config.mjs`       | `pnpm --filter @domio/dashboard analyze`       |
+| `@domio/admin-console`   | `apps/admin-console/next.config.mjs`   | `pnpm --filter @domio/admin-console analyze`   |
 | `@domio/creator-console` | `apps/creator-console/next.config.mjs` | `pnpm --filter @domio/creator-console analyze` |
-| `@domio/marketplace-web` | `apps/marketplace-web/next.config.ts` | `pnpm --filter @domio/marketplace-web analyze` |
+| `@domio/marketplace-web` | `apps/marketplace-web/next.config.ts`  | `pnpm --filter @domio/marketplace-web analyze` |
 
 `viewer`, `presenter`, `join-web`, and `landing` are Vite-based and use
 Vite's own bundle inspector (`pnpm dlx vite-bundle-visualizer`) rather

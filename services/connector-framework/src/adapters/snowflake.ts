@@ -42,21 +42,26 @@ export class SnowflakeAdapter implements ConnectorAdapter {
 
   async ping(ctx: AdapterContext): Promise<{ ok: boolean; latency_ms: number }> {
     const t0 = Date.now();
-    await ctx.transport.request({ method: 'POST', url: 'https://account.snowflakecomputing.com/session/v1/login' });
+    await ctx.transport.request({
+      method: 'POST',
+      url: 'https://account.snowflakecomputing.com/session/v1/login',
+    });
     return { ok: true, latency_ms: Date.now() - t0 };
   }
 
   async discover(_ctx: AdapterContext, _spec: DiscoverSpec): Promise<DiscoverResult> {
     return {
-      tables: [{
-        name: 'ANALYTICS.PUBLIC.SALES',
-        columns: [
-          { name: 'ID', type: 'number', semantic_role: 'id' },
-          { name: 'AMOUNT', type: 'currency', semantic_role: 'measure' },
-          { name: 'SALE_DATE', type: 'date', semantic_role: 'date' },
-        ],
-        row_count_estimate: 50000,
-      }],
+      tables: [
+        {
+          name: 'ANALYTICS.PUBLIC.SALES',
+          columns: [
+            { name: 'ID', type: 'number', semantic_role: 'id' },
+            { name: 'AMOUNT', type: 'currency', semantic_role: 'measure' },
+            { name: 'SALE_DATE', type: 'date', semantic_role: 'date' },
+          ],
+          row_count_estimate: 50000,
+        },
+      ],
     };
   }
 
@@ -75,7 +80,11 @@ export class SnowflakeAdapter implements ConnectorAdapter {
     };
     const result = body.result;
     if (!result) {
-      return { rows: [], columns: [], stats: { duration_ms: Date.now() - t0, row_count: 0, source: 'live' } };
+      return {
+        rows: [],
+        columns: [],
+        stats: { duration_ms: Date.now() - t0, row_count: 0, source: 'live' },
+      };
     }
     const colDefs = result.schema.resultMetaData.rowType;
     const colNames = colDefs.map((c) => c.name);

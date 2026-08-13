@@ -15,7 +15,11 @@
 
 import { useMemo } from 'react';
 import type { ReactElement } from 'react';
-import { formatPreviewSync, SUPPORTED_LOCALES, SUPPORTED_CURRENCIES } from '../../lib/localization-service';
+import {
+  formatPreviewSync,
+  SUPPORTED_LOCALES,
+  SUPPORTED_CURRENCIES,
+} from '../../lib/localization-service';
 import { cn } from '../../lib/cn';
 import { useT } from '../../lib/locale';
 
@@ -59,19 +63,19 @@ const SAMPLE_LABELS: Record<string, string> = {
 };
 
 const REGION_HINTS: Record<string, string> = {
-  'en': 'Americas / Europe',
-  'de': 'Europe',
-  'fr': 'Europe',
-  'es': 'Europe / Americas',
-  'it': 'Europe',
-  'pt': 'Americas',
-  'ja': 'Asia',
-  'zh': 'Asia',
-  'ko': 'Asia',
-  'ar': 'MENA',
-  'bn': 'South Asia',
-  'ur': 'South Asia',
-  'hi': 'South Asia',
+  en: 'Americas / Europe',
+  de: 'Europe',
+  fr: 'Europe',
+  es: 'Europe / Americas',
+  it: 'Europe',
+  pt: 'Americas',
+  ja: 'Asia',
+  zh: 'Asia',
+  ko: 'Asia',
+  ar: 'MENA',
+  bn: 'South Asia',
+  ur: 'South Asia',
+  hi: 'South Asia',
 };
 
 function groupLocales(): readonly LocaleGroup[] {
@@ -110,20 +114,22 @@ export function LocalePicker(props: LocalePickerProps): ReactElement {
           onChange={(e) => props.onChange(e.target.value)}
           aria-label={props.label ?? t('locale.locale')}
         >
-          {!props.groupByRegion && SUPPORTED_LOCALES.map((locale) => (
-            <option key={locale} value={locale}>
-              {SAMPLE_LABELS[locale] ?? locale}
-            </option>
-          ))}
-          {props.groupByRegion && groups.map((g) => (
-            <optgroup key={g.region} label={g.region}>
-              {g.entries.map((entry) => (
-                <option key={entry.locale} value={entry.locale}>
-                  {entry.label}
-                </option>
-              ))}
-            </optgroup>
-          ))}
+          {!props.groupByRegion &&
+            SUPPORTED_LOCALES.map((locale) => (
+              <option key={locale} value={locale}>
+                {SAMPLE_LABELS[locale] ?? locale}
+              </option>
+            ))}
+          {props.groupByRegion &&
+            groups.map((g) => (
+              <optgroup key={g.region} label={g.region}>
+                {g.entries.map((entry) => (
+                  <option key={entry.locale} value={entry.locale}>
+                    {entry.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
         </select>
       </label>
 
@@ -137,14 +143,19 @@ export function LocalePicker(props: LocalePickerProps): ReactElement {
             aria-label={t('locale.currency')}
           >
             {SUPPORTED_CURRENCIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
           </select>
         </label>
       ) : null}
 
       <div
-        className={cn('locale-picker__preview', preview.fallback && 'locale-picker__preview--fallback')}
+        className={cn(
+          'locale-picker__preview',
+          preview.fallback && 'locale-picker__preview--fallback',
+        )}
         data-testid="locale-picker-preview"
       >
         <span className="locale-picker__preview-label">{t('locale.preview')}</span>

@@ -73,12 +73,20 @@ function WidgetShell({
         <div className="flex items-center gap-2">
           <span className="text-xs px-2 py-0.5 rounded bg-slate-100">{status ?? 'draft'}</span>
           {status !== 'open' && (
-            <button type="button" className="text-xs bg-blue-600 text-white rounded px-2 py-1" onClick={onOpen}>
+            <button
+              type="button"
+              className="text-xs bg-blue-600 text-white rounded px-2 py-1"
+              onClick={onOpen}
+            >
               Open
             </button>
           )}
           {status === 'open' && (
-            <button type="button" className="text-xs bg-red-600 text-white rounded px-2 py-1" onClick={onClose}>
+            <button
+              type="button"
+              className="text-xs bg-red-600 text-white rounded px-2 py-1"
+              onClick={onClose}
+            >
               Close
             </button>
           )}
@@ -155,7 +163,10 @@ function WordCloudDirectorWidget(props: DirectorWidgetProps) {
 
 function QaDirectorWidget(props: DirectorWidgetProps) {
   const [local, setLocal] = useState(props.status ?? 'open');
-  const items = (props.snapshot?.submits as ReadonlyArray<{ id: string; body: string; upvotes: number }> | undefined) ?? [];
+  const items =
+    (props.snapshot?.submits as
+      | ReadonlyArray<{ id: string; body: string; upvotes: number }>
+      | undefined) ?? [];
   const sorted = [...items].sort((a, b) => b.upvotes - a.upvotes);
   return (
     <WidgetShell
@@ -173,7 +184,9 @@ function QaDirectorWidget(props: DirectorWidgetProps) {
       <ol className="text-sm">
         {sorted.map((q, i) => (
           <li key={q.id} className="border-b py-1 flex justify-between gap-2">
-            <span><span className="text-slate-500">{i + 1}.</span> {q.body}</span>
+            <span>
+              <span className="text-slate-500">{i + 1}.</span> {q.body}
+            </span>
             <span className="text-xs text-blue-700">▲ {q.upvotes}</span>
           </li>
         ))}
@@ -185,7 +198,10 @@ function QaDirectorWidget(props: DirectorWidgetProps) {
 
 function QuizDirectorWidget(props: DirectorWidgetProps) {
   const [local, setLocal] = useState(props.status ?? 'draft');
-  const board = (props.snapshot?.leaderboard as ReadonlyArray<{ participant_id: string; total_points: number; correct_count: number }> | undefined) ?? [];
+  const board =
+    (props.snapshot?.leaderboard as
+      | ReadonlyArray<{ participant_id: string; total_points: number; correct_count: number }>
+      | undefined) ?? [];
   return (
     <WidgetShell
       label={`Quiz: ${props.title}`}
@@ -202,7 +218,10 @@ function QuizDirectorWidget(props: DirectorWidgetProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left border-b">
-            <th>#</th><th>Participant</th><th>Points</th><th>Correct</th>
+            <th>#</th>
+            <th>Participant</th>
+            <th>Points</th>
+            <th>Correct</th>
           </tr>
         </thead>
         <tbody>
@@ -215,7 +234,11 @@ function QuizDirectorWidget(props: DirectorWidgetProps) {
             </tr>
           ))}
           {board.length === 0 && (
-            <tr><td colSpan={4} className="text-slate-500 py-2">No answers yet</td></tr>
+            <tr>
+              <td colSpan={4} className="text-slate-500 py-2">
+                No answers yet
+              </td>
+            </tr>
           )}
         </tbody>
       </table>
@@ -227,13 +250,16 @@ function ReactionDirectorWidget(_props: DirectorWidgetProps) {
   return (
     <section className="rounded border bg-white p-3 mb-2" data-testid="director-reaction">
       <h3 className="font-semibold text-sm">Reactions</h3>
-      <p className="text-xs text-slate-500">Audience reacts are visible in real time on this widget.</p>
+      <p className="text-xs text-slate-500">
+        Audience reacts are visible in real time on this widget.
+      </p>
     </section>
   );
 }
 
 function NavVoteDirectorWidget(_props: DirectorWidgetProps) {
-  const tally = (_props.snapshot as { next?: number; previous?: number; back?: number } | undefined) ?? {};
+  const tally =
+    (_props.snapshot as { next?: number; previous?: number; back?: number } | undefined) ?? {};
   return (
     <section className="rounded border bg-white p-3 mb-2" data-testid="director-nav">
       <h3 className="font-semibold text-sm">Nav vote tally</h3>
@@ -252,14 +278,18 @@ function SentimentDirectorWidget(props: DirectorWidgetProps) {
     <section className="rounded border bg-white p-3 mb-2" data-testid="director-sentiment">
       <h3 className="font-semibold text-sm">Sentiment · slide {props.widgetId}</h3>
       <p className="text-sm mt-1">
-        Average {typeof summary.average === 'number' ? summary.average.toFixed(2) : '—'} from {summary.count ?? 0} ratings
+        Average {typeof summary.average === 'number' ? summary.average.toFixed(2) : '—'} from{' '}
+        {summary.count ?? 0} ratings
       </p>
     </section>
   );
 }
 
 function RaiseHandDirectorWidget(props: DirectorWidgetProps) {
-  const items = (props.snapshot?.queue as ReadonlyArray<{ participant_id: string; raised_at_ms: number }> | undefined) ?? [];
+  const items =
+    (props.snapshot?.queue as
+      | ReadonlyArray<{ participant_id: string; raised_at_ms: number }>
+      | undefined) ?? [];
   return (
     <WidgetShell
       label={`Raise hand: ${props.title}`}
@@ -270,7 +300,9 @@ function RaiseHandDirectorWidget(props: DirectorWidgetProps) {
       <ol className="text-sm">
         {items.map((h, i) => (
           <li key={h.participant_id} className="border-b py-1 flex justify-between">
-            <span>{i + 1}. {h.participant_id}</span>
+            <span>
+              {i + 1}. {h.participant_id}
+            </span>
             <button type="button" className="text-xs bg-blue-600 text-white rounded px-2 py-0.5">
               Call
             </button>

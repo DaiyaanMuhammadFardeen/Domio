@@ -3,7 +3,16 @@
   "title": "CalendarEventUpdated",
   "description": "Emitted when a calendar event is synced and state changed.",
   "type": "object",
-  "required": ["event_id", "event_type", "ts_ms", "workspace_id", "deck_id", "actor_id", "actor_type", "payload"],
+  "required": [
+    "event_id",
+    "event_type",
+    "ts_ms",
+    "workspace_id",
+    "deck_id",
+    "actor_id",
+    "actor_type",
+    "payload"
+  ],
   "properties": {
     "event_id": { "type": "string" },
     "event_type": { "const": "calendar.event_updated" },

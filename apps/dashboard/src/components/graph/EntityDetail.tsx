@@ -67,12 +67,8 @@ export function EntityDetail({ entity }: EntityDetailProps) {
         className="space-y-3 rounded-xl border border-slate-200 bg-white p-4"
         data-testid="entity-detail-empty"
       >
-        <h2 className="text-sm font-semibold text-slate-900">
-          {t('dashboard.graph.legend')}
-        </h2>
-        <p className="text-xs text-slate-500">
-          {t('dashboard.graph.subheading')}
-        </p>
+        <h2 className="text-sm font-semibold text-slate-900">{t('dashboard.graph.legend')}</h2>
+        <p className="text-xs text-slate-500">{t('dashboard.graph.subheading')}</p>
       </aside>
     );
   }
@@ -84,10 +80,7 @@ export function EntityDetail({ entity }: EntityDetailProps) {
     >
       <header className="space-y-1">
         <div className="flex items-center justify-between">
-          <h2
-            className="text-base font-semibold text-slate-900"
-            data-testid="entity-detail-name"
-          >
+          <h2 className="text-base font-semibold text-slate-900" data-testid="entity-detail-name">
             {entity.name}
           </h2>
           <span
@@ -122,9 +115,7 @@ export function EntityDetail({ entity }: EntityDetailProps) {
               className="space-y-1 rounded-md border border-slate-100 p-2"
               data-testid={`entity-detail-deck-${deckGroup.deck_id}`}
             >
-              <h3 className="text-xs font-semibold text-slate-700">
-                {deckGroup.deck_title}
-              </h3>
+              <h3 className="text-xs font-semibold text-slate-700">{deckGroup.deck_title}</h3>
               <ul className="space-y-1">
                 {deckGroup.references.map((ref) => (
                   <li
@@ -135,9 +126,7 @@ export function EntityDetail({ entity }: EntityDetailProps) {
                     <span className="col-span-4 truncate text-slate-700 sm:text-slate-500">
                       {deckGroup.deck_title}
                     </span>
-                    <span className="col-span-4 truncate text-slate-700">
-                      {ref.slide_title}
-                    </span>
+                    <span className="col-span-4 truncate text-slate-700">{ref.slide_title}</span>
                     <span className="col-span-2">
                       <span
                         className={

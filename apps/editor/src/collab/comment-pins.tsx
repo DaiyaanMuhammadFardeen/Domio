@@ -30,22 +30,14 @@ function statusColor(status: CommentStatus): string {
 
 // ----- Component -----
 
-export function CommentPins({
-  deckId,
-  slideId,
-  currentActorId,
-}: CommentPinsProps): ReactElement {
+export function CommentPins({ deckId, slideId, currentActorId }: CommentPinsProps): ReactElement {
   const [comments, setComments] = useState<Comment[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const all = await listComments(deckId);
-      setComments(
-        all.filter(
-          (c) => c.target_id === slideId && c.target_type === 'slide',
-        ),
-      );
+      setComments(all.filter((c) => c.target_id === slideId && c.target_type === 'slide'));
     } catch {
       // Silently swallow — pins are decorative.
     }
@@ -93,18 +85,12 @@ export function CommentPins({
         const expanded = expandedId === comment.id;
 
         return (
-          <div
-            key={comment.id}
-            className="comment-pin"
-            style={{ left, top }}
-          >
+          <div key={comment.id} className="comment-pin" style={{ left, top }}>
             <button
               type="button"
               className="comment-pin__badge"
               style={{ background: statusColor(comment.status) }}
-              onClick={() =>
-                setExpandedId(expanded ? null : comment.id)
-              }
+              onClick={() => setExpandedId(expanded ? null : comment.id)}
               aria-label={`Comment by ${comment.author_id}`}
             >
               {comment.status === 'resolved' ? (
@@ -153,9 +139,7 @@ export function CommentPins({
                     ❤️
                   </button>
                 </div>
-                <span className="comment-pin__author">
-                  {comment.author_id}
-                </span>
+                <span className="comment-pin__author">{comment.author_id}</span>
               </div>
             )}
           </div>

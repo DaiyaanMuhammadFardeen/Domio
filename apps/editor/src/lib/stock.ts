@@ -114,9 +114,7 @@ export async function searchStock(options: StockSearchOptions = {}): Promise<Sto
   }
   if (q) {
     filtered = filtered.filter(
-      (p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.toLowerCase().includes(q)),
+      (p) => p.title.toLowerCase().includes(q) || p.tags.some((t) => t.toLowerCase().includes(q)),
     );
   }
   const start = (page - 1) * pageSize;

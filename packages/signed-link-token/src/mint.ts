@@ -154,9 +154,7 @@ export function toBase64Url(bytes: Uint8Array): string {
   for (let i = 0; i < bytes.length; i++) {
     bin += String.fromCharCode(bytes[i] as number);
   }
-  const b64 = (typeof btoa === 'function')
-    ? btoa(bin)
-    : Buffer.from(bytes).toString('base64');
+  const b64 = typeof btoa === 'function' ? btoa(bin) : Buffer.from(bytes).toString('base64');
   return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 

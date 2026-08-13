@@ -82,7 +82,17 @@ Hosts register handlers keyed by `ActionKind`. Unknown kinds throw
 ```ts
 const graph = new BranchingGraph();
 graph.addNode({ id: 's1', isStart: true, defaultStart: true });
-graph.addEdge({ id, deckId, tenantId, fromSlideId: 's1', toSlideId: 's2', name: 'next', ruleId: null, priority: 0, createdAt });
+graph.addEdge({
+  id,
+  deckId,
+  tenantId,
+  fromSlideId: 's1',
+  toSlideId: 's2',
+  name: 'next',
+  ruleId: null,
+  priority: 0,
+  createdAt,
+});
 const v = graph.validate();
 // { hasCycle, cycles, unreachable, islands, multiStart }
 ```

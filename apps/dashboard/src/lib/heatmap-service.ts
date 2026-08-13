@@ -42,10 +42,7 @@ export async function fetchHeatmap(
     baseUrl,
   );
   url.searchParams.set('workspace_id', workspaceId);
-  url.searchParams.set(
-    'from_ms',
-    String(opts.fromMs ?? Date.now() - 7 * 24 * 60 * 60 * 1000),
-  );
+  url.searchParams.set('from_ms', String(opts.fromMs ?? Date.now() - 7 * 24 * 60 * 60 * 1000));
   url.searchParams.set('to_ms', String(opts.toMs ?? Date.now()));
   try {
     const res = await fetch(url.toString(), { cache: 'no-store' });

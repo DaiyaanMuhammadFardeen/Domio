@@ -7,7 +7,7 @@
   "required": ["deck_id"],
   "additionalProperties": false,
   "properties": {
-    "deck_id":   { "type": "string", "format": "uuid" },
+    "deck_id": { "type": "string", "format": "uuid" },
     "deck_json": { "description": "Optional deck content as JSON." }
   }
 }

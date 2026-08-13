@@ -39,9 +39,7 @@ export function PeriodPicker({ period, onChange }: PeriodPickerProps) {
             onClick={() => onChange(p.value)}
             className={clsx(
               'rounded-md px-3 py-1.5 font-medium transition',
-              active
-                ? 'bg-brand-600 text-white shadow-sm'
-                : 'text-slate-600 hover:bg-slate-100',
+              active ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100',
             )}
           >
             {p.label}

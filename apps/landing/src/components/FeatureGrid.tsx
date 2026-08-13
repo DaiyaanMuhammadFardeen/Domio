@@ -8,11 +8,7 @@
  */
 
 import type { JSX } from 'react';
-import {
-  FEATURES,
-  FEATURE_CATEGORIES,
-  type FeatureCard,
-} from '../lib/marketing-data';
+import { FEATURES, FEATURE_CATEGORIES, type FeatureCard } from '../lib/marketing-data';
 
 interface FeatureGridProps {
   readonly features?: ReadonlyArray<FeatureCard>;

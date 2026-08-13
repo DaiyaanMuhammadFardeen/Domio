@@ -1,9 +1,5 @@
 import type { DeckDocument, ULID } from './generated/scene-graph.js';
-import {
-  DECK_SCHEMA_VERSION,
-  parseVersion,
-  type Semver,
-} from './version.js';
+import { DECK_SCHEMA_VERSION, parseVersion, type Semver } from './version.js';
 import { MigrationRegistry } from './registry.js';
 import { SchemaMigrator } from './migrate.js';
 import { validate } from './validate.js';
@@ -92,7 +88,9 @@ export function isCurrentSchemaVersion(
  * loader, the snapshot materializer, and the merge replays all share
  * the same migration chain.
  */
-export function defaultMigrator(registry: MigrationRegistry = new MigrationRegistry()): SchemaMigrator {
+export function defaultMigrator(
+  registry: MigrationRegistry = new MigrationRegistry(),
+): SchemaMigrator {
   return new SchemaMigrator(DECK_SCHEMA_VERSION, registry);
 }
 
@@ -120,10 +118,7 @@ export function upgradeOnRead(
     migrated = migrator.apply(document);
   } catch (err: unknown) {
     if (err instanceof Error && err.message.startsWith('No schema migration path')) {
-      throw new NoMigrationPathError(
-        document.schemaVersion,
-        migrator.current(),
-      );
+      throw new NoMigrationPathError(document.schemaVersion, migrator.current());
     }
     throw err;
   }

@@ -22,11 +22,7 @@ import { fetcher } from './fetcher';
 // Types
 // ---------------------------------------------------------------------------
 
-export type UsageMetric =
-  | 'api_calls'
-  | 'ai_tokens'
-  | 'render_minutes'
-  | 'export_minutes';
+export type UsageMetric = 'api_calls' | 'ai_tokens' | 'render_minutes' | 'export_minutes';
 
 export type RateLimitScope = 'per_key' | 'per_agent' | 'per_ip';
 export type RateLimitWindow = '1m' | '5m' | '1h' | '1d';
@@ -71,10 +67,7 @@ export interface RateLimitRule {
   created_at_ms: number;
 }
 
-export type RateLimitRuleInput = Omit<
-  RateLimitRule,
-  'id' | 'current_usage' | 'created_at_ms'
->;
+export type RateLimitRuleInput = Omit<RateLimitRule, 'id' | 'current_usage' | 'created_at_ms'>;
 
 // ---------------------------------------------------------------------------
 // Constants + seed
@@ -104,10 +97,7 @@ function deterministicNoise(seed: number, i: number): number {
  * organic: weekday spikes with a dip around weekends, plus a baseline
  * that varies per metric so the four charts look distinct.
  */
-function buildSeries(
-  metric: UsageMetric,
-  rangeDays: number,
-): UsagePoint[] {
+function buildSeries(metric: UsageMetric, rangeDays: number): UsagePoint[] {
   const points: UsagePoint[] = [];
   for (let i = 0; i < rangeDays; i += 1) {
     const day = NOW - (rangeDays - 1 - i) * DAY_MS;
@@ -143,10 +133,7 @@ function buildSeries(
  * Sum the metric across the supplied range. Used to build the
  * UsageSummary totals and the per-agent projections.
  */
-function totalForRange(
-  metric: UsageMetric,
-  rangeDays: number,
-): number {
+function totalForRange(metric: UsageMetric, rangeDays: number): number {
   return buildSeries(metric, rangeDays).reduce((acc, p) => acc + p.value, 0);
 }
 
@@ -321,10 +308,7 @@ export async function getUsageSummary(): Promise<UsageSummary> {
   };
 }
 
-export async function getUsageSeries(
-  metric: string,
-  rangeDays: number,
-): Promise<UsageSeries> {
+export async function getUsageSeries(metric: string, rangeDays: number): Promise<UsageSeries> {
   const safeMetric: UsageMetric = (
     ['api_calls', 'ai_tokens', 'render_minutes', 'export_minutes'] as const
   ).includes(metric as UsageMetric)
@@ -346,9 +330,7 @@ export async function getUsageSeries(
 
 export async function listAgentUsage(): Promise<AgentUsage[]> {
   try {
-    const json = await fetcher<{ items?: AgentUsage[] }>(
-      '/v1/billing/usage/by-agent',
-    );
+    const json = await fetcher<{ items?: AgentUsage[] }>('/v1/billing/usage/by-agent');
     if (Array.isArray(json?.items) && json.items.length > 0) {
       return json.items;
     }
@@ -361,9 +343,7 @@ export async function listAgentUsage(): Promise<AgentUsage[]> {
 
 export async function listRateLimitRules(): Promise<RateLimitRule[]> {
   try {
-    const json = await fetcher<{ items?: RateLimitRule[] }>(
-      '/v1/billing/rate-limits',
-    );
+    const json = await fetcher<{ items?: RateLimitRule[] }>('/v1/billing/rate-limits');
     if (Array.isArray(json?.items) && json.items.length > 0) {
       // Keep our local cache in sync with whatever the API returned.
       STORE.splice(0, STORE.length, ...json.items.map(cloneRule));
@@ -379,9 +359,7 @@ export async function listRateLimitRules(): Promise<RateLimitRule[]> {
 // Mutating operations
 // ---------------------------------------------------------------------------
 
-export async function createRateLimitRule(
-  input: RateLimitRuleInput,
-): Promise<RateLimitRule> {
+export async function createRateLimitRule(input: RateLimitRuleInput): Promise<RateLimitRule> {
   validateRuleInput(input);
   const rule: RateLimitRule = {
     id: genId(),
@@ -430,10 +408,10 @@ export async function updateRateLimitRule(
   });
   STORE[idx] = next;
   try {
-    return await fetcher<RateLimitRule>(
-      `/v1/billing/rate-limits/${encodeURIComponent(id)}`,
-      { method: 'PUT', body: input },
-    );
+    return await fetcher<RateLimitRule>(`/v1/billing/rate-limits/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: input,
+    });
   } catch {
     return cloneRule(next);
   }
@@ -446,10 +424,7 @@ export async function deleteRateLimitRule(id: string): Promise<void> {
   }
   STORE.splice(idx, 1);
   try {
-    await fetcher<void>(
-      `/v1/billing/rate-limits/${encodeURIComponent(id)}`,
-      { method: 'DELETE' },
-    );
+    await fetcher<void>(`/v1/billing/rate-limits/${encodeURIComponent(id)}`, { method: 'DELETE' });
   } catch {
     // swallow — the local mutation already succeeded.
   }

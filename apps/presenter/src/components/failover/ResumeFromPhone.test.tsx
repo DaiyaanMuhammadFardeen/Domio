@@ -33,7 +33,10 @@ describe('ResumeFromPhone', () => {
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toContain('/v1/presenter/sessions/failover/tok/resume');
     expect((init as RequestInit).method).toBe('POST');
-    expect(JSON.parse((init as RequestInit).body as string)).toEqual({ slide_id: 's1', slide_index: 2 });
+    expect(JSON.parse((init as RequestInit).body as string)).toEqual({
+      slide_id: 's1',
+      slide_index: 2,
+    });
     expect(onResumed).toHaveBeenCalled();
   });
 

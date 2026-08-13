@@ -87,7 +87,14 @@ export function CodeBlock({ layer, dataTestId = 'code-block' }: CodeBlockProps):
         {layer.showLineNumbers
           ? lines.map((line, i) => (
               <div key={i} style={{ display: 'flex' }}>
-                <span style={{ color: 'rgba(226,232,240,0.3)', width: 24, textAlign: 'right', marginRight: 8 }}>
+                <span
+                  style={{
+                    color: 'rgba(226,232,240,0.3)',
+                    width: 24,
+                    textAlign: 'right',
+                    marginRight: 8,
+                  }}
+                >
                   {i + 1}
                 </span>
                 <span>{line}</span>
@@ -108,9 +115,13 @@ export function CodeBlock({ layer, dataTestId = 'code-block' }: CodeBlockProps):
           }}
         >
           <div style={{ fontSize: 11, color: 'rgba(226,232,240,0.5)' }}>exit {result.exitCode}</div>
-          <pre style={{ margin: '4px 0 0', whiteSpace: 'pre-wrap' }}>{result.stdout || '(no output)'}</pre>
+          <pre style={{ margin: '4px 0 0', whiteSpace: 'pre-wrap' }}>
+            {result.stdout || '(no output)'}
+          </pre>
           {result.stderr ? (
-            <pre style={{ margin: '4px 0 0', color: '#fca5a5', whiteSpace: 'pre-wrap' }}>{result.stderr}</pre>
+            <pre style={{ margin: '4px 0 0', color: '#fca5a5', whiteSpace: 'pre-wrap' }}>
+              {result.stderr}
+            </pre>
           ) : null}
         </div>
       ) : null}

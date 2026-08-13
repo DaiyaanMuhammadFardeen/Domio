@@ -66,7 +66,14 @@ describe('TAKEDOWN_TRANSITIONS', () => {
   });
 
   it('covers all 6 statuses', () => {
-    const statuses: TakedownStatus[] = ['received', 'in_review', 'confirmed', 'dismissed', 'counter_notice', 'resolved'];
+    const statuses: TakedownStatus[] = [
+      'received',
+      'in_review',
+      'confirmed',
+      'dismissed',
+      'counter_notice',
+      'resolved',
+    ];
     for (const status of statuses) {
       expect(TAKEDOWN_TRANSITIONS).toHaveProperty(status);
     }
@@ -79,97 +86,123 @@ describe('validateTakedownTransition', () => {
   });
 
   it('throws for invalid transition', () => {
-    expect(() => validateTakedownTransition('received', 'confirmed')).toThrow(InvalidTakedownTransitionError);
+    expect(() => validateTakedownTransition('received', 'confirmed')).toThrow(
+      InvalidTakedownTransitionError,
+    );
   });
 });
 
 describe('validateTakedownInput', () => {
   it('accepts valid dmca input', () => {
-    expect(() => validateTakedownInput({
-      kind: 'dmca',
-      statement: 'This content infringes my copyright.',
-    })).not.toThrow();
+    expect(() =>
+      validateTakedownInput({
+        kind: 'dmca',
+        statement: 'This content infringes my copyright.',
+      }),
+    ).not.toThrow();
   });
 
   it('accepts valid trademark input', () => {
-    expect(() => validateTakedownInput({
-      kind: 'trademark',
-      statement: 'This uses my trademark without permission.',
-    })).not.toThrow();
+    expect(() =>
+      validateTakedownInput({
+        kind: 'trademark',
+        statement: 'This uses my trademark without permission.',
+      }),
+    ).not.toThrow();
   });
 
   it('accepts valid policy input', () => {
-    expect(() => validateTakedownInput({
-      kind: 'policy',
-      statement: 'This violates community guidelines.',
-    })).not.toThrow();
+    expect(() =>
+      validateTakedownInput({
+        kind: 'policy',
+        statement: 'This violates community guidelines.',
+      }),
+    ).not.toThrow();
   });
 
   it('accepts input with valid evidence URL', () => {
-    expect(() => validateTakedownInput({
-      kind: 'dmca',
-      statement: 'Evidence attached.',
-      evidenceUrl: 'https://example.com/evidence.pdf',
-    })).not.toThrow();
+    expect(() =>
+      validateTakedownInput({
+        kind: 'dmca',
+        statement: 'Evidence attached.',
+        evidenceUrl: 'https://example.com/evidence.pdf',
+      }),
+    ).not.toThrow();
   });
 
   it('throws for missing kind', () => {
-    expect(() => validateTakedownInput({
-      kind: '',
-      statement: 'Test',
-    })).toThrow('kind is required');
+    expect(() =>
+      validateTakedownInput({
+        kind: '',
+        statement: 'Test',
+      }),
+    ).toThrow('kind is required');
   });
 
   it('throws for invalid kind', () => {
-    expect(() => validateTakedownInput({
-      kind: 'invalid',
-      statement: 'Test',
-    })).toThrow('Invalid takedown kind');
+    expect(() =>
+      validateTakedownInput({
+        kind: 'invalid',
+        statement: 'Test',
+      }),
+    ).toThrow('Invalid takedown kind');
   });
 
   it('throws for empty statement', () => {
-    expect(() => validateTakedownInput({
-      kind: 'dmca',
-      statement: '',
-    })).toThrow('statement is required');
+    expect(() =>
+      validateTakedownInput({
+        kind: 'dmca',
+        statement: '',
+      }),
+    ).toThrow('statement is required');
   });
 
   it('throws for whitespace-only statement', () => {
-    expect(() => validateTakedownInput({
-      kind: 'dmca',
-      statement: '   ',
-    })).toThrow('statement is required');
+    expect(() =>
+      validateTakedownInput({
+        kind: 'dmca',
+        statement: '   ',
+      }),
+    ).toThrow('statement is required');
   });
 
   it('throws for statement > 4000 chars', () => {
-    expect(() => validateTakedownInput({
-      kind: 'dmca',
-      statement: 'x'.repeat(4001),
-    })).toThrow('statement must be at most 4000 characters');
+    expect(() =>
+      validateTakedownInput({
+        kind: 'dmca',
+        statement: 'x'.repeat(4001),
+      }),
+    ).toThrow('statement must be at most 4000 characters');
   });
 
   it('throws for invalid evidence URL', () => {
-    expect(() => validateTakedownInput({
-      kind: 'dmca',
-      statement: 'Test',
-      evidenceUrl: 'not-a-url',
-    })).toThrow('evidence_url must be a valid URL');
+    expect(() =>
+      validateTakedownInput({
+        kind: 'dmca',
+        statement: 'Test',
+        evidenceUrl: 'not-a-url',
+      }),
+    ).toThrow('evidence_url must be a valid URL');
   });
 
   it('throws for ftp evidence URL', () => {
-    expect(() => validateTakedownInput({
-      kind: 'dmca',
-      statement: 'Test',
-      evidenceUrl: 'ftp://example.com/file.pdf',
-    })).toThrow('evidence_url must use http or https protocol');
+    expect(() =>
+      validateTakedownInput({
+        kind: 'dmca',
+        statement: 'Test',
+        evidenceUrl: 'ftp://example.com/file.pdf',
+      }),
+    ).toThrow('evidence_url must use http or https protocol');
   });
 
   it('accepts null evidence URL', () => {
-    expect(() => validateTakedownInput({
-      kind: 'dmca',
-      statement: 'Test',
-      evidenceUrl: null,
-    })).not.toThrow();
+    expect(() =>
+      validateTakedownInput({
+        kind: 'dmca',
+        statement: 'Test',
+        evidenceUrl: null,
+      }),
+    ).not.toThrow();
   });
 });
 
@@ -239,7 +272,7 @@ describe('computeTrustScore', () => {
     const score = computeTrustScore({
       malware_scan: 0.5,
     });
-    expect(score).toBe(Math.round((0.5 * 0.3) / 0.3 * 10000) / 10000);
+    expect(score).toBe(Math.round(((0.5 * 0.3) / 0.3) * 10000) / 10000);
   });
 
   it('ignores non-numeric signals', () => {

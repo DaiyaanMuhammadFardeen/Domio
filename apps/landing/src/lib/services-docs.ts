@@ -28,11 +28,7 @@ export interface ServiceDoc {
  * (registry-only); a future wave will introspect the actual handlers
  * from the service's source.
  */
-const COMMON_HANDLERS: ReadonlyArray<string> = [
-  'GET /healthz',
-  'GET /v1/ready',
-  'GET /v1/version',
-];
+const COMMON_HANDLERS: ReadonlyArray<string> = ['GET /healthz', 'GET /v1/ready', 'GET /v1/version'];
 
 const RUNBOOK_STEPS: ReadonlyArray<string> = [
   'Confirm the service is reachable at its dev port via curl /healthz.',

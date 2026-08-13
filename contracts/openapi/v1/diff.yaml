@@ -35,7 +35,7 @@ paths:
         element-level granularity. If the target has not advanced
         since the base, returns a fast-forward indicator.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -49,32 +49,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ComputeDiffRequest"
+              $ref: '#/components/schemas/ComputeDiffRequest'
       responses:
-        "200":
+        '200':
           description: Diff computed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ComputeDiffResponse"
-        "400":
+                $ref: '#/components/schemas/ComputeDiffResponse'
+        '400':
           description: Invalid request.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "401":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck or branch not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/decks/{deckId}/diff/{mrId}:
     get:
       tags: [diff]
@@ -100,24 +100,24 @@ paths:
             maxLength: 128
           description: Merge request identifier.
       responses:
-        "200":
+        '200':
           description: Diff summary returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetDiffResponse"
-        "401":
+                $ref: '#/components/schemas/GetDiffResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck, MR, or diff not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
 components:
   securitySchemes:
     bearerAuth:
@@ -139,16 +139,16 @@ components:
       required: [slides, elements, conflicts]
       properties:
         slides:
-          $ref: "#/components/schemas/DiffSlideChanges"
+          $ref: '#/components/schemas/DiffSlideChanges'
         elements:
           type: array
           items:
-            $ref: "#/components/schemas/DiffElementChange"
+            $ref: '#/components/schemas/DiffElementChange'
           description: Per-element changes across all slides.
         conflicts:
           type: array
           items:
-            $ref: "#/components/schemas/DiffConflict"
+            $ref: '#/components/schemas/DiffConflict'
           description: Conflicting changes requiring resolution.
     DiffSlideChanges:
       type: object
@@ -157,15 +157,15 @@ components:
         added:
           type: array
           items:
-            $ref: "#/components/schemas/DiffSlideRef"
+            $ref: '#/components/schemas/DiffSlideRef'
         removed:
           type: array
           items:
-            $ref: "#/components/schemas/DiffSlideRef"
+            $ref: '#/components/schemas/DiffSlideRef'
         modified:
           type: array
           items:
-            $ref: "#/components/schemas/DiffSlideRef"
+            $ref: '#/components/schemas/DiffSlideRef'
     DiffSlideRef:
       type: object
       required: [slideId]
@@ -237,7 +237,7 @@ components:
       required: [diffSummary, isFastForward]
       properties:
         diffSummary:
-          $ref: "#/components/schemas/DiffSummary"
+          $ref: '#/components/schemas/DiffSummary'
         isFastForward:
           type: boolean
           description: Whether this was a fast-forward (no diff needed).
@@ -248,6 +248,6 @@ components:
       required: [diffSummary]
       properties:
         diffSummary:
-          $ref: "#/components/schemas/DiffSummary"
+          $ref: '#/components/schemas/DiffSummary'
         traceId:
           type: string

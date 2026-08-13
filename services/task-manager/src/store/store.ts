@@ -18,6 +18,9 @@ export interface TaskLinkStore {
   getLink(linkId: string): Promise<TaskLink | null>;
   listLinks(workspaceId: string): Promise<TaskLink[]>;
   listLinksByAssignment(assignmentId: string): Promise<TaskLink[]>;
-  updateLink(linkId: string, patch: Partial<Pick<TaskLink, 'field_map' | 'sync_mode' | 'last_synced_at' | 'updated_at'>>): Promise<TaskLink>;
+  updateLink(
+    linkId: string,
+    patch: Partial<Pick<TaskLink, 'field_map' | 'sync_mode' | 'last_synced_at' | 'updated_at'>>,
+  ): Promise<TaskLink>;
   deleteLink(linkId: string): Promise<void>;
 }

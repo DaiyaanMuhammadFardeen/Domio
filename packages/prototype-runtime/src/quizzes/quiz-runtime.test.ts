@@ -31,13 +31,18 @@ function makeQuiz(partial: Partial<Quiz> = {}): Quiz {
 describe('QuizRuntime — multiple-choice', () => {
   it('marks correct answer as correct', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1',
-        type: 'multiple_choice',
-        prompt: 'Capital of France?',
-        correctChoiceId: 'paris',
-        choices: [{ id: 'paris', label: 'Paris' }, { id: 'london', label: 'London' }],
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'multiple_choice',
+          prompt: 'Capital of France?',
+          correctChoiceId: 'paris',
+          choices: [
+            { id: 'paris', label: 'Paris' },
+            { id: 'london', label: 'London' },
+          ],
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed-a');
@@ -51,13 +56,18 @@ describe('QuizRuntime — multiple-choice', () => {
 
   it('marks wrong answer as incorrect', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1',
-        type: 'multiple_choice',
-        prompt: 'Capital of France?',
-        correctChoiceId: 'paris',
-        choices: [{ id: 'paris', label: 'Paris' }, { id: 'london', label: 'London' }],
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'multiple_choice',
+          prompt: 'Capital of France?',
+          correctChoiceId: 'paris',
+          choices: [
+            { id: 'paris', label: 'Paris' },
+            { id: 'london', label: 'London' },
+          ],
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed-a');
@@ -70,16 +80,20 @@ describe('QuizRuntime — multiple-choice', () => {
 describe('QuizRuntime — multi-select', () => {
   it('gives full credit for exact match', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1',
-        type: 'multi_select',
-        prompt: 'Pick the primes.',
-        correctChoiceIds: ['2', '3', '5'],
-        choices: [
-          { id: '2', label: '2' }, { id: '3', label: '3' },
-          { id: '4', label: '4' }, { id: '5', label: '5' },
-        ],
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'multi_select',
+          prompt: 'Pick the primes.',
+          correctChoiceIds: ['2', '3', '5'],
+          choices: [
+            { id: '2', label: '2' },
+            { id: '3', label: '3' },
+            { id: '4', label: '4' },
+            { id: '5', label: '5' },
+          ],
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed-a');
@@ -90,16 +104,20 @@ describe('QuizRuntime — multi-select', () => {
 
   it('gives partial credit for partial overlap', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1',
-        type: 'multi_select',
-        prompt: 'Pick the primes.',
-        correctChoiceIds: ['2', '3', '5'],
-        choices: [
-          { id: '2', label: '2' }, { id: '3', label: '3' },
-          { id: '4', label: '4' }, { id: '5', label: '5' },
-        ],
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'multi_select',
+          prompt: 'Pick the primes.',
+          correctChoiceIds: ['2', '3', '5'],
+          choices: [
+            { id: '2', label: '2' },
+            { id: '3', label: '3' },
+            { id: '4', label: '4' },
+            { id: '5', label: '5' },
+          ],
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed-a');
@@ -124,10 +142,14 @@ describe('QuizRuntime — true/false', () => {
 describe('QuizRuntime — short answer + Levenshtein', () => {
   it('accepts exact match', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'short_answer', prompt: 'Color of grass?',
-        acceptedAnswers: ['green'],
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'short_answer',
+          prompt: 'Color of grass?',
+          acceptedAnswers: ['green'],
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -136,10 +158,15 @@ describe('QuizRuntime — short answer + Levenshtein', () => {
 
   it('accepts typo within tolerance', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'short_answer', prompt: 'Color of grass?',
-        acceptedAnswers: ['green'], typoTolerance: 0.7,
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'short_answer',
+          prompt: 'Color of grass?',
+          acceptedAnswers: ['green'],
+          typoTolerance: 0.7,
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -149,10 +176,15 @@ describe('QuizRuntime — short answer + Levenshtein', () => {
 
   it('rejects answers outside tolerance', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'short_answer', prompt: 'Color of grass?',
-        acceptedAnswers: ['green'], typoTolerance: 0.85,
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'short_answer',
+          prompt: 'Color of grass?',
+          acceptedAnswers: ['green'],
+          typoTolerance: 0.85,
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -161,10 +193,14 @@ describe('QuizRuntime — short answer + Levenshtein', () => {
 
   it('is case-insensitive and trims whitespace', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'short_answer', prompt: 'Color of grass?',
-        acceptedAnswers: ['green'],
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'short_answer',
+          prompt: 'Color of grass?',
+          acceptedAnswers: ['green'],
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -175,13 +211,17 @@ describe('QuizRuntime — short answer + Levenshtein', () => {
 describe('QuizRuntime — fill-in-the-blank', () => {
   it('requires every blank to match', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'fill_blank', prompt: 'Hello ___ and ___!',
-        blanks: [
-          { id: 'b1', acceptedAnswers: ['world'] },
-          { id: 'b2', acceptedAnswers: ['friends'] },
-        ],
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'fill_blank',
+          prompt: 'Hello ___ and ___!',
+          blanks: [
+            { id: 'b1', acceptedAnswers: ['world'] },
+            { id: 'b2', acceptedAnswers: ['friends'] },
+          ],
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -198,13 +238,17 @@ describe('QuizRuntime — fill-in-the-blank', () => {
 describe('QuizRuntime — drag-to-match', () => {
   it('requires all pairs to match', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'drag_to_match', prompt: 'Match capital to country.',
-        pairs: [
-          { left: 'France', right: 'Paris' },
-          { left: 'Italy', right: 'Rome' },
-        ],
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'drag_to_match',
+          prompt: 'Match capital to country.',
+          pairs: [
+            { left: 'France', right: 'Paris' },
+            { left: 'Italy', right: 'Rome' },
+          ],
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -216,14 +260,23 @@ describe('QuizRuntime — drag-to-match', () => {
 describe('QuizRuntime — hotspot quiz', () => {
   it('accepts point-in-polygon', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'hotspot_quiz', prompt: 'Click the head.',
-        geometry: {
-          kind: 'polygon',
-          points: [{ x: 0.4, y: 0.4 }, { x: 0.6, y: 0.4 }, { x: 0.6, y: 0.6 }, { x: 0.4, y: 0.6 }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'hotspot_quiz',
+          prompt: 'Click the head.',
+          geometry: {
+            kind: 'polygon',
+            points: [
+              { x: 0.4, y: 0.4 },
+              { x: 0.6, y: 0.4 },
+              { x: 0.6, y: 0.6 },
+              { x: 0.4, y: 0.6 },
+            ],
+          },
+          tolerance: 0.05,
         },
-        tolerance: 0.05,
-      }],
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -233,11 +286,15 @@ describe('QuizRuntime — hotspot quiz', () => {
 
   it('accepts centroid distance within tolerance', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'hotspot_quiz', prompt: 'Click the head.',
-        geometry: { kind: 'rect', x: 0.4, y: 0.4, w: 0.2, h: 0.2 },
-        tolerance: 0.05,
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'hotspot_quiz',
+          prompt: 'Click the head.',
+          geometry: { kind: 'rect', x: 0.4, y: 0.4, w: 0.2, h: 0.2 },
+          tolerance: 0.05,
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -247,10 +304,14 @@ describe('QuizRuntime — hotspot quiz', () => {
 
   it('rejects out-of-bounds coordinates', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'hotspot_quiz', prompt: 'Click the head.',
-        geometry: { kind: 'rect', x: 0.4, y: 0.4, w: 0.2, h: 0.2 },
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'hotspot_quiz',
+          prompt: 'Click the head.',
+          geometry: { kind: 'rect', x: 0.4, y: 0.4, w: 0.2, h: 0.2 },
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -261,10 +322,15 @@ describe('QuizRuntime — hotspot quiz', () => {
 describe('QuizRuntime — flash card', () => {
   it('records known/unknown as correct/incorrect with 0.5 score for unknown', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'flash_card', prompt: 'Capital of France?',
-        front: 'Capital of France?', back: 'Paris',
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'flash_card',
+          prompt: 'Capital of France?',
+          front: 'Capital of France?',
+          back: 'Paris',
+        },
+      ],
     });
     const r = new QuizRuntime({ idGenerator: idGen, clock: () => 1 });
     r.start(quiz, 'seed');
@@ -276,12 +342,15 @@ describe('QuizRuntime — flash card', () => {
 describe('QuizRuntime — LLM-graded short answer', () => {
   it('falls back to human review queue below confidence threshold', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'short_answer_llm',
-        prompt: 'What is photosynthesis?',
-        referenceAnswer: 'Conversion of light energy into chemical energy by plants.',
-        fallbackThreshold: 0.7,
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'short_answer_llm',
+          prompt: 'What is photosynthesis?',
+          referenceAnswer: 'Conversion of light energy into chemical energy by plants.',
+          fallbackThreshold: 0.7,
+        },
+      ],
     });
     const r = new QuizRuntime({
       idGenerator: idGen,
@@ -297,11 +366,14 @@ describe('QuizRuntime — LLM-graded short answer', () => {
 
   it('does not enqueue when confidence is above threshold', async () => {
     const quiz = makeQuiz({
-      questions: [{
-        id: 'q1', type: 'short_answer_llm',
-        prompt: 'What is photosynthesis?',
-        referenceAnswer: 'X',
-      }],
+      questions: [
+        {
+          id: 'q1',
+          type: 'short_answer_llm',
+          prompt: 'What is photosynthesis?',
+          referenceAnswer: 'X',
+        },
+      ],
     });
     const r = new QuizRuntime({
       idGenerator: idGen,
@@ -400,7 +472,10 @@ describe('QuizRuntime — lifecycle', () => {
     });
     const r = new QuizRuntime({
       idGenerator: idGen,
-      clock: (() => { let t = 0; return () => (t += 100); })(),
+      clock: (() => {
+        let t = 0;
+        return () => (t += 100);
+      })(),
     });
     r.start(quiz, 'seed');
     await r.answer('q2', false);

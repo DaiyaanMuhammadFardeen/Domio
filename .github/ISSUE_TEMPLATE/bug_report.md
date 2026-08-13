@@ -13,15 +13,15 @@ assignees: ''
 ## Environment
 
 - **Component**: (editor / viewer / presenter / API / specific service)
-- **Branch / commit**: 
-- **Browser / OS**: 
+- **Branch / commit**:
+- **Browser / OS**:
 - **Phase**: (00 / 01 / 02 / ...)
 
 ## Steps to reproduce
 
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Expected
 

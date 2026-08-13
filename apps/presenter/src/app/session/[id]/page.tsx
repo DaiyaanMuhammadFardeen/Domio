@@ -20,14 +20,13 @@ export default async function PresenterSessionPage({ params, searchParams }: Rou
         <section className="boot__panel">
           <h2>Session not found</h2>
           <p>
-            Session <code>{sessionId}</code> could not be loaded. Make sure the
-            presenter-session service is running and the id is correct.
+            Session <code>{sessionId}</code> could not be loaded. Make sure the presenter-session
+            service is running and the id is correct.
           </p>
           {sp.display === 'secondary' && (
             <p style={{ marginTop: 12 }}>
-              <em>Tip:</em> the <code>?display=secondary</code> flag is a hint
-              to the runtime — when running on a dual-screen setup, open this
-              URL on the secondary display.
+              <em>Tip:</em> the <code>?display=secondary</code> flag is a hint to the runtime — when
+              running on a dual-screen setup, open this URL on the secondary display.
             </p>
           )}
         </section>

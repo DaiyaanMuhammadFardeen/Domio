@@ -208,7 +208,10 @@ describe('gesture-service', () => {
 
     it('returns null when the gesture is unmapped', () => {
       const empty: Pick<GestureMap, 'mappings'> = {
-        mappings: {} as Partial<Record<GestureKind, GestureAction>> as Record<GestureKind, GestureAction>,
+        mappings: {} as Partial<Record<GestureKind, GestureAction>> as Record<
+          GestureKind,
+          GestureAction
+        >,
       };
       expect(resolveAction(empty, 'open_palm')).toBeNull();
     });

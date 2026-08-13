@@ -42,6 +42,8 @@ describe('buildSessionSink', () => {
     const client = new Capture();
     const sink = buildSessionSink(client);
     await sink.upsert({ ...base, state: 'closed', ended_at_ms: 1_700_000_060_000 });
-    expect(client.calls[0]?.params?.['ended_at_ms']).toMatch(/^20\d{2}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$/);
+    expect(client.calls[0]?.params?.['ended_at_ms']).toMatch(
+      /^20\d{2}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}$/,
+    );
   });
 });

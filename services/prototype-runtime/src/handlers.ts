@@ -59,19 +59,32 @@ export interface PrototypeHandlerContext {
   resolveActorId?: (req: HttpRequest) => string | undefined;
 }
 
-function ok<T>(body: T): HttpResponse { return { status: 200, body }; }
-function created<T>(body: T): HttpResponse { return { status: 201, body }; }
-function noContent(): HttpResponse { return { status: 204, body: null }; }
+function ok<T>(body: T): HttpResponse {
+  return { status: 200, body };
+}
+function created<T>(body: T): HttpResponse {
+  return { status: 201, body };
+}
+function noContent(): HttpResponse {
+  return { status: 204, body: null };
+}
 function badRequest(message: string, code: string): HttpResponse {
   return { status: 400, body: { error: message, code } };
 }
-function unauthorized(): HttpResponse { return { status: 401, body: { error: 'Unauthorized', code: 'UNAUTHORIZED' } }; }
-function notFound(message: string): HttpResponse { return { status: 404, body: { error: message, code: 'NOT_FOUND' } }; }
+function unauthorized(): HttpResponse {
+  return { status: 401, body: { error: 'Unauthorized', code: 'UNAUTHORIZED' } };
+}
+function notFound(message: string): HttpResponse {
+  return { status: 404, body: { error: message, code: 'NOT_FOUND' } };
+}
 function conflict(message: string, code: string, extra?: Record<string, unknown>): HttpResponse {
   return { status: 409, body: { error: message, code, ...(extra ?? {}) } };
 }
 function unprocessable(message: string, code: string, details?: unknown): HttpResponse {
-  return { status: 422, body: { error: message, code, ...(details !== undefined ? { details } : {}) } };
+  return {
+    status: 422,
+    body: { error: message, code, ...(details !== undefined ? { details } : {}) },
+  };
 }
 
 // ── Hotspot handlers ────────────────────────────────────────────────────
@@ -95,12 +108,17 @@ export async function createHotspotHandler(
   const v = validateCreateHotspot(req.body);
   if (!v.valid) {
     ctx.metrics?.inc(P10_METRICS.validationFailed);
-    return badRequest(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+    return badRequest(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   }
   try {
     const record = await ctx.service.createHotspot(tenantId, req.params.deck_id, v.value!);
     ctx.metrics?.inc(P10_METRICS.created);
-    ctx.audit?.record({ tenantId, actorId: tenantId, action: 'hotspot.create', payload: { hotspotId: record.id } });
+    ctx.audit?.record({
+      tenantId,
+      actorId: tenantId,
+      action: 'hotspot.create',
+      payload: { hotspotId: record.id },
+    });
     return created(record);
   } catch (e) {
     return mapError(e, ctx);
@@ -129,7 +147,7 @@ export async function patchHotspotHandler(
   const v = validatePatchHotspot(req.body);
   if (!v.valid) {
     ctx.metrics?.inc(P10_METRICS.validationFailed);
-    return badRequest(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+    return badRequest(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   }
   try {
     const record = await ctx.service.patchHotspot(tenantId, req.params.id, v.value!);
@@ -174,7 +192,7 @@ export async function createOverlayHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validateCreateOverlay(req.body);
-  if (!v.valid) return badRequest(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return badRequest(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
     const record = await ctx.service.createOverlay(tenantId, req.params.deck_id, v.value!);
     ctx.metrics?.inc(P10_METRICS.created);
@@ -204,7 +222,7 @@ export async function patchOverlayHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validatePatchOverlay(req.body);
-  if (!v.valid) return badRequest(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return badRequest(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
     const record = await ctx.service.patchOverlay(tenantId, req.params.id, v.value!, req.body);
     ctx.metrics?.inc(P10_METRICS.updated);
@@ -248,7 +266,7 @@ export async function createBranchingEdgeHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validateCreateBranchingEdge(req.body);
-  if (!v.valid) return unprocessable(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return unprocessable(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
     const record = await ctx.service.createBranchingEdge(tenantId, req.params.deck_id, v.value!);
     ctx.metrics?.inc(P10_METRICS.created);
@@ -278,7 +296,7 @@ export async function patchBranchingEdgeHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validatePatchBranchingEdge(req.body);
-  if (!v.valid) return badRequest(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return badRequest(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
     const record = await ctx.service.patchBranchingEdge(tenantId, req.params.id, v.value!);
     ctx.metrics?.inc(P10_METRICS.updated);
@@ -322,7 +340,7 @@ export async function createVariableHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validateCreateVariable(req.body);
-  if (!v.valid) return unprocessable(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return unprocessable(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
     const record = await ctx.service.createVariable(tenantId, req.params.deck_id, v.value!);
     ctx.metrics?.inc(P10_METRICS.created);
@@ -352,7 +370,7 @@ export async function patchVariableHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validatePatchVariable(req.body);
-  if (!v.valid) return badRequest(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return badRequest(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
     const record = await ctx.service.patchVariable(tenantId, req.params.id, v.value!, req.body);
     ctx.metrics?.inc(P10_METRICS.updated);
@@ -396,9 +414,14 @@ export async function createVariableBindingHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validateCreateVariableBinding(req.body);
-  if (!v.valid) return unprocessable(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return unprocessable(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
-    const record = await ctx.service.createVariableBinding(tenantId, req.params.deck_id, v.value!, req.body);
+    const record = await ctx.service.createVariableBinding(
+      tenantId,
+      req.params.deck_id,
+      v.value!,
+      req.body,
+    );
     ctx.metrics?.inc(P10_METRICS.created);
     return created(record);
   } catch (e) {
@@ -440,7 +463,7 @@ export async function createConditionalRuleHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validateCreateConditionalRule(req.body);
-  if (!v.valid) return unprocessable(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return unprocessable(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
     const record = await ctx.service.createConditionalRule(tenantId, req.params.deck_id, v.value!);
     ctx.metrics?.inc(P10_METRICS.created);
@@ -470,9 +493,14 @@ export async function patchConditionalRuleHandler(
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
   if (!tenantId) return unauthorized();
   const v = validatePatchConditionalRule(req.body);
-  if (!v.valid) return badRequest(v.errors.map(e => e.message).join('; '), 'VALIDATION_ERROR');
+  if (!v.valid) return badRequest(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   try {
-    const record = await ctx.service.patchConditionalRule(tenantId, req.params.id, v.value!, req.body);
+    const record = await ctx.service.patchConditionalRule(
+      tenantId,
+      req.params.id,
+      v.value!,
+      req.body,
+    );
     ctx.metrics?.inc(P10_METRICS.updated);
     return ok(record);
   } catch (e) {
@@ -561,7 +589,11 @@ export async function patchInteractionStateHandler(
 }
 
 export async function transitionInteractionStateHandler(
-  req: HttpRequest<{ deck_id: string; id: string }, Record<string, unknown>, { tenant_id?: string }>,
+  req: HttpRequest<
+    { deck_id: string; id: string },
+    Record<string, unknown>,
+    { tenant_id?: string }
+  >,
   ctx: PrototypeHandlerContext,
 ): Promise<HttpResponse> {
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
@@ -572,7 +604,11 @@ export async function transitionInteractionStateHandler(
     return badRequest(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR');
   }
   try {
-    const { record, transition } = await ctx.service.transitionInteractionState(tenantId, req.params.id, v.value!);
+    const { record, transition } = await ctx.service.transitionInteractionState(
+      tenantId,
+      req.params.id,
+      v.value!,
+    );
     ctx.metrics?.inc(P10_METRICS.updated);
     return ok({ record, transition });
   } catch (e) {
@@ -755,7 +791,11 @@ export async function deleteQuizHandler(
 }
 
 export async function startAttemptHandler(
-  req: HttpRequest<{ quiz_id: string }, Record<string, unknown>, { tenant_id?: string; deck_id?: string }>,
+  req: HttpRequest<
+    { quiz_id: string },
+    Record<string, unknown>,
+    { tenant_id?: string; deck_id?: string }
+  >,
   ctx: PrototypeHandlerContext,
 ): Promise<HttpResponse> {
   const tenantId = req.query.tenant_id ?? ctx.resolveActorId?.(req);
@@ -887,7 +927,11 @@ export async function createPresentationSequenceHandler(
     return unprocessable(v.errors.map((e) => e.message).join('; '), 'VALIDATION_ERROR', v.errors);
   }
   try {
-    const record = await ctx.service.createPresentationSequence(tenantId, req.params.deck_id, v.value!);
+    const record = await ctx.service.createPresentationSequence(
+      tenantId,
+      req.params.deck_id,
+      v.value!,
+    );
     ctx.metrics?.inc(P10_METRICS.created);
     return created(record);
   } catch (e) {

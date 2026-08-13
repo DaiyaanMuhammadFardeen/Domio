@@ -23,7 +23,7 @@ export interface ElapsedResult {
 
 export interface StoppedResult {
   readonly stopped: true;
-  readonly reason: "max-duration";
+  readonly reason: 'max-duration';
   readonly elapsedMs: number;
 }
 
@@ -38,15 +38,11 @@ export interface MinGuardResult {
  * Compute elapsed time from a start timestamp to now.
  * If elapsed >= maxDurationMs, returns a StoppedResult.
  */
-export function checkElapsed(
-  startMs: number,
-  nowMs: number,
-  config?: TimingConfig,
-): TimingCheck {
+export function checkElapsed(startMs: number, nowMs: number, config?: TimingConfig): TimingCheck {
   const elapsedMs = nowMs - startMs;
   const maxMs = config?.maxDurationMs ?? DEFAULT_MAX_DURATION_MS;
   if (elapsedMs >= maxMs) {
-    return { stopped: true, reason: "max-duration", elapsedMs };
+    return { stopped: true, reason: 'max-duration', elapsedMs };
   }
   return { stopped: false, elapsedMs };
 }

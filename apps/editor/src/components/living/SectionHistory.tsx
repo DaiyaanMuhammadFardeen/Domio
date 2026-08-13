@@ -8,13 +8,7 @@
  * the author, the change summary, and a Restore button.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
 
 import {

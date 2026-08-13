@@ -86,8 +86,12 @@ export interface SyncProvider {
 }
 
 export const noopSyncProvider: SyncProvider = {
-  async pushEvent(): Promise<void> { /* noop */ },
-  async pullEvent(): Promise<CalendarEventState | null> { return null; },
+  async pushEvent(): Promise<void> {
+    /* noop */
+  },
+  async pullEvent(): Promise<CalendarEventState | null> {
+    return null;
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -99,7 +103,9 @@ export interface OverrideProvider {
 }
 
 export const noopOverrideProvider: OverrideProvider = {
-  async getInstanceOverride(): Promise<CalendarEventOverride | null> { return null; },
+  async getInstanceOverride(): Promise<CalendarEventOverride | null> {
+    return null;
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -111,7 +117,9 @@ export interface CalendarEventEmitter {
 }
 
 export const noopEmitter: CalendarEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------

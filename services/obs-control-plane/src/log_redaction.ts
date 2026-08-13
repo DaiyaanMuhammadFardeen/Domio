@@ -50,8 +50,14 @@ export const FORBIDDEN_LOG_PATTERNS: ReadonlyArray<{ name: string; pattern: RegE
   { name: 'console.log of req.body', pattern: /console\.log\s*\(\s*req\.body\s*\)/ },
   { name: 'console.log of res.body', pattern: /console\.log\s*\(\s*res\.body\s*\)/ },
   { name: 'logger.info of req.body', pattern: /logger\.(info|debug|trace)\s*\(\s*req\.body\s*\)/ },
-  { name: 'logger.error with raw error stack', pattern: /logger\.(error|warn)\s*\([^)]*err\.stack[^)]*\)/ },
-  { name: 'JSON.stringify of req.body in console', pattern: /console\.log\s*\(\s*JSON\.stringify\s*\(\s*req\.body\s*\)\s*\)/ },
+  {
+    name: 'logger.error with raw error stack',
+    pattern: /logger\.(error|warn)\s*\([^)]*err\.stack[^)]*\)/,
+  },
+  {
+    name: 'JSON.stringify of req.body in console',
+    pattern: /console\.log\s*\(\s*JSON\.stringify\s*\(\s*req\.body\s*\)\s*\)/,
+  },
 ];
 
 export interface LogRedactionIssue {
@@ -85,7 +91,10 @@ export function checkLogRedaction(rootDir: string): LogRedactionReport {
       if (trimmed.startsWith('/*') || trimmed.startsWith('*')) return;
 
       // Check forbidden tokens in log/console calls.
-      const logCallMatch = /\b(?:console\.log|console\.info|console\.debug|console\.trace|logger\.[a-z]+)\s*\(/i.exec(line);
+      const logCallMatch =
+        /\b(?:console\.log|console\.info|console\.debug|console\.trace|logger\.[a-z]+)\s*\(/i.exec(
+          line,
+        );
       if (logCallMatch) {
         for (const token of FORBIDDEN_LOG_TOKENS) {
           const tokenRe = new RegExp(`\\b${token.replace(/[.+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
@@ -149,7 +158,13 @@ function collectFiles(rootDir: string, accept: (path: string) => boolean): strin
         continue;
       }
       if (st.isDirectory()) {
-        if (entry === 'node_modules' || entry === 'dist' || entry === '.turbo' || entry === 'coverage') continue;
+        if (
+          entry === 'node_modules' ||
+          entry === 'dist' ||
+          entry === '.turbo' ||
+          entry === 'coverage'
+        )
+          continue;
         stack.push(full);
         continue;
       }

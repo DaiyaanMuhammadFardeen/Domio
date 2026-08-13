@@ -57,7 +57,7 @@ describe('shader registry — CRUD', () => {
     const app = createApp(makeDeps());
     const res = await app.request(`/v1/shaders?workspace_id=${WS}`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: unknown[] };
+    const body = (await res.json()) as { items: unknown[] };
     expect(body.items).toEqual([]);
   });
 
@@ -81,7 +81,12 @@ describe('shader registry — CRUD', () => {
       }),
     });
     expect(res.status).toBe(201);
-    const body = await res.json() as { id: string; name: string; kind: string; published: boolean };
+    const body = (await res.json()) as {
+      id: string;
+      name: string;
+      kind: string;
+      published: boolean;
+    };
     expect(body.id).toBeDefined();
     expect(body.name).toBe('My Shader');
     expect(body.kind).toBe('material');
@@ -96,7 +101,7 @@ describe('shader registry — CRUD', () => {
       body: JSON.stringify({ name: '' }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { code: string };
+    const body = (await res.json()) as { code: string };
     expect(body.code).toBe('VALIDATION_ERROR');
   });
 
@@ -106,7 +111,7 @@ describe('shader registry — CRUD', () => {
     const app = createApp(makeDeps({ repo }));
     const res = await app.request(`/v1/shaders/${shader.id}?workspace_id=${WS}`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { id: string };
+    const body = (await res.json()) as { id: string };
     expect(body.id).toBe(shader.id);
   });
 
@@ -126,7 +131,7 @@ describe('shader registry — CRUD', () => {
       body: JSON.stringify({ name: 'Updated Shader' }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { name: string };
+    const body = (await res.json()) as { name: string };
     expect(body.name).toBe('Updated Shader');
   });
 
@@ -168,7 +173,7 @@ describe('shader registry — CRUD', () => {
     const app = createApp(makeDeps({ repo }));
     const res = await app.request(`/v1/shaders?workspace_id=${WS}&kind=background`);
     expect(res.status).toBe(200);
-    const body = await res.json() as { items: Array<{ kind: string }> };
+    const body = (await res.json()) as { items: Array<{ kind: string }> };
     expect(body.items.length).toBe(1);
     expect(body.items[0]!.kind).toBe('background');
   });
@@ -192,7 +197,7 @@ describe('shader registry — WGSL requirement', () => {
       }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toContain('WGSL source required for kind background');
   });
 
@@ -209,7 +214,7 @@ describe('shader registry — WGSL requirement', () => {
       }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toContain('WGSL source required for kind particle');
   });
 
@@ -247,7 +252,7 @@ describe('shader registry — host-access rejection', () => {
       }),
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBe('Host-environment access is not allowed in shaders');
   });
 
@@ -341,7 +346,7 @@ describe('shader registry — extension detection', () => {
       method: 'POST',
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { banner?: string; published: boolean };
+    const body = (await res.json()) as { banner?: string; published: boolean };
     expect(body.banner).toContain('GL_EXT_foo');
     expect(body.published).toBe(true);
   });
@@ -357,7 +362,7 @@ describe('shader registry — extension detection', () => {
       method: 'POST',
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { banner?: string; published: boolean };
+    const body = (await res.json()) as { banner?: string; published: boolean };
     expect(body.banner).toBeUndefined();
     expect(body.published).toBe(true);
   });
@@ -400,7 +405,7 @@ describe('shader registry — build failure', () => {
       method: 'POST',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.compiled).toBe(false);
     expect(String(body.error)).toContain('TODO_COMPILE_ERROR');
     expect(body.fallback).toBe(SAFE_DEFAULT_SHADER);
@@ -443,7 +448,7 @@ describe('shader registry — build success', () => {
       method: 'POST',
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { programKey: string; published: boolean };
+    const body = (await res.json()) as { programKey: string; published: boolean };
     expect(body.programKey).toBe('prog-shader-001-background');
     expect(body.published).toBe(true);
   });
@@ -457,7 +462,7 @@ describe('shader registry — build success', () => {
       method: 'POST',
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { programKey: string };
+    const body = (await res.json()) as { programKey: string };
     expect(body.programKey).toBe('custom-key');
   });
 });
@@ -481,7 +486,7 @@ describe('shader registry — publish flow', () => {
       method: 'POST',
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as { published: boolean };
+    const body = (await res.json()) as { published: boolean };
     expect(body.published).toBe(true);
   });
 
@@ -510,7 +515,7 @@ describe('shader registry — publish flow', () => {
       }),
     });
     expect(createRes.status).toBe(201);
-    const created = await createRes.json() as { id: string; name: string; published: boolean };
+    const created = (await createRes.json()) as { id: string; name: string; published: boolean };
     expect(created.published).toBe(false);
 
     // Get
@@ -524,7 +529,7 @@ describe('shader registry — publish flow', () => {
       body: JSON.stringify({ name: 'Updated Lifecycle' }),
     });
     expect(updateRes.status).toBe(200);
-    const updated = await updateRes.json() as { name: string };
+    const updated = (await updateRes.json()) as { name: string };
     expect(updated.name).toBe('Updated Lifecycle');
 
     // Publish
@@ -532,7 +537,7 @@ describe('shader registry — publish flow', () => {
       method: 'POST',
     });
     expect(pubRes.status).toBe(200);
-    const published = await pubRes.json() as { published: boolean; programKey: string };
+    const published = (await pubRes.json()) as { published: boolean; programKey: string };
     expect(published.published).toBe(true);
     expect(published.programKey).toBeDefined();
   });
@@ -549,7 +554,7 @@ describe('shader registry — publish flow', () => {
       method: 'POST',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toContain('WGSL source required');
   });
 });

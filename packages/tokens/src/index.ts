@@ -25,13 +25,7 @@ export enum TokenGroup {
 }
 
 /** String literal union of all token group values. */
-export type TokenType =
-  | 'color'
-  | 'dimension'
-  | 'typography'
-  | 'shadow'
-  | 'motion'
-  | 'content';
+export type TokenType = 'color' | 'dimension' | 'typography' | 'shadow' | 'motion' | 'content';
 
 /** Roles a token can serve. */
 export type TokenRole = 'interactive' | 'brand' | 'content' | 'decorative';

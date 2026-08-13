@@ -12,9 +12,11 @@ describe('translation-pipeline', () => {
       tts: new StubTtsProvider(),
     });
     const out = await pipe.audioToAudio({
-      workspace_id: 'w1', session_id: 's1',
+      workspace_id: 'w1',
+      session_id: 's1',
       audio: new Uint8Array(16000),
-      source_lang: 'en', target_lang: 'es',
+      source_lang: 'en',
+      target_lang: 'es',
       sample_rate_hz: 16000,
     });
     expect(out.text).toMatch(/\[es\]/);
@@ -28,7 +30,12 @@ describe('translation-pipeline', () => {
       mt: new StubMtProvider(),
       tts: new StubTtsProvider(),
     });
-    const r = await pipe.translate({ workspace_id: 'w1', text: 'hello', source_lang: 'en', target_lang: 'es' });
+    const r = await pipe.translate({
+      workspace_id: 'w1',
+      text: 'hello',
+      source_lang: 'en',
+      target_lang: 'es',
+    });
     expect(r.text).toBe('[es] hello');
   });
 });

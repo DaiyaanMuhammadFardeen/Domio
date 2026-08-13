@@ -8,11 +8,7 @@ import type { Dataset, BindingSchema, BrushRange } from '../types.js';
  * Filter dataset rows to those within a brush range.
  * Supports both numeric and string (index-based) x-axis values.
  */
-export function brushZoom(
-  dataset: Dataset,
-  binding: BindingSchema,
-  range: BrushRange,
-): Dataset {
+export function brushZoom(dataset: Dataset, binding: BindingSchema, range: BrushRange): Dataset {
   const xBinding = binding.columns.find((c) => c.role === 'x');
   if (!xBinding) return dataset;
 

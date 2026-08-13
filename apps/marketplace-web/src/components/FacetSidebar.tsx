@@ -93,9 +93,7 @@ export function FacetSidebar({
               key={opt.value}
               type="button"
               data-testid={`facet-price-${opt.value}`}
-              onClick={() =>
-                onPriceChange(selectedPrice === opt.value ? null : opt.value)
-              }
+              onClick={() => onPriceChange(selectedPrice === opt.value ? null : opt.value)}
               aria-pressed={selectedPrice === opt.value}
               className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                 selectedPrice === opt.value
@@ -126,9 +124,7 @@ export function FacetSidebar({
                 key={value}
                 type="button"
                 data-testid={`facet-rating-${value}`}
-                onClick={() =>
-                  onRatingChange(active ? null : value)
-                }
+                onClick={() => onRatingChange(active ? null : value)}
                 aria-pressed={active}
                 className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                   active

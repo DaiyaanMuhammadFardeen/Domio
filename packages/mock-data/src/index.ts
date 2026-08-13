@@ -5,14 +5,7 @@
  * making it safe for re-runnable test fixtures.
  */
 
-export type {
-  MockField,
-  MockSpec,
-  MockRow,
-  MockResult,
-  FieldType,
-  Distribution,
-} from './types.js';
+export type { MockField, MockSpec, MockRow, MockResult, FieldType, Distribution } from './types.js';
 
 export {
   mulberry32,
@@ -29,5 +22,10 @@ export {
 
 export { generate, generateMany } from './generator.js';
 
-export type { RegionQuarterRow, CorrelatedRegionOpts, SeriesPoint, CorrelatedSeriesOpts } from './correlate.js';
+export type {
+  RegionQuarterRow,
+  CorrelatedRegionOpts,
+  SeriesPoint,
+  CorrelatedSeriesOpts,
+} from './correlate.js';
 export { correlatedRegions, correlatedSeries } from './correlate.js';

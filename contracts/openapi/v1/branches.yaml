@@ -35,7 +35,7 @@ paths:
         The branch name must be unique per deck. The new branch inherits
         the parent's history and diverges from the creation point.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -49,32 +49,32 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateBranchRequest"
+              $ref: '#/components/schemas/CreateBranchRequest'
       responses:
-        "201":
+        '201':
           description: Branch created.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BranchResponse"
-        "400":
+                $ref: '#/components/schemas/BranchResponse'
+        '400':
           description: Invalid request (e.g. duplicate name).
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "401":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
     get:
       tags: [branches]
       operationId: listBranches
@@ -99,24 +99,24 @@ paths:
             enum: [active, archived]
           description: Filter by branch status.
       responses:
-        "200":
+        '200':
           description: Branch list returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ListBranchesResponse"
-        "401":
+                $ref: '#/components/schemas/ListBranchesResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/decks/{deckId}/branches/{branchId}/checkout:
     post:
       tags: [branches]
@@ -127,7 +127,7 @@ paths:
         and the branch's HLC vector for resume. Cursor and selection state
         are preserved.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -145,24 +145,24 @@ paths:
             maxLength: 128
           description: Branch identifier.
       responses:
-        "200":
+        '200':
           description: Branch checkout successful.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CheckoutResponse"
-        "401":
+                $ref: '#/components/schemas/CheckoutResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck or branch not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/decks/{deckId}/branches/{branchId}/archive:
     post:
       tags: [branches]
@@ -173,7 +173,7 @@ paths:
         default branch list but can be restored. The "main" branch
         cannot be archived.
       parameters:
-        - $ref: "common.yaml#/components/parameters/IdempotencyKey"
+        - $ref: 'common.yaml#/components/parameters/IdempotencyKey'
         - in: path
           name: deckId
           required: true
@@ -191,30 +191,30 @@ paths:
             maxLength: 128
           description: Branch identifier.
       responses:
-        "200":
+        '200':
           description: Branch archived.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BranchResponse"
-        "400":
+                $ref: '#/components/schemas/BranchResponse'
+        '400':
           description: Cannot archive the main branch.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "401":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck or branch not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
   /v1/decks/{deckId}/branches/{branchId}/lineage:
     get:
       tags: [branches]
@@ -242,24 +242,24 @@ paths:
             maxLength: 128
           description: Branch identifier.
       responses:
-        "200":
+        '200':
           description: Branch lineage returned.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BranchLineageResponse"
-        "401":
+                $ref: '#/components/schemas/BranchLineageResponse'
+        '401':
           description: Unauthenticated.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
-        "404":
+                $ref: 'common.yaml#/components/schemas/Error'
+        '404':
           description: Deck or branch not found.
           content:
             application/json:
               schema:
-                $ref: "common.yaml#/components/schemas/Error"
+                $ref: 'common.yaml#/components/schemas/Error'
 components:
   securitySchemes:
     bearerAuth:
@@ -336,7 +336,7 @@ components:
       required: [branch]
       properties:
         branch:
-          $ref: "#/components/schemas/Branch"
+          $ref: '#/components/schemas/Branch'
         traceId:
           type: string
     ListBranchesResponse:
@@ -346,7 +346,7 @@ components:
         branches:
           type: array
           items:
-            $ref: "#/components/schemas/Branch"
+            $ref: '#/components/schemas/Branch'
         traceId:
           type: string
     CheckoutResponse:
@@ -354,11 +354,11 @@ components:
       required: [branch, resumeHlc]
       properties:
         branch:
-          $ref: "#/components/schemas/Branch"
+          $ref: '#/components/schemas/Branch'
         resumeHlc:
           description: HLC vector the client should use for resume.
           allOf:
-            - $ref: "realtime.yaml#/components/schemas/HLC"
+            - $ref: 'realtime.yaml#/components/schemas/HLC'
         traceId:
           type: string
     BranchLineage:
@@ -372,13 +372,13 @@ components:
         ancestors:
           type: array
           items:
-            $ref: "#/components/schemas/Branch"
+            $ref: '#/components/schemas/Branch'
           description: Ancestor chain from branch to root, ordered child-to-root.
     BranchLineageResponse:
       type: object
       required: [lineage]
       properties:
         lineage:
-          $ref: "#/components/schemas/BranchLineage"
+          $ref: '#/components/schemas/BranchLineage'
         traceId:
           type: string

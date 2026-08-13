@@ -39,7 +39,7 @@ function layoutNodes(nodes: ReadonlyArray<GraphNode>): Map<string, PositionedNod
     const claimIdx = i % Math.max(1, claims.length);
     const parent = claims[claimIdx];
     if (!parent) return;
-    const parentX = (positions.get(parent.id)?.x) ?? VIEWBOX_W / 2;
+    const parentX = positions.get(parent.id)?.x ?? VIEWBOX_W / 2;
     const offset = ((i % 5) - 2) * 60;
     const x = Math.max(20, Math.min(VIEWBOX_W - 20, parentX + offset));
     const y = VIEWBOX_H * 0.7 + ((i % 3) - 1) * 36;
@@ -92,14 +92,8 @@ function edgeStroke(kind: GraphEdge['kind']): string {
  * claim to surface the source slide preview; cross-deck edges
  * highlight decks that share the claim.
  */
-export function KnowledgeGraph({
-  workspaceId,
-  initial,
-  onClaimClick,
-}: KnowledgeGraphProps) {
-  const [data, setData] = useState<KnowledgeGraph>(
-    initial ?? { nodes: [], edges: [], claims: [] },
-  );
+export function KnowledgeGraph({ workspaceId, initial, onClaimClick }: KnowledgeGraphProps) {
+  const [data, setData] = useState<KnowledgeGraph>(initial ?? { nodes: [], edges: [], claims: [] });
   const [selected, setSelected] = useState<GraphNode | null>(null);
   const [search, setSearch] = useState('');
 
@@ -118,10 +112,7 @@ export function KnowledgeGraph({
     };
   }, [workspaceId, search, initial]);
 
-  const positions = useMemo(
-    () => layoutNodes(data.nodes),
-    [data.nodes],
-  );
+  const positions = useMemo(() => layoutNodes(data.nodes), [data.nodes]);
 
   function handleClick(node: GraphNode) {
     setSelected(node);
@@ -135,8 +126,8 @@ export function KnowledgeGraph({
         role="status"
         data-testid="knowledge-graph-empty"
       >
-        No graph data yet. Once the warehouse publishes cross-deck
-        claims + citations, they will render here.
+        No graph data yet. Once the warehouse publishes cross-deck claims + citations, they will
+        render here.
       </div>
     );
   }
@@ -146,10 +137,7 @@ export function KnowledgeGraph({
         (n) =>
           n.kind === 'slide' &&
           data.edges.some(
-            (e) =>
-              e.kind === 'source_slide' &&
-              e.from === selected.id &&
-              e.to === n.id,
+            (e) => e.kind === 'source_slide' && e.from === selected.id && e.to === n.id,
           ),
       )
     : null;
@@ -157,12 +145,7 @@ export function KnowledgeGraph({
     ? data.nodes.find(
         (n) =>
           n.kind === 'citation' &&
-          data.edges.some(
-            (e) =>
-              e.kind === 'cites' &&
-              e.from === selected.id &&
-              e.to === n.id,
-          ),
+          data.edges.some((e) => e.kind === 'cites' && e.from === selected.id && e.to === n.id),
       )
     : null;
   const crossDecks = selected
@@ -170,10 +153,7 @@ export function KnowledgeGraph({
         (n) =>
           n.kind === 'deck' &&
           data.edges.some(
-            (e) =>
-              e.kind === 'cross_deck' &&
-              e.from === selected.id &&
-              e.to === n.id,
+            (e) => e.kind === 'cross_deck' && e.from === selected.id && e.to === n.id,
           ),
       )
     : [];
@@ -251,42 +231,28 @@ export function KnowledgeGraph({
           className="rounded-xl border border-slate-200 bg-white p-4"
           data-testid="knowledge-graph-preview"
         >
-          <h3 className="text-sm font-semibold text-slate-900">
-            {selected.label}
-          </h3>
+          <h3 className="text-sm font-semibold text-slate-900">{selected.label}</h3>
           <dl className="mt-2 grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
             <div>
-              <dt className="font-medium uppercase tracking-wide text-slate-500">
-                Source slide
-              </dt>
-              <dd className="text-slate-700">
-                {slideForClaim?.label ?? '—'}
-              </dd>
+              <dt className="font-medium uppercase tracking-wide text-slate-500">Source slide</dt>
+              <dd className="text-slate-700">{slideForClaim?.label ?? '—'}</dd>
             </div>
             <div>
-              <dt className="font-medium uppercase tracking-wide text-slate-500">
-                Citation
-              </dt>
-              <dd className="text-slate-700">
-                {citationForClaim?.label ?? '—'}
-              </dd>
+              <dt className="font-medium uppercase tracking-wide text-slate-500">Citation</dt>
+              <dd className="text-slate-700">{citationForClaim?.label ?? '—'}</dd>
             </div>
             <div>
-              <dt className="font-medium uppercase tracking-wide text-slate-500">
-                Cross-deck
-              </dt>
+              <dt className="font-medium uppercase tracking-wide text-slate-500">Cross-deck</dt>
               <dd className="text-slate-700">
-                {crossDecks.length > 0
-                  ? crossDecks.map((d) => d.label).join(', ')
-                  : '—'}
+                {crossDecks.length > 0 ? crossDecks.map((d) => d.label).join(', ') : '—'}
               </dd>
             </div>
           </dl>
         </section>
       ) : (
         <p className="text-xs text-slate-500">
-          Click a claim (large brand-colored node) to see its source slide, citation, and
-          cross-deck links.
+          Click a claim (large brand-colored node) to see its source slide, citation, and cross-deck
+          links.
         </p>
       )}
     </div>

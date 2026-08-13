@@ -27,9 +27,7 @@ function layer(overrides: Partial<ComponentLayer['component']> = {}): ComponentL
 
 describe('PropsPanel', () => {
   it('renders the component name, catalog id, and variant switcher', () => {
-    render(
-      <PropsPanel element={layer()} onPropEdit={vi.fn()} onVariantChange={vi.fn()} />,
-    );
+    render(<PropsPanel element={layer()} onPropEdit={vi.fn()} onVariantChange={vi.fn()} />);
     expect(screen.getByText('Stat Card')).toBeInTheDocument();
     expect(screen.getByText(/domio\.stat-card · v1\.0\.0/)).toBeInTheDocument();
     const group = screen.getByRole('group', { name: 'Variant' });
@@ -38,18 +36,14 @@ describe('PropsPanel', () => {
   });
 
   it('marks required props with an asterisk', () => {
-    render(
-      <PropsPanel element={layer()} onPropEdit={vi.fn()} onVariantChange={vi.fn()} />,
-    );
+    render(<PropsPanel element={layer()} onPropEdit={vi.fn()} onVariantChange={vi.fn()} />);
     const valueLabel = screen.getByLabelText('Value *');
     expect(valueLabel).toBeInTheDocument();
   });
 
   it('emits a prop edit when a text field changes', () => {
     const onPropEdit = vi.fn();
-    render(
-      <PropsPanel element={layer()} onPropEdit={onPropEdit} onVariantChange={vi.fn()} />,
-    );
+    render(<PropsPanel element={layer()} onPropEdit={onPropEdit} onVariantChange={vi.fn()} />);
     const input = screen.getByLabelText('Label');
     fireEvent.change(input, { target: { value: 'MRR' } });
     expect(onPropEdit).toHaveBeenCalledWith('label', 'Revenue', 'MRR');
@@ -57,9 +51,7 @@ describe('PropsPanel', () => {
 
   it('emits a prop edit when a number field changes', () => {
     const onPropEdit = vi.fn();
-    render(
-      <PropsPanel element={layer()} onPropEdit={onPropEdit} onVariantChange={vi.fn()} />,
-    );
+    render(<PropsPanel element={layer()} onPropEdit={onPropEdit} onVariantChange={vi.fn()} />);
     const input = screen.getByLabelText('Value *');
     fireEvent.change(input, { target: { value: '99' } });
     expect(onPropEdit).toHaveBeenCalledWith('value', 42, 99);
@@ -67,9 +59,7 @@ describe('PropsPanel', () => {
 
   it('emits a prop edit when a toggle flips', () => {
     const onPropEdit = vi.fn();
-    render(
-      <PropsPanel element={layer()} onPropEdit={onPropEdit} onVariantChange={vi.fn()} />,
-    );
+    render(<PropsPanel element={layer()} onPropEdit={onPropEdit} onVariantChange={vi.fn()} />);
     const toggle = screen.getByLabelText('Show delta');
     fireEvent.click(toggle);
     expect(onPropEdit).toHaveBeenCalledWith('showDelta', true, false);
@@ -77,9 +67,7 @@ describe('PropsPanel', () => {
 
   it('emits a variant change when the variant switcher is used', () => {
     const onVariantChange = vi.fn();
-    render(
-      <PropsPanel element={layer()} onPropEdit={vi.fn()} onVariantChange={onVariantChange} />,
-    );
+    render(<PropsPanel element={layer()} onPropEdit={vi.fn()} onVariantChange={onVariantChange} />);
     fireEvent.click(screen.getByRole('button', { name: 'Dark' }));
     expect(onVariantChange).toHaveBeenCalledWith('light', 'dark');
   });

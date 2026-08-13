@@ -76,7 +76,9 @@ export class HeatmapAggregator {
   }
 
   /** Number of unique cells with at least one interaction. */
-  size(): number { return this.cells.size; }
+  size(): number {
+    return this.cells.size;
+  }
 
   /** Serialize to a heatmap bucket. */
   toBucket(): HeatmapBucket {

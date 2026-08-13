@@ -29,7 +29,9 @@ describe('AudienceVersionsPanel', () => {
     expect(screen.getByTestId('audience-versions-persona-five_min')).toBeInTheDocument();
     expect(screen.getByTestId('audience-versions-persona-technical')).toBeInTheDocument();
     expect(screen.getByTestId('audience-versions-persona-executive')).toBeInTheDocument();
-    expect(screen.getByTestId('audience-versions-persona-executive').getAttribute('aria-checked')).toBe('true');
+    expect(
+      screen.getByTestId('audience-versions-persona-executive').getAttribute('aria-checked'),
+    ).toBe('true');
   });
 
   it('calls the remote versions endpoint and renders the branched deck', async () => {
@@ -74,7 +76,11 @@ describe('AudienceVersionsPanel', () => {
   it('switches the active persona when a different chip is clicked', () => {
     render(<AudienceVersionsPanel deck={DECK} />);
     fireEvent.click(screen.getByTestId('audience-versions-persona-technical'));
-    expect(screen.getByTestId('audience-versions-persona-technical').getAttribute('aria-checked')).toBe('true');
-    expect(screen.getByTestId('audience-versions-persona-executive').getAttribute('aria-checked')).toBe('false');
+    expect(
+      screen.getByTestId('audience-versions-persona-technical').getAttribute('aria-checked'),
+    ).toBe('true');
+    expect(
+      screen.getByTestId('audience-versions-persona-executive').getAttribute('aria-checked'),
+    ).toBe('false');
   });
 });

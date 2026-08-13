@@ -64,20 +64,14 @@ export function Model3DEditor({
   const [distance, setDistance] = useState(2);
   const [pendingHotspot, setPendingHotspot] = useState<{ x: number; y: number } | null>(null);
 
-  const sortedKeyframes = useMemo(
-    () => [...keyframes].sort((a, b) => a.t - b.t),
-    [keyframes],
-  );
+  const sortedKeyframes = useMemo(() => [...keyframes].sort((a, b) => a.t - b.t), [keyframes]);
 
-  const handleViewportClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      setPendingHotspot({ x, y });
-    },
-    [],
-  );
+  const handleViewportClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setPendingHotspot({ x, y });
+  }, []);
 
   const handleAddHotspot = useCallback(
     (action: string) => {
@@ -104,7 +98,7 @@ export function Model3DEditor({
   const handleAddKeyframe = useCallback(() => {
     const next: CameraKeyframe = {
       id: nextId('kf'),
-      t: sortedKeyframes.length === 0 ? 0 : (sortedKeyframes[sortedKeyframes.length - 1]!.t) + 1000,
+      t: sortedKeyframes.length === 0 ? 0 : sortedKeyframes[sortedKeyframes.length - 1]!.t + 1000,
       orbit,
       distance,
     };
@@ -120,7 +114,11 @@ export function Model3DEditor({
 
   return (
     <div className="model3d-editor" data-testid="model3d-editor">
-      <div className="model3d-editor__viewport" onClick={handleViewportClick} data-testid="model3d-viewport">
+      <div
+        className="model3d-editor__viewport"
+        onClick={handleViewportClick}
+        data-testid="model3d-viewport"
+      >
         <div className="model3d-editor__model" data-testid="model3d-model">
           <span className="model3d-editor__model-label">{src ? 'GLB' : 'No model'}</span>
         </div>
@@ -129,7 +127,10 @@ export function Model3DEditor({
             key={h.id}
             className="model3d-editor__hotspot"
             style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%` }}
-            onClick={(e) => { e.stopPropagation(); handleRemoveHotspot(h.id); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveHotspot(h.id);
+            }}
             title={`${h.action} (click to remove)`}
             data-testid={`model3d-hotspot-${h.id}`}
           />
@@ -193,8 +194,12 @@ export function Model3DEditor({
         <ul>
           {sortedKeyframes.map((k) => (
             <li key={k.id} data-testid={`model3d-keyframe-${k.id}`}>
-              <span>{k.t}ms · orbit {k.orbit}° · d {k.distance.toFixed(1)}</span>
-              <button type="button" onClick={() => handleRemoveKeyframe(k.id)}>×</button>
+              <span>
+                {k.t}ms · orbit {k.orbit}° · d {k.distance.toFixed(1)}
+              </span>
+              <button type="button" onClick={() => handleRemoveKeyframe(k.id)}>
+                ×
+              </button>
             </li>
           ))}
         </ul>

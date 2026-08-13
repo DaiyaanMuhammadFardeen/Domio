@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "phone-pairing"
-  ],
+  "tags": ["tier-2", "domio", "phone-pairing"],
   "panels": [
     {
       "id": 1,

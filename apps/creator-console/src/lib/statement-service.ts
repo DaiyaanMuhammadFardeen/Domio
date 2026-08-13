@@ -98,12 +98,14 @@ function buildLines(creatorId: string, period: string): Statement['lines'] {
   return lines;
 }
 
-function sumLineTotals(lines: ReadonlyArray<{
-  gross_cents: number;
-  fees_cents: number;
-  refunds_cents: number;
-  net_cents: number;
-}>): { gross: number; fees: number; refunds: number; net: number } {
+function sumLineTotals(
+  lines: ReadonlyArray<{
+    gross_cents: number;
+    fees_cents: number;
+    refunds_cents: number;
+    net_cents: number;
+  }>,
+): { gross: number; fees: number; refunds: number; net: number } {
   let gross = 0;
   let fees = 0;
   let refunds = 0;
@@ -147,10 +149,7 @@ function seedStatementsForCreator(creatorId: string): Statement[] {
       net_cents: totals.net,
       currency: 'USD',
       generated_at_ms: status === 'draft' ? null : startMs + 25 * DAY_MS,
-      finalized_at_ms:
-        status === 'finalized' || status === 'paid'
-          ? startMs + 26 * DAY_MS
-          : null,
+      finalized_at_ms: status === 'finalized' || status === 'paid' ? startMs + 26 * DAY_MS : null,
       paid_at_ms: status === 'paid' ? startMs + 28 * DAY_MS : null,
       pdf_url:
         status === 'finalized' || status === 'paid'
@@ -233,8 +232,7 @@ export async function finalizeStatement(id: string): Promise<Statement> {
     generated_at_ms: current.generated_at_ms ?? now,
     finalized_at_ms: now,
     pdf_url:
-      current.pdf_url ??
-      `https://example.com/statements/${creatorId}/${current.period_month}.pdf`,
+      current.pdf_url ?? `https://example.com/statements/${creatorId}/${current.period_month}.pdf`,
   };
   seeded[idx] = finalized;
   return finalized;

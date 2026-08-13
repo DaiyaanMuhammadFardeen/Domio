@@ -10,11 +10,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Plus, Copy, ShieldOff, Check } from 'lucide-react';
-import {
-  listSCIMTokens,
-  createSCIMToken,
-  revokeSCIMToken,
-} from '../../lib/scim-service';
+import { listSCIMTokens, createSCIMToken, revokeSCIMToken } from '../../lib/scim-service';
 import type { SCIMToken, SCIMTokenCreateResult } from '../../lib/types';
 
 function formatRelTime(ms: number | null): string {
@@ -82,11 +78,7 @@ export default function SCIMPage() {
   }
 
   async function handleRevoke(token: SCIMToken) {
-    if (
-      !window.confirm(
-        `Revoke this SCIM token? Provisioning calls using it will fail.`,
-      )
-    ) {
+    if (!window.confirm(`Revoke this SCIM token? Provisioning calls using it will fail.`)) {
       return;
     }
     setBusy(token.id);
@@ -224,10 +216,7 @@ export default function SCIMPage() {
             <tbody className="divide-y divide-slate-100">
               {tokens.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-4 py-12 text-center text-sm text-slate-500"
-                  >
+                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-500">
                     No SCIM tokens yet. Create one above.
                   </td>
                 </tr>

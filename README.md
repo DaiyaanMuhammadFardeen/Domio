@@ -97,13 +97,13 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full guide.
 
 ## Documentation
 
-| Where | What |
-|---|---|
-| [`docs/01–12`](docs/) | Super docs — problem, requirements, UX, architecture, data, stack, security, infra, testing, team, legal, Bangladesh. |
-| [`docs/<domain>.md`](docs/) | Feature-domain deep dives (one per section of `feature-list.md`). |
-| [`docs/development_phases/`](docs/development_phases/) | 23-phase development plan with parallel-stream map. |
-| [`docs/adr/`](docs/adr/) | Architecture Decision Records. |
-| [`docs/runbooks/`](docs/runbooks/) | Operator runbooks. |
+| Where                                                  | What                                                                                                                  |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| [`docs/01–12`](docs/)                                  | Super docs — problem, requirements, UX, architecture, data, stack, security, infra, testing, team, legal, Bangladesh. |
+| [`docs/<domain>.md`](docs/)                            | Feature-domain deep dives (one per section of `feature-list.md`).                                                     |
+| [`docs/development_phases/`](docs/development_phases/) | 23-phase development plan with parallel-stream map.                                                                   |
+| [`docs/adr/`](docs/adr/)                               | Architecture Decision Records.                                                                                        |
+| [`docs/runbooks/`](docs/runbooks/)                     | Operator runbooks.                                                                                                    |
 
 ---
 
@@ -136,13 +136,13 @@ plane — ingestion, warehouse, identity, sessionization, heatmaps,
 A/B, CRM sync, sales notifications, team analytics, live delivery,
 benchmarks, and the dashboard.
 
-| Artifact | Link |
-|---|---|
-| Phase 17 spec | [`docs/development_phases/phase-17-spec.md`](docs/development_phases/phase-17-spec.md) |
-| Architecture data-flow | [`docs/architecture/phase-17-data-flow.md`](docs/architecture/phase-17-data-flow.md) |
-| Analytics runbook | [`docs/analytics-runbook.md`](docs/analytics-runbook.md) |
-| Phase 17 SLOs | [`slo/phase-17.md`](slo/phase-17.md) |
-| Dashboard app README | [`apps/dashboard/README.md`](apps/dashboard/README.md) |
-| Phase 17 DoD | [`docs/development_phases/phase-17-dod.md`](docs/development_phases/phase-17-dod.md) |
+| Artifact                  | Link                                                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Phase 17 spec             | [`docs/development_phases/phase-17-spec.md`](docs/development_phases/phase-17-spec.md)                 |
+| Architecture data-flow    | [`docs/architecture/phase-17-data-flow.md`](docs/architecture/phase-17-data-flow.md)                   |
+| Analytics runbook         | [`docs/analytics-runbook.md`](docs/analytics-runbook.md)                                               |
+| Phase 17 SLOs             | [`slo/phase-17.md`](slo/phase-17.md)                                                                   |
+| Dashboard app README      | [`apps/dashboard/README.md`](apps/dashboard/README.md)                                                 |
+| Phase 17 DoD              | [`docs/development_phases/phase-17-dod.md`](docs/development_phases/phase-17-dod.md)                   |
 | Phase 17 verification log | [`docs/development_phases/phase-17-verification.md`](docs/development_phases/phase-17-verification.md) |
-| Phase 17 commit log | [`docs/development_phases/phase-17-commit-log.md`](docs/development_phases/phase-17-commit-log.md) |
+| Phase 17 commit log       | [`docs/development_phases/phase-17-commit-log.md`](docs/development_phases/phase-17-commit-log.md)     |

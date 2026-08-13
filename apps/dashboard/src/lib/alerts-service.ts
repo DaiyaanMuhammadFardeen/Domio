@@ -68,9 +68,8 @@ interface AlertEventWire {
 }
 
 const DEFAULT_BASE: string =
-  (typeof process !== 'undefined'
-    ? process.env['NOTIFICATION_DISPATCHER_URL']
-    : undefined) ?? 'http://localhost:8097';
+  (typeof process !== 'undefined' ? process.env['NOTIFICATION_DISPATCHER_URL'] : undefined) ??
+  'http://localhost:8097';
 
 const VALID_METRICS: ReadonlyArray<AlertMetric> = [
   'completion_rate',
@@ -80,12 +79,7 @@ const VALID_METRICS: ReadonlyArray<AlertMetric> = [
   'dlq_depth',
 ];
 
-const VALID_CHANNELS: ReadonlyArray<AlertChannel> = [
-  'slack',
-  'teams',
-  'email',
-  'webhook',
-];
+const VALID_CHANNELS: ReadonlyArray<AlertChannel> = ['slack', 'teams', 'email', 'webhook'];
 
 const VALID_COMPARATORS: ReadonlyArray<AlertComparator> = ['above', 'below'];
 

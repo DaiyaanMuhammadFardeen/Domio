@@ -14,7 +14,11 @@ import {
 } from './libraryLog.js';
 import type { TeamLibrary, UserLibraryItem, TeamLibraryEvent } from '../store/types.js';
 
-async function seedLibrary(store: InMemoryStore, id = 'lib-1', overrides: Partial<TeamLibrary> = {}): Promise<TeamLibrary> {
+async function seedLibrary(
+  store: InMemoryStore,
+  id = 'lib-1',
+  overrides: Partial<TeamLibrary> = {},
+): Promise<TeamLibrary> {
   const lib: TeamLibrary = {
     id,
     workspaceId: 'ws-1',
@@ -29,7 +33,9 @@ async function seedLibrary(store: InMemoryStore, id = 'lib-1', overrides: Partia
   return lib;
 }
 
-function makeEvent(overrides: Partial<TeamLibraryEvent> & { kind: TeamLibraryEvent['kind']; componentId: string }): TeamLibraryEvent {
+function makeEvent(
+  overrides: Partial<TeamLibraryEvent> & { kind: TeamLibraryEvent['kind']; componentId: string },
+): TeamLibraryEvent {
   const { componentId, ...rest } = overrides;
   return {
     id: 'e1',
@@ -71,10 +77,16 @@ describe('libraryLog', () => {
       const deps = defaultDeps(store);
       await seedLibrary(store);
       const e1 = await appendLibraryEvent(deps, {
-        libraryId: 'lib-1', kind: 'component_published', componentId: 'a', actorId: 'u',
+        libraryId: 'lib-1',
+        kind: 'component_published',
+        componentId: 'a',
+        actorId: 'u',
       });
       const e2 = await appendLibraryEvent(deps, {
-        libraryId: 'lib-1', kind: 'component_removed', componentId: 'b', actorId: 'u',
+        libraryId: 'lib-1',
+        kind: 'component_removed',
+        componentId: 'b',
+        actorId: 'u',
       });
       expect(e1.seq).toBe(1);
       expect(e2.seq).toBe(2);
@@ -101,7 +113,10 @@ describe('libraryLog', () => {
       const deps = defaultDeps(store);
       await seedLibrary(store);
       const event = await appendLibraryEvent(deps, {
-        libraryId: 'lib-1', kind: 'component_published', componentId: 'x', actorId: 'u',
+        libraryId: 'lib-1',
+        kind: 'component_published',
+        componentId: 'x',
+        actorId: 'u',
       });
       expect(event.actorKind).toBe('human');
     });
@@ -110,7 +125,10 @@ describe('libraryLog', () => {
       const deps = defaultDeps(store);
       await expect(
         appendLibraryEvent(deps, {
-          libraryId: 'missing', kind: 'component_published', componentId: 'x', actorId: 'u',
+          libraryId: 'missing',
+          kind: 'component_published',
+          componentId: 'x',
+          actorId: 'u',
         }),
       ).rejects.toThrow('not found');
     });
@@ -120,8 +138,18 @@ describe('libraryLog', () => {
     it('replays events from afterSeq', async () => {
       const deps = defaultDeps(store);
       await seedLibrary(store);
-      await appendLibraryEvent(deps, { libraryId: 'lib-1', kind: 'component_published', componentId: 'a', actorId: 'u' });
-      await appendLibraryEvent(deps, { libraryId: 'lib-1', kind: 'component_removed', componentId: 'b', actorId: 'u' });
+      await appendLibraryEvent(deps, {
+        libraryId: 'lib-1',
+        kind: 'component_published',
+        componentId: 'a',
+        actorId: 'u',
+      });
+      await appendLibraryEvent(deps, {
+        libraryId: 'lib-1',
+        kind: 'component_removed',
+        componentId: 'b',
+        actorId: 'u',
+      });
 
       const result = await replayLibraryEvents(deps, 'lib-1', 0);
       expect(result.applied).toBe(2);
@@ -139,7 +167,12 @@ describe('libraryLog', () => {
     it('calls onEvent for each event', async () => {
       const deps = defaultDeps(store);
       await seedLibrary(store);
-      await appendLibraryEvent(deps, { libraryId: 'lib-1', kind: 'component_published', componentId: 'a', actorId: 'u' });
+      await appendLibraryEvent(deps, {
+        libraryId: 'lib-1',
+        kind: 'component_published',
+        componentId: 'a',
+        actorId: 'u',
+      });
 
       const called: string[] = [];
       await replayLibraryEvents(deps, 'lib-1', 0, async (e) => {
@@ -153,7 +186,12 @@ describe('libraryLog', () => {
     it('syncs from seq 0 and returns latest seq', async () => {
       const deps = defaultDeps(store);
       await seedLibrary(store);
-      await appendLibraryEvent(deps, { libraryId: 'lib-1', kind: 'component_published', componentId: 'a', actorId: 'u' });
+      await appendLibraryEvent(deps, {
+        libraryId: 'lib-1',
+        kind: 'component_published',
+        componentId: 'a',
+        actorId: 'u',
+      });
 
       const result = await syncLibraryToLatest(deps, 'lib-1');
       expect(result.applied).toBe(1);
@@ -185,7 +223,9 @@ describe('libraryLog', () => {
 
     it('throws ERR_NOT_FOUND for missing library', async () => {
       const deps = defaultDeps(store);
-      await expect(changeLibraryPolicy(deps, 'missing', 'u', 'latest')).rejects.toThrow('not found');
+      await expect(changeLibraryPolicy(deps, 'missing', 'u', 'latest')).rejects.toThrow(
+        'not found',
+      );
     });
   });
 
@@ -238,10 +278,46 @@ describe('libraryLog', () => {
   describe('summarizeUpdates', () => {
     it('groups events by componentId with unique kinds', () => {
       const events = [
-        makeEvent({ id: '1', libraryId: 'lib-1', seq: 1, componentId: 'a', kind: 'component_published', actorId: 'u', actorKind: 'human', createdAt: 1 }),
-        makeEvent({ id: '2', libraryId: 'lib-1', seq: 2, componentId: 'a', kind: 'component_removed', actorId: 'u', actorKind: 'human', createdAt: 2 }),
-        makeEvent({ id: '3', libraryId: 'lib-1', seq: 3, componentId: 'a', kind: 'component_published', actorId: 'u', actorKind: 'human', createdAt: 3 }),
-        makeEvent({ id: '4', libraryId: 'lib-1', seq: 4, componentId: 'b', kind: 'component_updated', actorId: 'u', actorKind: 'human', createdAt: 4 }),
+        makeEvent({
+          id: '1',
+          libraryId: 'lib-1',
+          seq: 1,
+          componentId: 'a',
+          kind: 'component_published',
+          actorId: 'u',
+          actorKind: 'human',
+          createdAt: 1,
+        }),
+        makeEvent({
+          id: '2',
+          libraryId: 'lib-1',
+          seq: 2,
+          componentId: 'a',
+          kind: 'component_removed',
+          actorId: 'u',
+          actorKind: 'human',
+          createdAt: 2,
+        }),
+        makeEvent({
+          id: '3',
+          libraryId: 'lib-1',
+          seq: 3,
+          componentId: 'a',
+          kind: 'component_published',
+          actorId: 'u',
+          actorKind: 'human',
+          createdAt: 3,
+        }),
+        makeEvent({
+          id: '4',
+          libraryId: 'lib-1',
+          seq: 4,
+          componentId: 'b',
+          kind: 'component_updated',
+          actorId: 'u',
+          actorKind: 'human',
+          createdAt: 4,
+        }),
       ];
       const result = summarizeUpdates(events);
       expect(result.length).toBe(2);

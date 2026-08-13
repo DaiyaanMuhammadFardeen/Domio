@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Domio MCP Media Tools
-  version: "1.0.0"
+  version: '1.0.0'
   description: |
     MCP HTTP transport for media tools introduced in Phase 11.
     Bearer token authentication; every tool accepts a JSON object `{ deckId, ... }`
@@ -60,7 +60,7 @@ paths:
               properties:
                 deckId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -68,11 +68,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/upload_video_asset:
     post:
       operationId: mcp_upload_video_asset
@@ -88,20 +88,20 @@ paths:
               required: [deckId, file, name]
               properties:
                 deckId: { type: string }
-                file: { type: string, description: "Base64-encoded file data" }
+                file: { type: string, description: 'Base64-encoded file data' }
                 name: { type: string }
                 licenseId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/get_video_asset:
     post:
       operationId: mcp_get_video_asset
@@ -119,16 +119,16 @@ paths:
                 deckId: { type: string }
                 videoAssetId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_video_asset:
     post:
       operationId: mcp_delete_video_asset
@@ -146,13 +146,13 @@ paths:
                 deckId: { type: string }
                 videoAssetId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/create_video_job:
     post:
       operationId: mcp_create_video_job
@@ -173,16 +173,16 @@ paths:
                 extractCaptions: { type: boolean }
                 extractWaveform: { type: boolean }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/get_video_job:
     post:
       operationId: mcp_get_video_job
@@ -200,16 +200,16 @@ paths:
                 deckId: { type: string }
                 jobId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/list_audio_tracks:
     post:
       operationId: mcp_list_audio_tracks
@@ -227,7 +227,7 @@ paths:
                 deckId: { type: string }
                 slideId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -235,11 +235,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/upload_audio_track:
     post:
       operationId: mcp_upload_audio_track
@@ -256,23 +256,23 @@ paths:
               properties:
                 deckId: { type: string }
                 slideId: { type: string }
-                file: { type: string, description: "Base64-encoded file data" }
+                file: { type: string, description: 'Base64-encoded file data' }
                 kind: { type: string, enum: [voiceover, music, ambient, sfx] }
                 volume: { type: number }
                 fadeInMs: { type: integer }
                 fadeOutMs: { type: integer }
                 licenseId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/update_audio_track:
     post:
       operationId: mcp_update_audio_track
@@ -293,16 +293,16 @@ paths:
                 fadeInMs: { type: integer }
                 fadeOutMs: { type: integer }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_audio_track:
     post:
       operationId: mcp_delete_audio_track
@@ -320,13 +320,13 @@ paths:
                 deckId: { type: string }
                 trackId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/list_lottie_assets:
     post:
       operationId: mcp_list_lottie_assets
@@ -343,7 +343,7 @@ paths:
               properties:
                 deckId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
@@ -351,11 +351,11 @@ paths:
                 type: object
                 properties:
                   items: { type: array, items: { type: object } }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/upload_lottie_asset:
     post:
       operationId: mcp_upload_lottie_asset
@@ -371,21 +371,21 @@ paths:
               required: [deckId, file, name, format]
               properties:
                 deckId: { type: string }
-                file: { type: string, description: "Base64-encoded file data" }
+                file: { type: string, description: 'Base64-encoded file data' }
                 name: { type: string }
                 format: { type: string, enum: [lottie, rive] }
                 licenseId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/get_lottie_asset:
     post:
       operationId: mcp_get_lottie_asset
@@ -403,16 +403,16 @@ paths:
                 deckId: { type: string }
                 lottieAssetId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema: { type: object }
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }
   /tools/delete_lottie_asset:
     post:
       operationId: mcp_delete_lottie_asset
@@ -430,10 +430,10 @@ paths:
                 deckId: { type: string }
                 lottieAssetId: { type: string }
       responses:
-        "200":
+        '200':
           description: OK
-        "400":
+        '400':
           description: invalid input
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/McpError" }
+              schema: { $ref: '#/components/schemas/McpError' }

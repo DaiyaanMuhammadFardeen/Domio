@@ -4,7 +4,16 @@
   "title": "Domio Deck Document",
   "description": "Canonical, versioned, persisted representation of a Domio deck. The single source of truth for the editor, viewer, MCP gateway, and renderer.",
   "type": "object",
-  "required": ["schemaVersion", "id", "tenantId", "workspaceId", "title", "revision", "slides", "settings"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "tenantId",
+    "workspaceId",
+    "title",
+    "revision",
+    "slides",
+    "settings"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {

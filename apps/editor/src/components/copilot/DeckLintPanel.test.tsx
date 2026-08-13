@@ -74,7 +74,9 @@ describe('DeckLintPanel', () => {
       expect(screen.getByTestId('deck-lint-violation-v-1')).toBeInTheDocument();
     });
     expect(screen.getByTestId('deck-lint-violation-v-1')).toHaveTextContent('Broken data binding');
-    expect(screen.getByTestId('deck-lint-violation-v-1')).toHaveTextContent('Dataset sheet-99 not found');
+    expect(screen.getByTestId('deck-lint-violation-v-1')).toHaveTextContent(
+      'Dataset sheet-99 not found',
+    );
     expect(screen.getByTestId('deck-lint-severity-v-1')).toHaveTextContent('high');
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('/v1/lint/deck'),

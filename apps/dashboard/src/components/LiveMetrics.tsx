@@ -8,12 +8,7 @@
  */
 
 import { type ReactElement } from 'react';
-import {
-  Activity,
-  BarChart3,
-  Eye,
-  MessageSquare,
-} from 'lucide-react';
+import { Activity, BarChart3, Eye, MessageSquare } from 'lucide-react';
 import { clsx } from 'clsx';
 import type {
   LiveAttendance,
@@ -46,17 +41,9 @@ function attentionTone(score: number): string {
   return 'text-rose-700';
 }
 
-export function LiveMetrics({
-  attendance,
-  poll,
-  question,
-  slide,
-}: LiveMetricsProps): ReactElement {
+export function LiveMetrics({ attendance, poll, question, slide }: LiveMetricsProps): ReactElement {
   return (
-    <div
-      className="grid grid-cols-2 gap-3 sm:grid-cols-4"
-      data-testid="live-metrics"
-    >
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" data-testid="live-metrics">
       <Metric
         testId="live-attendance"
         icon={<Eye className="h-4 w-4" />}
@@ -103,17 +90,12 @@ interface MetricProps {
 
 function Metric({ icon, label, value, sub, testId }: MetricProps): ReactElement {
   return (
-    <div
-      className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-      data-testid={testId}
-    >
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm" data-testid={testId}>
       <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
         <span className="text-slate-400">{icon}</span>
         {label}
       </div>
-      <div className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">
-        {value}
-      </div>
+      <div className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">{value}</div>
       <div className="mt-1 text-xs text-slate-500">{sub}</div>
     </div>
   );

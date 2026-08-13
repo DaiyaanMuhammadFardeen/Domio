@@ -39,15 +39,13 @@ export default function BrandGovernancePage() {
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [importResult, setImportResult] = useState<
-    { imported: number; skipped: number } | null
-  >(null);
-  const [enforcementFilter, setEnforcementFilter] = useState<'all' | BrandLockEnforcement>(
-    'all',
+  const [importResult, setImportResult] = useState<{ imported: number; skipped: number } | null>(
+    null,
   );
-  const [enforcementState, setEnforcementState] = useState<ReadonlyMap<string, BrandLockEnforcement>>(
-    new Map(),
-  );
+  const [enforcementFilter, setEnforcementFilter] = useState<'all' | BrandLockEnforcement>('all');
+  const [enforcementState, setEnforcementState] = useState<
+    ReadonlyMap<string, BrandLockEnforcement>
+  >(new Map());
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -291,7 +289,11 @@ export default function BrandGovernancePage() {
                           <option value="warning">warning</option>
                           <option value="off">off</option>
                         </select>
-                        <Badge tone={mode === 'enforced' ? 'green' : mode === 'warning' ? 'amber' : 'red'}>
+                        <Badge
+                          tone={
+                            mode === 'enforced' ? 'green' : mode === 'warning' ? 'amber' : 'red'
+                          }
+                        >
                           {mode}
                         </Badge>
                       </li>

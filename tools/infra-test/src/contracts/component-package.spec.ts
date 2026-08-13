@@ -48,7 +48,10 @@ const canonicalManifest = (overrides: Record<string, unknown> = {}) => {
     license_id: 'MIT',
     deps: [],
     props_schema: { type: 'object', properties: { value: { type: 'number' } } },
-    variants: [{ id: 'light', label: 'Light' }, { id: 'dark', label: 'Dark' }],
+    variants: [
+      { id: 'light', label: 'Light' },
+      { id: 'dark', label: 'Dark' },
+    ],
     files: {
       'build.js': { path: 'build.js', sha256: sha256of('build'), size_bytes: 120 },
     },
@@ -112,7 +115,9 @@ describe('P06 component-package-v1.schema.json', () => {
 
   it('rejects a variant id with invalid characters', () => {
     const validate = compile(load('component-package-v1.schema.json'));
-    expect(validate(canonicalManifest({ variants: [{ id: 'Dark Mode', label: 'Dark' }] }))).toBe(false);
+    expect(validate(canonicalManifest({ variants: [{ id: 'Dark Mode', label: 'Dark' }] }))).toBe(
+      false,
+    );
   });
 
   it('rejects a dependency with a bad version range', () => {
@@ -150,7 +155,12 @@ describe('P06 marketplace-listing-v1.schema.json', () => {
 
   it('validates a paid published listing with price in integer cents', () => {
     const validate = compile(load('marketplace-listing-v1.schema.json'));
-    const paid = listing({ status: 'published', is_free: false, price_cents: 990, currency: 'USD' });
+    const paid = listing({
+      status: 'published',
+      is_free: false,
+      price_cents: 990,
+      currency: 'USD',
+    });
     expect(validate(paid), JSON.stringify(validate.errors)).toBe(true);
   });
 

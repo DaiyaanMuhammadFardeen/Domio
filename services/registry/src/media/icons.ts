@@ -92,7 +92,13 @@ function expandSynonyms(query: string): string[] {
  * character distribution of the path string itself to avoid needing
  * an SVG rasterizer.
  */
-function parsePathMetrics(pathData: string): { minX: number; minY: number; maxX: number; maxY: number; points: Array<{ x: number; y: number }> } {
+function parsePathMetrics(pathData: string): {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  points: Array<{ x: number; y: number }>;
+} {
   // Extract all numeric values from path data (M, L, C, Q, etc. commands)
   const nums = pathData.match(/-?\d+\.?\d*/g)?.map(Number) ?? [];
 
@@ -124,8 +130,8 @@ function parsePathMetrics(pathData: string): { minX: number; minY: number; maxX:
 
   for (let i = 0; i < pathData.length; i++) {
     const code = pathData.charCodeAt(i);
-    const px = minX + ((code * 7 + i * 13) % 1000) / 1000 * width;
-    const py = minY + ((code * 11 + i * 17) % 1000) / 1000 * height;
+    const px = minX + (((code * 7 + i * 13) % 1000) / 1000) * width;
+    const py = minY + (((code * 11 + i * 17) % 1000) / 1000) * height;
     points.push({ x: px, y: py });
   }
 
@@ -210,10 +216,7 @@ export interface IngestIconInput {
  * Ingest an icon into the catalog. Validates inputs, computes perceptual hash,
  * and stores via putIcon.
  */
-export async function ingestIcon(
-  deps: ServiceDeps,
-  input: IngestIconInput,
-): Promise<IconRecord> {
+export async function ingestIcon(deps: ServiceDeps, input: IngestIconInput): Promise<IconRecord> {
   const name = input.name.trim();
   if (!name) throw Errors.validation('Icon name is required');
   if (!input.pathData || !input.pathData.trim()) {
@@ -243,10 +246,7 @@ export async function ingestIcon(
 /**
  * Find icons similar to the given icon by perceptual hash.
  */
-export async function findSimilarIcons(
-  deps: ServiceDeps,
-  iconId: string,
-): Promise<IconRecord[]> {
+export async function findSimilarIcons(deps: ServiceDeps, iconId: string): Promise<IconRecord[]> {
   const icon = await deps.store.getIcon(iconId);
   if (!icon) throw Errors.notFound(`icon ${iconId}`);
   if (!icon.perceptualHash) return [];
@@ -277,9 +277,7 @@ export async function searchIcons(
   // Apply style filter if provided
   if (opts.styles && opts.styles.length > 0) {
     const styleSet = new Set(opts.styles.map((s) => s.toLowerCase()));
-    filtered = filtered.filter((icon) =>
-      icon.styles.some((s) => styleSet.has(s.toLowerCase())),
-    );
+    filtered = filtered.filter((icon) => icon.styles.some((s) => styleSet.has(s.toLowerCase())));
   }
 
   // Apply limit
@@ -299,10 +297,7 @@ export function recolorIcon(svgOrPath: string, color: string): string {
   let result = svgOrPath;
 
   // Replace fill="..." attributes
-  result = result.replace(
-    /fill\s*=\s*"(?:#[0-9a-fA-F]{3,8}|rgb\([^)]*\))"/g,
-    `fill="${color}"`,
-  );
+  result = result.replace(/fill\s*=\s*"(?:#[0-9a-fA-F]{3,8}|rgb\([^)]*\))"/g, `fill="${color}"`);
 
   // Replace stroke="..." attributes
   result = result.replace(
@@ -311,10 +306,7 @@ export function recolorIcon(svgOrPath: string, color: string): string {
   );
 
   // Replace fill='...' (single quotes)
-  result = result.replace(
-    /fill\s*=\s*'(?:#[0-9a-fA-F]{3,8}|rgb\([^)]*\))'/g,
-    `fill='${color}'`,
-  );
+  result = result.replace(/fill\s*=\s*'(?:#[0-9a-fA-F]{3,8}|rgb\([^)]*\))'/g, `fill='${color}'`);
 
   // Replace stroke='...' (single quotes)
   result = result.replace(

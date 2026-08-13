@@ -60,7 +60,8 @@ function buildSeed(): Provenance[] {
       id: 'prv-001',
       element_id: 'el-stat-mrr',
       source_system: 'Stripe',
-      query: 'SELECT sum(amount) FROM charges WHERE status = \'succeeded\' AND created >= now() - interval \'30 days\'',
+      query:
+        "SELECT sum(amount) FROM charges WHERE status = 'succeeded' AND created >= now() - interval '30 days'",
       owner: 'finance@growthco.com',
       last_verified_at_ms: now - 12 * 60 * 1000, // 12 min ago — fresh
       freshness: 'fresh',
@@ -69,7 +70,8 @@ function buildSeed(): Provenance[] {
       id: 'prv-002',
       element_id: 'el-stat-churn',
       source_system: 'Salesforce',
-      query: 'GET /services/data/v59.0/query?q=SELECT+Id,Status+FROM+Opportunity+WHERE+IsClosed=true',
+      query:
+        'GET /services/data/v59.0/query?q=SELECT+Id,Status+FROM+Opportunity+WHERE+IsClosed=true',
       owner: 'revops@growthco.com',
       last_verified_at_ms: now - 5 * HOUR, // 5h ago — stale
       freshness: 'stale',
@@ -78,7 +80,8 @@ function buildSeed(): Provenance[] {
       id: 'prv-003',
       element_id: 'el-chart-active-users',
       source_system: 'Internal DB',
-      query: 'SELECT date_trunc(\'day\', event_at) AS d, count(distinct user_id) FROM app_events WHERE event_at >= now() - interval \'14 days\' GROUP BY 1',
+      query:
+        "SELECT date_trunc('day', event_at) AS d, count(distinct user_id) FROM app_events WHERE event_at >= now() - interval '14 days' GROUP BY 1",
       owner: 'data-platform@growthco.com',
       last_verified_at_ms: now - 3 * DAY, // 3d ago — outdated
       freshness: 'outdated',
@@ -87,7 +90,8 @@ function buildSeed(): Provenance[] {
       id: 'prv-004',
       element_id: 'el-stat-arpu',
       source_system: 'Stripe',
-      query: 'SELECT avg(amount_cents)/100 AS arpu FROM invoices WHERE created >= now() - interval \'30 days\'',
+      query:
+        "SELECT avg(amount_cents)/100 AS arpu FROM invoices WHERE created >= now() - interval '30 days'",
       owner: 'finance@growthco.com',
       last_verified_at_ms: now - 30 * 60 * 1000, // 30 min ago — fresh
       freshness: 'fresh',
@@ -114,7 +118,8 @@ function buildSeed(): Provenance[] {
       id: 'prv-007',
       element_id: 'el-chart-funnel',
       source_system: 'Internal DB',
-      query: 'SELECT stage, count(*) FROM funnel_events WHERE created_at >= now() - interval \'7 days\' GROUP BY stage',
+      query:
+        "SELECT stage, count(*) FROM funnel_events WHERE created_at >= now() - interval '7 days' GROUP BY stage",
       owner: 'product@growthco.com',
       last_verified_at_ms: now - 2 * HOUR, // 2h ago — fresh
       freshness: 'fresh',
@@ -123,7 +128,8 @@ function buildSeed(): Provenance[] {
       id: 'prv-008',
       element_id: 'el-stat-trial-conv',
       source_system: 'BigQuery',
-      query: 'SELECT count(distinct user_id) / count(*) AS rate FROM `growthco.analytics.trial_events` WHERE event = \'converted\'',
+      query:
+        "SELECT count(distinct user_id) / count(*) AS rate FROM `growthco.analytics.trial_events` WHERE event = 'converted'",
       owner: 'data-platform@growthco.com',
       last_verified_at_ms: now - 10 * DAY, // 10d ago — outdated
       freshness: 'outdated',

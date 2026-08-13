@@ -10,17 +10,18 @@ submit.
 
 ## Audit checklist (read these files first)
 
-| File                                                        | Look for                                                |
-| ----------------------------------------------------------- | -------------------------------------------------------- |
-| `apps/magic-link-landing/src/app/page.tsx`                  | What does the form submit to?                            |
-| `apps/magic-link-landing/src/app/page.tsx`                  | Does it read `?token=…` from the URL?                    |
-| `apps/magic-link-landing/src/app/page.tsx`                  | Does it call `guests-service` `/v1/guests/redeem`?       |
-| `services/guests/src/server.ts`                             | Is `/v1/guests/redeem` implemented?                      |
-| `apps/api/src/routes/p18/guests.ts`                         | Does the gateway proxy to `guests-service`?              |
+| File                                       | Look for                                           |
+| ------------------------------------------ | -------------------------------------------------- |
+| `apps/magic-link-landing/src/app/page.tsx` | What does the form submit to?                      |
+| `apps/magic-link-landing/src/app/page.tsx` | Does it read `?token=…` from the URL?              |
+| `apps/magic-link-landing/src/app/page.tsx` | Does it call `guests-service` `/v1/guests/redeem`? |
+| `services/guests/src/server.ts`            | Is `/v1/guests/redeem` implemented?                |
+| `apps/api/src/routes/p18/guests.ts`        | Does the gateway proxy to `guests-service`?        |
 
 ## Likely outcome
 
 The 300 lines are probably a real implementation but it might:
+
 - Use a placeholder submit handler
 - Call `apps/api` with a wrong path
 - Render the deck only after redeem succeeds but never confirm
@@ -30,6 +31,7 @@ The 300 lines are probably a real implementation but it might:
 ### `apps/magic-link-landing/src/app/page.tsx`
 
 Wire the form so:
+
 1. It reads `?token=…` from the URL (or a path segment `/m/[token]`).
 2. It auto-redeems on mount if the token is present.
 3. It POSTs `/v1/guests/redeem` to `apps/api` → proxies to `guests-service`.

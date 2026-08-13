@@ -20,7 +20,10 @@ export interface AuditRecorder {
 export class InMemoryAuditRecorder implements AuditRecorder {
   private events: AuditFontEvent[] = [];
   private counter = 0;
-  constructor(_idGen: () => string, private readonly clock: () => Date = () => new Date()) {}
+  constructor(
+    _idGen: () => string,
+    private readonly clock: () => Date = () => new Date(),
+  ) {}
   async record(event: Omit<AuditFontEvent, 'eventId' | 'createdAt'>): Promise<void> {
     this.counter++;
     const pad = (n: number) => n.toString().padStart(4, '0');

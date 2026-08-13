@@ -87,11 +87,7 @@ export class DocumentLoader {
     return this.migrator.apply(raw.document);
   }
 
-  async save(
-    deckId: ULID,
-    document: DeckDocument,
-    expectedRevision: number,
-  ): Promise<SaveResult> {
+  async save(deckId: ULID, document: DeckDocument, expectedRevision: number): Promise<SaveResult> {
     if (document.id !== deckId) {
       throw new DocumentLoaderError(
         'INVALID_SCHEMA',
@@ -114,11 +110,9 @@ export class DocumentLoader {
     }
     const result: SchemaValidateResult = validate(document);
     if (!result.valid) {
-      throw new DocumentLoaderError(
-        'INVALID_SCHEMA',
-        'Document failed structural validation.',
-        { errors: result.errors },
-      );
+      throw new DocumentLoaderError('INVALID_SCHEMA', 'Document failed structural validation.', {
+        errors: result.errors,
+      });
     }
     const persisted = await this.repository.insertRevision(
       deckId,

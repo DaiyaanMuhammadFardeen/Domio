@@ -17,8 +17,7 @@
  *   GET    /v1/marketplace/reviews/:listingId listReviews
  */
 
-import type {
-  MarketplacePreviewService} from './service.js';
+import type { MarketplacePreviewService } from './service.js';
 import {
   type AddReviewInput,
   type CreateListingInput,
@@ -66,8 +65,12 @@ export interface MarketplaceHandlerContext {
 // Response helpers
 // ---------------------------------------------------------------------------
 
-function ok<T>(body: T): HttpResponse { return { status: 200, body }; }
-function created<T>(body: T): HttpResponse { return { status: 201, body }; }
+function ok<T>(body: T): HttpResponse {
+  return { status: 200, body };
+}
+function created<T>(body: T): HttpResponse {
+  return { status: 201, body };
+}
 function badRequest(message: string, code: string, extra?: Record<string, unknown>): HttpResponse {
   return { status: 400, body: { error: message, code, ...(extra ?? {}) } };
 }
@@ -109,7 +112,8 @@ export async function createListingHandler(
     });
     return created(listing);
   } catch (e) {
-    if (e instanceof ListingValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof ListingValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     throw e;
   }
 }
@@ -158,7 +162,8 @@ export async function updateListingHandler(
     return ok(listing);
   } catch (e) {
     if (e instanceof ListingNotFoundError) return notFound(e.message, e.code);
-    if (e instanceof ListingValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof ListingValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     throw e;
   }
 }
@@ -183,7 +188,8 @@ export async function publishListingHandler(
     return ok(listing);
   } catch (e) {
     if (e instanceof ListingNotFoundError) return notFound(e.message, e.code);
-    if (e instanceof ListingValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof ListingValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     throw e;
   }
 }
@@ -264,7 +270,10 @@ export async function setFeaturedHandler(
 // ---------------------------------------------------------------------------
 
 export async function installThemeHandler(
-  req: HttpRequest<unknown, Omit<InstallThemeInput, 'installedBy' | 'isAdmin'> & { installedBy?: string; isAdmin?: boolean }>,
+  req: HttpRequest<
+    unknown,
+    Omit<InstallThemeInput, 'installedBy' | 'isAdmin'> & { installedBy?: string; isAdmin?: boolean }
+  >,
   ctx: MarketplaceHandlerContext,
 ): Promise<HttpResponse> {
   const actorId = req.body.installedBy ?? ctx.resolveActorId?.(req);
@@ -296,7 +305,8 @@ export async function installThemeHandler(
   } catch (e) {
     ctx.metrics?.recordInstallRejected();
     if (e instanceof ListingNotFoundError) return notFound(e.message, e.code);
-    if (e instanceof ListingValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof ListingValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     if (e instanceof ContentHashMismatchError) {
       return conflict(e.message, e.code, { expected: e.expected, actual: e.actual });
     }
@@ -338,7 +348,8 @@ export async function addReviewHandler(
     return created(review);
   } catch (e) {
     if (e instanceof ListingNotFoundError) return notFound(e.message, e.code);
-    if (e instanceof ListingValidationError) return badRequest(e.message, e.code, { issues: e.issues });
+    if (e instanceof ListingValidationError)
+      return badRequest(e.message, e.code, { issues: e.issues });
     throw e;
   }
 }

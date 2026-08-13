@@ -92,11 +92,9 @@ export function SummaryGenerator({
       )}
 
       {!response && !error && (
-        <p
-          className="text-xs text-slate-500"
-          data-testid={`${dataTestId}-empty`}
-        >
-          Click <strong className="text-slate-300">Generate</strong> for a 1-pager TL;DR and an executive-summary slide.
+        <p className="text-xs text-slate-500" data-testid={`${dataTestId}-empty`}>
+          Click <strong className="text-slate-300">Generate</strong> for a 1-pager TL;DR and an
+          executive-summary slide.
         </p>
       )}
 
@@ -125,17 +123,16 @@ export function SummaryGenerator({
             className="rounded-md border border-slate-700/60 bg-slate-800/40 p-3"
             data-testid={`${dataTestId}-slide`}
           >
-            <p className="text-[10px] uppercase tracking-wide text-slate-500">Executive summary slide</p>
+            <p className="text-[10px] uppercase tracking-wide text-slate-500">
+              Executive summary slide
+            </p>
             <p
               className="mt-1 text-base font-semibold text-slate-100"
               data-testid={`${dataTestId}-slide-title`}
             >
               {response.summary_slide.title}
             </p>
-            <p
-              className="mt-1 text-xs text-slate-400"
-              data-testid={`${dataTestId}-slide-body`}
-            >
+            <p className="mt-1 text-xs text-slate-400" data-testid={`${dataTestId}-slide-body`}>
               {response.summary_slide.body}
             </p>
             {response.summary_slide.bullets && response.summary_slide.bullets.length > 0 && (

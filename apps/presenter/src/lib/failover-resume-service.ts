@@ -25,10 +25,10 @@ export class FailoverService {
       },
     );
     if (!res.ok) {
-      const err: FailoverServiceError = Object.assign(
-        new Error(`HTTP ${res.status}`),
-        { status: res.status, name: 'FailoverServiceError' },
-      );
+      const err: FailoverServiceError = Object.assign(new Error(`HTTP ${res.status}`), {
+        status: res.status,
+        name: 'FailoverServiceError',
+      });
       throw err;
     }
   }

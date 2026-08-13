@@ -5,11 +5,7 @@
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
-import {
-  fetchKnowledgeGraph,
-  getGraph,
-  getEntityReferences,
-} from './knowledge-graph-service.js';
+import { fetchKnowledgeGraph, getGraph, getEntityReferences } from './knowledge-graph-service.js';
 
 const originalFetch = globalThis.fetch;
 
@@ -134,7 +130,11 @@ describe('knowledge-graph-service — Wave 11 entity graph', () => {
   it('returns deterministic seed references for known entities', async () => {
     const refs = await getEntityReferences('ent-orion');
     expect(refs.length).toBeGreaterThan(0);
-    expect(refs.every((r) => r.freshness === 'fresh' || r.freshness === 'stale' || r.freshness === 'outdated')).toBe(true);
+    expect(
+      refs.every(
+        (r) => r.freshness === 'fresh' || r.freshness === 'stale' || r.freshness === 'outdated',
+      ),
+    ).toBe(true);
     expect(refs.every((r) => typeof r.last_referenced_at_ms === 'number')).toBe(true);
   });
 

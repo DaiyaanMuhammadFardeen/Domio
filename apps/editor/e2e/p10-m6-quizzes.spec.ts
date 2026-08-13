@@ -32,7 +32,8 @@ test.describe('P10-M6.1 — Quizzes', () => {
     await page.click('[data-testid="m6-quiz-add-question"]');
     // The new question will get a fresh id we can't predict, so count the data-testid prefix.
     await page.waitForFunction(
-      (expected) => document.querySelectorAll('[data-testid^="m6-quiz-question-"]').length > expected,
+      (expected) =>
+        document.querySelectorAll('[data-testid^="m6-quiz-question-"]').length > expected,
       before,
     );
     const after = await page.locator('[data-testid^="m6-quiz-question-"]').count();

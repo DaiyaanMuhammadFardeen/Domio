@@ -86,7 +86,10 @@ export interface EncodeOptions {
 }
 
 export interface Encoder {
-  encodeVideo(frames: ExportFrame[], options: EncodeOptions): Promise<Uint8Array | { unsupported: true }>;
+  encodeVideo(
+    frames: ExportFrame[],
+    options: EncodeOptions,
+  ): Promise<Uint8Array | { unsupported: true }>;
 }
 
 // ---------------------------------------------------------------------------

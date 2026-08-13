@@ -8,9 +8,9 @@ Component / template / brand registry.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-registry` | availability | 99.9% | 30d |
+| SLO              | Kind         | Target | Window |
+| ---------------- | ------------ | ------ | ------ |
+| `avail-registry` | availability | 99.9%  | 30d    |
 
 ## Triage
 

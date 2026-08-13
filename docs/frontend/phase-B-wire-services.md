@@ -12,14 +12,14 @@ they just need stanzas in compose.
 
 ## Services to add
 
-| Service            | Internal port | Already in `services/`?  | Path                                  |
-| ------------------ | ------------- | ------------------------ | ------------------------------------- |
-| `crm-sync`         | 8095          | yes                      | `services/crm-sync/`                  |
-| `ab-assignment`    | 8090          | yes                      | `services/ab-assignment/`             |
-| `ab-measurement`   | 8091          | yes                      | `services/ab-measurement/`            |
-| `ab-statistics`    | 8092          | yes                      | `services/ab-statistics/`             |
-| `team-analytics`   | 8093          | yes                      | `services/team-analytics/`            |
-| `live-analytics`   | 8094          | yes                      | `services/live-analytics/`            |
+| Service          | Internal port | Already in `services/`? | Path                       |
+| ---------------- | ------------- | ----------------------- | -------------------------- |
+| `crm-sync`       | 8095          | yes                     | `services/crm-sync/`       |
+| `ab-assignment`  | 8090          | yes                     | `services/ab-assignment/`  |
+| `ab-measurement` | 8091          | yes                     | `services/ab-measurement/` |
+| `ab-statistics`  | 8092          | yes                     | `services/ab-statistics/`  |
+| `team-analytics` | 8093          | yes                     | `services/team-analytics/` |
+| `live-analytics` | 8094          | yes                     | `services/live-analytics/` |
 
 All six are HTTP / GraphQL services with the same `Node 22` + pnpm shape as
 `event-ingest` and `analytics-warehouse`. Mirror the existing stanza shape: an
@@ -33,30 +33,30 @@ needs.
 For each:
 
 ```yaml
-  <name>:
-    build:
-      context: .
-      dockerfile: services/<name>/Dockerfile
-    image: domio/<name>:dev
-    profiles: [full]
-    ports:
-      - "<external>:<internal>"
-    environment:
-      CLICKHOUSE_URL: http://clickhouse:8123
-      CLICKHOUSE_DB: domio
-      REDIS_URL: redis://redis:6379
-      NATS_URL: nats://nats:4222
-      PORT: "<internal>"
-    depends_on:
-      clickhouse:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "http://localhost:<internal>/v1/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
+<name>:
+  build:
+    context: .
+    dockerfile: services/<name>/Dockerfile
+  image: domio/<name>:dev
+  profiles: [full]
+  ports:
+    - '<external>:<internal>'
+  environment:
+    CLICKHOUSE_URL: http://clickhouse:8123
+    CLICKHOUSE_DB: domio
+    REDIS_URL: redis://redis:6379
+    NATS_URL: nats://nats:4222
+    PORT: '<internal>'
+  depends_on:
+    clickhouse:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  healthcheck:
+    test: ['CMD', 'wget', '-q', 'http://localhost:<internal>/v1/health']
+    interval: 10s
+    timeout: 3s
+    retries: 5
 ```
 
 Pick the exact env vars by reading each service's `src/config.ts` (or env
@@ -68,12 +68,12 @@ doesn't, leave it out.
 Add to the dashboard container's `environment` block:
 
 ```yaml
-      CRM_SYNC_URL: http://crm-sync:8095
-      AB_ASSIGNMENT_URL: http://ab-assignment:8090
-      AB_MEASUREMENT_URL: http://ab-measurement:8091
-      AB_STATISTICS_URL: http://ab-statistics:8092
-      TEAM_ANALYTICS_URL: http://team-analytics:8093
-      NEXT_PUBLIC_LIVE_HOST: ws://live-analytics:8094
+CRM_SYNC_URL: http://crm-sync:8095
+AB_ASSIGNMENT_URL: http://ab-assignment:8090
+AB_MEASUREMENT_URL: http://ab-measurement:8091
+AB_STATISTICS_URL: http://ab-statistics:8092
+TEAM_ANALYTICS_URL: http://team-analytics:8093
+NEXT_PUBLIC_LIVE_HOST: ws://live-analytics:8094
 ```
 
 ## Verification

@@ -22,7 +22,7 @@ export interface SupportMatrix {
 /** A successfully chosen encoder. */
 export interface EncoderChoice {
   readonly mimeType: string;
-  readonly container: "mp4" | "webm";
+  readonly container: 'mp4' | 'webm';
 }
 
 /** Returned when no codec is supported. */
@@ -33,10 +33,7 @@ export interface Unsupported {
 export type EncoderResult = EncoderChoice | Unsupported;
 
 /** Check if the browser supports a given MIME type string. */
-function mimeSupported(
-  support: SupportMatrix | undefined,
-  key: keyof SupportMatrix,
-): boolean {
+function mimeSupported(support: SupportMatrix | undefined, key: keyof SupportMatrix): boolean {
   return support?.[key] === true;
 }
 
@@ -45,14 +42,14 @@ function mimeSupported(
  */
 export function selectEncoder(support: SupportMatrix): EncoderResult {
   // Priority: h264 → vp9 → av1
-  if (mimeSupported(support, "h264")) {
-    return { mimeType: "video/mp4;codecs=h264", container: "mp4" };
+  if (mimeSupported(support, 'h264')) {
+    return { mimeType: 'video/mp4;codecs=h264', container: 'mp4' };
   }
-  if (mimeSupported(support, "vp9")) {
-    return { mimeType: "video/webm;codecs=vp9", container: "webm" };
+  if (mimeSupported(support, 'vp9')) {
+    return { mimeType: 'video/webm;codecs=vp9', container: 'webm' };
   }
-  if (mimeSupported(support, "av1")) {
-    return { mimeType: "video/webm;codecs=av1", container: "webm" };
+  if (mimeSupported(support, 'av1')) {
+    return { mimeType: 'video/webm;codecs=av1', container: 'webm' };
   }
   return { unsupported: true };
 }

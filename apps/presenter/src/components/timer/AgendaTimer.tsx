@@ -70,11 +70,7 @@ export function AgendaTimer({
   const handleVisibility = useCallback(
     (id: string, current: AgendaTimerData['visible_to']) => {
       const next: AgendaTimerData['visible_to'] =
-        current === 'presenter'
-          ? 'audience'
-          : current === 'audience'
-            ? 'both'
-            : 'presenter';
+        current === 'presenter' ? 'audience' : current === 'audience' ? 'both' : 'presenter';
       onVisibilityToggle?.(id, next);
     },
     [onVisibilityToggle],
@@ -96,17 +92,34 @@ export function AgendaTimer({
     >
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <strong style={{ fontSize: 12 }}>Agenda</strong>
-        <span style={{ fontSize: 10, color: 'var(--content-secondary)' }}>{agendaTimers.length} segments</span>
+        <span style={{ fontSize: 10, color: 'var(--content-secondary)' }}>
+          {agendaTimers.length} segments
+        </span>
       </header>
-      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <ul
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+        }}
+      >
         {agendaTimers.map((t) => {
           const alert = computeAlertLevel(t.remaining_ms, t.duration_ms);
-          const pct = t.duration_ms > 0
-            ? Math.min(100, Math.max(0, ((t.duration_ms - t.remaining_ms) / t.duration_ms) * 100))
-            : 0;
-          const isPrimary = primaryId === t.id || (primaryId === undefined && t.status === 'running');
+          const pct =
+            t.duration_ms > 0
+              ? Math.min(100, Math.max(0, ((t.duration_ms - t.remaining_ms) / t.duration_ms) * 100))
+              : 0;
+          const isPrimary =
+            primaryId === t.id || (primaryId === undefined && t.status === 'running');
           const barColor =
-            alert === 'hard' ? 'var(--danger)' : alert === 'soft' ? 'var(--warning)' : 'var(--success)';
+            alert === 'hard'
+              ? 'var(--danger)'
+              : alert === 'soft'
+                ? 'var(--warning)'
+                : 'var(--success)';
           return (
             <li
               key={t.id}
@@ -123,7 +136,9 @@ export function AgendaTimer({
                 gap: 4,
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
+              >
                 <button
                   type="button"
                   onClick={() => handlePick(t.id)}
@@ -145,7 +160,12 @@ export function AgendaTimer({
                   style={{
                     fontFamily: 'var(--font-mono)',
                     fontSize: 11,
-                    color: alert === 'hard' ? 'var(--danger)' : alert === 'soft' ? 'var(--warning)' : 'var(--content-secondary)',
+                    color:
+                      alert === 'hard'
+                        ? 'var(--danger)'
+                        : alert === 'soft'
+                          ? 'var(--warning)'
+                          : 'var(--content-secondary)',
                   }}
                 >
                   {formatMmSs(t.remaining_ms)}
@@ -170,7 +190,14 @@ export function AgendaTimer({
                   }}
                 />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--content-secondary)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 10,
+                  color: 'var(--content-secondary)',
+                }}
+              >
                 <span>{t.status}</span>
                 <button
                   type="button"

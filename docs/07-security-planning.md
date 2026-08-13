@@ -2,6 +2,7 @@
 
 > **Status:** Authoritative for threat model, controls, secure SDLC, and pen-test cadence. Bangladesh-specific overlays live in `11`; enterprise/SSO/SCIM/DLP details live in `enterprise-governance.md`.
 > **Assumptions:**
+>
 > - **Tenant isolation** is non-negotiable; cross-tenant operations require elevated roles and dual-control.
 > - **Defense in depth:** WAF, TLS 1.3, mTLS (SPIFFE) internal, Postgres RLS, capability-based plugin sandbox, audit-by-default.
 > - **Prompt injection** is a first-class threat; AI orchestration includes input filtering, output validation, and tool-call allowlists.
@@ -9,13 +10,13 @@
 > - **Secure by default:** MFA, passkeys, audit-on-privilege, content DLP pre-share are defaults; opt-out only where justified.
 > - **SBOM** generated and archived per release; AGPL avoidance per `11.7` of planning guide.
 > - **Pen test:** annual external + quarterly internal; bug bounty with 48h triage SLA for P0/P1.
-> **Owner:** Security lead.
-> **Last reviewed:** 2026-07-29.
+>   **Owner:** Security lead.
+>   **Last reviewed:** 2026-07-29.
 
 ---
 
 > **Purpose:** specify the threat model, controls, threat-to-control matrix, secure SDLC, and verification for the collaborative deck editor platform.
-> **Posture:** defense in depth, tenant isolation by default, prompt-injection awareness, and a secure-by-default config that is *opt-out* for high-trust enterprise cases.
+> **Posture:** defense in depth, tenant isolation by default, prompt-injection awareness, and a secure-by-default config that is _opt-out_ for high-trust enterprise cases.
 > **Cross-references:** `01` (personas), `02` (NFRs), `04` (architecture), `05` (RLS, PII), `06` (stack), `11` (legal), `12` (BD context).
 
 ---
@@ -39,116 +40,116 @@ We model threats per surface and across integrations. STRIDE = Spoofing, Tamperi
 
 ### 7.1.1 Identity & authentication
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| Credential stuffing | S | Attacker brute-forces passwords | MFA enforcement; passkeys; rate limit; breach-list checks |
-| Session theft | S/I | Cookie theft via XSS or malware | HttpOnly+Secure cookies; SameSite=Lax; CSP; passkeys |
-| IdP compromise | S/E | Attacker controls the SSO IdP | IdP-configured policies; admin MFA; break-glass accounts |
-| SCIM spoofing | S | Fake provisioning | SCIM token + IP allowlist; HMAC signing |
-| Session fixation | S | Attacker plants session | Rotate session id on auth |
+| Threat              | STRIDE | Description                     | Mitigation                                                |
+| ------------------- | ------ | ------------------------------- | --------------------------------------------------------- |
+| Credential stuffing | S      | Attacker brute-forces passwords | MFA enforcement; passkeys; rate limit; breach-list checks |
+| Session theft       | S/I    | Cookie theft via XSS or malware | HttpOnly+Secure cookies; SameSite=Lax; CSP; passkeys      |
+| IdP compromise      | S/E    | Attacker controls the SSO IdP   | IdP-configured policies; admin MFA; break-glass accounts  |
+| SCIM spoofing       | S      | Fake provisioning               | SCIM token + IP allowlist; HMAC signing                   |
+| Session fixation    | S      | Attacker plants session         | Rotate session id on auth                                 |
 
 ### 7.1.2 Collaboration & CRDT
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| CRDT flood | D | Malicious ops fill the log | per-deck rate; tenant quota; revoke write token |
-| CRDT injection | T/I | Malicious CRDT update causes UI or behavior change | schema validation of materialization; reject malformed ops |
-| Element-level tampering | T | Forged authority over another user's edit | per-element Lamport + signed actor IDs |
-| Forking bait | T | Forged branch with poisoned content | branch owner required; brand-locked content cannot be modified in branches |
-| Cursor tracking | I | Presence reveals user location/behavior | presence opt-out; ephemeral TTL; per-tenant disable |
-| Comment XSS | T/I | HTML in comments executes | Markdown only; sanitizer; CSP |
+| Threat                  | STRIDE | Description                                        | Mitigation                                                                 |
+| ----------------------- | ------ | -------------------------------------------------- | -------------------------------------------------------------------------- |
+| CRDT flood              | D      | Malicious ops fill the log                         | per-deck rate; tenant quota; revoke write token                            |
+| CRDT injection          | T/I    | Malicious CRDT update causes UI or behavior change | schema validation of materialization; reject malformed ops                 |
+| Element-level tampering | T      | Forged authority over another user's edit          | per-element Lamport + signed actor IDs                                     |
+| Forking bait            | T      | Forged branch with poisoned content                | branch owner required; brand-locked content cannot be modified in branches |
+| Cursor tracking         | I      | Presence reveals user location/behavior            | presence opt-out; ephemeral TTL; per-tenant disable                        |
+| Comment XSS             | T/I    | HTML in comments executes                          | Markdown only; sanitizer; CSP                                              |
 
 ### 7.1.3 Data sources & live data
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| Source credential leak | I | Raw creds exposed to clients | credentials in Vault; viewer never receives creds; signed snapshot URLs |
-| SSRF via connector | I | Server fetches attacker-chosen URLs | URL allowlist per source; outbound egress restricted; DNS pinning |
-| Data poisoning | T | Compromised source returns poisoned values | provenance chips; freshness thresholds; anomaly detection |
-| Connector overflow | D | Source overwhelms worker | per-source concurrency; queue caps |
-| Write-back abuse | T/I | Agent writes back to source (#48 extension) | agent scope requires explicit write grant; change log returned |
+| Threat                 | STRIDE | Description                                 | Mitigation                                                              |
+| ---------------------- | ------ | ------------------------------------------- | ----------------------------------------------------------------------- |
+| Source credential leak | I      | Raw creds exposed to clients                | credentials in Vault; viewer never receives creds; signed snapshot URLs |
+| SSRF via connector     | I      | Server fetches attacker-chosen URLs         | URL allowlist per source; outbound egress restricted; DNS pinning       |
+| Data poisoning         | T      | Compromised source returns poisoned values  | provenance chips; freshness thresholds; anomaly detection               |
+| Connector overflow     | D      | Source overwhelms worker                    | per-source concurrency; queue caps                                      |
+| Write-back abuse       | T/I    | Agent writes back to source (#48 extension) | agent scope requires explicit write grant; change log returned          |
 
 ### 7.1.4 AI & agentic surface
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| Prompt injection (docs) | T/I/E | Slide content or doc manipulates the AI | system-prompt separation; injection classifier; tool-call validation; no free-form tool use on untrusted input |
-| Prompt injection (data) | T/I | Chart data carries instructions | data rendered as values only; no instructions in tool args |
-| Tool abuse | E | Agent invokes unintended tools | tool allowlist per agent key; dry-run default; revocation |
-| MCP context leak | I | Tool call responses leak secrets | redactor; secret scan; per-tool DLP |
-| Cost amplification | D | Agent or user triggers huge model usage | per-tenant TPM; per-feature budget; abort on overshoot |
-| Hallucination-induced trust | T | AI-generated narrative treated as data | confidence flags (#238); human approval gate for high-stakes; provenance chips |
-| Voice/speech injection | T/I | Audio carries instructions | transcript treated as untrusted text |
+| Threat                      | STRIDE | Description                             | Mitigation                                                                                                     |
+| --------------------------- | ------ | --------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Prompt injection (docs)     | T/I/E  | Slide content or doc manipulates the AI | system-prompt separation; injection classifier; tool-call validation; no free-form tool use on untrusted input |
+| Prompt injection (data)     | T/I    | Chart data carries instructions         | data rendered as values only; no instructions in tool args                                                     |
+| Tool abuse                  | E      | Agent invokes unintended tools          | tool allowlist per agent key; dry-run default; revocation                                                      |
+| MCP context leak            | I      | Tool call responses leak secrets        | redactor; secret scan; per-tool DLP                                                                            |
+| Cost amplification          | D      | Agent or user triggers huge model usage | per-tenant TPM; per-feature budget; abort on overshoot                                                         |
+| Hallucination-induced trust | T      | AI-generated narrative treated as data  | confidence flags (#238); human approval gate for high-stakes; provenance chips                                 |
+| Voice/speech injection      | T/I    | Audio carries instructions              | transcript treated as untrusted text                                                                           |
 
 ### 7.1.5 Plugins, embeds, code blocks
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| Plugin escape | E | Plugin reads tokens or DOM outside sandbox | iframe sandbox + capability tokens + CSP; plugin manifest reviewed |
-| Code block escape | E | JS block accesses parent context | sandboxed iframe with strict CSP; no cookies/storage |
-| Iframe embedding abuse | I/T | Embed site hijacks layout | `sandbox="allow-scripts allow-same-origin"` disabled; auth passthrough only with explicit grant |
-| 3D model exploit | T/I | Malicious GLB triggers shader bug | asset scanned; glTF schema validated; sanitized at import |
-| Video exploit | T/D | Codec bug crashes player | strict mime; sandboxed video element; fall back to poster |
+| Threat                 | STRIDE | Description                                | Mitigation                                                                                      |
+| ---------------------- | ------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| Plugin escape          | E      | Plugin reads tokens or DOM outside sandbox | iframe sandbox + capability tokens + CSP; plugin manifest reviewed                              |
+| Code block escape      | E      | JS block accesses parent context           | sandboxed iframe with strict CSP; no cookies/storage                                            |
+| Iframe embedding abuse | I/T    | Embed site hijacks layout                  | `sandbox="allow-scripts allow-same-origin"` disabled; auth passthrough only with explicit grant |
+| 3D model exploit       | T/I    | Malicious GLB triggers shader bug          | asset scanned; glTF schema validated; sanitized at import                                       |
+| Video exploit          | T/D    | Codec bug crashes player                   | strict mime; sandboxed video element; fall back to poster                                       |
 
 ### 7.1.6 Sharing, publishing, viewer
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| Link guessing | I | Random slug guessed | high-entropy slugs; rate-limit; revoke on anomaly |
-| Token replay | S/I | Share token reused across sessions | per-session nonce; short-lived tokens |
-| Download bypass | I | Download restricted but printed/screenshot | DLP watermarking; per-viewer watermark; screenshot detection best-effort |
-| Custom domain takeover | S/E | Attacker proves control of domain | DNS-01 verification; CAA records; auto-revocation on lapse |
-| Embed-origin abuse | E | Embed origin reads share token | allowlist of origins; CORS locked |
+| Threat                 | STRIDE | Description                                | Mitigation                                                               |
+| ---------------------- | ------ | ------------------------------------------ | ------------------------------------------------------------------------ |
+| Link guessing          | I      | Random slug guessed                        | high-entropy slugs; rate-limit; revoke on anomaly                        |
+| Token replay           | S/I    | Share token reused across sessions         | per-session nonce; short-lived tokens                                    |
+| Download bypass        | I      | Download restricted but printed/screenshot | DLP watermarking; per-viewer watermark; screenshot detection best-effort |
+| Custom domain takeover | S/E    | Attacker proves control of domain          | DNS-01 verification; CAA records; auto-revocation on lapse               |
+| Embed-origin abuse     | E      | Embed origin reads share token             | allowlist of origins; CORS locked                                        |
 
 ### 7.1.7 Marketplace & payments
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| Listing poisoning | T | Malicious plugin/theme | static scan + sandboxed review; reputation; takedown |
-| Payout diversion | E | Attacker redirects creator payout | payout to verified accounts; multi-step approval; KYC |
-| License overclaim | I | Asset used without rights | license metadata required; enforcement via DMCA/equivalent flow |
-| Cart manipulation | T | Price changed client-side | server-side price; signed receipts |
+| Threat            | STRIDE | Description                       | Mitigation                                                      |
+| ----------------- | ------ | --------------------------------- | --------------------------------------------------------------- |
+| Listing poisoning | T      | Malicious plugin/theme            | static scan + sandboxed review; reputation; takedown            |
+| Payout diversion  | E      | Attacker redirects creator payout | payout to verified accounts; multi-step approval; KYC           |
+| License overclaim | I      | Asset used without rights         | license metadata required; enforcement via DMCA/equivalent flow |
+| Cart manipulation | T      | Price changed client-side         | server-side price; signed receipts                              |
 
 ### 7.1.8 Enterprise, audit, residency
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| Audit tampering | R/T | Audit log edited | append-only + WORM + signing |
-| Residency bypass | I | Data crosses residency boundary | tenant policy enforcement; signed cross-region transfer |
-| DLP bypass | I | Sensitive data leaks via export | DLP runs server-side before export; per-deck DLP rules |
-| Legal hold tampering | T | Hold deleted prematurely | hold blocks retention + delete; admin override logged |
+| Threat               | STRIDE | Description                     | Mitigation                                              |
+| -------------------- | ------ | ------------------------------- | ------------------------------------------------------- |
+| Audit tampering      | R/T    | Audit log edited                | append-only + WORM + signing                            |
+| Residency bypass     | I      | Data crosses residency boundary | tenant policy enforcement; signed cross-region transfer |
+| DLP bypass           | I      | Sensitive data leaks via export | DLP runs server-side before export; per-deck DLP rules  |
+| Legal hold tampering | T      | Hold deleted prematurely        | hold blocks retention + delete; admin override logged   |
 
 ### 7.1.9 Operational
 
-| Threat | STRIDE | Description | Mitigation |
-|---|---|---|---|
-| Supply chain | T/E | Malicious dep | SCA + SBOM + signed images; reproducible builds |
-| Misconfig | I/E | Storage bucket public | IaC guardrails; daily detection |
-| Insider threat | I/E | Privileged user abuses | least privilege; break-glass with dual-control; just-in-time elevation |
-| Backup theft | I | Backup misaccessed | encryption with separate KMS keys; immutable snapshots |
-| Token leak | I | Service token in CI | short-lived OIDC tokens; no static secrets in CI |
+| Threat         | STRIDE | Description            | Mitigation                                                             |
+| -------------- | ------ | ---------------------- | ---------------------------------------------------------------------- |
+| Supply chain   | T/E    | Malicious dep          | SCA + SBOM + signed images; reproducible builds                        |
+| Misconfig      | I/E    | Storage bucket public  | IaC guardrails; daily detection                                        |
+| Insider threat | I/E    | Privileged user abuses | least privilege; break-glass with dual-control; just-in-time elevation |
+| Backup theft   | I      | Backup misaccessed     | encryption with separate KMS keys; immutable snapshots                 |
+| Token leak     | I      | Service token in CI    | short-lived OIDC tokens; no static secrets in CI                       |
 
 ---
 
 ## 7.2 Threat-to-Control Matrix
 
-| Threat | Primary control | Secondary control | Detection |
-|---|---|---|---|
-| Credential stuffing | MFA + passkey + rate limit | breach check | anomaly detector |
-| Session theft | cookies + CSP | passkeys | per-session anomaly |
-| CRDT flood | per-deck rate | tenant quota | realtime spike alert |
-| CRDT injection | schema validation | reject + quarantine | crash rate alert |
-| SSRF | URL allowlist + egress filter | DNS pinning | egress log |
-| Data poisoning | provenance + freshness | anomaly | freshness alert |
-| Prompt injection (doc) | classifier + system-prompt separation | tool validation | LLM-call diff review |
-| Tool abuse | agent scope | dry-run default | agent audit |
-| Plugin escape | sandbox + capability tokens | manifest review | runtime violation alert |
-| Code block escape | iframe sandbox + CSP | no parent context | CSP report-uri |
-| Token replay | per-session nonce | token TTL | replay attempt log |
-| Audit tampering | append-only + WORM | signing | integrity check |
-| Residency bypass | tenant policy | signed transfer | cross-region log alert |
-| DLP bypass | server-side DLP | per-deck rules | blocked-export log |
-| Supply chain | SCA + SBOM + signed images | reproducible builds | dependency diff alert |
+| Threat                 | Primary control                       | Secondary control   | Detection               |
+| ---------------------- | ------------------------------------- | ------------------- | ----------------------- |
+| Credential stuffing    | MFA + passkey + rate limit            | breach check        | anomaly detector        |
+| Session theft          | cookies + CSP                         | passkeys            | per-session anomaly     |
+| CRDT flood             | per-deck rate                         | tenant quota        | realtime spike alert    |
+| CRDT injection         | schema validation                     | reject + quarantine | crash rate alert        |
+| SSRF                   | URL allowlist + egress filter         | DNS pinning         | egress log              |
+| Data poisoning         | provenance + freshness                | anomaly             | freshness alert         |
+| Prompt injection (doc) | classifier + system-prompt separation | tool validation     | LLM-call diff review    |
+| Tool abuse             | agent scope                           | dry-run default     | agent audit             |
+| Plugin escape          | sandbox + capability tokens           | manifest review     | runtime violation alert |
+| Code block escape      | iframe sandbox + CSP                  | no parent context   | CSP report-uri          |
+| Token replay           | per-session nonce                     | token TTL           | replay attempt log      |
+| Audit tampering        | append-only + WORM                    | signing             | integrity check         |
+| Residency bypass       | tenant policy                         | signed transfer     | cross-region log alert  |
+| DLP bypass             | server-side DLP                       | per-deck rules      | blocked-export log      |
+| Supply chain           | SCA + SBOM + signed images            | reproducible builds | dependency diff alert   |
 
 ---
 
@@ -204,17 +205,17 @@ We model threats per surface and across integrations. STRIDE = Spoofing, Tamperi
 
 ## 7.6 Rate Limiting & Abuse Prevention
 
-| Endpoint family | Limit (default) | Notes |
-|---|---|---|
-| Auth login | 5/min/IP, 20/hr/IP | account lockout after 10 failures |
-| OAuth callback | 30/min/IP | |
-| Editor commands | 600/min/key, 10/sec/burst | per-user, per-deck |
-| Data source queries | configurable per source | 429 + Retry-After |
-| AI calls | per-tenant TPM | burst 2x, then 429 |
-| MCP tool calls | per-agent key | soft and hard limits |
-| Webhook delivery | 100/min/webhook | per-target |
-| Public deck viewer | 600/min/IP | per-link |
-| Audience join | 10/min/IP | plus captcha on suspicion |
+| Endpoint family     | Limit (default)           | Notes                             |
+| ------------------- | ------------------------- | --------------------------------- |
+| Auth login          | 5/min/IP, 20/hr/IP        | account lockout after 10 failures |
+| OAuth callback      | 30/min/IP                 |                                   |
+| Editor commands     | 600/min/key, 10/sec/burst | per-user, per-deck                |
+| Data source queries | configurable per source   | 429 + Retry-After                 |
+| AI calls            | per-tenant TPM            | burst 2x, then 429                |
+| MCP tool calls      | per-agent key             | soft and hard limits              |
+| Webhook delivery    | 100/min/webhook           | per-target                        |
+| Public deck viewer  | 600/min/IP                | per-link                          |
+| Audience join       | 10/min/IP                 | plus captcha on suspicion         |
 
 Abuse signals: high velocity, low dwell time, suspicious UA, geo-anomaly. Captcha on suspicious flows.
 
@@ -343,19 +344,19 @@ Abuse signals: high velocity, low dwell time, suspicious UA, geo-anomaly. Captch
 
 ### 7.16.2 Verification (mapped to `09-testing-strategy.md`)
 
-| Control | Test type | Tooling |
-|---|---|---|
-| Auth | unit + integration | Vitest, Supertest |
-| Authz | contract | schema-driven |
-| SAST | static | CodeQL, Semgrep |
-| DAST | dynamic | OWASP ZAP |
-| SCA | dependency | Snyk, Trivy |
-| Pen test | manual + automated | external partner |
-| Fuzzing | fuzz | AFL + JS fuzzers |
-| CRDT resilience | property | fast-check |
-| Prompt injection | eval harness | custom |
-| Plugin escape | sandbox | e2e + manual |
-| Residency | policy | policy tests |
+| Control          | Test type          | Tooling           |
+| ---------------- | ------------------ | ----------------- |
+| Auth             | unit + integration | Vitest, Supertest |
+| Authz            | contract           | schema-driven     |
+| SAST             | static             | CodeQL, Semgrep   |
+| DAST             | dynamic            | OWASP ZAP         |
+| SCA              | dependency         | Snyk, Trivy       |
+| Pen test         | manual + automated | external partner  |
+| Fuzzing          | fuzz               | AFL + JS fuzzers  |
+| CRDT resilience  | property           | fast-check        |
+| Prompt injection | eval harness       | custom            |
+| Plugin escape    | sandbox            | e2e + manual      |
+| Residency        | policy             | policy tests      |
 
 ### 7.16.3 Beta-launch security gate (P20.5 subset)
 
@@ -373,7 +374,7 @@ Controls that **are not** in P20.5 (deferred to full P20) and therefore **not** 
 
 ### 7.16.4 Public-beta security gate (P22-beta subset)
 
-Public-beta (open sign-ups beyond the design-partner / closed-beta cohort) launches only after **P22-beta** (`phase-22-beta-hardening.md`) is green. P22-beta is the P21-independent subset of P22 that hardens the *existing* (non-frontier) surface for production scale. It includes the full P20 / P20.5 controls above plus:
+Public-beta (open sign-ups beyond the design-partner / closed-beta cohort) launches only after **P22-beta** (`phase-22-beta-hardening.md`) is green. P22-beta is the P21-independent subset of P22 that hardens the _existing_ (non-frontier) surface for production scale. It includes the full P20 / P20.5 controls above plus:
 
 - **External security review passed** (firm engaged in P22-beta-B; criticals / highs closed by P22-beta-D).
 - **Penetration test passed** (public API + MCP server + sharing endpoints; zero criticals / highs open).
@@ -391,27 +392,27 @@ P22-beta explicitly defers the P21-dependent security controls (biometric consen
 
 ## 7.17 Decisions Log
 
-| ID | Decision | Rationale | Alternative |
-|---|---|---|---|
-| D-SEC-01 | Passkeys + MFA by default | Defense in depth | Password-only — rejected |
-| D-SEC-02 | Per-tenant DEKs | Residency + isolation | Single key — rejected |
-| D-SEC-03 | Append-only audit with WORM | Immutability | Mutable — rejected |
-| D-SEC-04 | Server-side DLP | Cannot trust client | Client-side — rejected |
-| D-SEC-05 | Dry-run default for new MCP agents | Blast radius | Full power — rejected |
-| D-SEC-06 | iframe sandbox for embeds/code blocks | Strong isolation | Direct DOM access — rejected |
-| D-SEC-07 | Watermarking per-viewer | Trace leakage | Generic watermark — insufficient |
-| D-SEC-08 | mTLS for worker-to-DB | Internal trust | TLS only — insufficient |
+| ID       | Decision                              | Rationale             | Alternative                      |
+| -------- | ------------------------------------- | --------------------- | -------------------------------- |
+| D-SEC-01 | Passkeys + MFA by default             | Defense in depth      | Password-only — rejected         |
+| D-SEC-02 | Per-tenant DEKs                       | Residency + isolation | Single key — rejected            |
+| D-SEC-03 | Append-only audit with WORM           | Immutability          | Mutable — rejected               |
+| D-SEC-04 | Server-side DLP                       | Cannot trust client   | Client-side — rejected           |
+| D-SEC-05 | Dry-run default for new MCP agents    | Blast radius          | Full power — rejected            |
+| D-SEC-06 | iframe sandbox for embeds/code blocks | Strong isolation      | Direct DOM access — rejected     |
+| D-SEC-07 | Watermarking per-viewer               | Trace leakage         | Generic watermark — insufficient |
+| D-SEC-08 | mTLS for worker-to-DB                 | Internal trust        | TLS only — insufficient          |
 
 ---
 
 ## 7.18 Open Decisions
 
-| ID | Decision | Owner |
-|---|---|---|
-| OD-SEC-01 | Default-on MFA vs opt-in for non-enterprise users. | Security + Product |
-| OD-SEC-02 | Whether BI dashboard vendors (Looker, Tableau) require SSO passthrough or only signed URLs. | Enterprise |
-| OD-SEC-03 | Required re-key cadence for tenant DEKs (1y vs 3y). | Security |
-| OD-SEC-04 | Gaze-tracking / eye-tracking features (#207, #214): on-device-only by default? | Privacy + AI |
+| ID        | Decision                                                                                    | Owner              |
+| --------- | ------------------------------------------------------------------------------------------- | ------------------ |
+| OD-SEC-01 | Default-on MFA vs opt-in for non-enterprise users.                                          | Security + Product |
+| OD-SEC-02 | Whether BI dashboard vendors (Looker, Tableau) require SSO passthrough or only signed URLs. | Enterprise         |
+| OD-SEC-03 | Required re-key cadence for tenant DEKs (1y vs 3y).                                         | Security           |
+| OD-SEC-04 | Gaze-tracking / eye-tracking features (#207, #214): on-device-only by default?              | Privacy + AI       |
 
 ---
 

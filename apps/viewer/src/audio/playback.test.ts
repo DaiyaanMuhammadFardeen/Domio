@@ -15,8 +15,8 @@ const CONFIG: ViewerAudioConfig = {
   masterVolume: 0.9,
   tracks: [
     { id: 'music', kind: 'music', volume: 0.8, durationMs: 30_000, fadeInMs: 200, fadeOutMs: 500 },
-    { id: 'vo',    kind: 'voiceover', volume: 1.0, durationMs: 10_000, fadeOutMs: 100 },
-    { id: 'sfx',   kind: 'sfx', volume: 0.6, durationMs: 500 },
+    { id: 'vo', kind: 'voiceover', volume: 1.0, durationMs: 10_000, fadeOutMs: 100 },
+    { id: 'sfx', kind: 'sfx', volume: 0.6, durationMs: 500 },
   ],
 };
 
@@ -43,9 +43,7 @@ describe('createViewerAudioRuntime', () => {
     const rt = createViewerAudioRuntime();
     const state = rt.apply({
       ...CONFIG,
-      tracks: [
-        { id: 'm', kind: 'sfx', volume: 1, mute: true, durationMs: 100 },
-      ],
+      tracks: [{ id: 'm', kind: 'sfx', volume: 1, mute: true, durationMs: 100 }],
     });
     expect(rt.trackGain(state, 'm')).toBe(0);
     expect(rt.trackGain(state, 'unknown')).toBe(0);
@@ -56,8 +54,8 @@ describe('createViewerAudioRuntime', () => {
     const state = rt.apply({
       ...CONFIG,
       tracks: [
-        { id: 'left',  kind: 'music', volume: 1, pan: -2, durationMs: 100 },
-        { id: 'right', kind: 'music', volume: 1, pan:  2, durationMs: 100 },
+        { id: 'left', kind: 'music', volume: 1, pan: -2, durationMs: 100 },
+        { id: 'right', kind: 'music', volume: 1, pan: 2, durationMs: 100 },
       ],
     });
     expect(rt.trackPan(state, 'left')).toBe(-1);
@@ -67,7 +65,11 @@ describe('createViewerAudioRuntime', () => {
   it('fade envelope ramps correctly', () => {
     const rt = createViewerAudioRuntime();
     const cfg = fadeConfigFor({
-      id: 't', kind: 'music', durationMs: 1000, fadeInMs: 200, fadeOutMs: 200,
+      id: 't',
+      kind: 'music',
+      durationMs: 1000,
+      fadeInMs: 200,
+      fadeOutMs: 200,
     });
     expect(rt.fade(0, cfg)).toBe(0);
     expect(rt.fade(100, cfg)).toBeCloseTo(0.5, 5);
@@ -88,7 +90,11 @@ describe('createViewerAudioRuntime', () => {
   it('ducking multiplies fade gain for background tracks', () => {
     const rt = createViewerAudioRuntime();
     const fade = fadeConfigFor({
-      id: 'bg', kind: 'music', durationMs: 1000, fadeInMs: 0, fadeOutMs: 0,
+      id: 'bg',
+      kind: 'music',
+      durationMs: 1000,
+      fadeInMs: 0,
+      fadeOutMs: 0,
     });
     const duck = duckConfigFor(0.5, true);
     expect(rt.background(500, fade, duck, { voiceoverActive: false })).toBe(1);

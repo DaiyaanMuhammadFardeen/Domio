@@ -51,10 +51,7 @@ function classifyStatus(
   return 'active';
 }
 
-function toView(
-  grant: LicenseGrantView,
-  now: number,
-): LicenseGrantView {
+function toView(grant: LicenseGrantView, now: number): LicenseGrantView {
   return {
     ...grant,
     status: classifyStatus(grant.expiresAt, grant.revokedAt, now),
@@ -88,7 +85,9 @@ export function LicenseDashboard({
         setError(err instanceof Error ? err.message : String(err));
         setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [workspaceId, fetchGrants]);
 
   // Tick "now" once a minute so expiring counts update live.
@@ -119,7 +118,9 @@ export function LicenseDashboard({
   if (error) {
     return (
       <section data-testid="license-dashboard" className="license-dashboard">
-        <p data-testid="license-dashboard-error" role="alert">{error}</p>
+        <p data-testid="license-dashboard-error" role="alert">
+          {error}
+        </p>
       </section>
     );
   }
@@ -129,7 +130,8 @@ export function LicenseDashboard({
       <header className="license-dashboard__header">
         <h2>Licenses</h2>
         <p data-testid="license-dashboard-summary">
-          {summary.active} active · {summary.expiring} expiring · {summary.expired} expired · {summary.revoked} revoked
+          {summary.active} active · {summary.expiring} expiring · {summary.expired} expired ·{' '}
+          {summary.revoked} revoked
         </p>
       </header>
       <ul className="license-dashboard__list">

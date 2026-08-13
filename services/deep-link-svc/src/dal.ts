@@ -14,9 +14,7 @@ import {
   type DeepLinkSigningKey,
   type KeyRotationStore,
 } from '@domio/deep-link';
-import {
-  type ShortLinkStore,
-} from '@domio/deep-link/server';
+import { type ShortLinkStore } from '@domio/deep-link/server';
 
 // ── Repository interfaces ──────────────────────────────────────────────
 
@@ -33,7 +31,11 @@ export interface DeepLinkRepository extends ShortLinkStore {
 export interface DeepLinkKeyRepository extends KeyRotationStore {
   insert(record: DeepLinkSigningKey): Promise<void>;
   findActive(tenant_id: string, deck_id: string, now: number): Promise<DeepLinkSigningKey | null>;
-  findValid(tenant_id: string, deck_id: string, now: number): Promise<readonly DeepLinkSigningKey[]>;
+  findValid(
+    tenant_id: string,
+    deck_id: string,
+    now: number,
+  ): Promise<readonly DeepLinkSigningKey[]>;
   retireExpired(now: number): Promise<number>;
 }
 
@@ -53,7 +55,10 @@ export interface DeepLinkStats {
 
 export class NotFoundError extends Error {
   readonly code = 'NOT_FOUND' as const;
-  constructor(public readonly resource: string, public readonly id: string) {
+  constructor(
+    public readonly resource: string,
+    public readonly id: string,
+  ) {
     super(`${resource} ${id} not found`);
     this.name = 'NotFoundError';
   }
@@ -132,7 +137,11 @@ export class InMemoryDeepLinkKeyRepository implements DeepLinkKeyRepository {
     this.rows.push(record);
   }
 
-  async findActive(tenant_id: string, deck_id: string, now: number): Promise<DeepLinkSigningKey | null> {
+  async findActive(
+    tenant_id: string,
+    deck_id: string,
+    now: number,
+  ): Promise<DeepLinkSigningKey | null> {
     const candidates = this.rows
       .filter((k) => k.tenant_id === tenant_id && k.deck_id === deck_id)
       .filter((k) => k.not_before <= now && now <= k.not_after)
@@ -140,7 +149,11 @@ export class InMemoryDeepLinkKeyRepository implements DeepLinkKeyRepository {
     return candidates[0] ?? null;
   }
 
-  async findValid(tenant_id: string, deck_id: string, now: number): Promise<readonly DeepLinkSigningKey[]> {
+  async findValid(
+    tenant_id: string,
+    deck_id: string,
+    now: number,
+  ): Promise<readonly DeepLinkSigningKey[]> {
     return this.rows
       .filter((k) => k.tenant_id === tenant_id && k.deck_id === deck_id)
       .filter((k) => k.not_before <= now && now <= k.not_after + 7 * 24 * 60 * 60 * 1000);

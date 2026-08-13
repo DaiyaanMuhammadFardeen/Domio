@@ -45,9 +45,7 @@ function resolveHash(opts: QueryOptions): string | undefined {
 }
 
 /** Issue a POST to the dashboard GraphQL gateway. */
-export async function gqlRequest<T>(
-  opts: QueryOptions,
-): Promise<GqlResponse<T>> {
+export async function gqlRequest<T>(opts: QueryOptions): Promise<GqlResponse<T>> {
   const base = resolveBaseUrl(opts.baseUrl);
   const url = `${base}/api/graphql`;
   const hash = resolveHash(opts);

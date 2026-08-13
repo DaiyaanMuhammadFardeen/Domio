@@ -128,9 +128,7 @@ describe('useEditorShortcuts · dispatch', () => {
   it('skips keys when the focused element is editable', async () => {
     const undo = vi.fn();
     const bindings: EditorShortcutBindings = { undo };
-    renderHook(() =>
-      useEditorShortcuts({ bindings, skipEditable: true }),
-    );
+    renderHook(() => useEditorShortcuts({ bindings, skipEditable: true }));
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });

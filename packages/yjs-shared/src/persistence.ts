@@ -76,13 +76,8 @@ function fromBase64(b64: string): Uint8Array {
  * Throws a clear error if `globalThis.indexedDB` is unavailable (e.g. in
  * Node without a polyfill) — use the in-memory store for tests.
  */
-export function createIndexedDBStore(
-  dbName = 'domio/yjs',
-  storeName = 'updates',
-): KeyValueStore {
-  const idbFactory = (globalThis as Record<string, unknown>)['indexedDB'] as
-    | IDBFactory
-    | undefined;
+export function createIndexedDBStore(dbName = 'domio/yjs', storeName = 'updates'): KeyValueStore {
+  const idbFactory = (globalThis as Record<string, unknown>)['indexedDB'] as IDBFactory | undefined;
   if (!idbFactory) {
     throw new Error(
       'createIndexedDBStore: globalThis.indexedDB is not available. ' +
@@ -114,7 +109,10 @@ export function createIndexedDBStore(
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
       tx.oncomplete = () => db.close();
-      tx.onerror = () => { db.close(); reject(tx.error); };
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
     });
   }
 
@@ -213,9 +211,7 @@ export class PersistenceProvider {
       }
     }
 
-    const nextIdx = envelopes.length > 0
-      ? (envelopes[envelopes.length - 1]!.idx + 1)
-      : 0;
+    const nextIdx = envelopes.length > 0 ? envelopes[envelopes.length - 1]!.idx + 1 : 0;
 
     envelopes.push({ kind: 'chunk', idx: nextIdx, data: toBase64(update) });
 

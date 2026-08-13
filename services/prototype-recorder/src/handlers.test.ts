@@ -13,9 +13,7 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { HttpRequest } from './handlers.js';
 import { handlers } from './handlers.js';
-import {
-  PrototypeRecorderService,
-} from './service.js';
+import { PrototypeRecorderService } from './service.js';
 import {
   IntegrityChain,
   GENESIS_HASH,
@@ -34,11 +32,7 @@ import {
   InMemoryIntegrityChainRepository,
 } from './dal.js';
 import type { IntegrityKey } from './types.js';
-import {
-  PrototypeRecorderMetrics,
-  P10_M5_METRICS,
-  hmacFailureTrip,
-} from './metrics.js';
+import { PrototypeRecorderMetrics, P10_M5_METRICS, hmacFailureTrip } from './metrics.js';
 
 const TENANT = 'tenant-1';
 const DECK = '01H000000000000000000000D1';
@@ -54,9 +48,16 @@ function eventIdGen(): string {
   return `pe-${idCounter.toString().padStart(22, '0')}`;
 }
 
-function newKey(tenantId: string, deckId: string, kidSuffix: string, rotatedAt: number): IntegrityKey {
+function newKey(
+  tenantId: string,
+  deckId: string,
+  kidSuffix: string,
+  rotatedAt: number,
+): IntegrityKey {
   // Deterministic key for tests.
-  const seed = `${tenantId}-${deckId}-${kidSuffix}`.padEnd(HMAC_KEY_BYTES * 2, 'a').slice(0, HMAC_KEY_BYTES * 2);
+  const seed = `${tenantId}-${deckId}-${kidSuffix}`
+    .padEnd(HMAC_KEY_BYTES * 2, 'a')
+    .slice(0, HMAC_KEY_BYTES * 2);
   return {
     id: `ik-${kidSuffix}`,
     tenantId,
@@ -69,7 +70,11 @@ function newKey(tenantId: string, deckId: string, kidSuffix: string, rotatedAt: 
   };
 }
 
-function makeService(opts?: { regionPinned?: boolean; clock?: () => number; preKeys?: IntegrityKey[] }): {
+function makeService(opts?: {
+  regionPinned?: boolean;
+  clock?: () => number;
+  preKeys?: IntegrityKey[];
+}): {
   service: PrototypeRecorderService;
   metrics: PrototypeRecorderMetrics;
   events: InMemoryPrototypeEventRepository;
@@ -81,7 +86,11 @@ function makeService(opts?: { regionPinned?: boolean; clock?: () => number; preK
   const metrics = new PrototypeRecorderMetrics();
   const clock = opts?.clock ?? (() => FIXED_TIME);
   const service = new PrototypeRecorderService({
-    sessions, events, keys, clock, idGenerator: idGen,
+    sessions,
+    events,
+    keys,
+    clock,
+    idGenerator: idGen,
   });
   // Optionally seed keys
   if (opts?.preKeys) {
@@ -112,9 +121,13 @@ describe('IntegrityChain', () => {
     const key = newKey(TENANT, DECK, 'k1', FIXED_TIME);
     const chain = new IntegrityChain({ keys: [key], clock: () => FIXED_TIME });
     const ev = chain.buildEvent({
-      tenantId: TENANT, deckId: DECK, sessionId: 'sess-1',
-      eventType: 'slide_enter', payload: { slide: 's1' },
-      clientFingerprint: 'fp', region: 'us-east',
+      tenantId: TENANT,
+      deckId: DECK,
+      sessionId: 'sess-1',
+      eventType: 'slide_enter',
+      payload: { slide: 's1' },
+      clientFingerprint: 'fp',
+      region: 'us-east',
     });
     const verified = chain.verify({ event: { ...ev } });
     expect(verified.verified).toBe(true);
@@ -124,9 +137,13 @@ describe('IntegrityChain', () => {
     const key = newKey(TENANT, DECK, 'k1', FIXED_TIME);
     const chain = new IntegrityChain({ keys: [key], clock: () => FIXED_TIME });
     const ev = chain.buildEvent({
-      tenantId: TENANT, deckId: DECK, sessionId: 'sess-1',
-      eventType: 'slide_enter', payload: { slide: 's1' },
-      clientFingerprint: 'fp', region: 'us-east',
+      tenantId: TENANT,
+      deckId: DECK,
+      sessionId: 'sess-1',
+      eventType: 'slide_enter',
+      payload: { slide: 's1' },
+      clientFingerprint: 'fp',
+      region: 'us-east',
     });
     const tampered = { ...ev, payload: { slide: 's2' } };
     expect(() => chain.verify({ event: tampered })).toThrow(HmacVerificationError);
@@ -136,15 +153,23 @@ describe('IntegrityChain', () => {
     const key = newKey(TENANT, DECK, 'k1', FIXED_TIME);
     const chain = new IntegrityChain({ keys: [key], clock: () => FIXED_TIME });
     const e1 = chain.buildEvent({
-      tenantId: TENANT, deckId: DECK, sessionId: 'sess-1',
-      eventType: 'slide_enter', payload: { slide: 's1' },
-      clientFingerprint: 'fp', region: 'us-east',
+      tenantId: TENANT,
+      deckId: DECK,
+      sessionId: 'sess-1',
+      eventType: 'slide_enter',
+      payload: { slide: 's1' },
+      clientFingerprint: 'fp',
+      region: 'us-east',
     });
     chain.commit(e1);
     const e2 = chain.buildEvent({
-      tenantId: TENANT, deckId: DECK, sessionId: 'sess-1',
-      eventType: 'slide_enter', payload: { slide: 's2' },
-      clientFingerprint: 'fp', region: 'us-east',
+      tenantId: TENANT,
+      deckId: DECK,
+      sessionId: 'sess-1',
+      eventType: 'slide_enter',
+      payload: { slide: 's2' },
+      clientFingerprint: 'fp',
+      region: 'us-east',
     });
     chain.commit(e2);
 
@@ -156,7 +181,12 @@ describe('IntegrityChain', () => {
   it('rotates keys with 7-day overlap window', () => {
     const k1 = newKey(TENANT, DECK, 'k1', FIXED_TIME);
     const chain = new IntegrityChain({ keys: [k1], clock: () => FIXED_TIME });
-    const k2 = chain.rotateKey({ tenantId: TENANT, deckId: DECK, kid: 'k2', now: FIXED_TIME + 24 * 60 * 60 * 1000 });
+    const k2 = chain.rotateKey({
+      tenantId: TENANT,
+      deckId: DECK,
+      kid: 'k2',
+      now: FIXED_TIME + 24 * 60 * 60 * 1000,
+    });
     expect(k2.overlapUntil - k2.rotatedAt).toBe(ROTATION_OVERLAP_MS);
     expect(k2.kid).toBe('k2');
     // Both keys are still accept-verifying during overlap.
@@ -212,7 +242,9 @@ describe('PrototypeRecorderService', () => {
 
   it('starts a session and stamps consent + region', async () => {
     const s = await svc.startSession(TENANT, {
-      deckId: DECK, consent: 'opt_in', region: 'us-east',
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
     });
     expect(s.tenantId).toBe(TENANT);
     expect(s.consent).toBe('opt_in');
@@ -225,9 +257,15 @@ describe('PrototypeRecorderService', () => {
   });
 
   it('reuses the rejoined session when the token matches', async () => {
-    const first = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const first = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     const second = await svc.startSession(TENANT, {
-      deckId: DECK, consent: 'opt_in', region: 'us-east',
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
       rejoinSessionToken: first.sessionToken,
     });
     expect(second.id).toBe(first.id);
@@ -235,18 +273,27 @@ describe('PrototypeRecorderService', () => {
 
   it('refuses a rejoined session whose region pin mismatches', async () => {
     const first = await svc.startSession(TENANT, {
-      deckId: DECK, consent: 'opt_in', region: 'eu-central', regionPinned: true,
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'eu-central',
+      regionPinned: true,
     });
     await expect(
       svc.startSession(TENANT, {
-        deckId: DECK, consent: 'opt_in', region: 'us-east',
+        deckId: DECK,
+        consent: 'opt_in',
+        region: 'us-east',
         rejoinSessionToken: first.sessionToken,
       }),
     ).rejects.toThrow(RegionMismatchError);
   });
 
   it('ingests a single event and advances lastSeq', async () => {
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     const ev = await svc.ingestEvent(TENANT, {
       sessionId: s.id,
       eventType: 'slide_enter',
@@ -261,7 +308,11 @@ describe('PrototypeRecorderService', () => {
   });
 
   it('ingests a batch of 50 events with monotonic seq', async () => {
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     const events = Array.from({ length: 50 }, (_, i) => ({
       sessionId: s.id,
       eventType: 'click' as const,
@@ -274,7 +325,11 @@ describe('PrototypeRecorderService', () => {
   });
 
   it('verifies a client-supplied signed event', async () => {
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     const sessionToken = s.sessionToken;
     void sessionToken;
     // Read active key from the service by injecting one.
@@ -284,13 +339,20 @@ describe('PrototypeRecorderService', () => {
     // Build a signed event by hand using the same formula.
     const clientChain = new IntegrityChain({ keys: keys, clock: () => FIXED_TIME });
     const ev = clientChain.buildEvent({
-      tenantId: TENANT, deckId: DECK, sessionId: s.id,
-      eventType: 'click', payload: { x: 1, y: 2 },
-      clientFingerprint: 'fp', region: 'us-east',
+      tenantId: TENANT,
+      deckId: DECK,
+      sessionId: s.id,
+      eventType: 'click',
+      payload: { x: 1, y: 2 },
+      clientFingerprint: 'fp',
+      region: 'us-east',
     });
 
     await svc.ingestEvent(TENANT, {
-      sessionId: s.id, eventType: 'click', payload: {}, clientFingerprint: 'fp',
+      sessionId: s.id,
+      eventType: 'click',
+      payload: {},
+      clientFingerprint: 'fp',
       signedEvent: { ...ev },
     });
     const list = await svc.listEventsForSession(TENANT, s.id);
@@ -298,18 +360,29 @@ describe('PrototypeRecorderService', () => {
   });
 
   it('rejects a tampered signed event', async () => {
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     const keys = (svc as unknown as { chain: IntegrityChain }).chain.listKeys();
     const clientChain = new IntegrityChain({ keys, clock: () => FIXED_TIME });
     const ev = clientChain.buildEvent({
-      tenantId: TENANT, deckId: DECK, sessionId: s.id,
-      eventType: 'click', payload: { x: 1 },
-      clientFingerprint: 'fp', region: 'us-east',
+      tenantId: TENANT,
+      deckId: DECK,
+      sessionId: s.id,
+      eventType: 'click',
+      payload: { x: 1 },
+      clientFingerprint: 'fp',
+      region: 'us-east',
     });
     const tampered = { ...ev, payload: { x: 99 } };
     await expect(
       svc.ingestEvent(TENANT, {
-        sessionId: s.id, eventType: 'click', payload: {}, clientFingerprint: 'fp',
+        sessionId: s.id,
+        eventType: 'click',
+        payload: {},
+        clientFingerprint: 'fp',
         signedEvent: tampered,
       }),
     ).rejects.toThrow();
@@ -332,9 +405,16 @@ describe('PrototypeRecorderService', () => {
   });
 
   it('hard-deletes a session + cascades to its events (DSR)', async () => {
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     await svc.ingestEvent(TENANT, {
-      sessionId: s.id, eventType: 'click', payload: {}, clientFingerprint: 'fp',
+      sessionId: s.id,
+      eventType: 'click',
+      payload: {},
+      clientFingerprint: 'fp',
     });
     const { deletedEvents } = await svc.deleteSession(TENANT, s.id);
     expect(deletedEvents).toBe(1);
@@ -344,20 +424,32 @@ describe('PrototypeRecorderService', () => {
   it('deletes sessions older than a cutoff (DSR bulk)', async () => {
     let now = FIXED_TIME;
     ({ service: svc, metrics, events } = makeService({ clock: () => now }));
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     now += 1000;
     const subjectSessions = await svc.listMySessions(TENANT, s.subjectId ?? '');
     void subjectSessions;
     // Need to inject a subjectId to make listMySessions useful.
     const manual: IntegrityKey = {
-      id: 'ik-1', tenantId: TENANT, deckId: DECK, kid: 'k1',
-      keyHex: 'a'.repeat(64), rotatedAt: now,
-      expiresAt: now + KEY_HARD_EXPIRY_MS, overlapUntil: now + ROTATION_OVERLAP_MS,
+      id: 'ik-1',
+      tenantId: TENANT,
+      deckId: DECK,
+      kid: 'k1',
+      keyHex: 'a'.repeat(64),
+      rotatedAt: now,
+      expiresAt: now + KEY_HARD_EXPIRY_MS,
+      overlapUntil: now + ROTATION_OVERLAP_MS,
     };
     void manual;
     // Run retention at a future time well past expiresAt:
     await svc.ingestEvent(TENANT, {
-      sessionId: s.id, eventType: 'click', payload: {}, clientFingerprint: 'fp',
+      sessionId: s.id,
+      eventType: 'click',
+      payload: {},
+      clientFingerprint: 'fp',
     });
     const report = await svc.runRetention(now + 60 * 24 * 60 * 60 * 1000);
     expect(report.deletedSessions).toBeGreaterThanOrEqual(1);
@@ -372,7 +464,11 @@ describe('PrototypeRecorderService', () => {
   });
 
   it('benchmark: ingests 1000 events in under 5 seconds on the in-memory DAL', async () => {
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     const events = Array.from({ length: 1000 }, (_, i) => ({
       sessionId: s.id,
       eventType: 'click' as const,
@@ -390,7 +486,10 @@ describe('PrototypeRecorderService', () => {
   it('refuses to ingest when the session is missing', async () => {
     await expect(
       svc.ingestEvent(TENANT, {
-        sessionId: 'nonexistent', eventType: 'click', payload: {}, clientFingerprint: 'fp',
+        sessionId: 'nonexistent',
+        eventType: 'click',
+        payload: {},
+        clientFingerprint: 'fp',
       }),
     ).rejects.toThrow(NotFoundError);
   });
@@ -433,7 +532,13 @@ describe('PrototypeRecorderService HTTP handlers', () => {
 
   it('startSessionHandler returns 201 with the session', async () => {
     const res = await handlers.startSession(
-      req('POST', '/x', { tenantId: TENANT, deckId: DECK }, { consent: 'opt_in', region: 'us-east' }, {}),
+      req(
+        'POST',
+        '/x',
+        { tenantId: TENANT, deckId: DECK },
+        { consent: 'opt_in', region: 'us-east' },
+        {},
+      ),
       { service: svc, resolveSubjectId: ctxSubject } as never,
     );
     expect(res.status).toBe(201);
@@ -442,7 +547,13 @@ describe('PrototypeRecorderService HTTP handlers', () => {
 
   it('startSessionHandler rejects a bad body with 400', async () => {
     const res = await handlers.startSession(
-      req('POST', '/x', { tenantId: TENANT, deckId: DECK }, { consent: 'bad', region: 'us-east' }, {}),
+      req(
+        'POST',
+        '/x',
+        { tenantId: TENANT, deckId: DECK },
+        { consent: 'bad', region: 'us-east' },
+        {},
+      ),
       { service: svc } as never,
     );
     expect(res.status).toBe(400);
@@ -450,12 +561,21 @@ describe('PrototypeRecorderService HTTP handlers', () => {
   });
 
   it('ingestBatchHandler returns accepted count and events', async () => {
-    const session = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    const session = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     const res = await handlers.ingestBatch(
-      req('POST', '/x', { tenantId: TENANT }, {
-        sessionId: session.id,
-        events: [{ eventType: 'click', payload: { x: 1 }, clientFingerprint: 'fp' }],
-      }),
+      req(
+        'POST',
+        '/x',
+        { tenantId: TENANT },
+        {
+          sessionId: session.id,
+          events: [{ eventType: 'click', payload: { x: 1 }, clientFingerprint: 'fp' }],
+        },
+      ),
       { service: svc } as never,
     );
     expect(res.status).toBe(200);
@@ -518,7 +638,12 @@ describe('DSR handlers', () => {
   it('listMySessionsHandler returns 200 with subject attached to a session', async () => {
     const subjectId = 'subject-x';
     // create a session with explicit subject
-    await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east', subjectId });
+    await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+      subjectId,
+    });
     const res = await handlers_dsr_listMy(
       req('GET', '/x', undefined, undefined, { tenant_id: TENANT }),
       { service: svc, resolveSubjectId: () => subjectId } as never,
@@ -529,8 +654,17 @@ describe('DSR handlers', () => {
 
   it('deleteMySessionHandler returns 404 when the session does not belong to subject', async () => {
     const subjectId = 'subject-x';
-    await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east', subjectId });
-    const other = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east' });
+    await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+      subjectId,
+    });
+    const other = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+    });
     const res = await handlers_dsr_deleteMy(
       req('DELETE', '/x', { sessionId: other.id }, undefined, { tenant_id: TENANT }),
       { service: svc, resolveSubjectId: () => subjectId } as never,
@@ -540,7 +674,12 @@ describe('DSR handlers', () => {
 
   it('deleteMySessionHandler hard-deletes the owner session', async () => {
     const subjectId = 'subject-x';
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east', subjectId });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+      subjectId,
+    });
     const res = await handlers_dsr_deleteMy(
       req('DELETE', '/x', { sessionId: s.id }, undefined, { tenant_id: TENANT }),
       { service: svc, resolveSubjectId: () => subjectId } as never,
@@ -551,9 +690,17 @@ describe('DSR handlers', () => {
 
   it('bulk delete with ?before= removes only stale sessions', async () => {
     const subjectId = 'subject-x';
-    const s = await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east', subjectId });
+    const s = await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+      subjectId,
+    });
     const res = await handlers_dsr_bulk(
-      req('DELETE', '/x', undefined, undefined, { tenant_id: TENANT, before: String(FIXED_TIME + 365 * 24 * 60 * 60 * 1000) }),
+      req('DELETE', '/x', undefined, undefined, {
+        tenant_id: TENANT,
+        before: String(FIXED_TIME + 365 * 24 * 60 * 60 * 1000),
+      }),
       { service: svc, resolveSubjectId: () => subjectId } as never,
     );
     expect(res.status).toBe(200);
@@ -563,7 +710,12 @@ describe('DSR handlers', () => {
 
   it('bulk delete before= now removes nothing', async () => {
     const subjectId = 'subject-x';
-    await svc.startSession(TENANT, { deckId: DECK, consent: 'opt_in', region: 'us-east', subjectId });
+    await svc.startSession(TENANT, {
+      deckId: DECK,
+      consent: 'opt_in',
+      region: 'us-east',
+      subjectId,
+    });
     const res = await handlers_dsr_bulk(
       req('DELETE', '/x', undefined, undefined, { tenant_id: TENANT, before: '1' }),
       { service: svc, resolveSubjectId: () => subjectId } as never,

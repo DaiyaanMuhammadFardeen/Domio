@@ -84,9 +84,7 @@ export async function listQuestionPatterns(): Promise<QuestionPattern[]> {
  * Persist the supplied patterns. The entire list is replaced; missing
  * patterns are removed. Returns the newly stored list.
  */
-export async function saveQuestionPatterns(
-  next: QuestionPattern[],
-): Promise<QuestionPattern[]> {
+export async function saveQuestionPatterns(next: QuestionPattern[]): Promise<QuestionPattern[]> {
   patterns = next.map((p) => ({ ...p }));
   return patterns.map((p) => ({ ...p }));
 }
@@ -138,9 +136,7 @@ export async function recordMatchedQuestionForSession(
 /**
  * List all matches captured for the supplied session, in insertion order.
  */
-export async function listMatchedQuestions(
-  sessionId: string,
-): Promise<MatchedQuestion[]> {
+export async function listMatchedQuestions(sessionId: string): Promise<MatchedQuestion[]> {
   const list = matchesBySession.get(sessionId) ?? [];
   return list.map((m) => ({ ...m }));
 }
@@ -177,10 +173,7 @@ export function resetMatchedQuestions(): void {
  * substring match yields `pattern.relevance`, otherwise 0. Audio-based
  * scoring is owned by the runtime matcher (browser-side).
  */
-export function scoreMatch(
-  transcript: string,
-  pattern: QuestionPattern,
-): number {
+export function scoreMatch(transcript: string, pattern: QuestionPattern): number {
   if (!pattern.enabled) return 0;
   if (!transcript) return 0;
   const t = transcript.toLowerCase();

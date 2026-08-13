@@ -114,11 +114,17 @@ describe('PgGuestStore — nil pool', () => {
     await expect(store.createGuestAccess(ga)).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.createMagicLink(ml)).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.getGuestAccess('g')).rejects.toThrow(StoreNotConfiguredError);
-    await expect(store.getGuestAccessByEmail('deck', 'd', 'e')).rejects.toThrow(StoreNotConfiguredError);
+    await expect(store.getGuestAccessByEmail('deck', 'd', 'e')).rejects.toThrow(
+      StoreNotConfiguredError,
+    );
     await expect(store.getOpenMagicLinks('g')).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.getMagicLinkByHash('h')).rejects.toThrow(StoreNotConfiguredError);
-    await expect(store.markMagicLinkConsumed('m', new Date())).rejects.toThrow(StoreNotConfiguredError);
-    await expect(store.invalidateMagicLinks('g', new Date())).rejects.toThrow(StoreNotConfiguredError);
+    await expect(store.markMagicLinkConsumed('m', new Date())).rejects.toThrow(
+      StoreNotConfiguredError,
+    );
+    await expect(store.invalidateMagicLinks('g', new Date())).rejects.toThrow(
+      StoreNotConfiguredError,
+    );
     await expect(store.setGuestRevoked('g', new Date())).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.markGuestUser('g', 'u')).rejects.toThrow(StoreNotConfiguredError);
     await expect(store.withTransaction(async () => {})).rejects.toThrow(StoreNotConfiguredError);
@@ -268,8 +274,9 @@ describe('PgGuestStore — markMagicLinkConsumed', () => {
   it('throws GuestNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgGuestStore(pool as any);
-    await expect(store.markMagicLinkConsumed('nonexistent', new Date()))
-      .rejects.toThrow(GuestNotFoundError);
+    await expect(store.markMagicLinkConsumed('nonexistent', new Date())).rejects.toThrow(
+      GuestNotFoundError,
+    );
   });
 });
 
@@ -325,8 +332,9 @@ describe('PgGuestStore — setGuestRevoked', () => {
   it('throws GuestNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgGuestStore(pool as any);
-    await expect(store.setGuestRevoked('nonexistent', new Date()))
-      .rejects.toThrow(GuestNotFoundError);
+    await expect(store.setGuestRevoked('nonexistent', new Date())).rejects.toThrow(
+      GuestNotFoundError,
+    );
   });
 });
 
@@ -354,8 +362,9 @@ describe('PgGuestStore — markGuestUser', () => {
   it('throws GuestNotFoundError when not found', async () => {
     const pool = createFakePool(() => ({ rows: [], rowCount: 0 }));
     const store = new PgGuestStore(pool as any);
-    await expect(store.markGuestUser('nonexistent', 'user-001'))
-      .rejects.toThrow(GuestNotFoundError);
+    await expect(store.markGuestUser('nonexistent', 'user-001')).rejects.toThrow(
+      GuestNotFoundError,
+    );
   });
 });
 

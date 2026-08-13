@@ -76,9 +76,15 @@ describe('handoff_token: tampering + expiry', () => {
     const [payload, expires, hmac] = token.split('.') as [string, string, string];
     const flipped = payload.startsWith('A') ? `B${payload.slice(1)}` : `A${payload.slice(1)}`;
     const tampered = `${flipped}.${expires}.${hmac}`;
-    const result = verifyHandoverToken(tampered, KEY, BASE_CLAIMS.session_id, BASE_CLAIMS.to_actor, {
-      nowMs: 1_000_500,
-    });
+    const result = verifyHandoverToken(
+      tampered,
+      KEY,
+      BASE_CLAIMS.session_id,
+      BASE_CLAIMS.to_actor,
+      {
+        nowMs: 1_000_500,
+      },
+    );
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.code).toBe('BAD_SIGNATURE');
@@ -95,7 +101,12 @@ describe('handoff_token: tampering + expiry', () => {
   });
 
   it('rejects an entirely malformed envelope', () => {
-    const result = verifyHandoverToken('not-a-token', KEY, BASE_CLAIMS.session_id, BASE_CLAIMS.to_actor);
+    const result = verifyHandoverToken(
+      'not-a-token',
+      KEY,
+      BASE_CLAIMS.session_id,
+      BASE_CLAIMS.to_actor,
+    );
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.code).toBe('BAD_FORMAT');

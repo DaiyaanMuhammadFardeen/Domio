@@ -5,7 +5,13 @@
  * Used in unit tests and in dev when DATABASE_URL is unset.
  */
 
-import type { MergeRequest, SlideDiff, MergeRequestStatus, SlideDiffEntry, BindingDiffEntry } from '../types.js';
+import type {
+  MergeRequest,
+  SlideDiff,
+  MergeRequestStatus,
+  SlideDiffEntry,
+  BindingDiffEntry,
+} from '../types.js';
 import type { MergeRequestStore } from './store.js';
 
 export class InMemoryMergeRequestStore implements MergeRequestStore {

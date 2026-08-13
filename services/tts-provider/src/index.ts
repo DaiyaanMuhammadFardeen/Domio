@@ -35,7 +35,7 @@ export class StubTtsProvider implements TtsProvider {
       audio,
       language: req.language,
       provider: 'stub',
-      duration_ms: Math.round(audio.length / (req.sample_rate_hz ?? 16000) * 1000),
+      duration_ms: Math.round((audio.length / (req.sample_rate_hz ?? 16000)) * 1000),
     };
   }
 }

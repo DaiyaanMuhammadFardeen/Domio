@@ -21,7 +21,11 @@
 
 import type { LiveEvent, LivePulse } from '../types.js';
 
-export function derivePulse(workspace_id: string, session_id: string, events: LiveEvent[]): LivePulse {
+export function derivePulse(
+  workspace_id: string,
+  session_id: string,
+  events: LiveEvent[],
+): LivePulse {
   let concurrent = 0;
   let reactions = 0;
   let polls = 0;

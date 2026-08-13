@@ -7,7 +7,17 @@ import { createRef, type RefObject } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AutoFollowPresenter } from './AutoFollowPresenter';
 
-const RECT = { left: 0, top: 0, right: 100, bottom: 100, width: 100, height: 100, x: 0, y: 0, toJSON: () => '' };
+const RECT = {
+  left: 0,
+  top: 0,
+  right: 100,
+  bottom: 100,
+  width: 100,
+  height: 100,
+  x: 0,
+  y: 0,
+  toJSON: () => '',
+};
 
 function withRect(ref: RefObject<HTMLDivElement | null>): void {
   // Set the rect AFTER render, when ref.current is attached.
@@ -40,11 +50,7 @@ describe('AutoFollowPresenter', () => {
     render(
       <div>
         <div ref={ref}>slide</div>
-        <AutoFollowPresenter
-          targetRef={ref}
-          enabled={true}
-          onPointerMove={onPointerMove}
-        />
+        <AutoFollowPresenter targetRef={ref} enabled={true} onPointerMove={onPointerMove} />
       </div>,
     );
     withRect(ref);
@@ -55,7 +61,7 @@ describe('AutoFollowPresenter', () => {
     expect(Number(node.getAttribute('data-y'))).toBeCloseTo(0.8, 1);
   });
 
-it('clamps pointer values to 0..1', () => {
+  it('clamps pointer values to 0..1', () => {
     const ref = createRef<HTMLDivElement>();
     render(
       <div>

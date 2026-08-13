@@ -59,7 +59,11 @@ describe('webhooks/handlers', () => {
         callback_id: 'cb-1',
         action: {
           action_id: 'approve_btn',
-          value: JSON.stringify({ notificationId: 'n-1', action: 'approve', idempotencyKey: 'k-1' }),
+          value: JSON.stringify({
+            notificationId: 'n-1',
+            action: 'approve',
+            idempotencyKey: 'k-1',
+          }),
         },
       };
       const body = `payload=${encodeURIComponent(JSON.stringify(payload))}`;

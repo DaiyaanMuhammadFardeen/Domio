@@ -37,12 +37,7 @@ const TIERS: ReadonlyArray<PricingTier> = [
     tagline: 'For curious builders kicking the tyres.',
     monthly: 0,
     yearly: 0,
-    features: [
-      '3 decks',
-      '1 seat',
-      'Live presenter analytics (last 7 days)',
-      'Community support',
-    ],
+    features: ['3 decks', '1 seat', 'Live presenter analytics (last 7 days)', 'Community support'],
     cta: 'Start free',
     highlighted: false,
   },
@@ -88,8 +83,7 @@ const FAQ: ReadonlyArray<{ readonly question: string; readonly answer: string }>
   },
   {
     question: 'Do you offer a free trial of Pro?',
-    answer:
-      'Yes. Every workspace gets a 14-day Pro trial with no credit card required.',
+    answer: 'Yes. Every workspace gets a 14-day Pro trial with no credit card required.',
   },
   {
     question: 'How does annual billing work?',

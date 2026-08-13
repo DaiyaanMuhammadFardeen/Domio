@@ -26,22 +26,22 @@ much larger set of services that aren't yet in compose:
 Read each service's `src/server.ts` (or `src/index.ts`) to confirm its
 default port and env requirements. The table below is the starting point:
 
-| Service              | Default port | Notes                                         |
-| -------------------- | ------------ | --------------------------------------------- |
-| `marketplace`        | 8100         | needs Postgres for listings                   |
-| `creator-analytics`  | 8099         | needs ClickHouse                              |
-| `guests`             | 8098         | needs Postgres                                |
-| `library`            | 8101         | needs Postgres                                |
-| `suggestions`        | 8102         | needs Postgres                                |
-| `merge-requests`     | 8103         | needs Postgres                                |
-| `expiry`             | 8104         | needs Postgres                                |
-| `calendar`           | 8105         | needs Postgres                                |
-| `meeting-integration`| 8106         | needs Postgres                                |
-| `task-manager`       | 8107         | needs Postgres                                |
-| `participant-session`| 3011         | needs Redis + NATS                            |
-| `audience-service`   | 8097         | needs Redis                                   |
-| `embed-proxy`        | 8096         | stateless, just config                        |
-| `permission-engine`  | 8108         | needs Postgres                                |
+| Service               | Default port | Notes                       |
+| --------------------- | ------------ | --------------------------- |
+| `marketplace`         | 8100         | needs Postgres for listings |
+| `creator-analytics`   | 8099         | needs ClickHouse            |
+| `guests`              | 8098         | needs Postgres              |
+| `library`             | 8101         | needs Postgres              |
+| `suggestions`         | 8102         | needs Postgres              |
+| `merge-requests`      | 8103         | needs Postgres              |
+| `expiry`              | 8104         | needs Postgres              |
+| `calendar`            | 8105         | needs Postgres              |
+| `meeting-integration` | 8106         | needs Postgres              |
+| `task-manager`        | 8107         | needs Postgres              |
+| `participant-session` | 3011         | needs Redis + NATS          |
+| `audience-service`    | 8097         | needs Redis                 |
+| `embed-proxy`         | 8096         | stateless, just config      |
+| `permission-engine`   | 8108         | needs Postgres              |
 
 For Postgres-needing services, add a shared `domio-postgres` container
 (if not already in compose) or per-service schema migrations.
@@ -54,6 +54,7 @@ For Postgres-needing services, add a shared `domio-postgres` container
 ## Env wiring per app
 
 ### `admin-console`
+
 ```yaml
 environment:
   MARKETPLACE_URL: http://marketplace:8100
@@ -61,6 +62,7 @@ environment:
 ```
 
 ### `creator-console`
+
 ```yaml
 environment:
   MARKETPLACE_URL: http://marketplace:8100
@@ -69,6 +71,7 @@ environment:
 ```
 
 ### `marketplace-web`
+
 ```yaml
 environment:
   MARKETPLACE_URL: http://marketplace:8100
@@ -76,6 +79,7 @@ environment:
 ```
 
 ### `join-web`
+
 ```yaml
 environment:
   PARTICIPANT_SESSION_URL: ws://participant-session:3011
@@ -83,12 +87,14 @@ environment:
 ```
 
 ### `viewer`
+
 ```yaml
 environment:
   EMBED_PROXY_URL: http://embed-proxy:8096
 ```
 
 ### `magic-link-landing`
+
 ```yaml
 environment:
   GUESTS_URL: http://guests:8098
@@ -96,6 +102,7 @@ environment:
 ```
 
 ### `landing`
+
 None — landing is static.
 
 ## Verification

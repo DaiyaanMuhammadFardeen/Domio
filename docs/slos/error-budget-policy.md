@@ -20,12 +20,12 @@ The SRE Workbook recommends alerting on multiple burn-rate windows so
 that fast burns are caught quickly and slow burns are caught before the
 budget runs out. We adopt the following multi-window strategy:
 
-| Window | Burn-rate threshold | Page severity | Rationale |
-|---|---|---|---|
-| **1 h** | 14.4× | **page** (tier-1) / **ticket** (tier-2/3) | Catches catastrophic regressions within an hour. |
-| **6 h** | 6× | **page** (tier-1) / **ticket** (tier-2/3) | Catches fast sustained burns. |
-| **24 h** | 3× | **ticket** | Catches slow sustained burns. |
-| **72 h** | 1× | **ticket** | Catches "we will exhaust the budget in 30 days at this rate" trends. |
+| Window   | Burn-rate threshold | Page severity                             | Rationale                                                            |
+| -------- | ------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| **1 h**  | 14.4×               | **page** (tier-1) / **ticket** (tier-2/3) | Catches catastrophic regressions within an hour.                     |
+| **6 h**  | 6×                  | **page** (tier-1) / **ticket** (tier-2/3) | Catches fast sustained burns.                                        |
+| **24 h** | 3×                  | **ticket**                                | Catches slow sustained burns.                                        |
+| **72 h** | 1×                  | **ticket**                                | Catches "we will exhaust the budget in 30 days at this rate" trends. |
 
 **PagerDuty service routing:** the alert manager fires `page` severity
 directly; `ticket` severity opens a low-urgency PagerDuty ticket that
@@ -109,8 +109,8 @@ groups:
           slo: audience-availability
           tier: tier-1
         annotations:
-          summary: "audience burning budget at >14.4× over 1h"
-          runbook: "runbooks/audience/availability.md"
+          summary: 'audience burning budget at >14.4× over 1h'
+          runbook: 'runbooks/audience/availability.md'
 
       # 6h window, 6× burn → page tier-1
       - alert: SLOBurnMedT1Audience
@@ -126,8 +126,8 @@ groups:
           slo: audience-availability
           tier: tier-1
         annotations:
-          summary: "audience burning budget at >6× over 6h"
-          runbook: "runbooks/audience/availability.md"
+          summary: 'audience burning budget at >6× over 6h'
+          runbook: 'runbooks/audience/availability.md'
 
       # 24h window, 3× burn → ticket
       - alert: SLOBurnLowT1Audience
@@ -143,8 +143,8 @@ groups:
           slo: audience-availability
           tier: tier-1
         annotations:
-          summary: "audience burning budget at >3× over 24h"
-          runbook: "runbooks/audience/availability.md"
+          summary: 'audience burning budget at >3× over 24h'
+          runbook: 'runbooks/audience/availability.md'
 ```
 
 The full set of alert rules lives in `infra/prometheus/alerts/`,

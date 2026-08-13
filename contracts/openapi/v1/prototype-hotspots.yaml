@@ -17,13 +17,13 @@ paths:
       operationId: listHotspots
       summary: List hotspots for a deck
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
         - in: query
           name: slide_id
           schema: { type: string }
       responses:
-        "200":
+        '200':
           description: Hotspots in deterministic creation order.
           content:
             application/json:
@@ -33,82 +33,82 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/Hotspot" }
+                    items: { $ref: '#/components/schemas/Hotspot' }
     post:
       tags: [hotspots]
       operationId: createHotspot
       summary: Create a hotspot
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreateHotspotRequest" }
+            schema: { $ref: '#/components/schemas/CreateHotspotRequest' }
       responses:
-        "201":
+        '201':
           description: Hotspot created.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Hotspot" }
-        "422": { description: Geometry or target validation failed. }
+              schema: { $ref: '#/components/schemas/Hotspot' }
+        '422': { description: Geometry or target validation failed. }
   /v1/hotspots/{id}:
     get:
       tags: [hotspots]
       operationId: getHotspot
       summary: Get a hotspot
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Hotspot details.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Hotspot" }
-        "404": { description: Hotspot not found. }
+              schema: { $ref: '#/components/schemas/Hotspot' }
+        '404': { description: Hotspot not found. }
     patch:
       tags: [hotspots]
       operationId: patchHotspot
       summary: Update a hotspot using optimistic locking
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PatchHotspotRequest" }
+            schema: { $ref: '#/components/schemas/PatchHotspotRequest' }
       responses:
-        "200":
+        '200':
           description: Hotspot updated.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Hotspot" }
-        "404": { description: Hotspot not found. }
-        "409": { description: Version conflict. }
-        "422": { description: Geometry or target validation failed. }
+              schema: { $ref: '#/components/schemas/Hotspot' }
+        '404': { description: Hotspot not found. }
+        '409': { description: Version conflict. }
+        '422': { description: Geometry or target validation failed. }
     delete:
       tags: [hotspots]
       operationId: deleteHotspot
       summary: Delete a hotspot
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "204": { description: Hotspot deleted. }
-        "404": { description: Hotspot not found. }
+        '204': { description: Hotspot deleted. }
+        '404': { description: Hotspot not found. }
   /v1/decks/{deck_id}/branching-edges:
     get:
       tags: [branching-edges]
       operationId: listBranchingEdges
       summary: List branching edges for a deck
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Branching edges.
           content:
             application/json:
@@ -118,72 +118,72 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: "#/components/schemas/BranchingEdge" }
+                    items: { $ref: '#/components/schemas/BranchingEdge' }
     post:
       tags: [branching-edges]
       operationId: createBranchingEdge
       summary: Create a directed slide edge
       parameters:
-        - $ref: "#/components/parameters/DeckId"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/DeckId'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CreateBranchingEdgeRequest" }
+            schema: { $ref: '#/components/schemas/CreateBranchingEdgeRequest' }
       responses:
-        "201":
+        '201':
           description: Edge created.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/BranchingEdge" }
-        "409": { description: Duplicate edge. }
-        "422": { description: Self-loop or invalid slide reference. }
+              schema: { $ref: '#/components/schemas/BranchingEdge' }
+        '409': { description: Duplicate edge. }
+        '422': { description: Self-loop or invalid slide reference. }
   /v1/branching-edges/{id}:
     get:
       tags: [branching-edges]
       operationId: getBranchingEdge
       summary: Get a branching edge
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "200":
+        '200':
           description: Edge details.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/BranchingEdge" }
-        "404": { description: Edge not found. }
+              schema: { $ref: '#/components/schemas/BranchingEdge' }
+        '404': { description: Edge not found. }
     patch:
       tags: [branching-edges]
       operationId: patchBranchingEdge
       summary: Update a branching edge
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/PatchBranchingEdgeRequest" }
+            schema: { $ref: '#/components/schemas/PatchBranchingEdgeRequest' }
       responses:
-        "200":
+        '200':
           description: Edge updated.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/BranchingEdge" }
-        "404": { description: Edge not found. }
-        "422": { description: Self-loop or invalid slide reference. }
+              schema: { $ref: '#/components/schemas/BranchingEdge' }
+        '404': { description: Edge not found. }
+        '422': { description: Self-loop or invalid slide reference. }
     delete:
       tags: [branching-edges]
       operationId: deleteBranchingEdge
       summary: Delete a branching edge
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/TenantId"
+        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/TenantId'
       responses:
-        "204": { description: Edge deleted. }
-        "404": { description: Edge not found. }
+        '204': { description: Edge deleted. }
+        '404': { description: Edge not found. }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer }
@@ -207,7 +207,23 @@ components:
     Hotspot:
       type: object
       additionalProperties: false
-      required: [id, tenantId, deckId, slideId, name, geometry, gestureMask, zIndex, targetType, targetRef, status, version, createdAt, updatedAt]
+      required:
+        [
+          id,
+          tenantId,
+          deckId,
+          slideId,
+          name,
+          geometry,
+          gestureMask,
+          zIndex,
+          targetType,
+          targetRef,
+          status,
+          version,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id: { type: string }
         tenantId: { type: string }
@@ -266,7 +282,7 @@ components:
         fromSlideId: { type: string }
         toSlideId: { type: string }
         name: { type: string }
-        ruleId: { type: [string, "null"] }
+        ruleId: { type: [string, 'null'] }
         priority: { type: integer }
         createdAt: { type: integer }
     CreateBranchingEdgeRequest:
@@ -277,7 +293,7 @@ components:
         fromSlideId: { type: string }
         toSlideId: { type: string }
         name: { type: string, minLength: 1 }
-        ruleId: { type: [string, "null"] }
+        ruleId: { type: [string, 'null'] }
         priority: { type: integer, default: 0 }
     PatchBranchingEdgeRequest:
       type: object
@@ -285,5 +301,5 @@ components:
       properties:
         toSlideId: { type: string }
         name: { type: string, minLength: 1 }
-        ruleId: { type: [string, "null"] }
+        ruleId: { type: [string, 'null'] }
         priority: { type: integer }

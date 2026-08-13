@@ -50,9 +50,7 @@ export function JoinForm(props: JoinFormProps) {
   const [code, setCode] = useState(props.initialCode ?? '');
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
-  const [locale, setLocale] = useState<string>(
-    props.initialLocale ?? loadSavedLocale() ?? 'en',
-  );
+  const [locale, setLocale] = useState<string>(props.initialLocale ?? loadSavedLocale() ?? 'en');
   const [localeVisible, setLocaleVisible] = useState(false);
 
   useEffect(() => {
@@ -75,10 +73,7 @@ export function JoinForm(props: JoinFormProps) {
   };
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="flex flex-col gap-4 p-4 max-w-md w-full mx-auto"
-    >
+    <form onSubmit={onSubmit} className="flex flex-col gap-4 p-4 max-w-md w-full mx-auto">
       <label className="flex flex-col gap-1">
         <span className="text-sm font-medium">Session code</span>
         <input
@@ -134,13 +129,17 @@ export function JoinForm(props: JoinFormProps) {
             data-testid="join-locale"
           >
             {LIST_LOCALES.map((loc) => (
-              <option key={loc} value={loc}>{loc}</option>
+              <option key={loc} value={loc}>
+                {loc}
+              </option>
             ))}
           </select>
         </label>
       ) : null}
       {props.error ? (
-        <p className="text-red-700 text-sm" role="alert" data-testid="join-error">{props.error}</p>
+        <p className="text-red-700 text-sm" role="alert" data-testid="join-error">
+          {props.error}
+        </p>
       ) : null}
       {!codeValid && code.length > 0 ? (
         <p className="text-red-700 text-sm" role="alert" data-testid="join-code-error">

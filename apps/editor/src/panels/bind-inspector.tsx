@@ -12,11 +12,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import type { ChartType } from '@domio/chart';
 import { validateBinding, type BindingSchema } from '@domio/chart';
-import {
-  getDataSources,
-  getRequiredRoles,
-  type LiveDataBinding,
-} from '../lib/live-data-store';
+import { getDataSources, getRequiredRoles, type LiveDataBinding } from '../lib/live-data-store';
 import { formatLastSynced } from '../lib/connector-service';
 
 interface BindInspectorProps {
@@ -33,19 +29,18 @@ export function BindInspector({ binding, onChange, chartType }: BindInspectorPro
     [binding.queryId, sources],
   );
 
-  const requiredRoles = useMemo(
-    () => (chartType ? getRequiredRoles(chartType) : []),
-    [chartType],
-  );
+  const requiredRoles = useMemo(() => (chartType ? getRequiredRoles(chartType) : []), [chartType]);
 
   const validationErrors = useMemo(() => {
     if (!chartType || !selectedSource) return [];
     const schema: BindingSchema = {
       type: chartType,
-      columns: requiredRoles.map((r) => ({
-        role: r.role as BindingSchema['columns'][number]['role'],
-        column: binding.fieldMap[r.role] ?? '',
-      })).filter((c) => c.column !== ''),
+      columns: requiredRoles
+        .map((r) => ({
+          role: r.role as BindingSchema['columns'][number]['role'],
+          column: binding.fieldMap[r.role] ?? '',
+        }))
+        .filter((c) => c.column !== ''),
     };
     return validateBinding(schema, selectedSource.dataset);
   }, [chartType, selectedSource, requiredRoles, binding.fieldMap]);
@@ -133,11 +128,15 @@ export function BindInspector({ binding, onChange, chartType }: BindInspectorPro
                     try {
                       col = e.dataTransfer?.getData('text/domio-column') ?? '';
                     } catch {
-                      col = (window as unknown as { __domioDragColumn?: string }).__domioDragColumn ?? '';
+                      col =
+                        (window as unknown as { __domioDragColumn?: string }).__domioDragColumn ??
+                        '';
                     }
                     if (col) handleDrop(r.role, col);
                   }}
-                  style={dragOverRole === r.role ? { outline: '2px dashed var(--accent)' } : undefined}
+                  style={
+                    dragOverRole === r.role ? { outline: '2px dashed var(--accent)' } : undefined
+                  }
                 >
                   <option value="">Select column…</option>
                   {selectedSource.columns.map((c) => (
@@ -165,7 +164,8 @@ export function BindInspector({ binding, onChange, chartType }: BindInspectorPro
                       e.dataTransfer?.setData('text/domio-column', c.name);
                     } catch {
                       // jsdom without DataTransfer support — fall back to global
-                      (window as unknown as { __domioDragColumn?: string }).__domioDragColumn = c.name;
+                      (window as unknown as { __domioDragColumn?: string }).__domioDragColumn =
+                        c.name;
                     }
                   }}
                   data-testid={`p08-bind-chip-${c.name}`}
@@ -181,7 +181,9 @@ export function BindInspector({ binding, onChange, chartType }: BindInspectorPro
         {selectedSource && isFullyBound && (
           <div className="bind-inspector__row">
             <span className="bind-inspector__label">Status</span>
-            <span className={`bind-inspector__status bind-inspector__status--${isValid ? 'valid' : 'invalid'}`}>
+            <span
+              className={`bind-inspector__status bind-inspector__status--${isValid ? 'valid' : 'invalid'}`}
+            >
               {isValid ? 'Valid' : `${validationErrors.length} error(s)`}
             </span>
           </div>
@@ -205,8 +207,20 @@ export function catalogIdToChartType(catalogId: string): ChartType | undefined {
   if (!match) return undefined;
   const type = match[1] as string;
   const validTypes: string[] = [
-    'bar', 'line', 'area', 'pie', 'scatter', 'funnel', 'sankey',
-    'treemap', 'heatmap', 'waterfall', 'gauge', 'radar', 'candlestick', 'bullet',
+    'bar',
+    'line',
+    'area',
+    'pie',
+    'scatter',
+    'funnel',
+    'sankey',
+    'treemap',
+    'heatmap',
+    'waterfall',
+    'gauge',
+    'radar',
+    'candlestick',
+    'bullet',
   ];
   return validTypes.includes(type) ? (type as ChartType) : undefined;
 }

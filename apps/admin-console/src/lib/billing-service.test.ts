@@ -150,9 +150,9 @@ describe('billing-service', () => {
   });
 
   it('updateRateLimitRule throws for unknown id', async () => {
-    await expect(
-      updateRateLimitRule('rl-does-not-exist', { limit: 1 }),
-    ).rejects.toThrow(/not found/);
+    await expect(updateRateLimitRule('rl-does-not-exist', { limit: 1 })).rejects.toThrow(
+      /not found/,
+    );
   });
 
   it('deleteRateLimitRule removes from store', async () => {

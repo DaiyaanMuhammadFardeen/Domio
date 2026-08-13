@@ -5,8 +5,14 @@
   "description": "A directed transition between two prototype slides. Phase 10 M1.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "from_slide_id", "to_slide_id",
-    "name", "rule_id", "priority"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "from_slide_id",
+    "to_slide_id",
+    "name",
+    "rule_id",
+    "priority"
   ],
   "additionalProperties": false,
   "properties": {

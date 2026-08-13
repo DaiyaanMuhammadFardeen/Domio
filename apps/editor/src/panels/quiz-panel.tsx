@@ -47,7 +47,12 @@ export interface QuizRecord {
 
 interface QuizPanelProps {
   quiz: QuizRecord;
-  onPatch: (patch: { name?: string; questions?: QuizQuestionSpec[]; passThreshold?: number; version: number }) => void;
+  onPatch: (patch: {
+    name?: string;
+    questions?: QuizQuestionSpec[];
+    passThreshold?: number;
+    version: number;
+  }) => void;
   onDelete?: () => void;
 }
 

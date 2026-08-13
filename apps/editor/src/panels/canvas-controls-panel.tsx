@@ -30,8 +30,7 @@ interface ViewportDims {
 function useViewportDims(): ViewportDims {
   const [dims, setDims] = useState<ViewportDims>({ width: 1024, height: 768 });
   useEffect(() => {
-    const update = () =>
-      setDims({ width: window.innerWidth, height: window.innerHeight });
+    const update = () => setDims({ width: window.innerWidth, height: window.innerHeight });
     update();
     window.addEventListener('resize', update);
     return () => window.removeEventListener('resize', update);
@@ -96,22 +95,12 @@ export function CanvasControlsPanel(): ReactElement {
         <h4 style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>
           <FormattedMessage id="editor.canvasControls.zoom" />
         </h4>
-        <p style={{ margin: '4px 0 6px', fontSize: 12 }}>
-          {`${Math.round(zoom * 100)}%`}
-        </p>
+        <p style={{ margin: '4px 0 6px', fontSize: 12 }}>{`${Math.round(zoom * 100)}%`}</p>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => setZoom(1)}
-            style={buttonStyle}
-          >
+          <button type="button" onClick={() => setZoom(1)} style={buttonStyle}>
             100%
           </button>
-          <button
-            type="button"
-            onClick={() => setZoom(2)}
-            style={buttonStyle}
-          >
+          <button type="button" onClick={() => setZoom(2)} style={buttonStyle}>
             200%
           </button>
           <button
@@ -148,12 +137,7 @@ function ToggleRow(props: ToggleRowProps): ReactElement {
       }}
     >
       <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={onChange}
-          aria-labelledby={labelId}
-        />
+        <input type="checkbox" checked={checked} onChange={onChange} aria-labelledby={labelId} />
         <FormattedMessage id={labelId} />
       </span>
       {shortcut ? (

@@ -8,13 +8,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as fc from 'fast-check';
-import type {
-  TokenValue,
-  TokenRef,
-  TokenAlias,
-  ResolveScope,
-  DeckTokenState,
-} from './types.js';
+import type { TokenValue, TokenRef, TokenAlias, ResolveScope, DeckTokenState } from './types.js';
 import { resolve, resolveWithCache, invalidateCache } from './resolve.js';
 
 // ---------------------------------------------------------------------------
@@ -61,8 +55,15 @@ const scopeArb: fc.Arbitrary<ResolveScope> = fc.oneof(
 );
 
 const VALID_SOURCES = [
-  'override', 'theme', 'brand', 'org', 'alias',
-  'platform-fallback', 'companion-fallback', 'system-alias', 'system-default-literal',
+  'override',
+  'theme',
+  'brand',
+  'org',
+  'alias',
+  'platform-fallback',
+  'companion-fallback',
+  'system-alias',
+  'system-default-literal',
 ] as const;
 
 /** Build a DeckTokenState from generated components. */
@@ -118,7 +119,10 @@ describe('property: resolve converges for any precedence chain', () => {
           const deckTheme = new Map<TokenRef, TokenValue>(deckPairs);
           const brandTheme = new Map<TokenRef, TokenValue>(brandPairs);
           const orgTheme = new Map<TokenRef, TokenValue>(orgPairs);
-          const aliasEdges: TokenAlias[] = aliasPairs.map(([s, t]) => ({ aliasTokenId: s, targetTokenId: t }));
+          const aliasEdges: TokenAlias[] = aliasPairs.map(([s, t]) => ({
+            aliasTokenId: s,
+            targetTokenId: t,
+          }));
           const deckState = buildDeckState(deckTheme, brandTheme, orgTheme, aliasEdges);
 
           // Must not throw
@@ -128,7 +132,8 @@ describe('property: resolve converges for any precedence chain', () => {
           expect(typeof result.tokenId).toBe('string');
           expect(VALID_SOURCES).toContain(result.source);
           expect(
-            result.value === null || (typeof result.value === 'object' && result.value !== null && 'type' in result.value),
+            result.value === null ||
+              (typeof result.value === 'object' && result.value !== null && 'type' in result.value),
           ).toBe(true);
           if (result.warn !== undefined) {
             expect(['WARN_TOKEN_UNRESOLVED', 'WARN_TOKEN_FALLBACK']).toContain(result.warn);
@@ -162,7 +167,10 @@ describe('property: resolve converges for any precedence chain', () => {
           const deckTheme = new Map<TokenRef, TokenValue>(deckPairs);
           const brandTheme = new Map<TokenRef, TokenValue>(brandPairs);
           const orgTheme = new Map<TokenRef, TokenValue>(orgPairs);
-          const aliasEdges: TokenAlias[] = aliasPairs.map(([s, t]) => ({ aliasTokenId: s, targetTokenId: t }));
+          const aliasEdges: TokenAlias[] = aliasPairs.map(([s, t]) => ({
+            aliasTokenId: s,
+            targetTokenId: t,
+          }));
           const deckState = buildDeckState(deckTheme, brandTheme, orgTheme, aliasEdges);
 
           const r1 = resolve(tokenRef, scope, deckState);
@@ -192,7 +200,10 @@ describe('property: resolve converges for any precedence chain', () => {
           tokenRef: TokenRef,
         ) => {
           const deckTheme = new Map<TokenRef, TokenValue>(deckPairs);
-          const aliasEdges: TokenAlias[] = aliasPairs.map(([s, t]) => ({ aliasTokenId: s, targetTokenId: t }));
+          const aliasEdges: TokenAlias[] = aliasPairs.map(([s, t]) => ({
+            aliasTokenId: s,
+            targetTokenId: t,
+          }));
           const deckState = buildDeckState(deckTheme, new Map(), new Map(), aliasEdges);
 
           const start = Date.now();

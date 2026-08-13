@@ -65,11 +65,7 @@ const COLUMNS: ReadonlyArray<SortableColumn<DecisionRow>> = [
 export function DecisionTable({ rows }: { rows: DecisionRow[] }) {
   return (
     <div className="space-y-2">
-      <SortableTable
-        rows={rows}
-        columns={COLUMNS}
-        emptyMessage="No experiments"
-      />
+      <SortableTable rows={rows} columns={COLUMNS} emptyMessage="No experiments" />
       <div className="flex flex-wrap gap-2 text-xs text-slate-500">
         <Badge tone="green">significant</Badge>
         <Badge tone="yellow">underpowered</Badge>

@@ -64,8 +64,14 @@ describe('audit', () => {
 
       // Also add a human audit row
       await store.appendAudit({
-        id: uuid(), actorId: 'human-1', actorKind: 'human', action: 'h1',
-        resourceType: 't', resourceId: 'r', detail: {}, createdAt: Date.now(),
+        id: uuid(),
+        actorId: 'human-1',
+        actorKind: 'human',
+        action: 'h1',
+        resourceType: 't',
+        resourceId: 'r',
+        detail: {},
+        createdAt: Date.now(),
       });
 
       const rows = await listAgentActions(deps);

@@ -3,7 +3,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { OverlayStack, OverlayStackFullError, OverlayNotOpenError, OVERLAY_MAX_DEPTH } from './stack.js';
+import {
+  OverlayStack,
+  OverlayStackFullError,
+  OverlayNotOpenError,
+  OVERLAY_MAX_DEPTH,
+} from './stack.js';
 import type { Overlay } from '../types.js';
 
 function overlay(id: string): Overlay {

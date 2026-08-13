@@ -5,10 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { handlers, type HttpRequest } from './handlers.js';
 import { LocalizationService } from './service.js';
-import {
-  InMemoryExchangeRateRepository,
-  InMemoryLocaleConfigRepository,
-} from './dal.js';
+import { InMemoryExchangeRateRepository, InMemoryLocaleConfigRepository } from './dal.js';
 import { LocalizationMetrics } from './metrics.js';
 import { InMemoryAuditRecorder } from './audit.js';
 
@@ -41,12 +38,17 @@ describe('localization handlers — format', () => {
   it('POST /v1/localization/format returns formatted number', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.format(
-      req('POST', '/v1/localization/format', {}, {
-        value: 1234567.89,
-        locale: 'en-US',
-        style: 'decimal',
-        decimals: 2,
-      }),
+      req(
+        'POST',
+        '/v1/localization/format',
+        {},
+        {
+          value: 1234567.89,
+          locale: 'en-US',
+          style: 'decimal',
+          decimals: 2,
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -56,10 +58,15 @@ describe('localization handlers — format', () => {
   it('POST /v1/localization/format 400s on invalid locale', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.format(
-      req('POST', '/v1/localization/format', {}, {
-        value: 100,
-        locale: 'invalid-LOCALE!',
-      }),
+      req(
+        'POST',
+        '/v1/localization/format',
+        {},
+        {
+          value: 100,
+          locale: 'invalid-LOCALE!',
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(400);
@@ -71,9 +78,15 @@ describe('localization handlers — rates', () => {
   it('POST /v1/localization/rates ingests rates', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.rates(
-      req('POST', '/v1/localization/rates', {}, {
-        pairs: [{ pair: 'USD/EUR', rate: 0.92, asOf: new Date('2026-08-01') }],
-      }, { actorId: 'alice' }),
+      req(
+        'POST',
+        '/v1/localization/rates',
+        {},
+        {
+          pairs: [{ pair: 'USD/EUR', rate: 0.92, asOf: new Date('2026-08-01') }],
+        },
+        { actorId: 'alice' },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -83,9 +96,14 @@ describe('localization handlers — rates', () => {
   it('POST /v1/localization/rates 401s without actorId', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.rates(
-      req('POST', '/v1/localization/rates', {}, {
-        pairs: [{ pair: 'USD/EUR', rate: 0.92, asOf: new Date('2026-08-01') }],
-      }),
+      req(
+        'POST',
+        '/v1/localization/rates',
+        {},
+        {
+          pairs: [{ pair: 'USD/EUR', rate: 0.92, asOf: new Date('2026-08-01') }],
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(401);
@@ -97,11 +115,16 @@ describe('localization handlers — convert', () => {
     const { ctx, svc } = makeCtx();
     await svc.ingestRates([{ pair: 'USD/EUR', rate: 0.92, asOf: new Date('2026-08-01') }]);
     const res = await handlers.convert(
-      req('POST', '/v1/localization/convert', {}, {
-        amount: 100,
-        from: 'USD',
-        to: 'EUR',
-      }),
+      req(
+        'POST',
+        '/v1/localization/convert',
+        {},
+        {
+          amount: 100,
+          from: 'USD',
+          to: 'EUR',
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(200);
@@ -111,11 +134,16 @@ describe('localization handlers — convert', () => {
   it('POST /v1/localization/convert 404s on missing rate', async () => {
     const { ctx } = makeCtx();
     const res = await handlers.convert(
-      req('POST', '/v1/localization/convert', {}, {
-        amount: 100,
-        from: 'USD',
-        to: 'XYZ',
-      }),
+      req(
+        'POST',
+        '/v1/localization/convert',
+        {},
+        {
+          amount: 100,
+          from: 'USD',
+          to: 'XYZ',
+        },
+      ),
       ctx,
     );
     expect(res.status).toBe(404);
@@ -127,10 +155,15 @@ describe('localization handlers — audit', () => {
   it('records audit events on format', async () => {
     const { ctx, audit } = makeCtx();
     await handlers.format(
-      req('POST', '/v1/localization/format', {}, {
-        value: 100,
-        locale: 'en-US',
-      }),
+      req(
+        'POST',
+        '/v1/localization/format',
+        {},
+        {
+          value: 100,
+          locale: 'en-US',
+        },
+      ),
       ctx,
     );
     const events = await audit.listByTenant('default');

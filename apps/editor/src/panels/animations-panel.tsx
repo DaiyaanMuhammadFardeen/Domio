@@ -10,10 +10,20 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
-import type { LayerTimeline, SlideTransition, TimelineTrack, TriggerConfig, ReducedMotionPolicy } from '@domio/canvas';
+import type {
+  LayerTimeline,
+  SlideTransition,
+  TimelineTrack,
+  TriggerConfig,
+  ReducedMotionPolicy,
+} from '@domio/canvas';
 import { EasingPicker } from './easing-picker';
 import { MotionPathEditor } from '../components/animation/MotionPathEditor';
-import { EasingBezierEditor, formatBezierTuple, parseBezierTuple } from '../components/animation/EasingBezierEditor';
+import {
+  EasingBezierEditor,
+  formatBezierTuple,
+  parseBezierTuple,
+} from '../components/animation/EasingBezierEditor';
 import { defaultMotionPath, type MotionPath } from '../lib/motion-path';
 
 type AnimTab = 'timeline' | 'transition' | 'magicMove' | 'motionPath' | 'accessibility';
@@ -120,8 +130,12 @@ export function AnimationsPanel({
   }, []);
 
   // Sync with prop (source of truth)
-  useEffect(() => { if (timelineProp !== null) setLocalDraft(null); }, [timelineProp]);
-  useEffect(() => { if (magicRoleProp !== null) setLocalMagicRole(null); }, [magicRoleProp]);
+  useEffect(() => {
+    if (timelineProp !== null) setLocalDraft(null);
+  }, [timelineProp]);
+  useEffect(() => {
+    if (magicRoleProp !== null) setLocalMagicRole(null);
+  }, [magicRoleProp]);
 
   // Effective values: prop wins, local fills the gap
   const timeline = timelineProp ?? localDraft;
@@ -206,7 +220,10 @@ export function AnimationsPanel({
       const tracks = [...timeline.tracks];
       const existing = tracks[trackIdx];
       if (!existing) return;
-      const keyframes = [...existing.keyframes, { timeMs: Math.min(timeline.durationMs, 500), value: 1 }];
+      const keyframes = [
+        ...existing.keyframes,
+        { timeMs: Math.min(timeline.durationMs, 500), value: 1 },
+      ];
       keyframes.sort((a, b) => a.timeMs - b.timeMs);
       tracks[trackIdx] = { ...existing, keyframes };
       onTimelineChange({ ...timeline, tracks });
@@ -234,7 +251,10 @@ export function AnimationsPanel({
       const tracks = [...timeline.tracks];
       const existing = tracks[trackIdx];
       if (!existing) return;
-      tracks[trackIdx] = { ...existing, keyframes: existing.keyframes.filter((_, i) => i !== kfIdx) };
+      tracks[trackIdx] = {
+        ...existing,
+        keyframes: existing.keyframes.filter((_, i) => i !== kfIdx),
+      };
       onTimelineChange({ ...timeline, tracks });
     },
     [timeline, onTimelineChange],
@@ -318,7 +338,15 @@ export function AnimationsPanel({
       </header>
 
       {/* Tab bar */}
-      <div className="data-panel__section" style={{ display: 'flex', gap: 0, padding: 0, borderBottom: '1px solid var(--border, #333)' }}>
+      <div
+        className="data-panel__section"
+        style={{
+          display: 'flex',
+          gap: 0,
+          padding: 0,
+          borderBottom: '1px solid var(--border, #333)',
+        }}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -331,7 +359,8 @@ export function AnimationsPanel({
               background: activeTab === tab.id ? 'var(--bg-secondary, #1a1a1a)' : 'transparent',
               color: activeTab === tab.id ? 'var(--fg, #eee)' : 'var(--muted, #888)',
               border: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid var(--accent, #58a6ff)' : '2px solid transparent',
+              borderBottom:
+                activeTab === tab.id ? '2px solid var(--accent, #58a6ff)' : '2px solid transparent',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
@@ -370,22 +399,37 @@ export function AnimationsPanel({
                     value={timeline.durationMs}
                     min={50}
                     step={50}
-                    onChange={(e) => handleTimelineField('durationMs', Math.max(50, Number(e.target.value)))}
+                    onChange={(e) =>
+                      handleTimelineField('durationMs', Math.max(50, Number(e.target.value)))
+                    }
                     data-testid="p09-timeline-duration"
                   />
                 </div>
                 <div style={{ flex: '1 1 80px' }}>
-                  <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>Start offset (ms)</label>
+                  <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>
+                    Start offset (ms)
+                  </label>
                   <input
                     type="number"
                     className="data-panel__add-input"
                     value={timeline.startOffsetMs}
                     min={0}
-                    onChange={(e) => handleTimelineField('startOffsetMs', Math.max(0, Number(e.target.value)))}
+                    onChange={(e) =>
+                      handleTimelineField('startOffsetMs', Math.max(0, Number(e.target.value)))
+                    }
                   />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'end', gap: 8 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--muted, #888)', paddingBottom: 4 }}>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      fontSize: 11,
+                      color: 'var(--muted, #888)',
+                      paddingBottom: 4,
+                    }}
+                  >
                     <input
                       type="checkbox"
                       checked={timeline.loop}
@@ -402,7 +446,9 @@ export function AnimationsPanel({
                         className="data-panel__add-input"
                         value={timeline.playCount ?? 1}
                         min={1}
-                        onChange={(e) => handleTimelineField('playCount', Math.max(1, Number(e.target.value)))}
+                        onChange={(e) =>
+                          handleTimelineField('playCount', Math.max(1, Number(e.target.value)))
+                        }
                       />
                     </div>
                   )}
@@ -426,7 +472,9 @@ export function AnimationsPanel({
                 >
                   <option value="">None (manual)</option>
                   {TRIGGER_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
                   ))}
                 </select>
                 {timeline.trigger?.kind === 'on_timer' && (
@@ -450,7 +498,9 @@ export function AnimationsPanel({
                       />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>Debounce (ms)</label>
+                      <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>
+                        Debounce (ms)
+                      </label>
                       <input
                         type="number"
                         className="data-panel__add-input"
@@ -459,7 +509,10 @@ export function AnimationsPanel({
                         onChange={(e) => {
                           onTimelineChange({
                             ...timeline,
-                            trigger: { ...timeline.trigger!, debounceMs: Math.max(0, Number(e.target.value)) },
+                            trigger: {
+                              ...timeline.trigger!,
+                              debounceMs: Math.max(0, Number(e.target.value)),
+                            },
                           });
                         }}
                       />
@@ -469,7 +522,9 @@ export function AnimationsPanel({
                 {timeline.trigger?.kind === 'on_data_change' && (
                   <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>Data source</label>
+                      <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>
+                        Data source
+                      </label>
                       <input
                         className="data-panel__add-input"
                         value={timeline.trigger.sourceId ?? ''}
@@ -483,7 +538,9 @@ export function AnimationsPanel({
                       />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>Field path</label>
+                      <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>
+                        Field path
+                      </label>
                       <input
                         className="data-panel__add-input"
                         value={timeline.trigger.fieldPath ?? ''}
@@ -502,7 +559,10 @@ export function AnimationsPanel({
 
               {/* Tracks */}
               <div style={{ marginTop: 10 }}>
-                <div className="data-panel__section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div
+                  className="data-panel__section-title"
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
                   <span>Tracks ({timeline.tracks.length})</span>
                   <button
                     type="button"
@@ -516,7 +576,9 @@ export function AnimationsPanel({
                 </div>
 
                 {timeline.tracks.length === 0 ? (
-                  <div className="data-panel__empty" style={{ fontSize: 11 }}>No tracks yet</div>
+                  <div className="data-panel__empty" style={{ fontSize: 11 }}>
+                    No tracks yet
+                  </div>
                 ) : (
                   timeline.tracks.map((track, tIdx) => (
                     <div
@@ -529,7 +591,9 @@ export function AnimationsPanel({
                         border: '1px solid var(--border, #333)',
                       }}
                     >
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
+                      <div
+                        style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}
+                      >
                         <input
                           className="data-panel__add-input"
                           value={track.property}
@@ -541,7 +605,13 @@ export function AnimationsPanel({
                         <button
                           type="button"
                           onClick={() => handleRemoveTrack(tIdx)}
-                          style={{ background: 'none', border: 'none', color: 'var(--muted, #888)', cursor: 'pointer', fontSize: 14 }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--muted, #888)',
+                            cursor: 'pointer',
+                            fontSize: 14,
+                          }}
                           title="Remove track"
                           data-testid={`p09-remove-track-${tIdx}`}
                         >
@@ -555,7 +625,11 @@ export function AnimationsPanel({
                         const isBezier = easingTuple !== null;
                         const isExpanded = expandedKeyframes.has(`${tIdx}-${kIdx}`);
                         return (
-                          <div key={kIdx} style={{ marginBottom: 6 }} data-testid={`p09-keyframe-${tIdx}-${kIdx}`}>
+                          <div
+                            key={kIdx}
+                            style={{ marginBottom: 6 }}
+                            data-testid={`p09-keyframe-${tIdx}-${kIdx}`}
+                          >
                             <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                               <input
                                 type="number"
@@ -564,20 +638,35 @@ export function AnimationsPanel({
                                 min={0}
                                 max={timeline.durationMs}
                                 style={{ width: 60 }}
-                                onChange={(e) => handleKeyframeChange(tIdx, kIdx, 'timeMs', Math.max(0, Number(e.target.value)))}
+                                onChange={(e) =>
+                                  handleKeyframeChange(
+                                    tIdx,
+                                    kIdx,
+                                    'timeMs',
+                                    Math.max(0, Number(e.target.value)),
+                                  )
+                                }
                                 title="Time (ms)"
                               />
                               <input
                                 className="data-panel__add-input"
                                 value={String(kf.value)}
                                 style={{ flex: 1 }}
-                                onChange={(e) => handleKeyframeChange(tIdx, kIdx, 'value', e.target.value)}
+                                onChange={(e) =>
+                                  handleKeyframeChange(tIdx, kIdx, 'value', e.target.value)
+                                }
                                 title="Value"
                               />
                               <button
                                 type="button"
                                 onClick={() => toggleKeyframeExpanded(tIdx, kIdx)}
-                                style={{ background: 'none', border: 'none', color: 'var(--muted, #888)', cursor: 'pointer', fontSize: 12 }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--muted, #888)',
+                                  cursor: 'pointer',
+                                  fontSize: 12,
+                                }}
                                 title={isExpanded ? 'Hide bezier editor' : 'Edit bezier easing'}
                                 data-testid={`p09-keyframe-bezier-toggle-${tIdx}-${kIdx}`}
                               >
@@ -586,7 +675,13 @@ export function AnimationsPanel({
                               <button
                                 type="button"
                                 onClick={() => handleRemoveKeyframe(tIdx, kIdx)}
-                                style={{ background: 'none', border: 'none', color: 'var(--muted, #888)', cursor: 'pointer', fontSize: 12 }}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'var(--muted, #888)',
+                                  cursor: 'pointer',
+                                  fontSize: 12,
+                                }}
                                 title="Remove keyframe"
                               >
                                 ×
@@ -603,8 +698,17 @@ export function AnimationsPanel({
                                 }}
                                 data-testid={`p09-keyframe-bezier-${tIdx}-${kIdx}`}
                               >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                                  <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>Easing</label>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 8,
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  <label style={{ fontSize: 11, color: 'var(--muted, #888)' }}>
+                                    Easing
+                                  </label>
                                   <select
                                     className="data-panel__add-input"
                                     style={{ flex: 1, fontSize: 11 }}
@@ -612,7 +716,12 @@ export function AnimationsPanel({
                                     onChange={(e) => {
                                       const v = e.target.value;
                                       if (v === '__bezier') {
-                                        handleKeyframeChange(tIdx, kIdx, 'easing', 'cubic-bezier(0.42, 0, 0.58, 1)');
+                                        handleKeyframeChange(
+                                          tIdx,
+                                          kIdx,
+                                          'easing',
+                                          'cubic-bezier(0.42, 0, 0.58, 1)',
+                                        );
                                       } else {
                                         handleKeyframeChange(tIdx, kIdx, 'easing', v);
                                       }
@@ -633,7 +742,12 @@ export function AnimationsPanel({
                                     value={easingTuple!}
                                     size={140}
                                     onChange={(next) =>
-                                      handleKeyframeChange(tIdx, kIdx, 'easing', formatBezierTuple(next))
+                                      handleKeyframeChange(
+                                        tIdx,
+                                        kIdx,
+                                        'easing',
+                                        formatBezierTuple(next),
+                                      )
                                     }
                                     id={`p09-keyframe-bezier-editor-${tIdx}-${kIdx}`}
                                   />
@@ -702,7 +816,9 @@ export function AnimationsPanel({
               >
                 <option value="">None</option>
                 {TRANSITION_KINDS.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -717,7 +833,9 @@ export function AnimationsPanel({
                     value={transition.durationMs}
                     min={50}
                     step={50}
-                    onChange={(e) => handleTransitionField('durationMs', Math.max(50, Number(e.target.value)))}
+                    onChange={(e) =>
+                      handleTransitionField('durationMs', Math.max(50, Number(e.target.value)))
+                    }
                     data-testid="p09-transition-duration"
                   />
                 </div>
@@ -733,12 +851,16 @@ export function AnimationsPanel({
                   <select
                     className="data-panel__add-input"
                     value={transition.direction ?? ''}
-                    onChange={(e) => handleTransitionField('direction', e.target.value || undefined)}
+                    onChange={(e) =>
+                      handleTransitionField('direction', e.target.value || undefined)
+                    }
                     data-testid="p09-transition-direction"
                   >
                     <option value="">Default</option>
                     {DIRECTION_OPTIONS.map((d) => (
-                      <option key={d.value} value={d.value}>{d.label}</option>
+                      <option key={d.value} value={d.value}>
+                        {d.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -796,9 +918,7 @@ export function AnimationsPanel({
               </div>
             )}
             {!magicRole && (
-              <div style={{ fontSize: 11, color: 'var(--muted, #888)' }}>
-                No role assigned
-              </div>
+              <div style={{ fontSize: 11, color: 'var(--muted, #888)' }}>No role assigned</div>
             )}
           </div>
         </div>
@@ -825,7 +945,9 @@ export function AnimationsPanel({
                   // along it; ensure an `x` + `y` track exists so the viewer
                   // can play the path. We don't mutate keyframes here — the
                   // engine reads the path from the same prop bag.
-                  const hasPosTrack = timeline.tracks.some((t) => t.property === 'x' || t.property === 'y');
+                  const hasPosTrack = timeline.tracks.some(
+                    (t) => t.property === 'x' || t.property === 'y',
+                  );
                   if (!hasPosTrack) {
                     const tl: LayerTimeline = {
                       ...timeline,
@@ -878,7 +1000,8 @@ export function AnimationsPanel({
                   fontSize: 12,
                   cursor: 'pointer',
                   borderRadius: 4,
-                  background: reducedMotion === opt.value ? 'rgba(88, 166, 255, 0.1)' : 'transparent',
+                  background:
+                    reducedMotion === opt.value ? 'rgba(88, 166, 255, 0.1)' : 'transparent',
                   border: `1px solid ${reducedMotion === opt.value ? 'rgba(88, 166, 255, 0.3)' : 'var(--border, #333)'}`,
                   transition: 'all 0.15s ease',
                 }}

@@ -13,17 +13,35 @@ export type { MarketplaceServiceOptions } from './service.js';
 export { handlers } from './handlers.js';
 export type { HttpRequest, HttpResponse, MarketplaceHandlerContext } from './handlers.js';
 export { InMemoryMarketplaceStore } from './store/mem_store.js';
-export { PgMarketplaceStore, StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
+export {
+  PgMarketplaceStore,
+  StoreNotConfiguredError,
+  StoreNotImplementedError,
+} from './store/pg_store.js';
 export type { MarketplaceStore } from './store/store.js';
 export { FEATURE_FLAGS, checkFeature } from './feature_flags.js';
 export type { FeatureFlag } from './feature_flags.js';
 export { calculatePrice, normalizeCurrency } from './pricing.js';
-export { InMemoryAuditRecorder, computeHash, verifyHash, AUDIT_KID, GENESIS_HASH } from './audit.js';
+export {
+  InMemoryAuditRecorder,
+  computeHash,
+  verifyHash,
+  AUDIT_KID,
+  GENESIS_HASH,
+} from './audit.js';
 export type { AuditRecorder, AuditStore } from './audit.js';
 
 // Payment providers (Phase 19 Wave 2)
-export { StripeSandboxProvider, BkashSandboxProvider, NagadSandboxProvider } from './payments/providers.js';
-export type { PaymentProvider, CreateCheckoutInput, CreateCheckoutResult } from './payments/types.js';
+export {
+  StripeSandboxProvider,
+  BkashSandboxProvider,
+  NagadSandboxProvider,
+} from './payments/providers.js';
+export type {
+  PaymentProvider,
+  CreateCheckoutInput,
+  CreateCheckoutResult,
+} from './payments/types.js';
 
 // License signer (Phase 19 Wave 2)
 export { SandboxLicenseSigner, verifyLicenseToken } from './license.js';
@@ -31,9 +49,17 @@ export type { LicenseSigner } from './license.js';
 
 // Creator module (Phase 19 Wave 3)
 export { SandboxKycProvider, SandboxPayoutConnectProvider } from './creator/providers.js';
-export { validateTransition, canSellPaidListings, ONBOARDING_TRANSITIONS } from './creator/onboarding.js';
+export {
+  validateTransition,
+  canSellPaidListings,
+  ONBOARDING_TRANSITIONS,
+} from './creator/onboarding.js';
 export { startKycSessionBody, pollKycStatusBody } from './creator/kyc.js';
-export { validatePayoutMethodKind, createPayoutMethodBody, connectLinkBody } from './creator/payout.js';
+export {
+  validatePayoutMethodKind,
+  createPayoutMethodBody,
+  connectLinkBody,
+} from './creator/payout.js';
 export type {
   CreatorProfile,
   KycSession,
@@ -53,9 +79,18 @@ export {
 } from './creator/types.js';
 
 // Curated / Brand-Lock module (Phase 19 Wave 4 — WS-MKT-5)
-export { validateBrandLockInput, assertNotDenied, resolveVisibleListingIds, getOverridePrice } from './curated/logic.js';
+export {
+  validateBrandLockInput,
+  assertNotDenied,
+  resolveVisibleListingIds,
+  getOverridePrice,
+} from './curated/logic.js';
 export type { BrandLockedListing, BrandLockState } from './curated/types.js';
-export { BrandLockDeniedError, InvalidBrandLockError, BrandLockNotFoundError } from './curated/types.js';
+export {
+  BrandLockDeniedError,
+  InvalidBrandLockError,
+  BrandLockNotFoundError,
+} from './curated/types.js';
 
 // Takedown + Trust module (Phase 19 Wave 4 — WS-MKT-8)
 export {
@@ -68,8 +103,17 @@ export {
   counterNoticeBody,
   computeTrustScore,
 } from './takedown/logic.js';
-export type { TakedownRequest, TakedownKind, TakedownStatus, TrustScore } from './takedown/types.js';
-export { InvalidTakedownTransitionError, TakedownNotFoundError, TrustScoreNotFoundError } from './takedown/types.js';
+export type {
+  TakedownRequest,
+  TakedownKind,
+  TakedownStatus,
+  TrustScore,
+} from './takedown/types.js';
+export {
+  InvalidTakedownTransitionError,
+  TakedownNotFoundError,
+  TrustScoreNotFoundError,
+} from './takedown/types.js';
 
 // MCP module (Phase 19 Wave 5 — WS-MKT-9)
 export { checkMcpCapability, validateMcpToolInput } from './mcp/access.js';

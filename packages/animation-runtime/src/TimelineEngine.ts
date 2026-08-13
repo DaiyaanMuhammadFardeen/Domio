@@ -17,9 +17,7 @@ import type {
 
 const DEBOUNCE_MS = 250;
 
-type EngineEvent =
-  | { type: 'values'; values: readonly InterpolatedValue[] }
-  | PersistEvent;
+type EngineEvent = { type: 'values'; values: readonly InterpolatedValue[] } | PersistEvent;
 
 interface InternalTimeline {
   timeline: Timeline;
@@ -303,7 +301,12 @@ export class TimelineEngine {
         if (this.workerThreshold > 0 && this.workerAdapter) {
           const valueStr = String(kfA.value);
           if (valueStr.length > this.workerThreshold) {
-            return this.workerAdapter.interpolate(track, kfA.timeMs, kfB.timeMs, timelineDurationMs);
+            return this.workerAdapter.interpolate(
+              track,
+              kfA.timeMs,
+              kfB.timeMs,
+              timelineDurationMs,
+            );
           }
         }
 

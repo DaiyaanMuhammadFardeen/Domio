@@ -15,11 +15,7 @@
 import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { Badge } from '../../components/Badge';
 import { CRMTimeline } from '../../components/CRMTimeline';
-import {
-  fetchCrmTimeline,
-  fetchSyncStats,
-  type AdapterHealth,
-} from '../../lib/crm-service';
+import { fetchCrmTimeline, fetchSyncStats, type AdapterHealth } from '../../lib/crm-service';
 import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 function toneForHealth(status: AdapterHealth['status']) {
@@ -101,11 +97,7 @@ export default async function CrmPage() {
         )}
       </SuspenseBoundary>
 
-      <CRMTimeline
-        workspaceId={workspaceId}
-        initialEvents={timeline}
-        adapters={stats.adapters}
-      />
+      <CRMTimeline workspaceId={workspaceId} initialEvents={timeline} adapters={stats.adapters} />
       <CrossLinksFooter nodeId="doc.dashboard.crm" />
     </div>
   );
@@ -114,9 +106,7 @@ export default async function CrmPage() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
-        {label}
-      </div>
+      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
       <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
     </div>
   );

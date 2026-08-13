@@ -7,11 +7,7 @@
  * queued; UI subscribes to `subscribe()` for live state changes.
  */
 
-import {
-  AutosaveQueue,
-  InMemoryPersistentStore,
-  type AutosavePayload,
-} from '@domio/sdk';
+import { AutosaveQueue, InMemoryPersistentStore, type AutosavePayload } from '@domio/sdk';
 
 export type AutosaveStatus = 'idle' | 'pending' | 'syncing' | 'synced' | 'offline';
 
@@ -77,7 +73,9 @@ export function createAutosaveFacade(
       }
     },
     state() {
-      return snapshot(options.offline ? 'offline' : queue.pendingCount() > 0 ? 'pending' : 'synced');
+      return snapshot(
+        options.offline ? 'offline' : queue.pendingCount() > 0 ? 'pending' : 'synced',
+      );
     },
     subscribe(listener) {
       listeners.add(listener);

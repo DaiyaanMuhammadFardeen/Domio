@@ -39,7 +39,9 @@ export interface BatcherOptions extends AnalyticsConfig {
 }
 
 export class Batcher {
-  private readonly opts: Required<Omit<AnalyticsConfig, 'honorDnt' | 'random' | 'now' | 'transport' | 'queueStore'>> & {
+  private readonly opts: Required<
+    Omit<AnalyticsConfig, 'honorDnt' | 'random' | 'now' | 'transport' | 'queueStore'>
+  > & {
     honorDnt: boolean;
     random: () => number;
     now: () => number;

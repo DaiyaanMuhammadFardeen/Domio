@@ -120,8 +120,8 @@ export const list_deep_links: McpTool<DeepLinkListInput, readonly DeepLink[]> = 
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_deep_links', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/deep-links`).then(
-        (r) => (r as DeepLink[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/deep-links`).then((r) =>
+        (r as DeepLink[]).slice(),
       ),
     );
   },

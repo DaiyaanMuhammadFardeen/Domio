@@ -55,9 +55,7 @@ vi.mock('@domio/ui', async () => {
 
 function withLocale(node: React.ReactElement): React.ReactElement {
   return (
-    <FormattedMessageContext.Provider value={enMessages}>
-      {node}
-    </FormattedMessageContext.Provider>
+    <FormattedMessageContext.Provider value={enMessages}>{node}</FormattedMessageContext.Provider>
   );
 }
 
@@ -98,7 +96,11 @@ describe('ShareDialog', () => {
 
   it('emits onSave with the current state', () => {
     const onSave = vi.fn();
-    render(withLocale(<ShareDialog deckId="d1" deckTitle="Demo" open onClose={vi.fn()} onSave={onSave} />));
+    render(
+      withLocale(
+        <ShareDialog deckId="d1" deckTitle="Demo" open onClose={vi.fn()} onSave={onSave} />,
+      ),
+    );
     fireEvent.click(screen.getByTestId('share-dialog-save'));
     expect(onSave).toHaveBeenCalledTimes(1);
     const arg = onSave.mock.calls[0]?.[0] as ShareDialogState;
@@ -107,7 +109,11 @@ describe('ShareDialog', () => {
 
   it('toggles watermark checkbox', () => {
     const onSave = vi.fn();
-    render(withLocale(<ShareDialog deckId="d1" deckTitle="Demo" open onClose={vi.fn()} onSave={onSave} />));
+    render(
+      withLocale(
+        <ShareDialog deckId="d1" deckTitle="Demo" open onClose={vi.fn()} onSave={onSave} />,
+      ),
+    );
     const cb = screen.getByTestId('share-dialog-watermark') as HTMLInputElement;
     expect(cb.checked).toBe(false);
     fireEvent.click(cb);
@@ -141,7 +147,11 @@ describe('VisibilityPicker', () => {
   });
 
   it('shows password field when kind=password', () => {
-    render(withLocale(<VisibilityPicker value={{ kind: 'password', password: 'secret' }} onChange={vi.fn()} />));
+    render(
+      withLocale(
+        <VisibilityPicker value={{ kind: 'password', password: 'secret' }} onChange={vi.fn()} />,
+      ),
+    );
     expect(screen.getByTestId('visibility-picker-password')).toBeInTheDocument();
   });
 });

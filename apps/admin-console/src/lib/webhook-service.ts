@@ -8,12 +8,7 @@
  */
 
 import { fetcher } from './fetcher';
-import type {
-  Webhook,
-  WebhookDelivery,
-  WebhookEventType,
-  WebhookInput,
-} from './types';
+import type { Webhook, WebhookDelivery, WebhookEventType, WebhookInput } from './types';
 
 const NOW = Date.UTC(2026, 6, 1);
 const DAY_MS = 1000 * 60 * 60 * 24;
@@ -107,28 +102,20 @@ export async function listWebhooks(
   opts: { readonly tenantId?: string } = {},
 ): Promise<ReadonlyArray<Webhook>> {
   try {
-    const params = opts.tenantId
-      ? `?tenant_id=${encodeURIComponent(opts.tenantId)}`
-      : '';
-    const json = await fetcher<{ items?: Webhook[] }>(
-      `/v1/admin/webhooks${params}`,
-    );
+    const params = opts.tenantId ? `?tenant_id=${encodeURIComponent(opts.tenantId)}` : '';
+    const json = await fetcher<{ items?: Webhook[] }>(`/v1/admin/webhooks${params}`);
     const items = json.items ?? [];
     if (items.length > 0) return items;
   } catch {
     // fall through
   }
-  const items = opts.tenantId
-    ? STORE.filter((w) => w.tenant_id === opts.tenantId)
-    : STORE.slice();
+  const items = opts.tenantId ? STORE.filter((w) => w.tenant_id === opts.tenantId) : STORE.slice();
   return items.map(clone);
 }
 
 export async function getWebhook(id: string): Promise<Webhook | undefined> {
   try {
-    return await fetcher<Webhook>(
-      `/v1/admin/webhooks/${encodeURIComponent(id)}`,
-    );
+    return await fetcher<Webhook>(`/v1/admin/webhooks/${encodeURIComponent(id)}`);
   } catch {
     const found = STORE.find((w) => w.id === id);
     return found ? clone(found) : undefined;
@@ -168,10 +155,7 @@ export async function createWebhook(input: WebhookInput): Promise<Webhook> {
   }
 }
 
-export async function updateWebhook(
-  id: string,
-  input: WebhookInput,
-): Promise<Webhook> {
+export async function updateWebhook(id: string, input: WebhookInput): Promise<Webhook> {
   const idx = STORE.findIndex((w) => w.id === id);
   if (idx < 0) {
     throw new Error(`Webhook ${id} not found`);
@@ -191,10 +175,10 @@ export async function updateWebhook(
   };
   STORE[idx] = next;
   try {
-    return await fetcher<Webhook>(
-      `/v1/admin/webhooks/${encodeURIComponent(id)}`,
-      { method: 'PUT', body: input },
-    );
+    return await fetcher<Webhook>(`/v1/admin/webhooks/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: input,
+    });
   } catch {
     return clone(next);
   }
@@ -213,10 +197,7 @@ export async function deleteWebhook(id: string): Promise<void> {
     }
   }
   try {
-    await fetcher<void>(
-      `/v1/admin/webhooks/${encodeURIComponent(id)}`,
-      { method: 'DELETE' },
-    );
+    await fetcher<void>(`/v1/admin/webhooks/${encodeURIComponent(id)}`, { method: 'DELETE' });
   } catch {
     // swallow
   }
@@ -234,18 +215,15 @@ export async function rotateSecret(id: string): Promise<Webhook> {
   const next: Webhook = { ...prev, secret_rotated_at_ms: NOW };
   STORE[idx] = next;
   try {
-    return await fetcher<Webhook>(
-      `/v1/admin/webhooks/${encodeURIComponent(id)}/rotate-secret`,
-      { method: 'POST' },
-    );
+    return await fetcher<Webhook>(`/v1/admin/webhooks/${encodeURIComponent(id)}/rotate-secret`, {
+      method: 'POST',
+    });
   } catch {
     return clone(next);
   }
 }
 
-export async function listDeliveries(
-  webhookId: string,
-): Promise<ReadonlyArray<WebhookDelivery>> {
+export async function listDeliveries(webhookId: string): Promise<ReadonlyArray<WebhookDelivery>> {
   // Mirrors a paginated GET /v1/admin/webhooks/:id/deliveries endpoint
   // when it lands. For the seed we hand back up to 8 rows so the
   // panel has a deterministic upper bound.
@@ -398,10 +376,10 @@ export async function createSubscription(
   };
   SUBSCRIPTION_STORE.push(sub);
   try {
-    return await fetcher<WebhookSubscription>(
-      '/v1/admin/webhooks/subscriptions',
-      { method: 'POST', body: input },
-    );
+    return await fetcher<WebhookSubscription>('/v1/admin/webhooks/subscriptions', {
+      method: 'POST',
+      body: input,
+    });
   } catch {
     return cloneSub(sub);
   }
@@ -427,7 +405,7 @@ export async function testWebhook(
   }
   const hash = simpleHash(JSON.stringify(payload) + subscriptionId);
   const latency_ms = 20 + (hash % 60);
-  const status_code = (hash % 100) < 90 ? 200 : 500;
+  const status_code = hash % 100 < 90 ? 200 : 500;
   return {
     status_code,
     latency_ms,

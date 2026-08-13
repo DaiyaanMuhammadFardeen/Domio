@@ -68,9 +68,7 @@ export class PhysicsWorld {
     colliderDesc: RAPIER.ColliderDesc,
   ): RigidBodyHandle {
     const rbDesc =
-      type === 'dynamic'
-        ? RAPIER.RigidBodyDesc.dynamic()
-        : RAPIER.RigidBodyDesc.fixed();
+      type === 'dynamic' ? RAPIER.RigidBodyDesc.dynamic() : RAPIER.RigidBodyDesc.fixed();
 
     rbDesc.setTranslation(position.x, position.y, position.z);
 

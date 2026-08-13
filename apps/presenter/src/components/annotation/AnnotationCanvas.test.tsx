@@ -7,12 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  drawPen,
-  drawSpotlight,
-  drawZoom,
-  drawBlur,
-} from './AnnotationCanvas';
+import { drawPen, drawSpotlight, drawZoom, drawBlur } from './AnnotationCanvas';
 import type {
   PenGeometry,
   SpotlightGeometry,
@@ -25,18 +20,33 @@ function makeCtx(): CanvasRenderingContext2D {
   const handler: ProxyHandler<CanvasRenderingContext2D> = {
     get(_t, prop) {
       const key = String(prop);
-      if (key === 'save' || key === 'restore' || key === 'beginPath' ||
-          key === 'closePath' || key === 'moveTo' || key === 'lineTo' ||
-          key === 'stroke' || key === 'fill' || key === 'fillRect' ||
-          key === 'strokeRect' || key === 'clearRect') {
+      if (
+        key === 'save' ||
+        key === 'restore' ||
+        key === 'beginPath' ||
+        key === 'closePath' ||
+        key === 'moveTo' ||
+        key === 'lineTo' ||
+        key === 'stroke' ||
+        key === 'fill' ||
+        key === 'fillRect' ||
+        key === 'strokeRect' ||
+        key === 'clearRect'
+      ) {
         return () => calls.push(key);
       }
       if (key === 'arc') return () => calls.push('arc');
       if (key === 'setLineDash') return () => calls.push('setLineDash');
       if (key === 'setTransform') return () => calls.push('setTransform');
       // Property setters (style, fillStyle, strokeStyle, lineWidth, etc.)
-      if (key === 'fillStyle' || key === 'strokeStyle' || key === 'lineWidth' ||
-          key === 'lineCap' || key === 'lineJoin' || key === 'globalAlpha') {
+      if (
+        key === 'fillStyle' ||
+        key === 'strokeStyle' ||
+        key === 'lineWidth' ||
+        key === 'lineCap' ||
+        key === 'lineJoin' ||
+        key === 'globalAlpha'
+      ) {
         return undefined;
       }
       return undefined;
@@ -54,11 +64,13 @@ describe('AnnotationCanvas drawing helpers', () => {
   it('drawPen renders a single stroke', () => {
     const ctx = makeCtx();
     const geom: PenGeometry = {
-      strokes: [[
-        { x: 0.1, y: 0.2, pressure: 0.5, t: 0 },
-        { x: 0.5, y: 0.5, pressure: 0.5, t: 10 },
-        { x: 0.9, y: 0.8, pressure: 0.5, t: 20 },
-      ]],
+      strokes: [
+        [
+          { x: 0.1, y: 0.2, pressure: 0.5, t: 0 },
+          { x: 0.5, y: 0.5, pressure: 0.5, t: 10 },
+          { x: 0.9, y: 0.8, pressure: 0.5, t: 20 },
+        ],
+      ],
     };
     drawPen(ctx, geom, 800, 600, '#ff0000', 4, false);
     // Should call moveTo, lineTo x2, stroke

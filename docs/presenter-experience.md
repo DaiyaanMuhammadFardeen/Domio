@@ -261,41 +261,41 @@ States: no secondary display, single display, presentation mode fullscreen, wind
 
 ## 9.3 Functional & Non-Functional Requirements
 
-| FR/NFR ID | Description | Target |
-|---|---|---|
-| FR-PRE-01 | Presenter view shows current/next/notes/timer/preview on second screen or window | required |
-| FR-PRE-02 | Phone pairing via QR, clicker, notes, laser pointer | required |
-| FR-PRE-03 | Live annotation: pen, highlighter, spotlight, zoom, blur | required |
-| FR-PRE-04 | On-the-fly slide reorder and hide | required |
-| FR-PRE-05 | Jump-to-slide grid with thumbnail search | required |
-| FR-PRE-06 | Rehearsal mode with dwell tracking | required |
-| FR-PRE-07 | Teleprompter mode | required |
-| FR-PRE-08 | Live parking lot with auto wrap-up slide | required |
-| FR-PRE-09 | PiP presenter camera with virtual background | required |
-| FR-PRE-10 | Multi-presenter handoff | required |
-| FR-PRE-11 | Presenter failover (laptop → phone) | required |
-| FR-PRE-12 | Offline cached presenting with data snapshot fallback | required |
-| FR-PRE-13 | 4K/LED output profiles and dual-screen controls | required |
-| FR-PRE-14 | Agenda/countdown timers | required |
-| FR-PRE-15 | Backstage whisper (E2E encrypted) | required |
-| FR-PRE-16 | Post-session recap with edit/share | required |
-| NFR-PRE-PERF-1 | Annotation render lag p95 | ≤16 ms at 60 FPS |
-| NFR-PRE-PERF-2 | Remote control latency p95 (LAN) | ≤100 ms |
-| NFR-PRE-PERF-3 | Pairing handshake p95 | ≤3 s |
-| NFR-PRE-PERF-4 | Handoff completion p95 | ≤500 ms |
-| NFR-PRE-PERF-5 | Failover recovery time p95 | ≤5 s |
-| NFR-PRE-PERF-6 | Stage advance latency p95 | ≤150 ms |
-| NFR-PRE-PERF-7 | PiP segmentation FPS (mid laptop) | ≥30 FPS |
-| NFR-PRE-RELI-1 | Stage uptime over 60-min session | ≥99.9% with active failover |
-| NFR-PRE-OFFL-1 | Offline cache hit rate (recent decks) | ≥99% |
-| NFR-PRE-A11Y-1 | Presenter view keyboard-only operation | 100% reachable |
-| NFR-PRE-A11Y-2 | Screen reader support for presenter view | WCAG 2.2 AA |
-| NFR-PRE-I18N-1 | Teleprompter and notes rendering locale | locales defined in [03-ux-interface-planning.md](03-ux-interface-planning.md) |
-| NFR-PRE-SEC-1 | Whisper encryption | E2E between sender and presenter |
-| NFR-PRE-SEC-2 | PiP camera frames | never leave device |
-| NFR-PRE-PRIV-1 | Recap PII | redacted by default per [11-legal-compliance-bangladesh.md](11-legal-compliance-bangladesh.md) |
-| NFR-PRE-OBS-1 | Per-event structured logging | 100% of stage events |
-| NFR-PRE-OBS-2 | OpenTelemetry traces | every presenter session |
+| FR/NFR ID      | Description                                                                      | Target                                                                                         |
+| -------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| FR-PRE-01      | Presenter view shows current/next/notes/timer/preview on second screen or window | required                                                                                       |
+| FR-PRE-02      | Phone pairing via QR, clicker, notes, laser pointer                              | required                                                                                       |
+| FR-PRE-03      | Live annotation: pen, highlighter, spotlight, zoom, blur                         | required                                                                                       |
+| FR-PRE-04      | On-the-fly slide reorder and hide                                                | required                                                                                       |
+| FR-PRE-05      | Jump-to-slide grid with thumbnail search                                         | required                                                                                       |
+| FR-PRE-06      | Rehearsal mode with dwell tracking                                               | required                                                                                       |
+| FR-PRE-07      | Teleprompter mode                                                                | required                                                                                       |
+| FR-PRE-08      | Live parking lot with auto wrap-up slide                                         | required                                                                                       |
+| FR-PRE-09      | PiP presenter camera with virtual background                                     | required                                                                                       |
+| FR-PRE-10      | Multi-presenter handoff                                                          | required                                                                                       |
+| FR-PRE-11      | Presenter failover (laptop → phone)                                              | required                                                                                       |
+| FR-PRE-12      | Offline cached presenting with data snapshot fallback                            | required                                                                                       |
+| FR-PRE-13      | 4K/LED output profiles and dual-screen controls                                  | required                                                                                       |
+| FR-PRE-14      | Agenda/countdown timers                                                          | required                                                                                       |
+| FR-PRE-15      | Backstage whisper (E2E encrypted)                                                | required                                                                                       |
+| FR-PRE-16      | Post-session recap with edit/share                                               | required                                                                                       |
+| NFR-PRE-PERF-1 | Annotation render lag p95                                                        | ≤16 ms at 60 FPS                                                                               |
+| NFR-PRE-PERF-2 | Remote control latency p95 (LAN)                                                 | ≤100 ms                                                                                        |
+| NFR-PRE-PERF-3 | Pairing handshake p95                                                            | ≤3 s                                                                                           |
+| NFR-PRE-PERF-4 | Handoff completion p95                                                           | ≤500 ms                                                                                        |
+| NFR-PRE-PERF-5 | Failover recovery time p95                                                       | ≤5 s                                                                                           |
+| NFR-PRE-PERF-6 | Stage advance latency p95                                                        | ≤150 ms                                                                                        |
+| NFR-PRE-PERF-7 | PiP segmentation FPS (mid laptop)                                                | ≥30 FPS                                                                                        |
+| NFR-PRE-RELI-1 | Stage uptime over 60-min session                                                 | ≥99.9% with active failover                                                                    |
+| NFR-PRE-OFFL-1 | Offline cache hit rate (recent decks)                                            | ≥99%                                                                                           |
+| NFR-PRE-A11Y-1 | Presenter view keyboard-only operation                                           | 100% reachable                                                                                 |
+| NFR-PRE-A11Y-2 | Screen reader support for presenter view                                         | WCAG 2.2 AA                                                                                    |
+| NFR-PRE-I18N-1 | Teleprompter and notes rendering locale                                          | locales defined in [03-ux-interface-planning.md](03-ux-interface-planning.md)                  |
+| NFR-PRE-SEC-1  | Whisper encryption                                                               | E2E between sender and presenter                                                               |
+| NFR-PRE-SEC-2  | PiP camera frames                                                                | never leave device                                                                             |
+| NFR-PRE-PRIV-1 | Recap PII                                                                        | redacted by default per [11-legal-compliance-bangladesh.md](11-legal-compliance-bangladesh.md) |
+| NFR-PRE-OBS-1  | Per-event structured logging                                                     | 100% of stage events                                                                           |
+| NFR-PRE-OBS-2  | OpenTelemetry traces                                                             | every presenter session                                                                        |
 
 ---
 
@@ -560,7 +560,7 @@ All endpoints are versioned (`/v1/presenter/...`). Idempotency keys required for
 ```json
 {
   "pairing_token": "eyJhbGciOi...short_lived",
-  "capabilities": ["advance","retreat","jump","laser","notes"],
+  "capabilities": ["advance", "retreat", "jump", "laser", "notes"],
   "expires_at": "2026-07-29T10:30:00Z"
 }
 ```
@@ -623,22 +623,22 @@ All endpoints are versioned (`/v1/presenter/...`). Idempotency keys required for
 
 ## 9.10 Cross-Section Ties
 
-| Concern | Section |
-|---|---|
-| Scene graph, CRDT foundation | [editor-canvas.md](editor-canvas.md) |
-| Animation transitions during stage advance | [animation-transitions.md](animation-transitions.md) |
-| Prototype variables, conditional state | [prototyping-interactivity.md](prototyping-interactivity.md) |
-| Rehearsal coach, anticipated Q&A | [ai-copilot.md](ai-copilot.md) |
-| Audience channels for parking lot | [audience-participation.md](audience-participation.md) |
-| Recap data and engagement metrics | [analytics.md](analytics.md) |
-| Brand-aware timers and themes | [theming-branding.md](theming-branding.md) |
-| Export of recap and handouts | [sharing-publishing.md](sharing-publishing.md) |
-| Approval workflow before sharing recap | [collaboration-workflow.md](collaboration-workflow.md) |
-| Tenant isolation, audit retention | [enterprise-governance.md](enterprise-governance.md) |
-| Live data freshness on stage | [live-data-charts.md](live-data-charts.md) |
-| Agentic state introspection, scripted presenter commands | [agentic-interfaces.md](agentic-interfaces.md) |
-| 3D scenes and video during presentation | [3d-motion-media.md](3d-motion-media.md) |
-| Smart components used on stage | [components-templates.md](components-templates.md) |
+| Concern                                                  | Section                                                      |
+| -------------------------------------------------------- | ------------------------------------------------------------ |
+| Scene graph, CRDT foundation                             | [editor-canvas.md](editor-canvas.md)                         |
+| Animation transitions during stage advance               | [animation-transitions.md](animation-transitions.md)         |
+| Prototype variables, conditional state                   | [prototyping-interactivity.md](prototyping-interactivity.md) |
+| Rehearsal coach, anticipated Q&A                         | [ai-copilot.md](ai-copilot.md)                               |
+| Audience channels for parking lot                        | [audience-participation.md](audience-participation.md)       |
+| Recap data and engagement metrics                        | [analytics.md](analytics.md)                                 |
+| Brand-aware timers and themes                            | [theming-branding.md](theming-branding.md)                   |
+| Export of recap and handouts                             | [sharing-publishing.md](sharing-publishing.md)               |
+| Approval workflow before sharing recap                   | [collaboration-workflow.md](collaboration-workflow.md)       |
+| Tenant isolation, audit retention                        | [enterprise-governance.md](enterprise-governance.md)         |
+| Live data freshness on stage                             | [live-data-charts.md](live-data-charts.md)                   |
+| Agentic state introspection, scripted presenter commands | [agentic-interfaces.md](agentic-interfaces.md)               |
+| 3D scenes and video during presentation                  | [3d-motion-media.md](3d-motion-media.md)                     |
+| Smart components used on stage                           | [components-templates.md](components-templates.md)           |
 
 ---
 
@@ -651,6 +651,7 @@ All endpoints are versioned (`/v1/presenter/...`). Idempotency keys required for
 - Q5: is presenter mode supported on mobile-web (full features), or only on desktop browsers and paired phones?
 
 Out of scope (handled elsewhere):
+
 - Audience-side personalization (see [audience-participation.md](audience-participation.md)).
 - Slide design and editing (see [editor-canvas.md](editor-canvas.md)).
 - Live data binding semantics (see [live-data-charts.md](live-data-charts.md)).

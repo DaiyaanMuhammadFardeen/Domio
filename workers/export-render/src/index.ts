@@ -51,4 +51,10 @@ export function resetWorkerState(): void {
   }
 }
 
-export { ExportRenderWorker, type ExportRenderWorkerOptions, type ExportJob, type ExportJobRepository, type ExportJobStatus } from './worker.js';
+export {
+  ExportRenderWorker,
+  type ExportRenderWorkerOptions,
+  type ExportJob,
+  type ExportJobRepository,
+  type ExportJobStatus,
+} from './worker.js';

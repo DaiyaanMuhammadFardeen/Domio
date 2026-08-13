@@ -21,7 +21,9 @@ import {
 const handlers = new AnnotationHandlers({
   service: new AnnotationService({
     store: new InMemoryAnnotationStore(),
-    audit: new HashChainedAuditEmitter({ rootKey: process.env.ANNOTATION_AUDIT_ROOT_KEY ?? 'dev-only-root' }),
+    audit: new HashChainedAuditEmitter({
+      rootKey: process.env.ANNOTATION_AUDIT_ROOT_KEY ?? 'dev-only-root',
+    }),
     idempotency: new InMemoryIdempotencyStore(),
   }),
 });

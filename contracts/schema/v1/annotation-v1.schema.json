@@ -9,7 +9,11 @@
   "properties": {
     "id": { "type": "string", "format": "uuid" },
     "chart_widget_id": { "type": "string", "format": "uuid" },
-    "scenario_id": { "type": ["string", "null"], "format": "uuid", "description": "Null = visible in all scenarios (default)." },
+    "scenario_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Null = visible in all scenarios (default)."
+    },
     "point": {
       "type": "object",
       "description": "Bound data point the annotation pins to.",

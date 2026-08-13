@@ -9,8 +9,14 @@ export default defineConfig({
     alias: {
       '@domio/object-store': resolve(here, '../../../packages/object-store/src/index.ts'),
       '@domio/audit-ts': resolve(here, '../../../packages/audit-ts/src/index.ts'),
-      '@domio/recording-orchestrator': resolve(here, '../../../services/recording-orchestrator/src/index.ts'),
-      '@domio/recording-extensions': resolve(here, '../../../packages/recording-extensions/src/index.ts'),
+      '@domio/recording-orchestrator': resolve(
+        here,
+        '../../../services/recording-orchestrator/src/index.ts',
+      ),
+      '@domio/recording-extensions': resolve(
+        here,
+        '../../../packages/recording-extensions/src/index.ts',
+      ),
     },
   },
   test: {

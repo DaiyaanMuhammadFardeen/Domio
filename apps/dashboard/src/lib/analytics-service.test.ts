@@ -123,7 +123,8 @@ describe('analytics-service', () => {
     globalThis.fetch = mock;
 
     await fetchDecks('ws-xyz', 'http://wh.test');
-    const init = (mock as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]?.[1] as RequestInit;
+    const init = (mock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[1] as RequestInit;
     expect(init.headers).toMatchObject({ 'x-workspace-id': 'ws-xyz' });
   });
 });

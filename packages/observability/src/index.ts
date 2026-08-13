@@ -104,7 +104,8 @@ function readTransportEnv(): {
 
 export function init(opts: InitOptions): DomioObservability {
   const resource = buildResource(opts);
-  const endpoint = opts.endpoint ?? readEndpoint(process.env as unknown as Record<string, string | undefined>);
+  const endpoint =
+    opts.endpoint ?? readEndpoint(process.env as unknown as Record<string, string | undefined>);
   const envHeaders = readTransportEnv();
 
   if (!endpoint) {

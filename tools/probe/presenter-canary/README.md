@@ -15,12 +15,12 @@ End-to-end probe that exercises the full presenter lifecycle through
 
 ## SLOs surfaced
 
-| Metric                          | p95 target | PagerDuty rule                  |
-| ------------------------------- | ---------- | ------------------------------- |
-| `presenter_ws_open_ms`          | 800 ms     | `presenter-ws-p95-open-high`    |
-| `presenter_annotation_replay_ms`| 200 ms     | `presenter-annotation-p95-replay-high` |
-| `presenter_handoff_ms`          | 1500 ms    | `presenter-handoff-p95-high`    |
-| `presenter_recap_ms`            | 2000 ms    | `presenter-recap-p95-high`      |
+| Metric                           | p95 target | PagerDuty rule                         |
+| -------------------------------- | ---------- | -------------------------------------- |
+| `presenter_ws_open_ms`           | 800 ms     | `presenter-ws-p95-open-high`           |
+| `presenter_annotation_replay_ms` | 200 ms     | `presenter-annotation-p95-replay-high` |
+| `presenter_handoff_ms`           | 1500 ms    | `presenter-handoff-p95-high`           |
+| `presenter_recap_ms`             | 2000 ms    | `presenter-recap-p95-high`             |
 
 ## Usage
 

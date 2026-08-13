@@ -22,7 +22,9 @@ describe('ConsentBanner', () => {
 
   it('reports the active tier in the summary', () => {
     render(<ConsentBanner onChange={vi.fn()} defaultTier="anonymous" />);
-    expect(screen.getAllByTestId('consent-summary')[0]!.textContent).toContain('Anonymous analytics only');
+    expect(screen.getAllByTestId('consent-summary')[0]!.textContent).toContain(
+      'Anonymous analytics only',
+    );
   });
 
   it('confirms the selected tier via onChange', () => {

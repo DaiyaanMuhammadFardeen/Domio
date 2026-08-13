@@ -23,12 +23,12 @@ import AxeBuilder from '@axe-core/playwright';
 
 const DASHBOARD_ROUTES = [
   { name: 'overview', path: '/overview' },
-  { name: 'deck',     path: '/deck/deck-fixture-1' },
-  { name: 'heatmap',  path: '/heatmap' },
-  { name: 'ab',       path: '/ab' },
-  { name: 'crm',      path: '/crm' },
-  { name: 'team',     path: '/team' },
-  { name: 'live',     path: '/live' },
+  { name: 'deck', path: '/deck/deck-fixture-1' },
+  { name: 'heatmap', path: '/heatmap' },
+  { name: 'ab', path: '/ab' },
+  { name: 'crm', path: '/crm' },
+  { name: 'team', path: '/team' },
+  { name: 'live', path: '/live' },
   { name: 'benchmarks', path: '/benchmarks' },
 ];
 

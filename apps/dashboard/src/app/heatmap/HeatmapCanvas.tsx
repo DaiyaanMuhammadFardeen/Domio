@@ -31,9 +31,7 @@ export function HeatmapCanvas({
   onCellClick,
 }: HeatmapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [hover, setHover] = useState<{ x: number; y: number; intensity: number } | null>(
-    null,
-  );
+  const [hover, setHover] = useState<{ x: number; y: number; intensity: number } | null>(null);
 
   const width = cols * cellSize;
   const height = rows * cellSize;

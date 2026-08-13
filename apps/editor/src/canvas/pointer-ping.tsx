@@ -52,11 +52,7 @@ export function pingColor(actorId: string): string {
 }
 
 /** Is this event still within its animation window? */
-export function isPingActive(
-  event: PointerPingEvent,
-  now: number,
-  durationMs: number,
-): boolean {
+export function isPingActive(event: PointerPingEvent, now: number, durationMs: number): boolean {
   return now - event.timestamp < durationMs;
 }
 
@@ -64,11 +60,7 @@ export function isPingActive(
  * Normalised progress of a ping's animation.
  * 0 = just triggered, 1 = animation complete.
  */
-export function getPingProgress(
-  event: PointerPingEvent,
-  now: number,
-  durationMs: number,
-): number {
+export function getPingProgress(event: PointerPingEvent, now: number, durationMs: number): number {
   const elapsed = now - event.timestamp;
   return Math.min(1, Math.max(0, elapsed / durationMs));
 }

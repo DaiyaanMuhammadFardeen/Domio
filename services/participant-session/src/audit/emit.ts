@@ -54,7 +54,8 @@ export class HashChainedAudienceAuditEmitter implements AudienceAuditEmitter {
   }
 
   async emit(event: ParticipantAuditEvent): Promise<AuditChainEntry> {
-    const prev = this.entries.length === 0 ? 'GENESIS' : this.entries[this.entries.length - 1]!.hash;
+    const prev =
+      this.entries.length === 0 ? 'GENESIS' : this.entries[this.entries.length - 1]!.hash;
     const hash = hashEntry(prev, event);
     const entry: AuditChainEntry = { event, prev_hash: prev, hash };
     this.entries.push(entry);
@@ -83,7 +84,9 @@ export class NullAudienceAuditEmitter implements AudienceAuditEmitter {
   async emit(event: ParticipantAuditEvent): Promise<AuditChainEntry> {
     return { event, prev_hash: 'GENESIS', hash: 'NULL' };
   }
-  async head(): Promise<string> { return 'NULL'; }
+  async head(): Promise<string> {
+    return 'NULL';
+  }
   async verify(): Promise<{ ok: true; entries: number } | { ok: false; broken_at: number }> {
     return { ok: true, entries: 0 };
   }

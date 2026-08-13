@@ -99,9 +99,7 @@ describe('detectNPlusOne', () => {
     const parent = span('p1', undefined, 'GET /decks/:id/all');
     const children: OtelSpan[] = [];
     for (let i = 0; i < 60; i++) {
-      children.push(
-        span(`c${i}`, 'p1', 'cache.lookup', { cache: 'memory' }),
-      );
+      children.push(span(`c${i}`, 'p1', 'cache.lookup', { cache: 'memory' }));
     }
     const trace = buildTrace([parent, ...children]);
     const report = detectNPlusOne(trace, { childFanoutThreshold: 50 });
@@ -178,10 +176,58 @@ describe('summariseNPlusOne', () => {
 
 describe('tier1ReadEndpoints', () => {
   const slos: SloEntry[] = [
-    { service: '@domio/collab', slo: 'comments.list', tier: 'tier-1', sli: '', target: '99%', targetProbability: 0.99, window: '30d', windowSeconds: 30 * 86400, owner: '', alertPrefix: 'x', kind: 'availability' },
-    { service: '@domio/collab', slo: 'comments.list', tier: 'tier-1', sli: '', target: '99%', targetProbability: 0.99, window: '30d', windowSeconds: 30 * 86400, owner: '', alertPrefix: 'x', kind: 'availability' },
-    { service: '@domio/realtime-gateway', slo: 'presence.upsert', tier: 'tier-1', sli: '', target: '99%', targetProbability: 0.99, window: '30d', windowSeconds: 30 * 86400, owner: '', alertPrefix: 'x', kind: 'availability' },
-    { service: '@domio/library', slo: 'library.list', tier: 'tier-2', sli: '', target: '99%', targetProbability: 0.99, window: '30d', windowSeconds: 30 * 86400, owner: '', alertPrefix: 'x', kind: 'availability' },
+    {
+      service: '@domio/collab',
+      slo: 'comments.list',
+      tier: 'tier-1',
+      sli: '',
+      target: '99%',
+      targetProbability: 0.99,
+      window: '30d',
+      windowSeconds: 30 * 86400,
+      owner: '',
+      alertPrefix: 'x',
+      kind: 'availability',
+    },
+    {
+      service: '@domio/collab',
+      slo: 'comments.list',
+      tier: 'tier-1',
+      sli: '',
+      target: '99%',
+      targetProbability: 0.99,
+      window: '30d',
+      windowSeconds: 30 * 86400,
+      owner: '',
+      alertPrefix: 'x',
+      kind: 'availability',
+    },
+    {
+      service: '@domio/realtime-gateway',
+      slo: 'presence.upsert',
+      tier: 'tier-1',
+      sli: '',
+      target: '99%',
+      targetProbability: 0.99,
+      window: '30d',
+      windowSeconds: 30 * 86400,
+      owner: '',
+      alertPrefix: 'x',
+      kind: 'availability',
+    },
+    {
+      service: '@domio/library',
+      slo: 'library.list',
+      tier: 'tier-2',
+      sli: '',
+      target: '99%',
+      targetProbability: 0.99,
+      window: '30d',
+      windowSeconds: 30 * 86400,
+      owner: '',
+      alertPrefix: 'x',
+      kind: 'availability',
+    },
   ];
 
   it('deduplicates tier-1 endpoints', () => {

@@ -106,10 +106,9 @@ export class PgLibraryStore implements LibraryStore {
 
   async getEntry(entryId: string): Promise<SlideLibraryEntry | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getEntry');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM slide_library_entry WHERE id = $1',
-      [entryId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM slide_library_entry WHERE id = $1', [
+      entryId,
+    ]);
     if (rows.length === 0) return null;
     return entryRowToDomain(rows[0]!);
   }
@@ -125,7 +124,12 @@ export class PgLibraryStore implements LibraryStore {
 
   async updateEntry(
     entryId: string,
-    patch: Partial<Pick<SlideLibraryEntry, 'status' | 'version_id' | 'superseded_by' | 'last_reviewed_at' | 'updated_at' | 'updated_by'>>,
+    patch: Partial<
+      Pick<
+        SlideLibraryEntry,
+        'status' | 'version_id' | 'superseded_by' | 'last_reviewed_at' | 'updated_at' | 'updated_by'
+      >
+    >,
   ): Promise<SlideLibraryEntry> {
     if (!this.pool) throw new StoreNotConfiguredError('updateEntry');
 
@@ -219,10 +223,9 @@ export class PgLibraryStore implements LibraryStore {
 
   async getVersion(versionId: string): Promise<LibraryVersion | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getVersion');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM library_version WHERE id = $1',
-      [versionId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM library_version WHERE id = $1', [
+      versionId,
+    ]);
     if (rows.length === 0) return null;
     return versionRowToDomain(rows[0]!);
   }
@@ -285,10 +288,9 @@ export class PgLibraryStore implements LibraryStore {
 
   async getBinding(bindingId: string): Promise<AutoUpdateBinding | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getBinding');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM auto_update_binding WHERE id = $1',
-      [bindingId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM auto_update_binding WHERE id = $1', [
+      bindingId,
+    ]);
     if (rows.length === 0) return null;
     return bindingRowToDomain(rows[0]!);
   }
@@ -313,7 +315,19 @@ export class PgLibraryStore implements LibraryStore {
 
   async updateBinding(
     bindingId: string,
-    patch: Partial<Pick<AutoUpdateBinding, 'pinned_version_id' | 'mode' | 'schedule' | 'is_mandatory' | 'last_synced_at' | 'last_sync_status' | 'updated_at' | 'updated_by'>>,
+    patch: Partial<
+      Pick<
+        AutoUpdateBinding,
+        | 'pinned_version_id'
+        | 'mode'
+        | 'schedule'
+        | 'is_mandatory'
+        | 'last_synced_at'
+        | 'last_sync_status'
+        | 'updated_at'
+        | 'updated_by'
+      >
+    >,
   ): Promise<AutoUpdateBinding> {
     if (!this.pool) throw new StoreNotConfiguredError('updateBinding');
 
@@ -384,10 +398,9 @@ export class PgLibraryStore implements LibraryStore {
 
   async deleteBinding(bindingId: string): Promise<void> {
     if (!this.pool) throw new StoreNotConfiguredError('deleteBinding');
-    const { rowCount } = await this.pool.query(
-      'DELETE FROM auto_update_binding WHERE id = $1',
-      [bindingId],
-    );
+    const { rowCount } = await this.pool.query('DELETE FROM auto_update_binding WHERE id = $1', [
+      bindingId,
+    ]);
     if ((rowCount ?? 0) === 0) throw new BindingNotFoundError(bindingId);
   }
 
@@ -432,7 +445,10 @@ function entryRowToDomain(row: Record<string, unknown>): SlideLibraryEntry {
     ...optionalField('team_id', row.team_id as string | undefined),
     ...optionalField('description', row.description as string | undefined),
     ...optionalField('superseded_by', row.superseded_by as string | undefined),
-    ...optionalField('last_reviewed_at', row.last_reviewed_at != null ? toDate(row.last_reviewed_at) : undefined),
+    ...optionalField(
+      'last_reviewed_at',
+      row.last_reviewed_at != null ? toDate(row.last_reviewed_at) : undefined,
+    ),
   };
 }
 
@@ -464,7 +480,10 @@ function bindingRowToDomain(row: Record<string, unknown>): AutoUpdateBinding {
     created_by: row.created_by as string,
     updated_by: row.updated_by as string,
     ...optionalField('pinned_version_id', row.pinned_version_id as string | undefined),
-    ...optionalField('last_synced_at', row.last_synced_at != null ? toDate(row.last_synced_at) : undefined),
+    ...optionalField(
+      'last_synced_at',
+      row.last_synced_at != null ? toDate(row.last_synced_at) : undefined,
+    ),
     ...optionalField('last_sync_status', row.last_sync_status as string | undefined),
   };
 }
@@ -502,7 +521,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

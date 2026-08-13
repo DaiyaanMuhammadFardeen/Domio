@@ -56,7 +56,11 @@ export class PipController {
         kind: 'document',
         document: w.document,
         close: () => {
-          try { w.close(); } catch { /* ignore */ }
+          try {
+            w.close();
+          } catch {
+            /* ignore */
+          }
           this.current = null;
         },
       };
@@ -68,7 +72,9 @@ export class PipController {
     const synth: PipWindow = {
       kind: 'fallback',
       document: window.document,
-      close: () => { this.current = null; },
+      close: () => {
+        this.current = null;
+      },
     };
     this.current = synth;
     return synth;
@@ -80,18 +86,24 @@ export class PipController {
     this.current = null;
   }
 
-  active(): PipWindow | null { return this.current; }
+  active(): PipWindow | null {
+    return this.current;
+  }
 }
 
 /** React hook — exposes the controller state and a toggle function. */
-export function usePipController(): PipControllerState & { toggle: (w?: number, h?: number) => Promise<void> } {
+export function usePipController(): PipControllerState & {
+  toggle: (w?: number, h?: number) => Promise<void>;
+} {
   const controller = useState(() => new PipController())[0];
   const [supported, setSupported] = useState(false);
   const [active, setActive] = useState<PipWindow | null>(null);
 
   useEffect(() => {
     setSupported(controller.isSupported());
-    return () => { controller.close(); };
+    return () => {
+      controller.close();
+    };
   }, [controller]);
 
   const toggle = async (w?: number, h?: number) => {

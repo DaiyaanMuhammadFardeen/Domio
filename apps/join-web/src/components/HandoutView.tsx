@@ -47,10 +47,7 @@ export function HandoutView({
       <section data-testid="handout-attended-slides" className="flex flex-col gap-2">
         <header className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-slate-700">Slides you attended</h3>
-          <span
-            className="text-xs text-slate-500"
-            data-testid="handout-attended-count"
-          >
+          <span className="text-xs text-slate-500" data-testid="handout-attended-count">
             {slides.length}
           </span>
         </header>
@@ -64,9 +61,7 @@ export function HandoutView({
                 className="flex items-baseline gap-2 border-b border-slate-100 pb-1"
                 data-testid={`handout-slide-${slide.index}`}
               >
-                <span className="text-xs font-mono text-slate-400 w-6">
-                  {slide.index}
-                </span>
+                <span className="text-xs font-mono text-slate-400 w-6">{slide.index}</span>
                 <span className="text-sm text-slate-800">{slide.title}</span>
               </li>
             ))}

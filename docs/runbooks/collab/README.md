@@ -8,9 +8,9 @@ Yjs collab room service; awareness + undo + persistence.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-collab` | availability | 99.9% | 30d |
+| SLO            | Kind         | Target | Window |
+| -------------- | ------------ | ------ | ------ |
+| `avail-collab` | availability | 99.9%  | 30d    |
 
 ## Triage
 

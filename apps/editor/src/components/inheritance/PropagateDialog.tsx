@@ -121,10 +121,14 @@ export function PropagateDialog({
           gap: 12,
         }}
       >
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <header
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
+        >
           <h2 id={`${dataTestId}-heading`} style={{ margin: 0, fontSize: 18 }}>
             <FormattedMessage id="editor.inheritance.propagate.heading" />
-            {masterTitle ? <span style={{ fontWeight: 400, marginLeft: 8 }}>· {masterTitle}</span> : null}
+            {masterTitle ? (
+              <span style={{ fontWeight: 400, marginLeft: 8 }}>· {masterTitle}</span>
+            ) : null}
           </h2>
           <div style={{ display: 'flex', gap: 8 }}>
             <button
@@ -133,7 +137,13 @@ export function PropagateDialog({
               data-testid={`${dataTestId}-select-all`}
               style={{ padding: '4px 10px', cursor: 'pointer' }}
             >
-              <FormattedMessage id={allSelected ? 'editor.inheritance.propagate.deselectAll' : 'editor.inheritance.propagate.selectAll'} />
+              <FormattedMessage
+                id={
+                  allSelected
+                    ? 'editor.inheritance.propagate.deselectAll'
+                    : 'editor.inheritance.propagate.selectAll'
+                }
+              />
             </button>
           </div>
         </header>
@@ -165,7 +175,14 @@ export function PropagateDialog({
                     background: checked ? 'rgba(59,130,246,0.06)' : 'transparent',
                   }}
                 >
-                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 12,
+                      cursor: 'pointer',
+                    }}
+                  >
                     <input
                       type="checkbox"
                       checked={checked}
@@ -176,7 +193,8 @@ export function PropagateDialog({
                     <span style={{ flex: 1, minWidth: 0 }}>
                       <span style={{ display: 'block', fontWeight: 600 }}>{slide.title}</span>
                       <span style={{ display: 'block', fontSize: 12, opacity: 0.7 }}>
-                        <FormattedMessage id="editor.inheritance.propagate.lastChanged" /> {formatTimestamp(slide.lastChangedAtMs)}
+                        <FormattedMessage id="editor.inheritance.propagate.lastChanged" />{' '}
+                        {formatTimestamp(slide.lastChangedAtMs)}
                       </span>
                       <span style={{ display: 'block', fontSize: 12, opacity: 0.7 }}>
                         <FormattedMessage

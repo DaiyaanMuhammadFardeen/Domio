@@ -31,15 +31,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-domio}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-domio}
       POSTGRES_DB: ${POSTGRES_DB:-domio}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+      POSTGRES_INITDB_ARGS: '--encoding=UTF-8 --locale=C'
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init-postgres.sh:/docker-entrypoint-initdb.d/00-init.sh:ro
     healthcheck:
       <<: *healthcheck-defaults
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-domio} -d ${POSTGRES_DB:-domio}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-domio} -d ${POSTGRES_DB:-domio}']
 
   # ---------------------------------------------------------------------------
   # Redis — ephemeral cache + rate-limit + idempotency.
@@ -48,14 +48,23 @@ services:
     image: redis:7.4-alpine
     container_name: domio-redis
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+    command:
+      [
+        'redis-server',
+        '--appendonly',
+        'yes',
+        '--maxmemory',
+        '512mb',
+        '--maxmemory-policy',
+        'allkeys-lru',
+      ]
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis-data:/data
     healthcheck:
       <<: *healthcheck-defaults
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
 
   # ---------------------------------------------------------------------------
   # NATS JetStream — event bus + ephemeral coordination.
@@ -64,16 +73,16 @@ services:
     image: nats:2.10.22-alpine
     container_name: domio-nats
     restart: unless-stopped
-    command: ["nats-server", "-js", "-sd", "/data", "-m", "8222"]
+    command: ['nats-server', '-js', '-sd', '/data', '-m', '8222']
     ports:
-      - "4222:4222"   # client
-      - "8222:8222"   # monitoring
-      - "6222:6222"   # cluster
+      - '4222:4222' # client
+      - '8222:8222' # monitoring
+      - '6222:6222' # cluster
     volumes:
       - nats-data:/data
     healthcheck:
       <<: *healthcheck-defaults
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8222/healthz']
 
   # ---------------------------------------------------------------------------
   # MinIO — S3-compatible object storage (assets, exports, snapshots).
@@ -82,18 +91,18 @@ services:
     image: minio/minio:RELEASE.2024-10-13T13-34-11Z
     container_name: domio-minio
     restart: unless-stopped
-    command: ["server", "/data", "--console-address", ":9001"]
+    command: ['server', '/data', '--console-address', ':9001']
     environment:
       MINIO_ROOT_USER: ${S3_ACCESS_KEY:-domio}
       MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-domio-dev-only}
     ports:
-      - "9000:9000"   # S3 API
-      - "9001:9001"   # console
+      - '9000:9000' # S3 API
+      - '9001:9001' # console
     volumes:
       - minio-data:/data
     healthcheck:
       <<: *healthcheck-defaults
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
 
   minio-init:
     image: minio/mc:RELEASE.2024-10-08T09-37-26Z
@@ -107,7 +116,7 @@ services:
       mc mb --ignore-existing local/${S3_BUCKET:-domio-assets} &&
       mc anonymous set download local/${S3_BUCKET:-domio-assets}/public || true
       "
-    restart: "no"
+    restart: 'no'
 
   # ---------------------------------------------------------------------------
   # ClickHouse — analytics OLAP warehouse.
@@ -122,13 +131,23 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-domio}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     ports:
-      - "8123:8123"   # HTTP
-      - "9002:9000"   # native TCP (host 9002 → container 9000; MinIO reserves 9000/9001)
+      - '8123:8123' # HTTP
+      - '9002:9000' # native TCP (host 9002 → container 9000; MinIO reserves 9000/9001)
     volumes:
       - clickhouse-data:/var/lib/clickhouse
     healthcheck:
       <<: *healthcheck-defaults
-      test: ["CMD", "clickhouse-client", "--user", "domio", "--password", "domio", "--query", "SELECT 1"]
+      test:
+        [
+          'CMD',
+          'clickhouse-client',
+          '--user',
+          'domio',
+          '--password',
+          'domio',
+          '--query',
+          'SELECT 1',
+        ]
 
   # ---------------------------------------------------------------------------
   # OpenSearch — search + semantic queries.
@@ -141,22 +160,22 @@ services:
       cluster.name: domio-dev
       node.name: domio-opensearch
       discovery.type: single-node
-      bootstrap.memory_lock: "true"
-      "OPENSEARCH_JAVA_OPTS": "-Xms512m -Xmx512m"
-      "DISABLE_SECURITY_PLUGIN": "true"
-      "DISABLE_INSTALL_DEMO_CONFIG": "true"
+      bootstrap.memory_lock: 'true'
+      'OPENSEARCH_JAVA_OPTS': '-Xms512m -Xmx512m'
+      'DISABLE_SECURITY_PLUGIN': 'true'
+      'DISABLE_INSTALL_DEMO_CONFIG': 'true'
     ulimits:
       memlock:
         soft: -1
         hard: -1
     ports:
-      - "9200:9200"
-      - "9600:9600"
+      - '9200:9200'
+      - '9600:9600'
     volumes:
       - opensearch-data:/usr/share/opensearch/data
     healthcheck:
       <<: *healthcheck-defaults
-      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -E 'green|yellow'"]
+      test: ['CMD-SHELL', "curl -s http://localhost:9200/_cluster/health | grep -E 'green|yellow'"]
 
   # ---------------------------------------------------------------------------
   # MailHog — local email testing.
@@ -166,8 +185,8 @@ services:
     container_name: domio-mailhog
     restart: unless-stopped
     ports:
-      - "1025:1025"   # SMTP
-      - "8025:8025"   # web UI
+      - '1025:1025' # SMTP
+      - '8025:8025' # web UI
 
   # ---------------------------------------------------------------------------
   # OpenTelemetry Collector — receives OTLP gRPC.
@@ -176,12 +195,12 @@ services:
     image: otel/opentelemetry-collector-contrib:0.114.0
     container_name: domio-otel-collector
     restart: unless-stopped
-    command: ["--config=/etc/otel-collector-config.yaml"]
+    command: ['--config=/etc/otel-collector-config.yaml']
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     ports:
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
+      - '4317:4317' # OTLP gRPC
+      - '4318:4318' # OTLP HTTP
     depends_on:
       - jaeger
       - prometheus
@@ -194,14 +213,14 @@ services:
     container_name: domio-prometheus
     restart: unless-stopped
     command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--web.enable-lifecycle"
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
 
   # ---------------------------------------------------------------------------
   # Grafana — dashboards.
@@ -213,12 +232,12 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_USERS_ALLOW_SIGN_UP: 'false'
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
     ports:
-      - "3001:3000"
+      - '3001:3000'
     depends_on:
       - prometheus
 
@@ -230,11 +249,11 @@ services:
     container_name: domio-jaeger
     restart: unless-stopped
     environment:
-      COLLECTOR_OTLP_ENABLED: "true"
+      COLLECTOR_OTLP_ENABLED: 'true'
     ports:
-      - "16686:16686"   # UI
-      - "14268:14268"   # Jaeger HTTP
-      - "14250:14250"   # Jaeger gRPC
+      - '16686:16686' # UI
+      - '14268:14268' # Jaeger HTTP
+      - '14250:14250' # Jaeger gRPC
 
   # ---------------------------------------------------------------------------
   # Phase 15 — Presenter session service (W1).
@@ -264,8 +283,8 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "3010:3010"
-    profiles: ["phase15", "all"]
+      - '3010:3010'
+    profiles: ['phase15', 'all']
 
   # ---------------------------------------------------------------------------
   # Phase 15 — Phone pairing service (W6).
@@ -291,8 +310,8 @@ services:
       redis:
         condition: service_healthy
     ports:
-      - "3011:3011"
-    profiles: ["phase15", "all"]
+      - '3011:3011'
+    profiles: ['phase15', 'all']
 
   # ---------------------------------------------------------------------------
   # Phase 15 — Thumbnail service (W3).
@@ -322,8 +341,8 @@ services:
       minio:
         condition: service_healthy
     ports:
-      - "3012:3012"
-    profiles: ["phase15", "all"]
+      - '3012:3012'
+    profiles: ['phase15', 'all']
 
   # ---------------------------------------------------------------------------
   # Phase 15 — Presenter Next.js app (W2).
@@ -345,8 +364,8 @@ services:
       - phone-pairing
       - thumbnail
     ports:
-      - "3002:3002"
-    profiles: ["phase15", "all"]
+      - '3002:3002'
+    profiles: ['phase15', 'all']
 
   # ---------------------------------------------------------------------------
   # Phase 17 — ClickHouse loader (W2). Kafka consumer that ships
@@ -376,8 +395,8 @@ services:
       clickhouse:
         condition: service_healthy
     ports:
-      - "3040:8080"
-    profiles: ["phase17", "all"]
+      - '3040:8080'
+    profiles: ['phase17', 'all']
 
   # ---------------------------------------------------------------------------
   # Phase 17 — Event ingest edge (W1). Hono + ajv validation + HMAC
@@ -409,8 +428,8 @@ services:
       nats:
         condition: service_healthy
     ports:
-      - "3020:3020"
-    profiles: ["phase17", "all"]
+      - '3020:3020'
+    profiles: ['phase17', 'all']
 
   # ---------------------------------------------------------------------------
   # Phase 17 — Analytics warehouse (W2). Read API + rollup
@@ -430,13 +449,13 @@ services:
       CLICKHOUSE_DB: domio_analytics
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
-      READ_ONLY: "true"
+      READ_ONLY: 'true'
     depends_on:
       clickhouse:
         condition: service_healthy
     ports:
-      - "3030:3030"
-    profiles: ["phase17", "all"]
+      - '3030:3030'
+    profiles: ['phase17', 'all']
 
 volumes:
   postgres-data:

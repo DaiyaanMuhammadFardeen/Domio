@@ -49,14 +49,11 @@ export default function ApiExplorerPage() {
     };
   }, []);
 
-  const handleSend = useCallback(
-    async (opts: Parameters<typeof executeRequest>[0]) => {
-      setError(null);
-      const res = await executeRequest(opts);
-      return res;
-    },
-    [],
-  );
+  const handleSend = useCallback(async (opts: Parameters<typeof executeRequest>[0]) => {
+    setError(null);
+    const res = await executeRequest(opts);
+    return res;
+  }, []);
 
   // Auto-clear transient notices after 3s.
   useEffect(() => {

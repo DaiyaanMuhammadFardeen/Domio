@@ -157,10 +157,7 @@ export function ShareStateButton({
         {state.status === 'encoding' ? 'Sharing…' : 'Share current state'}
       </button>
       {state.status === 'copied' && state.lastUrl ? (
-        <span
-          className="share-state-button__hint"
-          data-testid={`${testIdPrefix}-copied`}
-        >
+        <span className="share-state-button__hint" data-testid={`${testIdPrefix}-copied`}>
           Copied to clipboard
         </span>
       ) : null}

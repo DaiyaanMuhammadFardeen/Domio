@@ -119,7 +119,12 @@ export class IdbQueueStore implements QueueStore {
           return;
         }
         const v = cursor.value as { seq: number; bytes: number; event: unknown; dropped: number };
-        records.push({ seq: v.seq, bytes: v.bytes, event: v.event as QueuedEvent['event'], dropped: v.dropped });
+        records.push({
+          seq: v.seq,
+          bytes: v.bytes,
+          event: v.event as QueuedEvent['event'],
+          dropped: v.dropped,
+        });
         cursor.continue();
       };
       cursorReq.onerror = () => reject(cursorReq.error ?? new Error('IDB cursor failed'));

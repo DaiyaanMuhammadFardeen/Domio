@@ -31,7 +31,7 @@ Each feature below is annotated with: a short **intent** statement, **acceptance
   - Snap-to-grid resolves to the nearest integer multiple of `gridStep` (configurable 1, 2, 4, 8, 16 px).
   - Pressing `Shift` constrains to 0°/45°/90° during rotation and preserves aspect ratio during resize.
 - **Behavioral details / edge cases**
-  - A drag transforms a `Layer`'s `transform: { x, y, w, h, rotation }` via an *intermediate* ephemeral layer in the history engine (#12) so the underlying scene graph never sees per-frame mutations.
+  - A drag transforms a `Layer`'s `transform: { x, y, w, h, rotation }` via an _intermediate_ ephemeral layer in the history engine (#12) so the underlying scene graph never sees per-frame mutations.
   - Drop targets inside auto-layout containers (#7) trigger reflow on drop, not before.
   - Dropping outside any slide frame creates a new slide at the drop point with the element's bounding box as initial slide aspect ratio.
   - During a multi-touch drag, only the first touch owns the gesture; subsequent touches are routed to the input pipeline's pointer arbitration.
@@ -69,7 +69,7 @@ Each feature below is annotated with: a short **intent** statement, **acceptance
 
 - **Intent:** A right-rail panel showing the full z-order tree with drag-to-reorder, type-ahead search, and tag filters.
 - **Acceptance criteria**
-  - Drag-reorder is a *structural* operation, not a z-index bump: it re-parents across frames (#6) when dropped onto another layer.
+  - Drag-reorder is a _structural_ operation, not a z-index bump: it re-parents across frames (#6) when dropped onto another layer.
   - Search matches `name`, `role`, `dataTags`, and component-id substrings; result set is highlighted; non-matching rows collapse to dimmed.
   - Filters: by `layerType`, by `locked` state, by `dataSourceId` (cross-section tie to #48), and by `componentInstanceId` (#25).
 - **Behavioral details / edge cases**
@@ -99,7 +99,7 @@ Each feature below is annotated with: a short **intent** statement, **acceptance
   - Inserting a child or editing text triggers a reflow in the next animation frame.
   - Auto-layout state is serializable; flipping a frame to auto-layout computes the layout from children's bounds.
 - **Behavioral details / edge cases**
-  - Constraints (#8) are applied *after* auto-layout resolves positions, so a `pin: left` child still tracks the container's left edge as the container grows.
+  - Constraints (#8) are applied _after_ auto-layout resolves positions, so a `pin: left` child still tracks the container's left edge as the container grows.
   - Children with explicit `position: absolute` escape the layout pass.
   - Layout runs on the renderer thread (off main thread) for frames with >100 children.
 - **Dependencies:** #6 (frames), #8 (constraints), #25 (smart components reflow with content), #85 (animation timelines can target auto-layout `gap`).
@@ -226,7 +226,7 @@ Each feature below is annotated with: a short **intent** statement, **acceptance
   - Cursor position updates fan out within 80 ms p95 over a healthy network.
   - A remote user's selection is rendered as a colored outline matching their avatar color.
   - Avatar list in the top-right shows all present users; clicking an avatar follows their viewport.
-  - Edits from two users to the same layer are resolved by CRDT (#21) — last-writer-wins is *never* the fallback for property changes.
+  - Edits from two users to the same layer are resolved by CRDT (#21) — last-writer-wins is _never_ the fallback for property changes.
 - **Behavioral details / edge cases**
   - Each user has a stable `presenceId` and a session token; presence is heartbeated every 5 s.
   - Cursor positions are throttled to 30 Hz with linear interpolation between samples on the receiver.
@@ -373,57 +373,60 @@ These flows are the **acceptance paths** for the section — every testable user
 
 ### 3.1 Functional requirements (summary)
 
-| ID | Requirement | Source feature(s) |
-|----|-------------|-------------------|
-| F-1 | Render an infinite canvas with multiple aspect ratios simultaneously | #1 |
-| F-2 | Author and transform layers via drag-and-drop with snap and guides | #2, #3 |
-| F-3 | Manage layer organization via select/group/lock/hide/layers panel | #4, #5 |
-| F-4 | Compose nested frames with auto-layout and constraints | #6, #7, #8 |
-| F-5 | Edit vectors with pen + booleans; align to grid/guides | #9, #10 |
-| F-6 | Zoom 2 %–6400 % with ≥ 55 FPS on reference hardware | #11 |
-| F-7 | Undo/redo any operation with visual history | #12 |
-| F-8 | Drive all authoring via keyboard and Cmd+K palette | #13 |
-| F-9 | Reuse styles via copy/paste/painter/match | #14 |
-| F-10 | Sample colors from anywhere via eyedropper | #15 |
-| F-11 | Right-click context menus per layer type | #16 |
-| F-12 | Multiplayer cursors, selections, presence | #17, #18 |
-| F-13 | Branch/merge with merge requests | #19, #20 |
-| F-14 | Offline editing with CRDT-based conflict-free sync | #21 |
-| F-15 | Autosave per keystroke with no save UI | #22 |
+| ID   | Requirement                                                          | Source feature(s) |
+| ---- | -------------------------------------------------------------------- | ----------------- |
+| F-1  | Render an infinite canvas with multiple aspect ratios simultaneously | #1                |
+| F-2  | Author and transform layers via drag-and-drop with snap and guides   | #2, #3            |
+| F-3  | Manage layer organization via select/group/lock/hide/layers panel    | #4, #5            |
+| F-4  | Compose nested frames with auto-layout and constraints               | #6, #7, #8        |
+| F-5  | Edit vectors with pen + booleans; align to grid/guides               | #9, #10           |
+| F-6  | Zoom 2 %–6400 % with ≥ 55 FPS on reference hardware                  | #11               |
+| F-7  | Undo/redo any operation with visual history                          | #12               |
+| F-8  | Drive all authoring via keyboard and Cmd+K palette                   | #13               |
+| F-9  | Reuse styles via copy/paste/painter/match                            | #14               |
+| F-10 | Sample colors from anywhere via eyedropper                           | #15               |
+| F-11 | Right-click context menus per layer type                             | #16               |
+| F-12 | Multiplayer cursors, selections, presence                            | #17, #18          |
+| F-13 | Branch/merge with merge requests                                     | #19, #20          |
+| F-14 | Offline editing with CRDT-based conflict-free sync                   | #21               |
+| F-15 | Autosave per keystroke with no save UI                               | #22               |
 
 ### 3.2 Non-functional requirements (latency budgets)
 
-| Interaction | Budget (p95) | Notes |
-|-------------|--------------|-------|
-| Pointer-down → first frame response | 8 ms | hard ceiling; under-budget is the goal |
-| Drag frame rate | ≥ 55 FPS (100 layers), ≥ 30 FPS (5,000 layers) | per #11 |
-| Zoom frame rate | ≥ 55 FPS | mid-zoom; snaps can drop to 30 FPS |
-| Op commit (local) | ≤ 16 ms | write to IndexedDB |
-| Op round-trip (online, healthy network) | ≤ 200 ms | send + ack |
-| Remote cursor render | ≤ 80 ms | from sender's pointer-move to receiver's render |
-| CRDT convergence on reconnect (offline < 5 min, < 500 ops) | ≤ 1 s | handshake + replay |
-| History scrub (timeline preview) | ≤ 200 ms per scrub | thumbnail + state replay |
-| Branch creation | ≤ 500 ms | copy scene-graph reference + log a branch op |
-| 3-way merge diff render | ≤ 1.5 s for decks up to 200 slides |  |
-| Cmd+K palette open | ≤ 50 ms | cold; ≤ 16 ms warm |
-| Eyedropper pixel sample | ≤ 16 ms | including sRGB→working-color-space conversion |
-| Autosave durability | 16 ms | per op |
+| Interaction                                                | Budget (p95)                                   | Notes                                           |
+| ---------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------- |
+| Pointer-down → first frame response                        | 8 ms                                           | hard ceiling; under-budget is the goal          |
+| Drag frame rate                                            | ≥ 55 FPS (100 layers), ≥ 30 FPS (5,000 layers) | per #11                                         |
+| Zoom frame rate                                            | ≥ 55 FPS                                       | mid-zoom; snaps can drop to 30 FPS              |
+| Op commit (local)                                          | ≤ 16 ms                                        | write to IndexedDB                              |
+| Op round-trip (online, healthy network)                    | ≤ 200 ms                                       | send + ack                                      |
+| Remote cursor render                                       | ≤ 80 ms                                        | from sender's pointer-move to receiver's render |
+| CRDT convergence on reconnect (offline < 5 min, < 500 ops) | ≤ 1 s                                          | handshake + replay                              |
+| History scrub (timeline preview)                           | ≤ 200 ms per scrub                             | thumbnail + state replay                        |
+| Branch creation                                            | ≤ 500 ms                                       | copy scene-graph reference + log a branch op    |
+| 3-way merge diff render                                    | ≤ 1.5 s for decks up to 200 slides             |                                                 |
+| Cmd+K palette open                                         | ≤ 50 ms                                        | cold; ≤ 16 ms warm                              |
+| Eyedropper pixel sample                                    | ≤ 16 ms                                        | including sRGB→working-color-space conversion   |
+| Autosave durability                                        | 16 ms                                          | per op                                          |
 
 ### 3.3 Conflict resolution semantics (CRDT choice and justification)
 
 **Choice:** A composite CRDT built from:
+
 - **Yjs-style `Y.Map` and `Y.Array`** for the scene-graph tree (layers, frames, slides).
 - **Per-property LWW (Last-Writer-Wins) registers** with hybrid logical clocks for scalar properties (transforms, styles, names).
 - **RGA (Replicated Growable Array)** for ordered collections (slide rail order, layer z-order within a parent, layers panel reorder).
 - **Per-layer vector clock** as the tiebreaker for LWW when wall clocks collide.
 
 **Justification:**
-- LWW per-property gives intuitive "whoever changed it most recently wins" semantics for the *vast* majority of conflicts (transforms, colors, text content).
+
+- LWW per-property gives intuitive "whoever changed it most recently wins" semantics for the _vast_ majority of conflicts (transforms, colors, text content).
 - RGA preserves ordering across concurrent reorderings — without it, two users concurrently reordering the slide rail could cause silent deletions.
 - Vector clocks per layer give deterministic resolution without a central authority (no server-side coordinator required for convergence), making offline (#21) safe.
-- We deliberately do *not* use OT (Operational Transformation); OT requires a central server to serialize ops and breaks down offline.
+- We deliberately do _not_ use OT (Operational Transformation); OT requires a central server to serialize ops and breaks down offline.
 
 **Edge cases:**
+
 - Concurrent edits to the same property: LWW picks the higher HLC timestamp; the loser receives an "edit superseded" notification (#17) and can manually re-apply if desired.
 - Concurrent slide deletion vs. child edit: deletion wins (the layer is gone); the child's edit is tombstoned and pruned after 30 days.
 - Concurrent branch creation from the same checkpoint: both branches succeed; they share the parent commit.
@@ -475,30 +478,31 @@ These flows are the **acceptance paths** for the section — every testable user
 
 ### 4.2 Modular client breakdown
 
-| Module | Responsibility | Boundary |
-|--------|----------------|----------|
-| **Renderer** | WebGL2/WebGPU pipeline, tile cache, anti-aliasing, GPU adapter failover | Pure rendering — does not mutate scene graph |
-| **Scene graph** | In-memory tree of `Slide`, `FrameLayer`, `GroupLayer`, etc. | Reactive: emits events; does not know about renderer |
-| **Input pipeline** | Pointer/keyboard arbitration, gesture recognition (pinch, drag, marquee, chord) | Emits semantic intents; never touches scene graph directly |
-| **History engine** | Command pattern; named ops; undo/redo stack; checkpoint pinning | Wraps scene-graph mutations |
-| **CRDT sync engine** | Local replica; outbound op queue; inbound op applier; conflict resolution | Wraps history engine; emits "remote intent" events |
-| **Presence service** | Cursor/selection publishing; chat/ping; avatar registry | Uses CRDT sync transport; separate ephemeral state store |
-| **Branch store** | Branch/merge request management; lineage graph; diff computation | Talks to server branch API + local CRDT |
+| Module               | Responsibility                                                                  | Boundary                                                   |
+| -------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Renderer**         | WebGL2/WebGPU pipeline, tile cache, anti-aliasing, GPU adapter failover         | Pure rendering — does not mutate scene graph               |
+| **Scene graph**      | In-memory tree of `Slide`, `FrameLayer`, `GroupLayer`, etc.                     | Reactive: emits events; does not know about renderer       |
+| **Input pipeline**   | Pointer/keyboard arbitration, gesture recognition (pinch, drag, marquee, chord) | Emits semantic intents; never touches scene graph directly |
+| **History engine**   | Command pattern; named ops; undo/redo stack; checkpoint pinning                 | Wraps scene-graph mutations                                |
+| **CRDT sync engine** | Local replica; outbound op queue; inbound op applier; conflict resolution       | Wraps history engine; emits "remote intent" events         |
+| **Presence service** | Cursor/selection publishing; chat/ping; avatar registry                         | Uses CRDT sync transport; separate ephemeral state store   |
+| **Branch store**     | Branch/merge request management; lineage graph; diff computation                | Talks to server branch API + local CRDT                    |
 
 ### 4.3 Server modular breakdown
 
-| Module | Responsibility | Notes |
-|--------|----------------|-------|
-| **API gateway** | REST + GraphQL surface (`/v1/...`); auth; rate limiting | OpenAPI source-of-truth |
-| **Sync service** | WS endpoint; CRDT op relay; per-deck fan-out | Stateless WS nodes; presence pinned via Redis |
-| **Presence service** | Cursor/selection pubsub; ephemeral storage (TTL 60 s) | Backed by Redis |
-| **Branch/merge service** | Branch creation; 3-way diff; merge request lifecycle | Computes diffs against CRDT snapshots |
-| **History snapshotter** | Periodic CRDT state snapshots (every 5,000 ops) | Stored in Postgres JSONB + S3 |
-| **Asset service** | Signed-URL upload; image transcoding; vector tile generation | Fronted by CDN |
+| Module                   | Responsibility                                               | Notes                                         |
+| ------------------------ | ------------------------------------------------------------ | --------------------------------------------- |
+| **API gateway**          | REST + GraphQL surface (`/v1/...`); auth; rate limiting      | OpenAPI source-of-truth                       |
+| **Sync service**         | WS endpoint; CRDT op relay; per-deck fan-out                 | Stateless WS nodes; presence pinned via Redis |
+| **Presence service**     | Cursor/selection pubsub; ephemeral storage (TTL 60 s)        | Backed by Redis                               |
+| **Branch/merge service** | Branch creation; 3-way diff; merge request lifecycle         | Computes diffs against CRDT snapshots         |
+| **History snapshotter**  | Periodic CRDT state snapshots (every 5,000 ops)              | Stored in Postgres JSONB + S3                 |
+| **Asset service**        | Signed-URL upload; image transcoding; vector tile generation | Fronted by CDN                                |
 
 ### 4.4 Modular monolith now vs. split later — long-term rationale
 
 We deliberately start as a **modular monolith** for these reasons:
+
 - A single team can move faster without network/observability overhead between services.
 - Most "seams" (presence vs. sync vs. branches) are small dataflows; splitting them prematurely creates a distributed monolith with worse debuggability.
 - The modules above are written with clear boundaries (typed RPC-style contracts, separate Postgres schemas per module where appropriate), so when scale demands a split (e.g., presence becoming its own cluster), the cut is along an existing boundary.
@@ -636,6 +640,7 @@ CREATE INDEX presence_deck ON presence_sessions(deck_id);
 ### 5.2 JSONB scene graph storage
 
 The per-slide scene graph is stored as JSONB for several reasons:
+
 - Whole-deck read/write is one row, avoiding N+1 queries during a typical "open the deck" load.
 - Postgres JSONB supports GIN indexes on selected properties (e.g., `scene->'layers'->>'type'`) for the layers-panel search (#5).
 - CRDT snapshots (#21) are themselves JSONB; storing both in the same format reduces impedance mismatch.
@@ -660,28 +665,28 @@ The per-slide scene graph is stored as JSONB for several reasons:
 
 ### 6.1 REST surface (`/v1`)
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| `GET` | `/decks/:deckId` | Deck metadata |
-| `POST` | `/decks` | Create deck |
-| `PATCH` | `/decks/:deckId` | Update metadata |
-| `GET` | `/decks/:deckId/slides` | List slides (summary) |
-| `GET` | `/decks/:deckId/slides/:slideId` | Full slide scene graph |
-| `POST` | `/decks/:deckId/slides` | Insert slide (returns op) |
-| `PATCH` | `/decks/:deckId/slides/:slideId` | Mutate slide (returns op) |
-| `DELETE` | `/decks/:deckId/slides/:slideId` | Delete slide |
-| `POST` | `/decks/:deckId/checkpoints` | Create named checkpoint |
-| `GET` | `/decks/:deckId/checkpoints` | List checkpoints |
-| `POST` | `/decks/:deckId/checkpoints/:id/restore` | Restore to checkpoint |
-| `GET` | `/decks/:deckId/diff?from=:seq&to=:seq` | Diff between two checkpoints |
-| `POST` | `/decks/:deckId/branches` | Create branch |
-| `GET` | `/decks/:deckId/branches` | List branches |
-| `POST` | `/decks/:deckId/branches/:branchId/checkout` | Switch to branch (returns WS endpoint) |
-| `POST` | `/decks/:deckId/merge_requests` | Create MR |
-| `GET` | `/decks/:deckId/merge_requests/:mrId` | Get MR + diff |
-| `POST` | `/decks/:deckId/merge_requests/:mrId/resolve` | Submit resolution |
-| `POST` | `/decks/:deckId/merge_requests/:mrId/merge` | Commit merge |
-| `POST` | `/decks/:deckId/ops` | Bulk op submission (also handled via WS) |
+| Method   | Path                                          | Purpose                                  |
+| -------- | --------------------------------------------- | ---------------------------------------- |
+| `GET`    | `/decks/:deckId`                              | Deck metadata                            |
+| `POST`   | `/decks`                                      | Create deck                              |
+| `PATCH`  | `/decks/:deckId`                              | Update metadata                          |
+| `GET`    | `/decks/:deckId/slides`                       | List slides (summary)                    |
+| `GET`    | `/decks/:deckId/slides/:slideId`              | Full slide scene graph                   |
+| `POST`   | `/decks/:deckId/slides`                       | Insert slide (returns op)                |
+| `PATCH`  | `/decks/:deckId/slides/:slideId`              | Mutate slide (returns op)                |
+| `DELETE` | `/decks/:deckId/slides/:slideId`              | Delete slide                             |
+| `POST`   | `/decks/:deckId/checkpoints`                  | Create named checkpoint                  |
+| `GET`    | `/decks/:deckId/checkpoints`                  | List checkpoints                         |
+| `POST`   | `/decks/:deckId/checkpoints/:id/restore`      | Restore to checkpoint                    |
+| `GET`    | `/decks/:deckId/diff?from=:seq&to=:seq`       | Diff between two checkpoints             |
+| `POST`   | `/decks/:deckId/branches`                     | Create branch                            |
+| `GET`    | `/decks/:deckId/branches`                     | List branches                            |
+| `POST`   | `/decks/:deckId/branches/:branchId/checkout`  | Switch to branch (returns WS endpoint)   |
+| `POST`   | `/decks/:deckId/merge_requests`               | Create MR                                |
+| `GET`    | `/decks/:deckId/merge_requests/:mrId`         | Get MR + diff                            |
+| `POST`   | `/decks/:deckId/merge_requests/:mrId/resolve` | Submit resolution                        |
+| `POST`   | `/decks/:deckId/merge_requests/:mrId/merge`   | Commit merge                             |
+| `POST`   | `/decks/:deckId/ops`                          | Bulk op submission (also handled via WS) |
 
 Versioning: `/v1` is the only path-versioned namespace. Within a version, fields are added non-breakingly; removals require `/v2`. Deprecation: 6-month sunset with `Sunset` header per RFC 8594.
 
@@ -731,20 +736,20 @@ input LayerFilter {
 
 The sync WS endpoint (`wss://api.domio/v1/sync/:deckId`) speaks a binary protocol (MessagePack) with these top-level message kinds:
 
-| Kind | Direction | Payload |
-|------|-----------|---------|
-| `hello` | C→S | `{ sessionId, token, lastHLC }` |
-| `welcome` | S→C | `{ serverHLC, peers: PresencePeer[] }` |
-| `op` | C↔S | `{ opId, deckId, slideId?, hlc, parentHlc, payload }` |
-| `op_ack` | S→C | `{ opId, status: 'ok' | 'rejected', reason? }` |
-| `presence` | C↔S | `{ sessionId, cursor?, selection?, viewport?, chat?, ping? }` |
-| `peer_joined` | S→C | `{ sessionId, user, color }` |
-| `peer_left` | S→C | `{ sessionId }` |
-| `branch_switch` | C↔S | `{ branchId, baseHLC }` |
-| `branch_head` | S→C | `{ branchId, headHLC, opsToReplay }` |
-| `merge_state` | S→C | `{ mrId, status, conflicts? }` |
-| `asset_progress` | S↔C | `{ assetId, uploadedBytes, totalBytes }` |
-| `error` | S→C | `{ code, message, retryable }` |
+| Kind             | Direction | Payload                                                       |
+| ---------------- | --------- | ------------------------------------------------------------- | ---------------------- |
+| `hello`          | C→S       | `{ sessionId, token, lastHLC }`                               |
+| `welcome`        | S→C       | `{ serverHLC, peers: PresencePeer[] }`                        |
+| `op`             | C↔S      | `{ opId, deckId, slideId?, hlc, parentHlc, payload }`         |
+| `op_ack`         | S→C       | `{ opId, status: 'ok'                                         | 'rejected', reason? }` |
+| `presence`       | C↔S      | `{ sessionId, cursor?, selection?, viewport?, chat?, ping? }` |
+| `peer_joined`    | S→C       | `{ sessionId, user, color }`                                  |
+| `peer_left`      | S→C       | `{ sessionId }`                                               |
+| `branch_switch`  | C↔S      | `{ branchId, baseHLC }`                                       |
+| `branch_head`    | S→C       | `{ branchId, headHLC, opsToReplay }`                          |
+| `merge_state`    | S→C       | `{ mrId, status, conflicts? }`                                |
+| `asset_progress` | S↔C      | `{ assetId, uploadedBytes, totalBytes }`                      |
+| `error`          | S→C       | `{ code, message, retryable }`                                |
 
 WS messages carry a `protocolVersion` field; mismatch triggers reconnect with the new protocol version.
 
@@ -804,30 +809,31 @@ WS messages carry a `protocolVersion` field; mismatch triggers reconnect with th
 
 This section is the foundation; the contracts below are inputs to every later section.
 
-| Cross-section tie | Section | How #1–22 connects |
-|-------------------|---------|---------------------|
-| **Components** (#2: 23–36) | Section 2 | Layers panel (#5) indexes components by `componentInstanceId`; CRDT sync (#21) propagates component overrides; branch/merge (#19) handles component variant collisions; autosave (#22) persists overrides |
-| **Theming** (#3: 37–47) | Section 3 | Style tokens (`style_tokens` table) reference layers by id; "paste to match destination" (#14) resolves to tokens; eyedropper (#15) tags with nearest token; constraints (#8) operate inside themed frames |
-| **Live data** (#4: 48–64) | Section 4 | Layers carry an optional `dataSourceBinding`; presence (#17) shows data refresh state; autosave (#22) snapshots `crdt_state` so re-fetched data restores deterministically |
-| **3D / motion** (#5: 65–84) | Section 5 | 3D scenes are nested inside frames (#6); motion targets the same `transform` fields; keyframe data rides as `Y.Array` entries in the CRDT (#21) |
-| **Animation** (#6: 85–95) | Section 6 | Timeline ops are CRDT ops (#21); branches (#19) let users experiment with motion variants; presence (#17) shows remote scrub on the timeline |
-| **Prototyping** (#7: 96–107) | Section 7 | Hotspots are layer-attached; interactivity state is a per-slide CRDT branch that forks on hot-spot entry |
-| **AI copilot** (#8: 108–125) | Section 8 | AI actions generate CRDT ops (#21) with `author_kind: 'agent'` so the audit trail is distinct (#227 in #16) |
-| **Presenter experience** (#9: 126–141) | Section 9 | Presenter mode reads the same scene graph (#1, #6); "jump to slide" uses the layers panel search (#5) over the slide rail |
-| **Audience participation** (#10: 142–154) | Section 10 | Audience-driven navigation (#148) generates events that mutate `currentSlide` via the same CRDT path; engagement events are presence-adjacent |
-| **Sharing** (#11: 155–168) | Section 11 | Shared-link state is a *read-only* projection of the deck's CRDT state; per-link content control (#159) is a filter over slides/layers |
-| **Analytics** (#12: 169–178) | Section 12 | Per-viewer analytics ride on presence sessions; "live session" analytics tap the same WS connection as collaboration (#17) |
-| **Collaboration** (#13: 179–192) | Section 13 | Comments are pinned to layer ids from the layers panel (#5); suggestion mode (#182) is a CRDT branch with restricted write rights |
-| **Enterprise** (#14: 193–204) | Section 14 | Audit logs subscribe to the op stream; DLP checks inspect ops before fan-out; data residency affects where the op log is stored |
-| **Novel** (#15: 205–219) | Section 15 | "Presentation state timeline" (#205) reuses the CRDT op log as the recording source; provenance chips (#215) join `crdt_ops` with `assets`/`data_sources` |
-| **Agentic** (#16: 221–240) | Section 16 | The MCP server exposes the same REST + WS API surface; agent edits flow through CRDT (#21) with `author_kind: 'agent'`; capability discovery (#236) reads from the OpenAPI + GraphQL schemas above; deck-as-code (#223–224) is a serialization of the scene graph; semantic addressing (#226) is a stable id scheme that this section already assigns to every layer |
+| Cross-section tie                         | Section    | How #1–22 connects                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Components** (#2: 23–36)                | Section 2  | Layers panel (#5) indexes components by `componentInstanceId`; CRDT sync (#21) propagates component overrides; branch/merge (#19) handles component variant collisions; autosave (#22) persists overrides                                                                                                                                                            |
+| **Theming** (#3: 37–47)                   | Section 3  | Style tokens (`style_tokens` table) reference layers by id; "paste to match destination" (#14) resolves to tokens; eyedropper (#15) tags with nearest token; constraints (#8) operate inside themed frames                                                                                                                                                           |
+| **Live data** (#4: 48–64)                 | Section 4  | Layers carry an optional `dataSourceBinding`; presence (#17) shows data refresh state; autosave (#22) snapshots `crdt_state` so re-fetched data restores deterministically                                                                                                                                                                                           |
+| **3D / motion** (#5: 65–84)               | Section 5  | 3D scenes are nested inside frames (#6); motion targets the same `transform` fields; keyframe data rides as `Y.Array` entries in the CRDT (#21)                                                                                                                                                                                                                      |
+| **Animation** (#6: 85–95)                 | Section 6  | Timeline ops are CRDT ops (#21); branches (#19) let users experiment with motion variants; presence (#17) shows remote scrub on the timeline                                                                                                                                                                                                                         |
+| **Prototyping** (#7: 96–107)              | Section 7  | Hotspots are layer-attached; interactivity state is a per-slide CRDT branch that forks on hot-spot entry                                                                                                                                                                                                                                                             |
+| **AI copilot** (#8: 108–125)              | Section 8  | AI actions generate CRDT ops (#21) with `author_kind: 'agent'` so the audit trail is distinct (#227 in #16)                                                                                                                                                                                                                                                          |
+| **Presenter experience** (#9: 126–141)    | Section 9  | Presenter mode reads the same scene graph (#1, #6); "jump to slide" uses the layers panel search (#5) over the slide rail                                                                                                                                                                                                                                            |
+| **Audience participation** (#10: 142–154) | Section 10 | Audience-driven navigation (#148) generates events that mutate `currentSlide` via the same CRDT path; engagement events are presence-adjacent                                                                                                                                                                                                                        |
+| **Sharing** (#11: 155–168)                | Section 11 | Shared-link state is a _read-only_ projection of the deck's CRDT state; per-link content control (#159) is a filter over slides/layers                                                                                                                                                                                                                               |
+| **Analytics** (#12: 169–178)              | Section 12 | Per-viewer analytics ride on presence sessions; "live session" analytics tap the same WS connection as collaboration (#17)                                                                                                                                                                                                                                           |
+| **Collaboration** (#13: 179–192)          | Section 13 | Comments are pinned to layer ids from the layers panel (#5); suggestion mode (#182) is a CRDT branch with restricted write rights                                                                                                                                                                                                                                    |
+| **Enterprise** (#14: 193–204)             | Section 14 | Audit logs subscribe to the op stream; DLP checks inspect ops before fan-out; data residency affects where the op log is stored                                                                                                                                                                                                                                      |
+| **Novel** (#15: 205–219)                  | Section 15 | "Presentation state timeline" (#205) reuses the CRDT op log as the recording source; provenance chips (#215) join `crdt_ops` with `assets`/`data_sources`                                                                                                                                                                                                            |
+| **Agentic** (#16: 221–240)                | Section 16 | The MCP server exposes the same REST + WS API surface; agent edits flow through CRDT (#21) with `author_kind: 'agent'`; capability discovery (#236) reads from the OpenAPI + GraphQL schemas above; deck-as-code (#223–224) is a serialization of the scene graph; semantic addressing (#226) is a stable id scheme that this section already assigns to every layer |
 
 ### 8.1 Branching tie-out (#19) as the Git-like primitive
 
 Because branching lives in this section but is consumed by sections 2 (component variants), 6 (motion variants), 13 (review workflows), and 16 (agent workflows), the contract is:
+
 - `Branch` is per-deck.
 - `MergeRequest` carries a `diff_summary` that is structured (not just visual) so sections 13 and 16 can branch on it programmatically.
-- A fast-forward merge (#19) is the *same* operation as a `restore` (#20) — both create a forward edge in history.
+- A fast-forward merge (#19) is the _same_ operation as a `restore` (#20) — both create a forward edge in history.
 
 ### 8.2 Offline-first vs. cloud-first
 
@@ -837,30 +843,30 @@ Section 21 (offline CRDT) is the dominant operating mode for the eventual produc
 
 ## Appendix A — Feature → Module → API mapping (cross-reference)
 
-| Feature | Primary module(s) | Primary API(s) |
-|---------|-------------------|----------------|
-| 1 Infinite canvas | Renderer, Scene graph | (internal) |
-| 2 Drag-drop | Input pipeline, Scene graph | `PATCH /slides/:id` (op) |
-| 3 Smart guides | Input pipeline, Scene graph (R-tree) | (internal) |
-| 4 Multi-select/group/lock/hide | Scene graph, History engine | `PATCH /slides/:id` |
-| 5 Layers panel | Layers panel UI, GraphQL | `Query.slides.layers(filter)` |
-| 6 Frames-within-frames | Scene graph | `PATCH /slides/:id` |
-| 7 Auto-layout | Layout engine (worker) | `PATCH /slides/:id` |
-| 8 Constraints | Layout engine | `PATCH /slides/:id`, `layer_constraints` table |
-| 9 Vector pen/booleans | Vector engine | `PATCH /slides/:id` |
-| 10 Rulers/grids | Renderer | (internal) |
-| 11 Zoom 2 %–6400 % | Renderer | (internal) |
-| 12 Undo/redo | History engine | (local) |
-| 13 Keyboard / Cmd+K | Shortcut registry | (local + remote search via GraphQL) |
-| 14 Paste styles | Style engine | (local + style token mapping) |
-| 15 Eyedropper | Color picker | (local) |
-| 16 Right-click menus | Menu registry | (local) |
-| 17 Multiplayer cursors | Presence service | WS `presence` |
-| 18 Cursor chat/ping | Presence service | WS `presence` |
-| 19 Branch/merge | Branch/merge service | REST + WS |
-| 20 Named checkpoints | History snapshotter | REST + WS |
-| 21 Offline CRDT | CRDT sync engine | REST + WS + IndexedDB |
-| 22 Autosave | Autosave queue + IndexedDB | REST + WS |
+| Feature                        | Primary module(s)                    | Primary API(s)                                 |
+| ------------------------------ | ------------------------------------ | ---------------------------------------------- |
+| 1 Infinite canvas              | Renderer, Scene graph                | (internal)                                     |
+| 2 Drag-drop                    | Input pipeline, Scene graph          | `PATCH /slides/:id` (op)                       |
+| 3 Smart guides                 | Input pipeline, Scene graph (R-tree) | (internal)                                     |
+| 4 Multi-select/group/lock/hide | Scene graph, History engine          | `PATCH /slides/:id`                            |
+| 5 Layers panel                 | Layers panel UI, GraphQL             | `Query.slides.layers(filter)`                  |
+| 6 Frames-within-frames         | Scene graph                          | `PATCH /slides/:id`                            |
+| 7 Auto-layout                  | Layout engine (worker)               | `PATCH /slides/:id`                            |
+| 8 Constraints                  | Layout engine                        | `PATCH /slides/:id`, `layer_constraints` table |
+| 9 Vector pen/booleans          | Vector engine                        | `PATCH /slides/:id`                            |
+| 10 Rulers/grids                | Renderer                             | (internal)                                     |
+| 11 Zoom 2 %–6400 %             | Renderer                             | (internal)                                     |
+| 12 Undo/redo                   | History engine                       | (local)                                        |
+| 13 Keyboard / Cmd+K            | Shortcut registry                    | (local + remote search via GraphQL)            |
+| 14 Paste styles                | Style engine                         | (local + style token mapping)                  |
+| 15 Eyedropper                  | Color picker                         | (local)                                        |
+| 16 Right-click menus           | Menu registry                        | (local)                                        |
+| 17 Multiplayer cursors         | Presence service                     | WS `presence`                                  |
+| 18 Cursor chat/ping            | Presence service                     | WS `presence`                                  |
+| 19 Branch/merge                | Branch/merge service                 | REST + WS                                      |
+| 20 Named checkpoints           | History snapshotter                  | REST + WS                                      |
+| 21 Offline CRDT                | CRDT sync engine                     | REST + WS + IndexedDB                          |
+| 22 Autosave                    | Autosave queue + IndexedDB           | REST + WS                                      |
 
 ---
 

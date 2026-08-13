@@ -7,22 +7,22 @@ replicaCount: 2
 image:
   repository: ghcr.io/domio/platform/participant-session
   pullPolicy: IfNotPresent
-  tag: "0.1.0"
+  tag: '0.1.0'
 
 imagePullSecrets: []
 
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 
 serviceAccount:
   create: true
   annotations: {}
-  name: ""
+  name: ''
 
 podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/path: "/metrics"
-  prometheus.io/port: "8091"
+  prometheus.io/scrape: 'true'
+  prometheus.io/path: '/metrics'
+  prometheus.io/port: '8091'
 
 podSecurityContext:
   fsGroup: 2000
@@ -42,7 +42,7 @@ service:
 
 ingress:
   enabled: false
-  className: ""
+  className: ''
   annotations: {}
   hosts:
     - host: participant.domio.local
@@ -67,10 +67,10 @@ autoscaling:
 
 env:
   NODE_ENV: production
-  PARTICIPANT_PORT: "8091"
-  PRESENTER_LOOKUP_URL: "http://presenter-session.domio.svc:8080"
+  PARTICIPANT_PORT: '8091'
+  PRESENTER_LOOKUP_URL: 'http://presenter-session.domio.svc:8080'
 
-envFromSecret: ""
+envFromSecret: ''
 
 probes:
   liveness:
@@ -90,13 +90,13 @@ probes:
 # ── Feature flags ──────────────────────────────────────────────
 # audience.join must be "true" for the WS gateway to accept joins.
 featureFlags:
-  audienceJoin: "true"
-  audienceFanout: "true"
-  audienceHeartbeat: "true"
+  audienceJoin: 'true'
+  audienceFanout: 'true'
+  audienceHeartbeat: 'true'
 
 # ── Idempotency window ─────────────────────────────────────────
 idempotency:
-  ttlMs: 86400000   # 24h
+  ttlMs: 86400000 # 24h
 
 nodeSelector: {}
 tolerations: []

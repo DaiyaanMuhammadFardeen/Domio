@@ -82,7 +82,9 @@ describe('QuizPanel', () => {
     fireEvent.change(screen.getByTestId('m6-quiz-type-q2'), {
       target: { value: 'short_answer' },
     });
-    const arg = onPatch.mock.calls[0]?.[0] as { questions: Array<{ id: string; type: string; prompt: string }> };
+    const arg = onPatch.mock.calls[0]?.[0] as {
+      questions: Array<{ id: string; type: string; prompt: string }>;
+    };
     const updated = arg.questions.find((q) => q.id === 'q2');
     expect(updated?.type).toBe('short_answer');
     expect(updated?.prompt).toBe('');

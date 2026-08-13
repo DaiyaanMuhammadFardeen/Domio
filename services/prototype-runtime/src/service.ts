@@ -26,7 +26,11 @@ import type {
   LlmReviewQueueItem,
   PresentationSequence,
 } from '@domio/prototype-runtime';
-import { StateMachine, EVENT_PRECEDENCE, type InteractionEventKind } from '@domio/prototype-runtime';
+import {
+  StateMachine,
+  EVENT_PRECEDENCE,
+  type InteractionEventKind,
+} from '@domio/prototype-runtime';
 
 import {
   NotFoundError,
@@ -92,7 +96,10 @@ export function newId(): string {
 
 export class ExpressionCompileError extends Error {
   readonly code = 'EXPRESSION_COMPILE_ERROR' as const;
-  constructor(public readonly source: string, public readonly reason: string) {
+  constructor(
+    public readonly source: string,
+    public readonly reason: string,
+  ) {
     super(`Failed to compile expression "${source}": ${reason}`);
     this.name = 'ExpressionCompileError';
   }
@@ -142,14 +149,20 @@ export class PrototypeRuntimeService {
       ...(opts.quizAnswers !== undefined ? { quizAnswers: opts.quizAnswers } : {}),
       ...(opts.quizResults !== undefined ? { quizResults: opts.quizResults } : {}),
       ...(opts.llmReviewQueue !== undefined ? { llmReviewQueue: opts.llmReviewQueue } : {}),
-      ...(opts.presentationSequences !== undefined ? { presentationSequences: opts.presentationSequences } : {}),
+      ...(opts.presentationSequences !== undefined
+        ? { presentationSequences: opts.presentationSequences }
+        : {}),
       idGenerator: opts.idGenerator ?? newId,
       clock: opts.clock ?? defaultClock,
     };
   }
 
   // ── Hotspots ────────────────────────────────────────────────────────
-  async createHotspot(tenantId: string, deckId: string, input: CreateHotspotInput): Promise<Hotspot> {
+  async createHotspot(
+    tenantId: string,
+    deckId: string,
+    input: CreateHotspotInput,
+  ): Promise<Hotspot> {
     const now = this.opts.clock();
     const record: Hotspot = {
       id: this.opts.idGenerator(),
@@ -185,9 +198,11 @@ export class PrototypeRuntimeService {
     const patch: HotspotPatch = {};
     if (input.name !== undefined) patch.name = input.name;
     if (input.geometry !== undefined) patch.geometry = input.geometry as Hotspot['geometry'];
-    if (input.gestureMask !== undefined) patch.gestureMask = input.gestureMask as Hotspot['gestureMask'];
+    if (input.gestureMask !== undefined)
+      patch.gestureMask = input.gestureMask as Hotspot['gestureMask'];
     if (input.zIndex !== undefined) patch.zIndex = input.zIndex;
-    if (input.targetType !== undefined) patch.targetType = input.targetType as Hotspot['targetType'];
+    if (input.targetType !== undefined)
+      patch.targetType = input.targetType as Hotspot['targetType'];
     if (input.targetRef !== undefined) patch.targetRef = input.targetRef as Hotspot['targetRef'];
     if (input.status !== undefined) patch.status = input.status;
     return this.opts.hotspots.update(id, tenantId, patch, input.version);
@@ -198,7 +213,11 @@ export class PrototypeRuntimeService {
   }
 
   // ── Overlays ────────────────────────────────────────────────────────
-  async createOverlay(tenantId: string, deckId: string, input: CreateOverlayInput): Promise<Overlay> {
+  async createOverlay(
+    tenantId: string,
+    deckId: string,
+    input: CreateOverlayInput,
+  ): Promise<Overlay> {
     const now = this.opts.clock();
     const record: Overlay = {
       id: this.opts.idGenerator(),
@@ -231,14 +250,22 @@ export class PrototypeRuntimeService {
     return this.opts.overlays.listByDeck(deckId, tenantId, slideId);
   }
 
-  async patchOverlay(tenantId: string, id: string, input: PatchOverlayInput, raw: Record<string, unknown>): Promise<Overlay> {
+  async patchOverlay(
+    tenantId: string,
+    id: string,
+    input: PatchOverlayInput,
+    raw: Record<string, unknown>,
+  ): Promise<Overlay> {
     const patch: OverlayPatch = {};
     if (raw['name'] !== undefined) patch.name = raw['name'] as string;
     if (raw['type'] !== undefined) patch.type = raw['type'] as Overlay['type'];
-    if (raw['sizeStrategy'] !== undefined) patch.sizeStrategy = raw['sizeStrategy'] as Overlay['sizeStrategy'];
+    if (raw['sizeStrategy'] !== undefined)
+      patch.sizeStrategy = raw['sizeStrategy'] as Overlay['sizeStrategy'];
     if (raw['anchor'] !== undefined) patch.anchor = raw['anchor'] as Overlay['anchor'];
-    if (raw['openTrigger'] !== undefined) patch.openTrigger = raw['openTrigger'] as Overlay['openTrigger'];
-    if (raw['closeTrigger'] !== undefined) patch.closeTrigger = raw['closeTrigger'] as Overlay['closeTrigger'];
+    if (raw['openTrigger'] !== undefined)
+      patch.openTrigger = raw['openTrigger'] as Overlay['openTrigger'];
+    if (raw['closeTrigger'] !== undefined)
+      patch.closeTrigger = raw['closeTrigger'] as Overlay['closeTrigger'];
     if (raw['persistent'] !== undefined) patch.persistent = raw['persistent'] as boolean;
     if (raw['schema'] !== undefined) patch.schema = raw['schema'] as Overlay['schema'];
     return this.opts.overlays.update(id, tenantId, patch, input.version);
@@ -249,7 +276,11 @@ export class PrototypeRuntimeService {
   }
 
   // ── Branching edges ─────────────────────────────────────────────────
-  async createBranchingEdge(tenantId: string, deckId: string, input: CreateBranchingEdgeInput): Promise<BranchingEdge> {
+  async createBranchingEdge(
+    tenantId: string,
+    deckId: string,
+    input: CreateBranchingEdgeInput,
+  ): Promise<BranchingEdge> {
     const now = this.opts.clock();
     const record: BranchingEdge = {
       id: this.opts.idGenerator(),
@@ -276,7 +307,11 @@ export class PrototypeRuntimeService {
     return this.opts.branchingEdges.listByDeck(deckId, tenantId);
   }
 
-  async patchBranchingEdge(tenantId: string, id: string, input: PatchBranchingEdgeInput): Promise<BranchingEdge> {
+  async patchBranchingEdge(
+    tenantId: string,
+    id: string,
+    input: PatchBranchingEdgeInput,
+  ): Promise<BranchingEdge> {
     const patch: BranchingEdgePatch = {};
     if (input.name !== undefined) patch.name = input.name;
     if (input.toSlideId !== undefined) patch.toSlideId = input.toSlideId;
@@ -290,7 +325,11 @@ export class PrototypeRuntimeService {
   }
 
   // ── Interaction states ──────────────────────────────────────────────
-  async createInteractionState(tenantId: string, deckId: string, input: CreateInteractionStateInput): Promise<InteractionState> {
+  async createInteractionState(
+    tenantId: string,
+    deckId: string,
+    input: CreateInteractionStateInput,
+  ): Promise<InteractionState> {
     const now = this.opts.clock();
     const record: InteractionState = {
       id: this.opts.idGenerator(),
@@ -317,13 +356,19 @@ export class PrototypeRuntimeService {
     return this.opts.interactionStates.listByDeck(deckId, tenantId);
   }
 
-  async patchInteractionState(tenantId: string, id: string, input: PatchInteractionStateInput): Promise<InteractionState> {
+  async patchInteractionState(
+    tenantId: string,
+    id: string,
+    input: PatchInteractionStateInput,
+  ): Promise<InteractionState> {
     type WritablePatch = { -readonly [K in keyof InteractionState]: InteractionState[K] };
     const patch: Partial<WritablePatch> = {};
     if (input.currentState !== undefined) patch.currentState = input.currentState;
     if (input.scope !== undefined) patch.scope = input.scope as InteractionStateScope;
-    if (input.persistInstanceState !== undefined) patch.persistInstanceState = input.persistInstanceState;
-    if (input.stateMachine !== undefined) patch.stateMachine = input.stateMachine as InteractionStateMachineSpec;
+    if (input.persistInstanceState !== undefined)
+      patch.persistInstanceState = input.persistInstanceState;
+    if (input.stateMachine !== undefined)
+      patch.stateMachine = input.stateMachine as InteractionStateMachineSpec;
     return this.opts.interactionStates.update(id, tenantId, patch);
   }
 
@@ -337,7 +382,17 @@ export class PrototypeRuntimeService {
     tenantId: string,
     id: string,
     input: TransitionInput,
-  ): Promise<{ record: InteractionState; transition: { previous: string; current: string; event: string; changed: boolean; at: number; precedence: number } }> {
+  ): Promise<{
+    record: InteractionState;
+    transition: {
+      previous: string;
+      current: string;
+      event: string;
+      changed: boolean;
+      at: number;
+      precedence: number;
+    };
+  }> {
     const existing = await this.getInteractionState(tenantId, id);
     const machine = new StateMachine(existing.instanceId, existing.stateMachine, {
       currentState: existing.currentState,
@@ -365,7 +420,11 @@ export class PrototypeRuntimeService {
   }
 
   // ── Variables ───────────────────────────────────────────────────────
-  async createVariable(tenantId: string, deckId: string, input: CreateVariableInput): Promise<Variable> {
+  async createVariable(
+    tenantId: string,
+    deckId: string,
+    input: CreateVariableInput,
+  ): Promise<Variable> {
     validateVariableSemantics({
       type: input.type,
       ...(input.enumValues !== undefined ? { enumValues: input.enumValues } : {}),
@@ -404,14 +463,20 @@ export class PrototypeRuntimeService {
     return this.opts.variables.listByDeck(deckId, tenantId);
   }
 
-  async patchVariable(tenantId: string, id: string, input: PatchVariableInput, raw: Record<string, unknown>): Promise<Variable> {
+  async patchVariable(
+    tenantId: string,
+    id: string,
+    input: PatchVariableInput,
+    raw: Record<string, unknown>,
+  ): Promise<Variable> {
     const patch: VariablePatch = {};
     if (raw['scope'] !== undefined) patch.scope = raw['scope'] as Variable['scope'];
     if (raw['enumValues'] !== undefined) patch.enumValues = raw['enumValues'] as readonly string[];
     if (raw['min'] !== undefined) patch.min = raw['min'] as number;
     if (raw['max'] !== undefined) patch.max = raw['max'] as number;
     if (raw['defaultValue'] !== undefined) patch.defaultValue = raw['defaultValue'];
-    if (raw['visibility'] !== undefined) patch.visibility = raw['visibility'] as Variable['visibility'];
+    if (raw['visibility'] !== undefined)
+      patch.visibility = raw['visibility'] as Variable['visibility'];
     if (raw['readOnly'] !== undefined) patch.readOnly = raw['readOnly'] as boolean;
 
     validateVariableSemantics({
@@ -428,7 +493,12 @@ export class PrototypeRuntimeService {
   }
 
   // ── Variable bindings ───────────────────────────────────────────────
-  async createVariableBinding(tenantId: string, deckId: string, input: CreateVariableBindingInput, raw: unknown): Promise<VariableBinding> {
+  async createVariableBinding(
+    tenantId: string,
+    deckId: string,
+    input: CreateVariableBindingInput,
+    raw: unknown,
+  ): Promise<VariableBinding> {
     validateCreateVariableBinding(raw); // round-trip validation; throws via returned errors at handler level
     const now = this.opts.clock();
     const record: VariableBinding = {
@@ -457,7 +527,11 @@ export class PrototypeRuntimeService {
   }
 
   // ── Conditional rules ───────────────────────────────────────────────
-  async createConditionalRule(tenantId: string, deckId: string, input: CreateConditionalRuleInput): Promise<ConditionalRule> {
+  async createConditionalRule(
+    tenantId: string,
+    deckId: string,
+    input: CreateConditionalRuleInput,
+  ): Promise<ConditionalRule> {
     const compiled = this.compileOrThrow(input.conditionSource);
     const now = this.opts.clock();
     const record: ConditionalRule = {
@@ -489,7 +563,12 @@ export class PrototypeRuntimeService {
     return this.opts.conditionalRules.listByDeck(deckId, tenantId);
   }
 
-  async patchConditionalRule(tenantId: string, id: string, input: PatchConditionalRuleInput, raw: Record<string, unknown>): Promise<ConditionalRule> {
+  async patchConditionalRule(
+    tenantId: string,
+    id: string,
+    input: PatchConditionalRuleInput,
+    raw: Record<string, unknown>,
+  ): Promise<ConditionalRule> {
     const patch: ConditionalRulePatch = {};
     if (raw['name'] !== undefined) patch.name = raw['name'] as string;
     if (raw['priority'] !== undefined) patch.priority = raw['priority'] as number;
@@ -498,7 +577,8 @@ export class PrototypeRuntimeService {
       patch.condition = compiled.ast;
       patch.conditionSource = raw['conditionSource'] as string;
     }
-    if (raw['scopeSlideId'] !== undefined) patch.scopeSlideId = raw['scopeSlideId'] as string | null;
+    if (raw['scopeSlideId'] !== undefined)
+      patch.scopeSlideId = raw['scopeSlideId'] as string | null;
     if (raw['action'] !== undefined) patch.action = raw['action'] as ConditionalRule['action'];
     if (raw['enabled'] !== undefined) patch.enabled = raw['enabled'] as boolean;
     return this.opts.conditionalRules.update(id, tenantId, patch, input.version);
@@ -662,7 +742,10 @@ export class PrototypeRuntimeService {
     return found;
   }
 
-  async listLlmReviewQueue(tenantId: string, status?: LlmReviewQueueItem['status']): Promise<LlmReviewQueueItem[]> {
+  async listLlmReviewQueue(
+    tenantId: string,
+    status?: LlmReviewQueueItem['status'],
+  ): Promise<LlmReviewQueueItem[]> {
     if (!this.opts.llmReviewQueue) return [];
     return this.opts.llmReviewQueue.listByTenant(tenantId, status);
   }
@@ -710,7 +793,10 @@ export class PrototypeRuntimeService {
     return found;
   }
 
-  async listPresentationSequences(tenantId: string, deckId: string): Promise<PresentationSequence[]> {
+  async listPresentationSequences(
+    tenantId: string,
+    deckId: string,
+  ): Promise<PresentationSequence[]> {
     return this.requireSequenceRepo().listByDeck(deckId, tenantId);
   }
 
@@ -727,7 +813,8 @@ export class PrototypeRuntimeService {
     if (input.loop !== undefined) patch.loop = input.loop;
     if (input.count !== undefined) patch.count = input.count;
     if (input.interruptionPolicy !== undefined) {
-      patch.interruptionPolicy = input.interruptionPolicy as PresentationSequence['interruptionPolicy'];
+      patch.interruptionPolicy =
+        input.interruptionPolicy as PresentationSequence['interruptionPolicy'];
     }
     if (input.reducedMotionDefaultOff !== undefined) {
       patch.reducedMotionDefaultOff = input.reducedMotionDefaultOff;

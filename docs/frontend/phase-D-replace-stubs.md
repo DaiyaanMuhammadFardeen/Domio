@@ -18,7 +18,10 @@ honestly tells them the service is unreachable.
 ### `apps/dashboard/src/app/crm/page.tsx`
 
 ```tsx
-async function fetchAdapters(): Promise<{ rows: Adapter[]; degraded: boolean }> {
+async function fetchAdapters(): Promise<{
+  rows: Adapter[];
+  degraded: boolean;
+}> {
   const url = new URL('/v1/health/stats', CRM_SYNC_URL);
   try {
     const res = await fetch(url, { cache: 'no-store' });

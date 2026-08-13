@@ -17,10 +17,7 @@ export type {
   ChunkUploader,
 } from './types.js';
 
-export {
-  startMultiTrackRecorder,
-  BrowserMediaSourceFactory,
-} from './multi-track.js';
+export { startMultiTrackRecorder, BrowserMediaSourceFactory } from './multi-track.js';
 export type { MediaSourceFactory, MultiTrackRecorderOptions } from './multi-track.js';
 
 export { ObjectStoreUploader, InMemoryUploader } from './object-store-uploader.js';

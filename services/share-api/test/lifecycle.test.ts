@@ -38,19 +38,20 @@ interface ServiceFixture {
 
 function makeService(opts: { audit?: 'mem' | 'chain' } = {}): ServiceFixture {
   let chain: Chain | null = null;
-  const audit = opts.audit === 'chain'
-    ? (() => {
-        chain = new Chain();
-        chain.loadKey({
-          kid: 'test-key',
-          keyHex: 'a'.repeat(64),
-          rotatedAt: new Date(NOW.getTime() - 1000),
-          expiresAt: new Date(NOW.getTime() + 365 * 24 * 60 * 60 * 1000),
-          overlapUntil: new Date(NOW.getTime() + 7 * 24 * 60 * 60 * 1000),
-        });
-        return new ChainAuditEmitter(chain);
-      })()
-    : new InMemoryAuditEmitter();
+  const audit =
+    opts.audit === 'chain'
+      ? (() => {
+          chain = new Chain();
+          chain.loadKey({
+            kid: 'test-key',
+            keyHex: 'a'.repeat(64),
+            rotatedAt: new Date(NOW.getTime() - 1000),
+            expiresAt: new Date(NOW.getTime() + 365 * 24 * 60 * 60 * 1000),
+            overlapUntil: new Date(NOW.getTime() + 7 * 24 * 60 * 60 * 1000),
+          });
+          return new ChainAuditEmitter(chain);
+        })()
+      : new InMemoryAuditEmitter();
   return {
     service: new ShareService({
       store: new InMemoryShareStore({ clock: () => NOW }),
@@ -98,18 +99,28 @@ describe('share-api lifecycle', () => {
     // 4. Update share (non-policy — change deck-level metadata via slug).
     //    `slug` is a link-level field, NOT a policy field, so this should
     //    emit share.updated (not share.policy_changed).
-    const updated = await service.updateShare('w1', linkId, {
-      actorId: 'alice',
-      slug: 'launch-deck-v2',
-    }, 2); // expectedSeq = 2 (insert was seq=1, rotateToken bumped to 2)
+    const updated = await service.updateShare(
+      'w1',
+      linkId,
+      {
+        actorId: 'alice',
+        slug: 'launch-deck-v2',
+      },
+      2,
+    ); // expectedSeq = 2 (insert was seq=1, rotateToken bumped to 2)
     expect(updated.link.slug).toBe('launch-deck-v2');
 
     // 5. Update policy via PATCH
-    const policyChanged = await service.updateShare('w1', linkId, {
-      actorId: 'alice',
-      visibility: 'allowlist',
-      allowedViewers: [{ type: 'email', value: 'bob@example.com' }],
-    }, 3);
+    const policyChanged = await service.updateShare(
+      'w1',
+      linkId,
+      {
+        actorId: 'alice',
+        visibility: 'allowlist',
+        allowedViewers: [{ type: 'email', value: 'bob@example.com' }],
+      },
+      3,
+    );
     expect(policyChanged.policy.visibility).toBe('allowlist');
     expect(policyChanged.policy.allowedViewers).toHaveLength(1);
 
@@ -135,8 +146,9 @@ describe('share-api lifecycle', () => {
     expect(intro.claims.workspace_id).toBe('w1');
 
     // 9. Introspect replay — must fail (nonce already seen).
-    await expect(service.introspect('w1', shortId, rotated.token))
-      .rejects.toBeInstanceOf(ShareValidationError);
+    await expect(service.introspect('w1', shortId, rotated.token)).rejects.toBeInstanceOf(
+      ShareValidationError,
+    );
 
     // 10. Revoke
     const revoked = await service.revokeShare('w1', linkId, 'alice', 6);
@@ -153,11 +165,11 @@ describe('share-api lifecycle', () => {
     const types = memEvents.map((e) => e.eventType);
     expect(types).toEqual([
       'share.created',
-      'share.updated',        // step 4
+      'share.updated', // step 4
       'share.policy_changed', // step 5
-      'share.token_rotated',  // step 6
-      'share.expiry_extended',// step 7
-      'share.deleted',        // step 10
+      'share.token_rotated', // step 6
+      'share.expiry_extended', // step 7
+      'share.deleted', // step 10
     ]);
     const verify = await chain!.verifyChain(memEvents);
     expect(verify).toBeUndefined(); // throws on failure; reaching here means ok
@@ -173,7 +185,9 @@ describe('share-api lifecycle', () => {
       clock: () => NOW,
     });
     const ok = await stub.createShare({
-      workspaceId: 'w2', deckId: 'd1', actorId: 'alice',
+      workspaceId: 'w2',
+      deckId: 'd1',
+      actorId: 'alice',
     });
     expect(ok.snapshot.link.shortId).toBe('COLLIDE1');
   });
@@ -181,33 +195,45 @@ describe('share-api lifecycle', () => {
   it('rejects concurrent modifications via expectedSeq', async () => {
     const { service } = makeService();
     const { snapshot } = await service.createShare({
-      workspaceId: 'w1', deckId: 'd1', actorId: 'alice',
+      workspaceId: 'w1',
+      deckId: 'd1',
+      actorId: 'alice',
     });
     // First update with seq=2 succeeds (insert seq=1, rotateToken bumped to 2).
-    await service.updateShare('w1', snapshot.link.id, {
-      actorId: 'alice',
-      allowPrint: true,
-    }, 2);
+    await service.updateShare(
+      'w1',
+      snapshot.link.id,
+      {
+        actorId: 'alice',
+        allowPrint: true,
+      },
+      2,
+    );
     // Second update with stale seq=2 must fail.
     await expect(
-      service.updateShare('w1', snapshot.link.id, {
-        actorId: 'alice',
-        allowPrint: false,
-      }, 2),
+      service.updateShare(
+        'w1',
+        snapshot.link.id,
+        {
+          actorId: 'alice',
+          allowPrint: false,
+        },
+        2,
+      ),
     ).rejects.toBeInstanceOf(ConcurrentModificationError);
   });
 
   it('rotated token invalidates the previous one (nonce seen)', async () => {
     const { service } = makeService();
     const { snapshot, token: originalToken } = await service.createShare({
-      workspaceId: 'w1', deckId: 'd1', actorId: 'alice',
+      workspaceId: 'w1',
+      deckId: 'd1',
+      actorId: 'alice',
     });
     const originalIntro = await service.introspect('w1', snapshot.link.shortId, originalToken);
     expect(originalIntro.claims.link_id).toBe(snapshot.link.id);
 
-    const { token: newToken } = await service.rotateShareToken(
-      'w1', snapshot.link.id, 'alice', 2,
-    );
+    const { token: newToken } = await service.rotateShareToken('w1', snapshot.link.id, 'alice', 2);
     const newIntro = await service.introspect('w1', snapshot.link.shortId, newToken);
     expect(newIntro.claims.link_id).toBe(snapshot.link.id);
     await expect(
@@ -218,10 +244,15 @@ describe('share-api lifecycle', () => {
   it('revoked link introspect fails (gone from the read surface)', async () => {
     const { service } = makeService();
     const { snapshot } = await service.createShare({
-      workspaceId: 'w1', deckId: 'd1', actorId: 'alice',
+      workspaceId: 'w1',
+      deckId: 'd1',
+      actorId: 'alice',
     });
     const { token: rotatedToken } = await service.rotateShareToken(
-      'w1', snapshot.link.id, 'alice', 2,
+      'w1',
+      snapshot.link.id,
+      'alice',
+      2,
     );
     await service.revokeShare('w1', snapshot.link.id, 'alice', 3);
     // Revoked links are filtered out of the read surface, so introspect

@@ -55,7 +55,12 @@ export interface VerifyTokenResult {
 // Compute token payload string
 // ---------------------------------------------------------------------------
 
-function tokenPayload(meetingId: string, presenterId: string, deckId: string, expiresAtMs: number): string {
+function tokenPayload(
+  meetingId: string,
+  presenterId: string,
+  deckId: string,
+  expiresAtMs: number,
+): string {
   return `${meetingId}.${presenterId}.${deckId}.${expiresAtMs}`;
 }
 
@@ -67,21 +72,22 @@ function tokenPayload(meetingId: string, presenterId: string, deckId: string, ex
  * Creates an opaque token string (HMAC-SHA256) for a meeting.
  * expires_at = min(meetingEndAt + 1h, now + 4h)
  */
-export function issueMeetingToken(
-  input: IssueTokenInput,
-  deps?: IssueTokenDeps,
-): MeetingToken {
+export function issueMeetingToken(input: IssueTokenInput, deps?: IssueTokenDeps): MeetingToken {
   const now = deps?.now?.() ?? new Date();
   const secret = deps?.secret ?? getTokenSecret();
 
   // Compute expiry: min(meetingEndAt + 1h, now + 4h)
   const meetingEndExpiry = new Date(input.meeting_end_at.getTime() + POST_MEETING_BUFFER_MS);
   const maxLifetimeExpiry = new Date(now.getTime() + MAX_TOKEN_LIFETIME_MS);
-  const expiresAt = meetingEndExpiry.getTime() < maxLifetimeExpiry.getTime()
-    ? meetingEndExpiry
-    : maxLifetimeExpiry;
+  const expiresAt =
+    meetingEndExpiry.getTime() < maxLifetimeExpiry.getTime() ? meetingEndExpiry : maxLifetimeExpiry;
 
-  const payload = tokenPayload(input.meeting_id, input.presenter_id, input.deck_id, expiresAt.getTime());
+  const payload = tokenPayload(
+    input.meeting_id,
+    input.presenter_id,
+    input.deck_id,
+    expiresAt.getTime(),
+  );
   const hmac = createHmac('sha256', secret).update(payload).digest('hex');
 
   return {

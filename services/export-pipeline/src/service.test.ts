@@ -75,7 +75,9 @@ function createFakeFrameSource(): FrameSource {
   return {
     async resolveFrames(_deckId, range, _scale): Promise<ExportFrame[]> {
       const count = range.end - range.start + 1;
-      return Array.from({ length: count }, (_, i) => makeSolidFrame(4, 4, i % 256, i % 256, i % 256));
+      return Array.from({ length: count }, (_, i) =>
+        makeSolidFrame(4, 4, i % 256, i % 256, i % 256),
+      );
     },
   };
 }
@@ -127,7 +129,9 @@ function makeService(overrides: Partial<ExportServiceOptions> = {}) {
     jobs,
     metrics,
     audit,
-    tick: () => { now = new Date(now.getTime() + 1000); },
+    tick: () => {
+      now = new Date(now.getTime() + 1000);
+    },
   };
 }
 
@@ -210,23 +214,23 @@ describe('ExportService — validation', () => {
 
   it('rejects invalid fps (0)', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.createJob({ ...DEFAULT_INPUT, fps: 0 }),
-    ).rejects.toBeInstanceOf(ValidationError);
+    await expect(svc.createJob({ ...DEFAULT_INPUT, fps: 0 })).rejects.toBeInstanceOf(
+      ValidationError,
+    );
   });
 
   it('rejects invalid fps (>120)', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.createJob({ ...DEFAULT_INPUT, fps: 200 }),
-    ).rejects.toBeInstanceOf(ValidationError);
+    await expect(svc.createJob({ ...DEFAULT_INPUT, fps: 200 })).rejects.toBeInstanceOf(
+      ValidationError,
+    );
   });
 
   it('rejects invalid scale (0)', async () => {
     const { svc } = makeService();
-    await expect(
-      svc.createJob({ ...DEFAULT_INPUT, scale: 0 }),
-    ).rejects.toBeInstanceOf(ValidationError);
+    await expect(svc.createJob({ ...DEFAULT_INPUT, scale: 0 })).rejects.toBeInstanceOf(
+      ValidationError,
+    );
   });
 
   it('rejects invalid range (start > end)', async () => {

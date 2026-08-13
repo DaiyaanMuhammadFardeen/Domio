@@ -48,10 +48,7 @@ export function ReviewsList({ reviews, total }: ReviewsListProps) {
 
       <div className="space-y-4">
         {reviews.map((review) => (
-          <article
-            key={review.id}
-            className="rounded-xl border border-border bg-surface p-4"
-          >
+          <article key={review.id} className="rounded-xl border border-border bg-surface p-4">
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex gap-0.5">
@@ -65,7 +62,10 @@ export function ReviewsList({ reviews, total }: ReviewsListProps) {
                   </span>
                 )}
               </div>
-              <time className="text-xs text-muted" dateTime={new Date(review.created_at).toISOString()}>
+              <time
+                className="text-xs text-muted"
+                dateTime={new Date(review.created_at).toISOString()}
+              >
                 {formatDate(review.created_at)}
               </time>
             </div>

@@ -92,13 +92,16 @@ export function ViewerNav({
         →
       </button>
 
-      <span style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.2)', margin: '0 4px' }} />
+      <span
+        style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.2)', margin: '0 4px' }}
+      />
 
       {/* Mode toggle (cycles stage → scroll → autoplay → stage). */}
       <button
         type="button"
         onClick={() => {
-          const next: ViewerMode = mode === 'stage' ? 'scroll' : mode === 'scroll' ? 'autoplay' : 'stage';
+          const next: ViewerMode =
+            mode === 'stage' ? 'scroll' : mode === 'scroll' ? 'autoplay' : 'stage';
           onChangeMode(next);
         }}
         aria-label={`Switch to ${

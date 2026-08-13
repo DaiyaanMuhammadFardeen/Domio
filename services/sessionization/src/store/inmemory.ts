@@ -12,7 +12,11 @@ export interface SessionStore {
   upsertSession(s: SessionRecord): Promise<SessionRecord>;
   getSession(workspace_id: string, session_id: string): Promise<SessionRecord | null>;
   recentOpen(workspace_id: string, viewer_id_key: string): Promise<SessionRecord[]>;
-  closeSession(workspace_id: string, session_id: string, ended_at_ms: number): Promise<SessionRecord | null>;
+  closeSession(
+    workspace_id: string,
+    session_id: string,
+    ended_at_ms: number,
+  ): Promise<SessionRecord | null>;
   listByWorkspace(workspace_id: string, since_ms: number, limit: number): Promise<SessionRecord[]>;
 }
 

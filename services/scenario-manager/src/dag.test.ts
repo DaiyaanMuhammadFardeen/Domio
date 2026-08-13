@@ -42,7 +42,11 @@ describe('validateParent — cycle detection', () => {
     const s = scenario('A', null);
     expect(() => validateParent(s, 'A', [s])).toThrow(ScenarioCycleError);
     const err = (() => {
-      try { validateParent(s, 'A', [s]); } catch (e) { return e; }
+      try {
+        validateParent(s, 'A', [s]);
+      } catch (e) {
+        return e;
+      }
     })();
     expect(err).toBeInstanceOf(ScenarioCycleError);
     expect((err as ScenarioCycleError).cyclePath).toEqual(['A', 'A']);
@@ -53,7 +57,11 @@ describe('validateParent — cycle detection', () => {
     const b = scenario('B', 'A');
     expect(() => validateParent(a, 'B', [a, b])).toThrow(ScenarioCycleError);
     const err = (() => {
-      try { validateParent(a, 'B', [a, b]); } catch (e) { return e; }
+      try {
+        validateParent(a, 'B', [a, b]);
+      } catch (e) {
+        return e;
+      }
     })();
     expect((err as ScenarioCycleError).cyclePath).toEqual(['B', 'A', 'B']);
   });
@@ -64,7 +72,11 @@ describe('validateParent — cycle detection', () => {
     const c = scenario('C', 'B');
     expect(() => validateParent(a, 'C', [a, b, c])).toThrow(ScenarioCycleError);
     const err = (() => {
-      try { validateParent(a, 'C', [a, b, c]); } catch (e) { return e; }
+      try {
+        validateParent(a, 'C', [a, b, c]);
+      } catch (e) {
+        return e;
+      }
     })();
     expect((err as ScenarioCycleError).cyclePath).toEqual(['C', 'B', 'A', 'C']);
   });
@@ -89,7 +101,9 @@ describe('validateParent — depth cap', () => {
     }
     // Adding a leaf at depth MAX_DEPTH+1 should fail
     const leaf = scenario('leaf', null);
-    expect(() => validateParent(leaf, `s${MAX_DEPTH - 1}`, chain)).toThrow(ScenarioDepthExceededError);
+    expect(() => validateParent(leaf, `s${MAX_DEPTH - 1}`, chain)).toThrow(
+      ScenarioDepthExceededError,
+    );
   });
 
   it('rejects when proposed depth exceeds MAX_DEPTH', () => {
@@ -100,7 +114,11 @@ describe('validateParent — depth cap', () => {
     }
     const leaf = scenario('leaf', null);
     const err = (() => {
-      try { validateParent(leaf, `d${MAX_DEPTH - 1}`, chain); } catch (e) { return e; }
+      try {
+        validateParent(leaf, `d${MAX_DEPTH - 1}`, chain);
+      } catch (e) {
+        return e;
+      }
     })();
     expect(err).toBeInstanceOf(ScenarioDepthExceededError);
     expect((err as ScenarioDepthExceededError).maxDepth).toBe(MAX_DEPTH);

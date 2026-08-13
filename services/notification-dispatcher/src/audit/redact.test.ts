@@ -112,7 +112,9 @@ describe('audit/redact', () => {
 
   it('buildAuditEntryWithRedaction includes redacted_fields list', () => {
     const entry = buildAuditEntryWithRedaction(notif(), 'sent');
-    expect(entry.redacted_fields).toEqual(expect.arrayContaining(['email', 'first_name', 'last_name']));
+    expect(entry.redacted_fields).toEqual(
+      expect.arrayContaining(['email', 'first_name', 'last_name']),
+    );
   });
 
   it('MemoryAuditWriter records entries', async () => {

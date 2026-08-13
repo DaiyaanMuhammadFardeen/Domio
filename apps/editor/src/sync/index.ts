@@ -7,7 +7,12 @@
 export { SyncProvider, type SyncProviderOptions, type SyncEvents } from './provider.js';
 export { LocalQueue, type LocalQueueOptions, type PendingOp } from './local-queue.js';
 export { IndexedDBProvider, type IndexedDBProviderOptions } from './indexeddb-provider.js';
-export { RemotePresenceProvider, type RemotePresenceProviderOptions, type RemotePeer, type PresenceEvents } from './presence.js';
+export {
+  RemotePresenceProvider,
+  type RemotePresenceProviderOptions,
+  type RemotePeer,
+  type PresenceEvents,
+} from './presence.js';
 export { SyncBridge, type BridgeOptions, type RemoteOpApplied } from './bridge.js';
 export { createBackoff, type BackoffOptions } from './backoff.js';
 export {

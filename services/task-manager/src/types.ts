@@ -72,8 +72,12 @@ export interface TaskProvider {
  * pullTask returns null (no external state).
  */
 export const noopTaskProvider: TaskProvider = {
-  async pushTask(): Promise<void> { /* no-op */ },
-  async pullTask(): Promise<null> { return null; },
+  async pushTask(): Promise<void> {
+    /* no-op */
+  },
+  async pullTask(): Promise<null> {
+    return null;
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -99,7 +103,9 @@ export interface TaskManagerEventEmitter {
 }
 
 export const noopEmitter: TaskManagerEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------

@@ -69,7 +69,10 @@ const handover = new Hono();
 // POST /v1/presenter/sessions/:id/handover/init
 handover.post('/v1/presenter/sessions/:id/handover/init', async (c) => {
   const id = c.req.param('id');
-  const body = (await c.req.json().catch(() => ({}))) as { to_presenter_id?: string; ttl_ms?: number };
+  const body = (await c.req.json().catch(() => ({}))) as {
+    to_presenter_id?: string;
+    ttl_ms?: number;
+  };
   if (!body.to_presenter_id) {
     return c.json({ error: 'VALIDATION', message: 'to_presenter_id is required' }, 400);
   }

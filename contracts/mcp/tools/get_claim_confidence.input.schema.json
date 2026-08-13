@@ -8,6 +8,6 @@
   "additionalProperties": false,
   "properties": {
     "claim_id": { "type": "string", "minLength": 1 },
-    "deck_id":  { "type": "string", "format": "uuid" }
+    "deck_id": { "type": "string", "format": "uuid" }
   }
 }

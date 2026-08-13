@@ -52,10 +52,13 @@ export function SegmentedVideoPlayer({
     videoRef.current = null;
   }, [layer.assetId]);
 
-  const onJump = useCallback((timeMs: number) => {
-    const el = resolveVideo();
-    if (el) el.currentTime = timeMs / 1000;
-  }, [resolveVideo]);
+  const onJump = useCallback(
+    (timeMs: number) => {
+      const el = resolveVideo();
+      if (el) el.currentTime = timeMs / 1000;
+    },
+    [resolveVideo],
+  );
 
   const chapters = layer.chapters ?? [];
 

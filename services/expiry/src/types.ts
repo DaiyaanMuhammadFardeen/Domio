@@ -118,7 +118,9 @@ export interface ExpiryEventEmitter {
 }
 
 export const noopEmitter: ExpiryEventEmitter = {
-  async publish(): Promise<void> { /* drop */ },
+  async publish(): Promise<void> {
+    /* drop */
+  },
 };
 
 // ---------------------------------------------------------------------------

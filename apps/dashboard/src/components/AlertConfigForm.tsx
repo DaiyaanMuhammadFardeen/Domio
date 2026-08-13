@@ -201,10 +201,7 @@ export function AlertConfigForm({ onSave }: AlertConfigFormProps) {
           {submitting ? 'Saving…' : 'Save rule'}
         </button>
         {submittedAt ? (
-          <span
-            data-testid="alert-saved"
-            className="text-xs font-medium text-emerald-700"
-          >
+          <span data-testid="alert-saved" className="text-xs font-medium text-emerald-700">
             Rule saved at {new Date(submittedAt).toLocaleTimeString()}
           </span>
         ) : null}

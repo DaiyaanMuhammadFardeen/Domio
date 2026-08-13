@@ -15,8 +15,21 @@
  *   thumbnails/<workspace_id>/<entity_id>/<sequence>.jpg
  */
 
-export type TrackKind = 'screen' | 'camera' | 'microphone' | 'system_audio' | 'annotations' | 'slide_diff' | 'widget_events';
-export type StorageBucket = 'recordings' | 'captions' | 'clips' | 'scorm' | 'replays' | 'thumbnails';
+export type TrackKind =
+  | 'screen'
+  | 'camera'
+  | 'microphone'
+  | 'system_audio'
+  | 'annotations'
+  | 'slide_diff'
+  | 'widget_events';
+export type StorageBucket =
+  | 'recordings'
+  | 'captions'
+  | 'clips'
+  | 'scorm'
+  | 'replays'
+  | 'thumbnails';
 
 export function recordingChunkKey(args: {
   workspace_id: string;
@@ -38,7 +51,11 @@ export function captionKey(args: {
   return `captions/${args.workspace_id}/${args.session_id}/${args.language}/${args.segment_index}.vtt`;
 }
 
-export function captionManifestKey(args: { workspace_id: string; session_id: string; language: string }): string {
+export function captionManifestKey(args: {
+  workspace_id: string;
+  session_id: string;
+  language: string;
+}): string {
   return `captions/${args.workspace_id}/${args.session_id}/${args.language}/manifest.vtt`;
 }
 
@@ -50,7 +67,11 @@ export function clipSegmentKey(args: {
   return `clips/${args.workspace_id}/${args.clip_id}/segments/${String(args.sequence).padStart(5, '0')}.mp4`;
 }
 
-export function clipCaptionKey(args: { workspace_id: string; clip_id: string; language: string }): string {
+export function clipCaptionKey(args: {
+  workspace_id: string;
+  clip_id: string;
+  language: string;
+}): string {
   return `clips/${args.workspace_id}/${args.clip_id}/captions/${args.language}.vtt`;
 }
 
@@ -90,7 +111,8 @@ export function parseKey(key: string): {
   const segs = key.split('/');
   if (segs.length < 3) return null;
   const bucket = segs[0] as StorageBucket;
-  if (!['recordings', 'captions', 'clips', 'scorm', 'replays', 'thumbnails'].includes(bucket)) return null;
+  if (!['recordings', 'captions', 'clips', 'scorm', 'replays', 'thumbnails'].includes(bucket))
+    return null;
   return {
     bucket,
     workspace_id: segs[1] ?? '',

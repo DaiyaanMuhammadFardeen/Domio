@@ -20,6 +20,7 @@
 **Features:** #169, #170, #171, #172, #173, #174, #175, #176, #177, #178.
 
 **Files to modify:**
+
 - `apps/dashboard/src/app/overview/page.tsx`
 - `apps/dashboard/src/app/deck/page.tsx`
 - `apps/dashboard/src/app/deck/[id]/page.tsx`
@@ -32,12 +33,14 @@
 - `apps/dashboard/src/app/export/page.tsx`
 
 **Build instructions:**
+
 1. Replace every zero-state fallback with `SuspenseBoundary` + `<EmptyState>` from Wave 1.
 2. Real fetch calls via Wave-1 services.
 3. Loading skeletons match the real layout.
 4. Error retry surface with the trace id from the Wave-1 toast.
 
 **Acceptance:**
+
 - No file contains `STUB_EXPERIMENTS` or `synthetic` fallback.
 - Every page renders correctly when warehouse is reachable; shows actionable empty state when not.
 
@@ -48,11 +51,13 @@
 **Features:** #177, #186.
 
 **Files to create:**
+
 - `apps/dashboard/src/app/funnel/page.tsx`
 - `apps/dashboard/src/components/FunnelChart.tsx`
 - `apps/dashboard/src/components/SlideBreakdownTable.tsx`
 
 **Build instructions:**
+
 1. Per-deck funnel: viewers → opened → reached slide N → converted (configured event).
 2. Drop-off slide annotations: each slide row shows bounce rate + a "why?" button that surfaces AI-suggested hypotheses.
 3. Time-series: cohort of viewers by week.
@@ -64,12 +69,14 @@
 **Features:** #188, #189.
 
 **Files to create:**
+
 - `apps/dashboard/src/app/cohorts/page.tsx`
 - `apps/dashboard/src/app/kpis/page.tsx`
 - `apps/dashboard/src/components/CohortMatrix.tsx`
 - `apps/dashboard/src/components/KPIBuilder.tsx`
 
 **Build instructions:**
+
 1. Cohort matrix: rows = join week, columns = week N retention, cell = heat intensity.
 2. KPI builder: pick metric from schema, configure aggregation, save as dashboard tile.
 3. Saved KPIs appear on overview.
@@ -81,10 +88,12 @@
 **Features:** #192.
 
 **Files to create:**
+
 - `apps/dashboard/src/app/heatmap/element/page.tsx`
 - `apps/dashboard/src/components/ElementHeatmap.tsx`
 
 **Build instructions:**
+
 1. Element-level heatmap shows attention per element (chart, button, text) on each slide.
 2. Click an element to drill into its time-series.
 
@@ -95,12 +104,14 @@
 **Features:** #193, #194.
 
 **Files to create:**
+
 - `apps/dashboard/src/app/sentiment/page.tsx`
 - `apps/dashboard/src/app/csat/page.tsx`
 - `apps/dashboard/src/components/SentimentTimeline.tsx`
 - `apps/dashboard/src/components/CSATBreakdown.tsx`
 
 **Build instructions:**
+
 1. Sentiment timeline: aggregated sentiment per slide over time.
 2. CSAT: per-session scores + per-slide NPS averages.
 
@@ -111,11 +122,13 @@
 **Features:** #195.
 
 **Files to create:**
+
 - `apps/dashboard/src/app/alerts/page.tsx`
 - `apps/dashboard/src/components/AlertConfigForm.tsx`
 - `apps/dashboard/src/components/AlertFeed.tsx`
 
 **Build instructions:**
+
 1. Alert config: pick metric + threshold + notification channel.
 2. Alert feed: live list of triggered alerts; click to drill into the data.
 3. Push to Slack/Teams via `services/notification-dispatcher`.
@@ -127,9 +140,11 @@
 **Features:** #175.
 
 **Files to modify:**
+
 - `apps/dashboard/src/app/live/page.tsx`
 
 **Build instructions:**
+
 1. Live HUD: attendance count, poll participation rate, question volume, current slide, time-in-slide, attention score.
 2. WS-driven; never falls back to static card.
 3. Toggle to overlay on the audience display (per Wave 4 handoff).
@@ -141,10 +156,12 @@
 **Features:** #176.
 
 **Files to modify:**
+
 - `apps/dashboard/src/app/crm/page.tsx`
 - `apps/dashboard/src/components/CRMTimeline.tsx`
 
 **Build instructions:**
+
 1. CRM timeline: per-contact events written back to Salesforce/HubSpot.
 2. Adapter health: status of each connector; retry button.
 
@@ -155,9 +172,11 @@
 **Features:** #178.
 
 **Files to modify:**
+
 - `apps/dashboard/src/app/benchmarks/page.tsx`
 
 **Build instructions:**
+
 1. Benchmarks compare the deck's completion rate to peers.
 2. Per-segment benchmark (industry, audience size, deck size).
 3. Actionable suggestions: "your QBR completion rate is in the 90th percentile."
@@ -169,11 +188,13 @@
 **Features:** #174.
 
 **Files to modify:**
+
 - `apps/dashboard/src/app/team/page.tsx`
 - `apps/dashboard/src/components/TeamLeaderboard.tsx`
 - `apps/dashboard/src/components/TemplateUsageHeatmap.tsx`
 
 **Build instructions:**
+
 1. Team leaderboard: most active creators, most-used templates.
 2. Template usage heatmap: which templates drive the most engagement.
 3. Filter by team, time range, template category.
@@ -185,10 +206,12 @@
 **Features:** #163 (dashboard export).
 
 **Files to modify:**
+
 - `apps/dashboard/src/app/export/page.tsx`
 - `apps/dashboard/src/components/ScheduledReportForm.tsx`
 
 **Build instructions:**
+
 1. Export current dashboard view as CSV/Parquet; poll job status.
 2. Schedule a recurring email/Slack export with the dashboard as PDF.
 3. Edit or delete scheduled reports.
@@ -200,10 +223,12 @@
 **Features:** #219, #124.
 
 **Files to create:**
+
 - `apps/dashboard/src/app/graph/page.tsx`
 - `apps/dashboard/src/components/KnowledgeGraph.tsx`
 
 **Build instructions:**
+
 1. Knowledge graph shows entities (people, products, KPIs) across all decks in the workspace.
 2. Click an entity to see every slide that references it, with freshness indicator.
 3. Search by entity name; jump to slide.
@@ -213,6 +238,7 @@
 ## 3. SOLID injection
 
 ### Dashboard module map
+
 ```
 apps/dashboard/src/
 ├── app/
@@ -240,6 +266,7 @@ apps/dashboard/src/
 ```
 
 ### Rule: every dashboard tile is a `<Tile variant="kpi" | "chart" | "table" | "funnel">`
+
 Tiles are typed and discoverable. Adding a new tile type means adding one variant to `<Tile>`.
 
 ---

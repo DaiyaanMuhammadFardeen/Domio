@@ -89,7 +89,11 @@ describe('GoogleSheetsAdapter — query + normalize', () => {
     expect(result.rows.length).toBe(2);
 
     // Check column names
-    expect(result.columns.map((c: CanonicalColumn) => c.name)).toEqual(['Name', 'Email', 'Revenue']);
+    expect(result.columns.map((c: CanonicalColumn) => c.name)).toEqual([
+      'Name',
+      'Email',
+      'Revenue',
+    ]);
 
     // Check column types are from canonical set
     const validTypes = ['string', 'number', 'boolean', 'date', 'currency', 'percent'];
@@ -242,7 +246,10 @@ describe('GraphqlAdapter — query + normalize', () => {
     const adapter = new GraphqlAdapter();
     const ctx = makeContext(transport);
 
-    const result = await adapter.query(ctx, { connection_id: 'conn-1', sql: '{ items { id name score } }' });
+    const result = await adapter.query(ctx, {
+      connection_id: 'conn-1',
+      sql: '{ items { id name score } }',
+    });
 
     expect(result.columns.length).toBe(3);
     expect(result.rows.length).toBe(2);
@@ -262,7 +269,10 @@ describe('PostgresAdapter — query with mocked transport', () => {
     routes.set('http://sql-gateway:3000/query', {
       status: 200,
       body: {
-        columns: [{ name: 'id', type: 'number' }, { name: 'email', type: 'string' }],
+        columns: [
+          { name: 'id', type: 'number' },
+          { name: 'email', type: 'string' },
+        ],
         rows: [
           [1, 'alice@example.com'],
           [2, 'bob@example.com'],
@@ -337,7 +347,7 @@ describe('PostgresAdapter — integration (docker-gated)', () => {
 
     const result = await adapter.query(ctx, {
       connection_id: 'conn-pg-integration',
-      sql: 'SELECT 1 AS id, \'hello\' AS msg',
+      sql: "SELECT 1 AS id, 'hello' AS msg",
     });
 
     expect(result.columns.length).toBe(2);
@@ -377,14 +387,18 @@ describe('Adapters — ping', () => {
 describe('Adapters — discover', () => {
   it('google_sheets discover returns tables', async () => {
     const adapter = new GoogleSheetsAdapter();
-    const result = await adapter.discover(makeContext(new RecordedTransport(new Map())), { connection_id: 'conn-1' });
+    const result = await adapter.discover(makeContext(new RecordedTransport(new Map())), {
+      connection_id: 'conn-1',
+    });
     expect(result.tables.length).toBeGreaterThan(0);
     expect(result.tables[0]!.columns.length).toBeGreaterThan(0);
   });
 
   it('postgres discover returns tables with PII annotations', async () => {
     const adapter = new PostgresAdapter();
-    const result = await adapter.discover(makeContext(new RecordedTransport(new Map())), { connection_id: 'conn-1' });
+    const result = await adapter.discover(makeContext(new RecordedTransport(new Map())), {
+      connection_id: 'conn-1',
+    });
     expect(result.tables.length).toBeGreaterThan(0);
     // The postgres adapter's fixture discover result has PII on email
     const emailCol = result.tables[0]!.columns.find((c) => c.name === 'email');
@@ -402,17 +416,26 @@ describe('Adapters — empty results', () => {
     routes.set('https://api.example.com/', { status: 200, body: { data: [] } });
     const transport = new RecordedTransport(routes);
     const adapter = new RestAdapter();
-    const result = await adapter.query(makeContext(transport), { connection_id: 'conn-1', sql: 'empty' });
+    const result = await adapter.query(makeContext(transport), {
+      connection_id: 'conn-1',
+      sql: 'empty',
+    });
     expect(result.rows).toHaveLength(0);
     expect(result.columns).toHaveLength(0);
   });
 
   it('notion adapter handles empty results', async () => {
     const routes = new Map<string, HttpResponse>();
-    routes.set('https://api.notion.com/v1/databases/', { status: 200, body: { results: [], has_more: false } });
+    routes.set('https://api.notion.com/v1/databases/', {
+      status: 200,
+      body: { results: [], has_more: false },
+    });
     const transport = new RecordedTransport(routes);
     const adapter = new NotionAdapter();
-    const result = await adapter.query(makeContext(transport), { connection_id: 'conn-1', sql: 'db-id' });
+    const result = await adapter.query(makeContext(transport), {
+      connection_id: 'conn-1',
+      sql: 'db-id',
+    });
     expect(result.rows).toHaveLength(0);
   });
 });

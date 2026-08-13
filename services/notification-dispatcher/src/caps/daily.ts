@@ -63,9 +63,16 @@ export class RedisDailyCap implements DailyCapStore {
   private countSha?: string;
   private resetSha?: string;
 
-  constructor(private readonly redis: Redis, private readonly ttlSeconds = 36 * 3600) {}
+  constructor(
+    private readonly redis: Redis,
+    private readonly ttlSeconds = 36 * 3600,
+  ) {}
 
-  async allowAndIncr(recipientID: string, cap: number, nowMs: number = Date.now()): Promise<boolean> {
+  async allowAndIncr(
+    recipientID: string,
+    cap: number,
+    nowMs: number = Date.now(),
+  ): Promise<boolean> {
     const key = keyFor(recipientID, nowMs);
     const sha = await this.ensureAllowSha();
     let res: unknown;
@@ -114,7 +121,11 @@ export class RedisDailyCap implements DailyCapStore {
 export class MemoryDailyCap implements DailyCapStore {
   private readonly counts = new Map<string, number>();
 
-  async allowAndIncr(recipientID: string, cap: number, nowMs: number = Date.now()): Promise<boolean> {
+  async allowAndIncr(
+    recipientID: string,
+    cap: number,
+    nowMs: number = Date.now(),
+  ): Promise<boolean> {
     const key = keyFor(recipientID, nowMs);
     const cur = this.counts.get(key) ?? 0;
     if (cur >= cap) return false;
@@ -147,7 +158,13 @@ export function keyFor(recipientID: string, nowMs: number): string {
 
 /** NoopDailyCap never caps — used when Redis is unavailable. */
 export class NoopDailyCap implements DailyCapStore {
-  async allowAndIncr(_recipientID: string, _cap: number, _nowMs?: number): Promise<boolean> { return true; }
-  async count(_recipientID: string, _nowMs?: number): Promise<number> { return 0; }
-  async reset(_recipientID: string, _nowMs?: number): Promise<void> { /* no-op */ }
+  async allowAndIncr(_recipientID: string, _cap: number, _nowMs?: number): Promise<boolean> {
+    return true;
+  }
+  async count(_recipientID: string, _nowMs?: number): Promise<number> {
+    return 0;
+  }
+  async reset(_recipientID: string, _nowMs?: number): Promise<void> {
+    /* no-op */
+  }
 }

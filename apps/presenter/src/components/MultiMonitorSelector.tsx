@@ -108,7 +108,8 @@ export function MultiMonitorSelector({
 
   const onChooseFallback = useCallback(() => {
     const url = `/audience?session=${encodeURIComponent(sessionId)}`;
-    const w = typeof window !== 'undefined' ? window.open(url, 'domio-audience', 'noopener=no') : null;
+    const w =
+      typeof window !== 'undefined' ? window.open(url, 'domio-audience', 'noopener=no') : null;
     if (!w) {
       setError('Pop-up blocked. Allow pop-ups for this origin to use the audience display.');
       return;
@@ -120,10 +121,7 @@ export function MultiMonitorSelector({
   const hasRealDisplays = useMemo(() => displays.some((d) => d.id !== 'popup'), [displays]);
 
   return (
-    <section
-      data-testid={dataTestId}
-      style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
-    >
+    <section data-testid={dataTestId} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <header>
         <strong>Audience display</strong>
         <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.6)', margin: '2px 0 0' }}>
@@ -135,9 +133,7 @@ export function MultiMonitorSelector({
         style={{ display: 'flex', flexDirection: 'column', gap: 4 }}
       >
         {displays.length === 0 ? (
-          <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.6)' }}>
-            No second display detected.
-          </p>
+          <p style={{ fontSize: 12, color: 'rgba(0,0,0,0.6)' }}>No second display detected.</p>
         ) : (
           displays.map((d) => {
             const active = d.id === activeId;
@@ -159,7 +155,9 @@ export function MultiMonitorSelector({
                 }}
               >
                 <strong>{d.label}</strong>{' '}
-                {d.resolution ? <span style={{ color: 'rgba(0,0,0,0.5)' }}>· {d.resolution}</span> : null}
+                {d.resolution ? (
+                  <span style={{ color: 'rgba(0,0,0,0.5)' }}>· {d.resolution}</span>
+                ) : null}
                 {d.isPrimary ? <span> · primary</span> : null}
               </button>
             );

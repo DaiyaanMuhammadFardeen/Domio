@@ -18,7 +18,10 @@ import { SuggestionsService, InMemorySuggestionsStore } from '@domio/suggestions
 import { MergeRequestService, InMemoryMergeRequestStore } from '@domio/merge-request-service';
 import { LibraryService, InMemoryLibraryStore } from '@domio/library-service';
 import { ExpiryService, InMemoryExpiryStore } from '@domio/expiry-service';
-import { MeetingIntegrationService, InMemoryMeetingStore } from '@domio/meeting-integration-service';
+import {
+  MeetingIntegrationService,
+  InMemoryMeetingStore,
+} from '@domio/meeting-integration-service';
 import { CalendarService, InMemoryCalendarStore } from '@domio/calendar-service';
 import { TaskManagerService, InMemoryTaskLinkStore } from '@domio/task-manager-service';
 import { GuestService, InMemoryGuestStore } from '@domio/guests-service';
@@ -94,5 +97,16 @@ export function createP18Services(): P18Services {
     store: new InMemoryGuestStore(),
   });
 
-  return { collab, permissions, suggestions, mergeRequests, library, expiry, meeting, calendar, tasks, guests };
+  return {
+    collab,
+    permissions,
+    suggestions,
+    mergeRequests,
+    library,
+    expiry,
+    meeting,
+    calendar,
+    tasks,
+    guests,
+  };
 }

@@ -3,12 +3,7 @@
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import {
-  classify,
-  fetchCsat,
-  fetchSentiment,
-  rollup,
-} from './sentiment-service.js';
+import { classify, fetchCsat, fetchSentiment, rollup } from './sentiment-service.js';
 
 const originalFetch = globalThis.fetch;
 

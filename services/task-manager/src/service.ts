@@ -19,11 +19,7 @@ import type {
   TaskProvider,
   TaskManagerEventEmitter,
 } from './types.js';
-import {
-  TaskLinkNotFoundError,
-  DuplicateTaskLinkError,
-  ValidationError,
-} from './types.js';
+import { TaskLinkNotFoundError, DuplicateTaskLinkError, ValidationError } from './types.js';
 import { noopEmitter, noopTaskProvider } from './types.js';
 import { checkFeature, FEATURE_FLAGS } from './feature_flags.js';
 import { validateFieldMap } from './mapping.js';

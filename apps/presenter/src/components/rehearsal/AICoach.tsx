@@ -17,14 +17,7 @@
  * rendered after hydration so we never touch `navigator` on the server.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { PaceTracker } from './PaceTracker';
 import { FillerWordCounter, type FillerPhraseCount } from './FillerWordCounter';
 import { EyeContactMeter } from './EyeContactMeter';
@@ -59,7 +52,10 @@ const FILLER_PHRASES: readonly string[] = ['um', 'uh', 'like', 'you know', 'so']
  * Count filler phrases in `text`. Matches are case-insensitive and
  * word-boundary aware (so "umbrella" does not trigger "um").
  */
-function countFillers(text: string, phrases: readonly string[] = FILLER_PHRASES): FillerPhraseCount[] {
+function countFillers(
+  text: string,
+  phrases: readonly string[] = FILLER_PHRASES,
+): FillerPhraseCount[] {
   if (!text) return [];
   const lc = text.toLowerCase();
   const out: FillerPhraseCount[] = [];
@@ -148,11 +144,14 @@ export function AICoach({
     return fresh;
   }, []);
 
-  const recordSample = useCallback((text: string, slideId: string) => {
-    if (!text.trim()) return;
-    const trace = ensureSlideTrace(slideId);
-    trace.samples.push({ text, ts: Date.now() });
-  }, [ensureSlideTrace]);
+  const recordSample = useCallback(
+    (text: string, slideId: string) => {
+      if (!text.trim()) return;
+      const trace = ensureSlideTrace(slideId);
+      trace.samples.push({ text, ts: Date.now() });
+    },
+    [ensureSlideTrace],
+  );
 
   // Live WPM tick — recompute from accumulated transcript every 2 s.
   useEffect(() => {
@@ -186,7 +185,7 @@ export function AICoach({
       const allText = samples.map((s) => s.text).join(' ');
       const first = samples[0];
       const last = samples[samples.length - 1];
-      const dwellMs = samples.length === 0 || !first || !last ? 0 : (last.ts - first.ts);
+      const dwellMs = samples.length === 0 || !first || !last ? 0 : last.ts - first.ts;
       const wc = wordCount(allText);
       const dwellMin = Math.max(1 / 60, dwellMs / 60_000);
       const wpm = dwellMs === 0 ? 0 : wc / dwellMin;
@@ -209,7 +208,11 @@ export function AICoach({
   const stopMediaPipeline = useCallback(() => {
     const rec = mediaRecorderRef.current;
     if (rec && rec.state !== 'inactive') {
-      try { rec.stop(); } catch { /* ignore */ }
+      try {
+        rec.stop();
+      } catch {
+        /* ignore */
+      }
     }
     mediaRecorderRef.current = null;
     const stream = mediaStreamRef.current;
@@ -220,7 +223,11 @@ export function AICoach({
     // Stop speech recognition if available.
     const recog = recognitionRef.current as { stop?: () => void } | null;
     if (recog && typeof recog.stop === 'function') {
-      try { recog.stop(); } catch { /* ignore */ }
+      try {
+        recog.stop();
+      } catch {
+        /* ignore */
+      }
     }
     recognitionRef.current = null;
   }, []);
@@ -259,7 +266,7 @@ export function AICoach({
 
     // Optional speech-recognition for live transcript. Most browsers
     // gate this behind vendor prefixes; skip if not available.
-    const w = typeof window !== 'undefined' ? window as unknown as Record<string, unknown> : null;
+    const w = typeof window !== 'undefined' ? (window as unknown as Record<string, unknown>) : null;
     const Ctor = w && (w['SpeechRecognition'] ?? w['webkitSpeechRecognition']);
     if (Ctor) {
       try {
@@ -267,7 +274,9 @@ export function AICoach({
           continuous: boolean;
           interimResults: boolean;
           lang: string;
-          onresult: ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+          onresult:
+            | ((ev: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void)
+            | null;
           onerror: ((ev: unknown) => void) | null;
           onend: (() => void) | null;
           start: () => void;
@@ -289,13 +298,22 @@ export function AICoach({
             recordSample(text, slide.slide_id);
           }
           const last = ev.results[ev.results.length - 1];
-          const finalText = last ? Array.from(last).map((r) => r?.transcript ?? '').filter(Boolean).join(' ') : '';
+          const finalText = last
+            ? Array.from(last)
+                .map((r) => r?.transcript ?? '')
+                .filter(Boolean)
+                .join(' ')
+            : '';
           if (finalText) {
             setTranscript((prev) => `${prev} ${finalText}`.trim());
           }
         };
-        recognition.onerror = () => { /* swallow */ };
-        recognition.onend = () => { /* swallow */ };
+        recognition.onerror = () => {
+          /* swallow */
+        };
+        recognition.onend = () => {
+          /* swallow */
+        };
         recognition.start();
         recognitionRef.current = recognition;
       } catch {
@@ -377,12 +395,18 @@ export function AICoach({
 
   const statusBadge = useMemo(() => {
     switch (status) {
-      case 'idle': return { label: 'Idle', className: 'bg-slate-500/15 text-slate-300' };
-      case 'recording': return { label: 'Live', className: 'bg-rose-500/15 text-rose-300' };
-      case 'paused': return { label: 'Paused', className: 'bg-amber-500/15 text-amber-300' };
-      case 'submitting': return { label: 'Submitting…', className: 'bg-blue-500/15 text-blue-300' };
-      case 'feedback': return { label: 'Feedback ready', className: 'bg-emerald-500/15 text-emerald-300' };
-      case 'error': return { label: 'Error', className: 'bg-rose-600/15 text-rose-300' };
+      case 'idle':
+        return { label: 'Idle', className: 'bg-slate-500/15 text-slate-300' };
+      case 'recording':
+        return { label: 'Live', className: 'bg-rose-500/15 text-rose-300' };
+      case 'paused':
+        return { label: 'Paused', className: 'bg-amber-500/15 text-amber-300' };
+      case 'submitting':
+        return { label: 'Submitting…', className: 'bg-blue-500/15 text-blue-300' };
+      case 'feedback':
+        return { label: 'Feedback ready', className: 'bg-emerald-500/15 text-emerald-300' };
+      case 'error':
+        return { label: 'Error', className: 'bg-rose-600/15 text-rose-300' };
     }
   }, [status]);
 
@@ -398,7 +422,9 @@ export function AICoach({
         <div className="flex flex-col">
           <h3 className="text-sm font-semibold text-slate-100">AI rehearsal coach</h3>
           <span className="text-[11px] text-slate-500">
-            {currentSlide ? `Slide ${currentSlideIndex + 1} / ${slides.length} — ${currentSlide.title ?? currentSlide.slide_id}` : 'No slides configured'}
+            {currentSlide
+              ? `Slide ${currentSlideIndex + 1} / ${slides.length} — ${currentSlide.title ?? currentSlide.slide_id}`
+              : 'No slides configured'}
           </span>
         </div>
         <span
@@ -412,7 +438,10 @@ export function AICoach({
       {/* Live metrics */}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <PaceTracker wpm={liveWpm} />
-        <FillerWordCounter counts={liveFillerCounts} elapsedMs={startedAtRef.current ? Date.now() - startedAtRef.current : 0} />
+        <FillerWordCounter
+          counts={liveFillerCounts}
+          elapsedMs={startedAtRef.current ? Date.now() - startedAtRef.current : 0}
+        />
         <EyeContactMeter score={liveEyeContact} />
       </div>
 

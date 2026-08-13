@@ -52,10 +52,7 @@ export interface PolicyResource {
 // Action
 // ---------------------------------------------------------------------------
 
-export type PolicyAction =
-  | 'slide-element.edit'
-  | 'slide-element.create'
-  | 'deck.share.create';
+export type PolicyAction = 'slide-element.edit' | 'slide-element.create' | 'deck.share.create';
 
 // ---------------------------------------------------------------------------
 // Context — request-level facts
@@ -100,20 +97,36 @@ export function brandLockRegionsPolicy(
   resource: PolicyResource,
 ): PolicyDecision {
   if (action !== 'slide-element.edit' && action !== 'slide-element.create') {
-    return { effect: 'allow', reason: 'action not covered by brand-lock rule', rule: 'brand_lock_regions' };
+    return {
+      effect: 'allow',
+      reason: 'action not covered by brand-lock rule',
+      rule: 'brand_lock_regions',
+    };
   }
 
   if (resource.kind !== 'slide-element') {
-    return { effect: 'allow', reason: 'resource not subject to brand lock', rule: 'brand_lock_regions' };
+    return {
+      effect: 'allow',
+      reason: 'resource not subject to brand lock',
+      rule: 'brand_lock_regions',
+    };
   }
 
   const isLocked = (resource.regions ?? []).some((r) => BRAND_LOCKED_REGIONS.has(r));
   if (!isLocked) {
-    return { effect: 'allow', reason: 'element not in a locked region', rule: 'brand_lock_regions' };
+    return {
+      effect: 'allow',
+      reason: 'element not in a locked region',
+      rule: 'brand_lock_regions',
+    };
   }
 
   if (subject.role === 'admin' || subject.role === 'owner') {
-    return { effect: 'allow', reason: 'admin role bypasses brand lock', rule: 'brand_lock_regions' };
+    return {
+      effect: 'allow',
+      reason: 'admin role bypasses brand lock',
+      rule: 'brand_lock_regions',
+    };
   }
 
   return {
@@ -135,7 +148,11 @@ export function restrictedDataSharePolicy(
   context: PolicyContext,
 ): PolicyDecision {
   if (action !== 'deck.share.create') {
-    return { effect: 'allow', reason: 'action not covered by restricted-share rule', rule: 'restricted_data_share' };
+    return {
+      effect: 'allow',
+      reason: 'action not covered by restricted-share rule',
+      rule: 'restricted_data_share',
+    };
   }
 
   if (resource.kind !== 'deck') {
@@ -152,7 +169,11 @@ export function restrictedDataSharePolicy(
   }
 
   if (subject.role === 'admin' || subject.role === 'owner') {
-    return { effect: 'allow', reason: 'admin override for restricted data share', rule: 'restricted_data_share' };
+    return {
+      effect: 'allow',
+      reason: 'admin override for restricted data share',
+      rule: 'restricted_data_share',
+    };
   }
 
   return {
@@ -191,9 +212,7 @@ export function evaluateAbac(
   ];
 
   const relevant = decisions.filter(
-    (d) =>
-      !d.reason.startsWith('action not covered') &&
-      !d.reason.startsWith('resource not'),
+    (d) => !d.reason.startsWith('action not covered') && !d.reason.startsWith('resource not'),
   );
 
   // First deny wins

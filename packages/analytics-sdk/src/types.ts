@@ -10,11 +10,7 @@
  * consent gates without a join.
  */
 
-export type PrivacyMode =
-  | 'identified'
-  | 'pseudonymous'
-  | 'anon_consent'
-  | 'anon_no_track';
+export type PrivacyMode = 'identified' | 'pseudonymous' | 'anon_consent' | 'anon_no_track';
 
 export type DeviceClass = 'mobile' | 'tablet' | 'desktop' | 'bot';
 
@@ -99,8 +95,8 @@ export interface ScrollProgressEvent extends AnalyticsEventBase {
   event_name: 'scroll_progress';
   dwell_ms: number;
   scroll_depth: number; // [0, 1]
-  tile_x: number;       // [0, 63]
-  tile_y: number;       // [0, 31]
+  tile_x: number; // [0, 63]
+  tile_y: number; // [0, 31]
   viewport_height_px: number;
   scroll_velocity_px_per_s?: number;
 }
@@ -279,7 +275,10 @@ export interface QueueStore {
 
 /** Error thrown by transport on 5xx; the batcher catches this and retries. */
 export class AnalyticsTransportError extends Error {
-  constructor(message: string, public readonly status?: number) {
+  constructor(
+    message: string,
+    public readonly status?: number,
+  ) {
     super(message);
     this.name = 'AnalyticsTransportError';
   }

@@ -51,7 +51,13 @@ describe('session-loader', () => {
 
   describe('fetchPairingForSsr', () => {
     it('returns parsed pairing on 200', async () => {
-      const fixture = { token: 'abc', deep_link: 'domio://pair?token=abc', epoch: 1, expires_at_ms: 1, paired_devices: 0 };
+      const fixture = {
+        token: 'abc',
+        deep_link: 'domio://pair?token=abc',
+        epoch: 1,
+        expires_at_ms: 1,
+        paired_devices: 0,
+      };
       const fetchMock = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => fixture,

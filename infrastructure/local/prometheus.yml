@@ -15,7 +15,5 @@ scrape_configs:
   - job_name: 'domio-self'
     static_configs:
       - targets: ['localhost:9090']
-
-
 # Also write OTLP metrics to Prometheus via the OTel collector.
 # (Configured in otel-collector-config.yaml.)

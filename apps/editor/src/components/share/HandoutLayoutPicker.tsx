@@ -49,7 +49,10 @@ const LAYOUT_LABEL_IDS: Readonly<Record<HandoutLayout, string>> = {
   'grid-9': 'editor.share.handout.layout.grid9',
 };
 
-export function buildHandoutRequest(cfg: HandoutConfig, deckId: string): {
+export function buildHandoutRequest(
+  cfg: HandoutConfig,
+  deckId: string,
+): {
   format: 'pdf';
   layout: `handout-${HandoutLayout}`;
   include_notes: boolean;
@@ -70,10 +73,14 @@ export function buildHandoutRequest(cfg: HandoutConfig, deckId: string): {
 }
 
 const PRINT_CSS: Readonly<Record<HandoutLayout, string>> = {
-  notes: '@page { size: letter; margin: 1in; } .slide { page-break-after: always; padding: 24px; border: 1px solid #ddd; }',
-  'grid-4': '@page { size: letter; margin: 0.5in; } .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; } .slide { padding: 8px; border: 1px solid #ddd; }',
-  'grid-6': '@page { size: letter; margin: 0.5in; } .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .slide { padding: 6px; border: 1px solid #ddd; }',
-  'grid-9': '@page { size: letter; margin: 0.5in; } .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; } .slide { padding: 4px; border: 1px solid #ddd; font-size: 10px; }',
+  notes:
+    '@page { size: letter; margin: 1in; } .slide { page-break-after: always; padding: 24px; border: 1px solid #ddd; }',
+  'grid-4':
+    '@page { size: letter; margin: 0.5in; } .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; } .slide { padding: 8px; border: 1px solid #ddd; }',
+  'grid-6':
+    '@page { size: letter; margin: 0.5in; } .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .slide { padding: 6px; border: 1px solid #ddd; }',
+  'grid-9':
+    '@page { size: letter; margin: 0.5in; } .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; } .slide { padding: 4px; border: 1px solid #ddd; font-size: 10px; }',
 };
 
 export function HandoutLayoutPicker({
@@ -194,13 +201,23 @@ export function HandoutLayoutPicker({
           }}
         >
           <style>{`@media print { ${css} }`}</style>
-          <div style={{ display: 'grid', gridTemplateColumns: cfg.layout === 'notes' ? '1fr' : 'repeat(2, 1fr)', gap: 6 }}>
-            {Array.from({ length: Math.min(slideCount, cfg.layout === 'notes' ? 2 : 6) }).map((_, i) => (
-              <div key={i} style={{ padding: 6, border: '1px solid #ddd', fontSize: 10 }}>
-                <strong>Slide {i + 1}</strong>
-                {cfg.includeNotes ? <p style={{ margin: '4px 0 0' }}>Speaker notes preview.</p> : null}
-              </div>
-            ))}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: cfg.layout === 'notes' ? '1fr' : 'repeat(2, 1fr)',
+              gap: 6,
+            }}
+          >
+            {Array.from({ length: Math.min(slideCount, cfg.layout === 'notes' ? 2 : 6) }).map(
+              (_, i) => (
+                <div key={i} style={{ padding: 6, border: '1px solid #ddd', fontSize: 10 }}>
+                  <strong>Slide {i + 1}</strong>
+                  {cfg.includeNotes ? (
+                    <p style={{ margin: '4px 0 0' }}>Speaker notes preview.</p>
+                  ) : null}
+                </div>
+              ),
+            )}
           </div>
           <p style={{ fontSize: 11, color: 'rgba(0,0,0,0.5)', marginTop: 6 }}>
             <FormattedMessage id="editor.share.handout.previewHint" />

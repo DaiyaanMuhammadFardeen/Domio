@@ -6,8 +6,17 @@
  * impl included here. Mirrors services/presenter-session/src/store/store.ts.
  */
 
-import type { RecordingSession, RecordingTrack, RecordingChunk, RecordingStatus } from '../types.js';
-import { RecordingNotFoundError, RecordingConflictError, RecordingChunkConflictError } from '../types.js';
+import type {
+  RecordingSession,
+  RecordingTrack,
+  RecordingChunk,
+  RecordingStatus,
+} from '../types.js';
+import {
+  RecordingNotFoundError,
+  RecordingConflictError,
+  RecordingChunkConflictError,
+} from '../types.js';
 import type { TrackKind } from '@domio/object-store';
 
 export interface StoreError {
@@ -39,11 +48,19 @@ export interface RecordingStore {
   /** Commit a chunk; throws if (track_kind, sequence) already exists. */
   commitChunk(chunk: RecordingChunk): Promise<RecordingChunk>;
   /** Release a lease — set lease_id and lease_expires_at to null. */
-  releaseLease(args: { recording_session_id: string; track_kind: TrackKind; sequence: number }): Promise<void>;
+  releaseLease(args: {
+    recording_session_id: string;
+    track_kind: TrackKind;
+    sequence: number;
+  }): Promise<void>;
 }
 
 export function isStore(x: unknown): x is RecordingStore {
-  return typeof x === 'object' && x !== null && typeof (x as { transitionStatus?: unknown }).transitionStatus === 'function';
+  return (
+    typeof x === 'object' &&
+    x !== null &&
+    typeof (x as { transitionStatus?: unknown }).transitionStatus === 'function'
+  );
 }
 
 // --- In-memory impl --------------------------------------------------------
@@ -115,14 +132,22 @@ export class InMemoryRecordingStore implements RecordingStore {
   async commitChunk(chunk: RecordingChunk): Promise<RecordingChunk> {
     const key = this.chunkKey(chunk.recording_session_id, chunk.track_kind, chunk.sequence);
     if (this.chunks.has(key)) {
-      throw new RecordingChunkConflictError(chunk.recording_session_id, chunk.track_kind, chunk.sequence);
+      throw new RecordingChunkConflictError(
+        chunk.recording_session_id,
+        chunk.track_kind,
+        chunk.sequence,
+      );
     }
     this.chunks.set(key, chunk);
     this.chunkSeq++;
     return chunk;
   }
 
-  async releaseLease(args: { recording_session_id: string; track_kind: TrackKind; sequence: number }): Promise<void> {
+  async releaseLease(args: {
+    recording_session_id: string;
+    track_kind: TrackKind;
+    sequence: number;
+  }): Promise<void> {
     const key = this.chunkKey(args.recording_session_id, args.track_kind, args.sequence);
     const existing = this.chunks.get(key);
     if (!existing) return;

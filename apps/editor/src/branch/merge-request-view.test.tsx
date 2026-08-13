@@ -18,7 +18,16 @@ function makeRequest(overrides: Partial<MergeRequestSummary> = {}): MergeRequest
     diffSummary: {
       slides: { added: [], removed: [], modified: [{ slideId: 's1' }] },
       elements: [],
-      conflicts: [{ slideId: 's1', elementId: 'e1', path: '/text', sourceValue: 'A', targetValue: 'B', baseValue: '' }],
+      conflicts: [
+        {
+          slideId: 's1',
+          elementId: 'e1',
+          path: '/text',
+          sourceValue: 'A',
+          targetValue: 'B',
+          baseValue: '',
+        },
+      ],
     },
     resolutionStrategy: null,
     resolvedBy: null,
@@ -30,12 +39,26 @@ function makeRequest(overrides: Partial<MergeRequestSummary> = {}): MergeRequest
 }
 
 function makeClient(): BranchClient {
-  const resolve = vi.fn().mockResolvedValue(makeRequest({ status: 'resolved', resolutionStrategy: 'manual' }));
-  const commit = vi.fn().mockResolvedValue({ mergeRequest: makeRequest({ status: 'merged' }), newRevision: 9 });
+  const resolve = vi
+    .fn()
+    .mockResolvedValue(makeRequest({ status: 'resolved', resolutionStrategy: 'manual' }));
+  const commit = vi
+    .fn()
+    .mockResolvedValue({ mergeRequest: makeRequest({ status: 'merged' }), newRevision: 9 });
   return {
-    listBranches: vi.fn(), createBranch: vi.fn(), archiveBranch: vi.fn(), checkout: vi.fn(), getLineage: vi.fn(),
-    listMergeRequests: vi.fn(), createMergeRequest: vi.fn(), resolveMergeRequest: resolve, commitMergeRequest: commit,
-    listCheckpoints: vi.fn(), createCheckpoint: vi.fn(), renameCheckpoint: vi.fn(), restoreCheckpoint: vi.fn(),
+    listBranches: vi.fn(),
+    createBranch: vi.fn(),
+    archiveBranch: vi.fn(),
+    checkout: vi.fn(),
+    getLineage: vi.fn(),
+    listMergeRequests: vi.fn(),
+    createMergeRequest: vi.fn(),
+    resolveMergeRequest: resolve,
+    commitMergeRequest: commit,
+    listCheckpoints: vi.fn(),
+    createCheckpoint: vi.fn(),
+    renameCheckpoint: vi.fn(),
+    restoreCheckpoint: vi.fn(),
   } as unknown as BranchClient;
 }
 
@@ -56,7 +79,14 @@ describe('MergeRequestView', () => {
   it('invokes commitMergeRequest when Merge is clicked', async () => {
     const client = makeClient();
     const onMerged = vi.fn();
-    render(<MergeRequestView deckId={DECK} client={client} request={makeRequest({ status: 'resolved' })} onMerged={onMerged} />);
+    render(
+      <MergeRequestView
+        deckId={DECK}
+        client={client}
+        request={makeRequest({ status: 'resolved' })}
+        onMerged={onMerged}
+      />,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Merge' }));
     await waitFor(() => expect(onMerged).toHaveBeenCalledWith(9));
   });

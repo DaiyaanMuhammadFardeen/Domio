@@ -32,7 +32,12 @@ export interface SSOConfigProps {
   readonly dataTestId?: string;
 }
 
-export function SSOConfig({ tenants, value, onChange, dataTestId = 'sso-config' }: SSOConfigProps): ReactElement {
+export function SSOConfig({
+  tenants,
+  value,
+  onChange,
+  dataTestId = 'sso-config',
+}: SSOConfigProps): ReactElement {
   const onTenant = useCallback(
     (tenantId: string) => {
       onChange({ ...value, tenantId });
@@ -73,7 +78,10 @@ export function SSOConfig({ tenants, value, onChange, dataTestId = 'sso-config' 
         style={{ padding: '6px 8px', borderRadius: 4, border: '1px solid rgba(0,0,0,0.2)' }}
       />
       {value.tenantId ? (
-        <div data-testid={`${dataTestId}-redirect`} style={{ fontSize: 12, color: 'rgba(0,0,0,0.6)' }}>
+        <div
+          data-testid={`${dataTestId}-redirect`}
+          style={{ fontSize: 12, color: 'rgba(0,0,0,0.6)' }}
+        >
           <FormattedMessage id="editor.share.sso.redirectHint" />
         </div>
       ) : null}

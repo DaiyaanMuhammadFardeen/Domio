@@ -220,6 +220,9 @@ export function fadeConfigFor(spec: ViewerAudioTrackSpec): FadeConfig {
 /**
  * Build a ducking config with the runtime's default ratio.
  */
-export function duckConfigFor(ratio: number = DEFAULT_DUCK_RATIO, enabled: boolean = true): DuckingConfig {
+export function duckConfigFor(
+  ratio: number = DEFAULT_DUCK_RATIO,
+  enabled: boolean = true,
+): DuckingConfig {
   return { duckRatio: ratio, enabled };
 }

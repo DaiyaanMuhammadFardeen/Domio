@@ -6,12 +6,7 @@
 import type { Element, ULID } from '@domio/schema';
 import type { DomioPropsSchema } from '@domio/schema-prop';
 
-export type ComponentCategory =
-  | 'statistics'
-  | 'data'
-  | 'structure'
-  | 'people'
-  | 'layout';
+export type ComponentCategory = 'statistics' | 'data' | 'structure' | 'people' | 'layout';
 
 export interface ComponentVariant {
   id: string;

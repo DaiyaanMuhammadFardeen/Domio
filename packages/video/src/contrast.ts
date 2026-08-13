@@ -55,10 +55,7 @@ function computeRMSContrast(luma: Float32Array): number {
  * @param pixelCount - Total number of pixels in the frame (N×N). Used for offload hint.
  * @returns ContrastResult with WCAG-aware recommendations.
  */
-export function analyzeContrast(
-  luma: Float32Array,
-  pixelCount: number,
-): ContrastResult {
+export function analyzeContrast(luma: Float32Array, pixelCount: number): ContrastResult {
   const n = luma.length;
   if (n === 0) {
     return {

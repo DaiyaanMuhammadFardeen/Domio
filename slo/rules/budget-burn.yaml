@@ -20,8 +20,8 @@ groups:
           slo: api-gateway-availability
           component: api-gateway
         annotations:
-          summary: "api-gateway availability burning budget at 14.4× (5m)"
-          runbook: "runbooks/api-gateway-5xx.md"
+          summary: 'api-gateway availability burning budget at 14.4× (5m)'
+          runbook: 'runbooks/api-gateway-5xx.md'
       - alert: ApiGatewayAvailBurnSlow
         expr: |
           (
@@ -35,7 +35,7 @@ groups:
           slo: api-gateway-availability
           component: api-gateway
         annotations:
-          summary: "api-gateway availability burning budget at 6× (30m)"
+          summary: 'api-gateway availability burning budget at 6× (30m)'
 
       # ------------------------------------------------------------------
       # api-gateway — latency p95 < 200ms
@@ -52,7 +52,7 @@ groups:
           slo: api-gateway-latency-p95
           component: api-gateway
         annotations:
-          summary: "api-gateway p95 latency over 200ms"
+          summary: 'api-gateway p95 latency over 200ms'
 
       # ------------------------------------------------------------------
       # realtime-gateway — connect success
@@ -71,7 +71,7 @@ groups:
           slo: realtime-connect
           component: realtime-gateway
         annotations:
-          summary: "realtime-gateway connect success burning budget at 14.4×"
+          summary: 'realtime-gateway connect success burning budget at 14.4×'
 
       # ------------------------------------------------------------------
       # editor — auto-save success
@@ -90,7 +90,7 @@ groups:
           slo: editor-autosave
           component: editor
         annotations:
-          summary: "editor auto-save burning budget at 14.4×"
+          summary: 'editor auto-save burning budget at 14.4×'
 
       # ------------------------------------------------------------------
       # postgres — replication lag (single-window, not burn-rate)
@@ -103,7 +103,7 @@ groups:
           slo: postgres-replication
           component: postgres
         annotations:
-          summary: "postgres replication lag > 60s"
+          summary: 'postgres replication lag > 60s'
 
       # ------------------------------------------------------------------
       # postgres — write latency p99
@@ -121,4 +121,4 @@ groups:
           slo: postgres-write-latency
           component: postgres
         annotations:
-          summary: "postgres write p99 latency over 100ms"
+          summary: 'postgres write p99 latency over 100ms'

@@ -57,21 +57,23 @@ describe('verifyHash', () => {
     const prevHash = GENESIS_HASH;
     const hash = computeHash(payload, seq, prevHash);
 
-    expect(verifyHash({
-      id: 'test',
-      workspaceId: 'ws1',
-      actorId: 'user1',
-      actorType: 'user',
-      actorKind: 'human',
-      eventKind: 'purchase',
-      eventType: 'purchase',
-      payload,
-      seq,
-      prevHash,
-      hash,
-      kid: AUDIT_KID,
-      recordedAt: new Date(),
-    })).toBe(true);
+    expect(
+      verifyHash({
+        id: 'test',
+        workspaceId: 'ws1',
+        actorId: 'user1',
+        actorType: 'user',
+        actorKind: 'human',
+        eventKind: 'purchase',
+        eventType: 'purchase',
+        payload,
+        seq,
+        prevHash,
+        hash,
+        kid: AUDIT_KID,
+        recordedAt: new Date(),
+      }),
+    ).toBe(true);
   });
 
   it('returns false for a tampered event', () => {
@@ -80,21 +82,23 @@ describe('verifyHash', () => {
     const prevHash = GENESIS_HASH;
     const hash = computeHash(payload, seq, prevHash);
 
-    expect(verifyHash({
-      id: 'test',
-      workspaceId: 'ws1',
-      actorId: 'user1',
-      actorType: 'user',
-      actorKind: 'human',
-      eventKind: 'purchase',
-      eventType: 'purchase',
-      payload: { amount: 9999 }, // tampered
-      seq,
-      prevHash,
-      hash,
-      kid: AUDIT_KID,
-      recordedAt: new Date(),
-    })).toBe(false);
+    expect(
+      verifyHash({
+        id: 'test',
+        workspaceId: 'ws1',
+        actorId: 'user1',
+        actorType: 'user',
+        actorKind: 'human',
+        eventKind: 'purchase',
+        eventType: 'purchase',
+        payload: { amount: 9999 }, // tampered
+        seq,
+        prevHash,
+        hash,
+        kid: AUDIT_KID,
+        recordedAt: new Date(),
+      }),
+    ).toBe(false);
   });
 });
 
@@ -219,15 +223,17 @@ describe('InMemoryAuditRecorder', () => {
 
     const events = [];
     for (let i = 0; i < 10; i++) {
-      events.push(await recorder.record({
-        workspaceId: 'ws1',
-        actorId: 'user1',
-        actorType: 'user',
-        actorKind: 'human',
-        eventKind: 'purchase',
-        eventType: 'purchase',
-        payload: { index: i, ts: Date.now() },
-      }));
+      events.push(
+        await recorder.record({
+          workspaceId: 'ws1',
+          actorId: 'user1',
+          actorType: 'user',
+          actorKind: 'human',
+          eventKind: 'purchase',
+          eventType: 'purchase',
+          payload: { index: i, ts: Date.now() },
+        }),
+      );
     }
 
     for (const event of events) {
@@ -279,8 +285,13 @@ describe('InMemoryAuditRecorder', () => {
     const recorder = new InMemoryAuditRecorder(store);
 
     const kinds = [
-      'purchase', 'refund', 'payout', 'takedown',
-      'kyc', 'brand_lock_curation', 'agent_purchase',
+      'purchase',
+      'refund',
+      'payout',
+      'takedown',
+      'kyc',
+      'brand_lock_curation',
+      'agent_purchase',
     ] as const;
 
     for (const eventKind of kinds) {

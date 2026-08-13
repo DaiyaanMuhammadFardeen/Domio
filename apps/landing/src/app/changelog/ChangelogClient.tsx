@@ -19,10 +19,7 @@
 'use client';
 
 import { useMemo, useState, type JSX } from 'react';
-import {
-  ReleaseFilter,
-  type ChangelogFilter,
-} from '../../components/changelog/ReleaseFilter';
+import { ReleaseFilter, type ChangelogFilter } from '../../components/changelog/ReleaseFilter';
 import { ReleaseEntry } from '../../components/changelog/ReleaseEntry';
 import type { ChangelogEntry } from '../../lib/changelog-data';
 
@@ -36,15 +33,11 @@ function hasFixes(e: ChangelogEntry): boolean {
 
 function hasBreaking(e: ChangelogEntry): boolean {
   return (
-    Array.isArray(e.breaking_changes) &&
-    (e.breaking_changes as ReadonlyArray<string>).length > 0
+    Array.isArray(e.breaking_changes) && (e.breaking_changes as ReadonlyArray<string>).length > 0
   );
 }
 
-function matchesFilter(
-  entry: ChangelogEntry,
-  filter: ChangelogFilter,
-): boolean {
+function matchesFilter(entry: ChangelogEntry, filter: ChangelogFilter): boolean {
   if (filter === 'all') return true;
   if (filter.has('breaking') && hasBreaking(entry)) return true;
   if (filter.has('fix') && hasFixes(entry)) return true;
@@ -60,15 +53,9 @@ export function ChangelogClient({ entries }: ChangelogClientProps): JSX.Element 
     [entries],
   );
   const fixCount = useMemo(() => entries.filter(hasFixes).length, [entries]);
-  const breakingCount = useMemo(
-    () => entries.filter(hasBreaking).length,
-    [entries],
-  );
+  const breakingCount = useMemo(() => entries.filter(hasBreaking).length, [entries]);
 
-  const visible = useMemo(
-    () => entries.filter((e) => matchesFilter(e, filter)),
-    [entries, filter],
-  );
+  const visible = useMemo(() => entries.filter((e) => matchesFilter(e, filter)), [entries, filter]);
 
   return (
     <div className="cl-page__body">
@@ -85,11 +72,7 @@ export function ChangelogClient({ entries }: ChangelogClientProps): JSX.Element 
           No releases match this filter yet.
         </p>
       ) : (
-        <div
-          className="cl-list"
-          data-testid="changelog-list"
-          data-visible-count={visible.length}
-        >
+        <div className="cl-list" data-testid="changelog-list" data-visible-count={visible.length}>
           {visible.map((entry) => (
             <ReleaseEntry key={entry.version} entry={entry} />
           ))}

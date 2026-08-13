@@ -91,10 +91,7 @@ export class PgGuestStore implements GuestStore {
 
   async getGuestAccess(id: string): Promise<GuestAccess | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getGuestAccess');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM guest_access WHERE id = $1',
-      [id],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM guest_access WHERE id = $1', [id]);
     if (rows.length === 0) return null;
     return guestAccessRowToDomain(rows[0]!);
   }
@@ -177,10 +174,9 @@ export class PgGuestStore implements GuestStore {
 
   async getMagicLinkByHash(tokenHash: string): Promise<GuestMagicLink | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getMagicLinkByHash');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM guest_magic_link WHERE token_hash = $1',
-      [tokenHash],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM guest_magic_link WHERE token_hash = $1', [
+      tokenHash,
+    ]);
     if (rows.length === 0) return null;
     return magicLinkRowToDomain(rows[0]!);
   }
@@ -266,7 +262,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

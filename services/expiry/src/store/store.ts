@@ -28,6 +28,10 @@ export interface ExpiryStore {
 
   insertFlag(flag: FreshnessFlag): Promise<void>;
   listOpenFlags(resourceType?: string, resourceId?: string): Promise<FreshnessFlag[]>;
-  resolveFlags(resourceType: string, resourceId: string, opts: { resolvedAt: Date; resolvedBy: string }): Promise<number>;
+  resolveFlags(
+    resourceType: string,
+    resourceId: string,
+    opts: { resolvedAt: Date; resolvedBy: string },
+  ): Promise<number>;
   getFlagHistory(resourceType: string, resourceId: string): Promise<FreshnessFlag[]>;
 }

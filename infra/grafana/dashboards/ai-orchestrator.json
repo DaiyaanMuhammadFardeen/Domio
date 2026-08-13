@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "ai-orchestrator"
-  ],
+  "tags": ["tier-2", "domio", "ai-orchestrator"],
   "panels": [
     {
       "id": 1,

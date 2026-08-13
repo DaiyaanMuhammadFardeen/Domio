@@ -19,9 +19,7 @@ import {
 describe('trust-data', () => {
   it('exports 4+ compliance badges with mixed statuses', () => {
     expect(COMPLIANCE_BADGES.length).toBeGreaterThanOrEqual(4);
-    const statuses = new Set<ComplianceStatus>(
-      COMPLIANCE_BADGES.map((b) => b.status),
-    );
+    const statuses = new Set<ComplianceStatus>(COMPLIANCE_BADGES.map((b) => b.status));
     expect(statuses.has('certified')).toBe(true);
   });
 

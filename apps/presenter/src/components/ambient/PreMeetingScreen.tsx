@@ -64,11 +64,7 @@ export function PreMeetingScreen({
   );
 
   return (
-    <section
-      data-testid={dataTestId}
-      aria-label="Pre-meeting screen"
-      style={wrapperStyle}
-    >
+    <section data-testid={dataTestId} aria-label="Pre-meeting screen" style={wrapperStyle}>
       <BackgroundVein brand={session.brand_kit} />
       <div style={gridStyle}>
         <Header session={session} />
@@ -357,9 +353,7 @@ function FooterMeta({ session }: FooterMetaProps): ReactElement {
       }}
     >
       <span>Room: {session.room_name}</span>
-      <span data-testid="pre-meeting-presenter-footer">
-        Presenter: {session.presenter_name}
-      </span>
+      <span data-testid="pre-meeting-presenter-footer">Presenter: {session.presenter_name}</span>
       <span>
         Deck: <code style={{ fontFamily: 'monospace' }}>{session.deck_id}</code>
       </span>

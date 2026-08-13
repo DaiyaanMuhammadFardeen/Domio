@@ -22,10 +22,25 @@ export interface OverlayState {
 }
 
 export interface OverlayDiff {
-  readonly datasetSnapshotRefs: { readonly added: readonly string[]; readonly removed: readonly string[] };
-  readonly formulaConstantOverrides: { readonly added: ReadonlyMap<string, number>; readonly removed: ReadonlyMap<string, number>; readonly changed: ReadonlyMap<string, { old: number; new: number }> };
-  readonly sliderValueOverrides: { readonly added: ReadonlyMap<string, number>; readonly removed: ReadonlyMap<string, number>; readonly changed: ReadonlyMap<string, { old: number; new: number }> };
-  readonly annotationOverrides: { readonly added: ReadonlyMap<string, string>; readonly removed: ReadonlyMap<string, string>; readonly changed: ReadonlyMap<string, { old: string; new: string }> };
+  readonly datasetSnapshotRefs: {
+    readonly added: readonly string[];
+    readonly removed: readonly string[];
+  };
+  readonly formulaConstantOverrides: {
+    readonly added: ReadonlyMap<string, number>;
+    readonly removed: ReadonlyMap<string, number>;
+    readonly changed: ReadonlyMap<string, { old: number; new: number }>;
+  };
+  readonly sliderValueOverrides: {
+    readonly added: ReadonlyMap<string, number>;
+    readonly removed: ReadonlyMap<string, number>;
+    readonly changed: ReadonlyMap<string, { old: number; new: number }>;
+  };
+  readonly annotationOverrides: {
+    readonly added: ReadonlyMap<string, string>;
+    readonly removed: ReadonlyMap<string, string>;
+    readonly changed: ReadonlyMap<string, { old: string; new: string }>;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -70,7 +85,11 @@ function mergeArray(base: readonly string[], override: readonly string[]): strin
 function diffMap<K extends string | number>(
   base: ReadonlyMap<K, number | string>,
   target: ReadonlyMap<K, number | string>,
-): { added: Map<K, number | string>; removed: Map<K, number | string>; changed: Map<K, { old: number | string; new: number | string }> } {
+): {
+  added: Map<K, number | string>;
+  removed: Map<K, number | string>;
+  changed: Map<K, { old: number | string; new: number | string }>;
+} {
   const added = new Map<K, number | string>();
   const removed = new Map<K, number | string>();
   const changed = new Map<K, { old: number | string; new: number | string }>();
@@ -120,7 +139,10 @@ export function applyOverlays(
       const os = overlayToState(overlay);
       state = {
         datasetSnapshotRefs: mergeArray(state.datasetSnapshotRefs, os.datasetSnapshotRefs),
-        formulaConstantOverrides: mergeMap(state.formulaConstantOverrides, os.formulaConstantOverrides),
+        formulaConstantOverrides: mergeMap(
+          state.formulaConstantOverrides,
+          os.formulaConstantOverrides,
+        ),
         sliderValueOverrides: mergeMap(state.sliderValueOverrides, os.sliderValueOverrides),
         annotationOverrides: mergeMap(state.annotationOverrides, os.annotationOverrides),
       };

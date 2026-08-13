@@ -9,23 +9,10 @@
 
 import type { EdgeBus } from '@domio/edge-pubsub';
 import { encode } from '@domio/edge-pubsub';
-import {
-  type QaThread,
-  type QaSubmit,
-  type ModerationDecision,
-  QaError,
-} from './types.js';
-import {
-  type QaStore,
-  isQaStore,
-  notFoundError,
-  tooLongError,
-} from './store.js';
+import { type QaThread, type QaSubmit, type ModerationDecision, QaError } from './types.js';
+import { type QaStore, isQaStore, notFoundError, tooLongError } from './store.js';
 import { type IdempotencyStore, InMemoryIdempotencyStore } from './idempotency/index.js';
-import {
-  type QaAuditEmitter,
-  type QaAuditEvent,
-} from './audit/emit.js';
+import { type QaAuditEmitter, type QaAuditEvent } from './audit/emit.js';
 import { type QaEngineMetrics, NullQaEngineMetrics } from './observability/metrics.js';
 
 export type QaModerator = (input: {
@@ -199,7 +186,9 @@ export class QaEngine {
       after: { body_length: submit.body.length, moderation: moderation ?? 'allow' },
     });
     this.metrics.submits.inc(1, { workspace_id: input.workspace_id });
-    this.metrics.submit_latency_ms.observe(this.now_ms() - start, { workspace_id: input.workspace_id });
+    this.metrics.submit_latency_ms.observe(this.now_ms() - start, {
+      workspace_id: input.workspace_id,
+    });
     await this.bus.publish({
       session_id: input.session_id,
       topic: 'qa',
@@ -236,7 +225,11 @@ export class QaEngine {
     return submit;
   }
 
-  async promoteToParkingLot(input: { thread_id: string; submit_id: string; actor_id: string }): Promise<{ submit: QaSubmit; promoted: true }> {
+  async promoteToParkingLot(input: {
+    thread_id: string;
+    submit_id: string;
+    actor_id: string;
+  }): Promise<{ submit: QaSubmit; promoted: true }> {
     const ts = this.now_ms();
     const submit = await this.store.getSubmit(input.submit_id);
     if (!submit) throw notFoundError(input.submit_id);

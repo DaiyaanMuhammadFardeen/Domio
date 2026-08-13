@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchElementTimeSeries, type ElementTimeSeriesPoint } from '../lib/element-heatmap-service';
+import {
+  fetchElementTimeSeries,
+  type ElementTimeSeriesPoint,
+} from '../lib/element-heatmap-service';
 
 export interface ElementTimeSeriesProps {
   workspaceId: string;
@@ -61,7 +64,10 @@ export function ElementTimeSeries({
       </header>
 
       {loading ? (
-        <div className="flex h-32 items-center justify-center text-sm text-slate-500" data-testid="drill-in-loading">
+        <div
+          className="flex h-32 items-center justify-center text-sm text-slate-500"
+          data-testid="drill-in-loading"
+        >
           Loading…
         </div>
       ) : error ? (
@@ -103,7 +109,9 @@ function TimeSeriesChart({ points }: { points: ReadonlyArray<ElementTimeSeriesPo
     const y = padT + plotH - (Math.max(0, p.attention) / max) * plotH;
     return { x, y };
   });
-  const path = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ');
+  const path = coords
+    .map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`)
+    .join(' ');
 
   return (
     <svg
@@ -115,8 +123,22 @@ function TimeSeriesChart({ points }: { points: ReadonlyArray<ElementTimeSeriesPo
       data-testid="drill-in-chart"
     >
       {/* Axes */}
-      <line x1={padL} y1={padT} x2={padL} y2={H - padB} className="stroke-slate-200" strokeWidth={1} />
-      <line x1={padL} y1={H - padB} x2={W - padR} y2={H - padB} className="stroke-slate-200" strokeWidth={1} />
+      <line
+        x1={padL}
+        y1={padT}
+        x2={padL}
+        y2={H - padB}
+        className="stroke-slate-200"
+        strokeWidth={1}
+      />
+      <line
+        x1={padL}
+        y1={H - padB}
+        x2={W - padR}
+        y2={H - padB}
+        className="stroke-slate-200"
+        strokeWidth={1}
+      />
       {/* Path */}
       <path d={path} fill="none" className="stroke-brand-600" strokeWidth={2} />
       {/* Dots */}

@@ -24,7 +24,9 @@ function makeMachine(overrides: Partial<StateInspectorMachine> = {}): StateInspe
   };
 }
 
-function defaultProps(overrides: Partial<React.ComponentProps<typeof StateInspectorPanel>> = {}): React.ComponentProps<typeof StateInspectorPanel> {
+function defaultProps(
+  overrides: Partial<React.ComponentProps<typeof StateInspectorPanel>> = {},
+): React.ComponentProps<typeof StateInspectorPanel> {
   return {
     machines: [],
     activeSlideId: 's1',
@@ -140,22 +142,14 @@ describe('StateInspectorPanel', () => {
   });
 
   it('disables the advance button when paused even if a machine is selected', () => {
-    render(
-      <StateInspectorPanel
-        {...defaultProps({ machines: [makeMachine()] })}
-      />,
-    );
+    render(<StateInspectorPanel {...defaultProps({ machines: [makeMachine()] })} />);
     fireEvent.click(screen.getByTestId('m3-pause-toggle'));
     expect(screen.getByTestId('m3-advance')).toBeDisabled();
   });
 
   it('applies the selected event when not paused', () => {
     const onAdvance = vi.fn();
-    render(
-      <StateInspectorPanel
-        {...defaultProps({ machines: [makeMachine()], onAdvance })}
-      />,
-    );
+    render(<StateInspectorPanel {...defaultProps({ machines: [makeMachine()], onAdvance })} />);
     fireEvent.change(screen.getByTestId('m3-advance-event'), { target: { value: 'press' } });
     fireEvent.click(screen.getByTestId('m3-advance'));
     expect(onAdvance).toHaveBeenCalledWith('m1', 'press');

@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-3",
-    "domio",
-    "prototype-recorder"
-  ],
+  "tags": ["tier-3", "domio", "prototype-recorder"],
   "panels": [
     {
       "id": 1,

@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  withinBudget,
-  pickDriftStrategy,
-  updateDrift,
-  type DriftState,
-} from './sync.js';
+import { withinBudget, pickDriftStrategy, updateDrift, type DriftState } from './sync.js';
 
 // ─── withinBudget ───────────────────────────────────────────────────────────
 

@@ -68,9 +68,8 @@ describe('BenchmarkChart', () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
-    const calledArgs = (
-      mockFetch as unknown as { mock: { calls: [string, RequestInit][] } }
-    ).mock.calls[0];
+    const calledArgs = (mockFetch as unknown as { mock: { calls: [string, RequestInit][] } }).mock
+      .calls[0];
     expect(calledArgs?.[0]).toContain('/v1/analytics/benchmarks/peers');
     const headers = (calledArgs?.[1]?.headers ?? {}) as Record<string, string>;
     expect(headers['x-workspace-id']).toBe('ws-demo');

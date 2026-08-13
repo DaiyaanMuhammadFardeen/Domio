@@ -54,19 +54,22 @@ export class ExcelAdapter implements ConnectorAdapter {
 
   async ping(ctx: AdapterContext): Promise<{ ok: boolean; latency_ms: number }> {
     const t0 = Date.now();
-    await ctx.transport.request({ method: 'GET', url: 'https://graph.microsoft.com/v1.0/me/drive/items' });
+    await ctx.transport.request({
+      method: 'GET',
+      url: 'https://graph.microsoft.com/v1.0/me/drive/items',
+    });
     return { ok: true, latency_ms: Date.now() - t0 };
   }
 
   async discover(_ctx: AdapterContext, _spec: DiscoverSpec): Promise<DiscoverResult> {
     return {
-      tables: [{
-        name: 'Sheet1',
-        columns: [
-          { name: 'Column1', type: 'string', semantic_role: 'dimension' },
-        ],
-        row_count_estimate: 50,
-      }],
+      tables: [
+        {
+          name: 'Sheet1',
+          columns: [{ name: 'Column1', type: 'string', semantic_role: 'dimension' }],
+          row_count_estimate: 50,
+        },
+      ],
     };
   }
 

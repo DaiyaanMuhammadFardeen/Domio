@@ -101,9 +101,9 @@ describe('review-service / submitReview', () => {
 
   it('surfaces moderation error detail when the API rejects (spam)', async () => {
     mockFetchOnce(422, { detail: 'Spam detected', title: 'Spam filter' });
-    await expect(
-      submitReview('lst_1', { rating: 1, body: 'BUY MY CRYPTO!!' }),
-    ).rejects.toThrow(/Spam detected/);
+    await expect(submitReview('lst_1', { rating: 1, body: 'BUY MY CRYPTO!!' })).rejects.toThrow(
+      /Spam detected/,
+    );
   });
 });
 
@@ -131,9 +131,7 @@ describe('review-service / replyToReview', () => {
 
   it('throws when a second reply is attempted (idempotent / server-enforced)', async () => {
     mockFetchOnce(409, { detail: 'Reply already exists' });
-    await expect(replyToReview('rv_1', { body: 'Again!' })).rejects.toThrow(
-      /already exists/,
-    );
+    await expect(replyToReview('rv_1', { body: 'Again!' })).rejects.toThrow(/already exists/);
   });
 });
 

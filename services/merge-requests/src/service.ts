@@ -103,8 +103,16 @@ export class MergeRequestService {
 
     // Build snapshots for diff computation
     const base: DiffSnapshot = { branch_id: 'base', version_id: baseVersionId, deck: baseSnapshot };
-    const source: DiffSnapshot = { branch_id: input.source_branch, version_id: sourceVersionId, deck: sourceSnapshot };
-    const target: DiffSnapshot = { branch_id: input.target_branch, version_id: targetVersionId, deck: targetSnapshot };
+    const source: DiffSnapshot = {
+      branch_id: input.source_branch,
+      version_id: sourceVersionId,
+      deck: sourceSnapshot,
+    };
+    const target: DiffSnapshot = {
+      branch_id: input.target_branch,
+      version_id: targetVersionId,
+      deck: targetSnapshot,
+    };
 
     // Check for fast-forward
     const ff = isFastForward(base, source, target);
@@ -206,10 +214,7 @@ export class MergeRequestService {
   // getMergeRequestDiffs
   // -------------------------------------------------------------------------
 
-  async getMergeRequestDiffs(
-    mrId: string,
-    _level: SlideDiffLevel = 'slide',
-  ): Promise<SlideDiff> {
+  async getMergeRequestDiffs(mrId: string, _level: SlideDiffLevel = 'slide'): Promise<SlideDiff> {
     checkFeature(FEATURE_FLAGS.mergeRequest);
     const diff = await this.store.getSlideDiffByMrId(mrId);
     if (!diff) throw new SlideDiffNotFoundError(mrId);
@@ -244,7 +249,7 @@ export class MergeRequestService {
 
     // Apply resolutions to slide_diffs
     const updatedSlideDiffs = diff.slide_diffs.map((sd): SlideDiffEntry => {
-      const resolution = resolutions.find(r => r.slide_id === sd.slide_id);
+      const resolution = resolutions.find((r) => r.slide_id === sd.slide_id);
       if (!resolution) return sd;
 
       // Apply resolution: 'theirs' keeps source (after), 'ours' keeps target (before)
@@ -268,8 +273,8 @@ export class MergeRequestService {
     });
 
     // Check if all conflicts are now resolved
-    const remainingConflicts = updatedSlideDiffs.filter(sd =>
-      sd.element_diffs.some(ed => ed.is_conflict),
+    const remainingConflicts = updatedSlideDiffs.filter((sd) =>
+      sd.element_diffs.some((ed) => ed.is_conflict),
     );
 
     const newStatus: MergeRequestStatus = remainingConflicts.length === 0 ? 'open' : 'conflict';
@@ -309,12 +314,12 @@ export class MergeRequestService {
     if (mr.diff_id) {
       const diff = await this.store.getSlideDiff(mr.diff_id);
       if (diff) {
-        const hasConflicts = diff.slide_diffs.some(sd =>
-          sd.element_diffs.some(ed => ed.is_conflict),
+        const hasConflicts = diff.slide_diffs.some((sd) =>
+          sd.element_diffs.some((ed) => ed.is_conflict),
         );
         if (hasConflicts) {
           throw new ConflictsUnresolvedError(
-            diff.slide_diffs.filter(sd => sd.element_diffs.some(ed => ed.is_conflict)).length,
+            diff.slide_diffs.filter((sd) => sd.element_diffs.some((ed) => ed.is_conflict)).length,
           );
         }
 
@@ -365,10 +370,7 @@ export class MergeRequestService {
   // closeMergeRequest
   // -------------------------------------------------------------------------
 
-  async closeMergeRequest(
-    mrId: string,
-    actorId: string,
-  ): Promise<MergeRequest> {
+  async closeMergeRequest(mrId: string, actorId: string): Promise<MergeRequest> {
     checkFeature(FEATURE_FLAGS.mergeRequest);
 
     const mr = await this.getMergeRequest(mrId);

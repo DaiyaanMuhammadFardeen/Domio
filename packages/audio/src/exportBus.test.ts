@@ -201,7 +201,10 @@ describe('createExportBus', () => {
   });
 
   it('toWavUri with stereo samples', () => {
-    const bus = createExportBus(mockContext(), { channels: 2, sampleRate: 48000 }) as ExportBusWithSamples;
+    const bus = createExportBus(mockContext(), {
+      channels: 2,
+      sampleRate: 48000,
+    }) as ExportBusWithSamples;
     bus._capturedSamples.set(new Float32Array([0.5, -0.5, 0, 0]));
     const uri = bus.toWavUri();
     const base64 = uri.replace('data:audio/wav;base64,', '');

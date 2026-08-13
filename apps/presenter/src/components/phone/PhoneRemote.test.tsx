@@ -43,15 +43,21 @@ describe('PhoneRemote', () => {
   it('shows a device list when the API returns devices', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () =>
-        new Response(
-          JSON.stringify({
-            devices: [
-              { device_id: 'd1', display_name: 'iPhone 15', connected_at_ms: Date.now(), supports_haptics: true },
-            ],
-          }),
-          { status: 200, headers: { 'content-type': 'application/json' } },
-        ),
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              devices: [
+                {
+                  device_id: 'd1',
+                  display_name: 'iPhone 15',
+                  connected_at_ms: Date.now(),
+                  supports_haptics: true,
+                },
+              ],
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          ),
       ),
     );
     render(<PhoneRemote pairing={PAIRING} />);

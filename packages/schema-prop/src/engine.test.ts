@@ -11,7 +11,12 @@ const STAT_CARD_SCHEMA: DomioPropsSchema = {
   required: ['value'],
   properties: {
     value: { type: 'number', title: 'Value', minimum: 0, 'x-domio-prop': { category: 'Content' } },
-    label: { type: 'string', title: 'Label', default: 'Metric', 'x-domio-prop': { category: 'Content' } },
+    label: {
+      type: 'string',
+      title: 'Label',
+      default: 'Metric',
+      'x-domio-prop': { category: 'Content' },
+    },
     unit: {
       type: 'string',
       title: 'Unit',
@@ -135,12 +140,18 @@ describe('validateProps', () => {
           type: 'array',
           minItems: 1,
           maxItems: 6,
-          items: { type: 'object', properties: { label: { type: 'string' }, value: { type: 'number' } }, required: ['label'] },
+          items: {
+            type: 'object',
+            properties: { label: { type: 'string' }, value: { type: 'number' } },
+            required: ['label'],
+          },
         },
       },
     };
     expect(validateProps(schema, { points: [{ label: 'a', value: 1 }] }).valid).toBe(true);
-    const tooMany = validateProps(schema, { points: Array.from({ length: 7 }, () => ({ label: 'x' })) });
+    const tooMany = validateProps(schema, {
+      points: Array.from({ length: 7 }, () => ({ label: 'x' })),
+    });
     expect(tooMany.errors.some((e) => e.code === 'max_items')).toBe(true);
     const missing = validateProps(schema, { points: [{ value: 1 }] });
     expect(missing.errors.some((e) => e.code === 'required')).toBe(true);
@@ -151,10 +162,7 @@ describe('validateProps', () => {
       type: 'object',
       properties: {
         delta: {
-          oneOf: [
-            { type: 'number' },
-            { type: 'string', format: 'color' },
-          ],
+          oneOf: [{ type: 'number' }, { type: 'string', format: 'color' }],
         },
       },
     };

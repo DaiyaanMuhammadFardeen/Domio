@@ -22,9 +22,7 @@ export function Step2Payout({ defaultValues, onSubmit }: Step2PayoutProps) {
   const [method, setMethod] = useState<PayoutMethod>(defaultValues?.method ?? 'stripe');
   const [last4, setLast4] = useState<string>(defaultValues?.last4 ?? '');
   const [stripeId, setStripeId] = useState<string>(defaultValues?.stripe_id ?? '');
-  const [paypalEmail, setPaypalEmail] = useState<string>(
-    defaultValues?.paypal_email ?? '',
-  );
+  const [paypalEmail, setPaypalEmail] = useState<string>(defaultValues?.paypal_email ?? '');
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [stripeConnecting, setStripeConnecting] = useState<boolean>(false);
@@ -112,10 +110,7 @@ export function Step2Payout({ defaultValues, onSubmit }: Step2PayoutProps) {
 
         {method === 'bank' && (
           <div>
-            <label
-              htmlFor="payout-bank-last4"
-              className="block text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="payout-bank-last4" className="block text-sm font-medium text-slate-700">
               {t('creator.onboarding.payout.bankLast4')}
             </label>
             <input

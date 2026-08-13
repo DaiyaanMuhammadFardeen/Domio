@@ -13,6 +13,7 @@ python -m ai_eval
 ## How It Works
 
 1. **Golden Sets** (`fixtures/*.jsonl`) define test cases with:
+
    - `template_id` — which prompt template to evaluate (e.g., `outline.from_prompt`)
    - `rendered_prompt` — the fully rendered prompt text (self-contained)
    - `expected` — expected output (exact match or substring containment)
@@ -45,9 +46,9 @@ Each `.jsonl` file contains one JSON object per line:
   "case_id": "outline-basic-1",
   "template_id": "outline.from_prompt",
   "version": "v1",
-  "input": {"topic": "AI", "audience": "engineers"},
+  "input": { "topic": "AI", "audience": "engineers" },
   "rendered_prompt": "Create a structured outline...",
-  "expected": {"contains": ["Introduction", "conclusion"]}
+  "expected": { "contains": ["Introduction", "conclusion"] }
 }
 ```
 
@@ -87,11 +88,11 @@ ai_eval/
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `AI_EVAL_JUDGE_MODEL` | `openai/gpt-5.2-mini` | Model for LLM-as-judge |
-| `AI_EVAL_JUDGE_API_KEY` | (none) | API key for judge model |
-| `EVAL_RUN_JUDGE` | `0` | Set to `1` to enable LLM judge scoring |
+| Variable                | Default               | Description                            |
+| ----------------------- | --------------------- | -------------------------------------- |
+| `AI_EVAL_JUDGE_MODEL`   | `openai/gpt-5.2-mini` | Model for LLM-as-judge                 |
+| `AI_EVAL_JUDGE_API_KEY` | (none)                | API key for judge model                |
+| `EVAL_RUN_JUDGE`        | `0`                   | Set to `1` to enable LLM judge scoring |
 
 ## Development
 
@@ -104,7 +105,7 @@ mypy src/              # Type check
 
 ## Golden Sets
 
-| Set ID | Template | Cases |
-|--------|----------|-------|
-| `eval-outline-basic-v1` | `outline.from_prompt` | 3 |
-| `eval-alttext-basic-v1` | `accessibility.alt_text` | 3 |
+| Set ID                  | Template                 | Cases |
+| ----------------------- | ------------------------ | ----- |
+| `eval-outline-basic-v1` | `outline.from_prompt`    | 3     |
+| `eval-alttext-basic-v1` | `accessibility.alt_text` | 3     |

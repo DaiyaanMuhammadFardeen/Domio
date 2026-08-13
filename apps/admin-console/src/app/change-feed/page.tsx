@@ -128,17 +128,12 @@ export default function ChangeFeedPage() {
       } else {
         // Merge replayed ops into the stream (newest first), dedup by id.
         const seen = new Set(ops.map((o) => o.id));
-        const merged = [
-          ...replayed.filter((o) => !seen.has(o.id)),
-          ...ops,
-        ];
+        const merged = [...replayed.filter((o) => !seen.has(o.id)), ...ops];
         setOps(merged);
         setReplayToast(`Replayed ${replayed.length} op(s).`);
       }
     } catch (e) {
-      setReplayToast(
-        `Replay failed: ${e instanceof Error ? e.message : 'unknown error'}`,
-      );
+      setReplayToast(`Replay failed: ${e instanceof Error ? e.message : 'unknown error'}`);
     } finally {
       setReplayBusy(false);
     }
@@ -163,9 +158,8 @@ export default function ChangeFeedPage() {
           <FormattedMessage id="admin.changeFeed.heading" catalogue={CATALOGUE} />
         </h1>
         <p className="text-sm text-slate-500">
-          Live stream of CRDT ops for a deck. Use the deck id to switch
-          subscriptions; the toolbar controls pause / resume / replay and
-          per-kind filtering.
+          Live stream of CRDT ops for a deck. Use the deck id to switch subscriptions; the toolbar
+          controls pause / resume / replay and per-kind filtering.
         </p>
       </header>
 
@@ -173,10 +167,7 @@ export default function ChangeFeedPage() {
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-1 min-w-[16rem] flex-col gap-1">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              <FormattedMessage
-                id="admin.changeFeed.deckId"
-                catalogue={CATALOGUE}
-              />
+              <FormattedMessage id="admin.changeFeed.deckId" catalogue={CATALOGUE} />
             </span>
             <input
               type="text"
@@ -197,10 +188,7 @@ export default function ChangeFeedPage() {
               className="rounded-md bg-brand-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700"
               data-testid="subscribe-button"
             >
-              <FormattedMessage
-                id="admin.changeFeed.subscribe"
-                catalogue={CATALOGUE}
-              />
+              <FormattedMessage id="admin.changeFeed.subscribe" catalogue={CATALOGUE} />
             </button>
           ) : (
             <button
@@ -209,10 +197,7 @@ export default function ChangeFeedPage() {
               className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
               data-testid="unsubscribe-button"
             >
-              <FormattedMessage
-                id="admin.changeFeed.unsubscribe"
-                catalogue={CATALOGUE}
-              />
+              <FormattedMessage id="admin.changeFeed.unsubscribe" catalogue={CATALOGUE} />
             </button>
           )}
         </div>
@@ -301,10 +286,7 @@ export default function ChangeFeedPage() {
             className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             data-testid="replay-button"
           >
-            <FormattedMessage
-              id="admin.changeFeed.replay"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.changeFeed.replay" catalogue={CATALOGUE} />
           </button>
 
           <button
@@ -313,26 +295,18 @@ export default function ChangeFeedPage() {
             className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
             data-testid="clear-button"
           >
-            <FormattedMessage
-              id="admin.changeFeed.clear"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.changeFeed.clear" catalogue={CATALOGUE} />
           </button>
         </div>
 
         <div className="mt-4">
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <FormattedMessage
-              id="admin.changeFeed.filter.heading"
-              catalogue={CATALOGUE}
-            />
+            <FormattedMessage id="admin.changeFeed.filter.heading" catalogue={CATALOGUE} />
           </h2>
           <OpKindFilter
             selected={filters}
             onChange={setFilters}
-            labelOf={(kind) =>
-              CATALOGUE[`admin.changeFeed.op.${kind}`] ?? kind
-            }
+            labelOf={(kind) => CATALOGUE[`admin.changeFeed.op.${kind}`] ?? kind}
           />
         </div>
 
@@ -341,13 +315,9 @@ export default function ChangeFeedPage() {
             ops={ops}
             paused={paused}
             filters={filters}
-            labelOf={(kind) =>
-              CATALOGUE[`admin.changeFeed.op.${kind}`] ?? kind
-            }
+            labelOf={(kind) => CATALOGUE[`admin.changeFeed.op.${kind}`] ?? kind}
             emptyLabel={CATALOGUE['admin.changeFeed.empty'] ?? 'No ops yet.'}
-            pausedLabel={
-              CATALOGUE['admin.changeFeed.status.paused'] ?? 'Paused'
-            }
+            pausedLabel={CATALOGUE['admin.changeFeed.status.paused'] ?? 'Paused'}
             liveLabel={CATALOGUE['admin.changeFeed.status.live'] ?? 'Live'}
           />
         </div>

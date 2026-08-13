@@ -50,9 +50,17 @@ describe('docs-tree', () => {
   it('every page has a non-empty slug, title, and body', () => {
     for (const section of DOCS_TREE) {
       for (const page of section.pages) {
-        expect(page.slug.length, `page slug in ${section.id} should be non-empty`).toBeGreaterThan(0);
-        expect(page.title.length, `page title in ${section.id} should be non-empty`).toBeGreaterThan(0);
-        expect(page.body_md.length, `page body in ${section.id} should be non-empty`).toBeGreaterThan(0);
+        expect(page.slug.length, `page slug in ${section.id} should be non-empty`).toBeGreaterThan(
+          0,
+        );
+        expect(
+          page.title.length,
+          `page title in ${section.id} should be non-empty`,
+        ).toBeGreaterThan(0);
+        expect(
+          page.body_md.length,
+          `page body in ${section.id} should be non-empty`,
+        ).toBeGreaterThan(0);
       }
     }
   });

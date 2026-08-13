@@ -20,7 +20,14 @@
       "description": "Subset of rules to run. Empty = run all. Known rules: overflow, missing_alt_text, low_contrast, title_too_long, empty_slide, too_many_bullets.",
       "items": {
         "type": "string",
-        "enum": ["overflow", "missing_alt_text", "low_contrast", "title_too_long", "empty_slide", "too_many_bullets"]
+        "enum": [
+          "overflow",
+          "missing_alt_text",
+          "low_contrast",
+          "title_too_long",
+          "empty_slide",
+          "too_many_bullets"
+        ]
       }
     }
   }

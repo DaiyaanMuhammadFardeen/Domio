@@ -54,10 +54,7 @@ export interface ToastProviderProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 }
 
-const POSITION_STYLE: Record<
-  NonNullable<ToastProviderProps['position']>,
-  CSSProperties
-> = {
+const POSITION_STYLE: Record<NonNullable<ToastProviderProps['position']>, CSSProperties> = {
   'top-right': { top: 'var(--space-4)', right: 'var(--space-4)' },
   'top-left': { top: 'var(--space-4)', left: 'var(--space-4)' },
   'bottom-right': { bottom: 'var(--space-4)', right: 'var(--space-4)' },
@@ -133,10 +130,10 @@ function ToastCard({
     toast.variant === 'success'
       ? 'var(--success)'
       : toast.variant === 'warning'
-      ? 'var(--warning)'
-      : toast.variant === 'danger'
-      ? 'var(--danger)'
-      : 'var(--accent-1)';
+        ? 'var(--warning)'
+        : toast.variant === 'danger'
+          ? 'var(--danger)'
+          : 'var(--accent-1)';
 
   return (
     <div
@@ -163,9 +160,7 @@ function ToastCard({
           gap: 'var(--space-3)',
         }}
       >
-        <span style={{ flex: 1, fontSize: 'var(--font-caption-size)' }}>
-          {toast.message}
-        </span>
+        <span style={{ flex: 1, fontSize: 'var(--font-caption-size)' }}>{toast.message}</span>
         <button
           type="button"
           aria-label="Dismiss notification"

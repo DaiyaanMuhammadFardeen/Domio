@@ -43,18 +43,18 @@ paths:
         Returns 200 as long as the process is alive and serving HTTP.
         Does NOT check downstream dependencies. Use `/readyz` for that.
       responses:
-        "200":
+        '200':
           description: Process is alive.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthzResponse"
-        "503":
+                $ref: '#/components/schemas/HealthzResponse'
+        '503':
           description: Process is shutting down or unhealthy.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
   /readyz:
     get:
       tags: [health]
@@ -65,18 +65,18 @@ paths:
         every critical downstream dependency (postgres, redis, nats,
         object storage). Returns 503 with reasons when not ready.
       responses:
-        "200":
+        '200':
           description: Process is ready.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReadinessResponse"
-        "503":
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
           description: Process is not ready.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReadinessResponse"
+                $ref: '#/components/schemas/ReadinessResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -106,7 +106,7 @@ components:
         type: string
         minLength: 8
         maxLength: 128
-        pattern: "^[A-Za-z0-9_-]+$"
+        pattern: '^[A-Za-z0-9_-]+$'
       example: 9b3f0c4d-7e2a-4f9a-b8d1-1c8f3a0e7d5b
     PageToken:
       in: query
@@ -165,7 +165,7 @@ components:
       required: [code, message]
       properties:
         code:
-          $ref: "#/components/schemas/ErrorCode"
+          $ref: '#/components/schemas/ErrorCode'
         message:
           type: string
           maxLength: 1024
@@ -193,7 +193,7 @@ components:
           minLength: 1
           maxLength: 64
         status:
-          $ref: "#/components/schemas/HealthStatus"
+          $ref: '#/components/schemas/HealthStatus'
         message:
           type: string
           maxLength: 1024
@@ -210,7 +210,7 @@ components:
       required: [status, timestamp, service, version]
       properties:
         status:
-          $ref: "#/components/schemas/HealthStatus"
+          $ref: '#/components/schemas/HealthStatus'
         timestamp:
           type: string
           format: date-time
@@ -225,13 +225,13 @@ components:
         components:
           type: array
           items:
-            $ref: "#/components/schemas/ComponentHealth"
+            $ref: '#/components/schemas/ComponentHealth'
     ReadinessResponse:
       type: object
       required: [status, ready, timestamp, service, version]
       properties:
         status:
-          $ref: "#/components/schemas/HealthStatus"
+          $ref: '#/components/schemas/HealthStatus'
         ready:
           type: boolean
         timestamp:
@@ -244,7 +244,7 @@ components:
         components:
           type: array
           items:
-            $ref: "#/components/schemas/ComponentHealth"
+            $ref: '#/components/schemas/ComponentHealth'
         not_ready_reasons:
           type: array
           items:
@@ -294,17 +294,17 @@ components:
           type: string
           minLength: 1
           maxLength: 64
-          pattern: "^[a-z][a-z0-9_]*$"
+          pattern: '^[a-z][a-z0-9_]*$'
         org_id:
           type: string
           minLength: 1
           maxLength: 64
-          pattern: "^[a-zA-Z0-9_-]+$"
+          pattern: '^[a-zA-Z0-9_-]+$'
         tenant_id:
           type: string
           minLength: 1
           maxLength: 64
-          pattern: "^[a-zA-Z0-9_-]+$"
+          pattern: '^[a-zA-Z0-9_-]+$'
         id:
           type: string
           minLength: 1

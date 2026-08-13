@@ -78,7 +78,12 @@ export type A11yFinding = ContrastFinding | CvdFinding;
 export interface AuditResult {
   readonly contrast: readonly ContrastFinding[];
   readonly cvd: readonly CvdFinding[];
-  readonly cvSafePalette: readonly { readonly hex: string; readonly L: number; readonly C: number; readonly H: number }[];
+  readonly cvSafePalette: readonly {
+    readonly hex: string;
+    readonly L: number;
+    readonly C: number;
+    readonly H: number;
+  }[];
   readonly decorativeSkipped: readonly string[];
   readonly prefersContrastMore: { readonly bodyTokensFailing: readonly string[] };
 }
@@ -213,19 +218,14 @@ function auditWcag(colors: readonly AuditColor[]): ContrastFinding[] {
   const out: ContrastFinding[] = [];
   const bgs = colors.filter((c) => c.role === 'background');
   const fgs = colors.filter((c) => c.role === 'content' || c.role === 'interactive');
-  const decoratives = new Set(
-    colors.filter((c) => c.role === 'decorative').map((c) => c.tokenId),
-  );
+  const decoratives = new Set(colors.filter((c) => c.role === 'decorative').map((c) => c.tokenId));
   for (const fg of fgs) {
     if (decoratives.has(fg.tokenId)) continue;
     for (const bg of bgs) {
       if (decoratives.has(bg.tokenId)) continue;
       const fgRgb = hexToSrgb(fg.hex);
       const bgRgb = hexToSrgb(bg.hex);
-      const ratio = wcagContrast(
-        [fgRgb.r, fgRgb.g, fgRgb.b],
-        [bgRgb.r, bgRgb.g, bgRgb.b],
-      );
+      const ratio = wcagContrast([fgRgb.r, fgRgb.g, fgRgb.b], [bgRgb.r, bgRgb.g, bgRgb.b]);
       const threshold = isLargeText(fg.role) ? WCAG_AA_LARGE : WCAG_AA_NORMAL;
       if (ratio < threshold) {
         out.push({
@@ -267,10 +267,7 @@ function auditApca(colors: readonly AuditColor[]): ContrastFinding[] {
     for (const bg of bgs) {
       const fgRgb = hexToSrgb(fg.hex);
       const bgRgb = hexToSrgb(bg.hex);
-      const lc = apcaContrast(
-        [fgRgb.r, fgRgb.g, fgRgb.b],
-        [bgRgb.r, bgRgb.g, bgRgb.b],
-      );
+      const lc = apcaContrast([fgRgb.r, fgRgb.g, fgRgb.b], [bgRgb.r, bgRgb.g, bgRgb.b]);
       if (Math.abs(lc) < APCA_BODY_THRESHOLD) {
         out.push({
           kind: 'apca',
@@ -351,11 +348,7 @@ export function suggestCvSafePalette(
     const seed = sorted[i]!;
     const newH = ((currentHue % 360) + 360) % 360;
     // Preserve L/C from seed where possible; clamp into sRGB gamut.
-    const [cL, cC] = clampToGamut(seed.L, seed.C, newH) as unknown as [
-      number,
-      number,
-      number,
-    ];
+    const [cL, cC] = clampToGamut(seed.L, seed.C, newH) as unknown as [number, number, number];
     const hex = oklchToHex(cL, cC, newH) ?? seed.hex;
     result.push({ hex, L: cL, C: cC, H: newH });
     currentHue += targetSpacing;
@@ -386,9 +379,7 @@ export function auditAccessibility(input: AuditInput): AuditResult {
   const wcagFindings = auditWcag(input.colors);
   const apcaFindings = auditApca(input.colors);
   const cvdFindings = auditCvd(input.colors);
-  const cvSafePalette = suggestCvSafePalette(
-    input.colors.filter((c) => c.role !== 'decorative'),
-  );
+  const cvSafePalette = suggestCvSafePalette(input.colors.filter((c) => c.role !== 'decorative'));
   const decorativeSkipped = input.colors
     .filter((c) => c.role === 'decorative')
     .map((c) => c.tokenId);

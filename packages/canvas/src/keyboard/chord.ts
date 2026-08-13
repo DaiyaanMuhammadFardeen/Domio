@@ -37,7 +37,10 @@ export class ChordMatcher {
   private readonly windowMs: number;
   private readonly now: () => number;
 
-  constructor(definitions: ChordDefinition[], options: { windowMs?: number; now?: () => number } = {}) {
+  constructor(
+    definitions: ChordDefinition[],
+    options: { windowMs?: number; now?: () => number } = {},
+  ) {
     this.definitions = definitions;
     this.windowMs = options.windowMs ?? 1000;
     this.now = options.now ?? Date.now;

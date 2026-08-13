@@ -92,12 +92,7 @@ export function ZoomHUD(props: ZoomHUDProps): ReactElement {
       }}
       data-testid="canvas-zoom-hud"
     >
-      <button
-        type="button"
-        onClick={() => zoomOut()}
-        aria-label="Zoom out"
-        style={zoomButtonStyle}
-      >
+      <button type="button" onClick={() => zoomOut()} aria-label="Zoom out" style={zoomButtonStyle}>
         −
       </button>
       {editing ? (
@@ -133,12 +128,7 @@ export function ZoomHUD(props: ZoomHUDProps): ReactElement {
           {formatPercent(zoom)}
         </button>
       )}
-      <button
-        type="button"
-        onClick={() => zoomIn()}
-        aria-label="Zoom in"
-        style={zoomButtonStyle}
-      >
+      <button type="button" onClick={() => zoomIn()} aria-label="Zoom in" style={zoomButtonStyle}>
         +
       </button>
       <button

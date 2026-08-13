@@ -48,11 +48,11 @@ export interface CohortMatrixProps {
  * exact percent + cohort size.
  */
 export function CohortMatrix({ matrix }: CohortMatrixProps) {
-  const width = Math.max(matrix.weeks, matrix.rows.reduce((m, r) => Math.max(m, r.retention.length), 0));
-  const cols = useMemo(
-    () => Array.from({ length: Math.max(1, width) }, (_, i) => i),
-    [width],
+  const width = Math.max(
+    matrix.weeks,
+    matrix.rows.reduce((m, r) => Math.max(m, r.retention.length), 0),
   );
+  const cols = useMemo(() => Array.from({ length: Math.max(1, width) }, (_, i) => i), [width]);
 
   if (matrix.rows.length === 0) {
     return (
@@ -103,9 +103,7 @@ export function CohortMatrix({ matrix }: CohortMatrixProps) {
               >
                 {row.joinWeek}
               </th>
-              <td className="px-2 py-1.5 text-right tabular-nums text-slate-500">
-                {row.size}
-              </td>
+              <td className="px-2 py-1.5 text-right tabular-nums text-slate-500">{row.size}</td>
               {cols.map((w) => {
                 const v = row.retention[w] ?? 0;
                 const tier = tierFor(v);

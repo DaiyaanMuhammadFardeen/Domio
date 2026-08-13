@@ -63,10 +63,7 @@ export async function submitCadJob(
   }
 }
 
-export async function pollCadJob(
-  id: string,
-  baseUrl: string = DEFAULT_API_BASE,
-): Promise<CadJob> {
+export async function pollCadJob(id: string, baseUrl: string = DEFAULT_API_BASE): Promise<CadJob> {
   try {
     return await getJson<CadJob>(`${baseUrl}/v1/cad-jobs/${encodeURIComponent(id)}`);
   } catch {
@@ -106,17 +103,29 @@ function executeLocally(req: SandboxRunRequest): SandboxRunResult {
     const logs: string[] = [];
     const errs: string[] = [];
     const fakeConsole = {
-      log: (...args: unknown[]) => logs.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ')),
-      error: (...args: unknown[]) => errs.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ')),
+      log: (...args: unknown[]) =>
+        logs.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ')),
+      error: (...args: unknown[]) =>
+        errs.push(args.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ')),
     };
     try {
       // eslint-disable-next-line no-new-func
       const fn = new Function('console', `'use strict'; ${req.source}`);
       const result = fn(fakeConsole);
       if (result !== undefined) logs.push(String(result));
-      return { stdout: logs.join('\n'), stderr: errs.join('\n'), exitCode: 0, durationMs: Date.now() - start };
+      return {
+        stdout: logs.join('\n'),
+        stderr: errs.join('\n'),
+        exitCode: 0,
+        durationMs: Date.now() - start,
+      };
     } catch (err) {
-      return { stdout: logs.join('\n'), stderr: err instanceof Error ? err.message : String(err), exitCode: 1, durationMs: Date.now() - start };
+      return {
+        stdout: logs.join('\n'),
+        stderr: err instanceof Error ? err.message : String(err),
+        exitCode: 1,
+        durationMs: Date.now() - start,
+      };
     }
   }
   return {

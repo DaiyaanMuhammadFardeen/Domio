@@ -31,17 +31,26 @@ export function MapPicker({ value, onChange, metricColumns = [] }: MapPickerProp
   const [scaleMin, setScaleMin] = useState(0);
   const [scaleMax, setScaleMax] = useState(100);
 
-  const handleLat = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...value, lat: Number(e.target.value) });
-  }, [value, onChange]);
+  const handleLat = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange({ ...value, lat: Number(e.target.value) });
+    },
+    [value, onChange],
+  );
 
-  const handleLng = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...value, lng: Number(e.target.value) });
-  }, [value, onChange]);
+  const handleLng = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange({ ...value, lng: Number(e.target.value) });
+    },
+    [value, onChange],
+  );
 
-  const handleLabel = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({ ...value, label: e.target.value });
-  }, [value, onChange]);
+  const handleLabel = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange({ ...value, label: e.target.value });
+    },
+    [value, onChange],
+  );
 
   return (
     <div className="map-picker" data-testid="map-picker">
@@ -91,7 +100,9 @@ export function MapPicker({ value, onChange, metricColumns = [] }: MapPickerProp
               data-testid="map-picker-metric"
             >
               {metricColumns.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c} value={c}>
+                  {c}
+                </option>
               ))}
             </select>
           </label>

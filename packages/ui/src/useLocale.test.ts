@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  LOCALE_COOKIE,
-  readLocaleFromCookie,
-  readLocaleFromNavigator,
-} from './useLocale.js';
+import { LOCALE_COOKIE, readLocaleFromCookie, readLocaleFromNavigator } from './useLocale.js';
 
 describe('readLocaleFromCookie', () => {
   it('returns null on missing cookie header', () => {

@@ -20,10 +20,7 @@ export function StepIndicator({ current, steps }: StepIndicatorProps) {
   const currentIdx = STEP_ORDER.indexOf(current);
 
   return (
-    <ol
-      className="flex items-center gap-2 overflow-x-auto"
-      data-testid="wizard-step-indicator"
-    >
+    <ol className="flex items-center gap-2 overflow-x-auto" data-testid="wizard-step-indicator">
       {steps.map((step, i) => {
         const completed = i < currentIdx;
         const active = step.key === current;
@@ -45,19 +42,13 @@ export function StepIndicator({ current, steps }: StepIndicatorProps) {
               {completed ? <Check className="h-3.5 w-3.5" /> : i + 1}
             </span>
             <span
-              className={clsx(
-                'text-sm font-medium',
-                active ? 'text-slate-900' : 'text-slate-500',
-              )}
+              className={clsx('text-sm font-medium', active ? 'text-slate-900' : 'text-slate-500')}
             >
               {step.label}
             </span>
             {i < steps.length - 1 && (
               <span
-                className={clsx(
-                  'mx-1 h-px w-8',
-                  completed ? 'bg-brand-600' : 'bg-slate-200',
-                )}
+                className={clsx('mx-1 h-px w-8', completed ? 'bg-brand-600' : 'bg-slate-200')}
                 aria-hidden
               />
             )}

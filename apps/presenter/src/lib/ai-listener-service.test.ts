@@ -199,10 +199,7 @@ describe('ai-listener-service', () => {
   describe('findBestMatch', () => {
     it('returns the highest-scoring pattern', () => {
       const patterns = DEFAULT_QUESTION_PATTERNS;
-      const best = findBestMatch(
-        'Could you show me the revenue breakdown?',
-        patterns,
-      );
+      const best = findBestMatch('Could you show me the revenue breakdown?', patterns);
       expect(best?.pattern.id).toBe('pat-revenue');
     });
 

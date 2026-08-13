@@ -13,10 +13,7 @@
  * @param size     - Number of entries (default 256)
  * @returns A `Float64Array` of size `size` with values in `[-0.25, 1.25]`
  */
-export function buildLut(
-  easingFn: (t: number) => number,
-  size: number = 256,
-): Float64Array {
+export function buildLut(easingFn: (t: number) => number, size: number = 256): Float64Array {
   const lut = new Float64Array(size);
   for (let i = 0; i < size; i++) {
     const t = i / (size - 1);

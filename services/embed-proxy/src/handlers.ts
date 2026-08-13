@@ -16,15 +16,8 @@
 import type { EmbedTokenService } from './tokens.js';
 import { proxyHandler, type ProxyHandlerContext } from './proxy.js';
 import type { HttpRequest, HttpResponse } from './types.js';
-import {
-  PolicyNotFoundError,
-  PolicyValidationError,
-} from './policies.js';
-import type {
-  EmbedPolicyService,
-  CreatePolicyInput,
-  UpdatePolicyInput,
-} from './policies.js';
+import { PolicyNotFoundError, PolicyValidationError } from './policies.js';
+import type { EmbedPolicyService, CreatePolicyInput, UpdatePolicyInput } from './policies.js';
 
 // ---------------------------------------------------------------------------
 // Context
@@ -95,7 +88,14 @@ export async function embedProxyHandler(
   };
 
   return proxyHandler(
-    { method: 'POST', path: '', params: { token: record.token }, body: undefined, query: {}, headers: req.headers },
+    {
+      method: 'POST',
+      path: '',
+      params: { token: record.token },
+      body: undefined,
+      query: {},
+      headers: req.headers,
+    },
     proxyCtx,
   );
 }
@@ -127,7 +127,8 @@ export async function validateEmbedTokenHandler(
   const record = ctx.tokenService.peek(req.params.token);
   if (!record) return unauthorized('Invalid embed token', 'INVALID_TOKEN');
   if (record.used) return unauthorized('Embed token already used', 'TOKEN_ALREADY_USED');
-  if (ctx.tokenService.now() > record.expiresAt.getTime()) return unauthorized('Embed token expired', 'TOKEN_EXPIRED');
+  if (ctx.tokenService.now() > record.expiresAt.getTime())
+    return unauthorized('Embed token expired', 'TOKEN_EXPIRED');
   return ok({ bindingId: record.bindingId, expiresAt: record.expiresAt });
 }
 

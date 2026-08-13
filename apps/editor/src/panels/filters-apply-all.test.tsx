@@ -15,25 +15,13 @@ const filter: CrossFilter = {
 
 describe('FiltersPanel — apply-to-all-slides', () => {
   it('renders an apply-all button for each filter', () => {
-    render(
-      <FiltersPanel
-        filters={[filter]}
-        onChange={vi.fn()}
-        onApplyAllSlides={vi.fn()}
-      />,
-    );
+    render(<FiltersPanel filters={[filter]} onChange={vi.fn()} onApplyAllSlides={vi.fn()} />);
     expect(screen.getByTestId('p08-filter-apply-all-filter-1')).toBeInTheDocument();
   });
 
   it('calls onApplyAllSlides with the filter when the button is clicked', () => {
     const onApplyAll = vi.fn();
-    render(
-      <FiltersPanel
-        filters={[filter]}
-        onChange={vi.fn()}
-        onApplyAllSlides={onApplyAll}
-      />,
-    );
+    render(<FiltersPanel filters={[filter]} onChange={vi.fn()} onApplyAllSlides={onApplyAll} />);
     fireEvent.click(screen.getByTestId('p08-filter-apply-all-filter-1'));
     expect(onApplyAll).toHaveBeenCalledWith(filter);
   });

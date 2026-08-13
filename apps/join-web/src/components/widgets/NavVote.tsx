@@ -33,9 +33,10 @@ function labelFor(target: string): string {
 }
 
 export function NavVoteInner(props: WidgetProps<NavVotePayload>) {
-  const targets = Array.isArray(props.payload.targets) && props.payload.targets.length > 0
-    ? props.payload.targets
-    : DEFAULT_TARGETS;
+  const targets =
+    Array.isArray(props.payload.targets) && props.payload.targets.length > 0
+      ? props.payload.targets
+      : DEFAULT_TARGETS;
   const [pick, setPick] = useState<string | null>(null);
 
   const handle = (target: string): void => {

@@ -83,8 +83,7 @@ function buildPanels(input: DashboardInput): GrafanaPanel[] {
     ]),
     panel(id++, 'timeseries', 'Latency p95 (ms)', 16, 0, 8, 6, [
       {
-        expr:
-          `histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{service="${serviceShort(input.service)}"}[5m])))`,
+        expr: `histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{service="${serviceShort(input.service)}"}[5m])))`,
         legendFormat: 'p95',
       },
     ]),
@@ -93,7 +92,7 @@ function buildPanels(input: DashboardInput): GrafanaPanel[] {
   // Row 2: SLO burn-rate panels.
   for (const slo of input.slos) {
     panels.push(
-      panel(id++, 'stat', `${slo.slo} (target ${slo.target})`, ((id - 2) % 24), 6, 8, 4, [
+      panel(id++, 'stat', `${slo.slo} (target ${slo.target})`, (id - 2) % 24, 6, 8, 4, [
         {
           expr: sloBurningExpr(slo),
           legendFormat: slo.slo,

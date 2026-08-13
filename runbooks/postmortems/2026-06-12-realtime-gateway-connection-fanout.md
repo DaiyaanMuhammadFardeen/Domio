@@ -50,10 +50,10 @@ that exercises the fanout path under realistic concurrency.
 - Proximate: hot key in the new fanout sharding strategy.
 - Contributing: load test suite only goes to 1k concurrent connections,
   not 10k+.
-- Contributing: the SLO alert is a *symptom* alert; we have no alert on
+- Contributing: the SLO alert is a _symptom_ alert; we have no alert on
   fanout shard balance.
 - Contributing: rollback procedure requires a manual `kubectl rollout
-  undo`, not a button. Increased TTR by ~5 minutes.
+undo`, not a button. Increased TTR by ~5 minutes.
 
 ## What went well
 

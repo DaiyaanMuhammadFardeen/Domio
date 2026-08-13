@@ -40,7 +40,11 @@ function buildSectionLinks(activeSlug: ReadonlyArray<string> | undefined): Reado
   });
 }
 
-function isActive(activeSlug: ReadonlyArray<string> | undefined, sectionId: string, pageSlug: string): boolean {
+function isActive(
+  activeSlug: ReadonlyArray<string> | undefined,
+  sectionId: string,
+  pageSlug: string,
+): boolean {
   if (!activeSlug || activeSlug.length === 0) return false;
   if (activeSlug.length === 1 && activeSlug[0] === sectionId) {
     // Section index page is implicitly selected when only the section id

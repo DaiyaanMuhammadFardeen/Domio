@@ -6,12 +6,7 @@
  * Used by the editor's "primary" inspector UI.
  */
 
-import type {
-  TokenRef,
-  TokenValue,
-  DeckTokenState,
-  InheritanceChainEntry,
-} from './types.js';
+import type { TokenRef, TokenValue, DeckTokenState, InheritanceChainEntry } from './types.js';
 import { resolve } from './resolve.js';
 
 /**
@@ -35,9 +30,10 @@ export function computeInheritanceChain(
   if (slideOverrides?.has(tokenRef)) {
     const override = slideOverrides.get(tokenRef);
     // Resolve if it's an alias
-    const val = override !== undefined && 'value' in override
-      ? (override as TokenValue)
-      : resolve(tokenRef, { kind: 'slide', slideId }, deckState).value;
+    const val =
+      override !== undefined && 'value' in override
+        ? (override as TokenValue)
+        : resolve(tokenRef, { kind: 'slide', slideId }, deckState).value;
     chain.push({ level: 'per-slide override', value: val ?? null, source: 'override' });
   } else {
     chain.push({ level: 'per-slide override', value: null, source: null });
@@ -50,9 +46,10 @@ export function computeInheritanceChain(
   for (const [, sectionOverrides] of deckState.sectionOverrides) {
     if (sectionOverrides.has(tokenRef)) {
       const override = sectionOverrides.get(tokenRef);
-      const val = override !== undefined && 'value' in override
-        ? (override as TokenValue)
-        : resolve(tokenRef, { kind: 'deck' }, deckState).value;
+      const val =
+        override !== undefined && 'value' in override
+          ? (override as TokenValue)
+          : resolve(tokenRef, { kind: 'deck' }, deckState).value;
       chain.push({ level: 'section override', value: val ?? null, source: 'override' });
       sectionFound = true;
       break;

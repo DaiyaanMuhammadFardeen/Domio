@@ -15,7 +15,11 @@ import type {
   ThresholdRuleRepository,
 } from './dal.js';
 import { validateParent, ancestors, descendants } from './dag.js';
-import { applyOverlays as mergeOverlays, diff as overlayDiff, type OverlayState } from './overlays.js';
+import {
+  applyOverlays as mergeOverlays,
+  diff as overlayDiff,
+  type OverlayState,
+} from './overlays.js';
 
 // ---------------------------------------------------------------------------
 // Errors
@@ -178,7 +182,9 @@ export class ScenarioService {
     const deckScenarios = await this.scenarios.listByDeck(existing.deckId, tenantId);
     const children = deckScenarios.filter((s) => s.parentId === id);
     if (children.length > 0) {
-      throw new Error(`Cannot delete scenario ${id}: ${children.length} child scenario(s) still reference it`);
+      throw new Error(
+        `Cannot delete scenario ${id}: ${children.length} child scenario(s) still reference it`,
+      );
     }
     await this.scenarios.delete(id, tenantId);
   }

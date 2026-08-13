@@ -21,7 +21,7 @@ paths:
       operationId: listBindings
       summary: List tracked bindings
       responses:
-        "200":
+        '200':
           description: List of bindings
           content:
             application/json:
@@ -31,7 +31,7 @@ paths:
                   bindings:
                     type: array
                     items:
-                      $ref: "#/components/schemas/FreshnessBinding"
+                      $ref: '#/components/schemas/FreshnessBinding'
 
   /v1/freshness/status:
     get:
@@ -39,7 +39,7 @@ paths:
       operationId: scanAllStatus
       summary: Scan all bindings for current freshness status
       responses:
-        "200":
+        '200':
           description: Freshness status per binding
           content:
             application/json:
@@ -49,7 +49,7 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: "#/components/schemas/FreshnessStatusResult"
+                      $ref: '#/components/schemas/FreshnessStatusResult'
 
   /v1/freshness/records/{bindingId}:
     get:
@@ -63,7 +63,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Freshness records
           content:
             application/json:
@@ -73,7 +73,7 @@ paths:
                   records:
                     type: array
                     items:
-                      $ref: "#/components/schemas/FreshnessRecord"
+                      $ref: '#/components/schemas/FreshnessRecord'
 
   /v1/freshness/signal/stale:
     post:
@@ -91,12 +91,12 @@ paths:
                 bindingId:
                   type: string
       responses:
-        "200":
+        '200':
           description: Stale signal recorded
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FreshnessRecord"
+                $ref: '#/components/schemas/FreshnessRecord'
 
   /v1/freshness/signal/error:
     post:
@@ -116,12 +116,12 @@ paths:
                 error:
                   type: string
       responses:
-        "200":
+        '200':
           description: Error signal recorded
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FreshnessRecord"
+                $ref: '#/components/schemas/FreshnessRecord'
 
 components:
   schemas:

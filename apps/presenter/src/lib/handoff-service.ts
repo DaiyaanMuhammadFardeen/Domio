@@ -18,8 +18,6 @@ export interface HandoffDescriptor {
 
 export const BOOTSTRAP_HANDOFFS: ReadonlyArray<HandoffDescriptor> = [];
 
-export async function listHandoffs(
-  _sessionId: string,
-): Promise<ReadonlyArray<HandoffDescriptor>> {
+export async function listHandoffs(_sessionId: string): Promise<ReadonlyArray<HandoffDescriptor>> {
   return BOOTSTRAP_HANDOFFS;
 }

@@ -51,9 +51,7 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
       'Theme marketplace — drop in coordinated typography and color packs',
       'New in-app review flow with screenshot capture and rating prompts',
     ],
-    fixes: [
-      'Prevented duplicate install prompts when refreshing the marketplace grid',
-    ],
+    fixes: ['Prevented duplicate install prompts when refreshing the marketplace grid'],
   },
   {
     version: '2.2.0',
@@ -79,9 +77,7 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
       'Data residency — pin workspaces to EU, US, or APAC regions',
       'Custom retention windows per deck with legal-hold overrides',
     ],
-    fixes: [
-      'SCIM group sync no longer drops members on large directory pulls',
-    ],
+    fixes: ['SCIM group sync no longer drops members on large directory pulls'],
     migration_guide_href: '/docs/migrations/2.0-to-2.1',
   },
   {
@@ -98,9 +94,7 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
       'Slide IDs are now opaque strings; numeric ids are no longer accepted on write paths',
       'OAuth refresh tokens rotate on every use; clients must handle 401-with-rotate',
     ],
-    fixes: [
-      'Editor no longer reflows the canvas when the inspector panel is collapsed',
-    ],
+    fixes: ['Editor no longer reflows the canvas when the inspector panel is collapsed'],
     migration_guide_href: '/docs/migrations/1.x-to-2.0',
   },
   {
@@ -112,9 +106,7 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
       'New funnel view surfaces drop-off between consecutive slides',
       'Cohort segmentation by acquisition channel and referrer',
     ],
-    fixes: [
-      'Heatmap tile requests no longer 503 during peak export windows',
-    ],
+    fixes: ['Heatmap tile requests no longer 503 during peak export windows'],
   },
   {
     version: '1.8.0',
@@ -125,9 +117,7 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
       'Two-way sliders — viewers steer a value and watch the deck react',
       'Per-slide participation metrics now stream to the dashboard',
     ],
-    fixes: [
-      'Poll results no longer flash stale values when the presenter advances',
-    ],
+    fixes: ['Poll results no longer flash stale values when the presenter advances'],
   },
   {
     version: '1.7.0',

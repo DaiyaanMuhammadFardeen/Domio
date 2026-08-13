@@ -68,10 +68,6 @@ export function AgentUsageTable({
   ];
 
   return (
-    <SortableTable
-      rows={rows as AgentUsageRow[]}
-      columns={columns}
-      emptyMessage={emptyMessage}
-    />
+    <SortableTable rows={rows as AgentUsageRow[]} columns={columns} emptyMessage={emptyMessage} />
   );
 }

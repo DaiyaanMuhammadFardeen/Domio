@@ -8,9 +8,9 @@ Deck library service; deck CRUD + listing + sharing.
 
 ## SLOs covered
 
-| SLO | Kind | Target | Window |
-|---|---|---|---|
-| `avail-library` | availability | 99.9% | 30d |
+| SLO             | Kind         | Target | Window |
+| --------------- | ------------ | ------ | ------ |
+| `avail-library` | availability | 99.9%  | 30d    |
 
 ## Triage
 

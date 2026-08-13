@@ -6,11 +6,11 @@ the directory for historical context.
 
 ## ADR index
 
-| ID | Title | Status | Date |
-|---:|---|---|---|
-| [0000](0000-template.md) | ADR template | n/a | — |
-| [0001](0001-monorepo.md) | Adopt a single monorepo with polyglot toolchains | accepted | 2026-07-29 |
-| [0002](0002-polyglot.md) | Adopt a polyglot backend with a non-negotiable contract rule | accepted | 2026-07-29 |
+|                             ID | Title                                                        | Status   | Date       |
+| -----------------------------: | ------------------------------------------------------------ | -------- | ---------- |
+|       [0000](0000-template.md) | ADR template                                                 | n/a      | —          |
+|       [0001](0001-monorepo.md) | Adopt a single monorepo with polyglot toolchains             | accepted | 2026-07-29 |
+|       [0002](0002-polyglot.md) | Adopt a polyglot backend with a non-negotiable contract rule | accepted | 2026-07-29 |
 | [0003](0003-contract-first.md) | Contract-first wire formats with generated clients committed | accepted | 2026-07-29 |
 
 ## Process

@@ -36,9 +36,7 @@ export default async function BenchmarksPage({
   ]);
   const industries = Array.from(new Set(all.map((b) => b.industry))).sort();
   const industryFilter = params.industry ?? '';
-  const rows = industryFilter
-    ? all.filter((b) => b.industry === industryFilter)
-    : all;
+  const rows = industryFilter ? all.filter((b) => b.industry === industryFilter) : all;
 
   // Default MDE calculator inputs.
   const baseline = 0.05;
@@ -51,9 +49,7 @@ export default async function BenchmarksPage({
     <div className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Benchmarks</h1>
-        <p className="text-sm text-slate-500">
-          Industry comparisons + power analysis
-        </p>
+        <p className="text-sm text-slate-500">Industry comparisons + power analysis</p>
       </header>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4">
@@ -121,7 +117,9 @@ export default async function BenchmarksPage({
                     <td className="px-4 py-2">{b.industry}</td>
                     <td className="px-4 py-2">{b.region}</td>
                     <td className="px-4 py-2 font-mono text-xs">{b.metric}</td>
-                    <td className="px-4 py-2 text-right tabular-nums">{b.sampleSize.toLocaleString()}</td>
+                    <td className="px-4 py-2 text-right tabular-nums">
+                      {b.sampleSize.toLocaleString()}
+                    </td>
                     <td className="px-4 py-2 text-right tabular-nums">{b.p25}</td>
                     <td className="px-4 py-2 text-right tabular-nums">{b.median}</td>
                     <td className="px-4 py-2 text-right tabular-nums">{b.p75}</td>

@@ -17,7 +17,9 @@ import { IngestUnavailableError } from './errors.js';
 
 export interface KafkaPublisher {
   publish(event: AnalyticsEvent): Promise<{ topic: string; partition: number; offset: string }>;
-  publishMany(events: AnalyticsEvent[]): Promise<Array<{ topic: string; partition: number; offset: string }>>;
+  publishMany(
+    events: AnalyticsEvent[],
+  ): Promise<Array<{ topic: string; partition: number; offset: string }>>;
   /** Send raw bytes (used by the disk-spool replay path). */
   publishRaw(topic: string, partitionKey: string, payload: Uint8Array): Promise<void>;
   disconnect(): Promise<void>;

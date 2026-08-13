@@ -2,7 +2,15 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { InMemoryStore } from '../store/memory.js';
 import { defaultDeps } from '../deps.js';
 import { sha256Hex } from '../crypto/index.js';
-import { publishPackage, getPackage, getPackageOrNull, listVersions, searchPackages, deprecatePackage, validatePropsSchema } from './catalog.js';
+import {
+  publishPackage,
+  getPackage,
+  getPackageOrNull,
+  listVersions,
+  searchPackages,
+  deprecatePackage,
+  validatePropsSchema,
+} from './catalog.js';
 
 describe('catalog', () => {
   let deps: ReturnType<typeof defaultDeps>;
@@ -58,26 +66,40 @@ describe('catalog', () => {
 
     it('updates an existing package (idempotent)', async () => {
       await publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Button',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Button',
       });
       const result = await publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Button v2',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Button v2',
       });
       expect(result.created).toBe(false);
     });
 
     it('throws for invalid catalogId', async () => {
-      await expect(publishPackage(deps, {
-        catalogId: 'Invalid_Catalog!',
-        version: '1.0.0', kind: 'component', name: 'X',
-      })).rejects.toThrow('Invalid catalogId');
+      await expect(
+        publishPackage(deps, {
+          catalogId: 'Invalid_Catalog!',
+          version: '1.0.0',
+          kind: 'component',
+          name: 'X',
+        }),
+      ).rejects.toThrow('Invalid catalogId');
     });
 
     it('throws for invalid semver', async () => {
-      await expect(publishPackage(deps, {
-        catalogId: 'comp.btn',
-        version: 'not-semver', kind: 'component', name: 'X',
-      })).rejects.toThrow('Invalid semver');
+      await expect(
+        publishPackage(deps, {
+          catalogId: 'comp.btn',
+          version: 'not-semver',
+          kind: 'component',
+          name: 'X',
+        }),
+      ).rejects.toThrow('Invalid semver');
     });
 
     it('verifies file blobs exist', async () => {
@@ -85,51 +107,82 @@ describe('catalog', () => {
       const hash = sha256Hex(bytes);
       await deps.store.putBlob({ sha256: hash, bytes, storedAt: Date.now() });
       const result = await publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Button',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Button',
         files: { 'index.js': hash },
       });
       expect(result.pkg.files['index.js']).toBe(hash);
     });
 
     it('throws when blob missing', async () => {
-      await expect(publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'X',
-        files: { 'index.js': 'a'.repeat(64) },
-      })).rejects.toThrow('Missing bundle blob');
+      await expect(
+        publishPackage(deps, {
+          catalogId: 'comp.btn',
+          version: '1.0.0',
+          kind: 'component',
+          name: 'X',
+          files: { 'index.js': 'a'.repeat(64) },
+        }),
+      ).rejects.toThrow('Missing bundle blob');
     });
 
     it('throws when packageHash mismatch', async () => {
-      await expect(publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'X',
-        packageHash: 'wrong-hash',
-      })).rejects.toThrow('packageHash does not match');
+      await expect(
+        publishPackage(deps, {
+          catalogId: 'comp.btn',
+          version: '1.0.0',
+          kind: 'component',
+          name: 'X',
+          packageHash: 'wrong-hash',
+        }),
+      ).rejects.toThrow('packageHash does not match');
     });
 
     it('throws for invalid file hash format', async () => {
-      await expect(publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'X',
-        files: { 'index.js': 'not-a-hash' },
-      })).rejects.toThrow('invalid sha256');
+      await expect(
+        publishPackage(deps, {
+          catalogId: 'comp.btn',
+          version: '1.0.0',
+          kind: 'component',
+          name: 'X',
+          files: { 'index.js': 'not-a-hash' },
+        }),
+      ).rejects.toThrow('invalid sha256');
     });
 
     it('preserves deprecation from existing package', async () => {
       await publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Btn',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Btn',
       });
       // Deprecate it
       await deprecatePackage(deps, { catalogId: 'comp.btn', reason: 'old' });
       // Re-publish (should preserve deprecation)
       const result = await publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Btn',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Btn',
       });
       expect(result.pkg.deprecation).toBeDefined();
     });
 
     it('stores optional fields', async () => {
       const result = await publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Btn',
-        category: 'ui', author: 'Alice', licenseId: 'MIT',
-        signingKeyId: 'key-1', signature: 'sig-1', sizeBudgetBytes: 1024,
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Btn',
+        category: 'ui',
+        author: 'Alice',
+        licenseId: 'MIT',
+        signingKeyId: 'key-1',
+        signature: 'sig-1',
+        sizeBudgetBytes: 1024,
       });
       expect(result.pkg.category).toBe('ui');
       expect(result.pkg.author).toBe('Alice');
@@ -143,7 +196,10 @@ describe('catalog', () => {
   describe('getPackage', () => {
     it('returns package', async () => {
       await publishPackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Btn',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Btn',
       });
       const pkg = await getPackage(deps, 'comp.btn', '1.0.0');
       expect(pkg.catalogId).toBe('comp.btn');
@@ -162,8 +218,18 @@ describe('catalog', () => {
 
   describe('listVersions', () => {
     it('returns all versions', async () => {
-      await publishPackage(deps, { catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Btn' });
-      await publishPackage(deps, { catalogId: 'comp.btn', version: '2.0.0', kind: 'component', name: 'Btn' });
+      await publishPackage(deps, {
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Btn',
+      });
+      await publishPackage(deps, {
+        catalogId: 'comp.btn',
+        version: '2.0.0',
+        kind: 'component',
+        name: 'Btn',
+      });
       const versions = await listVersions(deps, 'comp.btn');
       expect(versions.length).toBe(2);
     });
@@ -171,7 +237,12 @@ describe('catalog', () => {
 
   describe('searchPackages', () => {
     it('searches by query', async () => {
-      await publishPackage(deps, { catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Button' });
+      await publishPackage(deps, {
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Button',
+      });
       const results = await searchPackages(deps, 'button');
       expect(results.length).toBe(1);
     });
@@ -179,9 +250,17 @@ describe('catalog', () => {
 
   describe('deprecatePackage', () => {
     it('deprecates a specific version', async () => {
-      await publishPackage(deps, { catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Btn' });
+      await publishPackage(deps, {
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Btn',
+      });
       const result = await deprecatePackage(deps, {
-        catalogId: 'comp.btn', version: '1.0.0', reason: 'old', replaceWith: '2.0.0',
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        reason: 'old',
+        replaceWith: '2.0.0',
       });
       expect(result.deprecation).toBeDefined();
       expect(result.deprecation!.reason).toBe('old');
@@ -189,8 +268,18 @@ describe('catalog', () => {
     });
 
     it('deprecates all versions when no version specified', async () => {
-      await publishPackage(deps, { catalogId: 'comp.btn', version: '1.0.0', kind: 'component', name: 'Btn' });
-      await publishPackage(deps, { catalogId: 'comp.btn', version: '2.0.0', kind: 'component', name: 'Btn' });
+      await publishPackage(deps, {
+        catalogId: 'comp.btn',
+        version: '1.0.0',
+        kind: 'component',
+        name: 'Btn',
+      });
+      await publishPackage(deps, {
+        catalogId: 'comp.btn',
+        version: '2.0.0',
+        kind: 'component',
+        name: 'Btn',
+      });
       await deprecatePackage(deps, { catalogId: 'comp.btn', reason: 'retired' });
       const v1 = await getPackage(deps, 'comp.btn', '1.0.0');
       const v2 = await getPackage(deps, 'comp.btn', '2.0.0');
@@ -199,9 +288,12 @@ describe('catalog', () => {
     });
 
     it('throws when no versions exist', async () => {
-      await expect(deprecatePackage(deps, {
-        catalogId: 'missing', reason: 'old',
-      })).rejects.toThrow('not found');
+      await expect(
+        deprecatePackage(deps, {
+          catalogId: 'missing',
+          reason: 'old',
+        }),
+      ).rejects.toThrow('not found');
     });
   });
 });

@@ -222,9 +222,7 @@ describe('Creator analytics handlers', () => {
 
       expect(first.status).toBe(201);
       expect(second.status).toBe(201);
-      expect(
-        (first.body as Record<string, unknown>).statement,
-      ).toEqual(
+      expect((first.body as Record<string, unknown>).statement).toEqual(
         (second.body as Record<string, unknown>).statement,
       );
     });

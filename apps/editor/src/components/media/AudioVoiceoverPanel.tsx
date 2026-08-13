@@ -21,7 +21,10 @@ export interface AudioVoiceoverPanelProps {
   onUploaded?: (info: { id: string; url: string; durationMs: number }) => void;
 }
 
-export function AudioVoiceoverPanel({ slideId, onUploaded }: AudioVoiceoverPanelProps): ReactElement {
+export function AudioVoiceoverPanel({
+  slideId,
+  onUploaded,
+}: AudioVoiceoverPanelProps): ReactElement {
   const [recording, setRecording] = useState(false);
   const [durationMs, setDurationMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +105,11 @@ export function AudioVoiceoverPanel({ slideId, onUploaded }: AudioVoiceoverPanel
     <div className="audio-voiceover" data-testid="audio-voiceover">
       <div className="audio-voiceover__controls">
         {!recording ? (
-          <button type="button" onClick={() => void handleStart()} data-testid="audio-voiceover-record">
+          <button
+            type="button"
+            onClick={() => void handleStart()}
+            data-testid="audio-voiceover-record"
+          >
             ● Record
           </button>
         ) : (

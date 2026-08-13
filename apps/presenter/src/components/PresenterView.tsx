@@ -81,10 +81,7 @@ export function PresenterView({
   initialPairing,
   apiBaseUrl,
 }: PresenterViewProps) {
-  const client = useMemo(
-    () => new SessionClient({ baseUrl: apiBaseUrl ?? '' }),
-    [apiBaseUrl],
-  );
+  const client = useMemo(() => new SessionClient({ baseUrl: apiBaseUrl ?? '' }), [apiBaseUrl]);
   const [state, setState] = useState<PresenterSessionState>(initialState);
   const [pairing, setPairing] = useState<PairingInfo>(initialPairing);
   const [status, setStatus] = useState<{ kind: 'ok' | 'error'; message: string } | null>(null);
@@ -102,7 +99,15 @@ export function PresenterView({
   const [alertDismissed, setAlertDismissed] = useState(false);
   const [autoFollowEnabled, setAutoFollowEnabled] = useState(false);
   const [quietMode, setQuietMode] = useState(false);
-  const [audienceEvents, setAudienceEvents] = useState<readonly { id: string; x: number; y: number; kind: 'click' | 'drag' | 'whisper' | 'vote' | 'question'; ts: number }[]>([]);
+  const [audienceEvents, setAudienceEvents] = useState<
+    readonly {
+      id: string;
+      x: number;
+      y: number;
+      kind: 'click' | 'drag' | 'whisper' | 'vote' | 'question';
+      ts: number;
+    }[]
+  >([]);
   const slideFrameRef = useRef<HTMLDivElement | null>(null);
 
   // Touch the realtime-driven setters so they're not flagged as unused.
@@ -137,7 +142,9 @@ export function PresenterView({
     const onProgress = (e: Event) => {
       const detail = (e as CustomEvent<{ cached: number; total: number }>).detail;
       setCachedSlideCount(detail?.cached ?? 0);
-      setOfflineStatus((s) => (s === 'preparing' && (detail?.cached ?? 0) >= (detail?.total ?? 0) ? 'online' : s));
+      setOfflineStatus((s) =>
+        s === 'preparing' && (detail?.cached ?? 0) >= (detail?.total ?? 0) ? 'online' : s,
+      );
     };
     window.addEventListener('cache-progress', onProgress as EventListener);
 
@@ -160,7 +167,9 @@ export function PresenterView({
   useEffect(() => {
     if (state.ended_at) return;
     const handle = setInterval(() => {
-      client.heartbeat(sessionId).catch(() => { /* ignore — surface on next user action */ });
+      client.heartbeat(sessionId).catch(() => {
+        /* ignore — surface on next user action */
+      });
     }, 30_000);
     return () => clearInterval(handle);
   }, [client, sessionId, state.ended_at]);
@@ -168,7 +177,12 @@ export function PresenterView({
   // Pairing token rotation — refetch every 50 s (the token TTL is 60 s).
   useEffect(() => {
     const handle = setInterval(() => {
-      client.getPairing(sessionId).then(setPairing).catch(() => { /* ignore */ });
+      client
+        .getPairing(sessionId)
+        .then(setPairing)
+        .catch(() => {
+          /* ignore */
+        });
     }, 50_000);
     return () => clearInterval(handle);
   }, [client, sessionId]);
@@ -182,7 +196,11 @@ export function PresenterView({
       const planSlide = lookup.get(planOrder[state.state.slide_index] ?? '');
       if (planSlide) return planSlide;
     }
-    return slides.find((s) => s.slide_id === state.state.slide_id) ?? slides[state.state.slide_index] ?? null;
+    return (
+      slides.find((s) => s.slide_id === state.state.slide_id) ??
+      slides[state.state.slide_index] ??
+      null
+    );
   }, [state]);
 
   const nextSlide: SlideSnapshot | null = useMemo(() => {
@@ -200,38 +218,52 @@ export function PresenterView({
     return slides[nextIndex] ?? null;
   }, [state]);
 
-  const handleAdvance = useCallback(async (dir: 1 | -1) => {
-    const slides = state.slides;
-    const planOrder = state.plan.order;
-    const list = planOrder.length > 0 ? planOrder : slides.map((s) => s.slide_id);
-    const currentId = planOrder[state.state.slide_index] ?? state.state.slide_id;
-    const idx = list.indexOf(currentId);
-    if (idx < 0) return;
-    const targetIdx = idx + dir;
-    if (targetIdx < 0 || targetIdx >= list.length) return;
-    const targetId = list[targetIdx]!;
-    try {
-      const next = await (dir === 1
-        ? client.advance({ sessionId, target_slide_id: targetId, target_slide_index: targetIdx })
-        : client.retreat({ sessionId, target_slide_id: targetId, target_slide_index: targetIdx }));
-      setState(next);
-      setStatus({ kind: 'ok', message: `Slide ${targetIdx + 1} / ${list.length}` });
-    } catch (e) {
-      const err = e as SessionClientError;
-      setStatus({ kind: 'error', message: `Advance failed: HTTP ${err.status}` });
-    }
-  }, [client, sessionId, state]);
+  const handleAdvance = useCallback(
+    async (dir: 1 | -1) => {
+      const slides = state.slides;
+      const planOrder = state.plan.order;
+      const list = planOrder.length > 0 ? planOrder : slides.map((s) => s.slide_id);
+      const currentId = planOrder[state.state.slide_index] ?? state.state.slide_id;
+      const idx = list.indexOf(currentId);
+      if (idx < 0) return;
+      const targetIdx = idx + dir;
+      if (targetIdx < 0 || targetIdx >= list.length) return;
+      const targetId = list[targetIdx]!;
+      try {
+        const next = await (dir === 1
+          ? client.advance({ sessionId, target_slide_id: targetId, target_slide_index: targetIdx })
+          : client.retreat({
+              sessionId,
+              target_slide_id: targetId,
+              target_slide_index: targetIdx,
+            }));
+        setState(next);
+        setStatus({ kind: 'ok', message: `Slide ${targetIdx + 1} / ${list.length}` });
+      } catch (e) {
+        const err = e as SessionClientError;
+        setStatus({ kind: 'error', message: `Advance failed: HTTP ${err.status}` });
+      }
+    },
+    [client, sessionId, state],
+  );
 
-  const handleJump = useCallback(async (slide_id: string, slide_index: number) => {
-    try {
-      const next = await client.jump({ sessionId, target_slide_id: slide_id, target_slide_index: slide_index });
-      setState(next);
-      setStatus({ kind: 'ok', message: `Jumped to slide ${slide_index + 1}` });
-    } catch (e) {
-      const err = e as SessionClientError;
-      setStatus({ kind: 'error', message: `Jump failed: HTTP ${err.status}` });
-    }
-  }, [client, sessionId]);
+  const handleJump = useCallback(
+    async (slide_id: string, slide_index: number) => {
+      try {
+        const next = await client.jump({
+          sessionId,
+          target_slide_id: slide_id,
+          target_slide_index: slide_index,
+        });
+        setState(next);
+        setStatus({ kind: 'ok', message: `Jumped to slide ${slide_index + 1}` });
+      } catch (e) {
+        const err = e as SessionClientError;
+        setStatus({ kind: 'error', message: `Jump failed: HTTP ${err.status}` });
+      }
+    },
+    [client, sessionId],
+  );
 
   const handleEnd = useCallback(async () => {
     if (!confirm('End this session?')) return;
@@ -281,20 +313,28 @@ export function PresenterView({
     return Date.now() - lastMs > 60_000;
   }, [state.last_heartbeat_at]);
 
-  const jumpEntries = useMemo(() => state.slides.map((s, i) => ({
-    slide_id: s.slide_id,
-    slide_index: i,
-    title: s.title ?? `Slide ${i + 1}`,
-    thumbnail_url: s.thumbnail_url,
-    hidden: state.plan.hidden.includes(s.slide_id),
-    is_current: s.slide_id === state.state.slide_id,
-  })), [state]);
+  const jumpEntries = useMemo(
+    () =>
+      state.slides.map((s, i) => ({
+        slide_id: s.slide_id,
+        slide_index: i,
+        title: s.title ?? `Slide ${i + 1}`,
+        thumbnail_url: s.thumbnail_url,
+        hidden: state.plan.hidden.includes(s.slide_id),
+        is_current: s.slide_id === state.state.slide_id,
+      })),
+    [state],
+  );
 
   // Pick the highest-alert running/paused agenda timer for the overlay.
   const activeAlert = useMemo<{ level: AlertLevel; label: string }>(() => {
     const ranked = state.agenda_timers
       .filter((t) => t.status === 'running' || t.status === 'paused')
-      .map((t) => ({ id: t.id, label: t.label, level: computeAlertLevel(t.remaining_ms, t.duration_ms) }));
+      .map((t) => ({
+        id: t.id,
+        label: t.label,
+        level: computeAlertLevel(t.remaining_ms, t.duration_ms),
+      }));
     const hard = ranked.find((r) => r.level === 'hard');
     const soft = ranked.find((r) => r.level === 'soft');
     const pick = hard ?? soft;
@@ -359,7 +399,9 @@ export function PresenterView({
                     disabled={state.ended_at !== null}
                   />
                 ) : (
-                  <SnapshotFallback isStale={offlineStatus === 'offline' || offlineStatus === 'stale'}>
+                  <SnapshotFallback
+                    isStale={offlineStatus === 'offline' || offlineStatus === 'stale'}
+                  >
                     <span className="slide-card__placeholder">
                       {activeSlide.title ?? activeSlide.slide_id}
                     </span>
@@ -381,7 +423,9 @@ export function PresenterView({
               </div>
               <div className="slide-card__frame">
                 {nextSlide ? (
-                  <span className="slide-card__placeholder">{nextSlide.title ?? nextSlide.slide_id}</span>
+                  <span className="slide-card__placeholder">
+                    {nextSlide.title ?? nextSlide.slide_id}
+                  </span>
                 ) : (
                   <span className="slide-card__placeholder">End of deck</span>
                 )}
@@ -415,15 +459,12 @@ export function PresenterView({
             sessionId={sessionId}
             onSelect={(d) => setAudienceDisplay(d ? { id: d.id } : null)}
           />
-          <PhoneRemote
-            pairing={pairing}
-            {...(apiBaseUrl !== undefined ? { apiBaseUrl } : {})}
-          />
+          <PhoneRemote pairing={pairing} {...(apiBaseUrl !== undefined ? { apiBaseUrl } : {})} />
           <PhonePairingPanel pairing={pairing} />
           <NotesPane slide={activeSlide} />
           <TimerDisplay
             startedAtMs={new Date(state.started_at).getTime()}
-            budgetMs={(state.agenda_timers[0]?.duration_ms) ?? 60 * 60 * 1000}
+            budgetMs={state.agenda_timers[0]?.duration_ms ?? 60 * 60 * 1000}
             reducedMotion={reducedMotionState}
           />
           <AgendaTimer agendaTimers={state.agenda_timers} />
@@ -436,11 +477,7 @@ export function PresenterView({
             disabled={state.ended_at !== null}
             onUpdated={setState}
           />
-          <RehearsalPanel
-            sessionId={sessionId}
-            state={state}
-            disabled={state.ended_at !== null}
-          />
+          <RehearsalPanel sessionId={sessionId} state={state} disabled={state.ended_at !== null} />
           <JumpGrid slides={jumpEntries} onJump={handleJump} />
           <ProfileSelector actorId={state.presenter_id} />
           <ProfilePicker actorId={state.presenter_id} />
@@ -449,7 +486,7 @@ export function PresenterView({
             activeSlide={activeSlide}
             nextSlide={nextSlide}
             startedAtMs={new Date(state.started_at).getTime()}
-            budgetMs={(state.agenda_timers[0]?.duration_ms) ?? 60 * 60 * 1000}
+            budgetMs={state.agenda_timers[0]?.duration_ms ?? 60 * 60 * 1000}
           />
         </aside>
       </main>
@@ -459,26 +496,28 @@ export function PresenterView({
           onClick={() => handleAdvance(-1)}
           aria-label="Previous slide"
           disabled={state.state.slide_index === 0}
-        >← Prev</button>
+        >
+          ← Prev
+        </button>
         <button
           type="button"
           className="controls__primary"
           onClick={() => handleAdvance(1)}
           aria-label="Next slide"
           disabled={state.ended_at !== null}
-        >Next →</button>
+        >
+          Next →
+        </button>
         <button
           type="button"
           className="controls__danger"
           onClick={handleEnd}
           disabled={state.ended_at !== null}
-        >End session</button>
+        >
+          End session
+        </button>
         {status && (
-          <div
-            className={`status status--${status.kind}`}
-            role="status"
-            aria-live="polite"
-          >
+          <div className={`status status--${status.kind}`} role="status" aria-live="polite">
             {status.message}
           </div>
         )}
@@ -578,10 +617,7 @@ export function PresenterView({
           onDismiss={() => setAlertDismissed(true)}
         />
       )}
-      <AutoFollowPresenter
-        targetRef={slideFrameRef}
-        enabled={autoFollowEnabled}
-      />
+      <AutoFollowPresenter targetRef={slideFrameRef} enabled={autoFollowEnabled} />
     </div>
   );
 }

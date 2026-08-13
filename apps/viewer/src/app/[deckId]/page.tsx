@@ -47,7 +47,10 @@ export async function generateMetadata({ params }: DeckPageProps): Promise<Metad
   };
 }
 
-export default async function DeckPage({ params, searchParams }: DeckPageProps): Promise<ReactElement> {
+export default async function DeckPage({
+  params,
+  searchParams,
+}: DeckPageProps): Promise<ReactElement> {
   const { deckId } = await params;
   const { mode: modeParam, share } = await searchParams;
   const { deck } = await fetchViewerDeck(deckId);

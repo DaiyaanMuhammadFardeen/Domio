@@ -27,8 +27,7 @@ type Status =
 // Config (env vars with sensible defaults)
 // ---------------------------------------------------------------------------
 
-const APP_BASE =
-  process.env.NEXT_PUBLIC_APP_BASE ?? 'http://localhost:3000';
+const APP_BASE = process.env.NEXT_PUBLIC_APP_BASE ?? 'http://localhost:3000';
 
 // ---------------------------------------------------------------------------
 // Icons (inline SVG — no external deps)
@@ -40,12 +39,7 @@ function Spinner() {
 
 function CheckmarkIcon() {
   return (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 28 28"
-      aria-hidden="true"
-    >
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
       <polyline className="checkmark" points="7 14.5 12 19.5 21 9.5" />
     </svg>
   );
@@ -53,12 +47,7 @@ function CheckmarkIcon() {
 
 function ErrorIcon() {
   return (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 28 28"
-      aria-hidden="true"
-    >
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
       <line className="cross-icon" x1="9" y1="9" x2="19" y2="19" />
       <line className="cross-icon" x1="19" y1="9" x2="9" y2="19" />
     </svg>
@@ -144,9 +133,7 @@ function MagicLinkPageInner() {
               <Spinner />
             </div>
             <h1 className="card__title">Verifying your invite…</h1>
-            <p className="card__message">
-              Hang on while we check your link.
-            </p>
+            <p className="card__message">Hang on while we check your link.</p>
           </div>
         )}
 
@@ -157,14 +144,8 @@ function MagicLinkPageInner() {
               <CheckmarkIcon />
             </div>
             <h1 className="card__title">Your access is ready</h1>
-            <p className="card__message">
-              Opening your deck…
-            </p>
-            {result.guest_email && (
-              <p className="card__note">
-                Signed in as {result.guest_email}
-              </p>
-            )}
+            <p className="card__message">Opening your deck…</p>
+            {result.guest_email && <p className="card__note">Signed in as {result.guest_email}</p>}
           </div>
         )}
 
@@ -175,9 +156,7 @@ function MagicLinkPageInner() {
               <ErrorIcon />
             </div>
             <h1 className="card__title">This link is invalid or has expired</h1>
-            <p className="card__message">
-              Ask the person who invited you to send a new one.
-            </p>
+            <p className="card__message">Ask the person who invited you to send a new one.</p>
           </div>
         )}
 
@@ -189,7 +168,8 @@ function MagicLinkPageInner() {
             </div>
             <h1 className="card__title">This link has already been used</h1>
             <p className="card__message">
-              Each invite link can only be used once. If you need access again, ask the person who invited you for a new link.
+              Each invite link can only be used once. If you need access again, ask the person who
+              invited you for a new link.
             </p>
           </div>
         )}
@@ -202,7 +182,8 @@ function MagicLinkPageInner() {
             </div>
             <h1 className="card__title">This invitation has been revoked</h1>
             <p className="card__message">
-              The person who invited you has cancelled this invitation. If you think this is a mistake, reach out to them directly.
+              The person who invited you has cancelled this invitation. If you think this is a
+              mistake, reach out to them directly.
             </p>
           </div>
         )}
@@ -235,7 +216,8 @@ function MagicLinkPageInner() {
             </div>
             <h1 className="card__title">Something unexpected happened</h1>
             <p className="card__message">
-              We ran into an issue processing your invite. Try again, or contact the person who sent this link.
+              We ran into an issue processing your invite. Try again, or contact the person who sent
+              this link.
             </p>
             <button
               className="card__cta card__cta--primary"

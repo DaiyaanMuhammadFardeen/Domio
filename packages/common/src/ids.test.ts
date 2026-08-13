@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  isValidResourceId,
-  resourceIdToString,
-  parseResourceId,
-  newId,
-  newToken,
-} from './ids.js';
+import { isValidResourceId, resourceIdToString, parseResourceId, newId, newToken } from './ids.js';
 
 describe('ResourceId', () => {
   it('accepts a valid resource id', () => {

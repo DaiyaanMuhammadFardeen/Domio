@@ -10,7 +10,13 @@ import { describe, it, expect } from 'vitest';
 import type { ComponentLayer, DeckDocument, Element } from '@domio/schema';
 import { StructuralValidator, DECK_SCHEMA_VERSION, asULID } from '@domio/schema';
 import { validateProps } from '@domio/schema-prop';
-import { CATALOG, getComponent, searchComponents, listByCategory, listCategories } from './catalog.js';
+import {
+  CATALOG,
+  getComponent,
+  searchComponents,
+  listByCategory,
+  listCategories,
+} from './catalog.js';
 import { expandComponent } from './expand.js';
 import { DEFAULT_ACCENT } from './tokens.js';
 
@@ -37,7 +43,12 @@ function makeLayer(
       h: opts.h ?? def.size.h,
       rotation: 0,
     },
-    component: { catalogId, version: def.version, ...(opts.variant ? { variant: opts.variant } : {}), props },
+    component: {
+      catalogId,
+      version: def.version,
+      ...(opts.variant ? { variant: opts.variant } : {}),
+      props,
+    },
   };
 }
 
@@ -50,7 +61,9 @@ function asDeck(elements: Element[]): DeckDocument {
     title: 'test',
     revision: 1,
     settings: { defaultSlideRatio: { ratioW: 16, ratioH: 9 } },
-    slides: [{ id: ULID, semanticId: 'slide-1', position: 0, aspect: { ratioW: 16, ratioH: 9 }, elements }],
+    slides: [
+      { id: ULID, semanticId: 'slide-1', position: 0, aspect: { ratioW: 16, ratioH: 9 }, elements },
+    ],
   };
 }
 
@@ -96,67 +109,100 @@ describe('catalog registry', () => {
 });
 
 describe('props schemas', () => {
-  it.each(CATALOG.map((d) => [d.catalogId, d] as const))('%s — defaults resolve and validate', (_id, def) => {
-    const { valid, value } = validateProps(def.propsSchema, {}, { coerce: true, fillDefaults: true });
-    expect(valid).toBe(true);
-    expect(value).toBeDefined();
-  });
+  it.each(CATALOG.map((d) => [d.catalogId, d] as const))(
+    '%s — defaults resolve and validate',
+    (_id, def) => {
+      const { valid, value } = validateProps(
+        def.propsSchema,
+        {},
+        { coerce: true, fillDefaults: true },
+      );
+      expect(valid).toBe(true);
+      expect(value).toBeDefined();
+    },
+  );
 
-  it.each(CATALOG.map((d) => [d.catalogId, d] as const))('%s — required props are enforced', (_id, def) => {
-    const required = def.propsSchema.required ?? [];
-    if (required.length === 0) return;
-    const { valid, errors } = validateProps(def.propsSchema, {}, { fillDefaults: false });
-    expect(valid).toBe(false);
-    expect(errors.some((e) => e.path === required[0] && e.code === 'required')).toBe(true);
-  });
+  it.each(CATALOG.map((d) => [d.catalogId, d] as const))(
+    '%s — required props are enforced',
+    (_id, def) => {
+      const required = def.propsSchema.required ?? [];
+      if (required.length === 0) return;
+      const { valid, errors } = validateProps(def.propsSchema, {}, { fillDefaults: false });
+      expect(valid).toBe(false);
+      expect(errors.some((e) => e.path === required[0] && e.code === 'required')).toBe(true);
+    },
+  );
 
-  it.each(CATALOG.map((d) => [d.catalogId, d] as const))('%s — rejects unknown props when additionalProperties is false', (_id, def) => {
-    if (def.propsSchema.additionalProperties !== false) return;
-    const { valid } = validateProps(def.propsSchema, { ...def.propsSchema.required?.reduce((a, k) => ({ ...a, [k]: 'x' }), {}), __bogus: 1 });
-    expect(valid).toBe(false);
-  });
+  it.each(CATALOG.map((d) => [d.catalogId, d] as const))(
+    '%s — rejects unknown props when additionalProperties is false',
+    (_id, def) => {
+      if (def.propsSchema.additionalProperties !== false) return;
+      const { valid } = validateProps(def.propsSchema, {
+        ...def.propsSchema.required?.reduce((a, k) => ({ ...a, [k]: 'x' }), {}),
+        __bogus: 1,
+      });
+      expect(valid).toBe(false);
+    },
+  );
 });
 
 describe('builders produce valid scene-graph', () => {
-  it.each(CATALOG.map((d) => [d.catalogId, d] as const))('%s — default build passes StructuralValidator', (_id, def) => {
-    const { value: props } = validateProps(def.propsSchema, {}, { coerce: true, fillDefaults: true });
-    const ctx = {
-      variantId: def.defaultVariant,
-      id: (() => {
-        let n = 0;
-        return () => asULID(`00000000000000000000000000${n++}`.slice(-26));
-      })(),
-      semanticId: (role: string) => `t.${role}`,
-    };
-    const elements = def.build(props, ctx);
-    expect(elements.length).toBeGreaterThan(0);
-    const result = validator.validate(asDeck(elements));
-    expect(result.errors.filter((e) => e.code !== 'schema_version_mismatch')).toEqual([]);
-    for (const el of elements) {
-      expect(Number.isFinite(el.transform.x)).toBe(true);
-      expect(Number.isFinite(el.transform.y)).toBe(true);
-      expect(el.transform.w).toBeGreaterThanOrEqual(0);
-      expect(el.transform.h).toBeGreaterThanOrEqual(0);
-    }
-  });
+  it.each(CATALOG.map((d) => [d.catalogId, d] as const))(
+    '%s — default build passes StructuralValidator',
+    (_id, def) => {
+      const { value: props } = validateProps(
+        def.propsSchema,
+        {},
+        { coerce: true, fillDefaults: true },
+      );
+      const ctx = {
+        variantId: def.defaultVariant,
+        id: (() => {
+          let n = 0;
+          return () => asULID(`00000000000000000000000000${n++}`.slice(-26));
+        })(),
+        semanticId: (role: string) => `t.${role}`,
+      };
+      const elements = def.build(props, ctx);
+      expect(elements.length).toBeGreaterThan(0);
+      const result = validator.validate(asDeck(elements));
+      expect(result.errors.filter((e) => e.code !== 'schema_version_mismatch')).toEqual([]);
+      for (const el of elements) {
+        expect(Number.isFinite(el.transform.x)).toBe(true);
+        expect(Number.isFinite(el.transform.y)).toBe(true);
+        expect(el.transform.w).toBeGreaterThanOrEqual(0);
+        expect(el.transform.h).toBeGreaterThanOrEqual(0);
+      }
+    },
+  );
 
-  it.each(CATALOG.map((d) => [d.catalogId, d] as const))('%s — expansion is deterministic', (_id, def) => {
-    const layer = makeLayer(def.catalogId, {});
-    const a = expandComponent(layer);
-    const b = expandComponent(layer);
-    expect(a.map((e) => e.id)).toEqual(b.map((e) => e.id));
-  });
+  it.each(CATALOG.map((d) => [d.catalogId, d] as const))(
+    '%s — expansion is deterministic',
+    (_id, def) => {
+      const layer = makeLayer(def.catalogId, {});
+      const a = expandComponent(layer);
+      const b = expandComponent(layer);
+      expect(a.map((e) => e.id)).toEqual(b.map((e) => e.id));
+    },
+  );
 
-  it.each(CATALOG.map((d) => [d.catalogId, d] as const))('%s — expansion scales into the layer box', (_id, def) => {
-    const layer = makeLayer(def.catalogId, {}, { x: 0, y: 0, w: def.size.w * 2, h: def.size.h * 2 });
-    const elements = expandComponent(layer);
-    for (const el of elements) {
-      expect(el.transform.x).toBeGreaterThanOrEqual(0);
-      expect(el.transform.y).toBeGreaterThanOrEqual(0);
-      expect(el.transform.x + el.transform.w).toBeLessThanOrEqual(def.size.w * 2 + 0.01);
-      expect(el.transform.y + el.transform.h).toBeLessThanOrEqual(def.size.h * 2 + 0.01);
-    }
-  });
+  it.each(CATALOG.map((d) => [d.catalogId, d] as const))(
+    '%s — expansion scales into the layer box',
+    (_id, def) => {
+      const layer = makeLayer(
+        def.catalogId,
+        {},
+        { x: 0, y: 0, w: def.size.w * 2, h: def.size.h * 2 },
+      );
+      const elements = expandComponent(layer);
+      for (const el of elements) {
+        expect(el.transform.x).toBeGreaterThanOrEqual(0);
+        expect(el.transform.y).toBeGreaterThanOrEqual(0);
+        expect(el.transform.x + el.transform.w).toBeLessThanOrEqual(def.size.w * 2 + 0.01);
+        expect(el.transform.y + el.transform.h).toBeLessThanOrEqual(def.size.h * 2 + 0.01);
+      }
+    },
+  );
 });
 
 describe('expandComponent edge cases', () => {
@@ -175,8 +221,12 @@ describe('expandComponent edge cases', () => {
 
   it('honors the variant prop', () => {
     const def = getComponent('domio.stat-card')!;
-    const light = expandComponent(makeLayer(def.catalogId, { accent: DEFAULT_ACCENT }, { variant: 'light' }));
-    const dark = expandComponent(makeLayer(def.catalogId, { accent: DEFAULT_ACCENT }, { variant: 'dark' }));
+    const light = expandComponent(
+      makeLayer(def.catalogId, { accent: DEFAULT_ACCENT }, { variant: 'light' }),
+    );
+    const dark = expandComponent(
+      makeLayer(def.catalogId, { accent: DEFAULT_ACCENT }, { variant: 'dark' }),
+    );
     const lightBg = light.find((e) => e.semanticId === 'instance.card');
     const darkBg = dark.find((e) => e.semanticId === 'instance.card');
     expect(lightBg?.type).toBe('frame');

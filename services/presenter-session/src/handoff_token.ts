@@ -27,10 +27,7 @@
  */
 
 import { createHmac, timingSafeEqual } from 'crypto';
-import {
-  NullNonceStore,
-  type NonceStore,
-} from '@domio/signed-link-token';
+import { NullNonceStore, type NonceStore } from '@domio/signed-link-token';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -98,7 +95,10 @@ export function mintHandoverToken(
     throw new HandoverTokenError('BAD_FORMAT', `HMAC key must be >= 32 bytes, got ${key.length}`);
   }
   if (!claims.session_id || !claims.workspace_id || !claims.from_actor || !claims.to_actor) {
-    throw new HandoverTokenError('BAD_FORMAT', 'session_id, workspace_id, from_actor, to_actor required');
+    throw new HandoverTokenError(
+      'BAD_FORMAT',
+      'session_id, workspace_id, from_actor, to_actor required',
+    );
   }
   if (!Number.isInteger(claims.expected_version) || claims.expected_version < 1) {
     throw new HandoverTokenError('BAD_FORMAT', 'expected_version must be a positive integer');

@@ -27,7 +27,10 @@ export interface IssueLicenseResult {
  * Issue a signed license grant (compact JWS, HS256). Claims mirror the
  * `license_grant` row so verification can happen offline.
  */
-export async function issueLicenseGrant(deps: ServiceDeps, input: IssueLicenseInput): Promise<LicenseGrant> {
+export async function issueLicenseGrant(
+  deps: ServiceDeps,
+  input: IssueLicenseInput,
+): Promise<LicenseGrant> {
   const store = deps.store;
   const now = input.now ?? nowMs(deps);
   const listing = await store.getListing(input.listingId);
@@ -95,10 +98,14 @@ export interface VerifyLicenseResult {
  *  3. revocation check (server state)
  *  4. expiry with 30-day offline grace
  */
-export async function verifyLicense(deps: ServiceDeps, input: VerifyLicenseInput): Promise<VerifyLicenseResult> {
+export async function verifyLicense(
+  deps: ServiceDeps,
+  input: VerifyLicenseInput,
+): Promise<VerifyLicenseResult> {
   const now = input.now ?? nowMs(deps);
   const verified = verifyJws(input.token, deps.licenseSecret);
-  if (!verified.valid || !verified.payload) return { valid: false, reason: verified.reason ?? 'invalid-token' };
+  if (!verified.valid || !verified.payload)
+    return { valid: false, reason: verified.reason ?? 'invalid-token' };
   const claims = verified.payload as Record<string, unknown>;
   const licenseId = String(claims.sub ?? '');
 

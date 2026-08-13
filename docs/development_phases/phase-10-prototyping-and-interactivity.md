@@ -26,24 +26,24 @@
 
 **Feature numbers in scope (per `feature-list.md`):**
 
-| Feature | Name | Notes |
-|---|---|---|
-| #96 | Clickable hotspots and links between slides | Foundations for navigation; normalized-coord geometry; multi-gesture |
-| #97 | Interactive branching presentations | Directed graph; multi-start/multi-end; cycle detection; path_stack |
-| #98 | Overlay states (modals, tooltips, drawers) | Per-slide overlay_stack; persistent + transient; focus-trap |
-| #99 | Component states & interactions | State machines per instance; `default/hover/pressed/focused/disabled/loading/...` |
-| #100 | Variables & conditional logic | Typed var store; 5 scopes; safe expression compiler; reactive bindings DAG |
-| #101 | Form inputs feeding variables | 20+ input types; debounced validation; autosave drafts; locale-aware |
-| #102 | Embedded calculators | Sandboxed decimal128 DAG; form/graph mode; chart binding |
-| #103 | Device frames with simulated input | iPhone/iPad/Android/Desktop frames; touch-event shim; offline cache |
-| #104 | Prototype user-testing telemetry | Integrity-protected event log; replay; CSV/Parquet export; consent UI |
-| #105 | Mini-games/quiz mechanics | Drag-to-match, hotspot, MCQ, fill-blank, ordering, flash_card, short_answer |
-| #106 | Timed auto-advance sequences | `interval_ms`, pause/resume, `pause_on_event`, reduced-motion default-off |
-| #107 | Deep-linkable slide states | Signed base64url state token; short-form server mapping; scope-filtered vars |
+| Feature | Name                                        | Notes                                                                             |
+| ------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
+| #96     | Clickable hotspots and links between slides | Foundations for navigation; normalized-coord geometry; multi-gesture              |
+| #97     | Interactive branching presentations         | Directed graph; multi-start/multi-end; cycle detection; path_stack                |
+| #98     | Overlay states (modals, tooltips, drawers)  | Per-slide overlay_stack; persistent + transient; focus-trap                       |
+| #99     | Component states & interactions             | State machines per instance; `default/hover/pressed/focused/disabled/loading/...` |
+| #100    | Variables & conditional logic               | Typed var store; 5 scopes; safe expression compiler; reactive bindings DAG        |
+| #101    | Form inputs feeding variables               | 20+ input types; debounced validation; autosave drafts; locale-aware              |
+| #102    | Embedded calculators                        | Sandboxed decimal128 DAG; form/graph mode; chart binding                          |
+| #103    | Device frames with simulated input          | iPhone/iPad/Android/Desktop frames; touch-event shim; offline cache               |
+| #104    | Prototype user-testing telemetry            | Integrity-protected event log; replay; CSV/Parquet export; consent UI             |
+| #105    | Mini-games/quiz mechanics                   | Drag-to-match, hotspot, MCQ, fill-blank, ordering, flash_card, short_answer       |
+| #106    | Timed auto-advance sequences                | `interval_ms`, pause/resume, `pause_on_event`, reduced-motion default-off         |
+| #107    | Deep-linkable slide states                  | Signed base64url state token; short-form server mapping; scope-filtered vars      |
 
 **Out of scope (deferred):**
 
-- **3D interactions** (#65–#74, #69) — those are authored in Phase 11. Hotspots here may *trigger* Phase 11 camera keyframes or physics via the trigger resolver, but do not own 3D authoring.
+- **3D interactions** (#65–#74, #69) — those are authored in Phase 11. Hotspots here may _trigger_ Phase 11 camera keyframes or physics via the trigger resolver, but do not own 3D authoring.
 - **Audience participation transport** (#142–#154) — QR join, polls, leaderboards. The audience inputs ultimately write to the same `session`-/`viewer`-scoped variable store built here, but the transport is Phase 16.
 - **AI-authored interactive content** (#108, #111–#114) — Phase 12 wraps the JSON Schemas emitted here. AI cannot author a conditional rule it cannot read.
 - **MCP server core** (#221) — Phase 13, but every feature here must emit at least one MCP tool definition.
@@ -503,80 +503,80 @@ Exactly per `/docs/prototyping-interactivity.md` §7.5:
 
 ## 6. Verification
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #96 | Author draws a hotspot on a slide, releases, picks target slide | Hotspot visible in Connections panel; tap in prototype preview navigates to target | Editor FE |
-| #96 | Author targets a deleted slide | Hotspot flagged `dangling: true`; "Broken connection" panel offers one-click fix | Editor FE |
-| #96 | Hotspot drawn over a constrained element | Geometry stored in normalized coords; resolves correctly at runtime | Runtime |
-| #97 | Author builds a branching graph with cycle A→B→C→A | Connections panel flags cycle; runtime caps traversal at `max_hops_per_session` | Editor FE / Runtime |
-| #97 | Multi-start deck — two slides marked `is_start` | Connections panel warns; exactly one is `default_start` | Editor FE |
-| #97 | Replay with deterministic seed | Re-walked path is byte-identical to recorded `path_stack` | Runtime / Recorder |
-| #98 | Open a modal from inside another modal up to depth 5 | All five open with z-order `last-opened-on-top`; 6th rejected | Runtime |
-| #98 | Modal closed → focus returned to invoker; `aria-modal` set; `aria-describedby` set | axe-core pass; manual keyboard-only pass | FE / A11y |
-| #99 | Toggle a button; `onTransition` fires `default → pressed → default` | VarStore subscribers notified; animation replayed | Runtime |
-| #99 | Brand-locked component with locked state machine | Junior role cannot edit transitions; inline error | FE / Permissions |
-| #100 | Toggle `$pricingTier` variable; conditional rule `if $pricingTier == annual → show annualPricing` fires | Element visibility flips in < 16 ms | Runtime |
-| #100 | Author pastes `eval("alert(1)")` into rule expression | Compile-time reject; UI red squiggle | Compiler |
-| #100 | Circular binding A → B → A | Validation reject; runtime fallback `cyclic_update_aborted` | Runtime |
-| #100 | Formula divides by zero | Output `0` with `was_zero_division: true`; visible badge | Runtime |
-| #101 | Form input `email` validation: empty submit | Submit blocked; first failing field focused with `aria-invalid` | FE / A11y |
-| #101 | File upload > 5 MB | Rejected with inline error | FE / Security |
-| #101 | Locale `bn-BD`: date picker renders Bangla numerals and localized calendar | Locale-correct rendering | FE / i18n |
-| #102 | Drag a slider in an ROI calculator | Output charts update in < 16 ms; recompute ≤ 5 ms for ≤ 100 nodes | Runtime |
-| #102 | Paste `1e308` into a `number` input | Rejected with "value too large" inline error | Runtime |
-| #102 | Calculator DAG with a cycle | Author-time reject; runtime never executes | Runtime |
-| #103 | Author places an iPhone 15 Pro frame on a slide; hotspot over screen calls `simulate_device_tap(x_pct=50, y_pct=30)` | Iframe receives `pointerdown`/`pointerup` at mapped coords | Runtime |
-| #103 | External content source unreachable | "source unreachable" overlay; hotspot no-op | Runtime |
-| #103 | Frame orientation rotated from portrait → landscape | 250 ms rotate animation; safe-area insets recomputed | Runtime |
-| #104 | Author shares prototype test link; viewer runs a 5-min session | Recorder streams 5 K events; HMAC integrity verified | Recorder |
-| #104 | Researcher opens dashboard → replay | Deck replays exactly with variable inspector | FE |
-| #104 | PII field `email` filled in `opt_out` mode | Telemetry payload contains `***` | FE / Recorder |
-| #104 | DSR request: `DELETE /v1/me/telemetry_sessions/{id}` | Session + events removed within 24 h | Recorder |
-| #104 | Reorder/delete an event in the log post-hoc | HMAC chain mismatch alert fires | Security |
-| #105 | Quiz MCQ with 1 correct | Score variable updates; pass → next-module slide; fail → remediation slide | Runtime |
-| #105 | Drag-to-match by keyboard only (Tab + arrows + Enter) | Connections established; submit succeeds | FE / A11y |
-| #105 | xAPI statement emitted for a quiz attempt | External LRS receives and validates statement | Runtime |
-| #106 | Author declares a sequence of 5 slides with `interval_ms = 4000` | Auto-advance runs; pause control always visible | Runtime |
-| #106 | `prefers-reduced-motion: reduce` | Sequence disabled by default | Runtime |
-| #106 | Tab backgrounded mid-sequence | Clock paused; resumes on visibility | Runtime |
-| #107 | Author clicks Share State at slide 7 with Bear case + half-filled form | Recipient opens link → slide 7, Bear active, form draft restored, toast ≤ 1.5 s | Deep-link svc |
-| #107 | Token expired | "this link has expired, open at default?" | Deep-link svc |
-| #107 | Variable in snapshot deleted from deck | "Some variables from this link aren't in the current version" banner | Deep-link svc |
-| #107 | Resolve latency in-region | ≤ 300 ms p95 | Deep-link svc |
-| MCP | Agent invokes `create_hotspot` for `slide[3].hotspot[cta_pricing]` | Hotspot created; audit-trail entry "Agent: Claude via MCP — added hotspot" | MCP |
-| MCP | Agent invokes `set_variable` for `$pricingTier = annual` | Variable write succeeds; bindings reactive update | MCP / Runtime |
-| MCP | Agent without `modify_state` calls `set_variable` | Rejected with `403` | MCP / Auth |
-| Compliance | PDPA retention: 90-day default | Expired sessions/events hard-deleted within 24 h | Compliance |
-| Compliance | BD-PDPA consent tier `opt_out` | No PII in raw telemetry; only aggregates | Compliance |
-| Performance | Hotspot hit-test | ≤ 0.1 ms p99 | Perf |
-| Performance | Rule eval batch (100 rules) | ≤ 5 ms p99 | Perf |
-| Performance | Calculator DAG recompute (100 nodes) | ≤ 5 ms p99 | Perf |
-| Performance | Deep-link decode | ≤ 5 ms p99 for ≤ 4 KB tokens | Perf |
-| Performance | Telemetry ingest | ≥ 5 K events/sec/region p99 | Perf |
+| Feature     | Test                                                                                                                 | Expected result                                                                    | Owner               |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------- |
+| #96         | Author draws a hotspot on a slide, releases, picks target slide                                                      | Hotspot visible in Connections panel; tap in prototype preview navigates to target | Editor FE           |
+| #96         | Author targets a deleted slide                                                                                       | Hotspot flagged `dangling: true`; "Broken connection" panel offers one-click fix   | Editor FE           |
+| #96         | Hotspot drawn over a constrained element                                                                             | Geometry stored in normalized coords; resolves correctly at runtime                | Runtime             |
+| #97         | Author builds a branching graph with cycle A→B→C→A                                                                   | Connections panel flags cycle; runtime caps traversal at `max_hops_per_session`    | Editor FE / Runtime |
+| #97         | Multi-start deck — two slides marked `is_start`                                                                      | Connections panel warns; exactly one is `default_start`                            | Editor FE           |
+| #97         | Replay with deterministic seed                                                                                       | Re-walked path is byte-identical to recorded `path_stack`                          | Runtime / Recorder  |
+| #98         | Open a modal from inside another modal up to depth 5                                                                 | All five open with z-order `last-opened-on-top`; 6th rejected                      | Runtime             |
+| #98         | Modal closed → focus returned to invoker; `aria-modal` set; `aria-describedby` set                                   | axe-core pass; manual keyboard-only pass                                           | FE / A11y           |
+| #99         | Toggle a button; `onTransition` fires `default → pressed → default`                                                  | VarStore subscribers notified; animation replayed                                  | Runtime             |
+| #99         | Brand-locked component with locked state machine                                                                     | Junior role cannot edit transitions; inline error                                  | FE / Permissions    |
+| #100        | Toggle `$pricingTier` variable; conditional rule `if $pricingTier == annual → show annualPricing` fires              | Element visibility flips in < 16 ms                                                | Runtime             |
+| #100        | Author pastes `eval("alert(1)")` into rule expression                                                                | Compile-time reject; UI red squiggle                                               | Compiler            |
+| #100        | Circular binding A → B → A                                                                                           | Validation reject; runtime fallback `cyclic_update_aborted`                        | Runtime             |
+| #100        | Formula divides by zero                                                                                              | Output `0` with `was_zero_division: true`; visible badge                           | Runtime             |
+| #101        | Form input `email` validation: empty submit                                                                          | Submit blocked; first failing field focused with `aria-invalid`                    | FE / A11y           |
+| #101        | File upload > 5 MB                                                                                                   | Rejected with inline error                                                         | FE / Security       |
+| #101        | Locale `bn-BD`: date picker renders Bangla numerals and localized calendar                                           | Locale-correct rendering                                                           | FE / i18n           |
+| #102        | Drag a slider in an ROI calculator                                                                                   | Output charts update in < 16 ms; recompute ≤ 5 ms for ≤ 100 nodes                  | Runtime             |
+| #102        | Paste `1e308` into a `number` input                                                                                  | Rejected with "value too large" inline error                                       | Runtime             |
+| #102        | Calculator DAG with a cycle                                                                                          | Author-time reject; runtime never executes                                         | Runtime             |
+| #103        | Author places an iPhone 15 Pro frame on a slide; hotspot over screen calls `simulate_device_tap(x_pct=50, y_pct=30)` | Iframe receives `pointerdown`/`pointerup` at mapped coords                         | Runtime             |
+| #103        | External content source unreachable                                                                                  | "source unreachable" overlay; hotspot no-op                                        | Runtime             |
+| #103        | Frame orientation rotated from portrait → landscape                                                                  | 250 ms rotate animation; safe-area insets recomputed                               | Runtime             |
+| #104        | Author shares prototype test link; viewer runs a 5-min session                                                       | Recorder streams 5 K events; HMAC integrity verified                               | Recorder            |
+| #104        | Researcher opens dashboard → replay                                                                                  | Deck replays exactly with variable inspector                                       | FE                  |
+| #104        | PII field `email` filled in `opt_out` mode                                                                           | Telemetry payload contains `***`                                                   | FE / Recorder       |
+| #104        | DSR request: `DELETE /v1/me/telemetry_sessions/{id}`                                                                 | Session + events removed within 24 h                                               | Recorder            |
+| #104        | Reorder/delete an event in the log post-hoc                                                                          | HMAC chain mismatch alert fires                                                    | Security            |
+| #105        | Quiz MCQ with 1 correct                                                                                              | Score variable updates; pass → next-module slide; fail → remediation slide         | Runtime             |
+| #105        | Drag-to-match by keyboard only (Tab + arrows + Enter)                                                                | Connections established; submit succeeds                                           | FE / A11y           |
+| #105        | xAPI statement emitted for a quiz attempt                                                                            | External LRS receives and validates statement                                      | Runtime             |
+| #106        | Author declares a sequence of 5 slides with `interval_ms = 4000`                                                     | Auto-advance runs; pause control always visible                                    | Runtime             |
+| #106        | `prefers-reduced-motion: reduce`                                                                                     | Sequence disabled by default                                                       | Runtime             |
+| #106        | Tab backgrounded mid-sequence                                                                                        | Clock paused; resumes on visibility                                                | Runtime             |
+| #107        | Author clicks Share State at slide 7 with Bear case + half-filled form                                               | Recipient opens link → slide 7, Bear active, form draft restored, toast ≤ 1.5 s    | Deep-link svc       |
+| #107        | Token expired                                                                                                        | "this link has expired, open at default?"                                          | Deep-link svc       |
+| #107        | Variable in snapshot deleted from deck                                                                               | "Some variables from this link aren't in the current version" banner               | Deep-link svc       |
+| #107        | Resolve latency in-region                                                                                            | ≤ 300 ms p95                                                                       | Deep-link svc       |
+| MCP         | Agent invokes `create_hotspot` for `slide[3].hotspot[cta_pricing]`                                                   | Hotspot created; audit-trail entry "Agent: Claude via MCP — added hotspot"         | MCP                 |
+| MCP         | Agent invokes `set_variable` for `$pricingTier = annual`                                                             | Variable write succeeds; bindings reactive update                                  | MCP / Runtime       |
+| MCP         | Agent without `modify_state` calls `set_variable`                                                                    | Rejected with `403`                                                                | MCP / Auth          |
+| Compliance  | PDPA retention: 90-day default                                                                                       | Expired sessions/events hard-deleted within 24 h                                   | Compliance          |
+| Compliance  | BD-PDPA consent tier `opt_out`                                                                                       | No PII in raw telemetry; only aggregates                                           | Compliance          |
+| Performance | Hotspot hit-test                                                                                                     | ≤ 0.1 ms p99                                                                       | Perf                |
+| Performance | Rule eval batch (100 rules)                                                                                          | ≤ 5 ms p99                                                                         | Perf                |
+| Performance | Calculator DAG recompute (100 nodes)                                                                                 | ≤ 5 ms p99                                                                         | Perf                |
+| Performance | Deep-link decode                                                                                                     | ≤ 5 ms p99 for ≤ 4 KB tokens                                                       | Perf                |
+| Performance | Telemetry ingest                                                                                                     | ≥ 5 K events/sec/region p99                                                        | Perf                |
 
 ---
 
 ## 7. Risks & Open Decisions
 
-| Risk | Mitigation |
-|---|---|
-| Variable store and conditional-rule engine are shared infrastructure for Phases 12, 13, 14, 15, 16, 17, 20, 21 — a wrong API here is expensive to change. | Schema freeze at end of M1.1 / M2.1; review board including Phase 12 / 13 / 16 / 17 leads; JSON Schemas published early. |
-| Rule expression sandbox escape (QuickJS / Web Worker misconfig) | Pin known-good version; defense-in-depth: compile-time AST whitelist + runtime per-frame budget + memory cap; external fuzzing vendor in Phase 22. |
-| Telemetry volume blow-up at 100% sampling with viral sharing (#155, #173) | Configurable sampling per deck (`1/n`); storage budget enforcement with oldest-first drop; retention knob default 90 days. |
-| Deep-link tampering / replay attacks | HMAC signing with 30-day rotation + 7-day overlap; single-use link via `click_count <= 1`; revocation API. |
-| Hotspot hit-test on constrained elements after responsive scale | Geometry stored in normalized `[0..1]`; resolved at runtime against rendered rect; re-test on every constraint change. |
-| `prefers-reduced-motion` interaction with auto-advance (#106) and overlays (#98) | Default-off; explicit opt-in by author; always-visible pause control; axe-core checks. |
-| LLM-graded short-answer quizzes (#105) — confidence calibration | Confidence threshold default 0.7 with human review queue below; cost cap per deck; toggleable per quiz. |
-| Device-frame external content source security (#103 → F81) | iframe sandbox `sandbox="allow-scripts allow-same-origin allow-forms"`; org allowlist; auth passthrough JWT; CSP `frame-ancestors`. |
-| xAPI / SCORM LRS provider selection (#105) | Open question; ship pluggable LRS adapter interface; default to Yet Analytics SCORM Cloud reference impl. |
-| Quiz randomized attempt ordering must be deterministic per session but fair across attempts | Server-side shuffle keyed by `session_id`; persist ordering in `quiz_attempts` for replay. |
-| Concurrent edits to variables (#99 + #213 co-presenting) | Last-write-wins per variable; CRDT semantics; "merged with edit" toast on conflict. |
-| Device-frame iframe cache staleness (#103 + #137 offline) | Key by frame URL + content hash + last-modified; explicit refresh policy in the deck settings. |
-| Audio/video associated with quizzes (#105 → #93 reduced-motion) | Captions/transcripts mandatory; QA pass per release. |
-| Telemetry integrity chain storage cost | Compress `payload JSONB` (zstd); HMAC + prev_hash stored as `BYTEA`; archive cold sessions to object storage. |
-| Cross-deck deep links | Deferred to v2 with cross-deck knowledge graph (#219); current deep links are single-deck only. |
-| Open question: xAPI / SCORM provider selection | Ship adapter interface + reference LRS. |
-| Open question: NL-patch decomposition into tool calls (M8.2) | Begin with template-based decomposition; LLM-driven decomposition deferred to Phase 22 polish. |
+| Risk                                                                                                                                                      | Mitigation                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Variable store and conditional-rule engine are shared infrastructure for Phases 12, 13, 14, 15, 16, 17, 20, 21 — a wrong API here is expensive to change. | Schema freeze at end of M1.1 / M2.1; review board including Phase 12 / 13 / 16 / 17 leads; JSON Schemas published early.                           |
+| Rule expression sandbox escape (QuickJS / Web Worker misconfig)                                                                                           | Pin known-good version; defense-in-depth: compile-time AST whitelist + runtime per-frame budget + memory cap; external fuzzing vendor in Phase 22. |
+| Telemetry volume blow-up at 100% sampling with viral sharing (#155, #173)                                                                                 | Configurable sampling per deck (`1/n`); storage budget enforcement with oldest-first drop; retention knob default 90 days.                         |
+| Deep-link tampering / replay attacks                                                                                                                      | HMAC signing with 30-day rotation + 7-day overlap; single-use link via `click_count <= 1`; revocation API.                                         |
+| Hotspot hit-test on constrained elements after responsive scale                                                                                           | Geometry stored in normalized `[0..1]`; resolved at runtime against rendered rect; re-test on every constraint change.                             |
+| `prefers-reduced-motion` interaction with auto-advance (#106) and overlays (#98)                                                                          | Default-off; explicit opt-in by author; always-visible pause control; axe-core checks.                                                             |
+| LLM-graded short-answer quizzes (#105) — confidence calibration                                                                                           | Confidence threshold default 0.7 with human review queue below; cost cap per deck; toggleable per quiz.                                            |
+| Device-frame external content source security (#103 → F81)                                                                                                | iframe sandbox `sandbox="allow-scripts allow-same-origin allow-forms"`; org allowlist; auth passthrough JWT; CSP `frame-ancestors`.                |
+| xAPI / SCORM LRS provider selection (#105)                                                                                                                | Open question; ship pluggable LRS adapter interface; default to Yet Analytics SCORM Cloud reference impl.                                          |
+| Quiz randomized attempt ordering must be deterministic per session but fair across attempts                                                               | Server-side shuffle keyed by `session_id`; persist ordering in `quiz_attempts` for replay.                                                         |
+| Concurrent edits to variables (#99 + #213 co-presenting)                                                                                                  | Last-write-wins per variable; CRDT semantics; "merged with edit" toast on conflict.                                                                |
+| Device-frame iframe cache staleness (#103 + #137 offline)                                                                                                 | Key by frame URL + content hash + last-modified; explicit refresh policy in the deck settings.                                                     |
+| Audio/video associated with quizzes (#105 → #93 reduced-motion)                                                                                           | Captions/transcripts mandatory; QA pass per release.                                                                                               |
+| Telemetry integrity chain storage cost                                                                                                                    | Compress `payload JSONB` (zstd); HMAC + prev_hash stored as `BYTEA`; archive cold sessions to object storage.                                      |
+| Cross-deck deep links                                                                                                                                     | Deferred to v2 with cross-deck knowledge graph (#219); current deep links are single-deck only.                                                    |
+| Open question: xAPI / SCORM provider selection                                                                                                            | Ship adapter interface + reference LRS.                                                                                                            |
+| Open question: NL-patch decomposition into tool calls (M8.2)                                                                                              | Begin with template-based decomposition; LLM-driven decomposition deferred to Phase 22 polish.                                                     |
 
 ---
 

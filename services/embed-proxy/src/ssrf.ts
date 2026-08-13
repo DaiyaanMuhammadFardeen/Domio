@@ -35,12 +35,12 @@ export class SsrfBlockedError extends Error {
 
 /** RFC 1918 + loopback + link-local + metadata. */
 const BLOCKED_IPV4_PREFIXES: Array<{ prefix: string; bits: number; label: string }> = [
-  { prefix: '127.0.0.0', bits: 8, label: 'loopback' },      // 127.0.0.0/8
-  { prefix: '10.0.0.0', bits: 8, label: 'RFC1918' },         // 10.0.0.0/8
-  { prefix: '172.16.0.0', bits: 12, label: 'RFC1918' },      // 172.16.0.0/12
-  { prefix: '192.168.0.0', bits: 16, label: 'RFC1918' },     // 192.168.0.0/16
-  { prefix: '169.254.0.0', bits: 16, label: 'link-local' },  // 169.254.0.0/16
-  { prefix: '0.0.0.0', bits: 8, label: 'unspecified' },       // 0.0.0.0/8
+  { prefix: '127.0.0.0', bits: 8, label: 'loopback' }, // 127.0.0.0/8
+  { prefix: '10.0.0.0', bits: 8, label: 'RFC1918' }, // 10.0.0.0/8
+  { prefix: '172.16.0.0', bits: 12, label: 'RFC1918' }, // 172.16.0.0/12
+  { prefix: '192.168.0.0', bits: 16, label: 'RFC1918' }, // 192.168.0.0/16
+  { prefix: '169.254.0.0', bits: 16, label: 'link-local' }, // 169.254.0.0/16
+  { prefix: '0.0.0.0', bits: 8, label: 'unspecified' }, // 0.0.0.0/8
 ];
 
 /** Cloud metadata endpoints. */
@@ -152,8 +152,10 @@ export async function isUrlSafe(
         if (blocked) return { safe: false, reason: `resolved to blocked IPv4 range: ${blocked}` };
         // IPv6 checks
         if (addr === '::1') return { safe: false, reason: 'resolved to IPv6 loopback' };
-        if (addr.startsWith('fe80:') || addr.startsWith('fe90:')) return { safe: false, reason: 'resolved to IPv6 link-local' };
-        if (addr.startsWith('fc') || addr.startsWith('fd')) return { safe: false, reason: 'resolved to IPv6 ULA' };
+        if (addr.startsWith('fe80:') || addr.startsWith('fe90:'))
+          return { safe: false, reason: 'resolved to IPv6 link-local' };
+        if (addr.startsWith('fc') || addr.startsWith('fd'))
+          return { safe: false, reason: 'resolved to IPv6 ULA' };
       }
     } catch {
       return { safe: false, reason: 'DNS resolution failed' };

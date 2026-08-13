@@ -3,12 +3,5 @@
  */
 
 export { UsageChart, type UsageChartProps } from './UsageChart';
-export {
-  AgentUsageTable,
-  type AgentUsageRow,
-  type AgentUsageTableProps,
-} from './AgentUsageTable';
-export {
-  RateLimitRuleDrawer,
-  type RateLimitRuleDrawerProps,
-} from './RateLimitRuleDrawer';
+export { AgentUsageTable, type AgentUsageRow, type AgentUsageTableProps } from './AgentUsageTable';
+export { RateLimitRuleDrawer, type RateLimitRuleDrawerProps } from './RateLimitRuleDrawer';

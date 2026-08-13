@@ -101,7 +101,14 @@ export function ParkingLot({
       ) : (
         <ul
           data-testid={`${dataTestId}-list`}
-          style={{ listStyle: 'none', padding: 0, margin: '0 0 8px', display: 'flex', flexDirection: 'column', gap: 4 }}
+          style={{
+            listStyle: 'none',
+            padding: 0,
+            margin: '0 0 8px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+          }}
         >
           {filtered.map((item) => (
             <li
@@ -115,7 +122,9 @@ export function ParkingLot({
                 background: 'var(--surface-raised)',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
+              >
                 <strong style={{ fontSize: 11 }}>{item.author}</strong>
                 <span style={{ fontSize: 10, color: 'var(--content-muted)' }}>↑ {item.votes}</span>
               </div>

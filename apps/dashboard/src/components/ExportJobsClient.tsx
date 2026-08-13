@@ -84,15 +84,11 @@ export function ExportJobsClient({
 
   // Poll in-flight jobs until they reach done/failed.
   useEffect(() => {
-    const inflight = jobs.filter(
-      (j) => j.status === 'queued' || j.status === 'running',
-    );
+    const inflight = jobs.filter((j) => j.status === 'queued' || j.status === 'running');
     if (inflight.length === 0) return;
     let cancelled = false;
     const id = setInterval(async () => {
-      const updates = await Promise.all(
-        inflight.map((j) => getDashboardExport(workspaceId, j.id)),
-      );
+      const updates = await Promise.all(inflight.map((j) => getDashboardExport(workspaceId, j.id)));
       if (cancelled) return;
       setJobs((prev) => {
         const map = new Map(prev.map((j) => [j.id, j]));
@@ -134,13 +130,10 @@ export function ExportJobsClient({
           onClick={() => queue('csv')}
           className="rounded-xl border border-slate-200 bg-white p-5 text-left hover:border-brand-300 disabled:opacity-50"
         >
-          <div className="text-sm font-semibold text-slate-900">
-            CSV export
-          </div>
+          <div className="text-sm font-semibold text-slate-900">CSV export</div>
           <p className="mt-1 text-sm text-slate-500">
-            Queue a CSV export of the current dashboard state and poll
-            for completion. The download link appears once the job is
-            ready.
+            Queue a CSV export of the current dashboard state and poll for completion. The download
+            link appears once the job is ready.
           </p>
         </button>
         <button
@@ -150,12 +143,10 @@ export function ExportJobsClient({
           onClick={() => queue('pdf')}
           className="rounded-xl border border-slate-200 bg-white p-5 text-left hover:border-brand-300 disabled:opacity-50"
         >
-          <div className="text-sm font-semibold text-slate-900">
-            PDF export
-          </div>
+          <div className="text-sm font-semibold text-slate-900">PDF export</div>
           <p className="mt-1 text-sm text-slate-500">
-            Queue a PDF export. The download link appears once the
-            export service reports the job as done.
+            Queue a PDF export. The download link appears once the export service reports the job as
+            done.
           </p>
         </button>
       </section>

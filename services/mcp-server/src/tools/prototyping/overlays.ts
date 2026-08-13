@@ -170,9 +170,11 @@ export const delete_overlay: McpTool<OverlayDeleteInput, { deleted: boolean }> =
     const v = validateOverlayDelete(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'delete_overlay', v.value, () =>
-      callPrototypeRuntime(ctx, 'DELETE', `/decks/${v.value.deckId}/overlays/${v.value.overlayId}`).then(
-        () => ({ deleted: true }),
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'DELETE',
+        `/decks/${v.value.deckId}/overlays/${v.value.overlayId}`,
+      ).then(() => ({ deleted: true })),
     );
   },
 };
@@ -188,11 +190,16 @@ export const list_overlays: McpTool<OverlayListInput, readonly Overlay[]> = {
     const v = validateOverlayList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_overlays', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/overlays`).then(
-        (r) => (r as Overlay[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/overlays`).then((r) =>
+        (r as Overlay[]).slice(),
       ),
     );
   },
 };
 
-export const overlayTools = [create_overlay, update_overlay, delete_overlay, list_overlays] as const;
+export const overlayTools = [
+  create_overlay,
+  update_overlay,
+  delete_overlay,
+  list_overlays,
+] as const;

@@ -82,15 +82,20 @@ export class CadWorkerSimulator {
     // Pre-pull a failure decision so we don't depend on the wrong state.
     const willFail = Math.random() < this.getFailureRate();
     if (willFail) {
-      await this.advance(jobId, 'failed', this.getResultUrlPrefix(), signal, 'simulated conversion failure');
+      await this.advance(
+        jobId,
+        'failed',
+        this.getResultUrlPrefix(),
+        signal,
+        'simulated conversion failure',
+      );
       return;
     }
 
     for (const stage of stages) {
       const ok = await this.delay(this.getStageDelayMs(), signal);
       if (!ok) return;
-      const resultUrl =
-        stage === 'done' ? `${this.getResultUrlPrefix()}${jobId}.glb` : undefined;
+      const resultUrl = stage === 'done' ? `${this.getResultUrlPrefix()}${jobId}.glb` : undefined;
       await this.advance(jobId, stage, resultUrl, signal);
     }
   }
@@ -103,7 +108,12 @@ export class CadWorkerSimulator {
     errorMessage?: string,
   ): Promise<void> {
     if (signal.aborted) return;
-    const patch: { progress: CadProgress; resultUrl?: string | null; finishedAt?: string; errorMessage?: string | null } = {
+    const patch: {
+      progress: CadProgress;
+      resultUrl?: string | null;
+      finishedAt?: string;
+      errorMessage?: string | null;
+    } = {
       progress,
     };
     if (progress === 'done') {

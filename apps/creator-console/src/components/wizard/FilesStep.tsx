@@ -73,10 +73,7 @@ export function FilesStep({ assets, onAdd, onRemove }: FilesStepProps) {
         const asset = getAssetForKind(slot.kind);
         const progressPct = asset?.progress_pct ?? 0;
         return (
-          <div
-            key={slot.kind}
-            className="rounded-lg border border-slate-200 bg-slate-50 p-4"
-          >
+          <div key={slot.kind} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h3 className="text-sm font-medium text-slate-900">{t(slot.labelKey)}</h3>

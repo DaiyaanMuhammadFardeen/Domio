@@ -43,9 +43,7 @@ export async function getCuratedMarketplaceListings(params?: {
   if (params?.limit != null) qs.set('limit', String(params.limit));
   if (params?.offset != null) qs.set('offset', String(params.offset));
   const query = qs.toString();
-  return apiFetch<CuratedListResponse>(
-    `/v1/marketplace/curated${query ? `?${query}` : ''}`,
-  );
+  return apiFetch<CuratedListResponse>(`/v1/marketplace/curated${query ? `?${query}` : ''}`);
 }
 
 export async function getMarketplaceListingChangelog(

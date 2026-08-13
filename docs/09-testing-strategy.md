@@ -1,7 +1,7 @@
 # 09 — Testing Strategy
 
 > **Purpose:** define the test pyramid, ownership, suites, determinism, fixtures, Definition of Done, and release gates for the full platform.
-> **Posture:** the canvas, CRDT, MCP, AI, live data, and audience scale each have *domain-specific* test programs layered on top of the pyramid.
+> **Posture:** the canvas, CRDT, MCP, AI, live data, and audience scale each have _domain-specific_ test programs layered on top of the pyramid.
 > **Cross-references:** `02` (acceptance criteria, NFRs), `04` (architecture verification), `07` (security tests), `08` (load/chaos in staging), `10` (release gates).
 
 ---
@@ -21,23 +21,23 @@ flowchart TB
     DR[Disaster recovery — quarterly]
 ```
 
-| Layer | Owner | Runs in | Purpose | Cadence |
-|---|---|---|---|---|
-| Unit | feature team | PR + main | correctness, edge cases | every PR |
-| Property | platform | PR | invariants, schema, CRDT | every PR |
-| Fuzz | security | weekly | injection, malformed input | weekly + on PR |
-| Contract | module owner | PR + main | cross-module API/event shape | every PR |
-| Integration | platform | PR + main | service + DB behavior | every PR |
-| E2E | platform | main + nightly | full user journeys | every main |
-| Visual regression | platform | main + nightly | canvas + screens | every main |
-| Accessibility | a11y squad | nightly + pre-release | axe + manual | nightly + manual |
-| Localization | i18n squad | nightly | pseudo + key extraction | nightly |
-| Performance | SRE + platform | nightly + weekly | NFR-PERF | nightly |
-| Load | SRE | weekly | SCALE | weekly |
-| Chaos | SRE | monthly | resilience | monthly |
-| Security (SAST/DAST/SCA/pen) | security | PR + quarterly | OWASP Top 10, controls | PR + quarterly |
-| DR drills | SRE | quarterly | RTO/RPO | quarterly |
-| AI eval harness | AI team | every model change | quality + prompt-injection | on change |
+| Layer                        | Owner          | Runs in               | Purpose                      | Cadence          |
+| ---------------------------- | -------------- | --------------------- | ---------------------------- | ---------------- |
+| Unit                         | feature team   | PR + main             | correctness, edge cases      | every PR         |
+| Property                     | platform       | PR                    | invariants, schema, CRDT     | every PR         |
+| Fuzz                         | security       | weekly                | injection, malformed input   | weekly + on PR   |
+| Contract                     | module owner   | PR + main             | cross-module API/event shape | every PR         |
+| Integration                  | platform       | PR + main             | service + DB behavior        | every PR         |
+| E2E                          | platform       | main + nightly        | full user journeys           | every main       |
+| Visual regression            | platform       | main + nightly        | canvas + screens             | every main       |
+| Accessibility                | a11y squad     | nightly + pre-release | axe + manual                 | nightly + manual |
+| Localization                 | i18n squad     | nightly               | pseudo + key extraction      | nightly          |
+| Performance                  | SRE + platform | nightly + weekly      | NFR-PERF                     | nightly          |
+| Load                         | SRE            | weekly                | SCALE                        | weekly           |
+| Chaos                        | SRE            | monthly               | resilience                   | monthly          |
+| Security (SAST/DAST/SCA/pen) | security       | PR + quarterly        | OWASP Top 10, controls       | PR + quarterly   |
+| DR drills                    | SRE            | quarterly             | RTO/RPO                      | quarterly        |
+| AI eval harness              | AI team        | every model change    | quality + prompt-injection   | on change        |
 
 ---
 
@@ -250,16 +250,16 @@ A feature is "done" only when:
 
 Mapping back to `02` §2.8:
 
-| Gate | Verified by | Tooling |
-|---|---|---|
-| Correctness | all FRs | Vitest, Playwright |
-| Performance | NFRs | k6, custom |
-| Accessibility | axe + manual | axe, NVDA, VoiceOver |
-| Security | OWASP + controls | SAST/DAST/SCA, pen test, threat model |
-| Privacy | DSR + residency | policy tests, manual |
-| Localization | pseudo + native | i18n test, native QA |
-| Reliability | chaos + load | chaos tooling, k6 |
-| Documentation | ADRs + API + runbooks | doc CI lint |
+| Gate          | Verified by           | Tooling                               |
+| ------------- | --------------------- | ------------------------------------- |
+| Correctness   | all FRs               | Vitest, Playwright                    |
+| Performance   | NFRs                  | k6, custom                            |
+| Accessibility | axe + manual          | axe, NVDA, VoiceOver                  |
+| Security      | OWASP + controls      | SAST/DAST/SCA, pen test, threat model |
+| Privacy       | DSR + residency       | policy tests, manual                  |
+| Localization  | pseudo + native       | i18n test, native QA                  |
+| Reliability   | chaos + load          | chaos tooling, k6                     |
+| Documentation | ADRs + API + runbooks | doc CI lint                           |
 
 A milestone may not ship unless all eight pass.
 
@@ -267,48 +267,48 @@ A milestone may not ship unless all eight pass.
 
 ## 9.22 Tooling Summary
 
-| Concern | Tool |
-|---|---|
-| Unit (TS) | Vitest |
-| Unit (Go) | go test |
-| Property | fast-check, gopter |
-| Fuzz | AFL, JS fuzzer |
-| Contract | Pact + OpenAPI + AsyncAPI |
-| Integration | testcontainers + Vitest |
-| E2E | Playwright |
-| Visual | Playwright snapshots, PSNR diff |
-| A11y | axe-core, NVDA, VoiceOver, JAWS |
-| Perf | k6, custom scripts |
-| Load | k6, Locust |
-| Chaos | Chaos Toolkit, Gremlin |
-| SAST | CodeQL, Semgrep |
-| DAST | OWASP ZAP |
-| SCA | Snyk, Trivy |
-| Secret scan | gitleaks |
-| Synthetic RUM | Checkly or custom |
-| Tracing | OpenTelemetry, Tempo |
+| Concern       | Tool                            |
+| ------------- | ------------------------------- |
+| Unit (TS)     | Vitest                          |
+| Unit (Go)     | go test                         |
+| Property      | fast-check, gopter              |
+| Fuzz          | AFL, JS fuzzer                  |
+| Contract      | Pact + OpenAPI + AsyncAPI       |
+| Integration   | testcontainers + Vitest         |
+| E2E           | Playwright                      |
+| Visual        | Playwright snapshots, PSNR diff |
+| A11y          | axe-core, NVDA, VoiceOver, JAWS |
+| Perf          | k6, custom scripts              |
+| Load          | k6, Locust                      |
+| Chaos         | Chaos Toolkit, Gremlin          |
+| SAST          | CodeQL, Semgrep                 |
+| DAST          | OWASP ZAP                       |
+| SCA           | Snyk, Trivy                     |
+| Secret scan   | gitleaks                        |
+| Synthetic RUM | Checkly or custom               |
+| Tracing       | OpenTelemetry, Tempo            |
 
 ---
 
 ## 9.23 Decisions Log
 
-| ID | Decision | Rationale | Alternative |
-|---|---|---|---|
-| D-TEST-01 | Vitest + Playwright + axe baseline | Modern, fast, integrated | Jest — slower; rejected for new project |
-| D-TEST-02 | Property tests on CRDT and schema | Catches invariants beyond examples | Example-only — risk of edge bugs |
-| D-TEST-03 | AI eval harness is a product artifact | Treats AI as a release-gated surface | Ad-hoc manual — rejected |
-| D-TEST-04 | 10k audience load test weekly | Continuous validation | Quarterly — too late to catch regressions |
-| D-TEST-05 | Visual regression at canvas frame level | Catches subtle renderer bugs | DOM-only — misses draw bugs |
+| ID        | Decision                                | Rationale                            | Alternative                               |
+| --------- | --------------------------------------- | ------------------------------------ | ----------------------------------------- |
+| D-TEST-01 | Vitest + Playwright + axe baseline      | Modern, fast, integrated             | Jest — slower; rejected for new project   |
+| D-TEST-02 | Property tests on CRDT and schema       | Catches invariants beyond examples   | Example-only — risk of edge bugs          |
+| D-TEST-03 | AI eval harness is a product artifact   | Treats AI as a release-gated surface | Ad-hoc manual — rejected                  |
+| D-TEST-04 | 10k audience load test weekly           | Continuous validation                | Quarterly — too late to catch regressions |
+| D-TEST-05 | Visual regression at canvas frame level | Catches subtle renderer bugs         | DOM-only — misses draw bugs               |
 
 ---
 
 ## 9.24 Open Decisions
 
-| ID | Decision | Owner |
-|---|---|---|
-| OD-TEST-01 | Cloud vs self-hosted synthetic monitoring provider. | SRE |
-| OD-TEST-02 | Whether to gate release on 100% of axe issues or just P1 surfaces. | A11y lead |
-| OD-TEST-03 | Property test depth (fast-check perms × 1000 vs 100). | Platform |
+| ID         | Decision                                                             | Owner      |
+| ---------- | -------------------------------------------------------------------- | ---------- |
+| OD-TEST-01 | Cloud vs self-hosted synthetic monitoring provider.                  | SRE        |
+| OD-TEST-02 | Whether to gate release on 100% of axe issues or just P1 surfaces.   | A11y lead  |
+| OD-TEST-03 | Property test depth (fast-check perms × 1000 vs 100).                | Platform   |
 | OD-TEST-04 | Whether AI eval datasets are public to accelerate community testing. | AI product |
 
 ---

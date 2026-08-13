@@ -53,9 +53,7 @@ describe('analytics-service / getTopListings', () => {
   it('sorts the listings by revenue descending', async () => {
     const listings = await getTopListings('creator-1', '30d');
     for (let i = 1; i < listings.length; i++) {
-      expect(listings[i - 1]!.revenue_cents).toBeGreaterThanOrEqual(
-        listings[i]!.revenue_cents,
-      );
+      expect(listings[i - 1]!.revenue_cents).toBeGreaterThanOrEqual(listings[i]!.revenue_cents);
     }
   });
 
@@ -89,9 +87,7 @@ describe('analytics-service / getGeoDistribution', () => {
   it('sorts countries by revenue descending', async () => {
     const geos = await getGeoDistribution('creator-1', '30d');
     for (let i = 1; i < geos.length; i++) {
-      expect(geos[i - 1]!.revenue_cents).toBeGreaterThanOrEqual(
-        geos[i]!.revenue_cents,
-      );
+      expect(geos[i - 1]!.revenue_cents).toBeGreaterThanOrEqual(geos[i]!.revenue_cents);
     }
   });
 });

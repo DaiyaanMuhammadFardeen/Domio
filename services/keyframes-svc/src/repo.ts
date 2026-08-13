@@ -14,7 +14,10 @@ export interface CameraKeyframeRepository {
   insert(record: CameraKeyframe): Promise<void>;
   findById(id: string): Promise<CameraKeyframe | null>;
   listBySlide(slideId: string, sceneId?: string): Promise<CameraKeyframe[]>;
-  update(id: string, patch: Partial<Omit<CameraKeyframe, 'id' | 'createdAt'>>): Promise<CameraKeyframe>;
+  update(
+    id: string,
+    patch: Partial<Omit<CameraKeyframe, 'id' | 'createdAt'>>,
+  ): Promise<CameraKeyframe>;
   delete(id: string): Promise<boolean>;
 }
 
@@ -64,15 +67,18 @@ export class InMemoryCameraKeyframeRepository implements CameraKeyframeRepositor
     if (!existing) throw new KeyframeNotFoundError(id);
 
     // Merge nested objects properly
-    const position = patch.position !== undefined
-      ? { ...existing.position, ...patch.position } as CameraKeyframe['position']
-      : existing.position;
-    const target = patch.target !== undefined
-      ? { ...existing.target, ...patch.target } as CameraKeyframe['target']
-      : existing.target;
-    const easing = patch.easing !== undefined
-      ? { ...existing.easing, ...patch.easing } as CameraKeyframe['easing']
-      : existing.easing;
+    const position =
+      patch.position !== undefined
+        ? ({ ...existing.position, ...patch.position } as CameraKeyframe['position'])
+        : existing.position;
+    const target =
+      patch.target !== undefined
+        ? ({ ...existing.target, ...patch.target } as CameraKeyframe['target'])
+        : existing.target;
+    const easing =
+      patch.easing !== undefined
+        ? ({ ...existing.easing, ...patch.easing } as CameraKeyframe['easing'])
+        : existing.easing;
 
     const updated: CameraKeyframe = {
       ...existing,

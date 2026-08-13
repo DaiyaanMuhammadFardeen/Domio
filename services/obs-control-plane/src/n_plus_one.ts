@@ -62,7 +62,11 @@ export interface NPlusOneFinding {
 export interface NPlusOneReport {
   readonly spansAnalysed: number;
   readonly findings: readonly NPlusOneFinding[];
-  readonly highFanoutParents: ReadonlyArray<{ parentSpanId: string; parentName: string; childCount: number }>;
+  readonly highFanoutParents: ReadonlyArray<{
+    parentSpanId: string;
+    parentName: string;
+    childCount: number;
+  }>;
   readonly pass: boolean;
 }
 
@@ -217,7 +221,9 @@ export function summariseNPlusOne(reports: readonly NPlusOneReport[]): {
  * Top-N tier-1 read endpoints to audit. Centralised so the audit
  * script and tests stay in sync.
  */
-export function tier1ReadEndpoints(slos: readonly SloEntry[]): readonly { service: string; operation: string }[] {
+export function tier1ReadEndpoints(
+  slos: readonly SloEntry[],
+): readonly { service: string; operation: string }[] {
   const seen = new Set<string>();
   const out: { service: string; operation: string }[] = [];
   for (const slo of slos) {

@@ -9,11 +9,7 @@
  */
 
 import { newToken } from '@domio/common';
-import {
-  Op,
-  OpType,
-  HLC,
-} from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
+import { Op, OpType, HLC } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
 import type { OpAck } from '@domio/api-client/gen/domio/realtime/v1/realtime_pb.js';
 
 // ----- Pending op entry -----
@@ -81,8 +77,14 @@ async function persistPendingOps(ops: PendingOp[]): Promise<void> {
       store.put(record);
     }
     await new Promise<void>((resolve, reject) => {
-      tx.oncomplete = () => { db.close(); resolve(); };
-      tx.onerror = () => { db.close(); reject(tx.error); };
+      tx.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
     });
   } catch {
     // IndexedDB unavailable (test env) — skip persistence
@@ -99,7 +101,10 @@ async function loadPendingOps(): Promise<PendingOp[]> {
       req.onsuccess = () => resolve(req.result as Array<Record<string, unknown>>);
       req.onerror = () => reject(req.error);
       tx.oncomplete = () => db.close();
-      tx.onerror = () => { db.close(); reject(tx.error); };
+      tx.onerror = () => {
+        db.close();
+        reject(tx.error);
+      };
     });
     return all.map((r) => ({
       opId: r['opId'] as string,
@@ -108,7 +113,9 @@ async function loadPendingOps(): Promise<PendingOp[]> {
       slideId: r['slideId'] as string,
       opBytes: new Uint8Array(r['opBytes'] as number[]),
       hlc: new HLC(r['hlc'] as { physical: number; logical: number }),
-      parentHlc: r['parentHlc'] ? new HLC(r['parentHlc'] as { physical: number; logical: number }) : null,
+      parentHlc: r['parentHlc']
+        ? new HLC(r['parentHlc'] as { physical: number; logical: number })
+        : null,
       clientClock: r['clientClock'] as number,
       opType: r['opType'] as OpType,
     }));
@@ -152,11 +159,7 @@ export class LocalQueue {
    * Enqueue a local Yjs update as a pending Op.
    * Returns the Op that should be sent to the gateway.
    */
-  enqueue(params: {
-    slideId: string;
-    opBytes: Uint8Array;
-    authorId: string;
-  }): Op {
+  enqueue(params: { slideId: string; opBytes: Uint8Array; authorId: string }): Op {
     this.clientClock++;
 
     const hlc = new HLC({

@@ -46,8 +46,8 @@ storage:
 # only.
 proxy:
   remoteurl: ${DOCKER_UPSTREAM}
-  username: ""
-  password: ""
+  username: ''
+  password: ''
 
 http:
   addr: :5000
@@ -60,7 +60,6 @@ health:
     enabled: true
     interval: 10s
     threshold: 3
-
 # We do NOT enable deletions here. Stale blobs age out via the upstream's
 # max-age headers; if we need to reclaim disk in an emergency we run the
 # garbage collector manually in maintenance mode.

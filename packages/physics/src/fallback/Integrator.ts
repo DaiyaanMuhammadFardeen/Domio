@@ -16,7 +16,13 @@
  *    real-time timers or setTimeout.
  */
 
-import type { ColliderDesc, PhysicsWorldConfig, RigidBodyHandle, RigidBodyType, Vec3 } from '../types.js';
+import type {
+  ColliderDesc,
+  PhysicsWorldConfig,
+  RigidBodyHandle,
+  RigidBodyType,
+  Vec3,
+} from '../types.js';
 
 /** Internal rigid body representation for the fallback integrator. */
 interface FallbackBody {
@@ -54,7 +60,9 @@ export class Integrator {
   /** Internal body storage. */
   private bodies: FallbackBody[] = [];
 
-  constructor(config: PhysicsWorldConfig & { groundY?: number; restitution?: number; friction?: number } = {}) {
+  constructor(
+    config: PhysicsWorldConfig & { groundY?: number; restitution?: number; friction?: number } = {},
+  ) {
     this.gravity = config.gravity ?? { x: 0, y: -9.81, z: 0 };
     this.fixedTimeStep = config.fixedTimeStep ?? 1 / 60;
     this.groundY = config.groundY ?? 0;

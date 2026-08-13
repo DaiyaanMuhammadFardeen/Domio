@@ -20,10 +20,7 @@ export interface BreadcrumbsShellProps {
   readonly children: ReactNode;
 }
 
-export function BreadcrumbsShell({
-  currentId,
-  children,
-}: BreadcrumbsShellProps): JSX.Element {
+export function BreadcrumbsShell({ currentId, children }: BreadcrumbsShellProps): JSX.Element {
   const chain = landingBreadcrumbs(currentId);
   // Skip the trail when the page IS the home page (chain = [Home]).
   const visible = chain.length > 1 ? chain : [];

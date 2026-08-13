@@ -7,8 +7,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { CalendarService } from './service.js';
 import { InMemoryCalendarStore } from './store/mem_store.js';
-import { FeatureDisabledError, DuplicateCalendarLinkError, CalendarLinkNotFoundError, CalendarValidationError } from './types.js';
-import type { CalendarLinkInput, CalendarEventEmitter, SyncProvider, CalendarEventState } from './types.js';
+import {
+  FeatureDisabledError,
+  DuplicateCalendarLinkError,
+  CalendarLinkNotFoundError,
+  CalendarValidationError,
+} from './types.js';
+import type {
+  CalendarLinkInput,
+  CalendarEventEmitter,
+  SyncProvider,
+  CalendarEventState,
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -26,7 +36,9 @@ function makeInput(overrides?: Partial<CalendarLinkInput>): CalendarLinkInput {
   };
 }
 
-function createEmitter(): CalendarEventEmitter & { events: Array<{ subject: string; payload: Record<string, unknown> }> } {
+function createEmitter(): CalendarEventEmitter & {
+  events: Array<{ subject: string; payload: Record<string, unknown> }>;
+} {
   const events: Array<{ subject: string; payload: Record<string, unknown> }> = [];
   return {
     events,
@@ -36,13 +48,23 @@ function createEmitter(): CalendarEventEmitter & { events: Array<{ subject: stri
   };
 }
 
-function createSyncProvider(overrides?: Partial<SyncProvider>): SyncProvider & { pullResult: CalendarEventState | null } {
+function createSyncProvider(
+  overrides?: Partial<SyncProvider>,
+): SyncProvider & { pullResult: CalendarEventState | null } {
   const state = { pullResult: null as CalendarEventState | null };
   return {
-    get pullResult() { return state.pullResult; },
-    set pullResult(v: CalendarEventState | null) { state.pullResult = v; },
-    async pushEvent() { /* noop */ },
-    async pullEvent() { return state.pullResult; },
+    get pullResult() {
+      return state.pullResult;
+    },
+    set pullResult(v: CalendarEventState | null) {
+      state.pullResult = v;
+    },
+    async pushEvent() {
+      /* noop */
+    },
+    async pullEvent() {
+      return state.pullResult;
+    },
     ...overrides,
   };
 }
@@ -96,13 +118,15 @@ describe('CalendarService', () => {
 
     it('throws DuplicateCalendarLinkError for duplicate', async () => {
       await service.createLink(makeInput(), 'user-001', 'ws-001');
-      await expect(service.createLink(makeInput(), 'user-001', 'ws-001'))
-        .rejects.toThrow(DuplicateCalendarLinkError);
+      await expect(service.createLink(makeInput(), 'user-001', 'ws-001')).rejects.toThrow(
+        DuplicateCalendarLinkError,
+      );
     });
 
     it('throws CalendarValidationError for invalid input', async () => {
-      await expect(service.createLink(makeInput({ event_id: '' }), 'user-001', 'ws-001'))
-        .rejects.toThrow(CalendarValidationError);
+      await expect(
+        service.createLink(makeInput({ event_id: '' }), 'user-001', 'ws-001'),
+      ).rejects.toThrow(CalendarValidationError);
     });
 
     it('creates recurring link when recurrence_id provided', async () => {
@@ -120,8 +144,9 @@ describe('CalendarService', () => {
         is_recurring: true,
         recurrence_id: null,
       });
-      await expect(service.createLink(input, 'user-001', 'ws-001'))
-        .rejects.toThrow(CalendarValidationError);
+      await expect(service.createLink(input, 'user-001', 'ws-001')).rejects.toThrow(
+        CalendarValidationError,
+      );
     });
   });
 
@@ -156,8 +181,7 @@ describe('CalendarService', () => {
     });
 
     it('throws CalendarLinkNotFoundError for nonexistent link', async () => {
-      await expect(service.deleteLink('nonexistent'))
-        .rejects.toThrow(CalendarLinkNotFoundError);
+      await expect(service.deleteLink('nonexistent')).rejects.toThrow(CalendarLinkNotFoundError);
     });
   });
 
@@ -200,8 +224,7 @@ describe('CalendarService', () => {
     });
 
     it('throws CalendarLinkNotFoundError for nonexistent link', async () => {
-      await expect(service.syncLink('nonexistent'))
-        .rejects.toThrow(CalendarLinkNotFoundError);
+      await expect(service.syncLink('nonexistent')).rejects.toThrow(CalendarLinkNotFoundError);
     });
   });
 
@@ -293,8 +316,9 @@ describe('CalendarService', () => {
     it('throws FeatureDisabledError when feature is disabled', async () => {
       process.env['FEATURE_COLLAB_INTEGRATIONS_CALENDAR_DISABLED'] = 'true';
       try {
-        await expect(service.createLink(makeInput(), 'user-001', 'ws-001'))
-          .rejects.toThrow(FeatureDisabledError);
+        await expect(service.createLink(makeInput(), 'user-001', 'ws-001')).rejects.toThrow(
+          FeatureDisabledError,
+        );
       } finally {
         delete process.env['FEATURE_COLLAB_INTEGRATIONS_CALENDAR_DISABLED'];
       }

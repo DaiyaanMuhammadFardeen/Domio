@@ -198,9 +198,12 @@ export const create_hotspot: McpTool<HotspotCreateInput, Hotspot> = {
       throw new MCPError('INVALID_INPUT', 'invalid input', validated.issues);
     }
     return withAuditTrail(ctx, 'create_hotspot', validated.value, () =>
-      callPrototypeRuntime(ctx, 'POST', `/decks/${validated.value.deckId}/hotspots`, validated.value).then(
-        (r) => r as Hotspot,
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'POST',
+        `/decks/${validated.value.deckId}/hotspots`,
+        validated.value,
+      ).then((r) => r as Hotspot),
     );
   },
 };
@@ -270,11 +273,16 @@ export const list_hotspots: McpTool<HotspotListInput, readonly Hotspot[]> = {
       ? `?slideId=${encodeURIComponent(validated.value.slideId)}`
       : '';
     return withAuditTrail(ctx, 'list_hotspots', validated.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${validated.value.deckId}/hotspots${qs}`).then(
-        (r) => (r as Hotspot[]).slice(),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${validated.value.deckId}/hotspots${qs}`).then((r) =>
+        (r as Hotspot[]).slice(),
       ),
     );
   },
 };
 
-export const hotspotTools = [create_hotspot, update_hotspot, delete_hotspot, list_hotspots] as const;
+export const hotspotTools = [
+  create_hotspot,
+  update_hotspot,
+  delete_hotspot,
+  list_hotspots,
+] as const;

@@ -51,8 +51,7 @@ export function hashQuery(query: string): string {
 
 const WAREHOUSE_URL = process.env['WAREHOUSE_URL'] ?? 'http://localhost:8088';
 const LIVE_URL = process.env['LIVE_ANALYTICS_URL'] ?? 'http://localhost:8094';
-const AB_MEASUREMENT_URL =
-  process.env['AB_MEASUREMENT_URL'] ?? 'http://localhost:8091';
+const AB_MEASUREMENT_URL = process.env['AB_MEASUREMENT_URL'] ?? 'http://localhost:8091';
 
 async function callWarehouse(path: string, params: Record<string, string>): Promise<unknown> {
   const url = new URL(path, WAREHOUSE_URL);
@@ -119,7 +118,9 @@ const localResolvers = {
     async liveSession(_: unknown, args: Record<string, unknown>) {
       const sessionId = String(args['sessionId'] ?? '');
       if (!sessionId) throw new Error('sessionId is required');
-      const raw = (await callLive(`/v1/live/pulse?session_id=${encodeURIComponent(sessionId)}`)) as {
+      const raw = (await callLive(
+        `/v1/live/pulse?session_id=${encodeURIComponent(sessionId)}`,
+      )) as {
         concurrent_viewers?: number;
         current_slide?: string | null;
         recent_reactions?: string[];
@@ -162,8 +163,20 @@ const localResolvers = {
         workspaceId,
         status: 'running',
         variants: [
-          { variantId: 'a', variantKey: 'control', exposures: a.exposures, conversions: a.conversions, rate: a.rate },
-          { variantId: 'b', variantKey: 'treatment', exposures: b.exposures, conversions: b.conversions, rate: b.rate },
+          {
+            variantId: 'a',
+            variantKey: 'control',
+            exposures: a.exposures,
+            conversions: a.conversions,
+            rate: a.rate,
+          },
+          {
+            variantId: 'b',
+            variantKey: 'treatment',
+            exposures: b.exposures,
+            conversions: b.conversions,
+            rate: b.rate,
+          },
         ],
         lift: raw.lift ?? 0,
         pValue: raw.p_value ?? 1,
@@ -191,7 +204,9 @@ const localResolvers = {
         from_ms: String(args['fromMs'] ?? 0),
         to_ms: String(args['toMs'] ?? 0),
       };
-      const json = (await callWarehouse(`/v1/decks/${params['deck_id']}/slides`, params)) as { rows: unknown[] };
+      const json = (await callWarehouse(`/v1/decks/${params['deck_id']}/slides`, params)) as {
+        rows: unknown[];
+      };
       return json.rows;
     },
 
@@ -201,9 +216,13 @@ const localResolvers = {
         deck_id: String(args['deckId'] ?? ''),
         from_ms: String(args['fromMs'] ?? 0),
         to_ms: String(args['toMs'] ?? 0),
-        steps: Array.isArray(args['steps']) ? (args['steps'] as unknown[]).map(String).join(',') : '',
+        steps: Array.isArray(args['steps'])
+          ? (args['steps'] as unknown[]).map(String).join(',')
+          : '',
       };
-      const json = (await callWarehouse(`/v1/decks/${params['deck_id']}/funnel`, params)) as { rows: unknown[] };
+      const json = (await callWarehouse(`/v1/decks/${params['deck_id']}/funnel`, params)) as {
+        rows: unknown[];
+      };
       return json.rows;
     },
 
@@ -216,7 +235,10 @@ const localResolvers = {
       };
       const deckId = params['deck_id'] ?? '';
       const slideId = String(args['slideId'] ?? '');
-      const json = (await callWarehouse(`/v1/decks/${deckId}/slides/${slideId}/heatmap`, params)) as {
+      const json = (await callWarehouse(
+        `/v1/decks/${deckId}/slides/${slideId}/heatmap`,
+        params,
+      )) as {
         tile: unknown;
       };
       return json.tile;
@@ -241,9 +263,11 @@ export function buildSchema() {
 function usePersistedQueries(getQuery: (hash: string) => string | undefined): Plugin {
   return {
     onParams({ params, setParams }) {
-      const ext = (params as unknown as {
-        extensions?: { persistedQuery?: { sha256Hash?: string } };
-      }).extensions;
+      const ext = (
+        params as unknown as {
+          extensions?: { persistedQuery?: { sha256Hash?: string } };
+        }
+      ).extensions;
       const hash = ext?.persistedQuery?.sha256Hash;
       if (hash && !(params as unknown as { query?: string }).query) {
         const stored = getQuery(hash);

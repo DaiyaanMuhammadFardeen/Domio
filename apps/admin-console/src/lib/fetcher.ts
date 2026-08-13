@@ -27,19 +27,13 @@ function makeError(message: string, status: number, url: string): FetcherError {
 
 const API_BASE = process.env['NEXT_PUBLIC_API_BASE'] ?? 'http://localhost:8080';
 
-export async function fetcher<T>(
-  path: string,
-  opts: FetcherOptions = {},
-): Promise<T> {
+export async function fetcher<T>(path: string, opts: FetcherOptions = {}): Promise<T> {
   const url = new URL(path, API_BASE);
   const headers: Record<string, string> = {
     'content-type': 'application/json',
     ...(opts.headers ?? {}),
   };
-  const workspaceId =
-    opts.workspaceId ??
-    process.env['NEXT_PUBLIC_WORKSPACE_ID'] ??
-    'ws-demo';
+  const workspaceId = opts.workspaceId ?? process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
   if (workspaceId) headers['x-workspace-id'] = workspaceId;
 
   const init: RequestInit = {

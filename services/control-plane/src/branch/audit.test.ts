@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  AuditRecorderImpl,
-  InMemoryAuditSink,
-} from './audit.js';
+import { AuditRecorderImpl, InMemoryAuditSink } from './audit.js';
 import { asULID } from '@domio/schema';
 
 describe('AuditRecorderImpl', () => {

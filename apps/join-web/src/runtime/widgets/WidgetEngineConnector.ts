@@ -122,9 +122,7 @@ export interface WidgetEngineConnectorOptions {
   readonly subscribe: (cb: (frame: AudienceEnvelope) => void) => () => void;
 }
 
-export function connectWidgetEngine(
-  opts: WidgetEngineConnectorOptions,
-): WidgetEngineConnector {
+export function connectWidgetEngine(opts: WidgetEngineConnectorOptions): WidgetEngineConnector {
   const unsubscribe = opts.subscribe((frame) => {
     const widgetId = (frame as AudienceEnvelope & { widget_id?: string }).widget_id;
     if (!widgetId) return;

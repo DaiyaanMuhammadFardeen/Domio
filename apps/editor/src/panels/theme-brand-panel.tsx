@@ -85,11 +85,7 @@ export function ThemeBrandPanel(props: ThemeBrandPanelProps): ReactElement {
         </p>
       </header>
 
-      <ThemeSection
-        themes={themes}
-        activeThemeId={activeThemeId}
-        onThemeChange={onThemeChange}
-      />
+      <ThemeSection themes={themes} activeThemeId={activeThemeId} onThemeChange={onThemeChange} />
 
       <SchemeToggle colorScheme={colorScheme} onSchemeToggle={onSchemeToggle} />
 
@@ -161,10 +157,7 @@ function SchemeToggle({
           type="button"
           role="radio"
           aria-checked={colorScheme === 'light'}
-          className={cn(
-            'theme-brand-panel__scheme-btn',
-            colorScheme === 'light' && 'is-active',
-          )}
+          className={cn('theme-brand-panel__scheme-btn', colorScheme === 'light' && 'is-active')}
           onClick={() => onSchemeToggle('light')}
         >
           Light
@@ -173,10 +166,7 @@ function SchemeToggle({
           type="button"
           role="radio"
           aria-checked={colorScheme === 'dark'}
-          className={cn(
-            'theme-brand-panel__scheme-btn',
-            colorScheme === 'dark' && 'is-active',
-          )}
+          className={cn('theme-brand-panel__scheme-btn', colorScheme === 'dark' && 'is-active')}
           onClick={() => onSchemeToggle('dark')}
         >
           Dark
@@ -205,10 +195,7 @@ function BrandSection({
             type="button"
             role="radio"
             aria-checked={b.id === activeBrandKitId}
-            className={cn(
-              'theme-brand-panel__kit',
-              b.id === activeBrandKitId && 'is-active',
-            )}
+            className={cn('theme-brand-panel__kit', b.id === activeBrandKitId && 'is-active')}
             onClick={() => onBrandKitChange(b.id)}
             data-testid={`brand-kit-${b.id}`}
           >
@@ -323,12 +310,7 @@ function AuditSection({
     <section className="theme-brand-panel__audit" data-testid="audit-section">
       <header className="theme-brand-panel__audit-head">
         <h3 className="theme-brand-panel__audit-title">Accessibility</h3>
-        <span
-          className={cn(
-            'theme-brand-panel__audit-badge',
-            blockCount > 0 && 'is-block',
-          )}
-        >
+        <span className={cn('theme-brand-panel__audit-badge', blockCount > 0 && 'is-block')}>
           {blockCount} BLOCK
         </span>
       </header>

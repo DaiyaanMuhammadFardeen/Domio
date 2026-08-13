@@ -26,21 +26,46 @@ export interface Decision {
 }
 
 export interface MlPredictor {
-  predict(input: { workspace_id: string; raw_text: string }): Promise<{ decision: ModerationDecision; score: number }>;
+  predict(input: {
+    workspace_id: string;
+    raw_text: string;
+  }): Promise<{ decision: ModerationDecision; score: number }>;
 }
 
 export interface FlaggerStore {
-  record(decision: Decision & { workspace_id: string; session_id: string; subject_kind: Subject['subject_kind'] }): Promise<void>;
-  list(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<Decision & { subject_kind: Subject['subject_kind'] }>>;
+  record(
+    decision: Decision & {
+      workspace_id: string;
+      session_id: string;
+      subject_kind: Subject['subject_kind'];
+    },
+  ): Promise<void>;
+  list(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<Decision & { subject_kind: Subject['subject_kind'] }>>;
 }
 
 export class InMemoryFlaggerStore implements FlaggerStore {
-  private readonly rows: Array<Decision & { workspace_id: string; session_id: string; subject_kind: Subject['subject_kind'] }> = [];
-  async record(d: Decision & { workspace_id: string; session_id: string; subject_kind: Subject['subject_kind'] }): Promise<void> {
+  private readonly rows: Array<
+    Decision & { workspace_id: string; session_id: string; subject_kind: Subject['subject_kind'] }
+  > = [];
+  async record(
+    d: Decision & {
+      workspace_id: string;
+      session_id: string;
+      subject_kind: Subject['subject_kind'];
+    },
+  ): Promise<void> {
     this.rows.push(d);
   }
-  async list(input: { workspace_id: string; session_id: string }): Promise<ReadonlyArray<Decision & { subject_kind: Subject['subject_kind'] }>> {
-    return this.rows.filter((r) => r.workspace_id === input.workspace_id && r.session_id === input.session_id);
+  async list(input: {
+    workspace_id: string;
+    session_id: string;
+  }): Promise<ReadonlyArray<Decision & { subject_kind: Subject['subject_kind'] }>> {
+    return this.rows.filter(
+      (r) => r.workspace_id === input.workspace_id && r.session_id === input.session_id,
+    );
   }
 }
 

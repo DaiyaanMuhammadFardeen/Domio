@@ -48,13 +48,9 @@ export function PreviewTab({ draft }: PreviewTabProps) {
         </div>
         <div className="space-y-1 p-3">
           <p className="line-clamp-1 text-sm font-semibold text-slate-900">{title}</p>
-          {description && (
-            <p className="line-clamp-2 text-xs text-slate-500">{description}</p>
-          )}
+          {description && <p className="line-clamp-2 text-xs text-slate-500">{description}</p>}
           <div className="flex items-center justify-between pt-1">
-            <span className="text-sm font-medium text-slate-900">
-              {formatPrice(draft)}
-            </span>
+            <span className="text-sm font-medium text-slate-900">{formatPrice(draft)}</span>
             <span className="inline-flex items-center gap-0.5 text-xs text-amber-500">
               <Star className="h-3.5 w-3.5 fill-current" />
               <Star className="h-3.5 w-3.5 fill-current" />

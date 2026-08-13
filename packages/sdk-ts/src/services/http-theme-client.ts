@@ -28,9 +28,11 @@ export class HttpThemeServiceClient implements ThemeServiceClient {
   ) {}
 
   async listThemes(orgId: string): Promise<readonly ThemeRecord[]> {
-    const res = await this.transport.get(`${this.baseUrl}/v1/orgs/${encodeURIComponent(orgId)}/themes`);
+    const res = await this.transport.get(
+      `${this.baseUrl}/v1/orgs/${encodeURIComponent(orgId)}/themes`,
+    );
     this.throwIfError(res);
-    return ((res.body as { themes: ThemeRecord[] }).themes) ?? [];
+    return (res.body as { themes: ThemeRecord[] }).themes ?? [];
   }
 
   async getTheme(orgId: string, themeId: string): Promise<ThemeRecord> {
@@ -56,9 +58,11 @@ export class HttpThemeServiceClient implements ThemeServiceClient {
   }
 
   async listBrandKits(orgId: string): Promise<readonly BrandKitRecord[]> {
-    const res = await this.transport.get(`${this.baseUrl}/v1/orgs/${encodeURIComponent(orgId)}/brand-kits`);
+    const res = await this.transport.get(
+      `${this.baseUrl}/v1/orgs/${encodeURIComponent(orgId)}/brand-kits`,
+    );
     this.throwIfError(res);
-    return ((res.body as { brandKits: BrandKitRecord[] }).brandKits) ?? [];
+    return (res.body as { brandKits: BrandKitRecord[] }).brandKits ?? [];
   }
 
   async auditA11y(input: {
@@ -71,7 +75,7 @@ export class HttpThemeServiceClient implements ThemeServiceClient {
       { tokens: input.tokens },
     );
     this.throwIfError(res);
-    return ((res.body as { findings: A11yAuditFindingDTO[] }).findings) ?? [];
+    return (res.body as { findings: A11yAuditFindingDTO[] }).findings ?? [];
   }
 
   private throwIfError(res: { ok: boolean; status: number; body: unknown }): void {
@@ -79,8 +83,7 @@ export class HttpThemeServiceClient implements ThemeServiceClient {
     const body = res.body as { code?: string; error?: string } | null;
     const statusCode = this.codeFromStatus(res.status);
     const codeFromBody = body?.code as ThemeServiceError['code'] | undefined;
-    const code: ThemeServiceError['code'] =
-      codeFromBody ?? statusCode;
+    const code: ThemeServiceError['code'] = codeFromBody ?? statusCode;
     const message = body?.error ?? `Theme service error (status ${res.status}).`;
     const err: ThemeServiceError = { code, message };
     throw err;

@@ -52,7 +52,10 @@ export class Eyedropper {
    * Capture a sample. The pixel data is provided by the caller (the editor's
    * render loop reads the framebuffer; tests pass a deterministic fixture).
    */
-  sample(pixel: { r: number; g: number; b: number }, colorSpace: 'srgb' | 'display-p3' = 'srgb'): EyedropperSample {
+  sample(
+    pixel: { r: number; g: number; b: number },
+    colorSpace: 'srgb' | 'display-p3' = 'srgb',
+  ): EyedropperSample {
     const rgb: Rgb = { r: pixel.r, g: pixel.g, b: pixel.b };
     const tokens = this.options.tokens ?? fallbackPalette();
     const themeMatch = matchTheme(rgb, tokens);
@@ -79,9 +82,15 @@ export class Eyedropper {
 }
 
 function rgbToHexOrSpaces(rgb: Rgb): string {
-  const hex = '#' + [rgb.r, rgb.g, rgb.b]
-    .map((c) => Math.round(c * 255).toString(16).padStart(2, '0'))
-    .join('');
+  const hex =
+    '#' +
+    [rgb.r, rgb.g, rgb.b]
+      .map((c) =>
+        Math.round(c * 255)
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('');
   return hex;
 }
 

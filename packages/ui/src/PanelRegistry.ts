@@ -51,18 +51,14 @@ export function createPanelRegistry<
   return {
     add(panel) {
       if (store.has(panel.id)) {
-        throw new Error(
-          `[PanelRegistry] duplicate panel id: ${String(panel.id)}`,
-        );
+        throw new Error(`[PanelRegistry] duplicate panel id: ${String(panel.id)}`);
       }
       store.set(panel.id, panel);
     },
     addAll(panels) {
       for (const p of panels) {
         if (store.has(p.id)) {
-          throw new Error(
-            `[PanelRegistry] duplicate panel id: ${String(p.id)}`,
-          );
+          throw new Error(`[PanelRegistry] duplicate panel id: ${String(p.id)}`);
         }
         store.set(p.id, p);
       }

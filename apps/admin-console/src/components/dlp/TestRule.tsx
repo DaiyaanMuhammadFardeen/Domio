@@ -19,7 +19,10 @@ interface HighlightSegment {
  * Snippets must be sorted by start and non-overlapping for clean
  * rendering — caller (the service) guarantees this.
  */
-function highlightText(text: string, matches: ReadonlyArray<{ start: number; end: number }>): HighlightSegment[] {
+function highlightText(
+  text: string,
+  matches: ReadonlyArray<{ start: number; end: number }>,
+): HighlightSegment[] {
   if (matches.length === 0) return [{ text, highlight: false }];
   const out: HighlightSegment[] = [];
   let cursor = 0;
@@ -84,9 +87,7 @@ export function TestRule({ rule, onTest }: TestRuleProps) {
       className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
     >
       <div className="mb-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-          Test rule
-        </h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Test rule</h3>
         <p className="mt-1 text-xs text-slate-500">
           Pattern:{' '}
           <code className="rounded bg-slate-100 px-1 py-0.5 text-xs text-slate-700">
@@ -141,14 +142,10 @@ export function TestRule({ rule, onTest }: TestRuleProps) {
             <span
               className={clsx(
                 'inline-flex items-center rounded-full px-2 py-0.5 font-semibold uppercase tracking-wide',
-                result.matched
-                  ? 'bg-rose-50 text-rose-700'
-                  : 'bg-emerald-50 text-emerald-700',
+                result.matched ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700',
               )}
             >
-              {result.matched
-                ? `Matched ${result.matches.length} occurrence(s)`
-                : 'No matches'}
+              {result.matched ? `Matched ${result.matches.length} occurrence(s)` : 'No matches'}
             </span>
             <span data-testid="test-rule-latency" className="text-slate-500">
               Took {result.latency_ms.toFixed(1)}ms

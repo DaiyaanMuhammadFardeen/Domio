@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-2",
-    "domio",
-    "word-cloud-engine"
-  ],
+  "tags": ["tier-2", "domio", "word-cloud-engine"],
   "panels": [
     {
       "id": 1,

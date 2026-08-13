@@ -69,7 +69,10 @@ describe('domio/no-raw-hex', () => {
   });
 
   it('does not flag CSS variable references', () => {
-    const msgs = lint('const x = <div style={{ background: "var(--surface-base)" }} />;', 'no-raw-hex');
+    const msgs = lint(
+      'const x = <div style={{ background: "var(--surface-base)" }} />;',
+      'no-raw-hex',
+    );
     expect(msgs).toEqual([]);
   });
 });

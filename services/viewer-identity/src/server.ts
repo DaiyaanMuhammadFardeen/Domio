@@ -18,7 +18,15 @@ export function buildApp(deps: AppDeps): Hono {
   const app = new Hono();
 
   app.onError((err, c) => {
-    return c.json({ error: { code: 'internal_error', message: err instanceof Error ? err.message : String(err) } }, 500);
+    return c.json(
+      {
+        error: {
+          code: 'internal_error',
+          message: err instanceof Error ? err.message : String(err),
+        },
+      },
+      500,
+    );
   });
 
   app.route('/', healthRoutes());

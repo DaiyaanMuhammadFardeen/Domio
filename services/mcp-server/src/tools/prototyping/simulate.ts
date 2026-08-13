@@ -81,7 +81,10 @@ function validateSweep(input: unknown): ValidationResult<SweepInput> {
   return { ok: true, value: { deckId, calculatorId, inputName, from, to, steps } };
 }
 
-export const simulate_sweep: McpTool<SweepInput, { samples: readonly Sample[]; avgLatencyMs: number }> = {
+export const simulate_sweep: McpTool<
+  SweepInput,
+  { samples: readonly Sample[]; avgLatencyMs: number }
+> = {
   name: 'simulate_sweep',
   description: 'Sweep a calculator input across a numeric range.',
   capability: 'simulate',
@@ -90,20 +93,25 @@ export const simulate_sweep: McpTool<SweepInput, { samples: readonly Sample[]; a
   handler: async (ctx, input) => {
     const v = validateSweep(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
-    return withAuditTrail(ctx, 'simulate_sweep', { ...v.value, from: v.value.from, to: v.value.to, steps: v.value.steps }, async () => {
-      const samples = await sweep(
-        ctx,
-        v.value.calculatorId,
-        v.value.inputName,
-        v.value.from,
-        v.value.to,
-        v.value.steps,
-      );
-      const avg = samples.length
-        ? samples.reduce((acc, s) => acc + s.latencyMs, 0) / samples.length
-        : 0;
-      return { samples, avgLatencyMs: avg };
-    });
+    return withAuditTrail(
+      ctx,
+      'simulate_sweep',
+      { ...v.value, from: v.value.from, to: v.value.to, steps: v.value.steps },
+      async () => {
+        const samples = await sweep(
+          ctx,
+          v.value.calculatorId,
+          v.value.inputName,
+          v.value.from,
+          v.value.to,
+          v.value.steps,
+        );
+        const avg = samples.length
+          ? samples.reduce((acc, s) => acc + s.latencyMs, 0) / samples.length
+          : 0;
+        return { samples, avgLatencyMs: avg };
+      },
+    );
   },
 };
 

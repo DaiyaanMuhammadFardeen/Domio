@@ -20,10 +20,7 @@ import {
   MeetingNotActiveError,
   FeatureDisabledError,
 } from './types.js';
-import {
-  StoreNotConfiguredError,
-  StoreNotImplementedError,
-} from './store/pg_store.js';
+import { StoreNotConfiguredError, StoreNotImplementedError } from './store/pg_store.js';
 
 // ---------------------------------------------------------------------------
 // HTTP types
@@ -75,7 +72,9 @@ function serviceUnavailable(message: string, code: string): HttpResponse {
 // ---------------------------------------------------------------------------
 
 function getActorId(req: HttpRequest): string {
-  return req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? '';
+  return (
+    req.headers['x-actor-id'] ?? (req.query as Record<string, string | undefined>).actorId ?? ''
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -126,12 +125,15 @@ export async function connectMeetingIntegrationHandler(
 ): Promise<HttpResponse> {
   try {
     const actorId = getActorId(req);
-    const integration = await ctx.service.connect({
-      workspace_id: req.body.workspace_id,
-      vendor: req.params.vendor,
-      auth: req.body.auth,
-      connected_by: actorId || req.body.connected_by,
-    }, req.body.deck_id);
+    const integration = await ctx.service.connect(
+      {
+        workspace_id: req.body.workspace_id,
+        vendor: req.params.vendor,
+        auth: req.body.auth,
+        connected_by: actorId || req.body.connected_by,
+      },
+      req.body.deck_id,
+    );
     return created({ integration });
   } catch (e) {
     return mapError(e);
@@ -152,7 +154,11 @@ export async function disconnectMeetingIntegrationHandler(
     if (!workspaceId) {
       return badRequest('workspace_id is required', 'VALIDATION_ERROR');
     }
-    const integration = await ctx.service.disconnect(workspaceId, req.params.vendor, req.body.deck_id);
+    const integration = await ctx.service.disconnect(
+      workspaceId,
+      req.params.vendor,
+      req.body.deck_id,
+    );
     return ok({ integration });
   } catch (e) {
     return mapError(e);
@@ -165,7 +171,16 @@ export async function disconnectMeetingIntegrationHandler(
 // ---------------------------------------------------------------------------
 
 export async function issueMeetingTokenHandler(
-  req: HttpRequest<{ vendor: Vendor }, { workspace_id: string; meeting_id: string; presenter_id: string; deck_id: string; meeting_end_at: string }>,
+  req: HttpRequest<
+    { vendor: Vendor },
+    {
+      workspace_id: string;
+      meeting_id: string;
+      presenter_id: string;
+      deck_id: string;
+      meeting_end_at: string;
+    }
+  >,
   ctx: MeetingHandlerContext,
 ): Promise<HttpResponse> {
   try {

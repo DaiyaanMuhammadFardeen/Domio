@@ -105,9 +105,7 @@ describe('two-way-service (join-web)', () => {
 
     it('throws BidirServiceError for an unknown slider', async () => {
       __seedBidirSliders(SLIDE, SAMPLE);
-      await expect(adjustBidirSlider(SLIDE, 'nope', 10)).rejects.toBeInstanceOf(
-        BidirServiceError,
-      );
+      await expect(adjustBidirSlider(SLIDE, 'nope', 10)).rejects.toBeInstanceOf(BidirServiceError);
     });
   });
 

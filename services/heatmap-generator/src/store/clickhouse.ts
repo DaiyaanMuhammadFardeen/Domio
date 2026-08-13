@@ -28,7 +28,12 @@ export interface HeatmapStore {
    * SummingMergeTree guarantees (after merge) one row per tile, but the
    * aggregator handles partial rows in the meantime.
    */
-  fetchDay(workspace_id: string, deck_id: string, slide_id: string, bucket: string): Promise<HeatmapRow[]>;
+  fetchDay(
+    workspace_id: string,
+    deck_id: string,
+    slide_id: string,
+    bucket: string,
+  ): Promise<HeatmapRow[]>;
   /**
    * Read rollup rows for a (deck, slide) across a date range. Returns
    * rows in bucket ASC order; the aggregator stitches them.

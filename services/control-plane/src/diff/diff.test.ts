@@ -1,19 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import {
-  asULID,
-  type DeckDocument,
-  type Element,
-  type Slide,
-  type ULID,
-} from '@domio/schema';
-import {
-  DiffService,
-  NatsVisualDiffRenderer,
-} from './index.js';
-import {
-  BranchService,
-  MAIN_BRANCH,
-} from '../branch/service.js';
+import { asULID, type DeckDocument, type Element, type Slide, type ULID } from '@domio/schema';
+import { DiffService, NatsVisualDiffRenderer } from './index.js';
+import { BranchService, MAIN_BRANCH } from '../branch/service.js';
 import { InMemoryBranchRepository } from '../branch/dal.js';
 
 const DECK_ID = asULID('01H00000000000000000000000');
@@ -58,11 +46,7 @@ function ids(): () => ULID {
   return () => asULID(`01H0000000000000000000000${n++}`);
 }
 
-async function setup(opts: {
-  sourceX: number;
-  targetX: number;
-  baseX?: number;
-}) {
+async function setup(opts: { sourceX: number; targetX: number; baseX?: number }) {
   const repo = new InMemoryBranchRepository();
   const branchSvc = new BranchService(repo, ids());
   const mainBranch = await branchSvc.create({

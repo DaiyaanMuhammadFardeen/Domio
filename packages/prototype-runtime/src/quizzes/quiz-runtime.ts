@@ -31,10 +31,7 @@ import type {
 import { validateMultipleChoice } from './question-types/multiple-choice.js';
 import { validateMultiSelect } from './question-types/multi-select.js';
 import { validateTrueFalse } from './question-types/true-false.js';
-import {
-  validateShortAnswer,
-  validateFillBlank,
-} from './question-types/short-answer.js';
+import { validateShortAnswer, validateFillBlank } from './question-types/short-answer.js';
 import { validateDragToMatch } from './question-types/drag-to-match.js';
 import { validateHotspotQuiz } from './question-types/hotspot-quiz.js';
 import { validateFlashCard } from './question-types/flash-card.js';
@@ -199,9 +196,7 @@ export class QuizRuntime {
   attempts(): readonly QuizAnswer[] {
     const state = this.state;
     if (!state) return [];
-    return Array.from(state.answers.values()).sort(
-      (a, b) => a.submittedAt - b.submittedAt,
-    );
+    return Array.from(state.answers.values()).sort((a, b) => a.submittedAt - b.submittedAt);
   }
 
   /**

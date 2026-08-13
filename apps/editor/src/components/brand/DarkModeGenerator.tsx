@@ -78,12 +78,18 @@ export function DarkModeGenerator(props: DarkModeGeneratorProps): ReactElement {
       </header>
 
       {error && (
-        <div className="dark-mode-generator__error" data-testid="dark-mode-error">{error}</div>
+        <div className="dark-mode-generator__error" data-testid="dark-mode-error">
+          {error}
+        </div>
       )}
 
       <div
         className="dark-mode-generator__preview"
-        style={{ background: bg, color: fg, borderColor: activeTheme.tokens['color.border'] ?? '#d0d7de' }}
+        style={{
+          background: bg,
+          color: fg,
+          borderColor: activeTheme.tokens['color.border'] ?? '#d0d7de',
+        }}
         data-testid="dark-mode-preview"
       >
         <p>
@@ -103,7 +109,9 @@ export function DarkModeGenerator(props: DarkModeGeneratorProps): ReactElement {
 
       {preview && (
         <div className="dark-mode-generator__generated" data-testid="dark-mode-generated">
-          <span>Generated dark theme: <code>{preview.id}</code></span>
+          <span>
+            Generated dark theme: <code>{preview.id}</code>
+          </span>
           <span className="dark-mode-generator__generated-tokens">
             {Object.entries(preview.tokens).map(([k, v]) => (
               <span key={k}>

@@ -8,11 +8,7 @@
 import type { EdgeBus, EdgeSubscribeHandle } from '@domio/edge-pubsub';
 import { decode, topicFor } from '@domio/edge-pubsub';
 import type { LifecycleEvent } from '@domio/participant-session';
-import {
-  type SessionArchive,
-  type EngagementCounts,
-  emptyEngagement,
-} from './types.js';
+import { type SessionArchive, type EngagementCounts, emptyEngagement } from './types.js';
 import { isArchiveStore, type ArchiveStore } from './store.js';
 
 export interface ArchiverOptions {
@@ -128,7 +124,12 @@ export class SessionArchiver {
   }
 
   /** For tests — increment an engagement counter. */
-  incrementEngagement(input: { workspace_id: string; session_id: string; kind: keyof EngagementCounts; by?: number }): void {
+  incrementEngagement(input: {
+    workspace_id: string;
+    session_id: string;
+    kind: keyof EngagementCounts;
+    by?: number;
+  }): void {
     const key = `${input.workspace_id}::${input.session_id}`;
     let acc = this.accumulators.get(key);
     if (!acc) {
@@ -143,7 +144,10 @@ export class SessionArchiver {
       };
       this.accumulators.set(key, acc);
     }
-    acc.engagement = { ...acc.engagement, [input.kind]: acc.engagement[input.kind] + (input.by ?? 1) };
+    acc.engagement = {
+      ...acc.engagement,
+      [input.kind]: acc.engagement[input.kind] + (input.by ?? 1),
+    };
   }
 
   /** Inspect accumulator count (for tests/diagnostics). */

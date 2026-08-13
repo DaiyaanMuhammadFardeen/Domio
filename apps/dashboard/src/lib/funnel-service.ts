@@ -99,11 +99,7 @@ export async function fetchFunnelReport(
   baseUrl: string = DEFAULT_BASE,
 ): Promise<FunnelReport | null> {
   try {
-    const json = await fetcher<FunnelReportWire>(
-      baseUrl,
-      `/v1/analytics/funnel`,
-      { workspaceId },
-    );
+    const json = await fetcher<FunnelReportWire>(baseUrl, `/v1/analytics/funnel`, { workspaceId });
     return {
       deckId: String(json.deck_id ?? deckId),
       workspaceId: String(json.workspace_id ?? workspaceId),
@@ -143,15 +139,11 @@ export async function fetchWhyHypotheses(
   baseUrl: string = DEFAULT_BASE,
 ): Promise<WhyHypothesis | null> {
   try {
-    const json = await fetcher<WhyHypothesisWire>(
-      baseUrl,
-      `/v1/analytics/funnel/why`,
-      {
-        workspaceId,
-        method: 'POST',
-        body: { deck_id: deckId, slide_id: slideId },
-      },
-    );
+    const json = await fetcher<WhyHypothesisWire>(baseUrl, `/v1/analytics/funnel/why`, {
+      workspaceId,
+      method: 'POST',
+      body: { deck_id: deckId, slide_id: slideId },
+    });
     return {
       slideId: String(json.slide_id ?? slideId),
       summary: String(json.summary ?? ''),

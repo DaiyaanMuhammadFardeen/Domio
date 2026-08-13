@@ -100,23 +100,30 @@ function matchInterval(version: string, interval: string): boolean {
 }
 
 /** Latest version matching a patch/minor policy mode. */
-export function resolvePolicyTarget(versions: string[], mode: 'latest' | 'patch' | 'minor' | 'pinned'): string | null {
+export function resolvePolicyTarget(
+  versions: string[],
+  mode: 'latest' | 'patch' | 'minor' | 'pinned',
+): string | null {
   if (mode === 'latest') return maxVersion(versions);
   const sorted = sortVersions(versions).reverse();
   const latest = sorted[0];
   if (!latest) return null;
   const lv = parseSemver(latest)!;
   if (mode === 'patch') {
-    return sorted.find((v) => {
-      const p = parseSemver(v)!;
-      return p.major === lv.major && p.minor === lv.minor;
-    }) ?? latest;
+    return (
+      sorted.find((v) => {
+        const p = parseSemver(v)!;
+        return p.major === lv.major && p.minor === lv.minor;
+      }) ?? latest
+    );
   }
   if (mode === 'minor') {
-    return sorted.find((v) => {
-      const p = parseSemver(v)!;
-      return p.major === lv.major;
-    }) ?? latest;
+    return (
+      sorted.find((v) => {
+        const p = parseSemver(v)!;
+        return p.major === lv.major;
+      }) ?? latest
+    );
   }
   return latest;
 }

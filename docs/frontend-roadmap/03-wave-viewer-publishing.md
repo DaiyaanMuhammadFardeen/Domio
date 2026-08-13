@@ -22,6 +22,7 @@
 **Features:** #155, #165, #166.
 
 **Files to create/modify:**
+
 - `apps/viewer/src/app/[deckId]/page.tsx` — replaces stub.
 - `apps/viewer/src/app/[deckId]/[slideIdx]/page.tsx` — slide-specific route.
 - `apps/viewer/src/components/ViewerShell.tsx`
@@ -30,6 +31,7 @@
 - `apps/viewer/src/lib/{deck,publish,embed,seo}-service.ts`
 
 **Build instructions:**
+
 1. `/[deckId]` resolves to the deck's first slide (or a server-rendered cover page if a cover is configured).
 2. `/[deckId]/[slideIdx]` deep-links any slide.
 3. SEO meta + Open Graph tags come from `services/publish` (`/v1/publish/[deckId]/seo`).
@@ -40,10 +42,12 @@
 8. Reduced-motion: animations on slides become 200 ms fades when `prefers-reduced-motion: reduce`.
 
 **SOLID notes:**
+
 - **S:** `ViewerShell` is layout; `ViewerNav` is chrome; slide rendering is a separate component receiving the slide data.
 - **O:** a new renderer (e.g. for a new element type) registers via the scene-graph registry; the viewer iterates the registry.
 
 **Acceptance:**
+
 - Viewer renders any deck from the registry; no special-case code for "demo" decks.
 - Lighthouse SEO ≥ 100 on a published deck.
 
@@ -54,11 +58,13 @@
 **Features:** #156.
 
 **Files to create:**
+
 - `apps/viewer/src/app/[deckId]/scroll/page.tsx`
 - `apps/viewer/src/components/ScrollMode.tsx`
 - `apps/viewer/src/components/ScrollSlide.tsx`
 
 **Build instructions:**
+
 1. Same deck renders as a vertical scrollytelling page.
 2. Each slide sticks to the viewport top for one viewport-height.
 3. In-slide animations replay as the slide enters the viewport (IntersectionObserver).
@@ -72,12 +78,14 @@
 **Features:** #157, #158.
 
 **Files to create:**
+
 - `apps/editor/src/components/share/ShareDialog.tsx` (replaces the existing share-button placement)
 - `apps/editor/src/components/share/VisibilityPicker.tsx`
 - `apps/editor/src/components/share/DomainAllowlist.tsx`
 - `apps/editor/src/components/share/SSOConfig.tsx`
 
 **Build instructions:**
+
 1. Share dialog opens from the editor top bar; tabs: **Link**, **Embed**, **Visibility**, **Audience**, **Versions**.
 2. Visibility picker: Public, Password, Domain-restricted, SSO-gated, Email-gated.
 3. Password field writes to `POST /v1/shares/{id}/policy` with `{ kind: "password", value }`.
@@ -93,9 +101,11 @@
 **Features:** #159.
 
 **Files to create:**
+
 - `apps/editor/src/components/share/ContentControlTab.tsx`
 
 **Build instructions:**
+
 1. Editor shows a tree of slides with checkboxes. Each share link has its own checked set.
 2. "Investor view" link excludes the appendix; "Internal view" includes everything.
 3. Saved as `POST /v1/shares/{id}/slides` with `{ visible: [slideIds] }`.
@@ -107,10 +117,12 @@
 **Features:** #160.
 
 **Files to create:**
+
 - `apps/admin-console/src/app/custom-domains/page.tsx` (admin)
 - `apps/editor/src/components/share/CustomDomainPicker.tsx`
 
 **Build instructions:**
+
 1. Admin page lists custom domains per tenant; shows verification status (CNAME).
 2. Editor share dialog exposes a "Custom domain" picker; selecting one rewrites the share URL.
 3. White-label settings: logo + brand color override on the viewer chrome; tenant-scoped.
@@ -122,9 +134,11 @@
 **Features:** #161.
 
 **Files to create:**
+
 - `apps/editor/src/components/share/EmbedPlayground.tsx`
 
 **Build instructions:**
+
 1. Embed playground: pick a deck + starting slide + size; live preview iframe; copy HTML snippet.
 2. iframe uses `services/embed-proxy` to issue a JWT; snippet embeds `<iframe src="https://embed.domio.app/.../..." allow="..." sandbox="..."></iframe>`.
 3. Configurable: allow-interactivity, allow-fullscreen, lazy-load, theme sync.
@@ -136,9 +150,11 @@
 **Features:** #162.
 
 **Files to create:**
+
 - `apps/viewer/src/components/AutoPlayMode.tsx`
 
 **Build instructions:**
+
 1. AutoPlay mode reads a recorded voiceover (`services/recording-orchestrator` produces it) and advances slides synced to audio.
 2. Interactive elements remain interactive; clicking pauses auto-advance.
 3. Toggle from viewer nav.
@@ -150,10 +166,12 @@
 **Features:** #163, #164.
 
 **Files to create:**
+
 - `apps/editor/src/components/share/ExportDialog.tsx`
 - `apps/editor/src/components/share/ExportProgressTracker.tsx`
 
 **Build instructions:**
+
 1. Export dialog: format picker (MP4, PDF, PPTX), quality, slide range.
 2. Submit to `POST /v1/export`; poll or subscribe to job status.
 3. Progress tracker shows percent + remaining slides.
@@ -166,10 +184,12 @@
 **Features:** #165, #166.
 
 **Files to create:**
+
 - `apps/editor/src/components/share/SEOTab.tsx`
 - `apps/editor/src/components/share/SocialPreviewCard.tsx`
 
 **Build instructions:**
+
 1. SEO tab: title, description, canonical URL, robots directives; calls `POST /v1/publish/[deckId]/seo`.
 2. Social preview card: per-platform preview (Twitter, LinkedIn, Slack); auto-generated image from the deck's first slide; manual override.
 
@@ -180,9 +200,11 @@
 **Features:** #167.
 
 **Files to create:**
+
 - `apps/editor/src/components/share/HandoutLayoutPicker.tsx`
 
 **Build instructions:**
+
 1. Layouts: notes pages (one slide + notes per page), 4-up grid, 6-up grid, 9-up grid.
 2. Calls `POST /v1/export` with `format: pdf, layout: handout-{kind}`.
 
@@ -193,9 +215,11 @@
 **Features:** #168.
 
 **Files to create:**
+
 - `apps/editor/src/components/share/VersionPinSelector.tsx`
 
 **Build instructions:**
+
 1. Each share link pins to a deck version; "always latest" toggle.
 2. Selecting a version calls `PATCH /v1/shares/{id}` with `{ pinVersion: 'v' | 'latest' }`.
 3. Admin sees a propagation audit log per workspace.
@@ -207,6 +231,7 @@
 **Features:** #65, #66, #67, #68, #69, #70, #71, #72, #73, #74, #75, #76, #77, #78, #79, #80, #81, #82, #83, #84 (audience-side).
 
 **Files to create/modify:**
+
 - `apps/viewer/src/three/{Model3DViewer,CadImportedModel,KeyframePath}.tsx`
 - `apps/viewer/src/ar/ARHandoff.tsx`
 - `apps/viewer/src/video/{VideoPlayer,SegmentedVideoPlayer}.tsx`
@@ -215,6 +240,7 @@
 - `apps/viewer/src/embeds/{LiveAppEmbed,CodeBlock,LatexBlock,Map}.tsx`
 
 **Build instructions:**
+
 1. Each element type is a separate React component reading its scene-graph descriptor.
 2. `Model3DViewer` uses `apps/viewer/src/three/` and is shared with the editor's preview (S2.10).
 3. AR handoff generates a QR linking to the AR viewer (`apps/viewer/src/app/ar/[token]/page.tsx`).
@@ -223,10 +249,12 @@
 6. LaTeX renders to SVG via `services/latex-render`.
 
 **SOLID notes:**
+
 - **S:** each renderer is one file; viewer code never special-cases element kinds.
 - **O:** adding a new element type requires one new renderer file + one entry in `scene-graph` registry.
 
 **Acceptance:**
+
 - A deck with one of every element type renders correctly in the viewer.
 
 ---
@@ -236,10 +264,12 @@
 **Features:** #97, #103, #107.
 
 **Files to create:**
+
 - `apps/viewer/src/components/DeviceFrame.tsx`
 - `apps/viewer/src/components/BranchingNavigator.tsx`
 
 **Build instructions:**
+
 1. Device frames (iPhone/iPad/Mac) wrap a slide; the wrapped slide is interactive within the frame.
 2. Branching navigator: a non-linear deck surfaces a "What next?" choice on slides that branch.
 3. Deep-link state restoration: opening a URL with `?state=...` sets variables, scenarios, and slide index.
@@ -249,6 +279,7 @@
 ## 3. SOLID injection
 
 ### Viewer module map
+
 ```
 apps/viewer/src/
 ├── app/
@@ -268,6 +299,7 @@ apps/viewer/src/
 ```
 
 ### Rule: viewer is renderer-only
+
 The viewer never edits state; it only renders and emits telemetry. All editing authority is in the editor and presenter apps. This means viewer's store can be simpler than the editor's, and the viewer's bundle can be smaller.
 
 ---

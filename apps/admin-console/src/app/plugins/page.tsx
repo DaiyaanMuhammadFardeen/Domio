@@ -160,7 +160,8 @@ export default function PluginsPage() {
   }
 
   const activeTab = TABS.find((t) => t.key === tab) ?? TABS[0]!;
-  const filteredPlugins = tab !== 'pending' ? plugins.filter((p) => p.state === activeTab.state) : [];
+  const filteredPlugins =
+    tab !== 'pending' ? plugins.filter((p) => p.state === activeTab.state) : [];
   const pendingRequests = tab === 'pending' ? requests.filter((r) => r.status === 'pending') : [];
 
   return (
@@ -260,7 +261,9 @@ export default function PluginsPage() {
                         </Link>
                         <div className="mt-0.5 text-xs text-slate-500">{plugin.description}</div>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-slate-700">{plugin.publisher}</td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-slate-700">
+                        {plugin.publisher}
+                      </td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-slate-700">
                         <code className="text-xs">v{plugin.version}</code>
                       </td>
@@ -274,7 +277,9 @@ export default function PluginsPage() {
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-4 py-2.5">
-                        <Badge tone={stateTone(plugin.state)}>{PLUGIN_STATE_TONES[plugin.state] ? plugin.state : plugin.state}</Badge>
+                        <Badge tone={stateTone(plugin.state)}>
+                          {PLUGIN_STATE_TONES[plugin.state] ? plugin.state : plugin.state}
+                        </Badge>
                       </td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-right">
                         {plugin.state === 'installed' && (
@@ -357,7 +362,9 @@ export default function PluginsPage() {
                           Submitted {formatRelTime(req.submitted_at_ms)}
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-slate-700">{req.publisher}</td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-slate-700">
+                        {req.publisher}
+                      </td>
                       <td className="px-4 py-2.5">
                         <div className="flex flex-wrap gap-1">
                           {req.requested_scopes.map((s) => (

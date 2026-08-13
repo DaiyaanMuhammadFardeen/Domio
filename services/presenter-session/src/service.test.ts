@@ -48,13 +48,16 @@ describe('PresenterSessionService — lifecycle', () => {
   });
 
   it('start → advance × 5 → annotate → plan → handover → end yields the expected audit chain', async () => {
-    const started = await service.start({
-      workspace_id: 'ws-1',
-      deck_id: 'deck-1',
-      presenter_id: 'user-1',
-      initial_slide_id: 's1',
-      initial_slide_index: 0,
-    }, { actorId: 'user-1' });
+    const started = await service.start(
+      {
+        workspace_id: 'ws-1',
+        deck_id: 'deck-1',
+        presenter_id: 'user-1',
+        initial_slide_id: 's1',
+        initial_slide_index: 0,
+      },
+      { actorId: 'user-1' },
+    );
 
     expect(started.session.version).toBe(1);
     expect(started.session.state.slide_id).toBe('s1');
@@ -65,42 +68,60 @@ describe('PresenterSessionService — lifecycle', () => {
     // 5 advances.
     for (let i = 1; i <= 5; i++) {
       clock.now += 100;
-      current = await service.advance(current.id, {
-        target_slide_id: `s${i + 1}`,
-        target_slide_index: i,
-        expected_version: current.version,
-      }, { actorId: 'user-1' });
+      current = await service.advance(
+        current.id,
+        {
+          target_slide_id: `s${i + 1}`,
+          target_slide_index: i,
+          expected_version: current.version,
+        },
+        { actorId: 'user-1' },
+      );
       expect(current.state.slide_index).toBe(i);
     }
     expect(current.version).toBe(6);
 
     // Annotate.
     clock.now += 50;
-    current = await service.annotate(current.id, {
-      slide_id: current.state.slide_id,
-      kind: 'pen',
-      geometry: { strokes: [[{ x: 1, y: 2, pressure: 0.5 }]] },
-      drawn_by: 'user-1',
-      expected_version: current.version,
-    }, { actorId: 'user-1' }).then((r) => r.session);
+    current = await service
+      .annotate(
+        current.id,
+        {
+          slide_id: current.state.slide_id,
+          kind: 'pen',
+          geometry: { strokes: [[{ x: 1, y: 2, pressure: 0.5 }]] },
+          drawn_by: 'user-1',
+          expected_version: current.version,
+        },
+        { actorId: 'user-1' },
+      )
+      .then((r) => r.session);
     expect(current.version).toBe(7);
 
     // Plan reorder.
     clock.now += 50;
-    current = await service.plan(current.id, {
-      order: ['s4', 's3', 's2', 's1'],
-      expected_version: current.version,
-    }, { actorId: 'user-1' });
+    current = await service.plan(
+      current.id,
+      {
+        order: ['s4', 's3', 's2', 's1'],
+        expected_version: current.version,
+      },
+      { actorId: 'user-1' },
+    );
     expect(current.version).toBe(8);
 
     // Handover.
     clock.now += 50;
-    current = await service.handover(current.id, {
-      to_presenter_id: 'user-2',
-      state_snapshot: current.state,
-      transfer_token: 'token-blob',
-      expected_version: current.version,
-    }, { actorId: 'user-1' });
+    current = await service.handover(
+      current.id,
+      {
+        to_presenter_id: 'user-2',
+        state_snapshot: current.state,
+        transfer_token: 'token-blob',
+        expected_version: current.version,
+      },
+      { actorId: 'user-1' },
+    );
     expect(current.mode).toBe('multi_presenter');
     expect(current.version).toBe(9);
 
@@ -117,7 +138,11 @@ describe('PresenterSessionService — lifecycle', () => {
     const { events } = await audit.load();
     expect(events.map((e) => e.action)).toEqual([
       'session.start',
-      'session.advance', 'session.advance', 'session.advance', 'session.advance', 'session.advance',
+      'session.advance',
+      'session.advance',
+      'session.advance',
+      'session.advance',
+      'session.advance',
       'session.annotate',
       'session.plan',
       'session.handover',
@@ -128,13 +153,16 @@ describe('PresenterSessionService — lifecycle', () => {
   });
 
   it('rejects a handoff whose state_snapshot desyncs from the current stage', async () => {
-    const started = await service.start({
-      workspace_id: 'ws-1',
-      deck_id: 'deck-1',
-      presenter_id: 'user-1',
-      initial_slide_id: 's1',
-      initial_slide_index: 0,
-    }, { actorId: 'user-1' });
+    const started = await service.start(
+      {
+        workspace_id: 'ws-1',
+        deck_id: 'deck-1',
+        presenter_id: 'user-1',
+        initial_slide_id: 's1',
+        initial_slide_index: 0,
+      },
+      { actorId: 'user-1' },
+    );
 
     const stale = initialStageState({
       slide_id: 's9',
@@ -143,12 +171,16 @@ describe('PresenterSessionService — lifecycle', () => {
     });
 
     await expect(
-      service.handover(started.session.id, {
-        to_presenter_id: 'user-2',
-        state_snapshot: stale,
-        transfer_token: 'token-blob',
-        expected_version: started.session.version,
-      }, { actorId: 'user-1' }),
+      service.handover(
+        started.session.id,
+        {
+          to_presenter_id: 'user-2',
+          state_snapshot: stale,
+          transfer_token: 'token-blob',
+          expected_version: started.session.version,
+        },
+        { actorId: 'user-1' },
+      ),
     ).rejects.toBeInstanceOf(PresenterSessionConflictError);
   });
 });
@@ -170,29 +202,44 @@ describe('PresenterSessionService — optimistic concurrency', () => {
   });
 
   it('concurrent advances with the same expected_version yield exactly one winner', async () => {
-    const started = await service.start({
-      workspace_id: 'ws-1',
-      deck_id: 'deck-1',
-      presenter_id: 'user-1',
-      initial_slide_id: 's1',
-      initial_slide_index: 0,
-    }, { actorId: 'user-1' });
+    const started = await service.start(
+      {
+        workspace_id: 'ws-1',
+        deck_id: 'deck-1',
+        presenter_id: 'user-1',
+        initial_slide_id: 's1',
+        initial_slide_index: 0,
+      },
+      { actorId: 'user-1' },
+    );
 
     const [winner, loser] = await Promise.allSettled([
-      service.advance(started.session.id, {
-        target_slide_id: 's2',
-        target_slide_index: 1,
-        expected_version: started.session.version,
-      }, { actorId: 'user-1' }),
-      service.advance(started.session.id, {
-        target_slide_id: 's3',
-        target_slide_index: 2,
-        expected_version: started.session.version,
-      }, { actorId: 'user-1' }),
+      service.advance(
+        started.session.id,
+        {
+          target_slide_id: 's2',
+          target_slide_index: 1,
+          expected_version: started.session.version,
+        },
+        { actorId: 'user-1' },
+      ),
+      service.advance(
+        started.session.id,
+        {
+          target_slide_id: 's3',
+          target_slide_index: 2,
+          expected_version: started.session.version,
+        },
+        { actorId: 'user-1' },
+      ),
     ]);
 
-    const fulfilled = [winner, loser].filter((r) => r.status === 'fulfilled') as PromiseFulfilledResult<any>[];
-    const rejected = [winner, loser].filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+    const fulfilled = [winner, loser].filter(
+      (r) => r.status === 'fulfilled',
+    ) as PromiseFulfilledResult<any>[];
+    const rejected = [winner, loser].filter(
+      (r) => r.status === 'rejected',
+    ) as PromiseRejectedResult[];
 
     expect(fulfilled.length).toBe(1);
     expect(rejected.length).toBe(1);
@@ -200,30 +247,45 @@ describe('PresenterSessionService — optimistic concurrency', () => {
   });
 
   it('404s when the session does not exist', async () => {
-    await expect(service.advance('missing', {
-      target_slide_id: 's2',
-      expected_version: 1,
-    }, { actorId: 'user-1' })).rejects.toBeInstanceOf(PresenterSessionNotFoundError);
+    await expect(
+      service.advance(
+        'missing',
+        {
+          target_slide_id: 's2',
+          expected_version: 1,
+        },
+        { actorId: 'user-1' },
+      ),
+    ).rejects.toBeInstanceOf(PresenterSessionNotFoundError);
   });
 
   it('rejects mutations after end', async () => {
-    const started = await service.start({
-      workspace_id: 'ws-1',
-      deck_id: 'deck-1',
-      presenter_id: 'user-1',
-      initial_slide_id: 's1',
-      initial_slide_index: 0,
-    }, { actorId: 'user-1' });
+    const started = await service.start(
+      {
+        workspace_id: 'ws-1',
+        deck_id: 'deck-1',
+        presenter_id: 'user-1',
+        initial_slide_id: 's1',
+        initial_slide_index: 0,
+      },
+      { actorId: 'user-1' },
+    );
 
     await service.end(started.session.id, {
       actorId: 'user-1',
       expectedVersion: started.session.version,
     });
 
-    await expect(service.advance(started.session.id, {
-      target_slide_id: 's2',
-      expected_version: started.session.version + 1,
-    }, { actorId: 'user-1' })).rejects.toBeInstanceOf(PresenterSessionEndedError);
+    await expect(
+      service.advance(
+        started.session.id,
+        {
+          target_slide_id: 's2',
+          expected_version: started.session.version + 1,
+        },
+        { actorId: 'user-1' },
+      ),
+    ).rejects.toBeInstanceOf(PresenterSessionEndedError);
   });
 });
 
@@ -247,27 +309,38 @@ describe('PresenterSessionService — idempotency', () => {
   });
 
   it('repeating the same idempotency_key on advance replays the prior response', async () => {
-    const started = await service.start({
-      workspace_id: 'ws-1',
-      deck_id: 'deck-1',
-      presenter_id: 'user-1',
-      initial_slide_id: 's1',
-      initial_slide_index: 0,
-    }, { actorId: 'user-1' });
+    const started = await service.start(
+      {
+        workspace_id: 'ws-1',
+        deck_id: 'deck-1',
+        presenter_id: 'user-1',
+        initial_slide_id: 's1',
+        initial_slide_index: 0,
+      },
+      { actorId: 'user-1' },
+    );
 
-    const a = await service.advance(started.session.id, {
-      target_slide_id: 's2',
-      target_slide_index: 1,
-      expected_version: started.session.version,
-      idempotency_key: 'idem-1',
-    }, { actorId: 'user-1' });
+    const a = await service.advance(
+      started.session.id,
+      {
+        target_slide_id: 's2',
+        target_slide_index: 1,
+        expected_version: started.session.version,
+        idempotency_key: 'idem-1',
+      },
+      { actorId: 'user-1' },
+    );
 
-    const b = await service.advance(started.session.id, {
-      target_slide_id: 's2',
-      target_slide_index: 1,
-      expected_version: started.session.version,
-      idempotency_key: 'idem-1',
-    }, { actorId: 'user-1' });
+    const b = await service.advance(
+      started.session.id,
+      {
+        target_slide_id: 's2',
+        target_slide_index: 1,
+        expected_version: started.session.version,
+        idempotency_key: 'idem-1',
+      },
+      { actorId: 'user-1' },
+    );
 
     expect(a.id).toBe(b.id);
     expect(a.version).toBe(b.version);
@@ -301,7 +374,9 @@ describe('state machine', () => {
   it('applyAdvance is pure and bumps last_update_ts', async () => {
     const { applyAdvance, initialStageState } = await import('./state_machine.js');
     const initial = initialStageState({
-      slide_id: 's1', slide_index: 0, ts_ms: 100,
+      slide_id: 's1',
+      slide_index: 0,
+      ts_ms: 100,
     });
     const next = applyAdvance(initial, {
       type: 'advance',
@@ -322,28 +397,69 @@ describe('dynamic plan reducer', () => {
 
   it('reorder must be a permutation of canonical', async () => {
     const { DynamicPlanValidationError } = await import('./dynamic_plan.js');
-    const op = (await import('./dynamic_plan.js'));
+    const op = await import('./dynamic_plan.js');
     const base = { order: canonical, hidden: [], updated_by: '', updated_at_ms: 0 };
-    expect(() => op.applyDynamicPlanOp(base, {
-      type: 'reorder', order: ['s1', 's2'], by: 'u1', ts_ms: 1,
-    }, canonical)).toThrow(DynamicPlanValidationError);
-    expect(() => op.applyDynamicPlanOp(base, {
-      type: 'reorder', order: ['s1', 's2', 's3', 's3'], by: 'u1', ts_ms: 1,
-    }, canonical)).toThrow(DynamicPlanValidationError);
-    expect(() => op.applyDynamicPlanOp(base, {
-      type: 'reorder', order: ['s1', 's2', 's3', 'sX'], by: 'u1', ts_ms: 1,
-    }, canonical)).toThrow(DynamicPlanValidationError);
+    expect(() =>
+      op.applyDynamicPlanOp(
+        base,
+        {
+          type: 'reorder',
+          order: ['s1', 's2'],
+          by: 'u1',
+          ts_ms: 1,
+        },
+        canonical,
+      ),
+    ).toThrow(DynamicPlanValidationError);
+    expect(() =>
+      op.applyDynamicPlanOp(
+        base,
+        {
+          type: 'reorder',
+          order: ['s1', 's2', 's3', 's3'],
+          by: 'u1',
+          ts_ms: 1,
+        },
+        canonical,
+      ),
+    ).toThrow(DynamicPlanValidationError);
+    expect(() =>
+      op.applyDynamicPlanOp(
+        base,
+        {
+          type: 'reorder',
+          order: ['s1', 's2', 's3', 'sX'],
+          by: 'u1',
+          ts_ms: 1,
+        },
+        canonical,
+      ),
+    ).toThrow(DynamicPlanValidationError);
   });
 
   it('hide + show is a no-op', async () => {
     const { applyDynamicPlanOp } = await import('./dynamic_plan.js');
     const base = { order: canonical, hidden: [], updated_by: '', updated_at_ms: 0 };
-    const afterHide = applyDynamicPlanOp(base, {
-      type: 'hide', slide_ids: ['s1', 's2'], by: 'u1', ts_ms: 1,
-    }, canonical);
-    const afterShow = applyDynamicPlanOp(afterHide, {
-      type: 'show', slide_ids: ['s1', 's2'], by: 'u1', ts_ms: 2,
-    }, canonical);
+    const afterHide = applyDynamicPlanOp(
+      base,
+      {
+        type: 'hide',
+        slide_ids: ['s1', 's2'],
+        by: 'u1',
+        ts_ms: 1,
+      },
+      canonical,
+    );
+    const afterShow = applyDynamicPlanOp(
+      afterHide,
+      {
+        type: 'show',
+        slide_ids: ['s1', 's2'],
+        by: 'u1',
+        ts_ms: 2,
+      },
+      canonical,
+    );
     expect(afterShow.hidden).toEqual([]);
   });
 });

@@ -1,11 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { asULID } from '@domio/schema';
 import type { DeckDocument } from '@domio/schema';
-import {
-  InMemoryRevisionRepository,
-  RevisionConflictError,
-  RevisionService,
-} from './revisions.js';
+import { InMemoryRevisionRepository, RevisionConflictError, RevisionService } from './revisions.js';
 
 const deck: DeckDocument = {
   schemaVersion: '1.0.0',
@@ -30,9 +26,7 @@ describe('RevisionService', () => {
   it('returns 0 for an unseen (deck, branch)', async () => {
     const repo = new InMemoryRevisionRepository();
     const svc = new RevisionService(repo);
-    expect(
-      await svc.head(asULID('01H000000000000000000000A0'), 'main'),
-    ).toBe(0);
+    expect(await svc.head(asULID('01H000000000000000000000A0'), 'main')).toBe(0);
   });
 
   it('bumps the head revision monotonically per branch', async () => {

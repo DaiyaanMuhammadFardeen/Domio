@@ -18,12 +18,7 @@
  * the same stroke see identical output.
  */
 
-export type AnnotationKind =
-  | 'pen'
-  | 'highlighter'
-  | 'spotlight'
-  | 'zoom'
-  | 'blur';
+export type AnnotationKind = 'pen' | 'highlighter' | 'spotlight' | 'zoom' | 'blur';
 
 export interface Point {
   /** Normalized 0..1 within the slide viewport. */
@@ -61,11 +56,7 @@ export interface BlurGeometry {
   radius: number;
 }
 
-export type AnnotationGeometry =
-  | PenGeometry
-  | SpotlightGeometry
-  | ZoomGeometry
-  | BlurGeometry;
+export type AnnotationGeometry = PenGeometry | SpotlightGeometry | ZoomGeometry | BlurGeometry;
 
 export interface AnnotationCommitInput {
   session_id: string;

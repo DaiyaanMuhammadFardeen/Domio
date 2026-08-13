@@ -28,20 +28,22 @@ describe('generateDarkTheme', () => {
     expect(darkBody?.type).toBe('color');
     // Very dark's dark-mode counterpart should be in the upper lightness range.
     if (darkPrimary?.type === 'color') {
-      const sum = darkPrimary.value.channels[0] + darkPrimary.value.channels[1] + darkPrimary.value.channels[2];
+      const sum =
+        darkPrimary.value.channels[0] +
+        darkPrimary.value.channels[1] +
+        darkPrimary.value.channels[2];
       expect(sum).toBeGreaterThan(0);
     }
     // Near-white's dark-mode counterpart should be in the lower range.
     if (darkBody?.type === 'color') {
-      const sum = darkBody.value.channels[0] + darkBody.value.channels[1] + darkBody.value.channels[2];
+      const sum =
+        darkBody.value.channels[0] + darkBody.value.channels[1] + darkBody.value.channels[2];
       expect(sum).toBeLessThan(3 * 0.95);
     }
   });
 
   it('passes non-color tokens through unchanged', () => {
-    const light = new Map<string, TokenValue>([
-      ['spacing.layout.gutter', dim(16)],
-    ]);
+    const light = new Map<string, TokenValue>([['spacing.layout.gutter', dim(16)]]);
     const pair = generateDarkTheme(light);
     expect(pair.dark.get('spacing.layout.gutter')).toEqual(dim(16));
   });
@@ -56,9 +58,7 @@ describe('generateDarkTheme', () => {
   });
 
   it('reports confidence = 1.0 when there are no colors', () => {
-    const light = new Map<string, TokenValue>([
-      ['spacing.layout.gutter', dim(16)],
-    ]);
+    const light = new Map<string, TokenValue>([['spacing.layout.gutter', dim(16)]]);
     const pair = generateDarkTheme(light);
     expect(pair.confidence).toBe(1);
   });
@@ -72,9 +72,7 @@ describe('generateDarkTheme', () => {
 
 describe('generateLightTheme', () => {
   it('inverts a dark theme back to light', () => {
-    const dark = new Map<string, TokenValue>([
-      ['color.brand.primary', color(0.9, 0.9, 0.9)],
-    ]);
+    const dark = new Map<string, TokenValue>([['color.brand.primary', color(0.9, 0.9, 0.9)]]);
     const pair = generateLightTheme(dark);
     expect(pair.mode).toBe('light');
     const recovered = pair.light.get('color.brand.primary');

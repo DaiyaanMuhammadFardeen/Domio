@@ -86,11 +86,7 @@ function base64UrlDecodeString(str: string): string {
  * @param expiresInMs - Optional expiry in milliseconds (sets `exp` claim)
  * @returns Compact JWT string (header.payload.signature)
  */
-export function signJwt(
-  payload: JwtPayload,
-  secret: string,
-  expiresInMs?: number,
-): string {
+export function signJwt(payload: JwtPayload, secret: string, expiresInMs?: number): string {
   const header = { alg: 'HS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
 
@@ -127,11 +123,7 @@ export function signJwt(
  * @throws {JwtInvalidError} if the token is malformed or signature is invalid
  * @throws {JwtExpiredError} if the token has expired
  */
-export function verifyJwt(
-  token: string,
-  secret: string,
-  expectedAudience?: string,
-): JwtPayload {
+export function verifyJwt(token: string, secret: string, expectedAudience?: string): JwtPayload {
   const parts = token.split('.');
   if (parts.length !== 3) {
     throw new JwtInvalidError('expected 3 dot-separated parts');

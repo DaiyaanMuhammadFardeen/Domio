@@ -78,14 +78,22 @@ export function connect(opts: ConnectOptions): Transport {
     if (state === next) return;
     state = next;
     for (const cb of stateListeners) {
-      try { cb(state); } catch { /* swallow */ }
+      try {
+        cb(state);
+      } catch {
+        /* swallow */
+      }
     }
   };
 
   const deliver = (data: unknown): void => {
     const msg: TransportMessage = { data, ts: Date.now() };
     for (const cb of messageListeners) {
-      try { cb(msg); } catch { /* swallow */ }
+      try {
+        cb(msg);
+      } catch {
+        /* swallow */
+      }
     }
   };
 
@@ -130,7 +138,9 @@ export function connect(opts: ConnectOptions): Transport {
     };
     // Fire one immediate poll, then interval.
     void tick();
-    pollTimer = setI(() => { void tick(); }, pollIntervalMs);
+    pollTimer = setI(() => {
+      void tick();
+    }, pollIntervalMs);
   };
 
   const tryWebSocket = (): void => {
@@ -147,7 +157,11 @@ export function connect(opts: ConnectOptions): Transport {
     fallbackTimer = setT(() => {
       if (state === 'connecting' && !closed) {
         // WS never opened in time — abandon it and start polling.
-        try { ws?.close(); } catch { /* ignore */ }
+        try {
+          ws?.close();
+        } catch {
+          /* ignore */
+        }
         ws = null;
         startPolling();
       }
@@ -161,7 +175,11 @@ export function connect(opts: ConnectOptions): Transport {
     ws.onmessage = (ev: MessageEvent) => {
       let data: unknown = ev.data;
       if (typeof data === 'string') {
-        try { data = JSON.parse(data); } catch { /* leave as string */ }
+        try {
+          data = JSON.parse(data);
+        } catch {
+          /* leave as string */
+        }
       }
       deliver(data);
     };
@@ -189,7 +207,11 @@ export function connect(opts: ConnectOptions): Transport {
       setState('offline');
     } else {
       opts.signal.addEventListener('abort', () => {
-        try { ws?.close(); } catch { /* ignore */ }
+        try {
+          ws?.close();
+        } catch {
+          /* ignore */
+        }
         stopPolling();
         clearFallbackTimer();
         if (!closed) setState('offline');
@@ -201,24 +223,34 @@ export function connect(opts: ConnectOptions): Transport {
   tryWebSocket();
 
   return {
-    get state(): TransportState { return state; },
+    get state(): TransportState {
+      return state;
+    },
     close(): void {
       if (closed) return;
       closed = true;
       clearFallbackTimer();
       stopPolling();
-      try { ws?.close(); } catch { /* ignore */ }
+      try {
+        ws?.close();
+      } catch {
+        /* ignore */
+      }
       ws = null;
       setState('offline');
     },
     onMessage(cb: TransportListener): () => void {
       messageListeners.add(cb);
-      return () => { messageListeners.delete(cb); };
+      return () => {
+        messageListeners.delete(cb);
+      };
     },
     onStateChange(cb: StateListener): () => void {
       stateListeners.add(cb);
       cb(state);
-      return () => { stateListeners.delete(cb); };
+      return () => {
+        stateListeners.delete(cb);
+      };
     },
   };
 }

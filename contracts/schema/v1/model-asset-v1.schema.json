@@ -4,7 +4,22 @@
   "title": "Domio Model Asset V1",
   "description": "3D model asset metadata for Phase 11. Tracks uploaded models (glTF/GLB/USDZ/CAD), derived renditions, polygon budgets, and license provenance.",
   "type": "object",
-  "required": ["schemaVersion", "id", "workspaceId", "uploaderId", "name", "format", "sourceUrl", "derivedUrl", "polyCount", "textureCount", "hasAnimations", "metadata", "createdAt", "updatedAt"],
+  "required": [
+    "schemaVersion",
+    "id",
+    "workspaceId",
+    "uploaderId",
+    "name",
+    "format",
+    "sourceUrl",
+    "derivedUrl",
+    "polyCount",
+    "textureCount",
+    "hasAnimations",
+    "metadata",
+    "createdAt",
+    "updatedAt"
+  ],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
@@ -46,10 +61,7 @@
       "description": "CDN URL of the optimized glTF 2.0 binary (GLB) rendition."
     },
     "thumbnailUrl": {
-      "oneOf": [
-        { "type": "string", "format": "uri" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }],
       "description": "CDN URL of a preview thumbnail."
     },
     "polyCount": {
@@ -68,17 +80,11 @@
       "description": "Whether the model contains skeletal or morph-target animations."
     },
     "cadSourceUrl": {
-      "oneOf": [
-        { "type": "string", "format": "uri" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }],
       "description": "CDN URL of the original CAD file (STEP/FBX), kept for traceability."
     },
     "licenseId": {
-      "oneOf": [
-        { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" },
-        { "type": "null" }
-      ],
+      "oneOf": [{ "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$" }, { "type": "null" }],
       "description": "Reference to the license governing this asset."
     },
     "metadata": {

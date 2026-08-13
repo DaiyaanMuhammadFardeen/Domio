@@ -14,14 +14,13 @@
  * in-progress stroke and re-fetches.
  */
 
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { AnnotationClient, type AnnotationClientError, type AnnotationCommitBody, type AnnotationLayerDto } from '../../lib/annotation-service';
+  AnnotationClient,
+  type AnnotationClientError,
+  type AnnotationCommitBody,
+  type AnnotationLayerDto,
+} from '../../lib/annotation-service';
 import type { AnnotationKind, PenGeometry } from '@domio/annotation-engine';
 import { AnnotationCanvas, type AnnotationCanvasHandle } from './AnnotationCanvas';
 import { InkToolbar } from './InkToolbar';
@@ -60,7 +59,9 @@ export function AnnotationOverlay(props: AnnotationOverlayProps) {
         if (!cancelled) setStatus({ kind: 'error', message: `load failed: HTTP ${err.status}` });
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [client, sessionId, slideId]);
 
   const slideLayers = useMemo(
@@ -68,26 +69,29 @@ export function AnnotationOverlay(props: AnnotationOverlayProps) {
     [layers, slideId],
   );
 
-  const onStrokeComplete = useCallback(async (geom: PenGeometry) => {
-    try {
-      const commitBody: AnnotationCommitBody = {
-        slide_id: slideId,
-        kind: tool === 'highlighter' ? 'highlighter' : 'pen',
-        geometry: geom,
-        color,
-        stroke_width: width,
-        ephemeral: true,
-        drawn_by: presenterId,
-      };
-      if (displayName !== undefined) commitBody.drawn_by_display_name = displayName;
-      const layer = await client.commit(sessionId, commitBody);
-      setLayers((prev) => [...prev, layer]);
-      setStatus({ kind: 'ok', message: 'stroke committed' });
-    } catch (e) {
-      const err = e as AnnotationClientError;
-      setStatus({ kind: 'error', message: `commit failed: HTTP ${err.status}` });
-    }
-  }, [client, sessionId, slideId, tool, color, width, presenterId, displayName]);
+  const onStrokeComplete = useCallback(
+    async (geom: PenGeometry) => {
+      try {
+        const commitBody: AnnotationCommitBody = {
+          slide_id: slideId,
+          kind: tool === 'highlighter' ? 'highlighter' : 'pen',
+          geometry: geom,
+          color,
+          stroke_width: width,
+          ephemeral: true,
+          drawn_by: presenterId,
+        };
+        if (displayName !== undefined) commitBody.drawn_by_display_name = displayName;
+        const layer = await client.commit(sessionId, commitBody);
+        setLayers((prev) => [...prev, layer]);
+        setStatus({ kind: 'ok', message: 'stroke committed' });
+      } catch (e) {
+        const err = e as AnnotationClientError;
+        setStatus({ kind: 'error', message: `commit failed: HTTP ${err.status}` });
+      }
+    },
+    [client, sessionId, slideId, tool, color, width, presenterId, displayName],
+  );
 
   // Latest ephemeral for undo/save (last in slideLayers).
   const latest = slideLayers.length > 0 ? slideLayers[slideLayers.length - 1] : null;
@@ -143,7 +147,11 @@ export function AnnotationOverlay(props: AnnotationOverlayProps) {
           onStrokeComplete={onStrokeComplete}
         />
         {status && (
-          <div className={`annotation-overlay__status annotation-overlay__status--${status.kind}`} role="status" aria-live="polite">
+          <div
+            className={`annotation-overlay__status annotation-overlay__status--${status.kind}`}
+            role="status"
+            aria-live="polite"
+          >
             {status.message}
           </div>
         )}

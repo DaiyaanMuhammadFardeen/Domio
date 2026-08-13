@@ -102,10 +102,7 @@ export function SubscriptionForm({ onCreated }: SubscriptionFormProps) {
       className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
     >
       <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-        <FormattedMessage
-          id="admin.webhooks.subscribe.heading"
-          catalogue={CATALOGUE}
-        />
+        <FormattedMessage id="admin.webhooks.subscribe.heading" catalogue={CATALOGUE} />
       </h3>
 
       {error && (
@@ -213,7 +210,9 @@ export function SubscriptionForm({ onCreated }: SubscriptionFormProps) {
           data-testid="webhooks-subscribe-submit"
           className="rounded-md bg-brand-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-50"
         >
-          {submitting ? '…' : (
+          {submitting ? (
+            '…'
+          ) : (
             <FormattedMessage id="admin.webhooks.subscribe.submit" catalogue={CATALOGUE} />
           )}
         </button>

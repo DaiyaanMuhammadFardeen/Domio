@@ -30,13 +30,7 @@ interface EventTypePickerProps {
   readonly testid?: string;
 }
 
-export function EventTypePicker({
-  value,
-  onChange,
-  id,
-  label,
-  testid,
-}: EventTypePickerProps) {
+export function EventTypePicker({ value, onChange, id, label, testid }: EventTypePickerProps) {
   const auto = useId();
   const selectId = id ?? `event-type-${auto}`;
   const freeformId = `event-type-freeform-${auto}`;

@@ -16,11 +16,7 @@
  *    canonical display form for the byline and avatar bubble.
  */
 
-export type BlogCategory =
-  | 'engineering'
-  | 'product'
-  | 'customer-stories'
-  | 'company';
+export type BlogCategory = 'engineering' | 'product' | 'customer-stories' | 'company';
 
 export interface BlogAuthor {
   readonly name: string;

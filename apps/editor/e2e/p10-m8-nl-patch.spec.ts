@@ -18,6 +18,8 @@ test.describe('P10/M8 NL Patch', () => {
   test('shows the audit trail alongside the patch', async ({ page }) => {
     await page.goto('/');
     await page.click('[data-testid="m8-audit-tab"]');
-    await expect(page.locator('[data-testid="m8-audit-root"], [data-testid="m8-audit-empty"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="m8-audit-root"], [data-testid="m8-audit-empty"]'),
+    ).toBeVisible();
   });
 });

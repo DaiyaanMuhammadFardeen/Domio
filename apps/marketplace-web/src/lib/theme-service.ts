@@ -216,9 +216,7 @@ function buildFallback(slug: string): ThemeListing {
 
 export async function getTheme(slug: string): Promise<ThemeListing | null> {
   try {
-    return await apiFetch<ThemeListing>(
-      `/v1/marketplace/themes/${encodeURIComponent(slug)}`,
-    );
+    return await apiFetch<ThemeListing>(`/v1/marketplace/themes/${encodeURIComponent(slug)}`);
   } catch {
     return buildFallback(slug);
   }
@@ -226,9 +224,7 @@ export async function getTheme(slug: string): Promise<ThemeListing | null> {
 
 export async function listThemeSlugs(): Promise<string[]> {
   try {
-    const res = await apiFetch<{ items: ThemeListing[] }>(
-      `/v1/marketplace/themes`,
-    );
+    const res = await apiFetch<{ items: ThemeListing[] }>(`/v1/marketplace/themes`);
     return res.items.map((t) => t.slug);
   } catch {
     return Object.keys(FALLBACK_THEMES);

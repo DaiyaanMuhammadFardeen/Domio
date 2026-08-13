@@ -93,15 +93,16 @@ export function searchDocs(query: string): ReadonlyArray<DocsSearchHit> {
   hits.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     // Stable tiebreak: section order, then page order.
-    const sectionDiff = DOCS_TREE.findIndex((s) => s.id === a.section) -
+    const sectionDiff =
+      DOCS_TREE.findIndex((s) => s.id === a.section) -
       DOCS_TREE.findIndex((s) => s.id === b.section);
     if (sectionDiff !== 0) return sectionDiff;
-    const aPageIndex = DOCS_TREE
-      .find((s) => s.id === a.section)!
-      .pages.findIndex((p) => p.slug === a.page.slug);
-    const bPageIndex = DOCS_TREE
-      .find((s) => s.id === b.section)!
-      .pages.findIndex((p) => p.slug === b.page.slug);
+    const aPageIndex = DOCS_TREE.find((s) => s.id === a.section)!.pages.findIndex(
+      (p) => p.slug === a.page.slug,
+    );
+    const bPageIndex = DOCS_TREE.find((s) => s.id === b.section)!.pages.findIndex(
+      (p) => p.slug === b.page.slug,
+    );
     return aPageIndex - bPageIndex;
   });
 

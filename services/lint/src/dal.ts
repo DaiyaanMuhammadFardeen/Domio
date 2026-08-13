@@ -32,7 +32,9 @@ export interface LintRunRepository {
 
 export class InMemoryLintRunRepository implements LintRunRepository {
   private store = new Map<string, LintRunRecord>();
-  private k(r: LintRunRecord): string { return `${r.orgId}::${r.runId}`; }
+  private k(r: LintRunRecord): string {
+    return `${r.orgId}::${r.runId}`;
+  }
   async insert(record: LintRunRecord): Promise<void> {
     this.store.set(this.k(record), record);
   }

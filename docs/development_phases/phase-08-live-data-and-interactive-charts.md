@@ -26,30 +26,30 @@
 
 **Feature numbers in scope (per `feature-list.md`):**
 
-| Feature | Name | Notes |
-|---|---|---|
-| #48 | Live data connections | Sheets, Excel, Airtable, Notion, Postgres, MySQL, BigQuery, Snowflake, REST, GraphQL |
-| #49 | Charts alive during presentation | Hover, drill, legend toggle, brush zoom |
-| #50 | Full chart library | 14 types: bar, line, area, pie, scatter, funnel, sankey, treemap, heatmap, waterfall, gauge, radar, candlestick, bullet |
-| #51 | Data refresh on stage | Eager/lazy/manual/on-interval policy per binding |
-| #52 | Cross-chart filtering | Slide-scoped pub/sub |
-| #53 | What-if sliders | 100 ms recompute target |
-| #54 | Formula engine | Spreadsheet-style AST, sandboxed |
-| #55 | Data tables | Sort, paginate, conditional format, sparkline |
-| #56 | Mock data generator | Seeded, distributions, "mock" badge |
-| #57 | Scenario switcher | Snapshot overlays, DAG inheritance |
-| #58 | Number ticker & animated chart builds | Tweened on entry / data change |
-| #59 | Data annotations | {point, text, author, ts, color}, scenario-scoped |
-| #60 | Threshold alerts | Auto-restyle on breach; provenance chip |
-| #61 | Currency / unit localization | Per-session locale; stored source currency |
-| #62 | Embedded live dashboards | Looker, Tableau, PowerBI, Grafana via embed proxy |
-| #63 | Stale-data indicators | Per-binding freshness panel |
-| #64 | Per-viewer access control | Short-lived opaque tokens; vaulted credentials |
+| Feature | Name                                  | Notes                                                                                                                   |
+| ------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| #48     | Live data connections                 | Sheets, Excel, Airtable, Notion, Postgres, MySQL, BigQuery, Snowflake, REST, GraphQL                                    |
+| #49     | Charts alive during presentation      | Hover, drill, legend toggle, brush zoom                                                                                 |
+| #50     | Full chart library                    | 14 types: bar, line, area, pie, scatter, funnel, sankey, treemap, heatmap, waterfall, gauge, radar, candlestick, bullet |
+| #51     | Data refresh on stage                 | Eager/lazy/manual/on-interval policy per binding                                                                        |
+| #52     | Cross-chart filtering                 | Slide-scoped pub/sub                                                                                                    |
+| #53     | What-if sliders                       | 100 ms recompute target                                                                                                 |
+| #54     | Formula engine                        | Spreadsheet-style AST, sandboxed                                                                                        |
+| #55     | Data tables                           | Sort, paginate, conditional format, sparkline                                                                           |
+| #56     | Mock data generator                   | Seeded, distributions, "mock" badge                                                                                     |
+| #57     | Scenario switcher                     | Snapshot overlays, DAG inheritance                                                                                      |
+| #58     | Number ticker & animated chart builds | Tweened on entry / data change                                                                                          |
+| #59     | Data annotations                      | {point, text, author, ts, color}, scenario-scoped                                                                       |
+| #60     | Threshold alerts                      | Auto-restyle on breach; provenance chip                                                                                 |
+| #61     | Currency / unit localization          | Per-session locale; stored source currency                                                                              |
+| #62     | Embedded live dashboards              | Looker, Tableau, PowerBI, Grafana via embed proxy                                                                       |
+| #63     | Stale-data indicators                 | Per-binding freshness panel                                                                                             |
+| #64     | Per-viewer access control             | Short-lived opaque tokens; vaulted credentials                                                                          |
 
 **Out of scope (deferred to other phases):**
 
 - AI-driven data storytelling (#110), AI chart selection suggestion UI (#123) — Phase 12.
-- **MCP** tools `bind_data_source`, `run_scenario`, `simulate_sweep`, `get_data_lineage` (#221–236) — Phase 13. *However*, the contracts and tool surface defined here are reused by Phase 13, so they are designed JSON-Schema-first.
+- **MCP** tools `bind_data_source`, `run_scenario`, `simulate_sweep`, `get_data_lineage` (#221–236) — Phase 13. _However_, the contracts and tool surface defined here are reused by Phase 13, so they are designed JSON-Schema-first.
 - Agent-writable data layer (write-back, per the "Weaving AI further into what already exists" note in `feature-list.md`) — Phase 13 hookup; the connector framework exposes a `write` capability stub now and is wired later.
 - 3D data visualizations (#68) and embedded 3D dashboards — Phase 11.
 - License-aware connector marketplace — Phase 19.
@@ -356,44 +356,44 @@ Full DDL: `/docs/live-data-charts.md` §5 (`5.1`–`5.12`). Row-level security s
 
 ## 6. Verification
 
-| Feature | Test | Expected result | Owner |
-|---|---|---|---|
-| #48 AC-48.1–AC-48.6 | Sandbox OAuth handshake + credential screen + ping + discover | All 10 connectors produce a valid `data_connection`; bad creds surface a typed error; ping latency reported before "save" | M1 lead |
-| #48 schema drift | Rebind flow when a column disappears | Single-click rebind restores the chart; `broken` badge shown | M1 lead |
-| #49 AC-49.1–AC-49.5 | Playwright E2E on fixture deck | Hover/tooltip/drill/legend/brush work in presenter + viewer; keyboard accessible | M4 lead |
-| #50 AC-50.1–AC-50.5 | All 14 chart types render with fixture data | Each renders correctly at 1 k / 10 k points; binding schema enforced; accessibility palette honored | M4 lead |
-| #51 AC-51.1–AC-51.5 | Freshness policy E2E | Eager refresh < 4 s on stage-open (p95); on-interval drift ≤ 1 s; cached fallback when upstream is down | M2 lead |
-| #52 AC-52.1–AC-52.6 | Cross-chart filter Playwright | Click region on A → B/C update; clear chip works; scenario switch resets filters | M5 lead |
-| #53 AC-53.1–AC-53.6 | Slider recompute perf | Drag → chart re-renders ≤ 100 ms (p95) on 1 k affected fields; slider state in state timeline | M3 lead |
-| #54 AC-54.1–AC-54.6 | Formula sandbox | A1 + named ranges + SUMIF + LOOKUP evaluate; cycle detected; locale decimals parse; incremental recompute verified | M3 lead |
-| #55 AC-55.1–AC-55.6 | Data table fixture | Sort/paginate/cond-format/sparkline all work; CSV export preserves formatting | M4 lead |
-| #56 AC-56.1–AC-56.5 | Mock data generator | Same seed → same rows; "mock" badge visible in editor + presenter | M4 lead |
-| #57 AC-57.1–AC-57.6 | Scenario switcher | Toggle swap within 100 ms; cross-chart filters reset per scenario; partial scenario badge | M5 lead |
-| #58 AC-58.1–AC-58.5 | Ticker + chart build animation | Number tweens; bars animate from zero; rapid refreshes coalesce; reduced-motion respected | M5 lead |
-| #59 AC-59.1–AC-59.5 | Annotation CRUD | Pin / rebind / search / scenario-scoping all work; write-back hook present (no-op for non-writable sources) | M5 lead |
-| #60 AC-60.1–AC-60.5 | Threshold alerter | Breach re-styles callout; provenance chip emitted; floating-point tolerance honored | M5 lead |
-| #61 AC-61.1–AC-61.5 | Localization service | USD/EUR/BDT round-trip; stale exchange-rate badge; compound units handled | M5 lead |
-| #62 AC-62.1–AC-62.5 | Embed proxy + Looker sandbox | Token issued ≤ 60 s; iframe renders; provider outage falls back to snapshot + stale badge; SSRF blocked | M5 lead |
-| #63 AC-63.1–AC-63.4 | Freshness tracker | Per-binding + per-slide + per-deck panel; export footer preserves timestamp | M2 + M5 leads |
-| #64 AC-64.1–AC-64.5 | Viewer-token security review | Tokens ≤ 5 min; single-use for mutations; no raw credentials traverse gateway; generic error envelope; audit log entry per query | M2 lead + Security |
+| Feature             | Test                                                          | Expected result                                                                                                                  | Owner              |
+| ------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| #48 AC-48.1–AC-48.6 | Sandbox OAuth handshake + credential screen + ping + discover | All 10 connectors produce a valid `data_connection`; bad creds surface a typed error; ping latency reported before "save"        | M1 lead            |
+| #48 schema drift    | Rebind flow when a column disappears                          | Single-click rebind restores the chart; `broken` badge shown                                                                     | M1 lead            |
+| #49 AC-49.1–AC-49.5 | Playwright E2E on fixture deck                                | Hover/tooltip/drill/legend/brush work in presenter + viewer; keyboard accessible                                                 | M4 lead            |
+| #50 AC-50.1–AC-50.5 | All 14 chart types render with fixture data                   | Each renders correctly at 1 k / 10 k points; binding schema enforced; accessibility palette honored                              | M4 lead            |
+| #51 AC-51.1–AC-51.5 | Freshness policy E2E                                          | Eager refresh < 4 s on stage-open (p95); on-interval drift ≤ 1 s; cached fallback when upstream is down                          | M2 lead            |
+| #52 AC-52.1–AC-52.6 | Cross-chart filter Playwright                                 | Click region on A → B/C update; clear chip works; scenario switch resets filters                                                 | M5 lead            |
+| #53 AC-53.1–AC-53.6 | Slider recompute perf                                         | Drag → chart re-renders ≤ 100 ms (p95) on 1 k affected fields; slider state in state timeline                                    | M3 lead            |
+| #54 AC-54.1–AC-54.6 | Formula sandbox                                               | A1 + named ranges + SUMIF + LOOKUP evaluate; cycle detected; locale decimals parse; incremental recompute verified               | M3 lead            |
+| #55 AC-55.1–AC-55.6 | Data table fixture                                            | Sort/paginate/cond-format/sparkline all work; CSV export preserves formatting                                                    | M4 lead            |
+| #56 AC-56.1–AC-56.5 | Mock data generator                                           | Same seed → same rows; "mock" badge visible in editor + presenter                                                                | M4 lead            |
+| #57 AC-57.1–AC-57.6 | Scenario switcher                                             | Toggle swap within 100 ms; cross-chart filters reset per scenario; partial scenario badge                                        | M5 lead            |
+| #58 AC-58.1–AC-58.5 | Ticker + chart build animation                                | Number tweens; bars animate from zero; rapid refreshes coalesce; reduced-motion respected                                        | M5 lead            |
+| #59 AC-59.1–AC-59.5 | Annotation CRUD                                               | Pin / rebind / search / scenario-scoping all work; write-back hook present (no-op for non-writable sources)                      | M5 lead            |
+| #60 AC-60.1–AC-60.5 | Threshold alerter                                             | Breach re-styles callout; provenance chip emitted; floating-point tolerance honored                                              | M5 lead            |
+| #61 AC-61.1–AC-61.5 | Localization service                                          | USD/EUR/BDT round-trip; stale exchange-rate badge; compound units handled                                                        | M5 lead            |
+| #62 AC-62.1–AC-62.5 | Embed proxy + Looker sandbox                                  | Token issued ≤ 60 s; iframe renders; provider outage falls back to snapshot + stale badge; SSRF blocked                          | M5 lead            |
+| #63 AC-63.1–AC-63.4 | Freshness tracker                                             | Per-binding + per-slide + per-deck panel; export footer preserves timestamp                                                      | M2 + M5 leads      |
+| #64 AC-64.1–AC-64.5 | Viewer-token security review                                  | Tokens ≤ 5 min; single-use for mutations; no raw credentials traverse gateway; generic error envelope; audit log entry per query | M2 lead + Security |
 
 ---
 
 ## 7. Risks & Open Decisions
 
-| # | Risk / decision | Mitigation |
-|---|---|---|
-| R-08-1 | **Connector churn.** Each SaaS provider evolves its API; adapter maintenance is ongoing. | Pinned `connector_ver`, semantic-versioning the adapter, deprecation policy baked into `connector_framework`. |
-| R-08-2 | **Formula sandbox escape.** V8 isolates are powerful; one bug is RCE-class. | Defense in depth: caps (memory / CPU / stack / quota), no I/O, no `eval`, periodic red-team, fuzz with 50 k hostile ASTs in CI. |
-| R-08-3 | **Mock data crossing into shared decks.** Users accidentally publish mock-bound dashboards. | Editor + presenter "mock" badge; block publish-to-public if any binding is mock unless author explicitly confirms. |
-| R-08-4 | **GDPR/PDPA compliance for query audit logs.** Even request metadata can be sensitive. | Tenant-scoped log retention; signed append-only; configurable per-tenant TTL (default 90 d) honoring `dataset_snapshot.expires_at`. |
-| R-08-5 | **Embed proxy SSRF.** Looker/Tableau URLs must never reach internal IPs. | Strict allow/denylist; resolve at request time; reject `0.0.0.0/8`, `127.0.0.0/8`, `169.254.0.0/16`, `fc00::/7`, `metadata.google.internal`, AWS IMDS. |
-| R-08-6 | **Threshold rules blo**ating the AST. | Rules declared per chart binding, not per formula field; capped at 64 rules per binding in the inspector. |
-| R-08-7 | **Scenario DAG blow-up.** Authors inherit across decks; cycles could emerge. | Detect cycles on insert; surface "scenario cycle" inline; cap parent depth at 8. |
-| R-08-8 | **Refresh storms during press-the-button demos.** | Token-bucket + priority queue (eager > on-interval > lazy) + best-effort cache fallback (NFR §3.3). |
-| R-08-9 | **Localization precision.** Currency as float vs. bigint minor units. | `decimal` arithmetic server-side; `bigint` minor units at the wire edge; renderer formats with `Intl.NumberFormat`. |
-| R-08-10 | **Open decision: agent-writable data layer.** Write-back is hinted in `feature-list.md` but not in Phase 08 scope. | Adapter interface ships a stub `write(spec)` now (returns `NotImplemented`); Phase 13 wires the first two connectors (Airtable, Sheets) for write-back. |
-| R-08-11 | **Open decision: scenario inheritance from a parent deck.** Defer cross-deck scenarios to Phase 21; track as a follow-up. | Today, scenarios are deck-scoped; `parent_id` exists but the cross-deck resolution is a stub. |
+| #       | Risk / decision                                                                                                           | Mitigation                                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-08-1  | **Connector churn.** Each SaaS provider evolves its API; adapter maintenance is ongoing.                                  | Pinned `connector_ver`, semantic-versioning the adapter, deprecation policy baked into `connector_framework`.                                           |
+| R-08-2  | **Formula sandbox escape.** V8 isolates are powerful; one bug is RCE-class.                                               | Defense in depth: caps (memory / CPU / stack / quota), no I/O, no `eval`, periodic red-team, fuzz with 50 k hostile ASTs in CI.                         |
+| R-08-3  | **Mock data crossing into shared decks.** Users accidentally publish mock-bound dashboards.                               | Editor + presenter "mock" badge; block publish-to-public if any binding is mock unless author explicitly confirms.                                      |
+| R-08-4  | **GDPR/PDPA compliance for query audit logs.** Even request metadata can be sensitive.                                    | Tenant-scoped log retention; signed append-only; configurable per-tenant TTL (default 90 d) honoring `dataset_snapshot.expires_at`.                     |
+| R-08-5  | **Embed proxy SSRF.** Looker/Tableau URLs must never reach internal IPs.                                                  | Strict allow/denylist; resolve at request time; reject `0.0.0.0/8`, `127.0.0.0/8`, `169.254.0.0/16`, `fc00::/7`, `metadata.google.internal`, AWS IMDS.  |
+| R-08-6  | **Threshold rules blo**ating the AST.                                                                                     | Rules declared per chart binding, not per formula field; capped at 64 rules per binding in the inspector.                                               |
+| R-08-7  | **Scenario DAG blow-up.** Authors inherit across decks; cycles could emerge.                                              | Detect cycles on insert; surface "scenario cycle" inline; cap parent depth at 8.                                                                        |
+| R-08-8  | **Refresh storms during press-the-button demos.**                                                                         | Token-bucket + priority queue (eager > on-interval > lazy) + best-effort cache fallback (NFR §3.3).                                                     |
+| R-08-9  | **Localization precision.** Currency as float vs. bigint minor units.                                                     | `decimal` arithmetic server-side; `bigint` minor units at the wire edge; renderer formats with `Intl.NumberFormat`.                                     |
+| R-08-10 | **Open decision: agent-writable data layer.** Write-back is hinted in `feature-list.md` but not in Phase 08 scope.        | Adapter interface ships a stub `write(spec)` now (returns `NotImplemented`); Phase 13 wires the first two connectors (Airtable, Sheets) for write-back. |
+| R-08-11 | **Open decision: scenario inheritance from a parent deck.** Defer cross-deck scenarios to Phase 21; track as a follow-up. | Today, scenarios are deck-scoped; `parent_id` exists but the cross-deck resolution is a stub.                                                           |
 
 ---
 
@@ -414,18 +414,18 @@ Full DDL: `/docs/live-data-charts.md` §5 (`5.1`–`5.12`). Row-level security s
 
 1. **Connect.** Open the deck in the editor. Replace one KPI callout binding with `p08_demo_sheet`. Show the "ping" panel: latency 280 ms, 1 k rows. Save.
 2. **Map.** Drag a bar chart onto slide 5. Pick `p08_demo_pg` → `orders_by_region`. Confirm the auto-suggest mapping (`region → x`, `gmv → y`). Show the typed binding schema vs. the chart's requirements.
-3. **Formula + slider.** Add a formula field `gmv_after_discount = gmv * (1 - discount)` where `discount` is a slider (min 0, max 0.30). Drag the slider to 0.15. The chart re-renders in < 100 ms. *(#53, #54)*
-4. **Cross-chart filter.** On slide 7, click `EU` on the bar chart. The map chart and the line chart both update to EU-only. Click "Clear filter". *(#52)*
-5. **Scenario switch.** In presenter mode, toggle `Base → Bull`. The KPI callouts, the line chart, and the table on slide 7 all swap datasets in < 100 ms. *(#57)*
-6. **Refresh on stage.** Open the presenter toolbar and click "Refresh all". The Google Sheets chart (which a backend cron updated 30 s ago) re-renders within 4 s. *(#51)*
-7. **Animated build.** Drag the audience slider; the chart builds from zero with a stager. *(#58)*
-8. **Annotation.** Pin an annotation "this dip = server outage, March 3" on the line chart. Switch to Bear case — the annotation is hidden (scenario-scoped). *(#59)*
-9. **Threshold.** Show the revenue KPI. Edit the demo SQL to drop revenue below $1M. Refresh. The callout re-styles red, the provenance chip surfaces, and the presenter toolbar shows a "threshold breach" ping. *(#60)*
-10. **Localization.** In the viewer URL, append `?locale=fr-FR&ccy=EUR`. Reload. All numbers re-format with `Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'EUR'})`. *(#61)*
-11. **Embed.** Drop a Looker embed on slide 12. Click to enter presenter mode. The embed proxy authenticates Looker silently. *(#62)*
-12. **Stale badge.** Disconnect the network to `p08_demo_sheet`. Refresh. The chart shows the last cached values with a "Last sync 4 m ago" badge. *(#63)*
-13. **Viewer isolation.** Generate a share link in read-only mode. Open it from a separate incognito window. Open DevTools → Network → confirm no `credential_ref`, no bearer token, only the opaque viewer token. *(#64)*
-14. **Charts library.** Drop a candlestick (with `OHLC + volume` binding), a sankey (`source/target/value`), a treemap, and a heatmap, all on slide 13. Each renders under their typed binding schema. *(#50)*
+3. **Formula + slider.** Add a formula field `gmv_after_discount = gmv * (1 - discount)` where `discount` is a slider (min 0, max 0.30). Drag the slider to 0.15. The chart re-renders in < 100 ms. _(#53, #54)_
+4. **Cross-chart filter.** On slide 7, click `EU` on the bar chart. The map chart and the line chart both update to EU-only. Click "Clear filter". _(#52)_
+5. **Scenario switch.** In presenter mode, toggle `Base → Bull`. The KPI callouts, the line chart, and the table on slide 7 all swap datasets in < 100 ms. _(#57)_
+6. **Refresh on stage.** Open the presenter toolbar and click "Refresh all". The Google Sheets chart (which a backend cron updated 30 s ago) re-renders within 4 s. _(#51)_
+7. **Animated build.** Drag the audience slider; the chart builds from zero with a stager. _(#58)_
+8. **Annotation.** Pin an annotation "this dip = server outage, March 3" on the line chart. Switch to Bear case — the annotation is hidden (scenario-scoped). _(#59)_
+9. **Threshold.** Show the revenue KPI. Edit the demo SQL to drop revenue below $1M. Refresh. The callout re-styles red, the provenance chip surfaces, and the presenter toolbar shows a "threshold breach" ping. _(#60)_
+10. **Localization.** In the viewer URL, append `?locale=fr-FR&ccy=EUR`. Reload. All numbers re-format with `Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'EUR'})`. _(#61)_
+11. **Embed.** Drop a Looker embed on slide 12. Click to enter presenter mode. The embed proxy authenticates Looker silently. _(#62)_
+12. **Stale badge.** Disconnect the network to `p08_demo_sheet`. Refresh. The chart shows the last cached values with a "Last sync 4 m ago" badge. _(#63)_
+13. **Viewer isolation.** Generate a share link in read-only mode. Open it from a separate incognito window. Open DevTools → Network → confirm no `credential_ref`, no bearer token, only the opaque viewer token. _(#64)_
+14. **Charts library.** Drop a candlestick (with `OHLC + volume` binding), a sankey (`source/target/value`), a treemap, and a heatmap, all on slide 13. Each renders under their typed binding schema. _(#50)_
 
 **Pass criteria.** Every numbered acceptance criterion above is exercised. A "Demo passed" GitHub check is set when the Playwright suite covering flows 1–14 is green.
 

@@ -23,7 +23,10 @@ export interface QueryGatewayAuditRecorder {
 export class InMemoryQueryGatewayAuditRecorder implements QueryGatewayAuditRecorder {
   private events: QueryGatewayAuditEvent[] = [];
   private counter = 0;
-  constructor(_idGen: () => string, private readonly clock: () => Date = () => new Date()) {
+  constructor(
+    _idGen: () => string,
+    private readonly clock: () => Date = () => new Date(),
+  ) {
     void _idGen;
   }
 
@@ -38,6 +41,6 @@ export class InMemoryQueryGatewayAuditRecorder implements QueryGatewayAuditRecor
   }
 
   async listByOrg(orgId: string, limit = 100): Promise<QueryGatewayAuditEvent[]> {
-    return this.events.filter(e => e.orgId === orgId).slice(-limit);
+    return this.events.filter((e) => e.orgId === orgId).slice(-limit);
   }
 }

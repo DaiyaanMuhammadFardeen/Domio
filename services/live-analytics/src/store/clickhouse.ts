@@ -10,10 +10,7 @@
 import type { LiveAnalyticsConfig } from '../types.js';
 
 export interface ClickHouseClient {
-  query<T = Record<string, unknown>>(
-    sql: string,
-    params?: Record<string, unknown>,
-  ): Promise<T[]>;
+  query<T = Record<string, unknown>>(sql: string, params?: Record<string, unknown>): Promise<T[]>;
   execute(sql: string, params?: Record<string, unknown>): Promise<void>;
   ping(): Promise<boolean>;
 }
@@ -25,7 +22,11 @@ export function buildClickHouseClient(cfg: LiveAnalyticsConfig): ClickHouseClien
       ? 'Basic ' + Buffer.from(`${cfg.clickhouseUser}:${cfg.clickhousePassword}`).toString('base64')
       : '';
 
-  function buildUrl(sql: string, params: Record<string, unknown> | undefined, format: string): string {
+  function buildUrl(
+    sql: string,
+    params: Record<string, unknown> | undefined,
+    format: string,
+  ): string {
     const url = new URL(base);
     if (cfg.clickhouseDb) url.searchParams.set('database', cfg.clickhouseDb);
     url.searchParams.set('query', sql);
@@ -38,7 +39,11 @@ export function buildClickHouseClient(cfg: LiveAnalyticsConfig): ClickHouseClien
     return url.toString();
   }
 
-  async function fetchOnce(sql: string, params: Record<string, unknown> | undefined, format: string): Promise<Response> {
+  async function fetchOnce(
+    sql: string,
+    params: Record<string, unknown> | undefined,
+    format: string,
+  ): Promise<Response> {
     const url = buildUrl(sql, params, format);
     const headers: Record<string, string> = { 'content-type': 'text/plain' };
     if (auth) headers['authorization'] = auth;

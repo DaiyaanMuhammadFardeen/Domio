@@ -72,18 +72,14 @@ export class PgSuggestionsStore implements SuggestionsStore {
 
   async getSuggestion(suggestionId: string): Promise<Suggestion | null> {
     if (!this.pool) throw new StoreNotConfiguredError('getSuggestion');
-    const { rows } = await this.pool.query(
-      'SELECT * FROM suggestion WHERE id = $1',
-      [suggestionId],
-    );
+    const { rows } = await this.pool.query('SELECT * FROM suggestion WHERE id = $1', [
+      suggestionId,
+    ]);
     if (rows.length === 0) return null;
     return suggestionRowToDomain(rows[0]!);
   }
 
-  async listSuggestionsByDeck(
-    deckId: string,
-    status?: SuggestionStatus,
-  ): Promise<Suggestion[]> {
+  async listSuggestionsByDeck(deckId: string, status?: SuggestionStatus): Promise<Suggestion[]> {
     if (!this.pool) throw new StoreNotConfiguredError('listSuggestionsByDeck');
     const conditions: string[] = ['deck_id = $1'];
     const params: unknown[] = [deckId];
@@ -108,7 +104,9 @@ export class PgSuggestionsStore implements SuggestionsStore {
 
   async updateSuggestion(
     suggestionId: string,
-    patch: Partial<Pick<Suggestion, 'status' | 'resolved_at' | 'resolved_by' | 'updated_at' | 'updated_by'>>,
+    patch: Partial<
+      Pick<Suggestion, 'status' | 'resolved_at' | 'resolved_by' | 'updated_at' | 'updated_by'>
+    >,
   ): Promise<Suggestion> {
     if (!this.pool) throw new StoreNotConfiguredError('updateSuggestion');
 
@@ -236,7 +234,10 @@ export class StoreNotConfiguredError extends Error {
 
 export class StoreNotImplementedError extends Error {
   readonly code = 'STORE_NOT_IMPLEMENTED' as const;
-  constructor(public readonly op: string, public readonly args: Record<string, unknown>) {
+  constructor(
+    public readonly op: string,
+    public readonly args: Record<string, unknown>,
+  ) {
     super(`pg store op ${op} not yet implemented; args=${JSON.stringify(args)}`);
     this.name = 'StoreNotImplementedError';
   }

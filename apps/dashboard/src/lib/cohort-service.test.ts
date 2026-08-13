@@ -3,11 +3,7 @@
  */
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import {
-  fetchCohortMatrix,
-  fetchKpis,
-  saveKpi,
-} from './cohort-service.js';
+import { fetchCohortMatrix, fetchKpis, saveKpi } from './cohort-service.js';
 
 const originalFetch = globalThis.fetch;
 
@@ -24,9 +20,7 @@ describe('cohort-service', () => {
       json: async () => ({
         matrix: {
           weeks: 4,
-          rows: [
-            { joinWeek: '2025-W14', size: 100, retention: [1.0, 0.6, 0.4, 0.3] },
-          ],
+          rows: [{ joinWeek: '2025-W14', size: 100, retention: [1.0, 0.6, 0.4, 0.3] }],
         },
       }),
     })) as unknown as typeof fetch;

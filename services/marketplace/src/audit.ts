@@ -10,12 +10,7 @@
  */
 
 import { createHmac, randomUUID } from 'crypto';
-import type {
-  AuditEvent,
-  AuditActorType,
-  AuditActorKind,
-  AuditEventKind,
-} from './types.js';
+import type { AuditEvent, AuditActorType, AuditActorKind, AuditEventKind } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Constants

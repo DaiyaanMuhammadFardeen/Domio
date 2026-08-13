@@ -23,13 +23,13 @@ plugins: /verdaccio/plugins
 
 # Web UI is fine in dev but disable in production via the deploy profile.
 web:
-  title: "Domio BD npm mirror"
+  title: 'Domio BD npm mirror'
   enable: true
 
 # uplinks: where the proxy fetches from when a package is not in cache.
 uplinks:
   npmjs:
-    url: "${NPM_UPSTREAM}"
+    url: '${NPM_UPSTREAM}'
     maxage: 30m
     timeout: 30s
     cache: true
@@ -39,12 +39,12 @@ uplinks:
 # proxies everything. If we later need to block a specific package, we add a
 # scoped rule ABOVE this one (first match wins).
 packages:
-  "@*/*":
+  '@*/*':
     access: $all
     publish: $anonymous
     unpublish: $anonymous
     proxy: npmjs
-  "**":
+  '**':
     access: $all
     publish: $anonymous
     unpublish: $anonymous

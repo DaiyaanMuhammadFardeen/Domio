@@ -107,7 +107,7 @@ Each feature is annotated with: short **intent**, **acceptance criteria** (testa
   - Admin can place a legal hold on any deck, folder, or all content owned by a user; while held, the deck cannot be deleted, version history cannot be trimmed, and CRDT state is frozen.
   - Holds are scoped: start date, optional end date, custodian list, matter reference, and a reason (free text + matter-id).
   - Retention policies are configurable per content class: `drafts`, `published`, `archived`, `legalHold`, `auditLog` — with rules like "drafts: delete 90 days after last edit," "auditLog: retain 7 years."
-  - Dry-run mode: a policy can be run in `preview` to produce a report of what *would* be purged before destructive execution.
+  - Dry-run mode: a policy can be run in `preview` to produce a report of what _would_ be purged before destructive execution.
   - DSR-driven erasures (#197) operate inside the legal-hold constraint — content under hold is anonymized rather than deleted, and the event is logged.
 - **Behavioral details / edge cases**
   - **Hold precedence:** a legal hold always wins over retention; if a deck is under hold, the retention engine skips it and notes "skipped: under hold" in the run log.
@@ -230,12 +230,12 @@ Each feature is annotated with: short **intent**, **acceptance criteria** (testa
 5. IdP sends `POST /scim/v2/Groups` and `PATCH /Users/{id}` for group changes; Domio applies the **Group → Role mapping** table (e.g., `domio-editors → editor`, `domio-admins → admin`).
 6. When a user is unassigned in the IdP, SCIM `DELETE /Users/{id}` arrives; the user's session is revoked within 5 s, seat released, and an `audit_event` recorded.
 7. Admin sees live provisioning status on the dashboard ("3 users pending, 142 active, 0 errors").
-8. **Edge:** IdP sends a group the tenant doesn't have mapped; the user is created with the tenant's default role and a banner appears: *"Unmapped group: `finance-readonly`. Map it now?"*
+8. **Edge:** IdP sends a group the tenant doesn't have mapped; the user is created with the tenant's default role and a banner appears: _"Unmapped group: `finance-readonly`. Map it now?"_
 
 ### 2.2 Configuring the brand governance dashboard
 
 1. Admin opens **Brand → Governance**.
-2. The dashboard first renders with **on-brand score = N/A** and a CTA: *"Connect a brand kit to start scoring."*
+2. The dashboard first renders with **on-brand score = N/A** and a CTA: _"Connect a brand kit to start scoring."_
 3. Admin selects an existing brand kit (#39) or creates one. The score recalculates over all decks and lands within ~60 s for ≤ 1 K decks (or is queued with a progress indicator for larger tenants).
 4. Admin opens **Rules**, sees the default rule set (off-palette, off-type, off-template, brand-lock edits, accessibility regressions) and adjusts severities.
 5. Admin opens **Ignore list** to add the M&A project folder as exempt from off-palette.
@@ -889,19 +889,19 @@ CREATE INDEX idx_render_status ON render_job(status, created_at);
 
 All under `/scim/v2`; require `Authorization: Bearer <token>` (hashed token compared server-side).
 
-| Method | Path                          | Description |
-|--------|-------------------------------|-------------|
-| GET    | `/ServiceProviderConfig`      | Capability discovery |
-| GET    | `/Schemas`                    | User/Group schemas |
-| GET    | `/Users?filter=…&startIndex=…&count=…` | List users |
-| POST   | `/Users`                      | Create user (idempotent on `externalId`) |
-| GET    | `/Users/{id}`                 | Read user |
-| PATCH  | `/Users/{id}`                 | Patch (add/remove/replace ops) |
-| DELETE | `/Users/{id}`                 | Soft-disable |
-| GET    | `/Groups`                     | List groups |
-| POST   | `/Groups`                     | Create group |
-| PATCH  | `/Groups/{id}`                | Patch group membership |
-| DELETE | `/Groups/{id}`                | Delete group |
+| Method | Path                                   | Description                              |
+| ------ | -------------------------------------- | ---------------------------------------- |
+| GET    | `/ServiceProviderConfig`               | Capability discovery                     |
+| GET    | `/Schemas`                             | User/Group schemas                       |
+| GET    | `/Users?filter=…&startIndex=…&count=…` | List users                               |
+| POST   | `/Users`                               | Create user (idempotent on `externalId`) |
+| GET    | `/Users/{id}`                          | Read user                                |
+| PATCH  | `/Users/{id}`                          | Patch (add/remove/replace ops)           |
+| DELETE | `/Users/{id}`                          | Soft-disable                             |
+| GET    | `/Groups`                              | List groups                              |
+| POST   | `/Groups`                              | Create group                             |
+| PATCH  | `/Groups/{id}`                         | Patch group membership                   |
+| DELETE | `/Groups/{id}`                         | Delete group                             |
 
 `Content-Type: application/scim+json`. Errors are SCIM `{"schemas":["urn:ietf:params:scim:api:messages:2.0:Error"], "status":"...", "detail":"..."}`.
 
@@ -924,7 +924,10 @@ Request body:
   "name": "Bangladesh NID",
   "severity": "block",
   "matcher": { "kind": "regex", "pattern": "(?i)\\bNID[-\\s:]?\\d{10,17}\\b" },
-  "scope": { "elementTypes": ["text","chart","comment","altText"], "folderIds": [] },
+  "scope": {
+    "elementTypes": ["text", "chart", "comment", "altText"],
+    "folderIds": []
+  },
   "enabled": true
 }
 ```
@@ -974,19 +977,19 @@ REST base: `https://api.{zone}.domio.app/v1`. GraphQL: `https://api.{zone}.domio
 
 **Selected REST endpoints:**
 
-| Method | Path | Scope | Notes |
-|--------|------|-------|-------|
-| POST   | `/decks` | `decks:write` | Idempotent on `Idempotency-Key` |
-| GET    | `/decks/{id}` | `decks:read` | Includes resolved schema + bindings |
-| PATCH  | `/decks/{id}` | `decks:write` | Merge-patch; `dryRun=true` returns diff only |
-| DELETE | `/decks/{id}` | `decks:delete` | Respects legal hold (#198) |
-| POST   | `/decks/{id}/versions` | `decks:write` | Named checkpoint |
-| GET    | `/decks/{id}/versions` | `decks:read` | Paginated |
-| POST   | `/components` | `components:publish` | Upload signed `.dcomp` |
-| POST   | `/renders` | `renders:write` | Async, returns `renderJobId` |
-| GET    | `/renders/{jobId}` | `renders:read` | Status + signed output URL |
-| POST   | `/webhooks` | `webhooks:write` | Create subscription |
-| GET    | `/audit/query` | `audit:read` | Compliance scope |
+| Method | Path                   | Scope                | Notes                                        |
+| ------ | ---------------------- | -------------------- | -------------------------------------------- |
+| POST   | `/decks`               | `decks:write`        | Idempotent on `Idempotency-Key`              |
+| GET    | `/decks/{id}`          | `decks:read`         | Includes resolved schema + bindings          |
+| PATCH  | `/decks/{id}`          | `decks:write`        | Merge-patch; `dryRun=true` returns diff only |
+| DELETE | `/decks/{id}`          | `decks:delete`       | Respects legal hold (#198)                   |
+| POST   | `/decks/{id}/versions` | `decks:write`        | Named checkpoint                             |
+| GET    | `/decks/{id}/versions` | `decks:read`         | Paginated                                    |
+| POST   | `/components`          | `components:publish` | Upload signed `.dcomp`                       |
+| POST   | `/renders`             | `renders:write`      | Async, returns `renderJobId`                 |
+| GET    | `/renders/{jobId}`     | `renders:read`       | Status + signed output URL                   |
+| POST   | `/webhooks`            | `webhooks:write`     | Create subscription                          |
+| GET    | `/audit/query`         | `audit:read`         | Compliance scope                             |
 
 **GraphQL** is a single `/graphql` endpoint with a federated schema. The MCP server (#221) exposes the same schema as MCP tools — single source of truth.
 
@@ -1029,7 +1032,7 @@ Body:
   "name": "Chart Kit",
   "version": "2.4.1",
   "author": { "id": "...", "name": "Acme Studio" },
-  "permissions": ["canvas","data","network:outbound:api.acme.io","storage"],
+  "permissions": ["canvas", "data", "network:outbound:api.acme.io", "storage"],
   "ui": {
     "kind": "panel",
     "entry": "ui/index.html",

@@ -40,7 +40,10 @@ export interface IdentityConfig {
 export function loadConfigFromEnv(): IdentityConfig {
   const chUrl = process.env['CLICKHOUSE_URL'];
   return {
-    postgresUrl: process.env['DATABASE_URL'] ?? process.env['POSTGRES_URL'] ?? 'postgres://domio:domio@localhost:5432/domio',
+    postgresUrl:
+      process.env['DATABASE_URL'] ??
+      process.env['POSTGRES_URL'] ??
+      'postgres://domio:domio@localhost:5432/domio',
     redisUrl: process.env['REDIS_URL'] ?? 'redis://localhost:6379',
     port: Number(process.env['PORT'] ?? '3050'),
     identifierSalt: process.env['IDENTITY_SALT'] ?? 'change-me-on-deploy',

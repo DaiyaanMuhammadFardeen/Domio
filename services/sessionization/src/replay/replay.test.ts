@@ -45,9 +45,15 @@ async function runOnce(events: AnalyticsEvent[]): Promise<SessionRecord[]> {
   const captured: SessionRecord[] = [];
   const consumer = buildPartitionConsumer({
     engine: buildSessionEngine({ inactivityMs: 30 * 60 * 1000, maxSessionMs: 4 * 60 * 60 * 1000 }),
-    onUpsert: async (s) => { captured.push(s); },
-    onClose: async () => { /* noop */ },
-    onEmit: async () => { /* noop */ },
+    onUpsert: async (s) => {
+      captured.push(s);
+    },
+    onClose: async () => {
+      /* noop */
+    },
+    onEmit: async () => {
+      /* noop */
+    },
   });
   await consumer.run(events);
   return captured;
@@ -55,7 +61,10 @@ async function runOnce(events: AnalyticsEvent[]): Promise<SessionRecord[]> {
 
 function fingerprint(sessions: readonly SessionRecord[]): string {
   return sessions
-    .map((s) => `${s.session_id}|${s.started_at_ms}|${s.last_event_at_ms}|${s.event_count}|${s.viewer_id_key}`)
+    .map(
+      (s) =>
+        `${s.session_id}|${s.started_at_ms}|${s.last_event_at_ms}|${s.event_count}|${s.viewer_id_key}`,
+    )
     .join('\n');
 }
 
@@ -91,10 +100,19 @@ describe('replay determinism', () => {
     const events = makeCorpus(1000, 1_700_000_000_000);
     let closedCount = 0;
     const consumer = buildPartitionConsumer({
-      engine: buildSessionEngine({ inactivityMs: 30 * 60 * 1000, maxSessionMs: 4 * 60 * 60 * 1000 }),
-      onUpsert: async () => { /* noop */ },
-      onClose: async () => { closedCount += 1; },
-      onEmit: async () => { /* noop */ },
+      engine: buildSessionEngine({
+        inactivityMs: 30 * 60 * 1000,
+        maxSessionMs: 4 * 60 * 60 * 1000,
+      }),
+      onUpsert: async () => {
+        /* noop */
+      },
+      onClose: async () => {
+        closedCount += 1;
+      },
+      onEmit: async () => {
+        /* noop */
+      },
     });
     await consumer.run(events);
     expect(closedCount).toBeGreaterThan(0);

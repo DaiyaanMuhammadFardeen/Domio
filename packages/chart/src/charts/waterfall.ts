@@ -45,10 +45,12 @@ export function renderWaterfall(
   // Gridlines
   for (let i = 0; i <= 4; i++) {
     const y = padT + (plotH / 4) * i;
-    elements.push(svgLine(padL, y, W - padR, y, `grid_${i}`, {
-      stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
-      strokeWidth: 1,
-    }));
+    elements.push(
+      svgLine(padL, y, W - padR, y, `grid_${i}`, {
+        stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
+        strokeWidth: 1,
+      }),
+    );
   }
 
   labels.forEach((label, i) => {
@@ -63,13 +65,15 @@ export function renderWaterfall(
     const color = v >= 0 ? '#10B981' : '#EF4444';
 
     elements.push(rect(cx - barW / 2, top, barW, Math.max(h, 1), `bar_${i}`, { fill: color }));
-    elements.push(text(cx - slot / 2, H - 30, label, `label_${i}`, {
-      width: slot,
-      height: 16,
-      fontSize: opts.fontSize ?? 11,
-      fill: mutedColor,
-      textAnchor: 'middle',
-    }));
+    elements.push(
+      text(cx - slot / 2, H - 30, label, `label_${i}`, {
+        width: slot,
+        height: 16,
+        fontSize: opts.fontSize ?? 11,
+        fill: mutedColor,
+        textAnchor: 'middle',
+      }),
+    );
   });
 
   return elements;

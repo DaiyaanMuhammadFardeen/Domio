@@ -9,11 +9,7 @@
     "to": "now"
   },
   "timezone": "browser",
-  "tags": [
-    "tier-3",
-    "domio",
-    "shader-registry"
-  ],
+  "tags": ["tier-3", "domio", "shader-registry"],
   "panels": [
     {
       "id": 1,

@@ -19,9 +19,7 @@ describe('SessionHeader', () => {
     );
     expect(screen.getByTestId('session-header-code').textContent).toBe('ABC123');
     expect(screen.getByTestId('session-header-display-name').textContent).toBe('Alex');
-    expect(screen.getByTestId('session-header-slide-title').textContent).toBe(
-      'Wave 5 walkthrough',
-    );
+    expect(screen.getByTestId('session-header-slide-title').textContent).toBe('Wave 5 walkthrough');
     expect(screen.getByTestId('session-header-slide-index').textContent).toBe('3 / 10');
   });
 

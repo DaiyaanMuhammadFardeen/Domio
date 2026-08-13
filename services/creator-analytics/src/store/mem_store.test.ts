@@ -142,10 +142,12 @@ describe('InMemoryAnalyticsStore', () => {
   describe('listStatements', () => {
     it('returns statements for the creator', async () => {
       await store.insertStatement(makeStatement());
-      await store.insertStatement(makeStatement({
-        statement_id: 'stmt-2',
-        period_month: '2025-07',
-      }));
+      await store.insertStatement(
+        makeStatement({
+          statement_id: 'stmt-2',
+          period_month: '2025-07',
+        }),
+      );
 
       const result = await store.listStatements({ creator_id: 'creator-1' });
       expect(result).toHaveLength(2);
@@ -153,10 +155,12 @@ describe('InMemoryAnalyticsStore', () => {
 
     it('filters by kind', async () => {
       await store.insertStatement(makeStatement({ kind: 'monthly' }));
-      await store.insertStatement(makeStatement({
-        statement_id: 'stmt-2',
-        kind: 'yearly_1099k',
-      }));
+      await store.insertStatement(
+        makeStatement({
+          statement_id: 'stmt-2',
+          kind: 'yearly_1099k',
+        }),
+      );
 
       const monthly = await store.listStatements({ creator_id: 'creator-1', kind: 'monthly' });
       expect(monthly).toHaveLength(1);
@@ -197,7 +201,10 @@ describe('InMemoryAnalyticsStore', () => {
 
       store.clear();
 
-      const events = await store.getRevenueEvents({ creator_id: 'creator-1', period_month: '2025-06' });
+      const events = await store.getRevenueEvents({
+        creator_id: 'creator-1',
+        period_month: '2025-06',
+      });
       expect(events).toHaveLength(0);
 
       const grants = await store.getLicenseGrants('creator-1');

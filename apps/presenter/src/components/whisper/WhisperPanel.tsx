@@ -64,7 +64,12 @@ export function WhisperPanel({ sessionId, presenterId, client }: WhisperPanelPro
     <aside className="whisper-panel" aria-label="Whisper channel">
       <header className="whisper-panel__header">
         <span className="whisper-panel__title">Whisper</span>
-        <button type="button" className="whisper-panel__close" onClick={() => setOpen(false)} aria-label="Close whisper">
+        <button
+          type="button"
+          className="whisper-panel__close"
+          onClick={() => setOpen(false)}
+          aria-label="Close whisper"
+        >
           ✕
         </button>
       </header>
@@ -92,7 +97,9 @@ export function WhisperPanel({ sessionId, presenterId, client }: WhisperPanelPro
             }
           }}
         />
-        <button type="button" className="whisper-panel__send" onClick={onSend}>Send</button>
+        <button type="button" className="whisper-panel__send" onClick={onSend}>
+          Send
+        </button>
       </div>
     </aside>
   );

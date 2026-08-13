@@ -41,10 +41,12 @@ export function renderArea(
   // Gridlines
   for (let i = 0; i <= 4; i++) {
     const y = padT + (plotH / 4) * i;
-    elements.push(svgLine(padL, y, W - padR, y, `grid_${i}`, {
-      stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
-      strokeWidth: 1,
-    }));
+    elements.push(
+      svgLine(padL, y, W - padR, y, `grid_${i}`, {
+        stroke: theme === 'dark' ? '#334155' : '#e2e8f0',
+        strokeWidth: 1,
+      }),
+    );
   }
 
   if (n > 1) {
@@ -59,23 +61,27 @@ export function renderArea(
       ...points,
       { x: points[points.length - 1]!.x, y: padT + plotH },
     ];
-    elements.push(polyline(fillPoints, 'area', {
-      fill: 'rgba(79,70,229,0.25)',
-      stroke: 'rgba(79,70,229,0.6)',
-      strokeWidth: 2,
-    }));
+    elements.push(
+      polyline(fillPoints, 'area', {
+        fill: 'rgba(79,70,229,0.25)',
+        stroke: 'rgba(79,70,229,0.6)',
+        strokeWidth: 2,
+      }),
+    );
   }
 
   // Labels
   labels.forEach((label, i) => {
     const x = padL + (plotW / Math.max(n - 1, 1)) * i;
-    elements.push(text(Math.min(W - 80, Math.max(0, x - 40)), H - 30, label, `label_${i}`, {
-      width: 80,
-      height: 18,
-      fontSize: opts.fontSize ?? 12,
-      fill: mutedColor,
-      textAnchor: 'middle',
-    }));
+    elements.push(
+      text(Math.min(W - 80, Math.max(0, x - 40)), H - 30, label, `label_${i}`, {
+        width: 80,
+        height: 18,
+        fontSize: opts.fontSize ?? 12,
+        fill: mutedColor,
+        textAnchor: 'middle',
+      }),
+    );
   });
 
   return elements;

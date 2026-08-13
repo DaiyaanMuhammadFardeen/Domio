@@ -16,11 +16,7 @@ export interface DemoEmbedProps {
   readonly thumbnailAlt: string;
 }
 
-export function DemoEmbed({
-  viewerUrl,
-  title,
-  thumbnailAlt,
-}: DemoEmbedProps): JSX.Element {
+export function DemoEmbed({ viewerUrl, title, thumbnailAlt }: DemoEmbedProps): JSX.Element {
   return (
     <div className="demo-embed" data-testid="demo-embed">
       <iframe

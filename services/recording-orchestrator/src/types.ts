@@ -126,21 +126,34 @@ export class RecordingNotFoundError extends Error {
 }
 
 export class RecordingConflictError extends Error {
-  constructor(public readonly recording_session_id: string, public readonly expected_version: number, public readonly actual_version: number) {
-    super(`Recording ${recording_session_id} version mismatch: expected ${expected_version}, actual ${actual_version}`);
+  constructor(
+    public readonly recording_session_id: string,
+    public readonly expected_version: number,
+    public readonly actual_version: number,
+  ) {
+    super(
+      `Recording ${recording_session_id} version mismatch: expected ${expected_version}, actual ${actual_version}`,
+    );
     this.name = 'RecordingConflictError';
   }
 }
 
 export class RecordingInvalidTransitionError extends Error {
-  constructor(public readonly from: RecordingStatus, public readonly to: RecordingStatus) {
+  constructor(
+    public readonly from: RecordingStatus,
+    public readonly to: RecordingStatus,
+  ) {
     super(`Invalid recording transition: ${from} -> ${to}`);
     this.name = 'RecordingInvalidTransitionError';
   }
 }
 
 export class RecordingChunkConflictError extends Error {
-  constructor(public readonly recording_session_id: string, public readonly track_kind: TrackKind, public readonly sequence: number) {
+  constructor(
+    public readonly recording_session_id: string,
+    public readonly track_kind: TrackKind,
+    public readonly sequence: number,
+  ) {
     super(`Chunk ${sequence} already committed for ${track_kind} of ${recording_session_id}`);
     this.name = 'RecordingChunkConflictError';
   }

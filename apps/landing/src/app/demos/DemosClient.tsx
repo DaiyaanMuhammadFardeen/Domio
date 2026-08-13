@@ -33,10 +33,7 @@ export function DemosClient({
 }: DemosClientProps): JSX.Element {
   const [active, setActive] = useState<string | null>(null);
 
-  const availableTags = useMemo<ReadonlyArray<string>>(
-    () => uniqueSorted(DEMO_TAGS),
-    [],
-  );
+  const availableTags = useMemo<ReadonlyArray<string>>(() => uniqueSorted(DEMO_TAGS), []);
 
   const filtered: ReadonlyArray<DemoEntry> = useMemo(() => {
     if (active === null) return DEMOS;
@@ -53,9 +50,7 @@ export function DemosClient({
       <div className="demos__filters" role="group" aria-label="Filter demos by tag">
         <button
           type="button"
-          className={
-            'demos__chip' + (active === null ? ' demos__chip--active' : '')
-          }
+          className={'demos__chip' + (active === null ? ' demos__chip--active' : '')}
           data-testid="demo-filter-chip"
           data-tag="__all__"
           aria-pressed={active === null}
@@ -67,9 +62,7 @@ export function DemosClient({
           <button
             key={tag}
             type="button"
-            className={
-              'demos__chip' + (active === tag ? ' demos__chip--active' : '')
-            }
+            className={'demos__chip' + (active === tag ? ' demos__chip--active' : '')}
             data-testid="demo-filter-chip"
             data-tag={tag}
             aria-pressed={active === tag}

@@ -63,11 +63,13 @@ describe('SlideBreakdownTable', () => {
   });
 
   it('calls the hypothesis fetcher when "why?" is clicked', async () => {
-    const fetcher = vi.fn(async (): Promise<WhyHypothesis | null> => ({
-      slideId: 's-1',
-      summary: 'Cover slide is dense.',
-      hypotheses: ['Too many words', 'Low contrast CTA'],
-    }));
+    const fetcher = vi.fn(
+      async (): Promise<WhyHypothesis | null> => ({
+        slideId: 's-1',
+        summary: 'Cover slide is dense.',
+        hypotheses: ['Too many words', 'Low contrast CTA'],
+      }),
+    );
 
     render(
       <SlideBreakdownTable

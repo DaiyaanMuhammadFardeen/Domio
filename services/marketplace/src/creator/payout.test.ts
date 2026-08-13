@@ -53,31 +53,45 @@ describe('createPayoutMethodBody', () => {
   });
 
   it('throws for pending state', () => {
-    expect(() => createPayoutMethodBody('pending', 'stripe_connect', 'acct_123')).toThrow('Cannot create payout method from state');
+    expect(() => createPayoutMethodBody('pending', 'stripe_connect', 'acct_123')).toThrow(
+      'Cannot create payout method from state',
+    );
   });
 
   it('throws for profile_complete state', () => {
-    expect(() => createPayoutMethodBody('profile_complete', 'stripe_connect', 'acct_123')).toThrow('Cannot create payout method from state');
+    expect(() => createPayoutMethodBody('profile_complete', 'stripe_connect', 'acct_123')).toThrow(
+      'Cannot create payout method from state',
+    );
   });
 
   it('throws for kyc_required state', () => {
-    expect(() => createPayoutMethodBody('kyc_required', 'stripe_connect', 'acct_123')).toThrow('Cannot create payout method from state');
+    expect(() => createPayoutMethodBody('kyc_required', 'stripe_connect', 'acct_123')).toThrow(
+      'Cannot create payout method from state',
+    );
   });
 
   it('throws for kyc_submitted state', () => {
-    expect(() => createPayoutMethodBody('kyc_submitted', 'stripe_connect', 'acct_123')).toThrow('Cannot create payout method from state');
+    expect(() => createPayoutMethodBody('kyc_submitted', 'stripe_connect', 'acct_123')).toThrow(
+      'Cannot create payout method from state',
+    );
   });
 
   it('throws for invalid kind', () => {
-    expect(() => createPayoutMethodBody('kyc_approved', 'paypal', 'acct_123')).toThrow('Invalid payout method kind');
+    expect(() => createPayoutMethodBody('kyc_approved', 'paypal', 'acct_123')).toThrow(
+      'Invalid payout method kind',
+    );
   });
 
   it('throws for empty external_account_id', () => {
-    expect(() => createPayoutMethodBody('kyc_approved', 'stripe_connect', '')).toThrow('external_account_id is required');
+    expect(() => createPayoutMethodBody('kyc_approved', 'stripe_connect', '')).toThrow(
+      'external_account_id is required',
+    );
   });
 
   it('throws for whitespace-only external_account_id', () => {
-    expect(() => createPayoutMethodBody('kyc_approved', 'stripe_connect', '   ')).toThrow('external_account_id is required');
+    expect(() => createPayoutMethodBody('kyc_approved', 'stripe_connect', '   ')).toThrow(
+      'external_account_id is required',
+    );
   });
 });
 
@@ -102,14 +116,20 @@ describe('connectLinkBody', () => {
   });
 
   it('throws for profile_complete state', () => {
-    expect(() => connectLinkBody('profile_complete')).toThrow('Cannot get payout connect link from state');
+    expect(() => connectLinkBody('profile_complete')).toThrow(
+      'Cannot get payout connect link from state',
+    );
   });
 
   it('throws for kyc_required state', () => {
-    expect(() => connectLinkBody('kyc_required')).toThrow('Cannot get payout connect link from state');
+    expect(() => connectLinkBody('kyc_required')).toThrow(
+      'Cannot get payout connect link from state',
+    );
   });
 
   it('throws for kyc_submitted state', () => {
-    expect(() => connectLinkBody('kyc_submitted')).toThrow('Cannot get payout connect link from state');
+    expect(() => connectLinkBody('kyc_submitted')).toThrow(
+      'Cannot get payout connect link from state',
+    );
   });
 });

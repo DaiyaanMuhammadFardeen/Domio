@@ -59,21 +59,23 @@ function validateCreate(input: unknown): ValidationResult<RuleCreateInput> {
   const base: RuleCreateInput = { deckId, when, then };
   let value: RuleCreateInput;
   if (id) {
-    value = priority !== undefined
-      ? enabled !== undefined
-        ? { ...base, id, priority, enabled }
-        : { ...base, id, priority }
-      : enabled !== undefined
-        ? { ...base, id, enabled }
-        : { ...base, id };
+    value =
+      priority !== undefined
+        ? enabled !== undefined
+          ? { ...base, id, priority, enabled }
+          : { ...base, id, priority }
+        : enabled !== undefined
+          ? { ...base, id, enabled }
+          : { ...base, id };
   } else {
-    value = priority !== undefined
-      ? enabled !== undefined
-        ? { ...base, priority, enabled }
-        : { ...base, priority }
-      : enabled !== undefined
-        ? { ...base, enabled }
-        : base;
+    value =
+      priority !== undefined
+        ? enabled !== undefined
+          ? { ...base, priority, enabled }
+          : { ...base, priority }
+        : enabled !== undefined
+          ? { ...base, enabled }
+          : base;
   }
   return { ok: true, value };
 }
@@ -142,7 +144,9 @@ export const create_rule: McpTool<RuleCreateInput, Rule> = {
     const v = validateCreate(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'create_rule', v.value, () =>
-      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/rules`, v.value).then((r) => r as Rule),
+      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/rules`, v.value).then(
+        (r) => r as Rule,
+      ),
     );
   },
 };
@@ -158,9 +162,12 @@ export const update_rule: McpTool<RuleUpdateInput, Rule> = {
     const v = validateUpdate(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'update_rule', v.value, () =>
-      callPrototypeRuntime(ctx, 'PATCH', `/decks/${v.value.deckId}/rules/${v.value.ruleId}`, v.value.patch).then(
-        (r) => r as Rule,
-      ),
+      callPrototypeRuntime(
+        ctx,
+        'PATCH',
+        `/decks/${v.value.deckId}/rules/${v.value.ruleId}`,
+        v.value.patch,
+      ).then((r) => r as Rule),
     );
   },
 };
@@ -194,7 +201,9 @@ export const list_rules: McpTool<RuleListInput, readonly Rule[]> = {
     const v = validateList(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'list_rules', v.value, () =>
-      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/rules`).then((r) => (r as Rule[]).slice()),
+      callPrototypeRuntime(ctx, 'GET', `/decks/${v.value.deckId}/rules`).then((r) =>
+        (r as Rule[]).slice(),
+      ),
     );
   },
 };
@@ -210,12 +219,9 @@ export const test_rule: McpTool<RuleTestInput, { matched: boolean; result?: unkn
     const v = validateTest(input);
     if (!v.ok) throw new MCPError('INVALID_INPUT', 'invalid input', v.issues);
     return withAuditTrail(ctx, 'test_rule', v.value, () =>
-      callPrototypeRuntime(
-        ctx,
-        'POST',
-        `/decks/${v.value.deckId}/rules/${v.value.ruleId}/test`,
-        { context: v.value.context },
-      ).then((r) => r as { matched: boolean; result?: unknown }),
+      callPrototypeRuntime(ctx, 'POST', `/decks/${v.value.deckId}/rules/${v.value.ruleId}/test`, {
+        context: v.value.context,
+      }).then((r) => r as { matched: boolean; result?: unknown }),
     );
   },
 };

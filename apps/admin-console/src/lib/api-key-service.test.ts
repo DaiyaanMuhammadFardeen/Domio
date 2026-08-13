@@ -3,12 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  listAPIKeys,
-  createAPIKey,
-  revokeAPIKey,
-  getAPIKey,
-} from './api-key-service';
+import { listAPIKeys, createAPIKey, revokeAPIKey, getAPIKey } from './api-key-service';
 
 describe('api-key-service', () => {
   it('lists 4+ seeded keys', async () => {
@@ -50,14 +45,10 @@ describe('api-key-service', () => {
   });
 
   it('createAPIKey rejects empty name', async () => {
-    await expect(
-      createAPIKey({ name: '  ', scopes: ['read-only'] }),
-    ).rejects.toThrow();
+    await expect(createAPIKey({ name: '  ', scopes: ['read-only'] })).rejects.toThrow();
   });
 
   it('createAPIKey rejects empty scopes', async () => {
-    await expect(
-      createAPIKey({ name: 'No scopes', scopes: [] }),
-    ).rejects.toThrow();
+    await expect(createAPIKey({ name: 'No scopes', scopes: [] })).rejects.toThrow();
   });
 });

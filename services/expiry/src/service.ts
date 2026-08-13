@@ -11,8 +11,20 @@
 
 import { randomUUID } from 'crypto';
 import { checkFeature, FEATURE_FLAGS } from './feature_flags.js';
-import type { ExpiryPolicy, ExpiryPolicyInput, ExpiryEventEmitter, FreshnessFlag, ShareRevoker, WorkspaceDefaults } from './types.js';
-import { DEFAULT_WORKSPACE_DEFAULTS, PolicyNotFoundError, NoopShareRevoker, noopEmitter } from './types.js';
+import type {
+  ExpiryPolicy,
+  ExpiryPolicyInput,
+  ExpiryEventEmitter,
+  FreshnessFlag,
+  ShareRevoker,
+  WorkspaceDefaults,
+} from './types.js';
+import {
+  DEFAULT_WORKSPACE_DEFAULTS,
+  PolicyNotFoundError,
+  NoopShareRevoker,
+  noopEmitter,
+} from './types.js';
 import type { ExpiryStore } from './store/store.js';
 import { validatePolicyInput, isOverdue, tierAction } from './policies.js';
 
@@ -40,7 +52,10 @@ export class ExpiryService {
   private readonly store: ExpiryStore;
   private readonly emitter: ExpiryEventEmitter;
   private readonly shareRevoker: ShareRevoker;
-  private readonly isLegalHoldFn: (resourceType: string, resourceId: string) => boolean | Promise<boolean>;
+  private readonly isLegalHoldFn: (
+    resourceType: string,
+    resourceId: string,
+  ) => boolean | Promise<boolean>;
   private readonly getWorkspaceDefaults: (workspaceId: string) => Promise<WorkspaceDefaults | null>;
   private readonly clock: () => Date;
 
@@ -83,7 +98,8 @@ export class ExpiryService {
       interval_days: input.interval_days,
       responsible_id: input.responsible_id ?? existing?.responsible_id ?? null,
       escalation: input.escalation ?? existing?.escalation ?? wsDefaults.escalation,
-      auto_revoke_share: input.auto_revoke_share ?? existing?.auto_revoke_share ?? wsDefaults.auto_revoke_share,
+      auto_revoke_share:
+        input.auto_revoke_share ?? existing?.auto_revoke_share ?? wsDefaults.auto_revoke_share,
       created_at: existing?.created_at ?? this.now(),
       created_by: existing?.created_by ?? actorId,
       updated_by: actorId,
@@ -134,7 +150,11 @@ export class ExpiryService {
 
     const override = await this.store.getPolicy(resourceType, resourceId);
     const policyOverrides = override
-      ? { interval_days: override.interval_days, escalation: override.escalation, auto_revoke_share: override.auto_revoke_share }
+      ? {
+          interval_days: override.interval_days,
+          escalation: override.escalation,
+          auto_revoke_share: override.auto_revoke_share,
+        }
       : undefined;
 
     // Build effective policy (using workspace defaults + optional override)
@@ -220,7 +240,11 @@ export class ExpiryService {
     // Strict tier: auto-revoke external share
     let revoked = false;
     if (effectiveAutoRevoke && action.autoRevoke) {
-      const result = await this.shareRevoker.revokeShare(resourceType, resourceId, effectivePolicyObj);
+      const result = await this.shareRevoker.revokeShare(
+        resourceType,
+        resourceId,
+        effectivePolicyObj,
+      );
       if (result) {
         revoked = true;
         await this.emitter.publish('expiry.share_revoked', {
@@ -313,7 +337,7 @@ export class ExpiryService {
     checkFeature(FEATURE_FLAGS.expiry);
 
     const openFlags = await this.store.listOpenFlags();
-    const workspaceFlags = openFlags.filter(f => f.workspace_id === workspaceId);
+    const workspaceFlags = openFlags.filter((f) => f.workspace_id === workspaceId);
     const policies = await this.store.listPolicies(workspaceId);
 
     // Group open flags by tier (using policy lookup)
@@ -328,7 +352,7 @@ export class ExpiryService {
     // Count overdue policies
     for (const policy of policies) {
       const openFlagsForResource = workspaceFlags.filter(
-        f => f.resource_type === policy.resource_type && f.resource_id === policy.resource_id,
+        (f) => f.resource_type === policy.resource_type && f.resource_id === policy.resource_id,
       );
       if (openFlagsForResource.length > 0) {
         overdueCount++;

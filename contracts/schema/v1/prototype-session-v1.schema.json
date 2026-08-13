@@ -5,9 +5,19 @@
   "description": "A user-testing session for a prototype. Phase 10 M5. Resolves PDPA consent, region pin, and the integrity chain kid.",
   "type": "object",
   "required": [
-    "id", "tenant_id", "deck_id", "session_token", "consent", "region",
-    "region_pinned", "sampling_rate", "kid", "started_at", "last_event_at",
-    "expires_at", "last_seq"
+    "id",
+    "tenant_id",
+    "deck_id",
+    "session_token",
+    "consent",
+    "region",
+    "region_pinned",
+    "sampling_rate",
+    "kid",
+    "started_at",
+    "last_event_at",
+    "expires_at",
+    "last_seq"
   ],
   "additionalProperties": false,
   "properties": {

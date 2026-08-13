@@ -161,9 +161,7 @@ export default function CreateListingWizardPage() {
   if (submitted) {
     return (
       <div className="mx-auto max-w-3xl space-y-6" data-testid="wizard-page">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t('creator.wizard.submitted')}
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('creator.wizard.submitted')}</h1>
         <p className="text-sm text-slate-500">{submitted.title}</p>
         <button
           type="button"
@@ -200,9 +198,7 @@ export default function CreateListingWizardPage() {
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t('creator.wizard.title')}
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('creator.wizard.title')}</h1>
         </header>
 
         <StepIndicator
@@ -221,18 +217,10 @@ export default function CreateListingWizardPage() {
             <DetailsStep details={draft.details} onSave={handleDetailsSave} />
           )}
           {draft.step === 'media' && (
-            <MediaStep
-              assets={draft.assets}
-              onAdd={handleAddAsset}
-              onRemove={handleRemoveAsset}
-            />
+            <MediaStep assets={draft.assets} onAdd={handleAddAsset} onRemove={handleRemoveAsset} />
           )}
           {draft.step === 'files' && (
-            <FilesStep
-              assets={draft.assets}
-              onAdd={handleAddAsset}
-              onRemove={handleRemoveAsset}
-            />
+            <FilesStep assets={draft.assets} onAdd={handleAddAsset} onRemove={handleRemoveAsset} />
           )}
           {draft.step === 'pricing' && (
             <PricingStep pricing={draft.pricing} onSave={handlePricingSave} />

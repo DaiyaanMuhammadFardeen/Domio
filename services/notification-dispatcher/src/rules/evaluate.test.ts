@@ -34,18 +34,39 @@ describe('rules/evaluate', () => {
   });
 
   it('event_name condition matches exactly', () => {
-    expect(matches({ kind: 'event_name', equals: 'view' }, event({ event_name: 'view' }))).toBe(true);
-    expect(matches({ kind: 'event_name', equals: 'view' }, event({ event_name: 'interaction' }))).toBe(false);
+    expect(matches({ kind: 'event_name', equals: 'view' }, event({ event_name: 'view' }))).toBe(
+      true,
+    );
+    expect(
+      matches({ kind: 'event_name', equals: 'view' }, event({ event_name: 'interaction' })),
+    ).toBe(false);
   });
 
   it('lead_score condition returns false when source absent', () => {
-    expect(matches({ kind: 'lead_score', gte: 80, source: 'engagement_score' }, event())).toBe(false);
+    expect(matches({ kind: 'lead_score', gte: 80, source: 'engagement_score' }, event())).toBe(
+      false,
+    );
   });
 
   it('lead_score condition returns true when source >= gte', () => {
-    expect(matches({ kind: 'lead_score', gte: 80, source: 'engagement_score' }, event({ engagement_score: 90 }))).toBe(true);
-    expect(matches({ kind: 'lead_score', gte: 80, source: 'engagement_score' }, event({ engagement_score: 80 }))).toBe(true);
-    expect(matches({ kind: 'lead_score', gte: 80, source: 'engagement_score' }, event({ engagement_score: 79 }))).toBe(false);
+    expect(
+      matches(
+        { kind: 'lead_score', gte: 80, source: 'engagement_score' },
+        event({ engagement_score: 90 }),
+      ),
+    ).toBe(true);
+    expect(
+      matches(
+        { kind: 'lead_score', gte: 80, source: 'engagement_score' },
+        event({ engagement_score: 80 }),
+      ),
+    ).toBe(true);
+    expect(
+      matches(
+        { kind: 'lead_score', gte: 80, source: 'engagement_score' },
+        event({ engagement_score: 79 }),
+      ),
+    ).toBe(false);
   });
 
   it('disabled rule never fires', () => {
@@ -81,10 +102,20 @@ describe('rules/evaluate', () => {
 
   it('resolveRecipient handles all channels', () => {
     expect(resolveRecipient(rule({ channel: 'slack', target: { channel_id: '#s' } }))).toBe('#s');
-    expect(resolveRecipient(rule({ channel: 'teams', target: { webhook_url: 'https://teams.webhook' } }))).toBe('https://teams.webhook');
-    expect(resolveRecipient(rule({ channel: 'email', target: { email: 'a@b.com' } }))).toBe('a@b.com');
-    expect(resolveRecipient(rule({ channel: 'webhook', target: { url: 'https://x' } }))).toBe('https://x');
+    expect(
+      resolveRecipient(
+        rule({ channel: 'teams', target: { webhook_url: 'https://teams.webhook' } }),
+      ),
+    ).toBe('https://teams.webhook');
+    expect(resolveRecipient(rule({ channel: 'email', target: { email: 'a@b.com' } }))).toBe(
+      'a@b.com',
+    );
+    expect(resolveRecipient(rule({ channel: 'webhook', target: { url: 'https://x' } }))).toBe(
+      'https://x',
+    );
     expect(resolveRecipient(rule({ channel: 'in_app', target: { user_id: 'u-1' } }))).toBe('u-1');
-    expect(resolveRecipient(rule({ channel: 'mobile', target: { device_token: 'tok' } }))).toBe('tok');
+    expect(resolveRecipient(rule({ channel: 'mobile', target: { device_token: 'tok' } }))).toBe(
+      'tok',
+    );
   });
 });
