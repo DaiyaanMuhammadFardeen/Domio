@@ -54,7 +54,7 @@ export class FetchTransport implements AnalyticsTransport {
       method: 'POST',
       body,
       headers,
-      signal: this.opts.signal,
+      ...(this.opts.signal ? { signal: this.opts.signal } : {}),
     });
     if (!res.ok) {
       // 4xx → drop the batch (the server says the request is bad).

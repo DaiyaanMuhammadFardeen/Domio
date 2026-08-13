@@ -75,7 +75,7 @@ describe('AutoPlayMode', () => {
     const onChange = vi.fn();
     // Capture the onTimeUpdate callback by mocking the Voiceover's
     // <audio> element so we can fire the event manually.
-    const { rerender: _rerender } = render(
+    render(
       <AutoPlayMode
         deck={deck}
         voiceoverUrl="https://media.domio.app/voiceover.mp3"

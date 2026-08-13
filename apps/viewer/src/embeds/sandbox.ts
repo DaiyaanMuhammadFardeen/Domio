@@ -17,10 +17,10 @@
 import {
   buildCspHeader,
   buildFocusTrapHeader,
-  EmbedPolicyService,
   isAllowedOrigin,
   DEFAULT_POLICY,
   type EmbedPolicy,
+  type EmbedPolicyService,
 } from '@domio/embed-proxy';
 
 // ─── Public types ────────────────────────────────────────────────────

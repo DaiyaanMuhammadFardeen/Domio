@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale } from '@/hooks/useLocale';
 import { marketplaceWeb } from '@domio/ui/routing';
@@ -14,7 +14,15 @@ import type {
   PriceModel,
 } from '@/lib/types';
 
-export default function CheckoutPage() {
+export default function CheckoutPageRoute() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-12" data-testid="checkout-loading" />}>
+      <CheckoutPage />
+    </Suspense>
+  );
+}
+
+function CheckoutPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, formatPrice } = useLocale();

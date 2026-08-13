@@ -9,6 +9,12 @@
  * Wire format: base64url(JSON payload) where payload = { v, sid, exp, iat, kid, sig }
  *   sig = HMAC-SHA256(canonicalJson({ v, sid, exp, iat, kid }), secret)
  *
+ * Uses `node:crypto` because HMAC minting/verification lives on the
+ * server side only. The viewer never imports this module's crypto
+ * entry points — the client only uses `buildAudienceUrl` and
+ * `buildQrPayload`, which are defined in a separate file with no
+ * Node-only dependencies.
+ *
  * Injectable clock for deterministic tests.
  */
 

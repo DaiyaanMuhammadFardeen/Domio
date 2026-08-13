@@ -22,6 +22,8 @@
  * `data-testid="kiosk-reset-fired"` attribute set on the wrapper.
  */
 
+'use client';
+
 import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
 import { FullscreenLock } from './FullscreenLock';
 import { IdleScreen } from './IdleScreen';

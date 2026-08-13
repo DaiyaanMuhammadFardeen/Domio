@@ -42,21 +42,21 @@ export {
   type TypeTokens,
   type RadiusTokens,
   type MotionTokens,
-} from './tokens.js';
+} from './tokens';
 
 // Loading / error / empty
-export { SuspenseBoundary, useEmpty, type SuspenseBoundaryProps } from './SuspenseBoundary.js';
+export { SuspenseBoundary, useEmpty, type SuspenseBoundaryProps } from './SuspenseBoundary';
 
-export { Skeleton } from './Skeleton.js';
+export { Skeleton } from './Skeleton';
 
-export { EmptyState, type EmptyStateProps } from './EmptyState.js';
+export { EmptyState, type EmptyStateProps } from './EmptyState';
 
 export {
   ErrorBoundary,
   ErrorCard,
   type ErrorCardProps,
   type ErrorBoundaryProps,
-} from './ErrorBoundary.js';
+} from './ErrorBoundary';
 
 export {
   ToastProvider,
@@ -64,7 +64,7 @@ export {
   type ToastInput,
   type ToastProviderProps,
   type ToastVariant,
-} from './Toast.js';
+} from './Toast';
 
 // i18n
 export {
@@ -74,17 +74,17 @@ export {
   readLocaleFromNavigator,
   LOCALE_COOKIE,
   type UseLocaleResult,
-} from './useLocale.js';
+} from './useLocale';
 
-export { setLocale, type SetLocaleOptions } from './setLocale.js';
+export { setLocale, type SetLocaleOptions } from './setLocale';
 
 export {
   resolveLocaleFromHeaders,
   type ResolveLocaleHeaders,
   type ResolvedLocale,
-} from './serverLocale.js';
+} from './serverLocale';
 
-export { FormattedMessage, type FormattedMessageProps } from './FormattedMessage.js';
+export { FormattedMessage, type FormattedMessageProps } from './FormattedMessage';
 
 // Routing
 export {
@@ -109,13 +109,13 @@ export {
   type CreatorRoute,
   type MarketplaceRoute,
   type LandingRoute,
-} from './routing.js';
+} from './routing';
 
 // Registry pattern
-export { createPanelRegistry, type PanelRegistry, type PanelDefinition } from './PanelRegistry.js';
+export { createPanelRegistry, type PanelRegistry, type PanelDefinition } from './PanelRegistry';
 
 // Class-merge helper (clsx-like, dependency-free)
-export { cn } from './cn.js';
+export { cn } from './cn';
 
 // Navigation graph (Wave 13 IA Network)
 export {
@@ -127,7 +127,7 @@ export {
   type SurfaceRoot,
   type NavAnchor,
   type NavAnchorProps,
-} from './nav-graph.js';
+} from './nav-graph';
 
 export {
   nodeById,
@@ -141,9 +141,9 @@ export {
   relatedForHref,
   childrenOf,
   nodesPointingAt,
-} from './nav-resolver.js';
+} from './nav-resolver';
 
-export { Breadcrumbs, type BreadcrumbsProps } from './Breadcrumbs.js';
-export { RelatedLinks, type RelatedLinksProps } from './RelatedLinks.js';
-export { Pager, type PagerProps } from './Pager.js';
-export { AppNav, type AppNavProps, type AppNavClassNames } from './AppNav.js';
+export { Breadcrumbs, type BreadcrumbsProps } from './Breadcrumbs';
+export { RelatedLinks, type RelatedLinksProps } from './RelatedLinks';
+export { Pager, type PagerProps } from './Pager';
+export { AppNav, type AppNavProps, type AppNavClassNames } from './AppNav';

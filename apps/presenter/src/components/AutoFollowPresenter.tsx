@@ -96,7 +96,6 @@ export function AutoFollowPresenter({
           width: 128,
           height: 128,
           borderRadius: '50%',
-          background: 'var(--spotlight, transparent)',
           background: 'radial-gradient(circle, var(--surface-raised) 0%, transparent 70%)',
           opacity: 0.35,
         }}

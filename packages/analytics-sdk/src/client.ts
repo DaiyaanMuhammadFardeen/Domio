@@ -42,7 +42,6 @@ export interface ClientOptionsInternal extends ClientOptions {
   detectDnt?: () => boolean;
 }
 
-const DEFAULT_ULID_LEN = 26;
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 /**
@@ -73,7 +72,8 @@ export class AnalyticsClient {
 
   constructor(opts: ClientOptions) {
     this.opts = opts;
-    this.detectDnt = opts.detectDnt ?? defaultDntDetector;
+    const internalOpts = opts as ClientOptionsInternal;
+    this.detectDnt = internalOpts.detectDnt ?? defaultDntDetector;
     const queue = opts.queueStore ?? defaultQueueStore(opts);
     const transport = opts.transport ?? defaultTransport(opts);
     this.batcher = new Batcher({
@@ -214,16 +214,17 @@ export class AnalyticsClient {
     if (this.detectDnt() && (this.opts.honorDnt ?? true)) {
       throw new AnalyticsDroppedEventError('dnt');
     }
-    const stamped: AnalyticsEvent = {
-      ...stripEvent(event),
+    const scrubbed = stripEvent(event as unknown as Record<string, unknown>);
+    const stamped = {
+      ...scrubbed,
       event_id: event.event_id ?? ulid(this.opts.random ?? Math.random, this.opts.now ?? Date.now),
       schema_version: 1,
       ts_ms: event.ts_ms ?? (this.opts.now ?? Date.now)(),
       privacy_mode: event.privacy_mode ?? this.opts.context.privacy_mode,
       device_class: event.device_class ?? this.opts.context.device_class,
       source_app: event.source_app ?? this.opts.context.source_app,
-      ingest_topic: 'events.ingest.raw',
-    };
+      ingest_topic: 'events.ingest.raw' as const,
+    } as AnalyticsEvent;
     void this.batcher.enqueue(stamped);
     return true;
   }
@@ -250,7 +251,7 @@ function defaultTransport(opts: ClientOptions) {
   return new FetchTransport({ ingestUrl: opts.ingestUrl, hmacKeyHex: opts.hmacKeyHex });
 }
 
-function defaultQueueStore(opts: ClientOptions) {
+function defaultQueueStore(_opts: ClientOptions) {
   try {
     if (typeof indexedDB !== 'undefined') return new IdbQueueStore();
   } catch {

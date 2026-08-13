@@ -48,9 +48,9 @@ export function stripPii(input: string): string {
  * Walk an event payload and apply stripPii to every string field.
  * Returns a new object so the original is never mutated.
  */
-export function stripEvent<T extends Record<string, unknown>>(event: T): T {
+export function stripEvent<T extends object>(event: T): T {
   const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(event)) {
+  for (const [k, v] of Object.entries(event as Record<string, unknown>)) {
     out[k] = scrubValue(v);
   }
   return out as T;

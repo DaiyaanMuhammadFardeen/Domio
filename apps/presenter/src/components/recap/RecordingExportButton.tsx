@@ -50,7 +50,7 @@ export function RecordingExportButton({
   const abortRef = useRef<AbortController | null>(null);
 
   if (serviceRef.current === null) {
-    serviceRef.current = new RecordingService({ apiBaseUrl });
+    serviceRef.current = new RecordingService(apiBaseUrl !== undefined ? { apiBaseUrl } : {});
   }
 
   // Cancel any in-flight polling when the component unmounts.

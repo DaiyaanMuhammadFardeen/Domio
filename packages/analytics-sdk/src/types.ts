@@ -14,7 +14,7 @@ export type PrivacyMode = 'identified' | 'pseudonymous' | 'anon_consent' | 'anon
 
 export type DeviceClass = 'mobile' | 'tablet' | 'desktop' | 'bot';
 
-export type SourceApp = 'viewer' | 'presenter' | 'join-web';
+export type SourceApp = 'viewer' | 'presenter' | 'join-web' | 'rtgw' | 'pwg';
 
 export type RegionPin = 'global' | 'bd';
 

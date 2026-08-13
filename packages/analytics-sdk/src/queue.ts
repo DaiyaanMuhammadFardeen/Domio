@@ -71,11 +71,12 @@ export class IdbQueueStore implements QueueStore {
   constructor(opts: IdbQueueStoreOptions = {}) {
     this.dbName = opts.dbName ?? IDB_DB_NAME;
     this.maxBytes = opts.maxBytes ?? MAX_BYTES_DEFAULT;
-    const globalIdb = typeof indexedDB !== 'undefined' ? indexedDB : null;
-    this.indexedDB = opts.indexedDB ?? globalIdb;
-    if (!this.indexedDB) {
+    const globalIdb: IDBFactory | null = typeof indexedDB !== 'undefined' ? indexedDB : null;
+    const resolved: IDBFactory | null = opts.indexedDB ?? globalIdb;
+    if (!resolved) {
       throw new Error('IndexedDB unavailable; pass MemoryQueueStore instead');
     }
+    this.indexedDB = resolved;
   }
 
   private open(): Promise<IDBDatabase> {
@@ -98,7 +99,13 @@ export class IdbQueueStore implements QueueStore {
     const db = await this.open();
     const tx = db.transaction(IDB_STORE, 'readwrite');
     const store = tx.objectStore(IDB_STORE);
-    store.add({ bytes: record.bytes, event: record.event, dropped: record.dropped });
+    store.add({
+      seq: record.seq,
+      bytes: record.bytes,
+      event: record.event,
+      dropped: record.dropped,
+      event_id: record.event_id,
+    });
     await txDone(tx);
     this.cachedBytes += record.bytes;
     this.cachedCount += 1;
@@ -118,9 +125,16 @@ export class IdbQueueStore implements QueueStore {
           resolve();
           return;
         }
-        const v = cursor.value as { seq: number; bytes: number; event: unknown; dropped: number };
+        const v = cursor.value as {
+          seq: number;
+          bytes: number;
+          event: unknown;
+          dropped: number;
+          event_id: string;
+        };
         records.push({
           seq: v.seq,
+          event_id: v.event_id,
           bytes: v.bytes,
           event: v.event as QueuedEvent['event'],
           dropped: v.dropped,

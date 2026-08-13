@@ -33,7 +33,7 @@ export function ResumeFromPhone({
 }: ResumeFromPhoneProps): ReactElement {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const service = new FailoverService({ apiBaseUrl });
+  const service = new FailoverService(apiBaseUrl !== undefined ? { apiBaseUrl } : {});
 
   const handleResume = useCallback(async () => {
     setSubmitting(true);

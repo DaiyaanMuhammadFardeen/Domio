@@ -85,7 +85,10 @@ export function PhoneRemote({
   const lastSlideIndexRef = useRef<number | undefined>(undefined);
   const firedRef = useRef<Set<string>>(new Set());
 
-  const service = useMemo(() => new PhoneRemoteService({ apiBaseUrl }), [apiBaseUrl]);
+  const service = useMemo(
+    () => new PhoneRemoteService(apiBaseUrl !== undefined ? { apiBaseUrl } : {}),
+    [apiBaseUrl],
+  );
 
   const refresh = useCallback(async () => {
     try {

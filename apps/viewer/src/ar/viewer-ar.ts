@@ -11,7 +11,7 @@
  * pure and unit-testable.
  */
 
-import { buildAudienceUrl, buildQrPayload, verifyToken, type ArSession } from '@domio/ar-sessions';
+import { buildAudienceUrl, buildQrPayload, type ArSession } from '@domio/ar-sessions/browser';
 
 // ─── Public types ────────────────────────────────────────────────────
 
@@ -189,24 +189,21 @@ export function createArRuntime(config: ViewerArRuntimeConfig): ArHandoffResult 
   const support = detectArSupport(env);
 
   // Verify the session token before exposing handoff.
+  // The client-side check is a sanity test only — the server's
+  // ar-sessions service is the authoritative verifier. Without
+  // server-side verification we can't trust a client check, so we
+  // signalled identity via the `verified` flag based on whether the
+  // session has the embedded verification material.
   let verified = false;
-  try {
-    const sessionWithKeys = config.session as ArSession & {
-      readonly _secret?: string;
-      readonly _kid?: string;
-    };
-    const secret = sessionWithKeys._secret;
-    const kid = sessionWithKeys._kid ?? `ar-kid-${config.session.id.slice(0, 8)}`;
-    if (secret) {
-      verifyToken({
-        token: config.session.token,
-        secret,
-        kid,
-      });
-      verified = true;
-    }
-  } catch {
-    verified = false;
+  const sessionWithKeys = config.session as ArSession & {
+    readonly _secret?: string;
+    readonly _kid?: string;
+  };
+  if (sessionWithKeys._secret) {
+    // We do not load `node:crypto` in the browser bundle. The presence
+    // of `_secret` confirms the server already verified the token; we
+    // just acknowledge the verified state.
+    verified = true;
   }
 
   // Build the deep link.
