@@ -41,3 +41,5 @@ jobs:
     uses: ./.github/workflows/axe.yml
   chaos:
     uses: ./.github/workflows/chaos.yml
+  security:
+    uses: ./.github/workflows/security.yml
