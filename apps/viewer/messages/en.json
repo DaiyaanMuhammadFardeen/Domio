@@ -5,5 +5,17 @@
   "viewer.noDecks": "No published decks yet. Publish a deck from the editor to see it here.",
   "viewer.openDeck": "Open",
   "viewer.nextSlide": "Next slide",
-  "viewer.previousSlide": "Previous slide"
+  "viewer.previousSlide": "Previous slide",
+  "viewer.kiosk.heading": "Kiosk mode",
+  "viewer.kiosk.tap.advance": "Tap right to advance",
+  "viewer.kiosk.tap.back": "Tap left to go back",
+  "viewer.kiosk.longPress": "Long-press to pause",
+  "viewer.kiosk.idleReset": "Resets in {sec}s",
+  "viewer.kiosk.exitPin.heading": "Exit kiosk mode",
+  "viewer.kiosk.exitPin.prompt": "Enter admin PIN",
+  "viewer.kiosk.exitPin.submit": "Submit",
+  "viewer.kiosk.exitPin.cancel": "Cancel",
+  "viewer.kiosk.exitPin.invalid": "Invalid PIN",
+  "viewer.kiosk.exitPin.success": "PIN accepted — exiting kiosk mode",
+  "viewer.kiosk.paused": "Paused"
 }

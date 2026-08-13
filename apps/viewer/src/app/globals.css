@@ -11,6 +11,10 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); }
+
+/* Wave 11 §S11.14 — kiosk mode hides the cursor after inactivity. */
+body.kiosk-cursor-hidden,
+body.kiosk-cursor-hidden * { cursor: none !important; }
 .boot { max-width: 800px; margin: 0 auto; padding: 64px 32px; }
 .boot__header { text-align: center; margin-bottom: 48px; }
 .boot__header h1 { margin: 0 0 8px; font-size: 36px; font-weight: 700; }
