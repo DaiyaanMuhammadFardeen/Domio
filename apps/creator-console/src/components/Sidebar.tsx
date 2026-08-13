@@ -14,9 +14,11 @@ interface NavItem {
 const NAV: ReadonlyArray<NavItem> = [
   { href: creatorConsole('listings'), label: 'Listings', group: 'Studio' },
   { href: creatorConsole('listings-create'), label: 'Create listing', group: 'Studio' },
+  { href: creatorConsole('onboarding'), label: 'Onboarding', group: 'Studio' },
   { href: creatorConsole('analytics'), label: 'Analytics', group: 'Insights' },
   { href: creatorConsole('statements'), label: 'Statements', group: 'Insights' },
   { href: creatorConsole('payouts'), label: 'Payouts', group: 'Insights' },
+  { href: creatorConsole('reviews'), label: 'Reviews', group: 'Insights' },
   { href: creatorConsole('settings'), label: 'Settings', group: 'Account' },
 ];
 

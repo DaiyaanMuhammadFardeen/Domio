@@ -41,6 +41,18 @@ export function Header() {
             >
               {t('nav.browse')}
             </Link>
+            <Link
+              href={marketplaceWeb('sellers')}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-panel hover:text-fg"
+            >
+              {t('nav.creators')}
+            </Link>
+            <Link
+              href={marketplaceWeb('library')}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-panel hover:text-fg"
+            >
+              {t('nav.library')}
+            </Link>
           </nav>
         </div>
 

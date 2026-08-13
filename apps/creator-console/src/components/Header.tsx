@@ -3,8 +3,11 @@ import { creatorConsole, type CreatorRoute } from '@domio/ui/routing';
 
 const NAV_ITEMS: ReadonlyArray<{ route: CreatorRoute; label: string }> = [
   { route: 'listings', label: 'Listings' },
+  { route: 'listings-create', label: 'Create' },
   { route: 'analytics', label: 'Analytics' },
   { route: 'statements', label: 'Statements' },
+  { route: 'payouts', label: 'Payouts' },
+  { route: 'reviews', label: 'Reviews' },
   { route: 'settings', label: 'Settings' },
 ];
 
