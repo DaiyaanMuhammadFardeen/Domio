@@ -105,7 +105,7 @@ describe('ConsentScreen', () => {
     );
     fireEvent.click(screen.getByTestId('consent-accept-all'));
     expect(captured).not.toBeNull();
-    expect(captured?.policy_version).toBe('v1');
-    expect(captured?.accepted.length).toBe(3);
+    expect(captured!.policy_version).toBe('v1');
+    expect(captured!.accepted.length).toBe(3);
   });
 });

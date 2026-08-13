@@ -1,4 +1,8 @@
-import { nextSecurityHeaders } from '@domio/web-security';
+// Imported via the dist/ path because Node ESM doesn't resolve
+// workspace package exports from .mjs config files without an
+// explicit file extension. The build script ensures
+// packages/web-security/dist/ exists before next build runs.
+import { nextSecurityHeaders } from '@domio/web-security/dist/index.js';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
 /** @type {import('next').NextConfig} */

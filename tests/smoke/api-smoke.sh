@@ -50,7 +50,7 @@ check "deck demo"                     GET  /v1/decks/local/local/demo           
 # payload (even when empty) by contract.
 check "annotation list"               GET  /v1/annotation/local/list                      200
 check "permissions grants list"       GET  /v1/permissions/grants?resource_type=deck\&resource_id=local 200
-check "task-links root"               GET  /v1/task-links/                                200
+check "task-links root"               GET  /v1/task-links                                 200
 check "deck comments list"            GET  /v1/decks/local/comments                       200
 
 echo

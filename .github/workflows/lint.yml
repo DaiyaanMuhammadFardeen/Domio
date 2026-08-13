@@ -66,7 +66,7 @@ jobs:
         with:
           node-version: '22.11.0'
       - run: npm install -g prettier@3.4.2
-      - run: prettier --check '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}' --ignore-path .gitignore
+      - run: prettier --check '**/*.{ts,tsx,js,jsx,json,md,yml,yaml}' --ignore-path .prettierignore --ignore-path .gitignore
 
   shell:
     name: shellcheck

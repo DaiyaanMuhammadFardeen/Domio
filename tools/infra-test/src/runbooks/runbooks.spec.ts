@@ -68,9 +68,9 @@ describe('Runbooks — quarterly checklist structure', () => {
 describe('Runbooks — environments.md covers three envs', () => {
   it('environments.md mentions dev, staging, prod', () => {
     const text = readText(ENV_DOC);
-    expect(text).toMatch(/\| dev \|/);
-    expect(text).toMatch(/\| staging \|/);
-    expect(text).toMatch(/\| prod \|/);
+    expect(text).toMatch(/\|\s*dev\s*\|/);
+    expect(text).toMatch(/\|\s*staging\s*\|/);
+    expect(text).toMatch(/\|\s*prod\s*\|/);
   });
 
   it('environments.md codifies GHCR image registry default', () => {
