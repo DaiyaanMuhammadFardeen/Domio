@@ -272,3 +272,189 @@ export const WEBHOOK_EVENT_TYPES: ReadonlyArray<WebhookEventType> = [
   'plugin.installed',
   'plugin.disabled',
 ];
+
+// ── Wave 10 §S10.2: per-event subscriptions + tester ────────────────────
+//
+// Compact subscription model keyed by a single event. Distinct from the
+// legacy `Webhook` record above (which keys by URL with many events).
+// Real endpoints will live under `/v1/admin/webhooks/subscriptions/*`.
+// Until then we keep a small in-memory store and a deterministic
+// `testWebhook` that simulates a delivery.
+
+export type WebhookRetryPolicy = 'none' | 'exp1' | 'exp3';
+
+const VALID_RETRY_POLICIES: ReadonlyArray<WebhookRetryPolicy> = ['none', 'exp1', 'exp3'];
+
+export interface WebhookSubscription {
+  readonly id: string;
+  readonly event: string;
+  readonly url: string;
+  readonly secret_last4: string;
+  readonly retry_policy: WebhookRetryPolicy;
+  readonly active: boolean;
+  readonly created_at_ms: number;
+}
+
+export interface WebhookTestResult {
+  readonly status_code: number;
+  readonly latency_ms: number;
+  readonly headers: Record<string, string>;
+  readonly body: string;
+  readonly sent_at_ms: number;
+}
+
+export interface WebhookSubscriptionInput {
+  readonly event: string;
+  readonly url: string;
+  readonly secret: string;
+  readonly retry_policy: WebhookRetryPolicy;
+}
+
+const SUBSCRIPTION_SEED: ReadonlyArray<WebhookSubscription> = [
+  {
+    id: 'sub-deck-viewed',
+    event: 'deck.viewed',
+    url: 'https://hooks.example.com/domio/deck-viewed',
+    secret_last4: 'f01a',
+    retry_policy: 'exp3',
+    active: true,
+    created_at_ms: NOW - 14 * DAY_MS,
+  },
+  {
+    id: 'sub-comment-added',
+    event: 'comment.added',
+    url: 'https://hooks.example.com/domio/comments',
+    secret_last4: 'c9b2',
+    retry_policy: 'exp1',
+    active: true,
+    created_at_ms: NOW - 9 * DAY_MS,
+  },
+  {
+    id: 'sub-approval-granted',
+    event: 'approval.granted',
+    url: 'https://hooks.example.com/domio/approvals',
+    secret_last4: '84ee',
+    retry_policy: 'exp3',
+    active: true,
+    created_at_ms: NOW - 2 * DAY_MS,
+  },
+  {
+    id: 'sub-data-updated',
+    event: 'data.updated',
+    url: 'https://hooks.example.com/domio/data',
+    secret_last4: '1234',
+    retry_policy: 'none',
+    active: false,
+    created_at_ms: NOW - 30 * DAY_MS,
+  },
+];
+
+const SUBSCRIPTION_STORE: WebhookSubscription[] = SUBSCRIPTION_SEED.map((s) => ({ ...s }));
+
+function subscriptionGenId(): string {
+  return `sub-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function cloneSub(s: WebhookSubscription): WebhookSubscription {
+  return { ...s };
+}
+
+export async function listSubscriptions(): Promise<ReadonlyArray<WebhookSubscription>> {
+  try {
+    const json = await fetcher<{ items?: WebhookSubscription[] }>(
+      '/v1/admin/webhooks/subscriptions',
+    );
+    const items = json.items ?? [];
+    if (items.length > 0) return items;
+  } catch {
+    // fall through
+  }
+  return SUBSCRIPTION_STORE.map(cloneSub);
+}
+
+export async function createSubscription(
+  input: WebhookSubscriptionInput,
+): Promise<WebhookSubscription> {
+  if (!input.url.trim().toLowerCase().startsWith('https://')) {
+    throw new Error('Subscription URL must use HTTPS');
+  }
+  if (!input.event.trim()) {
+    throw new Error('Event is required');
+  }
+  if (!VALID_RETRY_POLICIES.includes(input.retry_policy)) {
+    throw new Error(`Invalid retry policy: ${input.retry_policy}`);
+  }
+  if (input.secret.length < 8) {
+    throw new Error('Secret must be at least 8 characters');
+  }
+  const sub: WebhookSubscription = {
+    id: subscriptionGenId(),
+    event: input.event.trim(),
+    url: input.url.trim(),
+    secret_last4: input.secret.slice(-4),
+    retry_policy: input.retry_policy,
+    active: true,
+    created_at_ms: NOW,
+  };
+  SUBSCRIPTION_STORE.push(sub);
+  try {
+    return await fetcher<WebhookSubscription>(
+      '/v1/admin/webhooks/subscriptions',
+      { method: 'POST', body: input },
+    );
+  } catch {
+    return cloneSub(sub);
+  }
+}
+
+export async function testWebhook(
+  subscriptionId: string,
+  payload: Record<string, unknown>,
+): Promise<WebhookTestResult> {
+  const sub = SUBSCRIPTION_STORE.find((s) => s.id === subscriptionId);
+  if (!sub) {
+    throw new Error(`Subscription ${subscriptionId} not found`);
+  }
+  const start = Date.now();
+  const sent_at_ms = start;
+  try {
+    await fetcher<WebhookTestResult>(
+      `/v1/admin/webhooks/subscriptions/${encodeURIComponent(subscriptionId)}/test`,
+      { method: 'POST', body: payload },
+    );
+  } catch {
+    // fall through to seed response
+  }
+  const hash = simpleHash(JSON.stringify(payload) + subscriptionId);
+  const latency_ms = 20 + (hash % 60);
+  const status_code = (hash % 100) < 90 ? 200 : 500;
+  return {
+    status_code,
+    latency_ms,
+    headers: {
+      'content-type': 'application/json',
+      'x-domio-subscription': subscriptionId,
+      'x-domio-event': sub.event,
+      'x-domio-retry-policy': sub.retry_policy,
+    },
+    body: JSON.stringify(
+      {
+        ok: status_code < 400,
+        received: payload,
+        subscription_id: subscriptionId,
+        event: sub.event,
+      },
+      null,
+      2,
+    ),
+    sent_at_ms,
+  };
+}
+
+function simpleHash(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i += 1) {
+    h = (h * 31 + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}

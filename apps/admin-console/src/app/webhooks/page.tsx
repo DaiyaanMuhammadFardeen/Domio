@@ -1,16 +1,20 @@
 /**
- * Webhooks admin page — Wave 8 §S8.8.
+ * Webhooks admin page — Wave 8 §S8.8 + Wave 10 §S10.2.
  *
- * Lists every webhook subscription, lets the operator create new
- * subscriptions, edit existing ones, rotate the signing secret, and
- * delete subscriptions. Each row expands to show recent delivery
- * attempts. Backed by `webhook-service.ts`.
+ * Tabs:
+ *   - Subscriptions : legacy webhook list / create / edit / rotate /
+ *                     delete with expandable delivery panel.
+ *   - Tester        : subscribe to a single-event webhook, fire a
+ *                     single-shot test, inspect the response.
+ *
+ * Defaults to the Subscriptions tab. Backed by `webhook-service.ts`.
  */
 
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight, Plus, X } from 'lucide-react';
+import { clsx } from 'clsx';
 import { FormattedMessage } from '@domio/ui';
 import enMessages from '../../../messages/en.json';
 import { Badge } from '../../components/Badge';
@@ -22,6 +26,7 @@ import {
   listWebhooks,
   rotateSecret,
   updateWebhook,
+  listSubscriptions,
 } from '../../lib/webhook-service';
 import type {
   Webhook,
@@ -29,6 +34,8 @@ import type {
   WebhookEventType,
   WebhookInput,
 } from '../../lib/types';
+import type { WebhookSubscription } from '../../lib/webhook-service';
+import { SubscriptionForm, WebhookTester } from '../../components/webhooks';
 
 const CATALOGUE = enMessages as Readonly<Record<string, string>>;
 
@@ -70,7 +77,21 @@ const EMPTY_FORM: WebhookFormState = {
   backoffSeconds: 30,
 };
 
+type TabKey = 'subscriptions' | 'tester';
+
+interface TabDef {
+  readonly key: TabKey;
+  readonly label: string;
+  readonly testid: string;
+}
+
+const TABS: ReadonlyArray<TabDef> = [
+  { key: 'subscriptions', label: 'Subscriptions', testid: 'webhooks-tab-subscriptions' },
+  { key: 'tester', label: 'Tester', testid: 'webhooks-tab-tester' },
+];
+
 export default function WebhooksPage() {
+  const [tab, setTab] = useState<TabKey>('subscriptions');
   const [webhooks, setWebhooks] = useState<ReadonlyArray<Webhook>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,13 +102,15 @@ export default function WebhooksPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deliveries, setDeliveries] = useState<ReadonlyArray<WebhookDelivery>>([]);
   const [loadingDeliveries, setLoadingDeliveries] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<ReadonlyArray<WebhookSubscription>>([]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const items = await listWebhooks();
+      const [items, subs] = await Promise.all([listWebhooks(), listSubscriptions()]);
       setWebhooks(items);
+      setSubscriptions(subs);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load webhooks');
     } finally {
@@ -98,6 +121,15 @@ export default function WebhooksPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  async function refreshSubscriptions() {
+    try {
+      const subs = await listSubscriptions();
+      setSubscriptions(subs);
+    } catch {
+      // ignore; tester keeps existing list
+    }
+  }
 
   function toggleFormEvent(event: WebhookEventType) {
     setForm((prev) => ({
@@ -250,12 +282,49 @@ export default function WebhooksPage() {
         </div>
       )}
 
-      {formOpen && (
-        <form
-          onSubmit={handleSubmit}
-          data-testid="webhooks-form"
-          className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-        >
+      <div
+        className="flex flex-wrap gap-1 border-b border-slate-200"
+        data-testid="webhooks-tabs"
+      >
+        {TABS.map((t) => {
+          const active = tab === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              data-testid={t.testid}
+              onClick={() => setTab(t.key)}
+              className={clsx(
+                'rounded-t-md px-4 py-2 text-sm font-medium transition',
+                active
+                  ? 'border-b-2 border-brand-500 text-brand-700'
+                  : 'text-slate-600 hover:text-slate-900',
+              )}
+            >
+              {t.key === 'subscriptions' ? (
+                <FormattedMessage
+                  id="admin.webhooks.tab.subscriptions"
+                  catalogue={CATALOGUE}
+                />
+              ) : (
+                <FormattedMessage
+                  id="admin.webhooks.tab.tester"
+                  catalogue={CATALOGUE}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {tab === 'subscriptions' && (
+        <>
+          {formOpen && (
+            <form
+              onSubmit={handleSubmit}
+              data-testid="webhooks-form"
+              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+            >
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">
             {editingId ? 'Edit webhook' : 'New webhook'}
           </h3>
@@ -578,6 +647,19 @@ export default function WebhooksPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+        </>
+      )}
+
+      {tab === 'tester' && (
+        <div className="space-y-6">
+          <SubscriptionForm
+            onCreated={() => {
+              void refreshSubscriptions();
+            }}
+          />
+          <WebhookTester subscriptions={subscriptions} />
         </div>
       )}
     </div>

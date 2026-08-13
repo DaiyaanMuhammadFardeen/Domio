@@ -1,5 +1,5 @@
 /**
- * Webhook service tests — Wave 8 §S8.8.
+ * Webhook service tests — Wave 8 §S8.8 + Wave 10 §S10.2.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -10,6 +10,10 @@ import {
   deleteWebhook,
   rotateSecret,
   listDeliveries,
+  listSubscriptions,
+  createSubscription,
+  testWebhook,
+  type WebhookRetryPolicy,
 } from './webhook-service';
 
 describe('webhook-service', () => {
@@ -88,5 +92,118 @@ describe('webhook-service', () => {
         retry_policy: { max_retries: 1, backoff_seconds: 10 },
       }),
     ).rejects.toThrow(/event/i);
+  });
+});
+
+describe('webhook-service subscriptions (Wave 10 §S10.2)', () => {
+  it('listSubscriptions returns 4+ seeded subscriptions', async () => {
+    const subs = await listSubscriptions();
+    expect(subs.length).toBeGreaterThanOrEqual(4);
+    const ids = subs.map((s) => s.id);
+    expect(ids).toContain('sub-deck-viewed');
+    expect(ids).toContain('sub-comment-added');
+    expect(ids).toContain('sub-approval-granted');
+    expect(ids).toContain('sub-data-updated');
+  });
+
+  it('createSubscription returns a subscription with a generated id and last4', async () => {
+    const sub = await createSubscription({
+      event: 'deck.viewed',
+      url: 'https://example.com/hook',
+      secret: 'whsec_0123456789abcdef',
+      retry_policy: 'exp3',
+    });
+    expect(sub.id).toMatch(/^sub-/);
+    expect(sub.event).toBe('deck.viewed');
+    expect(sub.url).toBe('https://example.com/hook');
+    expect(sub.secret_last4).toBe('cdef');
+    expect(sub.active).toBe(true);
+    expect(sub.retry_policy).toBe('exp3');
+  });
+
+  it('createSubscription appends to the list', async () => {
+    const before = await listSubscriptions();
+    const sub = await createSubscription({
+      event: 'share.created',
+      url: 'https://example.com/hook2',
+      secret: 'whsec_abcdef0123456789',
+      retry_policy: 'exp1',
+    });
+    const after = await listSubscriptions();
+    expect(after.length).toBe(before.length + 1);
+    expect(after.some((s) => s.id === sub.id)).toBe(true);
+  });
+
+  it.each<WebhookRetryPolicy>(['none', 'exp1', 'exp3'])(
+    'createSubscription accepts retry policy %s',
+    async (policy) => {
+      const sub = await createSubscription({
+        event: 'data.updated',
+        url: 'https://example.com/hook',
+        secret: 'whsec_0123456789abcdef',
+        retry_policy: policy,
+      });
+      expect(sub.retry_policy).toBe(policy);
+    },
+  );
+
+  it('createSubscription rejects a non-https url at runtime', async () => {
+    await expect(
+      createSubscription({
+        event: 'deck.viewed',
+        url: 'http://insecure.example.com/hook',
+        secret: 'whsec_0123456789abcdef',
+        retry_policy: 'exp3',
+      }),
+    ).rejects.toThrow(/HTTPS/i);
+  });
+
+  it('createSubscription rejects an empty event', async () => {
+    await expect(
+      createSubscription({
+        event: '',
+        url: 'https://example.com/hook',
+        secret: 'whsec_0123456789abcdef',
+        retry_policy: 'exp3',
+      }),
+    ).rejects.toThrow(/event/i);
+  });
+
+  it('createSubscription rejects a short secret', async () => {
+    await expect(
+      createSubscription({
+        event: 'deck.viewed',
+        url: 'https://example.com/hook',
+        secret: 'short',
+        retry_policy: 'exp3',
+      }),
+    ).rejects.toThrow(/secret/i);
+  });
+
+  it('testWebhook returns a populated result for a known subscription', async () => {
+    const result = await testWebhook('sub-deck-viewed', {
+      event: 'deck.viewed',
+      deck_id: 'deck_1',
+    });
+    expect(result.status_code).toBeGreaterThanOrEqual(200);
+    expect(result.status_code).toBeLessThan(600);
+    expect(result.latency_ms).toBeGreaterThan(0);
+    expect(result.headers['x-domio-subscription']).toBe('sub-deck-viewed');
+    expect(result.headers['x-domio-event']).toBe('deck.viewed');
+    expect(result.body).toContain('sub-deck-viewed');
+    expect(result.sent_at_ms).toBeGreaterThan(0);
+  });
+
+  it('testWebhook is deterministic for the same payload + subscription', async () => {
+    const a = await testWebhook('sub-deck-viewed', { event: 'deck.viewed', n: 1 });
+    const b = await testWebhook('sub-deck-viewed', { event: 'deck.viewed', n: 1 });
+    expect(a.status_code).toBe(b.status_code);
+    expect(a.body).toBe(b.body);
+  });
+
+  it('testWebhook rejects an unknown subscription id', async () => {
+    await expect(
+      testWebhook('sub-does-not-exist', { hello: 'world' }),
+    ).rejects.toThrow(/not found/i);
   });
 });
