@@ -2,19 +2,34 @@
  * analytics-service — typed client for the dashboard's overview +
  * deck-summary endpoints.
  *
- * Per Wave 1 §S1.2 of docs/frontend-roadmap/01-wave-productionization.md.
+ * Per Wave 7 §S7.1 of docs/frontend-roadmap/07-wave-analytics-insights.md.
  *
- * Wraps `/v1/decks/summary` on the warehouse. The dashboard's KPIs
- * (sessions, viewers, avg dwell, completion) are derived client-side
- * from the per-deck rows the warehouse returns. When the warehouse is
- * unreachable the loader returns zeros — never fabricated numbers.
+ * Wraps the warehouse REST endpoints:
+ *   GET /v1/analytics/overview → workspace-level KPIs
+ *   GET /v1/analytics/decks    → list of decks (rows) for a workspace
+ *   GET /v1/analytics/decks/{id} → summary for one deck
+ *
+ * On any failure the loader returns zeros / an empty list — never
+ * fabricated numbers.
  */
+
+import { fetcher } from './fetcher';
 
 export interface OverviewKpis {
   readonly sessions: { readonly value: number; readonly delta: number; readonly series: readonly number[] };
   readonly viewers: { readonly value: number; readonly delta: number; readonly series: readonly number[] };
   readonly avgDwellMs: { readonly value: number; readonly delta: number; readonly series: readonly number[] };
   readonly completionRate: { readonly value: number; readonly delta: number; readonly series: readonly number[] };
+}
+
+export interface DeckSummaryRow {
+  readonly workspaceId: string;
+  readonly deckId: string;
+  readonly sessionCount: number;
+  readonly viewerCount: number;
+  readonly totalEvents: number;
+  readonly avgSessionMs: number;
+  readonly completionRate: number;
 }
 
 const DEFAULT_BASE: string =
@@ -27,6 +42,23 @@ const EMPTY_KPIS: OverviewKpis = {
   completionRate: { value: 0, delta: 0, series: [0, 0, 0, 0, 0, 0, 0] },
 };
 
+interface OverviewWire {
+  sessions?: number | null;
+  viewers?: number | null;
+  avg_dwell_ms?: number | null;
+  completion_rate?: number | null;
+  sessions_delta?: number | null;
+  viewers_delta?: number | null;
+  avg_dwell_delta?: number | null;
+  completion_delta?: number | null;
+  sessions_series?: readonly number[] | null;
+  viewers_series?: readonly number[] | null;
+  avg_dwell_series?: readonly number[] | null;
+  completion_series?: readonly number[] | null;
+}
+
+const SEVEN_ZEROS = [0, 0, 0, 0, 0, 0, 0] as const;
+
 /**
  * Fetch the overview KPIs for a workspace from the warehouse.
  *
@@ -38,34 +70,28 @@ export async function fetchOverviewKpis(
   workspaceId: string,
   baseUrl: string = DEFAULT_BASE,
 ): Promise<OverviewKpis> {
-  const now = Date.now();
-  const url = new URL('/v1/decks/summary', baseUrl);
-  url.searchParams.set('workspace_id', workspaceId);
-  url.searchParams.set('from_ms', String(now - 7 * 24 * 60 * 60 * 1000));
-  url.searchParams.set('to_ms', String(now));
-
   try {
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) return EMPTY_KPIS;
-    const json = (await res.json()) as { rows?: Record<string, unknown>[] };
-    const rows = json.rows ?? [];
-    const sum = (key: string) => rows.reduce((acc, r) => acc + Number(r[key] ?? 0), 0);
-    const avg = (key: string) =>
-      rows.length === 0 ? 0 : sum(key) / rows.length;
-    const sessions = sum('session_count');
-    const viewers = sum('viewer_count');
-    const avgDwell = avg('avg_session_ms');
-    const completion = avg('completion_rate');
-    const perDay = (total: number): number[] =>
-      Array.from({ length: 7 }, (_, i) => Math.round(total / 7 + i));
+    const json = await fetcher<OverviewWire>(baseUrl, '/v1/analytics/overview', { workspaceId });
     return {
-      sessions: { value: sessions, delta: 4.2, series: perDay(sessions) },
-      viewers: { value: viewers, delta: -1.8, series: perDay(viewers) },
-      avgDwellMs: { value: avgDwell, delta: 2.5, series: perDay(avgDwell) },
+      sessions: {
+        value: Number(json.sessions ?? 0),
+        delta: Number(json.sessions_delta ?? 0),
+        series: Array.isArray(json.sessions_series) ? [...json.sessions_series] : [...SEVEN_ZEROS],
+      },
+      viewers: {
+        value: Number(json.viewers ?? 0),
+        delta: Number(json.viewers_delta ?? 0),
+        series: Array.isArray(json.viewers_series) ? [...json.viewers_series] : [...SEVEN_ZEROS],
+      },
+      avgDwellMs: {
+        value: Number(json.avg_dwell_ms ?? 0),
+        delta: Number(json.avg_dwell_delta ?? 0),
+        series: Array.isArray(json.avg_dwell_series) ? [...json.avg_dwell_series] : [...SEVEN_ZEROS],
+      },
       completionRate: {
-        value: completion,
-        delta: 0.6,
-        series: perDay(completion * 1000),
+        value: Number(json.completion_rate ?? 0),
+        delta: Number(json.completion_delta ?? 0),
+        series: Array.isArray(json.completion_series) ? [...json.completion_series] : [...SEVEN_ZEROS],
       },
     };
   } catch {
@@ -74,23 +100,65 @@ export async function fetchOverviewKpis(
 }
 
 /**
- * Fetch the per-deck summary rows for a workspace.
+ * Fetch the list of decks for a workspace.
  *
- * Returns the raw `rows` array the warehouse exposes. Wrapped here
- * so callers don't have to know the wire format.
+ * Returns an empty array on any failure.
  */
-export async function fetchDeckSummary(
+export async function fetchDecks(
   workspaceId: string,
   baseUrl: string = DEFAULT_BASE,
-): Promise<ReadonlyArray<Record<string, unknown>>> {
-  const url = new URL('/v1/decks/summary', baseUrl);
-  url.searchParams.set('workspace_id', workspaceId);
+): Promise<ReadonlyArray<DeckSummaryRow>> {
   try {
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) return [];
-    const json = (await res.json()) as { rows?: Record<string, unknown>[] };
-    return json.rows ?? [];
+    const json = await fetcher<{ decks?: DeckSummaryWire[] }>(baseUrl, '/v1/analytics/decks', {
+      workspaceId,
+    });
+    return (json.decks ?? []).map(mapDeckRow);
   } catch {
     return [];
   }
+}
+
+/**
+ * Fetch the summary for a single deck.
+ *
+ * Returns null if the warehouse is unreachable or the deck is not found.
+ */
+export async function fetchDeckSummary(
+  workspaceId: string,
+  deckId: string,
+  baseUrl: string = DEFAULT_BASE,
+): Promise<DeckSummaryRow | null> {
+  try {
+    const json = await fetcher<{ deck?: DeckSummaryWire | null }>(
+      baseUrl,
+      `/v1/analytics/decks/${encodeURIComponent(deckId)}`,
+      { workspaceId },
+    );
+    if (!json.deck) return null;
+    return mapDeckRow(json.deck);
+  } catch {
+    return null;
+  }
+}
+
+interface DeckSummaryWire {
+  workspace_id?: string;
+  deck_id?: string;
+  session_count?: number;
+  viewer_count?: number;
+  total_events?: number;
+  avg_session_ms?: number;
+  completion_rate?: number;
+}
+
+function mapDeckRow(raw: DeckSummaryWire): DeckSummaryRow {
+  return {
+    workspaceId: String(raw.workspace_id ?? ''),
+    deckId: String(raw.deck_id ?? ''),
+    sessionCount: Number(raw.session_count ?? 0),
+    viewerCount: Number(raw.viewer_count ?? 0),
+    totalEvents: Number(raw.total_events ?? 0),
+    avgSessionMs: Number(raw.avg_session_ms ?? 0),
+    completionRate: Number(raw.completion_rate ?? 0),
+  };
 }

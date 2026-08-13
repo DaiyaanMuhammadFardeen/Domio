@@ -19,16 +19,23 @@ describe('crm-service', () => {
       status: 200,
       json: async () => ({
         adapters: [
-          { provider: 'HubSpot', status: 'healthy', lastRunMs: 1000, avgDurationMs: 200 },
+          {
+            provider: 'HubSpot',
+            status: 'healthy',
+            last_run_ms: 1000,
+            avg_duration_ms: 200,
+          },
         ],
-        idempotencyCollisions24h: 2,
-        dlqDepth: 0,
+        idempotency_collisions_24h: 2,
+        dlq_depth: 0,
       }),
     })) as unknown as typeof fetch;
 
     const stats = await fetchSyncStats('ws-demo', 'http://crm.test');
     expect(stats.adapters).toHaveLength(1);
+    expect(stats.adapters[0]?.provider).toBe('HubSpot');
     expect(stats.idempotencyCollisions24h).toBe(2);
+    expect(stats.dlqDepth).toBe(0);
   });
 
   it('returns empty stats on a 5xx', async () => {

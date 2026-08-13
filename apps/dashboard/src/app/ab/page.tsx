@@ -1,11 +1,18 @@
 /**
  * /ab — server component.
  *
- * Lists A/B experiments fetched from ab-assignment. When the service
- * has no data, the page renders an actionable empty state — never a
- * hardcoded list. Per Wave 1 §S1.9.
+ * Per Wave 7 §S7.1 of docs/frontend-roadmap/07-wave-analytics-insights.md:
+ *   - Wired to `GET /v1/ab/experiments`.
+ *   - No STUB_EXPERIMENTS fallback.
+ *   - SuspenseBoundary + `<EmptyState>` from @domio/ui.
+ *
+ * Real measurements (lift / p-value / confidence interval) come from
+ * ab-measurement + ab-statistics once those services expose their typed
+ * clients — until then the dashboard renders an empty state instead of
+ * fabricating numbers.
  */
 
+import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { DecisionTable, type DecisionRow } from './DecisionTable';
 import { fetchExperiments } from '../../lib/ab-service';
 
@@ -46,21 +53,16 @@ export default async function AbPage() {
           Decisions from ab-measurement + ab-statistics
         </p>
       </header>
-      {rows.length === 0 ? (
-        <div
-          className="rounded-xl border border-slate-200 bg-white p-8 text-center"
-          role="status"
-        >
-          <h2 className="text-base font-semibold text-slate-900">No experiments yet</h2>
-          <p className="mt-2 text-sm text-slate-500">
-            Spin up an A/B test from the ab-assignment service to see it here. Lift,
-            p-value, and confidence-interval columns populate once ab-measurement
-            and ab-statistics report back.
-          </p>
-        </div>
-      ) : (
-        <DecisionTable rows={rows} />
-      )}
+      <SuspenseBoundary>
+        {rows.length === 0 ? (
+          <EmptyState
+            title="No experiments yet"
+            description="Spin up an A/B test from the ab-assignment service to see it here. Lift, p-value, and confidence-interval columns populate once ab-measurement and ab-statistics report back."
+          />
+        ) : (
+          <DecisionTable rows={rows} />
+        )}
+      </SuspenseBoundary>
     </div>
   );
 }

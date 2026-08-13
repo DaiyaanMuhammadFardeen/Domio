@@ -1,76 +1,23 @@
 /**
  * /live — HUD-style page.
  *
- * Subscribes to the live-analytics graphql-ws endpoint and renders
- * concurrent viewers, current slide, and recent reactions in real
- * time. Client component because of the WebSocket.
+ * Per Wave 7 §S7.7 of docs/frontend-roadmap/07-wave-analytics-insights.md:
+ *   - Full WS-driven HUD (LiveHUD) replaces the legacy static card.
+ *   - Attendance / poll participation / question volume /
+ *     current slide / time-in-slide / attention score.
+ *   - Overlay toggle for the audience display.
+ *   - SuspenseBoundary + WS subscription from
+ *     `live-analytics-service`.
  */
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createClient } from 'graphql-ws';
-import { Activity, Eye, MessageSquare } from 'lucide-react';
-
-const LIVE_URL =
-  typeof window !== 'undefined'
-    ? window.location.protocol === 'https:'
-      ? `wss://${process.env['NEXT_PUBLIC_LIVE_HOST'] ?? 'localhost:8094'}/v1/live`
-      : `ws://${process.env['NEXT_PUBLIC_LIVE_HOST'] ?? 'localhost:8094'}/v1/live`
-    : 'ws://localhost:8094/v1/live';
-
-interface PulseData {
-  sessionId: string;
-  concurrentViewers: number;
-  currentSlide: string | null;
-  recentReactions: string[];
-  lastEventMs: number;
-}
-
-const SUBSCRIPTION = /* GraphQL */ `
-  subscription LivePulse($sessionId: String!) {
-    livePulse(sessionId: $sessionId) {
-      sessionId
-      concurrentViewers
-      currentSlide
-      recentReactions
-      lastEventMs
-    }
-  }
-`;
+import { SuspenseBoundary } from '@domio/ui';
+import { useState } from 'react';
+import { LiveHUD } from '../../components/LiveHUD';
 
 export default function LivePage() {
   const [sessionId, setSessionId] = useState('session-demo');
-  const [data, setData] = useState<PulseData | null>(null);
-  const [status, setStatus] = useState<'connecting' | 'open' | 'closed' | 'error'>(
-    'connecting',
-  );
-
-  useEffect(() => {
-    const client = createClient({
-      url: LIVE_URL,
-      lazy: true,
-      retryAttempts: 0,
-    });
-
-    const dispose = client.subscribe(
-      { query: SUBSCRIPTION, variables: { sessionId } },
-      {
-        next: ({ data: payload }) => {
-          if (payload?.livePulse) {
-            setData(payload.livePulse as PulseData);
-            setStatus('open');
-          }
-        },
-        error: () => setStatus('error'),
-        complete: () => setStatus('closed'),
-      },
-    );
-
-    return () => {
-      dispose();
-    };
-  }, [sessionId]);
 
   return (
     <div className="space-y-6">
@@ -106,52 +53,11 @@ export default function LivePage() {
         >
           Subscribe
         </button>
-        <span
-          className={`ml-2 inline-flex items-center gap-1 text-xs ${
-            status === 'open' ? 'text-emerald-600' : 'text-slate-500'
-          }`}
-        >
-          <Activity className="h-3 w-3" /> {status}
-        </span>
       </form>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Tile
-          icon={<Eye className="h-4 w-4" />}
-          label="Concurrent viewers"
-          value={data?.concurrentViewers?.toLocaleString() ?? '—'}
-        />
-        <Tile
-          icon={<Activity className="h-4 w-4" />}
-          label="Current slide"
-          value={data?.currentSlide ?? '—'}
-        />
-        <Tile
-          icon={<MessageSquare className="h-4 w-4" />}
-          label="Recent reactions"
-          value={(data?.recentReactions ?? []).slice(-5).join(' · ') || '—'}
-        />
-      </section>
-    </div>
-  );
-}
-
-function Tile({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-        <span className="text-slate-400">{icon}</span>
-        {label}
-      </div>
-      <div className="mt-1 truncate text-lg font-semibold tabular-nums">{value}</div>
+      <SuspenseBoundary>
+        <LiveHUD sessionId={sessionId} />
+      </SuspenseBoundary>
     </div>
   );
 }

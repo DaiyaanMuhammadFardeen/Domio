@@ -1,12 +1,19 @@
 /**
  * /export — landing for the streaming export endpoint.
  *
- * Provides two download buttons (CSV + Parquet stub) that hit
- * `/api/export/[kind]`. The route handler streams from the warehouse
- * with backpressure (CSV) or returns a JSON stub (Parquet).
+ * Per Wave 7 §S7.1 of docs/frontend-roadmap/07-wave-analytics-insights.md:
+ *   - Wired to `POST /v1/exports/jobs` + polling `GET /v1/exports/jobs/{id}`.
+ *   - No stub URLs — the download button only appears once the job
+ *     is `done`.
+ *   - SuspenseBoundary wraps the polling client.
+ *
+ * Wave 7 §S7.11 also mounts the ScheduledReportForm so users can
+ * create recurring email / Slack / PDF exports.
  */
 
-import Link from 'next/link';
+import { SuspenseBoundary } from '@domio/ui';
+import { ExportJobsClient } from '../../components/ExportJobsClient';
+import { ScheduledReportForm } from '../../components/ScheduledReportForm';
 
 export default function ExportPage() {
   return (
@@ -14,34 +21,15 @@ export default function ExportPage() {
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Export</h1>
         <p className="text-sm text-slate-500">
-          Stream raw rows out of the warehouse
+          Queue CSV / PDF exports and poll for completion
         </p>
       </header>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Link
-          // eslint-disable-next-line domio/no-raw-href -- API endpoint, not a page route
-          href="/api/export/csv"
-          prefetch={false}
-          className="rounded-xl border border-slate-200 bg-white p-5 hover:border-brand-300"
-        >
-          <div className="text-sm font-semibold text-slate-900">CSV stream</div>
-          <p className="mt-1 text-sm text-slate-500">
-            Newline-delimited JSON flattened to CSV with backpressure-aware streaming.
-          </p>
-        </Link>
-        <Link
-          // eslint-disable-next-line domio/no-raw-href -- API endpoint, not a page route
-          href="/api/export/parquet"
-          prefetch={false}
-          className="rounded-xl border border-slate-200 bg-white p-5 hover:border-brand-300"
-        >
-          <div className="text-sm font-semibold text-slate-900">Parquet (stub)</div>
-          <p className="mt-1 text-sm text-slate-500">
-            Returns a JSON stub today. Wire up duckdb / parquetjs in Phase 18+.
-          </p>
-        </Link>
-      </section>
+      <SuspenseBoundary>
+        <ExportJobsClient />
+      </SuspenseBoundary>
+
+      <ScheduledReportForm workspaceId={process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo'} />
     </div>
   );
 }

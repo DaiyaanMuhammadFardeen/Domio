@@ -1,13 +1,15 @@
 /**
  * /deck — index page (decks list).
  *
- * Server component. Fetches the workspace's decks via
- * `deck-service.fetchDecks` and lists them with deep links into
- * /deck/[id]. On any failure the page renders an empty list — never
- * fabricated decks.
+ * Per Wave 7 §S7.1 of docs/frontend-roadmap/07-wave-analytics-insights.md:
+ *   - Wired to `GET /v1/analytics/decks`.
+ *   - No fabrication; renders an empty state when the warehouse
+ *     returns nothing.
+ *   - SuspenseBoundary + `<EmptyState>` from @domio/ui.
  */
 
 import Link from 'next/link';
+import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { dashboard } from '@domio/ui/routing';
 import { fetchDecks } from '../../lib/deck-service';
 
@@ -38,53 +40,52 @@ export default async function DecksIndexPage() {
         </p>
       </header>
 
-      {rows.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          <p className="mb-2 font-medium text-slate-700">No decks yet</p>
-          <p>
-            Deck analytics will appear here as soon as the event-ingest pipeline
-            receives viewer traffic. See{' '}
-            <Link href={dashboard('overview')} className="text-brand-600 underline">
-              Overview
-            </Link>{' '}
-            for aggregate activity.
-          </p>
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Deck</th>
-                <th className="px-4 py-3 text-right">Sessions</th>
-                <th className="px-4 py-3 text-right">Viewers</th>
-                <th className="px-4 py-3 text-right">Avg. duration</th>
-                <th className="px-4 py-3 text-right">Completion</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {rows.map((r) => (
-                <tr key={r.deckId}>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-700">{r.deckId}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{r.sessionCount.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{r.viewerCount.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{formatDuration(r.avgSessionMs)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums">{formatPct(r.completionRate)}</td>
-                  <td className="px-4 py-3 text-right">
-                    <Link
-                      href={dashboard('deck-detail', { id: r.deckId })}
-                      className="text-xs font-medium text-brand-600 hover:underline"
-                    >
-                      View →
-                    </Link>
-                  </td>
+      <SuspenseBoundary>
+        {rows.length === 0 ? (
+          <EmptyState
+            title="No decks yet"
+            description="Deck analytics will appear here as soon as the event-ingest pipeline receives viewer traffic. See the overview for aggregate activity."
+            action={{
+              label: 'Overview',
+              href: dashboard('overview'),
+            }}
+          />
+        ) : (
+          <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+            <table className="w-full text-sm">
+              <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <tr>
+                  <th className="px-4 py-3">Deck</th>
+                  <th className="px-4 py-3 text-right">Sessions</th>
+                  <th className="px-4 py-3 text-right">Viewers</th>
+                  <th className="px-4 py-3 text-right">Avg. duration</th>
+                  <th className="px-4 py-3 text-right">Completion</th>
+                  <th className="px-4 py-3"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {rows.map((r) => (
+                  <tr key={r.deckId} data-testid="deck-row">
+                    <td className="px-4 py-3 font-mono text-xs text-slate-700">{r.deckId}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{r.sessionCount.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{r.viewerCount.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{formatDuration(r.avgSessionMs)}</td>
+                    <td className="px-4 py-3 text-right tabular-nums">{formatPct(r.completionRate)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        href={dashboard('deck-detail', { id: r.deckId })}
+                        className="text-xs font-medium text-brand-600 hover:underline"
+                      >
+                        View →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </SuspenseBoundary>
     </div>
   );
 }

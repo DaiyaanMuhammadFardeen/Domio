@@ -1,11 +1,17 @@
 /**
  * /heatmap — server component with deck + slide selectors.
  *
+ * Per Wave 7 §S7.1 of docs/frontend-roadmap/07-wave-analytics-insights.md:
+ *   - Wired to `GET /v1/analytics/heatmap`.
+ *   - No synthetic 32×18 intensity grid.
+ *   - SuspenseBoundary + `<EmptyState>` from @domio/ui.
+ *
  * Pulls the heatmap tile from the warehouse via
  * `heatmap-service.fetchHeatmap`. When the warehouse is unreachable
- * the canvas renders an empty grid — never synthetic intensity data.
+ * the canvas renders an empty grid — never a synthetic intensity.
  */
 
+import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { HeatmapCanvas } from './HeatmapCanvas';
 import { fetchHeatmap } from '../../lib/heatmap-service';
 
@@ -62,13 +68,22 @@ export default async function HeatmapPage({
         </button>
       </form>
 
-      <HeatmapCanvas
-        deckId={deckId}
-        slideId={slideId}
-        cells={cells}
-        cols={COLS}
-        rows={ROWS}
-      />
+      <SuspenseBoundary>
+        {cells.length === 0 ? (
+          <EmptyState
+            title="No heatmap data"
+            description="The warehouse has no viewer-attention telemetry for this deck/slide. The canvas renders once the event-ingest pipeline records traffic."
+          />
+        ) : (
+          <HeatmapCanvas
+            deckId={deckId}
+            slideId={slideId}
+            cells={cells}
+            cols={COLS}
+            rows={ROWS}
+          />
+        )}
+      </SuspenseBoundary>
     </div>
   );
 }

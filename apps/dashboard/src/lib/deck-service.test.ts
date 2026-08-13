@@ -13,12 +13,12 @@ afterEach(() => {
 });
 
 describe('deck-service', () => {
-  it('maps the rows array into DeckSummaryRow objects', async () => {
+  it('maps the deck rows into DeckSummaryRow objects', async () => {
     globalThis.fetch = vi.fn(async () => ({
       ok: true,
       status: 200,
       json: async () => ({
-        rows: [
+        decks: [
           {
             workspace_id: 'ws-1',
             deck_id: 'deck-A',
@@ -42,7 +42,7 @@ describe('deck-service', () => {
     globalThis.fetch = vi.fn(async () => ({
       ok: true,
       status: 200,
-      json: async () => ({ rows: [] }),
+      json: async () => ({ deck: null }),
     })) as unknown as typeof fetch;
 
     const summary = await fetchDeckSummary('ws-1', 'missing', 'http://wh.test');
@@ -54,7 +54,7 @@ describe('deck-service', () => {
       ok: true,
       status: 200,
       json: async () => ({
-        rows: [
+        slides: [
           { slide_id: 's-1', views: 50, unique_viewers: 30, avg_dwell_ms: 5000, bounce_rate: 0.1 },
         ],
       }),
