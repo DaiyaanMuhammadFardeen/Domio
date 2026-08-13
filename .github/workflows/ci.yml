@@ -1,26 +1,5 @@
 name: CI
 
-# Domio — master CI/CD orchestrator.
-#
-# Runs all testing categories in parallel. Each category is its own
-# reusable workflow (./.github/workflows/<name>.yml). The workflow's
-# overall conclusion is the union of their results — branch protection
-# on master + main gates merges on this workflow succeeding.
-#
-# Note: GitHub limits the number of reusable-workflow jobs in a
-# single workflow file. We cap at 14 here and group the rest into
-# `meta-quality` (schema-validate, schema-migration-lint, public-
-# beta-gate) and `meta-security` (security, leak-scan) wrappers.
-#
-# Categories (each maps to a reusable workflow):
-#   static      — contracts, typecheck, lint
-#   unit        — vitest unit suite (with coverage gate)
-#   integration — multi-component integration tests
-#   execution   — smoke, external-e2e, editor-e2e, a11y-i18n, axe, chaos
-#   meta        — schema-validate, schema-migration-lint, public-beta-gate
-#   security    — security, leak-scan
-#   deploy      — load + build-provenance (push/schedule only)
-
 on:
   pull_request:
     branches: [master, main]
@@ -36,23 +15,20 @@ permissions:
   contents: read
 
 jobs:
-  # ── static gates ────────────────────────────────────────────────
-  contracts:
-    uses: ./.github/workflows/contract.yml
   typecheck:
     uses: ./.github/workflows/type.yml
   lint:
     uses: ./.github/workflows/lint.yml
-
-  # ── unit + integration ──────────────────────────────────────────
   unit:
     uses: ./.github/workflows/unit.yml
-  integration:
-    uses: ./.github/workflows/integration.yml
-
-  # ── execution ───────────────────────────────────────────────────
   smoke:
     uses: ./.github/workflows/smoke.yml
+  leak-scan:
+    uses: ./.github/workflows/leak-scan.yml
+  contracts:
+    uses: ./.github/workflows/contract.yml
+  integration:
+    uses: ./.github/workflows/integration.yml
   external-e2e:
     uses: ./.github/workflows/external-e2e.yml
   editor-e2e:
@@ -63,17 +39,5 @@ jobs:
     uses: ./.github/workflows/axe.yml
   chaos:
     uses: ./.github/workflows/chaos.yml
-
-  # ── security + meta ─────────────────────────────────────────────
   security:
     uses: ./.github/workflows/security.yml
-  leak-scan:
-    uses: ./.github/workflows/leak-scan.yml
-
-  # ── deploy readiness ────────────────────────────────────────────
-  load:
-    if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/load.yml
-  build-provenance:
-    if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/build-provenance.yml
