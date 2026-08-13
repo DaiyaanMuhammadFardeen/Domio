@@ -146,7 +146,6 @@ function findWorkspace(workspaceId: string): WorkspaceResidency | undefined {
 
 export async function listRegions(): Promise<ReadonlyArray<RegionInfo>> {
   try {
-    // eslint-disable-next-line domio/no-raw-fetch
     const json = await fetcher<{ items?: RegionInfo[] }>('/v1/admin/residency/regions');
     const items = json.items ?? [];
     if (items.length > 0) return items;
@@ -158,7 +157,6 @@ export async function listRegions(): Promise<ReadonlyArray<RegionInfo>> {
 
 export async function listWorkspaceResidency(): Promise<ReadonlyArray<WorkspaceResidency>> {
   try {
-    // eslint-disable-next-line domio/no-raw-fetch
     const json = await fetcher<{ items?: WorkspaceResidency[] }>(
       '/v1/admin/residency/workspaces',
     );
@@ -215,7 +213,6 @@ export async function previewMigration(
   };
   PLANS.push(plan);
   try {
-    // eslint-disable-next-line domio/no-raw-fetch
     await fetcher<MigrationPlan>('/v1/admin/residency/plans', {
       method: 'POST',
       body: req,
