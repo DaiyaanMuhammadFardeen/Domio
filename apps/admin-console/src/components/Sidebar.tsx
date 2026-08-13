@@ -8,7 +8,7 @@ import { adminConsole } from '@domio/ui';
 interface NavItem {
   href: string;
   label: string;
-  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing' | 'Identity' | 'Billing' | 'Build' | 'Governance' | 'Integrations' | 'Lifecycle' | 'Operations' | 'Extensions';
+  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing' | 'Identity' | 'Billing' | 'Build' | 'Governance' | 'Integrations' | 'Lifecycle' | 'Operations' | 'Extensions' | 'Agents';
 }
 
 const NAV: ReadonlyArray<NavItem> = [
@@ -21,6 +21,8 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: adminConsole('sso'), label: 'SSO', group: 'Identity' },
   { href: adminConsole('scim'), label: 'SCIM', group: 'Identity' },
   { href: adminConsole('seats'), label: 'Seat Analytics', group: 'Billing' },
+  { href: adminConsole('usage'), label: 'Usage & Spend', group: 'Billing' },
+  { href: adminConsole('rate-limits'), label: 'Rate Limits', group: 'Billing' },
   { href: adminConsole('component-sdk'), label: 'Component SDK', group: 'Build' },
   { href: adminConsole('dlp'), label: 'DLP', group: 'Governance' },
   { href: adminConsole('audit'), label: 'Audit Log', group: 'Governance' },
@@ -28,9 +30,13 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: adminConsole('api-keys'), label: 'API Keys', group: 'Integrations' },
   { href: adminConsole('webhooks'), label: 'Webhooks', group: 'Integrations' },
   { href: adminConsole('sdk'), label: 'SDK', group: 'Integrations' },
+  { href: adminConsole('api-explorer'), label: 'API Explorer', group: 'Integrations' },
   { href: adminConsole('legal-hold'), label: 'Legal Hold', group: 'Lifecycle' },
   { href: adminConsole('retention'), label: 'Retention', group: 'Lifecycle' },
   { href: adminConsole('rendering'), label: 'Headless Rendering', group: 'Operations' },
+  { href: adminConsole('change-feed'), label: 'Change Feed', group: 'Operations' },
+  { href: adminConsole('agent-handoff'), label: 'Agent Handoff', group: 'Agents' },
+  { href: adminConsole('mcp'), label: 'MCP Server', group: 'Agents' },
   { href: adminConsole('plugins'), label: 'Plugins', group: 'Extensions' },
 ];
 
