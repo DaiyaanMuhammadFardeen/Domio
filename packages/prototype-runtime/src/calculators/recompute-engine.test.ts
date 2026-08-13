@@ -155,11 +155,11 @@ describe('calculator builtins', () => {
     mode: 'form',
     precision: 2,
     inputs: [
-      { id: 'a', label: 'A' },
-      { id: 'b', label: 'B' },
-      { id: 'c', label: 'C' },
+      { id: 'a', label: 'A', defaultValue: 0 },
+      { id: 'b', label: 'B', defaultValue: 0 },
+      { id: 'c', label: 'C', defaultValue: 0 },
     ],
-    outputs: [{ id: 'out', formula: 'sum($a, $b, $c)' }],
+    outputs: [{ id: 'out', label: 'Out', formula: 'sum($a, $b, $c)' }],
   };
 
   it('sum aggregates', () => {
@@ -170,7 +170,7 @@ describe('calculator builtins', () => {
   it('average divides correctly', () => {
     const def: CalculatorDef = {
       ...defBase,
-      outputs: [{ id: 'avg', formula: 'average($a, $b, $c)' }],
+      outputs: [{ id: 'avg', label: 'Avg', formula: 'average($a, $b, $c)' }],
     };
     const state = recompute(def, { a: 3, b: 6, c: 9 });
     expect(state.outputs.avg).toBe(6);
@@ -180,8 +180,8 @@ describe('calculator builtins', () => {
     const def: CalculatorDef = {
       ...defBase,
       outputs: [
-        { id: 'mn', formula: 'min($a, $b, $c)' },
-        { id: 'mx', formula: 'max($a, $b, $c)' },
+        { id: 'mn', label: 'Min', formula: 'min($a, $b, $c)' },
+        { id: 'mx', label: 'Max', formula: 'max($a, $b, $c)' },
       ],
     };
     const state = recompute(def, { a: 3, b: 1, c: 5 });
@@ -192,11 +192,11 @@ describe('calculator builtins', () => {
   it('if selects branches', () => {
     const def: CalculatorDef = {
       ...defBase,
-      outputs: [{ id: 'pick', formula: 'if($a, $b, $c)' }],
+      outputs: [{ id: 'pick', label: 'Pick', formula: 'if($a, $b, $c)' }],
     };
     const state = recompute(def, { a: 1, b: 10, c: 20 });
     expect(state.outputs.pick).toBe(10);
-    const def2: CalculatorDef = { ...def, outputs: [{ id: 'pick', formula: 'if($a, $b, $c)' }] };
+    const def2: CalculatorDef = { ...def, outputs: [{ id: 'pick', label: 'Pick', formula: 'if($a, $b, $c)' }] };
     const state2 = recompute(def2, { a: 0, b: 10, c: 20 });
     expect(state2.outputs.pick).toBe(20);
   });
@@ -204,7 +204,7 @@ describe('calculator builtins', () => {
   it('coalesce returns first non-zero', () => {
     const def: CalculatorDef = {
       ...defBase,
-      outputs: [{ id: 'first', formula: 'coalesce($a, $b, $c)' }],
+      outputs: [{ id: 'first', label: 'First', formula: 'coalesce($a, $b, $c)' }],
     };
     const state = recompute(def, { a: 0, b: 7, c: 9 });
     expect(state.outputs.first).toBe(7);
@@ -213,7 +213,7 @@ describe('calculator builtins', () => {
   it('clamp constrains', () => {
     const def: CalculatorDef = {
       ...defBase,
-      outputs: [{ id: 'clamped', formula: 'clamp($a, 0, 10)' }],
+      outputs: [{ id: 'clamped', label: 'Clamped', formula: 'clamp($a, 0, 10)' }],
     };
     const state = recompute(def, { a: 50 });
     expect(state.outputs.clamped).toBe(10);
@@ -222,7 +222,7 @@ describe('calculator builtins', () => {
   it('round rounds to specified digits', () => {
     const def: CalculatorDef = {
       ...defBase,
-      outputs: [{ id: 'r', formula: 'round($a, 1)' }],
+      outputs: [{ id: 'r', label: 'R', formula: 'round($a, 1)' }],
     };
     const state = recompute(def, { a: 1.55 });
     expect(state.outputs.r).toBe(1.5);
@@ -231,7 +231,7 @@ describe('calculator builtins', () => {
   it('formatCurrency returns a string', () => {
     const def: CalculatorDef = {
       ...defBase,
-      outputs: [{ id: 's', formula: 'formatCurrency($a)' }],
+      outputs: [{ id: 's', label: 'S', formula: 'formatCurrency($a)' }],
     };
     const state = recompute(def, { a: 1234.5 });
     expect(String(state.outputs.s)).toMatch(/\$1,234\.50/);
@@ -276,8 +276,8 @@ describe('IRR Newton-Raphson', () => {
       name: 'fin',
       mode: 'form',
       precision: 2,
-      inputs: [{ id: 'rate', label: 'Rate' }],
-      outputs: [{ id: 'v', formula: 'npv($rate, [-1000, 300, 400, 500])' }],
+      inputs: [{ id: 'rate', label: 'Rate', defaultValue: 0 }],
+      outputs: [{ id: 'v', label: 'V', formula: 'npv($rate, [-1000, 300, 400, 500])' }],
     };
     const state = recompute(def, { rate: 0.1 });
     const v = Number(state.outputs.v);

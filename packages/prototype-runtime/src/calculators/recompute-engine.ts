@@ -17,7 +17,6 @@ import {
 import type {
   CalculatorDef,
   CalculatorInput,
-  CalculatorMode,
   CalculatorNode,
   CalculatorOutput,
   CalculatorState,
@@ -205,9 +204,10 @@ function recomputeGraph(
     }
   }
 
-  const ctx: RecomputeContext = {
+  const nodeValues: Record<string, number> = {};
+  const baseCtx: RecomputeContext = {
     inputs: values,
-    nodes: {},
+    nodes: nodeValues,
     precision: def.precision,
     locale: def.locale ?? 'en-US',
     currency: def.currency ?? 'USD',
@@ -236,15 +236,15 @@ function recomputeGraph(
       const args = Object.fromEntries(
         node.dependsOn.map((d) => [
           d,
-          ctx.nodes[d] !== undefined ? ctx.nodes[d]! : (values[d] ?? 0),
+          nodeValues[d] !== undefined ? nodeValues[d]! : (values[d] ?? 0),
         ]),
       );
-      const result = evalFormula(node.formula, { ...args, ...values, ctx });
+      const result = evalFormula(node.formula, { ...args, ...values, ctx: baseCtx });
       const rounded =
         (node.precision ?? def.precision) > 0
           ? Number(decRound(Number(result), node.precision ?? def.precision).value)
           : Number(result);
-      ctx.nodes[id] = rounded;
+      nodeValues[id] = rounded;
       outputValues[id] = rounded;
     } catch (e) {
       errors.push({ nodeId: id, message: e instanceof Error ? e.message : String(e) });
@@ -272,20 +272,25 @@ function evaluateOutput(out: CalculatorOutput, ctx: RecomputeContext): number | 
   // If the formula itself returned a string (e.g., via formatCurrency
   // builtin), honor it directly — don't re-round or reformat.
   if (typeof raw === 'string') return raw;
+  // Bare array literal as an output formula is a user error — return a
+  // stringified marker so the form still renders something meaningful.
+  if (Array.isArray(raw)) return String(raw);
+  // From here `raw` is narrowed to `number`.
+  const num = raw as number;
   // Apply format-specific handling BEFORE precision rounding so that
   // percent / currency / string see the raw computed value.
   if (out.format === 'currency') {
-    return decFormatCurrency(raw, out.currency ?? ctx.currency, out.locale ?? ctx.locale);
+    return decFormatCurrency(num, out.currency ?? ctx.currency, out.locale ?? ctx.locale);
   }
   if (out.format === 'percent') {
-    return `${(raw * 100).toFixed(2)}%`;
+    return `${(num * 100).toFixed(2)}%`;
   }
-  if (out.format === 'string') return String(raw);
+  if (out.format === 'string') return String(num);
   // Default numeric path: round to the calc's precision.
   if (ctx.precision > 0) {
-    return Number(decRound(String(raw), ctx.precision).value);
+    return Number(decRound(String(num), ctx.precision).value);
   }
-  return raw;
+  return num;
 }
 
 // ── Formula mini-language ──────────────────────────────────────────────
@@ -319,48 +324,82 @@ const BUILTINS: Readonly<
 > = {
   sum: {
     arity: 'min',
-    fn: (a) => a.reduce((s, x) => Number(decAdd(s, x as number).value), 0 as number),
+    fn: (a) => {
+      let s = 0;
+      for (const x of a) {
+        if (Array.isArray(x)) continue;
+        s = Number(decAdd(s, Number(x)).value);
+      }
+      return s;
+    },
   },
   average: {
     arity: 'min',
     fn: (a) => {
-      if (a.length === 0) return 0;
-      const total = a.reduce((s, x) => Number(decAdd(s, x as number).value), 0 as number);
-      return Number(div(total, a.length));
+      const nums: number[] = [];
+      for (const x of a) {
+        if (Array.isArray(x)) continue;
+        nums.push(Number(x));
+      }
+      if (nums.length === 0) return 0;
+      const total = nums.reduce((s, x) => Number(decAdd(s, x).value), 0);
+      return Number(div(total, nums.length));
     },
   },
   min: {
     arity: 'min',
-    fn: (a) =>
-      a.reduce(
-        (m, x) => Math.min(m, x as number),
-        Number.POSITIVE_INFINITY,
-      ),
+    fn: (a) => {
+      let m = Number.POSITIVE_INFINITY;
+      for (const x of a) {
+        if (Array.isArray(x)) continue;
+        const n = Number(x);
+        if (n < m) m = n;
+      }
+      return m;
+    },
   },
   max: {
     arity: 'min',
-    fn: (a) =>
-      a.reduce(
-        (m, x) => Math.max(m, x as number),
-        Number.NEGATIVE_INFINITY,
-      ),
+    fn: (a) => {
+      let m = Number.NEGATIVE_INFINITY;
+      for (const x of a) {
+        if (Array.isArray(x)) continue;
+        const n = Number(x);
+        if (n > m) m = n;
+      }
+      return m;
+    },
   },
-  if: { arity: 3, fn: ([cond, a, b]) => (cond as number !== 0 ? a : b) },
+  if: { arity: 3, fn: (args) => (Number(args[0]) !== 0 ? args[1] : args[2])! },
   coalesce: {
     arity: 'min',
     fn: (a) => {
-      for (const x of a) if (x !== 0 && Number.isFinite(x)) return x;
+      for (const x of a) {
+        if (Array.isArray(x)) continue;
+        const n = Number(x);
+        if (n !== 0 && Number.isFinite(n)) return n;
+      }
       return 0;
     },
   },
-  clamp: { arity: 3, fn: ([v, lo, hi]) => Math.min(hi as number, Math.max(lo as number, v as number)) },
+  clamp: {
+    arity: 3,
+    fn: ([v, lo, hi]) => Math.min(Number(hi), Math.max(Number(lo), Number(v))),
+  },
   // Use 'half-down' so 1.55 rounds to 1.5 (matches the most
   // user-friendly intuition; 0.5 always rounds toward zero).
   // decimal128's default is banker's rounding (1.55 → 1.6).
-  round: { arity: 'min', fn: (a) => Number(decRound(a[0] as number | string, a[1] as number ?? 0, 'half-down').value) },
+  round: {
+    arity: 'min',
+    fn: (a) => {
+      const v = a[0];
+      const digits = a[1];
+      return Number(decRound(Number(v ?? 0), Number(digits ?? 0), 'half-down').value);
+    },
+  },
   formatcurrency: {
     arity: 'min',
-    fn: (a, ctx) => decFormatCurrency(a[0] as number | string, ctx.currency, ctx.locale),
+    fn: (a, ctx) => decFormatCurrency(Number(a[0]), ctx.currency, ctx.locale),
   },
   // Finance
   irr: { arity: 1, fn: (a) => irr(a[0] as readonly number[]).value },

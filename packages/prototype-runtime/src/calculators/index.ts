@@ -86,7 +86,7 @@ export class RecomputeEngine {
     inputValues: Readonly<Record<string, number>>,
     opts?: { clock?: () => number },
   ): RecomputeResult {
-    const state = recompute(def, inputValues, { clock: opts?.clock });
+    const state = recompute(def, inputValues, opts?.clock !== undefined ? { clock: opts.clock } : {});
     this.cache.set(def.id, state);
     return { state, errors: state.errors };
   }
