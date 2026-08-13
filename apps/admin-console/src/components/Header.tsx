@@ -7,6 +7,12 @@ const NAV_ITEMS: ReadonlyArray<{ route: AdminRoute; label: string }> = [
   { route: 'takedowns', label: 'Takedowns' },
   { route: 'trust', label: 'Trust' },
   { route: 'payouts', label: 'Payouts' },
+  { route: 'sso', label: 'SSO' },
+  { route: 'dlp', label: 'DLP' },
+  { route: 'audit', label: 'Audit' },
+  { route: 'seats', label: 'Seats' },
+  { route: 'api-keys', label: 'API Keys' },
+  { route: 'plugins', label: 'Plugins' },
   { route: 'custom-domains', label: 'Custom Domains' },
 ];
 
