@@ -30,7 +30,7 @@ function GenericConfig(props: WidgetConfigPanelProps) {
   );
 }
 
-interface ConfigProps extends WidgetConfigPanelProps {}
+type ConfigProps = WidgetConfigPanelProps;
 
 function asString(v: unknown, fallback: string): string {
   return typeof v === 'string' ? v : fallback;

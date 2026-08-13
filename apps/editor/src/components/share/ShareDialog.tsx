@@ -17,6 +17,7 @@
 
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
 import { FormattedMessage } from '@domio/ui';
+import type { DeckDocument } from '@domio/schema/generated/scene-graph';
 import { VisibilityPicker, type VisibilityPolicy } from './VisibilityPicker';
 import { DomainAllowlist } from './DomainAllowlist';
 import { SSOConfig, type SSOConfigValue, type SSOTenant } from './SSOConfig';
@@ -44,7 +45,7 @@ export interface ShareDialogProps {
   readonly onSave?: (state: ShareDialogState) => Promise<void> | void;
   readonly initialState?: ShareDialogState;
   readonly ssoTenants?: readonly SSOTenant[];
-  readonly deck?: import('@domio/schema/generated/scene-graph').DeckDocument;
+  readonly deck?: DeckDocument;
   readonly customDomains?: readonly CustomDomainOption[];
   readonly deckVersions?: readonly DeckVersion[];
   readonly dataTestId?: string;

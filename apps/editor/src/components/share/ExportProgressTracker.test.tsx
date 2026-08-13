@@ -20,6 +20,7 @@ const enMessages = JSON.parse(fs.readFileSync(enFile, 'utf8')) as Record<string,
 const FormattedMessageContext = createContext<Readonly<Record<string, string>>>({});
 
 vi.mock('@domio/ui', async () => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const actual = await vi.importActual<typeof import('@domio/ui')>('@domio/ui');
   const React = await import('react');
   return {

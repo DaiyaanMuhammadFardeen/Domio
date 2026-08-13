@@ -19,6 +19,11 @@ const enMessages = JSON.parse(fs.readFileSync(enFile, 'utf8')) as Record<string,
 const FormattedMessageContext = createContext<Readonly<Record<string, string>>>({});
 
 vi.mock('@domio/ui', async () => {
+  // The `vi.importActual<typeof import('@domio/ui')>` pattern needs
+  // the inline `import('...')` type for module-shape inference —
+  // preferred over declaring a hand-rolled type because it stays in
+  // sync with the published module surface.
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   const actual = await vi.importActual<typeof import('@domio/ui')>('@domio/ui');
   const React = await import('react');
   return {

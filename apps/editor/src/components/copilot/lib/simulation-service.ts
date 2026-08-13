@@ -97,6 +97,10 @@ export interface ConfidenceRecord {
 // ---------------------------------------------------------------------------
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
+  // The copilot services are themselves the typed HTTP layer — they
+  // wrap each `/v1/ai/*` endpoint with a typed signature, so this
+  // `fetch` is the network boundary, not a stray view-level call.
+  // eslint-disable-next-line domio/no-raw-fetch
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
