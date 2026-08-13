@@ -44,8 +44,9 @@ describe('EditorRoot — store-wired smoke', () => {
     render(<EditorRoot doc={deck} />);
     expect(screen.getByText(/Domio/)).toBeInTheDocument();
     // Tab strip is populated by the panel registry — at minimum
-    // there should be a Layers tab.
-    expect(screen.getByTestId('tab-layers')).toBeInTheDocument();
+    // there should be a Layers tab. Wave 13 Phase C switched the
+    // rail from `tab-${id}` to `panel-tab-${id}` (see PanelRail.tsx).
+    expect(screen.getByTestId('panel-tab-layers')).toBeInTheDocument();
   });
 
   it('mounts the canvas chrome (rulers + zoom HUD) for an active slide', () => {

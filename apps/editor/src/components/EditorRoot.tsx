@@ -58,7 +58,7 @@ import { CommentPins } from '../collab/comment-pins';
 import { ApprovalBanner } from '../collab/approval-banner';
 import { AssignmentPanel } from '../collab/assignment-panel';
 
-import { Rulers, Guides, GridOverlay, ZoomHUD, GroupTransformHandle } from './canvas';
+import { Rulers, Guides, GridOverlay, ZoomHUD, GroupTransformHandle, PanelRail, PanelFooter } from './canvas';
 import {
   setEngineRef,
   snapshotHistory,
@@ -93,6 +93,7 @@ import { useViewport } from '../hooks/useViewport';
 import { useActiveSlide } from '../hooks/useActiveSlide';
 import type { EditorShortcutBindings } from '../hooks/useEditorShortcuts';
 import { editorPanels } from '../panels/registry';
+import type { EditorPanelGroup } from '../panels/registry';
 import type { EditorPanelContext } from '../panels/context';
 import type { AuditEntryView } from './prototyping/agent/AuditTrail';
 
@@ -106,6 +107,19 @@ const SLIDE_WIDTH = 1600;
 const SLIDE_HEIGHT = 900;
 
 export type EditorLeftTab = string;
+
+/**
+ * Editor panel groups — used by the two-tier rail introduced in
+ * Wave 13 Phase C. Order matches the rendering order in the rail.
+ */
+const GROUPS: ReadonlyArray<{ id: EditorPanelGroup; label: string }> = [
+  { id: 'core', label: 'Core' },
+  { id: 'data', label: 'Data' },
+  { id: 'interaction', label: 'Interaction' },
+  { id: 'audience', label: 'Audience' },
+  { id: 'agentic', label: 'Agentic' },
+  { id: 'ai', label: 'AI' },
+];
 
 export interface EditorRootProps {
   doc: DeckDocument;
@@ -314,26 +328,22 @@ export function EditorRoot(props: EditorRootProps): ReactElement {
       </header>
       <main className="editor-body">
         <aside className="editor-side editor-side--left">
-          <div className="side-tabs" role="tablist" aria-label="Left panel">
-            {editorPanels.list().map((panel: { id: string; label: string; group: string }) => (
-              <button
-                key={panel.id}
-                type="button"
-                role="tab"
-                aria-selected={leftTab === panel.id}
-                className={`side-tab${leftTab === panel.id ? ' is-active' : ''}`}
-                onClick={() => handleSetLeftTab(panel.id)}
-                data-testid={`tab-${panel.id}`}
-              >
-                {panel.label}
-              </button>
-            ))}
-          </div>
+          <PanelRail
+            panels={editorPanels.list()}
+            groups={GROUPS}
+            activeId={leftTab}
+            onSelect={(id) => handleSetLeftTab(id)}
+          />
           {(() => {
             const panel = editorPanels.get(leftTab);
             if (!panel) return null;
             const C = panel.Component;
-            return <C {...panelContext} />;
+            return (
+              <>
+                <C {...panelContext} />
+                <PanelFooter panelId={leftTab} />
+              </>
+            );
           })()}
         </aside>
         <section className="editor-canvas">

@@ -24,3 +24,6 @@ export type {
 } from './GroupTransformHandle';
 export { OutlineTree } from './OutlineTree';
 export type { OutlineTreeProps } from './OutlineTree';
+export { PanelRail } from './PanelRail';
+export type { PanelRailProps, PanelRailGroup, PanelRailPanel } from './PanelRail';
+export { PanelFooter } from './PanelFooter';
