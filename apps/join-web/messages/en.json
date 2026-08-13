@@ -11,5 +11,10 @@
   "join.handout.opening": "Opening handout…",
   "join.handout.resolving": "Resolving your handout link…",
   "join.handout.invalid": "handout link is invalid or expired",
-  "join.handout.unreachable": "handout link could not be resolved"
+  "join.handout.unreachable": "handout link could not be resolved",
+  "join.twoWay.heading": "Adjust this slide",
+  "join.twoWay.yourValue": "Your value",
+  "join.twoWay.presenterValue": "Presenter's value",
+  "join.twoWay.midpoint": "Midpoint",
+  "join.twoWay.saved": "Saved."
 }
