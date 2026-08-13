@@ -1,9 +1,10 @@
 /**
  * Top navigation header for the public marketing site.
  *
- * S10.4 introduces this header alongside the CLI page; Wave 12 will reuse it
- * site-wide. It renders the Domio wordmark plus the primary navigation
- * (Docs, Features, CLI, Pricing) and a Sign-in CTA.
+ * Wave 12 §S12.1 expands this from the S10.4 four-link strip to a
+ * primary navigation that covers every public surface on the
+ * site (Docs, Features, CLI, Plugins SDK, Pricing, Demos, Status,
+ * Blog, Help, Careers, Trust).
  */
 
 import type { JSX } from 'react';
@@ -15,10 +16,15 @@ interface NavLink {
 }
 
 const NAV_LINKS: ReadonlyArray<NavLink> = [
-  { label: 'Docs', href: landing('docs') },
-  { label: 'Features', href: landing('features') },
+  { label: 'Product', href: landing('features') },
   { label: 'CLI', href: landing('cli') },
+  { label: 'Plugins', href: landing('plugins-sdk') },
+  { label: 'Docs', href: landing('docs') },
   { label: 'Pricing', href: landing('pricing') },
+  { label: 'Demos', href: landing('demos') },
+  { label: 'Status', href: landing('status') },
+  { label: 'Blog', href: landing('blog') },
+  { label: 'Help', href: landing('help') },
 ];
 
 export interface SiteHeaderProps {
