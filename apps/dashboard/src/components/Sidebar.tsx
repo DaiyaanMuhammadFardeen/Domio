@@ -18,6 +18,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: '/ab', label: 'A/B tests', group: 'Experiments' },
   { href: '/crm', label: 'CRM sync', group: 'Operations' },
   { href: '/live', label: 'Live HUD', group: 'Operations' },
+  { href: '/graph', label: 'Knowledge graph', group: 'Analytics' },
   { href: '/benchmarks', label: 'Benchmarks', group: 'Power' },
   { href: '/export', label: 'Export', group: 'Power' },
 ];
