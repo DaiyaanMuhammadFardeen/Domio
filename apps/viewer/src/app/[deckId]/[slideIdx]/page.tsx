@@ -13,6 +13,7 @@ import type { ReactElement } from 'react';
 import { fetchViewerDeck } from '../../../lib/deck-service';
 import { bootstrapSeoForDeck } from '../../../lib/seo-service';
 import { ViewerShell } from '../../../components/ViewerShell';
+import { editor } from '@domio/ui/routing';
 
 export interface SlidePageProps {
   readonly params: Promise<{ deckId: string; slideIdx: string }>;
@@ -52,12 +53,17 @@ export default async function SlidePage({ params, searchParams }: SlidePageProps
   const validIdx = Number.isFinite(requestedIdx) ? Math.max(0, Math.min(requestedIdx, deck.slides.length - 1)) : 0;
   const initialMode = modeParam === 'scroll' ? 'scroll' : 'stage';
   return (
-    <ViewerShell
-      deck={deck}
-      initialIdx={validIdx}
-      initialMode={initialMode}
-      {...(share ? { watermark: `viewer:${share}` } : {})}
-      dataTestId={`viewer-${deckId}-slide-${validIdx}`}
-    />
+    <>
+      <ViewerShell
+        deck={deck}
+        initialIdx={validIdx}
+        initialMode={initialMode}
+        {...(share ? { watermark: `viewer:${share}` } : {})}
+        dataTestId={`viewer-${deckId}-slide-${validIdx}`}
+      />
+      <nav aria-label="Cross-app" className="viewer-cross-link">
+        <a href={editor(deckId)}>Edit this deck in editor →</a>
+      </nav>
+    </>
   );
 }

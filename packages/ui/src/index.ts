@@ -125,3 +125,34 @@ export {
 
 // Class-merge helper (clsx-like, dependency-free)
 export { cn } from './cn.js';
+
+// Navigation graph (Wave 13 IA Network)
+export {
+  NAV_GRAPH,
+  SURFACE_ROOTS,
+  type NavNode,
+  type NavSurface,
+  type NavCategory,
+  type SurfaceRoot,
+  type NavAnchor,
+  type NavAnchorProps,
+} from './nav-graph.js';
+
+export {
+  nodeById,
+  nodeByHref,
+  nodesBySurface,
+  primaryNav,
+  surfaceRoots,
+  breadcrumbsFor,
+  breadcrumbsForHref,
+  relatedFor,
+  relatedForHref,
+  childrenOf,
+  nodesPointingAt,
+} from './nav-resolver.js';
+
+export { Breadcrumbs, type BreadcrumbsProps } from './Breadcrumbs.js';
+export { RelatedLinks, type RelatedLinksProps } from './RelatedLinks.js';
+export { Pager, type PagerProps } from './Pager.js';
+export { AppNav, type AppNavProps } from './AppNav.js';

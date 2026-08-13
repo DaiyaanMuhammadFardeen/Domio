@@ -20,6 +20,7 @@ import {
   fetchSyncStats,
   type AdapterHealth,
 } from '../../lib/crm-service';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 function toneForHealth(status: AdapterHealth['status']) {
   switch (status) {
@@ -105,6 +106,7 @@ export default async function CrmPage() {
         initialEvents={timeline}
         adapters={stats.adapters}
       />
+      <CrossLinksFooter nodeId="doc.dashboard.crm" />
     </div>
   );
 }

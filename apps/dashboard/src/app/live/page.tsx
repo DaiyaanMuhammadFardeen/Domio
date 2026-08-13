@@ -15,6 +15,7 @@
 import { SuspenseBoundary } from '@domio/ui';
 import { useState } from 'react';
 import { LiveHUD } from '../../components/LiveHUD';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 export default function LivePage() {
   const [sessionId, setSessionId] = useState('session-demo');
@@ -58,6 +59,7 @@ export default function LivePage() {
       <SuspenseBoundary>
         <LiveHUD sessionId={sessionId} />
       </SuspenseBoundary>
+      <CrossLinksFooter nodeId="doc.dashboard.live" />
     </div>
   );
 }

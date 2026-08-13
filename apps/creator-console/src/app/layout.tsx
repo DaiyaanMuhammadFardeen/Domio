@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
+import { AppNav } from '@domio/ui';
 
 export const metadata: Metadata = {
   title: 'Domio creator console',
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-slate-50 text-slate-900 min-h-screen">
+        <AppNav activeSurface="creatorConsole" currentPath="/listings" brandHref="/listings" />
         <Header />
         <div className="flex">
           <Sidebar />

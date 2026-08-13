@@ -14,6 +14,7 @@
 import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { OverviewClient } from './OverviewClient';
 import { fetchOverviewKpis } from '../../lib/analytics-service';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 export default async function OverviewPage() {
   const workspaceId = process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
@@ -40,6 +41,7 @@ export default async function OverviewPage() {
           <OverviewClient kpis={kpis} />
         )}
       </SuspenseBoundary>
+      <CrossLinksFooter nodeId="doc.dashboard.overview" />
     </div>
   );
 }

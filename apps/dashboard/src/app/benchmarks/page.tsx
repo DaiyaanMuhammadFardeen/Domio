@@ -21,6 +21,7 @@ import {
   listPeerBenchmarks,
   requiredSampleSize,
 } from '../../lib/benchmark-service';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 export default async function BenchmarksPage({
   searchParams,
@@ -149,6 +150,7 @@ export default async function BenchmarksPage({
           <span className="text-xs text-slate-500">per variant</span>
         </div>
       </section>
+      <CrossLinksFooter nodeId="doc.dashboard.benchmarks" />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import type { ReactElement } from 'react';
 import { fetchViewerDeck } from '../../lib/deck-service';
 import { bootstrapSeoForDeck } from '../../lib/seo-service';
 import { ViewerShell } from '../../components/ViewerShell';
+import { editor } from '@domio/ui/routing';
 
 export interface DeckPageProps {
   readonly params: Promise<{ deckId: string }>;
@@ -52,11 +53,16 @@ export default async function DeckPage({ params, searchParams }: DeckPageProps):
   const { deck } = await fetchViewerDeck(deckId);
   const initialMode = modeParam === 'scroll' ? 'scroll' : 'stage';
   return (
-    <ViewerShell
-      deck={deck}
-      initialMode={initialMode}
-      {...(share ? { watermark: `viewer:${share}` } : {})}
-      dataTestId={`viewer-${deckId}`}
-    />
+    <>
+      <ViewerShell
+        deck={deck}
+        initialMode={initialMode}
+        {...(share ? { watermark: `viewer:${share}` } : {})}
+        dataTestId={`viewer-${deckId}`}
+      />
+      <nav aria-label="Cross-app" className="viewer-cross-link">
+        <a href={editor(deckId)}>Edit this deck in editor →</a>
+      </nav>
+    </>
   );
 }

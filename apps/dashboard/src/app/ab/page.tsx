@@ -15,6 +15,7 @@
 import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { DecisionTable, type DecisionRow } from './DecisionTable';
 import { fetchExperiments } from '../../lib/ab-service';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 const AB_ASSIGNMENT_URL =
   process.env['AB_ASSIGNMENT_URL'] ?? 'http://localhost:8090';
@@ -63,6 +64,7 @@ export default async function AbPage() {
           <DecisionTable rows={rows} />
         )}
       </SuspenseBoundary>
+      <CrossLinksFooter nodeId="doc.dashboard.ab" />
     </div>
   );
 }

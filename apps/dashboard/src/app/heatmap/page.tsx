@@ -14,6 +14,7 @@
 import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { HeatmapCanvas } from './HeatmapCanvas';
 import { fetchHeatmap } from '../../lib/heatmap-service';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 const COLS = 32;
 const ROWS = 18;
@@ -84,6 +85,7 @@ export default async function HeatmapPage({
           />
         )}
       </SuspenseBoundary>
+      <CrossLinksFooter nodeId="doc.dashboard.heatmap" />
     </div>
   );
 }

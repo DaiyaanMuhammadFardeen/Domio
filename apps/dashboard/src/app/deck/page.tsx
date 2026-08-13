@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { SuspenseBoundary, EmptyState } from '@domio/ui';
 import { dashboard } from '@domio/ui/routing';
 import { fetchDecks } from '../../lib/deck-service';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 function formatDuration(ms: number): string {
   if (!Number.isFinite(ms) || ms <= 0) return '—';
@@ -86,6 +87,7 @@ export default async function DecksIndexPage() {
           </div>
         )}
       </SuspenseBoundary>
+      <CrossLinksFooter nodeId="doc.dashboard.decks" />
     </div>
   );
 }

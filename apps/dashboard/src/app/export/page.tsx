@@ -14,6 +14,7 @@
 import { SuspenseBoundary } from '@domio/ui';
 import { ExportJobsClient } from '../../components/ExportJobsClient';
 import { ScheduledReportForm } from '../../components/ScheduledReportForm';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 export default function ExportPage() {
   return (
@@ -30,6 +31,7 @@ export default function ExportPage() {
       </SuspenseBoundary>
 
       <ScheduledReportForm workspaceId={process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo'} />
+      <CrossLinksFooter nodeId="doc.dashboard.export" />
     </div>
   );
 }

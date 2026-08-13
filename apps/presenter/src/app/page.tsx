@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { presenter } from '@domio/ui/routing';
+import { presenter, dashboard } from '@domio/ui/routing';
 
 export default function PresenterHomePage() {
   return (
@@ -26,6 +26,16 @@ export default function PresenterHomePage() {
             </Link>
           </li>
         </ul>
+      </section>
+      <section className="boot__panel">
+        <h2>Share a session</h2>
+        <p>
+          Generate presenter share links and pair codes from the dashboard — every
+          session lives there.
+        </p>
+        <p>
+          <Link href={dashboard('deck')}>Get a share link from the dashboard →</Link>
+        </p>
       </section>
     </main>
   );

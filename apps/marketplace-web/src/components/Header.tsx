@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useLocale } from '@/hooks/useLocale';
 import { LOCALES, type LocaleId } from '@/lib/i18n';
-import { marketplaceWeb } from '@domio/ui/routing';
+import { marketplaceWeb, landing } from '@domio/ui/routing';
 
 const LOCALE_LABELS: Record<LocaleId, string> = {
   en: 'EN',
@@ -52,6 +52,30 @@ export function Header() {
               className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-panel hover:text-fg"
             >
               {t('nav.library')}
+            </Link>
+            <Link
+              href={landing('docs')}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-panel hover:text-fg"
+            >
+              Docs
+            </Link>
+            <Link
+              href={landing('pricing')}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-panel hover:text-fg"
+            >
+              Pricing
+            </Link>
+            <Link
+              href={landing('trust')}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-panel hover:text-fg"
+            >
+              Trust
+            </Link>
+            <Link
+              href={landing('help')}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-panel hover:text-fg"
+            >
+              Help
             </Link>
           </nav>
         </div>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
-import { resolveLocaleFromHeaders } from '@domio/ui';
+import { AppNav, resolveLocaleFromHeaders } from '@domio/ui';
 import { headers } from 'next/headers';
 
 export const metadata: Metadata = {
@@ -30,6 +30,7 @@ export default async function RootLayout({
   return (
     <html lang={lang} dir={dir}>
       <body className="bg-slate-50 text-slate-900 min-h-screen">
+        <AppNav activeSurface="adminConsole" currentPath="/" brandHref="/" />
         <Header />
         <div className="flex">
           <Sidebar />

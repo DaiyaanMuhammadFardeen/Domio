@@ -1,5 +1,6 @@
 import './globals.css';
 import type { ReactNode } from 'react';
+import { AppNav } from '@domio/ui';
 
 export const metadata = {
   title: 'Join a Domio session',
@@ -14,7 +15,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AppNav activeSurface="joinWeb" hideSurfaceSwitcher currentPath="/" />
+        {children}
+      </body>
     </html>
   );
 }

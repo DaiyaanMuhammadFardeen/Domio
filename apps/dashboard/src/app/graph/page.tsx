@@ -12,6 +12,7 @@
 
 import { getGraph } from '../../lib/knowledge-graph-service';
 import { GraphExperience } from './GraphExperience';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 export default async function GraphPage() {
   const initial = await getGraph();
@@ -28,6 +29,7 @@ export default async function GraphPage() {
       </header>
 
       <GraphExperience initial={initial} />
+      <CrossLinksFooter nodeId="doc.dashboard.graph" />
     </div>
   );
 }

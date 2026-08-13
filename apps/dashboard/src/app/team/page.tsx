@@ -23,6 +23,7 @@ import {
   fetchTeamAnalytics,
   fetchTemplateUsageHeatmap,
 } from '../../lib/team-service';
+import { CrossLinksFooter } from '../../components/CrossLinksFooter';
 
 export default async function TeamPage() {
   const workspaceId = process.env['NEXT_PUBLIC_WORKSPACE_ID'] ?? 'ws-demo';
@@ -108,6 +109,7 @@ export default async function TeamPage() {
           />
         )}
       </SuspenseBoundary>
+      <CrossLinksFooter nodeId="doc.dashboard.team" />
     </div>
   );
 }
