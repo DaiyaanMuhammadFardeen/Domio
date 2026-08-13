@@ -17,9 +17,10 @@ import {
   listLegalHolds,
   releaseLegalHold,
   LegalHoldError,
-  type AffectedItem,
 } from '../../lib/legal-hold-service';
 import type { LegalHold, LegalHoldStatus, LegalHoldTargetKind } from '../../lib/types';
+
+type AffectedItem = { kind: 'deck' | 'asset'; id: string; label: string };
 
 const CATALOGUE = enMessages as Readonly<Record<string, string>>;
 

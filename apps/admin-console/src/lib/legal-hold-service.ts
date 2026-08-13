@@ -26,6 +26,12 @@ export class LegalHoldError extends Error {
 const NOW = Date.UTC(2026, 6, 1);
 const DAY_MS = 1000 * 60 * 60 * 24;
 
+export interface AffectedItem {
+  readonly kind: 'deck' | 'asset';
+  readonly id: string;
+  readonly label: string;
+}
+
 const SEED: readonly LegalHold[] = [
   {
     id: 'lh-acme-litigation',
@@ -189,7 +195,7 @@ export async function releaseLegalHold(
  */
 export async function getAffectedItems(
   id: string,
-): Promise<ReadonlyArray<{ kind: 'deck' | 'asset'; id: string; label: string }>> {
+): Promise<ReadonlyArray<AffectedItem>> {
   const hold = STORE.find((h) => h.id === id);
   if (!hold) return [];
   switch (hold.target_kind) {

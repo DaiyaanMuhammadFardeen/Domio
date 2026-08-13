@@ -217,5 +217,21 @@
   "admin.rendering.config.parallelism": "Max parallelism",
   "admin.rendering.config.retention": "Retention (days)",
   "admin.rendering.config.rateLimit": "Rate limit per tenant (jobs/min)",
-  "admin.rendering.config.save": "Save configuration"
+  "admin.rendering.config.save": "Save configuration",
+  "admin.nav.audit": "Audit Log",
+  "admin.audit.heading": "Audit Log",
+  "admin.audit.subheading": "Every privileged action by an admin, service, or system process.",
+  "admin.audit.filter.actor": "Actor",
+  "admin.audit.filter.action": "Action",
+  "admin.audit.filter.targetType": "Target type",
+  "admin.audit.filter.from": "From",
+  "admin.audit.filter.to": "To",
+  "admin.audit.filter.clear": "Clear filters",
+  "admin.audit.exportCsv": "Export CSV",
+  "admin.audit.empty": "No events match these filters.",
+  "admin.audit.pagination.next": "Next",
+  "admin.audit.pagination.prev": "Previous",
+  "admin.audit.detail.heading": "Event detail",
+  "admin.audit.detail.json": "Raw event",
+  "admin.audit.detail.diff": "Diff"
 }

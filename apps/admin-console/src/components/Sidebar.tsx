@@ -8,7 +8,7 @@ import { adminConsole } from '@domio/ui';
 interface NavItem {
   href: string;
   label: string;
-  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing' | 'Identity' | 'Billing' | 'Build' | 'Governance' | 'Integrations' | 'Lifecycle' | 'Operations';
+  group: 'Curation' | 'Moderation' | 'Finance' | 'Publishing' | 'Identity' | 'Billing' | 'Build' | 'Governance' | 'Integrations' | 'Lifecycle' | 'Operations' | 'Extensions';
 }
 
 const NAV: ReadonlyArray<NavItem> = [
@@ -23,6 +23,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: adminConsole('seats'), label: 'Seat Analytics', group: 'Billing' },
   { href: adminConsole('component-sdk'), label: 'Component SDK', group: 'Build' },
   { href: adminConsole('dlp'), label: 'DLP', group: 'Governance' },
+  { href: adminConsole('audit'), label: 'Audit Log', group: 'Governance' },
   { href: adminConsole('residency'), label: 'Residency', group: 'Governance' },
   { href: adminConsole('api-keys'), label: 'API Keys', group: 'Integrations' },
   { href: adminConsole('webhooks'), label: 'Webhooks', group: 'Integrations' },
@@ -30,6 +31,7 @@ const NAV: ReadonlyArray<NavItem> = [
   { href: adminConsole('legal-hold'), label: 'Legal Hold', group: 'Lifecycle' },
   { href: adminConsole('retention'), label: 'Retention', group: 'Lifecycle' },
   { href: adminConsole('rendering'), label: 'Headless Rendering', group: 'Operations' },
+  { href: adminConsole('plugins'), label: 'Plugins', group: 'Extensions' },
 ];
 
 function isActive(pathname: string, href: string): boolean {
