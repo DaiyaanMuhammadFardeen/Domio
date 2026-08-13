@@ -17,7 +17,7 @@ interface BlogPostParams {
   readonly params: Promise<{ readonly slug: string }>;
 }
 
-export function generateStaticParams(): ReadonlyArray<{ readonly slug: string }> {
+export function generateStaticParams(): Array<{ slug: string }> {
   return BLOG_POSTS.map((p) => ({ slug: p.slug }));
 }
 

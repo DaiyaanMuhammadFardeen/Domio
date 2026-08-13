@@ -8,6 +8,8 @@
  *  - the seed's structural invariants (90-day history, etc.)
  */
 
+import type { ServiceHealth } from './status-types';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   __testing,
@@ -47,7 +49,7 @@ describe('status-service', () => {
   });
 
   it('uptimePct treats operational + maintenance as healthy', () => {
-    const history = [
+    const history: ReadonlyArray<ServiceHealth> = [
       'operational',
       'operational',
       'maintenance',
