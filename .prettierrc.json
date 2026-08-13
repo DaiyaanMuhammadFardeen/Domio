@@ -7,7 +7,6 @@
   "useTabs": false,
   "arrowParens": "always",
   "endOfLine": "lf",
-  "plugins": ["prettier-plugin-organization"],
   "overrides": [
     {
       "files": "*.md",

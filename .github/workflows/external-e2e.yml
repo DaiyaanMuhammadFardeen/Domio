@@ -84,6 +84,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Generate clients
         run: pnpm gen || true
+      - name: Build workspace packages (dist-only deps)
+        run: |
+          pnpm --filter @domio/web-security build
       - name: Build all Next.js apps
         run: |
           pnpm --filter @domio/landing build

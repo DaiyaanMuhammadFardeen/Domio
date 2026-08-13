@@ -4,11 +4,16 @@
   "private": true,
   "type": "module",
   "description": "Custom ESLint rules for Domio (no-raw-href, no-raw-fetch, no-raw-hex).",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "lint": "eslint src",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

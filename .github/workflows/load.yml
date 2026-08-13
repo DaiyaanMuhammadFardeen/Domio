@@ -94,6 +94,13 @@ jobs:
       - uses: actions/setup-go@v5.2.0
         with:
           go-version: '1.23'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
       - name: Install workspace deps
         run: pnpm install --frozen-lockfile
       - name: Build event-ingest
@@ -103,7 +110,7 @@ jobs:
           mkdir -p "$INGEST_SPOOL_DIR"
           nohup node services/event-ingest/dist/index.js > /tmp/event-ingest.log 2>&1 &
           echo "$!" > /tmp/event-ingest.pid
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             if curl -fsS http://localhost:8787/healthz > /dev/null 2>&1; then
               echo "event-ingest ready"
               break
@@ -161,15 +168,24 @@ jobs:
       - uses: actions/setup-go@v5.2.0
         with:
           go-version: '1.23'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
       - name: Install workspace deps
         run: pnpm install --frozen-lockfile
+      - name: Build shared packages
+        run: pnpm --filter @domio/web-security build
       - name: Build dashboard
         run: pnpm --filter @domio/dashboard build
       - name: Start dashboard
         run: |
           nohup pnpm --filter @domio/dashboard start:3010 > /tmp/dashboard.log 2>&1 &
           echo "$!" > /tmp/dashboard.pid
-          for i in $(seq 1 90); do
+          for _ in $(seq 1 90); do
             if curl -fsS http://localhost:3010/ > /dev/null 2>&1; then
               echo "dashboard ready"
               break
@@ -236,6 +252,13 @@ jobs:
       - uses: actions/setup-go@v5.2.0
         with:
           go-version: '1.23'
+      - uses: pnpm/action-setup@v4.1.0
+        with:
+          version: 9.12.3
+      - uses: actions/setup-node@v4.3.0
+        with:
+          node-version: '22.11.0'
+          cache: pnpm
       - name: Install workspace deps
         run: pnpm install --frozen-lockfile
       - name: Build crm-sync
@@ -247,7 +270,7 @@ jobs:
         run: |
           nohup /tmp/crm-sync > /tmp/crm-sync.log 2>&1 &
           echo "$!" > /tmp/crm-sync.pid
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             if curl -fsS http://localhost:8082/healthz > /dev/null 2>&1 || \
                curl -fsS http://localhost:8082/v1/sync/options > /dev/null 2>&1; then
               echo "crm-sync ready"

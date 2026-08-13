@@ -40,6 +40,8 @@ jobs:
           path: ~/.local/share/pnpm/store
           key: pnpm-${{ runner.os }}-22.11.0-${{ hashFiles('**/pnpm-lock.yaml') }}
       - run: pnpm install --frozen-lockfile
+      - name: Build @domio/eslint-plugin
+        run: pnpm --filter @domio/eslint-plugin build
       - run: pnpm lint
       - name: Fail when any warnings present
         run: |
