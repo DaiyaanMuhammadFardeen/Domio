@@ -367,6 +367,7 @@
   "promote.name": "Name",
   "promote.namePlaceholder": "Component name",
   "promote.preview": "Preview",
+  "promote.publishing": "Publishing…",
   "promote.replaceSelection": "Replace selection with the new component",
   "promote.saveToLibrary": "Save to My Library",
   "promote.subtitle": "Create a reusable component from the selection.",
