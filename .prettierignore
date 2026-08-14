@@ -39,3 +39,8 @@ infra/k8s/
 contracts/openapi/v1/mcp-prototyping.yaml
 **/*.generated.*
 **/CHANGELOG.md
+
+# k6 load test scripts use ES module imports (k6 supports them at
+# runtime) but Prettier reformats them into CommonJS, which k6 won't
+# parse. Skip formatting for these.
+tests/load/k6/

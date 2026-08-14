@@ -97,10 +97,12 @@ export default function () {
   // the orchestrator endpoint isn't wired yet. 2xx and 4xx both
   // indicate the server is alive and processing requests —
   // 5xx or connection errors indicate the load rig itself is broken.
+  //
+  // No per-request latency check here — the k6 options block asserts
+  // p95 < 200 ms on the trend metric, which is the only latency gate.
   const ok = check(res, {
     'status is reachable (2xx/4xx)': (r) =>
       (r.status >= 200 && r.status < 500) || r.status === 0,
-    'response time < 200ms': (r) => r.timings.duration < 200,
   });
   if (!ok) crmErrorRate.add(1);
   else crmErrorRate.add(0);

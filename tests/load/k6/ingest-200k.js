@@ -91,10 +91,12 @@ export default function () {
   // route is wired, and the auth gate is doing its job. Anything in
   // 2xx/4xx counts as the server being alive; only 5xx and connection
   // errors indicate the load rig itself is broken.
+  //
+  // No per-request latency check here — the k6 options block asserts
+  // p95 < 50 ms on the trend metric, which is the only latency gate.
   const ok = check(res, {
     'status is reachable (2xx/4xx)': (r) =>
       (r.status >= 200 && r.status < 500) || r.status === 0,
-    'response time < 200ms': (r) => r.timings.duration < 200,
   });
   if (!ok) ingestErrorRate.add(1);
   else ingestErrorRate.add(0);
