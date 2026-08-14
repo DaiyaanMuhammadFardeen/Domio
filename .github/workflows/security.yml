@@ -69,7 +69,10 @@ concurrency:
 
 env:
   # Tools read by jobs.
-  CODEQL_LANGUAGES: typescript,javascript,python,go
+  # The Domio monorepo is JS/TS + Python only. Go is intentionally omitted
+  # because CodeQL's `build-mode: none` (used for un-built JS sources) is
+  # incompatible with the Go extractor.
+  CODEQL_LANGUAGES: typescript,javascript,python
   SEMGREP_CONFIG: p/owasp-top-ten p/security-audit p/typescript p/javascript
   TRIVY_SEVERITY: 'CRITICAL,HIGH'
   ZAP_TARGET: ${{ github.event.inputs.target_env == 'staging' && 'https://staging.domio.app' || 'https://preview.domio.app' }}
@@ -119,7 +122,7 @@ jobs:
           python-version: '3.12.8'
 
       - name: Run Semgrep
-        uses: returntocorp/semgrep-action@v1
+        uses: returntocorp/semgrep-action@v2
         with:
           config: >-
             ${{ env.SEMGREP_CONFIG }}
@@ -144,7 +147,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -184,7 +187,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run Trivy image scan
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: 'image'
           scan-ref: ${{ matrix.image }}
