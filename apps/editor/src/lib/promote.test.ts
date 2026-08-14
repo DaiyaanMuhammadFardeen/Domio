@@ -20,12 +20,17 @@ function makeTextElement(overrides: Partial<Element> = {}): Element {
     parentId: null,
     text: {
       content: 'Hello',
-      fontSize: 16,
-      fontFamily: 'sans',
-      color: '#E6EDF3',
-      fontWeight: 400,
-      lineHeight: 1.4,
-      align: 'left',
+      runs: [
+        {
+          start: 0,
+          end: 5,
+          style: {
+            fontFamily: 'sans',
+            fontSize: 16,
+            fontWeight: 400,
+          },
+        },
+      ],
     },
     transform: { x: 0, y: 0, w: 100, h: 50 },
     ...overrides,
@@ -41,6 +46,7 @@ function makeComponentElement(overrides: Partial<Element> = {}): Element {
     parentId: null,
     component: {
       catalogId: 'domio.stat-card',
+      version: '1.0.0',
       variant: 'default',
       props: {},
     },
@@ -61,12 +67,17 @@ function textOverrides(content: string): Partial<Element> {
   return {
     text: {
       content,
-      fontSize: 16,
-      fontFamily: 'sans',
-      color: '#E6EDF3',
-      fontWeight: 400,
-      lineHeight: 1.4,
-      align: 'left',
+      runs: [
+        {
+          start: 0,
+          end: content.length,
+          style: {
+            fontFamily: 'sans',
+            fontSize: 16,
+            fontWeight: 400,
+          },
+        },
+      ],
     },
   };
 }
@@ -113,8 +124,8 @@ describe('inferPropsSchema', () => {
   it('infers color prop from fill', () => {
     // Use an element without text content so only the color prop appears
     const el = mockElement({
-      id: 'test-el-color',
-      type: 'rect',
+      id: 'test-el-color' as Element['id'],
+      type: 'frame',
       semanticId: 's-c',
       name: 'Rect',
       parentId: null,
@@ -132,8 +143,8 @@ describe('inferPropsSchema', () => {
   it('handles mixed selection with text + color element', () => {
     const textEl = makeTextElement(textOverrides('Revenue'));
     const colorEl = mockElement({
-      id: 'test-el-2',
-      type: 'rect',
+      id: 'test-el-2' as Element['id'],
+      type: 'frame',
       semanticId: 's-c2',
       name: 'Box',
       parentId: null,
@@ -182,7 +193,7 @@ describe('buildComponentDef', () => {
       { prop0: 'Revenue' },
       {
         variantId: 'default',
-        id: () => 'new-id',
+        id: () => 'new-id' as unknown as Element['id'],
         semanticId: (s: string) => s,
       },
     );
@@ -194,7 +205,7 @@ describe('buildComponentDef', () => {
 
 describe('replaceWithComponentOp', () => {
   it('creates a forward/inverse op pair', () => {
-    const removed = [makeTextElement({ id: 'rm1' as Element['id'] })];
+    const removed = [makeTextElement({ id: 'rm1' as unknown as Element['id'] })];
     const added = [makeComponentElement({ id: 'add1' as Element['id'] })];
     const op = replaceWithComponentOp('slide-1', removed, added);
 
