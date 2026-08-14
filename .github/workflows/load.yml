@@ -131,7 +131,9 @@ jobs:
           set -e
           # Try the official k6 apt repo first; fall back to the
           # static binary if the keyserver is unreachable.
-          if curl -fsS https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz -o /tmp/k6.tgz; then
+          if curl -fsSL -o /tmp/k6.tgz \
+            https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz \
+            && [ -s /tmp/k6.tgz ]; then
             tar -xzf /tmp/k6.tgz -C /tmp
             sudo mv /tmp/k6-v0.50.0-linux-amd64/k6 /usr/local/bin/k6
           else
@@ -237,9 +239,19 @@ jobs:
           # hosted runner (the dirmngr service isn't available for
           # keyserver fetches, and the default universe repo doesn't
           # ship k6 on Ubuntu 24.04). Download from GitHub releases
-          # with redirects, then unpack and place on $PATH.
-          curl -fsSL -o /tmp/k6.tgz \
-            https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz
+          # with redirects + retries, then unpack and place on $PATH.
+          for i in 1 2 3; do
+            if curl -fsSL --retry 3 --retry-delay 5 \
+                -o /tmp/k6.tgz \
+                https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz \
+                && [ -s /tmp/k6.tgz ] && file /tmp/k6.tgz | grep -q gzip; then
+              break
+            fi
+            echo "k6 download attempt $i failed, retrying..."
+            rm -f /tmp/k6.tgz
+            sleep 5
+          done
+          test -s /tmp/k6.tgz || (echo "Failed to download k6 tarball"; exit 1)
           tar -xzf /tmp/k6.tgz -C /tmp
           sudo mv /tmp/k6-v0.50.0-linux-amd64/k6 /usr/local/bin/k6
           k6 version
@@ -354,9 +366,19 @@ jobs:
           # hosted runner (the dirmngr service isn't available for
           # keyserver fetches, and the default universe repo doesn't
           # ship k6 on Ubuntu 24.04). Download from GitHub releases
-          # with redirects, then unpack and place on $PATH.
-          curl -fsSL -o /tmp/k6.tgz \
-            https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz
+          # with redirects + retries, then unpack and place on $PATH.
+          for i in 1 2 3; do
+            if curl -fsSL --retry 3 --retry-delay 5 \
+                -o /tmp/k6.tgz \
+                https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz \
+                && [ -s /tmp/k6.tgz ] && file /tmp/k6.tgz | grep -q gzip; then
+              break
+            fi
+            echo "k6 download attempt $i failed, retrying..."
+            rm -f /tmp/k6.tgz
+            sleep 5
+          done
+          test -s /tmp/k6.tgz || (echo "Failed to download k6 tarball"; exit 1)
           tar -xzf /tmp/k6.tgz -C /tmp
           sudo mv /tmp/k6-v0.50.0-linux-amd64/k6 /usr/local/bin/k6
           k6 version
