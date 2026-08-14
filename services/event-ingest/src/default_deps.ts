@@ -14,7 +14,7 @@ import { buildRedisNonceCache, buildMemoryNonceCache } from './nonce.js';
 import { buildPiiStripper } from './pii.js';
 import { buildKafkaPublisher } from './kafka.js';
 import { buildDiskSpool } from './spool.js';
-import { buildNatsBridge } from './nats_bridge.js';
+import { buildNatsBridge, buildInMemoryNatsBridge } from './nats_bridge.js';
 import { buildDiskDlq, buildInMemoryDlq } from './dlq.js';
 import { buildMetrics } from './metrics/metrics.js';
 import { handleNatsEvent } from './ingest_pipeline.js';
@@ -49,7 +49,14 @@ export async function defaultDeps(cfg: IngestConfig): Promise<IngestDeps> {
     };
   });
   const spool = await buildDiskSpool(cfg.spoolDir);
-  const nats = await buildNatsBridge(cfg.natsUrl);
+  // The NATS bridge supports two modes: a real nats:// connection or
+  // an in-memory bridge used in tests / CI. The convention is that a
+  // value of 'memory' (or empty) means in-memory mode — anything else
+  // is treated as a real NATS URL.
+  const nats =
+    cfg.natsUrl === 'memory' || cfg.natsUrl === ''
+      ? buildInMemoryNatsBridge()
+      : await buildNatsBridge(cfg.natsUrl).catch(() => buildInMemoryNatsBridge());
   const dlq = await buildDiskDlq(`${cfg.spoolDir}/dlq`).catch(() => buildInMemoryDlq());
   const metrics = buildMetrics();
   let seq = 0;

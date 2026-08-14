@@ -233,22 +233,15 @@ jobs:
       - name: Install k6
         run: |
           set -e
-          # Try the official k6 apt repo first — it's the most reliable
-          # install path on the GitHub-hosted Ubuntu 24.04 runner.
-          if sudo apt-get install -y -qq k6 2>/dev/null; then
-            echo "installed k6 from default apt"
-          else
-            # Fall back to the upstream k6 apt repo with explicit GPG key
-            # from a keyserver reachable in CI (keyserver.ubuntu.com).
-            sudo gpg --no-default-keyring \
-              --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
-              --keyserver hkp://keyserver.ubuntu.com:80 \
-              --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69 || true
-            echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
-              | sudo tee /etc/apt/sources.list.d/k6.list > /dev/null
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq k6
-          fi
+          # Use the static tarball — the apt path is unreliable on the
+          # hosted runner (the dirmngr service isn't available for
+          # keyserver fetches, and the default universe repo doesn't
+          # ship k6 on Ubuntu 24.04). Download from GitHub releases
+          # with redirects, then unpack and place on $PATH.
+          curl -fsSL -o /tmp/k6.tgz \
+            https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz
+          tar -xzf /tmp/k6.tgz -C /tmp
+          sudo mv /tmp/k6-v0.50.0-linux-amd64/k6 /usr/local/bin/k6
           k6 version
       - name: Run k6 dashboard-10k
         env:
@@ -357,22 +350,15 @@ jobs:
       - name: Install k6
         run: |
           set -e
-          # Try the official k6 apt repo first — it's the most reliable
-          # install path on the GitHub-hosted Ubuntu 24.04 runner.
-          if sudo apt-get install -y -qq k6 2>/dev/null; then
-            echo "installed k6 from default apt"
-          else
-            # Fall back to the upstream k6 apt repo with explicit GPG key
-            # from a keyserver reachable in CI (keyserver.ubuntu.com).
-            sudo gpg --no-default-keyring \
-              --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
-              --keyserver hkp://keyserver.ubuntu.com:80 \
-              --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69 || true
-            echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
-              | sudo tee /etc/apt/sources.list.d/k6.list > /dev/null
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq k6
-          fi
+          # Use the static tarball — the apt path is unreliable on the
+          # hosted runner (the dirmngr service isn't available for
+          # keyserver fetches, and the default universe repo doesn't
+          # ship k6 on Ubuntu 24.04). Download from GitHub releases
+          # with redirects, then unpack and place on $PATH.
+          curl -fsSL -o /tmp/k6.tgz \
+            https://github.com/grafana/k6/releases/download/v0.50.0/k6-v0.50.0-linux-amd64.tar.gz
+          tar -xzf /tmp/k6.tgz -C /tmp
+          sudo mv /tmp/k6-v0.50.0-linux-amd64/k6 /usr/local/bin/k6
           k6 version
       - name: Run k6 crm-burst
         env:

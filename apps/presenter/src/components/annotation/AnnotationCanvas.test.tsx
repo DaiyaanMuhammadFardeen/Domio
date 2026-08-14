@@ -93,14 +93,14 @@ describe('AnnotationCanvas drawing helpers', () => {
 
   it('drawZoom renders a circle outline', () => {
     const ctx = makeCtx();
-    const geom: ZoomGeometry = { x: 0.5, y: 0.5, radius: 0.15 };
+    const geom: ZoomGeometry = { x: 0.5, y: 0.5, radius: 0.15, magnification: 2 };
     drawZoom(ctx, geom, 800, 600);
     expect(true).toBe(true);
   });
 
   it('drawBlur renders a filled rect', () => {
     const ctx = makeCtx();
-    const geom: BlurGeometry = { x: 0.2, y: 0.2, width: 0.4, height: 0.3 };
+    const geom: BlurGeometry = { x: 0.2, y: 0.2, width: 0.4, height: 0.3, radius: 0.05 };
     drawBlur(ctx, geom, 800, 600, 4);
     expect(true).toBe(true);
   });
