@@ -20,8 +20,15 @@ import { Trend, Rate } from 'k6/metrics';
 const dashboardLatencyMs = new Trend('dashboard_latency_ms');
 const dashboardErrorRate = new Rate('dashboard_errors');
 
+// Hash for the OverviewKPI persisted query. This MUST match the
+// hash recorded in apps/dashboard/src/lib/graphql/persisted-queries.json
+// (computed as SHA-256 of the OverviewKPI query body). The plugin in
+// apps/dashboard/src/lib/graphql/server.ts looks up the query by this
+// hash and attaches it to the request before execution; a mismatched
+// hash would yield a PersistedQueryNotFound response, which counts
+// as the server being alive but does not exercise the resolver path.
 const OVERVIEW_KPI_PERSISTED_QUERY_SHA =
-  'a4f9b6c8d2e1f3a7b5c9d8e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f900';
+  '3e6e4d21c241142b8939dc675b0b3347a73bf5ad6c66ead0355f4300a7fdf01f';
 
 // VUs default to 10k for the reference scenario, but CI runners
 // (single 7 GB / 2 CPU GitHub-hosted ubuntu-24.04) can sustain only

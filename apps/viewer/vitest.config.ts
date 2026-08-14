@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@domio/animation-runtime': resolve(here, '../../packages/animation-runtime/src/index.ts'),
+      '@domio/ar-sessions/browser': resolve(here, '../../services/ar-sessions/src/browser.ts'),
       '@domio/ar-sessions': resolve(here, '../../services/ar-sessions/src/index.ts'),
       '@domio/easing': resolve(here, '../../packages/easing/src/index.ts'),
       '@domio/audio': resolve(here, '../../packages/audio/src/index.ts'),
