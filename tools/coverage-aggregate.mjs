@@ -1,25 +1,25 @@
 #!/usr/bin/env node
-/**
- * Coverage aggregator for the monorepo unit-test job.
- *
- * When `pnpm exec turbo run test --coverage` runs, every package that
- * has vitest --coverage enabled produces its own
- * `<package>/coverage/coverage-summary.json`. The downstream
- * `tools/coverage-gate.mjs` script reads a single
- * `coverage/coverage-summary.json` at the repo root, so we need to
- * merge all package summaries into one before the gate runs.
- *
- * Strategy:
- *   1. Discover every `**/coverage/coverage-summary.json` under the repo.
- *   2. Sum `total.*.covered` and `total.*.pct`-able counts across files
- *      (weighted by the metric's own `total` denominator — that's what
- *      `pct` measures against).
- *   3. Write the merged total to `coverage/coverage-summary.json` at the
- *      repo root so the gate can read it.
- *
- * Coverage gate behaviour is unchanged; this script just feeds it the
- * right input.
- */
+//
+// Coverage aggregator for the monorepo unit-test job.
+//
+// When "pnpm exec turbo run test --coverage" runs, every package that
+// has vitest --coverage enabled produces its own
+// <package>/coverage/coverage-summary.json. The downstream
+// tools/coverage-gate.mjs script reads a single
+// coverage/coverage-summary.json at the repo root, so we need to
+// merge all package summaries into one before the gate runs.
+//
+// Strategy:
+//   1. Discover every coverage/coverage-summary.json under the repo.
+//   2. Sum total.*.covered and total.*.pct-able counts across files
+//      (weighted by the metric's own total denominator — that's what
+//      pct measures against).
+//   3. Write the merged total to coverage/coverage-summary.json at the
+//      repo root so the gate can read it.
+//
+// Coverage gate behaviour is unchanged; this script just feeds it the
+// right input.
+//
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { readdirSync } from 'node:fs';
