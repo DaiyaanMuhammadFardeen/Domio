@@ -243,7 +243,7 @@ export function PromoteDialog({
             disabled={publishing}
             data-testid="promote-publish"
           >
-            {publishing ? 'Publishing…' : 'Publish to library'}
+            {publishing ? t('promote.publishing') : t('app.save')}
           </button>
         </footer>
       </div>
