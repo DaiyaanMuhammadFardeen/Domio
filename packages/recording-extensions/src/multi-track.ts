@@ -128,6 +128,13 @@ export async function startMultiTrackRecorder(
   }
 
   let stopped = false;
+  // Capture the ended_at_ms timestamp on the first stop() call so
+  // subsequent calls return an identical summary. Without this, two
+  // consecutive stop() invocations could read Date.now() at slightly
+  // different millisecond boundaries and the test asserting
+  // a.ended_at_ms === b.ended_at_ms would flake on slow CI runners
+  // where the two reads cross a millisecond boundary.
+  let cachedEndedAtMs = 0;
   return {
     state: () => new Map(trackStates),
     progress: () => new Map(chunkCounts),
@@ -150,7 +157,7 @@ export async function startMultiTrackRecorder(
             trackSummary(track, mimeTypes, chunkCounts, totalBytes, totalDurationMs),
           ),
           started_at_ms: startedAtMs,
-          ended_at_ms: Date.now(),
+          ended_at_ms: cachedEndedAtMs,
         };
       }
       stopped = true;
@@ -163,6 +170,7 @@ export async function startMultiTrackRecorder(
       // Wait for last ondataavailable to flush.
       await new Promise((resolve) => setTimeout(resolve, 50));
       cfg.on_complete?.();
+      cachedEndedAtMs = Date.now();
       return {
         workspace_id: cfg.workspace_id,
         recording_session_id: cfg.recording_session_id,
@@ -170,7 +178,7 @@ export async function startMultiTrackRecorder(
           trackSummary(track, mimeTypes, chunkCounts, totalBytes, totalDurationMs),
         ),
         started_at_ms: startedAtMs,
-        ended_at_ms: Date.now(),
+        ended_at_ms: cachedEndedAtMs,
       };
     },
   };
