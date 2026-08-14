@@ -72,6 +72,8 @@ jobs:
           PGPASSWORD: domio
       - name: Run vitest with coverage
         run: pnpm exec turbo run test --filter='!@domio/test-e2e' --filter='!@domio/test-a11y' --filter='!@domio/test-load-replay' -- --coverage
+      - name: Merge coverage summaries
+        run: node tools/coverage-aggregate.mjs
       - name: Enforce coverage gate
         run: |
           node tools/coverage-gate.mjs
