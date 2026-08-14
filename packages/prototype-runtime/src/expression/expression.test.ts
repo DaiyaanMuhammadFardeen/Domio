@@ -317,7 +317,10 @@ describe('expression/evaluator', () => {
   it('default caps are exported', () => {
     expect(DEFAULT_EVAL_CAPS.maxSteps).toBe(5_000);
     expect(DEFAULT_EVAL_CAPS.maxDepth).toBe(64);
-    expect(DEFAULT_EVAL_CAPS.maxRuntimeMs).toBe(5);
+    // 50 ms is the default — see evaluator.ts for the rationale (5 ms
+    // is too tight for CI runners sharing CPUs with other packages;
+    // 50 ms is still well under a frame at 60 Hz).
+    expect(DEFAULT_EVAL_CAPS.maxRuntimeMs).toBe(50);
   });
 
   it('exposes ExpressionError as the umbrella class', () => {

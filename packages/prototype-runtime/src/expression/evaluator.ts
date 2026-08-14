@@ -28,14 +28,21 @@ export interface EvalCaps {
   readonly maxSteps: number;
   /** Max recursion depth (default 64). */
   readonly maxDepth: number;
-  /** Wall-clock budget in ms (default 5). */
+  /** Wall-clock budget in ms (default 50). */
   readonly maxRuntimeMs: number;
 }
 
 export const DEFAULT_EVAL_CAPS: EvalCaps = Object.freeze({
   maxSteps: 5_000,
   maxDepth: 64,
-  maxRuntimeMs: 5,
+  // The cap exists to catch runaway expressions (infinite recursion
+  // in user-defined calls, pathological built-ins). 5 ms is far too
+  // tight for CI runners that share CPUs with other packages — Date.now()
+  // has 1 ms granularity, and any GC pause or coverage-instrumentation
+  // overhead can blow it. 50 ms is still a fraction of a frame at 60 Hz
+  // and catches real problems (a 5-second loop will still hit the cap
+  // long before it terminates naturally).
+  maxRuntimeMs: 50,
 });
 
 export interface EvalContext {
