@@ -343,19 +343,19 @@ jobs:
           nohup /tmp/crm-sync > /tmp/crm-sync.log 2>&1 &
           echo "$!" > /tmp/crm-sync.pid
           for _ in $(seq 1 60); do
-            # The `/v1/sync/options` endpoint is always present on the
-            # crm-sync Go server; use it as the readiness probe. The
-            # `/healthz` path is opportunistic.
-            if curl -fsS http://localhost:8082/v1/sync/options > /dev/null 2>&1 || \
-               curl -fsS http://localhost:8082/healthz > /dev/null 2>&1; then
+            # crm-sync's HTTP surface is intentionally tiny — only
+            # /healthz and /readyz are wired. The orchestrator runs
+            # over NATS subscriptions and is added in a later
+            # milestone. Probe /healthz as the readiness check.
+            if curl -fsS http://localhost:8082/healthz > /dev/null 2>&1; then
               echo "crm-sync ready"
               break
             fi
             sleep 1
           done
-          # Confirm the process is alive — the previous readiness probe
-          # should have already succeeded, but the bare `/` path returns
-          # 404 by design, so we check the PID instead.
+          # Confirm the process is alive — the readiness probe should
+          # have succeeded, but the bare `/` path returns 404 by
+          # design, so we check the PID as a belt-and-braces guard.
           if ! kill -0 "$(cat /tmp/crm-sync.pid)" 2>/dev/null; then
             echo "crm-sync failed to start"; tail -50 /tmp/crm-sync.log; exit 1
           fi
