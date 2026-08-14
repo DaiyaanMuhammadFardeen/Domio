@@ -35,7 +35,7 @@ describe('gqlRequest (persisted queries)', () => {
     const init = call?.[1] as RequestInit;
     const body = JSON.parse(String(init.body));
     expect(body.extensions.persistedQuery.sha256Hash).toMatchInlineSnapshot(
-      `"1bf12deab9c81d1d5ef6da6dd0bd2e3a2ee7da0a4ec2e3a2ed8c7e0b8b3f4e70"`,
+      `"3e6e4d21c241142b8939dc675b0b3347a73bf5ad6c66ead0355f4300a7fdf01f"`,
     );
   });
 
