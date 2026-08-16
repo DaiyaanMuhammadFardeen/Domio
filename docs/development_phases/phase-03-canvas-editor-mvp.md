@@ -1,3 +1,19 @@
+## 📜 Planning-context banner
+
+---
+
+> ## ⚠️ Planning context — not a status report
+>
+> This is the original planning doc for this phase. The **live status of
+> every phase** (what's actually shipped today on `master`) lives in
+> **[`../../STATUS.md`](../../STATUS.md)**. Do not read this file as a
+> status report — read it as the original spec that drove the work.
+>
+> See **[`../../CONSOLIDATED.md`](../../CONSOLIDATED.md)** for the full
+> doc map.
+
+---
+
 # Phase 03 — Canvas editor — minimum viable editor
 
 > **Phase number:** 03

@@ -1,3 +1,19 @@
+## 📜 Planning-context banner
+
+---
+
+> ## ⚠️ Planning context — not a status report
+>
+> This is the original planning doc for this phase. The **live status of
+> every phase** (what's actually shipped today on `master`) lives in
+> **[`../../STATUS.md`](../../STATUS.md)**. Do not read this file as a
+> status report — read it as the original spec that drove the work.
+>
+> See **[`../../CONSOLIDATED.md`](../../CONSOLIDATED.md)** for the full
+> doc map.
+
+---
+
 # Phase 01 — Observability, CI/CD, and Infrastructure Baseline
 
 > **Status:** Not started · **Owner:** DevOps/SRE Lead + Security Lead (joint) · **Critical path:** yes · **Parallel stream:** foundation (overlaps with P00, then both gates must be green before P02) · **Phase file:** `phase-01-observability-cicd-infra-baseline.md`
