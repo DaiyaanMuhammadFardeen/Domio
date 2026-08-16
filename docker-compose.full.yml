@@ -133,7 +133,7 @@ services:
       - domio-dev
 
   clickhouse:
-    profiles: [core, services, full]
+    profiles: [core, services, apps, full]
     image: clickhouse/clickhouse-server:24.3-alpine
     container_name: domio-clickhouse
     restart: unless-stopped
@@ -319,7 +319,7 @@ services:
       - domio-dev
 
   analytics-warehouse:
-    profiles: [services, full]
+    profiles: [services, apps, full]
     build:
       context: .
       dockerfile: services/analytics-warehouse/Dockerfile

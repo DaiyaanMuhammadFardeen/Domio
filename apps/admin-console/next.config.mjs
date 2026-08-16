@@ -1,5 +1,4 @@
 import { nextSecurityHeaders } from '@domio/web-security';
-import withBundleAnalyzer from '@next/bundle-analyzer';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -30,4 +29,14 @@ const nextConfig = {
   },
 };
 
-export default withBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })(nextConfig);
+// Bundle analyzer is a devDep. Only require it (and the `next build`
+// rewrite it triggers) when ANALYZE=true so the production container
+// can install `--prod` without dragging devDeps in.
+const nextConfigWithBundler =
+  process.env.ANALYZE === 'true'
+    ? (await import('@next/bundle-analyzer')).default({
+        enabled: true,
+      })(nextConfig)
+    : nextConfig;
+
+export default nextConfigWithBundler;
